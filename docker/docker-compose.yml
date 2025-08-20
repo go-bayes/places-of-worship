@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgis/postgis:15-3.4
+    container_name: places-of-worship-db
+    environment:
+      POSTGRES_DB: places_of_worship
+      POSTGRES_USER: places_user
+      POSTGRES_PASSWORD: places_dev_password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../database/schemas:/docker-entrypoint-initdb.d/schemas:ro
+      - ../database/migrations:/docker-entrypoint-initdb.d/migrations:ro
+    networks:
+      - places-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U places_user -d places_of_worship"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    container_name: places-of-worship-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - places-network
+    command: redis-server --appendonly yes
+
+  api:
+    build:
+      context: ../api
+      dockerfile: Dockerfile
+    container_name: places-of-worship-api
+    environment:
+      - DATABASE_URL=postgresql://places_user:places_dev_password@postgres:5432/places_of_worship
+      - REDIS_URL=redis://redis:6379/0
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../api:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - places-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  places-network:
+    driver: bridge

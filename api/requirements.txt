@@ -1,0 +1,38 @@
+# Core web framework
+Flask==3.0.0
+flask-cors==4.0.0
+
+# Database connectivity
+asyncpg==0.29.0
+psycopg2-binary==2.9.9
+
+# Geospatial data processing
+geopandas==0.14.1
+shapely==2.0.2
+fiona==1.9.5
+
+# Caching
+redis==5.0.1
+
+# Data processing
+pandas==2.1.4
+numpy==1.26.2
+
+# HTTP client (for external APIs later)
+httpx==0.25.2
+
+# Development and testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# Logging and monitoring
+structlog==23.2.0
+
+# Environment configuration
+python-dotenv==1.0.0
+
+# Date/time handling
+python-dateutil==2.8.2
+
+# JSON handling improvements
+orjson==3.9.10
