@@ -156,7 +156,7 @@ class EnhancedPlacesOfWorshipApp {
         try {
             // Load places, census, and comprehensive demographic data
             const [placesResponse, censusResponse, demographicResponse, boundariesResponse] = await Promise.all([
-                fetch('./data/nz_places.geojson'),
+                fetch('./data/nz_places_optimized.geojson'),
                 fetch('./src/religion.json'),
                 fetch('./src/demographics.json'),
                 fetch('./data/sa2.geojson')
@@ -448,11 +448,11 @@ class EnhancedPlacesOfWorshipApp {
         const color = this.calculateCensusColor(sa2Code);
         
         return {
-            fillColor: color,
-            fillOpacity: 0.6,
-            weight: 0.5,
-            color: "black",
-            opacity: 0.8
+            fillColor: 'transparent',
+            fillOpacity: 0,
+            weight: 1,
+            color: "#666666",
+            opacity: 0.4
         };
     }
     
@@ -706,7 +706,12 @@ class EnhancedPlacesOfWorshipApp {
         
         if (saData) {
             const popupContent = this.createCensusPopupContent(feature.properties, saData);
-            layer.bindPopup(popupContent);
+            layer.bindPopup(popupContent, {minWidth: 600});
+            
+            // Add popup event handler for creating histogram
+            layer.on('popupopen', (e) => {
+                this.createReligiousHistogram(saData, feature.properties.SA22018_V1_NAME);
+            });
         }
     }
     
@@ -720,7 +725,7 @@ class EnhancedPlacesOfWorshipApp {
         
         let popupContent = `
             <div class="census-popup">
-                <h3>${properties.SA22018_V1_00_NAME}</h3>
+                <h3>${properties.SA22018_V1_NAME}</h3>
                 <p><strong>Year:</strong> ${this.currentYear}</p>
                 <p><strong>SA2 Code:</strong> ${sa2Code}</p>
         `;
@@ -730,13 +735,27 @@ class EnhancedPlacesOfWorshipApp {
             popupContent += `<p><strong>Total Population:</strong> ${yearData["Total"].toLocaleString()}</p>`;
         }
         
-        // Religious data
-        popupContent += `<h4>Religion</h4>`;
-        popupContent += `<p>Christian: ${yearData["Christian"] || 0}</p>`;
-        popupContent += `<p>No Religion: ${yearData["No religion"] || 0}</p>`;
-        popupContent += `<p>Buddhism: ${yearData["Buddhism"] || 0}</p>`;
-        popupContent += `<p>Hinduism: ${yearData["Hinduism"] || 0}</p>`;
-        popupContent += `<p>Islam: ${yearData["Islam"] || 0}</p>`;
+        // Religious data with delta analysis
+        popupContent += `<h4>Religion (${this.currentYear})</h4>`;
+        const religions = ['Christian', 'No religion', 'Buddhism', 'Hinduism', 'Islam', 'Judaism', 'Sikhism'];
+        
+        // Calculate deltas if we have previous year data
+        const previousYear = this.currentYear === 2018 ? 2013 : 2006;
+        const previousYearData = saData[String(previousYear)] || {};
+        
+        religions.forEach(religion => {
+            const current = yearData[religion] || 0;
+            const previous = previousYearData[religion] || 0;
+            const delta = current - previous;
+            const deltaPercent = previous > 0 ? ((delta / previous) * 100).toFixed(1) : 'N/A';
+            const deltaIcon = delta > 0 ? '↗' : delta < 0 ? '↘' : '→';
+            const deltaColor = delta > 0 ? 'green' : delta < 0 ? 'red' : 'gray';
+            
+            popupContent += `<p>${religion}: ${current.toLocaleString()} <span style="color: ${deltaColor};">${deltaIcon} ${deltaPercent}%</span></p>`;
+        });
+        
+        // Add histogram placeholder
+        popupContent += `<div id="religion-chart" style="width: 100%; height: 300px; margin-top: 10px;"></div>`;
         
         // Comprehensive demographic data if available
         if (comprehensiveData) {
@@ -901,6 +920,53 @@ class EnhancedPlacesOfWorshipApp {
         if (loadingEl) {
             loadingEl.style.display = 'none';
         }
+    }
+    
+    createReligiousHistogram(saData, regionName) {
+        // Create religious change histogram using Plotly
+        const religions = ['Christian', 'No religion', 'Buddhism', 'Hinduism', 'Islam', 'Judaism', 'Sikhism'];
+        const currentYear = this.currentYear;
+        const previousYear = currentYear === 2018 ? 2013 : 2006;
+        
+        const currentData = saData[String(currentYear)] || {};
+        const previousData = saData[String(previousYear)] || {};
+        
+        const currentValues = religions.map(religion => currentData[religion] || 0);
+        const previousValues = religions.map(religion => previousData[religion] || 0);
+        
+        const plotData = [
+            {
+                x: religions,
+                y: previousValues,
+                name: `${previousYear}`,
+                type: 'bar',
+                marker: { color: 'lightblue' }
+            },
+            {
+                x: religions,
+                y: currentValues,
+                name: `${currentYear}`,
+                type: 'bar',
+                marker: { color: 'darkblue' }
+            }
+        ];
+        
+        const layout = {
+            title: `Religious Affiliation in ${regionName}`,
+            xaxis: { title: 'Religion' },
+            yaxis: { title: 'Number of People' },
+            barmode: 'group',
+            height: 300,
+            margin: { l: 60, r: 20, t: 60, b: 60 }
+        };
+        
+        // Create the plot in the popup
+        setTimeout(() => {
+            const chartContainer = document.getElementById('religion-chart');
+            if (chartContainer) {
+                Plotly.newPlot(chartContainer, plotData, layout, {displayModeBar: false});
+            }
+        }, 100); // Small delay to ensure popup is fully rendered
     }
 }
 
