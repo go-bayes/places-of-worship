@@ -1,15 +1,15 @@
 # Core web framework
 Flask==3.0.0
-flask-cors==4.0.0
+flask-cors==4.0.1
 
 # Database connectivity
 asyncpg==0.29.0
 psycopg2-binary==2.9.9
 
 # Geospatial data processing
-geopandas==0.14.1
+geopandas==0.14.2
 shapely==2.0.2
-fiona==1.9.5
+fiona==1.9.6
 
 # Caching
 redis==5.0.1
@@ -34,5 +34,5 @@ python-dotenv==1.0.0
 # Date/time handling
 python-dateutil==2.8.2
 
-# JSON handling improvements
-orjson==3.9.10
+# JSON handling - using standard library for security
+# orjson removed due to recursion vulnerability
