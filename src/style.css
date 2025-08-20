@@ -1,0 +1,328 @@
+/* Enhanced Places of Worship Frontend Styles */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+header {
+    background: linear-gradient(135deg, #2c3e50, #3498db);
+    color: white;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.8rem;
+    font-weight: 300;
+}
+
+header .subtitle {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.controls {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: white;
+    border-bottom: 1px solid #e9ecef;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.control-group label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #495057;
+    min-width: fit-content;
+}
+
+.control-group input, .control-group select {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.control-group button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #007bff;
+    background: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.control-group button:hover {
+    background: #0056b3;
+}
+
+.control-group button:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+#currentYear {
+    background: #e9ecef;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    font-weight: 500;
+    min-width: 3rem;
+    text-align: center;
+}
+
+.main-content {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+.map-container {
+    flex: 1;
+    position: relative;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+.info-panel {
+    width: 350px;
+    background: white;
+    border-left: 1px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+}
+
+.legend {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.legend h4 {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    color: #343a40;
+    line-height: 1.3;
+}
+
+.legend-items {
+    margin-bottom: 1rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.legend-item i {
+    width: 20px;
+    height: 15px;
+    margin-right: 8px;
+    border-radius: 2px;
+}
+
+.legend-source {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.legend-source a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.legend-source a:hover {
+    text-decoration: underline;
+}
+
+.region-stats {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+}
+
+.region-stats h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    color: #343a40;
+}
+
+#regionChart {
+    position: relative;
+    height: 250px;
+    margin-bottom: 1rem;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-overlay.hidden {
+    display: none;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-overlay p {
+    margin: 0;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+/* Leaflet popup customization */
+.leaflet-popup-content {
+    font-family: inherit;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.leaflet-popup-content h2 {
+    margin: 0 0 0.8rem 0;
+    font-size: 1rem;
+    color: #2c3e50;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 0.5rem;
+}
+
+.leaflet-popup-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+}
+
+.leaflet-popup-content th,
+.leaflet-popup-content td {
+    padding: 0.4rem 0.6rem;
+    text-align: left;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.leaflet-popup-content th {
+    background-color: #f8f9fa;
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: #495057;
+}
+
+.leaflet-popup-content tr:last-child td {
+    border-bottom: none;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        height: 100vh;
+    }
+    
+    .controls {
+        padding: 0.5rem 1rem;
+        gap: 1rem;
+    }
+    
+    .main-content {
+        flex-direction: column;
+    }
+    
+    .info-panel {
+        width: 100%;
+        height: 250px;
+        border-left: none;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .legend {
+        padding: 1rem;
+    }
+    
+    .region-stats {
+        padding: 1rem;
+    }
+    
+    #regionChart {
+        height: 150px;
+    }
+}
+
+/* Enhanced styling for temporal controls */
+#yearSlider {
+    width: 200px;
+    accent-color: #3498db;
+}
+
+#yearSlider::-webkit-slider-track {
+    background: #e9ecef;
+    height: 4px;
+    border-radius: 2px;
+}
+
+#yearSlider::-webkit-slider-thumb {
+    background: #3498db;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Animation for smooth transitions */
+.map-container {
+    transition: opacity 0.3s ease;
+}
+
+.map-container.loading {
+    opacity: 0.7;
+}
+
+/* Attribution styling */
+.leaflet-control-attribution {
+    font-size: 0.7rem !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+}

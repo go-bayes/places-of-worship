@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Places of Worship - New Zealand</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; }
+        #map { height: 100vh; width: 100vw; }
+        .info { 
+            padding: 6px 8px; 
+            background: white; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.2); 
+            border-radius: 5px; 
+        }
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            z-index: 1000;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">Loading places of worship...</div>
+    <div id="map"></div>
+    
+    <script>
+        // Initialize map
+        var map = L.map('map').setView([-41.235726, 172.5118422], 6);
+        
+        // Add base layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            maxZoom: 19,
+            minZoom: 5
+        }).addTo(map);
+        
+        // Create marker cluster group
+        var markers = L.markerClusterGroup({
+            chunkedLoading: true,
+            maxClusterRadius: 50
+        });
+        
+        // Color mapping for denominations
+        var denominationColors = {
+            'Christian': '#e74c3c',
+            'Catholic': '#c0392b', 
+            'Anglican': '#e67e22',
+            'Baptist': '#f39c12',
+            'Presbyterian': '#f1c40f',
+            'Methodist': '#27ae60',
+            'Islam': '#16a085',
+            'Buddhism': '#3498db',
+            'Hinduism': '#9b59b6',
+            'Judaism': '#8e44ad',
+            'Sikhism': '#2c3e50',
+            'Unknown': '#95a5a6'
+        };
+        
+        function getColorForDenomination(denom) {
+            return denominationColors[denom] || denominationColors['Unknown'];
+        }
+        
+        // Load and display places
+        $.getJSON("data/nz_places_optimized.geojson", function(data) {
+            console.log(`Loaded ${data.features.length} places of worship`);
+            
+            data.features.forEach(function(feature) {
+                var coords = feature.geometry.coordinates;
+                var props = feature.properties;
+                var color = getColorForDenomination(props.denomination);
+                
+                var marker = L.circleMarker([coords[1], coords[0]], {
+                    radius: 6,
+                    fillColor: color,
+                    color: 'white',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
+                
+                var popupContent = `
+                    <div style="min-width: 200px;">
+                        <h3 style="margin-top: 0;">${props.name}</h3>
+                        <p><strong>Denomination:</strong> ${props.denomination}</p>
+                        <p><strong>Confidence:</strong> ${Math.round(props.confidence * 100)}%</p>
+                        ${props.website ? `<p><strong>Website:</strong> <a href="${props.website}" target="_blank">${props.website}</a></p>` : ''}
+                        ${props.phone ? `<p><strong>Phone:</strong> ${props.phone}</p>` : ''}
+                        <small>OSM ID: ${props.osm_id}</small>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                markers.addLayer(marker);
+            });
+            
+            map.addLayer(markers);
+            
+            // Hide loading
+            document.getElementById('loading').style.display = 'none';
+            
+            // Add info control
+            var info = L.control({position: 'topright'});
+            info.onAdd = function (map) {
+                var div = L.DomUtil.create('div', 'info');
+                div.innerHTML = `
+                    <h4>Places of Worship - NZ</h4>
+                    <p><strong>${data.features.length}</strong> total places</p>
+                    <p>Source: OpenStreetMap</p>
+                `;
+                return div;
+            };
+            info.addTo(map);
+            
+        }).fail(function() {
+            document.getElementById('loading').innerHTML = 'Error: Failed to load data';
+        });
+    </script>
+</body>
+</html>
