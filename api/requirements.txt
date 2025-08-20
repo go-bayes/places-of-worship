@@ -9,7 +9,7 @@ psycopg2-binary==2.9.9
 # Geospatial data processing
 geopandas==0.14.2
 shapely==2.0.2
-fiona==1.9.6
+fiona==1.10b2
 
 # Caching
 redis==5.0.1
