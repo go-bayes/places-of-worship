@@ -76,10 +76,10 @@ class ReligiousDataApp {
     
     async loadData() {
         try {
-            // Load both religion data and boundaries from our API
+            // Load both religion data and boundaries from static files
             const [religionResponse, boundariesResponse] = await Promise.all([
-                fetch(`${this.API_BASE_URL}/nz/demographics/religion.json`),
-                fetch(`${this.API_BASE_URL}/nz/boundaries/sa2.geojson`)
+                fetch('./religion.json'),
+                fetch('./sa2.geojson')
             ]);
             
             if (!religionResponse.ok || !boundariesResponse.ok) {
@@ -99,7 +99,7 @@ class ReligiousDataApp {
             
         } catch (error) {
             console.error('Error loading data:', error);
-            this.showError('Failed to load data. Please ensure the API is running.');
+            this.showError('Failed to load data files. Please ensure religion.json and sa2.geojson are available.');
         }
     }
     

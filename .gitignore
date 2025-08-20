@@ -86,36 +86,102 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Data files (temporary/cache)
-data/raw/
-data/temp/
-data/cache/
+# ====================================
+# DATA MANAGEMENT - NEVER COMMIT DATA
+# ====================================
+
+# Data directories (git-ignored for size and privacy)
+data/
+datasets/
+cache/
+raw_data/
+processed_data/
+exports/
+research_data/
+
+# Geographic and spatial data files
+*.geojson
+*.kml
+*.kmz
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.qpj
+
+# Compressed geographic data
+*.geojson.gz
+*.kml.gz
+*.json.gz
+*.csv.gz
+
+# Large data formats
 *.parquet
-*.geojson.tmp
-*.csv.tmp
+*.feather
+*.hdf5
+*.h5
+*.nc
 
-# Test outputs
-test-results/
-coverage/
-.pytest_cache/
-.coverage
-
-# Documentation builds
-docs/_build/
-docs/site/
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Large data files (use Git LFS)
+# OpenStreetMap data
 *.pbf
+*.osm
 *.osm.bz2
 *.osm.gz
-*.shp
-*.mbtiles
+*.osm.xml
 
-# Temporary files
-tmp/
-temp/
+# Map tiles and raster data
+*.mbtiles
+*.tif
+*.tiff
+*.png.world
+*.tfw
+
+# Database exports and dumps
+*.sql.dump
+*.backup
+*.bak
+
+# Temporary processing files
 *.tmp
 *.temp
+temp_*
+cache_*
+processing_*
+download_*
+
+# Research outputs (may be large)
+figures/
+plots/
+analysis_output/
+reports/output/
+visualizations/
+
+# Data processing artifacts
+*.lock
+*.pid
+*.state
+*.checkpoint
+
+# Large CSV files (keep small samples, ignore large datasets)
+*_large.csv
+*_full.csv
+*_complete.csv
+data_*.csv
+
+# Jupyter notebook outputs (keep notebooks, ignore large outputs)
+*.ipynb_checkpoints/
+
+# Test data (keep small test files, ignore large test datasets)
+test_data_large/
+test_datasets/
+
+# Backup files
+*.backup
+*~backup
+*.orig
+
+# Version control for data (use proper data versioning tools)
+*.v1
+*.v2
+*.version_*

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Places of Worship - New Zealand</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+          crossorigin=""/>
+    
+    <!-- Marker Clustering CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+        }
+        
+        .header p {
+            margin: 0;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            background: white;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .control-group label {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.9em;
+        }
+        
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        select, button, input[type="range"] {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            white-space: nowrap;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #3498db;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        .census-controls {
+            display: none;
+            grid-column: span 2;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .census-controls.active {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .year-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .year-control input[type="range"] {
+            flex: 1;
+        }
+        
+        #map {
+            height: calc(100vh - 280px);
+            width: 100%;
+        }
+        
+        .info-panel {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            margin: 10px;
+            max-width: 300px;
+        }
+        
+        .info-panel h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+        
+        .info-item {
+            margin: 8px 0;
+            color: #555;
+        }
+        
+        .info-item strong {
+            color: #2c3e50;
+        }
+        
+        .place-popup, .census-popup {
+            max-width: 280px;
+        }
+        
+        .place-popup h3, .census-popup h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 1.2em;
+        }
+        
+        .place-popup p, .census-popup p {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+        
+        .place-popup a, .census-popup a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .place-popup a:hover, .census-popup a:hover {
+            text-decoration: underline;
+        }
+        
+        .place-popup small, .census-popup small {
+            color: #666;
+            font-size: 0.8em;
+        }
+        
+        .place-marker {
+            border-radius: 50%;
+        }
+        
+        .marker-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        /* Pulsing animation for markers */
+        @keyframes pulse {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.3;
+            }
+            100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+        }
+        
+        /* Hover effects for markers */
+        .leaflet-marker-icon:hover .marker-core {
+            transform: scale(1.2) !important;
+            box-shadow: 0 0 12px rgba(0,0,0,0.8) !important;
+            transition: all 0.2s ease !important;
+        }
+        
+        /* Enhanced marker visibility on different zoom levels */
+        .leaflet-zoom-animated .place-marker {
+            transition: all 0.3s ease;
+        }
+        
+        .legend {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            max-width: 250px;
+            z-index: 1000;
+        }
+        
+        .legend h4 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+        
+        .legend-section {
+            margin-bottom: 15px;
+        }
+        
+        .legend-section h5 {
+            margin: 0 0 8px 0;
+            color: #2c3e50;
+            font-size: 0.9em;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            font-size: 0.8em;
+        }
+        
+        .legend-dot {
+            margin-right: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        .category-legend {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+        }
+        
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 2000;
+            text-align: center;
+        }
+        
+        .attribution {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            font-size: 0.8em;
+            color: #666;
+            text-align: center;
+        }
+        
+        .attribution a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .attribution a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Marker cluster styling */
+        .marker-cluster-small {
+            background-color: rgba(181, 226, 140, 0.6);
+        }
+        
+        .marker-cluster-small div {
+            background-color: rgba(110, 204, 57, 0.6);
+        }
+        
+        .marker-cluster-medium {
+            background-color: rgba(241, 211, 87, 0.6);
+        }
+        
+        .marker-cluster-medium div {
+            background-color: rgba(240, 194, 12, 0.6);
+        }
+        
+        .marker-cluster-large {
+            background-color: rgba(253, 156, 115, 0.6);
+        }
+        
+        .marker-cluster-large div {
+            background-color: rgba(241, 128, 23, 0.6);
+        }
+        
+        @media (max-width: 1024px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .census-controls.active {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            #map {
+                height: calc(100vh - 350px);
+            }
+            
+            .legend {
+                position: relative;
+                bottom: auto;
+                right: auto;
+                margin: 10px;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Enhanced Places of Worship Map</h1>
+        <p>Interactive visualization of <span id="totalPlaces">0</span> places of worship with census data overlay</p>
+    </div>
+    
+    <div class="controls">
+        <!-- Map Style Control -->
+        <div class="control-group">
+            <label for="mapStyleSelect">Map Style:</label>
+            <select id="mapStyleSelect">
+                <option value="OpenStreetMap">Standard</option>
+                <option value="Grayscale">Grayscale</option>
+                <option value="Dark">Dark</option>
+                <option value="Satellite">Satellite</option>
+                <option value="Terrain">Terrain</option>
+            </select>
+        </div>
+        
+        <!-- Census Overlay Toggle -->
+        <div class="control-group">
+            <label for="censusOverlayToggle">Census Data Overlay:</label>
+            <div class="control-row">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="censusOverlayToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+                <span>Show regional demographics</span>
+            </div>
+        </div>
+        
+        <!-- Religious Category Filter -->
+        <div class="control-group">
+            <label for="majorCategoryFilter">Religious Category:</label>
+            <select id="majorCategoryFilter">
+                <option value="all">All Categories</option>
+            </select>
+        </div>
+        
+        <!-- Denomination Filter -->
+        <div class="control-group">
+            <label for="denominationFilter">Denomination:</label>
+            <select id="denominationFilter">
+                <option value="all">All Denominations</option>
+            </select>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="control-group">
+            <label>Actions:</label>
+            <div class="control-row">
+                <button id="resetButton">Reset View</button>
+                <button id="toggleClustering">Disable Clustering</button>
+            </div>
+        </div>
+        
+        <!-- Current Filter Display -->
+        <div class="control-group">
+            <label>Currently Showing:</label>
+            <div class="info-item">
+                <strong><span id="currentFilter">All Categories</span></strong>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Census Controls (shown when overlay is enabled) -->
+    <div id="censusControls" class="census-controls">
+        <div class="control-group">
+            <label for="censusMetricSelect">Census Metric:</label>
+            <select id="censusMetricSelect">
+                <option value="no_religion_change">No Religion Change (2006-2018)</option>
+                <option value="christian_change">Christian Change (2006-2018)</option>
+                <option value="total_population">Total Population</option>
+                <option value="diversity_index">Religious Diversity Index</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label for="yearSlider">Census Year:</label>
+            <div class="year-control">
+                <span>2006</span>
+                <input type="range" id="yearSlider" min="2006" max="2018" step="6" value="2018">
+                <span>2018</span>
+                <strong id="currentYear">2018</strong>
+            </div>
+        </div>
+    </div>
+    
+    <div id="map"></div>
+    
+    <div class="legend">
+        <h4>Legend</h4>
+        
+        <div class="legend-section">
+            <h5>Major Religious Categories</h5>
+            <div class="category-legend">
+                <div class="legend-item">
+                    <div class="legend-dot" style="background-color: #e74c3c; width: 12px; height: 12px; border: 2px solid white; box-shadow: 0 0 3px rgba(0,0,0,0.5);"></div>
+                    Christian
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background-color: #27ae60; width: 12px; height: 12px; border: 2px solid white; box-shadow: 0 0 3px rgba(0,0,0,0.5);"></div>
+                    Islam
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background-color: #f39c12; width: 12px; height: 12px; border: 2px solid white; box-shadow: 0 0 3px rgba(0,0,0,0.5);"></div>
+                    Buddhism
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background-color: #9b59b6; width: 12px; height: 12px; border: 2px solid white; box-shadow: 0 0 3px rgba(0,0,0,0.5);"></div>
+                    Judaism
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background-color: #e67e22; width: 12px; height: 12px; border: 2px solid white; box-shadow: 0 0 3px rgba(0,0,0,0.5);"></div>
+                    Hinduism
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background-color: #1abc9c; width: 12px; height: 12px; border: 2px solid white; box-shadow: 0 0 3px rgba(0,0,0,0.5);"></div>
+                    Sikhism
+                </div>
+            </div>
+        </div>
+        
+        <div class="legend-section">
+            <h5>Data Quality</h5>
+            <div class="legend-item">
+                <div class="legend-dot" style="background-color: #3498db; width: 16px; height: 16px; border: 3px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5);"></div>
+                High (≥80%)
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background-color: #3498db; width: 14px; height: 14px; border: 3px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5);"></div>
+                Medium (≥60%)
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background-color: #3498db; width: 12px; height: 12px; border: 3px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5); opacity: 0.8;"></div>
+                Low (&lt;60%)
+            </div>
+        </div>
+    </div>
+    
+    <div class="attribution">
+        Places Data: © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a> (ODbL) | 
+        Census Data: © <a href="https://www.stats.govt.nz/" target="_blank">Statistics New Zealand</a> (CC BY 4.0) | 
+        Map Tiles: Various providers
+    </div>
+    
+    <div id="loading">
+        <h3>Loading enhanced map data...</h3>
+        <p>Please wait while we load places of worship and census data.</p>
+    </div>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+            crossorigin=""></script>
+    
+    <!-- Marker Clustering JS -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    
+    <!-- Denomination Mapper -->
+    <script src="src/denomination-mapper.js"></script>
+    
+    <!-- Enhanced Application -->
+    <script src="src/enhanced-places-app.js"></script>
+    
+    <script>
+        // Show/hide census controls based on overlay toggle
+        document.getElementById('censusOverlayToggle').addEventListener('change', function(e) {
+            const censusControls = document.getElementById('censusControls');
+            if (e.target.checked) {
+                censusControls.classList.add('active');
+            } else {
+                censusControls.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
