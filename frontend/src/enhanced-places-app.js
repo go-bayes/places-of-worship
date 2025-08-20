@@ -17,6 +17,7 @@ class EnhancedPlacesOfWorshipApp {
         
         // Census data
         this.censusData = null;
+        this.demographicData = null;
         this.censusLayer = null;
         this.boundariesData = null;
         this.showCensusOverlay = false;
@@ -153,24 +154,27 @@ class EnhancedPlacesOfWorshipApp {
     
     async loadData() {
         try {
-            // Load both places and census data
-            const [placesResponse, censusResponse, boundariesResponse] = await Promise.all([
+            // Load places, census, and comprehensive demographic data
+            const [placesResponse, censusResponse, demographicResponse, boundariesResponse] = await Promise.all([
                 fetch('./data/nz_places.geojson'),
                 fetch('./src/religion.json'),
+                fetch('./src/demographics.json'),
                 fetch('./src/sa2.geojson')
             ]);
             
-            if (!placesResponse.ok || !censusResponse.ok || !boundariesResponse.ok) {
+            if (!placesResponse.ok || !censusResponse.ok || !demographicResponse.ok || !boundariesResponse.ok) {
                 throw new Error('Failed to load data files');
             }
             
             this.placesData = await placesResponse.json();
             this.censusData = await censusResponse.json();
+            this.demographicData = await demographicResponse.json();
             this.boundariesData = await boundariesResponse.json();
             
             console.log('Loaded data:', {
                 places: this.placesData.features.length,
                 censusRegions: Object.keys(this.censusData).length,
+                demographicRegions: Object.keys(this.demographicData).length,
                 boundaries: this.boundariesData.features.length
             });
             
@@ -457,15 +461,32 @@ class EnhancedPlacesOfWorshipApp {
         const saData = this.censusData[sa2CodeStr];
         if (!saData) return "gray";
         
+        // Use demographic data if available, fallback to census data
+        const dataSource = this.demographicData[sa2CodeStr] || saData;
+        
         switch (this.currentCensusMetric) {
             case 'no_religion_change':
-                return this.calculateNoReligionChangeColor(saData);
+                return this.calculateNoReligionChangeColor(dataSource);
             case 'christian_change':
-                return this.calculateChristianChangeColor(saData);
+                return this.calculateChristianChangeColor(dataSource);
             case 'total_population':
-                return this.calculatePopulationColor(saData);
+                return this.calculatePopulationColor(dataSource);
             case 'diversity_index':
-                return this.calculateDiversityColor(saData);
+                return this.calculateDiversityColor(dataSource);
+            case 'median_age':
+                return this.calculateMedianAgeColor(dataSource);
+            case 'gender_ratio':
+                return this.calculateGenderRatioColor(dataSource);
+            case 'ethnicity_diversity':
+                return this.calculateEthnicityDiversityColor(dataSource);
+            case 'income_level':
+                return this.calculateIncomeLevelColor(dataSource);
+            case 'population_density':
+                return this.calculatePopulationDensityColor(dataSource);
+            case 'unemployment_rate':
+                return this.calculateUnemploymentColor(dataSource);
+            case 'home_ownership':
+                return this.calculateHomeOwnershipColor(dataSource);
             default:
                 return "gray";
         }
@@ -545,6 +566,140 @@ class EnhancedPlacesOfWorshipApp {
         return "#9370DB";
     }
     
+    calculateMedianAgeColor(saData) {
+        const yearData = saData[String(this.currentYear)];
+        if (!yearData || yearData.median_age === undefined) return "gray";
+        
+        const medianAge = yearData.median_age;
+        if (medianAge < 30) return "#FFE5E5";      // Very young - light red
+        if (medianAge < 35) return "#FFB3B3";      // Young - light pink
+        if (medianAge < 40) return "#FF8080";      // Middle-young - pink
+        if (medianAge < 45) return "#FFE5CC";      // Middle - light orange
+        if (medianAge < 50) return "#FFCC99";      // Middle-older - orange
+        return "#FF9966";                          // Older - dark orange
+    }
+    
+    calculateGenderRatioColor(saData) {
+        const yearData = saData[String(this.currentYear)];
+        if (!yearData || !yearData.gender_profile) return "gray";
+        
+        const genderData = yearData.gender_profile;
+        const total = genderData.Female + genderData.Male;
+        if (total === 0) return "gray";
+        
+        const femaleRatio = genderData.Female / total;
+        
+        if (femaleRatio < 0.48) return "#4A90E2";      // More male - blue
+        if (femaleRatio < 0.495) return "#A8CBEA";     // Slightly more male - light blue
+        if (femaleRatio < 0.505) return "#E8E8E8";     // Balanced - light gray
+        if (femaleRatio < 0.52) return "#F5A3C7";      // Slightly more female - light pink
+        return "#E91E63";                              // More female - pink
+    }
+    
+    calculateEthnicityDiversityColor(saData) {
+        const yearData = saData[String(this.currentYear)];
+        if (!yearData || !yearData.ethnicity_profile) return "gray";
+        
+        const ethnicityData = yearData.ethnicity_profile;
+        const total = Object.values(ethnicityData).reduce((sum, count) => sum + count, 0);
+        
+        if (total === 0) return "gray";
+        
+        // Calculate diversity index (Shannon diversity)
+        let diversity = 0;
+        for (const count of Object.values(ethnicityData)) {
+            if (count > 0) {
+                const proportion = count / total;
+                diversity -= proportion * Math.log(proportion);
+            }
+        }
+        
+        // Color based on diversity level
+        if (diversity < 0.5) return "#FFF5E6";         // Low diversity - very light orange
+        if (diversity < 1.0) return "#FFE0B3";         // Low-medium - light orange
+        if (diversity < 1.5) return "#FFCC80";         // Medium - orange
+        if (diversity < 2.0) return "#FF9800";         // High - darker orange
+        return "#E65100";                              // Very high - deep orange
+    }
+    
+    calculateIncomeLevelColor(saData) {
+        const yearData = saData[String(this.currentYear)];
+        if (!yearData || !yearData.income_profile) return "gray";
+        
+        const incomeData = yearData.income_profile;
+        const total = Object.values(incomeData).reduce((sum, count) => sum + count, 0);
+        
+        if (total === 0) return "gray";
+        
+        // Calculate weighted average income (approximate)
+        const incomeWeights = {
+            "Under $15,000": 10000,
+            "$15,000-$30,000": 22500,
+            "$30,000-$50,000": 40000,
+            "$50,000-$70,000": 60000,
+            "$70,000-$100,000": 85000,
+            "$100,000-$150,000": 125000,
+            "$150,000+": 200000
+        };
+        
+        let weightedSum = 0;
+        for (const [bracket, count] of Object.entries(incomeData)) {
+            weightedSum += (incomeWeights[bracket] || 0) * count;
+        }
+        
+        const avgIncome = weightedSum / total;
+        
+        if (avgIncome < 30000) return "#FFEBEE";       // Low income - very light red
+        if (avgIncome < 50000) return "#FFCDD2";       // Low-medium - light red
+        if (avgIncome < 70000) return "#FFF3E0";       // Medium - light orange
+        if (avgIncome < 100000) return "#C8E6C9";      // Medium-high - light green
+        if (avgIncome < 130000) return "#4CAF50";      // High - green
+        return "#2E7D32";                              // Very high - dark green
+    }
+    
+    calculatePopulationDensityColor(saData) {
+        const yearData = saData[String(this.currentYear)];
+        if (!yearData || yearData.population_density === undefined) return "gray";
+        
+        const density = yearData.population_density;
+        
+        if (density < 10) return "#E8F5E8";            // Very low - very light green
+        if (density < 50) return "#C8E6C9";            // Low - light green  
+        if (density < 200) return "#81C784";           // Medium-low - green
+        if (density < 500) return "#FFF3E0";           // Medium - light orange
+        if (density < 1000) return "#FFCC80";          // Medium-high - orange
+        if (density < 2000) return "#FF8A65";          // High - red-orange
+        return "#D32F2F";                              // Very high - red
+    }
+    
+    calculateUnemploymentColor(saData) {
+        const yearData = saData[String(this.currentYear)];
+        if (!yearData || yearData.unemployment_rate === undefined) return "gray";
+        
+        const unemploymentRate = yearData.unemployment_rate * 100; // Convert to percentage
+        
+        if (unemploymentRate < 2) return "#E8F5E8";    // Very low - light green
+        if (unemploymentRate < 4) return "#C8E6C9";    // Low - green
+        if (unemploymentRate < 6) return "#FFF3E0";    // Medium - light orange
+        if (unemploymentRate < 8) return "#FFCC80";    // Medium-high - orange
+        if (unemploymentRate < 12) return "#FF8A65";   // High - red-orange
+        return "#D32F2F";                              // Very high - red
+    }
+    
+    calculateHomeOwnershipColor(saData) {
+        const yearData = saData[String(this.currentYear)];
+        if (!yearData || yearData.home_ownership_rate === undefined) return "gray";
+        
+        const ownershipRate = yearData.home_ownership_rate;
+        
+        if (ownershipRate < 0.4) return "#FFEBEE";     // Very low - light red
+        if (ownershipRate < 0.5) return "#FFCDD2";     // Low - red
+        if (ownershipRate < 0.6) return "#FFF3E0";     // Medium-low - light orange
+        if (ownershipRate < 0.7) return "#C8E6C9";     // Medium - light green
+        if (ownershipRate < 0.8) return "#81C784";     // High - green
+        return "#4CAF50";                              // Very high - dark green
+    }
+    
     onEachCensusFeature(feature, layer) {
         const sa2Code = String(feature.properties.SA22018_V1_00); // Convert to string
         const saData = this.censusData[sa2Code];
@@ -556,21 +711,97 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     createCensusPopupContent(properties, saData) {
+        const sa2Code = String(properties.SA22018_V1_00);
         const yearData = saData[String(this.currentYear)] || {};
         
-        return `
+        // Check if we have comprehensive demographic data
+        const demographicData = this.demographicData[sa2Code];
+        const comprehensiveData = demographicData ? demographicData[String(this.currentYear)] : null;
+        
+        let popupContent = `
             <div class="census-popup">
-                <h3>Census Data - ${properties.SA22018_V1_00_NAME}</h3>
+                <h3>${properties.SA22018_V1_00_NAME}</h3>
                 <p><strong>Year:</strong> ${this.currentYear}</p>
-                <p><strong>Total Population:</strong> ${yearData["Total"] || 'N/A'}</p>
-                <p><strong>Christian:</strong> ${yearData["Christian"] || 0}</p>
-                <p><strong>No Religion:</strong> ${yearData["No religion"] || 0}</p>
-                <p><strong>Buddhism:</strong> ${yearData["Buddhism"] || 0}</p>
-                <p><strong>Hinduism:</strong> ${yearData["Hinduism"] || 0}</p>
-                <p><strong>Islam:</strong> ${yearData["Islam"] || 0}</p>
-                <small>Source: Statistics New Zealand</small>
-            </div>
+                <p><strong>SA2 Code:</strong> ${sa2Code}</p>
         `;
+        
+        // Basic population data
+        if (yearData["Total"]) {
+            popupContent += `<p><strong>Total Population:</strong> ${yearData["Total"].toLocaleString()}</p>`;
+        }
+        
+        // Religious data
+        popupContent += `<h4>Religion</h4>`;
+        popupContent += `<p>Christian: ${yearData["Christian"] || 0}</p>`;
+        popupContent += `<p>No Religion: ${yearData["No religion"] || 0}</p>`;
+        popupContent += `<p>Buddhism: ${yearData["Buddhism"] || 0}</p>`;
+        popupContent += `<p>Hinduism: ${yearData["Hinduism"] || 0}</p>`;
+        popupContent += `<p>Islam: ${yearData["Islam"] || 0}</p>`;
+        
+        // Comprehensive demographic data if available
+        if (comprehensiveData) {
+            // Age data
+            if (comprehensiveData.median_age !== undefined) {
+                popupContent += `<h4>Age Profile</h4>`;
+                popupContent += `<p>Median Age: ${comprehensiveData.median_age.toFixed(1)} years</p>`;
+                
+                // Top age groups
+                const ageProfile = comprehensiveData.age_profile;
+                if (ageProfile) {
+                    const sortedAges = Object.entries(ageProfile)
+                        .sort(([,a], [,b]) => b - a)
+                        .slice(0, 3);
+                    popupContent += `<p>Largest Age Groups: ${sortedAges.map(([age, count]) => `${age} (${count})`).join(', ')}</p>`;
+                }
+            }
+            
+            // Gender data
+            if (comprehensiveData.gender_profile) {
+                const genderData = comprehensiveData.gender_profile;
+                const total = genderData.Female + genderData.Male;
+                if (total > 0) {
+                    const femalePercent = ((genderData.Female / total) * 100).toFixed(1);
+                    popupContent += `<h4>Gender</h4>`;
+                    popupContent += `<p>Female: ${femalePercent}% (${genderData.Female})</p>`;
+                    popupContent += `<p>Male: ${(100 - femalePercent).toFixed(1)}% (${genderData.Male})</p>`;
+                }
+            }
+            
+            // Ethnicity data
+            if (comprehensiveData.ethnicity_profile) {
+                popupContent += `<h4>Ethnicity (Top 3)</h4>`;
+                const ethnicityData = Object.entries(comprehensiveData.ethnicity_profile)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 3);
+                ethnicityData.forEach(([ethnicity, count]) => {
+                    popupContent += `<p>${ethnicity}: ${count}</p>`;
+                });
+            }
+            
+            // Economic indicators
+            if (comprehensiveData.unemployment_rate !== undefined) {
+                popupContent += `<h4>Economic</h4>`;
+                popupContent += `<p>Unemployment: ${(comprehensiveData.unemployment_rate * 100).toFixed(1)}%</p>`;
+            }
+            
+            if (comprehensiveData.home_ownership_rate !== undefined) {
+                popupContent += `<p>Home Ownership: ${(comprehensiveData.home_ownership_rate * 100).toFixed(1)}%</p>`;
+            }
+            
+            // Area characteristics
+            if (comprehensiveData.population_density !== undefined) {
+                popupContent += `<p>Density: ${comprehensiveData.population_density} people/km²</p>`;
+            }
+            
+            if (comprehensiveData.region_type) {
+                popupContent += `<p>Type: ${comprehensiveData.region_type.charAt(0).toUpperCase() + comprehensiveData.region_type.slice(1)}</p>`;
+            }
+        }
+        
+        popupContent += `<small>Sources: Statistics New Zealand, OpenStreetMap</small>`;
+        popupContent += `</div>`;
+        
+        return popupContent;
     }
     
     // UI Control methods

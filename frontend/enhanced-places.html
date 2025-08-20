@@ -384,7 +384,7 @@
 <body>
     <div class="header">
         <h1>Enhanced Places of Worship Map</h1>
-        <p>Interactive visualization of <span id="totalPlaces">0</span> places of worship with census data overlay</p>
+        <p>Interactive visualization of <span id="totalPlaces">0</span> places of worship with comprehensive demographic overlays</p>
     </div>
     
     <div class="controls">
@@ -449,12 +449,29 @@
     <!-- Census Controls (shown when overlay is enabled) -->
     <div id="censusControls" class="census-controls">
         <div class="control-group">
-            <label for="censusMetricSelect">Census Metric:</label>
+            <label for="censusMetricSelect">Demographic Metric:</label>
             <select id="censusMetricSelect">
-                <option value="no_religion_change">No Religion Change (2006-2018)</option>
-                <option value="christian_change">Christian Change (2006-2018)</option>
-                <option value="total_population">Total Population</option>
-                <option value="diversity_index">Religious Diversity Index</option>
+                <optgroup label="Religious Demographics">
+                    <option value="no_religion_change">No Religion Change (2006-2018)</option>
+                    <option value="christian_change">Christian Change (2006-2018)</option>
+                    <option value="diversity_index">Religious Diversity Index</option>
+                </optgroup>
+                <optgroup label="Age & Gender">
+                    <option value="median_age">Median Age</option>
+                    <option value="gender_ratio">Gender Ratio (Male/Female)</option>
+                </optgroup>
+                <optgroup label="Ethnicity & Culture">
+                    <option value="ethnicity_diversity">Ethnicity Diversity</option>
+                </optgroup>
+                <optgroup label="Economic Indicators">
+                    <option value="income_level">Average Income Level</option>
+                    <option value="unemployment_rate">Unemployment Rate</option>
+                    <option value="home_ownership">Home Ownership Rate</option>
+                </optgroup>
+                <optgroup label="Population & Geography">
+                    <option value="total_population">Total Population</option>
+                    <option value="population_density">Population Density</option>
+                </optgroup>
             </select>
         </div>
         
