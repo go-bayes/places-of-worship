@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://go-bayes.github.io/places-of-worship/schemas/organisation.schema.json",
+  "title": "Place of Worship — Organisation (Congregation)",
+  "description": "Religious community using one site/structure (may share sites; sites may host multiple organisations).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["org_id", "site_id", "status", "sources"],
+  "properties": {
+    "org_id": { "type": "string", "pattern": "^[0-9a-fA-F-]{36}$" },
+    "site_id": { "type": "string", "pattern": "^[0-9a-fA-F-]{36}$" },
+    "structure_ids": { "type": "array", "items": { "type": "string", "pattern": "^[0-9a-fA-F-]{36}$" } },
+    "names": { "type": "array", "items": { "$ref": "site.schema.json#/$defs/Name" } },
+    "religion": { "type": "string", "description": "Controlled vocabulary, initially aligned to OSM values (e.g., christian, muslim, hindu, buddhist, sikh, jewish, taoist, shinto, bahai, jain, indigenous, etc.)." },
+    "denomination": { "type": "string", "description": "Subgroup/denomination (aligned to OSM denomination=* values where possible)." },
+    "affiliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["diocese", "parish", "synod", "presbytery", "conference", "board", "other"] },
+        "name": { "type": "string" },
+        "identifier": { "type": "string" }
+      }
+    },
+    "languages": { "type": "array", "items": { "type": "string", "description": "BCP-47 language tag" } },
+    "service_times": {
+      "type": "array",
+      "description": "Optional structured service schedule.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "day": { "type": "string", "enum": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
+          "time_local": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" },
+          "rule": { "type": "string", "description": "Optional RRULE-like string (e.g., FREQ=WEEKLY;BYDAY=SU)." },
+          "timezone": { "type": "string" }
+        }
+      }
+    },
+    "contact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "phone": { "type": "string" },
+        "email": { "type": "string", "format": "email" }
+      }
+    },
+    "website": { "type": "string", "format": "uri" },
+    "status": { "type": "string", "enum": ["active", "inactive", "relocated", "unknown"] },
+    "active_from": { "type": ["string", "null"], "format": "date" },
+    "active_to": { "type": ["string", "null"], "format": "date" },
+    "sameAs": { "type": "array", "items": { "type": "string", "format": "uri" } },
+    "tags_raw": { "type": "object", "additionalProperties": { "type": ["string", "number", "boolean", "null"] } },
+    "sources": { "type": "array", "minItems": 1, "items": { "$ref": "site.schema.json#/$defs/Source" } }
+  },
+  "x_crosswalk": {
+    "osm": {
+      "fields": {
+        "names[].name": "name",
+        "religion": "religion",
+        "denomination": "denomination",
+        "website": "website",
+        "languages[]": "language",
+        "service_times[]": "service_times",
+        "affiliation.name": "diocese"
+      }
+    },
+    "schema.org": {
+      "@type": "PlaceOfWorship",
+      "fields": {
+        "names[].name": "name",
+        "religion": "additionalProperty (PropertyValue: key='religion')",
+        "denomination": "additionalProperty (PropertyValue: key='denomination')",
+        "website": "url",
+        "languages[]": "availableLanguage",
+        "service_times[]": "openingHours",
+        "affiliation.name": "parentOrganization"
+      }
+    }
+  }
+}

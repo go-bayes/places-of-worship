@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://go-bayes.github.io/places-of-worship/schemas/site.schema.json",
+  "title": "Place of Worship — Site",
+  "description": "Persistent location (parcel/compound) where religious activity occurs. Distinct from structures and organisations.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["site_id", "geometry", "country_code", "status", "valid_from", "sources"],
+  "properties": {
+    "site_id": {
+      "type": "string",
+      "description": "Stable identifier (UUIDv4 preferred).",
+      "pattern": "^[0-9a-fA-F-]{36}$"
+    },
+    "names": {
+      "type": "array",
+      "description": "Name(s) associated with the site.",
+      "items": { "$ref": "#/$defs/Name" }
+    },
+    "geometry": { "$ref": "#/$defs/Geometry" },
+    "centroid": { "$ref": "#/$defs/PointGeometry", "description": "Cached centroid for indexing." },
+    "address": { "$ref": "#/$defs/PostalAddress" },
+    "admin": { "$ref": "#/$defs/Admin" },
+    "country_code": {
+      "type": "string",
+      "description": "ISO 3166-1 alpha-2 country code.",
+      "pattern": "^[A-Z]{2}$"
+    },
+    "status": { "type": "string", "enum": ["active", "closed", "demolished", "relocated", "proposed", "unknown"] },
+    "valid_from": { "type": "string", "format": "date" },
+    "valid_to": { "type": ["string", "null"], "format": "date" },
+    "sameAs": { "type": "array", "items": { "type": "string", "format": "uri" } },
+    "tags_raw": {
+      "type": "object",
+      "description": "Optional raw tag bag from sources (e.g., OSM).",
+      "additionalProperties": { "type": ["string", "number", "boolean", "null"] }
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "last_seen": { "type": "string", "format": "date-time" },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/Source" }
+    }
+  },
+  "$defs": {
+    "Geometry": {
+      "type": "object",
+      "required": ["type", "coordinates"],
+      "properties": {
+        "type": { "type": "string", "enum": ["Point", "Polygon", "MultiPolygon"] },
+        "coordinates": {}
+      },
+      "additionalProperties": false
+    },
+    "PointGeometry": {
+      "type": "object",
+      "required": ["type", "coordinates"],
+      "properties": {
+        "type": { "type": "string", "const": "Point" },
+        "coordinates": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "items": { "type": "number" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "Name": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "lang": { "type": "string", "description": "BCP-47 language tag, if known." },
+        "script": { "type": "string", "description": "ISO 15924 script code, if known." },
+        "type": { "type": "string", "enum": ["official", "local", "alt", "historic"] }
+      }
+    },
+    "PostalAddress": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "street_address": { "type": "string" },
+        "locality": { "type": "string" },
+        "region": { "type": "string" },
+        "postal_code": { "type": "string" },
+        "country_code": { "type": "string", "pattern": "^[A-Z]{2}$" }
+      }
+    },
+    "Admin": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "adm1_code": { "type": "string" },
+        "adm1_name": { "type": "string" },
+        "adm2_code": { "type": "string" },
+        "adm2_name": { "type": "string" }
+      }
+    },
+    "Source": {
+      "type": "object",
+      "required": ["name", "source_id", "retrieved_at", "licence"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "enum": ["openstreetmap", "wikidata", "other"] },
+        "source_id": { "type": "string", "description": "Source identifier (e.g., OSM node/way/relation id)." },
+        "url": { "type": "string", "format": "uri" },
+        "retrieved_at": { "type": "string", "format": "date-time" },
+        "query_hash": { "type": "string", "description": "Stable hash of extraction query." },
+        "dataset_version": { "type": "string" },
+        "licence": {
+          "type": "object",
+          "required": ["name", "url"],
+          "properties": {
+            "name": { "type": "string", "default": "ODbL-1.0" },
+            "url": { "type": "string", "format": "uri", "default": "https://opendatacommons.org/licenses/odbl/1-0/" },
+            "attribution": { "type": "string", "default": "© OpenStreetMap contributors" }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  },
+  "x_crosswalk": {
+    "osm": {
+      "primary": { "key": "amenity", "value": "place_of_worship" },
+      "fields": {
+        "names[].name": "name",
+        "address.street_address": "addr:street",
+        "address.locality": "addr:city",
+        "address.region": "addr:state",
+        "address.postal_code": "addr:postcode",
+        "address.country_code": "addr:country",
+        "sameAs[]": "wikidata"
+      }
+    },
+    "schema.org": {
+      "@type": "PlaceOfWorship",
+      "fields": {
+        "names[].name": "name",
+        "address": "address",
+        "centroid": "geo",
+        "sameAs": "sameAs"
+      }
+    }
+  },
+  "$comment": "GeoJSON geometry per RFC 7946. Status values are conservative; extend if needed."
+}
