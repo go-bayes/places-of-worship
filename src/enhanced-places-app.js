@@ -712,6 +712,32 @@ class EnhancedPlacesOfWorshipApp {
             layer.on('popupopen', (e) => {
                 this.createReligiousHistogram(saData, feature.properties.SA22018_V1_NAME);
             });
+            
+            // Add hover effects like age_map
+            layer.on('mouseover', (e) => {
+                layer.setStyle({
+                    color: 'orange',
+                    weight: 3,
+                    fillOpacity: 0.1,
+                    fillColor: 'orange'
+                });
+                layer.bringToFront();
+            });
+            
+            layer.on('mouseout', (e) => {
+                layer.setStyle({
+                    color: '#666666',
+                    weight: 1,
+                    fillOpacity: 0,
+                    fillColor: 'transparent'
+                });
+            });
+            
+            // Add tooltip with region name
+            layer.bindTooltip(feature.properties.SA22018_V1_NAME, {
+                sticky: true,
+                direction: 'auto'
+            });
         }
     }
     
