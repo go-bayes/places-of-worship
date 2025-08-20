@@ -70,6 +70,12 @@ class EnhancedPlacesOfWorshipApp {
                 maxZoom: 19,
                 minZoom: 5,
             }),
+            'Google Hybrid': L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+                attribution: '&copy; Google Maps',
+                maxZoom: 20,
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                minZoom: 5,
+            }),
             'Terrain': L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
                 attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
                 maxZoom: 17,
@@ -77,8 +83,8 @@ class EnhancedPlacesOfWorshipApp {
             })
         };
         
-        // Add default base layer
-        this.baseLayers['OpenStreetMap'].addTo(this.map);
+        // Add default base layer - start with grayscale
+        this.baseLayers['Grayscale'].addTo(this.map);
         
         // Initialize marker cluster group
         this.markerClusterGroup = L.markerClusterGroup({
@@ -399,7 +405,8 @@ class EnhancedPlacesOfWorshipApp {
                 <h3>${props.name}</h3>
                 <p><strong>Category:</strong> ${majorCategory}</p>
                 <p><strong>Denomination:</strong> ${props.denomination}</p>
-                <p><strong>Confidence:</strong> ${(props.confidence * 100).toFixed(0)}%</p>
+                <p><strong>Confidence:</strong> ${(props.confidence * 100).toFixed(0)}% 
+                   <small title="Based on OSM data completeness: name availability, address details, denomination specificity, and contact information">ⓘ</small></p>
                 ${props.address ? `<p><strong>Address:</strong> ${props.address}</p>` : ''}
                 ${props.phone ? `<p><strong>Phone:</strong> ${props.phone}</p>` : ''}
                 ${props.website ? `<p><strong>Website:</strong> <a href="${props.website}" target="_blank">${props.website}</a></p>` : ''}
