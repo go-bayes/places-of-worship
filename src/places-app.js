@@ -66,7 +66,7 @@ class PlacesOfWorshipApp {
     
     async loadPlacesData() {
         try {
-            const response = await fetch('https://www.dropbox.com/scl/fi/jss3eqlbkitemjb1bomjx/nz_places.geojson?rlkey=2iquuitdfcwq0u7lo3lounlnb&dl=1');
+            const response = await fetch('./data/nz_places.geojson');
             if (!response.ok) {
                 throw new Error('Failed to load places data');
             }
