@@ -78,8 +78,8 @@ class ReligiousDataApp {
         try {
             // Load both religion data and boundaries from static files
             const [religionResponse, boundariesResponse] = await Promise.all([
-                fetch('./religion.json'),
-                fetch('./sa2.geojson')
+                fetch('https://www.dropbox.com/scl/fi/k3ykwk1x26wzeibu34056/religion.json?rlkey=jje4fwnbq9wmufr3i9icjc3bu&dl=1'),
+                fetch('https://www.dropbox.com/scl/fi/4vvvn4dmzoo4f2ky35gl5/sa2.geojson?rlkey=ch8jqvczpqivtkzgow5ujtqvq&dl=1')
             ]);
             
             if (!religionResponse.ok || !boundariesResponse.ok) {
