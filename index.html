@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Places of Worship - New Zealand</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .subtitle {
+            font-size: 1.3em;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+        .map-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+        .map-card {
+            background: rgba(255, 255, 255, 0.95);
+            color: #2c3e50;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+            text-decoration: none;
+        }
+        .map-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        .map-card h2 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+        }
+        .map-card p {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+        .features {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+        .features li {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        .features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        .github-link {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .github-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Places of Worship</h1>
+        <p class="subtitle">Interactive mapping of religious communities across New Zealand</p>
+        
+        <div class="map-options">
+            <a href="enhanced-places.html" class="map-card">
+                <h2>🗺️ Enhanced Demographic Map</h2>
+                <p><strong>Complete visualization with comprehensive demographic overlays</strong></p>
+                <ul class="features">
+                    <li>3,370 places of worship from OpenStreetMap</li>
+                    <li>Age, gender, ethnicity & income demographics</li>
+                    <li>Religious category filtering (Christian, Islam, Buddhism, etc.)</li>
+                    <li>Multiple map styles (satellite, terrain, grayscale)</li>
+                    <li>Regional census data overlay (2006-2018)</li>
+                    <li>Interactive clustering & detailed popups</li>
+                </ul>
+            </a>
+            
+            <a href="places.html" class="map-card">
+                <h2>📍 Simple Places Map</h2>
+                <p><strong>Clean, focused view of places of worship</strong></p>
+                <ul class="features">
+                    <li>Individual place markers with clustering</li>
+                    <li>Denomination filtering & search</li>
+                    <li>Data quality indicators</li>
+                    <li>Fast loading & mobile-friendly</li>
+                    <li>OpenStreetMap data attribution</li>
+                </ul>
+            </a>
+        </div>
+        
+        <div class="footer">
+            <p>
+                <strong>Data Sources:</strong> 
+                <a href="https://www.openstreetmap.org/copyright" target="_blank" class="github-link">OpenStreetMap</a> |
+                <a href="https://www.stats.govt.nz/" target="_blank" class="github-link">Statistics New Zealand</a>
+            </p>
+            <p>
+                <a href="https://github.com/go-bayes/places-of-worship" target="_blank" class="github-link">📱 View on GitHub</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
