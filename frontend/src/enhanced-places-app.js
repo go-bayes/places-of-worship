@@ -157,9 +157,9 @@ class EnhancedPlacesOfWorshipApp {
             // Load places, census, and comprehensive demographic data
             const [placesResponse, censusResponse, demographicResponse, boundariesResponse] = await Promise.all([
                 fetch('./data/nz_places.geojson'),
-                fetch('./src/religion.json'),
-                fetch('./src/demographics.json'),
-                fetch('./src/sa2.geojson')
+                fetch('https://www.dropbox.com/scl/fi/k3ykwk1x26wzeibu34056/religion.json?rlkey=jje4fwnbq9wmufr3i9icjc3bu&dl=1'),
+                fetch('https://www.dropbox.com/scl/fi/vjoqkmv08g0wit8kl6d29/demographics.json?rlkey=6h4lnbh4k9yjqdhx3wmag773m&dl=1'),
+                fetch('./data/sa2.geojson')
             ]);
             
             if (!placesResponse.ok || !censusResponse.ok || !demographicResponse.ok || !boundariesResponse.ok) {
