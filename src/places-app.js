@@ -66,7 +66,7 @@ class PlacesOfWorshipApp {
     
     async loadPlacesData() {
         try {
-            const response = await fetch('./data/nz_places.geojson');
+            const response = await fetch('./data/nz_places_optimized.geojson');
             if (!response.ok) {
                 throw new Error('Failed to load places data');
             }
