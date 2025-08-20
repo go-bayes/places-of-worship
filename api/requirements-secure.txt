@@ -3,7 +3,7 @@
 
 # Core web framework
 Flask==3.0.0
-flask-cors==4.0.1  # Updated from 4.0.0 to fix CORS vulnerabilities
+flask-cors==6.0.0  # Updated from 4.0.0 to fix CORS vulnerabilities
 
 # Database connectivity
 asyncpg==0.29.0
