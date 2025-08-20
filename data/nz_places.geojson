@@ -1,0 +1,205 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "title": "Places of Worship - New Zealand (Sample)",
+    "description": "Sample dataset for GitHub Pages demo",
+    "source": "OpenStreetMap contributors",
+    "license": "ODbL",
+    "extraction_date": "2025-08-20T20:30:00Z",
+    "total_places": 50
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [174.7633, -36.8485]
+      },
+      "properties": {
+        "place_id": "sample-001",
+        "osm_id": 123456,
+        "osm_type": "node",
+        "name": "St Matthew-in-the-City",
+        "denomination": "Anglican",
+        "data_sources": ["osm"],
+        "confidence": 0.95,
+        "address": "87 Federal Street, Auckland Central",
+        "phone": "+64 9 357 9099",
+        "website": "https://stmatthews.org.nz",
+        "extracted_at": "2025-08-20T20:30:00Z",
+        "extraction_method": "sample_data"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [174.7719, -36.8406]
+      },
+      "properties": {
+        "place_id": "sample-002",
+        "osm_id": 123457,
+        "osm_type": "way",
+        "name": "St Patrick's Cathedral",
+        "denomination": "Catholic",
+        "data_sources": ["osm"],
+        "confidence": 0.92,
+        "address": "43 Wyndham Street, Auckland Central",
+        "extracted_at": "2025-08-20T20:30:00Z",
+        "extraction_method": "sample_data"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [174.7772, -36.8626]
+      },
+      "properties": {
+        "place_id": "sample-003",
+        "osm_id": 123458,
+        "osm_type": "node",
+        "name": "Auckland Baptist Church",
+        "denomination": "Baptist",
+        "data_sources": ["osm"],
+        "confidence": 0.88,
+        "address": "150 Queen Street, Auckland Central",
+        "extracted_at": "2025-08-20T20:30:00Z",
+        "extraction_method": "sample_data"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [174.7465, -36.8506]
+      },
+      "properties": {
+        "place_id": "sample-004",
+        "osm_id": 123459,
+        "osm_type": "node",
+        "name": "Auckland Islamic Centre",
+        "denomination": "Islam",
+        "data_sources": ["osm"],
+        "confidence": 0.85,
+        "address": "28 Hargreaves Street, College Hill",
+        "extracted_at": "2025-08-20T20:30:00Z",
+        "extraction_method": "sample_data"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [174.7598, -36.8618]
+      },
+      "properties": {
+        "place_id": "sample-005",
+        "osm_id": 123460,
+        "osm_type": "node",
+        "name": "Auckland Hebrew Congregation",
+        "denomination": "Judaism",
+        "data_sources": ["osm"],
+        "confidence": 0.90,
+        "address": "108 Greys Avenue, Auckland Central",
+        "extracted_at": "2025-08-20T20:30:00Z",
+        "extraction_method": "sample_data"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [174.7402, -36.8532]
+      },
+      "properties": {
+        "place_id": "sample-006",
+        "osm_id": 123461,
+        "osm_type": "way",
+        "name": "Auckland Buddhist Centre",
+        "denomination": "Buddhism",
+        "data_sources": ["osm"],
+        "confidence": 0.82,
+        "address": "381 Richmond Road, Grey Lynn",
+        "extracted_at": "2025-08-20T20:30:00Z",
+        "extraction_method": "sample_data"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [174.7892, -36.8428]
+      },
+      "properties": {
+        "place_id": "sample-007",
+        "osm_id": 123462,
+        "osm_type": "node",
+        "name": "Presbyterian Church of Aotearoa",
+        "denomination": "Presbyterian",
+        "data_sources": ["osm"],
+        "confidence": 0.87,
+        "address": "12 Aurora Terrace, Parnell",
+        "extracted_at": "2025-08-20T20:30:00Z",
+        "extraction_method": "sample_data"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [174.7234, -36.8715]
+      },
+      "properties": {
+        "place_id": "sample-008",
+        "osm_id": 123463,
+        "osm_type": "node",
+        "name": "Methodist Church Auckland",
+        "denomination": "Methodist",
+        "data_sources": ["osm"],
+        "confidence": 0.83,
+        "address": "74 Karangahape Road, Auckland Central",
+        "extracted_at": "2025-08-20T20:30:00Z",
+        "extraction_method": "sample_data"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [174.7156, -36.8445]
+      },
+      "properties": {
+        "place_id": "sample-009",
+        "osm_id": 123464,
+        "osm_type": "node",
+        "name": "Sikh Temple Auckland",
+        "denomination": "Sikhism",
+        "data_sources": ["osm"],
+        "confidence": 0.86,
+        "address": "15 Curran Street, Herne Bay",
+        "extracted_at": "2025-08-20T20:30:00Z",
+        "extraction_method": "sample_data"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [174.7678, -36.8512]
+      },
+      "properties": {
+        "place_id": "sample-010",
+        "osm_id": 123465,
+        "osm_type": "node",
+        "name": "Hindu Temple Auckland",
+        "denomination": "Hinduism",
+        "data_sources": ["osm"],
+        "confidence": 0.84,
+        "address": "325 Queen Street, Auckland Central",
+        "extracted_at": "2025-08-20T20:30:00Z",
+        "extraction_method": "sample_data"
+      }
+    }
+  ]
+}

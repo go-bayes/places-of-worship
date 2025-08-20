@@ -65,12 +65,12 @@ def main():
     Main function to update HTML files with Dropbox URLs
     """
     
-    # Actual Dropbox public sharing URLs (converted to direct download)
+    # Note: These URLs need to be replaced with actual Dropbox public sharing URLs
     dropbox_urls = {
-        'nz_places.geojson': 'https://www.dropbox.com/scl/fi/jss3eqlbkitemjb1bomjx/nz_places.geojson?rlkey=2iquuitdfcwq0u7lo3lounlnb&dl=1',
-        'sa2.geojson': 'https://www.dropbox.com/scl/fi/4vvvn4dmzoo4f2ky35gl5/sa2.geojson?rlkey=ch8jqvczpqivtkzgow5ujtqvq&dl=1',
-        'religion.json': 'https://www.dropbox.com/scl/fi/k3ykwk1x26wzeibu34056/religion.json?rlkey=jje4fwnbq9wmufr3i9icjc3bu&dl=1',
-        'demographics.json': 'https://www.dropbox.com/scl/fi/vjoqkmv08g0wit8kl6d29/demographics.json?rlkey=6h4lnbh4k9yjqdhx3wmag773m&dl=1'
+        'nz_places.geojson': 'PLACEHOLDER_DROPBOX_URL_FOR_PLACES',
+        'sa2.geojson': 'PLACEHOLDER_DROPBOX_URL_FOR_SA2_BOUNDARIES', 
+        'religion.json': 'PLACEHOLDER_DROPBOX_URL_FOR_RELIGION_DATA',
+        'demographics.json': 'PLACEHOLDER_DROPBOX_URL_FOR_DEMOGRAPHICS_DATA'
     }
     
     # Get repository root
