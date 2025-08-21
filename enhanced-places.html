@@ -17,6 +17,9 @@
     <!-- Plotly.js for histograms -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     
+    <!-- Google Maps API for Street View -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBhSHcGYySVS9nLEZ1mF73Gv_9z41rNOXs"></script>
+    
     <style>
         body {
             margin: 0;
@@ -268,6 +271,13 @@
         
         .leaflet-tooltip-right:before {
             border-right-color: rgba(0, 0, 0, 0.8) !important;
+        }
+        
+        /* Street View panorama styling */
+        .pano {
+            height: 300px;
+            width: 500px;
+            margin-top: 10px;
         }
         
         /* Hover effects for markers */

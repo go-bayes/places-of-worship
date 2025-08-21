@@ -36,6 +36,7 @@ class EnhancedPlacesOfWorshipApp {
     async init() {
         this.setupMap();
         this.setupControls();
+        this.setupStreetView();
         await this.loadData();
         this.setupDenominationColors();
         this.displayPlaces();
@@ -324,7 +325,7 @@ class EnhancedPlacesOfWorshipApp {
         
         // Create popup content
         const popupContent = this.createPopupContent(props);
-        marker.bindPopup(popupContent);
+        marker.bindPopup(popupContent, { maxWidth: 600 });
         
         return marker;
     }
@@ -412,6 +413,7 @@ class EnhancedPlacesOfWorshipApp {
                 ${props.website ? `<p><strong>Website:</strong> <a href="${props.website}" target="_blank">${props.website}</a></p>` : ''}
                 <p><strong>Source:</strong> OpenStreetMap (OSM ID: ${props.osm_id})</p>
                 <small>Data quality: ${props.confidence >= 0.8 ? 'High' : props.confidence >= 0.6 ? 'Medium' : 'Low'}</small>
+                <div class="pano"></div>
             </div>
         `;
     }
@@ -953,6 +955,35 @@ class EnhancedPlacesOfWorshipApp {
         if (loadingEl) {
             loadingEl.style.display = 'none';
         }
+    }
+    
+    setupStreetView() {
+        // Add Street View integration like religion repository
+        this.map.on('popupopen', (e) => {
+            const panoElem = e.popup._contentNode.querySelector('.pano');
+            if (panoElem && window.google && window.google.maps) {
+                const sv = new google.maps.StreetViewService();
+                sv.getPanorama({ location: e.popup._latlng }, (data, status) => {
+                    if (status === 'OK') {
+                        new google.maps.StreetViewPanorama(panoElem, {
+                            position: e.popup._latlng,
+                            pov: {
+                                heading: 0,
+                                pitch: 0
+                            },
+                            zoom: 1
+                        });
+                    } else {
+                        panoElem.textContent = 'No Street View available for this location';
+                        panoElem.style.textAlign = 'center';
+                        panoElem.style.padding = '20px';
+                        panoElem.style.backgroundColor = '#f5f5f5';
+                        panoElem.style.border = '1px solid #ddd';
+                        panoElem.style.borderRadius = '4px';
+                    }
+                });
+            }
+        });
     }
     
     createReligiousHistogram(saData, regionName) {
