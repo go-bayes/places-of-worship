@@ -958,31 +958,34 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     setupStreetView() {
-        // Add Street View integration like religion repository
+        // Add Street View integration like religion repository with improved timing
         this.map.on('popupopen', (e) => {
-            const panoElem = e.popup._contentNode.querySelector('.pano');
-            if (panoElem && window.google && window.google.maps) {
-                const sv = new google.maps.StreetViewService();
-                sv.getPanorama({ location: e.popup._latlng }, (data, status) => {
-                    if (status === 'OK') {
-                        new google.maps.StreetViewPanorama(panoElem, {
-                            position: e.popup._latlng,
-                            pov: {
-                                heading: 0,
-                                pitch: 0
-                            },
-                            zoom: 1
+            // Add delay to ensure popup is fully rendered
+            setTimeout(() => {
+                const panoElem = e.popup._contentNode.querySelector('.pano');
+                if (panoElem) {
+                    // Check if Google Maps API is loaded
+                    if (window.google && window.google.maps && window.google.maps.StreetViewService) {
+                        const sv = new google.maps.StreetViewService();
+                        sv.getPanorama({ location: e.popup._latlng }, (data, status) => {
+                            if (status === 'OK') {
+                                new google.maps.StreetViewPanorama(panoElem, {
+                                    position: e.popup._latlng,
+                                    pov: {
+                                        heading: 0,
+                                        pitch: 0
+                                    },
+                                    zoom: 1
+                                });
+                            } else {
+                                panoElem.innerHTML = '<div style="text-align: center; padding: 20px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; color: #666;">No Street View available for this location</div>';
+                            }
                         });
                     } else {
-                        panoElem.textContent = 'No Street View available for this location';
-                        panoElem.style.textAlign = 'center';
-                        panoElem.style.padding = '20px';
-                        panoElem.style.backgroundColor = '#f5f5f5';
-                        panoElem.style.border = '1px solid #ddd';
-                        panoElem.style.borderRadius = '4px';
+                        panoElem.innerHTML = '<div style="text-align: center; padding: 20px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; color: #856404;">Loading Google Maps API...</div>';
                     }
-                });
-            }
+                }
+            }, 100);
         });
     }
     
