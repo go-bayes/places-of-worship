@@ -13,7 +13,7 @@
     integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/leaflet-geosearch@latest/dist/bundle.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@latest/assets/css/leaflet.css">
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBhSHcGYySVS9nLEZ1mF73Gv_9z41rNOXs"></script>
+  <!-- Google Maps API removed - using direct links instead -->
   <script src="https://unpkg.com/leaflet-providers@1.3.0/leaflet-providers.js"></script>
   <script src="https://unpkg.com/vis@4.21.0/dist/vis.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.23.0/moment.min.js"></script>
@@ -160,22 +160,37 @@
 
     map.on("popupopen", function (e) {
       console.log(e);
-      var panoElem = $(".pano", e.popup._contentNode)[0];
-      var sv = new google.maps.StreetViewService();
-      sv.getPanorama({ location: e.popup._latlng }, function (data, status) {
-        if (status === 'OK') {
-          var pano = new google.maps.StreetViewPanorama(panoElem, {
-            position: e.popup._latlng,
-            pov: {
-              heading: 0,
-              pitch: 0
-            },
-            zoom: 1
-          });
-        } else {
-          $(panoElem).text("No streetview for this location");
+      setTimeout(() => {
+        var panoElem = $(".pano", e.popup._contentNode)[0];
+        if (panoElem) {
+          const coords = e.popup._latlng;
+          const lat = coords.lat.toFixed(6);
+          const lng = coords.lng.toFixed(6);
+          
+          panoElem.innerHTML = `
+            <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 15px; margin-top: 10px;">
+              <h4 style="margin: 0 0 10px 0; color: #495057;">Location Services</h4>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <a href="https://www.google.com/maps/@${lat},${lng},19z" target="_blank" 
+                   style="background: #007bff; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px;">
+                   📍 Google Maps
+                </a>
+                <a href="https://www.google.com/maps?q=${lat},${lng}&layer=c&cbll=${lat},${lng}" target="_blank"
+                   style="background: #28a745; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px;">
+                   👁 Street View
+                </a>
+                <a href="https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=19" target="_blank"
+                   style="background: #6c757d; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px;">
+                   🗺 OpenStreetMap
+                </a>
+              </div>
+              <small style="color: #6c757d; margin-top: 8px; display: block;">
+                Coordinates: ${lat}, ${lng}
+              </small>
+            </div>
+          `;
         }
-      });
+      }, 100);
     })
 
     function capitilize(string) {
