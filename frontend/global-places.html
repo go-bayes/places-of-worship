@@ -1,0 +1,471 @@
+<html>
+
+<head>
+  <title>Global Places of Worship Map - Proof of Concept</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.css"
+    integrity="sha256-iYUgmrapfDGvBrePJPrMWQZDcObdAcStKBpjP3Az+3s=" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.js"
+    integrity="sha256-CNm+7c26DTTCGRQkM9vp7aP85kHFMqs9MhPEuytF+fQ=" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/leaflet.glify@3.1.0/dist/glify-browser.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.3.2/spin.min.js"></script>
+  <script src="https://unpkg.com/leaflet-spin@1.1.0/leaflet.spin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/leaflet-geosearch@latest/dist/bundle.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@latest/assets/css/leaflet.css">
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBhSHcGYySVS9nLEZ1mF73Gv_9z41rNOXs"></script>
+  <script src="https://unpkg.com/leaflet-providers@1.3.0/leaflet-providers.js"></script>
+  <script src="https://unpkg.com/vis@4.21.0/dist/vis.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.23.0/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" integrity="sha512-dfX5uYVXzyU8+KHqj8bjo7UkOdg18PaOtpa48djpNbZHwExddghZ+ZmzWT06R5v6NSk3ZUfsH6FNEDepLx9hPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+    integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-77710107-11"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'UA-77710107-11');
+  </script>
+</head>
+
+<body>
+  <h1 id="title">Global Places of Worship Map - Proof of Concept</h1>
+  <div id="map" style="height:85%"></div>
+  <div id="timeline" style="height:15%">
+    <div id="buttons">
+      <button type="button" class="btn" id="play"><i class="fas fa-play"></i></button>
+      <button type="button" onclick="timeline.zoomIn(1)" class="btn" id="zoomIn"><i
+          class="fas fa-search-plus"></i></button>
+      <button type="button" onclick="timeline.zoomOut(1)" class="btn" id="zoomOut"><i
+          class="fas fa-search-minus"></i></button>
+    </div>
+  </div>
+  <script>
+    var map = L.map('map', {
+      worldCopyJump: true,
+      zoomControl: false // Zoom added layer for ordering
+    }).setView([-36.8862, 174.7651], 12);
+    var positron = L.tileLayer.provider('CartoDB.Positron').addTo(map);
+
+    // DOM element where the Timeline will be attached
+    var container = document.getElementById('timeline');
+
+    // Create a DataSet (allows two way data-binding)
+    var dataset = new vis.DataSet([]);
+
+    // Configuration for the Timeline
+    var options = {
+      min: "0000",
+      max: "2100",
+      format: {
+        minorLabels: {
+          //year: "YYYY [AD]"
+        }
+      },
+      type: 'point',
+      width: "100%",
+      maxHeight: "100%",
+      zoomable: true,
+      zoomMin: 1000 * 60 * 60 * 24 * 7,
+      //stack: false
+    }
+
+    // Create a Timeline
+    var timeline = new vis.Timeline(container, dataset, options);
+    timeline.setWindow("1800", "2050");
+
+    timeline.on('select', function (properties) {
+      var selected = properties.items[0];
+      console.log(selected)
+      for (var c of window.churches) {
+        if (c.id == selected) {
+          console.log(c);
+          var popup = L.popup({ maxWidth: "auto" })
+            .setLatLng([c.lat, c.lng])
+            .setContent(buildPopupHTML(c))
+            .openOn(map)
+        }
+      }
+    });
+
+    timeline.addCustomTime(new Date(), 1);
+
+    function update() {
+      var t = timeline.getCustomTime(1);
+      if (t < new Date("2019-01-01")) {
+        filteredData = window.churches.filter(d => d.parsed_date < t)
+        createPointsLayer(filteredData)
+      } else {
+        createPointsLayer(window.churches)
+      }
+      updateStats();
+    }
+
+    timeline.on('timechanged', function (e) {
+      console.log(e);
+      update();
+    });
+
+    var playing = false;
+    var playInterval = setInterval(function () {
+      if (playing) {
+        var min = dataset.min("start").start;
+        var max = dataset.max("start").start;
+        var ct = timeline.getCustomTime(1);
+        var newTime = moment(ct).add(1, "year");
+        if (newTime < min || newTime > max) {
+          newTime = min;
+        }
+        timeline.setCustomTime(newTime, 1);
+        update();
+      }
+    }, 500);
+
+    $("#play").click(function () {
+      console.log("play");
+      playing = !playing;
+      if (playing) {
+        $("#play i").attr("class", "fas fa-pause");
+      } else {
+        $("#play i").attr("class", "fas fa-play");
+      }
+    });
+
+    const colors = {
+      christian: { r: 1, g: 0, b: 0 },     // Red
+      muslim: { r: 0, g: 1, b: 0 },        // Green
+      buddhist: { r: 1, g: 1, b: 0 },      // Yellow
+      hindu: { r: 1, g: 0.5, b: 0 },       // Orange
+      jewish: { r: 0, g: 0, b: 1 },        // Blue
+      sikh: { r: 0.5, g: 0, b: 0.5 },      // Purple
+      shinto: { r: 1, g: 0.75, b: 0.8 },   // Pink
+      taoist: { r: 0, g: 1, b: 1 },        // Cyan
+      unknown: { r: 0.5, g: 0.5, b: 0.5 }, // Gray
+      townhalls: { r: 0, g: 0.5, b: 1 },    // Sky Blue
+      schools: { r: 1, g: 0.75, b: 0 }      // Gold
+    };
+
+    var markers = [];
+    var timelinePoints = [];
+
+    var placesOfWorship = L.layerGroup().addTo(map);
+    var municipal = L.layerGroup()//.addTo(map);
+    var school = L.layerGroup()//.addTo(map);
+    var gmaps = L.layerGroup()
+
+    map.on("popupopen", function (e) {
+      console.log(e);
+      var panoElem = $(".pano", e.popup._contentNode)[0];
+      var sv = new google.maps.StreetViewService();
+      sv.getPanorama({ location: e.popup._latlng }, function (data, status) {
+        if (status === 'OK') {
+          var pano = new google.maps.StreetViewPanorama(panoElem, {
+            position: e.popup._latlng,
+            pov: {
+              heading: 0,
+              pitch: 0
+            },
+            zoom: 1
+          });
+        } else {
+          $(panoElem).text("No streetview for this location");
+        }
+      });
+    })
+
+    function capitilize(string) {
+      if (string) {
+        return string.replace(/_/g, " ").replace("catholc", "catholic").replace(/\w\S*/g, function (txt) {
+          return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        });
+      }
+    }
+
+    function buildPopupHTML(feature) {
+      var html = `<b>${feature.name}</b>`
+      if (feature.religion) html += `<div>Religion: ${capitilize(feature.religion)}</div>`
+      if (feature.denomination) html += `<div>Denomination: ${capitilize(feature.denomination)}</div>`
+      if (feature.start_date) html += `<div>Established: ${feature.start_date}</div>`
+      html += `<div class='pano'></div>`;
+      return html;
+    }
+
+    function updateStats() {
+      var powCounts = { christian: 0, muslim: 0, buddhist: 0, hindu: 0, jewish: 0, sikh: 0, shinto: 0, taoist: 0, unknown: 0 }
+      var timeline_items = {}
+      for (var d of window.churches) {
+        if (d.religion in powCounts) {
+          powCounts[d.religion] += 1;
+        } else {
+          powCounts.unknown += 1;
+        }
+        if (d.parsed_date) {
+          timeline_items[d.id] = { id: d.id, start: d.parsed_date, title: d.name + ", est: " + d.start_date, latlng: [d.lat, d.lng] }
+        }
+      }
+      for (var k in powCounts) {
+        $("#" + k + "C").text(powCounts[k].toLocaleString());
+      }
+      dataset.clear()
+      dataset.add(Object.values(timeline_items))
+    }
+
+    function createPointsLayer(data, dataset = "churches") {
+      var points = data.map(f => [f.lat, f.lng])
+      var pointsLayer = L.glify.points({
+        map: map,
+        data: points,
+        size: 10,
+        color: function (i, e) {
+          if (data[i].type == "churches") {
+            var color = colors[data[i].religion]
+            if (color) {
+              return color;
+            } else {
+              return colors.unknown
+            }
+          } else if (data[i].type == "townhalls") {
+            return colors.townhalls
+          } else if (data[i].type == "schools") {
+            return colors.schools
+          }
+        },
+        hover: function (e, point) {
+          var i = points.indexOf(point);
+          var feature = data[i];
+          if (window.tooltip) map.closeTooltip(window.tooltip)
+          window.tooltip = L.tooltip()
+            .setContent(feature.name)
+            .setLatLng(point)
+            .addTo(map);
+        },
+        sensitivity: 2,
+        sensitivityHover: 2,
+        click: function (e, point) {
+          var i = points.indexOf(point);
+          var feature = data[i];
+          var popup = L.popup({ maxWidth: "auto" })
+            .setLatLng(point)
+            .setContent(buildPopupHTML(feature))
+            .openOn(map)
+        },
+        opacity: 1,
+        //fragmentShaderSource: L.glify.shader.fragment.simpleCircle
+      })
+      if (dataset == "churches") {
+        if (window.churchesLayer) window.churchesLayer.remove()
+        window.churchesLayer = pointsLayer
+      } else if (dataset == "townhalls") {
+        if (window.townhallsLayer) window.townhallsLayer.remove()
+        window.townhallsLayer = pointsLayer
+      } else if (dataset == "schools") {
+        if (window.schoolsLayer) window.schoolsLayer.remove()
+        window.schoolsLayer = pointsLayer
+      }
+    }
+
+    function parseDates(data) {
+      for (var i in data) {
+        var d = data[i]
+        data[i].id = data[i].lat + "_" + data[i].lng
+        if (d.start_date) {
+          // Timeline functionality
+          var dateStr = d.start_date;
+          var dt = new Date(dateStr);
+          if (dt == "Invalid Date") {
+            var matches = dateStr.match(/\d{3,4}/);
+            if (matches) {
+              dateStr = matches[0];
+              dt = new Date(dateStr);
+            }
+          }
+          if (dateStr.length == 4) {
+            dt.setDate(Math.random() * 365);
+          }
+          if (dt != "Invalid Date") {
+            data[i].parsed_date = dt;
+          }
+        }
+      }
+    }
+
+    window.limit = 100000
+    window.datasets_to_fetch = ["churches"]
+
+    function fetchData() {
+      // https://api-proxy.auckland-cer.cloud.edu.au/OSM_API_v2/docs#/default/get__get
+      var bounds = map.getBounds().toBBoxString();
+      if (window.pending_request) window.pending_request.abort();
+      //map.spin(true)
+      window.pending_request = $.getJSON("https://api-proxy.auckland-cer.cloud.edu.au/OSM_API_v2", {
+          bounds: bounds,
+          dataset: datasets_to_fetch.join(","),
+          limit: limit
+        }, function (data) {
+          console.log(data)
+          map.spin(false)
+          $("#totalC").text(data.meta.churches?.toLocaleString() || 0)
+          if (data.meta.churches > limit && datasets_to_fetch.includes("churches")) {
+            $("#totalC").append(" (displaying 100K)")
+          }
+          $("#schoolC").text(data.meta.schools?.toLocaleString() || 0)
+          if (data.meta.schools > limit && datasets_to_fetch.includes("schools")) {
+            $("#schoolC").append(" (displaying 100K)")
+          }
+          $("#townhallC").text(data.meta.townhalls?.toLocaleString() || 0)
+          if (data.meta.townhalls > limit && datasets_to_fetch.includes("townhalls")) {
+            $("#townhallC").append(" (displaying 100K)")
+          }
+          if (window.churchesLayer) window.churchesLayer.remove()
+          if (window.townhallsLayer) window.townhallsLayer.remove()
+          if (window.schoolsLayer) window.schoolsLayer.remove()
+          if (data.churches && datasets_to_fetch.includes("churches")) {
+            window.churches = data.churches;
+            parseDates(churches);
+            createPointsLayer(churches, "churches")
+          }
+          if (data.townhalls && datasets_to_fetch.includes("townhalls")) {
+            window.townhalls = data.townhalls;
+            createPointsLayer(townhalls, "townhalls")
+          }
+          if (data.schools && datasets_to_fetch.includes("schools")) {
+            window.schools = data.schools;
+            createPointsLayer(schools, "schools")
+          }
+          updateStats();
+        }
+      )
+    }
+    fetchData();
+
+    var baseMaps = {
+      "OSM": L.tileLayer.provider("OpenStreetMap.Mapnik"),
+      "CartoDB Positron": positron,
+      "CartoDB Dark Matter": L.tileLayer.provider("CartoDB.DarkMatter"),
+      "ESRI WorldImagery": L.tileLayer.provider("Esri.WorldImagery"),
+      "Google Hybrid": L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+      })
+    }
+
+    var overlayMaps = {
+      "Places of worship": placesOfWorship,
+      "Municipal buildings": municipal,
+      "Schools": school,
+      "NZ Google Maps places of worship": gmaps
+    }
+
+    L.control.layers(baseMaps, overlayMaps, { position: "topleft" }).addTo(map);
+
+    Papa.parse("gmaps.csv", {
+      download: true,
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+      complete: function (results) {
+        console.log(results)
+        results.data = results.data.filter(r => r.types.includes("place_of_worship"))
+        for (var r of results.data) {
+          var color = r.iconBackgroundColor
+          if (r.types.includes("church")) {
+            color = "red"
+          } else if (r.types.includes("hindu_temple")) {
+            color = "orange"
+          } else if (r.types.includes("mosque")) {
+            color = "green"
+          } else if (r.types.includes("synagogue")) {
+            color = "blue"
+          } else if (r.types.includes("buddhist_temple")) {
+            color = "yellow"
+          } else if (r.iconMaskBaseUri.includes("sikh")) {
+            color = "purple"
+          }
+          var marker = L.circleMarker([r["location.latitude"], r["location.longitude"]], {color: color}).bindTooltip(r["displayName.text"]).addTo(gmaps);
+          marker.bindPopup(`<b>${r["displayName.text"]}</b><br>
+            ${r.formattedAddress}<br>
+            Primary type: ${r.primaryType}<br>
+            Types: ${JSON.parse(r.types.replace(/'/g, '"'))}<br>
+            Icon: ${r.iconMaskBaseUri.replace("https://maps.gstatic.com/mapfiles/place_api/icons/v2/", "").replace("_pinlet", "").replace("worship_", "")}<br>
+            Rating: ${r.rating}<br>
+            <div class='pano'></div>
+          `);
+          markers.push(marker);
+        }
+      }
+    })
+
+
+    map.on("overlayadd", function (e) {
+      console.log(e)
+      if (e.name == "Municipal buildings") {
+        datasets_to_fetch.push("townhalls")
+      } else if (e.name == "Schools") {
+        datasets_to_fetch.push("schools")
+      } else if (e.name == "Places of worship") {
+        datasets_to_fetch.push("churches")
+      }
+      fetchData()
+    })
+    map.on("overlayremove", function (e) {
+      console.log(e)
+      if (e.name == "Municipal buildings") {
+        datasets_to_fetch = datasets_to_fetch.filter(d => d != "townhalls")
+        window.townhallsLayer.remove()
+      } else if (e.name == "Schools") {
+        datasets_to_fetch = datasets_to_fetch.filter(d => d != "schools")
+        window.schoolsLayer.remove()
+      } else if (e.name == "Places of worship") {
+        datasets_to_fetch = datasets_to_fetch.filter(d => d != "churches")
+        window.churchesLayer.remove()
+      }
+    })
+
+    $(".leaflet-control-layers-base").prepend("<b>Basemaps</b>");
+    $(".leaflet-control-layers-overlays").prepend("<b>Overlays</b>");
+
+    L.control.zoom({
+      position: 'topleft'
+    }).addTo(map);
+
+    var geoSearch = new GeoSearch.GeoSearchControl({
+      provider: new GeoSearch.OpenStreetMapProvider(),
+      style: 'button',
+      autoComplete: true,
+      autoCompleteDelay: 250,
+      autoClose: true,
+      position: "topleft"
+    }).addTo(map);
+
+    map.on("moveend", function () {
+      console.log("moveend");
+      fetchData();
+    });
+
+    var legend = L.control({ position: 'topleft' });
+
+    legend.onAdd = function (map) {
+      var div = L.DomUtil.create('div', 'info legend');
+      div.innerHTML += "<h4>Places of worship</h4>";
+      for (var k in colors) {
+        if (k == "townhalls" || k == "schools") continue;
+        var color = colors[k];
+        div.innerHTML += `<i class="circle" style="background:rgb(${color.r * 255}, ${color.g * 255}, ${color.b * 255})"></i>${capitilize(k)}: <span id="${k}C"></span><br>`;
+      }
+      div.innerHTML += `<br>Total: <span id="totalC"></span><br>`
+
+      div.innerHTML += `<br><h4>Other public infrastructure</h4><i class="circle" style="background:rgb(${colors.townhalls.r * 255}, ${colors.townhalls.g * 255}, ${colors.townhalls.b * 255});border-color:hotpink"></i>Town halls: <span id="townhallC"></span><br><i class="circle" style="background:rgb(${colors.schools.r * 255}, ${colors.schools.g * 255}, ${colors.schools.b * 255})"></i>Schools: <span id="schoolC"></span>`;
+
+      return div;
+    };
+
+    legend.addTo(map);
+  </script>
+</body>
+
+</html>

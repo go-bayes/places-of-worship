@@ -1,0 +1,6 @@
+# Git LFS tracking for large data files
+*.parquet filter=lfs diff=lfs merge=lfs -text
+*.geojson filter=lfs diff=lfs merge=lfs -text
+data/global/* filter=lfs diff=lfs merge=lfs -text
+data/**/*.parquet filter=lfs diff=lfs merge=lfs -text
+data/**/*.geojson filter=lfs diff=lfs merge=lfs -text

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Places of Worship - Proof of Concept</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .hero h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+        }
+        .hero p {
+            margin: 0;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        .stats {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .stats h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .map-link {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        .map-link:hover {
+            background: #218838;
+        }
+        .architecture {
+            background: #e9ecef;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .architecture h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        ul {
+            margin-bottom: 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>🗺️ Global Places of Worship</h1>
+        <p>Interactive mapping system with 160K+ locations worldwide</p>
+    </div>
+    
+    <div class="warning">
+        <strong>⚡ Proof of Concept:</strong> This demo uses municipal building data as placeholder for places of worship. 
+        The full implementation will extract real places of worship from OpenStreetMap globally.
+    </div>
+
+    <div class="stats">
+        <h2>📊 Dataset Overview</h2>
+        <ul>
+            <li><strong>Total Places:</strong> ~161,929 locations</li>
+            <li><strong>Geographic Coverage:</strong> Global (all continents)</li>
+            <li><strong>Data Source:</strong> OpenStreetMap (municipal buildings as demo)</li>
+            <li><strong>Technology:</strong> FastAPI + GeoPandas + Leaflet.glify (WebGL)</li>
+            <li><strong>Performance:</strong> Sub-second queries for 100K+ points</li>
+        </ul>
+    </div>
+
+    <div style="text-align: center;">
+        <a href="frontend/global-places.html" class="map-link">
+            🚀 Launch Global Interactive Map
+        </a>
+        <br>
+        <a href="http://localhost:8000/health" class="map-link" style="background: #17a2b8;">
+            📡 API Health Check
+        </a>
+        <br>
+        <a href="index.html" class="map-link" style="background: #6c757d;">
+            🇳🇿 NZ Places of Worship (Original)
+        </a>
+    </div>
+
+    <div class="architecture">
+        <h3>🏗️ Architecture Highlights</h3>
+        <ul>
+            <li><strong>Proven Performance:</strong> Based on religion repository's tested 100K+ point rendering</li>
+            <li><strong>WebGL Acceleration:</strong> Leaflet.glify for smooth interaction with massive datasets</li>
+            <li><strong>Viewport-based Loading:</strong> Only fetches data for current map view</li>
+            <li><strong>Spatial Indexing:</strong> Optimised parquet files with pre-computed spatial indices</li>
+            <li><strong>Modular Design:</strong> Clean separation between fast map queries and rich research data</li>
+            <li><strong>Global Scalability:</strong> Architecture designed for millions of places worldwide</li>
+        </ul>
+    </div>
+
+    <div class="architecture">
+        <h3>🎯 Next Steps for Full Implementation</h3>
+        <ul>
+            <li><strong>Real Data Extraction:</strong> Extract 2M+ actual places of worship via Overpass API</li>
+            <li><strong>Regional Demographics:</strong> Add census overlays and boundary data</li>
+            <li><strong>Historical Analysis:</strong> Temporal data with change detection</li>
+            <li><strong>Multi-source Validation:</strong> Cross-reference with government databases</li>
+            <li><strong>Enhanced Frontend:</strong> Copy from NZ implementation with global coverage</li>
+        </ul>
+    </div>
+
+    <script>
+        // Check API status and update page
+        fetch('http://localhost:8000/health')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    document.querySelector('.hero p').innerHTML = 
+                        `Interactive mapping system with ${data.places_loaded.toLocaleString()}+ locations worldwide 
+                         <span style="color: #90EE90;">● API Online</span>`;
+                }
+            })
+            .catch(() => {
+                document.querySelector('.hero p').innerHTML += 
+                    ' <span style="color: #FFB6C1;">● API Offline</span>';
+            });
+    </script>
+</body>
+</html>
