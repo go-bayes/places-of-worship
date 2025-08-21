@@ -974,7 +974,7 @@ class EnhancedPlacesOfWorshipApp {
                                    style="background: #007bff; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px;">
                                    📍 Google Maps
                                 </a>
-                                <a href="https://www.google.com/maps/@${lat},${lng},3a,75y,0h,90t/data=!3m7!1e1" target="_blank"
+                                <a href="https://www.google.com/maps?q=${lat},${lng}&layer=c&cbll=${lat},${lng}" target="_blank"
                                    style="background: #28a745; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px;">
                                    👁 Street View
                                 </a>
