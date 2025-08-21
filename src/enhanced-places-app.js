@@ -71,10 +71,9 @@ class EnhancedPlacesOfWorshipApp {
                 maxZoom: 19,
                 minZoom: 5,
             }),
-            'Google Hybrid': L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
-                attribution: '&copy; Google Maps',
+            'Google Satellite': L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+                attribution: '&copy; Google',
                 maxZoom: 20,
-                subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
                 minZoom: 5,
             }),
             'Terrain': L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
@@ -958,32 +957,37 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     setupStreetView() {
-        // Add Street View integration like religion repository with improved timing
+        // Alternative to Street View: provide useful links and information
         this.map.on('popupopen', (e) => {
-            // Add delay to ensure popup is fully rendered
             setTimeout(() => {
                 const panoElem = e.popup._contentNode.querySelector('.pano');
                 if (panoElem) {
-                    // Check if Google Maps API is loaded
-                    if (window.google && window.google.maps && window.google.maps.StreetViewService) {
-                        const sv = new google.maps.StreetViewService();
-                        sv.getPanorama({ location: e.popup._latlng }, (data, status) => {
-                            if (status === 'OK') {
-                                new google.maps.StreetViewPanorama(panoElem, {
-                                    position: e.popup._latlng,
-                                    pov: {
-                                        heading: 0,
-                                        pitch: 0
-                                    },
-                                    zoom: 1
-                                });
-                            } else {
-                                panoElem.innerHTML = '<div style="text-align: center; padding: 20px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; color: #666;">No Street View available for this location</div>';
-                            }
-                        });
-                    } else {
-                        panoElem.innerHTML = '<div style="text-align: center; padding: 20px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; color: #856404;">Loading Google Maps API...</div>';
-                    }
+                    const coords = e.popup._latlng;
+                    const lat = coords.lat.toFixed(6);
+                    const lng = coords.lng.toFixed(6);
+                    
+                    panoElem.innerHTML = `
+                        <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 15px; margin-top: 10px;">
+                            <h4 style="margin: 0 0 10px 0; color: #495057;">Location Services</h4>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <a href="https://www.google.com/maps/@${lat},${lng},19z" target="_blank" 
+                                   style="background: #007bff; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px;">
+                                   📍 Google Maps
+                                </a>
+                                <a href="https://www.google.com/maps/@${lat},${lng},3a,75y,0h,90t/data=!3m7!1e1" target="_blank"
+                                   style="background: #28a745; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px;">
+                                   👁 Street View
+                                </a>
+                                <a href="https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=19" target="_blank"
+                                   style="background: #6c757d; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px;">
+                                   🗺 OpenStreetMap
+                                </a>
+                            </div>
+                            <small style="color: #6c757d; margin-top: 8px; display: block;">
+                                Coordinates: ${lat}, ${lng}
+                            </small>
+                        </div>
+                    `;
                 }
             }, 100);
         });
