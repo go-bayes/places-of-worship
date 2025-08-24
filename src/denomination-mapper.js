@@ -60,7 +60,7 @@ class DenominationMapper {
                 ]
             },
             'Other Religions': {
-                color: '#8e44ad',
+                color: '#f39c12',
                 denominations: [
                     'bahai', 'ratana', 'masonic', 'iglesia_ni_cristo',
                     'jehovahs_witness', 'mormon', 'latter-day_saints',
