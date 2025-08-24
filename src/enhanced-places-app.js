@@ -9,6 +9,7 @@ class EnhancedPlacesOfWorshipApp {
         this.baseLayers = {};
         this.overlayLayers = {};
         this.layerControl = null;
+        this.currentBaseLayer = null;
         
         // Place data
         this.placesData = null;
@@ -84,7 +85,8 @@ class EnhancedPlacesOfWorshipApp {
         };
         
         // Add default base layer - start with grayscale
-        this.baseLayers['Grayscale'].addTo(this.map);
+        this.currentBaseLayer = this.baseLayers['Grayscale'];
+        this.currentBaseLayer.addTo(this.map);
         
         // Initialize marker cluster group
         this.markerClusterGroup = L.markerClusterGroup({
@@ -864,16 +866,15 @@ class EnhancedPlacesOfWorshipApp {
     
     // UI Control methods
     changeMapStyle(styleKey) {
-        // Remove current base layer
-        this.map.eachLayer((layer) => {
-            if (this.baseLayers[layer.options.attribution]) {
-                this.map.removeLayer(layer);
-            }
-        });
+        // Remove current base layer if it exists
+        if (this.currentBaseLayer) {
+            this.map.removeLayer(this.currentBaseLayer);
+        }
         
         // Add new base layer
         if (this.baseLayers[styleKey]) {
-            this.baseLayers[styleKey].addTo(this.map);
+            this.currentBaseLayer = this.baseLayers[styleKey];
+            this.currentBaseLayer.addTo(this.map);
         }
     }
     
