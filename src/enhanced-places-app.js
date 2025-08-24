@@ -167,7 +167,7 @@ class EnhancedPlacesOfWorshipApp {
                 fetch('./src/nz_places.json'),
                 fetch('./src/religion.json'),
                 fetch('./src/demographics.json'),
-                fetch('./src/sa2.geojson')
+                fetch('./sa2.geojson')
             ]);
             
             if (!placesResponse.ok || !censusResponse.ok || !demographicResponse.ok || !boundariesResponse.ok) {
