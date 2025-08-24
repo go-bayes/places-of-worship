@@ -161,27 +161,26 @@ class EnhancedPlacesOfWorshipApp {
     async loadData() {
         try {
             // Load places, census, and comprehensive demographic data
-            const [placesResponse, censusResponse, demographicResponse, boundariesResponse] = await Promise.all([
-                fetch('https://go-bayes.github.io/places-of-worship/data/nz_places_optimized.geojson'),
+            const [placesResponse, censusResponse, demographicResponse] = await Promise.all([
+                fetch('https://go-bayes.github.io/places-of-worship/data/global/nz_places.json'),
                 fetch('https://go-bayes.github.io/places-of-worship/src/religion.json'),
-                fetch('https://go-bayes.github.io/places-of-worship/src/demographics.json'),
-                fetch('https://go-bayes.github.io/places-of-worship/data/sa2.geojson')
+                fetch('https://go-bayes.github.io/places-of-worship/src/demographics.json')
             ]);
             
-            if (!placesResponse.ok || !censusResponse.ok || !demographicResponse.ok || !boundariesResponse.ok) {
+            if (!placesResponse.ok || !censusResponse.ok || !demographicResponse.ok) {
                 throw new Error('Failed to load data files');
             }
             
             this.placesData = await placesResponse.json();
             this.censusData = await censusResponse.json();
             this.demographicData = await demographicResponse.json();
-            this.boundariesData = await boundariesResponse.json();
+            this.boundariesData = null; // No boundaries for now
             
             console.log('Loaded data:', {
-                places: this.placesData.features.length,
+                places: this.placesData.length,
                 censusRegions: Object.keys(this.censusData).length,
                 demographicRegions: Object.keys(this.demographicData).length,
-                boundaries: this.boundariesData.features.length
+                boundaries: this.boundariesData ? this.boundariesData.features.length : 0
             });
             
             // Populate filter dropdowns
@@ -247,17 +246,17 @@ class EnhancedPlacesOfWorshipApp {
         if (this.currentMajorCategory === 'all') {
             // Return all unique denominations
             const denominations = new Set();
-            this.placesData.features.forEach(feature => {
-                denominations.add(feature.properties.denomination);
+            this.placesData.forEach(place => {
+                denominations.add(place.denomination);
             });
             return Array.from(denominations).sort();
         } else {
             // Return denominations within the major category
             const denominations = new Set();
-            this.placesData.features.forEach(feature => {
-                const category = this.denominationMapper.getMajorCategory(feature.properties.denomination);
+            this.placesData.forEach(place => {
+                const category = this.denominationMapper.getMajorCategory(place.denomination);
                 if (category === this.currentMajorCategory) {
-                    denominations.add(feature.properties.denomination);
+                    denominations.add(place.denomination);
                 }
             });
             return Array.from(denominations).sort();
@@ -265,14 +264,14 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     countMajorCategory(category) {
-        return this.placesData.features.filter(feature => 
-            this.denominationMapper.getMajorCategory(feature.properties.denomination) === category
+        return this.placesData.filter(place => 
+            this.denominationMapper.getMajorCategory(place.denomination) === category
         ).length;
     }
     
     countDenomination(denomination) {
-        return this.placesData.features.filter(
-            feature => feature.properties.denomination === denomination
+        return this.placesData.filter(
+            place => place.denomination === denomination
         ).length;
     }
     
@@ -293,37 +292,37 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     getFilteredPlaces() {
-        let filtered = this.placesData.features;
+        let filtered = this.placesData;
         
         // Filter by major category
         if (this.currentMajorCategory !== 'all') {
-            filtered = filtered.filter(feature => 
-                this.denominationMapper.getMajorCategory(feature.properties.denomination) === this.currentMajorCategory
+            filtered = filtered.filter(place => 
+                this.denominationMapper.getMajorCategory(place.denomination) === this.currentMajorCategory
             );
         }
         
         // Filter by specific denomination
         if (this.currentDenomination !== 'all') {
-            filtered = filtered.filter(feature => 
-                feature.properties.denomination === this.currentDenomination
+            filtered = filtered.filter(place => 
+                place.denomination === this.currentDenomination
             );
         }
         
         return filtered;
     }
     
-    createPlaceMarker(feature) {
-        const props = feature.properties;
-        const [lng, lat] = feature.geometry.coordinates;
+    createPlaceMarker(place) {
+        const lat = place.lat;
+        const lng = place.lng;
         
         // Get color using denomination mapper
-        const color = this.denominationMapper.getDenominationColor(props.denomination, this.denominationColors);
-        const icon = this.createDenominationIcon(color, props.confidence);
+        const color = this.denominationMapper.getDenominationColor(place.denomination, this.denominationColors);
+        const icon = this.createDenominationIcon(color, place.confidence || 1.0);
         
         const marker = L.marker([lat, lng], { icon });
         
         // Create popup content
-        const popupContent = this.createPopupContent(props);
+        const popupContent = this.createPopupContent(place);
         marker.bindPopup(popupContent, { maxWidth: 600 });
         
         return marker;
