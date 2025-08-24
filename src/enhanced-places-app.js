@@ -162,10 +162,10 @@ class EnhancedPlacesOfWorshipApp {
         try {
             // Load places, census, and comprehensive demographic data
             const [placesResponse, censusResponse, demographicResponse, boundariesResponse] = await Promise.all([
-                fetch('./data/nz_places_optimized.geojson'),
-                fetch('./src/religion.json'),
-                fetch('./src/demographics.json'),
-                fetch('./data/sa2.geojson')
+                fetch('https://go-bayes.github.io/places-of-worship/data/nz_places_optimized.geojson'),
+                fetch('https://go-bayes.github.io/places-of-worship/src/religion.json'),
+                fetch('https://go-bayes.github.io/places-of-worship/src/demographics.json'),
+                fetch('https://go-bayes.github.io/places-of-worship/data/sa2.geojson')
             ]);
             
             if (!placesResponse.ok || !censusResponse.ok || !demographicResponse.ok || !boundariesResponse.ok) {
