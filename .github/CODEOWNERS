@@ -1,0 +1,23 @@
+# CODEOWNERS file for places-of-worship repository
+# This file defines individuals or teams that are responsible for code in this repository.
+
+# Global ownership - all files require review from repository owner
+* @go-bayes
+
+# Data files require special attention
+/data/ @go-bayes
+/data/global/ @go-bayes
+
+# API and backend code
+/api/ @go-bayes
+/scripts/ @go-bayes
+
+# Frontend applications
+/src/ @go-bayes
+/frontend/ @go-bayes
+
+# Configuration and documentation
+*.md @go-bayes
+*.json @go-bayes
+*.yml @go-bayes
+*.yaml @go-bayes
