@@ -163,26 +163,27 @@ class EnhancedPlacesOfWorshipApp {
     async loadData() {
         try {
             // Load places, census, and comprehensive demographic data
-            const [placesResponse, censusResponse, demographicResponse] = await Promise.all([
+            const [placesResponse, censusResponse, demographicResponse, boundariesResponse] = await Promise.all([
                 fetch('https://go-bayes.github.io/places-of-worship/src/nz_places.json'),
                 fetch('https://go-bayes.github.io/places-of-worship/src/religion.json'),
-                fetch('https://go-bayes.github.io/places-of-worship/src/demographics.json')
+                fetch('https://go-bayes.github.io/places-of-worship/src/demographics.json'),
+                fetch('https://go-bayes.github.io/places-of-worship/src/sa2.geojson')
             ]);
             
-            if (!placesResponse.ok || !censusResponse.ok || !demographicResponse.ok) {
+            if (!placesResponse.ok || !censusResponse.ok || !demographicResponse.ok || !boundariesResponse.ok) {
                 throw new Error('Failed to load data files');
             }
             
             this.placesData = await placesResponse.json();
             this.censusData = await censusResponse.json();
             this.demographicData = await demographicResponse.json();
-            this.boundariesData = null; // No boundaries for now
+            this.boundariesData = await boundariesResponse.json();
             
             console.log('Loaded data:', {
                 places: this.placesData.length,
                 censusRegions: Object.keys(this.censusData).length,
                 demographicRegions: Object.keys(this.demographicData).length,
-                boundaries: this.boundariesData ? this.boundariesData.features.length : 0
+                boundaries: this.boundariesData.features.length
             });
             
             // Populate filter dropdowns
