@@ -188,13 +188,19 @@ class EnhancedPlacesOfWorshipApp {
             
         } catch (error) {
             console.error('Error loading data:', error);
+            this.hideLoading();
             this.showError('Failed to load data files. Please check that all data files are available.');
         }
     }
     
     setupDenominationColors() {
-        // Use denomination mapper for consistent coloring
-        const categorizedData = this.denominationMapper.categorizeFeatures(this.placesData.features);
+        // Use denomination mapper for consistent coloring - convert to GeoJSON format
+        const geoJsonFeatures = this.placesData.map(place => ({
+            properties: {
+                denomination: place.denomination
+            }
+        }));
+        const categorizedData = this.denominationMapper.categorizeFeatures(geoJsonFeatures);
         
         // Create colors for specific denominations within major categories
         Object.keys(categorizedData.denominations).forEach(denom => {
