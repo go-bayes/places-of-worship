@@ -151,7 +151,7 @@ Each country file (`data/global/{country_code}_places.json`) follows this schema
 - Advanced filtering and search
 - Research-grade data export tools
 
-## 📄 Data Licensing & Attribution
+## Data Licensing & Attribution
 
 ### OpenStreetMap (OSM) Data
 This project makes use of OpenStreetMap data. All OSM data and derivative databases are subject to the [Open Database License (ODbL 1.0)](https://opendatacommons.org/licenses/odbl/).
@@ -181,7 +181,6 @@ This project is licensed under the Open Database License (ODbL 1.0) to maintain 
 - **Live Demo**: [https://go-bayes.github.io/places-of-worship/](https://go-bayes.github.io/places-of-worship/)
 - **OpenStreetMap**: [https://www.openstreetmap.org/](https://www.openstreetmap.org/)
 - **ODbL License**: [https://opendatacommons.org/licenses/odbl/](https://opendatacommons.org/licenses/odbl/)
-- **GitHub Repository**: [https://github.com/go-bayes/places-of-worship](https://github.com/go-bayes/places-of-worship)
 
 ---
 
