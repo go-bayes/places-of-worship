@@ -195,7 +195,7 @@ class EnhancedPlacesOfWorshipApp {
                 fetch('./src/religion.json'),
                 fetch('./src/demographics.json'),
                 fetch('./sa2.geojson'),
-                fetch('./nz_territorial_authorities_simple.geojson'),
+                fetch('./nz_territorial_authorities_simplified.geojson'),
                 fetch('./ta_aggregated_data.json')
             ]);
             
@@ -610,18 +610,18 @@ class EnhancedPlacesOfWorshipApp {
         const taData = this.taCensusData ? this.taCensusData[taCodeStr] : null;
         if (!taData) return "gray";
         
-        // Use TA census data directly (no demographic fallback for now)
+        // Use TA census data directly with TA-specific color functions
         const dataSource = taData;
         
         switch (this.currentCensusMetric) {
             case 'no_religion_change':
-                return this.calculateNoReligionChangeColor(dataSource);
+                return this.calculateTANoReligionChangeColor(dataSource);
             case 'christian_change':
-                return this.calculateChristianChangeColor(dataSource);
+                return this.calculateTAChristianChangeColor(dataSource);
             case 'total_population':
-                return this.calculatePopulationColor(dataSource);
+                return this.calculateTAPopulationColor(dataSource);
             case 'diversity_index':
-                return this.calculateDiversityColor(dataSource);
+                return this.calculateTADiversityColor(dataSource);
             default:
                 return "gray"; // Most demographic metrics not available for TA yet
         }
@@ -1477,6 +1477,100 @@ class EnhancedPlacesOfWorshipApp {
                     title: 'Demographic Overlay',
                     content: '<div class="legend-item">Overlay active - colors represent selected metric</div>'
                 };
+        }
+    }
+
+    // TA-specific color calculation functions
+    calculateTANoReligionChangeColor(taData) {
+        if (!taData["2006"] || !taData["2018"] || 
+            !taData["2006"]["Total stated"] || !taData["2018"]["Total stated"]) {
+            return "gray";
+        }
+        
+        const noReligion06Pct = taData["2006"]["No religion"] / taData["2006"]["Total stated"] * 100;
+        const noReligion18Pct = taData["2018"]["No religion"] / taData["2018"]["Total stated"] * 100;
+        const diff = noReligion18Pct - noReligion06Pct;
+        
+        if (diff < -1) {
+            return "purple"; // More religious
+        } else if (diff > 1) {
+            return "pink"; // More secular
+        } else {
+            return "lightgray"; // Stable
+        }
+    }
+
+    calculateTAChristianChangeColor(taData) {
+        if (!taData["2006"] || !taData["2018"] || 
+            !taData["2006"]["Total stated"] || !taData["2018"]["Total stated"]) {
+            return "gray";
+        }
+        
+        const christian06Pct = taData["2006"]["Christian"] / taData["2006"]["Total stated"] * 100;
+        const christian18Pct = taData["2018"]["Christian"] / taData["2018"]["Total stated"] * 100;
+        const diff = christian18Pct - christian06Pct;
+        
+        if (diff > 1) {
+            return "#2E8B57"; // More Christian
+        } else if (diff < -1) {
+            return "#CD5C5C"; // Less Christian
+        } else {
+            return "#D3D3D3"; // Stable
+        }
+    }
+
+    calculateTAPopulationColor(taData) {
+        if (!taData["2018"] || !taData["2018"]["Total stated"]) {
+            return "gray";
+        }
+        
+        const population = taData["2018"]["Total stated"];
+        
+        if (population > 100000) {
+            return "#FF4500"; // High population
+        } else if (population > 50000) {
+            return "#FF6347"; // Medium-high population
+        } else if (population > 25000) {
+            return "#FFA500"; // Medium population
+        } else if (population > 10000) {
+            return "#FFD700"; // Medium-low population
+        } else {
+            return "#FFFFE0"; // Low population
+        }
+    }
+
+    calculateTADiversityColor(taData) {
+        if (!taData["2018"] || !taData["2018"]["Total stated"]) {
+            return "gray";
+        }
+        
+        const data2018 = taData["2018"];
+        const total = data2018["Total stated"];
+        
+        if (total === 0) return "gray";
+        
+        // Calculate Simpson diversity index
+        let sum = 0;
+        const religions = ["Christian", "No religion", "Buddhism", "Hinduism", "Islam", "Judaism", "Māori Christian", "Other religion"];
+        
+        for (const religion of religions) {
+            const count = data2018[religion] || 0;
+            const proportion = count / total;
+            sum += proportion * proportion;
+        }
+        
+        const diversity = 1 - sum;
+        
+        if (diversity > 0.7) {
+            return "#4CAF50"; // Very diverse
+        } else if (diversity > 0.6) {
+            return "#8BC34A"; // Diverse
+        } else if (diversity > 0.5) {
+            return "#FFC107"; // Moderate diversity
+        } else if (diversity > 0.3) {
+            return "#FF9800"; // Low diversity
+        } else {
+            return "#FF5722"; // Very low diversity
         }
     }
 }
