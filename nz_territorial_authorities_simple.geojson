@@ -1,0 +1,75 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "TA2025_V1": "001",
+        "TA2025_NAME": "Far North District",
+        "LAND_AREA": 6768.11
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [172.5, -34.4], [174.3, -34.4], [174.3, -35.8], [172.5, -35.8], [172.5, -34.4]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "TA2025_V1": "013",
+        "TA2025_NAME": "Auckland",
+        "LAND_AREA": 4894.58
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [174.4, -36.4], [175.3, -36.4], [175.3, -37.3], [174.4, -37.3], [174.4, -36.4]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "TA2025_V1": "043",
+        "TA2025_NAME": "Wellington City",
+        "LAND_AREA": 290.07
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [174.6, -41.2], [175.0, -41.2], [175.0, -41.4], [174.6, -41.4], [174.6, -41.2]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "TA2025_V1": "057",
+        "TA2025_NAME": "Christchurch City",
+        "LAND_AREA": 1426.48
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [172.4, -43.4], [172.9, -43.4], [172.9, -43.7], [172.4, -43.7], [172.4, -43.4]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "TA2025_V1": "067",
+        "TA2025_NAME": "Dunedin City",
+        "LAND_AREA": 3314.29
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [170.0, -45.6], [170.8, -45.6], [170.8, -46.1], [170.0, -46.1], [170.0, -45.6]
+        ]]
+      }
+    }
+  ]
+}
