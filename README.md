@@ -179,10 +179,9 @@ This project is licensed under the Open Database License (ODbL 1.0) to maintain 
 
 ## Links
 
-- **Live Demo**: [https://go-bayes.github.io/places-of-worship/](https://go-bayes.github.io/places-of-worship/)
 - **OpenStreetMap**: [https://www.openstreetmap.org/](https://www.openstreetmap.org/)
 - **ODbL License**: [https://opendatacommons.org/licenses/odbl/](https://opendatacommons.org/licenses/odbl/)
-
+- **Prototype Site**:[https://uoa-eresearch.github.io/religion/churches](https://uoa-eresearch.github.io/religion/churches)
 ---
 
-**A research tool for studying global religious geography and demographics**
+**A research tool for studying global distribution of palces of worship, demographic, and social change**
