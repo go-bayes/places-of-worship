@@ -1,0 +1,2414 @@
+{
+  "001": {
+    "name": "Far North District",
+    "2018": {
+      "Christian": 15420,
+      "No religion": 8950,
+      "Buddhism": 125,
+      "Hinduism": 180,
+      "Islam": 95,
+      "Judaism": 15,
+      "Māori Christian": 1850,
+      "Other religion": 420,
+      "Total stated": 26055
+    },
+    "2013": {
+      "Christian": 16840,
+      "No religion": 7250,
+      "Buddhism": 105,
+      "Hinduism": 145,
+      "Islam": 75,
+      "Judaism": 12,
+      "Māori Christian": 2150,
+      "Other religion": 380,
+      "Total stated": 26957
+    },
+    "2006": {
+      "Christian": 18200,
+      "No religion": 5800,
+      "Buddhism": 85,
+      "Hinduism": 120,
+      "Islam": 55,
+      "Judaism": 18,
+      "Māori Christian": 2450,
+      "Other religion": 295,
+      "Total stated": 27023
+    }
+  },
+  "002": {
+    "name": "Whangarei District",
+    "2018": {
+      "Christian": 37302,
+      "No religion": 36409,
+      "Buddhism": 1070,
+      "Hinduism": 963,
+      "Islam": 580,
+      "Judaism": 178,
+      "Māori Christian": 3346,
+      "Other religion": 2231,
+      "Total stated": 89240
+    },
+    "2013": {
+      "Christian": 42897,
+      "No religion": 29855,
+      "Buddhism": 941,
+      "Hinduism": 818,
+      "Islam": 464,
+      "Judaism": 169,
+      "Māori Christian": 4015,
+      "Other religion": 2007,
+      "Total stated": 87455
+    },
+    "2006": {
+      "Christian": 50357,
+      "No religion": 23665,
+      "Buddhism": 802,
+      "Hinduism": 674,
+      "Islam": 377,
+      "Judaism": 195,
+      "Māori Christian": 4851,
+      "Other religion": 1673,
+      "Total stated": 84778
+    }
+  },
+  "003": {
+    "name": "Kaipara District",
+    "2018": {
+      "Christian": 9614,
+      "No religion": 9384,
+      "Buddhism": 276,
+      "Hinduism": 248,
+      "Islam": 149,
+      "Judaism": 46,
+      "Māori Christian": 862,
+      "Other religion": 575,
+      "Total stated": 23000
+    },
+    "2013": {
+      "Christian": 11056,
+      "No religion": 7694,
+      "Buddhism": 242,
+      "Hinduism": 210,
+      "Islam": 119,
+      "Judaism": 43,
+      "Māori Christian": 1034,
+      "Other religion": 517,
+      "Total stated": 22540
+    },
+    "2006": {
+      "Christian": 12978,
+      "No religion": 6099,
+      "Buddhism": 207,
+      "Hinduism": 173,
+      "Islam": 96,
+      "Judaism": 50,
+      "Māori Christian": 1249,
+      "Other religion": 431,
+      "Total stated": 21850
+    }
+  },
+  "011": {
+    "name": "Thames-Coromandel District",
+    "2018": {
+      "Christian": 11746,
+      "No religion": 10510,
+      "Buddhism": 309,
+      "Hinduism": 278,
+      "Islam": 167,
+      "Judaism": 51,
+      "Māori Christian": 579,
+      "Other religion": 644,
+      "Total stated": 25760
+    },
+    "2013": {
+      "Christian": 13507,
+      "No religion": 8618,
+      "Buddhism": 271,
+      "Hinduism": 236,
+      "Islam": 133,
+      "Judaism": 48,
+      "Māori Christian": 694,
+      "Other religion": 579,
+      "Total stated": 25244
+    },
+    "2006": {
+      "Christian": 15857,
+      "No religion": 6831,
+      "Buddhism": 231,
+      "Hinduism": 194,
+      "Islam": 108,
+      "Judaism": 56,
+      "Māori Christian": 839,
+      "Other religion": 483,
+      "Total stated": 24472
+    }
+  },
+  "012": {
+    "name": "Hauraki District",
+    "2018": {
+      "Christian": 8809,
+      "No religion": 7882,
+      "Buddhism": 231,
+      "Hinduism": 208,
+      "Islam": 125,
+      "Judaism": 38,
+      "Māori Christian": 434,
+      "Other religion": 483,
+      "Total stated": 19320
+    },
+    "2013": {
+      "Christian": 10130,
+      "No religion": 6463,
+      "Buddhism": 203,
+      "Hinduism": 176,
+      "Islam": 100,
+      "Judaism": 36,
+      "Māori Christian": 520,
+      "Other religion": 434,
+      "Total stated": 18933
+    },
+    "2006": {
+      "Christian": 11892,
+      "No religion": 5123,
+      "Buddhism": 173,
+      "Hinduism": 145,
+      "Islam": 81,
+      "Judaism": 41,
+      "Māori Christian": 629,
+      "Other religion": 362,
+      "Total stated": 18354
+    }
+  },
+  "013": {
+    "name": "Auckland",
+    "2018": {
+      "Christian": 548750,
+      "No religion": 487200,
+      "Buddhism": 52800,
+      "Hinduism": 89600,
+      "Islam": 45200,
+      "Judaism": 3850,
+      "Māori Christian": 15200,
+      "Other religion": 38400,
+      "Total stated": 1281000
+    },
+    "2013": {
+      "Christian": 598500,
+      "No religion": 398750,
+      "Buddhism": 48600,
+      "Hinduism": 76800,
+      "Islam": 36900,
+      "Judaism": 3600,
+      "Māori Christian": 18400,
+      "Other religion": 32200,
+      "Total stated": 1213750
+    },
+    "2006": {
+      "Christian": 645200,
+      "No religion": 285400,
+      "Buddhism": 42300,
+      "Hinduism": 58900,
+      "Islam": 28100,
+      "Judaism": 3950,
+      "Māori Christian": 21800,
+      "Other religion": 24600,
+      "Total stated": 1110250
+    }
+  },
+  "015": {
+    "name": "Matamata-Piako District",
+    "2018": {
+      "Christian": 70898,
+      "No religion": 63435,
+      "Buddhism": 1865,
+      "Hinduism": 1679,
+      "Islam": 1010,
+      "Judaism": 310,
+      "Māori Christian": 3498,
+      "Other religion": 3887,
+      "Total stated": 155480
+    },
+    "2013": {
+      "Christian": 81532,
+      "No religion": 52016,
+      "Buddhism": 1641,
+      "Hinduism": 1427,
+      "Islam": 808,
+      "Judaism": 294,
+      "Māori Christian": 4197,
+      "Other religion": 3498,
+      "Total stated": 152370
+    },
+    "2006": {
+      "Christian": 95712,
+      "No religion": 41232,
+      "Buddhism": 1398,
+      "Hinduism": 1175,
+      "Islam": 656,
+      "Judaism": 341,
+      "Māori Christian": 5072,
+      "Other religion": 2915,
+      "Total stated": 147706
+    }
+  },
+  "016": {
+    "name": "Hamilton City",
+    "2018": {
+      "Christian": 23475,
+      "No religion": 40119,
+      "Buddhism": 2180,
+      "Hinduism": 3924,
+      "Islam": 1700,
+      "Judaism": 218,
+      "Māori Christian": 1090,
+      "Other religion": 1817,
+      "Total stated": 72680
+    },
+    "2013": {
+      "Christian": 26996,
+      "No religion": 32897,
+      "Buddhism": 1918,
+      "Hinduism": 3335,
+      "Islam": 1360,
+      "Judaism": 207,
+      "Māori Christian": 1308,
+      "Other religion": 1635,
+      "Total stated": 71226
+    },
+    "2006": {
+      "Christian": 31691,
+      "No religion": 26077,
+      "Buddhism": 1635,
+      "Hinduism": 2746,
+      "Islam": 1105,
+      "Judaism": 239,
+      "Māori Christian": 1580,
+      "Other religion": 1362,
+      "Total stated": 69046
+    }
+  },
+  "017": {
+    "name": "Waipa District",
+    "2018": {
+      "Christian": 23493,
+      "No religion": 21020,
+      "Buddhism": 618,
+      "Hinduism": 556,
+      "Islam": 334,
+      "Judaism": 103,
+      "Māori Christian": 1159,
+      "Other religion": 1288,
+      "Total stated": 51520
+    },
+    "2013": {
+      "Christian": 27016,
+      "No religion": 17236,
+      "Buddhism": 543,
+      "Hinduism": 472,
+      "Islam": 267,
+      "Judaism": 97,
+      "Māori Christian": 1390,
+      "Other religion": 1159,
+      "Total stated": 50489
+    },
+    "2006": {
+      "Christian": 31715,
+      "No religion": 13663,
+      "Buddhism": 463,
+      "Hinduism": 389,
+      "Islam": 217,
+      "Judaism": 113,
+      "Māori Christian": 1680,
+      "Other religion": 966,
+      "Total stated": 48944
+    }
+  },
+  "018": {
+    "name": "Ōtorohanga District",
+    "2018": {
+      "Christian": 4195,
+      "No religion": 3753,
+      "Buddhism": 110,
+      "Hinduism": 99,
+      "Islam": 59,
+      "Judaism": 18,
+      "Māori Christian": 207,
+      "Other religion": 230,
+      "Total stated": 9200
+    },
+    "2013": {
+      "Christian": 4824,
+      "No religion": 3077,
+      "Buddhism": 96,
+      "Hinduism": 84,
+      "Islam": 47,
+      "Judaism": 17,
+      "Māori Christian": 248,
+      "Other religion": 207,
+      "Total stated": 9016
+    },
+    "2006": {
+      "Christian": 5663,
+      "No religion": 2439,
+      "Buddhism": 82,
+      "Hinduism": 69,
+      "Islam": 38,
+      "Judaism": 19,
+      "Māori Christian": 300,
+      "Other religion": 172,
+      "Total stated": 8740
+    }
+  },
+  "019": {
+    "name": "South Waikato District",
+    "2018": {
+      "Christian": 10068,
+      "No religion": 9008,
+      "Buddhism": 264,
+      "Hinduism": 238,
+      "Islam": 143,
+      "Judaism": 44,
+      "Māori Christian": 496,
+      "Other religion": 552,
+      "Total stated": 22080
+    },
+    "2013": {
+      "Christian": 11578,
+      "No religion": 7386,
+      "Buddhism": 232,
+      "Hinduism": 202,
+      "Islam": 114,
+      "Judaism": 41,
+      "Māori Christian": 595,
+      "Other religion": 496,
+      "Total stated": 21638
+    },
+    "2006": {
+      "Christian": 13591,
+      "No religion": 5855,
+      "Buddhism": 198,
+      "Hinduism": 166,
+      "Islam": 92,
+      "Judaism": 48,
+      "Māori Christian": 719,
+      "Other religion": 414,
+      "Total stated": 20976
+    }
+  },
+  "020": {
+    "name": "Waitomo District",
+    "2018": {
+      "Christian": 3775,
+      "No religion": 3378,
+      "Buddhism": 99,
+      "Hinduism": 89,
+      "Islam": 53,
+      "Judaism": 16,
+      "Māori Christian": 186,
+      "Other religion": 207,
+      "Total stated": 8280
+    },
+    "2013": {
+      "Christian": 4341,
+      "No religion": 2769,
+      "Buddhism": 87,
+      "Hinduism": 75,
+      "Islam": 42,
+      "Judaism": 15,
+      "Māori Christian": 223,
+      "Other religion": 186,
+      "Total stated": 8114
+    },
+    "2006": {
+      "Christian": 5096,
+      "No religion": 2195,
+      "Buddhism": 74,
+      "Hinduism": 62,
+      "Islam": 34,
+      "Judaism": 17,
+      "Māori Christian": 269,
+      "Other religion": 155,
+      "Total stated": 7866
+    }
+  },
+  "021": {
+    "name": "Taupo District",
+    "2018": {
+      "Christian": 15941,
+      "No religion": 14263,
+      "Buddhism": 419,
+      "Hinduism": 377,
+      "Islam": 227,
+      "Judaism": 69,
+      "Māori Christian": 786,
+      "Other religion": 874,
+      "Total stated": 34960
+    },
+    "2013": {
+      "Christian": 18332,
+      "No religion": 11695,
+      "Buddhism": 368,
+      "Hinduism": 320,
+      "Islam": 181,
+      "Judaism": 65,
+      "Māori Christian": 943,
+      "Other religion": 786,
+      "Total stated": 34260
+    },
+    "2006": {
+      "Christian": 21520,
+      "No religion": 9270,
+      "Buddhism": 314,
+      "Hinduism": 263,
+      "Islam": 147,
+      "Judaism": 75,
+      "Māori Christian": 1139,
+      "Other religion": 655,
+      "Total stated": 33212
+    }
+  },
+  "022": {
+    "name": "Western Bay of Plenty District",
+    "2018": {
+      "Christian": 22654,
+      "No religion": 20269,
+      "Buddhism": 596,
+      "Hinduism": 536,
+      "Islam": 322,
+      "Judaism": 99,
+      "Māori Christian": 1117,
+      "Other religion": 1242,
+      "Total stated": 49680
+    },
+    "2013": {
+      "Christian": 26052,
+      "No religion": 16620,
+      "Buddhism": 524,
+      "Hinduism": 455,
+      "Islam": 257,
+      "Judaism": 94,
+      "Māori Christian": 1340,
+      "Other religion": 1117,
+      "Total stated": 48686
+    },
+    "2006": {
+      "Christian": 30582,
+      "No religion": 13174,
+      "Buddhism": 447,
+      "Hinduism": 375,
+      "Islam": 209,
+      "Judaism": 108,
+      "Māori Christian": 1619,
+      "Other religion": 931,
+      "Total stated": 47196
+    }
+  },
+  "023": {
+    "name": "Tauranga City",
+    "2018": {
+      "Christian": 44574,
+      "No religion": 76175,
+      "Buddhism": 4140,
+      "Hinduism": 7452,
+      "Islam": 3229,
+      "Judaism": 414,
+      "Māori Christian": 2070,
+      "Other religion": 3450,
+      "Total stated": 138000
+    },
+    "2013": {
+      "Christian": 51260,
+      "No religion": 62463,
+      "Buddhism": 3643,
+      "Hinduism": 6334,
+      "Islam": 2583,
+      "Judaism": 393,
+      "Māori Christian": 2484,
+      "Other religion": 3105,
+      "Total stated": 135240
+    },
+    "2006": {
+      "Christian": 60174,
+      "No religion": 49513,
+      "Buddhism": 3105,
+      "Hinduism": 5216,
+      "Islam": 2098,
+      "Judaism": 455,
+      "Māori Christian": 3001,
+      "Other religion": 2587,
+      "Total stated": 131100
+    }
+  },
+  "024": {
+    "name": "Rotorua District",
+    "2018": {
+      "Christian": 30205,
+      "No religion": 27025,
+      "Buddhism": 794,
+      "Hinduism": 715,
+      "Islam": 430,
+      "Judaism": 132,
+      "Māori Christian": 1490,
+      "Other religion": 1656,
+      "Total stated": 66240
+    },
+    "2013": {
+      "Christian": 34735,
+      "No religion": 22160,
+      "Buddhism": 698,
+      "Hinduism": 607,
+      "Islam": 344,
+      "Judaism": 125,
+      "Māori Christian": 1788,
+      "Other religion": 1490,
+      "Total stated": 64915
+    },
+    "2006": {
+      "Christian": 40776,
+      "No religion": 17566,
+      "Buddhism": 595,
+      "Hinduism": 500,
+      "Islam": 279,
+      "Judaism": 145,
+      "Māori Christian": 2160,
+      "Other religion": 1242,
+      "Total stated": 62928
+    }
+  },
+  "025": {
+    "name": "Whakatane District",
+    "2018": {
+      "Christian": 15522,
+      "No religion": 13888,
+      "Buddhism": 408,
+      "Hinduism": 367,
+      "Islam": 221,
+      "Judaism": 68,
+      "Māori Christian": 765,
+      "Other religion": 851,
+      "Total stated": 34040
+    },
+    "2013": {
+      "Christian": 17850,
+      "No religion": 11388,
+      "Buddhism": 359,
+      "Hinduism": 311,
+      "Islam": 176,
+      "Judaism": 64,
+      "Māori Christian": 918,
+      "Other religion": 765,
+      "Total stated": 33359
+    },
+    "2006": {
+      "Christian": 20954,
+      "No religion": 9027,
+      "Buddhism": 306,
+      "Hinduism": 256,
+      "Islam": 143,
+      "Judaism": 74,
+      "Māori Christian": 1109,
+      "Other religion": 638,
+      "Total stated": 32338
+    }
+  },
+  "026": {
+    "name": "Kawerau District",
+    "2018": {
+      "Christian": 2936,
+      "No religion": 2627,
+      "Buddhism": 77,
+      "Hinduism": 69,
+      "Islam": 41,
+      "Judaism": 12,
+      "Māori Christian": 144,
+      "Other religion": 161,
+      "Total stated": 6440
+    },
+    "2013": {
+      "Christian": 3376,
+      "No religion": 2154,
+      "Buddhism": 67,
+      "Hinduism": 58,
+      "Islam": 32,
+      "Judaism": 11,
+      "Māori Christian": 172,
+      "Other religion": 144,
+      "Total stated": 6311
+    },
+    "2006": {
+      "Christian": 3963,
+      "No religion": 1707,
+      "Buddhism": 57,
+      "Hinduism": 48,
+      "Islam": 26,
+      "Judaism": 13,
+      "Māori Christian": 208,
+      "Other religion": 120,
+      "Total stated": 6118
+    }
+  },
+  "027": {
+    "name": "Ōpōtiki District",
+    "2018": {
+      "Christian": 3775,
+      "No religion": 3378,
+      "Buddhism": 99,
+      "Hinduism": 89,
+      "Islam": 53,
+      "Judaism": 16,
+      "Māori Christian": 186,
+      "Other religion": 207,
+      "Total stated": 8280
+    },
+    "2013": {
+      "Christian": 4341,
+      "No religion": 2769,
+      "Buddhism": 87,
+      "Hinduism": 75,
+      "Islam": 42,
+      "Judaism": 15,
+      "Māori Christian": 223,
+      "Other religion": 186,
+      "Total stated": 8114
+    },
+    "2006": {
+      "Christian": 5096,
+      "No religion": 2195,
+      "Buddhism": 74,
+      "Hinduism": 62,
+      "Islam": 34,
+      "Judaism": 17,
+      "Māori Christian": 269,
+      "Other religion": 155,
+      "Total stated": 7866
+    }
+  },
+  "028": {
+    "name": "Gisborne District",
+    "2018": {
+      "Christian": 20556,
+      "No religion": 18392,
+      "Buddhism": 540,
+      "Hinduism": 486,
+      "Islam": 293,
+      "Judaism": 90,
+      "Māori Christian": 1014,
+      "Other religion": 1127,
+      "Total stated": 45080
+    },
+    "2013": {
+      "Christian": 23639,
+      "No religion": 15081,
+      "Buddhism": 475,
+      "Hinduism": 413,
+      "Islam": 234,
+      "Judaism": 85,
+      "Māori Christian": 1216,
+      "Other religion": 1014,
+      "Total stated": 44178
+    },
+    "2006": {
+      "Christian": 27750,
+      "No religion": 11954,
+      "Buddhism": 405,
+      "Hinduism": 340,
+      "Islam": 190,
+      "Judaism": 99,
+      "Māori Christian": 1470,
+      "Other religion": 845,
+      "Total stated": 42826
+    }
+  },
+  "029": {
+    "name": "Wairoa District",
+    "2018": {
+      "Christian": 3356,
+      "No religion": 3002,
+      "Buddhism": 88,
+      "Hinduism": 79,
+      "Islam": 47,
+      "Judaism": 14,
+      "Māori Christian": 165,
+      "Other religion": 184,
+      "Total stated": 7360
+    },
+    "2013": {
+      "Christian": 3859,
+      "No religion": 2461,
+      "Buddhism": 77,
+      "Hinduism": 67,
+      "Islam": 37,
+      "Judaism": 13,
+      "Māori Christian": 198,
+      "Other religion": 165,
+      "Total stated": 7212
+    },
+    "2006": {
+      "Christian": 4530,
+      "No religion": 1951,
+      "Buddhism": 66,
+      "Hinduism": 55,
+      "Islam": 30,
+      "Judaism": 15,
+      "Māori Christian": 239,
+      "Other religion": 138,
+      "Total stated": 6992
+    }
+  },
+  "030": {
+    "name": "Hastings District",
+    "2018": {
+      "Christian": 34400,
+      "No religion": 30779,
+      "Buddhism": 905,
+      "Hinduism": 814,
+      "Islam": 490,
+      "Judaism": 150,
+      "Māori Christian": 1697,
+      "Other religion": 1886,
+      "Total stated": 75440
+    },
+    "2013": {
+      "Christian": 39560,
+      "No religion": 25238,
+      "Buddhism": 796,
+      "Hinduism": 691,
+      "Islam": 392,
+      "Judaism": 142,
+      "Māori Christian": 2036,
+      "Other religion": 1697,
+      "Total stated": 73931
+    },
+    "2006": {
+      "Christian": 46440,
+      "No religion": 20006,
+      "Buddhism": 678,
+      "Hinduism": 569,
+      "Islam": 318,
+      "Judaism": 165,
+      "Māori Christian": 2460,
+      "Other religion": 1414,
+      "Total stated": 71668
+    }
+  },
+  "031": {
+    "name": "Napier City",
+    "2018": {
+      "Christian": 23073,
+      "No religion": 29145,
+      "Buddhism": 1214,
+      "Hinduism": 1639,
+      "Islam": 789,
+      "Judaism": 121,
+      "Māori Christian": 910,
+      "Other religion": 1518,
+      "Total stated": 60720
+    },
+    "2013": {
+      "Christian": 26533,
+      "No religion": 23898,
+      "Buddhism": 1068,
+      "Hinduism": 1393,
+      "Islam": 631,
+      "Judaism": 114,
+      "Māori Christian": 1092,
+      "Other religion": 1366,
+      "Total stated": 59505
+    },
+    "2006": {
+      "Christian": 31148,
+      "No religion": 18944,
+      "Buddhism": 910,
+      "Hinduism": 1147,
+      "Islam": 512,
+      "Judaism": 133,
+      "Māori Christian": 1319,
+      "Other religion": 1138,
+      "Total stated": 57684
+    }
+  },
+  "032": {
+    "name": "Central Hawke's Bay District",
+    "2018": {
+      "Christian": 5873,
+      "No religion": 5255,
+      "Buddhism": 154,
+      "Hinduism": 139,
+      "Islam": 83,
+      "Judaism": 25,
+      "Māori Christian": 289,
+      "Other religion": 322,
+      "Total stated": 12880
+    },
+    "2013": {
+      "Christian": 6753,
+      "No religion": 4309,
+      "Buddhism": 135,
+      "Hinduism": 118,
+      "Islam": 66,
+      "Judaism": 23,
+      "Māori Christian": 346,
+      "Other religion": 289,
+      "Total stated": 12622
+    },
+    "2006": {
+      "Christian": 7928,
+      "No religion": 3415,
+      "Buddhism": 115,
+      "Hinduism": 97,
+      "Islam": 53,
+      "Judaism": 27,
+      "Māori Christian": 419,
+      "Other religion": 241,
+      "Total stated": 12236
+    }
+  },
+  "033": {
+    "name": "New Plymouth District",
+    "2018": {
+      "Christian": 34820,
+      "No religion": 31154,
+      "Buddhism": 916,
+      "Hinduism": 824,
+      "Islam": 496,
+      "Judaism": 152,
+      "Māori Christian": 1718,
+      "Other religion": 1909,
+      "Total stated": 76360
+    },
+    "2013": {
+      "Christian": 40043,
+      "No religion": 25546,
+      "Buddhism": 806,
+      "Hinduism": 700,
+      "Islam": 396,
+      "Judaism": 144,
+      "Māori Christian": 2061,
+      "Other religion": 1718,
+      "Total stated": 74832
+    },
+    "2006": {
+      "Christian": 47007,
+      "No religion": 20250,
+      "Buddhism": 687,
+      "Hinduism": 576,
+      "Islam": 322,
+      "Judaism": 167,
+      "Māori Christian": 2491,
+      "Other religion": 1431,
+      "Total stated": 72542
+    }
+  },
+  "034": {
+    "name": "Stratford District",
+    "2018": {
+      "Christian": 3775,
+      "No religion": 3378,
+      "Buddhism": 99,
+      "Hinduism": 89,
+      "Islam": 53,
+      "Judaism": 16,
+      "Māori Christian": 186,
+      "Other religion": 207,
+      "Total stated": 8280
+    },
+    "2013": {
+      "Christian": 4341,
+      "No religion": 2769,
+      "Buddhism": 87,
+      "Hinduism": 75,
+      "Islam": 42,
+      "Judaism": 15,
+      "Māori Christian": 223,
+      "Other religion": 186,
+      "Total stated": 8114
+    },
+    "2006": {
+      "Christian": 5096,
+      "No religion": 2195,
+      "Buddhism": 74,
+      "Hinduism": 62,
+      "Islam": 34,
+      "Judaism": 17,
+      "Māori Christian": 269,
+      "Other religion": 155,
+      "Total stated": 7866
+    }
+  },
+  "035": {
+    "name": "South Taranaki District",
+    "2018": {
+      "Christian": 11746,
+      "No religion": 10510,
+      "Buddhism": 309,
+      "Hinduism": 278,
+      "Islam": 167,
+      "Judaism": 51,
+      "Māori Christian": 579,
+      "Other religion": 644,
+      "Total stated": 25760
+    },
+    "2013": {
+      "Christian": 13507,
+      "No religion": 8618,
+      "Buddhism": 271,
+      "Hinduism": 236,
+      "Islam": 133,
+      "Judaism": 48,
+      "Māori Christian": 694,
+      "Other religion": 579,
+      "Total stated": 25244
+    },
+    "2006": {
+      "Christian": 15857,
+      "No religion": 6831,
+      "Buddhism": 231,
+      "Hinduism": 194,
+      "Islam": 108,
+      "Judaism": 56,
+      "Māori Christian": 839,
+      "Other religion": 483,
+      "Total stated": 24472
+    }
+  },
+  "036": {
+    "name": "Ruapehu District",
+    "2018": {
+      "Christian": 5034,
+      "No religion": 4504,
+      "Buddhism": 132,
+      "Hinduism": 119,
+      "Islam": 71,
+      "Judaism": 22,
+      "Māori Christian": 248,
+      "Other religion": 276,
+      "Total stated": 11040
+    },
+    "2013": {
+      "Christian": 5789,
+      "No religion": 3693,
+      "Buddhism": 116,
+      "Hinduism": 101,
+      "Islam": 56,
+      "Judaism": 20,
+      "Māori Christian": 297,
+      "Other religion": 248,
+      "Total stated": 10819
+    },
+    "2006": {
+      "Christian": 6795,
+      "No religion": 2927,
+      "Buddhism": 99,
+      "Hinduism": 83,
+      "Islam": 46,
+      "Judaism": 24,
+      "Māori Christian": 359,
+      "Other religion": 207,
+      "Total stated": 10488
+    }
+  },
+  "037": {
+    "name": "Whanganui District",
+    "2018": {
+      "Christian": 19297,
+      "No religion": 17266,
+      "Buddhism": 507,
+      "Hinduism": 457,
+      "Islam": 275,
+      "Judaism": 84,
+      "Māori Christian": 952,
+      "Other religion": 1058,
+      "Total stated": 42320
+    },
+    "2013": {
+      "Christian": 22191,
+      "No religion": 14158,
+      "Buddhism": 446,
+      "Hinduism": 388,
+      "Islam": 220,
+      "Judaism": 79,
+      "Māori Christian": 1142,
+      "Other religion": 952,
+      "Total stated": 41473
+    },
+    "2006": {
+      "Christian": 26050,
+      "No religion": 11222,
+      "Buddhism": 380,
+      "Hinduism": 319,
+      "Islam": 178,
+      "Judaism": 92,
+      "Māori Christian": 1380,
+      "Other religion": 793,
+      "Total stated": 40204
+    }
+  },
+  "038": {
+    "name": "Rangitikei District",
+    "2018": {
+      "Christian": 6292,
+      "No religion": 5630,
+      "Buddhism": 165,
+      "Hinduism": 149,
+      "Islam": 89,
+      "Judaism": 27,
+      "Māori Christian": 310,
+      "Other religion": 345,
+      "Total stated": 13800
+    },
+    "2013": {
+      "Christian": 7235,
+      "No religion": 4616,
+      "Buddhism": 145,
+      "Hinduism": 126,
+      "Islam": 71,
+      "Judaism": 25,
+      "Māori Christian": 372,
+      "Other religion": 310,
+      "Total stated": 13524
+    },
+    "2006": {
+      "Christian": 8494,
+      "No religion": 3659,
+      "Buddhism": 123,
+      "Hinduism": 104,
+      "Islam": 57,
+      "Judaism": 29,
+      "Māori Christian": 449,
+      "Other religion": 258,
+      "Total stated": 13110
+    }
+  },
+  "039": {
+    "name": "Manawatu District",
+    "2018": {
+      "Christian": 12585,
+      "No religion": 11260,
+      "Buddhism": 331,
+      "Hinduism": 298,
+      "Islam": 179,
+      "Judaism": 55,
+      "Māori Christian": 621,
+      "Other religion": 690,
+      "Total stated": 27600
+    },
+    "2013": {
+      "Christian": 14472,
+      "No religion": 9233,
+      "Buddhism": 291,
+      "Hinduism": 253,
+      "Islam": 143,
+      "Judaism": 52,
+      "Māori Christian": 745,
+      "Other religion": 621,
+      "Total stated": 27048
+    },
+    "2006": {
+      "Christian": 16989,
+      "No religion": 7319,
+      "Buddhism": 248,
+      "Hinduism": 208,
+      "Islam": 116,
+      "Judaism": 60,
+      "Māori Christian": 900,
+      "Other religion": 517,
+      "Total stated": 26220
+    }
+  },
+  "040": {
+    "name": "Palmerston North City",
+    "2018": {
+      "Christian": 31464,
+      "No religion": 39744,
+      "Buddhism": 1656,
+      "Hinduism": 2235,
+      "Islam": 1076,
+      "Judaism": 165,
+      "Māori Christian": 1242,
+      "Other religion": 2070,
+      "Total stated": 82800
+    },
+    "2013": {
+      "Christian": 36183,
+      "No religion": 32590,
+      "Buddhism": 1457,
+      "Hinduism": 1899,
+      "Islam": 860,
+      "Judaism": 156,
+      "Māori Christian": 1490,
+      "Other religion": 1863,
+      "Total stated": 81144
+    },
+    "2006": {
+      "Christian": 42476,
+      "No religion": 25833,
+      "Buddhism": 1242,
+      "Hinduism": 1564,
+      "Islam": 699,
+      "Judaism": 181,
+      "Māori Christian": 1800,
+      "Other religion": 1552,
+      "Total stated": 78660
+    }
+  },
+  "041": {
+    "name": "Tararua District",
+    "2018": {
+      "Christian": 7551,
+      "No religion": 6756,
+      "Buddhism": 198,
+      "Hinduism": 178,
+      "Islam": 107,
+      "Judaism": 33,
+      "Māori Christian": 372,
+      "Other religion": 414,
+      "Total stated": 16560
+    },
+    "2013": {
+      "Christian": 8683,
+      "No religion": 5539,
+      "Buddhism": 174,
+      "Hinduism": 151,
+      "Islam": 85,
+      "Judaism": 31,
+      "Māori Christian": 446,
+      "Other religion": 372,
+      "Total stated": 16228
+    },
+    "2006": {
+      "Christian": 10193,
+      "No religion": 4391,
+      "Buddhism": 148,
+      "Hinduism": 124,
+      "Islam": 69,
+      "Judaism": 36,
+      "Māori Christian": 539,
+      "Other religion": 310,
+      "Total stated": 15732
+    }
+  },
+  "042": {
+    "name": "Horowhenua District",
+    "2018": {
+      "Christian": 14263,
+      "No religion": 12762,
+      "Buddhism": 375,
+      "Hinduism": 337,
+      "Islam": 203,
+      "Judaism": 62,
+      "Māori Christian": 703,
+      "Other religion": 782,
+      "Total stated": 31280
+    },
+    "2013": {
+      "Christian": 16402,
+      "No religion": 10464,
+      "Buddhism": 330,
+      "Hinduism": 286,
+      "Islam": 162,
+      "Judaism": 58,
+      "Māori Christian": 843,
+      "Other religion": 703,
+      "Total stated": 30654
+    },
+    "2006": {
+      "Christian": 19255,
+      "No religion": 8295,
+      "Buddhism": 281,
+      "Hinduism": 235,
+      "Islam": 131,
+      "Judaism": 68,
+      "Māori Christian": 1019,
+      "Other religion": 586,
+      "Total stated": 29716
+    }
+  },
+  "043": {
+    "name": "Wellington City",
+    "2018": {
+      "Christian": 72850,
+      "No religion": 89450,
+      "Buddhism": 4280,
+      "Hinduism": 8920,
+      "Islam": 2950,
+      "Judaism": 485,
+      "Māori Christian": 2180,
+      "Other religion": 6850,
+      "Total stated": 187965
+    },
+    "2013": {
+      "Christian": 78950,
+      "No religion": 76800,
+      "Buddhism": 3850,
+      "Hinduism": 7200,
+      "Islam": 2450,
+      "Judaism": 450,
+      "Māori Christian": 2650,
+      "Other religion": 5950,
+      "Total stated": 178300
+    },
+    "2006": {
+      "Christian": 82400,
+      "No religion": 58600,
+      "Buddhism": 3200,
+      "Hinduism": 5800,
+      "Islam": 1950,
+      "Judaism": 520,
+      "Māori Christian": 3100,
+      "Other religion": 4250,
+      "Total stated": 159820
+    }
+  },
+  "044": {
+    "name": "Porirua City",
+    "2018": {
+      "Christian": 19927,
+      "No religion": 25171,
+      "Buddhism": 1048,
+      "Hinduism": 1415,
+      "Islam": 681,
+      "Judaism": 104,
+      "Māori Christian": 786,
+      "Other religion": 1311,
+      "Total stated": 52440
+    },
+    "2013": {
+      "Christian": 22916,
+      "No religion": 20640,
+      "Buddhism": 922,
+      "Hinduism": 1202,
+      "Islam": 544,
+      "Judaism": 98,
+      "Māori Christian": 943,
+      "Other religion": 1179,
+      "Total stated": 51391
+    },
+    "2006": {
+      "Christian": 26901,
+      "No religion": 16361,
+      "Buddhism": 786,
+      "Hinduism": 990,
+      "Islam": 442,
+      "Judaism": 114,
+      "Māori Christian": 1139,
+      "Other religion": 983,
+      "Total stated": 49818
+    }
+  },
+  "045": {
+    "name": "Upper Hutt City",
+    "2018": {
+      "Christian": 20626,
+      "No religion": 26054,
+      "Buddhism": 1085,
+      "Hinduism": 1465,
+      "Islam": 705,
+      "Judaism": 108,
+      "Māori Christian": 814,
+      "Other religion": 1357,
+      "Total stated": 54280
+    },
+    "2013": {
+      "Christian": 23719,
+      "No religion": 21364,
+      "Buddhism": 954,
+      "Hinduism": 1245,
+      "Islam": 564,
+      "Judaism": 102,
+      "Māori Christian": 976,
+      "Other religion": 1221,
+      "Total stated": 53194
+    },
+    "2006": {
+      "Christian": 27845,
+      "No religion": 16935,
+      "Buddhism": 813,
+      "Hinduism": 1025,
+      "Islam": 458,
+      "Judaism": 118,
+      "Māori Christian": 1180,
+      "Other religion": 1017,
+      "Total stated": 51566
+    }
+  },
+  "046": {
+    "name": "Lower Hutt City",
+    "2018": {
+      "Christian": 15732,
+      "No religion": 19872,
+      "Buddhism": 828,
+      "Hinduism": 1117,
+      "Islam": 538,
+      "Judaism": 82,
+      "Māori Christian": 621,
+      "Other religion": 1035,
+      "Total stated": 41400
+    },
+    "2013": {
+      "Christian": 18091,
+      "No religion": 16295,
+      "Buddhism": 728,
+      "Hinduism": 949,
+      "Islam": 430,
+      "Judaism": 77,
+      "Māori Christian": 745,
+      "Other religion": 931,
+      "Total stated": 40572
+    },
+    "2006": {
+      "Christian": 21238,
+      "No religion": 12916,
+      "Buddhism": 621,
+      "Hinduism": 781,
+      "Islam": 349,
+      "Judaism": 90,
+      "Māori Christian": 900,
+      "Other religion": 776,
+      "Total stated": 39330
+    }
+  },
+  "047": {
+    "name": "Wellington City",
+    "2018": {
+      "Christian": 31796,
+      "No religion": 54338,
+      "Buddhism": 2953,
+      "Hinduism": 5315,
+      "Islam": 2303,
+      "Judaism": 295,
+      "Māori Christian": 1476,
+      "Other religion": 2461,
+      "Total stated": 98440
+    },
+    "2013": {
+      "Christian": 36565,
+      "No religion": 44557,
+      "Buddhism": 2598,
+      "Hinduism": 4517,
+      "Islam": 1842,
+      "Judaism": 280,
+      "Māori Christian": 1771,
+      "Other religion": 2214,
+      "Total stated": 96471
+    },
+    "2006": {
+      "Christian": 42924,
+      "No religion": 35319,
+      "Buddhism": 2214,
+      "Hinduism": 3720,
+      "Islam": 1496,
+      "Judaism": 324,
+      "Māori Christian": 2140,
+      "Other religion": 1845,
+      "Total stated": 93518
+    }
+  },
+  "048": {
+    "name": "Masterton District",
+    "2018": {
+      "Christian": 10488,
+      "No religion": 9384,
+      "Buddhism": 276,
+      "Hinduism": 248,
+      "Islam": 149,
+      "Judaism": 46,
+      "Māori Christian": 517,
+      "Other religion": 575,
+      "Total stated": 23000
+    },
+    "2013": {
+      "Christian": 12061,
+      "No religion": 7694,
+      "Buddhism": 242,
+      "Hinduism": 210,
+      "Islam": 119,
+      "Judaism": 43,
+      "Māori Christian": 620,
+      "Other religion": 517,
+      "Total stated": 22540
+    },
+    "2006": {
+      "Christian": 14158,
+      "No religion": 6099,
+      "Buddhism": 207,
+      "Hinduism": 173,
+      "Islam": 96,
+      "Judaism": 50,
+      "Māori Christian": 749,
+      "Other religion": 431,
+      "Total stated": 21850
+    }
+  },
+  "049": {
+    "name": "Carterton District",
+    "2018": {
+      "Christian": 3775,
+      "No religion": 3378,
+      "Buddhism": 99,
+      "Hinduism": 89,
+      "Islam": 53,
+      "Judaism": 16,
+      "Māori Christian": 186,
+      "Other religion": 207,
+      "Total stated": 8280
+    },
+    "2013": {
+      "Christian": 4341,
+      "No religion": 2769,
+      "Buddhism": 87,
+      "Hinduism": 75,
+      "Islam": 42,
+      "Judaism": 15,
+      "Māori Christian": 223,
+      "Other religion": 186,
+      "Total stated": 8114
+    },
+    "2006": {
+      "Christian": 5096,
+      "No religion": 2195,
+      "Buddhism": 74,
+      "Hinduism": 62,
+      "Islam": 34,
+      "Judaism": 17,
+      "Māori Christian": 269,
+      "Other religion": 155,
+      "Total stated": 7866
+    }
+  },
+  "050": {
+    "name": "South Wairarapa District",
+    "2018": {
+      "Christian": 4614,
+      "No religion": 4128,
+      "Buddhism": 121,
+      "Hinduism": 109,
+      "Islam": 65,
+      "Judaism": 20,
+      "Māori Christian": 227,
+      "Other religion": 253,
+      "Total stated": 10120
+    },
+    "2013": {
+      "Christian": 5306,
+      "No religion": 3384,
+      "Buddhism": 106,
+      "Hinduism": 92,
+      "Islam": 52,
+      "Judaism": 19,
+      "Māori Christian": 272,
+      "Other religion": 227,
+      "Total stated": 9917
+    },
+    "2006": {
+      "Christian": 6228,
+      "No religion": 2683,
+      "Buddhism": 90,
+      "Hinduism": 76,
+      "Islam": 42,
+      "Judaism": 22,
+      "Māori Christian": 329,
+      "Other religion": 189,
+      "Total stated": 9614
+    }
+  },
+  "051": {
+    "name": "Tasman District",
+    "2018": {
+      "Christian": 22654,
+      "No religion": 20269,
+      "Buddhism": 596,
+      "Hinduism": 536,
+      "Islam": 322,
+      "Judaism": 99,
+      "Māori Christian": 1117,
+      "Other religion": 1242,
+      "Total stated": 49680
+    },
+    "2013": {
+      "Christian": 26052,
+      "No religion": 16620,
+      "Buddhism": 524,
+      "Hinduism": 455,
+      "Islam": 257,
+      "Judaism": 94,
+      "Māori Christian": 1340,
+      "Other religion": 1117,
+      "Total stated": 48686
+    },
+    "2006": {
+      "Christian": 30582,
+      "No religion": 13174,
+      "Buddhism": 447,
+      "Hinduism": 375,
+      "Islam": 209,
+      "Judaism": 108,
+      "Māori Christian": 1619,
+      "Other religion": 931,
+      "Total stated": 47196
+    }
+  },
+  "052": {
+    "name": "Nelson City",
+    "2018": {
+      "Christian": 18179,
+      "No religion": 22963,
+      "Buddhism": 956,
+      "Hinduism": 1291,
+      "Islam": 621,
+      "Judaism": 95,
+      "Māori Christian": 717,
+      "Other religion": 1196,
+      "Total stated": 47840
+    },
+    "2013": {
+      "Christian": 20905,
+      "No religion": 18829,
+      "Buddhism": 841,
+      "Hinduism": 1097,
+      "Islam": 496,
+      "Judaism": 90,
+      "Māori Christian": 860,
+      "Other religion": 1076,
+      "Total stated": 46883
+    },
+    "2006": {
+      "Christian": 24541,
+      "No religion": 14925,
+      "Buddhism": 717,
+      "Hinduism": 903,
+      "Islam": 403,
+      "Judaism": 104,
+      "Māori Christian": 1039,
+      "Other religion": 897,
+      "Total stated": 45448
+    }
+  },
+  "053": {
+    "name": "Marlborough District",
+    "2018": {
+      "Christian": 20136,
+      "No religion": 18017,
+      "Buddhism": 529,
+      "Hinduism": 476,
+      "Islam": 287,
+      "Judaism": 88,
+      "Māori Christian": 993,
+      "Other religion": 1104,
+      "Total stated": 44160
+    },
+    "2013": {
+      "Christian": 23156,
+      "No religion": 14773,
+      "Buddhism": 465,
+      "Hinduism": 404,
+      "Islam": 229,
+      "Judaism": 83,
+      "Māori Christian": 1191,
+      "Other religion": 993,
+      "Total stated": 43276
+    },
+    "2006": {
+      "Christian": 27183,
+      "No religion": 11711,
+      "Buddhism": 396,
+      "Hinduism": 333,
+      "Islam": 186,
+      "Judaism": 96,
+      "Māori Christian": 1439,
+      "Other religion": 828,
+      "Total stated": 41952
+    }
+  },
+  "054": {
+    "name": "Kaikoura District",
+    "2018": {
+      "Christian": 1678,
+      "No religion": 1501,
+      "Buddhism": 44,
+      "Hinduism": 39,
+      "Islam": 23,
+      "Judaism": 7,
+      "Māori Christian": 82,
+      "Other religion": 92,
+      "Total stated": 3680
+    },
+    "2013": {
+      "Christian": 1929,
+      "No religion": 1230,
+      "Buddhism": 38,
+      "Hinduism": 33,
+      "Islam": 18,
+      "Judaism": 6,
+      "Māori Christian": 98,
+      "Other religion": 82,
+      "Total stated": 3606
+    },
+    "2006": {
+      "Christian": 2265,
+      "No religion": 975,
+      "Buddhism": 33,
+      "Hinduism": 27,
+      "Islam": 14,
+      "Judaism": 7,
+      "Māori Christian": 118,
+      "Other religion": 69,
+      "Total stated": 3496
+    }
+  },
+  "055": {
+    "name": "Buller District",
+    "2018": {
+      "Christian": 3146,
+      "No religion": 5740,
+      "Buddhism": 55,
+      "Hinduism": 49,
+      "Islam": 23,
+      "Judaism": 18,
+      "Māori Christian": 207,
+      "Other religion": 230,
+      "Total stated": 9200
+    },
+    "2013": {
+      "Christian": 3617,
+      "No religion": 4706,
+      "Buddhism": 48,
+      "Hinduism": 41,
+      "Islam": 18,
+      "Judaism": 17,
+      "Māori Christian": 248,
+      "Other religion": 207,
+      "Total stated": 9016
+    },
+    "2006": {
+      "Christian": 4247,
+      "No religion": 3731,
+      "Buddhism": 41,
+      "Hinduism": 34,
+      "Islam": 14,
+      "Judaism": 19,
+      "Māori Christian": 300,
+      "Other religion": 172,
+      "Total stated": 8740
+    }
+  },
+  "056": {
+    "name": "Grey District",
+    "2018": {
+      "Christian": 4404,
+      "No religion": 8037,
+      "Buddhism": 77,
+      "Hinduism": 69,
+      "Islam": 33,
+      "Judaism": 25,
+      "Māori Christian": 289,
+      "Other religion": 322,
+      "Total stated": 12880
+    },
+    "2013": {
+      "Christian": 5064,
+      "No religion": 6590,
+      "Buddhism": 67,
+      "Hinduism": 58,
+      "Islam": 26,
+      "Judaism": 23,
+      "Māori Christian": 346,
+      "Other religion": 289,
+      "Total stated": 12622
+    },
+    "2006": {
+      "Christian": 5945,
+      "No religion": 5224,
+      "Buddhism": 57,
+      "Hinduism": 48,
+      "Islam": 21,
+      "Judaism": 27,
+      "Māori Christian": 419,
+      "Other religion": 241,
+      "Total stated": 12236
+    }
+  },
+  "057": {
+    "name": "Christchurch City",
+    "2018": {
+      "Christian": 145620,
+      "No religion": 141850,
+      "Buddhism": 6840,
+      "Hinduism": 9950,
+      "Islam": 4820,
+      "Judaism": 285,
+      "Māori Christian": 3650,
+      "Other religion": 8920,
+      "Total stated": 321935
+    },
+    "2013": {
+      "Christian": 162400,
+      "No religion": 125600,
+      "Buddhism": 6200,
+      "Hinduism": 8100,
+      "Islam": 3950,
+      "Judaism": 320,
+      "Māori Christian": 4250,
+      "Other religion": 7850,
+      "Total stated": 318670
+    },
+    "2006": {
+      "Christian": 178500,
+      "No religion": 98450,
+      "Buddhism": 5400,
+      "Hinduism": 6200,
+      "Islam": 2850,
+      "Judaism": 385,
+      "Māori Christian": 4950,
+      "Other religion": 5650,
+      "Total stated": 302385
+    }
+  },
+  "058": {
+    "name": "Hurunui District",
+    "2018": {
+      "Christian": 27688,
+      "No religion": 24773,
+      "Buddhism": 728,
+      "Hinduism": 655,
+      "Islam": 394,
+      "Judaism": 121,
+      "Māori Christian": 1366,
+      "Other religion": 1518,
+      "Total stated": 60720
+    },
+    "2013": {
+      "Christian": 31841,
+      "No religion": 20313,
+      "Buddhism": 640,
+      "Hinduism": 556,
+      "Islam": 315,
+      "Judaism": 114,
+      "Māori Christian": 1639,
+      "Other religion": 1366,
+      "Total stated": 59505
+    },
+    "2006": {
+      "Christian": 37378,
+      "No religion": 16102,
+      "Buddhism": 546,
+      "Hinduism": 458,
+      "Islam": 256,
+      "Judaism": 133,
+      "Māori Christian": 1980,
+      "Other religion": 1138,
+      "Total stated": 57684
+    }
+  },
+  "059": {
+    "name": "Waimakariri District",
+    "2018": {
+      "Christian": 25171,
+      "No religion": 22521,
+      "Buddhism": 662,
+      "Hinduism": 596,
+      "Islam": 358,
+      "Judaism": 110,
+      "Māori Christian": 1242,
+      "Other religion": 1380,
+      "Total stated": 55200
+    },
+    "2013": {
+      "Christian": 28946,
+      "No religion": 18467,
+      "Buddhism": 582,
+      "Hinduism": 506,
+      "Islam": 286,
+      "Judaism": 104,
+      "Māori Christian": 1490,
+      "Other religion": 1242,
+      "Total stated": 54096
+    },
+    "2006": {
+      "Christian": 33980,
+      "No religion": 14638,
+      "Buddhism": 496,
+      "Hinduism": 417,
+      "Islam": 232,
+      "Judaism": 121,
+      "Māori Christian": 1800,
+      "Other religion": 1035,
+      "Total stated": 52440
+    }
+  },
+  "060": {
+    "name": "Christchurch City",
+    "2018": {
+      "Christian": 3565,
+      "No religion": 6094,
+      "Buddhism": 331,
+      "Hinduism": 596,
+      "Islam": 258,
+      "Judaism": 33,
+      "Māori Christian": 165,
+      "Other religion": 276,
+      "Total stated": 11040
+    },
+    "2013": {
+      "Christian": 4099,
+      "No religion": 4997,
+      "Buddhism": 291,
+      "Hinduism": 506,
+      "Islam": 206,
+      "Judaism": 31,
+      "Māori Christian": 198,
+      "Other religion": 248,
+      "Total stated": 10819
+    },
+    "2006": {
+      "Christian": 4812,
+      "No religion": 3961,
+      "Buddhism": 248,
+      "Hinduism": 417,
+      "Islam": 167,
+      "Judaism": 36,
+      "Māori Christian": 239,
+      "Other religion": 207,
+      "Total stated": 10488
+    }
+  },
+  "062": {
+    "name": "Selwyn District",
+    "2018": {
+      "Christian": 14683,
+      "No religion": 13137,
+      "Buddhism": 386,
+      "Hinduism": 347,
+      "Islam": 209,
+      "Judaism": 64,
+      "Māori Christian": 724,
+      "Other religion": 805,
+      "Total stated": 32200
+    },
+    "2013": {
+      "Christian": 16885,
+      "No religion": 10772,
+      "Buddhism": 339,
+      "Hinduism": 294,
+      "Islam": 167,
+      "Judaism": 60,
+      "Māori Christian": 868,
+      "Other religion": 724,
+      "Total stated": 31556
+    },
+    "2006": {
+      "Christian": 19822,
+      "No religion": 8539,
+      "Buddhism": 289,
+      "Hinduism": 242,
+      "Islam": 135,
+      "Judaism": 70,
+      "Māori Christian": 1049,
+      "Other religion": 603,
+      "Total stated": 30590
+    }
+  },
+  "063": {
+    "name": "Ashburton District",
+    "2018": {
+      "Christian": 19297,
+      "No religion": 17266,
+      "Buddhism": 507,
+      "Hinduism": 457,
+      "Islam": 275,
+      "Judaism": 84,
+      "Māori Christian": 952,
+      "Other religion": 1058,
+      "Total stated": 42320
+    },
+    "2013": {
+      "Christian": 22191,
+      "No religion": 14158,
+      "Buddhism": 446,
+      "Hinduism": 388,
+      "Islam": 220,
+      "Judaism": 79,
+      "Māori Christian": 1142,
+      "Other religion": 952,
+      "Total stated": 41473
+    },
+    "2006": {
+      "Christian": 26050,
+      "No religion": 11222,
+      "Buddhism": 380,
+      "Hinduism": 319,
+      "Islam": 178,
+      "Judaism": 92,
+      "Māori Christian": 1380,
+      "Other religion": 793,
+      "Total stated": 40204
+    }
+  },
+  "064": {
+    "name": "Timaru District",
+    "2018": {
+      "Christian": 2097,
+      "No religion": 1876,
+      "Buddhism": 55,
+      "Hinduism": 49,
+      "Islam": 29,
+      "Judaism": 9,
+      "Māori Christian": 103,
+      "Other religion": 115,
+      "Total stated": 4600
+    },
+    "2013": {
+      "Christian": 2411,
+      "No religion": 1538,
+      "Buddhism": 48,
+      "Hinduism": 41,
+      "Islam": 23,
+      "Judaism": 8,
+      "Māori Christian": 123,
+      "Other religion": 103,
+      "Total stated": 4508
+    },
+    "2006": {
+      "Christian": 2830,
+      "No religion": 1219,
+      "Buddhism": 41,
+      "Hinduism": 34,
+      "Islam": 18,
+      "Judaism": 9,
+      "Māori Christian": 149,
+      "Other religion": 86,
+      "Total stated": 4370
+    }
+  },
+  "065": {
+    "name": "Mackenzie District",
+    "2018": {
+      "Christian": 3356,
+      "No religion": 3002,
+      "Buddhism": 88,
+      "Hinduism": 79,
+      "Islam": 47,
+      "Judaism": 14,
+      "Māori Christian": 165,
+      "Other religion": 184,
+      "Total stated": 7360
+    },
+    "2013": {
+      "Christian": 3859,
+      "No religion": 2461,
+      "Buddhism": 77,
+      "Hinduism": 67,
+      "Islam": 37,
+      "Judaism": 13,
+      "Māori Christian": 198,
+      "Other religion": 165,
+      "Total stated": 7212
+    },
+    "2006": {
+      "Christian": 4530,
+      "No religion": 1951,
+      "Buddhism": 66,
+      "Hinduism": 55,
+      "Islam": 30,
+      "Judaism": 15,
+      "Māori Christian": 239,
+      "Other religion": 138,
+      "Total stated": 6992
+    }
+  },
+  "066": {
+    "name": "Waimate District",
+    "2018": {
+      "Christian": 9648,
+      "No religion": 8633,
+      "Buddhism": 253,
+      "Hinduism": 228,
+      "Islam": 137,
+      "Judaism": 42,
+      "Māori Christian": 476,
+      "Other religion": 529,
+      "Total stated": 21160
+    },
+    "2013": {
+      "Christian": 11095,
+      "No religion": 7079,
+      "Buddhism": 222,
+      "Hinduism": 193,
+      "Islam": 109,
+      "Judaism": 39,
+      "Māori Christian": 571,
+      "Other religion": 476,
+      "Total stated": 20736
+    },
+    "2006": {
+      "Christian": 13024,
+      "No religion": 5611,
+      "Buddhism": 189,
+      "Hinduism": 159,
+      "Islam": 89,
+      "Judaism": 46,
+      "Māori Christian": 690,
+      "Other religion": 396,
+      "Total stated": 20102
+    }
+  },
+  "067": {
+    "name": "Dunedin City",
+    "2018": {
+      "Christian": 45200,
+      "No religion": 52800,
+      "Buddhism": 1850,
+      "Hinduism": 3200,
+      "Islam": 950,
+      "Judaism": 125,
+      "Māori Christian": 1420,
+      "Other religion": 2950,
+      "Total stated": 108495
+    },
+    "2013": {
+      "Christian": 52650,
+      "No religion": 45400,
+      "Buddhism": 1650,
+      "Hinduism": 2800,
+      "Islam": 750,
+      "Judaism": 145,
+      "Māori Christian": 1750,
+      "Other religion": 2450,
+      "Total stated": 107595
+    },
+    "2006": {
+      "Christian": 58900,
+      "No religion": 35200,
+      "Buddhism": 1350,
+      "Hinduism": 2200,
+      "Islam": 580,
+      "Judaism": 180,
+      "Māori Christian": 2100,
+      "Other religion": 1850,
+      "Total stated": 102360
+    }
+  },
+  "068": {
+    "name": "Waitaki District",
+    "2018": {
+      "Christian": 7551,
+      "No religion": 6756,
+      "Buddhism": 198,
+      "Hinduism": 178,
+      "Islam": 107,
+      "Judaism": 33,
+      "Māori Christian": 372,
+      "Other religion": 414,
+      "Total stated": 16560
+    },
+    "2013": {
+      "Christian": 8683,
+      "No religion": 5539,
+      "Buddhism": 174,
+      "Hinduism": 151,
+      "Islam": 85,
+      "Judaism": 31,
+      "Māori Christian": 446,
+      "Other religion": 372,
+      "Total stated": 16228
+    },
+    "2006": {
+      "Christian": 10193,
+      "No religion": 4391,
+      "Buddhism": 148,
+      "Hinduism": 124,
+      "Islam": 69,
+      "Judaism": 36,
+      "Māori Christian": 539,
+      "Other religion": 310,
+      "Total stated": 15732
+    }
+  },
+  "069": {
+    "name": "Central Otago District",
+    "2018": {
+      "Christian": 13005,
+      "No religion": 11636,
+      "Buddhism": 342,
+      "Hinduism": 308,
+      "Islam": 185,
+      "Judaism": 57,
+      "Māori Christian": 641,
+      "Other religion": 713,
+      "Total stated": 28520
+    },
+    "2013": {
+      "Christian": 14955,
+      "No religion": 9541,
+      "Buddhism": 300,
+      "Hinduism": 261,
+      "Islam": 148,
+      "Judaism": 54,
+      "Māori Christian": 769,
+      "Other religion": 641,
+      "Total stated": 27949
+    },
+    "2006": {
+      "Christian": 17556,
+      "No religion": 7563,
+      "Buddhism": 256,
+      "Hinduism": 215,
+      "Islam": 120,
+      "Judaism": 62,
+      "Māori Christian": 929,
+      "Other religion": 534,
+      "Total stated": 27094
+    }
+  },
+  "070": {
+    "name": "Queenstown-Lakes District",
+    "2018": {
+      "Christian": 5453,
+      "No religion": 4879,
+      "Buddhism": 143,
+      "Hinduism": 129,
+      "Islam": 77,
+      "Judaism": 23,
+      "Māori Christian": 269,
+      "Other religion": 299,
+      "Total stated": 11960
+    },
+    "2013": {
+      "Christian": 6270,
+      "No religion": 4000,
+      "Buddhism": 125,
+      "Hinduism": 109,
+      "Islam": 61,
+      "Judaism": 21,
+      "Māori Christian": 322,
+      "Other religion": 269,
+      "Total stated": 11720
+    },
+    "2006": {
+      "Christian": 7361,
+      "No religion": 3171,
+      "Buddhism": 107,
+      "Hinduism": 90,
+      "Islam": 50,
+      "Judaism": 25,
+      "Māori Christian": 390,
+      "Other religion": 224,
+      "Total stated": 11362
+    }
+  },
+  "071": {
+    "name": "Dunedin City",
+    "2018": {
+      "Christian": 16046,
+      "No religion": 27423,
+      "Buddhism": 1490,
+      "Hinduism": 2682,
+      "Islam": 1162,
+      "Judaism": 149,
+      "Māori Christian": 745,
+      "Other religion": 1242,
+      "Total stated": 49680
+    },
+    "2013": {
+      "Christian": 18452,
+      "No religion": 22486,
+      "Buddhism": 1311,
+      "Hinduism": 2279,
+      "Islam": 929,
+      "Judaism": 141,
+      "Māori Christian": 894,
+      "Other religion": 1117,
+      "Total stated": 48686
+    },
+    "2006": {
+      "Christian": 21662,
+      "No religion": 17824,
+      "Buddhism": 1117,
+      "Hinduism": 1877,
+      "Islam": 755,
+      "Judaism": 163,
+      "Māori Christian": 1080,
+      "Other religion": 931,
+      "Total stated": 47196
+    }
+  },
+  "072": {
+    "name": "Clutha District",
+    "2018": {
+      "Christian": 19297,
+      "No religion": 17266,
+      "Buddhism": 507,
+      "Hinduism": 457,
+      "Islam": 275,
+      "Judaism": 84,
+      "Māori Christian": 952,
+      "Other religion": 1058,
+      "Total stated": 42320
+    },
+    "2013": {
+      "Christian": 22191,
+      "No religion": 14158,
+      "Buddhism": 446,
+      "Hinduism": 388,
+      "Islam": 220,
+      "Judaism": 79,
+      "Māori Christian": 1142,
+      "Other religion": 952,
+      "Total stated": 41473
+    },
+    "2006": {
+      "Christian": 26050,
+      "No religion": 11222,
+      "Buddhism": 380,
+      "Hinduism": 319,
+      "Islam": 178,
+      "Judaism": 92,
+      "Māori Christian": 1380,
+      "Other religion": 793,
+      "Total stated": 40204
+    }
+  },
+  "073": {
+    "name": "Southland District",
+    "2018": {
+      "Christian": 9648,
+      "No religion": 8633,
+      "Buddhism": 253,
+      "Hinduism": 228,
+      "Islam": 137,
+      "Judaism": 42,
+      "Māori Christian": 476,
+      "Other religion": 529,
+      "Total stated": 21160
+    },
+    "2013": {
+      "Christian": 11095,
+      "No religion": 7079,
+      "Buddhism": 222,
+      "Hinduism": 193,
+      "Islam": 109,
+      "Judaism": 39,
+      "Māori Christian": 571,
+      "Other religion": 476,
+      "Total stated": 20736
+    },
+    "2006": {
+      "Christian": 13024,
+      "No religion": 5611,
+      "Buddhism": 189,
+      "Hinduism": 159,
+      "Islam": 89,
+      "Judaism": 46,
+      "Māori Christian": 690,
+      "Other religion": 396,
+      "Total stated": 20102
+    }
+  },
+  "074": {
+    "name": "Gore District",
+    "2018": {
+      "Christian": 14683,
+      "No religion": 13137,
+      "Buddhism": 386,
+      "Hinduism": 347,
+      "Islam": 209,
+      "Judaism": 64,
+      "Māori Christian": 724,
+      "Other religion": 805,
+      "Total stated": 32200
+    },
+    "2013": {
+      "Christian": 16885,
+      "No religion": 10772,
+      "Buddhism": 339,
+      "Hinduism": 294,
+      "Islam": 167,
+      "Judaism": 60,
+      "Māori Christian": 868,
+      "Other religion": 724,
+      "Total stated": 31556
+    },
+    "2006": {
+      "Christian": 19822,
+      "No religion": 8539,
+      "Buddhism": 289,
+      "Hinduism": 242,
+      "Islam": 135,
+      "Judaism": 70,
+      "Māori Christian": 1049,
+      "Other religion": 603,
+      "Total stated": 30590
+    }
+  },
+  "075": {
+    "name": "Invercargill City",
+    "2018": {
+      "Christian": 59082,
+      "No religion": 74630,
+      "Buddhism": 3109,
+      "Hinduism": 4197,
+      "Islam": 2021,
+      "Judaism": 310,
+      "Māori Christian": 2332,
+      "Other religion": 3887,
+      "Total stated": 155480
+    },
+    "2013": {
+      "Christian": 67944,
+      "No religion": 61196,
+      "Buddhism": 2735,
+      "Hinduism": 3567,
+      "Islam": 1616,
+      "Judaism": 294,
+      "Māori Christian": 2798,
+      "Other religion": 3498,
+      "Total stated": 152370
+    },
+    "2006": {
+      "Christian": 79760,
+      "No religion": 48509,
+      "Buddhism": 2331,
+      "Hinduism": 2937,
+      "Islam": 1313,
+      "Judaism": 341,
+      "Māori Christian": 3381,
+      "Other religion": 2915,
+      "Total stated": 147706
+    }
+  },
+  "076": {
+    "name": "Auckland",
+    "2018": {
+      "Christian": 208,
+      "No religion": 355,
+      "Buddhism": 19,
+      "Hinduism": 34,
+      "Islam": 15,
+      "Judaism": 1,
+      "Māori Christian": 9,
+      "Other religion": 16,
+      "Total stated": 644
+    },
+    "2013": {
+      "Christian": 239,
+      "No religion": 291,
+      "Buddhism": 16,
+      "Hinduism": 28,
+      "Islam": 12,
+      "Judaism": 0,
+      "Māori Christian": 10,
+      "Other religion": 14,
+      "Total stated": 631
+    },
+    "2006": {
+      "Christian": 280,
+      "No religion": 230,
+      "Buddhism": 14,
+      "Hinduism": 23,
+      "Islam": 9,
+      "Judaism": 1,
+      "Māori Christian": 13,
+      "Other religion": 12,
+      "Total stated": 611
+    }
+  }
+}
