@@ -23,7 +23,7 @@ class EnhancedPlacesOfWorshipApp {
         this.boundariesData = null;
         this.showCensusOverlay = false;
         this.currentCensusMetric = 'no_religion_change';
-        this.currentYear = 2018;
+        this.overlayYear = 2018;  // Fixed year for overlay colors
         
         // Filtering
         this.currentMajorCategory = 'all';
@@ -139,15 +139,6 @@ class EnhancedPlacesOfWorshipApp {
             this.changeMapStyle(e.target.value);
         });
         
-        // Year slider for census data
-        const yearSlider = document.getElementById('yearSlider');
-        if (yearSlider) {
-            yearSlider.addEventListener('input', (e) => {
-                this.currentYear = parseInt(e.target.value);
-                document.getElementById('currentYear').textContent = this.currentYear;
-                this.updateCensusVisualization();
-            });
-        }
         
         // Reset button
         document.getElementById('resetButton').addEventListener('click', () => {
@@ -547,7 +538,7 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     calculatePopulationColor(saData) {
-        const yearData = saData[String(this.currentYear)];
+        const yearData = saData[String(this.overlayYear)];
         if (!yearData || !yearData["Total"]) return "gray";
         
         const population = yearData["Total"];
@@ -559,7 +550,7 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     calculateDiversityColor(saData) {
-        const yearData = saData[String(this.currentYear)];
+        const yearData = saData[String(this.overlayYear)];
         if (!yearData || !yearData["Total stated"]) return "gray";
         
         // Calculate Shannon diversity index
@@ -583,7 +574,7 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     calculateMedianAgeColor(saData) {
-        const yearData = saData[String(this.currentYear)];
+        const yearData = saData[String(this.overlayYear)];
         if (!yearData || yearData.median_age === undefined) return "gray";
         
         const medianAge = yearData.median_age;
@@ -596,7 +587,7 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     calculateGenderRatioColor(saData) {
-        const yearData = saData[String(this.currentYear)];
+        const yearData = saData[String(this.overlayYear)];
         if (!yearData || !yearData.gender_profile) return "gray";
         
         const genderData = yearData.gender_profile;
@@ -613,7 +604,7 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     calculateEthnicityDiversityColor(saData) {
-        const yearData = saData[String(this.currentYear)];
+        const yearData = saData[String(this.overlayYear)];
         if (!yearData || !yearData.ethnicity_profile) return "gray";
         
         const ethnicityData = yearData.ethnicity_profile;
@@ -639,7 +630,7 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     calculateIncomeLevelColor(saData) {
-        const yearData = saData[String(this.currentYear)];
+        const yearData = saData[String(this.overlayYear)];
         if (!yearData || !yearData.income_profile) return "gray";
         
         const incomeData = yearData.income_profile;
@@ -674,7 +665,7 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     calculatePopulationDensityColor(saData) {
-        const yearData = saData[String(this.currentYear)];
+        const yearData = saData[String(this.overlayYear)];
         if (!yearData || yearData.population_density === undefined) return "gray";
         
         const density = yearData.population_density;
@@ -689,7 +680,7 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     calculateUnemploymentColor(saData) {
-        const yearData = saData[String(this.currentYear)];
+        const yearData = saData[String(this.overlayYear)];
         if (!yearData || yearData.unemployment_rate === undefined) return "gray";
         
         const unemploymentRate = yearData.unemployment_rate * 100; // Convert to percentage
@@ -703,7 +694,7 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     calculateHomeOwnershipColor(saData) {
-        const yearData = saData[String(this.currentYear)];
+        const yearData = saData[String(this.overlayYear)];
         if (!yearData || yearData.home_ownership_rate === undefined) return "gray";
         
         const ownershipRate = yearData.home_ownership_rate;
@@ -759,45 +750,42 @@ class EnhancedPlacesOfWorshipApp {
     
     createCensusPopupContent(properties, saData) {
         const sa2Code = String(properties.SA22018_V1_00);
-        const yearData = saData[String(this.currentYear)] || {};
-        
-        // Check if we have comprehensive demographic data
-        const demographicData = this.demographicData[sa2Code];
-        const comprehensiveData = demographicData ? demographicData[String(this.currentYear)] : null;
+        // Get data for latest year (2018) for basic info
+        const latestData = saData[String(2018)] || {};
         
         let popupContent = `
             <div class="census-popup">
                 <h3>${properties.SA22018_V1_NAME}</h3>
-                <p><strong>Year:</strong> ${this.currentYear}</p>
                 <p><strong>SA2 Code:</strong> ${sa2Code}</p>
+                <p><strong>Census Timeline:</strong> 2006 → 2013 → 2018</p>
         `;
         
-        // Basic population data
-        if (yearData["Total"]) {
-            popupContent += `<p><strong>Total Population:</strong> ${yearData["Total"].toLocaleString()}</p>`;
+        // Basic population data from latest census
+        if (latestData["Total"]) {
+            popupContent += `<p><strong>Population (2018):</strong> ${latestData["Total"].toLocaleString()}</p>`;
         }
         
-        // Religious data with delta analysis
-        popupContent += `<h4>Religion (${this.currentYear})</h4>`;
-        const religions = ['Christian', 'No religion', 'Buddhism', 'Hinduism', 'Islam', 'Judaism', 'Sikhism'];
+        // Religious data timeline - show key religions only
+        popupContent += `<h4>Religious Affiliation Timeline</h4>`;
+        const keyReligions = ['Christian', 'No religion', 'Buddhism', 'Hinduism', 'Islam'];
         
-        // Calculate deltas if we have previous year data
-        const previousYear = this.currentYear === 2018 ? 2013 : 2006;
-        const previousYearData = saData[String(previousYear)] || {};
-        
-        religions.forEach(religion => {
-            const current = yearData[religion] || 0;
-            const previous = previousYearData[religion] || 0;
-            const delta = current - previous;
-            const deltaPercent = previous > 0 ? ((delta / previous) * 100).toFixed(1) : 'N/A';
-            const deltaIcon = delta > 0 ? '↗' : delta < 0 ? '↘' : '→';
-            const deltaColor = delta > 0 ? 'green' : delta < 0 ? 'red' : 'gray';
+        keyReligions.forEach(religion => {
+            const data2006 = saData[String(2006)]?.[religion] || 0;
+            const data2013 = saData[String(2013)]?.[religion] || 0;  
+            const data2018 = saData[String(2018)]?.[religion] || 0;
             
-            popupContent += `<p>${religion}: ${current.toLocaleString()} <span style="color: ${deltaColor};">${deltaIcon} ${deltaPercent}%</span></p>`;
+            const trend = data2018 > data2006 ? '↗' : data2018 < data2006 ? '↘' : '→';
+            const trendColor = data2018 > data2006 ? 'green' : data2018 < data2006 ? 'red' : 'gray';
+            
+            popupContent += `<p><strong>${religion}:</strong> ${data2006.toLocaleString()} → ${data2013.toLocaleString()} → ${data2018.toLocaleString()} <span style="color: ${trendColor};">${trend}</span></p>`;
         });
         
         // Add histogram placeholder
         popupContent += `<div id="religion-chart" style="width: 100%; height: 300px; margin-top: 10px;"></div>`;
+        
+        // Get comprehensive demographic data from latest year (2018)
+        const demographicData = this.demographicData[sa2Code];
+        const comprehensiveData = demographicData ? demographicData[String(2018)] : null;
         
         // Comprehensive demographic data if available
         if (comprehensiveData) {
@@ -1001,36 +989,43 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     createReligiousHistogram(saData, regionName) {
-        // Create religious change histogram using Plotly
+        // Create comprehensive 3-year religious timeline histogram using Plotly
         const religions = ['Christian', 'No religion', 'Buddhism', 'Hinduism', 'Islam', 'Judaism', 'Sikhism'];
-        const currentYear = this.currentYear;
-        const previousYear = currentYear === 2018 ? 2013 : 2006;
         
-        const currentData = saData[String(currentYear)] || {};
-        const previousData = saData[String(previousYear)] || {};
+        const data2006 = saData[String(2006)] || {};
+        const data2013 = saData[String(2013)] || {};
+        const data2018 = saData[String(2018)] || {};
         
-        const currentValues = religions.map(religion => currentData[religion] || 0);
-        const previousValues = religions.map(religion => previousData[religion] || 0);
+        const values2006 = religions.map(religion => data2006[religion] || 0);
+        const values2013 = religions.map(religion => data2013[religion] || 0);
+        const values2018 = religions.map(religion => data2018[religion] || 0);
         
         const plotData = [
             {
                 x: religions,
-                y: previousValues,
-                name: `${previousYear}`,
+                y: values2006,
+                name: '2006',
                 type: 'bar',
-                marker: { color: 'lightblue' }
+                marker: { color: '#E8F4FD' }
             },
             {
                 x: religions,
-                y: currentValues,
-                name: `${currentYear}`,
+                y: values2013,
+                name: '2013',
                 type: 'bar',
-                marker: { color: 'darkblue' }
+                marker: { color: '#7CC7E8' }
+            },
+            {
+                x: religions,
+                y: values2018,
+                name: '2018',
+                type: 'bar',
+                marker: { color: '#1F77B4' }
             }
         ];
         
         const layout = {
-            title: `Religious Affiliation in ${regionName}`,
+            title: `Religious Change Timeline - ${regionName}`,
             xaxis: { title: 'Religion' },
             yaxis: { title: 'Number of People' },
             barmode: 'group',

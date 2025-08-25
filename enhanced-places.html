@@ -152,15 +152,6 @@
             gap: 15px;
         }
         
-        .year-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .year-control input[type="range"] {
-            flex: 1;
-        }
         
         #map {
             height: calc(100vh - 280px);
@@ -515,15 +506,6 @@
             </select>
         </div>
         
-        <div class="control-group">
-            <label for="yearSlider">Census Year:</label>
-            <div class="year-control">
-                <span>2006</span>
-                <input type="range" id="yearSlider" min="2006" max="2018" step="6" value="2018">
-                <span>2018</span>
-                <strong id="currentYear">2018</strong>
-            </div>
-        </div>
     </div>
     
     <div id="map"></div>
