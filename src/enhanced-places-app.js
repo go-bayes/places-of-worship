@@ -141,6 +141,7 @@ class EnhancedPlacesOfWorshipApp {
         censusMetricSelect.addEventListener('change', (e) => {
             this.currentCensusMetric = e.target.value;
             this.updateCensusVisualization();
+            this.updateDemographicLegend();
         });
         
         // Map style selector
@@ -434,8 +435,10 @@ class EnhancedPlacesOfWorshipApp {
     toggleCensusOverlay() {
         if (this.showCensusOverlay) {
             this.addCensusOverlay();
+            this.updateDemographicLegend();
         } else {
             this.removeCensusOverlay();
+            this.hideDemographicLegend();
         }
     }
     
@@ -472,6 +475,7 @@ class EnhancedPlacesOfWorshipApp {
         if (this.showCensusOverlay) {
             this.removeCensusOverlay();
             this.addCensusOverlay();
+            this.updateDemographicLegend();
         }
     }
     
@@ -1141,6 +1145,197 @@ class EnhancedPlacesOfWorshipApp {
                 Plotly.newPlot(chartContainer, plotData, layout, {displayModeBar: false});
             }
         }, 100); // Small delay to ensure popup is fully rendered
+    }
+    
+    updateDemographicLegend() {
+        const legendSection = document.getElementById('demographicLegend');
+        const legendTitle = document.getElementById('demographicLegendTitle');
+        const legendContent = document.getElementById('demographicLegendContent');
+        
+        if (!this.showCensusOverlay) {
+            legendSection.style.display = 'none';
+            return;
+        }
+        
+        legendSection.style.display = 'block';
+        
+        // Update title and content based on current metric
+        const legendData = this.getDemographicLegendData();
+        legendTitle.textContent = legendData.title;
+        legendContent.innerHTML = legendData.content;
+    }
+    
+    hideDemographicLegend() {
+        const legendSection = document.getElementById('demographicLegend');
+        legendSection.style.display = 'none';
+    }
+    
+    getDemographicLegendData() {
+        switch (this.currentCensusMetric) {
+            case 'no_religion_change':
+                return {
+                    title: 'No Religion Change (2006-2018)',
+                    content: `
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: purple; width: 12px; height: 12px;"></div>
+                            More Religious (&lt;-1%)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: lightgray; width: 12px; height: 12px;"></div>
+                            Stable (-1% to +1%)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: orange; width: 12px; height: 12px;"></div>
+                            Less Religious (&gt;+1%)
+                        </div>
+                    `
+                };
+            
+            case 'christian_change':
+                return {
+                    title: 'Christian Change (2006-2018)',
+                    content: `
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #2E8B57; width: 12px; height: 12px;"></div>
+                            More Christian (&gt;+1%)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: lightgray; width: 12px; height: 12px;"></div>
+                            Stable (-1% to +1%)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #B22222; width: 12px; height: 12px;"></div>
+                            Less Christian (&lt;-1%)
+                        </div>
+                    `
+                };
+            
+            case 'median_age':
+                return {
+                    title: 'Median Age',
+                    content: `
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #FFE5E5; width: 12px; height: 12px;"></div>
+                            Very Young (&lt;30)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #FFB3B3; width: 12px; height: 12px;"></div>
+                            Young (30-35)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #FFE5CC; width: 12px; height: 12px;"></div>
+                            Middle (35-45)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #FFCC99; width: 12px; height: 12px;"></div>
+                            Middle-Older (45-50)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #FF9966; width: 12px; height: 12px;"></div>
+                            Older (&gt;50)
+                        </div>
+                    `
+                };
+            
+            case 'population_density':
+                return {
+                    title: 'Population Density (per km²)',
+                    content: `
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #E8F5E8; width: 12px; height: 12px;"></div>
+                            Very Low (&lt;10)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #C8E6C9; width: 12px; height: 12px;"></div>
+                            Low (10-50)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #A5D6A7; width: 12px; height: 12px;"></div>
+                            Medium (50-100)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #FFCC80; width: 12px; height: 12px;"></div>
+                            High (100-1000)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #FF8A65; width: 12px; height: 12px;"></div>
+                            Very High (1000-2000)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #D32F2F; width: 12px; height: 12px;"></div>
+                            Extreme (&gt;2000)
+                        </div>
+                    `
+                };
+            
+            case 'income_level':
+                return {
+                    title: 'Average Income Level',
+                    content: `
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #FFCDD2; width: 12px; height: 12px;"></div>
+                            Low (&lt;$40k)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #FFE0B2; width: 12px; height: 12px;"></div>
+                            Medium-Low ($40k-$60k)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #FFF9C4; width: 12px; height: 12px;"></div>
+                            Medium ($60k-$80k)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #C8E6C9; width: 12px; height: 12px;"></div>
+                            Medium-High ($80k-$100k)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #4CAF50; width: 12px; height: 12px;"></div>
+                            High ($100k-$130k)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #2E7D32; width: 12px; height: 12px;"></div>
+                            Very High (&gt;$130k)
+                        </div>
+                    `
+                };
+            
+            case 'unemployment_rate':
+                return {
+                    title: 'Unemployment Rate',
+                    content: `
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #E8F5E8; width: 12px; height: 12px;"></div>
+                            Very Low (&lt;2%)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #C8E6C9; width: 12px; height: 12px;"></div>
+                            Low (2-4%)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #FFF9C4; width: 12px; height: 12px;"></div>
+                            Medium (4-6%)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #FFE0B2; width: 12px; height: 12px;"></div>
+                            Medium-High (6-8%)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #FFCC80; width: 12px; height: 12px;"></div>
+                            High (8-12%)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background-color: #D32F2F; width: 12px; height: 12px;"></div>
+                            Very High (&gt;12%)
+                        </div>
+                    `
+                };
+            
+            default:
+                return {
+                    title: 'Demographic Overlay',
+                    content: '<div class="legend-item">Overlay active - colors represent selected metric</div>'
+                };
+        }
     }
 }
 
