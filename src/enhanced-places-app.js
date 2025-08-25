@@ -726,10 +726,50 @@ class EnhancedPlacesOfWorshipApp {
             const data2013 = taData[String(2013)]?.[religion] || 0;  
             const data2018 = taData[String(2018)]?.[religion] || 0;
             
-            const trend = data2018 > data2006 ? '↗' : data2018 < data2006 ? '↘' : '→';
-            const trendColor = data2018 > data2006 ? 'green' : data2018 < data2006 ? 'red' : 'gray';
+            const total2006 = taData[String(2006)]?.['Total stated'] || 0;
+            const total2013 = taData[String(2013)]?.['Total stated'] || 0;
+            const total2018 = taData[String(2018)]?.['Total stated'] || 0;
             
-            popupContent += `<p><strong>${religion}:</strong> ${data2006.toLocaleString()} → ${data2013.toLocaleString()} → ${data2018.toLocaleString()} <span style="color: ${trendColor};">${trend}</span></p>`;
+            if (total2006 > 0 && total2018 > 0) {
+                // Calculate percentages
+                const pct2006 = (data2006 / total2006 * 100);
+                const pct2013 = (data2013 / total2013 * 100);
+                const pct2018 = (data2018 / total2018 * 100);
+                
+                // Calculate proportional changes
+                const pointChange = pct2018 - pct2006; // Percentage point change
+                const relativeChange = pct2006 > 0 ? ((pct2018 - pct2006) / pct2006 * 100) : 0; // Relative change
+                
+                // Determine trend and colors
+                const trend = pointChange > 0.5 ? '↗' : pointChange < -0.5 ? '↘' : '→';
+                const trendColor = pointChange > 0.5 ? 'green' : pointChange < -0.5 ? 'red' : 'gray';
+                const changeColor = pointChange > 0 ? '#2E8B57' : pointChange < 0 ? '#CD5C5C' : '#666';
+                
+                // Format the proportional change display
+                const changeText = Math.abs(pointChange) > 0.1 ? 
+                    `<span style="color: ${changeColor}; font-weight: bold;">
+                        ${pointChange > 0 ? '+' : ''}${pointChange.toFixed(1)} points
+                        ${Math.abs(relativeChange) > 1 ? ` (${relativeChange > 0 ? '+' : ''}${relativeChange.toFixed(0)}%)` : ''}
+                    </span>` : 
+                    '<span style="color: #666;">stable</span>';
+                
+                popupContent += `
+                    <p><strong>${religion}:</strong><br>
+                    <span style="font-size: 0.9em;">
+                        ${pct2006.toFixed(1)}% → ${pct2013.toFixed(1)}% → ${pct2018.toFixed(1)}% 
+                        <span style="color: ${trendColor};">${trend}</span>
+                    </span><br>
+                    <span style="font-size: 0.85em; color: #555;">
+                        Change 2006-2018: ${changeText}
+                    </span>
+                    </p>`;
+            } else {
+                // Fallback to absolute numbers if percentages can't be calculated
+                const trend = data2018 > data2006 ? '↗' : data2018 < data2006 ? '↘' : '→';
+                const trendColor = data2018 > data2006 ? 'green' : data2018 < data2006 ? 'red' : 'gray';
+                
+                popupContent += `<p><strong>${religion}:</strong> ${data2006.toLocaleString()} → ${data2013.toLocaleString()} → ${data2018.toLocaleString()} <span style="color: ${trendColor};">${trend}</span></p>`;
+            }
         });
         
         // Add chart placeholder for histogram
@@ -1014,10 +1054,50 @@ class EnhancedPlacesOfWorshipApp {
             const data2013 = saData[String(2013)]?.[religion] || 0;  
             const data2018 = saData[String(2018)]?.[religion] || 0;
             
-            const trend = data2018 > data2006 ? '↗' : data2018 < data2006 ? '↘' : '→';
-            const trendColor = data2018 > data2006 ? 'green' : data2018 < data2006 ? 'red' : 'gray';
+            const total2006 = saData[String(2006)]?.['Total stated'] || 0;
+            const total2013 = saData[String(2013)]?.['Total stated'] || 0;
+            const total2018 = saData[String(2018)]?.['Total stated'] || 0;
             
-            popupContent += `<p><strong>${religion}:</strong> ${data2006.toLocaleString()} → ${data2013.toLocaleString()} → ${data2018.toLocaleString()} <span style="color: ${trendColor};">${trend}</span></p>`;
+            if (total2006 > 0 && total2018 > 0) {
+                // Calculate percentages
+                const pct2006 = (data2006 / total2006 * 100);
+                const pct2013 = (data2013 / total2013 * 100);
+                const pct2018 = (data2018 / total2018 * 100);
+                
+                // Calculate proportional changes
+                const pointChange = pct2018 - pct2006; // Percentage point change
+                const relativeChange = pct2006 > 0 ? ((pct2018 - pct2006) / pct2006 * 100) : 0; // Relative change
+                
+                // Determine trend and colors
+                const trend = pointChange > 0.5 ? '↗' : pointChange < -0.5 ? '↘' : '→';
+                const trendColor = pointChange > 0.5 ? 'green' : pointChange < -0.5 ? 'red' : 'gray';
+                const changeColor = pointChange > 0 ? '#2E8B57' : pointChange < 0 ? '#CD5C5C' : '#666';
+                
+                // Format the proportional change display
+                const changeText = Math.abs(pointChange) > 0.1 ? 
+                    `<span style="color: ${changeColor}; font-weight: bold;">
+                        ${pointChange > 0 ? '+' : ''}${pointChange.toFixed(1)} points
+                        ${Math.abs(relativeChange) > 1 ? ` (${relativeChange > 0 ? '+' : ''}${relativeChange.toFixed(0)}%)` : ''}
+                    </span>` : 
+                    '<span style="color: #666;">stable</span>';
+                
+                popupContent += `
+                    <p><strong>${religion}:</strong><br>
+                    <span style="font-size: 0.9em;">
+                        ${pct2006.toFixed(1)}% → ${pct2013.toFixed(1)}% → ${pct2018.toFixed(1)}% 
+                        <span style="color: ${trendColor};">${trend}</span>
+                    </span><br>
+                    <span style="font-size: 0.85em; color: #555;">
+                        Change 2006-2018: ${changeText}
+                    </span>
+                    </p>`;
+            } else {
+                // Fallback to absolute numbers if percentages can't be calculated
+                const trend = data2018 > data2006 ? '↗' : data2018 < data2006 ? '↘' : '→';
+                const trendColor = data2018 > data2006 ? 'green' : data2018 < data2006 ? 'red' : 'gray';
+                
+                popupContent += `<p><strong>${religion}:</strong> ${data2006.toLocaleString()} → ${data2013.toLocaleString()} → ${data2018.toLocaleString()} <span style="color: ${trendColor};">${trend}</span></p>`;
+            }
         });
         
         // Add histogram placeholder
