@@ -224,8 +224,28 @@ class EnhancedPlacesOfWorshipApp {
                 places: this.placesData.length,
                 censusRegions: Object.keys(this.censusData).length,
                 demographicRegions: Object.keys(this.demographicData).length,
-                boundaries: this.boundariesData.features.length
+                boundaries: this.boundariesData.features.length,
+                territorialAuthorityFeatures: this.territorialAuthorityData.features.length,
+                taCensusRegions: Object.keys(this.taCensusData).length
             });
+            
+            // Debug: Show sample SA2 properties and keys
+            if (this.boundariesData.features.length > 0) {
+                console.log('Sample SA2 boundary properties:', this.boundariesData.features[0].properties);
+            }
+            if (Object.keys(this.censusData).length > 0) {
+                const firstCensusKey = Object.keys(this.censusData)[0];
+                console.log(`Sample SA2 census data key: ${firstCensusKey}`, this.censusData[firstCensusKey]);
+            }
+            
+            // Debug: Show sample TA properties and keys
+            if (this.territorialAuthorityData.features.length > 0) {
+                console.log('Sample TA boundary properties:', this.territorialAuthorityData.features[0].properties);
+            }
+            if (Object.keys(this.taCensusData).length > 0) {
+                const firstTaKey = Object.keys(this.taCensusData)[0];
+                console.log(`Sample TA census data key: ${firstTaKey}`, this.taCensusData[firstTaKey]);
+            }
             
             // Populate filter dropdowns
             this.populateFilterDropdowns();
@@ -532,9 +552,25 @@ class EnhancedPlacesOfWorshipApp {
         
         const color = this.calculateCensusColor(regionCode);
         
+        // Reduced logging - only show first few regions and any issues
+        if (!this._loggedRegionCount) this._loggedRegionCount = 0;
+        if (this._loggedRegionCount < 3 || color === 'gray') {
+            console.log('Census overlay:', {
+                boundaryType: this.useDetailedBoundaries ? 'SA2' : 'TA',
+                regionCode: regionCode,
+                color: color,
+                isGray: color === 'gray'
+            });
+            this._loggedRegionCount++;
+        }
+        
+        // Make boundaries always visible with neutral styling when data is missing
+        const fillColor = color === 'gray' ? '#f0f0f0' : color;
+        const fillOpacity = color === 'gray' ? 0.1 : 0.3;
+        
         return {
-            fillColor: color === 'gray' ? 'transparent' : color,
-            fillOpacity: color === 'gray' ? 0 : 0.3,
+            fillColor: fillColor,
+            fillOpacity: fillOpacity,
             weight: 1,
             color: this.useDetailedBoundaries ? "#666666" : "#333333",
             opacity: this.useDetailedBoundaries ? 0.4 : 0.6
@@ -551,7 +587,23 @@ class EnhancedPlacesOfWorshipApp {
             regionData = this.taCensusData[regionCodeStr];
         }
         
-        if (!regionData) return "gray";
+        if (!regionData) {
+            // Only log missing data issues, not every lookup
+            if (!this._loggedMissingData) {
+                this._loggedMissingData = new Set();
+            }
+            if (!this._loggedMissingData.has(regionCodeStr)) {
+                console.log(`Missing ${this.useDetailedBoundaries ? 'SA2' : 'TA'} data for region: ${regionCodeStr}`);
+                this._loggedMissingData.add(regionCodeStr);
+                
+                // Show available keys once
+                if (this._loggedMissingData.size === 1) {
+                    const dataset = this.useDetailedBoundaries ? this.censusData : this.taCensusData;
+                    console.log(`Available keys:`, Object.keys(dataset).slice(0, 10));
+                }
+            }
+            return "gray";
+        }
         
         // Use demographic data if available, fallback to census data
         let dataSource;
@@ -561,32 +613,55 @@ class EnhancedPlacesOfWorshipApp {
             dataSource = regionData; // TA data doesn't need demographic fallback for now
         }
         
+        let calculatedColor;
         switch (this.currentCensusMetric) {
             case 'no_religion_change':
-                return this.calculateNoReligionChangeColor(dataSource);
+                calculatedColor = this.calculateNoReligionChangeColor(dataSource);
+                break;
             case 'christian_change':
-                return this.calculateChristianChangeColor(dataSource);
+                calculatedColor = this.calculateChristianChangeColor(dataSource);
+                break;
             case 'total_population':
-                return this.calculatePopulationColor(dataSource);
+                calculatedColor = this.calculatePopulationColor(dataSource);
+                break;
             case 'diversity_index':
-                return this.calculateDiversityColor(dataSource);
+                calculatedColor = this.calculateDiversityColor(dataSource);
+                break;
             case 'median_age':
-                return this.calculateMedianAgeColor(dataSource);
+                calculatedColor = this.calculateMedianAgeColor(dataSource);
+                break;
             case 'gender_ratio':
-                return this.calculateGenderRatioColor(dataSource);
+                calculatedColor = this.calculateGenderRatioColor(dataSource);
+                break;
             case 'ethnicity_diversity':
-                return this.calculateEthnicityDiversityColor(dataSource);
+                calculatedColor = this.calculateEthnicityDiversityColor(dataSource);
+                break;
             case 'income_level':
-                return this.calculateIncomeLevelColor(dataSource);
+                calculatedColor = this.calculateIncomeLevelColor(dataSource);
+                break;
             case 'population_density':
-                return this.calculatePopulationDensityColor(dataSource);
+                calculatedColor = this.calculatePopulationDensityColor(dataSource);
+                break;
             case 'unemployment_rate':
-                return this.calculateUnemploymentColor(dataSource);
+                calculatedColor = this.calculateUnemploymentColor(dataSource);
+                break;
             case 'home_ownership':
-                return this.calculateHomeOwnershipColor(dataSource);
+                calculatedColor = this.calculateHomeOwnershipColor(dataSource);
+                break;
             default:
-                return "gray";
+                calculatedColor = "gray";
         }
+        
+        // Only log if calculation failed
+        if (calculatedColor === 'gray' && !this._loggedMetricFailures) {
+            this._loggedMetricFailures = new Set();
+        }
+        if (calculatedColor === 'gray' && !this._loggedMetricFailures.has(this.currentCensusMetric)) {
+            console.log(`Metric ${this.currentCensusMetric} returned gray - check data structure`);
+            console.log('Sample dataSource:', dataSource);
+            this._loggedMetricFailures.add(this.currentCensusMetric);
+        }
+        return calculatedColor;
     }
     
     calculateNoReligionChangeColor(saData) {
