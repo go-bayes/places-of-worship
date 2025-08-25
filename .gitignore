@@ -102,6 +102,8 @@ research_data/
 # EXCEPTIONS: Allow small essential files for GitHub Pages deployment
 !data/nz_places.geojson
 !data/sa2.geojson
+!ta_boundaries.geojson
+!sa2.geojson
 
 # Geographic and spatial data files
 *.geojson

@@ -195,7 +195,7 @@ class EnhancedPlacesOfWorshipApp {
                 fetch('./src/religion.json'),
                 fetch('./src/demographics.json'),
                 fetch('./sa2.geojson'),
-                fetch('./nz_territorial_authorities_simplified.geojson?v=' + Date.now()),
+                fetch('./ta_boundaries.geojson'),
                 fetch('./ta_aggregated_data.json')
             ]);
             
