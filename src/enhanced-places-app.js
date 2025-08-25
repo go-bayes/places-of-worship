@@ -137,12 +137,6 @@ class EnhancedPlacesOfWorshipApp {
             }
         });
         
-        // Geographic resolution toggle
-        const geographicToggle = document.getElementById('geographicResolutionToggle');
-        geographicToggle.addEventListener('change', (e) => {
-            this.useDetailedBoundaries = !e.target.checked;
-            this.updateGeographicResolution();
-        });
         
         // Census metric selector
         const censusMetricSelect = document.getElementById('censusMetricSelect');
@@ -229,23 +223,6 @@ class EnhancedPlacesOfWorshipApp {
                 taCensusRegions: Object.keys(this.taCensusData).length
             });
             
-            // Debug: Show sample SA2 properties and keys
-            if (this.boundariesData.features.length > 0) {
-                console.log('Sample SA2 boundary properties:', this.boundariesData.features[0].properties);
-            }
-            if (Object.keys(this.censusData).length > 0) {
-                const firstCensusKey = Object.keys(this.censusData)[0];
-                console.log(`Sample SA2 census data key: ${firstCensusKey}`, this.censusData[firstCensusKey]);
-            }
-            
-            // Debug: Show sample TA properties and keys
-            if (this.territorialAuthorityData.features.length > 0) {
-                console.log('Sample TA boundary properties:', this.territorialAuthorityData.features[0].properties);
-            }
-            if (Object.keys(this.taCensusData).length > 0) {
-                const firstTaKey = Object.keys(this.taCensusData)[0];
-                console.log(`Sample TA census data key: ${firstTaKey}`, this.taCensusData[firstTaKey]);
-            }
             
             // Populate filter dropdowns
             this.populateFilterDropdowns();
@@ -499,10 +476,9 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     addCensusOverlay() {
-        const boundariesData = this.useDetailedBoundaries ? this.boundariesData : this.territorialAuthorityData;
-        if (!boundariesData || this.censusLayer) return;
+        if (!this.boundariesData || this.censusLayer) return;
         
-        this.censusLayer = L.geoJSON(boundariesData, {
+        this.censusLayer = L.geoJSON(this.boundariesData, {
             style: (feature) => this.getCensusFeatureStyle(feature),
             onEachFeature: (feature, layer) => this.onEachCensusFeature(feature, layer)
         });
@@ -518,22 +494,6 @@ class EnhancedPlacesOfWorshipApp {
         }
     }
     
-    updateGeographicResolution() {
-        // Update the label
-        const label = document.getElementById('geographicResolutionLabel');
-        if (this.useDetailedBoundaries) {
-            label.textContent = 'Statistical Areas (Detailed)';
-        } else {
-            label.textContent = 'Territorial Authorities (Regional)';
-        }
-        
-        // Refresh census overlay if it's currently shown
-        if (this.showCensusOverlay) {
-            this.removeCensusOverlay();
-            this.addCensusOverlay();
-            this.updateDemographicLegend();
-        }
-    }
     
     updateCensusVisualization() {
         if (this.censusLayer) {
@@ -542,126 +502,52 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     getCensusFeatureStyle(feature) {
-        // Get the appropriate region code based on boundary type
-        let regionCode;
-        if (this.useDetailedBoundaries) {
-            regionCode = String(feature.properties.SA22018_V1_00); // SA2 code
-        } else {
-            regionCode = String(feature.properties.TA2025_V1 || feature.properties.TA2025_NAME); // TA code or name
-        }
-        
-        const color = this.calculateCensusColor(regionCode);
-        
-        // Reduced logging - only show first few regions and any issues
-        if (!this._loggedRegionCount) this._loggedRegionCount = 0;
-        if (this._loggedRegionCount < 3 || color === 'gray') {
-            console.log('Census overlay:', {
-                boundaryType: this.useDetailedBoundaries ? 'SA2' : 'TA',
-                regionCode: regionCode,
-                color: color,
-                isGray: color === 'gray'
-            });
-            this._loggedRegionCount++;
-        }
-        
-        // Make boundaries always visible with neutral styling when data is missing
-        const fillColor = color === 'gray' ? '#f0f0f0' : color;
-        const fillOpacity = color === 'gray' ? 0.1 : 0.3;
+        const sa2Code = String(feature.properties.SA22018_V1_00); // Convert to string
+        const color = this.calculateCensusColor(sa2Code);
         
         return {
-            fillColor: fillColor,
-            fillOpacity: fillOpacity,
+            fillColor: 'transparent',
+            fillOpacity: 0,
             weight: 1,
-            color: this.useDetailedBoundaries ? "#666666" : "#333333",
-            opacity: this.useDetailedBoundaries ? 0.4 : 0.6
+            color: "#666666",
+            opacity: 0.4
         };
     }
     
-    calculateCensusColor(regionCode) {
-        const regionCodeStr = String(regionCode); // Ensure string format
-        let regionData;
-        
-        if (this.useDetailedBoundaries) {
-            regionData = this.censusData[regionCodeStr];
-        } else {
-            regionData = this.taCensusData[regionCodeStr];
-        }
-        
-        if (!regionData) {
-            // Only log missing data issues, not every lookup
-            if (!this._loggedMissingData) {
-                this._loggedMissingData = new Set();
-            }
-            if (!this._loggedMissingData.has(regionCodeStr)) {
-                console.log(`Missing ${this.useDetailedBoundaries ? 'SA2' : 'TA'} data for region: ${regionCodeStr}`);
-                this._loggedMissingData.add(regionCodeStr);
-                
-                // Show available keys once
-                if (this._loggedMissingData.size === 1) {
-                    const dataset = this.useDetailedBoundaries ? this.censusData : this.taCensusData;
-                    console.log(`Available keys:`, Object.keys(dataset).slice(0, 10));
-                }
-            }
-            return "gray";
-        }
+    calculateCensusColor(sa2Code) {
+        const sa2CodeStr = String(sa2Code); // Ensure string format
+        const saData = this.censusData[sa2CodeStr];
+        if (!saData) return "gray";
         
         // Use demographic data if available, fallback to census data
-        let dataSource;
-        if (this.useDetailedBoundaries) {
-            dataSource = this.demographicData[regionCodeStr] || regionData;
-        } else {
-            dataSource = regionData; // TA data doesn't need demographic fallback for now
-        }
+        const dataSource = this.demographicData[sa2CodeStr] || saData;
         
-        let calculatedColor;
         switch (this.currentCensusMetric) {
             case 'no_religion_change':
-                calculatedColor = this.calculateNoReligionChangeColor(dataSource);
-                break;
+                return this.calculateNoReligionChangeColor(dataSource);
             case 'christian_change':
-                calculatedColor = this.calculateChristianChangeColor(dataSource);
-                break;
+                return this.calculateChristianChangeColor(dataSource);
             case 'total_population':
-                calculatedColor = this.calculatePopulationColor(dataSource);
-                break;
+                return this.calculatePopulationColor(dataSource);
             case 'diversity_index':
-                calculatedColor = this.calculateDiversityColor(dataSource);
-                break;
+                return this.calculateDiversityColor(dataSource);
             case 'median_age':
-                calculatedColor = this.calculateMedianAgeColor(dataSource);
-                break;
+                return this.calculateMedianAgeColor(dataSource);
             case 'gender_ratio':
-                calculatedColor = this.calculateGenderRatioColor(dataSource);
-                break;
+                return this.calculateGenderRatioColor(dataSource);
             case 'ethnicity_diversity':
-                calculatedColor = this.calculateEthnicityDiversityColor(dataSource);
-                break;
+                return this.calculateEthnicityDiversityColor(dataSource);
             case 'income_level':
-                calculatedColor = this.calculateIncomeLevelColor(dataSource);
-                break;
+                return this.calculateIncomeLevelColor(dataSource);
             case 'population_density':
-                calculatedColor = this.calculatePopulationDensityColor(dataSource);
-                break;
+                return this.calculatePopulationDensityColor(dataSource);
             case 'unemployment_rate':
-                calculatedColor = this.calculateUnemploymentColor(dataSource);
-                break;
+                return this.calculateUnemploymentColor(dataSource);
             case 'home_ownership':
-                calculatedColor = this.calculateHomeOwnershipColor(dataSource);
-                break;
+                return this.calculateHomeOwnershipColor(dataSource);
             default:
-                calculatedColor = "gray";
+                return "gray";
         }
-        
-        // Only log if calculation failed
-        if (calculatedColor === 'gray' && !this._loggedMetricFailures) {
-            this._loggedMetricFailures = new Set();
-        }
-        if (calculatedColor === 'gray' && !this._loggedMetricFailures.has(this.currentCensusMetric)) {
-            console.log(`Metric ${this.currentCensusMetric} returned gray - check data structure`);
-            console.log('Sample dataSource:', dataSource);
-            this._loggedMetricFailures.add(this.currentCensusMetric);
-        }
-        return calculatedColor;
     }
     
     calculateNoReligionChangeColor(saData) {
@@ -873,26 +759,16 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     onEachCensusFeature(feature, layer) {
-        // Get the appropriate region code and data based on boundary type
-        let regionCode, regionData, regionName;
+        const sa2Code = String(feature.properties.SA22018_V1_00); // Convert to string
+        const saData = this.censusData[sa2Code];
         
-        if (this.useDetailedBoundaries) {
-            regionCode = String(feature.properties.SA22018_V1_00);
-            regionData = this.censusData[regionCode];
-            regionName = feature.properties.SA22018_V1_NAME;
-        } else {
-            regionCode = String(feature.properties.TA2025_V1 || feature.properties.TA2025_NAME);
-            regionData = this.taCensusData[regionCode];
-            regionName = feature.properties.TA2025_NAME;
-        }
-        
-        if (regionData) {
-            const popupContent = this.createCensusPopupContent(feature.properties, regionData);
+        if (saData) {
+            const popupContent = this.createCensusPopupContent(feature.properties, saData);
             layer.bindPopup(popupContent, {minWidth: 700, maxWidth: 800});
             
             // Add popup event handler for creating histogram
             layer.on('popupopen', (e) => {
-                this.createReligiousHistogram(regionData, regionName);
+                this.createReligiousHistogram(saData, feature.properties.SA22018_V1_NAME);
             });
             
             // Add hover effects like age_map
@@ -923,24 +799,15 @@ class EnhancedPlacesOfWorshipApp {
         }
     }
     
-    createCensusPopupContent(properties, regionData) {
-        let regionCode, regionName;
-        
-        if (this.useDetailedBoundaries) {
-            regionCode = String(properties.SA22018_V1_00);
-            regionName = properties.SA22018_V1_NAME;
-        } else {
-            regionCode = String(properties.TA2025_V1 || properties.TA2025_NAME);
-            regionName = properties.TA2025_NAME;
-        }
-        
+    createCensusPopupContent(properties, saData) {
+        const sa2Code = String(properties.SA22018_V1_00);
         // Get data for latest year (2018) for basic info
-        const latestData = regionData[String(2018)] || {};
+        const latestData = saData[String(2018)] || {};
         
         let popupContent = `
             <div class="census-popup">
-                <h3>${regionName}</h3>
-                <p><strong>${this.useDetailedBoundaries ? 'SA2' : 'TA'} Code:</strong> ${regionCode}</p>
+                <h3>${properties.SA22018_V1_NAME}</h3>
+                <p><strong>SA2 Code:</strong> ${sa2Code}</p>
                 <p><strong>Census Timeline:</strong> 2006 → 2013 → 2018</p>
         `;
         
@@ -954,9 +821,9 @@ class EnhancedPlacesOfWorshipApp {
         const keyReligions = ['Christian', 'No religion', 'Buddhism', 'Hinduism', 'Islam'];
         
         keyReligions.forEach(religion => {
-            const data2006 = regionData[String(2006)]?.[religion] || 0;
-            const data2013 = regionData[String(2013)]?.[religion] || 0;  
-            const data2018 = regionData[String(2018)]?.[religion] || 0;
+            const data2006 = saData[String(2006)]?.[religion] || 0;
+            const data2013 = saData[String(2013)]?.[religion] || 0;  
+            const data2018 = saData[String(2018)]?.[religion] || 0;
             
             const trend = data2018 > data2006 ? '↗' : data2018 < data2006 ? '↘' : '→';
             const trendColor = data2018 > data2006 ? 'green' : data2018 < data2006 ? 'red' : 'gray';
@@ -1172,13 +1039,13 @@ class EnhancedPlacesOfWorshipApp {
         });
     }
     
-    createReligiousHistogram(regionData, regionName) {
+    createReligiousHistogram(saData, regionName) {
         // Create comprehensive 3-year religious timeline histogram using Plotly
         const religions = ['Christian', 'No religion', 'Buddhism', 'Hinduism', 'Islam', 'Judaism', 'Sikhism'];
         
-        const data2006 = regionData[String(2006)] || {};
-        const data2013 = regionData[String(2013)] || {};
-        const data2018 = regionData[String(2018)] || {};
+        const data2006 = saData[String(2006)] || {};
+        const data2013 = saData[String(2013)] || {};
+        const data2018 = saData[String(2018)] || {};
         
         const values2006 = religions.map(religion => data2006[religion] || 0);
         const values2013 = religions.map(religion => data2013[religion] || 0);
