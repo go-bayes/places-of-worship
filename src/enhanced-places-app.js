@@ -713,7 +713,7 @@ class EnhancedPlacesOfWorshipApp {
         
         if (saData) {
             const popupContent = this.createCensusPopupContent(feature.properties, saData);
-            layer.bindPopup(popupContent, {minWidth: 600});
+            layer.bindPopup(popupContent, {minWidth: 700, maxWidth: 800});
             
             // Add popup event handler for creating histogram
             layer.on('popupopen', (e) => {
@@ -781,7 +781,7 @@ class EnhancedPlacesOfWorshipApp {
         });
         
         // Add histogram placeholder
-        popupContent += `<div id="religion-chart" style="width: 100%; height: 300px; margin-top: 10px;"></div>`;
+        popupContent += `<div id="religion-chart" style="width: 100%; height: 450px; margin-top: 15px; border: 1px solid #ddd; border-radius: 5px;"></div>`;
         
         // Get comprehensive demographic data from latest year (2018)
         const demographicData = this.demographicData[sa2Code];
@@ -1000,37 +1000,69 @@ class EnhancedPlacesOfWorshipApp {
         const values2013 = religions.map(religion => data2013[religion] || 0);
         const values2018 = religions.map(religion => data2018[religion] || 0);
         
+        // Debug: check data availability
+        console.log('Histogram data for', regionName);
+        console.log('2006 values:', values2006);
+        console.log('2013 values:', values2013);  
+        console.log('2018 values:', values2018);
+        
         const plotData = [
             {
                 x: religions,
                 y: values2006,
-                name: '2006',
+                name: '2006 Census',
                 type: 'bar',
-                marker: { color: '#E8F4FD' }
+                marker: { 
+                    color: '#B3D9FF',
+                    line: { color: '#4A90E2', width: 1 }
+                },
+                hovertemplate: '<b>%{x}</b><br>2006: %{y}<extra></extra>'
             },
             {
                 x: religions,
                 y: values2013,
-                name: '2013',
+                name: '2013 Census',
                 type: 'bar',
-                marker: { color: '#7CC7E8' }
+                marker: { 
+                    color: '#7CC7E8',
+                    line: { color: '#5DADE2', width: 1 }
+                },
+                hovertemplate: '<b>%{x}</b><br>2013: %{y}<extra></extra>'
             },
             {
                 x: religions,
                 y: values2018,
-                name: '2018',
+                name: '2018 Census',
                 type: 'bar',
-                marker: { color: '#1F77B4' }
+                marker: { 
+                    color: '#1F77B4',
+                    line: { color: '#154A8A', width: 1 }
+                },
+                hovertemplate: '<b>%{x}</b><br>2018: %{y}<extra></extra>'
             }
         ];
         
         const layout = {
-            title: `Religious Change Timeline - ${regionName}`,
-            xaxis: { title: 'Religion' },
-            yaxis: { title: 'Number of People' },
+            title: {
+                text: `Religious Change Timeline - ${regionName}`,
+                font: { size: 16 }
+            },
+            xaxis: { 
+                title: 'Religion',
+                tickangle: -45
+            },
+            yaxis: { 
+                title: 'Number of People'
+            },
             barmode: 'group',
-            height: 300,
-            margin: { l: 60, r: 20, t: 60, b: 60 }
+            height: 420,
+            margin: { l: 70, r: 30, t: 70, b: 80 },
+            showlegend: true,
+            legend: {
+                orientation: "h",
+                x: 0.1,
+                y: 1.1
+            }
         };
         
         // Create the plot in the popup
