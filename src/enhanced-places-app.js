@@ -195,7 +195,7 @@ class EnhancedPlacesOfWorshipApp {
                 fetch('./src/religion.json'),
                 fetch('./src/demographics.json'),
                 fetch('./sa2.geojson'),
-                fetch('./nz_territorial_authorities_simplified.geojson'),
+                fetch('./nz_territorial_authorities_simplified.geojson?v=' + Date.now()),
                 fetch('./ta_aggregated_data.json')
             ]);
             
@@ -243,6 +243,24 @@ class EnhancedPlacesOfWorshipApp {
                 territorialAuthorityFeatures: this.territorialAuthorityData.features.length,
                 taCensusRegions: Object.keys(this.taCensusData).length
             });
+            
+            // Debug TA boundaries - check if they're real or rectangular
+            if (this.territorialAuthorityData.features.length > 0) {
+                const firstTA = this.territorialAuthorityData.features[0];
+                const coords = firstTA.geometry.coordinates[0];
+                if (coords && coords.length > 0) {
+                    const ring = coords[0];
+                    console.log('First TA (' + firstTA.properties.TA2025_NAME + ') has', ring.length, 'coordinate points');
+                    console.log('Sample coordinates:', ring.slice(0, 3));
+                    
+                    // Check if it's a rectangle (4-5 points with very simple coordinates)
+                    if (ring.length <= 5) {
+                        console.warn('WARNING: TA boundaries appear to be rectangles!');
+                    } else {
+                        console.log('✓ TA boundaries appear to be real geographic shapes');
+                    }
+                }
+            }
             
             
             // Populate filter dropdowns
