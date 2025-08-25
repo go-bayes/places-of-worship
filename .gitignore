@@ -103,6 +103,7 @@ research_data/
 !data/nz_places.geojson
 !data/sa2.geojson
 !ta_boundaries.geojson
+!territorial_authorities.geojson
 !sa2.geojson
 
 # Geographic and spatial data files

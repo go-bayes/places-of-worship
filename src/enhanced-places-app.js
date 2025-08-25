@@ -190,12 +190,19 @@ class EnhancedPlacesOfWorshipApp {
             console.log('Starting to load data files...');
             
             // Load places, census, and comprehensive demographic data
+            console.log('Attempting to fetch TA boundaries from: ./territorial_authorities.geojson');
+            
             const [placesResponse, censusResponse, demographicResponse, boundariesResponse, territorialAuthorityResponse, taCensusResponse] = await Promise.all([
                 fetch('./src/nz_places.json'),
                 fetch('./src/religion.json'),
                 fetch('./src/demographics.json'),
                 fetch('./sa2.geojson'),
-                fetch('./ta_boundaries.geojson'),
+                fetch('./territorial_authorities.geojson').catch(e => {
+                    console.error('Failed to fetch TA boundaries:', e);
+                    console.log('Current URL base:', window.location.href);
+                    console.log('Resolved TA boundaries URL:', new URL('./territorial_authorities.geojson', window.location.href).href);
+                    throw e;
+                }),
                 fetch('./ta_aggregated_data.json')
             ]);
             
