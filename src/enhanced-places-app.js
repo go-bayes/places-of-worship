@@ -127,6 +127,14 @@ class EnhancedPlacesOfWorshipApp {
         censusToggle.addEventListener('change', (e) => {
             this.showCensusOverlay = e.target.checked;
             this.toggleCensusOverlay();
+            
+            // Show/hide census controls
+            const censusControls = document.getElementById('censusControls');
+            if (e.target.checked) {
+                censusControls.classList.add('active');
+            } else {
+                censusControls.classList.remove('active');
+            }
         });
         
         // Geographic resolution toggle
@@ -164,6 +172,8 @@ class EnhancedPlacesOfWorshipApp {
     
     async loadData() {
         try {
+            console.log('Starting to load data files...');
+            
             // Load places, census, and comprehensive demographic data
             const [placesResponse, censusResponse, demographicResponse, boundariesResponse, territorialAuthorityResponse, taCensusResponse] = await Promise.all([
                 fetch('./src/nz_places.json'),
@@ -174,8 +184,33 @@ class EnhancedPlacesOfWorshipApp {
                 fetch('./ta_aggregated_data.json')
             ]);
             
-            if (!placesResponse.ok || !censusResponse.ok || !demographicResponse.ok || !boundariesResponse.ok || !territorialAuthorityResponse.ok || !taCensusResponse.ok) {
-                throw new Error('Failed to load data files');
+            console.log('Fetch responses:', {
+                places: placesResponse.status,
+                census: censusResponse.status, 
+                demographic: demographicResponse.status,
+                boundaries: boundariesResponse.status,
+                territorialAuthority: territorialAuthorityResponse.status,
+                taCensus: taCensusResponse.status
+            });
+            
+            // Check each response individually for better error reporting
+            if (!placesResponse.ok) {
+                throw new Error(`Failed to load places data: ${placesResponse.status} ${placesResponse.statusText}`);
+            }
+            if (!censusResponse.ok) {
+                throw new Error(`Failed to load census data: ${censusResponse.status} ${censusResponse.statusText}`);
+            }
+            if (!demographicResponse.ok) {
+                throw new Error(`Failed to load demographic data: ${demographicResponse.status} ${demographicResponse.statusText}`);
+            }
+            if (!boundariesResponse.ok) {
+                throw new Error(`Failed to load SA2 boundaries: ${boundariesResponse.status} ${boundariesResponse.statusText}`);
+            }
+            if (!territorialAuthorityResponse.ok) {
+                throw new Error(`Failed to load TA boundaries: ${territorialAuthorityResponse.status} ${territorialAuthorityResponse.statusText}`);
+            }
+            if (!taCensusResponse.ok) {
+                throw new Error(`Failed to load TA census data: ${taCensusResponse.status} ${taCensusResponse.statusText}`);
             }
             
             this.placesData = await placesResponse.json();
@@ -197,8 +232,9 @@ class EnhancedPlacesOfWorshipApp {
             
         } catch (error) {
             console.error('Error loading data:', error);
+            console.error('Error stack:', error.stack);
             this.hideLoading();
-            this.showError('Failed to load data files. Please check that all data files are available.');
+            this.showError(`Failed to load data files: ${error.message}. Please check the browser console for detailed error information.`);
         }
     }
     

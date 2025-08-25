@@ -563,16 +563,6 @@
     <!-- Enhanced Application -->
     <script src="src/enhanced-places-app.js"></script>
     
-    <script>
-        // Show/hide census controls based on overlay toggle
-        document.getElementById('censusOverlayToggle').addEventListener('change', function(e) {
-            const censusControls = document.getElementById('censusControls');
-            if (e.target.checked) {
-                censusControls.classList.add('active');
-            } else {
-                censusControls.classList.remove('active');
-            }
-        });
-    </script>
+    <!-- Enhanced app handles all event listeners -->
 </body>
 </html>
