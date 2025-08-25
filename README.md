@@ -15,10 +15,11 @@ A mapping infrastructure for religious sites, educational institutions, and civi
 ## Three Mapping Systems
 
 ### 1. Production Global Map
-- 161,929+ global locations with temporal data
+- 2m+ global locations with temporal data
 - WebGL-accelerated rendering via Leaflet.glify  
 - Timeline-based historical analysis
 - Viewport-based dynamic loading
+- Based on Nick Young & Joseph Bulbulia's prototype (University of Auckland, Centre for E-research)
 - **Access**: [Global Interactive Map](https://go-bayes.github.io/places-of-worship/frontend/global-places.html)
 
 ### 2. Enhanced New Zealand Map  

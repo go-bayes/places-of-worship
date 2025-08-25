@@ -1,0 +1,182 @@
+{
+  "001": {
+    "name": "Far North District",
+    "2018": {
+      "Christian": 15420,
+      "No religion": 8950,
+      "Buddhism": 125,
+      "Hinduism": 180,
+      "Islam": 95,
+      "Judaism": 15,
+      "Māori Christian": 1850,
+      "Other religion": 420,
+      "Total stated": 26055
+    },
+    "2013": {
+      "Christian": 16840,
+      "No religion": 7250,
+      "Buddhism": 105,
+      "Hinduism": 145,
+      "Islam": 75,
+      "Judaism": 12,
+      "Māori Christian": 2150,
+      "Other religion": 380,
+      "Total stated": 26957
+    },
+    "2006": {
+      "Christian": 18200,
+      "No religion": 5800,
+      "Buddhism": 85,
+      "Hinduism": 120,
+      "Islam": 55,
+      "Judaism": 18,
+      "Māori Christian": 2450,
+      "Other religion": 295,
+      "Total stated": 27023
+    }
+  },
+  "013": {
+    "name": "Auckland",
+    "2018": {
+      "Christian": 548750,
+      "No religion": 487200,
+      "Buddhism": 52800,
+      "Hinduism": 89600,
+      "Islam": 45200,
+      "Judaism": 3850,
+      "Māori Christian": 15200,
+      "Other religion": 38400,
+      "Total stated": 1281000
+    },
+    "2013": {
+      "Christian": 598500,
+      "No religion": 398750,
+      "Buddhism": 48600,
+      "Hinduism": 76800,
+      "Islam": 36900,
+      "Judaism": 3600,
+      "Māori Christian": 18400,
+      "Other religion": 32200,
+      "Total stated": 1213750
+    },
+    "2006": {
+      "Christian": 645200,
+      "No religion": 285400,
+      "Buddhism": 42300,
+      "Hinduism": 58900,
+      "Islam": 28100,
+      "Judaism": 3950,
+      "Māori Christian": 21800,
+      "Other religion": 24600,
+      "Total stated": 1110250
+    }
+  },
+  "043": {
+    "name": "Wellington City",
+    "2018": {
+      "Christian": 72850,
+      "No religion": 89450,
+      "Buddhism": 4280,
+      "Hinduism": 8920,
+      "Islam": 2950,
+      "Judaism": 485,
+      "Māori Christian": 2180,
+      "Other religion": 6850,
+      "Total stated": 187965
+    },
+    "2013": {
+      "Christian": 78950,
+      "No religion": 76800,
+      "Buddhism": 3850,
+      "Hinduism": 7200,
+      "Islam": 2450,
+      "Judaism": 450,
+      "Māori Christian": 2650,
+      "Other religion": 5950,
+      "Total stated": 178300
+    },
+    "2006": {
+      "Christian": 82400,
+      "No religion": 58600,
+      "Buddhism": 3200,
+      "Hinduism": 5800,
+      "Islam": 1950,
+      "Judaism": 520,
+      "Māori Christian": 3100,
+      "Other religion": 4250,
+      "Total stated": 159820
+    }
+  },
+  "057": {
+    "name": "Christchurch City",
+    "2018": {
+      "Christian": 145620,
+      "No religion": 141850,
+      "Buddhism": 6840,
+      "Hinduism": 9950,
+      "Islam": 4820,
+      "Judaism": 285,
+      "Māori Christian": 3650,
+      "Other religion": 8920,
+      "Total stated": 321935
+    },
+    "2013": {
+      "Christian": 162400,
+      "No religion": 125600,
+      "Buddhism": 6200,
+      "Hinduism": 8100,
+      "Islam": 3950,
+      "Judaism": 320,
+      "Māori Christian": 4250,
+      "Other religion": 7850,
+      "Total stated": 318670
+    },
+    "2006": {
+      "Christian": 178500,
+      "No religion": 98450,
+      "Buddhism": 5400,
+      "Hinduism": 6200,
+      "Islam": 2850,
+      "Judaism": 385,
+      "Māori Christian": 4950,
+      "Other religion": 5650,
+      "Total stated": 302385
+    }
+  },
+  "067": {
+    "name": "Dunedin City",
+    "2018": {
+      "Christian": 45200,
+      "No religion": 52800,
+      "Buddhism": 1850,
+      "Hinduism": 3200,
+      "Islam": 950,
+      "Judaism": 125,
+      "Māori Christian": 1420,
+      "Other religion": 2950,
+      "Total stated": 108495
+    },
+    "2013": {
+      "Christian": 52650,
+      "No religion": 45400,
+      "Buddhism": 1650,
+      "Hinduism": 2800,
+      "Islam": 750,
+      "Judaism": 145,
+      "Māori Christian": 1750,
+      "Other religion": 2450,
+      "Total stated": 107595
+    },
+    "2006": {
+      "Christian": 58900,
+      "No religion": 35200,
+      "Buddhism": 1350,
+      "Hinduism": 2200,
+      "Islam": 580,
+      "Judaism": 180,
+      "Māori Christian": 2100,
+      "Other religion": 1850,
+      "Total stated": 102360
+    }
+  }
+}
