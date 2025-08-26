@@ -327,6 +327,9 @@ class EnhancedPlacesOfWorshipApp {
             // Populate filter dropdowns
             this.populateFilterDropdowns();
             
+            // Hide loading screen now that all data is loaded
+            this.hideLoading();
+            
         } catch (error) {
             console.error('Error loading data:', error);
             console.error('Error stack:', error.stack);
