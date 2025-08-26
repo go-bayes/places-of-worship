@@ -1191,6 +1191,29 @@ class EnhancedPlacesOfWorshipApp {
     
     createPopupContent(props) {
         const majorCategory = this.denominationMapper.getMajorCategory(props.denomination);
+        const lat = props.lat || props.latitude;
+        const lng = props.lng || props.longitude;
+        
+        // Create location services section
+        const locationServices = lat && lng ? `
+            <div class="location-services" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; border-left: 3px solid #17a2b8;">
+                <h5 style="margin: 0 0 8px 0; color: #333;">Location Services</h5>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" rel="noopener noreferrer" 
+                       style="color: #007bff; text-decoration: none; display: flex; align-items: center; gap: 4px;">
+                        📍 Google Maps
+                    </a>
+                    <a href="https://www.google.com/maps/@${lat},${lng},3a,75y,0h,90t/data=!3m4!1e1!3m2!1s0x0:0x0!2e0" target="_blank" rel="noopener noreferrer"
+                       style="color: #007bff; text-decoration: none; display: flex; align-items: center; gap: 4px;">
+                        👁 Street View
+                    </a>
+                    <a href="https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=18/${lat}/${lng}" target="_blank" rel="noopener noreferrer"
+                       style="color: #007bff; text-decoration: none; display: flex; align-items: center; gap: 4px;">
+                        🗺 OpenStreetMap
+                    </a>
+                </div>
+            </div>
+        ` : '';
         
         return `
             <div class="place-popup">
@@ -1204,6 +1227,7 @@ class EnhancedPlacesOfWorshipApp {
                 ${props.website ? `<p><strong>Website:</strong> <a href="${props.website}" target="_blank">${props.website}</a></p>` : ''}
                 <p><strong>Source:</strong> OpenStreetMap (OSM ID: ${props.osm_id})</p>
                 <small>Data quality: ${props.confidence >= 0.8 ? 'High' : props.confidence >= 0.6 ? 'Medium' : 'Low'}</small>
+                ${locationServices}
                 <div class="pano"></div>
             </div>
         `;
