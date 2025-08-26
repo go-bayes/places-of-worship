@@ -50,13 +50,37 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     async init() {
-        this.setupMap();
-        this.setupControls();
-        await this.loadData();
-        this.initializeColorScale();
-        this.setupDenominationColors();
-        this.displayPlaces();
-        this.hideLoading();
+        try {
+            console.log('🚀 Starting Enhanced Places app initialization...');
+            
+            // Step 1: Setup map and controls (no data needed)
+            console.log('📍 Setting up map and controls...');
+            this.setupMap();
+            this.setupControls();
+            
+            // Step 2: Load all data files
+            console.log('📊 Loading data files...');
+            await this.loadData();
+            
+            // Step 3: Initialize components that depend on loaded data
+            console.log('🎨 Initializing color scales and denomination mapping...');
+            this.initializeColorScale();
+            this.setupDenominationColors();
+            
+            // Step 4: Display places on map
+            console.log('🗺️  Displaying places on map...');
+            this.displayPlaces();
+            
+            // Step 5: All initialization complete - hide loading screen
+            console.log('✅ App initialization completed successfully');
+            this.hideLoading();
+            
+        } catch (error) {
+            console.error('❌ Failed to initialize application:', error);
+            console.error('Error stack:', error.stack);
+            this.hideLoading();
+            this.showError(`Application failed to initialize: ${error.message}. Please check the browser console for detailed error information.`);
+        }
     }
     
     setupMap() {
@@ -327,8 +351,7 @@ class EnhancedPlacesOfWorshipApp {
             // Populate filter dropdowns
             this.populateFilterDropdowns();
             
-            // Hide loading screen now that all data is loaded
-            this.hideLoading();
+            console.log('✅ All static census data loaded successfully');
             
         } catch (error) {
             console.error('Error loading data:', error);
