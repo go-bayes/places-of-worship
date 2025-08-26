@@ -145,23 +145,28 @@ class EnhancedPlacesOfWorshipApp {
     setupControls() {
         // Major category filter
         const majorCategorySelect = document.getElementById('majorCategoryFilter');
-        majorCategorySelect.addEventListener('change', (e) => {
+        if (majorCategorySelect) {
+            majorCategorySelect.addEventListener('change', (e) => {
             this.currentMajorCategory = e.target.value;
             this.updateDenominationFilter();
             this.updateDisplay();
-        });
+            });
+        }
         
         // Denomination filter
         const denominationSelect = document.getElementById('denominationFilter');
-        denominationSelect.addEventListener('change', (e) => {
+        if (denominationSelect) {
+            denominationSelect.addEventListener('change', (e) => {
             this.currentDenomination = e.target.value;
             this.updateDisplay();
-        });
+            });
+        }
         
         // Geographic resolution toggle
         const geographicToggle = document.getElementById('geographicResolutionToggle');
-        const geographicLabel = document.getElementById('geographicLabel');
-        geographicToggle.addEventListener('change', (e) => {
+        if (geographicToggle) {
+            const geographicLabel = document.getElementById('geographicLabel');
+            geographicToggle.addEventListener('change', (e) => {
             this.useDetailedBoundaries = !e.target.checked;
             
             // Update label
@@ -177,11 +182,13 @@ class EnhancedPlacesOfWorshipApp {
                 this.addReligiousDensityOverlay();
                 this.updateDemographicLegend();
             }
-        });
+            });
+        }
         
         // Religious density overlay toggle
         const religiousDensityToggle = document.getElementById('religiousDensityToggle');
-        religiousDensityToggle.addEventListener('change', (e) => {
+        if (religiousDensityToggle) {
+            religiousDensityToggle.addEventListener('change', (e) => {
             console.log('Religious density toggle changed:', e.target.checked);
             this.showReligiousDensity = e.target.checked;
             this.toggleReligiousDensityOverlay();
@@ -193,46 +200,62 @@ class EnhancedPlacesOfWorshipApp {
             } else {
                 demographicControls.classList.remove('active');
             }
-        });
+            });
+        }
         
         // Demographic metric selector
         const demographicMetricSelect = document.getElementById('demographicMetricSelect');
-        demographicMetricSelect.addEventListener('change', (e) => {
+        if (demographicMetricSelect) {
+            demographicMetricSelect.addEventListener('change', (e) => {
             console.log('Demographic mode changed to:', e.target.value);
             this.currentDemographicMode = e.target.value;
             this.updateColorScale(); // Update color scale for new mode
             this.updateReligiousDensityVisualization(); // Refresh visualization
             this.updateDemographicLegend(); // Update legend
-        });
+            });
+        }
         
         // Map style selector
         const mapStyleSelect = document.getElementById('mapStyleSelect');
-        mapStyleSelect.addEventListener('change', (e) => {
+        if (mapStyleSelect) {
+            mapStyleSelect.addEventListener('change', (e) => {
             this.changeMapStyle(e.target.value);
-        });
+            });
+        }
         
         // Initialize demographic toggle
         this.initializeDemographicToggle();
         
-        
         // Reset button
-        document.getElementById('resetButton').addEventListener('click', () => {
+        const resetButton = document.getElementById('resetButton');
+        if (resetButton) {
+            resetButton.addEventListener('click', () => {
             this.resetView();
-        });
+            });
+        }
         
         // Toggle clustering
-        document.getElementById('toggleClustering').addEventListener('click', () => {
+        const toggleClustering = document.getElementById('toggleClustering');
+        if (toggleClustering) {
+            toggleClustering.addEventListener('click', () => {
             this.toggleClustering();
-        });
+            });
+        }
         
         // Export buttons
-        document.getElementById('exportButton').addEventListener('click', () => {
-            this.exportData('all');
-        });
+        const exportButton = document.getElementById('exportButton');
+        if (exportButton) {
+            exportButton.addEventListener('click', () => {
+                this.exportData('all');
+            });
+        }
         
-        document.getElementById('exportFilteredButton').addEventListener('click', () => {
-            this.exportData('filtered');
-        });
+        const exportFilteredButton = document.getElementById('exportFilteredButton');
+        if (exportFilteredButton) {
+            exportFilteredButton.addEventListener('click', () => {
+                this.exportData('filtered');
+            });
+        }
     }
     
     initializeDemographicToggle() {
