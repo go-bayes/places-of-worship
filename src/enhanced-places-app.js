@@ -321,8 +321,8 @@ class EnhancedPlacesOfWorshipApp {
                 }
             }
             
-            // Load additional demographic data from Stats NZ API
-            await this.loadAdditionalDemographicData();
+            // All data loaded successfully - no API calls needed for static census data
+            console.log('✓ All static census data loaded successfully');
             
             // Populate filter dropdowns
             this.populateFilterDropdowns();
@@ -335,224 +335,14 @@ class EnhancedPlacesOfWorshipApp {
         }
     }
     
-    async loadAdditionalDemographicData() {
-        try {
-            console.log('Loading additional demographic data from Stats NZ...');
-            
-            // Check if API key is available
-            const statsNZApiKey = localStorage.getItem('statsNZ_api_key') || 
-                                  window.STATS_NZ_API_KEY || 
-                                  '5f3f95fc8ec04a04a852f83bb71cdc6f' || // Primary key
-                                  null;
-            
-            if (!statsNZApiKey) {
-                console.log('No Stats NZ API key available - using cached data only');
-                // Try to load cached data
-                await this.loadCachedDemographicData();
-                return;
-            }
-            
-            // Fetch comprehensive demographic data from Stats NZ API
-            const promises = [];
-            
-            // PRIMARY: Replace flawed TA census data with proper Stats NZ data
-            promises.push(this.fetchTACensusData(statsNZApiKey));
-            
-            // ADDITIONAL: Birth rates by territorial authority (where available)
-            promises.push(this.fetchBirthRateData(statsNZApiKey));
-            
-            // Migration data by territorial authority
-            promises.push(this.fetchMigrationData(statsNZApiKey));
-            
-            // Population change data by SA2
-            promises.push(this.fetchPopulationChangeData(statsNZApiKey));
-            
-            const [birthRateData, migrationData, populationChangeData] = await Promise.all(promises);
-            
-            this.birthRateData = birthRateData;
-            this.migrationData = migrationData;
-            this.populationChangeData = populationChangeData;
-            
-            console.log('Additional demographic data loaded successfully');
-            
-        } catch (error) {
-            console.warn('Failed to load additional demographic data:', error);
-            // Fallback to cached data
-            await this.loadCachedDemographicData();
-        }
-    }
     
-    async loadCachedDemographicData() {
-        // Load from local cache files if API is unavailable
-        try {
-            const promises = [
-                fetch('./src/birth_rates_cache.json').then(r => r.json()).catch(() => null),
-                fetch('./src/migration_data_cache.json').then(r => r.json()).catch(() => null),
-                fetch('./src/population_change_cache.json').then(r => r.json()).catch(() => null)
-            ];
-            
-            const [birthRateData, migrationData, populationChangeData] = await Promise.all(promises);
-            
-            this.birthRateData = birthRateData;
-            this.migrationData = migrationData;
-            this.populationChangeData = populationChangeData;
-            
-            console.log('Loaded cached demographic data');
-        } catch (error) {
-            console.log('No cached demographic data available');
-        }
-    }
     
-    async fetchBirthRateData(apiKey) {
-        try {
-            // Note: Stats NZ open data API closed August 30, 2024
-            // Using portal.apis.stats.govt.nz API structure with subscription key
-            const endpoint = 'https://portal.apis.stats.govt.nz/v1/births-deaths/births';
-            
-            const response = await fetch(`${endpoint}?territorial_authority=all&years=2018,2019,2020,2021,2022`, {
-                headers: {
-                    'Ocp-Apim-Subscription-Key': apiKey,
-                    'Accept': 'application/json'
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error(`Birth rate API request failed: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            return this.processBirthRateData(data);
-            
-        } catch (error) {
-            console.warn('Failed to fetch birth rate data:', error);
-            return null;
-        }
-    }
     
-    async fetchMigrationData(apiKey) {
-        try {
-            // Using portal.apis.stats.govt.nz API structure with subscription key
-            const endpoint = 'https://portal.apis.stats.govt.nz/v1/population/migration';
-            
-            const response = await fetch(`${endpoint}?territorial_authority=all&years=2018,2019,2020,2021,2022`, {
-                headers: {
-                    'Ocp-Apim-Subscription-Key': apiKey,
-                    'Accept': 'application/json'
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error(`Migration API request failed: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            return this.processMigrationData(data);
-            
-        } catch (error) {
-            console.warn('Failed to fetch migration data:', error);
-            return null;
-        }
-    }
     
-    async fetchPopulationChangeData(apiKey) {
-        try {
-            // Using portal.apis.stats.govt.nz API structure with subscription key
-            const endpoint = 'https://portal.apis.stats.govt.nz/v1/census/population-change';
-            
-            const response = await fetch(`${endpoint}?geographic_level=SA2&years=2013,2018,2023`, {
-                headers: {
-                    'Ocp-Apim-Subscription-Key': apiKey,
-                    'Accept': 'application/json'
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error(`Population change API request failed: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            return this.processPopulationChangeData(data);
-            
-        } catch (error) {
-            console.warn('Failed to fetch population change data:', error);
-            return null;
-        }
-    }
     
-    processBirthRateData(rawData) {
-        // Process Stats NZ birth rate data into our format
-        const processed = {};
-        
-        if (rawData && rawData.data) {
-            rawData.data.forEach(record => {
-                const taCode = record.territorial_authority_code;
-                const year = record.year;
-                const births = record.births || 0;
-                const population = record.population || 1;
-                const birthRate = (births / population) * 1000; // births per 1000 people
-                
-                if (!processed[taCode]) {
-                    processed[taCode] = {};
-                }
-                processed[taCode][year] = {
-                    births: births,
-                    population: population,
-                    birth_rate: birthRate
-                };
-            });
-        }
-        
-        return processed;
-    }
     
-    processMigrationData(rawData) {
-        // Process Stats NZ migration data into our format
-        const processed = {};
-        
-        if (rawData && rawData.data) {
-            rawData.data.forEach(record => {
-                const taCode = record.territorial_authority_code;
-                const year = record.year;
-                
-                if (!processed[taCode]) {
-                    processed[taCode] = {};
-                }
-                processed[taCode][year] = {
-                    internal_migration_in: record.internal_arrivals || 0,
-                    internal_migration_out: record.internal_departures || 0,
-                    external_migration_in: record.external_arrivals || 0,
-                    external_migration_out: record.external_departures || 0,
-                    net_migration: (record.internal_arrivals || 0) - (record.internal_departures || 0) + 
-                                  (record.external_arrivals || 0) - (record.external_departures || 0)
-                };
-            });
-        }
-        
-        return processed;
-    }
     
-    processPopulationChangeData(rawData) {
-        // Process Stats NZ population change data into our format
-        const processed = {};
-        
-        if (rawData && rawData.data) {
-            rawData.data.forEach(record => {
-                const sa2Code = record.sa2_code;
-                const year = record.year;
-                
-                if (!processed[sa2Code]) {
-                    processed[sa2Code] = {};
-                }
-                processed[sa2Code][year] = {
-                    population: record.population || 0,
-                    population_change: record.population_change || 0,
-                    population_change_percent: record.population_change_percent || 0
-                };
-            });
-        }
-        
-        return processed;
-    }
+    
     
     addBirthRateMigrationData(taCode) {
         let content = '';
@@ -614,33 +404,6 @@ class EnhancedPlacesOfWorshipApp {
         return content;
     }
     
-    addSA2PopulationChangeData(sa2Code) {
-        let content = '';
-        
-        // Add population change data if available for SA2
-        if (this.populationChangeData && this.populationChangeData[sa2Code]) {
-            content += `<h4>Population Change</h4>`;
-            const changeData = this.populationChangeData[sa2Code];
-            const latestYear = Math.max(...Object.keys(changeData).map(y => parseInt(y)));
-            
-            if (changeData[latestYear]) {
-                const data = changeData[latestYear];
-                const changePercent = data.population_change_percent;
-                const changeIcon = changePercent > 0 ? '↗' : changePercent < 0 ? '↘' : '→';
-                const changeColor = changePercent > 0 ? '#27ae60' : changePercent < 0 ? '#e74c3c' : '#666';
-                
-                content += `
-                    <p><strong>Population Change:</strong> 
-                    <span style="color: ${changeColor};">
-                    ${changePercent > 0 ? '+' : ''}${changePercent.toFixed(1)}% ${changeIcon}
-                    </span></p>
-                    <p><strong>Population (${latestYear}):</strong> ${data.population.toLocaleString()}</p>
-                `;
-            }
-        }
-        
-        return content;
-    }
     
     setupDenominationColors() {
         // Use denomination mapper for consistent coloring - convert to GeoJSON format
@@ -1741,8 +1504,7 @@ class EnhancedPlacesOfWorshipApp {
             popupContent += `<p><strong>Regional Profile:</strong> ${regionalContext}</p>`;
         }
         
-        // Add birth rate and migration data if available
-        popupContent += this.addBirthRateMigrationData(taCode);
+        // Demographic data will be added via static files in future enhancement
         
         // Add data limitations note
         popupContent += `
@@ -2141,8 +1903,7 @@ class EnhancedPlacesOfWorshipApp {
                 popupContent += `<p>Home Ownership: ${(comprehensiveData.home_ownership_rate * 100).toFixed(1)}%</p>`;
             }
             
-            // Add SA2 population change data
-            popupContent += this.addSA2PopulationChangeData(sa2Code);
+            // Population change data will be added via static files in future enhancement
             
             // Area characteristics
             if (comprehensiveData.population_density !== undefined) {
