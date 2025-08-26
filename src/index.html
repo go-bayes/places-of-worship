@@ -24,9 +24,18 @@
         
         <div class="controls">
             <div class="control-group">
-                <label for="yearSlider">Census Year:</label>
-                <input type="range" id="yearSlider" min="2006" max="2018" step="6" value="2018">
-                <span id="currentYear">2018</span>
+                <label for="demographicToggle">Show Demographics:</label>
+                <select id="demographicToggle">
+                    <option value="none">None</option>
+                    <option value="age">Age Structure</option>
+                    <option value="gender">Gender Ratio</option>
+                    <option value="population_density">Population Density</option>
+                    <option value="home_ownership">Home Ownership</option>
+                    <option value="income">Median Income</option>
+                    <option value="ethnicity">Ethnicity</option>
+                    <option value="migration">Migration Patterns</option>
+                    <option value="birth_rates">Birth Rates</option>
+                </select>
             </div>
             
             <div class="control-group">

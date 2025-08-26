@@ -24,9 +24,17 @@ class EnhancedPlacesOfWorshipApp {
         this.territorialAuthorityData = null;
         this.taCensusData = null;
         this.showReligiousDensity = false;
+        this.showCensusOverlay = false; // Keep for backward compatibility
         this.currentDemographicMode = 'religious_percentage';
+        this.currentCensusMetric = 'no_religion_change'; // Keep for backward compatibility
+        this.currentDemographic = 'none'; // Demographic toggle selection
         this.overlayYear = 2018;  // Fixed year for overlay colors
         this.useDetailedBoundaries = false;  // Default to TA boundaries (simplified view)
+        
+        // Additional demographic data containers
+        this.birthRateData = null;  // Birth rates by SA2/TA
+        this.migrationData = null;  // Migration rates by SA2/TA
+        this.populationChangeData = null;  // Population change data
         
         // Color scaling system
         this.colorScale = null;
@@ -44,7 +52,6 @@ class EnhancedPlacesOfWorshipApp {
     async init() {
         this.setupMap();
         this.setupControls();
-        this.setupStreetView();
         await this.loadData();
         this.initializeColorScale();
         this.setupDenominationColors();
@@ -151,6 +158,7 @@ class EnhancedPlacesOfWorshipApp {
         // Religious density overlay toggle
         const religiousDensityToggle = document.getElementById('religiousDensityToggle');
         religiousDensityToggle.addEventListener('change', (e) => {
+            console.log('Religious density toggle changed:', e.target.checked);
             this.showReligiousDensity = e.target.checked;
             this.toggleReligiousDensityOverlay();
             
@@ -166,9 +174,11 @@ class EnhancedPlacesOfWorshipApp {
         // Demographic metric selector
         const demographicMetricSelect = document.getElementById('demographicMetricSelect');
         demographicMetricSelect.addEventListener('change', (e) => {
+            console.log('Demographic mode changed to:', e.target.value);
             this.currentDemographicMode = e.target.value;
-            this.updateReligiousDensityVisualization();
-            this.updateDemographicLegend();
+            this.updateColorScale(); // Update color scale for new mode
+            this.updateReligiousDensityVisualization(); // Refresh visualization
+            this.updateDemographicLegend(); // Update legend
         });
         
         // Map style selector
@@ -176,6 +186,9 @@ class EnhancedPlacesOfWorshipApp {
         mapStyleSelect.addEventListener('change', (e) => {
             this.changeMapStyle(e.target.value);
         });
+        
+        // Initialize demographic toggle
+        this.initializeDemographicToggle();
         
         
         // Reset button
@@ -188,6 +201,40 @@ class EnhancedPlacesOfWorshipApp {
             this.toggleClustering();
         });
         
+        // Export buttons
+        document.getElementById('exportButton').addEventListener('click', () => {
+            this.exportData('all');
+        });
+        
+        document.getElementById('exportFilteredButton').addEventListener('click', () => {
+            this.exportData('filtered');
+        });
+    }
+    
+    initializeDemographicToggle() {
+        const demographicToggle = document.getElementById('demographicToggle');
+        if (!demographicToggle) return;
+        
+        demographicToggle.addEventListener('change', (e) => {
+            this.currentDemographic = e.target.value;
+            this.updateDemographicDisplay();
+        });
+        
+        // Initialize with none selected
+        this.currentDemographic = 'none';
+    }
+    
+    updateDemographicDisplay() {
+        // Add demographic data to popups when a region is clicked
+        // This will be called when demographic toggle changes
+        console.log('Demographic display updated to:', this.currentDemographic);
+        
+        // Update any open popup with new demographic data
+        if (this.currentPopup && this.currentPopup.isOpen()) {
+            const popupContent = this.currentPopup.getContent();
+            // Re-generate popup content with demographic data if needed
+            // This will be implemented when we add the demographic data integration
+        }
     }
     
     async loadData() {
@@ -274,6 +321,8 @@ class EnhancedPlacesOfWorshipApp {
                 }
             }
             
+            // Load additional demographic data from Stats NZ API
+            await this.loadAdditionalDemographicData();
             
             // Populate filter dropdowns
             this.populateFilterDropdowns();
@@ -284,6 +333,313 @@ class EnhancedPlacesOfWorshipApp {
             this.hideLoading();
             this.showError(`Failed to load data files: ${error.message}. Please check the browser console for detailed error information.`);
         }
+    }
+    
+    async loadAdditionalDemographicData() {
+        try {
+            console.log('Loading additional demographic data from Stats NZ...');
+            
+            // Check if API key is available
+            const statsNZApiKey = localStorage.getItem('statsNZ_api_key') || 
+                                  window.STATS_NZ_API_KEY || 
+                                  '5f3f95fc8ec04a04a852f83bb71cdc6f' || // Primary key
+                                  null;
+            
+            if (!statsNZApiKey) {
+                console.log('No Stats NZ API key available - using cached data only');
+                // Try to load cached data
+                await this.loadCachedDemographicData();
+                return;
+            }
+            
+            // Fetch comprehensive demographic data from Stats NZ API
+            const promises = [];
+            
+            // PRIMARY: Replace flawed TA census data with proper Stats NZ data
+            promises.push(this.fetchTACensusData(statsNZApiKey));
+            
+            // ADDITIONAL: Birth rates by territorial authority (where available)
+            promises.push(this.fetchBirthRateData(statsNZApiKey));
+            
+            // Migration data by territorial authority
+            promises.push(this.fetchMigrationData(statsNZApiKey));
+            
+            // Population change data by SA2
+            promises.push(this.fetchPopulationChangeData(statsNZApiKey));
+            
+            const [birthRateData, migrationData, populationChangeData] = await Promise.all(promises);
+            
+            this.birthRateData = birthRateData;
+            this.migrationData = migrationData;
+            this.populationChangeData = populationChangeData;
+            
+            console.log('Additional demographic data loaded successfully');
+            
+        } catch (error) {
+            console.warn('Failed to load additional demographic data:', error);
+            // Fallback to cached data
+            await this.loadCachedDemographicData();
+        }
+    }
+    
+    async loadCachedDemographicData() {
+        // Load from local cache files if API is unavailable
+        try {
+            const promises = [
+                fetch('./src/birth_rates_cache.json').then(r => r.json()).catch(() => null),
+                fetch('./src/migration_data_cache.json').then(r => r.json()).catch(() => null),
+                fetch('./src/population_change_cache.json').then(r => r.json()).catch(() => null)
+            ];
+            
+            const [birthRateData, migrationData, populationChangeData] = await Promise.all(promises);
+            
+            this.birthRateData = birthRateData;
+            this.migrationData = migrationData;
+            this.populationChangeData = populationChangeData;
+            
+            console.log('Loaded cached demographic data');
+        } catch (error) {
+            console.log('No cached demographic data available');
+        }
+    }
+    
+    async fetchBirthRateData(apiKey) {
+        try {
+            // Note: Stats NZ open data API closed August 30, 2024
+            // Using portal.apis.stats.govt.nz API structure with subscription key
+            const endpoint = 'https://portal.apis.stats.govt.nz/v1/births-deaths/births';
+            
+            const response = await fetch(`${endpoint}?territorial_authority=all&years=2018,2019,2020,2021,2022`, {
+                headers: {
+                    'Ocp-Apim-Subscription-Key': apiKey,
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Birth rate API request failed: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return this.processBirthRateData(data);
+            
+        } catch (error) {
+            console.warn('Failed to fetch birth rate data:', error);
+            return null;
+        }
+    }
+    
+    async fetchMigrationData(apiKey) {
+        try {
+            // Using portal.apis.stats.govt.nz API structure with subscription key
+            const endpoint = 'https://portal.apis.stats.govt.nz/v1/population/migration';
+            
+            const response = await fetch(`${endpoint}?territorial_authority=all&years=2018,2019,2020,2021,2022`, {
+                headers: {
+                    'Ocp-Apim-Subscription-Key': apiKey,
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Migration API request failed: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return this.processMigrationData(data);
+            
+        } catch (error) {
+            console.warn('Failed to fetch migration data:', error);
+            return null;
+        }
+    }
+    
+    async fetchPopulationChangeData(apiKey) {
+        try {
+            // Using portal.apis.stats.govt.nz API structure with subscription key
+            const endpoint = 'https://portal.apis.stats.govt.nz/v1/census/population-change';
+            
+            const response = await fetch(`${endpoint}?geographic_level=SA2&years=2013,2018,2023`, {
+                headers: {
+                    'Ocp-Apim-Subscription-Key': apiKey,
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Population change API request failed: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return this.processPopulationChangeData(data);
+            
+        } catch (error) {
+            console.warn('Failed to fetch population change data:', error);
+            return null;
+        }
+    }
+    
+    processBirthRateData(rawData) {
+        // Process Stats NZ birth rate data into our format
+        const processed = {};
+        
+        if (rawData && rawData.data) {
+            rawData.data.forEach(record => {
+                const taCode = record.territorial_authority_code;
+                const year = record.year;
+                const births = record.births || 0;
+                const population = record.population || 1;
+                const birthRate = (births / population) * 1000; // births per 1000 people
+                
+                if (!processed[taCode]) {
+                    processed[taCode] = {};
+                }
+                processed[taCode][year] = {
+                    births: births,
+                    population: population,
+                    birth_rate: birthRate
+                };
+            });
+        }
+        
+        return processed;
+    }
+    
+    processMigrationData(rawData) {
+        // Process Stats NZ migration data into our format
+        const processed = {};
+        
+        if (rawData && rawData.data) {
+            rawData.data.forEach(record => {
+                const taCode = record.territorial_authority_code;
+                const year = record.year;
+                
+                if (!processed[taCode]) {
+                    processed[taCode] = {};
+                }
+                processed[taCode][year] = {
+                    internal_migration_in: record.internal_arrivals || 0,
+                    internal_migration_out: record.internal_departures || 0,
+                    external_migration_in: record.external_arrivals || 0,
+                    external_migration_out: record.external_departures || 0,
+                    net_migration: (record.internal_arrivals || 0) - (record.internal_departures || 0) + 
+                                  (record.external_arrivals || 0) - (record.external_departures || 0)
+                };
+            });
+        }
+        
+        return processed;
+    }
+    
+    processPopulationChangeData(rawData) {
+        // Process Stats NZ population change data into our format
+        const processed = {};
+        
+        if (rawData && rawData.data) {
+            rawData.data.forEach(record => {
+                const sa2Code = record.sa2_code;
+                const year = record.year;
+                
+                if (!processed[sa2Code]) {
+                    processed[sa2Code] = {};
+                }
+                processed[sa2Code][year] = {
+                    population: record.population || 0,
+                    population_change: record.population_change || 0,
+                    population_change_percent: record.population_change_percent || 0
+                };
+            });
+        }
+        
+        return processed;
+    }
+    
+    addBirthRateMigrationData(taCode) {
+        let content = '';
+        
+        // Add birth rate data if available
+        if (this.birthRateData && this.birthRateData[taCode]) {
+            content += `<h4>Birth Rate Profile</h4>`;
+            const birthData = this.birthRateData[taCode];
+            const latestYear = Math.max(...Object.keys(birthData).map(y => parseInt(y)));
+            
+            if (birthData[latestYear]) {
+                const data = birthData[latestYear];
+                content += `
+                    <p><strong>Birth Rate (${latestYear}):</strong> ${data.birth_rate.toFixed(1)} births per 1,000 people</p>
+                    <p><strong>Total Births:</strong> ${data.births.toLocaleString()}</p>
+                `;
+                
+                // Show trend if multiple years available
+                const years = Object.keys(birthData).map(y => parseInt(y)).sort();
+                if (years.length > 1) {
+                    const earliestYear = years[0];
+                    const trendChange = birthData[latestYear].birth_rate - birthData[earliestYear].birth_rate;
+                    const trendIcon = trendChange > 0 ? '↗' : trendChange < 0 ? '↘' : '→';
+                    const trendColor = trendChange > 0 ? '#27ae60' : trendChange < 0 ? '#e74c3c' : '#666';
+                    
+                    content += `
+                        <p><strong>Trend (${earliestYear}-${latestYear}):</strong> 
+                        <span style="color: ${trendColor};">
+                        ${trendChange > 0 ? '+' : ''}${trendChange.toFixed(1)} per 1,000 ${trendIcon}
+                        </span></p>
+                    `;
+                }
+            }
+        }
+        
+        // Add migration data if available
+        if (this.migrationData && this.migrationData[taCode]) {
+            content += `<h4>Migration Profile</h4>`;
+            const migrationData = this.migrationData[taCode];
+            const latestYear = Math.max(...Object.keys(migrationData).map(y => parseInt(y)));
+            
+            if (migrationData[latestYear]) {
+                const data = migrationData[latestYear];
+                const netMigration = data.net_migration;
+                const migrationIcon = netMigration > 0 ? '↗' : netMigration < 0 ? '↘' : '→';
+                const migrationColor = netMigration > 0 ? '#27ae60' : netMigration < 0 ? '#e74c3c' : '#666';
+                
+                content += `
+                    <p><strong>Net Migration (${latestYear}):</strong> 
+                    <span style="color: ${migrationColor};">
+                    ${netMigration > 0 ? '+' : ''}${netMigration.toLocaleString()} people ${migrationIcon}
+                    </span></p>
+                    <p><strong>Internal Migration:</strong> ${(data.internal_migration_in - data.internal_migration_out).toLocaleString()} (net)</p>
+                    <p><strong>External Migration:</strong> ${(data.external_migration_in - data.external_migration_out).toLocaleString()} (net)</p>
+                `;
+            }
+        }
+        
+        return content;
+    }
+    
+    addSA2PopulationChangeData(sa2Code) {
+        let content = '';
+        
+        // Add population change data if available for SA2
+        if (this.populationChangeData && this.populationChangeData[sa2Code]) {
+            content += `<h4>Population Change</h4>`;
+            const changeData = this.populationChangeData[sa2Code];
+            const latestYear = Math.max(...Object.keys(changeData).map(y => parseInt(y)));
+            
+            if (changeData[latestYear]) {
+                const data = changeData[latestYear];
+                const changePercent = data.population_change_percent;
+                const changeIcon = changePercent > 0 ? '↗' : changePercent < 0 ? '↘' : '→';
+                const changeColor = changePercent > 0 ? '#27ae60' : changePercent < 0 ? '#e74c3c' : '#666';
+                
+                content += `
+                    <p><strong>Population Change:</strong> 
+                    <span style="color: ${changeColor};">
+                    ${changePercent > 0 ? '+' : ''}${changePercent.toFixed(1)}% ${changeIcon}
+                    </span></p>
+                    <p><strong>Population (${latestYear}):</strong> ${data.population.toLocaleString()}</p>
+                `;
+            }
+        }
+        
+        return content;
     }
     
     setupDenominationColors() {
@@ -305,15 +661,41 @@ class EnhancedPlacesOfWorshipApp {
         // Initialize chroma.js color scale based on data distribution analysis
         // Using Spectral palette with domain based on religious identification percentiles
         if (typeof chroma !== 'undefined') {
-            this.colorScale = chroma.scale(['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#ffffbf', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142'])
-                .domain(this.religionColorDomain);
-            console.log('Color scale initialized with domain:', this.religionColorDomain);
+            this.updateColorScale();
+            console.log('Color scale initialized');
         } else {
             console.error('Chroma.js library not loaded');
         }
     }
     
+    updateColorScale() {
+        // Update color scale based on current demographic mode
+        let domain, colors;
+        
+        switch (this.currentDemographicMode) {
+            case 'religious_percentage':
+                domain = [30, 65]; // Percentage range
+                colors = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#ffffbf', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142'];
+                break;
+            case 'religious_counts':
+                domain = [10, 50]; // Log-scaled count range
+                colors = ['#f7f7f7', '#cccccc', '#969696', '#636363', '#252525']; // Grayscale for counts
+                break;
+            case 'temporal_change':
+                domain = [0, 40]; // Change range (-20 to +20, shifted to 0-40)
+                colors = ['#1a9850', '#66bd63', '#a6d96a', '#d9ef8b', '#ffffbf', '#fee08b', '#fdae61', '#f46d43', '#d73027']; // Diverging green-red (reversed)
+                break;
+            default:
+                domain = [30, 65];
+                colors = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#ffffbf', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142'];
+        }
+        
+        this.colorScale = chroma.scale(colors).domain(domain);
+        console.log(`Color scale updated for ${this.currentDemographicMode} with domain:`, domain);
+    }
+    
     toggleReligiousDensityOverlay() {
+        console.log('toggleReligiousDensityOverlay called, showReligiousDensity:', this.showReligiousDensity);
         if (this.showReligiousDensity) {
             this.addReligiousDensityOverlay();
             this.updateDemographicLegend();
@@ -384,10 +766,44 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     getTAReligiousDensityStyle(feature) {
-        const taCode = feature.properties.TA2021_V1_ || feature.properties.TA2021_V1_00;
+        let taCode = feature.properties.TA2025_V1 || feature.properties.TA2021_V1_ || feature.properties.TA2021_V1_00;
+        const taName = feature.properties.TA2025_NAME || feature.properties.TA2021_V1_NAME || 'Unknown';
+        
+        // handle TA code mapping for mismatched GeoJSON and census codes
+        const taCodeMapping = {
+            '001': '012',  // Far North District -> Far North
+            '068': '058',  // Waitaki District -> Waitaki
+            '069': '006',  // Central Otago District -> Central Otago
+            '070': '038',  // Queenstown-Lakes District -> Queenstown-Lakes
+            '071': '011',  // Dunedin City -> Dunedin
+            '072': '010',  // Clutha District -> Clutha
+            '073': '046',  // Southland District -> Southland
+            '074': '014',  // Gore District -> Gore
+            '075': '021',  // Invercargill City -> Invercargill
+            '076': '002'   // Auckland -> Auckland
+        };
+        
+        // apply mapping if needed
+        if (taCodeMapping[taCode]) {
+            console.log(`🔄 Mapping TA code ${taCode} (${taName}) to census code ${taCodeMapping[taCode]}`);
+            taCode = taCodeMapping[taCode];
+        }
+        
         const taData = this.taCensusData[taCode];
         
-        if (!taData || !taData[this.overlayYear]) {
+        // Enhanced debug logging for specific problem TAs
+        if (!taData) {
+            console.log(`❌ No TA data found for ${taName} (${taCode})`);
+            console.log('Available TA codes in census data:', Object.keys(this.taCensusData));
+            console.log('Feature properties:', feature.properties);
+        } else {
+            // Log successful matches for key areas
+            if (['Queenstown', 'Southland', 'Gore', 'Dunedin'].some(name => taName.includes(name))) {
+                console.log(`✅ Found data for ${taName} (${taCode}):`, Object.keys(taData));
+            }
+        }
+        
+        if (!taData || !taData[String(2018)]) {
             return {
                 fillColor: '#cccccc',
                 weight: 1,
@@ -397,14 +813,26 @@ class EnhancedPlacesOfWorshipApp {
             };
         }
         
-        const yearData = taData[this.overlayYear];
-        const religionPct = this.calculateReligiousPercentage(yearData);
-        
+        const yearData = taData[String(2018)];
+        let colorValue = null;
         let fillColor = '#cccccc';
         let fillOpacity = 0.1;
         
-        if (this.colorScale && religionPct !== null) {
-            fillColor = this.colorScale(religionPct).hex();
+        // Apply different color calculation based on display mode
+        switch (this.currentDemographicMode) {
+            case 'religious_percentage':
+                colorValue = this.calculateReligiousPercentage(yearData);
+                break;
+            case 'religious_counts':
+                colorValue = this.calculateReligiousCounts(yearData);
+                break;
+            case 'temporal_change':
+                colorValue = this.calculateTemporalChange(taData);
+                break;
+        }
+        
+        if (this.colorScale && colorValue !== null) {
+            fillColor = this.colorScale(colorValue).hex();
             fillOpacity = 0.6;
         }
         
@@ -421,7 +849,7 @@ class EnhancedPlacesOfWorshipApp {
         const sa2Code = feature.properties.SA22018_V1 || feature.properties.SA22018_V1_00;
         const sa2Data = this.censusData[sa2Code];
         
-        if (!sa2Data || !sa2Data[this.overlayYear]) {
+        if (!sa2Data || !sa2Data[String(2018)]) {
             return {
                 fillColor: '#cccccc',
                 weight: 0.5,
@@ -431,7 +859,7 @@ class EnhancedPlacesOfWorshipApp {
             };
         }
         
-        const yearData = sa2Data[this.overlayYear];
+        const yearData = sa2Data[String(2018)];
         const religionPct = this.calculateReligiousPercentage(yearData);
         
         let fillColor = '#cccccc';
@@ -453,6 +881,18 @@ class EnhancedPlacesOfWorshipApp {
     
     calculateReligiousPercentage(yearData) {
         // Calculate percentage of people with religious identification (excluding no religion)
+        // Formula: (Total stated - No religion) / Total stated * 100
+        const totalStated = yearData['Total stated'] || 0;
+        const noReligion = yearData['No religion'] || 0;
+        
+        if (totalStated === 0) return null;
+        
+        const religiousCount = totalStated - noReligion;
+        return (religiousCount / totalStated) * 100;
+    }
+    
+    calculateReligiousCounts(yearData) {
+        // Calculate total religious population for count-based visualization
         const totalStated = yearData['Total stated'] || 0;
         if (totalStated === 0) return null;
         
@@ -469,7 +909,22 @@ class EnhancedPlacesOfWorshipApp {
             }
         });
         
-        return (religiousCount / totalStated) * 100;
+        // Return log-scaled value for better visualization of count differences
+        return religiousCount > 0 ? Math.log10(religiousCount + 1) * 10 : 0;
+    }
+    
+    calculateTemporalChange(taData) {
+        // Calculate change in religious percentage from 2013 to 2018 (2006 data not available)
+        if (!taData['2013'] || !taData['2018']) return null;
+        
+        const pct2013 = this.calculateReligiousPercentage(taData['2013']);
+        const pct2018 = this.calculateReligiousPercentage(taData['2018']);
+        
+        if (pct2013 === null || pct2018 === null) return null;
+        
+        // Return percentage point change, clamped to reasonable range for color scaling
+        const change = pct2018 - pct2013;
+        return Math.max(-20, Math.min(20, change)) + 20; // Shift to positive range (0-40) for color scale
     }
     
     updateReligiousDensityVisualization() {
@@ -481,8 +936,28 @@ class EnhancedPlacesOfWorshipApp {
     
     showTAReligiousDensityPopup(e) {
         const feature = e.target.feature;
-        const taCode = feature.properties.TA2021_V1_ || feature.properties.TA2021_V1_00;
+        let taCode = feature.properties.TA2025_V1 || feature.properties.TA2021_V1_ || feature.properties.TA2021_V1_00;
         const taName = feature.properties.TA2025_NAME || feature.properties.TA2021_V1_NAME || 'Unknown Area';
+        
+        // handle TA code mapping for mismatched GeoJSON and census codes
+        const taCodeMapping = {
+            '001': '012',  // Far North District -> Far North
+            '068': '058',  // Waitaki District -> Waitaki
+            '069': '006',  // Central Otago District -> Central Otago
+            '070': '038',  // Queenstown-Lakes District -> Queenstown-Lakes
+            '071': '011',  // Dunedin City -> Dunedin
+            '072': '010',  // Clutha District -> Clutha
+            '073': '046',  // Southland District -> Southland
+            '074': '014',  // Gore District -> Gore
+            '075': '021',  // Invercargill City -> Invercargill
+            '076': '002'   // Auckland -> Auckland
+        };
+        
+        // apply mapping if needed
+        if (taCodeMapping[taCode]) {
+            taCode = taCodeMapping[taCode];
+        }
+        
         const taData = this.taCensusData[taCode];
         
         if (!taData) {
@@ -497,7 +972,7 @@ class EnhancedPlacesOfWorshipApp {
         }
         
         const popupContent = this.formatReligiousDensityPopup(taData, taName, taCode, 'TA');
-        e.target.bindPopup(popupContent, {minWidth: 700, maxWidth: 800});
+        e.target.bindPopup(popupContent, {minWidth: 900, maxWidth: 1000});
         
         // Add popup event handler for creating histogram
         e.target.on('popupopen', (popupEvent) => {
@@ -523,7 +998,7 @@ class EnhancedPlacesOfWorshipApp {
         }
         
         const popupContent = this.formatReligiousDensityPopup(sa2Data, sa2Name, sa2Code, 'SA2');
-        e.target.bindPopup(popupContent, {minWidth: 700, maxWidth: 800});
+        e.target.bindPopup(popupContent, {minWidth: 900, maxWidth: 1000});
         
         // Add popup event handler for creating histogram
         e.target.on('popupopen', (popupEvent) => {
@@ -539,9 +1014,33 @@ class EnhancedPlacesOfWorshipApp {
         
         // Add summary statistics for each year
         years.forEach(year => {
-            if (censusData[year]) {
+            if (year === '2006') {
+                // Check if 2006 data exists (SA-2) or not (TA)
+                if (censusData[year] && censusData[year]['Total stated'] > 0) {
+                    const yearData = censusData[year];
+                    const total = yearData['Total'] || yearData['Total stated'] || 0;
+                    const religionPct = this.calculateReligiousPercentage(yearData);
+                    
+                    summaryContent += `
+                        <div style="margin: 8px 0; padding: 8px; background: rgba(52, 152, 219, 0.1); border-left: 3px solid #3498db;">
+                            <strong>${year}:</strong> 
+                            Total: ${total.toLocaleString()}, 
+                            Religious: ${religionPct ? religionPct.toFixed(1) + '%' : 'N/A'}
+                        </div>
+                    `;
+                } else {
+                    summaryContent += `
+                        <div style="margin: 8px 0; padding: 8px; background: rgba(149, 149, 149, 0.1); border-left: 3px solid #999;">
+                            <strong>${year}:</strong> 
+                            Total: N/A, 
+                            Religious: N/A
+                        </div>
+                    `;
+                }
+            } else if (censusData[year]) {
                 const yearData = censusData[year];
-                const total = yearData['Total'] || 0;
+                // handle both TA data ('Total stated' only) and SA2 data ('Total' + 'Total stated')
+                const total = yearData['Total'] || yearData['Total stated'] || 0;
                 const totalStated = yearData['Total stated'] || 0;
                 const religionPct = this.calculateReligiousPercentage(yearData);
                 
@@ -555,6 +1054,12 @@ class EnhancedPlacesOfWorshipApp {
             }
         });
         
+        // Add demographic data section if selected
+        let demographicContent = '';
+        if (this.currentDemographic && this.currentDemographic !== 'none') {
+            demographicContent = this.generateDemographicContent(areaName, areaCode, areaType);
+        }
+
         return `
             <div class="census-popup">
                 <h3>${areaName}</h3>
@@ -564,9 +1069,100 @@ class EnhancedPlacesOfWorshipApp {
                     <h4>Summary Statistics</h4>
                     ${summaryContent}
                 </div>
+                ${demographicContent}
                 ${histogramDiv}
             </div>
         `;
+    }
+    
+    generateDemographicContent(areaName, areaCode, areaType) {
+        // Generate demographic information based on current selection
+        const demographicType = this.currentDemographic;
+        let content = `<div style="margin-top: 20px; padding: 15px; background: rgba(46, 125, 50, 0.1); border-left: 3px solid #2E7D32;">`;
+        
+        switch (demographicType) {
+            case 'age':
+                content += `
+                    <h4>📊 Age Structure</h4>
+                    <p><em>Age demographic data for ${areaName} would be displayed here.</em></p>
+                    <p>• Median age, age groups, dependency ratios</p>
+                    <p>• Young adult population (20-34 years)</p>
+                    <p>• Aging population trends</p>
+                `;
+                break;
+            case 'gender':
+                content += `
+                    <h4>⚧ Gender Ratio</h4>
+                    <p><em>Gender distribution data for ${areaName} would be displayed here.</em></p>
+                    <p>• Male/female ratio</p>
+                    <p>• Gender diversity indicators</p>
+                `;
+                break;
+            case 'population_density':
+                content += `
+                    <h4>🏘 Population Density</h4>
+                    <p><em>Population density data for ${areaName} would be displayed here.</em></p>
+                    <p>• People per km²</p>
+                    <p>• Urban vs rural classification</p>
+                    <p>• Housing density patterns</p>
+                `;
+                break;
+            case 'home_ownership':
+                content += `
+                    <h4>🏠 Home Ownership</h4>
+                    <p><em>Housing tenure data for ${areaName} would be displayed here.</em></p>
+                    <p>• Ownership vs rental rates</p>
+                    <p>• Housing affordability indicators</p>
+                    <p>• Dwelling types</p>
+                `;
+                break;
+            case 'income':
+                content += `
+                    <h4>💰 Income Statistics</h4>
+                    <p><em>Income data for ${areaName} would be displayed here.</em></p>
+                    <p>• Median household income</p>
+                    <p>• Income distribution quintiles</p>
+                    <p>• Employment rates</p>
+                `;
+                break;
+            case 'ethnicity':
+                content += `
+                    <h4>🌍 Ethnicity</h4>
+                    <p><em>Ethnic composition data for ${areaName} would be displayed here.</em></p>
+                    <p>• European, Māori, Pacific, Asian populations</p>
+                    <p>• Cultural diversity indices</p>
+                    <p>• Immigration patterns</p>
+                `;
+                break;
+            case 'migration':
+                content += `
+                    <h4>🚶 Migration Patterns</h4>
+                    <p><em>Migration data for ${areaName} would be displayed here.</em></p>
+                    <p>• Internal migration flows</p>
+                    <p>• International migration</p>
+                    <p>• Population mobility trends</p>
+                `;
+                break;
+            case 'birth_rates':
+                content += `
+                    <h4>👶 Birth Rates</h4>
+                    <p><em>Fertility and birth rate data for ${areaName} would be displayed here.</em></p>
+                    <p>• Total fertility rate</p>
+                    <p>• Age-specific fertility rates</p>
+                    <p>• Family formation patterns</p>
+                `;
+                break;
+            default:
+                return '';
+        }
+        
+        content += `
+            <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                📝 <em>Demographic data integration with Stats NZ APIs planned for future release</em>
+            </p>
+        </div>`;
+        
+        return content;
     }
     
     populateFilterDropdowns() {
@@ -891,7 +1487,26 @@ class EnhancedPlacesOfWorshipApp {
     
     // Territorial Authority specific functions (parallel to SA2)
     getTACensusFeatureStyle(feature) {
-        const taCode = String(feature.properties.TA2025_V1 || feature.properties.TA2025_NAME);
+        let taCode = String(feature.properties.TA2025_V1 || feature.properties.TA2025_NAME);
+        
+        // handle TA code mapping for mismatched GeoJSON and census codes
+        const taCodeMapping = {
+            '001': '012',  // Far North District -> Far North
+            '068': '058',  // Waitaki District -> Waitaki
+            '069': '006',  // Central Otago District -> Central Otago
+            '070': '038',  // Queenstown-Lakes District -> Queenstown-Lakes
+            '071': '011',  // Dunedin City -> Dunedin
+            '072': '010',  // Clutha District -> Clutha
+            '073': '046',  // Southland District -> Southland
+            '074': '014',  // Gore District -> Gore
+            '075': '021',  // Invercargill City -> Invercargill
+            '076': '002'   // Auckland -> Auckland
+        };
+        
+        if (taCodeMapping[taCode]) {
+            taCode = taCodeMapping[taCode];
+        }
+        
         const color = this.calculateTACensusColor(taCode);
         
         return {
@@ -926,12 +1541,31 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     onEachTACensusFeature(feature, layer) {
-        const taCode = String(feature.properties.TA2025_V1 || feature.properties.TA2025_NAME);
+        let taCode = String(feature.properties.TA2025_V1 || feature.properties.TA2025_NAME);
+        
+        // handle TA code mapping for mismatched GeoJSON and census codes
+        const taCodeMapping = {
+            '001': '012',  // Far North District -> Far North
+            '068': '058',  // Waitaki District -> Waitaki
+            '069': '006',  // Central Otago District -> Central Otago
+            '070': '038',  // Queenstown-Lakes District -> Queenstown-Lakes
+            '071': '011',  // Dunedin City -> Dunedin
+            '072': '010',  // Clutha District -> Clutha
+            '073': '046',  // Southland District -> Southland
+            '074': '014',  // Gore District -> Gore
+            '075': '021',  // Invercargill City -> Invercargill
+            '076': '002'   // Auckland -> Auckland
+        };
+        
+        if (taCodeMapping[taCode]) {
+            taCode = taCodeMapping[taCode];
+        }
+        
         const taData = this.taCensusData ? this.taCensusData[taCode] : null;
         
         if (taData) {
             const popupContent = this.createTACensusPopupContent(feature.properties, taData);
-            layer.bindPopup(popupContent, {minWidth: 700, maxWidth: 800});
+            layer.bindPopup(popupContent, {minWidth: 900, maxWidth: 1000});
             
             // Add popup event handler for creating histogram
             layer.on('popupopen', (e) => {
@@ -961,8 +1595,26 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     createTACensusPopupContent(properties, taData) {
-        const taCode = String(properties.TA2025_V1 || properties.TA2025_NAME);
+        let taCode = String(properties.TA2025_V1 || properties.TA2025_NAME);
         const taName = properties.TA2025_NAME;
+        
+        // handle TA code mapping for mismatched GeoJSON and census codes
+        const taCodeMapping = {
+            '001': '012',  // Far North District -> Far North
+            '068': '058',  // Waitaki District -> Waitaki
+            '069': '006',  // Central Otago District -> Central Otago
+            '070': '038',  // Queenstown-Lakes District -> Queenstown-Lakes
+            '071': '011',  // Dunedin City -> Dunedin
+            '072': '010',  // Clutha District -> Clutha
+            '073': '046',  // Southland District -> Southland
+            '074': '014',  // Gore District -> Gore
+            '075': '021',  // Invercargill City -> Invercargill
+            '076': '002'   // Auckland -> Auckland
+        };
+        
+        if (taCodeMapping[taCode]) {
+            taCode = taCodeMapping[taCode];
+        }
         
         // Get data for latest year (2018) for basic info
         const latestData = taData[String(2018)] || {};
@@ -995,23 +1647,24 @@ class EnhancedPlacesOfWorshipApp {
         const keyReligions = ['Christian', 'No religion', 'Buddhism', 'Hinduism', 'Islam'];
         
         keyReligions.forEach(religion => {
-            const data2006 = taData[String(2006)]?.[religion] || 0;
             const data2013 = taData[String(2013)]?.[religion] || 0;  
             const data2018 = taData[String(2018)]?.[religion] || 0;
             
-            const total2006 = taData[String(2006)]?.['Total stated'] || 0;
             const total2013 = taData[String(2013)]?.['Total stated'] || 0;
             const total2018 = taData[String(2018)]?.['Total stated'] || 0;
             
-            if (total2006 > 0 && total2018 > 0) {
+            if (total2013 > 0 && total2018 > 0) {
+                // Check if 2006 data is available (SA-2) or not (TA)
+                const has2006Data = total2006 > 0;
+                
                 // Calculate percentages
-                const pct2006 = (data2006 / total2006 * 100);
+                const pct2006 = has2006Data ? (data2006 / total2006 * 100) : null;
                 const pct2013 = (data2013 / total2013 * 100);
                 const pct2018 = (data2018 / total2018 * 100);
                 
-                // Calculate proportional changes
-                const pointChange = pct2018 - pct2006; // Percentage point change
-                const relativeChange = pct2006 > 0 ? ((pct2018 - pct2006) / pct2006 * 100) : 0; // Relative change
+                // Calculate proportional changes from 2013 to 2018
+                const pointChange = pct2018 - pct2013; // Percentage point change
+                const relativeChange = pct2013 > 0 ? ((pct2018 - pct2013) / pct2013 * 100) : 0; // Relative change
                 
                 // Determine trend and colors
                 const trend = pointChange > 0.5 ? '↗' : pointChange < -0.5 ? '↘' : '→';
@@ -1021,46 +1674,101 @@ class EnhancedPlacesOfWorshipApp {
                 // Format the proportional change display
                 const changeText = Math.abs(pointChange) > 0.1 ? 
                     `<span style="color: ${changeColor}; font-weight: bold;">
-                        ${pointChange > 0 ? '+' : ''}${pointChange.toFixed(1)} points
-                        ${Math.abs(relativeChange) > 1 ? ` (${relativeChange > 0 ? '+' : ''}${relativeChange.toFixed(0)}%)` : ''}
+                        ${pointChange > 0 ? '+' : ''}${pointChange.toFixed(1)}pt (${data2018 > data2013 ? '+' : ''}${(data2018-data2013).toLocaleString()})
                     </span>` : 
                     '<span style="color: #666;">stable</span>';
                 
                 popupContent += `
                     <p><strong>${religion}:</strong><br>
                     <span style="font-size: 0.9em;">
-                        ${pct2006.toFixed(1)}% → ${pct2013.toFixed(1)}% → ${pct2018.toFixed(1)}% 
+                        ${has2006Data ? pct2006.toFixed(1) + '%' : 'N/A'} → ${pct2013.toFixed(1)}% → ${pct2018.toFixed(1)}% 
                         <span style="color: ${trendColor};">${trend}</span>
                     </span><br>
                     <span style="font-size: 0.85em; color: #555;">
-                        Change 2006-2018: ${changeText}
+                        Change 2013-2018: ${changeText}
                     </span>
                     </p>`;
             } else {
                 // Fallback to absolute numbers if percentages can't be calculated
-                const trend = data2018 > data2006 ? '↗' : data2018 < data2006 ? '↘' : '→';
-                const trendColor = data2018 > data2006 ? 'green' : data2018 < data2006 ? 'red' : 'gray';
+                const trend = data2018 > data2013 ? '↗' : data2018 < data2013 ? '↘' : '→';
+                const trendColor = data2018 > data2013 ? 'green' : data2018 < data2013 ? 'red' : 'gray';
                 
-                popupContent += `<p><strong>${religion}:</strong> ${data2006.toLocaleString()} → ${data2013.toLocaleString()} → ${data2018.toLocaleString()} <span style="color: ${trendColor};">${trend}</span></p>`;
+                popupContent += `<p><strong>${religion}:</strong> ${has2006Data ? data2006.toLocaleString() : 'N/A'} → ${data2013.toLocaleString()} → ${data2018.toLocaleString()} <span style="color: ${trendColor};">${trend}</span></p>`;
             }
         });
         
+        // Add demographic context section
+        popupContent += `<h4>Demographic Context</h4>`;
+        
+        // Calculate population change and density information
+        const pop2013 = taData[String(2013)]?.['Total stated'] || 0;
+        const pop2018 = taData[String(2018)]?.['Total stated'] || 0;
+        const landArea = properties.LAND_AREA; // km²
+        
+        if (pop2013 > 0 && pop2018 > 0) {
+            const popChange = pop2018 - pop2013;
+            const popChangePercent = ((popChange / pop2013) * 100).toFixed(1);
+            const changeColor = popChange > 0 ? '#27ae60' : '#e74c3c';
+            const changeIcon = popChange > 0 ? '↗' : '↘';
+            
+            popupContent += `
+                <p><strong>Population Change (2013-2018):</strong><br>
+                <span style="color: ${changeColor};">
+                ${popChange > 0 ? '+' : ''}${popChange.toLocaleString()} people (${popChangePercent}%) ${changeIcon}
+                </span></p>
+            `;
+        }
+        
+        if (landArea && pop2018 > 0) {
+            const density = (pop2018 / landArea).toFixed(1);
+            popupContent += `
+                <p><strong>Area:</strong> ${landArea.toLocaleString()} km²</p>
+                <p><strong>Population Density (2018):</strong> ${density} people/km²</p>
+            `;
+        }
+        
+        // Add regional context
+        const religiousPct2018 = this.calculateReligiousPercentage(taData[String(2018)]);
+        if (religiousPct2018) {
+            let regionalContext = '';
+            if (religiousPct2018 > 65) {
+                regionalContext = 'High religious identification (above national average)';
+            } else if (religiousPct2018 < 50) {
+                regionalContext = 'Lower religious identification (below national average)';
+            } else {
+                regionalContext = 'Moderate religious identification (near national average)';
+            }
+            popupContent += `<p><strong>Regional Profile:</strong> ${regionalContext}</p>`;
+        }
+        
+        // Add birth rate and migration data if available
+        popupContent += this.addBirthRateMigrationData(taCode);
+        
+        // Add data limitations note
+        popupContent += `
+            <div style="margin-top: 15px; padding: 8px; background: #f8f9fa; border-left: 3px solid #17a2b8; font-size: 0.85em; color: #666;">
+                <strong>Note:</strong> Detailed demographic breakdowns (age, ethnicity, income) are available at SA2 level. 
+                Switch to "Statistical Area 2" view for comprehensive demographics.
+            </div>
+        `;
+        
         // Add chart placeholder for histogram
-        popupContent += `<div id="religion-chart" style="width: 100%; height: 450px; margin-top: 15px; border: 1px solid #ddd; border-radius: 5px;"></div>`;
+        popupContent += `<div id="religious-histogram" style="width: 100%; min-height: 400px; margin-top: 15px;"></div>`;
         
         popupContent += `</div>`;
         return popupContent;
     }
     
     calculateNoReligionChangeColor(saData) {
-        if (!saData["2006"] || !saData["2018"] || 
-            !saData["2006"]["Total stated"] || !saData["2018"]["Total stated"]) {
+        // Use 2013→2018 change for consistency with TA level
+        if (!saData["2013"] || !saData["2018"] || 
+            !saData["2013"]["Total stated"] || !saData["2018"]["Total stated"]) {
             return "gray";
         }
         
-        const noReligion06Pct = saData["2006"]["No religion"] / saData["2006"]["Total stated"] * 100;
+        const noReligion13Pct = saData["2013"]["No religion"] / saData["2013"]["Total stated"] * 100;
         const noReligion18Pct = saData["2018"]["No religion"] / saData["2018"]["Total stated"] * 100;
-        const diff = noReligion18Pct - noReligion06Pct;
+        const diff = noReligion18Pct - noReligion13Pct;
         
         if (diff < -1) {
             return "purple"; // More religious
@@ -1072,14 +1780,15 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     calculateChristianChangeColor(saData) {
-        if (!saData["2006"] || !saData["2018"] || 
-            !saData["2006"]["Total stated"] || !saData["2018"]["Total stated"]) {
+        // Use 2013→2018 change for consistency with TA level
+        if (!saData["2013"] || !saData["2018"] || 
+            !saData["2013"]["Total stated"] || !saData["2018"]["Total stated"]) {
             return "gray";
         }
         
-        const christian06Pct = saData["2006"]["Christian"] / saData["2006"]["Total stated"] * 100;
+        const christian13Pct = saData["2013"]["Christian"] / saData["2013"]["Total stated"] * 100;
         const christian18Pct = saData["2018"]["Christian"] / saData["2018"]["Total stated"] * 100;
-        const diff = christian18Pct - christian06Pct;
+        const diff = christian18Pct - christian13Pct;
         
         if (diff > 1) {
             return "#2E8B57"; // More Christian
@@ -1266,7 +1975,7 @@ class EnhancedPlacesOfWorshipApp {
         
         if (saData) {
             const popupContent = this.createCensusPopupContent(feature.properties, saData);
-            layer.bindPopup(popupContent, {minWidth: 700, maxWidth: 800});
+            layer.bindPopup(popupContent, {minWidth: 900, maxWidth: 1000});
             
             // Add popup event handler for creating histogram
             layer.on('popupopen', (e) => {
@@ -1331,15 +2040,18 @@ class EnhancedPlacesOfWorshipApp {
             const total2013 = saData[String(2013)]?.['Total stated'] || 0;
             const total2018 = saData[String(2018)]?.['Total stated'] || 0;
             
-            if (total2006 > 0 && total2018 > 0) {
+            if (total2013 > 0 && total2018 > 0) {
+                // Check if 2006 data is available (SA-2) or not (TA)
+                const has2006Data = total2006 > 0;
+                
                 // Calculate percentages
-                const pct2006 = (data2006 / total2006 * 100);
+                const pct2006 = has2006Data ? (data2006 / total2006 * 100) : null;
                 const pct2013 = (data2013 / total2013 * 100);
                 const pct2018 = (data2018 / total2018 * 100);
                 
-                // Calculate proportional changes
-                const pointChange = pct2018 - pct2006; // Percentage point change
-                const relativeChange = pct2006 > 0 ? ((pct2018 - pct2006) / pct2006 * 100) : 0; // Relative change
+                // Calculate proportional changes from 2013 to 2018
+                const pointChange = pct2018 - pct2013; // Percentage point change
+                const relativeChange = pct2013 > 0 ? ((pct2018 - pct2013) / pct2013 * 100) : 0; // Relative change
                 
                 // Determine trend and colors
                 const trend = pointChange > 0.5 ? '↗' : pointChange < -0.5 ? '↘' : '→';
@@ -1349,32 +2061,31 @@ class EnhancedPlacesOfWorshipApp {
                 // Format the proportional change display
                 const changeText = Math.abs(pointChange) > 0.1 ? 
                     `<span style="color: ${changeColor}; font-weight: bold;">
-                        ${pointChange > 0 ? '+' : ''}${pointChange.toFixed(1)} points
-                        ${Math.abs(relativeChange) > 1 ? ` (${relativeChange > 0 ? '+' : ''}${relativeChange.toFixed(0)}%)` : ''}
+                        ${pointChange > 0 ? '+' : ''}${pointChange.toFixed(1)}pt (${data2018 > data2013 ? '+' : ''}${(data2018-data2013).toLocaleString()})
                     </span>` : 
                     '<span style="color: #666;">stable</span>';
                 
                 popupContent += `
                     <p><strong>${religion}:</strong><br>
                     <span style="font-size: 0.9em;">
-                        ${pct2006.toFixed(1)}% → ${pct2013.toFixed(1)}% → ${pct2018.toFixed(1)}% 
+                        ${has2006Data ? pct2006.toFixed(1) + '%' : 'N/A'} → ${pct2013.toFixed(1)}% → ${pct2018.toFixed(1)}% 
                         <span style="color: ${trendColor};">${trend}</span>
                     </span><br>
                     <span style="font-size: 0.85em; color: #555;">
-                        Change 2006-2018: ${changeText}
+                        Change 2013-2018: ${changeText}
                     </span>
                     </p>`;
             } else {
                 // Fallback to absolute numbers if percentages can't be calculated
-                const trend = data2018 > data2006 ? '↗' : data2018 < data2006 ? '↘' : '→';
-                const trendColor = data2018 > data2006 ? 'green' : data2018 < data2006 ? 'red' : 'gray';
+                const trend = data2018 > data2013 ? '↗' : data2018 < data2013 ? '↘' : '→';
+                const trendColor = data2018 > data2013 ? 'green' : data2018 < data2013 ? 'red' : 'gray';
                 
-                popupContent += `<p><strong>${religion}:</strong> ${data2006.toLocaleString()} → ${data2013.toLocaleString()} → ${data2018.toLocaleString()} <span style="color: ${trendColor};">${trend}</span></p>`;
+                popupContent += `<p><strong>${religion}:</strong> ${has2006Data ? data2006.toLocaleString() : 'N/A'} → ${data2013.toLocaleString()} → ${data2018.toLocaleString()} <span style="color: ${trendColor};">${trend}</span></p>`;
             }
         });
         
         // Add histogram placeholder
-        popupContent += `<div id="religion-chart" style="width: 100%; height: 450px; margin-top: 15px; border: 1px solid #ddd; border-radius: 5px;"></div>`;
+        popupContent += `<div id="religious-histogram" style="width: 100%; height: 300px; margin-top: 15px;"></div>`;
         
         // Get comprehensive demographic data from latest year (2018)
         const demographicData = this.demographicData[sa2Code];
@@ -1430,6 +2141,9 @@ class EnhancedPlacesOfWorshipApp {
                 popupContent += `<p>Home Ownership: ${(comprehensiveData.home_ownership_rate * 100).toFixed(1)}%</p>`;
             }
             
+            // Add SA2 population change data
+            popupContent += this.addSA2PopulationChangeData(sa2Code);
+            
             // Area characteristics
             if (comprehensiveData.population_density !== undefined) {
                 popupContent += `<p>Density: ${comprehensiveData.population_density} people/km²</p>`;
@@ -1483,10 +2197,10 @@ class EnhancedPlacesOfWorshipApp {
         this.currentMajorCategory = 'all';
         this.currentDenomination = 'all';
         
-        // Reset census overlay
-        document.getElementById('censusOverlayToggle').checked = false;
-        this.showCensusOverlay = false;
-        this.removeCensusOverlay();
+        // Reset religious density overlay
+        document.getElementById('religiousDensityToggle').checked = false;
+        this.showReligiousDensity = false;
+        this.removeReligiousDensityOverlay();
         
         this.updateDenominationFilter();
         this.updateDisplay();
@@ -1581,91 +2295,6 @@ class EnhancedPlacesOfWorshipApp {
         });
     }
     
-    createReligiousHistogram(saData, regionName) {
-        // Create comprehensive 3-year religious timeline histogram using Plotly
-        const religions = ['Christian', 'No religion', 'Buddhism', 'Hinduism', 'Islam', 'Judaism', 'Sikhism'];
-        
-        const data2006 = saData[String(2006)] || {};
-        const data2013 = saData[String(2013)] || {};
-        const data2018 = saData[String(2018)] || {};
-        
-        const values2006 = religions.map(religion => data2006[religion] || 0);
-        const values2013 = religions.map(religion => data2013[religion] || 0);
-        const values2018 = religions.map(religion => data2018[religion] || 0);
-        
-        // Debug: check data availability
-        console.log('Histogram data for', regionName);
-        console.log('2006 values:', values2006);
-        console.log('2013 values:', values2013);  
-        console.log('2018 values:', values2018);
-        
-        const plotData = [
-            {
-                x: religions,
-                y: values2006,
-                name: '2006 Census',
-                type: 'bar',
-                marker: { 
-                    color: '#B3D9FF',
-                    line: { color: '#4A90E2', width: 1 }
-                },
-                hovertemplate: '<b>%{x}</b><br>2006: %{y}<extra></extra>'
-            },
-            {
-                x: religions,
-                y: values2013,
-                name: '2013 Census',
-                type: 'bar',
-                marker: { 
-                    color: '#7CC7E8',
-                    line: { color: '#5DADE2', width: 1 }
-                },
-                hovertemplate: '<b>%{x}</b><br>2013: %{y}<extra></extra>'
-            },
-            {
-                x: religions,
-                y: values2018,
-                name: '2018 Census',
-                type: 'bar',
-                marker: { 
-                    color: '#1F77B4',
-                    line: { color: '#154A8A', width: 1 }
-                },
-                hovertemplate: '<b>%{x}</b><br>2018: %{y}<extra></extra>'
-            }
-        ];
-        
-        const layout = {
-            title: {
-                text: `Religious Change Timeline - ${regionName}`,
-                font: { size: 16 }
-            },
-            xaxis: { 
-                title: 'Religion',
-                tickangle: -45
-            },
-            yaxis: { 
-                title: 'Number of People'
-            },
-            barmode: 'group',
-            height: 420,
-            margin: { l: 70, r: 30, t: 70, b: 80 },
-            showlegend: true,
-            legend: {
-                orientation: "h",
-                x: 0.1,
-                y: 1.1
-            }
-        };
-        
-        // Create the plot in the popup
-        setTimeout(() => {
-            const chartContainer = document.getElementById('religion-chart');
-            if (chartContainer) {
-                Plotly.newPlot(chartContainer, plotData, layout, {displayModeBar: false});
-            }
-        }, 100); // Small delay to ensure popup is fully rendered
-    }
     
     updateDemographicLegend() {
         const legendSection = document.getElementById('demographicLegend');
@@ -1712,7 +2341,7 @@ class EnhancedPlacesOfWorshipApp {
                 content = this.createCountBasedLegend();
                 break;
             case 'temporal_change':
-                title = 'Religious Change (2006→2018)';
+                title = 'Religious Change (2013→2018)';
                 content = this.createTemporalChangeLegend();
                 break;
         }
@@ -1730,8 +2359,8 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     createReligiousHistogram(censusData, areaName) {
-        // Create rich Plotly.js histogram showing temporal change 2006→2013→2018
-        // Following age_map patterns for 300px height and stacked bars
+        // Create simple HTML/CSS visualization instead of Plotly
+        // Much more readable and larger display
         
         setTimeout(() => {
             const container = document.getElementById('religious-histogram');
@@ -1740,120 +2369,153 @@ class EnhancedPlacesOfWorshipApp {
                 return;
             }
             
-            if (typeof Plotly === 'undefined') {
-                console.error('Plotly.js not loaded');
-                container.innerHTML = '<p>Plotly.js not available for histogram</p>';
-                return;
-            }
-            
             const years = ['2006', '2013', '2018'];
-            const religionsToShow = ['Christian', 'No religion', 'Buddhism', 'Hinduism', 'Islam', 'Judaism', 
-                                  'Maori religions, beliefs, and philosophies', 'Other religions, beliefs, and philosophies'];
+            const religionsToShow = ['Christian', 'No religion', 'Buddhism', 'Hinduism', 'Islam', 'Judaism'];
+            
+            // Enhanced color palette for denominations
             const religionColors = {
-                'Christian': '#e74c3c',
-                'No religion': '#95a5a6', 
-                'Buddhism': '#f39c12',
-                'Hinduism': '#e67e22',
-                'Islam': '#27ae60',
-                'Judaism': '#9b59b6',
-                'Maori religions, beliefs, and philosophies': '#c0392b',
-                'Other religions, beliefs, and philosophies': '#16a085'
+                'Christian': '#e74c3c',           // Vibrant red
+                'No religion': '#95a5a6',        // Light grey
+                'Buddhism': '#f39c12',           // Orange
+                'Hinduism': '#e67e22',           // Dark orange  
+                'Islam': '#27ae60',              // Green
+                'Judaism': '#9b59b6'             // Purple
             };
             
-            let traces = [];
+            // Create HTML table with trend indicators
+            let htmlContent = `
+                <div style="width: 100%; background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <h3 style="text-align: center; margin-bottom: 20px; color: #2c3e50; font-size: 16px;">
+                        Religious Affiliation Timeline - ${areaName}
+                    </h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <thead>
+                            <tr style="background: #34495e; color: white;">
+                                <th style="text-align: left; padding: 12px; border: 1px solid #ddd;">Religion</th>
+                                <th style="text-align: right; padding: 12px; border: 1px solid #ddd;">2006</th>
+                                <th style="text-align: right; padding: 12px; border: 1px solid #ddd;">2013</th>
+                                <th style="text-align: right; padding: 12px; border: 1px solid #ddd;">2018</th>
+                                <th style="text-align: center; padding: 12px; border: 1px solid #ddd;">Trend</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
             
-            // Create traces for each religion showing change across years
-            religionsToShow.forEach(religion => {
-                let yearCounts = [];
-                let yearPercentages = [];
+            religionsToShow.forEach((religion, index) => {
+                const data2006 = censusData[String(2006)]?.[religion] || 0;
+                const data2013 = censusData[String(2013)]?.[religion] || 0;  
+                const data2018 = censusData[String(2018)]?.[religion] || 0;
                 
-                years.forEach(year => {
-                    const yearData = censusData[year];
-                    if (yearData) {
-                        const count = yearData[religion] || 0;
-                        const total = yearData['Total stated'] || 1;
-                        const percentage = (count / total * 100);
-                        
-                        yearCounts.push(count);
-                        yearPercentages.push(percentage);
-                    } else {
-                        yearCounts.push(0);
-                        yearPercentages.push(0);
-                    }
-                });
+                // Calculate proportions (percentages) - check if 2006 data available
+                const total2006 = censusData[String(2006)]?.['Total stated'] || 0;
+                const total2013 = censusData[String(2013)]?.['Total stated'] || 0;
+                const total2018 = censusData[String(2018)]?.['Total stated'] || 0;
+                const has2006Data = total2006 > 0;
                 
-                traces.push({
-                    x: years,
-                    y: yearCounts,
-                    name: religion.replace('religions, beliefs, and philosophies', 'religions'),
-                    type: 'bar',
-                    marker: {
-                        color: religionColors[religion] || '#3498db'
-                    },
-                    text: yearPercentages.map(p => p.toFixed(1) + '%'),
-                    textposition: 'none',
-                    hovertemplate: '<b>%{fullData.name}</b><br>' +
-                                 'Year: %{x}<br>' +
-                                 'Count: %{y:,}<br>' +
-                                 'Percentage: %{text}<br>' +
-                                 '<extra></extra>'
-                });
+                const pct2006 = has2006Data ? (data2006 / total2006 * 100) : 0;
+                const pct2013 = total2013 > 0 ? (data2013 / total2013 * 100) : 0;
+                const pct2018 = total2018 > 0 ? (data2018 / total2018 * 100) : 0;
+                
+                // Calculate percentage point change from 2013 to 2018
+                const percentagePointChange = pct2018 - pct2013;
+                const countChange = data2018 - data2013;
+                
+                // Use percentage points for trend direction (more meaningful for religious data)
+                const trendIcon = percentagePointChange > 1.0 ? '↗' : percentagePointChange < -1.0 ? '↘' : '→';
+                const trendColor = percentagePointChange > 1.0 ? '#27ae60' : percentagePointChange < -1.0 ? '#e74c3c' : '#666';
+                
+                // Show both percentage point change and count change
+                const percentageText = percentagePointChange > 0 ? `+${percentagePointChange.toFixed(1)}pt` : `${percentagePointChange.toFixed(1)}pt`;
+                const countText = countChange > 0 ? `(+${countChange.toLocaleString()})` : `(${countChange.toLocaleString()})`;
+                const changeText = `${percentageText} ${countText}`;
+                
+                // Row background alternating
+                const rowBg = index % 2 === 0 ? '#f8f9fa' : 'white';
+                const religionColor = religionColors[religion] || '#34495e';
+                
+                htmlContent += `
+                    <tr style="background: ${rowBg};">
+                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">
+                            <span style="display: inline-block; width: 12px; height: 12px; background: ${religionColor}; border-radius: 2px; margin-right: 8px;"></span>
+                            ${religion}
+                        </td>
+                        <td style="text-align: right; padding: 10px; border: 1px solid #ddd;">
+                            ${has2006Data ? data2006.toLocaleString() : 'N/A'}<br>
+                            <small style="color: #666;">(${has2006Data ? pct2006.toFixed(1) + '%' : 'N/A'})</small>
+                        </td>
+                        <td style="text-align: right; padding: 10px; border: 1px solid #ddd;">
+                            ${data2013.toLocaleString()}<br>
+                            <small style="color: #666;">(${pct2013.toFixed(1)}%)</small>
+                        </td>
+                        <td style="text-align: right; padding: 10px; border: 1px solid #ddd;">
+                            ${data2018.toLocaleString()}<br>
+                            <small style="color: #666;">(${pct2018.toFixed(1)}%)</small>
+                        </td>
+                        <td style="text-align: center; padding: 10px; border: 1px solid #ddd;">
+                            <span style="color: ${trendColor}; font-weight: bold; font-size: 16px;">${trendIcon}</span>
+                            <br>
+                            <span style="color: ${trendColor}; font-size: 11px;">${changeText}</span>
+                        </td>
+                    </tr>
+                `;
             });
             
-            const layout = {
-                title: {
-                    text: `Religious Affiliation Timeline - ${areaName}`,
-                    font: { size: 16 }
-                },
-                xaxis: {
-                    title: 'Census Year',
-                    tickmode: 'array',
-                    tickvals: years
-                },
-                yaxis: {
-                    title: 'Number of People'
-                },
-                height: 300,
-                barmode: 'stack',
-                margin: {
-                    l: 60,
-                    r: 20,
-                    t: 50,
-                    b: 50
-                },
-                legend: {
-                    orientation: 'h',
-                    x: 0,
-                    y: -0.3,
-                    font: { size: 10 }
-                },
-                plot_bgcolor: 'rgba(0,0,0,0)',
-                paper_bgcolor: 'rgba(0,0,0,0)'
-            };
+            htmlContent += `
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 15px; padding: 12px; background: #e8f6f3; border-left: 4px solid #27ae60; font-size: 12px; color: #2c3e50;">
+                        <strong>Reading the trends (2013→2018):</strong><br>
+                        ↗ Growing (+1.0+ percentage points) &nbsp;&nbsp; 
+                        ↘ Declining (-1.0+ percentage points) &nbsp;&nbsp; 
+                        → Stable (±1.0 percentage points)<br>
+                        <em>Format: percentage point change (count change)</em>
+                    </div>
+                </div>
+            `;
             
-            const config = {
-                displayModeBar: true,
-                modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d', 'autoScale2d'],
-                displaylogo: false,
-                responsive: true
-            };
+            container.innerHTML = htmlContent;
             
-            Plotly.newPlot(container, traces, layout, config);
-            
-        }, 100); // Small delay to ensure popup is fully rendered
+        }, 50); // Small delay to ensure popup is fully rendered
     }
     
     createColorScaleLegend(description) {
         if (!this.colorScale) return '<p>Color scale not available</p>';
         
-        // Create graduated color legend based on percentile thresholds  
-        const thresholds = [30, 35, 40, 45, 50, 55, 60, 65];
+        // Get appropriate thresholds based on current mode
+        let thresholds, formatValue;
+        
+        switch (this.currentDemographicMode) {
+            case 'religious_percentage':
+                thresholds = [30, 35, 40, 45, 50, 55, 60, 65];
+                formatValue = (val) => `${val}%`;
+                break;
+            case 'religious_counts':
+                thresholds = [10, 20, 30, 40, 50];
+                formatValue = (val) => {
+                    const actualCount = Math.round(Math.pow(10, val/10) - 1);
+                    return actualCount >= 1000 ? `${Math.round(actualCount/1000)}k` : actualCount.toString();
+                };
+                break;
+            case 'temporal_change':
+                thresholds = [5, 15, 20, 25, 35]; // Representing -15, -5, 0, +5, +15 percentage points
+                formatValue = (val) => {
+                    const change = val - 20; // Convert back to actual change
+                    return change > 0 ? `+${change}pt` : `${change}pt`;
+                };
+                break;
+            default:
+                thresholds = [30, 35, 40, 45, 50, 55, 60, 65];
+                formatValue = (val) => `${val}%`;
+        }
+        
         let legendHtml = `<p style="font-size: 0.9em; margin-bottom: 10px;">${description}</p>`;
         
         thresholds.forEach((threshold, index) => {
             const color = this.colorScale(threshold).hex();
             const nextThreshold = thresholds[index + 1];
-            const range = nextThreshold ? `${threshold}% - ${nextThreshold}%` : `${threshold}%+`;
+            const range = nextThreshold ? 
+                `${formatValue(threshold)} - ${formatValue(nextThreshold)}` : 
+                `${formatValue(threshold)}+`;
             
             legendHtml += `
                 <div class="legend-item" style="margin: 4px 0;">
@@ -1886,13 +2548,13 @@ class EnhancedPlacesOfWorshipApp {
     
     createTemporalChangeLegend() {
         return `
-            <p style="font-size: 0.9em; margin-bottom: 10px;">Change in religious identification 2006→2018</p>
+            <p style="font-size: 0.9em; margin-bottom: 10px;">Change in religious identification 2013→2018</p>
             <div class="legend-item">
-                <div class="legend-dot" style="background-color: #d53e4f; width: 16px; height: 16px;"></div>
-                Large decrease (&gt;-5 points)
+                <div class="legend-dot" style="background-color: #1a9850; width: 16px; height: 16px;"></div>
+                Large decrease (&gt;-5 points) - More secular
             </div>
             <div class="legend-item">
-                <div class="legend-dot" style="background-color: #f46d43; width: 14px; height: 14px;"></div>
+                <div class="legend-dot" style="background-color: #66bd63; width: 14px; height: 14px;"></div>
                 Moderate decrease (-2 to -5 points)
             </div>
             <div class="legend-item">
@@ -1900,12 +2562,12 @@ class EnhancedPlacesOfWorshipApp {
                 Stable (-2 to +2 points)
             </div>
             <div class="legend-item">
-                <div class="legend-dot" style="background-color: #abdda4; width: 14px; height: 14px;"></div>
+                <div class="legend-dot" style="background-color: #f46d43; width: 14px; height: 14px;"></div>
                 Moderate increase (+2 to +5 points)
             </div>
             <div class="legend-item">
-                <div class="legend-dot" style="background-color: #66c2a5; width: 16px; height: 16px;"></div>
-                Large increase (&gt;+5 points)
+                <div class="legend-dot" style="background-color: #d73027; width: 16px; height: 16px;"></div>
+                Large increase (&gt;+5 points) - More religious
             </div>
         `;
     }
@@ -1914,7 +2576,7 @@ class EnhancedPlacesOfWorshipApp {
         switch (this.currentCensusMetric) {
             case 'no_religion_change':
                 return {
-                    title: 'No Religion Change (2006-2018)',
+                    title: 'No Religion Change (2013-2018)',
                     content: `
                         <div class="legend-item">
                             <div class="legend-dot" style="background-color: purple; width: 12px; height: 12px;"></div>
@@ -1933,7 +2595,7 @@ class EnhancedPlacesOfWorshipApp {
             
             case 'christian_change':
                 return {
-                    title: 'Christian Change (2006-2018)',
+                    title: 'Christian Change (2013-2018)',
                     content: `
                         <div class="legend-item">
                             <div class="legend-dot" style="background-color: #2E8B57; width: 12px; height: 12px;"></div>
@@ -2169,6 +2831,115 @@ class EnhancedPlacesOfWorshipApp {
             return "#FF9800"; // Low diversity
         } else {
             return "#FF5722"; // Very low diversity
+        }
+    }
+    
+    exportData(type = 'all') {
+        console.log(`Exporting ${type} data...`);
+        
+        try {
+            let dataToExport = [];
+            const currentDate = new Date().toISOString().split('T')[0];
+            
+            if (type === 'all' || type === 'filtered') {
+                // Export TA religious data
+                if (this.taCensusData) {
+                    dataToExport = this.prepareTADataForExport();
+                }
+            }
+            
+            if (dataToExport.length === 0) {
+                alert('No data available for export');
+                return;
+            }
+            
+            // Convert to CSV
+            const csvContent = this.convertToCSV(dataToExport);
+            const filename = `nz_religious_data_${type}_${currentDate}.csv`;
+            
+            // Download CSV file
+            this.downloadCSV(csvContent, filename);
+            
+        } catch (error) {
+            console.error('Export failed:', error);
+            alert('Export failed. Please try again.');
+        }
+    }
+    
+    prepareTADataForExport() {
+        const exportData = [];
+        
+        Object.entries(this.taCensusData).forEach(([taCode, taData]) => {
+            const taName = taData.name || `TA_${taCode}`;
+            
+            // Export data for each year
+            ['2006', '2013', '2018'].forEach(year => {
+                if (taData[year]) {
+                    const yearData = taData[year];
+                    const religiousPercentage = this.calculateReligiousPercentage(yearData);
+                    const totalStated = yearData['Total stated'] || 0;
+                    
+                    exportData.push({
+                        'TA_Code': taCode,
+                        'TA_Name': taName,
+                        'Year': year,
+                        'Total_Population': yearData['Total'] || 0,
+                        'Total_Stated': totalStated,
+                        'Religious_Percentage': religiousPercentage ? religiousPercentage.toFixed(2) : 'N/A',
+                        'Christian': yearData['Christian'] || 0,
+                        'No_Religion': yearData['No religion'] || 0,
+                        'Buddhism': yearData['Buddhism'] || 0,
+                        'Hinduism': yearData['Hinduism'] || 0,
+                        'Islam': yearData['Islam'] || 0,
+                        'Judaism': yearData['Judaism'] || 0,
+                        'Maori_Religions': yearData['Maori religions, beliefs, and philosophies'] || 0,
+                        'Other_Religions': yearData['Other religions, beliefs, and philosophies'] || 0
+                    });
+                }
+            });
+        });
+        
+        return exportData;
+    }
+    
+    convertToCSV(data) {
+        if (data.length === 0) return '';
+        
+        // Get headers from the first object
+        const headers = Object.keys(data[0]);
+        const csvHeaders = headers.join(',');
+        
+        // Convert data rows
+        const csvRows = data.map(row => {
+            return headers.map(header => {
+                const value = row[header];
+                // Handle commas and quotes in values
+                if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+                    return `"${value.replace(/"/g, '""')}"`;
+                }
+                return value;
+            }).join(',');
+        });
+        
+        return [csvHeaders, ...csvRows].join('\n');
+    }
+    
+    downloadCSV(csvContent, filename) {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            console.log(`CSV exported: ${filename}`);
+        } else {
+            alert('CSV export not supported in this browser');
         }
     }
 }
