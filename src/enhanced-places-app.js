@@ -162,26 +162,44 @@ class EnhancedPlacesOfWorshipApp {
             });
         }
         
-        // Geographic resolution toggle
+        // Census overlay toggle (Show regional demographics)
+        const censusOverlayToggle = document.getElementById('censusOverlayToggle');
+        if (censusOverlayToggle) {
+            censusOverlayToggle.addEventListener('change', (e) => {
+                console.log('Census overlay toggle changed:', e.target.checked);
+                this.showReligiousDensity = e.target.checked;
+                this.toggleReligiousDensityOverlay();
+                
+                if (e.target.checked) {
+                    this.showDemographicLegend(this.getReligiousDensityLegendData());
+                } else {
+                    this.hideDemographicLegend();
+                }
+            });
+        }
+        
+        // Geographic resolution toggle (Statistical Areas)
         const geographicToggle = document.getElementById('geographicResolutionToggle');
         if (geographicToggle) {
-            const geographicLabel = document.getElementById('geographicLabel');
+            const geographicLabel = document.getElementById('geographicResolutionLabel');
             geographicToggle.addEventListener('change', (e) => {
-            this.useDetailedBoundaries = !e.target.checked;
-            
-            // Update label
-            if (e.target.checked) {
-                geographicLabel.textContent = 'Territorial Authority';
-            } else {
-                geographicLabel.textContent = 'Statistical Area 2 (SA2)';
-            }
-            
-            // Refresh overlays if currently shown
-            if (this.showReligiousDensity) {
-                this.removeReligiousDensityOverlay();
-                this.addReligiousDensityOverlay();
-                this.updateDemographicLegend();
-            }
+                this.useDetailedBoundaries = !e.target.checked;
+                
+                // Update label
+                if (geographicLabel) {
+                    if (e.target.checked) {
+                        geographicLabel.textContent = 'Territorial Authority (Overview)';
+                    } else {
+                        geographicLabel.textContent = 'Statistical Area 2 (Detailed)';
+                    }
+                }
+                
+                // Refresh overlays if currently shown
+                if (this.showReligiousDensity) {
+                    this.removeReligiousDensityOverlay();
+                    this.addReligiousDensityOverlay();
+                    this.updateDemographicLegend();
+                }
             });
         }
         
