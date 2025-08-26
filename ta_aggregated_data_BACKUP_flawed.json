@@ -1,0 +1,2072 @@
+{
+  "012": {
+    "name": "Far North",
+    "2006": {
+      "No religion": 36735,
+      "Buddhism": 315,
+      "Christian": 23172,
+      "Hinduism": 324,
+      "Islam": 117,
+      "Judaism": 60,
+      "Total stated": 60723
+    },
+    "2013": {
+      "No religion": 18165,
+      "Buddhism": 318,
+      "Christian": 23451,
+      "Hinduism": 234,
+      "Islam": 87,
+      "Judaism": 78,
+      "Total stated": 42333
+    },
+    "2018": {
+      "No religion": 29754,
+      "Buddhism": 318,
+      "Christian": 24591,
+      "Hinduism": 321,
+      "Islam": 111,
+      "Judaism": 63,
+      "Total stated": 55158
+    }
+  },
+  "067": {
+    "name": "Whangārei",
+    "2006": {
+      "No religion": 53928,
+      "Buddhism": 519,
+      "Christian": 29427,
+      "Hinduism": 927,
+      "Islam": 288,
+      "Judaism": 93,
+      "Total stated": 85182
+    },
+    "2013": {
+      "No religion": 30702,
+      "Buddhism": 516,
+      "Christian": 31770,
+      "Hinduism": 435,
+      "Islam": 147,
+      "Judaism": 87,
+      "Total stated": 63657
+    },
+    "2018": {
+      "No religion": 47388,
+      "Buddhism": 513,
+      "Christian": 31338,
+      "Hinduism": 702,
+      "Islam": 174,
+      "Judaism": 75,
+      "Total stated": 80190
+    }
+  },
+  "023": {
+    "name": "Kaipara",
+    "2006": {
+      "No religion": 14508,
+      "Buddhism": 99,
+      "Christian": 7908,
+      "Hinduism": 141,
+      "Islam": 57,
+      "Judaism": 24,
+      "Total stated": 22737
+    },
+    "2013": {
+      "No religion": 7326,
+      "Buddhism": 102,
+      "Christian": 8142,
+      "Hinduism": 51,
+      "Islam": 39,
+      "Judaism": 12,
+      "Total stated": 15672
+    },
+    "2018": {
+      "No religion": 11865,
+      "Buddhism": 93,
+      "Christian": 7881,
+      "Hinduism": 111,
+      "Islam": 42,
+      "Judaism": 15,
+      "Total stated": 20007
+    }
+  },
+  "052": {
+    "name": "Thames-Coromandel",
+    "2006": {
+      "No religion": 18825,
+      "Buddhism": 273,
+      "Christian": 8967,
+      "Hinduism": 222,
+      "Islam": 45,
+      "Judaism": 21,
+      "Total stated": 28353
+    },
+    "2013": {
+      "No religion": 11214,
+      "Buddhism": 267,
+      "Christian": 10953,
+      "Hinduism": 153,
+      "Islam": 30,
+      "Judaism": 24,
+      "Total stated": 22641
+    },
+    "2018": {
+      "No religion": 16266,
+      "Buddhism": 273,
+      "Christian": 9879,
+      "Hinduism": 174,
+      "Islam": 45,
+      "Judaism": 12,
+      "Total stated": 26649
+    }
+  },
+  "032": {
+    "name": "Napier",
+    "2006": {
+      "No religion": 36117,
+      "Buddhism": 522,
+      "Christian": 19827,
+      "Hinduism": 600,
+      "Islam": 291,
+      "Judaism": 54,
+      "Total stated": 57411
+    },
+    "2013": {
+      "Judaism": 75,
+      "No religion": 23112,
+      "Buddhism": 561,
+      "Christian": 25293,
+      "Hinduism": 279,
+      "Islam": 267,
+      "Total stated": 49587
+    },
+    "2018": {
+      "No religion": 32574,
+      "Buddhism": 435,
+      "Christian": 21333,
+      "Hinduism": 390,
+      "Islam": 213,
+      "Judaism": 48,
+      "Total stated": 54993
+    }
+  },
+  "018": {
+    "name": "Hauraki",
+    "2006": {
+      "No religion": 12573,
+      "Buddhism": 129,
+      "Christian": 5820,
+      "Hinduism": 126,
+      "Islam": 30,
+      "Judaism": 12,
+      "Total stated": 18690
+    },
+    "2013": {
+      "No religion": 7791,
+      "Buddhism": 105,
+      "Christian": 7086,
+      "Hinduism": 75,
+      "Islam": 15,
+      "Judaism": 15,
+      "Total stated": 15087
+    },
+    "2018": {
+      "No religion": 11001,
+      "Buddhism": 99,
+      "Christian": 6285,
+      "Hinduism": 78,
+      "Islam": 24,
+      "Judaism": 3,
+      "Total stated": 17490
+    }
+  },
+  "055": {
+    "name": "Waikato",
+    "2006": {
+      "No religion": 48372,
+      "Buddhism": 450,
+      "Christian": 25209,
+      "Hinduism": 1524,
+      "Islam": 513,
+      "Judaism": 48,
+      "Total stated": 76116
+    },
+    "2013": {
+      "No religion": 27228,
+      "Buddhism": 351,
+      "Christian": 25674,
+      "Hinduism": 420,
+      "Islam": 132,
+      "Judaism": 84,
+      "Total stated": 53889
+    },
+    "2018": {
+      "No religion": 40728,
+      "Buddhism": 369,
+      "Christian": 25131,
+      "Hinduism": 729,
+      "Islam": 240,
+      "Judaism": 60,
+      "Total stated": 67257
+    }
+  },
+  "031": {
+    "name": "Matamata-Piako",
+    "2006": {
+      "No religion": 20559,
+      "Buddhism": 351,
+      "Christian": 11478,
+      "Hinduism": 339,
+      "Islam": 132,
+      "Judaism": 18,
+      "Total stated": 32877
+    },
+    "2013": {
+      "No religion": 12882,
+      "Buddhism": 273,
+      "Christian": 14211,
+      "Hinduism": 195,
+      "Islam": 81,
+      "Judaism": 36,
+      "Total stated": 27678
+    },
+    "2018": {
+      "No religion": 17685,
+      "Buddhism": 318,
+      "Christian": 12321,
+      "Hinduism": 264,
+      "Islam": 111,
+      "Judaism": 21,
+      "Total stated": 30720
+    }
+  },
+  "016": {
+    "name": "Hamilton",
+    "2006": {
+      "No religion": 83589,
+      "Buddhism": 2358,
+      "Christian": 56580,
+      "Hinduism": 7653,
+      "Islam": 4710,
+      "Judaism": 126,
+      "Total stated": 155016
+    },
+    "2013": {
+      "Judaism": 156,
+      "No religion": 54156,
+      "Buddhism": 2130,
+      "Christian": 60501,
+      "Hinduism": 3759,
+      "Islam": 2445,
+      "Total stated": 123147
+    },
+    "2018": {
+      "No religion": 74769,
+      "Buddhism": 2013,
+      "Christian": 58338,
+      "Hinduism": 5730,
+      "Islam": 3561,
+      "Judaism": 90,
+      "Total stated": 144501
+    }
+  },
+  "058": {
+    "name": "Waipā",
+    "2006": {
+      "No religion": 32661,
+      "Buddhism": 294,
+      "Christian": 18870,
+      "Hinduism": 555,
+      "Islam": 183,
+      "Judaism": 36,
+      "Total stated": 52599
+    },
+    "2013": {
+      "No religion": 19221,
+      "Buddhism": 246,
+      "Christian": 21630,
+      "Hinduism": 237,
+      "Islam": 63,
+      "Judaism": 30,
+      "Total stated": 41427
+    },
+    "2018": {
+      "No religion": 27471,
+      "Buddhism": 246,
+      "Christian": 19653,
+      "Hinduism": 330,
+      "Islam": 99,
+      "Judaism": 33,
+      "Total stated": 47832
+    }
+  },
+  "069": {
+    "name": "Ōtorohanga",
+    "2006": {
+      "No religion": 6246,
+      "Buddhism": 36,
+      "Christian": 2790,
+      "Hinduism": 72,
+      "Islam": 15,
+      "Judaism": 6,
+      "Total stated": 9165
+    },
+    "2013": {
+      "No religion": 3948,
+      "Buddhism": 48,
+      "Christian": 3732,
+      "Hinduism": 51,
+      "Islam": 6,
+      "Judaism": 3,
+      "Total stated": 7788
+    },
+    "2018": {
+      "No religion": 5607,
+      "Buddhism": 48,
+      "Christian": 3099,
+      "Hinduism": 96,
+      "Islam": 30,
+      "Judaism": 3,
+      "Total stated": 8883
+    }
+  },
+  "044": {
+    "name": "South Waikato",
+    "2006": {
+      "No religion": 13887,
+      "Buddhism": 117,
+      "Christian": 7539,
+      "Hinduism": 129,
+      "Islam": 60,
+      "Judaism": 18,
+      "Total stated": 21750
+    },
+    "2013": {
+      "No religion": 8592,
+      "Buddhism": 117,
+      "Christian": 9396,
+      "Hinduism": 108,
+      "Islam": 45,
+      "Judaism": 9,
+      "Total stated": 18267
+    },
+    "2018": {
+      "No religion": 12180,
+      "Buddhism": 93,
+      "Christian": 8463,
+      "Hinduism": 138,
+      "Islam": 63,
+      "Judaism": 12,
+      "Total stated": 20949
+    }
+  },
+  "061": {
+    "name": "Waitomo",
+    "2006": {
+      "No religion": 5373,
+      "Buddhism": 45,
+      "Christian": 2703,
+      "Hinduism": 72,
+      "Islam": 72,
+      "Judaism": 6,
+      "Total stated": 8271
+    },
+    "2013": {
+      "No religion": 3582,
+      "Buddhism": 39,
+      "Christian": 3714,
+      "Hinduism": 51,
+      "Islam": 51,
+      "Judaism": 6,
+      "Total stated": 7443
+    },
+    "2018": {
+      "No religion": 4947,
+      "Buddhism": 27,
+      "Christian": 2937,
+      "Hinduism": 60,
+      "Islam": 60,
+      "Judaism": 6,
+      "Total stated": 8037
+    }
+  },
+  "050": {
+    "name": "Taupō",
+    "2006": {
+      "No religion": 22287,
+      "Buddhism": 228,
+      "Christian": 11580,
+      "Hinduism": 513,
+      "Islam": 126,
+      "Judaism": 21,
+      "Total stated": 34755
+    },
+    "2013": {
+      "No religion": 13428,
+      "Buddhism": 237,
+      "Christian": 13440,
+      "Hinduism": 219,
+      "Islam": 69,
+      "Judaism": 30,
+      "Total stated": 27423
+    },
+    "2018": {
+      "No religion": 19311,
+      "Buddhism": 189,
+      "Christian": 12243,
+      "Hinduism": 297,
+      "Islam": 87,
+      "Judaism": 21,
+      "Total stated": 32148
+    }
+  },
+  "063": {
+    "name": "Western Bay of Plenty",
+    "2006": {
+      "No religion": 30768,
+      "Buddhism": 324,
+      "Christian": 16215,
+      "Hinduism": 675,
+      "Islam": 135,
+      "Judaism": 30,
+      "Total stated": 48147
+    },
+    "2013": {
+      "No religion": 17202,
+      "Buddhism": 300,
+      "Christian": 18324,
+      "Hinduism": 474,
+      "Islam": 84,
+      "Judaism": 57,
+      "Total stated": 36441
+    },
+    "2018": {
+      "No religion": 26028,
+      "Buddhism": 276,
+      "Christian": 16938,
+      "Hinduism": 537,
+      "Islam": 57,
+      "Judaism": 18,
+      "Total stated": 43854
+    }
+  },
+  "051": {
+    "name": "Tauranga",
+    "2006": {
+      "No religion": 82131,
+      "Buddhism": 939,
+      "Christian": 47799,
+      "Hinduism": 2307,
+      "Islam": 669,
+      "Judaism": 120,
+      "Total stated": 133965
+    },
+    "2013": {
+      "No religion": 47070,
+      "Buddhism": 780,
+      "Christian": 50223,
+      "Hinduism": 900,
+      "Islam": 336,
+      "Judaism": 147,
+      "Total stated": 99456
+    },
+    "2018": {
+      "No religion": 69714,
+      "Buddhism": 681,
+      "Christian": 48642,
+      "Hinduism": 1368,
+      "Islam": 450,
+      "Judaism": 135,
+      "Total stated": 120990
+    }
+  },
+  "040": {
+    "name": "Rotorua",
+    "2006": {
+      "No religion": 39501,
+      "Buddhism": 492,
+      "Christian": 22902,
+      "Hinduism": 1266,
+      "Islam": 243,
+      "Judaism": 39,
+      "Total stated": 64443
+    },
+    "2013": {
+      "No religion": 24699,
+      "Buddhism": 438,
+      "Christian": 27210,
+      "Hinduism": 810,
+      "Islam": 171,
+      "Judaism": 66,
+      "Total stated": 53394
+    },
+    "2018": {
+      "No religion": 35838,
+      "Buddhism": 390,
+      "Christian": 25182,
+      "Hinduism": 1302,
+      "Islam": 207,
+      "Judaism": 30,
+      "Total stated": 62949
+    }
+  },
+  "065": {
+    "name": "Whakatāne",
+    "2006": {
+      "No religion": 19377,
+      "Buddhism": 135,
+      "Christian": 10869,
+      "Hinduism": 165,
+      "Islam": 87,
+      "Judaism": 6,
+      "Total stated": 30639
+    },
+    "2013": {
+      "No religion": 11667,
+      "Buddhism": 120,
+      "Christian": 13008,
+      "Hinduism": 93,
+      "Islam": 33,
+      "Judaism": 30,
+      "Total stated": 24951
+    },
+    "2018": {
+      "No religion": 17175,
+      "Buddhism": 114,
+      "Christian": 11760,
+      "Hinduism": 147,
+      "Islam": 39,
+      "Judaism": 12,
+      "Total stated": 29247
+    }
+  },
+  "024": {
+    "name": "Kawerau",
+    "2006": {
+      "No religion": 4023,
+      "Buddhism": 24,
+      "Christian": 2016,
+      "Hinduism": 24,
+      "Islam": 9,
+      "Judaism": 0,
+      "Total stated": 6096
+    },
+    "2013": {
+      "No religion": 2085,
+      "Buddhism": 18,
+      "Christian": 2253,
+      "Hinduism": 33,
+      "Islam": 12,
+      "Judaism": 3,
+      "Total stated": 4404
+    },
+    "2018": {
+      "No religion": 3492,
+      "Buddhism": 24,
+      "Christian": 2106,
+      "Hinduism": 33,
+      "Islam": 12,
+      "Judaism": 3,
+      "Total stated": 5670
+    }
+  },
+  "068": {
+    "name": "Ōpōtiki",
+    "2006": {
+      "No religion": 4779,
+      "Buddhism": 30,
+      "Christian": 2817,
+      "Hinduism": 45,
+      "Islam": 18,
+      "Judaism": 3,
+      "Total stated": 7692
+    },
+    "2013": {
+      "No religion": 2343,
+      "Buddhism": 27,
+      "Christian": 3159,
+      "Hinduism": 42,
+      "Islam": 15,
+      "Judaism": 6,
+      "Total stated": 5592
+    },
+    "2018": {
+      "No religion": 3909,
+      "Buddhism": 33,
+      "Christian": 2988,
+      "Hinduism": 30,
+      "Islam": 21,
+      "Judaism": 0,
+      "Total stated": 6981
+    }
+  },
+  "013": {
+    "name": "Gisborne",
+    "2006": {
+      "No religion": 27456,
+      "Buddhism": 183,
+      "Christian": 15945,
+      "Hinduism": 282,
+      "Islam": 132,
+      "Judaism": 24,
+      "Total stated": 44022
+    },
+    "2013": {
+      "No religion": 15030,
+      "Buddhism": 216,
+      "Christian": 19239,
+      "Hinduism": 183,
+      "Islam": 96,
+      "Judaism": 33,
+      "Total stated": 34797
+    },
+    "2018": {
+      "No religion": 22899,
+      "Buddhism": 156,
+      "Christian": 17304,
+      "Hinduism": 183,
+      "Islam": 78,
+      "Judaism": 24,
+      "Total stated": 40644
+    }
+  },
+  "059": {
+    "name": "Wairoa",
+    "2006": {
+      "No religion": 3822,
+      "Buddhism": 12,
+      "Christian": 3090,
+      "Hinduism": 18,
+      "Islam": 33,
+      "Judaism": 6,
+      "Total stated": 6981
+    },
+    "2013": {
+      "No religion": 1974,
+      "Buddhism": 24,
+      "Christian": 3828,
+      "Hinduism": 9,
+      "Islam": 51,
+      "Judaism": 6,
+      "Total stated": 5892
+    },
+    "2018": {
+      "No religion": 3024,
+      "Buddhism": 21,
+      "Christian": 3438,
+      "Hinduism": 9,
+      "Islam": 42,
+      "Judaism": 3,
+      "Total stated": 6537
+    }
+  },
+  "017": {
+    "name": "Hastings",
+    "2006": {
+      "No religion": 43230,
+      "Buddhism": 489,
+      "Christian": 30942,
+      "Hinduism": 1002,
+      "Islam": 438,
+      "Judaism": 57,
+      "Total stated": 76158
+    },
+    "2013": {
+      "No religion": 25752,
+      "Buddhism": 582,
+      "Christian": 34581,
+      "Hinduism": 636,
+      "Islam": 423,
+      "Judaism": 93,
+      "Total stated": 62067
+    },
+    "2018": {
+      "No religion": 37806,
+      "Buddhism": 480,
+      "Christian": 32235,
+      "Hinduism": 678,
+      "Islam": 390,
+      "Judaism": 60,
+      "Total stated": 71649
+    }
+  },
+  "006": {
+    "name": "Central Hawke's Bay",
+    "2006": {
+      "No religion": 8772,
+      "Buddhism": 45,
+      "Christian": 4965,
+      "Hinduism": 45,
+      "Islam": 30,
+      "Judaism": 6,
+      "Total stated": 13863
+    },
+    "2013": {
+      "No religion": 4863,
+      "Buddhism": 45,
+      "Christian": 6144,
+      "Hinduism": 18,
+      "Islam": 12,
+      "Judaism": 3,
+      "Total stated": 11085
+    },
+    "2018": {
+      "No religion": 7179,
+      "Buddhism": 36,
+      "Christian": 5265,
+      "Hinduism": 24,
+      "Islam": 18,
+      "Judaism": 6,
+      "Total stated": 12528
+    }
+  },
+  "034": {
+    "name": "New Plymouth",
+    "2006": {
+      "No religion": 49008,
+      "Buddhism": 381,
+      "Christian": 26940,
+      "Hinduism": 930,
+      "Islam": 507,
+      "Judaism": 54,
+      "Total stated": 77820
+    },
+    "2013": {
+      "No religion": 30468,
+      "Buddhism": 471,
+      "Christian": 33390,
+      "Hinduism": 489,
+      "Islam": 291,
+      "Judaism": 60,
+      "Total stated": 65169
+    },
+    "2018": {
+      "No religion": 42108,
+      "Buddhism": 396,
+      "Christian": 28950,
+      "Hinduism": 663,
+      "Islam": 435,
+      "Judaism": 51,
+      "Total stated": 72603
+    }
+  },
+  "047": {
+    "name": "Stratford",
+    "2006": {
+      "No religion": 5721,
+      "Buddhism": 24,
+      "Christian": 3150,
+      "Hinduism": 54,
+      "Islam": 12,
+      "Judaism": 0,
+      "Total stated": 8961
+    },
+    "2013": {
+      "No religion": 3492,
+      "Buddhism": 39,
+      "Christian": 4329,
+      "Hinduism": 39,
+      "Islam": 6,
+      "Judaism": 9,
+      "Total stated": 7914
+    },
+    "2018": {
+      "No religion": 4758,
+      "Buddhism": 24,
+      "Christian": 3576,
+      "Hinduism": 39,
+      "Islam": 0,
+      "Judaism": 0,
+      "Total stated": 8397
+    }
+  },
+  "043": {
+    "name": "South Taranaki",
+    "2006": {
+      "No religion": 16275,
+      "Buddhism": 78,
+      "Christian": 8898,
+      "Hinduism": 186,
+      "Islam": 105,
+      "Judaism": 12,
+      "Total stated": 25554
+    },
+    "2013": {
+      "Christian": 12168,
+      "No religion": 10287,
+      "Buddhism": 54,
+      "Hinduism": 159,
+      "Islam": 93,
+      "Judaism": 18,
+      "Total stated": 22779
+    },
+    "2018": {
+      "No religion": 14037,
+      "Buddhism": 78,
+      "Christian": 9867,
+      "Hinduism": 183,
+      "Islam": 90,
+      "Judaism": 9,
+      "Total stated": 24264
+    }
+  },
+  "041": {
+    "name": "Ruapehu",
+    "2006": {
+      "No religion": 7254,
+      "Buddhism": 51,
+      "Christian": 3609,
+      "Hinduism": 60,
+      "Islam": 33,
+      "Judaism": 3,
+      "Total stated": 11010
+    },
+    "2013": {
+      "No religion": 4689,
+      "Buddhism": 60,
+      "Christian": 4851,
+      "Hinduism": 69,
+      "Islam": 24,
+      "Judaism": 9,
+      "Total stated": 9702
+    },
+    "2018": {
+      "No religion": 6291,
+      "Buddhism": 57,
+      "Christian": 4062,
+      "Hinduism": 84,
+      "Islam": 9,
+      "Judaism": 3,
+      "Total stated": 10506
+    }
+  },
+  "066": {
+    "name": "Whanganui",
+    "2006": {
+      "No religion": 25440,
+      "Buddhism": 237,
+      "Christian": 15279,
+      "Hinduism": 384,
+      "Islam": 135,
+      "Judaism": 33,
+      "Total stated": 41508
+    },
+    "2013": {
+      "No religion": 15786,
+      "Buddhism": 207,
+      "Christian": 19038,
+      "Hinduism": 216,
+      "Islam": 111,
+      "Judaism": 54,
+      "Total stated": 35412
+    },
+    "2018": {
+      "No religion": 21870,
+      "Buddhism": 192,
+      "Christian": 16887,
+      "Hinduism": 294,
+      "Islam": 123,
+      "Judaism": 33,
+      "Total stated": 39399
+    }
+  },
+  "039": {
+    "name": "Rangitīkei",
+    "2006": {
+      "No religion": 8217,
+      "Buddhism": 45,
+      "Christian": 5109,
+      "Hinduism": 54,
+      "Islam": 57,
+      "Judaism": 9,
+      "Total stated": 13491
+    },
+    "2013": {
+      "No religion": 4812,
+      "Buddhism": 57,
+      "Christian": 6924,
+      "Hinduism": 30,
+      "Islam": 27,
+      "Judaism": 12,
+      "Total stated": 11862
+    },
+    "2018": {
+      "No religion": 6921,
+      "Buddhism": 30,
+      "Christian": 5790,
+      "Hinduism": 36,
+      "Islam": 33,
+      "Judaism": 9,
+      "Total stated": 12819
+    }
+  },
+  "028": {
+    "name": "Manawatū",
+    "2006": {
+      "No religion": 18819,
+      "Buddhism": 105,
+      "Christian": 9798,
+      "Hinduism": 177,
+      "Islam": 105,
+      "Judaism": 15,
+      "Total stated": 29019
+    },
+    "2013": {
+      "No religion": 11463,
+      "Buddhism": 111,
+      "Christian": 12750,
+      "Hinduism": 111,
+      "Islam": 78,
+      "Judaism": 27,
+      "Total stated": 24540
+    },
+    "2018": {
+      "No religion": 15807,
+      "Buddhism": 87,
+      "Christian": 10665,
+      "Hinduism": 111,
+      "Islam": 75,
+      "Judaism": 6,
+      "Total stated": 26751
+    }
+  },
+  "036": {
+    "name": "Palmerston North",
+    "2006": {
+      "No religion": 45948,
+      "Buddhism": 957,
+      "Christian": 27795,
+      "Hinduism": 1953,
+      "Islam": 1611,
+      "Judaism": 63,
+      "Total stated": 78327
+    },
+    "2013": {
+      "No religion": 32133,
+      "Buddhism": 948,
+      "Christian": 35301,
+      "Hinduism": 1146,
+      "Islam": 960,
+      "Judaism": 75,
+      "Total stated": 70563
+    },
+    "2018": {
+      "No religion": 41967,
+      "Buddhism": 900,
+      "Christian": 30426,
+      "Hinduism": 1527,
+      "Islam": 1317,
+      "Judaism": 66,
+      "Total stated": 76203
+    }
+  },
+  "048": {
+    "name": "Tararua",
+    "2006": {
+      "No religion": 10128,
+      "Buddhism": 42,
+      "Christian": 5823,
+      "Hinduism": 54,
+      "Islam": 63,
+      "Judaism": 9,
+      "Total stated": 16119
+    },
+    "2013": {
+      "No religion": 6162,
+      "Buddhism": 84,
+      "Christian": 8103,
+      "Hinduism": 48,
+      "Islam": 42,
+      "Judaism": 12,
+      "Total stated": 14451
+    },
+    "2018": {
+      "No religion": 8904,
+      "Buddhism": 51,
+      "Christian": 6582,
+      "Hinduism": 54,
+      "Islam": 42,
+      "Judaism": 6,
+      "Total stated": 15639
+    }
+  },
+  "019": {
+    "name": "Horowhenua",
+    "2006": {
+      "No religion": 20640,
+      "Buddhism": 129,
+      "Christian": 11451,
+      "Hinduism": 228,
+      "Islam": 87,
+      "Judaism": 24,
+      "Total stated": 32559
+    },
+    "2013": {
+      "No religion": 11631,
+      "Buddhism": 132,
+      "Christian": 13731,
+      "Hinduism": 114,
+      "Islam": 60,
+      "Judaism": 30,
+      "Total stated": 25698
+    },
+    "2018": {
+      "No religion": 16992,
+      "Buddhism": 126,
+      "Christian": 11976,
+      "Hinduism": 141,
+      "Islam": 45,
+      "Judaism": 18,
+      "Total stated": 29298
+    }
+  },
+  "025": {
+    "name": "Kāpiti Coast",
+    "2006": {
+      "No religion": 32124,
+      "Buddhism": 318,
+      "Christian": 17505,
+      "Hinduism": 441,
+      "Islam": 147,
+      "Judaism": 69,
+      "Total stated": 50604
+    },
+    "2013": {
+      "No religion": 20490,
+      "Buddhism": 393,
+      "Christian": 22443,
+      "Hinduism": 216,
+      "Islam": 72,
+      "Judaism": 72,
+      "Total stated": 43686
+    },
+    "2018": {
+      "No religion": 28410,
+      "Buddhism": 312,
+      "Christian": 19215,
+      "Hinduism": 288,
+      "Islam": 75,
+      "Judaism": 60,
+      "Total stated": 48360
+    }
+  },
+  "037": {
+    "name": "Porirua",
+    "2006": {
+      "No religion": 28149,
+      "Buddhism": 693,
+      "Christian": 22938,
+      "Hinduism": 1194,
+      "Islam": 807,
+      "Judaism": 54,
+      "Total stated": 53835
+    },
+    "2013": {
+      "No religion": 17835,
+      "Buddhism": 693,
+      "Christian": 25341,
+      "Hinduism": 486,
+      "Islam": 402,
+      "Judaism": 81,
+      "Total stated": 44838
+    },
+    "2018": {
+      "No religion": 24774,
+      "Buddhism": 561,
+      "Christian": 24609,
+      "Hinduism": 741,
+      "Islam": 651,
+      "Judaism": 54,
+      "Total stated": 51390
+    }
+  },
+  "054": {
+    "name": "Upper Hutt",
+    "2006": {
+      "No religion": 23904,
+      "Buddhism": 357,
+      "Christian": 15222,
+      "Hinduism": 1287,
+      "Islam": 267,
+      "Judaism": 42,
+      "Total stated": 41079
+    },
+    "2013": {
+      "No religion": 15783,
+      "Buddhism": 393,
+      "Christian": 18804,
+      "Hinduism": 432,
+      "Islam": 165,
+      "Judaism": 45,
+      "Total stated": 35622
+    },
+    "2018": {
+      "No religion": 21315,
+      "Buddhism": 354,
+      "Christian": 16920,
+      "Hinduism": 723,
+      "Islam": 189,
+      "Judaism": 30,
+      "Total stated": 39531
+    }
+  },
+  "026": {
+    "name": "Lower Hutt",
+    "2006": {
+      "No religion": 53313,
+      "Buddhism": 1422,
+      "Christian": 36432,
+      "Hinduism": 4839,
+      "Islam": 1536,
+      "Judaism": 111,
+      "Total stated": 97653
+    },
+    "2013": {
+      "No religion": 36789,
+      "Buddhism": 1329,
+      "Christian": 44460,
+      "Hinduism": 2949,
+      "Islam": 741,
+      "Judaism": 171,
+      "Total stated": 86439
+    },
+    "2018": {
+      "No religion": 48495,
+      "Buddhism": 1230,
+      "Christian": 39942,
+      "Hinduism": 4005,
+      "Islam": 1083,
+      "Judaism": 120,
+      "Total stated": 94875
+    }
+  },
+  "062": {
+    "name": "Wellington",
+    "2006": {
+      "No religion": 116868,
+      "Buddhism": 3381,
+      "Christian": 54612,
+      "Hinduism": 7752,
+      "Islam": 3693,
+      "Judaism": 678,
+      "Total stated": 186984
+    },
+    "2013": {
+      "No religion": 84351,
+      "Buddhism": 3903,
+      "Christian": 74298,
+      "Hinduism": 6009,
+      "Islam": 2580,
+      "Judaism": 756,
+      "Total stated": 171897
+    },
+    "2018": {
+      "No religion": 107769,
+      "Buddhism": 3402,
+      "Christian": 63573,
+      "Hinduism": 7410,
+      "Islam": 3294,
+      "Judaism": 612,
+      "Total stated": 186060
+    }
+  },
+  "030": {
+    "name": "Masterton",
+    "2006": {
+      "No religion": 15363,
+      "Buddhism": 111,
+      "Christian": 9009,
+      "Hinduism": 225,
+      "Islam": 114,
+      "Judaism": 30,
+      "Total stated": 24852
+    },
+    "2013": {
+      "No religion": 9246,
+      "Buddhism": 117,
+      "Christian": 11094,
+      "Hinduism": 117,
+      "Islam": 30,
+      "Judaism": 36,
+      "Total stated": 20640
+    },
+    "2018": {
+      "No religion": 12831,
+      "Buddhism": 102,
+      "Christian": 9627,
+      "Hinduism": 174,
+      "Islam": 33,
+      "Judaism": 30,
+      "Total stated": 22797
+    }
+  },
+  "005": {
+    "name": "Carterton",
+    "2006": {
+      "No religion": 5904,
+      "Buddhism": 36,
+      "Christian": 3087,
+      "Hinduism": 42,
+      "Islam": 30,
+      "Judaism": 9,
+      "Total stated": 9108
+    },
+    "2013": {
+      "No religion": 3381,
+      "Buddhism": 45,
+      "Christian": 3900,
+      "Hinduism": 39,
+      "Islam": 15,
+      "Judaism": 9,
+      "Total stated": 7389
+    },
+    "2018": {
+      "No religion": 4887,
+      "Buddhism": 39,
+      "Christian": 3267,
+      "Hinduism": 45,
+      "Islam": 12,
+      "Judaism": 9,
+      "Total stated": 8259
+    }
+  },
+  "045": {
+    "name": "South Wairarapa",
+    "2006": {
+      "No religion": 7278,
+      "Buddhism": 75,
+      "Christian": 3249,
+      "Hinduism": 51,
+      "Islam": 3,
+      "Judaism": 18,
+      "Total stated": 10674
+    },
+    "2013": {
+      "No religion": 3900,
+      "Buddhism": 54,
+      "Christian": 4380,
+      "Hinduism": 27,
+      "Islam": 0,
+      "Judaism": 12,
+      "Total stated": 8373
+    },
+    "2018": {
+      "No religion": 5877,
+      "Buddhism": 60,
+      "Christian": 3534,
+      "Hinduism": 30,
+      "Islam": 6,
+      "Judaism": 9,
+      "Total stated": 9516
+    }
+  },
+  "049": {
+    "name": "Tasman",
+    "2006": {
+      "No religion": 35490,
+      "Buddhism": 555,
+      "Christian": 15627,
+      "Hinduism": 213,
+      "Islam": 93,
+      "Judaism": 36,
+      "Total stated": 52014
+    },
+    "2013": {
+      "No religion": 22734,
+      "Buddhism": 459,
+      "Christian": 18588,
+      "Hinduism": 108,
+      "Islam": 45,
+      "Judaism": 57,
+      "Total stated": 41991
+    },
+    "2018": {
+      "No religion": 30732,
+      "Buddhism": 450,
+      "Christian": 15804,
+      "Hinduism": 135,
+      "Islam": 54,
+      "Judaism": 27,
+      "Total stated": 47202
+    }
+  },
+  "033": {
+    "name": "Nelson",
+    "2006": {
+      "No religion": 31077,
+      "Buddhism": 621,
+      "Christian": 14841,
+      "Hinduism": 573,
+      "Islam": 237,
+      "Judaism": 69,
+      "Total stated": 47418
+    },
+    "2013": {
+      "No religion": 22065,
+      "Buddhism": 561,
+      "Christian": 18255,
+      "Hinduism": 252,
+      "Islam": 87,
+      "Judaism": 93,
+      "Total stated": 41313
+    },
+    "2018": {
+      "No religion": 28581,
+      "Buddhism": 597,
+      "Christian": 16179,
+      "Hinduism": 462,
+      "Islam": 99,
+      "Judaism": 69,
+      "Total stated": 45987
+    }
+  },
+  "029": {
+    "name": "Marlborough",
+    "2006": {
+      "No religion": 28410,
+      "Buddhism": 357,
+      "Christian": 15129,
+      "Hinduism": 384,
+      "Islam": 150,
+      "Judaism": 36,
+      "Total stated": 44466
+    },
+    "2013": {
+      "No religion": 17727,
+      "Buddhism": 318,
+      "Christian": 20151,
+      "Hinduism": 198,
+      "Islam": 57,
+      "Judaism": 33,
+      "Total stated": 38484
+    },
+    "2018": {
+      "No religion": 25185,
+      "Buddhism": 288,
+      "Christian": 16812,
+      "Hinduism": 249,
+      "Islam": 63,
+      "Judaism": 27,
+      "Total stated": 42624
+    }
+  },
+  "022": {
+    "name": "Kaikōura",
+    "2006": {
+      "No religion": 2388,
+      "Buddhism": 15,
+      "Christian": 1359,
+      "Hinduism": 15,
+      "Islam": 21,
+      "Judaism": 0,
+      "Total stated": 3798
+    },
+    "2013": {
+      "No religion": 1416,
+      "Buddhism": 27,
+      "Christian": 1632,
+      "Hinduism": 9,
+      "Islam": 15,
+      "Judaism": 3,
+      "Total stated": 3102
+    },
+    "2018": {
+      "No religion": 1938,
+      "Buddhism": 21,
+      "Christian": 1521,
+      "Hinduism": 12,
+      "Islam": 21,
+      "Judaism": 0,
+      "Total stated": 3513
+    }
+  },
+  "004": {
+    "name": "Buller",
+    "2006": {
+      "No religion": 6225,
+      "Buddhism": 48,
+      "Christian": 2787,
+      "Hinduism": 54,
+      "Islam": 15,
+      "Judaism": 6,
+      "Total stated": 9135
+    },
+    "2013": {
+      "No religion": 4908,
+      "Buddhism": 63,
+      "Christian": 4023,
+      "Hinduism": 36,
+      "Islam": 21,
+      "Judaism": 6,
+      "Total stated": 9057
+    },
+    "2018": {
+      "No religion": 5469,
+      "Buddhism": 21,
+      "Christian": 2979,
+      "Hinduism": 45,
+      "Islam": 12,
+      "Judaism": 3,
+      "Total stated": 8529
+    }
+  },
+  "015": {
+    "name": "Grey",
+    "2006": {
+      "No religion": 7992,
+      "Buddhism": 42,
+      "Christian": 4440,
+      "Hinduism": 90,
+      "Islam": 36,
+      "Judaism": 6,
+      "Total stated": 12606
+    },
+    "2013": {
+      "No religion": 5403,
+      "Buddhism": 51,
+      "Christian": 6096,
+      "Hinduism": 39,
+      "Islam": 27,
+      "Judaism": 18,
+      "Total stated": 11634
+    },
+    "2018": {
+      "No religion": 6903,
+      "Buddhism": 30,
+      "Christian": 4923,
+      "Hinduism": 72,
+      "Islam": 30,
+      "Judaism": 9,
+      "Total stated": 11967
+    }
+  },
+  "064": {
+    "name": "Westland",
+    "2006": {
+      "No religion": 5082,
+      "Buddhism": 30,
+      "Christian": 2730,
+      "Hinduism": 51,
+      "Islam": 18,
+      "Judaism": 3,
+      "Total stated": 7914
+    },
+    "2013": {
+      "No religion": 3426,
+      "Buddhism": 36,
+      "Christian": 3738,
+      "Hinduism": 51,
+      "Islam": 21,
+      "Judaism": 6,
+      "Total stated": 7278
+    },
+    "2018": {
+      "No religion": 4437,
+      "Buddhism": 42,
+      "Christian": 3168,
+      "Hinduism": 78,
+      "Islam": 24,
+      "Judaism": 6,
+      "Total stated": 7755
+    }
+  },
+  "020": {
+    "name": "Hurunui",
+    "2006": {
+      "No religion": 7965,
+      "Buddhism": 36,
+      "Christian": 4125,
+      "Hinduism": 72,
+      "Islam": 21,
+      "Judaism": 9,
+      "Total stated": 12228
+    },
+    "2013": {
+      "No religion": 4719,
+      "Buddhism": 54,
+      "Christian": 5451,
+      "Hinduism": 48,
+      "Islam": 21,
+      "Judaism": 9,
+      "Total stated": 10302
+    },
+    "2018": {
+      "No religion": 6591,
+      "Buddhism": 24,
+      "Christian": 4599,
+      "Hinduism": 66,
+      "Islam": 21,
+      "Judaism": 6,
+      "Total stated": 11307
+    }
+  },
+  "056": {
+    "name": "Waimakariri",
+    "2006": {
+      "No religion": 38385,
+      "Buddhism": 183,
+      "Christian": 20577,
+      "Hinduism": 318,
+      "Islam": 153,
+      "Judaism": 33,
+      "Total stated": 59649
+    },
+    "2013": {
+      "No religion": 21894,
+      "Buddhism": 174,
+      "Christian": 23160,
+      "Hinduism": 99,
+      "Islam": 69,
+      "Judaism": 36,
+      "Total stated": 45432
+    },
+    "2018": {
+      "No religion": 32061,
+      "Buddhism": 144,
+      "Christian": 21402,
+      "Hinduism": 186,
+      "Islam": 102,
+      "Judaism": 27,
+      "Total stated": 53922
+    }
+  },
+  "009": {
+    "name": "Christchurch",
+    "2006": {
+      "No religion": 214776,
+      "Buddhism": 4005,
+      "Christian": 123660,
+      "Hinduism": 8271,
+      "Islam": 5094,
+      "Judaism": 312,
+      "Total stated": 356118
+    },
+    "2013": {
+      "No religion": 144162,
+      "Buddhism": 4113,
+      "Christian": 150639,
+      "Hinduism": 3276,
+      "Islam": 2634,
+      "Judaism": 435,
+      "Total stated": 305259
+    },
+    "2018": {
+      "No religion": 187500,
+      "Buddhism": 3555,
+      "Christian": 133920,
+      "Hinduism": 6492,
+      "Islam": 3942,
+      "Judaism": 279,
+      "Total stated": 335688
+    }
+  },
+  "042": {
+    "name": "Selwyn",
+    "2006": {
+      "No religion": 45111,
+      "Buddhism": 549,
+      "Christian": 23736,
+      "Hinduism": 1251,
+      "Islam": 573,
+      "Judaism": 33,
+      "Total stated": 71253
+    },
+    "2013": {
+      "No religion": 19677,
+      "Buddhism": 225,
+      "Christian": 20739,
+      "Hinduism": 141,
+      "Islam": 162,
+      "Judaism": 42,
+      "Total stated": 40986
+    },
+    "2018": {
+      "No religion": 33426,
+      "Buddhism": 321,
+      "Christian": 21324,
+      "Hinduism": 342,
+      "Islam": 234,
+      "Judaism": 30,
+      "Total stated": 55677
+    }
+  },
+  "002": {
+    "name": "Ashburton",
+    "2006": {
+      "No religion": 17214,
+      "Buddhism": 219,
+      "Christian": 13605,
+      "Hinduism": 375,
+      "Islam": 198,
+      "Judaism": 6,
+      "Total stated": 31617
+    },
+    "2013": {
+      "No religion": 10914,
+      "Buddhism": 114,
+      "Christian": 16743,
+      "Hinduism": 204,
+      "Islam": 69,
+      "Judaism": 24,
+      "Total stated": 28068
+    },
+    "2018": {
+      "No religion": 14943,
+      "Buddhism": 132,
+      "Christian": 15186,
+      "Hinduism": 282,
+      "Islam": 78,
+      "Judaism": 6,
+      "Total stated": 30627
+    }
+  },
+  "053": {
+    "name": "Timaru",
+    "2006": {
+      "No religion": 24648,
+      "Buddhism": 171,
+      "Christian": 17445,
+      "Hinduism": 444,
+      "Islam": 198,
+      "Judaism": 15,
+      "Total stated": 42921
+    },
+    "2013": {
+      "No religion": 16452,
+      "Buddhism": 162,
+      "Christian": 23064,
+      "Hinduism": 126,
+      "Islam": 90,
+      "Judaism": 30,
+      "Total stated": 39924
+    },
+    "2018": {
+      "No religion": 22413,
+      "Buddhism": 135,
+      "Christian": 18873,
+      "Hinduism": 321,
+      "Islam": 96,
+      "Judaism": 9,
+      "Total stated": 41847
+    }
+  },
+  "027": {
+    "name": "Mackenzie",
+    "2006": {
+      "No religion": 2916,
+      "Buddhism": 51,
+      "Christian": 1560,
+      "Hinduism": 72,
+      "Islam": 36,
+      "Judaism": 3,
+      "Total stated": 4638
+    },
+    "2013": {
+      "No religion": 1602,
+      "Buddhism": 51,
+      "Christian": 2031,
+      "Hinduism": 15,
+      "Islam": 6,
+      "Judaism": 6,
+      "Total stated": 3711
+    },
+    "2018": {
+      "No religion": 2517,
+      "Buddhism": 57,
+      "Christian": 1806,
+      "Hinduism": 54,
+      "Islam": 12,
+      "Judaism": 3,
+      "Total stated": 4449
+    }
+  },
+  "057": {
+    "name": "Waimate",
+    "2006": {
+      "No religion": 4395,
+      "Buddhism": 33,
+      "Christian": 2724,
+      "Hinduism": 69,
+      "Islam": 21,
+      "Judaism": 3,
+      "Total stated": 7245
+    },
+    "2013": {
+      "No religion": 2802,
+      "Buddhism": 30,
+      "Christian": 3780,
+      "Hinduism": 48,
+      "Islam": 9,
+      "Judaism": 3,
+      "Total stated": 6672
+    },
+    "2018": {
+      "No religion": 3879,
+      "Buddhism": 45,
+      "Christian": 2982,
+      "Hinduism": 66,
+      "Islam": 6,
+      "Judaism": 6,
+      "Total stated": 6984
+    }
+  },
+  "008": {
+    "name": "Chatham Islands",
+    "2006": {
+      "No religion": 345,
+      "Buddhism": 3,
+      "Christian": 183,
+      "Hinduism": 3,
+      "Islam": 3,
+      "Judaism": 3,
+      "Total stated": 540
+    },
+    "2013": {
+      "No religion": 192,
+      "Buddhism": 0,
+      "Christian": 279,
+      "Hinduism": 0,
+      "Islam": 3,
+      "Judaism": 3,
+      "Total stated": 477
+    },
+    "2018": {
+      "No religion": 321,
+      "Buddhism": 3,
+      "Christian": 222,
+      "Hinduism": 0,
+      "Islam": 0,
+      "Judaism": 0,
+      "Total stated": 546
+    }
+  },
+  "060": {
+    "name": "Waitaki",
+    "2006": {
+      "No religion": 12153,
+      "Buddhism": 117,
+      "Christian": 8541,
+      "Hinduism": 207,
+      "Islam": 114,
+      "Judaism": 18,
+      "Total stated": 21150
+    },
+    "2013": {
+      "No religion": 7683,
+      "Buddhism": 129,
+      "Christian": 10392,
+      "Hinduism": 69,
+      "Islam": 57,
+      "Judaism": 36,
+      "Total stated": 18366
+    },
+    "2018": {
+      "No religion": 10689,
+      "Buddhism": 105,
+      "Christian": 9258,
+      "Hinduism": 129,
+      "Islam": 66,
+      "Judaism": 15,
+      "Total stated": 20262
+    }
+  },
+  "007": {
+    "name": "Central Otago",
+    "2006": {
+      "No religion": 14187,
+      "Buddhism": 84,
+      "Christian": 7770,
+      "Hinduism": 156,
+      "Islam": 48,
+      "Judaism": 6,
+      "Total stated": 22251
+    },
+    "2013": {
+      "No religion": 7521,
+      "Buddhism": 72,
+      "Christian": 8832,
+      "Hinduism": 39,
+      "Islam": 18,
+      "Judaism": 12,
+      "Total stated": 16494
+    },
+    "2018": {
+      "No religion": 11532,
+      "Buddhism": 69,
+      "Christian": 8121,
+      "Hinduism": 54,
+      "Islam": 24,
+      "Judaism": 6,
+      "Total stated": 19806
+    }
+  },
+  "038": {
+    "name": "Queenstown-Lakes",
+    "2006": {
+      "No religion": 31371,
+      "Buddhism": 477,
+      "Christian": 11529,
+      "Hinduism": 825,
+      "Islam": 228,
+      "Judaism": 78,
+      "Total stated": 44508
+    },
+    "2013": {
+      "No religion": 13431,
+      "Buddhism": 363,
+      "Christian": 10866,
+      "Hinduism": 276,
+      "Islam": 84,
+      "Judaism": 87,
+      "Total stated": 25107
+    },
+    "2018": {
+      "No religion": 23943,
+      "Buddhism": 375,
+      "Christian": 11382,
+      "Hinduism": 609,
+      "Islam": 138,
+      "Judaism": 60,
+      "Total stated": 36507
+    }
+  },
+  "011": {
+    "name": "Dunedin",
+    "2006": {
+      "No religion": 77928,
+      "Buddhism": 900,
+      "Christian": 35628,
+      "Hinduism": 1266,
+      "Islam": 1560,
+      "Judaism": 156,
+      "Total stated": 117438
+    },
+    "2013": {
+      "No religion": 55230,
+      "Buddhism": 1197,
+      "Christian": 49353,
+      "Hinduism": 843,
+      "Islam": 867,
+      "Judaism": 171,
+      "Total stated": 107661
+    },
+    "2018": {
+      "No religion": 70662,
+      "Buddhism": 981,
+      "Christian": 40995,
+      "Hinduism": 1074,
+      "Islam": 1299,
+      "Judaism": 162,
+      "Total stated": 115173
+    }
+  },
+  "010": {
+    "name": "Clutha",
+    "2006": {
+      "No religion": 10659,
+      "Buddhism": 99,
+      "Christian": 5538,
+      "Hinduism": 60,
+      "Islam": 69,
+      "Judaism": 9,
+      "Total stated": 16434
+    },
+    "2013": {
+      "No religion": 7287,
+      "Buddhism": 60,
+      "Christian": 7653,
+      "Hinduism": 39,
+      "Islam": 48,
+      "Judaism": 12,
+      "Total stated": 15099
+    },
+    "2018": {
+      "No religion": 9669,
+      "Buddhism": 117,
+      "Christian": 6066,
+      "Hinduism": 60,
+      "Islam": 69,
+      "Judaism": 6,
+      "Total stated": 15987
+    }
+  },
+  "046": {
+    "name": "Southland",
+    "2006": {
+      "No religion": 18042,
+      "Buddhism": 249,
+      "Christian": 10107,
+      "Hinduism": 171,
+      "Islam": 33,
+      "Judaism": 6,
+      "Total stated": 28608
+    },
+    "2013": {
+      "No religion": 11961,
+      "Buddhism": 117,
+      "Christian": 14544,
+      "Hinduism": 108,
+      "Islam": 39,
+      "Judaism": 21,
+      "Total stated": 26790
+    },
+    "2018": {
+      "No religion": 15963,
+      "Buddhism": 108,
+      "Christian": 11850,
+      "Hinduism": 153,
+      "Islam": 54,
+      "Judaism": 18,
+      "Total stated": 28146
+    }
+  },
+  "014": {
+    "name": "Gore",
+    "2006": {
+      "No religion": 6558,
+      "Buddhism": 33,
+      "Christian": 4680,
+      "Hinduism": 81,
+      "Islam": 36,
+      "Judaism": 6,
+      "Total stated": 11394
+    },
+    "2013": {
+      "No religion": 4266,
+      "Buddhism": 36,
+      "Christian": 6480,
+      "Hinduism": 27,
+      "Islam": 24,
+      "Judaism": 3,
+      "Total stated": 10836
+    },
+    "2018": {
+      "No religion": 5856,
+      "Buddhism": 15,
+      "Christian": 5349,
+      "Hinduism": 48,
+      "Islam": 33,
+      "Judaism": 6,
+      "Total stated": 11307
+    }
+  },
+  "021": {
+    "name": "Invercargill",
+    "2006": {
+      "No religion": 30351,
+      "Buddhism": 315,
+      "Christian": 18333,
+      "Hinduism": 591,
+      "Islam": 339,
+      "Judaism": 18,
+      "Total stated": 49947
+    },
+    "2013": {
+      "No religion": 21222,
+      "Buddhism": 273,
+      "Christian": 24279,
+      "Hinduism": 252,
+      "Islam": 126,
+      "Judaism": 42,
+      "Total stated": 46194
+    },
+    "2018": {
+      "No religion": 27642,
+      "Buddhism": 261,
+      "Christian": 20334,
+      "Hinduism": 411,
+      "Islam": 237,
+      "Judaism": 18,
+      "Total stated": 48903
+    }
+  },
+  "003": {
+    "name": "Auckland",
+    "2006": {
+      "No religion": 742494,
+      "Buddhism": 31080,
+      "Christian": 578619,
+      "Hinduism": 90207,
+      "Islam": 48102,
+      "Judaism": 2592,
+      "Total stated": 1493094
+    },
+    "2013": {
+      "No religion": 489915,
+      "Buddhism": 32778,
+      "Christian": 615936,
+      "Hinduism": 61458,
+      "Islam": 31155,
+      "Judaism": 3102,
+      "Total stated": 1234344
+    },
+    "2018": {
+      "No religion": 669120,
+      "Buddhism": 29619,
+      "Christian": 603312,
+      "Hinduism": 81711,
+      "Islam": 40221,
+      "Judaism": 2580,
+      "Total stated": 1426563
+    }
+  },
+  "001": {
+    "name": "Area Outside Territorial Authority",
+    "2006": {
+      "No religion": 30,
+      "Buddhism": 0,
+      "Christian": 21,
+      "Hinduism": 0,
+      "Islam": 3,
+      "Judaism": 0,
+      "Total stated": 54
+    },
+    "2013": {
+      "No religion": 18,
+      "Buddhism": 0,
+      "Christian": 15,
+      "Hinduism": 0,
+      "Islam": 0,
+      "Judaism": 0,
+      "Total stated": 33
+    },
+    "2018": {
+      "No religion": 9,
+      "Buddhism": 0,
+      "Christian": 12,
+      "Hinduism": 0,
+      "Islam": 0,
+      "Judaism": 0,
+      "Total stated": 21
+    }
+  },
+  "035": {
+    "name": "New Zealand",
+    "2006": {
+      "No religion": 2576049,
+      "Buddhism": 57132,
+      "Christian": 1614636,
+      "Hinduism": 144753,
+      "Islam": 75138,
+      "Judaism": 5538,
+      "Total stated": 4473246
+    },
+    "2013": {
+      "No religion": 1635348,
+      "Buddhism": 58407,
+      "Christian": 1858977,
+      "Hinduism": 89916,
+      "Islam": 46146,
+      "Judaism": 6867,
+      "Total stated": 3695661
+    },
+    "2018": {
+      "No religion": 2264601,
+      "Buddhism": 52761,
+      "Christian": 1717179,
+      "Hinduism": 123384,
+      "Islam": 60621,
+      "Judaism": 5265,
+      "Total stated": 4223811
+    }
+  }
+}
