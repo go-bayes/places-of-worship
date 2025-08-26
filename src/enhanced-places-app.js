@@ -23,10 +23,14 @@ class EnhancedPlacesOfWorshipApp {
         this.boundariesData = null;
         this.territorialAuthorityData = null;
         this.taCensusData = null;
-        this.showCensusOverlay = false;
-        this.currentCensusMetric = 'no_religion_change';
+        this.showReligiousDensity = false;
+        this.currentDemographicMode = 'religious_percentage';
         this.overlayYear = 2018;  // Fixed year for overlay colors
-        this.useDetailedBoundaries = true;  // Default to SA2 boundaries
+        this.useDetailedBoundaries = false;  // Default to TA boundaries (simplified view)
+        
+        // Color scaling system
+        this.colorScale = null;
+        this.religionColorDomain = [30, 65];  // Based on data analysis: 25th-90th percentiles
         
         // Filtering
         this.currentMajorCategory = 'all';
@@ -42,6 +46,7 @@ class EnhancedPlacesOfWorshipApp {
         this.setupControls();
         this.setupStreetView();
         await this.loadData();
+        this.initializeColorScale();
         this.setupDenominationColors();
         this.displayPlaces();
         this.hideLoading();
@@ -122,27 +127,47 @@ class EnhancedPlacesOfWorshipApp {
             this.updateDisplay();
         });
         
-        // Census overlay toggle
-        const censusToggle = document.getElementById('censusOverlayToggle');
-        censusToggle.addEventListener('change', (e) => {
-            this.showCensusOverlay = e.target.checked;
-            this.toggleCensusOverlay();
+        // Geographic resolution toggle
+        const geographicToggle = document.getElementById('geographicResolutionToggle');
+        const geographicLabel = document.getElementById('geographicLabel');
+        geographicToggle.addEventListener('change', (e) => {
+            this.useDetailedBoundaries = !e.target.checked;
             
-            // Show/hide census controls
-            const censusControls = document.getElementById('censusControls');
+            // Update label
             if (e.target.checked) {
-                censusControls.classList.add('active');
+                geographicLabel.textContent = 'Territorial Authority';
             } else {
-                censusControls.classList.remove('active');
+                geographicLabel.textContent = 'Statistical Area 2 (SA2)';
+            }
+            
+            // Refresh overlays if currently shown
+            if (this.showReligiousDensity) {
+                this.removeReligiousDensityOverlay();
+                this.addReligiousDensityOverlay();
+                this.updateDemographicLegend();
             }
         });
         
+        // Religious density overlay toggle
+        const religiousDensityToggle = document.getElementById('religiousDensityToggle');
+        religiousDensityToggle.addEventListener('change', (e) => {
+            this.showReligiousDensity = e.target.checked;
+            this.toggleReligiousDensityOverlay();
+            
+            // Show/hide demographic controls
+            const demographicControls = document.getElementById('demographicControls');
+            if (e.target.checked) {
+                demographicControls.classList.add('active');
+            } else {
+                demographicControls.classList.remove('active');
+            }
+        });
         
-        // Census metric selector
-        const censusMetricSelect = document.getElementById('censusMetricSelect');
-        censusMetricSelect.addEventListener('change', (e) => {
-            this.currentCensusMetric = e.target.value;
-            this.updateCensusVisualization();
+        // Demographic metric selector
+        const demographicMetricSelect = document.getElementById('demographicMetricSelect');
+        demographicMetricSelect.addEventListener('change', (e) => {
+            this.currentDemographicMode = e.target.value;
+            this.updateReligiousDensityVisualization();
             this.updateDemographicLegend();
         });
         
@@ -163,26 +188,6 @@ class EnhancedPlacesOfWorshipApp {
             this.toggleClustering();
         });
         
-        // Geographic resolution toggle
-        const geographicResolutionToggle = document.getElementById('geographicResolutionToggle');
-        const geographicResolutionLabel = document.getElementById('geographicResolutionLabel');
-        geographicResolutionToggle.addEventListener('change', (e) => {
-            this.useDetailedBoundaries = !e.target.checked;
-            
-            // Update label
-            if (e.target.checked) {
-                geographicResolutionLabel.textContent = 'Territorial Authorities (Regional)';
-            } else {
-                geographicResolutionLabel.textContent = 'Statistical Areas (Detailed)';
-            }
-            
-            // Refresh census overlay if it's currently shown
-            if (this.showCensusOverlay) {
-                this.removeCensusOverlay();
-                this.addCensusOverlay();
-                this.updateDemographicLegend();
-            }
-        });
     }
     
     async loadData() {
@@ -294,6 +299,274 @@ class EnhancedPlacesOfWorshipApp {
         Object.keys(categorizedData.denominations).forEach(denom => {
             this.denominationColors[denom] = this.denominationMapper.getDenominationColor(denom, {});
         });
+    }
+    
+    initializeColorScale() {
+        // Initialize chroma.js color scale based on data distribution analysis
+        // Using Spectral palette with domain based on religious identification percentiles
+        if (typeof chroma !== 'undefined') {
+            this.colorScale = chroma.scale(['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#ffffbf', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142'])
+                .domain(this.religionColorDomain);
+            console.log('Color scale initialized with domain:', this.religionColorDomain);
+        } else {
+            console.error('Chroma.js library not loaded');
+        }
+    }
+    
+    toggleReligiousDensityOverlay() {
+        if (this.showReligiousDensity) {
+            this.addReligiousDensityOverlay();
+            this.updateDemographicLegend();
+        } else {
+            this.removeReligiousDensityOverlay();
+            this.hideDemographicLegend();
+        }
+    }
+    
+    addReligiousDensityOverlay() {
+        // Check if we have the required data and layer doesn't already exist
+        if (!this.useDetailedBoundaries && this.taCensusData && this.territorialAuthorityData) {
+            this.addTAReligiousDensityOverlay();
+        } else if (this.useDetailedBoundaries && this.censusData && this.boundariesData) {
+            this.addSA2ReligiousDensityOverlay();
+        } else {
+            console.warn('Required data not available for religious density overlay');
+        }
+    }
+    
+    removeReligiousDensityOverlay() {
+        if (this.censusLayer) {
+            this.map.removeLayer(this.censusLayer);
+            this.censusLayer = null;
+        }
+    }
+    
+    addTAReligiousDensityOverlay() {
+        // Add TA-based religious density overlay
+        if (this.censusLayer) {
+            this.map.removeLayer(this.censusLayer);
+        }
+        
+        this.censusLayer = L.geoJSON(this.territorialAuthorityData, {
+            style: (feature) => this.getTAReligiousDensityStyle(feature),
+            onEachFeature: (feature, layer) => {
+                layer.on({
+                    mouseover: (e) => this.highlightFeature(e),
+                    mouseout: (e) => this.resetHighlight(e),
+                    click: (e) => this.showTAReligiousDensityPopup(e)
+                });
+            }
+        }).addTo(this.map);
+        
+        // Move census layer behind places
+        this.censusLayer.bringToBack();
+    }
+    
+    addSA2ReligiousDensityOverlay() {
+        // Add SA2-based religious density overlay  
+        if (this.censusLayer) {
+            this.map.removeLayer(this.censusLayer);
+        }
+        
+        this.censusLayer = L.geoJSON(this.boundariesData, {
+            style: (feature) => this.getSA2ReligiousDensityStyle(feature),
+            onEachFeature: (feature, layer) => {
+                layer.on({
+                    mouseover: (e) => this.highlightFeature(e),
+                    mouseout: (e) => this.resetHighlight(e),
+                    click: (e) => this.showSA2ReligiousDensityPopup(e)
+                });
+            }
+        }).addTo(this.map);
+        
+        // Move census layer behind places
+        this.censusLayer.bringToBack();
+    }
+    
+    getTAReligiousDensityStyle(feature) {
+        const taCode = feature.properties.TA2021_V1_ || feature.properties.TA2021_V1_00;
+        const taData = this.taCensusData[taCode];
+        
+        if (!taData || !taData[this.overlayYear]) {
+            return {
+                fillColor: '#cccccc',
+                weight: 1,
+                opacity: 0.3,
+                color: '#666',
+                fillOpacity: 0.1
+            };
+        }
+        
+        const yearData = taData[this.overlayYear];
+        const religionPct = this.calculateReligiousPercentage(yearData);
+        
+        let fillColor = '#cccccc';
+        let fillOpacity = 0.1;
+        
+        if (this.colorScale && religionPct !== null) {
+            fillColor = this.colorScale(religionPct).hex();
+            fillOpacity = 0.6;
+        }
+        
+        return {
+            fillColor: fillColor,
+            weight: 1.5,
+            opacity: 0.8,
+            color: '#333',
+            fillOpacity: fillOpacity
+        };
+    }
+    
+    getSA2ReligiousDensityStyle(feature) {
+        const sa2Code = feature.properties.SA22018_V1 || feature.properties.SA22018_V1_00;
+        const sa2Data = this.censusData[sa2Code];
+        
+        if (!sa2Data || !sa2Data[this.overlayYear]) {
+            return {
+                fillColor: '#cccccc',
+                weight: 0.5,
+                opacity: 0.2,
+                color: '#666',
+                fillOpacity: 0.1
+            };
+        }
+        
+        const yearData = sa2Data[this.overlayYear];
+        const religionPct = this.calculateReligiousPercentage(yearData);
+        
+        let fillColor = '#cccccc';
+        let fillOpacity = 0.1;
+        
+        if (this.colorScale && religionPct !== null) {
+            fillColor = this.colorScale(religionPct).hex();
+            fillOpacity = 0.6;
+        }
+        
+        return {
+            fillColor: fillColor,
+            weight: 0.5,
+            opacity: 0.6,
+            color: '#333',
+            fillOpacity: fillOpacity
+        };
+    }
+    
+    calculateReligiousPercentage(yearData) {
+        // Calculate percentage of people with religious identification (excluding no religion)
+        const totalStated = yearData['Total stated'] || 0;
+        if (totalStated === 0) return null;
+        
+        let religiousCount = 0;
+        const religiousCategories = ['Christian', 'Buddhism', 'Hinduism', 'Islam', 'Judaism', 
+                                   'Maori religions, beliefs, and philosophies', 
+                                   'Other religions, beliefs, and philosophies',
+                                   'Spiritualism and New Age religions'];
+        
+        religiousCategories.forEach(category => {
+            const count = yearData[category];
+            if (count && typeof count === 'number') {
+                religiousCount += count;
+            }
+        });
+        
+        return (religiousCount / totalStated) * 100;
+    }
+    
+    updateReligiousDensityVisualization() {
+        if (this.showReligiousDensity) {
+            this.removeReligiousDensityOverlay();
+            this.addReligiousDensityOverlay();
+        }
+    }
+    
+    showTAReligiousDensityPopup(e) {
+        const feature = e.target.feature;
+        const taCode = feature.properties.TA2021_V1_ || feature.properties.TA2021_V1_00;
+        const taName = feature.properties.TA2025_NAME || feature.properties.TA2021_V1_NAME || 'Unknown Area';
+        const taData = this.taCensusData[taCode];
+        
+        if (!taData) {
+            e.target.bindPopup(`
+                <div class="census-popup">
+                    <h3>${taName}</h3>
+                    <p><strong>TA Code:</strong> ${taCode}</p>
+                    <p><em>No census data available</em></p>
+                </div>
+            `);
+            return;
+        }
+        
+        const popupContent = this.formatReligiousDensityPopup(taData, taName, taCode, 'TA');
+        e.target.bindPopup(popupContent, {minWidth: 700, maxWidth: 800});
+        
+        // Add popup event handler for creating histogram
+        e.target.on('popupopen', (popupEvent) => {
+            this.createReligiousHistogram(taData, taName);
+        });
+    }
+    
+    showSA2ReligiousDensityPopup(e) {
+        const feature = e.target.feature;
+        const sa2Code = feature.properties.SA22018_V1 || feature.properties.SA22018_V1_00;
+        const sa2Name = feature.properties.SA22018_V1_NAME || 'Unknown Area';
+        const sa2Data = this.censusData[sa2Code];
+        
+        if (!sa2Data) {
+            e.target.bindPopup(`
+                <div class="census-popup">
+                    <h3>${sa2Name}</h3>
+                    <p><strong>SA2 Code:</strong> ${sa2Code}</p>
+                    <p><em>No census data available</em></p>
+                </div>
+            `);
+            return;
+        }
+        
+        const popupContent = this.formatReligiousDensityPopup(sa2Data, sa2Name, sa2Code, 'SA2');
+        e.target.bindPopup(popupContent, {minWidth: 700, maxWidth: 800});
+        
+        // Add popup event handler for creating histogram
+        e.target.on('popupopen', (popupEvent) => {
+            this.createReligiousHistogram(sa2Data, sa2Name);
+        });
+    }
+    
+    formatReligiousDensityPopup(censusData, areaName, areaCode, areaType) {
+        // Create comprehensive popup with temporal data and histogram placeholder
+        const years = ['2006', '2013', '2018'];
+        let summaryContent = '';
+        let histogramDiv = '<div id="religious-histogram" style="width: 100%; height: 300px; margin-top: 15px;"></div>';
+        
+        // Add summary statistics for each year
+        years.forEach(year => {
+            if (censusData[year]) {
+                const yearData = censusData[year];
+                const total = yearData['Total'] || 0;
+                const totalStated = yearData['Total stated'] || 0;
+                const religionPct = this.calculateReligiousPercentage(yearData);
+                
+                summaryContent += `
+                    <div style="margin: 8px 0; padding: 8px; background: rgba(52, 152, 219, 0.1); border-left: 3px solid #3498db;">
+                        <strong>${year}:</strong> 
+                        Total: ${total.toLocaleString()}, 
+                        Religious: ${religionPct ? religionPct.toFixed(1) + '%' : 'N/A'}
+                    </div>
+                `;
+            }
+        });
+        
+        return `
+            <div class="census-popup">
+                <h3>${areaName}</h3>
+                <p><strong>${areaType} Code:</strong> ${areaCode}</p>
+                <p><strong>Census Timeline:</strong> 2006 → 2013 → 2018</p>
+                <div style="margin-top: 15px;">
+                    <h4>Summary Statistics</h4>
+                    ${summaryContent}
+                </div>
+                ${histogramDiv}
+            </div>
+        `;
     }
     
     populateFilterDropdowns() {
@@ -1399,15 +1672,22 @@ class EnhancedPlacesOfWorshipApp {
         const legendTitle = document.getElementById('demographicLegendTitle');
         const legendContent = document.getElementById('demographicLegendContent');
         
-        if (!this.showCensusOverlay) {
+        // Check if religious density overlay is shown (new system) or old census overlay
+        if (!this.showReligiousDensity && !this.showCensusOverlay) {
             legendSection.style.display = 'none';
             return;
         }
         
         legendSection.style.display = 'block';
         
-        // Update title and content based on current metric
-        const legendData = this.getDemographicLegendData();
+        // Update title and content based on current mode
+        let legendData;
+        if (this.showReligiousDensity) {
+            legendData = this.getReligiousDensityLegendData();
+        } else {
+            legendData = this.getDemographicLegendData();
+        }
+        
         legendTitle.textContent = legendData.title;
         legendContent.innerHTML = legendData.content;
     }
@@ -1415,6 +1695,219 @@ class EnhancedPlacesOfWorshipApp {
     hideDemographicLegend() {
         const legendSection = document.getElementById('demographicLegend');
         legendSection.style.display = 'none';
+    }
+    
+    getReligiousDensityLegendData() {
+        // Create dynamic legend based on chroma.js color scale and current demographic mode
+        let title = 'Religious Identification';
+        let content = '';
+        
+        switch (this.currentDemographicMode) {
+            case 'religious_percentage':
+                title = 'Religious Identification %';
+                content = this.createColorScaleLegend('% of population with religious identification');
+                break;
+            case 'religious_counts':
+                title = 'Religious Population Counts';  
+                content = this.createCountBasedLegend();
+                break;
+            case 'temporal_change':
+                title = 'Religious Change (2006→2018)';
+                content = this.createTemporalChangeLegend();
+                break;
+        }
+        
+        // Add data source attribution
+        content += `
+            <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.8em; color: #666;">
+                <strong>Data Sources:</strong><br>
+                Statistics New Zealand (CC BY 4.0)<br>
+                Census 2006, 2013, 2018
+            </div>
+        `;
+        
+        return { title, content };
+    }
+    
+    createReligiousHistogram(censusData, areaName) {
+        // Create rich Plotly.js histogram showing temporal change 2006→2013→2018
+        // Following age_map patterns for 300px height and stacked bars
+        
+        setTimeout(() => {
+            const container = document.getElementById('religious-histogram');
+            if (!container) {
+                console.warn('Histogram container not found');
+                return;
+            }
+            
+            if (typeof Plotly === 'undefined') {
+                console.error('Plotly.js not loaded');
+                container.innerHTML = '<p>Plotly.js not available for histogram</p>';
+                return;
+            }
+            
+            const years = ['2006', '2013', '2018'];
+            const religionsToShow = ['Christian', 'No religion', 'Buddhism', 'Hinduism', 'Islam', 'Judaism', 
+                                  'Maori religions, beliefs, and philosophies', 'Other religions, beliefs, and philosophies'];
+            const religionColors = {
+                'Christian': '#e74c3c',
+                'No religion': '#95a5a6', 
+                'Buddhism': '#f39c12',
+                'Hinduism': '#e67e22',
+                'Islam': '#27ae60',
+                'Judaism': '#9b59b6',
+                'Maori religions, beliefs, and philosophies': '#c0392b',
+                'Other religions, beliefs, and philosophies': '#16a085'
+            };
+            
+            let traces = [];
+            
+            // Create traces for each religion showing change across years
+            religionsToShow.forEach(religion => {
+                let yearCounts = [];
+                let yearPercentages = [];
+                
+                years.forEach(year => {
+                    const yearData = censusData[year];
+                    if (yearData) {
+                        const count = yearData[religion] || 0;
+                        const total = yearData['Total stated'] || 1;
+                        const percentage = (count / total * 100);
+                        
+                        yearCounts.push(count);
+                        yearPercentages.push(percentage);
+                    } else {
+                        yearCounts.push(0);
+                        yearPercentages.push(0);
+                    }
+                });
+                
+                traces.push({
+                    x: years,
+                    y: yearCounts,
+                    name: religion.replace('religions, beliefs, and philosophies', 'religions'),
+                    type: 'bar',
+                    marker: {
+                        color: religionColors[religion] || '#3498db'
+                    },
+                    text: yearPercentages.map(p => p.toFixed(1) + '%'),
+                    textposition: 'none',
+                    hovertemplate: '<b>%{fullData.name}</b><br>' +
+                                 'Year: %{x}<br>' +
+                                 'Count: %{y:,}<br>' +
+                                 'Percentage: %{text}<br>' +
+                                 '<extra></extra>'
+                });
+            });
+            
+            const layout = {
+                title: {
+                    text: `Religious Affiliation Timeline - ${areaName}`,
+                    font: { size: 16 }
+                },
+                xaxis: {
+                    title: 'Census Year',
+                    tickmode: 'array',
+                    tickvals: years
+                },
+                yaxis: {
+                    title: 'Number of People'
+                },
+                height: 300,
+                barmode: 'stack',
+                margin: {
+                    l: 60,
+                    r: 20,
+                    t: 50,
+                    b: 50
+                },
+                legend: {
+                    orientation: 'h',
+                    x: 0,
+                    y: -0.3,
+                    font: { size: 10 }
+                },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)'
+            };
+            
+            const config = {
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d', 'autoScale2d'],
+                displaylogo: false,
+                responsive: true
+            };
+            
+            Plotly.newPlot(container, traces, layout, config);
+            
+        }, 100); // Small delay to ensure popup is fully rendered
+    }
+    
+    createColorScaleLegend(description) {
+        if (!this.colorScale) return '<p>Color scale not available</p>';
+        
+        // Create graduated color legend based on percentile thresholds  
+        const thresholds = [30, 35, 40, 45, 50, 55, 60, 65];
+        let legendHtml = `<p style="font-size: 0.9em; margin-bottom: 10px;">${description}</p>`;
+        
+        thresholds.forEach((threshold, index) => {
+            const color = this.colorScale(threshold).hex();
+            const nextThreshold = thresholds[index + 1];
+            const range = nextThreshold ? `${threshold}% - ${nextThreshold}%` : `${threshold}%+`;
+            
+            legendHtml += `
+                <div class="legend-item" style="margin: 4px 0;">
+                    <div class="legend-dot" style="background-color: ${color}; width: 16px; height: 16px; border: 1px solid #333;"></div>
+                    <span style="font-size: 0.85em;">${range}</span>
+                </div>
+            `;
+        });
+        
+        return legendHtml;
+    }
+    
+    createCountBasedLegend() {
+        return `
+            <p style="font-size: 0.9em; margin-bottom: 10px;">Number of people with religious identification</p>
+            <div class="legend-item">
+                <div class="legend-dot" style="background-color: #3288bd; width: 16px; height: 16px;"></div>
+                High population areas
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background-color: #66c2a5; width: 14px; height: 14px;"></div>
+                Medium population areas
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background-color: #abdda4; width: 12px; height: 12px;"></div>
+                Low population areas
+            </div>
+        `;
+    }
+    
+    createTemporalChangeLegend() {
+        return `
+            <p style="font-size: 0.9em; margin-bottom: 10px;">Change in religious identification 2006→2018</p>
+            <div class="legend-item">
+                <div class="legend-dot" style="background-color: #d53e4f; width: 16px; height: 16px;"></div>
+                Large decrease (&gt;-5 points)
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background-color: #f46d43; width: 14px; height: 14px;"></div>
+                Moderate decrease (-2 to -5 points)
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background-color: #ffffbf; width: 12px; height: 12px;"></div>
+                Stable (-2 to +2 points)
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background-color: #abdda4; width: 14px; height: 14px;"></div>
+                Moderate increase (+2 to +5 points)
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background-color: #66c2a5; width: 16px; height: 16px;"></div>
+                Large increase (&gt;+5 points)
+            </div>
+        `;
     }
     
     getDemographicLegendData() {

@@ -400,15 +400,27 @@
             </select>
         </div>
         
-        <!-- Census Overlay Toggle -->
+        <!-- Geographic Resolution Toggle -->
         <div class="control-group">
-            <label for="censusOverlayToggle">Census Data Overlay:</label>
+            <label for="geographicResolutionToggle">Geographic Resolution:</label>
             <div class="control-row">
                 <label class="toggle-switch">
-                    <input type="checkbox" id="censusOverlayToggle">
+                    <input type="checkbox" id="geographicResolutionToggle" checked>
                     <span class="toggle-slider"></span>
                 </label>
-                <span>Show regional demographics</span>
+                <span id="geographicLabel">Territorial Authority</span>
+            </div>
+        </div>
+        
+        <!-- Religious Density Overlay Toggle -->
+        <div class="control-group">
+            <label for="religiousDensityToggle">Religious Density Overlay:</label>
+            <div class="control-row">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="religiousDensityToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+                <span>Show religious identification %</span>
             </div>
         </div>
         
@@ -446,32 +458,14 @@
         </div>
     </div>
     
-    <!-- Census Controls (shown when overlay is enabled) -->
-    <div id="censusControls" class="census-controls">
+    <!-- Demographic Controls (shown when religious density overlay is enabled) -->
+    <div id="demographicControls" class="census-controls">
         <div class="control-group">
-            <label for="censusMetricSelect">Demographic Metric:</label>
-            <select id="censusMetricSelect">
-                <optgroup label="Religious Demographics">
-                    <option value="no_religion_change">No Religion Change (2006-2018)</option>
-                    <option value="christian_change">Christian Change (2006-2018)</option>
-                    <option value="diversity_index">Religious Diversity Index</option>
-                </optgroup>
-                <optgroup label="Age & Gender">
-                    <option value="median_age">Median Age</option>
-                    <option value="gender_ratio">Gender Ratio (Male/Female)</option>
-                </optgroup>
-                <optgroup label="Ethnicity & Culture">
-                    <option value="ethnicity_diversity">Ethnicity Diversity</option>
-                </optgroup>
-                <optgroup label="Economic Indicators">
-                    <option value="income_level">Average Income Level</option>
-                    <option value="unemployment_rate">Unemployment Rate</option>
-                    <option value="home_ownership">Home Ownership Rate</option>
-                </optgroup>
-                <optgroup label="Population & Geography">
-                    <option value="total_population">Total Population</option>
-                    <option value="population_density">Population Density</option>
-                </optgroup>
+            <label for="demographicMetricSelect">Display Mode:</label>
+            <select id="demographicMetricSelect">
+                <option value="religious_percentage">Religious Identification %</option>
+                <option value="religious_counts">Religious Population Counts</option>
+                <option value="temporal_change">Temporal Change (2006→2018)</option>
             </select>
         </div>
         
@@ -491,7 +485,8 @@
     <div class="legend">
         <h4>Legend</h4>
         
-        <div class="legend-section">
+        <!-- Religious Categories Legend -->
+        <div id="placesLegend" class="legend-section">
             <h5>Major Religious Categories</h5>
             <div class="category-legend">
                 <div class="legend-item">
@@ -521,7 +516,16 @@
             </div>
         </div>
         
-        <div class="legend-section">
+        <!-- Dynamic Demographic Legend (hidden by default) -->
+        <div id="demographicLegend" class="legend-section" style="display: none;">
+            <h5 id="demographicLegendTitle">Religious Identification %</h5>
+            <div id="demographicLegendContent">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+        </div>
+        
+        <!-- Data Quality Legend -->
+        <div id="dataQualityLegend" class="legend-section">
             <h5>Data Quality</h5>
             <div class="legend-item">
                 <div class="legend-dot" style="background-color: #3498db; width: 16px; height: 16px; border: 3px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5);"></div>
@@ -556,6 +560,12 @@
     
     <!-- Marker Clustering JS -->
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    
+    <!-- Chroma.js for color scaling -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.4.2/chroma.min.js"></script>
+    
+    <!-- Plotly.js for rich histograms -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     
     <!-- Denomination Mapper -->
     <script src="src/denomination-mapper.js"></script>
