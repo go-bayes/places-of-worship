@@ -543,12 +543,19 @@ class EnhancedPlacesOfWorshipApp {
     addAgeGenderData(taCode) {
         let content = '';
         
-        // Add age data if available
-        if (this.ageGenderData && this.ageGenderData[taCode]) {
-            const taData = this.ageGenderData[taCode];
-            const latestYear = Math.max(...Object.keys(taData).map(y => parseInt(y)));
-            
-            if (taData[latestYear] && taData[latestYear].age) {
+        try {
+            // Add age data if available
+            if (this.ageGenderData && this.ageGenderData[taCode]) {
+                const taData = this.ageGenderData[taCode];
+                const years = Object.keys(taData).filter(y => !isNaN(parseInt(y)));
+                
+                if (years.length === 0) {
+                    return content;
+                }
+                
+                const latestYear = Math.max(...years.map(y => parseInt(y)));
+                
+                if (taData[latestYear] && taData[latestYear].age) {
                 const ageData = taData[latestYear].age;
                 content += `<h4>Age Profile (${latestYear})</h4>`;
                 content += `
@@ -583,13 +590,17 @@ class EnhancedPlacesOfWorshipApp {
                 }
             }
             
-            // Add gender data
-            if (taData[latestYear] && taData[latestYear].gender) {
-                const genderData = taData[latestYear].gender;
-                content += `
-                    <p><strong>Gender Split:</strong> ${genderData.male_percent}% male, ${genderData.female_percent}% female</p>
-                `;
+                // Add gender data
+                if (taData[latestYear] && taData[latestYear].gender) {
+                    const genderData = taData[latestYear].gender;
+                    content += `
+                        <p><strong>Gender Split:</strong> ${genderData.male_percent}% male, ${genderData.female_percent}% female</p>
+                    `;
+                }
             }
+        } catch (error) {
+            console.warn('Error processing age/gender data for TA', taCode, ':', error);
+            return '';
         }
         
         return content;
@@ -598,10 +609,17 @@ class EnhancedPlacesOfWorshipApp {
     addEmploymentIncomeData(taCode) {
         let content = '';
         
-        // Add employment data if available
-        if (this.employmentIncomeData && this.employmentIncomeData[taCode]) {
-            const taData = this.employmentIncomeData[taCode];
-            const latestYear = Math.max(...Object.keys(taData).map(y => parseInt(y)));
+        try {
+            // Add employment data if available
+            if (this.employmentIncomeData && this.employmentIncomeData[taCode]) {
+                const taData = this.employmentIncomeData[taCode];
+                const years = Object.keys(taData).filter(y => !isNaN(parseInt(y)));
+                
+                if (years.length === 0) {
+                    return content;
+                }
+                
+                const latestYear = Math.max(...years.map(y => parseInt(y)));
             
             if (taData[latestYear] && taData[latestYear].employment) {
                 const empData = taData[latestYear].employment;
@@ -668,6 +686,9 @@ class EnhancedPlacesOfWorshipApp {
                     }
                 }
             }
+        } catch (error) {
+            console.warn('Error processing employment/income data for TA', taCode, ':', error);
+            return '';
         }
         
         return content;
@@ -676,10 +697,17 @@ class EnhancedPlacesOfWorshipApp {
     addEthnicityDensityData(taCode) {
         let content = '';
         
-        // Add ethnicity and population density data if available
-        if (this.ethnicityDensityData && this.ethnicityDensityData[taCode]) {
-            const taData = this.ethnicityDensityData[taCode];
-            const latestYear = Math.max(...Object.keys(taData).map(y => parseInt(y)));
+        try {
+            // Add ethnicity and population density data if available
+            if (this.ethnicityDensityData && this.ethnicityDensityData[taCode]) {
+                const taData = this.ethnicityDensityData[taCode];
+                const years = Object.keys(taData).filter(y => !isNaN(parseInt(y)));
+                
+                if (years.length === 0) {
+                    return content;
+                }
+                
+                const latestYear = Math.max(...years.map(y => parseInt(y)));
             
             if (taData[latestYear] && taData[latestYear].ethnicity) {
                 const ethnicityData = taData[latestYear].ethnicity;
@@ -706,6 +734,9 @@ class EnhancedPlacesOfWorshipApp {
                     <p><strong>Population Density:</strong> ${geographyData.population_density} people/km² (${geographyData.population_density_category})</p>
                 `;
             }
+        } catch (error) {
+            console.warn('Error processing ethnicity/density data for TA', taCode, ':', error);
+            return '';
         }
         
         return content;
@@ -1287,17 +1318,19 @@ class EnhancedPlacesOfWorshipApp {
                 }
                 break;
             case 'age_employment_income':
-                const ageEmpIncData = this.addAgeGenderData(areaCode) + this.addEmploymentIncomeData(areaCode);
-                if (ageEmpIncData) {
-                    content += ageEmpIncData;
+                const ageData = this.addAgeGenderData(areaCode);
+                const empIncData = this.addEmploymentIncomeData(areaCode);
+                if (ageData || empIncData) {
+                    content += `<h4>👥💼 Age, Employment & Income Profile</h4>`;
+                    if (ageData) content += ageData;
+                    if (empIncData) content += empIncData;
                 } else {
                     content += `
                         <h4>👥💼 Age, Employment & Income</h4>
                         <p><em>Age, employment and income data for ${areaName} not available.</em></p>
-                        <p>• Total fertility rate</p>
-                    <p>• Age-specific fertility rates</p>
-                    <p>• Family formation patterns</p>
-                `;
+                        <p>• Age demographics and employment statistics would be shown here</p>
+                    `;
+                }
                 break;
             default:
                 return '';
