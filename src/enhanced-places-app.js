@@ -224,13 +224,33 @@ class EnhancedPlacesOfWorshipApp {
             censusOverlayToggle.addEventListener('change', (e) => {
                 console.log('Census overlay toggle changed:', e.target.checked);
                 this.showReligiousDensity = e.target.checked;
-                this.toggleReligiousDensityOverlay();
                 
                 if (e.target.checked) {
-                    this.showDemographicLegend(this.getReligiousDensityLegendData());
+                    // When enabling demographics, default to SA-2 level (more detailed)
+                    this.useDetailedBoundaries = true;
+                    
+                    // Update the geographic resolution toggle to reflect SA-2 default
+                    const geographicToggle = document.getElementById('geographicResolutionToggle');
+                    const geographicLabel = document.getElementById('geographicResolutionLabel');
+                    if (geographicToggle) {
+                        geographicToggle.checked = false; // Unchecked = SA-2 level
+                        if (geographicLabel) {
+                            geographicLabel.textContent = 'Statistical Area 2 (Detailed)';
+                        }
+                    }
+                    
+                    // Refresh the overlay to show SA-2 level immediately
+                    this.removeReligiousDensityOverlay();
+                    setTimeout(() => {
+                        this.addReligiousDensityOverlay();
+                        this.showDemographicLegend(this.getReligiousDensityLegendData());
+                    }, 50);
+                    return; // Don't call toggleReligiousDensityOverlay again below
                 } else {
                     this.hideDemographicLegend();
                 }
+                
+                this.toggleReligiousDensityOverlay();
             });
         }
         
