@@ -410,6 +410,69 @@
                 max-width: none;
             }
         }
+        
+        /* special area popup styling */
+        .census-popup.special-area {
+            border-left: 4px solid #e67e22;
+            background: linear-gradient(135deg, #fff, #fdf6e3);
+        }
+        
+        .census-popup.special-area h3 {
+            color: #d35400;
+            border-bottom: 2px solid #f39c12;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .special-area-explanation {
+            background: #ecf0f1;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border-left: 3px solid #3498db;
+        }
+        
+        .special-area-explanation h4 {
+            color: #2c3e50;
+            margin-top: 0;
+            font-size: 1.1em;
+        }
+        
+        .census-timeline {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border: 1px solid #dee2e6;
+        }
+        
+        .census-timeline h4 {
+            color: #2c3e50;
+            margin: 0 0 8px 0;
+            font-size: 1em;
+        }
+        
+        .timeline-data {
+            font-family: monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+            color: #495057;
+        }
+        
+        .area-characteristics {
+            margin-top: 10px;
+        }
+        
+        .area-characteristics ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+        
+        .area-characteristics li {
+            margin-bottom: 4px;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
     </style>
 </head>
 <body>
@@ -595,6 +658,29 @@
             <div class="legend-item">
                 <div class="legend-dot" style="background-color: #3498db; width: 12px; height: 12px; border: 3px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5); opacity: 0.8;"></div>
                 Low (&lt;60%)
+            </div>
+        </div>
+        
+        <div class="legend-section">
+            <h5>Special Area Types</h5>
+            <div class="legend-item">
+                <span style="font-size: 1.2em;">🌲</span>
+                Conservation Areas / Forest Parks
+            </div>
+            <div class="legend-item">
+                <span style="font-size: 1.2em;">🌊</span>
+                Water Bodies / Oceanic Areas
+            </div>
+            <div class="legend-item">
+                <span style="font-size: 1.2em;">🏝️</span>
+                Island Areas
+            </div>
+            <div class="legend-item">
+                <span style="font-size: 1.2em;">🏔️</span>
+                Remote Uninhabited Areas
+            </div>
+            <div class="legend-description" style="font-size: 0.85em; color: #666; margin-top: 8px; font-style: italic;">
+                * These areas have no permanent residents and therefore no religious affiliation data
             </div>
         </div>
     </div>

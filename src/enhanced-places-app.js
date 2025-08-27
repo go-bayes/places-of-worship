@@ -1193,17 +1193,36 @@ class EnhancedPlacesOfWorshipApp {
         const sa2Data = this.censusData[sa2Code];
         
         if (!sa2Data) {
-            e.target.bindPopup(`
-                <div class="census-popup">
-                    <h3>${sa2Name}</h3>
-                    <p><strong>SA2 Code:</strong> ${sa2Code}</p>
-                    <p><em>No census data available</em></p>
-                </div>
-            `);
+            // check if this is a special uninhabited area
+            const specialArea = this.detectSpecialAreaType(sa2Name, sa2Code, null);
+            if (specialArea) {
+                e.target.bindPopup(`
+                    <div class="census-popup special-area">
+                        <h3>${specialArea.icon} ${sa2Name}</h3>
+                        <p><strong>SA2 Code:</strong> ${sa2Code}</p>
+                        <p><strong>Area Type:</strong> ${specialArea.description}</p>
+                        <div class="special-area-explanation">
+                            <p><em>This area has no resident population data as it represents a ${specialArea.description.toLowerCase()}. Census data collection focuses on areas with permanent residential populations.</em></p>
+                        </div>
+                    </div>
+                `);
+            } else {
+                e.target.bindPopup(`
+                    <div class="census-popup">
+                        <h3>${sa2Name}</h3>
+                        <p><strong>SA2 Code:</strong> ${sa2Code}</p>
+                        <p><em>No census data available</em></p>
+                    </div>
+                `);
+            }
             return;
         }
         
-        const popupContent = this.formatReligiousDensityPopup(sa2Data, sa2Name, sa2Code, 'SA2');
+        // check if area has data but is uninhabited
+        const specialArea = this.detectSpecialAreaType(sa2Name, sa2Code, sa2Data);
+        const popupContent = specialArea ? 
+            this.formatSpecialAreaPopup(sa2Data, sa2Name, sa2Code, specialArea, 'SA2') :
+            this.formatReligiousDensityPopup(sa2Data, sa2Name, sa2Code, 'SA2');
         e.target.bindPopup(popupContent, {minWidth: 900, maxWidth: 1000});
         
         // Add popup event handler for creating histogram
@@ -1212,6 +1231,94 @@ class EnhancedPlacesOfWorshipApp {
         });
     }
     
+    detectSpecialAreaType(areaName, areaCode, censusData) {
+        // detect uninhabited special areas based on name patterns and data characteristics
+        const name = areaName.toLowerCase();
+        
+        // forest parks and conservation areas
+        if (name.includes('forest park') || name.includes('forest reserve') || 
+            name.includes('conservation area') || name.includes('national park')) {
+            return { type: 'conservation', icon: '🌲', description: 'Protected Conservation Area' };
+        }
+        
+        // water bodies
+        if (name.includes('inland water') || name.includes('lake ') || name.includes('harbour') || 
+            name.includes('inlet') || name.includes('bay') || name.includes('sound') || 
+            name.includes('strait') || name.includes('river') || name.includes('creek')) {
+            return { type: 'water', icon: '🌊', description: 'Water Body / Oceanic Area' };
+        }
+        
+        // islands (inhabited or uninhabited)
+        if (name.includes('island') || name.includes('islands')) {
+            return { type: 'island', icon: '🏝️', description: 'Island Area' };
+        }
+        
+        // remote areas with zero population
+        if (censusData && this.isUninhabitedArea(censusData)) {
+            return { type: 'remote', icon: '🏔️', description: 'Remote Uninhabited Area' };
+        }
+        
+        return null;
+    }
+    
+    isUninhabitedArea(censusData) {
+        // check if area has consistent zero/null population across years
+        const years = ['2006', '2013', '2018'];
+        let totalZeroYears = 0;
+        
+        years.forEach(year => {
+            const yearData = censusData[year];
+            if (yearData) {
+                const total = yearData['Total'] || yearData['Total stated'] || 0;
+                if (total === 0) totalZeroYears++;
+            }
+        });
+        
+        // if 2+ years show zero population, likely uninhabited
+        return totalZeroYears >= 2;
+    }
+    
+    formatSpecialAreaPopup(censusData, areaName, areaCode, specialArea, areaType) {
+        // create enhanced popup for special uninhabited areas
+        const years = ['2006', '2013', '2018'];
+        let timelineContent = '';
+        
+        // show census timeline to demonstrate consistent uninhabited status
+        years.forEach(year => {
+            const yearData = censusData[year];
+            const total = yearData ? (yearData['Total'] || yearData['Total stated'] || 0) : 'N/A';
+            const religious = yearData ? this.calculateReligiousPercentage(yearData) : 'N/A';
+            timelineContent += `<strong>${year}:</strong> Total: ${total}, Religious: ${religious === 'N/A' ? 'N/A' : religious + '%'}<br>`;
+        });
+        
+        return `
+            <div class="census-popup special-area">
+                <h3>${specialArea.icon} ${areaName}</h3>
+                <p><strong>${areaType} Code:</strong> ${areaCode}</p>
+                <p><strong>Area Type:</strong> ${specialArea.description}</p>
+                
+                <div class="census-timeline">
+                    <h4>Census Timeline: 2006 → 2013 → 2018</h4>
+                    <div class="timeline-data">${timelineContent}</div>
+                </div>
+                
+                <div class="special-area-explanation">
+                    <h4>Why No Religious Data?</h4>
+                    <p><em>This ${specialArea.description.toLowerCase()} has no permanent resident population. Statistics New Zealand tracks these areas for geographic completeness, but census data collection focuses on areas with residential populations.</em></p>
+                    
+                    <div class="area-characteristics">
+                        <strong>Area Characteristics:</strong>
+                        <ul>
+                            <li>Geographic boundary maintained for statistical purposes</li>
+                            <li>Zero or minimal permanent residents across multiple census years</li>
+                            <li>May include seasonal workers, visitors, or temporary populations not captured in residential census</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     formatReligiousDensityPopup(censusData, areaName, areaCode, areaType) {
         // Create comprehensive popup with temporal data and histogram placeholder
         const years = ['2006', '2013', '2018'];
