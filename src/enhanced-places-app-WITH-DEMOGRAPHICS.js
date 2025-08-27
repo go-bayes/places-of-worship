@@ -1281,7 +1281,7 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     formatReligiousDensityPopup(censusData, areaName, areaCode, areaType) {
-        // Create comprehensive popup with temporal data and histogram placeholder
+        // Create popup with temporal data and histogram placeholder
         const years = ['2006', '2013', '2018'];
         let summaryContent = '';
         let histogramDiv = '<div id="religious-histogram" style="width: 100%; height: 300px; margin-top: 15px;"></div>';

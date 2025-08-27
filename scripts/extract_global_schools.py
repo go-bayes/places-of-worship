@@ -48,7 +48,7 @@ class GlobalSchoolsExtractor:
         }
     
     def build_overpass_query(self, country_code: str) -> str:
-        """Build comprehensive Overpass query for schools in a country"""
+        """Build Overpass query for schools in a country"""
         return f"""
         [out:json][timeout:{self.timeout}];
         area["ISO3166-1"="{country_code}"]["admin_level"="2"]->.country;

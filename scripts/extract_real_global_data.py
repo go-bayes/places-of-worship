@@ -98,7 +98,7 @@ class RealGlobalPlacesExtractor:
         return server
     
     def build_country_query(self, country_code: str) -> str:
-        """Build comprehensive Overpass QL query for places of worship"""
+        """Build Overpass QL query for places of worship"""
         return f"""
         [out:json][timeout:1800];
         area["ISO3166-1"="{country_code}"]->.country;
@@ -457,7 +457,7 @@ class RealGlobalPlacesExtractor:
         
         logger.info(f"💾 Saved {total_places:,} places to {parquet_file}")
         
-        # Create comprehensive statistics
+        # Create statistics
         stats = {
             'extraction_summary': {
                 'total_places': total_places,

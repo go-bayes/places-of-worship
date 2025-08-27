@@ -9,7 +9,7 @@ A mapping infrastructure for religious sites, educational institutions, and civi
 - 3,524,540 places of worship extracted from OpenStreetMap
 - 247 countries and territories included
 - WebGL-accelerated interactive mapping
-- Comprehensive OpenStreetMap attribution and licensing compliance
+- OpenStreetMap attribution and licensing compliance
 - Multi-dataset architecture supporting places, schools, and civic buildings
 
 ## Three Mapping Systems
