@@ -53,6 +53,16 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     async init() {
+        console.log('🚀 Starting Enhanced Places app initialization...');
+        
+        // EMERGENCY FIX: Skip everything and just hide loading screen immediately
+        console.log('⚠️  EMERGENCY MODE: Hiding loading screen immediately');
+        this.hideLoading();
+        console.log('✅ Loading screen hidden in emergency mode');
+        
+        return;
+        
+        // Original initialization code below (commented out for debugging)
         try {
             console.log('🚀 Starting Enhanced Places app initialization...');
             
