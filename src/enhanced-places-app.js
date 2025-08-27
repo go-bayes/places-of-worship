@@ -1268,9 +1268,9 @@ class EnhancedPlacesOfWorshipApp {
         
         switch (demographicType) {
             case 'age':
-                const ageData = this.addAgeGenderData(areaCode);
-                if (ageData) {
-                    content += ageData;
+                const ageContent = this.addAgeGenderData(areaCode);
+                if (ageContent) {
+                    content += ageContent;
                 } else {
                     content += `
                         <h4>📊 Age Structure</h4>
@@ -1403,12 +1403,12 @@ class EnhancedPlacesOfWorshipApp {
                 }
                 break;
             case 'age_employment_income':
-                const ageData = this.addAgeGenderData(areaCode);
-                const empIncData = this.addEmploymentIncomeData(areaCode);
-                if (ageData || empIncData) {
+                const ageIncomeContent = this.addAgeGenderData(areaCode);
+                const empIncContent = this.addEmploymentIncomeData(areaCode);
+                if (ageIncomeContent || empIncContent) {
                     content += `<h4>👥💼 Age, Employment & Income Profile</h4>`;
-                    if (ageData) content += ageData;
-                    if (empIncData) content += empIncData;
+                    if (ageIncomeContent) content += ageIncomeContent;
+                    if (empIncContent) content += empIncContent;
                 } else {
                     content += `
                         <h4>👥💼 Age, Employment & Income</h4>
