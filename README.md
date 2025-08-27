@@ -2,8 +2,6 @@
 
 A mapping infrastructure for religious sites, educational institutions, and civic buildings, built using OpenStreetMap data from 247 countries and territories.
 
-**Live Demo**: [https://go-bayes.github.io/places-of-worship/landing.html](https://go-bayes.github.io/places-of-worship/landing.html)
-
 ## Dataset Overview
 
 - 3,524,540 places of worship extracted from OpenStreetMap
