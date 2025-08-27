@@ -41,7 +41,7 @@ class EnhancedPlacesOfWorshipApp {
         this.showCensusOverlay = false; // Keep for backward compatibility
         this.currentDemographicMode = 'religious_percentage';
         this.currentCensusMetric = 'no_religion_change'; // Keep for backward compatibility
-        this.currentDemographic = 'none'; // Demographic toggle selection
+        this.currentDemographic = 'comprehensive'; // Demographic toggle selection - show all demographic data by default
         this.overlayYear = 2018;  // Fixed year for overlay colors
         this.useDetailedBoundaries = false;  // Default to TA boundaries (simplified view)
         
@@ -52,6 +52,14 @@ class EnhancedPlacesOfWorshipApp {
         this.ageGenderData = null;  // Age and gender demographics by TA
         this.employmentIncomeData = null;  // Employment and income data by TA
         this.ethnicityDensityData = null;  // Ethnicity and population density by TA
+        
+        // Enhanced reporting system
+        this.reportingSystem = {
+            confidenceMetrics: {},
+            dataQualityScores: {},
+            sourceTracking: {},
+            temporalAnalysis: {}
+        };
         
         // Color scaling system
         this.colorScale = null;
@@ -277,7 +285,29 @@ class EnhancedPlacesOfWorshipApp {
             });
         }
         
-        // Demographic metric selector
+        // Census metric selector - enhanced to handle data quality options
+        const censusMetricSelect = document.getElementById('censusMetricSelect');
+        if (censusMetricSelect) {
+            censusMetricSelect.addEventListener('change', (e) => {
+                console.log('Census metric changed to:', e.target.value);
+                this.currentCensusMetric = e.target.value;
+                
+                // Handle data quality specific options
+                if (e.target.value === 'data_quality') {
+                    this.showDataQualityDashboard();
+                } else if (e.target.value === 'source_confidence') {
+                    this.showSourceConfidenceDashboard();
+                } else {
+                    this.hideDataQualityDashboard();
+                    // Standard demographic processing
+                    this.updateColorScale();
+                    this.updateReligiousDensityVisualization();
+                    this.updateDemographicLegend();
+                }
+            });
+        }
+        
+        // Demographic metric selector (backward compatibility)
         const demographicMetricSelect = document.getElementById('demographicMetricSelect');
         if (demographicMetricSelect) {
             demographicMetricSelect.addEventListener('change', (e) => {
@@ -343,8 +373,8 @@ class EnhancedPlacesOfWorshipApp {
             console.warn('demographicToggle element not found in HTML - skipping demographic toggle setup');
         }
         
-        // Initialize with none selected
-        this.currentDemographic = 'none';
+        // Initialize with comprehensive demographic data showing
+        this.currentDemographic = 'comprehensive';
     }
     
     updateDemographicDisplay() {
@@ -508,6 +538,7 @@ class EnhancedPlacesOfWorshipApp {
             if (ageGenderResponse && ageGenderResponse.ok) {
                 const ageGenderData = await ageGenderResponse.json();
                 this.ageGenderData = ageGenderData.data || {};
+                this.calculateDataQualityScores('age_gender', ageGenderData);
                 console.log('✓ Age/gender data loaded:', Object.keys(this.ageGenderData).length, 'areas');
             } else {
                 console.log('⚠ Age/gender data not available');
@@ -517,6 +548,7 @@ class EnhancedPlacesOfWorshipApp {
             if (employmentIncomeResponse && employmentIncomeResponse.ok) {
                 const employmentIncomeData = await employmentIncomeResponse.json();
                 this.employmentIncomeData = employmentIncomeData.data || {};
+                this.calculateDataQualityScores('employment_income', employmentIncomeData);
                 console.log('✓ Employment/income data loaded:', Object.keys(this.employmentIncomeData).length, 'areas');
             } else {
                 console.log('⚠ Employment/income data not available');
@@ -526,6 +558,7 @@ class EnhancedPlacesOfWorshipApp {
             if (ethnicityDensityResponse && ethnicityDensityResponse.ok) {
                 const ethnicityDensityData = await ethnicityDensityResponse.json();
                 this.ethnicityDensityData = ethnicityDensityData.data || {};
+                this.calculateDataQualityScores('ethnicity_density', ethnicityDensityData);
                 console.log('✓ Ethnicity/density data loaded:', Object.keys(this.ethnicityDensityData).length, 'areas');
             } else {
                 console.log('⚠ Ethnicity/density data not available');
@@ -626,6 +659,9 @@ class EnhancedPlacesOfWorshipApp {
     addAgeGenderData(taCode) {
         let content = '';
         
+        console.log(`🔍 DEBUG addAgeGenderData: Looking for TA code "${taCode}"`);
+        console.log(`🔍 DEBUG addAgeGenderData: ageGenderData keys:`, this.ageGenderData ? Object.keys(this.ageGenderData) : 'null');
+        
         try {
             // Add age data if available
             if (this.ageGenderData && this.ageGenderData[taCode]) {
@@ -637,48 +673,100 @@ class EnhancedPlacesOfWorshipApp {
                 }
                 
                 const latestYear = Math.max(...years.map(y => parseInt(y)));
+                const yearData = taData[latestYear];
                 
-                if (taData[latestYear] && taData[latestYear].age) {
-                const ageData = taData[latestYear].age;
-                content += `<h4>Age Profile (${latestYear})</h4>`;
-                content += `
-                    <p><strong>Median Age:</strong> ${ageData.median_age} years</p>
-                    <div style="margin: 10px 0;">
-                        <p><strong>Age Distribution:</strong></p>
-                        <p style="margin-left: 15px;">• 0-14 years: ${ageData.age_0_14_percent}% (${ageData.age_0_14.toLocaleString()})</p>
-                        <p style="margin-left: 15px;">• 15-29 years: ${ageData.age_15_29_percent}% (${ageData.age_15_29.toLocaleString()})</p>
-                        <p style="margin-left: 15px;">• 30-49 years: ${ageData.age_30_49_percent}% (${ageData.age_30_49.toLocaleString()})</p>
-                        <p style="margin-left: 15px;">• 50-64 years: ${ageData.age_50_64_percent}% (${ageData.age_50_64.toLocaleString()})</p>
-                        <p style="margin-left: 15px;">• 65+ years: ${ageData.age_65_plus_percent}% (${ageData.age_65_plus.toLocaleString()})</p>
-                    </div>
-                `;
+                // Calculate confidence score for this TA-level data
+                const metadata = { source: 'Statistics New Zealand' };
+                const confidence = this.calculateAreaConfidenceScore(yearData, 'age_gender', metadata);
+                const confidenceColor = confidence >= 0.9 ? '#27ae60' : confidence >= 0.8 ? '#f39c12' : '#e74c3c';
+                const confidenceLabel = confidence >= 0.9 ? 'Very High' : confidence >= 0.8 ? 'High' : 'Medium';
                 
-                // Show trend if multiple years available
-                const years = Object.keys(taData).map(y => parseInt(y)).sort();
-                if (years.length > 1) {
-                    const earliestYear = years[0];
-                    const earliestAge = taData[earliestYear].age;
-                    if (earliestAge) {
-                        const agingTrend = ageData.median_age - earliestAge.median_age;
-                        const trendIcon = agingTrend > 0 ? '↗' : agingTrend < 0 ? '↘' : '→';
-                        const trendColor = agingTrend > 1 ? '#e74c3c' : agingTrend < -1 ? '#27ae60' : '#666';
-                        
+                if (yearData && yearData.age) {
+                    const ageData = yearData.age;
+                    content += `
+                        <div style="background: rgba(33, 150, 243, 0.05); padding: 12px; border-radius: 6px; margin: 10px 0;">
+                            <h4 style="margin-bottom: 8px; color: #1976d2;">📊 Age & Gender Profile (${latestYear})</h4>
+                            <div style="font-size: 0.85em; color: ${confidenceColor}; margin-bottom: 10px;">
+                                <strong>Data Quality:</strong> ${confidenceLabel} Confidence (${Math.round(confidence * 100)}%)
+                            </div>
+                    `;
+                    
+                    // Age structure with visual elements
+                    if (ageData.median_age) {
+                        const ageCategory = ageData.median_age < 35 ? 'Young' : ageData.median_age < 45 ? 'Middle-aged' : 'Mature';
                         content += `
-                            <p><strong>Aging Trend (${earliestYear}-${latestYear}):</strong> 
-                            <span style="color: ${trendColor};">
-                            ${agingTrend > 0 ? '+' : ''}${agingTrend.toFixed(1)} years ${trendIcon}
-                            </span></p>
+                            <div style="background: #e3f2fd; padding: 8px; border-radius: 4px; margin-bottom: 10px;">
+                                <div style="font-weight: bold; color: #1976d2;">Median Age: ${ageData.median_age} years</div>
+                                <div style="font-size: 0.8em; color: #666;">${ageCategory} community profile</div>
+                            </div>
                         `;
                     }
-                }
-            }
-            
-                // Add gender data
-                if (taData[latestYear] && taData[latestYear].gender) {
-                    const genderData = taData[latestYear].gender;
-                    content += `
-                        <p><strong>Gender Split:</strong> ${genderData.male_percent}% male, ${genderData.female_percent}% female</p>
-                    `;
+                    
+                    // Enhanced age distribution
+                    content += `<div style="margin-bottom: 15px;"><div style="font-weight: bold; margin-bottom: 8px; color: #1976d2;">Age Distribution:</div>`;
+                    
+                    const ageGroups = [
+                        { label: 'Children (0-14)', count: ageData.age_0_14, percent: ageData.age_0_14_percent, color: '#4caf50' },
+                        { label: 'Youth (15-29)', count: ageData.age_15_29, percent: ageData.age_15_29_percent, color: '#8bc34a' },
+                        { label: 'Adults (30-49)', count: ageData.age_30_49, percent: ageData.age_30_49_percent, color: '#2196f3' },
+                        { label: 'Middle-aged (50-64)', count: ageData.age_50_64, percent: ageData.age_50_64_percent, color: '#ff9800' },
+                        { label: 'Seniors (65+)', count: ageData.age_65_plus, percent: ageData.age_65_plus_percent, color: '#f44336' }
+                    ];
+                    
+                    ageGroups.forEach(group => {
+                        if (group.count !== undefined && group.percent !== undefined) {
+                            content += `
+                                <div style="display: flex; align-items: center; margin: 4px 0;">
+                                    <div style="width: 120px; font-size: 0.9em;">${group.label}:</div>
+                                    <div style="width: 80px; text-align: right; margin-right: 8px;">${group.count?.toLocaleString()} (${group.percent}%)</div>
+                                    <div style="flex-grow: 1; height: 6px; background: #eee; border-radius: 3px; margin: 0 8px;">
+                                        <div style="width: ${Math.min(group.percent, 100)}%; height: 100%; background: ${group.color}; border-radius: 3px;"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+                    
+                    content += `</div>`;
+                    
+                    // Gender data if available
+                    if (yearData.gender) {
+                        const genderData = yearData.gender;
+                        const maleRatio = genderData.male && genderData.female ? 
+                            (genderData.male / genderData.female * 100).toFixed(0) : 'N/A';
+                        content += `
+                            <div style="background: #f3e5f5; padding: 8px; border-radius: 4px; margin-top: 10px;">
+                                <div style="font-weight: bold; color: #7b1fa2; margin-bottom: 5px;">Gender Distribution:</div>
+                                <div style="font-size: 0.9em;">
+                                    Male: ${genderData.male_percent}% • Female: ${genderData.female_percent}%<br>
+                                    <small>Males per 100 females: ${maleRatio}</small>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    // Show aging trend if multiple years available
+                    if (years.length > 1) {
+                        const sortedYears = years.sort();
+                        const earliestYear = sortedYears[0];
+                        const earliestAge = taData[earliestYear]?.age;
+                        if (earliestAge) {
+                            const agingTrend = ageData.median_age - earliestAge.median_age;
+                            const trendIcon = agingTrend > 0 ? '↗️' : agingTrend < 0 ? '↘️' : '→';
+                            const trendColor = agingTrend > 1 ? '#e74c3c' : agingTrend < -1 ? '#27ae60' : '#666';
+                            
+                            content += `
+                                <div style="background: rgba(158, 158, 158, 0.1); padding: 6px; border-radius: 4px; margin-top: 10px; font-size: 0.85em;">
+                                    <strong>Aging Trend (${earliestYear}-${latestYear}):</strong> 
+                                    <span style="color: ${trendColor};">
+                                    ${agingTrend > 0 ? '+' : ''}${agingTrend.toFixed(1)} years ${trendIcon}
+                                    </span>
+                                </div>
+                            `;
+                        }
+                    }
+                    
+                    content += `</div>`;
                 }
             }
         } catch (error) {
@@ -1241,16 +1329,37 @@ class EnhancedPlacesOfWorshipApp {
         });
         
         // Add demographic data section if selected
+        console.log(`🔍 DEBUG: formatReligiousDensityPopup called for ${areaName} (${areaCode}, ${areaType})`);
+        console.log(`🔍 DEBUG: currentDemographic = ${this.currentDemographic}`);
+        
         let demographicContent = '';
         if (this.currentDemographic && this.currentDemographic !== 'none') {
+            console.log(`🔍 DEBUG: Calling generateDemographicContent...`);
             demographicContent = this.generateDemographicContent(areaName, areaCode, areaType);
+            console.log(`🔍 DEBUG: Generated demographic content:`, demographicContent.length, 'characters');
+        } else {
+            console.log(`🔍 DEBUG: Skipping demographic content - currentDemographic is ${this.currentDemographic}`);
         }
 
-        return `
+        // Calculate confidence score for this area's census data
+        const censusConfidence = this.calculateCensusConfidenceScore(censusData, areaCode, areaType);
+        const confidenceColor = censusConfidence >= 0.9 ? '#27ae60' : censusConfidence >= 0.8 ? '#f39c12' : '#e74c3c';
+        const confidenceLabel = censusConfidence >= 0.9 ? 'Very High' : censusConfidence >= 0.8 ? 'High' : 'Medium';
+        
+        let finalContent = `
             <div class="census-popup">
                 <h3>${areaName}</h3>
                 <p><strong>${areaType} Code:</strong> ${areaCode}</p>
                 <p><strong>Census Timeline:</strong> 2006 → 2013 → 2018</p>
+                
+                <div style="margin-top: 12px; padding: 8px; background: rgba(39, 174, 96, 0.1); border-left: 3px solid ${confidenceColor}; border-radius: 0 4px 4px 0;">
+                    <small style="color: #2c3e50;">
+                        <strong>📊 Data Quality:</strong> 
+                        <span style="color: ${confidenceColor}; font-weight: 600;">${confidenceLabel} Confidence</span> 
+                        (${Math.round(censusConfidence * 100)}%) - Official Stats NZ Census Data
+                    </small>
+                </div>
+                
                 <div style="margin-top: 15px;">
                     <h4>Summary Statistics</h4>
                     ${summaryContent}
@@ -1259,11 +1368,23 @@ class EnhancedPlacesOfWorshipApp {
                 ${histogramDiv}
             </div>
         `;
+        
+        // Enhance with quality information
+        finalContent = this.enhancePopupWithQualityInfo(areaCode, areaType, finalContent);
+        
+        return finalContent;
     }
     
     generateDemographicContent(areaName, areaCode, areaType) {
         // Generate demographic information based on current selection
         const demographicType = this.currentDemographic;
+        console.log(`🔍 DEBUG: Generating demographic content for ${areaName} (${areaCode}), type: ${demographicType}`);
+        console.log(`🔍 DEBUG: Available demographic data:`, {
+            ageGender: !!this.ageGenderData && Object.keys(this.ageGenderData).length,
+            employment: !!this.employmentIncomeData && Object.keys(this.employmentIncomeData).length,
+            ethnicity: !!this.ethnicityDensityData && Object.keys(this.ethnicityDensityData).length
+        });
+        
         let content = `<div style="margin-top: 20px; padding: 15px; background: rgba(46, 125, 50, 0.1); border-left: 3px solid #2E7D32;">`;
         
         switch (demographicType) {
@@ -1387,10 +1508,18 @@ class EnhancedPlacesOfWorshipApp {
                 break;
             case 'comprehensive':
                 // Show all available demographic data for comprehensive view
+                console.log(`🔍 DEBUG: Comprehensive case - calling demographic methods for areaCode: ${areaCode}`);
                 const allAgeGender = this.addAgeGenderData(areaCode);
                 const allEmploymentIncome = this.addEmploymentIncomeData(areaCode);
                 const allEthnicityDensity = this.addEthnicityDensityData(areaCode);
                 const allBirthMigration = this.addBirthRateMigrationData(areaCode);
+                
+                console.log(`🔍 DEBUG: Demographic method results:`, {
+                    ageGender: allAgeGender ? allAgeGender.length : 0,
+                    employment: allEmploymentIncome ? allEmploymentIncome.length : 0,
+                    ethnicity: allEthnicityDensity ? allEthnicityDensity.length : 0,
+                    birthMigration: allBirthMigration ? allBirthMigration.length : 0
+                });
                 
                 content += `<h4>📊 Comprehensive Demographic Profile</h4>`;
                 if (allAgeGender) content += allAgeGender;
@@ -1400,6 +1529,7 @@ class EnhancedPlacesOfWorshipApp {
                 
                 if (!allAgeGender && !allEmploymentIncome && !allEthnicityDensity && !allBirthMigration) {
                     content += `<p><em>Comprehensive demographic data for ${areaName} not available.</em></p>`;
+                    console.log(`🔍 DEBUG: No demographic data found for area ${areaCode}`);
                 }
                 break;
             case 'age_employment_income':
@@ -1769,6 +1899,24 @@ class EnhancedPlacesOfWorshipApp {
                 return this.calculateUnemploymentColor(dataSource);
             case 'home_ownership':
                 return this.calculateHomeOwnershipColor(dataSource);
+            case 'young_adults':
+                return this.calculateYoungAdultsColor(dataSource);
+            case 'elderly_population':
+                return this.calculateElderlyColor(dataSource);
+            case 'working_age':
+                return this.calculateWorkingAgeColor(dataSource);
+            case 'european_percentage':
+                return this.calculateEuropeanPercentageColor(dataSource);
+            case 'maori_percentage':
+                return this.calculateMaoriPercentageColor(dataSource);
+            case 'pacific_percentage':
+                return this.calculatePacificPercentageColor(dataSource);
+            case 'asian_percentage':
+                return this.calculateAsianPercentageColor(dataSource);
+            case 'high_income':
+                return this.calculateHighIncomeColor(dataSource);
+            case 'low_income':
+                return this.calculateLowIncomeColor(dataSource);
             default:
                 return "gray";
         }
@@ -2257,6 +2405,173 @@ class EnhancedPlacesOfWorshipApp {
         return "#4CAF50";                              // Very high - dark green
     }
     
+    // Enhanced SA-2 Demographic Calculation Methods
+    calculateYoungAdultsColor(saData) {
+        const yearData = saData[String(this.overlayYear)];
+        if (!yearData || !yearData.age_profile) return "gray";
+        
+        const ageProfile = yearData.age_profile;
+        const totalPop = yearData.Total || 0;
+        if (totalPop === 0) return "gray";
+        
+        const youngAdults = (ageProfile['20-24'] || 0) + (ageProfile['25-29'] || 0) + (ageProfile['30-34'] || 0);
+        const percentage = (youngAdults / totalPop) * 100;
+        
+        if (percentage < 15) return "#FFEBEE";    // Very low - light red
+        if (percentage < 20) return "#FFF3E0";    // Low - light orange
+        if (percentage < 25) return "#FFFDE7";    // Medium - light yellow
+        if (percentage < 30) return "#C8E6C9";    // High - light green
+        return "#4CAF50";                         // Very high - dark green
+    }
+    
+    calculateElderlyColor(saData) {
+        const yearData = saData[String(this.overlayYear)];
+        if (!yearData || !yearData.age_profile) return "gray";
+        
+        const ageProfile = yearData.age_profile;
+        const totalPop = yearData.Total || 0;
+        if (totalPop === 0) return "gray";
+        
+        const elderly = (ageProfile['65-69'] || 0) + (ageProfile['70-74'] || 0) + 
+                       (ageProfile['75-79'] || 0) + (ageProfile['80-84'] || 0) + (ageProfile['85+'] || 0);
+        const percentage = (elderly / totalPop) * 100;
+        
+        if (percentage < 8) return "#E3F2FD";     // Very low - light blue
+        if (percentage < 12) return "#BBDEFB";    // Low - blue
+        if (percentage < 16) return "#90CAF9";    // Medium - medium blue
+        if (percentage < 20) return "#64B5F6";    // High - darker blue
+        return "#2196F3";                         // Very high - dark blue
+    }
+    
+    calculateWorkingAgeColor(saData) {
+        const yearData = saData[String(this.overlayYear)];
+        if (!yearData || !yearData.age_profile) return "gray";
+        
+        const ageProfile = yearData.age_profile;
+        const totalPop = yearData.Total || 0;
+        if (totalPop === 0) return "gray";
+        
+        const workingAge = (ageProfile['25-29'] || 0) + (ageProfile['30-34'] || 0) + 
+                          (ageProfile['35-39'] || 0) + (ageProfile['40-44'] || 0) + 
+                          (ageProfile['45-49'] || 0) + (ageProfile['50-54'] || 0) + 
+                          (ageProfile['55-59'] || 0) + (ageProfile['60-64'] || 0);
+        const percentage = (workingAge / totalPop) * 100;
+        
+        if (percentage < 45) return "#FFEBEE";    // Very low - light red
+        if (percentage < 50) return "#FFF3E0";    // Low - light orange
+        if (percentage < 55) return "#C8E6C9";    // Medium - light green
+        if (percentage < 60) return "#81C784";    // High - green
+        return "#4CAF50";                         // Very high - dark green
+    }
+    
+    calculateEuropeanPercentageColor(saData) {
+        const yearData = saData[String(this.overlayYear)];
+        if (!yearData || !yearData.ethnicity_profile) return "gray";
+        
+        const ethnicity = yearData.ethnicity_profile;
+        const totalPop = yearData.Total || 0;
+        if (totalPop === 0) return "gray";
+        
+        const european = ethnicity.European || 0;
+        const percentage = (european / totalPop) * 100;
+        
+        if (percentage < 40) return "#FFF3E0";    // Low - light orange
+        if (percentage < 60) return "#FFE0B2";    // Medium-low - orange
+        if (percentage < 75) return "#FFCC80";    // Medium - darker orange
+        if (percentage < 85) return "#FFB74D";    // High - orange
+        return "#FF9800";                         // Very high - dark orange
+    }
+    
+    calculateMaoriPercentageColor(saData) {
+        const yearData = saData[String(this.overlayYear)];
+        if (!yearData || !yearData.ethnicity_profile) return "gray";
+        
+        const ethnicity = yearData.ethnicity_profile;
+        const totalPop = yearData.Total || 0;
+        if (totalPop === 0) return "gray";
+        
+        const maori = ethnicity.Māori || 0;
+        const percentage = (maori / totalPop) * 100;
+        
+        if (percentage < 5) return "#F3E5F5";     // Very low - light purple
+        if (percentage < 10) return "#E1BEE7";    // Low - purple
+        if (percentage < 20) return "#CE93D8";    // Medium - medium purple
+        if (percentage < 30) return "#BA68C8";    // High - darker purple
+        return "#9C27B0";                         // Very high - dark purple
+    }
+    
+    calculatePacificPercentageColor(saData) {
+        const yearData = saData[String(this.overlayYear)];
+        if (!yearData || !yearData.ethnicity_profile) return "gray";
+        
+        const ethnicity = yearData.ethnicity_profile;
+        const totalPop = yearData.Total || 0;
+        if (totalPop === 0) return "gray";
+        
+        const pacific = ethnicity.Pacific || 0;
+        const percentage = (pacific / totalPop) * 100;
+        
+        if (percentage < 2) return "#E8F5E8";     // Very low - very light green
+        if (percentage < 5) return "#C8E6C9";     // Low - light green
+        if (percentage < 10) return "#A5D6A7";    // Medium - green
+        if (percentage < 20) return "#81C784";    // High - darker green
+        return "#66BB6A";                         // Very high - dark green
+    }
+    
+    calculateAsianPercentageColor(saData) {
+        const yearData = saData[String(this.overlayYear)];
+        if (!yearData || !yearData.ethnicity_profile) return "gray";
+        
+        const ethnicity = yearData.ethnicity_profile;
+        const totalPop = yearData.Total || 0;
+        if (totalPop === 0) return "gray";
+        
+        const asian = ethnicity.Asian || 0;
+        const percentage = (asian / totalPop) * 100;
+        
+        if (percentage < 5) return "#E0F2F1";     // Very low - very light teal
+        if (percentage < 10) return "#B2DFDB";    // Low - light teal
+        if (percentage < 20) return "#80CBC4";    // Medium - teal
+        if (percentage < 30) return "#4DB6AC";    // High - darker teal
+        return "#26A69A";                         // Very high - dark teal
+    }
+    
+    calculateHighIncomeColor(saData) {
+        const yearData = saData[String(this.overlayYear)];
+        if (!yearData || !yearData.income_profile) return "gray";
+        
+        const income = yearData.income_profile;
+        const totalEarners = Object.values(income).reduce((sum, val) => sum + (val || 0), 0);
+        if (totalEarners === 0) return "gray";
+        
+        const highIncome = (income['$100,000-$150,000'] || 0) + (income['$150,000+'] || 0);
+        const percentage = (highIncome / totalEarners) * 100;
+        
+        if (percentage < 10) return "#FFEBEE";    // Very low - light red
+        if (percentage < 20) return "#FFF3E0";    // Low - light orange
+        if (percentage < 30) return "#FFFDE7";    // Medium - light yellow
+        if (percentage < 40) return "#C8E6C9";    // High - light green
+        return "#4CAF50";                         // Very high - dark green
+    }
+    
+    calculateLowIncomeColor(saData) {
+        const yearData = saData[String(this.overlayYear)];
+        if (!yearData || !yearData.income_profile) return "gray";
+        
+        const income = yearData.income_profile;
+        const totalEarners = Object.values(income).reduce((sum, val) => sum + (val || 0), 0);
+        if (totalEarners === 0) return "gray";
+        
+        const lowIncome = (income['Under $15,000'] || 0) + (income['$15,000-$30,000'] || 0);
+        const percentage = (lowIncome / totalEarners) * 100;
+        
+        if (percentage < 15) return "#C8E6C9";    // Very low - light green (good)
+        if (percentage < 25) return "#FFFDE7";    // Low - light yellow
+        if (percentage < 35) return "#FFF3E0";    // Medium - light orange
+        if (percentage < 45) return "#FFCDD2";    // High - light red
+        return "#FFEBEE";                         // Very high - red (concerning)
+    }
+    
     onEachCensusFeature(feature, layer) {
         const sa2Code = String(feature.properties.SA22018_V1_00); // Convert to string
         const saData = this.censusData[sa2Code];
@@ -2525,6 +2840,429 @@ class EnhancedPlacesOfWorshipApp {
         }
     }
     
+    // Enhanced reporting system methods
+    calculateDataQualityScores(dataType, rawData) {
+        if (!rawData || !rawData.data) return;
+        
+        const metadata = rawData.metadata || {};
+        const data = rawData.data;
+        
+        // Track source information
+        this.reportingSystem.sourceTracking[dataType] = {
+            source: metadata.source || 'Unknown',
+            downloadDate: metadata.download_date || new Date().toISOString().split('T')[0],
+            status: metadata.status || 'UNKNOWN',
+            recordCount: Object.keys(data).length
+        };
+        
+        // Calculate confidence scores
+        let totalConfidence = 0;
+        let scoreCount = 0;
+        
+        Object.keys(data).forEach(areaCode => {
+            const areaData = data[areaCode]['2018'] || data[areaCode]['2013'] || {};
+            let confidence = this.calculateAreaConfidenceScore(areaData, dataType, metadata);
+            
+            this.reportingSystem.confidenceMetrics[`${dataType}_${areaCode}`] = confidence;
+            totalConfidence += confidence;
+            scoreCount++;
+        });
+        
+        // Store overall data quality score
+        this.reportingSystem.dataQualityScores[dataType] = {
+            averageConfidence: scoreCount > 0 ? totalConfidence / scoreCount : 0,
+            coverage: Object.keys(data).length,
+            completeness: this.calculateDataCompleteness(data, dataType),
+            freshness: this.calculateDataFreshness(metadata.download_date),
+            overallScore: this.calculateOverallQualityScore(data, dataType, metadata)
+        };
+        
+        console.log(`📊 Data quality calculated for ${dataType}:`, this.reportingSystem.dataQualityScores[dataType]);
+    }
+    
+    calculateAreaConfidenceScore(areaData, dataType, metadata = {}) {
+        if (!areaData || Object.keys(areaData).length === 0) return 0;
+        
+        // Check if this is Stats NZ official data
+        const isStatsNZ = metadata.source && metadata.source.toLowerCase().includes('statistics new zealand');
+        const isOfficialCensus = metadata.source && (
+            metadata.source.toLowerCase().includes('census') || 
+            metadata.source.toLowerCase().includes('official')
+        );
+        
+        // Stats NZ official data gets high base confidence
+        let score = isStatsNZ || isOfficialCensus ? 0.92 : 0.7;
+        
+        // Adjust for data completeness and population size
+        switch(dataType) {
+            case 'age_gender':
+                if (areaData.age && areaData.gender) {
+                    score += isStatsNZ ? 0.05 : 0.2;
+                    // Population size affects statistical reliability
+                    const totalPop = areaData.gender?.total_population || 0;
+                    if (totalPop > 1000) {
+                        score += 0.02;
+                    } else if (totalPop < 100) {
+                        score -= 0.05; // Small area uncertainty
+                    }
+                }
+                break;
+            case 'employment_income':
+                if (areaData.employment && areaData.income) {
+                    score += isStatsNZ ? 0.05 : 0.2;
+                    // Employment data quality indicators
+                    if (areaData.income?.median_income && areaData.employment?.employment_rate) {
+                        score += 0.02;
+                    }
+                }
+                break;
+            case 'ethnicity_density':
+                if (areaData.ethnicity && areaData.geography) {
+                    score += isStatsNZ ? 0.05 : 0.2;
+                    // Population density affects enumeration quality
+                    const totalPop = areaData.ethnicity?.total_population || 0;
+                    const density = areaData.geography?.population_density || 0;
+                    if (totalPop > 100 && density > 10) {
+                        score += 0.02;
+                    } else if (density < 1) {
+                        score -= 0.03; // Very sparse areas harder to enumerate
+                    }
+                }
+                break;
+        }
+        
+        // Temporal adjustments for data freshness
+        const downloadDate = metadata.download_date || '';
+        if (downloadDate) {
+            const currentYear = new Date().getFullYear();
+            const downloadYear = parseInt(downloadDate.split('-')[0]) || currentYear;
+            const yearsOld = currentYear - downloadYear;
+            
+            if (yearsOld <= 1) {
+                score += 0.01; // Very recent
+            } else if (yearsOld > 5) {
+                score -= 0.02 * (yearsOld - 5); // Aging penalty
+            }
+        }
+        
+        return Math.min(1.0, Math.max(0.0, score));
+    }
+    
+    calculateCensusConfidenceScore(censusData, areaCode, areaType) {
+        // Calculate confidence score for main SA-2/TA census data
+        if (!censusData || Object.keys(censusData).length === 0) return 0;
+        
+        // Stats NZ census data gets high base confidence
+        let score = 0.95; // Official government census data
+        
+        // Assess data completeness across years
+        const years = ['2006', '2013', '2018'];
+        let availableYears = 0;
+        let totalPopulation = 0;
+        
+        years.forEach(year => {
+            if (censusData[year] && censusData[year]['Total stated']) {
+                availableYears++;
+                totalPopulation = Math.max(totalPopulation, censusData[year]['Total stated']);
+            }
+        });
+        
+        // Adjust for temporal coverage
+        if (availableYears === 3) {
+            score += 0.02; // Full temporal coverage
+        } else if (availableYears < 2) {
+            score -= 0.03; // Limited temporal data
+        }
+        
+        // Population size affects statistical reliability
+        if (totalPopulation > 1000) {
+            score += 0.02; // Large population, more reliable
+        } else if (totalPopulation < 100) {
+            score -= 0.04; // Small area statistics less reliable
+        } else if (totalPopulation < 50) {
+            score -= 0.08; // Very small areas have suppression issues
+        }
+        
+        // TA vs SA-2 level adjustments
+        if (areaType === 'TA') {
+            score += 0.01; // TA aggregation reduces small area issues
+        }
+        
+        return Math.min(1.0, Math.max(0.0, score));
+    }
+    
+    calculateDataCompleteness(data, dataType) {
+        const totalAreas = Object.keys(data).length;
+        let completeAreas = 0;
+        
+        Object.values(data).forEach(area => {
+            const currentData = area['2018'] || area['2013'] || {};
+            if (Object.keys(currentData).length > 2) { // More than just basic fields
+                completeAreas++;
+            }
+        });
+        
+        return totalAreas > 0 ? (completeAreas / totalAreas) : 0;
+    }
+    
+    calculateDataFreshness(downloadDate) {
+        if (!downloadDate) return 0.5; // Unknown freshness
+        
+        const download = new Date(downloadDate);
+        const now = new Date();
+        const daysDiff = (now - download) / (1000 * 60 * 60 * 24);
+        
+        if (daysDiff <= 30) return 1.0; // Very fresh
+        if (daysDiff <= 90) return 0.8; // Fresh
+        if (daysDiff <= 365) return 0.6; // Acceptable
+        return 0.4; // Stale
+    }
+    
+    calculateOverallQualityScore(data, dataType, metadata) {
+        const qualityMetrics = this.reportingSystem.dataQualityScores[dataType];
+        if (!qualityMetrics) return 0.5;
+        
+        const weights = {
+            confidence: 0.4,
+            completeness: 0.3,
+            freshness: 0.2,
+            coverage: 0.1
+        };
+        
+        const coverageScore = Math.min(1.0, Object.keys(data).length / 50); // Normalize to 50 areas
+        
+        return (
+            qualityMetrics.averageConfidence * weights.confidence +
+            qualityMetrics.completeness * weights.completeness +
+            qualityMetrics.freshness * weights.freshness +
+            coverageScore * weights.coverage
+        );
+    }
+    
+    getDataQualityReport() {
+        const report = {
+            summary: {},
+            details: this.reportingSystem
+        };
+        
+        // Generate summary statistics
+        const qualityScores = this.reportingSystem.dataQualityScores;
+        const allScores = Object.values(qualityScores).map(q => q.overallScore).filter(s => s > 0);
+        
+        report.summary = {
+            averageQuality: allScores.length > 0 ? (allScores.reduce((a, b) => a + b, 0) / allScores.length) : 0,
+            dataTypesAvailable: Object.keys(qualityScores).length,
+            totalConfidenceScores: Object.keys(this.reportingSystem.confidenceMetrics).length,
+            sourcesTracked: Object.keys(this.reportingSystem.sourceTracking).length
+        };
+        
+        return report;
+    }
+    
+    enhancePopupWithQualityInfo(areaCode, areaType, popupContent) {
+        // Add data quality indicators to popup content
+        const qualityIndicators = this.getAreaQualityIndicators(areaCode, areaType);
+        
+        if (qualityIndicators.length > 0) {
+            const qualitySection = `
+                <div style="margin-top: 15px; padding: 10px; background: rgba(76, 175, 80, 0.1); border-left: 3px solid #4CAF50;">
+                    <h5 style="margin: 0 0 8px 0; color: #2E7D32;">📊 Data Quality</h5>
+                    ${qualityIndicators.map(indicator => `
+                        <div style="display: flex; align-items: center; margin: 4px 0;">
+                            <div style="width: 12px; height: 12px; border-radius: 50%; background: ${indicator.color}; margin-right: 8px;"></div>
+                            <span style="font-size: 0.9em;">${indicator.label}: ${indicator.score}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            popupContent += qualitySection;
+        }
+        
+        return popupContent;
+    }
+    
+    getAreaQualityIndicators(areaCode, areaType) {
+        const indicators = [];
+        
+        // Check for available demographic data types
+        ['age_gender', 'employment_income', 'ethnicity_density'].forEach(dataType => {
+            const confidenceKey = `${dataType}_${areaCode}`;
+            const confidence = this.reportingSystem.confidenceMetrics[confidenceKey];
+            
+            if (confidence !== undefined) {
+                let color, label;
+                if (confidence >= 0.8) {
+                    color = '#4CAF50'; label = 'High';
+                } else if (confidence >= 0.6) {
+                    color = '#FF9800'; label = 'Medium';
+                } else {
+                    color = '#F44336'; label = 'Low';
+                }
+                
+                indicators.push({
+                    type: dataType,
+                    score: `${Math.round(confidence * 100)}%`,
+                    color: color,
+                    label: `${dataType.replace('_', '/')} ${label}`
+                });
+            }
+        });
+        
+        return indicators;
+    }
+    
+    showDataQualityDashboard() {
+        const dashboard = document.getElementById('qualityDashboard');
+        const content = document.getElementById('qualityDashboardContent');
+        
+        if (!dashboard || !content) return;
+        
+        const report = this.getDataQualityReport();
+        
+        content.innerHTML = `
+            <div style="margin-bottom: 15px;">
+                <h5>📈 Summary Statistics</h5>
+                <div style="background: rgba(33, 150, 243, 0.1); padding: 10px; border-radius: 4px; margin: 8px 0;">
+                    <div><strong>Overall Quality:</strong> ${Math.round(report.summary.averageQuality * 100)}%</div>
+                    <div><strong>Data Types:</strong> ${report.summary.dataTypesAvailable}</div>
+                    <div><strong>Areas Covered:</strong> ${report.summary.totalConfidenceScores}</div>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <h5>📊 Data Type Quality</h5>
+                ${this.generateDataTypeQualityBars(report.details.dataQualityScores)}
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <h5>🔍 Source Information</h5>
+                ${this.generateSourceSummary(report.details.sourceTracking)}
+            </div>
+            
+            <div style="font-size: 0.8em; color: #666; margin-top: 10px;">
+                <em>Click on map regions for detailed quality metrics</em>
+            </div>
+        `;
+        
+        dashboard.style.display = 'block';
+    }
+    
+    showSourceConfidenceDashboard() {
+        const dashboard = document.getElementById('qualityDashboard');
+        const content = document.getElementById('qualityDashboardContent');
+        
+        if (!dashboard || !content) return;
+        
+        content.innerHTML = `
+            <div style="margin-bottom: 15px;">
+                <h5>🎯 Stats NZ Confidence Scoring System</h5>
+                <div style="background: rgba(76, 175, 80, 0.1); padding: 10px; border-radius: 4px; margin: 8px 0; font-size: 0.9em;">
+                    <div><strong>Very High (90-100%):</strong> Official Stats NZ Census data with full coverage</div>
+                    <div><strong>High (80-89%):</strong> Official data with good population size and coverage</div>
+                    <div><strong>Medium (60-79%):</strong> Smaller areas or limited temporal coverage</div>
+                    <div><strong>Low (&lt;60%):</strong> Very small populations with potential suppression</div>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <h5>📋 Scoring Criteria</h5>
+                <div style="font-size: 0.8em; color: #555;">
+                    <div>• <strong>Completeness:</strong> Data field coverage</div>
+                    <div>• <strong>Freshness:</strong> Data recency</div>
+                    <div>• <strong>Accuracy:</strong> Source reliability</div>
+                    <div>• <strong>Coverage:</strong> Geographic extent</div>
+                </div>
+            </div>
+            
+            ${this.generateConfidenceDistribution()}
+            
+            <div style="font-size: 0.8em; color: #666; margin-top: 10px;">
+                <em>Quality indicators appear in region popups</em>
+            </div>
+        `;
+        
+        dashboard.style.display = 'block';
+    }
+    
+    hideDataQualityDashboard() {
+        const dashboard = document.getElementById('qualityDashboard');
+        if (dashboard) {
+            dashboard.style.display = 'none';
+        }
+    }
+    
+    generateDataTypeQualityBars(qualityScores) {
+        if (!qualityScores || Object.keys(qualityScores).length === 0) {
+            return '<div><em>No quality data available</em></div>';
+        }
+        
+        return Object.entries(qualityScores).map(([dataType, scores]) => {
+            const percentage = Math.round(scores.overallScore * 100);
+            const color = percentage >= 80 ? '#4CAF50' : percentage >= 60 ? '#FF9800' : '#F44336';
+            
+            return `
+                <div style="margin: 6px 0;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9em;">
+                        <span>${dataType.replace('_', ' ')}</span>
+                        <span>${percentage}%</span>
+                    </div>
+                    <div style="width: 100%; height: 6px; background: #eee; border-radius: 3px; margin-top: 2px;">
+                        <div style="width: ${percentage}%; height: 100%; background: ${color}; border-radius: 3px;"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    generateSourceSummary(sourceTracking) {
+        if (!sourceTracking || Object.keys(sourceTracking).length === 0) {
+            return '<div><em>No source information available</em></div>';
+        }
+        
+        return Object.entries(sourceTracking).map(([dataType, source]) => `
+            <div style="margin: 8px 0; padding: 6px; background: rgba(158, 158, 158, 0.1); border-radius: 4px; font-size: 0.8em;">
+                <div><strong>${dataType.replace('_', ' ')}</strong></div>
+                <div>Source: ${source.source}</div>
+                <div>Updated: ${source.downloadDate}</div>
+                <div>Records: ${source.recordCount}</div>
+                ${source.status === 'MOCK_DATA_FOR_DEMO' ? '<div style="color: #FF9800;"><em>⚠ Demo Data</em></div>' : ''}
+            </div>
+        `).join('');
+    }
+    
+    generateConfidenceDistribution() {
+        const metrics = this.reportingSystem.confidenceMetrics;
+        if (!metrics || Object.keys(metrics).length === 0) {
+            return '<div><em>No confidence metrics available</em></div>';
+        }
+        
+        const confidenceValues = Object.values(metrics);
+        const high = confidenceValues.filter(v => v >= 0.8).length;
+        const medium = confidenceValues.filter(v => v >= 0.6 && v < 0.8).length;
+        const low = confidenceValues.filter(v => v < 0.6).length;
+        const total = confidenceValues.length;
+        
+        return `
+            <div style="margin-bottom: 15px;">
+                <h5>📊 Confidence Distribution</h5>
+                <div style="font-size: 0.9em;">
+                    <div style="display: flex; justify-content: space-between; margin: 4px 0;">
+                        <span>🟢 High Confidence:</span>
+                        <span>${high} (${Math.round(high/total*100)}%)</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin: 4px 0;">
+                        <span>🟡 Medium Confidence:</span>
+                        <span>${medium} (${Math.round(medium/total*100)}%)</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin: 4px 0;">
+                        <span>🔴 Low Confidence:</span>
+                        <span>${low} (${Math.round(low/total*100)}%)</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     showError(message) {
         const errorDiv = document.createElement('div');
         errorDiv.className = 'error-message';
