@@ -58,25 +58,64 @@ class EnhancedPlacesOfWorshipApp {
             
             // Step 1: Setup map and controls (no data needed)
             console.log('📍 Setting up map and controls...');
-            this.setupMap();
-            this.setupControls();
+            try {
+                this.setupMap();
+                console.log('✅ Map setup completed');
+            } catch (error) {
+                console.error('❌ Map setup failed:', error);
+                throw error;
+            }
+            
+            try {
+                this.setupControls();
+                console.log('✅ Controls setup completed');
+            } catch (error) {
+                console.error('❌ Controls setup failed:', error);
+                throw error;
+            }
             
             // Step 2: Load all data files
             console.log('📊 Loading data files...');
-            await this.loadData();
+            try {
+                await this.loadData();
+                console.log('✅ Data loading completed');
+            } catch (error) {
+                console.error('❌ Data loading failed:', error);
+                throw error;
+            }
             
             // Step 3: Initialize components that depend on loaded data
             console.log('🎨 Initializing color scales and denomination mapping...');
-            this.initializeColorScale();
-            this.setupDenominationColors();
+            try {
+                this.initializeColorScale();
+                console.log('✅ Color scale initialized');
+            } catch (error) {
+                console.error('❌ Color scale initialization failed:', error);
+                throw error;
+            }
+            
+            try {
+                this.setupDenominationColors();
+                console.log('✅ Denomination colors setup completed');
+            } catch (error) {
+                console.error('❌ Denomination colors setup failed:', error);
+                throw error;
+            }
             
             // Step 4: Display places on map
             console.log('🗺️  Displaying places on map...');
-            this.displayPlaces();
+            try {
+                this.displayPlaces();
+                console.log('✅ Places displayed on map');
+            } catch (error) {
+                console.error('❌ Places display failed:', error);
+                throw error;
+            }
             
             // Step 5: All initialization complete - hide loading screen
-            console.log('✅ App initialization completed successfully');
+            console.log('✅ App initialization completed successfully - hiding loading screen now');
             this.hideLoading();
+            console.log('✅ Loading screen hidden');
             
         } catch (error) {
             console.error('❌ Failed to initialize application:', error);
@@ -308,22 +347,46 @@ class EnhancedPlacesOfWorshipApp {
     async loadData() {
         try {
             console.log('Starting to load data files...');
+            console.log('Current URL base:', window.location.href);
             
             // Load places, census, and comprehensive demographic data
-            console.log('Attempting to fetch TA boundaries from: ./territorial_authorities.geojson');
+            console.log('📂 Attempting to fetch all required files...');
+            console.log('  - ./src/nz_places.json');
+            console.log('  - ./src/religion.json'); 
+            console.log('  - ./src/demographics.json');
+            console.log('  - ./sa2.geojson');
+            console.log('  - ./territorial_authorities.geojson');
+            console.log('  - ./ta_aggregated_data.json');
             
             const [placesResponse, censusResponse, demographicResponse, boundariesResponse, territorialAuthorityResponse, taCensusResponse] = await Promise.all([
-                fetch('./src/nz_places.json'),
-                fetch('./src/religion.json'),
-                fetch('./src/demographics.json'),
-                fetch('./sa2.geojson'),
-                fetch('./territorial_authorities.geojson').catch(e => {
-                    console.error('Failed to fetch TA boundaries:', e);
-                    console.log('Current URL base:', window.location.href);
+                fetch('./src/nz_places.json').then(response => {
+                    console.log('📄 nz_places.json response:', response.status, response.statusText);
+                    return response;
+                }),
+                fetch('./src/religion.json').then(response => {
+                    console.log('📄 religion.json response:', response.status, response.statusText);
+                    return response;
+                }),
+                fetch('./src/demographics.json').then(response => {
+                    console.log('📄 demographics.json response:', response.status, response.statusText);
+                    return response;
+                }),
+                fetch('./sa2.geojson').then(response => {
+                    console.log('📄 sa2.geojson response:', response.status, response.statusText);
+                    return response;
+                }),
+                fetch('./territorial_authorities.geojson').then(response => {
+                    console.log('📄 territorial_authorities.geojson response:', response.status, response.statusText);
+                    return response;
+                }).catch(e => {
+                    console.error('❌ Failed to fetch TA boundaries:', e);
                     console.log('Resolved TA boundaries URL:', new URL('./territorial_authorities.geojson', window.location.href).href);
                     throw e;
                 }),
-                fetch('./ta_aggregated_data.json')
+                fetch('./ta_aggregated_data.json').then(response => {
+                    console.log('📄 ta_aggregated_data.json response:', response.status, response.statusText);
+                    return response;
+                })
             ]);
             
             console.log('Fetch responses:', {
