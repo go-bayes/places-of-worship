@@ -515,12 +515,24 @@
                     <option value="total_population">Total Population</option>
                     <option value="population_density">Population Density</option>
                 </optgroup>
+                <optgroup label="Data Quality & Sources">
+                    <option value="data_quality">Data Quality Overview</option>
+                    <option value="source_confidence">Source Confidence Scores</option>
+                </optgroup>
             </select>
         </div>
         
     </div>
     
     <div id="map"></div>
+    
+    <!-- Data Quality Dashboard (initially hidden) -->
+    <div id="qualityDashboard" class="legend" style="display: none; left: 20px; max-width: 350px;">
+        <h4>📊 Data Quality Dashboard</h4>
+        <div id="qualityDashboardContent">
+            <!-- Content populated by JavaScript -->
+        </div>
+    </div>
     
     <div class="legend">
         <h4>Legend</h4>

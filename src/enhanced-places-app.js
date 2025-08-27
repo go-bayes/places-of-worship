@@ -53,6 +53,14 @@ class EnhancedPlacesOfWorshipApp {
         this.employmentIncomeData = null;  // Employment and income data by TA
         this.ethnicityDensityData = null;  // Ethnicity and population density by TA
         
+        // Enhanced reporting system
+        this.reportingSystem = {
+            confidenceMetrics: {},
+            dataQualityScores: {},
+            sourceTracking: {},
+            temporalAnalysis: {}
+        };
+        
         // Color scaling system
         this.colorScale = null;
         this.religionColorDomain = [30, 65];  // Based on data analysis: 25th-90th percentiles
@@ -277,7 +285,29 @@ class EnhancedPlacesOfWorshipApp {
             });
         }
         
-        // Demographic metric selector
+        // Census metric selector - enhanced to handle data quality options
+        const censusMetricSelect = document.getElementById('censusMetricSelect');
+        if (censusMetricSelect) {
+            censusMetricSelect.addEventListener('change', (e) => {
+                console.log('Census metric changed to:', e.target.value);
+                this.currentCensusMetric = e.target.value;
+                
+                // Handle data quality specific options
+                if (e.target.value === 'data_quality') {
+                    this.showDataQualityDashboard();
+                } else if (e.target.value === 'source_confidence') {
+                    this.showSourceConfidenceDashboard();
+                } else {
+                    this.hideDataQualityDashboard();
+                    // Standard demographic processing
+                    this.updateColorScale();
+                    this.updateReligiousDensityVisualization();
+                    this.updateDemographicLegend();
+                }
+            });
+        }
+        
+        // Demographic metric selector (backward compatibility)
         const demographicMetricSelect = document.getElementById('demographicMetricSelect');
         if (demographicMetricSelect) {
             demographicMetricSelect.addEventListener('change', (e) => {
@@ -508,6 +538,7 @@ class EnhancedPlacesOfWorshipApp {
             if (ageGenderResponse && ageGenderResponse.ok) {
                 const ageGenderData = await ageGenderResponse.json();
                 this.ageGenderData = ageGenderData.data || {};
+                this.calculateDataQualityScores('age_gender', ageGenderData);
                 console.log('✓ Age/gender data loaded:', Object.keys(this.ageGenderData).length, 'areas');
             } else {
                 console.log('⚠ Age/gender data not available');
@@ -517,6 +548,7 @@ class EnhancedPlacesOfWorshipApp {
             if (employmentIncomeResponse && employmentIncomeResponse.ok) {
                 const employmentIncomeData = await employmentIncomeResponse.json();
                 this.employmentIncomeData = employmentIncomeData.data || {};
+                this.calculateDataQualityScores('employment_income', employmentIncomeData);
                 console.log('✓ Employment/income data loaded:', Object.keys(this.employmentIncomeData).length, 'areas');
             } else {
                 console.log('⚠ Employment/income data not available');
@@ -526,6 +558,7 @@ class EnhancedPlacesOfWorshipApp {
             if (ethnicityDensityResponse && ethnicityDensityResponse.ok) {
                 const ethnicityDensityData = await ethnicityDensityResponse.json();
                 this.ethnicityDensityData = ethnicityDensityData.data || {};
+                this.calculateDataQualityScores('ethnicity_density', ethnicityDensityData);
                 console.log('✓ Ethnicity/density data loaded:', Object.keys(this.ethnicityDensityData).length, 'areas');
             } else {
                 console.log('⚠ Ethnicity/density data not available');
@@ -1256,7 +1289,7 @@ class EnhancedPlacesOfWorshipApp {
             console.log(`🔍 DEBUG: Skipping demographic content - currentDemographic is ${this.currentDemographic}`);
         }
 
-        return `
+        let finalContent = `
             <div class="census-popup">
                 <h3>${areaName}</h3>
                 <p><strong>${areaType} Code:</strong> ${areaCode}</p>
@@ -1269,6 +1302,11 @@ class EnhancedPlacesOfWorshipApp {
                 ${histogramDiv}
             </div>
         `;
+        
+        // Enhance with quality information
+        finalContent = this.enhancePopupWithQualityInfo(areaCode, areaType, finalContent);
+        
+        return finalContent;
     }
     
     generateDemographicContent(areaName, areaCode, areaType) {
@@ -2551,6 +2589,353 @@ class EnhancedPlacesOfWorshipApp {
         }
     }
     
+    // Enhanced reporting system methods
+    calculateDataQualityScores(dataType, rawData) {
+        if (!rawData || !rawData.data) return;
+        
+        const metadata = rawData.metadata || {};
+        const data = rawData.data;
+        
+        // Track source information
+        this.reportingSystem.sourceTracking[dataType] = {
+            source: metadata.source || 'Unknown',
+            downloadDate: metadata.download_date || new Date().toISOString().split('T')[0],
+            status: metadata.status || 'UNKNOWN',
+            recordCount: Object.keys(data).length
+        };
+        
+        // Calculate confidence scores
+        let totalConfidence = 0;
+        let scoreCount = 0;
+        
+        Object.keys(data).forEach(areaCode => {
+            const areaData = data[areaCode]['2018'] || data[areaCode]['2013'] || {};
+            let confidence = this.calculateAreaConfidenceScore(areaData, dataType);
+            
+            this.reportingSystem.confidenceMetrics[`${dataType}_${areaCode}`] = confidence;
+            totalConfidence += confidence;
+            scoreCount++;
+        });
+        
+        // Store overall data quality score
+        this.reportingSystem.dataQualityScores[dataType] = {
+            averageConfidence: scoreCount > 0 ? totalConfidence / scoreCount : 0,
+            coverage: Object.keys(data).length,
+            completeness: this.calculateDataCompleteness(data, dataType),
+            freshness: this.calculateDataFreshness(metadata.download_date),
+            overallScore: this.calculateOverallQualityScore(data, dataType, metadata)
+        };
+        
+        console.log(`📊 Data quality calculated for ${dataType}:`, this.reportingSystem.dataQualityScores[dataType]);
+    }
+    
+    calculateAreaConfidenceScore(areaData, dataType) {
+        if (!areaData || Object.keys(areaData).length === 0) return 0;
+        
+        let score = 0.7; // Base confidence for having data
+        
+        // Type-specific confidence adjustments
+        switch(dataType) {
+            case 'age_gender':
+                if (areaData.age && areaData.gender) {
+                    score += 0.2;
+                    if (areaData.age.median_age && areaData.gender.total_population > 100) {
+                        score += 0.1;
+                    }
+                }
+                break;
+            case 'employment_income':
+                if (areaData.employment && areaData.income) {
+                    score += 0.2;
+                    if (areaData.income.median_income && areaData.employment.employment_rate) {
+                        score += 0.1;
+                    }
+                }
+                break;
+            case 'ethnicity_density':
+                if (areaData.ethnicity && areaData.geography) {
+                    score += 0.2;
+                    if (areaData.geography.population_density && areaData.ethnicity.total_population > 50) {
+                        score += 0.1;
+                    }
+                }
+                break;
+        }
+        
+        return Math.min(1.0, score);
+    }
+    
+    calculateDataCompleteness(data, dataType) {
+        const totalAreas = Object.keys(data).length;
+        let completeAreas = 0;
+        
+        Object.values(data).forEach(area => {
+            const currentData = area['2018'] || area['2013'] || {};
+            if (Object.keys(currentData).length > 2) { // More than just basic fields
+                completeAreas++;
+            }
+        });
+        
+        return totalAreas > 0 ? (completeAreas / totalAreas) : 0;
+    }
+    
+    calculateDataFreshness(downloadDate) {
+        if (!downloadDate) return 0.5; // Unknown freshness
+        
+        const download = new Date(downloadDate);
+        const now = new Date();
+        const daysDiff = (now - download) / (1000 * 60 * 60 * 24);
+        
+        if (daysDiff <= 30) return 1.0; // Very fresh
+        if (daysDiff <= 90) return 0.8; // Fresh
+        if (daysDiff <= 365) return 0.6; // Acceptable
+        return 0.4; // Stale
+    }
+    
+    calculateOverallQualityScore(data, dataType, metadata) {
+        const qualityMetrics = this.reportingSystem.dataQualityScores[dataType];
+        if (!qualityMetrics) return 0.5;
+        
+        const weights = {
+            confidence: 0.4,
+            completeness: 0.3,
+            freshness: 0.2,
+            coverage: 0.1
+        };
+        
+        const coverageScore = Math.min(1.0, Object.keys(data).length / 50); // Normalize to 50 areas
+        
+        return (
+            qualityMetrics.averageConfidence * weights.confidence +
+            qualityMetrics.completeness * weights.completeness +
+            qualityMetrics.freshness * weights.freshness +
+            coverageScore * weights.coverage
+        );
+    }
+    
+    getDataQualityReport() {
+        const report = {
+            summary: {},
+            details: this.reportingSystem
+        };
+        
+        // Generate summary statistics
+        const qualityScores = this.reportingSystem.dataQualityScores;
+        const allScores = Object.values(qualityScores).map(q => q.overallScore).filter(s => s > 0);
+        
+        report.summary = {
+            averageQuality: allScores.length > 0 ? (allScores.reduce((a, b) => a + b, 0) / allScores.length) : 0,
+            dataTypesAvailable: Object.keys(qualityScores).length,
+            totalConfidenceScores: Object.keys(this.reportingSystem.confidenceMetrics).length,
+            sourcesTracked: Object.keys(this.reportingSystem.sourceTracking).length
+        };
+        
+        return report;
+    }
+    
+    enhancePopupWithQualityInfo(areaCode, areaType, popupContent) {
+        // Add data quality indicators to popup content
+        const qualityIndicators = this.getAreaQualityIndicators(areaCode, areaType);
+        
+        if (qualityIndicators.length > 0) {
+            const qualitySection = `
+                <div style="margin-top: 15px; padding: 10px; background: rgba(76, 175, 80, 0.1); border-left: 3px solid #4CAF50;">
+                    <h5 style="margin: 0 0 8px 0; color: #2E7D32;">📊 Data Quality</h5>
+                    ${qualityIndicators.map(indicator => `
+                        <div style="display: flex; align-items: center; margin: 4px 0;">
+                            <div style="width: 12px; height: 12px; border-radius: 50%; background: ${indicator.color}; margin-right: 8px;"></div>
+                            <span style="font-size: 0.9em;">${indicator.label}: ${indicator.score}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            popupContent += qualitySection;
+        }
+        
+        return popupContent;
+    }
+    
+    getAreaQualityIndicators(areaCode, areaType) {
+        const indicators = [];
+        
+        // Check for available demographic data types
+        ['age_gender', 'employment_income', 'ethnicity_density'].forEach(dataType => {
+            const confidenceKey = `${dataType}_${areaCode}`;
+            const confidence = this.reportingSystem.confidenceMetrics[confidenceKey];
+            
+            if (confidence !== undefined) {
+                let color, label;
+                if (confidence >= 0.8) {
+                    color = '#4CAF50'; label = 'High';
+                } else if (confidence >= 0.6) {
+                    color = '#FF9800'; label = 'Medium';
+                } else {
+                    color = '#F44336'; label = 'Low';
+                }
+                
+                indicators.push({
+                    type: dataType,
+                    score: `${Math.round(confidence * 100)}%`,
+                    color: color,
+                    label: `${dataType.replace('_', '/')} ${label}`
+                });
+            }
+        });
+        
+        return indicators;
+    }
+    
+    showDataQualityDashboard() {
+        const dashboard = document.getElementById('qualityDashboard');
+        const content = document.getElementById('qualityDashboardContent');
+        
+        if (!dashboard || !content) return;
+        
+        const report = this.getDataQualityReport();
+        
+        content.innerHTML = `
+            <div style="margin-bottom: 15px;">
+                <h5>📈 Summary Statistics</h5>
+                <div style="background: rgba(33, 150, 243, 0.1); padding: 10px; border-radius: 4px; margin: 8px 0;">
+                    <div><strong>Overall Quality:</strong> ${Math.round(report.summary.averageQuality * 100)}%</div>
+                    <div><strong>Data Types:</strong> ${report.summary.dataTypesAvailable}</div>
+                    <div><strong>Areas Covered:</strong> ${report.summary.totalConfidenceScores}</div>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <h5>📊 Data Type Quality</h5>
+                ${this.generateDataTypeQualityBars(report.details.dataQualityScores)}
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <h5>🔍 Source Information</h5>
+                ${this.generateSourceSummary(report.details.sourceTracking)}
+            </div>
+            
+            <div style="font-size: 0.8em; color: #666; margin-top: 10px;">
+                <em>Click on map regions for detailed quality metrics</em>
+            </div>
+        `;
+        
+        dashboard.style.display = 'block';
+    }
+    
+    showSourceConfidenceDashboard() {
+        const dashboard = document.getElementById('qualityDashboard');
+        const content = document.getElementById('qualityDashboardContent');
+        
+        if (!dashboard || !content) return;
+        
+        content.innerHTML = `
+            <div style="margin-bottom: 15px;">
+                <h5>🎯 Confidence Scoring System</h5>
+                <div style="background: rgba(76, 175, 80, 0.1); padding: 10px; border-radius: 4px; margin: 8px 0; font-size: 0.9em;">
+                    <div><strong>High (80-100%):</strong> Complete, recent, validated data</div>
+                    <div><strong>Medium (60-79%):</strong> Good coverage, some gaps</div>
+                    <div><strong>Low (&lt;60%):</strong> Limited or outdated data</div>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <h5>📋 Scoring Criteria</h5>
+                <div style="font-size: 0.8em; color: #555;">
+                    <div>• <strong>Completeness:</strong> Data field coverage</div>
+                    <div>• <strong>Freshness:</strong> Data recency</div>
+                    <div>• <strong>Accuracy:</strong> Source reliability</div>
+                    <div>• <strong>Coverage:</strong> Geographic extent</div>
+                </div>
+            </div>
+            
+            ${this.generateConfidenceDistribution()}
+            
+            <div style="font-size: 0.8em; color: #666; margin-top: 10px;">
+                <em>Quality indicators appear in region popups</em>
+            </div>
+        `;
+        
+        dashboard.style.display = 'block';
+    }
+    
+    hideDataQualityDashboard() {
+        const dashboard = document.getElementById('qualityDashboard');
+        if (dashboard) {
+            dashboard.style.display = 'none';
+        }
+    }
+    
+    generateDataTypeQualityBars(qualityScores) {
+        if (!qualityScores || Object.keys(qualityScores).length === 0) {
+            return '<div><em>No quality data available</em></div>';
+        }
+        
+        return Object.entries(qualityScores).map(([dataType, scores]) => {
+            const percentage = Math.round(scores.overallScore * 100);
+            const color = percentage >= 80 ? '#4CAF50' : percentage >= 60 ? '#FF9800' : '#F44336';
+            
+            return `
+                <div style="margin: 6px 0;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9em;">
+                        <span>${dataType.replace('_', ' ')}</span>
+                        <span>${percentage}%</span>
+                    </div>
+                    <div style="width: 100%; height: 6px; background: #eee; border-radius: 3px; margin-top: 2px;">
+                        <div style="width: ${percentage}%; height: 100%; background: ${color}; border-radius: 3px;"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    generateSourceSummary(sourceTracking) {
+        if (!sourceTracking || Object.keys(sourceTracking).length === 0) {
+            return '<div><em>No source information available</em></div>';
+        }
+        
+        return Object.entries(sourceTracking).map(([dataType, source]) => `
+            <div style="margin: 8px 0; padding: 6px; background: rgba(158, 158, 158, 0.1); border-radius: 4px; font-size: 0.8em;">
+                <div><strong>${dataType.replace('_', ' ')}</strong></div>
+                <div>Source: ${source.source}</div>
+                <div>Updated: ${source.downloadDate}</div>
+                <div>Records: ${source.recordCount}</div>
+                ${source.status === 'MOCK_DATA_FOR_DEMO' ? '<div style="color: #FF9800;"><em>⚠ Demo Data</em></div>' : ''}
+            </div>
+        `).join('');
+    }
+    
+    generateConfidenceDistribution() {
+        const metrics = this.reportingSystem.confidenceMetrics;
+        if (!metrics || Object.keys(metrics).length === 0) {
+            return '<div><em>No confidence metrics available</em></div>';
+        }
+        
+        const confidenceValues = Object.values(metrics);
+        const high = confidenceValues.filter(v => v >= 0.8).length;
+        const medium = confidenceValues.filter(v => v >= 0.6 && v < 0.8).length;
+        const low = confidenceValues.filter(v => v < 0.6).length;
+        const total = confidenceValues.length;
+        
+        return `
+            <div style="margin-bottom: 15px;">
+                <h5>📊 Confidence Distribution</h5>
+                <div style="font-size: 0.9em;">
+                    <div style="display: flex; justify-content: space-between; margin: 4px 0;">
+                        <span>🟢 High Confidence:</span>
+                        <span>${high} (${Math.round(high/total*100)}%)</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin: 4px 0;">
+                        <span>🟡 Medium Confidence:</span>
+                        <span>${medium} (${Math.round(medium/total*100)}%)</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin: 4px 0;">
+                        <span>🔴 Low Confidence:</span>
+                        <span>${low} (${Math.round(low/total*100)}%)</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     showError(message) {
         const errorDiv = document.createElement('div');
         errorDiv.className = 'error-message';
