@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # language: python
-# comments: lower case
 # purpose: validate TA code mappings between GeoJSON boundaries and census data
 
 import json
