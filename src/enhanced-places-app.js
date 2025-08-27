@@ -53,16 +53,6 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     async init() {
-        console.log('🚀 Starting Enhanced Places app initialization...');
-        
-        // EMERGENCY FIX: Skip everything and just hide loading screen immediately
-        console.log('⚠️  EMERGENCY MODE: Hiding loading screen immediately');
-        this.hideLoading();
-        console.log('✅ Loading screen hidden in emergency mode');
-        
-        return;
-        
-        // Original initialization code below (commented out for debugging)
         try {
             console.log('🚀 Starting Enhanced Places app initialization...');
             
@@ -330,12 +320,14 @@ class EnhancedPlacesOfWorshipApp {
     
     initializeDemographicToggle() {
         const demographicToggle = document.getElementById('demographicToggle');
-        if (!demographicToggle) return;
-        
-        demographicToggle.addEventListener('change', (e) => {
-            this.currentDemographic = e.target.value;
-            this.updateDemographicDisplay();
-        });
+        if (demographicToggle) {
+            demographicToggle.addEventListener('change', (e) => {
+                this.currentDemographic = e.target.value;
+                this.updateDemographicDisplay();
+            });
+        } else {
+            console.warn('demographicToggle element not found in HTML - skipping demographic toggle setup');
+        }
         
         // Initialize with none selected
         this.currentDemographic = 'none';
