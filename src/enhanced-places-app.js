@@ -393,7 +393,11 @@ class EnhancedPlacesOfWorshipApp {
             console.log('✓ All static census data loaded successfully');
             
             // Load additional demographic data files (optional - won't fail if not available)
-            await this.loadAdditionalDemographicData();
+            try {
+                await this.loadAdditionalDemographicData();
+            } catch (error) {
+                console.warn('Failed to load additional demographic data, continuing without it:', error);
+            }
             
             // Populate filter dropdowns
             this.populateFilterDropdowns();
