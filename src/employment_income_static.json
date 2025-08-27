@@ -5,6 +5,31 @@
     "status": "MOCK_DATA_FOR_DEMO"
   },
   "data": {
+    "001": {
+      "2018": {
+        "employment": {
+          "working_age_population": 23500,
+          "employed": 20200,
+          "unemployed": 1100,
+          "not_in_labour_force": 2200,
+          "employment_rate": 86.0,
+          "unemployment_rate": 5.2,
+          "participation_rate": 90.6
+        },
+        "income": {
+          "median_income": 48000,
+          "income_under_20k": 2800,
+          "income_20k_50k": 8500,
+          "income_50k_100k": 7200,
+          "income_over_100k": 2200,
+          "total_income_earners": 20700,
+          "income_under_20k_percent": 13.5,
+          "income_20k_50k_percent": 41.1,
+          "income_50k_100k_percent": 34.8,
+          "income_over_100k_percent": 10.6
+        }
+      }
+    },
     "002": {
       "2018": {
         "employment": {
@@ -50,6 +75,56 @@
           "income_20k_50k_percent": 43.0,
           "income_50k_100k_percent": 32.9,
           "income_over_100k_percent": 11.1
+        }
+      }
+    },
+    "003": {
+      "2018": {
+        "employment": {
+          "working_age_population": 16200,
+          "employed": 14000,
+          "unemployed": 900,
+          "not_in_labour_force": 1300,
+          "employment_rate": 86.4,
+          "unemployment_rate": 6.0,
+          "participation_rate": 92.0
+        },
+        "income": {
+          "median_income": 45000,
+          "income_under_20k": 2100,
+          "income_20k_50k": 6800,
+          "income_50k_100k": 4200,
+          "income_over_100k": 900,
+          "total_income_earners": 14000,
+          "income_under_20k_percent": 15.0,
+          "income_20k_50k_percent": 48.6,
+          "income_50k_100k_percent": 30.0,
+          "income_over_100k_percent": 6.4
+        }
+      }
+    },
+    "004": {
+      "2018": {
+        "employment": {
+          "working_age_population": 36000,
+          "employed": 31000,
+          "unemployed": 2200,
+          "not_in_labour_force": 2800,
+          "employment_rate": 86.1,
+          "unemployment_rate": 6.6,
+          "participation_rate": 92.2
+        },
+        "income": {
+          "median_income": 52000,
+          "income_under_20k": 3800,
+          "income_20k_50k": 14200,
+          "income_50k_100k": 10800,
+          "income_over_100k": 2200,
+          "total_income_earners": 31000,
+          "income_under_20k_percent": 12.3,
+          "income_20k_50k_percent": 45.8,
+          "income_50k_100k_percent": 34.8,
+          "income_over_100k_percent": 7.1
         }
       }
     },

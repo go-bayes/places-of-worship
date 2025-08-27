@@ -626,6 +626,9 @@ class EnhancedPlacesOfWorshipApp {
     addAgeGenderData(taCode) {
         let content = '';
         
+        console.log(`🔍 DEBUG addAgeGenderData: Looking for TA code "${taCode}"`);
+        console.log(`🔍 DEBUG addAgeGenderData: ageGenderData keys:`, this.ageGenderData ? Object.keys(this.ageGenderData) : 'null');
+        
         try {
             // Add age data if available
             if (this.ageGenderData && this.ageGenderData[taCode]) {
@@ -1241,9 +1244,16 @@ class EnhancedPlacesOfWorshipApp {
         });
         
         // Add demographic data section if selected
+        console.log(`🔍 DEBUG: formatReligiousDensityPopup called for ${areaName} (${areaCode}, ${areaType})`);
+        console.log(`🔍 DEBUG: currentDemographic = ${this.currentDemographic}`);
+        
         let demographicContent = '';
         if (this.currentDemographic && this.currentDemographic !== 'none') {
+            console.log(`🔍 DEBUG: Calling generateDemographicContent...`);
             demographicContent = this.generateDemographicContent(areaName, areaCode, areaType);
+            console.log(`🔍 DEBUG: Generated demographic content:`, demographicContent.length, 'characters');
+        } else {
+            console.log(`🔍 DEBUG: Skipping demographic content - currentDemographic is ${this.currentDemographic}`);
         }
 
         return `
@@ -1394,10 +1404,18 @@ class EnhancedPlacesOfWorshipApp {
                 break;
             case 'comprehensive':
                 // Show all available demographic data for comprehensive view
+                console.log(`🔍 DEBUG: Comprehensive case - calling demographic methods for areaCode: ${areaCode}`);
                 const allAgeGender = this.addAgeGenderData(areaCode);
                 const allEmploymentIncome = this.addEmploymentIncomeData(areaCode);
                 const allEthnicityDensity = this.addEthnicityDensityData(areaCode);
                 const allBirthMigration = this.addBirthRateMigrationData(areaCode);
+                
+                console.log(`🔍 DEBUG: Demographic method results:`, {
+                    ageGender: allAgeGender ? allAgeGender.length : 0,
+                    employment: allEmploymentIncome ? allEmploymentIncome.length : 0,
+                    ethnicity: allEthnicityDensity ? allEthnicityDensity.length : 0,
+                    birthMigration: allBirthMigration ? allBirthMigration.length : 0
+                });
                 
                 content += `<h4>📊 Comprehensive Demographic Profile</h4>`;
                 if (allAgeGender) content += allAgeGender;
@@ -1407,6 +1425,7 @@ class EnhancedPlacesOfWorshipApp {
                 
                 if (!allAgeGender && !allEmploymentIncome && !allEthnicityDensity && !allBirthMigration) {
                     content += `<p><em>Comprehensive demographic data for ${areaName} not available.</em></p>`;
+                    console.log(`🔍 DEBUG: No demographic data found for area ${areaCode}`);
                 }
                 break;
             case 'age_employment_income':

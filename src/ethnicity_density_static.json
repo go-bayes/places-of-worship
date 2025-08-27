@@ -5,6 +5,30 @@
     "status": "MOCK_DATA_FOR_DEMO"
   },
   "data": {
+    "001": {
+      "2018": {
+        "ethnicity": {
+          "total_population": 31300,
+          "european": 26500,
+          "maori": 2800,
+          "pacific": 450,
+          "asian": 1200,
+          "middle_eastern_latin_african": 280,
+          "other": 70,
+          "european_percent": 84.7,
+          "maori_percent": 8.9,
+          "pacific_percent": 1.4,
+          "asian_percent": 3.8,
+          "melaa_percent": 0.9,
+          "other_percent": 0.2
+        },
+        "geography": {
+          "area_km2": 1165,
+          "population_density": 26.9,
+          "population_density_category": "Low"
+        }
+      }
+    },
     "002": {
       "2018": {
         "ethnicity": {
@@ -48,6 +72,54 @@
           "area_km2": 5600,
           "population_density": 275.1,
           "population_density_category": "High"
+        }
+      }
+    },
+    "003": {
+      "2018": {
+        "ethnicity": {
+          "total_population": 21600,
+          "european": 18500,
+          "maori": 1800,
+          "pacific": 320,
+          "asian": 650,
+          "middle_eastern_latin_african": 250,
+          "other": 80,
+          "european_percent": 85.6,
+          "maori_percent": 8.3,
+          "pacific_percent": 1.5,
+          "asian_percent": 3.0,
+          "melaa_percent": 1.2,
+          "other_percent": 0.4
+        },
+        "geography": {
+          "area_km2": 890,
+          "population_density": 24.3,
+          "population_density_category": "Low"
+        }
+      }
+    },
+    "004": {
+      "2018": {
+        "ethnicity": {
+          "total_population": 48000,
+          "european": 40800,
+          "maori": 3800,
+          "pacific": 800,
+          "asian": 1800,
+          "middle_eastern_latin_african": 650,
+          "other": 150,
+          "european_percent": 85.0,
+          "maori_percent": 7.9,
+          "pacific_percent": 1.7,
+          "asian_percent": 3.8,
+          "melaa_percent": 1.4,
+          "other_percent": 0.3
+        },
+        "geography": {
+          "area_km2": 1200,
+          "population_density": 40.0,
+          "population_density_category": "Medium"
         }
       }
     },

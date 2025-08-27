@@ -5,6 +5,30 @@
     "status": "MOCK_DATA_FOR_DEMO"
   },
   "data": {
+    "001": {
+      "2018": {
+        "age": {
+          "median_age": 42.1,
+          "age_0_14": 6240,
+          "age_15_29": 5890,
+          "age_30_49": 8150,
+          "age_50_64": 6820,
+          "age_65_plus": 4200,
+          "age_0_14_percent": 20.1,
+          "age_15_29_percent": 18.9,
+          "age_30_49_percent": 26.2,
+          "age_50_64_percent": 21.9,
+          "age_65_plus_percent": 13.5
+        },
+        "gender": {
+          "male": 15600,
+          "female": 15700,
+          "male_percent": 49.8,
+          "female_percent": 50.2,
+          "total_population": 31300
+        }
+      }
+    },
     "002": {
       "2018": {
         "age": {
@@ -48,6 +72,54 @@
           "male_percent": 49.1,
           "female_percent": 50.9,
           "total_population": 1540680
+        }
+      }
+    },
+    "003": {
+      "2018": {
+        "age": {
+          "median_age": 39.8,
+          "age_0_14": 4200,
+          "age_15_29": 3800,
+          "age_30_49": 5600,
+          "age_50_64": 4800,
+          "age_65_plus": 3200,
+          "age_0_14_percent": 19.4,
+          "age_15_29_percent": 17.6,
+          "age_30_49_percent": 25.9,
+          "age_50_64_percent": 22.2,
+          "age_65_plus_percent": 14.8
+        },
+        "gender": {
+          "male": 10800,
+          "female": 10800,
+          "male_percent": 50.0,
+          "female_percent": 50.0,
+          "total_population": 21600
+        }
+      }
+    },
+    "004": {
+      "2018": {
+        "age": {
+          "median_age": 44.2,
+          "age_0_14": 8400,
+          "age_15_29": 7200,
+          "age_30_49": 11800,
+          "age_50_64": 12200,
+          "age_65_plus": 8400,
+          "age_0_14_percent": 17.5,
+          "age_15_29_percent": 15.0,
+          "age_30_49_percent": 24.6,
+          "age_50_64_percent": 25.4,
+          "age_65_plus_percent": 17.5
+        },
+        "gender": {
+          "male": 24000,
+          "female": 24000,
+          "male_percent": 50.0,
+          "female_percent": 50.0,
+          "total_population": 48000
         }
       }
     },
