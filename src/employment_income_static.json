@@ -1,0 +1,82 @@
+{
+  "metadata": {
+    "source": "Statistics New Zealand",
+    "download_date": "2025-08-27",
+    "status": "MOCK_DATA_FOR_DEMO"
+  },
+  "data": {
+    "002": {
+      "2018": {
+        "employment": {
+          "working_age_population": 1250000,
+          "employed": 1087500,
+          "unemployed": 62500,
+          "not_in_labour_force": 100000,
+          "employment_rate": 87.0,
+          "unemployment_rate": 5.4,
+          "participation_rate": 92.0
+        },
+        "income": {
+          "median_income": 52000,
+          "income_under_20k": 125000,
+          "income_20k_50k": 425000,
+          "income_50k_100k": 380000,
+          "income_over_100k": 145000,
+          "total_income_earners": 1075000,
+          "income_under_20k_percent": 11.6,
+          "income_20k_50k_percent": 39.5,
+          "income_50k_100k_percent": 35.3,
+          "income_over_100k_percent": 13.5
+        }
+      },
+      "2013": {
+        "employment": {
+          "working_age_population": 1150000,
+          "employed": 1000000,
+          "unemployed": 80000,
+          "not_in_labour_force": 70000,
+          "employment_rate": 87.0,
+          "unemployment_rate": 7.4,
+          "participation_rate": 93.9
+        },
+        "income": {
+          "median_income": 46800,
+          "income_under_20k": 135000,
+          "income_20k_50k": 445000,
+          "income_50k_100k": 340000,
+          "income_over_100k": 115000,
+          "total_income_earners": 1035000,
+          "income_under_20k_percent": 13.0,
+          "income_20k_50k_percent": 43.0,
+          "income_50k_100k_percent": 32.9,
+          "income_over_100k_percent": 11.1
+        }
+      }
+    },
+    "076": {
+      "2018": {
+        "employment": {
+          "working_age_population": 1250000,
+          "employed": 1100000,
+          "unemployed": 55000,
+          "not_in_labour_force": 95000,
+          "employment_rate": 88.0,
+          "unemployment_rate": 4.8,
+          "participation_rate": 92.4
+        },
+        "income": {
+          "median_income": 55200,
+          "income_under_20k": 110000,
+          "income_20k_50k": 420000,
+          "income_50k_100k": 395000,
+          "income_over_100k": 165000,
+          "total_income_earners": 1090000,
+          "income_under_20k_percent": 10.1,
+          "income_20k_50k_percent": 38.5,
+          "income_50k_100k_percent": 36.2,
+          "income_over_100k_percent": 15.1
+        }
+      }
+    }
+  }
+}

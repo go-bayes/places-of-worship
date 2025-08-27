@@ -35,6 +35,9 @@ class EnhancedPlacesOfWorshipApp {
         this.birthRateData = null;  // Birth rates by SA2/TA
         this.migrationData = null;  // Migration rates by SA2/TA
         this.populationChangeData = null;  // Population change data
+        this.ageGenderData = null;  // Age and gender demographics by TA
+        this.employmentIncomeData = null;  // Employment and income data by TA
+        this.ethnicityDensityData = null;  // Ethnicity and population density by TA
         
         // Color scaling system
         this.colorScale = null;
@@ -389,10 +392,13 @@ class EnhancedPlacesOfWorshipApp {
             // All data loaded successfully - no API calls needed for static census data
             console.log('✓ All static census data loaded successfully');
             
+            // Load additional demographic data files (optional - won't fail if not available)
+            await this.loadAdditionalDemographicData();
+            
             // Populate filter dropdowns
             this.populateFilterDropdowns();
             
-            console.log('✅ All static census data loaded successfully');
+            console.log('✅ All census and demographic data loaded successfully');
             
         } catch (error) {
             console.error('Error loading data:', error);
@@ -402,14 +408,77 @@ class EnhancedPlacesOfWorshipApp {
         }
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
+    async loadAdditionalDemographicData() {
+        console.log('Loading additional demographic data...');
+        
+        try {
+            const [ageGenderResponse, employmentIncomeResponse, ethnicityDensityResponse, birthRatesResponse, migrationResponse, populationChangeResponse] = await Promise.all([
+                fetch('./src/age_gender_static.json').catch(e => null),
+                fetch('./src/employment_income_static.json').catch(e => null),
+                fetch('./src/ethnicity_density_static.json').catch(e => null),
+                fetch('./src/birth_rates_static.json').catch(e => null),
+                fetch('./src/migration_data_static.json').catch(e => null),
+                fetch('./src/population_change_static.json').catch(e => null)
+            ]);
+            
+            // Load age and gender data
+            if (ageGenderResponse && ageGenderResponse.ok) {
+                const ageGenderData = await ageGenderResponse.json();
+                this.ageGenderData = ageGenderData.data || {};
+                console.log('✓ Age/gender data loaded:', Object.keys(this.ageGenderData).length, 'areas');
+            } else {
+                console.log('⚠ Age/gender data not available');
+            }
+            
+            // Load employment and income data
+            if (employmentIncomeResponse && employmentIncomeResponse.ok) {
+                const employmentIncomeData = await employmentIncomeResponse.json();
+                this.employmentIncomeData = employmentIncomeData.data || {};
+                console.log('✓ Employment/income data loaded:', Object.keys(this.employmentIncomeData).length, 'areas');
+            } else {
+                console.log('⚠ Employment/income data not available');
+            }
+            
+            // Load ethnicity and population density data
+            if (ethnicityDensityResponse && ethnicityDensityResponse.ok) {
+                const ethnicityDensityData = await ethnicityDensityResponse.json();
+                this.ethnicityDensityData = ethnicityDensityData.data || {};
+                console.log('✓ Ethnicity/density data loaded:', Object.keys(this.ethnicityDensityData).length, 'areas');
+            } else {
+                console.log('⚠ Ethnicity/density data not available');
+            }
+            
+            // Load birth rates data
+            if (birthRatesResponse && birthRatesResponse.ok) {
+                const birthRatesData = await birthRatesResponse.json();
+                this.birthRateData = birthRatesData.data || {};
+                console.log('✓ Birth rates data loaded:', Object.keys(this.birthRateData).length, 'areas');
+            } else {
+                console.log('⚠ Birth rates data not available');
+            }
+            
+            // Load migration data
+            if (migrationResponse && migrationResponse.ok) {
+                const migrationData = await migrationResponse.json();
+                this.migrationData = migrationData.data || {};
+                console.log('✓ Migration data loaded:', Object.keys(this.migrationData).length, 'areas');
+            } else {
+                console.log('⚠ Migration data not available');
+            }
+            
+            // Load population change data
+            if (populationChangeResponse && populationChangeResponse.ok) {
+                const populationChangeData = await populationChangeResponse.json();
+                this.populationChangeData = populationChangeData.data || {};
+                console.log('✓ Population change data loaded:', Object.keys(this.populationChangeData).length, 'areas');
+            } else {
+                console.log('⚠ Population change data not available');
+            }
+            
+        } catch (error) {
+            console.warn('Error loading additional demographic data:', error);
+        }
+    }
     
     addBirthRateMigrationData(taCode) {
         let content = '';
@@ -464,6 +533,177 @@ class EnhancedPlacesOfWorshipApp {
                     </span></p>
                     <p><strong>Internal Migration:</strong> ${(data.internal_migration_in - data.internal_migration_out).toLocaleString()} (net)</p>
                     <p><strong>External Migration:</strong> ${(data.external_migration_in - data.external_migration_out).toLocaleString()} (net)</p>
+                `;
+            }
+        }
+        
+        return content;
+    }
+    
+    addAgeGenderData(taCode) {
+        let content = '';
+        
+        // Add age data if available
+        if (this.ageGenderData && this.ageGenderData[taCode]) {
+            const taData = this.ageGenderData[taCode];
+            const latestYear = Math.max(...Object.keys(taData).map(y => parseInt(y)));
+            
+            if (taData[latestYear] && taData[latestYear].age) {
+                const ageData = taData[latestYear].age;
+                content += `<h4>Age Profile (${latestYear})</h4>`;
+                content += `
+                    <p><strong>Median Age:</strong> ${ageData.median_age} years</p>
+                    <div style="margin: 10px 0;">
+                        <p><strong>Age Distribution:</strong></p>
+                        <p style="margin-left: 15px;">• 0-14 years: ${ageData.age_0_14_percent}% (${ageData.age_0_14.toLocaleString()})</p>
+                        <p style="margin-left: 15px;">• 15-29 years: ${ageData.age_15_29_percent}% (${ageData.age_15_29.toLocaleString()})</p>
+                        <p style="margin-left: 15px;">• 30-49 years: ${ageData.age_30_49_percent}% (${ageData.age_30_49.toLocaleString()})</p>
+                        <p style="margin-left: 15px;">• 50-64 years: ${ageData.age_50_64_percent}% (${ageData.age_50_64.toLocaleString()})</p>
+                        <p style="margin-left: 15px;">• 65+ years: ${ageData.age_65_plus_percent}% (${ageData.age_65_plus.toLocaleString()})</p>
+                    </div>
+                `;
+                
+                // Show trend if multiple years available
+                const years = Object.keys(taData).map(y => parseInt(y)).sort();
+                if (years.length > 1) {
+                    const earliestYear = years[0];
+                    const earliestAge = taData[earliestYear].age;
+                    if (earliestAge) {
+                        const agingTrend = ageData.median_age - earliestAge.median_age;
+                        const trendIcon = agingTrend > 0 ? '↗' : agingTrend < 0 ? '↘' : '→';
+                        const trendColor = agingTrend > 1 ? '#e74c3c' : agingTrend < -1 ? '#27ae60' : '#666';
+                        
+                        content += `
+                            <p><strong>Aging Trend (${earliestYear}-${latestYear}):</strong> 
+                            <span style="color: ${trendColor};">
+                            ${agingTrend > 0 ? '+' : ''}${agingTrend.toFixed(1)} years ${trendIcon}
+                            </span></p>
+                        `;
+                    }
+                }
+            }
+            
+            // Add gender data
+            if (taData[latestYear] && taData[latestYear].gender) {
+                const genderData = taData[latestYear].gender;
+                content += `
+                    <p><strong>Gender Split:</strong> ${genderData.male_percent}% male, ${genderData.female_percent}% female</p>
+                `;
+            }
+        }
+        
+        return content;
+    }
+    
+    addEmploymentIncomeData(taCode) {
+        let content = '';
+        
+        // Add employment data if available
+        if (this.employmentIncomeData && this.employmentIncomeData[taCode]) {
+            const taData = this.employmentIncomeData[taCode];
+            const latestYear = Math.max(...Object.keys(taData).map(y => parseInt(y)));
+            
+            if (taData[latestYear] && taData[latestYear].employment) {
+                const empData = taData[latestYear].employment;
+                content += `<h4>Employment Profile (${latestYear})</h4>`;
+                content += `
+                    <p><strong>Employment Rate:</strong> ${empData.employment_rate}%</p>
+                    <p><strong>Unemployment Rate:</strong> ${empData.unemployment_rate}%</p>
+                    <p><strong>Labour Force Participation:</strong> ${empData.participation_rate}%</p>
+                    <p><strong>Working Age Population:</strong> ${empData.working_age_population.toLocaleString()}</p>
+                `;
+                
+                // Show employment trend if multiple years available
+                const years = Object.keys(taData).map(y => parseInt(y)).sort();
+                if (years.length > 1) {
+                    const earliestYear = years[0];
+                    const earliestEmp = taData[earliestYear].employment;
+                    if (earliestEmp) {
+                        const unemploymentChange = empData.unemployment_rate - earliestEmp.unemployment_rate;
+                        const trendIcon = unemploymentChange > 0 ? '↗' : unemploymentChange < 0 ? '↘' : '→';
+                        const trendColor = unemploymentChange > 0 ? '#e74c3c' : unemploymentChange < 0 ? '#27ae60' : '#666';
+                        
+                        content += `
+                            <p><strong>Unemployment Trend (${earliestYear}-${latestYear}):</strong> 
+                            <span style="color: ${trendColor};">
+                            ${unemploymentChange > 0 ? '+' : ''}${unemploymentChange.toFixed(1)}% ${trendIcon}
+                            </span></p>
+                        `;
+                    }
+                }
+            }
+            
+            // Add income data
+            if (taData[latestYear] && taData[latestYear].income) {
+                const incomeData = taData[latestYear].income;
+                content += `<h4>Income Profile (${latestYear})</h4>`;
+                content += `
+                    <p><strong>Median Income:</strong> $${incomeData.median_income.toLocaleString()}</p>
+                    <div style="margin: 10px 0;">
+                        <p><strong>Income Distribution:</strong></p>
+                        <p style="margin-left: 15px;">• Under $20k: ${incomeData.income_under_20k_percent}% (${incomeData.income_under_20k.toLocaleString()})</p>
+                        <p style="margin-left: 15px;">• $20k-$50k: ${incomeData.income_20k_50k_percent}% (${incomeData.income_20k_50k.toLocaleString()})</p>
+                        <p style="margin-left: 15px;">• $50k-$100k: ${incomeData.income_50k_100k_percent}% (${incomeData.income_50k_100k.toLocaleString()})</p>
+                        <p style="margin-left: 15px;">• Over $100k: ${incomeData.income_over_100k_percent}% (${incomeData.income_over_100k.toLocaleString()})</p>
+                    </div>
+                `;
+                
+                // Show income trend if multiple years available
+                const years = Object.keys(taData).map(y => parseInt(y)).sort();
+                if (years.length > 1) {
+                    const earliestYear = years[0];
+                    const earliestIncome = taData[earliestYear].income;
+                    if (earliestIncome) {
+                        const incomeChange = incomeData.median_income - earliestIncome.median_income;
+                        const incomeChangePercent = (incomeChange / earliestIncome.median_income) * 100;
+                        const trendIcon = incomeChange > 0 ? '↗' : incomeChange < 0 ? '↘' : '→';
+                        const trendColor = incomeChange > 0 ? '#27ae60' : incomeChange < 0 ? '#e74c3c' : '#666';
+                        
+                        content += `
+                            <p><strong>Income Growth (${earliestYear}-${latestYear}):</strong> 
+                            <span style="color: ${trendColor};">
+                            $${incomeChange.toLocaleString()} (+${incomeChangePercent.toFixed(1)}%) ${trendIcon}
+                            </span></p>
+                        `;
+                    }
+                }
+            }
+        }
+        
+        return content;
+    }
+    
+    addEthnicityDensityData(taCode) {
+        let content = '';
+        
+        // Add ethnicity and population density data if available
+        if (this.ethnicityDensityData && this.ethnicityDensityData[taCode]) {
+            const taData = this.ethnicityDensityData[taCode];
+            const latestYear = Math.max(...Object.keys(taData).map(y => parseInt(y)));
+            
+            if (taData[latestYear] && taData[latestYear].ethnicity) {
+                const ethnicityData = taData[latestYear].ethnicity;
+                content += `<h4>Ethnicity Profile (${latestYear})</h4>`;
+                content += `
+                    <div style="margin: 10px 0;">
+                        <p><strong>Ethnic Composition:</strong></p>
+                        <p style="margin-left: 15px;">• European: ${ethnicityData.european_percent}% (${ethnicityData.european.toLocaleString()})</p>
+                        <p style="margin-left: 15px;">• Māori: ${ethnicityData.maori_percent}% (${ethnicityData.maori.toLocaleString()})</p>
+                        <p style="margin-left: 15px;">• Pacific: ${ethnicityData.pacific_percent}% (${ethnicityData.pacific.toLocaleString()})</p>
+                        <p style="margin-left: 15px;">• Asian: ${ethnicityData.asian_percent}% (${ethnicityData.asian.toLocaleString()})</p>
+                        <p style="margin-left: 15px;">• MELAA: ${ethnicityData.melaa_percent}% (${ethnicityData.middle_eastern_latin_african.toLocaleString()})</p>
+                        <p style="margin-left: 15px;">• Other: ${ethnicityData.other_percent}% (${ethnicityData.other.toLocaleString()})</p>
+                    </div>
+                `;
+            }
+            
+            // Add population density data
+            if (taData[latestYear] && taData[latestYear].geography) {
+                const geographyData = taData[latestYear].geography;
+                content += `<h4>Population Density</h4>`;
+                content += `
+                    <p><strong>Area:</strong> ${geographyData.area_km2.toLocaleString()} km²</p>
+                    <p><strong>Population Density:</strong> ${geographyData.population_density} people/km² (${geographyData.population_density_category})</p>
                 `;
             }
         }
@@ -912,72 +1152,149 @@ class EnhancedPlacesOfWorshipApp {
         
         switch (demographicType) {
             case 'age':
-                content += `
-                    <h4>📊 Age Structure</h4>
-                    <p><em>Age demographic data for ${areaName} would be displayed here.</em></p>
-                    <p>• Median age, age groups, dependency ratios</p>
-                    <p>• Young adult population (20-34 years)</p>
-                    <p>• Aging population trends</p>
-                `;
+                const ageData = this.addAgeGenderData(areaCode);
+                if (ageData) {
+                    content += ageData;
+                } else {
+                    content += `
+                        <h4>📊 Age Structure</h4>
+                        <p><em>Age demographic data for ${areaName} not available.</em></p>
+                        <p>• Median age, age groups, dependency ratios</p>
+                        <p>• Young adult population (20-34 years)</p>
+                        <p>• Aging population trends</p>
+                    `;
+                }
                 break;
             case 'gender':
-                content += `
-                    <h4>⚧ Gender Ratio</h4>
-                    <p><em>Gender distribution data for ${areaName} would be displayed here.</em></p>
-                    <p>• Male/female ratio</p>
-                    <p>• Gender diversity indicators</p>
-                `;
+                const genderData = this.addAgeGenderData(areaCode);
+                if (genderData) {
+                    content += genderData;
+                } else {
+                    content += `
+                        <h4>⚧ Gender Ratio</h4>
+                        <p><em>Gender distribution data for ${areaName} not available.</em></p>
+                        <p>• Male/female ratio</p>
+                        <p>• Gender diversity indicators</p>
+                    `;
+                }
                 break;
             case 'population_density':
-                content += `
-                    <h4>🏘 Population Density</h4>
-                    <p><em>Population density data for ${areaName} would be displayed here.</em></p>
-                    <p>• People per km²</p>
-                    <p>• Urban vs rural classification</p>
-                    <p>• Housing density patterns</p>
-                `;
+                const densityData = this.addEthnicityDensityData(areaCode);
+                if (densityData) {
+                    content += densityData;
+                } else {
+                    content += `
+                        <h4>🏘 Population Density</h4>
+                        <p><em>Population density data for ${areaName} not available.</em></p>
+                        <p>• People per km²</p>
+                        <p>• Urban vs rural classification</p>
+                        <p>• Housing density patterns</p>
+                    `;
+                }
                 break;
             case 'home_ownership':
                 content += `
                     <h4>🏠 Home Ownership</h4>
-                    <p><em>Housing tenure data for ${areaName} would be displayed here.</em></p>
+                    <p><em>Housing tenure data for ${areaName} not available.</em></p>
                     <p>• Ownership vs rental rates</p>
                     <p>• Housing affordability indicators</p>
                     <p>• Dwelling types</p>
                 `;
                 break;
             case 'income':
-                content += `
-                    <h4>💰 Income Statistics</h4>
-                    <p><em>Income data for ${areaName} would be displayed here.</em></p>
-                    <p>• Median household income</p>
-                    <p>• Income distribution quintiles</p>
-                    <p>• Employment rates</p>
-                `;
+                const incomeData = this.addEmploymentIncomeData(areaCode);
+                if (incomeData) {
+                    content += incomeData;
+                } else {
+                    content += `
+                        <h4>💰 Income Statistics</h4>
+                        <p><em>Income data for ${areaName} not available.</em></p>
+                        <p>• Median household income</p>
+                        <p>• Income distribution quintiles</p>
+                        <p>• Employment rates</p>
+                    `;
+                }
                 break;
             case 'ethnicity':
-                content += `
-                    <h4>🌍 Ethnicity</h4>
-                    <p><em>Ethnic composition data for ${areaName} would be displayed here.</em></p>
-                    <p>• European, Māori, Pacific, Asian populations</p>
-                    <p>• Cultural diversity indices</p>
-                    <p>• Immigration patterns</p>
-                `;
+                const ethnicityData = this.addEthnicityDensityData(areaCode);
+                if (ethnicityData) {
+                    content += ethnicityData;
+                } else {
+                    content += `
+                        <h4>🌍 Ethnicity</h4>
+                        <p><em>Ethnic composition data for ${areaName} not available.</em></p>
+                        <p>• European, Māori, Pacific, Asian populations</p>
+                        <p>• Cultural diversity indices</p>
+                        <p>• Immigration patterns</p>
+                    `;
+                }
                 break;
             case 'migration':
-                content += `
-                    <h4>🚶 Migration Patterns</h4>
-                    <p><em>Migration data for ${areaName} would be displayed here.</em></p>
-                    <p>• Internal migration flows</p>
-                    <p>• International migration</p>
-                    <p>• Population mobility trends</p>
-                `;
+                const migrationData = this.addBirthRateMigrationData(areaCode);
+                if (migrationData) {
+                    content += migrationData;
+                } else {
+                    content += `
+                        <h4>🚶 Migration Patterns</h4>
+                        <p><em>Migration data for ${areaName} not available.</em></p>
+                        <p>• Internal migration flows</p>
+                        <p>• International migration</p>
+                        <p>• Population mobility trends</p>
+                    `;
+                }
                 break;
             case 'birth_rates':
-                content += `
-                    <h4>👶 Birth Rates</h4>
-                    <p><em>Fertility and birth rate data for ${areaName} would be displayed here.</em></p>
-                    <p>• Total fertility rate</p>
+                const birthData = this.addBirthRateMigrationData(areaCode);
+                if (birthData) {
+                    content += birthData;
+                } else {
+                    content += `
+                        <h4>👶 Birth Rates</h4>
+                        <p><em>Fertility and birth rate data for ${areaName} not available.</em></p>
+                        <p>• Total fertility rate</p>
+                    `;
+                }
+                break;
+            case 'employment':
+                const employmentData = this.addEmploymentIncomeData(areaCode);
+                if (employmentData) {
+                    content += employmentData;
+                } else {
+                    content += `
+                        <h4>💼 Employment</h4>
+                        <p><em>Employment data for ${areaName} not available.</em></p>
+                        <p>• Employment rates</p>
+                        <p>• Labour force participation</p>
+                        <p>• Industry composition</p>
+                    `;
+                }
+                break;
+            case 'comprehensive':
+                // Show all available demographic data for comprehensive view
+                const allAgeGender = this.addAgeGenderData(areaCode);
+                const allEmploymentIncome = this.addEmploymentIncomeData(areaCode);
+                const allEthnicityDensity = this.addEthnicityDensityData(areaCode);
+                const allBirthMigration = this.addBirthRateMigrationData(areaCode);
+                
+                content += `<h4>📊 Comprehensive Demographic Profile</h4>`;
+                if (allAgeGender) content += allAgeGender;
+                if (allEmploymentIncome) content += allEmploymentIncome;
+                if (allEthnicityDensity) content += allEthnicityDensity;
+                if (allBirthMigration) content += allBirthMigration;
+                
+                if (!allAgeGender && !allEmploymentIncome && !allEthnicityDensity && !allBirthMigration) {
+                    content += `<p><em>Comprehensive demographic data for ${areaName} not available.</em></p>`;
+                }
+                break;
+            case 'age_employment_income':
+                const ageEmpIncData = this.addAgeGenderData(areaCode) + this.addEmploymentIncomeData(areaCode);
+                if (ageEmpIncData) {
+                    content += ageEmpIncData;
+                } else {
+                    content += `
+                        <h4>👥💼 Age, Employment & Income</h4>
+                        <p><em>Age, employment and income data for ${areaName} not available.</em></p>
+                        <p>• Total fertility rate</p>
                     <p>• Age-specific fertility rates</p>
                     <p>• Family formation patterns</p>
                 `;

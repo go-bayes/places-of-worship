@@ -1,0 +1,79 @@
+{
+  "metadata": {
+    "source": "Statistics New Zealand",
+    "download_date": "2025-08-27",
+    "status": "MOCK_DATA_FOR_DEMO"
+  },
+  "data": {
+    "002": {
+      "2018": {
+        "ethnicity": {
+          "total_population": 1667000,
+          "european": 1100000,
+          "maori": 250000,
+          "pacific": 200000,
+          "asian": 420000,
+          "middle_eastern_latin_african": 35000,
+          "other": 15000,
+          "european_percent": 66.0,
+          "maori_percent": 15.0,
+          "pacific_percent": 12.0,
+          "asian_percent": 25.2,
+          "melaa_percent": 2.1,
+          "other_percent": 0.9
+        },
+        "geography": {
+          "area_km2": 5600,
+          "population_density": 297.7,
+          "population_density_category": "High"
+        }
+      },
+      "2013": {
+        "ethnicity": {
+          "total_population": 1540680,
+          "european": 1050000,
+          "maori": 220000,
+          "pacific": 180000,
+          "asian": 350000,
+          "middle_eastern_latin_african": 28000,
+          "other": 12000,
+          "european_percent": 68.1,
+          "maori_percent": 14.3,
+          "pacific_percent": 11.7,
+          "asian_percent": 22.7,
+          "melaa_percent": 1.8,
+          "other_percent": 0.8
+        },
+        "geography": {
+          "area_km2": 5600,
+          "population_density": 275.1,
+          "population_density_category": "High"
+        }
+      }
+    },
+    "076": {
+      "2018": {
+        "ethnicity": {
+          "total_population": 1667000,
+          "european": 1100000,
+          "maori": 250000,
+          "pacific": 200000,
+          "asian": 420000,
+          "middle_eastern_latin_african": 35000,
+          "other": 15000,
+          "european_percent": 66.0,
+          "maori_percent": 15.0,
+          "pacific_percent": 12.0,
+          "asian_percent": 25.2,
+          "melaa_percent": 2.1,
+          "other_percent": 0.9
+        },
+        "geography": {
+          "area_km2": 5600,
+          "population_density": 297.7,
+          "population_density_category": "High"
+        }
+      }
+    }
+  }
+}
