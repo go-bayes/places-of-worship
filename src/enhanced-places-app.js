@@ -3,6 +3,20 @@
  * Combines individual places with census overlay, multiple map styles, and hierarchical filtering
  */
 
+console.log('🔥 DEBUG: enhanced-places-app.js file is being loaded');
+
+// EMERGENCY TEST: Hide loading screen immediately when this script loads
+setTimeout(() => {
+    console.log('🔥 DEBUG: Emergency timeout attempting to hide loading screen');
+    const loadingEl = document.getElementById('loading');
+    if (loadingEl) {
+        console.log('🔥 DEBUG: Found loading element, hiding it');
+        loadingEl.style.display = 'none';
+    } else {
+        console.log('🔥 DEBUG: Loading element not found!');
+    }
+}, 1000);
+
 class EnhancedPlacesOfWorshipApp {
     constructor() {
         this.map = null;
@@ -3216,6 +3230,19 @@ class EnhancedPlacesOfWorshipApp {
 }
 
 // Initialize the app when page loads
+console.log('🔥 DEBUG: Setting up DOMContentLoaded listener');
+
 document.addEventListener('DOMContentLoaded', () => {
-    new EnhancedPlacesOfWorshipApp();
+    console.log('🔥 DEBUG: DOMContentLoaded event fired, creating app');
+    try {
+        const app = new EnhancedPlacesOfWorshipApp();
+        console.log('🔥 DEBUG: App created successfully:', app);
+    } catch (error) {
+        console.error('🔥 DEBUG: App creation failed:', error);
+        // Emergency fallback - just hide loading
+        const loadingEl = document.getElementById('loading');
+        if (loadingEl) loadingEl.style.display = 'none';
+    }
 });
+
+console.log('🔥 DEBUG: DOMContentLoaded listener set up');
