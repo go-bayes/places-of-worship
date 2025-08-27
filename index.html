@@ -3,580 +3,546 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Places of Worship - New Zealand</title>
-    
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
-          crossorigin=""/>
-    
-    <!-- Marker Clustering CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-    
+    <title>Places of Worship Mapping Project | Research Infrastructure</title>
     <style>
-        body {
+        * {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Georgia, 'Times New Roman', serif;
+            background: #ffffff;
+            min-height: 100vh;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
         
         .header {
-            background: linear-gradient(135deg, #2c3e50, #3498db);
-            color: white;
-            padding: 20px;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 60px;
+            padding: 60px 20px 40px;
+            border-bottom: 3px solid #34495e;
         }
         
         .header h1 {
-            margin: 0 0 10px 0;
-            font-size: 2.5em;
+            font-size: 2.8em;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-weight: 400;
+            letter-spacing: -1px;
+        }
+        
+        .header .subtitle {
+            font-size: 1.4em;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-bottom: 30px;
         }
         
         .header p {
-            margin: 0;
             font-size: 1.1em;
-            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            color: #34495e;
         }
         
-        .controls {
-            background: white;
-            padding: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            align-items: center;
-        }
-        
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        .control-group label {
-            font-weight: bold;
-            color: #2c3e50;
-            font-size: 0.9em;
-        }
-        
-        .control-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        select, button, input[type="range"] {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        
-        button {
-            background: #3498db;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            white-space: nowrap;
-        }
-        
-        button:hover {
-            background: #2980b9;
-        }
-        
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
-        
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-        
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        
-        input:checked + .toggle-slider {
-            background-color: #3498db;
-        }
-        
-        input:checked + .toggle-slider:before {
-            transform: translateX(26px);
-        }
-        
-        .census-controls {
-            display: none;
-            grid-column: span 2;
+        .research-summary {
             background: #f8f9fa;
-            padding: 15px;
-            border-radius: 6px;
-            border: 1px solid #dee2e6;
+            border-left: 4px solid #3498db;
+            padding: 30px;
+            margin: 40px 0;
+            border-radius: 0 8px 8px 0;
         }
         
-        .census-controls.active {
+        .research-summary h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .data-overview {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            gap: 30px;
+            margin: 40px 0;
+            text-align: center;
         }
         
-        .year-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .year-control input[type="range"] {
-            flex: 1;
-        }
-        
-        #map {
-            height: calc(100vh - 280px);
-            width: 100%;
-        }
-        
-        .info-panel {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 15px;
+        .data-stat {
+            padding: 20px;
+            border: 1px solid #dee2e6;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            margin: 10px;
-            max-width: 300px;
         }
         
-        .info-panel h3 {
-            margin: 0 0 10px 0;
+        .data-number {
+            font-size: 2.2em;
+            font-weight: 600;
             color: #2c3e50;
+            display: block;
+            margin-bottom: 8px;
         }
         
-        .info-item {
-            margin: 8px 0;
+        .data-label {
+            font-size: 0.95em;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .systems-section {
+            margin: 60px 0;
+        }
+        
+        .section-title {
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: #2c3e50;
+            text-align: center;
+            font-weight: 400;
+        }
+        
+        .systems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+        
+        .system-card {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 35px;
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .system-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .system-status {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-production {
+            background: #d1f2eb;
+            color: #00695c;
+        }
+        
+        .status-enhanced {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .status-development {
+            background: #fff8e1;
+            color: #f57f17;
+        }
+        
+        .system-title {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .system-subtitle {
+            color: #7f8c8d;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+        
+        .system-description {
+            color: #4a5568;
+            margin-bottom: 25px;
+            text-align: justify;
+        }
+        
+        .technical-specs {
+            margin: 25px 0;
+        }
+        
+        .technical-specs h5 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 1em;
+            font-weight: 600;
+        }
+        
+        .technical-specs ul {
+            list-style: none;
             color: #555;
         }
         
-        .info-item strong {
-            color: #2c3e50;
+        .technical-specs ul li {
+            padding: 4px 0;
+            position: relative;
+            padding-left: 20px;
         }
         
-        .place-popup, .census-popup {
-            max-width: 280px;
+        .technical-specs ul li:before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #7f8c8d;
         }
         
-        .place-popup h3, .census-popup h3 {
-            margin: 0 0 10px 0;
+        .access-link {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #2c3e50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+        
+        .access-link:hover {
+            background: #34495e;
+        }
+        
+        .methodology-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 40px;
+            margin: 60px 0;
+        }
+        
+        .methodology-title {
+            font-size: 1.8em;
+            margin-bottom: 25px;
             color: #2c3e50;
+            text-align: center;
+            font-weight: 400;
+        }
+        
+        .methodology-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .methodology-item {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .methodology-item h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.15em;
+            font-weight: 500;
+        }
+        
+        .methodology-item p {
+            color: #555;
+            font-size: 0.95em;
+        }
+        
+        .attribution-section {
+            background: #34495e;
+            color: white;
+            padding: 50px;
+            margin: 60px 0;
+            border-radius: 8px;
+        }
+        
+        .attribution-title {
+            font-size: 1.5em;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 400;
+        }
+        
+        .attribution-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .contributor-highlight {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+        }
+        
+        .data-licensing {
+            background: #2c3e50;
+            color: white;
+            padding: 40px;
+            margin: 40px 0;
+            border-radius: 8px;
+        }
+        
+        .data-licensing h4 {
+            margin-bottom: 20px;
             font-size: 1.2em;
         }
         
-        .place-popup p, .census-popup p {
-            margin: 5px 0;
-            font-size: 0.9em;
+        .data-licensing a {
+            color: #74b9ff;
+            text-decoration: none;
         }
         
-        .place-popup a, .census-popup a {
+        .data-licensing a:hover {
+            text-decoration: underline;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 40px 20px;
+            border-top: 1px solid #dee2e6;
+            margin-top: 60px;
+        }
+        
+        .footer p {
+            margin: 10px 0;
+        }
+        
+        .footer a {
             color: #3498db;
             text-decoration: none;
         }
         
-        .place-popup a:hover, .census-popup a:hover {
+        .footer a:hover {
             text-decoration: underline;
-        }
-        
-        .place-popup small, .census-popup small {
-            color: #666;
-            font-size: 0.8em;
-        }
-        
-        .place-marker {
-            border-radius: 50%;
-        }
-        
-        .marker-container {
-            position: relative;
-            display: inline-block;
-        }
-        
-        /* Pulsing animation for markers */
-        @keyframes pulse {
-            0% {
-                transform: scale(0.8);
-                opacity: 0.5;
-            }
-            50% {
-                transform: scale(1.2);
-                opacity: 0.3;
-            }
-            100% {
-                transform: scale(0.8);
-                opacity: 0.5;
-            }
-        }
-        
-        /* Hover effects for markers */
-        .leaflet-marker-icon:hover .marker-core {
-            transform: scale(1.2) !important;
-            box-shadow: 0 0 12px rgba(0,0,0,0.8) !important;
-            transition: all 0.2s ease !important;
-        }
-        
-        /* Enhanced marker visibility on different zoom levels */
-        .leaflet-zoom-animated .place-marker {
-            transition: all 0.3s ease;
-        }
-        
-        .legend {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            max-width: 250px;
-            z-index: 1000;
-        }
-        
-        .legend h4 {
-            margin: 0 0 10px 0;
-            color: #2c3e50;
-        }
-        
-        .legend-section {
-            margin-bottom: 15px;
-        }
-        
-        .legend-section h5 {
-            margin: 0 0 8px 0;
-            color: #2c3e50;
-            font-size: 0.9em;
-        }
-        
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin: 5px 0;
-            font-size: 0.8em;
-        }
-        
-        .legend-dot {
-            margin-right: 8px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-        
-        .category-legend {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 5px;
-        }
-        
-        #loading {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.95);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            z-index: 2000;
-            text-align: center;
-        }
-        
-        .attribution {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px;
-            font-size: 0.8em;
-            color: #666;
-            text-align: center;
-        }
-        
-        .attribution a {
-            color: #3498db;
-            text-decoration: none;
-        }
-        
-        .attribution a:hover {
-            text-decoration: underline;
-        }
-        
-        /* Marker cluster styling */
-        .marker-cluster-small {
-            background-color: rgba(181, 226, 140, 0.6);
-        }
-        
-        .marker-cluster-small div {
-            background-color: rgba(110, 204, 57, 0.6);
-        }
-        
-        .marker-cluster-medium {
-            background-color: rgba(241, 211, 87, 0.6);
-        }
-        
-        .marker-cluster-medium div {
-            background-color: rgba(240, 194, 12, 0.6);
-        }
-        
-        .marker-cluster-large {
-            background-color: rgba(253, 156, 115, 0.6);
-        }
-        
-        .marker-cluster-large div {
-            background-color: rgba(241, 128, 23, 0.6);
-        }
-        
-        @media (max-width: 1024px) {
-            .controls {
-                grid-template-columns: 1fr;
-            }
-            
-            .census-controls.active {
-                grid-template-columns: 1fr;
-            }
         }
         
         @media (max-width: 768px) {
             .header h1 {
-                font-size: 1.8em;
+                font-size: 2.2em;
             }
             
-            #map {
-                height: calc(100vh - 350px);
+            .systems-grid {
+                grid-template-columns: 1fr;
             }
             
-            .legend {
-                position: relative;
-                bottom: auto;
-                right: auto;
-                margin: 10px;
-                max-width: none;
+            .methodology-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .data-overview {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Enhanced Places of Worship Map</h1>
-        <p>Interactive visualization of <span id="totalPlaces">0</span> places of worship with comprehensive demographic overlays</p>
-    </div>
-    
-    <div class="controls">
-        <!-- Map Style Control -->
-        <div class="control-group">
-            <label for="mapStyleSelect">Map Style:</label>
-            <select id="mapStyleSelect">
-                <option value="OpenStreetMap">Standard</option>
-                <option value="Grayscale" selected>Grayscale</option>
-                <option value="Dark">Dark</option>
-                <option value="Satellite">Satellite</option>
-                <option value="Terrain">Terrain</option>
-            </select>
+    <div class="container">
+        <div class="header">
+            <h1>Places of Worship Mapping Project</h1>
+            <p class="subtitle">Global Research Infrastructure for Religious Geography</p>
+            <p>A comprehensive academic research platform for the systematic study of religious institutions, demographic patterns, and spatial analysis across multiple scales and temporal frameworks.</p>
         </div>
         
-        <!-- Geographic Resolution Toggle -->
-        <div class="control-group">
-            <label for="geographicResolutionToggle">Geographic Resolution:</label>
-            <div class="control-row">
-                <label class="toggle-switch">
-                    <input type="checkbox" id="geographicResolutionToggle">
-                    <span class="toggle-slider"></span>
-                </label>
-                <span id="geographicLabel">Territorial Authority</span>
+        <div class="research-summary">
+            <h3>Research Overview</h3>
+            <p>This project provides scholarly infrastructure for investigating the geographic distribution of religious institutions and their relationship to demographic, social, and temporal factors. The platform integrates multiple data sources and analytical frameworks to support rigorous academic research in religious geography, spatial sociology, and demographic analysis.</p>
+        </div>
+        
+        <div class="data-overview">
+            <div class="data-stat">
+                <span class="data-number">2,072,349</span>
+                <span class="data-label">Places Mapped</span>
+            </div>
+            <div class="data-stat">
+                <span class="data-number">247</span>
+                <span class="data-label">Countries/Territories</span>
+            </div>
+            <div class="data-stat">
+                <span class="data-number">99.2%</span>
+                <span class="data-label">Global Coverage</span>
+            </div>
+            <div class="data-stat">
+                <span class="data-number">2006-2018</span>
+                <span class="data-label">Temporal Range (NZ)</span>
             </div>
         </div>
         
-        <!-- Religious Density Overlay Toggle -->
-        <div class="control-group">
-            <label for="religiousDensityToggle">Religious Density Overlay:</label>
-            <div class="control-row">
-                <label class="toggle-switch">
-                    <input type="checkbox" id="religiousDensityToggle">
-                    <span class="toggle-slider"></span>
-                </label>
-                <span>Show religious identification %</span>
-            </div>
-        </div>
-        
-        <!-- Religious Category Filter -->
-        <div class="control-group">
-            <label for="majorCategoryFilter">Religious Category:</label>
-            <select id="majorCategoryFilter">
-                <option value="all">All Categories</option>
-            </select>
-        </div>
-        
-        <!-- Denomination Filter -->
-        <div class="control-group">
-            <label for="denominationFilter">Denomination:</label>
-            <select id="denominationFilter">
-                <option value="all">All Denominations</option>
-            </select>
-        </div>
-        
-        <!-- Action Buttons -->
-        <div class="control-group">
-            <label>Actions:</label>
-            <div class="control-row">
-                <button id="resetButton">Reset View</button>
-                <button id="toggleClustering">Disable Clustering</button>
-            </div>
-            <div class="control-row" style="margin-top: 8px;">
-                <button id="exportButton">Export Data (CSV)</button>
-                <button id="exportFilteredButton">Export Filtered (CSV)</button>
-            </div>
-        </div>
-        
-        <!-- Current Filter Display -->
-        <div class="control-group">
-            <label>Currently Showing:</label>
-            <div class="info-item">
-                <strong><span id="currentFilter">All Categories</span></strong>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Demographic Controls (shown when religious density overlay is enabled) -->
-    <div id="demographicControls" class="census-controls">
-        <div class="control-group">
-            <label for="demographicMetricSelect">Display Mode:</label>
-            <select id="demographicMetricSelect">
-                <option value="religious_percentage">Religious Identification %</option>
-                <option value="religious_counts">Religious Population Counts</option>
-                <option value="temporal_change">Temporal Change (2006→2018)</option>
-            </select>
-        </div>
-        
-        <div class="control-group">
-            <label for="yearSlider">Census Year:</label>
-            <div class="year-control">
-                <span>2006</span>
-                <input type="range" id="yearSlider" min="2006" max="2018" step="6" value="2018">
-                <span>2018</span>
-                <strong id="currentYear">2018</strong>
-            </div>
-        </div>
-    </div>
-    
-    <div id="map"></div>
-    
-    <div class="legend">
-        <h4>Legend</h4>
-        
-        <!-- Religious Categories Legend -->
-        <div id="placesLegend" class="legend-section">
-            <h5>Major Religious Categories</h5>
-            <div class="category-legend">
-                <div class="legend-item">
-                    <div class="legend-dot" style="background-color: #e74c3c; width: 12px; height: 12px; border: 2px solid white; box-shadow: 0 0 3px rgba(0,0,0,0.5);"></div>
-                    Christian
+        <div class="systems-section">
+            <h2 class="section-title">Research Applications</h2>
+            
+            <div class="systems-grid">
+                <!-- Global Research Platform -->
+                <div class="system-card">
+                    <div class="system-status status-production">Active Research Platform</div>
+                    <h3 class="system-title">Global Interactive Mapping System</h3>
+                    <p class="system-subtitle">Multi-scale temporal analysis of religious institutions worldwide</p>
+                    
+                    <p class="system-description">
+                        A production-ready research platform supporting large-scale spatial analysis of religious institutions. 
+                        Built on proven academic infrastructure with WebGL acceleration for interactive exploration of 
+                        global patterns across multiple temporal and spatial scales.
+                    </p>
+                    
+                    <div class="technical-specs">
+                        <h5>Technical Specifications:</h5>
+                        <ul>
+                            <li>2,072,349 validated location records with metadata</li>
+                            <li>Multi-denominational classification system</li>
+                            <li>WebGL-accelerated rendering for large datasets</li>
+                            <li>Temporal data integration and analysis</li>
+                            <li>RESTful API for research data access</li>
+                            <li>Spatial query optimization for academic workflows</li>
+                        </ul>
+                    </div>
+                    
+                    <a href="https://go-bayes.github.io/places-of-worship/frontend/global-places.html" class="access-link">Access Global Platform</a>
                 </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background-color: #27ae60; width: 12px; height: 12px; border: 2px solid white; box-shadow: 0 0 3px rgba(0,0,0,0.5);"></div>
-                    Islam
+                
+                <!-- Enhanced Regional Analysis -->
+                <div class="system-card">
+                    <div class="system-status status-enhanced">Enhanced Analysis</div>
+                    <h3 class="system-title">New Zealand Demographic Integration</h3>
+                    <p class="system-subtitle">Census-integrated analysis with multi-level geographic units</p>
+                    
+                    <p class="system-description">
+                        Advanced analytical platform combining religious institution data with official census statistics. 
+                        Supports multi-level analysis across Statistical Area 2 and Territorial Authority boundaries, 
+                        with comprehensive demographic integration for empirical research applications.
+                    </p>
+                    
+                    <div class="technical-specs">
+                        <h5>Research Features:</h5>
+                        <ul>
+                            <li>4,718 New Zealand places with precision validation</li>
+                            <li>Census integration (2006, 2013, 2018)</li>
+                            <li>Multi-level geographic analysis (SA2/TA)</li>
+                            <li>Temporal change detection algorithms</li>
+                            <li>Interactive demographic visualisation</li>
+                            <li>Statistical histogram generation</li>
+                        </ul>
+                    </div>
+                    
+                    <a href="https://go-bayes.github.io/places-of-worship/enhanced-places.html" class="access-link">Access Enhanced Analysis</a>
                 </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background-color: #f39c12; width: 12px; height: 12px; border: 2px solid white; box-shadow: 0 0 3px rgba(0,0,0,0.5);"></div>
-                    Buddhism
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background-color: #9b59b6; width: 12px; height: 12px; border: 2px solid white; box-shadow: 0 0 3px rgba(0,0,0,0.5);"></div>
-                    Judaism
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background-color: #e67e22; width: 12px; height: 12px; border: 2px solid white; box-shadow: 0 0 3px rgba(0,0,0,0.5);"></div>
-                    Hinduism
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background-color: #1abc9c; width: 12px; height: 12px; border: 2px solid white; box-shadow: 0 0 3px rgba(0,0,0,0.5);"></div>
-                    Sikhism
+                
+                <!-- Development Research Database -->
+                <div class="system-card">
+                    <div class="system-status status-development">Research Database</div>
+                    <h3 class="system-title">Global Research Database</h3>
+                    <p class="system-subtitle">Comprehensive worldwide dataset for academic research</p>
+                    
+                    <p class="system-description">
+                        Complete global research dataset extracted from authoritative sources with systematic validation protocols. 
+                        Designed for academic research requiring comprehensive geographic coverage with plans for integration 
+                        of additional institutional types and demographic data sources.
+                    </p>
+                    
+                    <div class="technical-specs">
+                        <h5>Dataset Characteristics:</h5>
+                        <ul>
+                            <li>Systematic extraction from OpenStreetMap</li>
+                            <li>Quality validation and confidence scoring</li>
+                            <li>Standardised attribution schema</li>
+                            <li>Geographic coverage: 247/249 countries</li>
+                            <li>API access for research applications</li>
+                            <li>Extensible framework for additional data types</li>
+                        </ul>
+                    </div>
+                    
+                    <a href="https://github.com/go-bayes/places-of-worship/blob/main/api/main.py" class="access-link">View Technical Documentation</a>
                 </div>
             </div>
         </div>
         
-        <!-- Dynamic Demographic Legend (hidden by default) -->
-        <div id="demographicLegend" class="legend-section" style="display: none;">
-            <h5 id="demographicLegendTitle">Religious Identification %</h5>
-            <div id="demographicLegendContent">
-                <!-- Dynamic content will be inserted here -->
+        <div class="methodology-section">
+            <h2 class="methodology-title">Research Methodology</h2>
+            
+            <div class="methodology-grid">
+                <div class="methodology-item">
+                    <h4>Data Collection</h4>
+                    <p>Systematic extraction from OpenStreetMap using validated taxonomies for religious institutions. 
+                    Quality validation protocols ensure consistency and accuracy across global datasets.</p>
+                </div>
+                
+                <div class="methodology-item">
+                    <h4>Spatial Analysis</h4>
+                    <p>Multi-scale geographic analysis supporting research from local to global scales. 
+                    Integration with administrative boundaries and census geographies.</p>
+                </div>
+                
+                <div class="methodology-item">
+                    <h4>Temporal Integration</h4>
+                    <p>Longitudinal analysis capabilities with particular depth in New Zealand context using 
+                    official census data across multiple time periods (2006-2018).</p>
+                </div>
+                
+                <div class="methodology-item">
+                    <h4>Quality Assurance</h4>
+                    <p>Confidence scoring systems, source validation, and systematic error detection to 
+                    ensure research-grade data quality for academic applications.</p>
+                </div>
             </div>
         </div>
         
-        <!-- Data Quality Legend -->
-        <div id="dataQualityLegend" class="legend-section">
-            <h5>Data Quality</h5>
-            <div class="legend-item">
-                <div class="legend-dot" style="background-color: #3498db; width: 16px; height: 16px; border: 3px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5);"></div>
-                High (≥80%)
-            </div>
-            <div class="legend-item">
-                <div class="legend-dot" style="background-color: #3498db; width: 14px; height: 14px; border: 3px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5);"></div>
-                Medium (≥60%)
-            </div>
-            <div class="legend-item">
-                <div class="legend-dot" style="background-color: #3498db; width: 12px; height: 12px; border: 3px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5); opacity: 0.8;"></div>
-                Low (&lt;60%)
+        <div class="attribution-section">
+            <h3 class="attribution-title">Project Origins & Academic Acknowledgments</h3>
+            <div class="attribution-content">
+                <p>
+                    In 2018, Professor Joseph Bulbulia approached Nick Young to develop a global research platform 
+                    for places of worship. Nick built the foundational prototype, establishing the infrastructure 
+                    that has evolved into this comprehensive academic research resource.
+                </p>
+                
+                <div class="contributor-highlight">
+                    <p><strong>Academic Acknowledgment</strong></p>
+                    <p>We gratefully acknowledge Nick Young and the Centre for E-research at the University of Auckland 
+                    for their foundational work and continued commitment to open science. Their pioneering development 
+                    enabled the systematic research infrastructure that now supports global academic inquiry 
+                    spanning 247 countries and territories.</p>
+                </div>
             </div>
         </div>
+        
+        <div class="data-licensing">
+            <h4>Data Sources & Academic Usage</h4>
+            <p><strong>OpenStreetMap Data:</strong></p>
+            <p style="margin-bottom: 15px;">
+                This research utilises OpenStreetMap data under the 
+                <a href="https://opendatacommons.org/licenses/odbl/">Open Database License (ODbL 1.0)</a>.
+                Proper attribution: <strong>© OpenStreetMap contributors</strong>. 
+                Derived databases distributed under ODbL consistent with licence requirements.
+            </p>
+            <p style="margin-bottom: 15px;">
+                <strong>Official Statistics:</strong> Statistics New Zealand (CC BY 4.0), 
+                Various National Statistical Offices
+            </p>
+            <p style="font-size: 0.9em;">
+                <strong>For Academic Citation:</strong> Please acknowledge this research infrastructure 
+                and underlying data sources in academic publications.
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Research Infrastructure:</strong> FastAPI • PostGIS • Leaflet.js • WebGL • Python • OpenStreetMap</p>
+            <p style="margin-top: 20px;">
+                <a href="https://github.com/go-bayes/places-of-worship">Source Code Repository</a> • 
+                <a href="https://www.openstreetmap.org/">OpenStreetMap Project</a> •
+                <a href="https://opendatacommons.org/licenses/odbl/">Open Database License</a>
+            </p>
+        </div>
     </div>
-    
-    <div class="attribution">
-        Places Data: © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a> (ODbL) | 
-        Census Data: © <a href="https://www.stats.govt.nz/" target="_blank">Statistics New Zealand</a> (CC BY 4.0) | 
-        Map Tiles: Various providers
-    </div>
-    
-    <div id="loading">
-        <h3>Loading enhanced map data...</h3>
-        <p>Please wait while we load places of worship and census data.</p>
-    </div>
-    
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
-            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
-            crossorigin=""></script>
-    
-    <!-- Marker Clustering JS -->
-    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
-    
-    <!-- Chroma.js for color scaling -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.4.2/chroma.min.js"></script>
-    
-    <!-- Plotly.js for rich histograms -->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    
-    <!-- Denomination Mapper -->
-    <script src="src/denomination-mapper.js"></script>
-    
-    <!-- Enhanced Application -->
-    <script src="src/enhanced-places-app.js"></script>
-    
-    <!-- Enhanced app handles all event listeners -->
 </body>
 </html>
