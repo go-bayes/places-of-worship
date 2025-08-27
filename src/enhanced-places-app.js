@@ -41,7 +41,7 @@ class EnhancedPlacesOfWorshipApp {
         this.showCensusOverlay = false; // Keep for backward compatibility
         this.currentDemographicMode = 'religious_percentage';
         this.currentCensusMetric = 'no_religion_change'; // Keep for backward compatibility
-        this.currentDemographic = 'none'; // Demographic toggle selection
+        this.currentDemographic = 'comprehensive'; // Demographic toggle selection - show all demographic data by default
         this.overlayYear = 2018;  // Fixed year for overlay colors
         this.useDetailedBoundaries = false;  // Default to TA boundaries (simplified view)
         
@@ -343,8 +343,8 @@ class EnhancedPlacesOfWorshipApp {
             console.warn('demographicToggle element not found in HTML - skipping demographic toggle setup');
         }
         
-        // Initialize with none selected
-        this.currentDemographic = 'none';
+        // Initialize with comprehensive demographic data showing
+        this.currentDemographic = 'comprehensive';
     }
     
     updateDemographicDisplay() {
@@ -1264,6 +1264,13 @@ class EnhancedPlacesOfWorshipApp {
     generateDemographicContent(areaName, areaCode, areaType) {
         // Generate demographic information based on current selection
         const demographicType = this.currentDemographic;
+        console.log(`🔍 DEBUG: Generating demographic content for ${areaName} (${areaCode}), type: ${demographicType}`);
+        console.log(`🔍 DEBUG: Available demographic data:`, {
+            ageGender: !!this.ageGenderData && Object.keys(this.ageGenderData).length,
+            employment: !!this.employmentIncomeData && Object.keys(this.employmentIncomeData).length,
+            ethnicity: !!this.ethnicityDensityData && Object.keys(this.ethnicityDensityData).length
+        });
+        
         let content = `<div style="margin-top: 20px; padding: 15px; background: rgba(46, 125, 50, 0.1); border-left: 3px solid #2E7D32;">`;
         
         switch (demographicType) {
