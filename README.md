@@ -23,7 +23,7 @@ A mapping infrastructure for religious sites, educational institutions, and civi
 - **Access**: [Global Interactive Map](https://go-bayes.github.io/places-of-worship/frontend/global-places.html)
 
 ### 2. Enhanced New Zealand Map  
-- 3,370+ NZ places with census integration
+- 4k+ NZ places with census integration
 - Census data overlays (2006-2018)
 - Religious change analysis with delta calculations
 - Interactive regional demographics
