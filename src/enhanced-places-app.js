@@ -769,6 +769,7 @@ class EnhancedPlacesOfWorshipApp {
                     }
                 }
             }
+        }
         } catch (error) {
             console.warn('Error processing employment/income data for TA', taCode, ':', error);
             return '';
@@ -817,6 +818,7 @@ class EnhancedPlacesOfWorshipApp {
                     <p><strong>Population Density:</strong> ${geographyData.population_density} people/km² (${geographyData.population_density_category})</p>
                 `;
             }
+        }
         } catch (error) {
             console.warn('Error processing ethnicity/density data for TA', taCode, ':', error);
             return '';
