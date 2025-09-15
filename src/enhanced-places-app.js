@@ -140,8 +140,8 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     setupMap() {
-        // Initialize Leaflet map centred on New Zealand
-        this.map = L.map('map').setView([-41.235726, 172.5118422], 6);
+        // Initialize Leaflet map centred on New Zealand (prefer Canvas for performance)
+        this.map = L.map('map', { preferCanvas: true }).setView([-41.235726, 172.5118422], 6);
         
         // Define base tile layers
         this.baseLayers = {
@@ -183,9 +183,11 @@ class EnhancedPlacesOfWorshipApp {
         this.currentBaseLayer = this.baseLayers['Grayscale'];
         this.currentBaseLayer.addTo(this.map);
         
-        // Initialize marker cluster group
+        // Initialize marker cluster group (tuned for smoother incremental rendering)
         this.markerClusterGroup = L.markerClusterGroup({
             chunkedLoading: true,
+            chunkInterval: 50,
+            chunkDelay: 25,
             maxClusterRadius: 50,
             iconCreateFunction: (cluster) => this.createClusterIcon(cluster)
         });
@@ -899,6 +901,27 @@ class EnhancedPlacesOfWorshipApp {
         this.colorScale = chroma.scale(colors).domain(domain);
         console.log(`Color scale updated for ${this.currentDemographicMode} with domain:`, domain);
     }
+
+    // Determine major category using religion first, then denomination
+    getCategoryForPlace(place) {
+        try {
+            const religion = (place.religion || '').toString().trim().toLowerCase();
+            if (religion) {
+                if (religion.includes('christian')) return 'Christian';
+                if (religion.includes('muslim') || religion.includes('islam')) return 'Islam';
+                if (religion.includes('buddh')) return 'Buddhism';
+                if (religion.includes('hindu')) return 'Hinduism';
+                if (religion.includes('jew')) return 'Judaism';
+                if (religion.includes('sikh')) return 'Sikhism';
+                if (religion.includes('tao') || religion.includes('dao')) return 'Other Religions';
+                if (religion.includes('shinto')) return 'Other Religions';
+            }
+            // Fallback to denomination mapping
+            return this.denominationMapper.getMajorCategory(place.denomination);
+        } catch (e) {
+            return 'Unknown';
+        }
+    }
     
     toggleReligiousDensityOverlay() {
         console.log('toggleReligiousDensityOverlay called, showReligiousDensity:', this.showReligiousDensity);
@@ -1599,29 +1622,21 @@ class EnhancedPlacesOfWorshipApp {
     
     getRelevantDenominations() {
         if (this.currentMajorCategory === 'all') {
-            // Return all unique denominations
             const denominations = new Set();
-            this.placesData.forEach(place => {
-                denominations.add(place.denomination);
-            });
-            return Array.from(denominations).sort();
-        } else {
-            // Return denominations within the major category
-            const denominations = new Set();
-            this.placesData.forEach(place => {
-                const category = this.denominationMapper.getMajorCategory(place.denomination);
-                if (category === this.currentMajorCategory) {
-                    denominations.add(place.denomination);
-                }
-            });
+            this.placesData.forEach(place => denominations.add(place.denomination));
             return Array.from(denominations).sort();
         }
+        const denominations = new Set();
+        this.placesData.forEach(place => {
+            if (this.getCategoryForPlace(place) === this.currentMajorCategory) {
+                denominations.add(place.denomination);
+            }
+        });
+        return Array.from(denominations).sort();
     }
     
     countMajorCategory(category) {
-        return this.placesData.filter(place => 
-            this.denominationMapper.getMajorCategory(place.denomination) === category
-        ).length;
+        return this.placesData.filter(place => this.getCategoryForPlace(place) === category).length;
     }
     
     countDenomination(denomination) {
@@ -1649,11 +1664,9 @@ class EnhancedPlacesOfWorshipApp {
     getFilteredPlaces() {
         let filtered = this.placesData;
         
-        // Filter by major category
+        // Filter by major category (religion-first)
         if (this.currentMajorCategory !== 'all') {
-            filtered = filtered.filter(place => 
-                this.denominationMapper.getMajorCategory(place.denomination) === this.currentMajorCategory
-            );
+            filtered = filtered.filter(place => this.getCategoryForPlace(place) === this.currentMajorCategory);
         }
         
         // Filter by specific denomination
@@ -1670,11 +1683,15 @@ class EnhancedPlacesOfWorshipApp {
         const lat = place.lat;
         const lng = place.lng;
         
-        // Get color using denomination mapper
-        const color = this.denominationMapper.getDenominationColor(place.denomination, this.denominationColors);
+        // Determine color using religion-first category
+        const category = this.getCategoryForPlace(place);
+        const color = this.denominationMapper.getCategoryColor(category);
         const icon = this.createDenominationIcon(color, place.confidence || 1.0);
-        
-        const marker = L.marker([lat, lng], { icon });
+
+        // Prefer known-religion markers on top when multiple places overlap
+        const hasKnownReligion = !!(place.religion && String(place.religion).toLowerCase() !== 'unknown');
+        const zIndexOffset = hasKnownReligion ? 200 : 0;
+        const marker = L.marker([lat, lng], { icon, zIndexOffset });
         
         // Create popup content
         const popupContent = this.createPopupContent(place);
@@ -1684,51 +1701,18 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     createDenominationIcon(color, confidence) {
-        // Much larger, more visible icons based on confidence
-        const baseSize = confidence >= 0.8 ? 16 : confidence >= 0.6 ? 14 : 12;
-        const pulseSize = baseSize + 6;
-        
+        // Lightweight, single-node icon for performance
+        const size = confidence >= 0.8 ? 12 : confidence >= 0.6 ? 10 : 8;
+        const html = `<div style="
+            width:${size}px; height:${size}px; border-radius:50%;
+            background:${color}; border:1.5px solid #fff; box-shadow:0 0 4px rgba(0,0,0,0.3);
+        "></div>`;
         return L.divIcon({
             className: 'place-marker',
-            html: `
-                <div class="marker-container">
-                    <div class="marker-pulse" style="
-                        width: ${pulseSize}px; 
-                        height: ${pulseSize}px; 
-                        background-color: ${color}; 
-                        opacity: 0.3;
-                        border-radius: 50%;
-                        position: absolute;
-                        animation: pulse 2s infinite;
-                        top: -3px;
-                        left: -3px;
-                    "></div>
-                    <div class="marker-core" style="
-                        width: ${baseSize}px; 
-                        height: ${baseSize}px; 
-                        background-color: ${color}; 
-                        border: 3px solid white; 
-                        border-radius: 50%; 
-                        box-shadow: 0 0 6px rgba(0,0,0,0.7);
-                        position: relative;
-                        z-index: 10;
-                        opacity: ${confidence >= 0.6 ? 1.0 : 0.8};
-                    "></div>
-                    <div class="marker-inner" style="
-                        width: ${Math.max(4, baseSize - 8)}px; 
-                        height: ${Math.max(4, baseSize - 8)}px; 
-                        background-color: rgba(255,255,255,0.8); 
-                        border-radius: 50%; 
-                        position: absolute;
-                        top: 50%;
-                        left: 50%;
-                        transform: translate(-50%, -50%);
-                        z-index: 11;
-                    "></div>
-                </div>`,
-            iconSize: [pulseSize, pulseSize],
-            iconAnchor: [pulseSize/2, pulseSize/2],
-            popupAnchor: [0, -pulseSize/2]
+            html,
+            iconSize: [size, size],
+            iconAnchor: [size/2, size/2],
+            popupAnchor: [0, -size/2]
         });
     }
     
@@ -1752,9 +1736,12 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     createPopupContent(props) {
-        const majorCategory = this.denominationMapper.getMajorCategory(props.denomination);
+        // Prefer denomination; if missing, fall back to religion to determine category and colour
+        const denomOrReligion = (props.denomination && String(props.denomination).trim()) ? props.denomination : (props.religion || '');
+        const majorCategory = this.denominationMapper.getMajorCategory(denomOrReligion);
         const lat = props.lat || props.latitude;
         const lng = props.lng || props.longitude;
+        const cap = (s) => s ? String(s).replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : '';
         
         // Create location services section
         const locationServices = lat && lng ? `
@@ -1780,8 +1767,9 @@ class EnhancedPlacesOfWorshipApp {
         return `
             <div class="place-popup">
                 <h3>${props.name}</h3>
+                ${props.religion ? `<p><strong>Religion:</strong> ${cap(props.religion)}</p>` : ''}
                 <p><strong>Category:</strong> ${majorCategory}</p>
-                <p><strong>Denomination:</strong> ${props.denomination}</p>
+                ${props.denomination ? `<p><strong>Denomination:</strong> ${cap(props.denomination)}</p>` : ''}
                 <p><strong>Confidence:</strong> ${(props.confidence * 100).toFixed(0)}% 
                    <small title="Based on OSM data completeness: name availability, address details, denomination specificity, and contact information">ⓘ</small></p>
                 ${props.address ? `<p><strong>Address:</strong> ${props.address}</p>` : ''}
@@ -1790,6 +1778,7 @@ class EnhancedPlacesOfWorshipApp {
                 <p><strong>Source:</strong> OpenStreetMap (OSM ID: ${props.osm_id})</p>
                 <small>Data quality: ${props.confidence >= 0.8 ? 'High' : props.confidence >= 0.6 ? 'Medium' : 'Low'}</small>
                 ${locationServices}
+                ${lat && lng ? `<small style="display:block;margin-top:6px;color:#666">Coordinates: ${lat}, ${lng}</small>` : ''}
                 <div class="pano"></div>
             </div>
         `;

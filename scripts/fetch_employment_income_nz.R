@@ -1,5 +1,4 @@
-# language: R  
-# comments: lower case
+# language: R
 # purpose: fetch employment and income data by TA from Stats NZ
 # output: static JSON file for enhanced places application
 # source: Statistics New Zealand - portal.apis.stats.govt.nz
@@ -21,7 +20,7 @@ cat("Fetching employment and income data from Stats NZ API...\n")
 fetch_employment_income_data <- function() {
   # Request employment and income data for TA level for census years
   url <- paste0(endpoint, "?geographic_level=TA&years=2013,2018&categories=employment,income")
-  
+
   response <- GET(
     url,
     add_headers(
@@ -29,13 +28,13 @@ fetch_employment_income_data <- function() {
       "Accept" = "application/json"
     )
   )
-  
+
   if (status_code(response) != 200) {
     cat("ERROR: API request failed with status", status_code(response), "\n")
     cat("Response:", content(response, "text"), "\n")
     return(NULL)
   }
-  
+
   # Parse response
   data <- content(response, "parsed")
   return(data)
@@ -47,29 +46,29 @@ process_employment_income_data <- function(raw_data) {
     cat("No employment/income data to process\n")
     return(list())
   }
-  
+
   processed <- list()
-  
+
   for (record in raw_data$data) {
     ta_code <- record$ta_code
     year <- as.character(record$year)
     category <- record$category
-    
+
     if (is.null(processed[[ta_code]])) {
       processed[[ta_code]] <- list()
     }
-    
+
     if (is.null(processed[[ta_code]][[year]])) {
       processed[[ta_code]][[year]] <- list()
     }
-    
+
     # process employment data
     if (category == "employment") {
       total_working_age <- record$working_age_population %||% 0
       employed <- record$employed %||% 0
       unemployed <- record$unemployed %||% 0
       not_in_labour_force <- record$not_in_labour_force %||% 0
-      
+
       processed[[ta_code]][[year]]$employment <- list(
         working_age_population = total_working_age,
         employed = employed,
@@ -80,7 +79,7 @@ process_employment_income_data <- function(raw_data) {
         participation_rate = if (total_working_age > 0) round(((employed + unemployed) / total_working_age) * 100, 1) else 0
       )
     }
-    
+
     # process income data
     if (category == "income") {
       processed[[ta_code]][[year]]$income <- list(
@@ -97,7 +96,7 @@ process_employment_income_data <- function(raw_data) {
       )
     }
   }
-  
+
   return(processed)
 }
 
@@ -110,7 +109,7 @@ raw_data <- fetch_employment_income_data()
 if (!is.null(raw_data)) {
   # Process data
   employment_income_data <- process_employment_income_data(raw_data)
-  
+
   # Add metadata
   output_data <- list(
     metadata = list(
@@ -124,31 +123,31 @@ if (!is.null(raw_data)) {
     ),
     data = employment_income_data
   )
-  
+
   # Save as JSON
   output_path <- "../src/employment_income_static.json"
   write_json(output_data, output_path, pretty = TRUE, auto_unbox = TRUE)
-  
+
   cat("✓ Employment and income data saved to:", output_path, "\n")
   cat("✓ Contains data for", length(employment_income_data), "TA areas\n")
-  
 } else {
   cat("❌ Failed to fetch employment and income data\n")
-  
+
   # Create empty file to prevent loading errors
   output_data <- list(
     metadata = list(
-      source = "Statistics New Zealand", 
+      source = "Statistics New Zealand",
       download_date = as.character(Sys.Date()),
       status = "API_UNAVAILABLE"
     ),
     data = list()
   )
-  
+
   output_path <- "../src/employment_income_static.json"
   write_json(output_data, output_path, pretty = TRUE, auto_unbox = TRUE)
-  
+
   cat("Created empty employment/income file to prevent loading errors\n")
 }
 
 cat("Employment and income data collection completed.\n")
+

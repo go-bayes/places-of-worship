@@ -83,6 +83,31 @@ uvicorn main:app --reload --port 8000
 python -m http.server 8000
 ```
 
+### Optional Frontend Config
+- Copy `frontend/config.example.js` to `frontend/config.js` and set:
+  - `apiBase` to your local API (e.g., `http://localhost:8000`) to prefer local queries
+  - `googleMapsApiKey` to enable fast Street View thumbnails in popups (optional)
+
+If no config is present, the global map will fall back to the public proxy and show links instead of thumbnails.
+
+### Fast Query Mode (API)
+Enable streaming Parquet scans (Polars/PyArrow) instead of in-memory GeoDataFrames:
+
+```bash
+export FAST_QUERY_MODE=1
+uvicorn api.main:app --reload --port 8000
+```
+
+This is fully backward compatible; if dependencies are missing, the API automatically falls back to the existing in-memory mode.
+
+### Data Manifest
+Generate a dataset manifest with counts and checksums:
+
+```bash
+python scripts/generate_manifest.py
+```
+Outputs `data/global/manifest.json` with totals by country, Parquet file metadata, and ODbL attribution.
+
 ## Data Schema
 
 Each country file (`data/global/{country_code}_places.json`) follows this schema:

@@ -9,6 +9,7 @@ class DenominationMapper {
             'Christian': {
                 color: '#e74c3c',
                 denominations: [
+                    'christian', 'christianity',
                     'anglican', 'catholic', 'baptist', 'presbyterian', 'methodist',
                     'orthodox', 'evangelical', 'pentecostal', 'lutheran', 'reformed',
                     'salvation_army', 'brethren', 'congregational', 'apostolic',

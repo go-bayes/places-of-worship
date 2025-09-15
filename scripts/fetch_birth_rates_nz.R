@@ -1,5 +1,4 @@
 # language: R
-# comments: lower case
 # purpose: fetch birth rates by territorial authority from Stats NZ
 # output: static JSON file for enhanced places application
 # source: Statistics New Zealand - portal.apis.stats.govt.nz
@@ -21,7 +20,7 @@ cat("Fetching birth rate data from Stats NZ API...\\n")
 fetch_birth_rates <- function() {
   # Request birth rates for all territorial authorities for recent years
   url <- paste0(endpoint, "?territorial_authority=all&years=2018,2019,2020,2021,2022")
-  
+
   response <- GET(
     url,
     add_headers(
@@ -29,13 +28,13 @@ fetch_birth_rates <- function() {
       "Accept" = "application/json"
     )
   )
-  
+
   if (status_code(response) != 200) {
     cat("ERROR: API request failed with status", status_code(response), "\\n")
     cat("Response:", content(response, "text"), "\\n")
     return(NULL)
   }
-  
+
   # Parse response
   data <- content(response, "parsed")
   return(data)
@@ -47,27 +46,27 @@ process_birth_rates <- function(raw_data) {
     cat("No birth rate data to process\\n")
     return(list())
   }
-  
+
   processed <- list()
-  
+
   for (record in raw_data$data) {
     ta_code <- record$territorial_authority_code
     year <- as.character(record$year)
     births <- record$births %||% 0
     population <- record$population %||% 1
-    birth_rate <- (births / population) * 1000  # births per 1000 people
-    
+    birth_rate <- (births / population) * 1000 # births per 1000 people
+
     if (is.null(processed[[ta_code]])) {
       processed[[ta_code]] <- list()
     }
-    
+
     processed[[ta_code]][[year]] <- list(
       births = births,
       population = population,
       birth_rate = round(birth_rate, 2)
     )
   }
-  
+
   return(processed)
 }
 
@@ -80,7 +79,7 @@ raw_data <- fetch_birth_rates()
 if (!is.null(raw_data)) {
   # Process data
   birth_rate_data <- process_birth_rates(raw_data)
-  
+
   # Add metadata
   output_data <- list(
     metadata = list(
@@ -93,17 +92,16 @@ if (!is.null(raw_data)) {
     ),
     data = birth_rate_data
   )
-  
+
   # Save as JSON
   output_path <- "../src/birth_rates_static.json"
   write_json(output_data, output_path, pretty = TRUE, auto_unbox = TRUE)
-  
+
   cat("✓ Birth rate data saved to:", output_path, "\\n")
   cat("✓ Contains data for", length(birth_rate_data), "territorial authorities\\n")
-  
 } else {
   cat("❌ Failed to fetch birth rate data\\n")
-  
+
   # Create empty file to prevent loading errors
   output_data <- list(
     metadata = list(
@@ -113,11 +111,12 @@ if (!is.null(raw_data)) {
     ),
     data = list()
   )
-  
+
   output_path <- "../src/birth_rates_static.json"
   write_json(output_data, output_path, pretty = TRUE, auto_unbox = TRUE)
-  
+
   cat("Created empty birth rate file to prevent loading errors\\n")
 }
 
 cat("Birth rate data collection completed.\\n")
+

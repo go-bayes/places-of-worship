@@ -1,5 +1,4 @@
 # language: R
-# comments: lower case
 # purpose: fetch census religion by territorial authority for 2006, 2013, 2018
 # output: clean JSON data to replace flawed ta_aggregated_data.json
 
@@ -31,7 +30,7 @@ print(head(religion_raw))
 
 # extract the data we need using correct column names
 religion_all <- religion_raw %>%
-  # filter for count data only (not percentages)  
+  # filter for count data only (not percentages)
   filter(unit == "Count" & !is.na(value)) %>%
   # select relevant columns
   select(
@@ -58,10 +57,10 @@ harmonise_religion <- function(religion) {
   # keep exact case for key categories to match Stats NZ data
   case_when(
     religion == "Total people stated" ~ "Total people stated",
-    religion == "Total people" ~ "Total people", 
+    religion == "Total people" ~ "Total people",
     religion == "No religion" ~ "No religion",
     religion == "Christianity" ~ "Christianity",
-    religion == "Buddhism" ~ "Buddhism", 
+    religion == "Buddhism" ~ "Buddhism",
     religion == "Hinduism" ~ "Hinduism",
     religion == "Islam" ~ "Islam",
     religion == "Judaism" ~ "Judaism",
@@ -69,7 +68,7 @@ harmonise_religion <- function(religion) {
     grepl("Māori religions", religion) ~ "Māori religions",
     grepl("Spiritualism", religion) ~ "Spiritualism",
     grepl("Other Religions", religion) ~ "Other religions",
-    TRUE ~ religion  # keep original for all other detailed categories
+    TRUE ~ religion # keep original for all other detailed categories
   )
 }
 
@@ -86,7 +85,7 @@ duplicates <- religion_all %>%
   summarise(n = n(), .groups = "drop") %>%
   filter(n > 1)
 
-if(nrow(duplicates) > 0) {
+if (nrow(duplicates) > 0) {
   cat("Found", nrow(duplicates), "duplicate entries. Summarising...\n")
   # sum up duplicates
   religion_all <- religion_all %>%
@@ -95,10 +94,12 @@ if(nrow(duplicates) > 0) {
 }
 
 all_religion <- religion_all %>%
-  pivot_wider(names_from = census_year, 
-              values_from = count, 
-              names_prefix = "count_",
-              values_fill = 0) %>%
+  pivot_wider(
+    names_from = census_year,
+    values_from = count,
+    names_prefix = "count_",
+    values_fill = 0
+  ) %>%
   # add 2006 as NA for now (not available in this source)
   mutate(count_2006 = NA_real_)
 
@@ -161,25 +162,29 @@ final_data <- ta_religion_summary %>%
   left_join(religion_detail, by = "ta_name") %>%
   # create final structure matching original format
   mutate(
-    ta_code = row_number(),  # temporary - will need proper mapping
-    data = pmap(list(ta_name, total_stated_2006, total_stated_2013, total_stated_2018,
-                     religious_2006, religious_2013, religious_2018, religions),
-                function(name, total06, total13, total18, rel06, rel13, rel18, religions) {
-                  list(
-                    ta_name = name,
-                    population = list(
-                      "2006" = total06,
-                      "2013" = total13,
-                      "2018" = total18
-                    ),
-                    religious_percentage = list(
-                      "2006" = round(rel06, 1),
-                      "2013" = round(rel13, 1),
-                      "2018" = round(rel18, 1)
-                    ),
-                    religions = religions
-                  )
-                })
+    ta_code = row_number(), # temporary - will need proper mapping
+    data = pmap(
+      list(
+        ta_name, total_stated_2006, total_stated_2013, total_stated_2018,
+        religious_2006, religious_2013, religious_2018, religions
+      ),
+      function(name, total06, total13, total18, rel06, rel13, rel18, religions) {
+        list(
+          ta_name = name,
+          population = list(
+            "2006" = total06,
+            "2013" = total13,
+            "2018" = total18
+          ),
+          religious_percentage = list(
+            "2006" = round(rel06, 1),
+            "2013" = round(rel13, 1),
+            "2018" = round(rel18, 1)
+          ),
+          religions = religions
+        )
+      }
+    )
   )
 
 # convert to named list for JSON output
@@ -197,3 +202,4 @@ cat("✓ Contains", length(output_data), "territorial authorities\n")
 # ---- preview data ----
 cat("\nPreview of first territorial authority:\n")
 print(output_data[[1]], max.levels = 3)
+

@@ -1,5 +1,4 @@
-# language: R  
-# comments: lower case
+# language: R
 # purpose: fetch age and gender demographics by TA from Stats NZ
 # output: static JSON file for enhanced places application
 # source: Statistics New Zealand - portal.apis.stats.govt.nz
@@ -21,7 +20,7 @@ cat("Fetching age and gender demographics from Stats NZ API...\n")
 fetch_age_gender_data <- function() {
   # Request age and gender data for TA level for census years
   url <- paste0(endpoint, "?geographic_level=TA&years=2013,2018&categories=age,gender")
-  
+
   response <- GET(
     url,
     add_headers(
@@ -29,13 +28,13 @@ fetch_age_gender_data <- function() {
       "Accept" = "application/json"
     )
   )
-  
+
   if (status_code(response) != 200) {
     cat("ERROR: API request failed with status", status_code(response), "\n")
     cat("Response:", content(response, "text"), "\n")
     return(NULL)
   }
-  
+
   # Parse response
   data <- content(response, "parsed")
   return(data)
@@ -47,22 +46,22 @@ process_age_gender_data <- function(raw_data) {
     cat("No age/gender data to process\n")
     return(list())
   }
-  
+
   processed <- list()
-  
+
   for (record in raw_data$data) {
     ta_code <- record$ta_code
     year <- as.character(record$year)
     category <- record$category
-    
+
     if (is.null(processed[[ta_code]])) {
       processed[[ta_code]] <- list()
     }
-    
+
     if (is.null(processed[[ta_code]][[year]])) {
       processed[[ta_code]][[year]] <- list()
     }
-    
+
     # process age demographics
     if (category == "age") {
       processed[[ta_code]][[year]]$age <- list(
@@ -79,7 +78,7 @@ process_age_gender_data <- function(raw_data) {
         age_65_plus_percent = round((record$age_65_plus %||% 0) / (record$total_population %||% 1) * 100, 1)
       )
     }
-    
+
     # process gender demographics
     if (category == "gender") {
       processed[[ta_code]][[year]]$gender <- list(
@@ -91,7 +90,7 @@ process_age_gender_data <- function(raw_data) {
       )
     }
   }
-  
+
   return(processed)
 }
 
@@ -104,7 +103,7 @@ raw_data <- fetch_age_gender_data()
 if (!is.null(raw_data)) {
   # Process data
   age_gender_data <- process_age_gender_data(raw_data)
-  
+
   # Add metadata
   output_data <- list(
     metadata = list(
@@ -118,31 +117,31 @@ if (!is.null(raw_data)) {
     ),
     data = age_gender_data
   )
-  
+
   # Save as JSON
   output_path <- "../src/age_gender_static.json"
   write_json(output_data, output_path, pretty = TRUE, auto_unbox = TRUE)
-  
+
   cat("✓ Age and gender data saved to:", output_path, "\n")
   cat("✓ Contains data for", length(age_gender_data), "TA areas\n")
-  
 } else {
   cat("❌ Failed to fetch age and gender data\n")
-  
+
   # Create empty file to prevent loading errors
   output_data <- list(
     metadata = list(
-      source = "Statistics New Zealand", 
+      source = "Statistics New Zealand",
       download_date = as.character(Sys.Date()),
       status = "API_UNAVAILABLE"
     ),
     data = list()
   )
-  
+
   output_path <- "../src/age_gender_static.json"
   write_json(output_data, output_path, pretty = TRUE, auto_unbox = TRUE)
-  
+
   cat("Created empty age/gender file to prevent loading errors\n")
 }
 
 cat("Age and gender data collection completed.\n")
+

@@ -4,6 +4,7 @@
 
 import json
 import os
+from pathlib import Path
 
 def validate_ta_codes():
     """test TA code mappings between boundaries and census data"""
@@ -11,7 +12,8 @@ def validate_ta_codes():
     
     # load territorial authority boundaries
     try:
-        with open('territorial_authorities.geojson', 'r') as f:
+        repo_root = Path(__file__).resolve().parent
+        with open(repo_root / 'territorial_authorities.geojson', 'r') as f:
             boundaries = json.load(f)
         print(f"✓ loaded {len(boundaries['features'])} territorial authorities from GeoJSON")
     except FileNotFoundError:
@@ -20,7 +22,7 @@ def validate_ta_codes():
     
     # load census data
     try:
-        with open('ta_aggregated_data.json', 'r') as f:
+        with open(repo_root / 'ta_aggregated_data.json', 'r') as f:
             census = json.load(f)
         print(f"✓ loaded {len(census)} territorial authorities from census data")
     except FileNotFoundError:
@@ -95,8 +97,8 @@ def validate_ta_codes():
         return True
 
 if __name__ == "__main__":
-    # change to project directory
-    os.chdir('/Users/joseph/GIT/places-of-worship')
+    # ensure paths resolve relative to this file
+    os.chdir(Path(__file__).resolve().parent)
     
     if validate_ta_codes():
         print("\n✅ TA code validation passed")
