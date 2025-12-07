@@ -17,6 +17,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 import hashlib
+from datetime import datetime, timezone  #
 
 try:
     import pyarrow.parquet as pq  # type: ignore
@@ -43,7 +44,7 @@ def main() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     meta = {
-        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "attribution": {
             "license": "ODbL-1.0",
             "url": "https://opendatacommons.org/licenses/odbl/1-0/",
