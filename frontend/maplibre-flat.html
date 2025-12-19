@@ -194,10 +194,10 @@
     }
 
     const WELLINGTON = [174.7762, -41.2865];
-    const OVERVIEW_TILES = "http://127.0.0.1:3001/places-overview/{z}/{x}/{y}";
-    const PLACES_TILES = "http://127.0.0.1:3001/places/{z}/{x}/{y}";
-    const POLYGONS_TILES = "http://127.0.0.1:3001/nz-polygons/{z}/{x}/{y}";
-    const BUILDINGS_TILES = "http://127.0.0.1:3001/buildings/{z}/{x}/{y}";
+    const OVERVIEW_TILES = "https://tiles.placemap.org/places-overview/{z}/{x}/{y}";
+    const PLACES_TILES = "https://tiles.placemap.org/places/{z}/{x}/{y}";
+    const POLYGONS_TILES = "https://tiles.placemap.org/nz-polygons/{z}/{x}/{y}";
+    const BUILDINGS_TILES = "https://tiles.placemap.org/buildings/{z}/{x}/{y}";
 
     const urlParams = new URLSearchParams(window.location.search);
     const OVERVIEW_LAYER = urlParams.get("overviewLayer") || "places_overview";
