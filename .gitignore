@@ -9,6 +9,7 @@ database/dumps/
 .env
 .env.local
 .env.*.local
+frontend/config.js
 config/local.yml
 config/secrets.yml
 

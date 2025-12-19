@@ -473,9 +473,23 @@
             font-size: 0.9em;
             color: #6c757d;
         }
+        .back-link {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.9);
+            color: #f8fafc;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 12px;
+            text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.12);
+        }
     </style>
 </head>
 <body>
+    <a class="back-link" href="https://go-bayes.github.io/places-of-worship/frontend/maplibre-flat.html">Global Map</a>
     <div class="header">
         <h1>Enhanced Places of Worship Map</h1>
         <p>Interactive visualization of <span id="totalPlaces">0</span> places of worship with demographic overlays</p>

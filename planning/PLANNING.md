@@ -40,6 +40,12 @@ Building on the successful NZ prototype and the religion repository's global arc
 
 ## Technical Implementation
 
+### Denomination Counts (Planned)
+- Precompute denomination counts per tile (z/x/y) for fast viewport summaries
+- Serve as a lightweight counts tileset (or JSON endpoint) via Martin
+- UI reads counts for current viewport and renders a compact summary
+- Avoids client-side counting and keeps mid-zoom performance stable
+
 ### Backend Architecture
 
 #### Core API (FastAPI)
