@@ -39,7 +39,7 @@
     #dock {
       position: fixed; left: 12px; right: auto; bottom: 6px;
       display: flex; flex-direction: column; gap: 10px; z-index: 11;
-      width: clamp(260px, 36vw, 420px);
+      width: min(92vw, 420px);
     }
     .dock-panel {
       background: rgba(15, 23, 42, 0.86); border: 1px solid rgba(255,255,255,0.08);
@@ -50,23 +50,23 @@
     .dock-row { display: flex; gap: 8px; flex-wrap: nowrap; align-items: center; }
     .dock-row input {
       flex: 1; min-width: 0; background: rgba(255,255,255,0.08); border: 1px solid transparent;
-      color: var(--text); padding: 7px 9px; border-radius: 10px; font-size: 11px;
+      color: var(--text); padding: 7px 8px; border-radius: 10px; font-size: 10.5px;
     }
     .dock-row select {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.08);
       color: var(--text);
-      padding: 6px 8px;
+      padding: 6px 7px;
       border-radius: 10px;
-      font-size: 11px;
-      min-width: 118px;
+      font-size: 10.5px;
+      min-width: 110px;
       flex-shrink: 0;
     }
     .dock-row input::placeholder { color: rgba(226,232,240,0.6); }
     .dock-row button {
       background: rgba(226, 232, 240, 0.16); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 10px; padding: 7px 9px; font-weight: 700; cursor: pointer;
-      transition: transform 120ms ease, box-shadow 120ms ease; font-size: 11px;
+      border-radius: 10px; padding: 7px 8px; font-weight: 700; cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease; font-size: 10.5px;
     }
     .dock-row button.secondary { background: rgba(255,255,255,0.12); color: var(--text); }
     .dock-row button:hover { transform: translateY(-1px); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
@@ -82,7 +82,7 @@
     }
     .dock-chip {
       background: rgba(148,163,184,0.18); color: var(--text); border: 1px solid rgba(255,255,255,0.08);
-      padding: 3px 6px; border-radius: 999px; font-size: 10px; cursor: pointer;
+      padding: 3px 6px; border-radius: 999px; font-size: 9.5px; cursor: pointer;
       transition: transform 120ms ease, background 120ms ease;
     }
     .dock-chip:hover { transform: translateY(-1px); background: rgba(148,163,184,0.28); }
@@ -142,7 +142,7 @@
     }
     #corner-link {
       position: fixed;
-      right: 92px;
+      right: 12px;
       bottom: 6px;
       z-index: 11;
       background: rgba(15, 23, 42, 0.86);
@@ -154,12 +154,10 @@
       text-decoration: none;
       opacity: 0.8;
     }
-    .draggable { cursor: grab; touch-action: none; }
-    .draggable.dragging { cursor: grabbing; }
     .maplibregl-ctrl-bottom-right { bottom: 56px; }
     @media (max-width: 640px) {
       #hud { max-width: 94vw; }
-      #dock { left: 10px; right: 10px; bottom: 10px; width: 94vw; }
+      #dock { left: 10px; right: 10px; bottom: 10px; width: auto; }
       #corner-link { right: 12px; bottom: 10px; }
       .maplibregl-ctrl-bottom-right { bottom: 80px; }
     }
@@ -167,8 +165,8 @@
 </head>
 <body>
   <div id="map"></div>
-  <a id="corner-link" class="draggable" href="https://go-bayes.github.io/places-of-worship/enhanced-places.html">Explore Enhanced View (NZ)</a>
-  <div id="dock" class="draggable">
+  <a id="corner-link" href="https://go-bayes.github.io/places-of-worship/enhanced-places.html">Explore Enhanced View (NZ)</a>
+  <div id="dock">
     <div class="dock-panel">
       <div class="dock-row">
         <input id="searchInput" type="text" placeholder="Search an address or place (prototype)">
@@ -247,29 +245,39 @@
     const maptilerStyles = hasMaptilerKey
       ? [
           {
-            id: "streets",
-            label: "MapTiler Streets",
-            url: `https://api.maptiler.com/maps/streets/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+            id: "backdrop",
+            label: "Backdrop",
+            url: `https://api.maptiler.com/maps/backdrop/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
           },
           {
-            id: "basic",
-            label: "MapTiler Basic",
-            url: `https://api.maptiler.com/maps/basic/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+            id: "aquarelle",
+            label: "Aquarelle",
+            url: `https://api.maptiler.com/maps/aquarelle/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
           },
           {
-            id: "bright",
-            label: "MapTiler Bright",
-            url: `https://api.maptiler.com/maps/bright/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
-          },
-          {
-            id: "positron",
-            label: "MapTiler Positron",
-            url: `https://api.maptiler.com/maps/positron/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+            id: "dataviz",
+            label: "Dataviz",
+            url: `https://api.maptiler.com/maps/dataviz/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
           },
           {
             id: "satellite",
-            label: "MapTiler Satellite",
+            label: "Satellite",
             url: `https://api.maptiler.com/maps/satellite/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+          },
+          {
+            id: "toner",
+            label: "Toner",
+            url: `https://api.maptiler.com/maps/toner/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+          },
+          {
+            id: "topo",
+            label: "Topo",
+            url: `https://api.maptiler.com/maps/topo/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+          },
+          {
+            id: "winter",
+            label: "Winter",
+            url: `https://api.maptiler.com/maps/winter/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
           }
         ]
       : [];
@@ -634,9 +642,7 @@
       { label: "Los Angeles", coords: [-118.2437, 34.0522], zoom: 9 },
       { label: "New York", coords: [-74.006, 40.7128], zoom: 9 },
       { label: "London", coords: [-0.1276, 51.5072], zoom: 9 },
-      { label: "Cairo", coords: [31.2357, 30.0444], zoom: 9 },
       { label: "Jerusalem", coords: [35.2137, 31.7683], zoom: 11 },
-      { label: "Delhi", coords: [77.1025, 28.7041], zoom: 9 },
       { label: "Singapore", coords: [103.8198, 1.3521], zoom: 11 }
     ];
 
@@ -683,48 +689,6 @@
       }
     });
 
-    function makeDraggable(element) {
-      let isDragging = false;
-      let startX = 0;
-      let startY = 0;
-      let originLeft = 0;
-      let originTop = 0;
-
-      element.addEventListener("mousedown", (event) => {
-        if (event.target.closest("input,button,select,textarea,a")) {
-          return;
-        }
-        isDragging = true;
-        element.classList.add("dragging");
-        const rect = element.getBoundingClientRect();
-        startX = event.clientX;
-        startY = event.clientY;
-        originLeft = rect.left;
-        originTop = rect.top;
-        element.style.right = "auto";
-        element.style.bottom = "auto";
-        element.style.left = `${originLeft}px`;
-        element.style.top = `${originTop}px`;
-        event.preventDefault();
-      });
-
-      window.addEventListener("mousemove", (event) => {
-        if (!isDragging) return;
-        const nextLeft = originLeft + (event.clientX - startX);
-        const nextTop = originTop + (event.clientY - startY);
-        element.style.left = `${Math.max(8, nextLeft)}px`;
-        element.style.top = `${Math.max(8, nextTop)}px`;
-      });
-
-      window.addEventListener("mouseup", () => {
-        if (!isDragging) return;
-        isDragging = false;
-        element.classList.remove("dragging");
-      });
-    }
-
-    makeDraggable(document.getElementById("dock"));
-    makeDraggable(document.getElementById("corner-link"));
 
 
   </script>
