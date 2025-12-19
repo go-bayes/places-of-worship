@@ -88,8 +88,8 @@
     .dock-chip:hover { transform: translateY(-1px); background: rgba(148,163,184,0.28); }
     .dock-row + .dock-row { margin-top: 4px; }
     .streetview {
-      width: 380px;
-      height: 240px;
+      width: min(380px, 70vw);
+      height: min(240px, 32vh);
       border-radius: 10px;
       overflow: hidden;
       background: rgba(15, 23, 42, 0.8);
@@ -101,8 +101,11 @@
       margin-top: 8px;
     }
     .streetview.expanded {
-      width: 640px;
-      height: 420px;
+      width: min(640px, 86vw);
+      height: min(420px, 60vh);
+    }
+    .maplibregl-popup-content {
+      max-width: min(720px, 88vw);
     }
     .streetview-toolbar {
       display: flex;
@@ -162,10 +165,10 @@
       background: rgba(15, 23, 42, 0.62);
       border: 1px solid rgba(255,255,255,0.06);
       border-radius: 12px;
-      padding: 8px 10px;
+      padding: 6px 8px;
       font-size: 10px;
       color: #e2e8f0;
-      min-width: 140px;
+      min-width: 118px;
     }
     #counts h3 {
       margin: 0 0 6px;
@@ -178,12 +181,12 @@
       padding: 0;
       margin: 0;
       display: grid;
-      gap: 4px;
+      gap: 3px;
     }
     #counts li {
       display: flex;
       justify-content: space-between;
-      gap: 12px;
+      gap: 6px;
       color: #cbd5f5;
       align-items: center;
     }
@@ -368,6 +371,16 @@
         if (selected) {
           activeBasemapId = selected.id;
           map.setStyle(selected.style || selected.url);
+          map.once("style.load", () => {
+            addCustomLayers();
+            updateCounts();
+            map.triggerRepaint();
+            map.once("idle", ensureCustomLayers);
+          });
+          setTimeout(() => {
+            ensureCustomLayers();
+            map.triggerRepaint();
+          }, 900);
         }
       });
       basemapSelect.disabled = basemapOptions.length <= 1;
@@ -434,7 +447,8 @@
             ["zoom"],
             0, 0.75,
             7, 0.75,
-            9, 0.0
+            10.5, 0.55,
+            12, 0.0
           ]
         }
       });
@@ -487,7 +501,8 @@
         map.getCanvas().style.cursor = "pointer";
         const feature = e.features && e.features[0];
         if (!feature) return;
-        const name = feature.properties?.name || "Unnamed";
+        const props = feature.properties || {};
+        const name = props["name:en"] || props.name_en || props.name || "Unnamed";
         const lat = feature.properties?.lat;
         const lng = feature.properties?.lng;
         const coords = feature.geometry?.coordinates || (lng && lat ? [lng, lat] : null);
@@ -506,7 +521,8 @@
       map.on("click", LAYERS.places, async (e) => {
         const feature = e.features && e.features[0];
         if (!feature) return;
-        const name = feature.properties?.name || "Unnamed";
+        const props = feature.properties || {};
+        const name = props["name:en"] || props.name_en || props.name || "Unnamed";
         const lat = feature.properties?.lat;
         const lng = feature.properties?.lng;
         const coords = feature.geometry?.coordinates || (lng && lat ? [lng, lat] : null);
@@ -779,6 +795,7 @@
       }
     });
 
+    const countsPanel = document.getElementById("counts");
     const countsList = document.getElementById("countsList");
     const countsTotal = document.getElementById("countsTotal");
     const countLabels = [
@@ -801,6 +818,11 @@
       requestAnimationFrame(() => {
         countsScheduled = false;
         const zoom = map.getZoom();
+        if (zoom < 4) {
+          countsPanel.style.display = "none";
+          return;
+        }
+        countsPanel.style.display = "block";
         const layerId = zoom < 9 ? LAYERS.overview : LAYERS.places;
         if (!map.getLayer(layerId)) return;
         const features = map.queryRenderedFeatures({ layers: [layerId] });
