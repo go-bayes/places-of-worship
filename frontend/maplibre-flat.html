@@ -43,30 +43,30 @@
     }
     .dock-panel {
       background: rgba(15, 23, 42, 0.86); border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 14px; padding: 10px 12px; backdrop-filter: blur(10px);
+      border-radius: 14px; padding: 8px 10px; backdrop-filter: blur(10px);
       box-shadow: 0 12px 30px rgba(0,0,0,0.35);
       width: 100%;
     }
     .dock-row { display: flex; gap: 8px; flex-wrap: nowrap; align-items: center; }
     .dock-row input {
       flex: 1; min-width: 0; background: rgba(255,255,255,0.08); border: 1px solid transparent;
-      color: var(--text); padding: 8px 10px; border-radius: 10px; font-size: 12px;
+      color: var(--text); padding: 7px 9px; border-radius: 10px; font-size: 11px;
     }
     .dock-row select {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.08);
       color: var(--text);
-      padding: 7px 10px;
+      padding: 6px 8px;
       border-radius: 10px;
-      font-size: 12px;
-      min-width: 126px;
+      font-size: 11px;
+      min-width: 118px;
       flex-shrink: 0;
     }
     .dock-row input::placeholder { color: rgba(226,232,240,0.6); }
     .dock-row button {
       background: rgba(226, 232, 240, 0.16); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 10px; padding: 8px 10px; font-weight: 700; cursor: pointer;
-      transition: transform 120ms ease, box-shadow 120ms ease; font-size: 12px;
+      border-radius: 10px; padding: 7px 9px; font-weight: 700; cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease; font-size: 11px;
     }
     .dock-row button.secondary { background: rgba(255,255,255,0.12); color: var(--text); }
     .dock-row button:hover { transform: translateY(-1px); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
@@ -82,7 +82,7 @@
     }
     .dock-chip {
       background: rgba(148,163,184,0.18); color: var(--text); border: 1px solid rgba(255,255,255,0.08);
-      padding: 4px 7px; border-radius: 999px; font-size: 10px; cursor: pointer;
+      padding: 3px 6px; border-radius: 999px; font-size: 10px; cursor: pointer;
       transition: transform 120ms ease, background 120ms ease;
     }
     .dock-chip:hover { transform: translateY(-1px); background: rgba(148,163,184,0.28); }
@@ -142,28 +142,33 @@
     }
     #corner-link {
       position: fixed;
-      right: 12px;
-      bottom: 64px;
+      right: 92px;
+      bottom: 6px;
       z-index: 11;
       background: rgba(15, 23, 42, 0.86);
       border: 1px solid rgba(255,255,255,0.08);
       color: #e2e8f0;
       border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 11px;
+      padding: 5px 9px;
+      font-size: 10px;
       text-decoration: none;
+      opacity: 0.8;
     }
+    .draggable { cursor: grab; touch-action: none; }
+    .draggable.dragging { cursor: grabbing; }
+    .maplibregl-ctrl-bottom-right { bottom: 56px; }
     @media (max-width: 640px) {
       #hud { max-width: 94vw; }
       #dock { left: 10px; right: 10px; bottom: 10px; width: 94vw; }
-      #corner-link { bottom: 80px; }
+      #corner-link { right: 12px; bottom: 10px; }
+      .maplibregl-ctrl-bottom-right { bottom: 80px; }
     }
   </style>
 </head>
 <body>
   <div id="map"></div>
-  <a id="corner-link" href="https://go-bayes.github.io/places-of-worship/enhanced-places.html">Explore Enhanced View (NZ)</a>
-  <div id="dock">
+  <a id="corner-link" class="draggable" href="https://go-bayes.github.io/places-of-worship/enhanced-places.html">Explore Enhanced View (NZ)</a>
+  <div id="dock" class="draggable">
     <div class="dock-panel">
       <div class="dock-row">
         <input id="searchInput" type="text" placeholder="Search an address or place (prototype)">
@@ -183,6 +188,7 @@
     if (!window.maplibregl) {
       throw new Error("MapLibre missing");
     }
+    const showStatus = () => {};
 
     const WELLINGTON = [174.7762, -41.2865];
     const OVERVIEW_TILES = "https://tiles.placemap.org/places-overview/{z}/{x}/{y}";
@@ -611,6 +617,15 @@
       initBasemapSelect();
     });
 
+    map.on("error", (e) => {
+      const message = e && e.error && e.error.message ? e.error.message : "";
+      if (activeBasemapId !== "carto-light" && message.includes("api.maptiler.com")) {
+        activeBasemapId = "carto-light";
+        basemapSelect.value = "carto-light";
+        map.setStyle(cartoStyle.style);
+      }
+    });
+
     const cityChips = document.getElementById("cityChips");
     const searchInput = document.getElementById("searchInput");
     const searchButton = document.getElementById("searchButton");
@@ -652,14 +667,12 @@
       try {
         const result = await geocode(query);
         if (!result) {
-          showStatus("No results found. Try a broader query.");
           return;
         }
         const lon = parseFloat(result.lon);
         const lat = parseFloat(result.lat);
         flyTo([lon, lat], 13);
       } catch (error) {
-        showStatus("Search failed. Check network access for geocoding.");
       }
     }
 
@@ -669,6 +682,49 @@
         runSearch();
       }
     });
+
+    function makeDraggable(element) {
+      let isDragging = false;
+      let startX = 0;
+      let startY = 0;
+      let originLeft = 0;
+      let originTop = 0;
+
+      element.addEventListener("mousedown", (event) => {
+        if (event.target.closest("input,button,select,textarea,a")) {
+          return;
+        }
+        isDragging = true;
+        element.classList.add("dragging");
+        const rect = element.getBoundingClientRect();
+        startX = event.clientX;
+        startY = event.clientY;
+        originLeft = rect.left;
+        originTop = rect.top;
+        element.style.right = "auto";
+        element.style.bottom = "auto";
+        element.style.left = `${originLeft}px`;
+        element.style.top = `${originTop}px`;
+        event.preventDefault();
+      });
+
+      window.addEventListener("mousemove", (event) => {
+        if (!isDragging) return;
+        const nextLeft = originLeft + (event.clientX - startX);
+        const nextTop = originTop + (event.clientY - startY);
+        element.style.left = `${Math.max(8, nextLeft)}px`;
+        element.style.top = `${Math.max(8, nextTop)}px`;
+      });
+
+      window.addEventListener("mouseup", () => {
+        if (!isDragging) return;
+        isDragging = false;
+        element.classList.remove("dragging");
+      });
+    }
+
+    makeDraggable(document.getElementById("dock"));
+    makeDraggable(document.getElementById("corner-link"));
 
 
   </script>
