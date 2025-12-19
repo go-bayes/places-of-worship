@@ -38,35 +38,35 @@
     .chip i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
     #dock {
       position: fixed; left: 12px; right: auto; bottom: 6px;
-      display: flex; flex-direction: column; gap: 10px; z-index: 11;
+      display: flex; flex-direction: column; gap: 6px; z-index: 11;
       width: min(94vw, 480px);
     }
     .dock-panel {
-      background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 14px; padding: 10px 12px; backdrop-filter: blur(10px);
-      box-shadow: 0 10px 22px rgba(0,0,0,0.28);
+      background: rgba(15, 23, 42, 0.62); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 6px 8px; backdrop-filter: blur(10px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.24);
       width: 100%;
     }
-    .dock-row { display: flex; gap: 8px; flex-wrap: nowrap; align-items: center; min-height: 44px; }
+    .dock-row { display: flex; gap: 6px; flex-wrap: nowrap; align-items: center; min-height: 28px; }
     .dock-row input {
-      flex: 1.2; min-width: 0; background: rgba(255,255,255,0.08); border: 1px solid transparent;
-      color: var(--text); padding: 5px 8px; border-radius: 10px; font-size: 10px;
+      flex: 1.3; min-width: 0; background: rgba(255,255,255,0.08); border: 1px solid transparent;
+      color: var(--text); padding: 3px 6px; border-radius: 8px; font-size: 9px;
     }
     .dock-row select {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.08);
       color: var(--text);
-      padding: 5px 7px;
-      border-radius: 10px;
-      font-size: 10px;
-      min-width: 108px;
+      padding: 3px 6px;
+      border-radius: 8px;
+      font-size: 9px;
+      min-width: 104px;
       flex-shrink: 0;
     }
     .dock-row input::placeholder { color: rgba(226,232,240,0.6); }
     .dock-row button {
       background: rgba(226, 232, 240, 0.16); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 10px; padding: 5px 8px; font-weight: 700; cursor: pointer;
-      transition: transform 120ms ease, box-shadow 120ms ease; font-size: 10px;
+      border-radius: 8px; padding: 3px 6px; font-weight: 700; cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease; font-size: 9px;
     }
     .dock-row button.secondary { background: rgba(255,255,255,0.12); color: var(--text); }
     .dock-row button:hover { transform: translateY(-1px); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
@@ -81,12 +81,12 @@
       flex: 1;
     }
     .dock-chip {
-      background: rgba(148,163,184,0.16); color: var(--text); border: 1px solid rgba(255,255,255,0.06);
-      padding: 3px 6px; border-radius: 999px; font-size: 9.5px; cursor: pointer;
+      background: rgba(148,163,184,0.14); color: var(--text); border: 1px solid rgba(255,255,255,0.05);
+      padding: 2px 6px; border-radius: 999px; font-size: 8.5px; cursor: pointer;
       transition: transform 120ms ease, background 120ms ease;
     }
     .dock-chip:hover { transform: translateY(-1px); background: rgba(148,163,184,0.28); }
-    .dock-row + .dock-row { margin-top: 8px; }
+    .dock-row + .dock-row { margin-top: 4px; }
     .streetview {
       width: 380px;
       height: 240px;
@@ -145,14 +145,51 @@
       right: 12px;
       bottom: 6px;
       z-index: 11;
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255,255,255,0.06);
       color: #e2e8f0;
       border-radius: 999px;
-      padding: 5px 9px;
-      font-size: 10px;
+      padding: 4px 8px;
+      font-size: 9px;
       text-decoration: none;
       opacity: 0.85;
+    }
+    #counts {
+      position: fixed;
+      right: 12px;
+      top: 12px;
+      z-index: 11;
+      background: rgba(15, 23, 42, 0.62);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-size: 10px;
+      color: #e2e8f0;
+      min-width: 140px;
+    }
+    #counts h3 {
+      margin: 0 0 6px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    #counts ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 4px;
+    }
+    #counts li {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #cbd5f5;
+    }
+    #counts .count-total {
+      margin-top: 6px;
+      font-weight: 600;
+      color: #f1f5f9;
     }
     .maplibregl-ctrl-bottom-right { bottom: 56px; }
     @media (max-width: 640px) {
@@ -166,6 +203,11 @@
 <body>
   <div id="map"></div>
   <a id="corner-link" href="https://go-bayes.github.io/places-of-worship/enhanced-places.html">Explore Enhanced View (NZ)</a>
+  <div id="counts">
+    <h3>Visible Places</h3>
+    <ul id="countsList"></ul>
+    <div class="count-total" id="countsTotal">Total: 0</div>
+  </div>
   <div id="dock">
     <div class="dock-panel">
       <div class="dock-row">
@@ -339,12 +381,27 @@
       });
     }
 
+    const SOURCES = {
+      overview: "pow-overview",
+      places: "pow-places",
+      polygons: "pow-polygons",
+      buildings: "pow-buildings"
+    };
+    const LAYERS = {
+      overview: "pow-overview-points",
+      places: "pow-places-points",
+      polygonsFill: "pow-polygons-fill",
+      polygonsLine: "pow-polygons-line",
+      buildingsFill: "pow-buildings-fill",
+      buildingsLine: "pow-buildings-line"
+    };
+
     function addOverviewLayer() {
-      map.addSource("places-overview", { type: "vector", tiles: [OVERVIEW_TILES], minzoom: 0, maxzoom: 9 });
+      map.addSource(SOURCES.overview, { type: "vector", tiles: [OVERVIEW_TILES], minzoom: 0, maxzoom: 9 });
       map.addLayer({
-        id: "places-overview",
+        id: LAYERS.overview,
         type: "circle",
-        source: "places-overview",
+        source: SOURCES.overview,
         "source-layer": OVERVIEW_LAYER,
         maxzoom: 9,
         paint: {
@@ -373,11 +430,11 @@
 
     let placesHandlersAttached = false;
     function addPlacesLayer() {
-      map.addSource("places", { type: "vector", tiles: [PLACES_TILES], minzoom: 6, maxzoom: 18 });
+      map.addSource(SOURCES.places, { type: "vector", tiles: [PLACES_TILES], minzoom: 6, maxzoom: 18 });
       map.addLayer({
-        id: "places-points",
+        id: LAYERS.places,
         type: "circle",
-        source: "places",
+        source: SOURCES.places,
         "source-layer": PLACES_LAYER,
         paint: {
           "circle-radius": [
@@ -414,7 +471,7 @@
       }
       placesHandlersAttached = true;
 
-      map.on("mousemove", "places-points", (e) => {
+      map.on("mousemove", LAYERS.places, (e) => {
         map.getCanvas().style.cursor = "pointer";
         const feature = e.features && e.features[0];
         if (!feature) return;
@@ -429,12 +486,12 @@
           .addTo(map);
       });
 
-      map.on("mouseleave", "places-points", () => {
+      map.on("mouseleave", LAYERS.places, () => {
         map.getCanvas().style.cursor = "";
         hoverPopup.remove();
       });
 
-      map.on("click", "places-points", async (e) => {
+      map.on("click", LAYERS.places, async (e) => {
         const feature = e.features && e.features[0];
         if (!feature) return;
         const name = feature.properties?.name || "Unnamed";
@@ -565,29 +622,29 @@
     }
 
     function addPolygonsLayer() {
-      map.addSource("nz-polygons", { type: "vector", tiles: [POLYGONS_TILES], minzoom: 2, maxzoom: 14 });
+      map.addSource(SOURCES.polygons, { type: "vector", tiles: [POLYGONS_TILES], minzoom: 2, maxzoom: 14 });
       map.addLayer({
-        id: "nz-polygons-fill",
+        id: LAYERS.polygonsFill,
         type: "fill",
-        source: "nz-polygons",
+        source: SOURCES.polygons,
         "source-layer": POLYGONS_LAYER,
         paint: { "fill-color": "rgba(125, 211, 252, 0.10)", "fill-outline-color": "rgba(255,255,255,0.05)" }
       });
       map.addLayer({
-        id: "nz-polygons-line",
+        id: LAYERS.polygonsLine,
         type: "line",
-        source: "nz-polygons",
+        source: SOURCES.polygons,
         "source-layer": POLYGONS_LAYER,
         paint: { "line-color": "rgba(255,255,255,0.25)", "line-width": 0.6 }
       });
     }
 
     function addBuildingsLayer() {
-      map.addSource("buildings", { type: "vector", tiles: [BUILDINGS_TILES], minzoom: 10, maxzoom: 18 });
+      map.addSource(SOURCES.buildings, { type: "vector", tiles: [BUILDINGS_TILES], minzoom: 10, maxzoom: 18 });
       map.addLayer({
-        id: "buildings-fill",
+        id: LAYERS.buildingsFill,
         type: "fill",
-        source: "buildings",
+        source: SOURCES.buildings,
         "source-layer": BUILDINGS_LAYER,
         minzoom: 10,
         paint: {
@@ -596,9 +653,9 @@
         }
       });
       map.addLayer({
-        id: "buildings-line",
+        id: LAYERS.buildingsLine,
         type: "line",
-        source: "buildings",
+        source: SOURCES.buildings,
         "source-layer": BUILDINGS_LAYER,
         minzoom: 10,
         paint: {
@@ -609,12 +666,12 @@
     }
 
     function addCustomLayers() {
-      ["places-overview", "places-points", "nz-polygons-line", "nz-polygons-fill", "buildings-line", "buildings-fill"].forEach((id) => {
+      Object.values(LAYERS).forEach((id) => {
         if (map.getLayer(id)) {
           map.removeLayer(id);
         }
       });
-      ["places-overview", "places", "nz-polygons", "buildings"].forEach((id) => {
+      Object.values(SOURCES).forEach((id) => {
         if (map.getSource(id)) {
           map.removeSource(id);
         }
@@ -629,10 +686,12 @@
 
     map.on("style.load", () => {
       addCustomLayers();
+      updateCounts();
     });
 
     map.on("load", () => {
       initBasemapSelect();
+      updateCounts();
     });
 
     map.on("error", (e) => {
@@ -698,6 +757,66 @@
         runSearch();
       }
     });
+
+    const countsList = document.getElementById("countsList");
+    const countsTotal = document.getElementById("countsTotal");
+    const countLabels = [
+      { key: "christian", label: "Christian" },
+      { key: "muslim", label: "Muslim" },
+      { key: "hindu", label: "Hindu" },
+      { key: "buddhist", label: "Buddhist" },
+      { key: "jewish", label: "Jewish" },
+      { key: "sikh", label: "Sikh" },
+      { key: "shinto", label: "Shinto" },
+      { key: "taoist", label: "Taoist" },
+      { key: "unknown", label: "Unknown" }
+    ];
+    let countsScheduled = false;
+
+    function updateCounts() {
+      if (!map.isStyleLoaded()) return;
+      if (countsScheduled) return;
+      countsScheduled = true;
+      requestAnimationFrame(() => {
+        countsScheduled = false;
+        const zoom = map.getZoom();
+        const layerId = zoom < 9 ? LAYERS.overview : LAYERS.places;
+        if (!map.getLayer(layerId)) return;
+        const features = map.queryRenderedFeatures({ layers: [layerId] });
+        const counts = {
+          christian: 0,
+          muslim: 0,
+          hindu: 0,
+          buddhist: 0,
+          jewish: 0,
+          sikh: 0,
+          shinto: 0,
+          taoist: 0,
+          unknown: 0
+        };
+        features.forEach((feature) => {
+          const key = feature.properties?.religion || "unknown";
+          if (counts[key] === undefined) {
+            counts.unknown += 1;
+          } else {
+            counts[key] += 1;
+          }
+        });
+        countsList.innerHTML = "";
+        let total = 0;
+        countLabels.forEach(({ key, label }) => {
+          const value = counts[key] || 0;
+          total += value;
+          const item = document.createElement("li");
+          item.innerHTML = `<span>${label}</span><span>${value.toLocaleString()}</span>`;
+          countsList.appendChild(item);
+        });
+        countsTotal.textContent = `Total: ${total.toLocaleString()}`;
+      });
+    }
+
+    map.on("moveend", updateCounts);
+    map.on("zoomend", updateCounts);
 
 
 
