@@ -128,6 +128,20 @@
       gap: 6px;
       margin-top: 8px;
     }
+    .popup-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+      cursor: grab;
+      user-select: none;
+    }
+    .popup-header.dragging { cursor: grabbing; }
+    .popup-title {
+      font-weight: 600;
+      color: #111;
+    }
     .popup-actions a,
     .popup-actions button {
       display: inline-flex;
@@ -339,7 +353,7 @@
         ]
       : [];
     const basemapOptions = [cartoStyle, ...maptilerStyles];
-    const defaultBasemapId = cartoStyle.id;
+    const defaultBasemapId = hasMaptilerKey ? "backdrop" : cartoStyle.id;
     let activeBasemapId = defaultBasemapId;
 
     const map = new maplibregl.Map({
@@ -366,6 +380,13 @@
         basemapSelect.appendChild(option);
       });
       basemapSelect.value = defaultBasemapId;
+      if (defaultBasemapId !== cartoStyle.id) {
+        const selected = basemapOptions.find((style) => style.id === defaultBasemapId);
+        if (selected) {
+          activeBasemapId = selected.id;
+          map.setStyle(selected.style || selected.url);
+        }
+      }
       basemapSelect.addEventListener("change", (event) => {
         const selected = basemapOptions.find((style) => style.id === event.target.value);
         if (selected) {
@@ -530,10 +551,13 @@
         const panoId = `pano-${Date.now()}`;
         const latFixed = coords[1].toFixed(6);
         const lngFixed = coords[0].toFixed(6);
-        const popup = new maplibregl.Popup({ maxWidth: "720px" })
+        const popup = new maplibregl.Popup({ maxWidth: "720px", closeOnClick: true })
           .setLngLat(coords)
           .setHTML(
-            `<div style="font-weight:600;color:#111;">${name}</div>` +
+            `<div class="popup-header" data-drag-handle="true">` +
+            `<span class="popup-title">${name}</span>` +
+            `<span style="font-size:11px;color:#64748b;">Drag</span>` +
+            `</div>` +
             `<div class="streetview expanded" id="${panoId}">Loading Street View…</div>` +
             `<div class="streetview-toolbar">` +
             `<button type="button" data-mode="interior" data-pano="${panoId}">Interior</button>` +
@@ -548,6 +572,47 @@
           .addTo(map);
 
         const panoContainer = () => document.getElementById(panoId);
+        const popupContent = popup.getElement();
+        const dragHandle = popupContent.querySelector("[data-drag-handle]");
+        if (dragHandle) {
+          const mapCanvas = map.getCanvas();
+          let dragging = false;
+          let startX = 0;
+          let startY = 0;
+
+          dragHandle.addEventListener("mousedown", (event) => {
+            dragging = true;
+            dragHandle.classList.add("dragging");
+            startX = event.clientX;
+            startY = event.clientY;
+            mapCanvas.style.cursor = "grabbing";
+            if (map.dragPan) map.dragPan.disable();
+            document.body.style.userSelect = "none";
+            event.stopPropagation();
+            event.preventDefault();
+          });
+
+          window.addEventListener("mousemove", (event) => {
+            if (!dragging) return;
+            const dx = event.clientX - startX;
+            const dy = event.clientY - startY;
+            startX = event.clientX;
+            startY = event.clientY;
+            const current = map.project(popup.getLngLat());
+            const next = { x: current.x + dx, y: current.y + dy };
+            const nextLngLat = map.unproject(next);
+            popup.setLngLat(nextLngLat);
+          });
+
+          window.addEventListener("mouseup", () => {
+            if (!dragging) return;
+            dragging = false;
+            dragHandle.classList.remove("dragging");
+            mapCanvas.style.cursor = "";
+            if (map.dragPan) map.dragPan.enable();
+            document.body.style.userSelect = "";
+          });
+        }
         if (!GOOGLE_MAPS_KEY) {
           const node = panoContainer();
           if (node) node.textContent = "Street View unavailable.";
@@ -748,6 +813,8 @@
       { label: "LA", coords: [-118.2437, 34.0522], zoom: 9 },
       { label: "NYC", coords: [-74.006, 40.7128], zoom: 9 },
       { label: "London", coords: [-0.1276, 51.5072], zoom: 9 },
+      { label: "Mauritius", coords: [57.5522, -20.3484], zoom: 10 },
+      { label: "Buenos Aires", shortLabel: "BA", coords: [-58.3816, -34.6037], zoom: 10 },
       { label: "Jerusalem", coords: [35.2137, 31.7683], zoom: 11 },
       { label: "Singapore", coords: [103.8198, 1.3521], zoom: 11 }
     ];
@@ -759,7 +826,7 @@
     cityPresets.forEach((city) => {
       const chip = document.createElement("button");
       chip.className = "dock-chip";
-      chip.textContent = city.label;
+      chip.textContent = city.shortLabel || city.label;
       chip.addEventListener("click", () => flyTo(city.coords, city.zoom));
       cityChips.appendChild(chip);
     });
