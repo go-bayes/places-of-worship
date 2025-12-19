@@ -47,16 +47,16 @@
       box-shadow: 0 8px 18px rgba(0,0,0,0.24);
       width: 100%;
     }
-    .dock-row { display: flex; gap: 6px; flex-wrap: nowrap; align-items: center; min-height: 28px; }
+    .dock-row { display: flex; gap: 6px; flex-wrap: nowrap; align-items: center; min-height: 24px; }
     .dock-row input {
       flex: 1.3; min-width: 0; background: rgba(255,255,255,0.08); border: 1px solid transparent;
-      color: var(--text); padding: 3px 6px; border-radius: 8px; font-size: 9px;
+      color: var(--text); padding: 2px 6px; border-radius: 8px; font-size: 9px;
     }
     .dock-row select {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.08);
       color: var(--text);
-      padding: 3px 6px;
+      padding: 2px 6px;
       border-radius: 8px;
       font-size: 9px;
       min-width: 104px;
@@ -65,7 +65,7 @@
     .dock-row input::placeholder { color: rgba(226,232,240,0.6); }
     .dock-row button {
       background: rgba(226, 232, 240, 0.16); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px; padding: 3px 6px; font-weight: 700; cursor: pointer;
+      border-radius: 8px; padding: 2px 6px; font-weight: 700; cursor: pointer;
       transition: transform 120ms ease, box-shadow 120ms ease; font-size: 9px;
     }
     .dock-row button.secondary { background: rgba(255,255,255,0.12); color: var(--text); }
@@ -185,6 +185,18 @@
       justify-content: space-between;
       gap: 12px;
       color: #cbd5f5;
+      align-items: center;
+    }
+    #counts .legend {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    #counts .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.25);
     }
     #counts .count-total {
       margin-top: 6px;
@@ -684,9 +696,18 @@
       addPlacesLayer();
     }
 
+    function ensureCustomLayers() {
+      if (!map.isStyleLoaded()) return;
+      if (!map.getLayer(LAYERS.places) && !map.getLayer(LAYERS.overview)) {
+        addCustomLayers();
+        updateCounts();
+      }
+    }
+
     map.on("style.load", () => {
       addCustomLayers();
       updateCounts();
+      setTimeout(ensureCustomLayers, 350);
     });
 
     map.on("load", () => {
@@ -708,8 +729,8 @@
     const searchButton = document.getElementById("searchButton");
     const cityPresets = [
       { label: "Wellington", coords: [174.7762, -41.2865], zoom: 10 },
-      { label: "Los Angeles", coords: [-118.2437, 34.0522], zoom: 9 },
-      { label: "New York", coords: [-74.006, 40.7128], zoom: 9 },
+      { label: "LA", coords: [-118.2437, 34.0522], zoom: 9 },
+      { label: "NYC", coords: [-74.006, 40.7128], zoom: 9 },
       { label: "London", coords: [-0.1276, 51.5072], zoom: 9 },
       { label: "Jerusalem", coords: [35.2137, 31.7683], zoom: 11 },
       { label: "Singapore", coords: [103.8198, 1.3521], zoom: 11 }
@@ -761,15 +782,15 @@
     const countsList = document.getElementById("countsList");
     const countsTotal = document.getElementById("countsTotal");
     const countLabels = [
-      { key: "christian", label: "Christian" },
-      { key: "muslim", label: "Muslim" },
-      { key: "hindu", label: "Hindu" },
-      { key: "buddhist", label: "Buddhist" },
-      { key: "jewish", label: "Jewish" },
-      { key: "sikh", label: "Sikh" },
-      { key: "shinto", label: "Shinto" },
-      { key: "taoist", label: "Taoist" },
-      { key: "unknown", label: "Unknown" }
+      { key: "christian", label: "Christian", color: "#e11d48" },
+      { key: "muslim", label: "Muslim", color: "#16a34a" },
+      { key: "hindu", label: "Hindu", color: "#f97316" },
+      { key: "buddhist", label: "Buddhist", color: "#facc15" },
+      { key: "jewish", label: "Jewish", color: "#2563eb" },
+      { key: "sikh", label: "Sikh", color: "#7c3aed" },
+      { key: "shinto", label: "Shinto", color: "#ec4899" },
+      { key: "taoist", label: "Taoist", color: "#06b6d4" },
+      { key: "unknown", label: "Unknown", color: "#9ca3af" }
     ];
     let countsScheduled = false;
 
@@ -804,19 +825,27 @@
         });
         countsList.innerHTML = "";
         let total = 0;
-        countLabels.forEach(({ key, label }) => {
+        countLabels.forEach(({ key, label, color }) => {
           const value = counts[key] || 0;
           total += value;
           const item = document.createElement("li");
-          item.innerHTML = `<span>${label}</span><span>${value.toLocaleString()}</span>`;
+          item.innerHTML =
+            `<span class="legend"><span class="dot" style="background:${color}"></span>${label}</span>` +
+            `<span>${value.toLocaleString()}</span>`;
           countsList.appendChild(item);
         });
         countsTotal.textContent = `Total: ${total.toLocaleString()}`;
       });
     }
 
-    map.on("moveend", updateCounts);
-    map.on("zoomend", updateCounts);
+    map.on("moveend", () => {
+      updateCounts();
+      ensureCustomLayers();
+    });
+    map.on("zoomend", () => {
+      updateCounts();
+      ensureCustomLayers();
+    });
 
 
 
