@@ -39,34 +39,34 @@
     #dock {
       position: fixed; left: 12px; right: auto; bottom: 6px;
       display: flex; flex-direction: column; gap: 10px; z-index: 11;
-      width: min(92vw, 420px);
+      width: min(94vw, 480px);
     }
     .dock-panel {
-      background: rgba(15, 23, 42, 0.86); border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 14px; padding: 8px 10px; backdrop-filter: blur(10px);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+      background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 10px 12px; backdrop-filter: blur(10px);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.28);
       width: 100%;
     }
-    .dock-row { display: flex; gap: 8px; flex-wrap: nowrap; align-items: center; }
+    .dock-row { display: flex; gap: 8px; flex-wrap: nowrap; align-items: center; min-height: 44px; }
     .dock-row input {
-      flex: 1; min-width: 0; background: rgba(255,255,255,0.08); border: 1px solid transparent;
-      color: var(--text); padding: 7px 8px; border-radius: 10px; font-size: 10.5px;
+      flex: 1.2; min-width: 0; background: rgba(255,255,255,0.08); border: 1px solid transparent;
+      color: var(--text); padding: 5px 8px; border-radius: 10px; font-size: 10px;
     }
     .dock-row select {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.08);
       color: var(--text);
-      padding: 6px 7px;
+      padding: 5px 7px;
       border-radius: 10px;
-      font-size: 10.5px;
-      min-width: 110px;
+      font-size: 10px;
+      min-width: 108px;
       flex-shrink: 0;
     }
     .dock-row input::placeholder { color: rgba(226,232,240,0.6); }
     .dock-row button {
       background: rgba(226, 232, 240, 0.16); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 10px; padding: 7px 8px; font-weight: 700; cursor: pointer;
-      transition: transform 120ms ease, box-shadow 120ms ease; font-size: 10.5px;
+      border-radius: 10px; padding: 5px 8px; font-weight: 700; cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease; font-size: 10px;
     }
     .dock-row button.secondary { background: rgba(255,255,255,0.12); color: var(--text); }
     .dock-row button:hover { transform: translateY(-1px); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
@@ -81,7 +81,7 @@
       flex: 1;
     }
     .dock-chip {
-      background: rgba(148,163,184,0.18); color: var(--text); border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(148,163,184,0.16); color: var(--text); border: 1px solid rgba(255,255,255,0.06);
       padding: 3px 6px; border-radius: 999px; font-size: 9.5px; cursor: pointer;
       transition: transform 120ms ease, background 120ms ease;
     }
@@ -145,14 +145,14 @@
       right: 12px;
       bottom: 6px;
       z-index: 11;
-      background: rgba(15, 23, 42, 0.86);
+      background: rgba(15, 23, 42, 0.7);
       border: 1px solid rgba(255,255,255,0.08);
       color: #e2e8f0;
       border-radius: 999px;
       padding: 5px 9px;
       font-size: 10px;
       text-decoration: none;
-      opacity: 0.8;
+      opacity: 0.85;
     }
     .maplibregl-ctrl-bottom-right { bottom: 56px; }
     @media (max-width: 640px) {
@@ -609,6 +609,16 @@
     }
 
     function addCustomLayers() {
+      ["places-overview", "places-points", "nz-polygons-line", "nz-polygons-fill", "buildings-line", "buildings-fill"].forEach((id) => {
+        if (map.getLayer(id)) {
+          map.removeLayer(id);
+        }
+      });
+      ["places-overview", "places", "nz-polygons", "buildings"].forEach((id) => {
+        if (map.getSource(id)) {
+          map.removeSource(id);
+        }
+      });
       if (OVERVIEW_ENABLED) {
         addOverviewLayer();
       }
