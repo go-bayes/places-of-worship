@@ -44,7 +44,7 @@
     #dock {
       position: fixed; left: 12px; right: auto; bottom: 6px;
       display: flex; flex-direction: column; gap: 10px; z-index: 11;
-      width: min(92vw, 560px);
+      width: min(92vw, 480px);
     }
     .dock-panel {
       background: rgba(15, 23, 42, 0.86); border: 1px solid rgba(255,255,255,0.08);
@@ -164,18 +164,9 @@
       <div class="dock-row">
         <input id="searchInput" type="text" placeholder="Search an address or place (prototype)">
         <button id="searchButton">Search</button>
-        <button id="countsToggle" class="secondary">Counts</button>
-      </div>
-      <div class="dock-row">
         <select id="basemapSelect"></select>
       </div>
       <div class="dock-row dock-cities" id="cityChips"></div>
-    </div>
-    <div class="dock-panel" id="countsPanel" style="display:none;">
-      <div style="font-size:12px;color:#cbd5f5;font-weight:600;margin-bottom:6px;">Counts (coming soon)</div>
-      <div style="font-size:12px;color:#e2e8f0;">
-        This will show denominations in view using precomputed tiles.
-      </div>
     </div>
   </div>
 
@@ -668,8 +659,10 @@
 
     map.on("error", (e) => {
       const detail = e && e.error && e.error.message ? e.error.message : "Unknown error";
-      if (detail.includes("Failed to fetch") && activeBasemapId !== "carto-light") {
-        setBasemap("carto-light");
+      if (detail.includes("Failed to fetch")) {
+        if (activeBasemapId !== "carto-light") {
+          setBasemap("carto-light");
+        }
         return;
       }
       showStatus(`Map error: ${detail}`);
@@ -678,8 +671,6 @@
     const cityChips = document.getElementById("cityChips");
     const searchInput = document.getElementById("searchInput");
     const searchButton = document.getElementById("searchButton");
-    const countsToggle = document.getElementById("countsToggle");
-    const countsPanel = document.getElementById("countsPanel");
     const cityPresets = [
       { label: "Wellington", coords: [174.7762, -41.2865], zoom: 10 },
       { label: "Los Angeles", coords: [-118.2437, 34.0522], zoom: 9 },
@@ -736,10 +727,6 @@
       }
     });
 
-    countsToggle.addEventListener("click", () => {
-      const visible = countsPanel.style.display !== "none";
-      countsPanel.style.display = visible ? "none" : "block";
-    });
 
   </script>
 </body>
