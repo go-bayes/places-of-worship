@@ -44,7 +44,7 @@
     #dock {
       position: fixed; left: 12px; right: auto; bottom: 6px;
       display: flex; flex-direction: column; gap: 10px; z-index: 11;
-      width: fit-content; max-width: 92vw;
+      width: min(92vw, 560px);
     }
     .dock-panel {
       background: rgba(15, 23, 42, 0.86); border: 1px solid rgba(255,255,255,0.08);
@@ -74,7 +74,7 @@
     }
     .dock-row button.secondary { background: rgba(255,255,255,0.12); color: var(--text); }
     .dock-row button:hover { transform: translateY(-1px); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
-    .dock-cities { display: flex; gap: 8px; flex-wrap: wrap; width: max-content; }
+    .dock-cities { display: flex; gap: 8px; flex-wrap: wrap; width: 100%; }
     .dock-chip {
       background: rgba(148,163,184,0.18); color: var(--text); border: 1px solid rgba(255,255,255,0.08);
       padding: 6px 10px; border-radius: 999px; font-size: 12px; cursor: pointer;
@@ -150,7 +150,7 @@
     }
     @media (max-width: 640px) {
       #hud { max-width: 94vw; }
-      #dock { left: 10px; right: auto; bottom: 10px; max-width: 94vw; }
+      #dock { left: 10px; right: 10px; bottom: 10px; width: 94vw; }
       #corner-link { bottom: 80px; }
     }
   </style>
@@ -179,6 +179,7 @@
     </div>
   </div>
 
+  <script src="config.public.js"></script>
   <script src="config.js"></script>
   <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
   <script>
@@ -655,7 +656,6 @@
       initBasemapSelect();
       addBasemapLayers();
       if (!STADIA_MAPS_KEY) {
-        showStatus("Stadia key missing. Using CARTO Light fallback.");
         setBasemap("carto-light");
       }
       if (OVERVIEW_ENABLED) {
@@ -669,7 +669,6 @@
     map.on("error", (e) => {
       const detail = e && e.error && e.error.message ? e.error.message : "Unknown error";
       if (detail.includes("Failed to fetch") && activeBasemapId !== "carto-light") {
-        showStatus("Basemap failed to load. Falling back to CARTO Light.");
         setBasemap("carto-light");
         return;
       }
