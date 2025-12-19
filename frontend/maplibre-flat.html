@@ -36,15 +36,10 @@
       background: rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.06);
     }
     .chip i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
-    #status {
-      position: fixed; bottom: 12px; left: 12px; right: 12px; max-width: 520px;
-      background: rgba(200,30,30,0.9); color: #fff; padding: 8px 12px; border-radius: 8px;
-      font-size: 12px; display: none; z-index: 12;
-    }
     #dock {
       position: fixed; left: 12px; right: auto; bottom: 6px;
       display: flex; flex-direction: column; gap: 10px; z-index: 11;
-      width: min(92vw, 440px);
+      width: clamp(260px, 36vw, 420px);
     }
     .dock-panel {
       background: rgba(15, 23, 42, 0.86); border: 1px solid rgba(255,255,255,0.08);
@@ -55,25 +50,27 @@
     .dock-row { display: flex; gap: 8px; flex-wrap: nowrap; align-items: center; }
     .dock-row input {
       flex: 1; min-width: 0; background: rgba(255,255,255,0.08); border: 1px solid transparent;
-      color: var(--text); padding: 10px 12px; border-radius: 10px; font-size: 13px;
+      color: var(--text); padding: 8px 10px; border-radius: 10px; font-size: 12px;
     }
     .dock-row select {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.08);
       color: var(--text);
-      padding: 9px 12px;
+      padding: 7px 10px;
       border-radius: 10px;
-      font-size: 13px;
-      min-width: 130px;
+      font-size: 12px;
+      min-width: 126px;
+      flex-shrink: 0;
     }
     .dock-row input::placeholder { color: rgba(226,232,240,0.6); }
     .dock-row button {
       background: rgba(226, 232, 240, 0.16); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 10px; padding: 9px 12px; font-weight: 700; cursor: pointer;
-      transition: transform 120ms ease, box-shadow 120ms ease; font-size: 13px;
+      border-radius: 10px; padding: 8px 10px; font-weight: 700; cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease; font-size: 12px;
     }
     .dock-row button.secondary { background: rgba(255,255,255,0.12); color: var(--text); }
     .dock-row button:hover { transform: translateY(-1px); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
+    .dock-cities-row { align-items: center; }
     .dock-cities {
       display: flex;
       gap: 6px;
@@ -81,10 +78,11 @@
       width: 100%;
       overflow-x: auto;
       padding-bottom: 2px;
+      flex: 1;
     }
     .dock-chip {
       background: rgba(148,163,184,0.18); color: var(--text); border: 1px solid rgba(255,255,255,0.08);
-      padding: 5px 8px; border-radius: 999px; font-size: 11px; cursor: pointer;
+      padding: 4px 7px; border-radius: 999px; font-size: 10px; cursor: pointer;
       transition: transform 120ms ease, background 120ms ease;
     }
     .dock-chip:hover { transform: translateY(-1px); background: rgba(148,163,184,0.28); }
@@ -164,16 +162,17 @@
 </head>
 <body>
   <div id="map"></div>
-  <div id="status">Map failed to load. Check Martin and tile URLs.</div>
   <a id="corner-link" href="https://go-bayes.github.io/places-of-worship/enhanced-places.html">Explore Enhanced View (NZ)</a>
   <div id="dock">
     <div class="dock-panel">
       <div class="dock-row">
         <input id="searchInput" type="text" placeholder="Search an address or place (prototype)">
         <button id="searchButton">Search</button>
+      </div>
+      <div class="dock-row dock-cities-row">
+        <div class="dock-cities" id="cityChips"></div>
         <select id="basemapSelect"></select>
       </div>
-      <div class="dock-row dock-cities" id="cityChips"></div>
     </div>
   </div>
 
@@ -181,17 +180,7 @@
   <script src="config.js"></script>
   <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
   <script>
-    const status = document.getElementById("status");
-    function showStatus(message) {
-      status.textContent = message;
-      status.style.display = "none";
-    }
-    function hideStatus() {
-      status.style.display = "none";
-    }
-
     if (!window.maplibregl) {
-      showStatus("MapLibre failed to load. Check network connectivity.");
       throw new Error("MapLibre missing");
     }
 
@@ -208,7 +197,7 @@
     const POLYGONS_LAYER = urlParams.get("polygonsLayer") || "nz-polygons";
     const BUILDINGS_LAYER = urlParams.get("buildingsLayer") || "buildings";
     const GOOGLE_MAPS_KEY = window.GOOGLE_MAPS_API_KEY || "";
-    const STADIA_MAPS_KEY = window.STADIA_MAPS_API_KEY || "";
+    const MAPTILER_API_KEY = window.MAPTILER_API_KEY || "";
     let googleMapsReady = false;
 
     const religionColors = [
@@ -225,19 +214,66 @@
       "#9ca3af"
     ];
 
-    const monochromeStyle = {
-      version: 8,
-      name: "Monochrome",
-      glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
-      sources: {},
-      layers: [
-        { id: "background", type: "background", paint: { "background-color": "#f8fafc" } }
-      ]
+    const basemapSelect = document.getElementById("basemapSelect");
+    const hasMaptilerKey = Boolean(MAPTILER_API_KEY && !MAPTILER_API_KEY.includes("REPLACE_WITH_MAPTILER_KEY"));
+    const cartoStyle = {
+      id: "carto-light",
+      label: "CARTO Light",
+      style: {
+        version: 8,
+        name: "CARTO Light",
+        sources: {
+          "carto-light": {
+            type: "raster",
+            tiles: [
+              "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+              "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+              "https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+              "https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
+            ],
+            tileSize: 256,
+            attribution: "© OpenStreetMap contributors, © CARTO"
+          }
+        },
+        layers: [{ id: "carto-light", type: "raster", source: "carto-light" }]
+      }
     };
+    const maptilerStyles = hasMaptilerKey
+      ? [
+          {
+            id: "streets",
+            label: "MapTiler Streets",
+            url: `https://api.maptiler.com/maps/streets/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+          },
+          {
+            id: "basic",
+            label: "MapTiler Basic",
+            url: `https://api.maptiler.com/maps/basic/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+          },
+          {
+            id: "bright",
+            label: "MapTiler Bright",
+            url: `https://api.maptiler.com/maps/bright/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+          },
+          {
+            id: "positron",
+            label: "MapTiler Positron",
+            url: `https://api.maptiler.com/maps/positron/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+          },
+          {
+            id: "satellite",
+            label: "MapTiler Satellite",
+            url: `https://api.maptiler.com/maps/satellite/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+          }
+        ]
+      : [];
+    const basemapOptions = [cartoStyle, ...maptilerStyles];
+    const defaultBasemapId = cartoStyle.id;
+    let activeBasemapId = defaultBasemapId;
 
     const map = new maplibregl.Map({
       container: "map",
-      style: monochromeStyle,
+      style: cartoStyle.style,
       center: WELLINGTON,
       zoom: 4.5,
       pitch: 0,
@@ -250,125 +286,23 @@
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
     map.addControl(new maplibregl.FullscreenControl(), "bottom-right");
 
-    const basemapSelect = document.getElementById("basemapSelect");
-    const basemaps = [
-      {
-        id: "stamen-toner",
-        label: "Stamen Toner",
-        requiresKey: true,
-        tiles: [
-          `https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png?api_key=${encodeURIComponent(STADIA_MAPS_KEY)}`
-        ],
-        attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank" rel="noopener">Stadia Maps</a> &copy; OpenStreetMap contributors'
-      },
-      {
-        id: "stamen-terrain",
-        label: "Stamen Terrain",
-        requiresKey: true,
-        tiles: [
-          `https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png?api_key=${encodeURIComponent(STADIA_MAPS_KEY)}`
-        ],
-        attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank" rel="noopener">Stadia Maps</a> &copy; OpenStreetMap contributors'
-      },
-      {
-        id: "stamen-watercolor",
-        label: "Stamen Watercolor",
-        requiresKey: true,
-        tiles: [
-          `https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg?api_key=${encodeURIComponent(STADIA_MAPS_KEY)}`
-        ],
-        attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank" rel="noopener">Stadia Maps</a> &copy; OpenStreetMap contributors'
-      },
-      {
-        id: "alidade-smooth",
-        label: "Alidade Smooth",
-        requiresKey: true,
-        tiles: [
-          `https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${encodeURIComponent(STADIA_MAPS_KEY)}`
-        ],
-        attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank" rel="noopener">Stadia Maps</a> &copy; OpenStreetMap contributors'
-      },
-      {
-        id: "alidade-smooth-dark",
-        label: "Alidade Smooth Dark",
-        requiresKey: true,
-        tiles: [
-          `https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${encodeURIComponent(STADIA_MAPS_KEY)}`
-        ],
-        attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank" rel="noopener">Stadia Maps</a> &copy; OpenStreetMap contributors'
-      },
-      {
-        id: "alidade-satellite",
-        label: "Alidade Satellite",
-        requiresKey: true,
-        tiles: [
-          `https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg?api_key=${encodeURIComponent(STADIA_MAPS_KEY)}`
-        ],
-        attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank" rel="noopener">Stadia Maps</a> &copy; OpenStreetMap contributors'
-      },
-      {
-        id: "carto-light",
-        label: "CARTO Light",
-        requiresKey: false,
-        tiles: [
-          "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-          "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-          "https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-          "https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
-        ],
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
-      }
-    ];
-
-    const defaultBasemapId = "carto-light";
-    let activeBasemapId = defaultBasemapId;
-
-    function addBasemapLayers() {
-      basemaps.forEach((basemap) => {
-        if (basemap.requiresKey && !STADIA_MAPS_KEY) {
-          return;
-        }
-        map.addSource(basemap.id, {
-          type: "raster",
-          tiles: basemap.tiles,
-          tileSize: 256,
-          attribution: basemap.attribution
-        });
-        map.addLayer({
-          id: `basemap-${basemap.id}`,
-          type: "raster",
-          source: basemap.id,
-          minzoom: 0,
-          maxzoom: 19,
-          layout: {
-            visibility: basemap.id === defaultBasemapId ? "visible" : "none"
-          }
-        });
-      });
-    }
-
-    function setBasemap(id) {
-      activeBasemapId = id;
-      basemaps.forEach((basemap) => {
-        const layerId = `basemap-${basemap.id}`;
-        if (map.getLayer(layerId)) {
-          map.setLayoutProperty(layerId, "visibility", basemap.id === id ? "visible" : "none");
-        }
-      });
-    }
-
     function initBasemapSelect() {
       basemapSelect.innerHTML = "";
-      basemaps.forEach((basemap) => {
+      basemapOptions.forEach((style) => {
         const option = document.createElement("option");
-        option.value = basemap.id;
-        option.textContent = basemap.label;
+        option.value = style.id;
+        option.textContent = style.label;
         basemapSelect.appendChild(option);
       });
       basemapSelect.value = defaultBasemapId;
       basemapSelect.addEventListener("change", (event) => {
-        setBasemap(event.target.value);
+        const selected = basemapOptions.find((style) => style.id === event.target.value);
+        if (selected) {
+          activeBasemapId = selected.id;
+          map.setStyle(selected.style || selected.url);
+        }
       });
+      basemapSelect.disabled = basemapOptions.length <= 1;
     }
 
     function loadGoogleMaps() {
@@ -423,6 +357,7 @@
       });
     }
 
+    let placesHandlersAttached = false;
     function addPlacesLayer() {
       map.addSource("places", { type: "vector", tiles: [PLACES_TILES], minzoom: 6, maxzoom: 18 });
       map.addLayer({
@@ -459,6 +394,11 @@
         closeOnClick: false,
         maxWidth: "260px"
       });
+
+      if (placesHandlersAttached) {
+        return;
+      }
+      placesHandlersAttached = true;
 
       map.on("mousemove", "places-points", (e) => {
         map.getCanvas().style.cursor = "pointer";
@@ -654,31 +594,21 @@
       });
     }
 
-    map.on("load", () => {
-      addBasemapLayers();
-      setBasemap(defaultBasemapId);
-      initBasemapSelect();
-      hideStatus();
+    function addCustomLayers() {
       if (OVERVIEW_ENABLED) {
         addOverviewLayer();
       }
       addPolygonsLayer();
       addBuildingsLayer();
       addPlacesLayer();
+    }
+
+    map.on("style.load", () => {
+      addCustomLayers();
     });
 
-    map.on("error", (e) => {
-      const detail = e && e.error && e.error.message ? e.error.message : "Unknown error";
-      if (detail.includes("Failed to fetch")) {
-        if (activeBasemapId !== "carto-light") {
-          setBasemap("carto-light");
-        }
-        hideStatus();
-        return;
-      }
-      if (detail.includes("MapLibre failed to load")) {
-        showStatus(detail);
-      }
+    map.on("load", () => {
+      initBasemapSelect();
     });
 
     const cityChips = document.getElementById("cityChips");
