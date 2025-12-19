@@ -44,7 +44,7 @@
     #dock {
       position: fixed; left: 12px; right: auto; bottom: 6px;
       display: flex; flex-direction: column; gap: 10px; z-index: 11;
-      width: min(92vw, 520px);
+      width: min(92vw, 440px);
     }
     .dock-panel {
       background: rgba(15, 23, 42, 0.86); border: 1px solid rgba(255,255,255,0.08);
@@ -64,7 +64,7 @@
       padding: 9px 12px;
       border-radius: 10px;
       font-size: 13px;
-      min-width: 150px;
+      min-width: 130px;
     }
     .dock-row input::placeholder { color: rgba(226,232,240,0.6); }
     .dock-row button {
@@ -184,7 +184,7 @@
     const status = document.getElementById("status");
     function showStatus(message) {
       status.textContent = message;
-      status.style.display = "block";
+      status.style.display = "none";
     }
     function hideStatus() {
       status.style.display = "none";
@@ -318,13 +318,16 @@
         ],
         attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
       }
-    ].filter((basemap) => (basemap.requiresKey ? STADIA_MAPS_KEY : true));
+    ];
 
     const defaultBasemapId = "carto-light";
     let activeBasemapId = defaultBasemapId;
 
     function addBasemapLayers() {
       basemaps.forEach((basemap) => {
+        if (basemap.requiresKey && !STADIA_MAPS_KEY) {
+          return;
+        }
         map.addSource(basemap.id, {
           type: "raster",
           tiles: basemap.tiles,
