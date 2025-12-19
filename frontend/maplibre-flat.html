@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | MapLibre Flat Prototype</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0c10;
+      --panel: rgba(13, 16, 23, 0.82);
+      --text: #e8edf2;
+      --accent: #cbd5f5;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; }
+    body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: "Work Sans", -apple-system, "Segoe UI", sans-serif; }
+    #map { position: fixed; inset: 0; }
+    #hud {
+      position: fixed; top: 12px; left: 12px; right: 12px; max-width: 520px;
+      padding: 14px 16px; background: var(--panel); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; backdrop-filter: blur(12px); box-shadow: 0 8px 30px rgba(0,0,0,0.25); z-index: 10;
+    }
+    #hud h1 { margin: 0 0 4px; font-weight: 600; letter-spacing: -0.02em; font-size: 18px; }
+    #hud p { margin: 0 0 10px; color: var(--muted); font-size: 13px; line-height: 1.4; }
+    #hud .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    #hud button {
+      background: var(--accent); color: #0b0c10; border: none; border-radius: 10px; padding: 9px 12px;
+      font-weight: 700; cursor: pointer; transition: transform 120ms ease, box-shadow 120ms ease; font-size: 13px;
+    }
+    #hud button.secondary { background: rgba(255,255,255,0.08); color: var(--text); }
+    #hud button:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.25); }
+    #legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted);
+      background: rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.06);
+    }
+    .chip i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+    #status {
+      position: fixed; bottom: 12px; left: 12px; right: 12px; max-width: 520px;
+      background: rgba(200,30,30,0.9); color: #fff; padding: 8px 12px; border-radius: 8px;
+      font-size: 12px; display: none; z-index: 12;
+    }
+    #dock {
+      position: fixed; left: 12px; right: auto; bottom: 6px;
+      display: flex; flex-direction: column; gap: 10px; z-index: 11;
+      width: fit-content; max-width: 92vw;
+    }
+    .dock-panel {
+      background: rgba(15, 23, 42, 0.86); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 10px 12px; backdrop-filter: blur(10px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+      width: 100%;
+    }
+    .dock-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .dock-row input {
+      flex: 1; min-width: 180px; background: rgba(255,255,255,0.08); border: 1px solid transparent;
+      color: var(--text); padding: 10px 12px; border-radius: 10px; font-size: 13px;
+    }
+    .dock-row select {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      min-width: 200px;
+    }
+    .dock-row input::placeholder { color: rgba(226,232,240,0.6); }
+    .dock-row button {
+      background: rgba(226, 232, 240, 0.16); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 9px 12px; font-weight: 700; cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease; font-size: 13px;
+    }
+    .dock-row button.secondary { background: rgba(255,255,255,0.12); color: var(--text); }
+    .dock-row button:hover { transform: translateY(-1px); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
+    .dock-cities { display: flex; gap: 8px; flex-wrap: wrap; width: max-content; }
+    .dock-chip {
+      background: rgba(148,163,184,0.18); color: var(--text); border: 1px solid rgba(255,255,255,0.08);
+      padding: 6px 10px; border-radius: 999px; font-size: 12px; cursor: pointer;
+      transition: transform 120ms ease, background 120ms ease;
+    }
+    .dock-chip:hover { transform: translateY(-1px); background: rgba(148,163,184,0.28); }
+    .dock-row + .dock-row { margin-top: 8px; }
+    .streetview {
+      width: 380px;
+      height: 240px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.8);
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    .streetview.expanded {
+      width: 640px;
+      height: 420px;
+    }
+    .streetview-toolbar {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      gap: 8px;
+    }
+    .streetview-toolbar button {
+      background: rgba(226, 232, 240, 0.18);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .popup-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .popup-actions a,
+    .popup-actions button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.1);
+      background: rgba(15, 23, 42, 0.08);
+      color: #111;
+      font-size: 12px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    #corner-link {
+      position: fixed;
+      right: 12px;
+      bottom: 64px;
+      z-index: 11;
+      background: rgba(15, 23, 42, 0.86);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #e2e8f0;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      text-decoration: none;
+    }
+    @media (max-width: 640px) {
+      #hud { max-width: 94vw; }
+      #dock { left: 10px; right: auto; bottom: 10px; max-width: 94vw; }
+      #corner-link { bottom: 80px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="status">Map failed to load. Check Martin and tile URLs.</div>
+  <a id="corner-link" href="https://go-bayes.github.io/places-of-worship/enhanced-places.html">Explore Enhanced View (NZ)</a>
+  <div id="dock">
+    <div class="dock-panel">
+      <div class="dock-row">
+        <input id="searchInput" type="text" placeholder="Search an address or place (prototype)">
+        <button id="searchButton">Search</button>
+        <button id="countsToggle" class="secondary">Counts</button>
+      </div>
+      <div class="dock-row">
+        <select id="basemapSelect"></select>
+      </div>
+      <div class="dock-row dock-cities" id="cityChips"></div>
+    </div>
+    <div class="dock-panel" id="countsPanel" style="display:none;">
+      <div style="font-size:12px;color:#cbd5f5;font-weight:600;margin-bottom:6px;">Counts (coming soon)</div>
+      <div style="font-size:12px;color:#e2e8f0;">
+        This will show denominations in view using precomputed tiles.
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    const status = document.getElementById("status");
+    function showStatus(message) {
+      status.textContent = message;
+      status.style.display = "block";
+    }
+
+    if (!window.maplibregl) {
+      showStatus("MapLibre failed to load. Check network connectivity.");
+      throw new Error("MapLibre missing");
+    }
+
+    const WELLINGTON = [174.7762, -41.2865];
+    const OVERVIEW_TILES = "http://127.0.0.1:3001/places-overview/{z}/{x}/{y}";
+    const PLACES_TILES = "http://127.0.0.1:3001/places/{z}/{x}/{y}";
+    const POLYGONS_TILES = "http://127.0.0.1:3001/nz-polygons/{z}/{x}/{y}";
+    const BUILDINGS_TILES = "http://127.0.0.1:3001/buildings/{z}/{x}/{y}";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const OVERVIEW_LAYER = urlParams.get("overviewLayer") || "places_overview";
+    const OVERVIEW_ENABLED = urlParams.get("overview") !== "0";
+    const PLACES_LAYER = urlParams.get("placesLayer") || "places";
+    const POLYGONS_LAYER = urlParams.get("polygonsLayer") || "nz-polygons";
+    const BUILDINGS_LAYER = urlParams.get("buildingsLayer") || "buildings";
+    const GOOGLE_MAPS_KEY = window.GOOGLE_MAPS_API_KEY || "";
+    const STADIA_MAPS_KEY = window.STADIA_MAPS_API_KEY || "";
+    let googleMapsReady = false;
+
+    const religionColors = [
+      "match",
+      ["get", "religion"],
+      "christian", "#e11d48",
+      "muslim", "#16a34a",
+      "hindu", "#f97316",
+      "buddhist", "#facc15",
+      "jewish", "#2563eb",
+      "sikh", "#7c3aed",
+      "shinto", "#ec4899",
+      "taoist", "#06b6d4",
+      "#9ca3af"
+    ];
+
+    const monochromeStyle = {
+      version: 8,
+      name: "Monochrome",
+      glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+      sources: {},
+      layers: [
+        { id: "background", type: "background", paint: { "background-color": "#0b0c10" } }
+      ]
+    };
+
+    const map = new maplibregl.Map({
+      container: "map",
+      style: monochromeStyle,
+      center: WELLINGTON,
+      zoom: 4.5,
+      pitch: 0,
+      bearing: 0,
+      projection: "mercator",
+      hash: true,
+      maxZoom: 18
+    });
+
+    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
+    map.addControl(new maplibregl.FullscreenControl(), "bottom-right");
+
+    const basemapSelect = document.getElementById("basemapSelect");
+    const basemaps = [
+      {
+        id: "stamen-toner",
+        label: "Stamen Toner",
+        requiresKey: true,
+        tiles: [
+          `https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png?api_key=${encodeURIComponent(STADIA_MAPS_KEY)}`
+        ],
+        attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank" rel="noopener">Stadia Maps</a> &copy; OpenStreetMap contributors'
+      },
+      {
+        id: "stamen-terrain",
+        label: "Stamen Terrain",
+        requiresKey: true,
+        tiles: [
+          `https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png?api_key=${encodeURIComponent(STADIA_MAPS_KEY)}`
+        ],
+        attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank" rel="noopener">Stadia Maps</a> &copy; OpenStreetMap contributors'
+      },
+      {
+        id: "stamen-watercolor",
+        label: "Stamen Watercolor",
+        requiresKey: true,
+        tiles: [
+          `https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg?api_key=${encodeURIComponent(STADIA_MAPS_KEY)}`
+        ],
+        attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank" rel="noopener">Stadia Maps</a> &copy; OpenStreetMap contributors'
+      },
+      {
+        id: "alidade-smooth",
+        label: "Alidade Smooth",
+        requiresKey: true,
+        tiles: [
+          `https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${encodeURIComponent(STADIA_MAPS_KEY)}`
+        ],
+        attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank" rel="noopener">Stadia Maps</a> &copy; OpenStreetMap contributors'
+      },
+      {
+        id: "alidade-smooth-dark",
+        label: "Alidade Smooth Dark",
+        requiresKey: true,
+        tiles: [
+          `https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${encodeURIComponent(STADIA_MAPS_KEY)}`
+        ],
+        attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank" rel="noopener">Stadia Maps</a> &copy; OpenStreetMap contributors'
+      },
+      {
+        id: "alidade-satellite",
+        label: "Alidade Satellite",
+        requiresKey: true,
+        tiles: [
+          `https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg?api_key=${encodeURIComponent(STADIA_MAPS_KEY)}`
+        ],
+        attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank" rel="noopener">Stadia Maps</a> &copy; OpenStreetMap contributors'
+      },
+      {
+        id: "carto-light",
+        label: "CARTO Light",
+        requiresKey: false,
+        tiles: [
+          "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+          "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+          "https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+          "https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
+        ],
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+      }
+    ].filter((basemap) => (basemap.requiresKey ? STADIA_MAPS_KEY : true));
+
+    const defaultBasemapId = basemaps.find((b) => b.id === "stamen-toner")
+      ? "stamen-toner"
+      : "carto-light";
+    let activeBasemapId = defaultBasemapId;
+
+    function addBasemapLayers() {
+      basemaps.forEach((basemap) => {
+        map.addSource(basemap.id, {
+          type: "raster",
+          tiles: basemap.tiles,
+          tileSize: 256,
+          attribution: basemap.attribution
+        });
+        map.addLayer({
+          id: `basemap-${basemap.id}`,
+          type: "raster",
+          source: basemap.id,
+          minzoom: 0,
+          maxzoom: 19,
+          layout: {
+            visibility: basemap.id === defaultBasemapId ? "visible" : "none"
+          }
+        });
+      });
+    }
+
+    function setBasemap(id) {
+      activeBasemapId = id;
+      basemaps.forEach((basemap) => {
+        const layerId = `basemap-${basemap.id}`;
+        if (map.getLayer(layerId)) {
+          map.setLayoutProperty(layerId, "visibility", basemap.id === id ? "visible" : "none");
+        }
+      });
+    }
+
+    function initBasemapSelect() {
+      basemapSelect.innerHTML = "";
+      basemaps.forEach((basemap) => {
+        const option = document.createElement("option");
+        option.value = basemap.id;
+        option.textContent = basemap.label;
+        basemapSelect.appendChild(option);
+      });
+      basemapSelect.value = defaultBasemapId;
+      basemapSelect.addEventListener("change", (event) => {
+        setBasemap(event.target.value);
+      });
+    }
+
+    function loadGoogleMaps() {
+      if (googleMapsReady) return Promise.resolve();
+      if (!GOOGLE_MAPS_KEY) return Promise.reject(new Error("Missing Google Maps key"));
+      if (window.google && window.google.maps) {
+        googleMapsReady = true;
+        return Promise.resolve();
+      }
+      return new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(GOOGLE_MAPS_KEY)}`;
+        script.async = true;
+        script.onload = () => {
+          googleMapsReady = true;
+          resolve();
+        };
+        script.onerror = () => reject(new Error("Failed to load Google Maps"));
+        document.head.appendChild(script);
+      });
+    }
+
+    function addOverviewLayer() {
+      map.addSource("places-overview", { type: "vector", tiles: [OVERVIEW_TILES], minzoom: 0, maxzoom: 9 });
+      map.addLayer({
+        id: "places-overview",
+        type: "circle",
+        source: "places-overview",
+        "source-layer": OVERVIEW_LAYER,
+        maxzoom: 9,
+        paint: {
+          "circle-radius": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            0, 2,
+            6, 5,
+            9, 6
+          ],
+          "circle-color": religionColors,
+          "circle-stroke-width": 0.6,
+          "circle-stroke-color": "rgba(10, 11, 14, 0.6)",
+          "circle-opacity": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            0, 0.75,
+            7, 0.75,
+            9, 0.0
+          ]
+        }
+      });
+    }
+
+    function addPlacesLayer() {
+      map.addSource("places", { type: "vector", tiles: [PLACES_TILES], minzoom: 6, maxzoom: 18 });
+      map.addLayer({
+        id: "places-points",
+        type: "circle",
+        source: "places",
+        "source-layer": PLACES_LAYER,
+        paint: {
+          "circle-radius": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            6, 2.2,
+            10, 4.2,
+            16, 6.5
+          ],
+          "circle-color": religionColors,
+          "circle-stroke-width": 0.8,
+          "circle-stroke-color": "#0b0c10",
+          "circle-opacity": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            6, 0.0,
+            9, 0.85,
+            12, 0.75,
+            18, 0.7
+          ]
+        }
+      });
+
+      const hoverPopup = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        maxWidth: "260px"
+      });
+
+      map.on("mousemove", "places-points", (e) => {
+        map.getCanvas().style.cursor = "pointer";
+        const feature = e.features && e.features[0];
+        if (!feature) return;
+        const name = feature.properties?.name || "Unnamed";
+        const lat = feature.properties?.lat;
+        const lng = feature.properties?.lng;
+        const coords = feature.geometry?.coordinates || (lng && lat ? [lng, lat] : null);
+        if (!coords) return;
+        hoverPopup
+          .setLngLat(coords)
+          .setHTML(`<div style="font-weight:600;color:#111;">${name}</div>`)
+          .addTo(map);
+      });
+
+      map.on("mouseleave", "places-points", () => {
+        map.getCanvas().style.cursor = "";
+        hoverPopup.remove();
+      });
+
+      map.on("click", "places-points", async (e) => {
+        const feature = e.features && e.features[0];
+        if (!feature) return;
+        const name = feature.properties?.name || "Unnamed";
+        const lat = feature.properties?.lat;
+        const lng = feature.properties?.lng;
+        const coords = feature.geometry?.coordinates || (lng && lat ? [lng, lat] : null);
+        if (!coords) return;
+        const panoId = `pano-${Date.now()}`;
+        const latFixed = coords[1].toFixed(6);
+        const lngFixed = coords[0].toFixed(6);
+        const popup = new maplibregl.Popup({ maxWidth: "720px" })
+          .setLngLat(coords)
+          .setHTML(
+            `<div style="font-weight:600;color:#111;">${name}</div>` +
+            `<div class="streetview expanded" id="${panoId}">Loading Street View…</div>` +
+            `<div class="streetview-toolbar">` +
+            `<button type="button" data-mode="interior" data-pano="${panoId}">Interior</button>` +
+            `<button type="button" data-mode="expand" data-pano="${panoId}">Collapse</button>` +
+            `</div>` +
+            `<div class="popup-actions">` +
+            `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>` +
+            `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +
+            `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
+            `</div>`
+          )
+          .addTo(map);
+
+        const panoContainer = () => document.getElementById(panoId);
+        if (!GOOGLE_MAPS_KEY) {
+          const node = panoContainer();
+          if (node) node.textContent = "Street View needs GOOGLE_MAPS_API_KEY.";
+          return;
+        }
+        try {
+          await loadGoogleMaps();
+          const node = panoContainer();
+          if (!node) return;
+          const sv = new google.maps.StreetViewService();
+          let panoInstance = null;
+          let currentSource = "OUTDOOR";
+          const popupEl = popup.getElement();
+          const expandButton = popupEl.querySelector(`[data-mode="expand"][data-pano="${panoId}"]`);
+          const interiorButton = popupEl.querySelector(`[data-mode="interior"][data-pano="${panoId}"]`);
+
+          function resizePanorama() {
+            if (panoInstance && window.google?.maps?.event) {
+              window.google.maps.event.trigger(panoInstance, "resize");
+            }
+          }
+
+          function setMessage(message) {
+            const target = panoContainer();
+            if (target) target.textContent = message;
+          }
+
+          function loadPanorama(source) {
+            const target = panoContainer();
+            if (!target) return;
+            target.textContent = "Loading Street View…";
+            const request = {
+              location: { lat: coords[1], lng: coords[0] },
+              radius: 150,
+              source: google.maps.StreetViewSource[source] || google.maps.StreetViewSource.DEFAULT
+            };
+            sv.getPanorama(request, (data, status) => {
+              if (status === "OK") {
+                currentSource = source;
+                panoInstance = new google.maps.StreetViewPanorama(target, {
+                  position: { lat: coords[1], lng: coords[0] },
+                  pov: { heading: 0, pitch: 0 },
+                  zoom: 1,
+                  addressControl: false,
+                  fullscreenControl: false,
+                  motionTracking: false,
+                  showRoadLabels: false
+                });
+                resizePanorama();
+              } else if (source === "OUTDOOR") {
+                setMessage("No outdoor Street View. Try Interior.");
+              } else {
+                setMessage("No Street View for this location.");
+              }
+            });
+          }
+
+          if (expandButton) {
+            expandButton.addEventListener("click", () => {
+              const target = panoContainer();
+              if (!target) return;
+              const expanded = target.classList.toggle("expanded");
+              expandButton.textContent = expanded ? "Collapse" : "Expand";
+              resizePanorama();
+            });
+          }
+
+          if (interiorButton) {
+            interiorButton.addEventListener("click", () => {
+              const next = currentSource === "OUTDOOR" ? "DEFAULT" : "OUTDOOR";
+              interiorButton.textContent = next === "DEFAULT" ? "Exterior" : "Interior";
+              loadPanorama(next);
+            });
+          }
+          const copyButton = popupEl.querySelector(`[data-copy]`);
+          if (copyButton) {
+            copyButton.addEventListener("click", async () => {
+              const value = copyButton.getAttribute("data-copy");
+              try {
+                await navigator.clipboard.writeText(value || "");
+                copyButton.textContent = "Copied";
+                setTimeout(() => {
+                  copyButton.textContent = "Copy coords";
+                }, 1200);
+              } catch (error) {
+                copyButton.textContent = "Copy failed";
+                setTimeout(() => {
+                  copyButton.textContent = "Copy coords";
+                }, 1200);
+              }
+            });
+          }
+
+          loadPanorama("OUTDOOR");
+        } catch (error) {
+          const node = panoContainer();
+          if (node) node.textContent = "Street View failed to load.";
+        }
+      });
+    }
+
+    function addPolygonsLayer() {
+      map.addSource("nz-polygons", { type: "vector", tiles: [POLYGONS_TILES], minzoom: 2, maxzoom: 14 });
+      map.addLayer({
+        id: "nz-polygons-fill",
+        type: "fill",
+        source: "nz-polygons",
+        "source-layer": POLYGONS_LAYER,
+        paint: { "fill-color": "rgba(125, 211, 252, 0.10)", "fill-outline-color": "rgba(255,255,255,0.05)" }
+      });
+      map.addLayer({
+        id: "nz-polygons-line",
+        type: "line",
+        source: "nz-polygons",
+        "source-layer": POLYGONS_LAYER,
+        paint: { "line-color": "rgba(255,255,255,0.25)", "line-width": 0.6 }
+      });
+    }
+
+    function addBuildingsLayer() {
+      map.addSource("buildings", { type: "vector", tiles: [BUILDINGS_TILES], minzoom: 10, maxzoom: 18 });
+      map.addLayer({
+        id: "buildings-fill",
+        type: "fill",
+        source: "buildings",
+        "source-layer": BUILDINGS_LAYER,
+        minzoom: 10,
+        paint: {
+          "fill-color": "rgba(15, 23, 42, 0.12)",
+          "fill-outline-color": "rgba(15, 23, 42, 0.25)"
+        }
+      });
+      map.addLayer({
+        id: "buildings-line",
+        type: "line",
+        source: "buildings",
+        "source-layer": BUILDINGS_LAYER,
+        minzoom: 10,
+        paint: {
+          "line-color": "rgba(15, 23, 42, 0.35)",
+          "line-width": 0.6
+        }
+      });
+    }
+
+    map.on("load", () => {
+      initBasemapSelect();
+      addBasemapLayers();
+      if (!STADIA_MAPS_KEY) {
+        showStatus("Stadia key missing. Using CARTO Light fallback.");
+        setBasemap("carto-light");
+      }
+      if (OVERVIEW_ENABLED) {
+        addOverviewLayer();
+      }
+      addPolygonsLayer();
+      addBuildingsLayer();
+      addPlacesLayer();
+    });
+
+    map.on("error", (e) => {
+      const detail = e && e.error && e.error.message ? e.error.message : "Unknown error";
+      if (detail.includes("Failed to fetch") && activeBasemapId !== "carto-light") {
+        showStatus("Basemap failed to load. Falling back to CARTO Light.");
+        setBasemap("carto-light");
+        return;
+      }
+      showStatus(`Map error: ${detail}`);
+    });
+
+    const cityChips = document.getElementById("cityChips");
+    const searchInput = document.getElementById("searchInput");
+    const searchButton = document.getElementById("searchButton");
+    const countsToggle = document.getElementById("countsToggle");
+    const countsPanel = document.getElementById("countsPanel");
+    const cityPresets = [
+      { label: "Wellington", coords: [174.7762, -41.2865], zoom: 10 },
+      { label: "Los Angeles", coords: [-118.2437, 34.0522], zoom: 9 },
+      { label: "New York", coords: [-74.006, 40.7128], zoom: 9 },
+      { label: "London", coords: [-0.1276, 51.5072], zoom: 9 },
+      { label: "Cairo", coords: [31.2357, 30.0444], zoom: 9 },
+      { label: "Jerusalem", coords: [35.2137, 31.7683], zoom: 11 },
+      { label: "Delhi", coords: [77.1025, 28.7041], zoom: 9 },
+      { label: "Singapore", coords: [103.8198, 1.3521], zoom: 11 }
+    ];
+
+    function flyTo(coords, zoom) {
+      map.flyTo({ center: coords, zoom: zoom || 10, speed: 1.2, curve: 1.4 });
+    }
+
+    cityPresets.forEach((city) => {
+      const chip = document.createElement("button");
+      chip.className = "dock-chip";
+      chip.textContent = city.label;
+      chip.addEventListener("click", () => flyTo(city.coords, city.zoom));
+      cityChips.appendChild(chip);
+    });
+
+
+    async function geocode(query) {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
+      const response = await fetch(url, { headers: { "Accept": "application/json" } });
+      if (!response.ok) throw new Error("Geocoding failed");
+      const results = await response.json();
+      return results && results.length ? results[0] : null;
+    }
+
+    async function runSearch() {
+      const query = searchInput.value.trim();
+      if (!query) return;
+      try {
+        const result = await geocode(query);
+        if (!result) {
+          showStatus("No results found. Try a broader query.");
+          return;
+        }
+        const lon = parseFloat(result.lon);
+        const lat = parseFloat(result.lat);
+        flyTo([lon, lat], 13);
+      } catch (error) {
+        showStatus("Search failed. Check network access for geocoding.");
+      }
+    }
+
+    searchButton.addEventListener("click", runSearch);
+    searchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        runSearch();
+      }
+    });
+
+    countsToggle.addEventListener("click", () => {
+      const visible = countsPanel.style.display !== "none";
+      countsPanel.style.display = visible ? "none" : "block";
+    });
+
+  </script>
+</body>
+</html>

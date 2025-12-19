@@ -46,6 +46,11 @@ Building on the successful NZ prototype and the religion repository's global arc
 - UI reads counts for current viewport and renders a compact summary
 - Avoids client-side counting and keeps mid-zoom performance stable
 
+### Mobile Delivery (Planned)
+- Default to responsive web map for launch
+- Evaluate WebView shells for iOS/Android as a fast app-store path
+- Consider MapLibre Native later if offline or native UX is required
+
 ### Backend Architecture
 
 #### Core API (FastAPI)
