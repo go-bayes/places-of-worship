@@ -631,6 +631,7 @@
             `<div class="popup-actions">` +
             `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>` +
             `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +
+            `<button type="button" data-mode="interior-alt" data-pano="${panoId}">Try Interior</button>` +
             `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
             `</div>`
           )
@@ -693,6 +694,7 @@
           const popupEl = popup.getElement();
           const expandButton = popupEl.querySelector(`[data-mode="expand"][data-pano="${panoId}"]`);
           const interiorButton = popupEl.querySelector(`[data-mode="interior"][data-pano="${panoId}"]`);
+          const interiorAltButton = popupEl.querySelector(`[data-mode="interior-alt"][data-pano="${panoId}"]`);
 
           function resizePanorama() {
             if (panoInstance && window.google?.maps?.event) {
@@ -717,6 +719,9 @@
             sv.getPanorama(request, (data, status) => {
               if (status === "OK") {
                 currentSource = source;
+                if (interiorAltButton) {
+                  interiorAltButton.textContent = source === "OUTDOOR" ? "Try Interior" : "Try Exterior";
+                }
                 panoInstance = new google.maps.StreetViewPanorama(target, {
                   position: { lat: coords[1], lng: coords[0] },
                   pov: { heading: 0, pitch: 0 },
@@ -727,8 +732,22 @@
                   showRoadLabels: false
                 });
                 resizePanorama();
+                setTimeout(resizePanorama, 200);
+                setTimeout(resizePanorama, 800);
+                let tilesLoaded = false;
+                if (window.google?.maps?.event) {
+                  window.google.maps.event.addListenerOnce(panoInstance, "tilesloaded", () => {
+                    tilesLoaded = true;
+                    resizePanorama();
+                  });
+                }
+                setTimeout(() => {
+                  if (!tilesLoaded) {
+                    setMessage("Street View imagery failed to load.");
+                  }
+                }, 2500);
               } else if (source === "OUTDOOR") {
-                setMessage("No outdoor Street View. Try Interior.");
+                setMessage("No outdoor Street View. Use “Try Interior”.");
               } else {
                 setMessage("No Street View for this location.");
               }
@@ -749,6 +768,12 @@
             interiorButton.addEventListener("click", () => {
               const next = currentSource === "OUTDOOR" ? "DEFAULT" : "OUTDOOR";
               interiorButton.textContent = next === "DEFAULT" ? "Exterior" : "Interior";
+              loadPanorama(next);
+            });
+          }
+          if (interiorAltButton) {
+            interiorAltButton.addEventListener("click", () => {
+              const next = currentSource === "OUTDOOR" ? "DEFAULT" : "OUTDOOR";
               loadPanorama(next);
             });
           }
