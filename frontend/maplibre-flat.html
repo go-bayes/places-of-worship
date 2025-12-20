@@ -302,7 +302,7 @@
 <body>
   <div id="map"></div>
   <div id="tile-status">Loading tiles…</div>
-  <a id="corner-link" href="https://go-bayes.github.io/places-of-worship/enhanced-places.html">Explore Enhanced View (NZ)</a>
+  <a id="corner-link" href="https://go-bayes.github.io/places-of-worship/enhanced-places.html">Data Link (NZ)</a>
   <button id="corner-reset" type="button">Reset View</button>
   <div id="counts">
     <h3>Visible Places</h3>
@@ -331,21 +331,48 @@
     }
     const showStatus = () => {};
 
-    const WELLINGTON = [174.7762, -41.2865];
-    const OVERVIEW_TILES = "https://tiles.placemap.org/places-overview/{z}/{x}/{y}";
-    const PLACES_TILES = "https://tiles.placemap.org/places/{z}/{x}/{y}";
-    const POLYGONS_TILES = "https://tiles.placemap.org/nz-polygons/{z}/{x}/{y}";
-    const BUILDINGS_TILES = "https://tiles.placemap.org/buildings/{z}/{x}/{y}";
+    const CONFIG = {
+      center: [174.7762, -41.2865],
+      initialZoom: 4.5,
+      streetViewMinZoom: 14,
+      streetViewFailDelayMs: 1200,
+      tiles: {
+        overview: "https://tiles.placemap.org/places-overview/{z}/{x}/{y}",
+        places: "https://tiles.placemap.org/places/{z}/{x}/{y}",
+        polygons: "https://tiles.placemap.org/nz-polygons/{z}/{x}/{y}",
+        buildings: "https://tiles.placemap.org/buildings/{z}/{x}/{y}"
+      },
+      layerDefaults: {
+        overview: "places_overview",
+        places: "places",
+        polygons: "nz-polygons",
+        buildings: "buildings"
+      }
+    };
 
     const urlParams = new URLSearchParams(window.location.search);
-    const OVERVIEW_LAYER = urlParams.get("overviewLayer") || "places_overview";
+    const OVERVIEW_LAYER = urlParams.get("overviewLayer") || CONFIG.layerDefaults.overview;
     const OVERVIEW_ENABLED = urlParams.get("overview") !== "0";
-    const PLACES_LAYER = urlParams.get("placesLayer") || "places";
-    const POLYGONS_LAYER = urlParams.get("polygonsLayer") || "nz-polygons";
-    const BUILDINGS_LAYER = urlParams.get("buildingsLayer") || "buildings";
+    const PLACES_LAYER = urlParams.get("placesLayer") || CONFIG.layerDefaults.places;
+    const POLYGONS_LAYER = urlParams.get("polygonsLayer") || CONFIG.layerDefaults.polygons;
+    const BUILDINGS_LAYER = urlParams.get("buildingsLayer") || CONFIG.layerDefaults.buildings;
     const GOOGLE_MAPS_KEY = window.GOOGLE_MAPS_API_KEY || "";
     const MAPTILER_API_KEY = window.MAPTILER_API_KEY || "";
     let googleMapsReady = false;
+
+    function prewarmStreetView() {
+      if (!GOOGLE_MAPS_KEY) return;
+      loadGoogleMaps()
+        .then(() => {
+          if (!window.google?.maps) return;
+          const sv = new google.maps.StreetViewService();
+          sv.getPanorama(
+            { location: { lat: CONFIG.center[1], lng: CONFIG.center[0] }, radius: 400, source: google.maps.StreetViewSource.OUTDOOR },
+            () => {}
+          );
+        })
+        .catch(() => {});
+    }
 
     const religionColors = [
       "match",
@@ -442,11 +469,22 @@
       map.triggerRepaint();
     }
 
+    function refreshMapLayers() {
+      ensureCustomLayers();
+      updateCounts();
+      nudgeMap();
+      map.triggerRepaint();
+      setTimeout(() => {
+        ensureCustomLayers();
+        map.triggerRepaint();
+      }, 280);
+    }
+
     const map = new maplibregl.Map({
       container: "map",
       style: cartoStyle.style,
-      center: WELLINGTON,
-      zoom: 4.5,
+      center: CONFIG.center,
+      zoom: CONFIG.initialZoom,
       pitch: 0,
       bearing: 0,
       projection: "mercator",
@@ -507,12 +545,14 @@
               const zoom = map.getZoom();
               map.jumpTo({ center, zoom: zoom + 0.00001 });
               map.jumpTo({ center, zoom });
+              refreshMapLayers();
             });
           });
           setTimeout(() => {
             ensureCustomLayers();
             map.triggerRepaint();
             nudgeMap();
+            refreshMapLayers();
           }, 900);
         }
       });
@@ -555,7 +595,7 @@
     };
 
     function addOverviewLayer() {
-      map.addSource(SOURCES.overview, { type: "vector", tiles: [OVERVIEW_TILES], minzoom: 0, maxzoom: 9 });
+      map.addSource(SOURCES.overview, { type: "vector", tiles: [CONFIG.tiles.overview], minzoom: 0, maxzoom: 9 });
       map.addLayer({
         id: LAYERS.overview,
         type: "circle",
@@ -589,7 +629,7 @@
 
     let placesHandlersAttached = false;
     function addPlacesLayer() {
-      map.addSource(SOURCES.places, { type: "vector", tiles: [PLACES_TILES], minzoom: 6, maxzoom: 18 });
+      map.addSource(SOURCES.places, { type: "vector", tiles: [CONFIG.tiles.places], minzoom: 6, maxzoom: 18 });
       map.addLayer({
         id: LAYERS.places,
         type: "circle",
@@ -665,6 +705,16 @@
         const latFixed = coords[1].toFixed(6);
         const lngFixed = coords[0].toFixed(6);
         const currentZoom = map.getZoom();
+        if (currentZoom < CONFIG.streetViewMinZoom) {
+          new maplibregl.Popup({ maxWidth: "320px", closeOnClick: true })
+            .setLngLat(coords)
+            .setHTML(
+              `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
+              `<div style="padding:6px 0;color:#111;font-size:13px;">Zoom closer (zoom ${CONFIG.streetViewMinZoom}+) to open Street View.</div>`
+            )
+            .addTo(map);
+          return;
+        }
         const popup = new maplibregl.Popup({ maxWidth: "720px", closeOnClick: true })
           .setLngLat(coords)
           .setHTML(
@@ -747,9 +797,10 @@
           let panoLoading = false;
           let lastPanoRequest = 0;
           let resizeObserver = null;
+          let pendingFailTimer = null;
 
-          if (currentZoom < 10) {
-            node.textContent = "Zoom closer (zoom 10+) to load Street View.";
+          if (currentZoom < CONFIG.streetViewMinZoom) {
+            node.textContent = `Zoom closer (zoom ${CONFIG.streetViewMinZoom}+) to load Street View.`;
             return;
           }
 
@@ -809,18 +860,27 @@
             if (target) target.textContent = message;
           }
 
-          function loadPanorama(source) {
+          function loadPanorama(source, attempt = 0) {
             const target = panoContainer();
             if (!target) return;
+            if (pendingFailTimer) {
+              clearTimeout(pendingFailTimer);
+              pendingFailTimer = null;
+            }
             const now = Date.now();
             lastPanoRequest = now;
             target.textContent = "Loading Street View…";
+            const radius = attempt === 0 ? 400 : 800;
             const request = {
               location: { lat: coords[1], lng: coords[0] },
-              radius: 150,
+              radius,
               source: google.maps.StreetViewSource[source] || google.maps.StreetViewSource.DEFAULT
             };
             sv.getPanorama(request, (data, status) => {
+              if (pendingFailTimer) {
+                clearTimeout(pendingFailTimer);
+                pendingFailTimer = null;
+              }
               if (status === "OK") {
                 currentSource = source;
                 if (interiorAltButton) {
@@ -836,10 +896,20 @@
                   showRoadLabels: false
                 });
                 resizePanorama();
-              } else if (source === "OUTDOOR") {
-                setMessage("No outdoor Street View. Use “Try Interior”.");
               } else {
-                setMessage("No Street View for this location.");
+                if (attempt === 0) {
+                  // Fallback: broaden search and switch source if we started outdoors.
+                  const nextSource = source === "OUTDOOR" ? "DEFAULT" : "OUTDOOR";
+                  loadPanorama(nextSource, attempt + 1);
+                  return;
+                }
+                pendingFailTimer = setTimeout(() => {
+                  if (source === "OUTDOOR") {
+                    setMessage("No outdoor Street View. Use “Try Interior”.");
+                  } else {
+                    setMessage("No Street View for this location.");
+                  }
+                }, CONFIG.streetViewFailDelayMs);
               }
             });
           }
@@ -892,6 +962,7 @@
           popup.on("close", () => {
             if (resizeObserver) resizeObserver.disconnect();
             resizeObserver = null;
+            if (pendingFailTimer) clearTimeout(pendingFailTimer);
           });
         } catch (error) {
           const node = panoContainer();
@@ -901,7 +972,7 @@
     }
 
     function addPolygonsLayer() {
-      map.addSource(SOURCES.polygons, { type: "vector", tiles: [POLYGONS_TILES], minzoom: 2, maxzoom: 14 });
+      map.addSource(SOURCES.polygons, { type: "vector", tiles: [CONFIG.tiles.polygons], minzoom: 2, maxzoom: 14 });
       map.addLayer({
         id: LAYERS.polygonsFill,
         type: "fill",
@@ -919,7 +990,7 @@
     }
 
     function addBuildingsLayer() {
-      map.addSource(SOURCES.buildings, { type: "vector", tiles: [BUILDINGS_TILES], minzoom: 10, maxzoom: 18 });
+      map.addSource(SOURCES.buildings, { type: "vector", tiles: [CONFIG.tiles.buildings], minzoom: 10, maxzoom: 18 });
       map.addLayer({
         id: LAYERS.buildingsFill,
         type: "fill",
@@ -976,12 +1047,15 @@
       updateCounts();
       setTimeout(ensureCustomLayers, 350);
       setTimeout(nudgeMap, 400);
+      setTimeout(refreshMapLayers, 650);
     });
 
     map.on("load", () => {
       initBasemapSelect();
       updateCounts();
       map.once("idle", nudgeMap);
+      map.once("idle", refreshMapLayers);
+      map.once("idle", prewarmStreetView);
     });
 
     map.on("error", (e) => {
@@ -1022,8 +1096,9 @@
     });
 
     resetButton.addEventListener("click", () => {
-      flyTo(WELLINGTON, 4.5);
+      flyTo(CONFIG.center, CONFIG.initialZoom);
       map.once("idle", nudgeMap);
+      map.once("idle", refreshMapLayers);
     });
 
 
