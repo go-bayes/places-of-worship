@@ -296,6 +296,9 @@
       #dock { left: 10px; right: 10px; bottom: 10px; width: auto; }
       #corner-link { right: 12px; bottom: 10px; }
       .maplibregl-ctrl-bottom-right { bottom: 80px; }
+      #counts { display: none !important; }
+      #basemapSelect { display: none; }
+      #cityChips { display: none; }
     }
   </style>
 </head>
@@ -703,6 +706,20 @@
         const latFixed = coords[1].toFixed(6);
         const lngFixed = coords[0].toFixed(6);
         const currentZoom = map.getZoom();
+        if (IS_MOBILE) {
+          new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
+            .setLngLat(coords)
+            .setHTML(
+              `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
+              `<div class="popup-actions" style="margin-top:6px;">` +
+              `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>` +
+              `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +
+              `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
+              `</div>`
+            )
+            .addTo(map);
+          return;
+        }
         if (currentZoom < CONFIG.streetViewMinZoom) {
           new maplibregl.Popup({ maxWidth: "320px", closeOnClick: true })
             .setLngLat(coords)
