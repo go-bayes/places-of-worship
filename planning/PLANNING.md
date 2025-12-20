@@ -51,6 +51,9 @@ Building on the successful NZ prototype and the religion repository's global arc
 - Evaluate WebView shells for iOS/Android as a fast app-store path
 - Consider MapLibre Native later if offline or native UX is required
 
+### Street View (Deferred)
+- Interior Street View is deferred until exterior pano behavior is fully stable.
+
 ### Backend Architecture
 
 #### Core API (FastAPI)
