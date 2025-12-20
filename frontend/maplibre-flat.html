@@ -130,12 +130,13 @@
       gap: 8px;
     }
     .streetview-toolbar button {
-      background: rgba(226, 232, 240, 0.18);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(15, 23, 42, 0.35);
+      color: #0b0c10;
       border-radius: 8px;
       padding: 6px 10px;
       font-size: 12px;
+      font-weight: 700;
       cursor: pointer;
     }
     .popup-actions {
@@ -432,6 +433,15 @@
     const defaultBasemapId = hasMaptilerKey ? "backdrop" : cartoStyle.id;
     let activeBasemapId = defaultBasemapId;
 
+    function nudgeMap() {
+      if (!map || !map.isStyleLoaded()) return;
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+      map.jumpTo({ center, zoom: zoom + 0.00001 });
+      map.jumpTo({ center, zoom });
+      map.triggerRepaint();
+    }
+
     const map = new maplibregl.Map({
       container: "map",
       style: cartoStyle.style,
@@ -502,6 +512,7 @@
           setTimeout(() => {
             ensureCustomLayers();
             map.triggerRepaint();
+            nudgeMap();
           }, 900);
         }
       });
@@ -653,6 +664,7 @@
         const panoId = `pano-${Date.now()}`;
         const latFixed = coords[1].toFixed(6);
         const lngFixed = coords[0].toFixed(6);
+        const currentZoom = map.getZoom();
         const popup = new maplibregl.Popup({ maxWidth: "720px", closeOnClick: true })
           .setLngLat(coords)
           .setHTML(
@@ -660,10 +672,10 @@
             `<span class="popup-title">${name}</span>` +
             `<span style="font-size:11px;color:#64748b;">Drag</span>` +
             `</div>` +
-            `<div class="streetview expanded" id="${panoId}">Loading Street View…</div>` +
+            `<div class="streetview" id="${panoId}">Loading Street View…</div>` +
             `<div class="streetview-toolbar">` +
             `<button type="button" data-mode="interior" data-pano="${panoId}">Interior</button>` +
-            `<button type="button" data-mode="expand" data-pano="${panoId}">Collapse</button>` +
+            `<button type="button" data-mode="expand" data-pano="${panoId}">Expand</button>` +
             `</div>` +
             `<div class="popup-actions">` +
             `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>` +
@@ -735,6 +747,11 @@
           let panoLoading = false;
           let lastPanoRequest = 0;
           let resizeObserver = null;
+
+          if (currentZoom < 10) {
+            node.textContent = "Zoom closer (zoom 10+) to load Street View.";
+            return;
+          }
 
           function attachResizeHandle(target) {
             if (!target || target.querySelector(".sv-resize-handle")) return;
@@ -958,11 +975,13 @@
       addCustomLayers();
       updateCounts();
       setTimeout(ensureCustomLayers, 350);
+      setTimeout(nudgeMap, 400);
     });
 
     map.on("load", () => {
       initBasemapSelect();
       updateCounts();
+      map.once("idle", nudgeMap);
     });
 
     map.on("error", (e) => {
@@ -1004,6 +1023,7 @@
 
     resetButton.addEventListener("click", () => {
       flyTo(WELLINGTON, 4.5);
+      map.once("idle", nudgeMap);
     });
 
 
