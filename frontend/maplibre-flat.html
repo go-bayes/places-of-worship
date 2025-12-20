@@ -171,6 +171,38 @@
       text-decoration: none;
       opacity: 0.85;
     }
+    #corner-reset {
+      position: fixed;
+      right: 160px;
+      bottom: 6px;
+      z-index: 11;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #e2e8f0;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 9px;
+      text-decoration: none;
+      opacity: 0.85;
+      cursor: pointer;
+    }
+    #tile-status {
+      position: fixed;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #e2e8f0;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 9px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+      z-index: 11;
+    }
+    #tile-status.visible { opacity: 0.9; }
     #counts {
       position: fixed;
       right: 12px;
@@ -231,7 +263,9 @@
 </head>
 <body>
   <div id="map"></div>
+  <div id="tile-status">Loading tiles…</div>
   <a id="corner-link" href="https://go-bayes.github.io/places-of-worship/enhanced-places.html">Explore Enhanced View (NZ)</a>
+  <button id="corner-reset" type="button">Reset View</button>
   <div id="counts">
     <h3>Visible Places</h3>
     <ul id="countsList"></ul>
@@ -321,6 +355,11 @@
             url: `https://api.maptiler.com/maps/backdrop/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
           },
           {
+            id: "streets",
+            label: "Streets",
+            url: `https://api.maptiler.com/maps/streets/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+          },
+          {
             id: "aquarelle",
             label: "Aquarelle",
             url: `https://api.maptiler.com/maps/aquarelle/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
@@ -371,6 +410,25 @@
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
     map.addControl(new maplibregl.FullscreenControl(), "bottom-right");
 
+    let pinnedLabel = null;
+    let pinnedTimer = null;
+    function showPinnedLabel(name, coords) {
+      if (!pinnedLabel) {
+        pinnedLabel = new maplibregl.Popup({
+          closeButton: false,
+          closeOnClick: false,
+          maxWidth: "260px",
+          className: "pinned-label"
+        });
+      }
+      pinnedLabel
+        .setLngLat(coords)
+        .setHTML(`<div style="font-weight:600;color:#111;">${name}</div>`)
+        .addTo(map);
+      if (pinnedTimer) clearTimeout(pinnedTimer);
+      pinnedTimer = setTimeout(() => pinnedLabel.remove(), 2200);
+    }
+
     function initBasemapSelect() {
       basemapSelect.innerHTML = "";
       basemapOptions.forEach((style) => {
@@ -396,7 +454,13 @@
             addCustomLayers();
             updateCounts();
             map.triggerRepaint();
-            map.once("idle", ensureCustomLayers);
+            map.once("idle", () => {
+              ensureCustomLayers();
+              const center = map.getCenter();
+              const zoom = map.getZoom();
+              map.jumpTo({ center, zoom: zoom + 0.00001 });
+              map.jumpTo({ center, zoom });
+            });
           });
           setTimeout(() => {
             ensureCustomLayers();
@@ -532,6 +596,7 @@
           .setLngLat(coords)
           .setHTML(`<div style="font-weight:600;color:#111;">${name}</div>`)
           .addTo(map);
+        showPinnedLabel(name, coords);
       });
 
       map.on("mouseleave", LAYERS.places, () => {
@@ -808,6 +873,8 @@
     const cityChips = document.getElementById("cityChips");
     const searchInput = document.getElementById("searchInput");
     const searchButton = document.getElementById("searchButton");
+    const resetButton = document.getElementById("corner-reset");
+    const tileStatus = document.getElementById("tile-status");
     const cityPresets = [
       { label: "Wellington", coords: [174.7762, -41.2865], zoom: 10 },
       { label: "LA", coords: [-118.2437, 34.0522], zoom: 9 },
@@ -829,6 +896,10 @@
       chip.textContent = city.shortLabel || city.label;
       chip.addEventListener("click", () => flyTo(city.coords, city.zoom));
       cityChips.appendChild(chip);
+    });
+
+    resetButton.addEventListener("click", () => {
+      flyTo(WELLINGTON, 4.5);
     });
 
 
@@ -927,14 +998,24 @@
       });
     }
 
+    let tileTimer = null;
+    function showTileStatus() {
+      tileStatus.classList.add("visible");
+      if (tileTimer) clearTimeout(tileTimer);
+      tileTimer = setTimeout(() => tileStatus.classList.remove("visible"), 2200);
+    }
+
+    map.on("movestart", showTileStatus);
     map.on("moveend", () => {
       updateCounts();
       ensureCustomLayers();
     });
+    map.on("zoomstart", showTileStatus);
     map.on("zoomend", () => {
       updateCounts();
       ensureCustomLayers();
     });
+    map.on("styledata", showTileStatus);
 
 
 
