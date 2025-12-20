@@ -79,6 +79,14 @@
       overflow-x: auto;
       padding-bottom: 2px;
       flex: 1;
+      scrollbar-width: none;
+      scrollbar-color: transparent transparent;
+    }
+    .dock-cities::-webkit-scrollbar {
+      display: none;
+      height: 0;
+      background: transparent;
+    }
     }
     .dock-chip {
       background: rgba(148,163,184,0.14); color: var(--text); border: 1px solid rgba(255,255,255,0.05);
@@ -90,6 +98,10 @@
     .streetview {
       width: min(380px, 70vw);
       height: min(240px, 32vh);
+      min-width: 260px;
+      min-height: 160px;
+      max-width: 90vw;
+      max-height: 72vh;
       border-radius: 10px;
       overflow: hidden;
       background: rgba(15, 23, 42, 0.8);
@@ -99,6 +111,10 @@
       justify-content: center;
       font-size: 12px;
       margin-top: 8px;
+      resize: both;
+      position: relative;
+      cursor: default;
+      touch-action: none;
     }
     .streetview.expanded {
       width: min(640px, 86vw);
@@ -156,6 +172,27 @@
       font-size: 12px;
       text-decoration: none;
       cursor: pointer;
+    }
+    .sv-resize-handle {
+      position: absolute;
+      right: 6px;
+      bottom: 6px;
+      width: 18px;
+      height: 18px;
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(255,255,255,0.55);
+      border-radius: 5px;
+      cursor: nwse-resize;
+      z-index: 3;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      display: grid;
+      place-items: center;
+      color: #e2e8f0;
+      font-size: 11px;
+      line-height: 1;
+      font-weight: 700;
+      user-select: none;
+      pointer-events: auto;
     }
     #corner-link {
       position: fixed;
@@ -697,11 +734,57 @@
           const interiorAltButton = popupEl.querySelector(`[data-mode="interior-alt"][data-pano="${panoId}"]`);
           let panoLoading = false;
           let lastPanoRequest = 0;
+          let resizeObserver = null;
+
+          function attachResizeHandle(target) {
+            if (!target || target.querySelector(".sv-resize-handle")) return;
+            const handle = document.createElement("div");
+            handle.className = "sv-resize-handle";
+            handle.textContent = "↘";
+            target.appendChild(handle);
+            const MIN_W = 260;
+            const MIN_H = 160;
+            handle.addEventListener("mousedown", (event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              handle.style.cursor = "nwse-resize";
+              const startX = event.clientX;
+              const startY = event.clientY;
+              const rect = target.getBoundingClientRect();
+              const startW = rect.width;
+              const startH = rect.height;
+
+              function onMove(e) {
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                const nextW = Math.min(window.innerWidth * 0.9, Math.max(MIN_W, startW + deltaX));
+                const nextH = Math.min(window.innerHeight * 0.72, Math.max(MIN_H, startH + deltaY));
+                target.style.width = `${nextW}px`;
+                target.style.height = `${nextH}px`;
+                resizePanorama();
+              }
+              function onUp() {
+                window.removeEventListener("mousemove", onMove);
+                window.removeEventListener("mouseup", onUp);
+                handle.style.cursor = "nwse-resize";
+              }
+              window.addEventListener("mousemove", onMove);
+              window.addEventListener("mouseup", onUp);
+            });
+          }
 
           function resizePanorama() {
             if (panoInstance && window.google?.maps?.event) {
               window.google.maps.event.trigger(panoInstance, "resize");
             }
+          }
+
+          function watchResize() {
+            const target = panoContainer();
+            if (!target || typeof ResizeObserver === "undefined") return;
+            if (resizeObserver) resizeObserver.disconnect();
+            resizeObserver = new ResizeObserver(() => resizePanorama());
+            resizeObserver.observe(target);
           }
 
           function setMessage(message) {
@@ -787,6 +870,12 @@
           }
 
           loadPanorama("OUTDOOR");
+          attachResizeHandle(panoContainer());
+          watchResize();
+          popup.on("close", () => {
+            if (resizeObserver) resizeObserver.disconnect();
+            resizeObserver = null;
+          });
         } catch (error) {
           const node = panoContainer();
           if (node) node.textContent = "Street View failed to load.";
