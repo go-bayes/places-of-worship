@@ -321,7 +321,7 @@
       .dock-row button { padding: 3px 6px; font-size: clamp(7px, 2vw, 8px); }
       .dock-cities { gap: 4px; }
       .dock-chip { font-size: clamp(6px, 1.4vw, 7px); padding: 2px 4px; }
-      #mobile-search-toggle { display: block; }
+      #mobile-search-toggle { display: none; }
       .maplibregl-ctrl { transform: scale(0.85); transform-origin: bottom right; }
     }
   </style>
@@ -329,7 +329,7 @@
 <body>
   <div id="map"></div>
   <div id="tile-status">Loading tiles…</div>
-  <a id="corner-link" href="https://go-bayes.github.io/places-of-worship/enhanced-places.html">Data Link (NZ)</a>
+  <a id="corner-link" style="display:none;" href="https://go-bayes.github.io/places-of-worship/enhanced-places.html">Data Link (NZ)</a>
   <button id="corner-reset" type="button" style="display:none;">Reset View</button>
   <button id="mobile-search-toggle" type="button">Search</button>
   <div id="counts">
@@ -1160,26 +1160,6 @@
       map.once("idle", nudgeMap);
       map.once("idle", refreshMapLayers);
     });
-    if (dockReset) {
-      dockReset.addEventListener("click", () => {
-        flyTo(CONFIG.center, CONFIG.initialZoom);
-        map.once("idle", nudgeMap);
-        map.once("idle", refreshMapLayers);
-      });
-    }
-
-    if (IS_MOBILE) {
-      const dock = document.getElementById("dock");
-      if (dock) dock.style.display = "none";
-      if (mobileSearchToggle) {
-        mobileSearchToggle.addEventListener("click", () => {
-          if (!dock) return;
-          const isHidden = dock.style.display === "none";
-          dock.style.display = isHidden ? "flex" : "none";
-          mobileSearchToggle.textContent = isHidden ? "Close" : "Search";
-        });
-      }
-    }
 
     async function geocode(query) {
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
