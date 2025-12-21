@@ -337,6 +337,25 @@
       color: #f1f5f9;
     }
     .maplibregl-ctrl-bottom-right { bottom: 56px; }
+    .compass-btn {
+      position: fixed;
+      right: 12px;
+      top: 12px;
+      z-index: 12;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(15,23,42,0.7);
+      color: #e2e8f0;
+      font-size: 11px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+    }
+    .compass-btn.hidden { display: none !important; }
     @media (max-width: 640px) {
       #hud { max-width: 94vw; }
       #dock { display: none !important; }
@@ -362,7 +381,8 @@
   <div id="map"></div>
   <div id="tile-status">Loading tiles…</div>
   <a id="corner-link" href="https://go-bayes.github.io/places-of-worship/enhanced-places.html">Data Link (NZ)</a>
-  <button id="corner-reset" type="button">Reset View</button>
+  <button id="corner-reset" type="button">Reset North</button>
+  <button id="compassBtn" class="compass-btn" title="Reset bearing">N</button>
   <button id="dock-toggle" type="button">Search / Places</button>
   <button id="mobile-search-toggle" type="button">Search</button>
   <div id="counts">
@@ -1232,9 +1252,7 @@
     });
 
     resetButton.addEventListener("click", () => {
-      flyTo(CONFIG.center, CONFIG.initialZoom);
-      map.once("idle", nudgeMap);
-      map.once("idle", refreshMapLayers);
+      map.resetNorth();
     });
 
     if (dockToggle) {
