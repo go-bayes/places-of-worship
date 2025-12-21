@@ -71,15 +71,23 @@
       flex-wrap: nowrap;
       width: 100%;
       overflow-x: auto;
-      padding-bottom: 2px;
+      overflow-y: hidden;
+      padding-bottom: 4px;
       flex: 1;
-      scrollbar-width: none;
-      scrollbar-color: transparent transparent;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(148,163,184,0.4) rgba(15,23,42,0.2);
+      -webkit-overflow-scrolling: touch;
     }
     .dock-cities::-webkit-scrollbar {
-      display: none;
-      height: 0;
-      background: transparent;
+      height: 8px;
+      background: rgba(15,23,42,0.2);
+    }
+    .dock-cities::-webkit-scrollbar-thumb {
+      background: rgba(148,163,184,0.4);
+      border-radius: 4px;
+    }
+    .dock-cities::-webkit-scrollbar-thumb:hover {
+      background: rgba(148,163,184,0.6);
     }
     .dock-chip {
       background: rgba(148,163,184,0.14); color: var(--text); border: 1px solid rgba(255,255,255,0.05);

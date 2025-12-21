@@ -5,6 +5,23 @@
 - Overture Maps (!) REVIEW - `scripts/extract_overture_images` pipleline. 
 - mappillary for images.
 
+### Desktop:
+  - Buttons scaled to 1.5x (midpoint between original and 2x)
+  - Table kept at 2x size
+  - Theme menu text size updated to 1.5x
+  - City bar scrolling functionality restored
+  - GitHub icon replacing "i" symbol
+  - GitHub icon aligned with Reset North button (no movement)
+  - Show Denomination Key button visible on desktop (upper right)
+  - "Zoom to 14x" message when clicking points below zoom threshold
+
+  ### Mobile:
+  - Buttons scaled to 1.5x
+  - GitHub button moved to left side
+  - Search popup button added on right side
+  - Cities removed from mobile search
+  - Mobile search popup functionality
+
 ## Current state
 - MapLibre GL frontend (`frontend/maplibre-flat.html`) served via GitHub Pages.
 - Basemap: MapTiler styles (Backdrop default) with CARTO fallback.
