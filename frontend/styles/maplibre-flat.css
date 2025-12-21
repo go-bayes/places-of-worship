@@ -74,10 +74,14 @@
       overflow-y: hidden;
       padding-bottom: 4px;
       flex: 1;
+      cursor: grab;
+      touch-action: pan-x;
+      overscroll-behavior-x: contain;
       scrollbar-width: thin;
       scrollbar-color: rgba(148,163,184,0.4) rgba(15,23,42,0.2);
       -webkit-overflow-scrolling: touch;
     }
+    .dock-cities.dragging { cursor: grabbing; }
     .dock-cities::-webkit-scrollbar {
       height: 8px;
       background: rgba(15,23,42,0.2);

@@ -903,6 +903,59 @@
       cityChips.appendChild(chip);
     });
 
+    if (cityChips) {
+      let isDragging = false;
+      let dragStartX = 0;
+      let dragStartScroll = 0;
+      let dragMoved = false;
+      const dragThreshold = 6;
+
+      const stopDrag = (event) => {
+        if (!isDragging) return;
+        isDragging = false;
+        cityChips.classList.remove("dragging");
+        if (cityChips.releasePointerCapture && event.pointerId !== undefined) {
+          cityChips.releasePointerCapture(event.pointerId);
+        }
+        if (dragMoved) {
+          setTimeout(() => {
+            dragMoved = false;
+          }, 0);
+        }
+      };
+
+      cityChips.addEventListener("pointerdown", (event) => {
+        if (event.button !== undefined && event.button !== 0) return;
+        isDragging = true;
+        dragMoved = false;
+        dragStartX = event.clientX;
+        dragStartScroll = cityChips.scrollLeft;
+        cityChips.classList.add("dragging");
+        if (cityChips.setPointerCapture && event.pointerId !== undefined) {
+          cityChips.setPointerCapture(event.pointerId);
+        }
+      });
+
+      cityChips.addEventListener("pointermove", (event) => {
+        if (!isDragging) return;
+        const deltaX = event.clientX - dragStartX;
+        if (Math.abs(deltaX) > dragThreshold) {
+          dragMoved = true;
+        }
+        cityChips.scrollLeft = dragStartScroll - deltaX;
+      });
+
+      cityChips.addEventListener("pointerup", stopDrag);
+      cityChips.addEventListener("pointercancel", stopDrag);
+      cityChips.addEventListener("pointerleave", stopDrag);
+
+      cityChips.addEventListener("click", (event) => {
+        if (!dragMoved) return;
+        event.preventDefault();
+        event.stopPropagation();
+      }, true);
+    }
+
     resetButton.addEventListener("click", () => {
       // Mobile only: reset bearing to north (no recenter); hidden on desktop
       map.resetNorth();
