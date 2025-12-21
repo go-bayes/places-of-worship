@@ -39,7 +39,7 @@
     #dock {
       position: fixed; left: 12px; right: auto; bottom: 6px;
       display: flex; flex-direction: column; gap: 6px; z-index: 11;
-      width: min(94vw, 480px);
+      width: min(94vw, 560px);
       max-width: 94vw;
     }
     .dock-panel {
@@ -47,6 +47,7 @@
       border-radius: 12px; padding: 6px 8px; backdrop-filter: blur(10px);
       box-shadow: 0 8px 18px rgba(0,0,0,0.24);
       width: 100%;
+      opacity: 0.95;
     }
     .dock-row { display: flex; gap: 6px; flex-wrap: nowrap; align-items: center; min-height: 24px; width: 100%; }
     .dock-row input {
@@ -1252,7 +1253,9 @@
     });
 
     resetButton.addEventListener("click", () => {
+      // Desktop: reset north + recenter; mobile: still visible, but main use is desktop
       map.resetNorth();
+      flyTo(CONFIG.center, CONFIG.initialZoom);
     });
 
     if (dockToggle) {
