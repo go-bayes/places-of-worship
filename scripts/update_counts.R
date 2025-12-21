@@ -10,6 +10,10 @@ suppressPackageStartupMessages({
 args <- commandArgs(trailingOnly = TRUE)
 data_dir <- if (length(args) >= 1) args[[1]] else "data/global"
 manifest_path <- if (length(args) >= 2) args[[2]] else file.path(data_dir, "manifest.json")
+# Write a dated manifest copy for diffing
+manifest_dated_path <- if (length(args) >= 3) args[[3]] else file.path(data_dir, paste0("manifest-", format(Sys.Date(), "%Y%m%d"), ".json"))
+# Write a changes report
+changes_path <- if (length(args) >= 4) args[[4]] else file.path(data_dir, "changes.csv")
 
 if (!dir.exists(data_dir)) {
   stop("Data directory not found: ", data_dir)
@@ -58,6 +62,28 @@ write.csv(
   row.names = FALSE
 )
 
+# Save dated manifest
+write_json(manifest, manifest_dated_path, pretty = TRUE, auto_unbox = TRUE)
+
+# Diff against previous manifest if available
+if (file.exists(manifest_path)) {
+  prev <- tryCatch(read_json(manifest_path, simplifyVector = TRUE), error = function(e) NULL)
+  if (!is.null(prev) && !is.null(prev$totals$by_country)) {
+    prev_counts <- unlist(prev$totals$by_country)
+    delta <- by_country - prev_counts[names(by_country)]
+    delta[is.na(delta)] <- by_country[is.na(delta)]  # new countries
+    changes <- data.frame(
+      country = names(by_country),
+      previous = as.integer(prev_counts[names(by_country)]),
+      current = as.integer(by_country),
+      delta = as.integer(delta)
+    )
+    write.csv(changes, changes_path, row.names = FALSE)
+    message("Changes written: ", changes_path)
+  }
+}
+
 message("Done. Total places: ", total)
 message("Updated: ", manifest_path)
 message("Summary: ", summary_path)
+message("Dated manifest: ", manifest_dated_path)
