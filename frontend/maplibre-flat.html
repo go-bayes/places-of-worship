@@ -198,19 +198,86 @@
       user-select: none;
       pointer-events: auto;
     }
-    #corner-link {
+    #corner-info {
       position: fixed;
       right: 12px;
-      bottom: 6px;
+      bottom: 10px;
       z-index: 11;
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(255,255,255,0.06);
-      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+    }
+    #mobile-github {
+      position: fixed;
+      left: 12px;
+      bottom: 10px;
+      z-index: 11;
+      width: 28px;
+      height: 28px;
       border-radius: 999px;
-      padding: 4px 8px;
-      font-size: 9px;
-      text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(15, 23, 42, 0.6);
+      color: #e2e8f0;
+      display: none;
+      align-items: center;
+      justify-content: center;
       opacity: 0.85;
+      text-decoration: none;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+    }
+    #mobile-github svg {
+      width: 14px;
+      height: 14px;
+      display: block;
+    }
+    #corner-info-toggle {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(15, 23, 42, 0.6);
+      color: #e2e8f0;
+      font-size: 13px;
+      font-weight: 600;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+      opacity: 0.85;
+      padding: 0;
+    }
+    #corner-info-toggle:hover {
+      opacity: 1;
+    }
+    #corner-info-menu {
+      position: absolute;
+      right: 0;
+      bottom: 32px;
+      display: grid;
+      gap: 4px;
+      padding: 6px;
+      min-width: 170px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(15, 23, 42, 0.6);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.35);
+      opacity: 0.85;
+    }
+    #corner-info-menu[hidden] {
+      display: none;
+    }
+    #corner-info-menu a {
+      display: block;
+      padding: 6px 8px;
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-size: 10px;
+      text-decoration: none;
+      white-space: nowrap;
+      background: rgba(15, 23, 42, 0.45);
+    }
+    #corner-info-menu a:hover,
+    #corner-info-menu a:focus-visible {
+      background: rgba(148, 163, 184, 0.28);
     }
     #corner-reset {
       position: fixed;
@@ -245,20 +312,6 @@
       z-index: 11;
     }
     #tile-status.visible { opacity: 0.5; }
-    #corner-link {
-      position: fixed;
-      right: 12px;
-      bottom: 10px;
-      z-index: 11;
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: #e2e8f0;
-      border-radius: 999px;
-      padding: 4px 8px;
-      font-size: 10px;
-      text-decoration: none;
-      opacity: 0.9;
-    }
     #dock-toggle {
       position: fixed;
       left: 12px;
@@ -385,7 +438,8 @@
     @media (max-width: 640px) {
       #hud { max-width: 94vw; }
       #dock { display: none !important; }
-      #corner-link { right: 12px; bottom: 10px; }
+      #corner-info { right: 12px; bottom: 10px; }
+      #mobile-github { display: inline-flex; }
       .maplibregl-ctrl-bottom-right { bottom: 80px; }
       #counts {
         display: none;
@@ -413,7 +467,7 @@
       .dock-cities { gap: 4px; }
       .dock-chip { font-size: clamp(6px, 1.4vw, 7px); padding: 2px 4px; }
       #mobile-search-toggle { display: none; }
-      #corner-link { display: none; }
+      #corner-info { display: none; }
       #dock-toggle { display: none; }
       #counts-toggle {
         display: inline-flex;
@@ -431,7 +485,18 @@
 <body>
   <div id="map"></div>
   <div id="tile-status">Loading tiles…</div>
-  <a id="corner-link" href="https://go-bayes.github.io/places-of-worship/enhanced-places.html">Data Link (NZ)</a>
+  <div id="corner-info">
+    <button id="corner-info-toggle" type="button" aria-label="Info" aria-haspopup="true" aria-expanded="false" aria-controls="corner-info-menu">i</button>
+    <div id="corner-info-menu" role="menu" hidden>
+      <a role="menuitem" href="https://go-bayes.github.io/places-of-worship/enhanced-places.html">Enhanced Data (NZ)</a>
+      <a role="menuitem" href="https://github.com/go-bayes/places-of-worship">GitHub Repo</a>
+    </div>
+  </div>
+  <a id="mobile-github" href="https://github.com/go-bayes/places-of-worship" aria-label="GitHub repo">
+    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.5 7.5 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+    </svg>
+  </a>
   <button id="corner-reset" type="button">Reset North</button>
   <button id="compassBtn" class="compass-btn" title="Reset bearing">N</button>
   <button id="dock-toggle" type="button">Search / Places</button>
@@ -1277,9 +1342,13 @@
     const searchInput = document.getElementById("searchInput");
     const searchButton = document.getElementById("searchButton");
     const resetButton = document.getElementById("corner-reset");
+    const dock = document.getElementById("dock");
     const dockToggle = document.getElementById("dock-toggle");
     const mobileSearchToggle = document.getElementById("mobile-search-toggle");
     const tileStatus = document.getElementById("tile-status");
+    const cornerInfo = document.getElementById("corner-info");
+    const infoToggle = document.getElementById("corner-info-toggle");
+    const infoMenu = document.getElementById("corner-info-menu");
     const cityPresets = [
       { label: "Wellington", coords: [174.7762, -41.2865], zoom: 10 },
       { label: "LA", coords: [-118.2437, 34.0522], zoom: 9 },
@@ -1310,8 +1379,45 @@
       map.resetNorth();
     });
 
+    function closeInfoMenu() {
+      if (!infoMenu || !infoToggle) return;
+      if (infoMenu.hidden) return;
+      infoMenu.hidden = true;
+      infoToggle.setAttribute("aria-expanded", "false");
+    }
+
+    function syncInfoPosition() {
+      if (!cornerInfo) return;
+      if (!dock || dock.style.display === "none" || !searchInput) {
+        cornerInfo.style.top = "";
+        cornerInfo.style.bottom = "";
+        return;
+      }
+      const inputRect = searchInput.getBoundingClientRect();
+      if (!inputRect.height) return;
+      cornerInfo.style.top = `${Math.round(inputRect.top)}px`;
+      cornerInfo.style.bottom = "auto";
+    }
+
+    if (infoToggle && infoMenu) {
+      infoToggle.addEventListener("click", () => {
+        const shouldOpen = infoMenu.hidden;
+        infoMenu.hidden = !shouldOpen;
+        infoToggle.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+      });
+      document.addEventListener("click", (event) => {
+        if (infoMenu.hidden) return;
+        if (infoMenu.contains(event.target) || infoToggle.contains(event.target)) return;
+        closeInfoMenu();
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeInfoMenu();
+        }
+      });
+    }
+
     if (dockToggle) {
-      const dock = document.getElementById("dock");
       if (dock) {
         dock.style.display = "none";
       }
@@ -1320,8 +1426,13 @@
         const hidden = dock.style.display === "none";
         dock.style.display = hidden ? "flex" : "none";
         dockToggle.textContent = hidden ? "Hide Search/Places" : "Search / Places";
+        requestAnimationFrame(syncInfoPosition);
       });
     }
+
+    window.addEventListener("resize", () => {
+      requestAnimationFrame(syncInfoPosition);
+    });
 
     async function geocode(query) {
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
