@@ -4,8 +4,11 @@
 ## Quick Links
 
 
-- Global map: (https://www.placesmap.org)[https://www.placesmap.org] or 
+### Global Map: 
+https://www.placesmap.org or 
 https://go-bayes.github.io/places-of-worship/frontend/maplibre-flat.html 
+
+## Data Enhances Map
 - Enhanced NZ: https://go-bayes.github.io/places-of-worship/index.html
 
 ## Stack
