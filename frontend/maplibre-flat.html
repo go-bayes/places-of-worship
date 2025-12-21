@@ -527,8 +527,10 @@
       minZoom: IS_MOBILE ? CONFIG.mobileMinZoom : 0
     });
 
-    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
-    map.addControl(new maplibregl.FullscreenControl(), "bottom-right");
+    if (!IS_MOBILE) {
+      map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
+      map.addControl(new maplibregl.FullscreenControl(), "bottom-right");
+    }
 
     let pinnedLabel = null;
     let pinnedTimer = null;
