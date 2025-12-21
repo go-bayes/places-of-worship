@@ -40,6 +40,7 @@
       position: fixed; left: 12px; right: auto; bottom: 6px;
       display: flex; flex-direction: column; gap: 6px; z-index: 11;
       width: min(94vw, 480px);
+      max-width: 94vw;
     }
     .dock-panel {
       background: rgba(15, 23, 42, 0.62); border: 1px solid rgba(255,255,255,0.06);
@@ -47,10 +48,10 @@
       box-shadow: 0 8px 18px rgba(0,0,0,0.24);
       width: 100%;
     }
-    .dock-row { display: flex; gap: 6px; flex-wrap: nowrap; align-items: center; min-height: 24px; }
+    .dock-row { display: flex; gap: 6px; flex-wrap: nowrap; align-items: center; min-height: 24px; width: 100%; }
     .dock-row input {
-      flex: 1.3; min-width: 0; background: rgba(255,255,255,0.08); border: 1px solid transparent;
-      color: var(--text); padding: 6px 8px; border-radius: 8px; font-size: 11px;
+      flex: 1 1 auto; min-width: 0; background: rgba(255,255,255,0.08); border: 1px solid transparent;
+      color: var(--text); padding: 6px 8px; border-radius: 8px; font-size: clamp(9px, 2vw, 11px);
     }
     .dock-row select {
       background: rgba(255,255,255,0.08);
@@ -58,15 +59,15 @@
       color: var(--text);
       padding: 2px 6px;
       border-radius: 8px;
-      font-size: 9px;
+      font-size: clamp(8px, 1.8vw, 9px);
       min-width: 104px;
       flex-shrink: 0;
     }
     .dock-row input::placeholder { color: rgba(226,232,240,0.6); }
     .dock-row button {
       background: rgba(226, 232, 240, 0.16); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px; padding: 2px 6px; font-weight: 700; cursor: pointer;
-      transition: transform 120ms ease, box-shadow 120ms ease; font-size: 9px;
+      border-radius: 8px; padding: 3px 7px; font-weight: 700; cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease; font-size: clamp(9px, 2vw, 10px);
     }
     .dock-row button.secondary { background: rgba(255,255,255,0.12); color: var(--text); }
     .dock-row button:hover { transform: translateY(-1px); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
@@ -90,7 +91,7 @@
     }
     .dock-chip {
       background: rgba(148,163,184,0.14); color: var(--text); border: 1px solid rgba(255,255,255,0.05);
-      padding: 2px 6px; border-radius: 999px; font-size: 8.5px; cursor: pointer;
+      padding: 2px 6px; border-radius: 999px; font-size: clamp(7px, 1.8vw, 8.5px); cursor: pointer;
       transition: transform 120ms ease, background 120ms ease;
     }
     .dock-chip:hover { transform: translateY(-1px); background: rgba(148,163,184,0.28); }
@@ -227,7 +228,7 @@
     #tile-status {
       position: fixed;
       left: 50%;
-      bottom: 12px;
+      top: 10px;
       transform: translateX(-50%);
       background: rgba(15, 23, 42, 0.72);
       border: 1px solid rgba(255,255,255,0.08);
@@ -308,17 +309,17 @@
     .maplibregl-ctrl-bottom-right { bottom: 56px; }
     @media (max-width: 640px) {
       #hud { max-width: 94vw; }
-      #dock { left: 10px; right: 10px; bottom: 10px; width: auto; }
+      #dock { left: 10px; right: 10px; bottom: 10px; width: 100%; max-width: 100%; }
       #corner-link { right: 12px; bottom: 10px; }
       .maplibregl-ctrl-bottom-right { bottom: 80px; }
       #counts { display: none !important; }
       #basemapSelect { display: none; }
       #cityChips { display: flex; }
       .dock-row { gap: 4px; }
-      .dock-row input { padding: 4px 6px; font-size: 9px; }
-      .dock-row button { padding: 3px 6px; font-size: 9px; }
+      .dock-row input { padding: 4px 6px; font-size: clamp(8px, 2vw, 9px); }
+      .dock-row button { padding: 3px 6px; font-size: clamp(8px, 2vw, 9px); }
       .dock-cities { gap: 4px; }
-      .dock-chip { font-size: 7px; padding: 2px 5px; }
+      .dock-chip { font-size: clamp(6.5px, 1.6vw, 7px); padding: 2px 5px; }
       #mobile-search-toggle { display: block; }
     }
   </style>
@@ -327,7 +328,7 @@
   <div id="map"></div>
   <div id="tile-status">Loading tiles…</div>
   <a id="corner-link" href="https://go-bayes.github.io/places-of-worship/enhanced-places.html">Data Link (NZ)</a>
-  <button id="corner-reset" type="button">Reset View</button>
+  <button id="corner-reset" type="button" style="display:none;">Reset View</button>
   <button id="mobile-search-toggle" type="button">Search</button>
   <div id="counts">
     <h3>Visible Places</h3>
@@ -339,6 +340,7 @@
         <div class="dock-row">
           <input id="searchInput" type="text" placeholder="Search an address or place (prototype)">
           <button id="searchButton">Search</button>
+          <button id="dockReset" title="Reset view">Reset</button>
         </div>
         <div class="dock-row dock-cities-row">
           <div class="dock-cities" id="cityChips"></div>
@@ -1122,6 +1124,7 @@
     const cityChips = document.getElementById("cityChips");
     const searchInput = document.getElementById("searchInput");
     const searchButton = document.getElementById("searchButton");
+    const dockReset = document.getElementById("dockReset");
     const resetButton = document.getElementById("corner-reset");
     const mobileSearchToggle = document.getElementById("mobile-search-toggle");
     const tileStatus = document.getElementById("tile-status");
@@ -1153,6 +1156,13 @@
       map.once("idle", nudgeMap);
       map.once("idle", refreshMapLayers);
     });
+    if (dockReset) {
+      dockReset.addEventListener("click", () => {
+        flyTo(CONFIG.center, CONFIG.initialZoom);
+        map.once("idle", nudgeMap);
+        map.once("idle", refreshMapLayers);
+      });
+    }
 
     if (IS_MOBILE) {
       const dock = document.getElementById("dock");
