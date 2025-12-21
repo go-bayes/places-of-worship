@@ -3,7 +3,9 @@
 
 ## Quick Links
 
-- Global map: https://go-bayes.github.io/places-of-worship/frontend/maplibre-flat.html
+
+- Global map: (https://www.placesmap.org)[https://www.placesmap.org] or 
+https://go-bayes.github.io/places-of-worship/frontend/maplibre-flat.html 
 - Enhanced NZ: https://go-bayes.github.io/places-of-worship/index.html
 
 ## Stack
@@ -35,10 +37,13 @@ This project makes use of OpenStreetMap data. All OSM data and derivative databa
 
 This project is licensed under the Open Database License (ODbL 1.0) to maintain compatibility with OpenStreetMap data.
 
+## Team
 
+- Dr. Joseph Watts, University of Canterbury
+- Prof. Joseph Bulbulia, Victoria University of Wellington
 
 ## Thanks
 
 This project is funded through a subgrant funded by the Templeton Religion Trust (TRT-2022-30666).
 
-Nick Young at the University of Auckland provided the initial inspiration. 
+Nick Young at the University of Auckland Centre for E-research provided the initial inspiration. 
