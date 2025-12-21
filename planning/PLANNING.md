@@ -2,7 +2,7 @@
 
 ## To do
 - investigate Mapillary / KartaView for sourcing images
-- Overture Maps (!)
+- Overture Maps (!) REVIEW - `scripts/extract_overture_images` pipleline. 
 
 ## Current state
 - MapLibre GL frontend (`frontend/maplibre-flat.html`) served via GitHub Pages.
