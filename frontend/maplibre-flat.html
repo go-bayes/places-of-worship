@@ -1253,9 +1253,8 @@
     });
 
     resetButton.addEventListener("click", () => {
-      // Mobile only: reset north + recenter; hidden on desktop
+      // Mobile only: reset bearing to north (no recenter); hidden on desktop
       map.resetNorth();
-      flyTo(CONFIG.center, CONFIG.initialZoom);
     });
 
     if (dockToggle) {
