@@ -1,5 +1,9 @@
 # Global Places of Worship Mapping - Planning (current)
 
+## To do
+- investigate Mapillary / KartaView for sourcing images
+- Overture Maps (!)
+
 ## Current state
 - MapLibre GL frontend (`frontend/maplibre-flat.html`) served via GitHub Pages.
 - Basemap: MapTiler styles (Backdrop default) with CARTO fallback.
