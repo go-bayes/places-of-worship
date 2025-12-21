@@ -1253,7 +1253,7 @@
     });
 
     resetButton.addEventListener("click", () => {
-      // Desktop: reset north + recenter; mobile: still visible, but main use is desktop
+      // Mobile only: reset north + recenter; hidden on desktop
       map.resetNorth();
       flyTo(CONFIG.center, CONFIG.initialZoom);
     });
