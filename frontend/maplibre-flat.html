@@ -375,7 +375,6 @@
         <div class="dock-row">
           <input id="searchInput" type="text" placeholder="Search an address or place (prototype)">
           <button id="searchButton">Search</button>
-          <button id="dockReset" title="Reset view">Reset</button>
         </div>
         <div class="dock-row dock-cities-row">
           <div class="dock-cities" id="cityChips"></div>
@@ -658,6 +657,7 @@
       buildingsLine: "pow-buildings-line"
     };
 
+    let overviewMobileHandlerAttached = false;
     function addOverviewLayer() {
       map.addSource(SOURCES.overview, { type: "vector", tiles: [CONFIG.tiles.overview], minzoom: 0, maxzoom: 9 });
       map.addLayer({
@@ -689,6 +689,29 @@
           ]
         }
       });
+
+      if (IS_MOBILE && !overviewMobileHandlerAttached) {
+        overviewMobileHandlerAttached = true;
+        map.on("click", LAYERS.overview, (e) => {
+          const feature = e.features && e.features[0];
+          if (!feature) return;
+          const props = feature.properties || {};
+          const name = props["name:en"] || props.name_en || props.name || "Unnamed";
+          const coords = feature.geometry?.coordinates;
+          if (!coords) return;
+          const latFixed = coords[1].toFixed(6);
+          const lngFixed = coords[0].toFixed(6);
+          new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
+            .setLngLat(coords)
+            .setHTML(
+              `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
+              `<div class="popup-actions" style="margin-top:6px;">` +
+              `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>` +
+              `</div>`
+            )
+            .addTo(map);
+        });
+      }
     }
 
     let placesHandlersAttached = false;
@@ -1161,7 +1184,6 @@
     const cityChips = document.getElementById("cityChips");
     const searchInput = document.getElementById("searchInput");
     const searchButton = document.getElementById("searchButton");
-    const dockReset = document.getElementById("dockReset");
     const resetButton = document.getElementById("corner-reset");
     const dockToggle = document.getElementById("dock-toggle");
     const mobileSearchToggle = document.getElementById("mobile-search-toggle");
@@ -1197,16 +1219,11 @@
       map.once("idle", refreshMapLayers);
     });
 
-    if (dockReset) {
-      dockReset.addEventListener("click", () => {
-        flyTo(CONFIG.center, CONFIG.initialZoom);
-        map.once("idle", nudgeMap);
-        map.once("idle", refreshMapLayers);
-      });
-    }
-
     if (dockToggle) {
       const dock = document.getElementById("dock");
+      if (dock) {
+        dock.style.display = "none";
+      }
       dockToggle.addEventListener("click", () => {
         if (!dock) return;
         const hidden = dock.style.display === "none";
