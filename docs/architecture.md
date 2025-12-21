@@ -1,60 +1,49 @@
 # Places of Worship - Architecture Overview
 
-## High-level flow
+## High-level flow (current)
 
-ASCII diagram
-
-User Browser
-   |
-   v
-GitHub Pages (static frontend)
-  |  - MapLibre GL JS
-  |  - UI + controls
-  v
-MapTiler Cloud (basemap styles)
-  ^
-  |
-Martin tile server (custom tiles) ----> Google VM (Docker)
-  |
-  v
-Google Cloud Storage (tiles bucket)
-  |
-  v
-Street View (Google Maps JS API)
-
+```
 User browser
-  -> GitHub Pages (static frontend)
-     -> MapLibre GL JS renders map
-     -> MapTiler Cloud styles (basemap)
-     -> Martin tile server (custom data layers)
-     -> Google Maps JS API (Street View in popups)
+  -> GitHub Pages (static frontend, MapLibre GL)
+     -> Basemap: MapTiler styles (Backdrop default) or CARTO fallback
+     -> Custom tiles: Martin @ https://tiles.placemap.org (places, overview, buildings, NZ polygons)
+     -> Street View: Google Maps JS API (inline desktop, link-only mobile)
+
+Tile origin
+  GCS bucket (places-tiles) -> Google VM (Docker) -> Martin -> HTTPS
+
+Domains
+  www.placesmap.org  -> GitHub Pages
+  tiles.placemap.org -> Google VM (Martin)
+```
 
 ## Components
 
 Frontend (GitHub Pages)
-- Files: `frontend/maplibre-flat.html`, `frontend/style.css`, `frontend/config.public.js`
-- Role: UI, map controls, filters, popups, legend, counts
+- File: `frontend/maplibre-flat.html` (+ `config.public.js`, optional `config.js`)
+- Features: MapLibre layers, desktop Street View, mobile link-out, mobile dock toggle, basemap selector (desktop only), counts (desktop only), city chips/search.
 
 Basemap (MapTiler Cloud)
-- Role: vector basemap styles (Backdrop, Toner, etc.)
+- Styles: Backdrop (default), Streets, Aquarelle, Dataviz, Satellite, Toner, Topo, Winter
 - Key: `window.MAPTILER_API_KEY` in `frontend/config.public.js`
-- Fallback: CARTO Light raster style when MapTiler fails
+- Fallback: CARTO Light raster when MapTiler is unavailable
 
-Custom data tiles (Martin + Google VM)
-- Martin (Docker) serves vector tiles for:
-  - `places` (full points)
-  - `places-overview` (overview points)
+Custom data tiles (Martin on GCP VM)
+- Layers:
+  - `places` (full detail points)
+  - `places-overview` (low-zoom overview points)
   - `buildings`
   - `nz-polygons`
 - Endpoint: `https://tiles.placemap.org`
-- VM pulls tiles from Google Cloud Storage into `/srv/tiles`
+- VM pulls tiles from GCS into `/srv/tiles` and serves via Dockerised Martin
 
 Tile storage (Google Cloud Storage)
-- Bucket: `places-tiles`
-- Contains `.mbtiles` and `.pmtiles` files
+- Bucket: `places-tiles` (mbtiles/pmtiles)
+- Synced to VM; Martin reads from local `/srv/tiles`
 
 Street View (Google Maps JS API)
-- Used for popup panoramas
+- Inline pano on desktop (zoom gate)
+- External link on mobile
 - Key: `window.GOOGLE_MAPS_API_KEY` in `frontend/config.public.js`
 
 DNS
@@ -64,11 +53,11 @@ DNS
 
 ## Data pipeline (local -> tiles -> server)
 
-1) Build tiles locally (Tippecanoe)
-2) Upload tiles to Google Cloud Storage
-3) VM syncs tiles into `/srv/tiles`
-4) Martin serves tiles over HTTPS
-5) Frontend consumes tiles in MapLibre
+1) Build tiles locally with Tippecanoe (`places.mbtiles`, `places-overview.mbtiles`, `buildings.mbtiles`, `nz-polygons.pmtiles`).
+2) Upload tiles to GCS bucket `places-tiles`.
+3) VM syncs/copies tiles into `/srv/tiles`.
+4) Martin (Docker) serves tiles at `https://tiles.placemap.org`.
+5) Frontend consumes tiles in MapLibre; MapTiler provides basemap.
 
 ## URLs used by the frontend
 
