@@ -363,6 +363,7 @@
       initialZoom: 4.5,
       streetViewMinZoom: 14,
       streetViewFailDelayMs: 1200,
+      mobileMinZoom: 3.0,
       tiles: {
         overview: "https://tiles.placemap.org/places-overview/{z}/{x}/{y}",
         places: "https://tiles.placemap.org/places/{z}/{x}/{y}",
@@ -520,7 +521,8 @@
       bearing: 0,
       projection: "mercator",
       hash: true,
-      maxZoom: 18
+      maxZoom: 18,
+      minZoom: IS_MOBILE ? CONFIG.mobileMinZoom : 0
     });
 
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
