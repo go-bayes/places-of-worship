@@ -781,27 +781,45 @@
 
       map.on("click", LAYERS.places, async (e) => {
         const feature = e.features && e.features[0];
-        if (!feature) return;
-        const props = feature.properties || {};
-        const name = props["name:en"] || props.name_en || props.name || "Unnamed";
-        const lat = feature.properties?.lat;
-        const lng = feature.properties?.lng;
-        const coords = feature.geometry?.coordinates || (lng && lat ? [lng, lat] : null);
+        const props = feature?.properties || {};
+        const name = props["name:en"] || props.name_en || props.name || "Loading place…";
+        const lat = props?.lat;
+        const lng = props?.lng;
+        let coords = feature?.geometry?.coordinates || (lng && lat ? [lng, lat] : null);
+        if (!coords) coords = e.lngLat ? [e.lngLat.lng, e.lngLat.lat] : null;
         if (!coords) return;
         const panoId = `pano-${Date.now()}`;
         const latFixed = coords[1].toFixed(6);
         const lngFixed = coords[0].toFixed(6);
         const currentZoom = map.getZoom();
+        const openStreetViewLink = `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>`;
+
+        // Mobile: always allow Street View link at any zoom, with retry to fetch name
         if (IS_MOBILE) {
-          new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
+          const popup = new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
             .setLngLat(coords)
             .setHTML(
               `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
-              `<div class="popup-actions" style="margin-top:6px;">` +
-              `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>` +
-              `</div>`
+              `<div class="popup-actions" style="margin-top:6px;">${openStreetViewLink}</div>`
             )
             .addTo(map);
+
+          const fillPopupName = () => {
+            const liveFeatures = map.queryRenderedFeatures({ layers: [LAYERS.places, LAYERS.overview], filter: ["==", ["id"], feature?.id || null] });
+            const f = liveFeatures && liveFeatures[0];
+            const p = f?.properties || {};
+            const betterName = p["name:en"] || p.name_en || p.name;
+            if (betterName) {
+              popup.setHTML(
+                `<div class="popup-header"><span class="popup-title">${betterName}</span></div>` +
+                `<div class="popup-actions" style="margin-top:6px;">${openStreetViewLink}</div>`
+              );
+            }
+          };
+
+          // Retry shortly in case tile was still loading
+          setTimeout(fillPopupName, 180);
+          map.once("idle", fillPopupName);
           return;
         }
         if (currentZoom < CONFIG.streetViewMinZoom) {
