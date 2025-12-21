@@ -135,8 +135,8 @@
       border: 1px solid rgba(15, 23, 42, 0.35);
       color: #0b0c10;
       border-radius: 8px;
-      padding: 6px 10px;
-      font-size: 12px;
+      padding: 5px 8px;
+      font-size: 11px;
       font-weight: 700;
       cursor: pointer;
     }
@@ -159,6 +159,7 @@
     .popup-title {
       font-weight: 600;
       color: #111;
+      font-size: 14px;
     }
     .popup-actions a,
     .popup-actions button {
@@ -166,12 +167,12 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding: 6px 10px;
+      padding: 5px 8px;
       border-radius: 8px;
       border: 1px solid rgba(0,0,0,0.1);
       background: rgba(15, 23, 42, 0.08);
       color: #111;
-      font-size: 12px;
+      font-size: 11px;
       text-decoration: none;
       cursor: pointer;
     }
@@ -247,12 +248,12 @@
       left: 12px;
       bottom: 12px;
       z-index: 12;
-      padding: 8px 10px;
+      padding: 6px 8px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.14);
       background: rgba(15,23,42,0.7);
       color: #e2e8f0;
-      font-size: 11px;
+      font-size: 10px;
       cursor: pointer;
       display: none;
       box-shadow: 0 8px 16px rgba(0,0,0,0.28);
@@ -316,11 +317,12 @@
       #basemapSelect { display: none; }
       #cityChips { display: flex; }
       .dock-row { gap: 4px; }
-      .dock-row input { padding: 4px 6px; font-size: clamp(8px, 2vw, 9px); }
-      .dock-row button { padding: 3px 6px; font-size: clamp(8px, 2vw, 9px); }
+      .dock-row input { padding: 4px 6px; font-size: clamp(7px, 2vw, 8px); }
+      .dock-row button { padding: 3px 6px; font-size: clamp(7px, 2vw, 8px); }
       .dock-cities { gap: 4px; }
-      .dock-chip { font-size: clamp(6.5px, 1.6vw, 7px); padding: 2px 5px; }
+      .dock-chip { font-size: clamp(6px, 1.4vw, 7px); padding: 2px 4px; }
       #mobile-search-toggle { display: block; }
+      .maplibregl-ctrl { transform: scale(0.85); transform-origin: bottom right; }
     }
   </style>
 </head>
@@ -449,10 +451,10 @@
             url: `https://api.maptiler.com/maps/backdrop/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
           },
           {
-            id: "streets",
-            label: "Streets",
-            url: `https://api.maptiler.com/maps/streets/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
-          },
+      id: "streets",
+      label: "Streets",
+      url: `https://api.maptiler.com/maps/streets/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+    },
           {
             id: "aquarelle",
             label: "Aquarelle",
@@ -479,12 +481,12 @@
             url: `https://api.maptiler.com/maps/topo/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
           },
           {
-            id: "winter",
-            label: "Winter",
-            url: `https://api.maptiler.com/maps/winter/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
-          }
-        ]
-      : [];
+      id: "winter",
+      label: "Winter",
+      url: `https://api.maptiler.com/maps/winter/style.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+    }
+  ]
+: [];
     const basemapOptions = [cartoStyle, ...maptilerStyles];
     const defaultBasemapId = hasMaptilerKey ? "backdrop" : cartoStyle.id;
     let activeBasemapId = defaultBasemapId;
@@ -739,8 +741,6 @@
               `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
               `<div class="popup-actions" style="margin-top:6px;">` +
               `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>` +
-              `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +
-              `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
               `</div>`
             )
             .addTo(map);
