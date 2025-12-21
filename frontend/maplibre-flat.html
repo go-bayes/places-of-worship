@@ -231,14 +231,14 @@
     #tile-status {
       position: fixed;
       left: 50%;
-      top: 10px;
-      transform: translateX(-50%);
-      background: rgba(15, 23, 42, 0.72);
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(15, 23, 42, 1);
       border: 1px solid rgba(255,255,255,0.08);
       color: #e2e8f0;
       border-radius: 999px;
-      padding: 4px 10px;
-      font-size: 9px;
+      padding: 3px 8px;
+      font-size: 8px;
       opacity: 0;
       pointer-events: none;
       transition: opacity 200ms ease;
@@ -287,6 +287,24 @@
       cursor: pointer;
       display: none;
       box-shadow: 0 8px 16px rgba(0,0,0,0.28);
+    }
+    #counts-toggle {
+      position: fixed;
+      left: 50%;
+      top: 10px;
+      transform: translateX(-50%);
+      z-index: 12;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(15,23,42,0.72);
+      color: #e2e8f0;
+      font-size: 9px;
+      cursor: pointer;
+      display: none;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.28);
+      letter-spacing: 0.01em;
+      opacity: 0.85;
     }
     #counts {
       position: fixed;
@@ -362,7 +380,24 @@
       #dock { display: none !important; }
       #corner-link { right: 12px; bottom: 10px; }
       .maplibregl-ctrl-bottom-right { bottom: 80px; }
-      #counts { display: none !important; }
+      #counts {
+        display: none;
+        left: 50%;
+        right: auto;
+        top: 44px;
+        bottom: auto;
+        transform: translateX(-50%);
+        width: min(86vw, 240px);
+        max-height: min(50vh, 240px);
+        overflow-y: auto;
+        padding: 6px 8px;
+        font-size: 9px;
+        opacity: 0.85;
+      }
+      #counts h3 { font-size: 9px; }
+      #counts ul { gap: 3px; }
+      #counts li { font-size: 9px; }
+      #counts .dot { width: 6px; height: 6px; }
       #basemapSelect { display: none; }
       #cityChips { display: none; }
       .dock-row { gap: 4px; }
@@ -373,6 +408,14 @@
       #mobile-search-toggle { display: none; }
       #corner-link { display: none; }
       #dock-toggle { display: none; }
+      #counts-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 9px;
+        padding: 4px 10px;
+      }
       .maplibregl-ctrl { transform: scale(0.85); transform-origin: bottom right; }
       #corner-reset { display: block; }
     }
@@ -386,6 +429,7 @@
   <button id="compassBtn" class="compass-btn" title="Reset bearing">N</button>
   <button id="dock-toggle" type="button">Search / Places</button>
   <button id="mobile-search-toggle" type="button">Search</button>
+  <button id="counts-toggle" type="button" aria-controls="counts" aria-expanded="false">Show Denomination Key</button>
   <div id="counts">
     <h3>Visible Places</h3>
     <ul id="countsList"></ul>
@@ -1303,6 +1347,7 @@
     const countsPanel = document.getElementById("counts");
     const countsList = document.getElementById("countsList");
     const countsTotal = document.getElementById("countsTotal");
+    const countsToggle = document.getElementById("counts-toggle");
     const countLabels = [
       { key: "christian", label: "Christian", color: "#e11d48" },
       { key: "muslim", label: "Muslim", color: "#16a34a" },
@@ -1314,7 +1359,23 @@
       { key: "taoist", label: "Taoist", color: "#06b6d4" },
       { key: "unknown", label: "Unknown", color: "#9ca3af" }
     ];
+    let countsUserEnabled = !IS_MOBILE;
     let countsScheduled = false;
+
+    function syncCountsToggleLabel() {
+      if (!countsToggle) return;
+      countsToggle.textContent = countsUserEnabled ? "Hide Denomination Key" : "Show Denomination Key";
+      countsToggle.setAttribute("aria-expanded", countsUserEnabled ? "true" : "false");
+    }
+
+    if (countsToggle) {
+      syncCountsToggleLabel();
+      countsToggle.addEventListener("click", () => {
+        countsUserEnabled = !countsUserEnabled;
+        syncCountsToggleLabel();
+        updateCounts();
+      });
+    }
 
     function updateCounts() {
       if (!map.isStyleLoaded()) return;
@@ -1323,7 +1384,7 @@
       requestAnimationFrame(() => {
         countsScheduled = false;
         const zoom = map.getZoom();
-        if (zoom < 4) {
+        if (zoom < 4 || !countsUserEnabled) {
           countsPanel.style.display = "none";
           return;
         }
