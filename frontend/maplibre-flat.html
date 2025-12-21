@@ -1384,7 +1384,13 @@
       requestAnimationFrame(() => {
         countsScheduled = false;
         const zoom = map.getZoom();
-        if (zoom < 4 || !countsUserEnabled) {
+        const eligibleZoom = zoom >= 4;
+        if (countsToggle && IS_MOBILE) {
+          countsToggle.style.display = eligibleZoom ? "inline-flex" : "none";
+          countsToggle.disabled = !eligibleZoom;
+          countsToggle.setAttribute("aria-disabled", eligibleZoom ? "false" : "true");
+        }
+        if (!eligibleZoom || !countsUserEnabled) {
           countsPanel.style.display = "none";
           return;
         }
