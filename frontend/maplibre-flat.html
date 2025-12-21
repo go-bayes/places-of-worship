@@ -244,7 +244,7 @@
       transition: opacity 200ms ease;
       z-index: 11;
     }
-    #tile-status.visible { opacity: 0.9; }
+    #tile-status.visible { opacity: 0.5; }
     #corner-link {
       position: fixed;
       right: 12px;
@@ -331,6 +331,13 @@
       margin: 0;
       display: grid;
       gap: 3px;
+    }
+    #countsHint {
+      display: none;
+      text-align: center;
+      color: #cbd5f5;
+      font-size: 9px;
+      padding: 2px 0 6px;
     }
     #counts li {
       display: flex;
@@ -432,6 +439,7 @@
   <button id="counts-toggle" type="button" aria-controls="counts" aria-expanded="false">Show Denomination Key</button>
   <div id="counts">
     <h3>Visible Places</h3>
+    <div id="countsHint">Zoom in for key</div>
     <ul id="countsList"></ul>
     <div class="count-total" id="countsTotal">Total: 0</div>
   </div>
@@ -1345,6 +1353,7 @@
     });
 
     const countsPanel = document.getElementById("counts");
+    const countsHint = document.getElementById("countsHint");
     const countsList = document.getElementById("countsList");
     const countsTotal = document.getElementById("countsTotal");
     const countsToggle = document.getElementById("counts-toggle");
@@ -1397,11 +1406,25 @@
             syncCountsToggleLabel();
           }
         }
-        if (!eligibleZoom || !countsUserEnabled) {
+        if (!eligibleZoom) {
+          if (IS_MOBILE) {
+            countsPanel.style.display = "none";
+          } else {
+            countsPanel.style.display = "block";
+            if (countsHint) countsHint.style.display = "block";
+            countsList.style.display = "none";
+            countsTotal.style.display = "none";
+          }
+          return;
+        }
+        if (!countsUserEnabled) {
           countsPanel.style.display = "none";
           return;
         }
         countsPanel.style.display = "block";
+        if (countsHint) countsHint.style.display = "none";
+        countsList.style.display = "grid";
+        countsTotal.style.display = "block";
         const layerId = zoom < 9 ? LAYERS.overview : LAYERS.places;
         if (!map.getLayer(layerId)) return;
         const features = map.queryRenderedFeatures({ layers: [layerId] });
