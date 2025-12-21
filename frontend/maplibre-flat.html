@@ -471,6 +471,7 @@
       streetViewMinZoom: 14,
       streetViewFailDelayMs: 1200,
       mobileMinZoom: 3.0,
+      desktopMinZoom: 1.5,
       tiles: {
         overview: "https://tiles.placemap.org/places-overview/{z}/{x}/{y}",
         places: "https://tiles.placemap.org/places/{z}/{x}/{y}",
@@ -629,7 +630,7 @@
       projection: "mercator",
       hash: true,
       maxZoom: 18,
-      minZoom: IS_MOBILE ? CONFIG.mobileMinZoom : 0
+      minZoom: IS_MOBILE ? CONFIG.mobileMinZoom : CONFIG.desktopMinZoom
     });
 
     if (!IS_MOBILE) {
