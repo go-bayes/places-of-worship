@@ -16,7 +16,7 @@ A mapping stack for religious sites (and other civic POIs) using MapLibre GL + c
 ### Global MapLibre Prototype
 - Global places of worship + NZ polygons + buildings
 - Default MapTiler Backdrop (CARTO fallback if MapTiler key missing)
-- Inline Street View (desktop), external Street View/OSM links (mobile)
+- Inline Street View (desktop), external Street View link (mobile)
 - Martin tiles at `https://tiles.placemap.org`
 - **Access**: [MapLibre Global](https://go-bayes.github.io/places-of-worship/frontend/maplibre-flat.html)
 
@@ -52,32 +52,10 @@ places-of-worship/
 └── landing.html            # Project overview
 ```
 
-## Getting Started
-
-### View Maps Online
-1. **Landing Page**: [https://go-bayes.github.io/places-of-worship/landing.html](https://go-bayes.github.io/places-of-worship/landing.html)
-2. **Global Map**: [https://go-bayes.github.io/places-of-worship/frontend/global-places.html](https://go-bayes.github.io/places-of-worship/frontend/global-places.html)  
-3. **Enhanced NZ**: [https://go-bayes.github.io/places-of-worship/index.html](https://go-bayes.github.io/places-of-worship/index.html)
-
-### Local Development
-```bash
-# Clone repository
-git clone https://github.com/go-bayes/places-of-worship.git
-cd places-of-worship
-
-# Set up Python environment for data extraction
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install requests geopandas pandas
-
-# Run local API server (optional)
-cd api
-python -m pip install fastapi uvicorn
-uvicorn main:app --reload --port 8000
-
-# Serve static files for development
-python -m http.server 8000
-```
+## Quick Links
+- Global map: https://go-bayes.github.io/places-of-worship/frontend/maplibre-flat.html
+- Enhanced NZ: https://go-bayes.github.io/places-of-worship/index.html
+- Data (JSON, when synced): https://go-bayes.github.io/places-of-worship/data/global/
 
 ### Optional Frontend Config
 - Copy `frontend/config.example.js` to `frontend/config.js` and set:
