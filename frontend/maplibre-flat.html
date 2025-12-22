@@ -910,9 +910,9 @@
         ];
         const nearby = map.queryRenderedFeatures(bbox, { layers: [LAYERS.places, LAYERS.overview] });
         if (nearby && nearby.length) {
-          showClickHint("Center");
+          showClickHint("Move closer and centre on a place");
         } else {
-          showClickHint("Move closer and center on a place");
+          showClickHint("Center");
         }
       });
     }
@@ -1054,8 +1054,8 @@
 
     function syncDockToggleLabel(isOpen) {
       if (!dockToggle) return;
-      const showLabel = IS_MOBILE ? "Hide Search" : "Hide Search/Places";
-      const hideLabel = IS_MOBILE ? "Search" : "Search / Places";
+      const showLabel = IS_MOBILE ? "Search" : "Search / Places";
+      const hideLabel = IS_MOBILE ? "Hide Search" : "Hide Search/Places";
       dockToggle.textContent = isOpen ? hideLabel : showLabel;
     }
 
