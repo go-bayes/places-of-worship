@@ -328,12 +328,13 @@
       z-index: 13;
       padding: 9px 15px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(15,23,42,0.7);
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(15,23,42,0.72);
       color: #e2e8f0;
       font-size: 15px;
       cursor: pointer;
       box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+      opacity: 0.85;
     }
     #counts-wrap {
       position: fixed;
