@@ -262,7 +262,7 @@
         const selected = basemapOptions.find((style) => style.id === event.target.value);
         if (selected) {
           activeBasemapId = selected.id;
-          map.setStyle(selected.style || selected.url);
+          map.setStyle(selected.style || selected.url, { diff: false });
           map.once("style.load", () => {
             addCustomLayers();
             updateCounts();
@@ -321,6 +321,7 @@
       buildingsFill: "pow-buildings-fill",
       buildingsLine: "pow-buildings-line"
     };
+    const OVERLAY_SOURCES = new Set(Object.values(SOURCES));
 
     let mobileFeatureClickHandled = false;
 
@@ -865,6 +866,12 @@
       setTimeout(ensureCustomLayers, 350);
       setTimeout(nudgeMap, 400);
       setTimeout(refreshMapLayers, 650);
+    });
+
+    map.on("sourcedata", (event) => {
+      if (!event || !event.isSourceLoaded || !event.sourceId) return;
+      if (!OVERLAY_SOURCES.has(event.sourceId)) return;
+      map.triggerRepaint();
     });
 
     map.on("load", () => {
