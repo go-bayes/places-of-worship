@@ -29,7 +29,7 @@
     }
     .chip i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
     #dock {
-      position: fixed; left: 12px; right: auto; bottom: 6px;
+      position: fixed; left: 50%; bottom: 64px; transform: translateX(-50%);
       display: flex; flex-direction: column; gap: 6px; z-index: 11;
       width: min(94vw, 560px);
       max-width: 94vw;
@@ -220,7 +220,7 @@
       border: 1px solid rgba(255,255,255,0.08);
       background: rgba(15, 23, 42, 0.6);
       color: #e2e8f0;
-      display: none;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       opacity: 0.85;
@@ -289,10 +289,10 @@
     }
     #corner-reset {
       position: fixed;
-      left: 50%;
-      bottom: 10px;
-      transform: translateX(-50%);
-      z-index: 11;
+      left: 12px;
+      top: 12px;
+      z-index: 12;
+      transform: none;
       background: rgba(15, 23, 42, 0.6);
       border: 1px solid rgba(255,255,255,0.06);
       color: #e2e8f0;
@@ -322,8 +322,10 @@
     #tile-status.visible { opacity: 0.5; }
     #dock-toggle {
       position: fixed;
-      left: 12px;
-      top: 12px;
+      left: 50%;
+      bottom: 10px;
+      top: auto;
+      transform: translateX(-50%);
       z-index: 12;
       padding: 9px 15px;
       border-radius: 999px;
@@ -351,9 +353,10 @@
     }
     #counts-toggle {
       position: fixed;
-      left: 50%;
-      top: 10px;
-      transform: translateX(-50%);
+      right: 12px;
+      top: 12px;
+      left: auto;
+      transform: none;
       z-index: 12;
       padding: 6px 15px;
       border-radius: 999px;
@@ -371,7 +374,7 @@
     #counts {
       position: fixed;
       right: 12px;
-      top: 12px;
+      top: 56px;
       z-index: 11;
       background: rgba(15, 23, 42, 0.62);
       border: 1px solid rgba(255,255,255,0.06);
@@ -446,9 +449,10 @@
     .compass-btn.hidden { display: none !important; }
     @media (max-width: 640px) {
       #hud { max-width: 94vw; }
-      #dock { display: none !important; }
+      #dock { width: min(92vw, 420px); }
       #corner-info { right: 12px; bottom: 10px; }
       #mobile-github { display: inline-flex; }
+      .dock-cities-row { display: none; }
       .maplibregl-ctrl-bottom-right { bottom: 80px; }
       #counts {
         display: none;
@@ -475,19 +479,28 @@
       .dock-row button { padding: 5px 9px; font-size: clamp(11px, 3vw, 12px); }
       .dock-cities { gap: 6px; }
       .dock-chip { font-size: clamp(9px, 2.1vw, 11px); padding: 3px 6px; }
-      #mobile-search-toggle { display: none; }
       #corner-info { display: none; }
-      #dock-toggle { display: none; }
+      #dock-toggle {
+        display: inline-flex;
+        left: 50%;
+        bottom: 12px;
+        top: auto;
+        transform: translateX(-50%);
+      }
       #counts-toggle {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 9px;
+        left: 50%;
+        right: auto;
+        top: 10px;
+        transform: translateX(-50%);
         font-size: 14px;
         padding: 6px 20px;
         white-space: nowrap;
         min-width: max-content;
       }
       .maplibregl-ctrl { transform: scale(0.85); transform-origin: bottom right; }
-      #corner-reset { display: block; }
+      #corner-reset { display: inline-flex; }
     }

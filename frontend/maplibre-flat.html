@@ -907,7 +907,6 @@
     const resetButton = document.getElementById("corner-reset");
     const dock = document.getElementById("dock");
     const dockToggle = document.getElementById("dock-toggle");
-    const mobileSearchToggle = document.getElementById("mobile-search-toggle");
     const tileStatus = document.getElementById("tile-status");
     const cornerInfo = document.getElementById("corner-info");
     const infoToggle = document.getElementById("corner-info-toggle");
@@ -991,7 +990,6 @@
     }
 
     resetButton.addEventListener("click", () => {
-      // Mobile only: reset bearing to north (no recenter); hidden on desktop
       map.resetNorth();
     });
 
@@ -1033,15 +1031,23 @@
       });
     }
 
+    function syncDockToggleLabel(isOpen) {
+      if (!dockToggle) return;
+      const showLabel = IS_MOBILE ? "Search" : "Search / Places";
+      const hideLabel = IS_MOBILE ? "Hide Search" : "Hide Search/Places";
+      dockToggle.textContent = isOpen ? hideLabel : showLabel;
+    }
+
     if (dockToggle) {
       if (dock) {
-        dock.style.display = "flex";
+        dock.style.display = "none";
+        syncDockToggleLabel(false);
       }
       dockToggle.addEventListener("click", () => {
         if (!dock) return;
         const hidden = dock.style.display === "none";
         dock.style.display = hidden ? "flex" : "none";
-        dockToggle.textContent = hidden ? "Hide Search/Places" : "Search / Places";
+        syncDockToggleLabel(!hidden);
         requestAnimationFrame(syncInfoPosition);
       });
     }
