@@ -362,7 +362,7 @@
       color: #e2e8f0;
       font-size: 14px;
       cursor: pointer;
-      display: none;
+      display: inline-flex;
       box-shadow: 0 8px 16px rgba(0,0,0,0.28);
       letter-spacing: 0.01em;
       opacity: 0.85;

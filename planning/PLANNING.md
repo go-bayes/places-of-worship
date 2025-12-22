@@ -9,9 +9,6 @@
   - Buttons scaled to 1.5x (midpoint between original and 2x)
   - Table kept at 2x size
   - Theme menu text size updated to 1.5x
-  - City bar scrolling functionality restored
-  - GitHub icon replacing "i" symbol
-  - GitHub icon aligned with Reset North button (no movement)
   - Show Denomination Key button visible on desktop (upper right)
   - "Zoom to 14x" message when clicking points below zoom threshold
 

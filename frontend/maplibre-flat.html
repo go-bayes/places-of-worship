@@ -325,6 +325,49 @@
       buildingsLine: "pow-buildings-line"
     };
 
+    let mobileFeatureClickHandled = false;
+
+    function markMobileFeatureClickHandled() {
+      if (!IS_MOBILE) return;
+      mobileFeatureClickHandled = true;
+      requestAnimationFrame(() => {
+        mobileFeatureClickHandled = false;
+      });
+    }
+
+    function showMobileStreetViewPopup(name, coords, featureId) {
+      if (!coords) return;
+      const latFixed = coords[1].toFixed(6);
+      const lngFixed = coords[0].toFixed(6);
+      const openStreetViewLink = `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>`;
+      const popup = new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
+        .setLngLat(coords)
+        .setHTML(
+          `<div class="popup-header"><span class="popup-title">${name || "Unnamed"}</span></div>` +
+          `<div class="popup-actions" style="margin-top:6px;">${openStreetViewLink}</div>`
+        )
+        .addTo(map);
+
+      if (featureId === undefined || featureId === null) return;
+      const fillPopupName = () => {
+        const liveFeatures = map.queryRenderedFeatures({
+          layers: [LAYERS.places, LAYERS.overview],
+          filter: ["==", ["id"], featureId]
+        });
+        const f = liveFeatures && liveFeatures[0];
+        const p = f?.properties || {};
+        const betterName = p["name:en"] || p.name_en || p.name;
+        if (betterName) {
+          popup.setHTML(
+            `<div class="popup-header"><span class="popup-title">${betterName}</span></div>` +
+            `<div class="popup-actions" style="margin-top:6px;">${openStreetViewLink}</div>`
+          );
+        }
+      };
+      setTimeout(fillPopupName, 180);
+      map.once("idle", fillPopupName);
+    }
+
     let overviewMobileHandlerAttached = false;
     function addOverviewLayer() {
       map.addSource(SOURCES.overview, { type: "vector", tiles: [CONFIG.tiles.overview], minzoom: 0, maxzoom: 9 });
@@ -363,21 +406,13 @@
         map.on("click", LAYERS.overview, (e) => {
           const feature = e.features && e.features[0];
           if (!feature) return;
+          if (mobileFeatureClickHandled) return;
           const props = feature.properties || {};
           const name = props["name:en"] || props.name_en || props.name || "Unnamed";
           const coords = feature.geometry?.coordinates;
           if (!coords) return;
-          const latFixed = coords[1].toFixed(6);
-          const lngFixed = coords[0].toFixed(6);
-          new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
-            .setLngLat(coords)
-            .setHTML(
-              `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
-              `<div class="popup-actions" style="margin-top:6px;">` +
-              `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>` +
-              `</div>`
-            )
-            .addTo(map);
+          markMobileFeatureClickHandled();
+          showMobileStreetViewPopup(name, coords, feature.id);
         });
       }
     }
@@ -464,30 +499,9 @@
 
         // Mobile: always allow Street View link at any zoom, with retry to fetch name
         if (IS_MOBILE) {
-          const popup = new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
-            .setLngLat(coords)
-            .setHTML(
-              `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
-              `<div class="popup-actions" style="margin-top:6px;">${openStreetViewLink}</div>`
-            )
-            .addTo(map);
-
-          const fillPopupName = () => {
-            const liveFeatures = map.queryRenderedFeatures({ layers: [LAYERS.places, LAYERS.overview], filter: ["==", ["id"], feature?.id || null] });
-            const f = liveFeatures && liveFeatures[0];
-            const p = f?.properties || {};
-            const betterName = p["name:en"] || p.name_en || p.name;
-            if (betterName) {
-              popup.setHTML(
-                `<div class="popup-header"><span class="popup-title">${betterName}</span></div>` +
-                `<div class="popup-actions" style="margin-top:6px;">${openStreetViewLink}</div>`
-              );
-            }
-          };
-
-          // Retry shortly in case tile was still loading
-          setTimeout(fillPopupName, 180);
-          map.once("idle", fillPopupName);
+          if (mobileFeatureClickHandled) return;
+          markMobileFeatureClickHandled();
+          showMobileStreetViewPopup(name, coords, feature?.id);
           return;
         }
         if (currentZoom < CONFIG.streetViewMinZoom) {
@@ -867,6 +881,26 @@
       }
     });
 
+    if (IS_MOBILE) {
+      map.on("click", (e) => {
+        if (mobileFeatureClickHandled || !map.isStyleLoaded()) return;
+        const tapPadding = 12;
+        const bbox = [
+          [e.point.x - tapPadding, e.point.y - tapPadding],
+          [e.point.x + tapPadding, e.point.y + tapPadding]
+        ];
+        const features = map.queryRenderedFeatures(bbox, { layers: [LAYERS.places, LAYERS.overview] });
+        if (!features.length) return;
+        const feature = features.find((item) => item.layer && item.layer.id === LAYERS.places) || features[0];
+        const props = feature.properties || {};
+        const name = props["name:en"] || props.name_en || props.name || "Unnamed";
+        const coords = feature.geometry?.coordinates;
+        if (!coords) return;
+        markMobileFeatureClickHandled();
+        showMobileStreetViewPopup(name, coords, feature.id);
+      });
+    }
+
     const cityChips = document.getElementById("cityChips");
     const searchInput = document.getElementById("searchInput");
     const searchButton = document.getElementById("searchButton");
@@ -1089,7 +1123,7 @@
         countsScheduled = false;
         const zoom = map.getZoom();
         const eligibleZoom = zoom >= 4;
-        if (countsToggle && IS_MOBILE) {
+        if (countsToggle) {
           countsToggle.style.display = "inline-flex";
           countsToggle.disabled = !eligibleZoom;
           countsToggle.setAttribute("aria-disabled", eligibleZoom ? "false" : "true");
@@ -1101,14 +1135,8 @@
           }
         }
         if (!eligibleZoom) {
-          if (IS_MOBILE) {
-            countsPanel.style.display = "none";
-          } else {
-            countsPanel.style.display = "block";
-            if (countsHint) countsHint.style.display = "block";
-            countsList.style.display = "none";
-            countsTotal.style.display = "none";
-          }
+          countsPanel.style.display = "none";
+          if (countsHint) countsHint.style.display = "none";
           return;
         }
         if (!countsUserEnabled) {
