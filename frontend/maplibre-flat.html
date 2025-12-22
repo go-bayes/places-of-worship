@@ -1074,7 +1074,11 @@
         }
         const lon = parseFloat(result.lon);
         const lat = parseFloat(result.lat);
-        flyTo([lon, lat], 13);
+        if (IS_MOBILE) {
+          map.jumpTo({ center: [lon, lat], zoom: 13 });
+        } else {
+          flyTo([lon, lat], 13);
+        }
       } catch (error) {
       }
     }
