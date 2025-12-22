@@ -33,7 +33,7 @@
     }
     .chip i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
     #dock {
-      position: fixed; left: 50%; bottom: calc(var(--safe-bottom) + 30px); transform: translateX(-50%);
+      position: fixed; left: 50%; bottom: calc(var(--safe-bottom) + 36px); transform: translateX(-50%);
       display: flex; flex-direction: column; gap: 6px; z-index: 11;
       width: min(94dvw, 560px);
       max-width: 94dvw;
@@ -301,6 +301,24 @@
       z-index: 11;
     }
     #tile-status.visible { opacity: 0.5; }
+    #click-hint {
+      position: fixed;
+      left: 50%;
+      top: 48%;
+      transform: translate(-50%, -50%);
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #e2e8f0;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+      z-index: 12;
+      white-space: nowrap;
+    }
+    #click-hint.visible { opacity: 0.8; }
     #dock-toggle {
       position: fixed;
       left: 50%;
@@ -450,7 +468,7 @@
       #basemapSelect { display: none; }
       #cityChips { display: none; }
       .dock-row { gap: 4px; }
-      .dock-row input { padding: 6px 9px; font-size: clamp(11px, 3vw, 12px); }
+      .dock-row input { padding: 6px 9px; font-size: 16px; }
       .dock-row button { padding: 5px 9px; font-size: clamp(11px, 3vw, 12px); }
       .dock-cities { gap: 6px; }
       .dock-chip { font-size: clamp(9px, 2.1vw, 11px); padding: 3px 6px; }
@@ -479,5 +497,9 @@
         min-width: max-content;
       }
       .maplibregl-ctrl { transform: scale(0.85); transform-origin: bottom right; }
-      #corner-reset { display: inline-flex; }
+      #corner-reset {
+        display: inline-flex;
+        font-size: 11px;
+        padding: 5px 9px;
+      }
     }

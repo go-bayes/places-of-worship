@@ -10,6 +10,7 @@
 <body>
   <div id="map"></div>
   <div id="tile-status">Loading tiles…</div>
+  <div id="click-hint" role="status" aria-live="polite"></div>
   <div id="corner-info">
     <button id="corner-info-toggle" type="button" aria-label="Info" aria-haspopup="true" aria-expanded="false" aria-controls="corner-info-menu">
       <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
@@ -897,6 +898,15 @@
       });
     }
 
+    if (!IS_MOBILE) {
+      map.on("click", (e) => {
+        if (!map.isStyleLoaded()) return;
+        const features = map.queryRenderedFeatures(e.point, { layers: [LAYERS.places, LAYERS.overview] });
+        if (features && features.length) return;
+        showClickHint("Move closer and center on a place");
+      });
+    }
+
     const cityChips = document.getElementById("cityChips");
     const searchInput = document.getElementById("searchInput");
     const searchButton = document.getElementById("searchButton");
@@ -904,6 +914,7 @@
     const dock = document.getElementById("dock");
     const dockToggle = document.getElementById("dock-toggle");
     const tileStatus = document.getElementById("tile-status");
+    const clickHint = document.getElementById("click-hint");
     const cornerInfo = document.getElementById("corner-info");
     const infoToggle = document.getElementById("corner-info-toggle");
     const infoMenu = document.getElementById("corner-info-menu");
@@ -989,6 +1000,17 @@
       map.resetNorth();
     });
 
+    let clickHintTimer = null;
+    function showClickHint(message) {
+      if (!clickHint) return;
+      clickHint.textContent = message;
+      clickHint.classList.add("visible");
+      if (clickHintTimer) clearTimeout(clickHintTimer);
+      clickHintTimer = setTimeout(() => {
+        clickHint.classList.remove("visible");
+      }, 1600);
+    }
+
     function closeInfoMenu() {
       if (!infoMenu || !infoToggle) return;
       if (infoMenu.hidden) return;
@@ -1022,8 +1044,8 @@
 
     function syncDockToggleLabel(isOpen) {
       if (!dockToggle) return;
-      const showLabel = IS_MOBILE ? "Search" : "Search / Places";
-      const hideLabel = IS_MOBILE ? "Hide Search" : "Hide Search/Places";
+      const showLabel = IS_MOBILE ? "Hide Search" : "Hide Search/Places";
+      const hideLabel = IS_MOBILE ? "Search" : "Search / Places";
       dockToggle.textContent = isOpen ? hideLabel : showLabel;
     }
 
@@ -1036,6 +1058,9 @@
         if (!dock) return;
         const hidden = dock.style.display === "none";
         dock.style.display = hidden ? "flex" : "none";
+        if (!hidden && searchInput) {
+          searchInput.blur();
+        }
         syncDockToggleLabel(!hidden);
         requestAnimationFrame(syncInfoPosition);
       });
