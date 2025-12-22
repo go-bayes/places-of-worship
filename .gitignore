@@ -99,6 +99,7 @@ raw_data/
 processed_data/
 exports/
 research_data/
+research/
 
 # EXCEPTIONS: Allow small essential files for GitHub Pages deployment
 !data/nz_places.geojson
