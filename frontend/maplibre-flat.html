@@ -392,9 +392,10 @@
           .setLngLat(coords)
           .setHTML(
             `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
-            `<div style="padding:6px 0;color:#111;font-size:13px;">Move closer and centre.</div>`
+            `<div style="padding:6px 0;color:#111;font-size:13px;">Move Closer and Center on a Place.</div>`
           )
           .addTo(map);
+        showClickHint("Move Closer and Center on a Place");
         return;
       }
       if (IS_MOBILE) {
@@ -496,7 +497,7 @@
         let pendingFailTimer = null;
 
         if (currentZoom < CONFIG.streetViewMinZoom) {
-          node.textContent = "Move closer and centre.";
+          node.textContent = "Move Closer and Center on a Place.";
           return;
         }
 
@@ -918,7 +919,7 @@
         if (features && features.length) return;
         const zoom = map.getZoom();
         if (zoom < 9) {
-          showClickHint("Move closer and centre");
+          showClickHint("Move Closer and Center on a Place");
           return;
         }
         const hitPadding = 12;
@@ -956,9 +957,9 @@
         ];
         const nearby = map.queryRenderedFeatures(bbox, { layers: [LAYERS.places] });
         if (nearby && nearby.length) {
-          showClickHint("Centre");
+          showClickHint("Center");
         } else {
-          showClickHint("Move closer and centre");
+          showClickHint("Move Closer and Center on a Place");
         }
       });
     }
