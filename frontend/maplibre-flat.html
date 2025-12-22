@@ -1005,15 +1005,19 @@
       let dragStartX = 0;
       let dragStartScroll = 0;
       let dragMoved = false;
+      let pointerId = null;
+      let hasPointerCapture = false;
       const dragThreshold = 6;
 
       const stopDrag = (event) => {
         if (!isDragging) return;
         isDragging = false;
         cityChips.classList.remove("dragging");
-        if (cityChips.releasePointerCapture && event.pointerId !== undefined) {
-          cityChips.releasePointerCapture(event.pointerId);
+        if (hasPointerCapture && cityChips.releasePointerCapture && pointerId !== null) {
+          cityChips.releasePointerCapture(pointerId);
         }
+        hasPointerCapture = false;
+        pointerId = null;
         if (dragMoved) {
           setTimeout(() => {
             dragMoved = false;
@@ -1025,19 +1029,24 @@
         if (event.button !== undefined && event.button !== 0) return;
         isDragging = true;
         dragMoved = false;
+        pointerId = event.pointerId !== undefined ? event.pointerId : null;
         dragStartX = event.clientX;
         dragStartScroll = cityChips.scrollLeft;
         cityChips.classList.add("dragging");
-        if (cityChips.setPointerCapture && event.pointerId !== undefined) {
-          cityChips.setPointerCapture(event.pointerId);
-        }
+        hasPointerCapture = false;
       });
 
       cityChips.addEventListener("pointermove", (event) => {
         if (!isDragging) return;
         const deltaX = event.clientX - dragStartX;
         if (Math.abs(deltaX) > dragThreshold) {
-          dragMoved = true;
+          if (!dragMoved) {
+            dragMoved = true;
+            if (!hasPointerCapture && cityChips.setPointerCapture && pointerId !== null) {
+              cityChips.setPointerCapture(pointerId);
+              hasPointerCapture = true;
+            }
+          }
         }
         cityChips.scrollLeft = dragStartScroll - deltaX;
       });

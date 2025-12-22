@@ -54,9 +54,9 @@
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.08);
       color: var(--text);
-      padding: 2px 6px;
+      padding: 3px 8px;
       border-radius: 8px;
-      font-size: clamp(8px, 1.8vw, 9px);
+      font-size: clamp(11px, 2.7vw, 13px);
       min-width: 104px;
       flex-shrink: 0;
     }
