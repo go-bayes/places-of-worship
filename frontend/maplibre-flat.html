@@ -1153,9 +1153,10 @@
         const eligibleZoom = zoom >= 4;
         if (countsToggle) {
           countsToggle.style.display = "inline-flex";
-          countsToggle.disabled = !eligibleZoom;
-          countsToggle.setAttribute("aria-disabled", eligibleZoom ? "false" : "true");
-          if (!eligibleZoom) {
+          const disableToggle = !eligibleZoom && !IS_MOBILE;
+          countsToggle.disabled = disableToggle;
+          countsToggle.setAttribute("aria-disabled", disableToggle ? "true" : "false");
+          if (!eligibleZoom && disableToggle) {
             countsToggle.textContent = "Zoom in for key";
             countsToggle.setAttribute("aria-expanded", "false");
           } else {
@@ -1163,8 +1164,15 @@
           }
         }
         if (!eligibleZoom) {
-          countsPanel.style.display = "none";
-          if (countsHint) countsHint.style.display = "none";
+          if (!countsUserEnabled) {
+            countsPanel.style.display = "none";
+            if (countsHint) countsHint.style.display = "none";
+            return;
+          }
+          countsPanel.style.display = "block";
+          if (countsHint) countsHint.style.display = "block";
+          countsList.style.display = "none";
+          countsTotal.style.display = "none";
           return;
         }
         if (!countsUserEnabled) {
