@@ -901,8 +901,19 @@
     if (!IS_MOBILE) {
       map.on("click", (e) => {
         if (!map.isStyleLoaded()) return;
+        const target = e.originalEvent && e.originalEvent.target;
+        if (target instanceof Element) {
+          const isUiClick = target.closest(
+            "button, a, input, select, textarea, label, #dock, #counts-wrap, #corner-info, .maplibregl-ctrl"
+          );
+          if (isUiClick) return;
+        }
         const features = map.queryRenderedFeatures(e.point, { layers: [LAYERS.places, LAYERS.overview] });
         if (features && features.length) return;
+        if (map.getZoom() < 9) {
+          showClickHint("Move closer and center on a place");
+          return;
+        }
         const missPadding = 14;
         const bbox = [
           [e.point.x - missPadding, e.point.y - missPadding],
@@ -910,9 +921,9 @@
         ];
         const nearby = map.queryRenderedFeatures(bbox, { layers: [LAYERS.places, LAYERS.overview] });
         if (nearby && nearby.length) {
-          showClickHint("Move closer and centre on a place");
-        } else {
           showClickHint("Center");
+        } else {
+          showClickHint("Move closer and center on a place");
         }
       });
     }
@@ -1054,8 +1065,8 @@
 
     function syncDockToggleLabel(isOpen) {
       if (!dockToggle) return;
-      const showLabel = IS_MOBILE ? "Search" : "Search / Places";
-      const hideLabel = IS_MOBILE ? "Hide Search" : "Hide Search/Places";
+      const showLabel = "Search/Places";
+      const hideLabel = "Hide Search/Places";
       dockToggle.textContent = isOpen ? hideLabel : showLabel;
     }
 
