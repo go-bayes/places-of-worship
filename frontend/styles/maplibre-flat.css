@@ -4,6 +4,10 @@
       --text: #e8edf2;
       --accent: #cbd5f5;
       --muted: #94a3b8;
+      --safe-top: max(12px, env(safe-area-inset-top, 0px));
+      --safe-right: max(12px, env(safe-area-inset-right, 0px));
+      --safe-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+      --safe-left: max(12px, env(safe-area-inset-left, 0px));
     }
     * { box-sizing: border-box; }
     body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: "Work Sans", -apple-system, "Segoe UI", sans-serif; }
@@ -29,7 +33,7 @@
     }
     .chip i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
     #dock {
-      position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%);
+      position: fixed; left: 50%; bottom: calc(var(--safe-bottom) + 30px); transform: translateX(-50%);
       display: flex; flex-direction: column; gap: 6px; z-index: 11;
       width: min(94dvw, 560px);
       max-width: 94dvw;
@@ -203,9 +207,9 @@
     }
     #corner-info {
       position: fixed;
-      left: 12px;
-      bottom: 10px;
-      z-index: 11;
+      left: var(--safe-left);
+      bottom: var(--safe-bottom);
+      z-index: 13;
       display: flex;
       align-items: flex-end;
     }
@@ -266,9 +270,9 @@
     }
     #corner-reset {
       position: fixed;
-      left: 12px;
-      top: 12px;
-      z-index: 12;
+      left: var(--safe-left);
+      top: var(--safe-top);
+      z-index: 13;
       transform: none;
       background: rgba(15, 23, 42, 0.6);
       border: 1px solid rgba(255,255,255,0.06);
@@ -300,10 +304,10 @@
     #dock-toggle {
       position: fixed;
       left: 50%;
-      bottom: 10px;
+      bottom: var(--safe-bottom);
       top: auto;
       transform: translateX(-50%);
-      z-index: 12;
+      z-index: 13;
       padding: 9px 15px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.12);
@@ -315,9 +319,9 @@
     }
     #counts-wrap {
       position: fixed;
-      right: 12px;
-      top: 12px;
-      z-index: 12;
+      right: var(--safe-right);
+      top: var(--safe-top);
+      z-index: 13;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -425,7 +429,7 @@
         width: 46dvw;
         max-width: 46dvw;
       }
-      #corner-info { left: 12px; bottom: 10px; }
+      #corner-info { left: var(--safe-left); bottom: var(--safe-bottom); }
       .dock-cities-row { display: none; }
       .maplibregl-ctrl-bottom-right { bottom: 80px; }
       #counts {
@@ -453,14 +457,14 @@
       #dock-toggle {
         display: inline-flex;
         left: 50%;
-        bottom: 12px;
+        bottom: var(--safe-bottom);
         top: auto;
         transform: translateX(-50%);
       }
       #counts-wrap {
         left: 50%;
         right: auto;
-        top: 10px;
+        top: var(--safe-top);
         transform: translateX(-50%);
       }
       #counts-toggle {

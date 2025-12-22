@@ -1042,7 +1042,11 @@
     }
 
     window.addEventListener("resize", () => {
-      requestAnimationFrame(syncInfoPosition);
+      requestAnimationFrame(() => {
+        syncInfoPosition();
+        map.resize();
+        updateCounts();
+      });
     });
 
     async function geocode(query) {
