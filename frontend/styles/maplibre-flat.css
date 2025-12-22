@@ -29,7 +29,7 @@
     }
     .chip i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
     #dock {
-      position: fixed; left: 50%; bottom: 54px; transform: translateX(-50%);
+      position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%);
       display: flex; flex-direction: column; gap: 6px; z-index: 11;
       width: min(94dvw, 560px);
       max-width: 94dvw;
