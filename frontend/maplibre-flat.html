@@ -95,7 +95,7 @@
           if (!window.google?.maps) return;
           const sv = new google.maps.StreetViewService();
           sv.getPanorama(
-            { location: { lat: CONFIG.center[1], lng: CONFIG.center[0] }, radius: 400, source: google.maps.StreetViewSource.OUTDOOR },
+            { location: { lat: CONFIG.center[1], lng: CONFIG.center[0] }, radius: 560, source: google.maps.StreetViewSource.OUTDOOR },
             () => {}
           );
         })
@@ -568,7 +568,7 @@
           const now = Date.now();
           lastPanoRequest = now;
           target.textContent = "Loading Street View…";
-          const radius = attempt === 0 ? 400 : 800;
+          const radius = attempt === 0 ? 560 : 1120;
           const request = {
             location: { lat: coords[1], lng: coords[0] },
             radius,
