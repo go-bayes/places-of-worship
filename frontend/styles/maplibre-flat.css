@@ -310,8 +310,8 @@
       border: 1px solid rgba(255,255,255,0.12);
       color: #e2e8f0;
       border-radius: 999px;
-      padding: 8px 14px;
-      font-size: 14px;
+      padding: 10px 18px;
+      font-size: 28px;
       opacity: 0;
       pointer-events: none;
       transition: opacity 180ms ease;

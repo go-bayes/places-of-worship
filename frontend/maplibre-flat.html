@@ -903,7 +903,17 @@
         if (!map.isStyleLoaded()) return;
         const features = map.queryRenderedFeatures(e.point, { layers: [LAYERS.places, LAYERS.overview] });
         if (features && features.length) return;
-        showClickHint("Move closer and center on a place");
+        const missPadding = 14;
+        const bbox = [
+          [e.point.x - missPadding, e.point.y - missPadding],
+          [e.point.x + missPadding, e.point.y + missPadding]
+        ];
+        const nearby = map.queryRenderedFeatures(bbox, { layers: [LAYERS.places, LAYERS.overview] });
+        if (nearby && nearby.length) {
+          showClickHint("Center");
+        } else {
+          showClickHint("Move closer and center on a place");
+        }
       });
     }
 
