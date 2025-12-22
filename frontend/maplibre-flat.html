@@ -1117,7 +1117,7 @@
         if (!hidden && searchInput) {
           searchInput.blur();
         }
-        syncDockToggleLabel(!hidden);
+        syncDockToggleLabel(hidden);
         requestAnimationFrame(syncInfoPosition);
       });
     }
