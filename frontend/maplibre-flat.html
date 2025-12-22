@@ -365,6 +365,307 @@
       map.once("idle", fillPopupName);
     }
 
+    async function handlePlaceFeatureClick(feature, fallbackLngLat) {
+      if (!feature) return;
+      const props = feature?.properties || {};
+      const name = props["name:en"] || props.name_en || props.name || "Loading place…";
+      const lat = props?.lat;
+      const lng = props?.lng;
+      let coords = feature?.geometry?.coordinates || (lng && lat ? [lng, lat] : null);
+      if (!coords && fallbackLngLat) coords = [fallbackLngLat.lng, fallbackLngLat.lat];
+      if (!coords) return;
+      const panoId = `pano-${Date.now()}`;
+      const latFixed = coords[1].toFixed(6);
+      const lngFixed = coords[0].toFixed(6);
+      const currentZoom = map.getZoom();
+      const openStreetViewLink = `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>`;
+
+      // Mobile: always allow Street View link at any zoom, with retry to fetch name
+      if (IS_MOBILE) {
+        if (mobileFeatureClickHandled) return;
+        markMobileFeatureClickHandled();
+        showMobileStreetViewPopup(name, coords, feature?.id);
+        return;
+      }
+      if (currentZoom < CONFIG.streetViewMinZoom) {
+        new maplibregl.Popup({ maxWidth: "320px", closeOnClick: true })
+          .setLngLat(coords)
+          .setHTML(
+            `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
+            `<div style="padding:6px 0;color:#111;font-size:13px;">Zoom closer (zoom ${CONFIG.streetViewMinZoom}+) to open Street View.</div>`
+          )
+          .addTo(map);
+        return;
+      }
+      if (IS_MOBILE) {
+        new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
+          .setLngLat(coords)
+          .setHTML(
+            `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
+            `<div class="popup-actions" style="margin-top:6px;">` +
+            `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>` +
+            `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +
+            `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
+            `</div>`
+          )
+          .addTo(map);
+        return;
+      }
+      const popup = new maplibregl.Popup({ maxWidth: "720px", closeOnClick: true })
+        .setLngLat(coords)
+        .setHTML(
+          `<div class="popup-header" data-drag-handle="true">` +
+          `<span class="popup-title">${name}</span>` +
+          `<span style="font-size:11px;color:#64748b;">Drag</span>` +
+          `</div>` +
+          `<div class="streetview" id="${panoId}">Loading Street View…</div>` +
+          `<div class="streetview-toolbar">` +
+          `<button type="button" data-mode="interior" data-pano="${panoId}">Interior</button>` +
+          `<button type="button" data-mode="expand" data-pano="${panoId}">Expand</button>` +
+          `</div>` +
+          `<div class="popup-actions">` +
+          `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>` +
+          `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +
+          `<button type="button" data-mode="interior-alt" data-pano="${panoId}">Try Interior</button>` +
+          `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
+          `</div>`
+        )
+        .addTo(map);
+
+      const panoContainer = () => document.getElementById(panoId);
+      const popupContent = popup.getElement();
+      const dragHandle = popupContent.querySelector("[data-drag-handle]");
+      if (dragHandle) {
+        const mapCanvas = map.getCanvas();
+        let dragging = false;
+        let startX = 0;
+        let startY = 0;
+
+        dragHandle.addEventListener("mousedown", (event) => {
+          dragging = true;
+          dragHandle.classList.add("dragging");
+          startX = event.clientX;
+          startY = event.clientY;
+          mapCanvas.style.cursor = "grabbing";
+          if (map.dragPan) map.dragPan.disable();
+          document.body.style.userSelect = "none";
+          event.stopPropagation();
+          event.preventDefault();
+        });
+
+        window.addEventListener("mousemove", (event) => {
+          if (!dragging) return;
+          const dx = event.clientX - startX;
+          const dy = event.clientY - startY;
+          startX = event.clientX;
+          startY = event.clientY;
+          const current = map.project(popup.getLngLat());
+          const next = { x: current.x + dx, y: current.y + dy };
+          const nextLngLat = map.unproject(next);
+          popup.setLngLat(nextLngLat);
+        });
+
+        window.addEventListener("mouseup", () => {
+          if (!dragging) return;
+          dragging = false;
+          dragHandle.classList.remove("dragging");
+          mapCanvas.style.cursor = "";
+          if (map.dragPan) map.dragPan.enable();
+          document.body.style.userSelect = "";
+        });
+      }
+      if (!GOOGLE_MAPS_KEY) {
+        const node = panoContainer();
+        if (node) node.textContent = "Street View unavailable.";
+        return;
+      }
+      try {
+        await loadGoogleMaps();
+        const node = panoContainer();
+        if (!node) return;
+        const sv = new google.maps.StreetViewService();
+        let panoInstance = null;
+        let currentSource = "OUTDOOR";
+        const popupEl = popup.getElement();
+        const expandButton = popupEl.querySelector(`[data-mode="expand"][data-pano="${panoId}"]`);
+        const interiorButton = popupEl.querySelector(`[data-mode="interior"][data-pano="${panoId}"]`);
+        const interiorAltButton = popupEl.querySelector(`[data-mode="interior-alt"][data-pano="${panoId}"]`);
+        let panoLoading = false;
+        let lastPanoRequest = 0;
+        let resizeObserver = null;
+        let pendingFailTimer = null;
+
+        if (currentZoom < CONFIG.streetViewMinZoom) {
+          node.textContent = `Zoom closer (zoom ${CONFIG.streetViewMinZoom}+) to load Street View.`;
+          return;
+        }
+
+        function attachResizeHandle(target) {
+          if (!target || target.querySelector(".sv-resize-handle")) return;
+          const handle = document.createElement("div");
+          handle.className = "sv-resize-handle";
+          handle.textContent = "↘";
+          target.appendChild(handle);
+          const MIN_W = 260;
+          const MIN_H = 160;
+          handle.addEventListener("mousedown", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            handle.style.cursor = "nwse-resize";
+            const startX = event.clientX;
+            const startY = event.clientY;
+            const rect = target.getBoundingClientRect();
+            const startW = rect.width;
+            const startH = rect.height;
+
+            function onMove(e) {
+              const deltaX = e.clientX - startX;
+              const deltaY = e.clientY - startY;
+              const nextW = Math.min(window.innerWidth * 0.9, Math.max(MIN_W, startW + deltaX));
+              const nextH = Math.min(window.innerHeight * 0.72, Math.max(MIN_H, startH + deltaY));
+              target.style.width = `${nextW}px`;
+              target.style.height = `${nextH}px`;
+              resizePanorama();
+            }
+            function onUp() {
+              window.removeEventListener("mousemove", onMove);
+              window.removeEventListener("mouseup", onUp);
+              handle.style.cursor = "nwse-resize";
+            }
+            window.addEventListener("mousemove", onMove);
+            window.addEventListener("mouseup", onUp);
+          });
+        }
+
+        function resizePanorama() {
+          if (panoInstance && window.google?.maps?.event) {
+            window.google.maps.event.trigger(panoInstance, "resize");
+          }
+        }
+
+        function watchResize() {
+          const target = panoContainer();
+          if (!target || typeof ResizeObserver === "undefined") return;
+          if (resizeObserver) resizeObserver.disconnect();
+          resizeObserver = new ResizeObserver(() => resizePanorama());
+          resizeObserver.observe(target);
+        }
+
+        function setMessage(message) {
+          const target = panoContainer();
+          if (target) target.textContent = message;
+        }
+
+        function loadPanorama(source, attempt = 0) {
+          const target = panoContainer();
+          if (!target) return;
+          if (pendingFailTimer) {
+            clearTimeout(pendingFailTimer);
+            pendingFailTimer = null;
+          }
+          const now = Date.now();
+          lastPanoRequest = now;
+          target.textContent = "Loading Street View…";
+          const radius = attempt === 0 ? 400 : 800;
+          const request = {
+            location: { lat: coords[1], lng: coords[0] },
+            radius,
+            source: google.maps.StreetViewSource[source] || google.maps.StreetViewSource.DEFAULT
+          };
+          sv.getPanorama(request, (data, status) => {
+            if (pendingFailTimer) {
+              clearTimeout(pendingFailTimer);
+              pendingFailTimer = null;
+            }
+            if (status === "OK") {
+              currentSource = source;
+              if (interiorAltButton) {
+                interiorAltButton.textContent = source === "OUTDOOR" ? "Try Interior" : "Try Exterior";
+              }
+              panoInstance = new google.maps.StreetViewPanorama(target, {
+                position: { lat: coords[1], lng: coords[0] },
+                pov: { heading: 0, pitch: 0 },
+                zoom: 1,
+                addressControl: false,
+                fullscreenControl: false,
+                motionTracking: false,
+                showRoadLabels: false
+              });
+              resizePanorama();
+            } else {
+              if (attempt === 0) {
+                // Fallback: broaden search and switch source if we started outdoors.
+                const nextSource = source === "OUTDOOR" ? "DEFAULT" : "OUTDOOR";
+                loadPanorama(nextSource, attempt + 1);
+                return;
+              }
+              pendingFailTimer = setTimeout(() => {
+                if (source === "OUTDOOR") {
+                  setMessage("No outdoor Street View. Use “Try Interior”.");
+                } else {
+                  setMessage("No Street View for this location.");
+                }
+              }, CONFIG.streetViewFailDelayMs);
+            }
+          });
+        }
+
+        if (expandButton) {
+          expandButton.addEventListener("click", () => {
+            const target = panoContainer();
+            if (!target) return;
+            const expanded = target.classList.toggle("expanded");
+            expandButton.textContent = expanded ? "Collapse" : "Expand";
+            resizePanorama();
+          });
+        }
+
+        if (interiorButton) {
+          interiorButton.addEventListener("click", () => {
+            const next = currentSource === "OUTDOOR" ? "DEFAULT" : "OUTDOOR";
+            interiorButton.textContent = next === "DEFAULT" ? "Exterior" : "Interior";
+            loadPanorama(next);
+          });
+        }
+        if (interiorAltButton) {
+          interiorAltButton.addEventListener("click", () => {
+            const next = currentSource === "OUTDOOR" ? "DEFAULT" : "OUTDOOR";
+            loadPanorama(next);
+          });
+        }
+        const copyButton = popupEl.querySelector(`[data-copy]`);
+        if (copyButton) {
+          copyButton.addEventListener("click", async () => {
+            const value = copyButton.getAttribute("data-copy");
+            try {
+              await navigator.clipboard.writeText(value || "");
+              copyButton.textContent = "Copied";
+              setTimeout(() => {
+                copyButton.textContent = "Copy coords";
+              }, 1200);
+            } catch (error) {
+              copyButton.textContent = "Copy failed";
+              setTimeout(() => {
+                copyButton.textContent = "Copy coords";
+              }, 1200);
+            }
+          });
+        }
+
+        loadPanorama("OUTDOOR");
+        attachResizeHandle(panoContainer());
+        watchResize();
+        popup.on("close", () => {
+          if (resizeObserver) resizeObserver.disconnect();
+          resizeObserver = null;
+          if (pendingFailTimer) clearTimeout(pendingFailTimer);
+        });
+      } catch (error) {
+        const node = panoContainer();
+        if (node) node.textContent = "Street View failed to load.";
+      }
+    }
+
     let overviewMobileHandlerAttached = false;
     function addOverviewLayer() {
       map.addSource(SOURCES.overview, { type: "vector", tiles: [CONFIG.tiles.overview], minzoom: 0, maxzoom: 9 });
@@ -427,9 +728,9 @@
             "interpolate",
             ["linear"],
             ["zoom"],
-            6, 2.2,
-            10, 4.2,
-            16, 6.5
+            6, 3,
+            10, 5.5,
+            16, 8.5
           ],
           "circle-color": religionColors,
           "circle-stroke-width": 0.8,
@@ -479,305 +780,10 @@
         hoverPopup.remove();
       });
 
-      map.on("click", LAYERS.places, async (e) => {
+      map.on("click", LAYERS.places, (e) => {
         const feature = e.features && e.features[0];
-        const props = feature?.properties || {};
-        const name = props["name:en"] || props.name_en || props.name || "Loading place…";
-        const lat = props?.lat;
-        const lng = props?.lng;
-        let coords = feature?.geometry?.coordinates || (lng && lat ? [lng, lat] : null);
-        if (!coords) coords = e.lngLat ? [e.lngLat.lng, e.lngLat.lat] : null;
-        if (!coords) return;
-        const panoId = `pano-${Date.now()}`;
-        const latFixed = coords[1].toFixed(6);
-        const lngFixed = coords[0].toFixed(6);
-        const currentZoom = map.getZoom();
-        const openStreetViewLink = `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>`;
-
-        // Mobile: always allow Street View link at any zoom, with retry to fetch name
-        if (IS_MOBILE) {
-          if (mobileFeatureClickHandled) return;
-          markMobileFeatureClickHandled();
-          showMobileStreetViewPopup(name, coords, feature?.id);
-          return;
-        }
-        if (currentZoom < CONFIG.streetViewMinZoom) {
-          new maplibregl.Popup({ maxWidth: "320px", closeOnClick: true })
-            .setLngLat(coords)
-            .setHTML(
-              `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
-              `<div style="padding:6px 0;color:#111;font-size:13px;">Zoom closer (zoom ${CONFIG.streetViewMinZoom}+) to open Street View.</div>`
-            )
-            .addTo(map);
-          return;
-        }
-        if (IS_MOBILE) {
-          new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
-            .setLngLat(coords)
-            .setHTML(
-              `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
-              `<div class="popup-actions" style="margin-top:6px;">` +
-              `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>` +
-              `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +
-              `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
-              `</div>`
-            )
-            .addTo(map);
-          return;
-        }
-        const popup = new maplibregl.Popup({ maxWidth: "720px", closeOnClick: true })
-          .setLngLat(coords)
-          .setHTML(
-            `<div class="popup-header" data-drag-handle="true">` +
-            `<span class="popup-title">${name}</span>` +
-            `<span style="font-size:11px;color:#64748b;">Drag</span>` +
-            `</div>` +
-            `<div class="streetview" id="${panoId}">Loading Street View…</div>` +
-            `<div class="streetview-toolbar">` +
-            `<button type="button" data-mode="interior" data-pano="${panoId}">Interior</button>` +
-            `<button type="button" data-mode="expand" data-pano="${panoId}">Expand</button>` +
-            `</div>` +
-            `<div class="popup-actions">` +
-            `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>` +
-            `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +
-            `<button type="button" data-mode="interior-alt" data-pano="${panoId}">Try Interior</button>` +
-            `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
-            `</div>`
-          )
-          .addTo(map);
-
-        const panoContainer = () => document.getElementById(panoId);
-        const popupContent = popup.getElement();
-        const dragHandle = popupContent.querySelector("[data-drag-handle]");
-        if (dragHandle) {
-          const mapCanvas = map.getCanvas();
-          let dragging = false;
-          let startX = 0;
-          let startY = 0;
-
-          dragHandle.addEventListener("mousedown", (event) => {
-            dragging = true;
-            dragHandle.classList.add("dragging");
-            startX = event.clientX;
-            startY = event.clientY;
-            mapCanvas.style.cursor = "grabbing";
-            if (map.dragPan) map.dragPan.disable();
-            document.body.style.userSelect = "none";
-            event.stopPropagation();
-            event.preventDefault();
-          });
-
-          window.addEventListener("mousemove", (event) => {
-            if (!dragging) return;
-            const dx = event.clientX - startX;
-            const dy = event.clientY - startY;
-            startX = event.clientX;
-            startY = event.clientY;
-            const current = map.project(popup.getLngLat());
-            const next = { x: current.x + dx, y: current.y + dy };
-            const nextLngLat = map.unproject(next);
-            popup.setLngLat(nextLngLat);
-          });
-
-          window.addEventListener("mouseup", () => {
-            if (!dragging) return;
-            dragging = false;
-            dragHandle.classList.remove("dragging");
-            mapCanvas.style.cursor = "";
-            if (map.dragPan) map.dragPan.enable();
-            document.body.style.userSelect = "";
-          });
-        }
-        if (!GOOGLE_MAPS_KEY) {
-          const node = panoContainer();
-          if (node) node.textContent = "Street View unavailable.";
-          return;
-        }
-        try {
-          await loadGoogleMaps();
-          const node = panoContainer();
-          if (!node) return;
-          const sv = new google.maps.StreetViewService();
-          let panoInstance = null;
-          let currentSource = "OUTDOOR";
-          const popupEl = popup.getElement();
-          const expandButton = popupEl.querySelector(`[data-mode="expand"][data-pano="${panoId}"]`);
-          const interiorButton = popupEl.querySelector(`[data-mode="interior"][data-pano="${panoId}"]`);
-          const interiorAltButton = popupEl.querySelector(`[data-mode="interior-alt"][data-pano="${panoId}"]`);
-          let panoLoading = false;
-          let lastPanoRequest = 0;
-          let resizeObserver = null;
-          let pendingFailTimer = null;
-
-          if (currentZoom < CONFIG.streetViewMinZoom) {
-            node.textContent = `Zoom closer (zoom ${CONFIG.streetViewMinZoom}+) to load Street View.`;
-            return;
-          }
-
-          function attachResizeHandle(target) {
-            if (!target || target.querySelector(".sv-resize-handle")) return;
-            const handle = document.createElement("div");
-            handle.className = "sv-resize-handle";
-            handle.textContent = "↘";
-            target.appendChild(handle);
-            const MIN_W = 260;
-            const MIN_H = 160;
-            handle.addEventListener("mousedown", (event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              handle.style.cursor = "nwse-resize";
-              const startX = event.clientX;
-              const startY = event.clientY;
-              const rect = target.getBoundingClientRect();
-              const startW = rect.width;
-              const startH = rect.height;
-
-              function onMove(e) {
-                const deltaX = e.clientX - startX;
-                const deltaY = e.clientY - startY;
-                const nextW = Math.min(window.innerWidth * 0.9, Math.max(MIN_W, startW + deltaX));
-                const nextH = Math.min(window.innerHeight * 0.72, Math.max(MIN_H, startH + deltaY));
-                target.style.width = `${nextW}px`;
-                target.style.height = `${nextH}px`;
-                resizePanorama();
-              }
-              function onUp() {
-                window.removeEventListener("mousemove", onMove);
-                window.removeEventListener("mouseup", onUp);
-                handle.style.cursor = "nwse-resize";
-              }
-              window.addEventListener("mousemove", onMove);
-              window.addEventListener("mouseup", onUp);
-            });
-          }
-
-          function resizePanorama() {
-            if (panoInstance && window.google?.maps?.event) {
-              window.google.maps.event.trigger(panoInstance, "resize");
-            }
-          }
-
-          function watchResize() {
-            const target = panoContainer();
-            if (!target || typeof ResizeObserver === "undefined") return;
-            if (resizeObserver) resizeObserver.disconnect();
-            resizeObserver = new ResizeObserver(() => resizePanorama());
-            resizeObserver.observe(target);
-          }
-
-          function setMessage(message) {
-            const target = panoContainer();
-            if (target) target.textContent = message;
-          }
-
-          function loadPanorama(source, attempt = 0) {
-            const target = panoContainer();
-            if (!target) return;
-            if (pendingFailTimer) {
-              clearTimeout(pendingFailTimer);
-              pendingFailTimer = null;
-            }
-            const now = Date.now();
-            lastPanoRequest = now;
-            target.textContent = "Loading Street View…";
-            const radius = attempt === 0 ? 400 : 800;
-            const request = {
-              location: { lat: coords[1], lng: coords[0] },
-              radius,
-              source: google.maps.StreetViewSource[source] || google.maps.StreetViewSource.DEFAULT
-            };
-            sv.getPanorama(request, (data, status) => {
-              if (pendingFailTimer) {
-                clearTimeout(pendingFailTimer);
-                pendingFailTimer = null;
-              }
-              if (status === "OK") {
-                currentSource = source;
-                if (interiorAltButton) {
-                  interiorAltButton.textContent = source === "OUTDOOR" ? "Try Interior" : "Try Exterior";
-                }
-                panoInstance = new google.maps.StreetViewPanorama(target, {
-                  position: { lat: coords[1], lng: coords[0] },
-                  pov: { heading: 0, pitch: 0 },
-                  zoom: 1,
-                  addressControl: false,
-                  fullscreenControl: false,
-                  motionTracking: false,
-                  showRoadLabels: false
-                });
-                resizePanorama();
-              } else {
-                if (attempt === 0) {
-                  // Fallback: broaden search and switch source if we started outdoors.
-                  const nextSource = source === "OUTDOOR" ? "DEFAULT" : "OUTDOOR";
-                  loadPanorama(nextSource, attempt + 1);
-                  return;
-                }
-                pendingFailTimer = setTimeout(() => {
-                  if (source === "OUTDOOR") {
-                    setMessage("No outdoor Street View. Use “Try Interior”.");
-                  } else {
-                    setMessage("No Street View for this location.");
-                  }
-                }, CONFIG.streetViewFailDelayMs);
-              }
-            });
-          }
-
-          if (expandButton) {
-            expandButton.addEventListener("click", () => {
-              const target = panoContainer();
-              if (!target) return;
-              const expanded = target.classList.toggle("expanded");
-              expandButton.textContent = expanded ? "Collapse" : "Expand";
-              resizePanorama();
-            });
-          }
-
-          if (interiorButton) {
-            interiorButton.addEventListener("click", () => {
-              const next = currentSource === "OUTDOOR" ? "DEFAULT" : "OUTDOOR";
-              interiorButton.textContent = next === "DEFAULT" ? "Exterior" : "Interior";
-              loadPanorama(next);
-            });
-          }
-          if (interiorAltButton) {
-            interiorAltButton.addEventListener("click", () => {
-              const next = currentSource === "OUTDOOR" ? "DEFAULT" : "OUTDOOR";
-              loadPanorama(next);
-            });
-          }
-          const copyButton = popupEl.querySelector(`[data-copy]`);
-          if (copyButton) {
-            copyButton.addEventListener("click", async () => {
-              const value = copyButton.getAttribute("data-copy");
-              try {
-                await navigator.clipboard.writeText(value || "");
-                copyButton.textContent = "Copied";
-                setTimeout(() => {
-                  copyButton.textContent = "Copy coords";
-                }, 1200);
-              } catch (error) {
-                copyButton.textContent = "Copy failed";
-                setTimeout(() => {
-                  copyButton.textContent = "Copy coords";
-                }, 1200);
-              }
-            });
-          }
-
-          loadPanorama("OUTDOOR");
-          attachResizeHandle(panoContainer());
-          watchResize();
-          popup.on("close", () => {
-            if (resizeObserver) resizeObserver.disconnect();
-            resizeObserver = null;
-            if (pendingFailTimer) clearTimeout(pendingFailTimer);
-          });
-        } catch (error) {
-          const node = panoContainer();
-          if (node) node.textContent = "Street View failed to load.";
-        }
+        if (!feature) return;
+        void handlePlaceFeatureClick(feature, e.lngLat);
       });
     }
 
@@ -910,16 +916,45 @@
         }
         const features = map.queryRenderedFeatures(e.point, { layers: [LAYERS.places, LAYERS.overview] });
         if (features && features.length) return;
-        if (map.getZoom() < 9) {
+        const zoom = map.getZoom();
+        if (zoom < 9) {
           showClickHint("Move closer and center on a place");
           return;
+        }
+        const hitPadding = 12;
+        const hitBbox = [
+          [e.point.x - hitPadding, e.point.y - hitPadding],
+          [e.point.x + hitPadding, e.point.y + hitPadding]
+        ];
+        const hitCandidates = map.queryRenderedFeatures(hitBbox, { layers: [LAYERS.places] });
+        if (hitCandidates && hitCandidates.length) {
+          let closestFeature = null;
+          let closestDist = Infinity;
+          hitCandidates.forEach((candidate) => {
+            const candidateLng = candidate.properties?.lng;
+            const candidateLat = candidate.properties?.lat;
+            const candidateCoords = candidate.geometry?.coordinates || (candidateLng && candidateLat ? [candidateLng, candidateLat] : null);
+            if (!candidateCoords) return;
+            const screenPoint = map.project(candidateCoords);
+            const dx = screenPoint.x - e.point.x;
+            const dy = screenPoint.y - e.point.y;
+            const dist = Math.hypot(dx, dy);
+            if (dist <= hitPadding && dist < closestDist) {
+              closestDist = dist;
+              closestFeature = candidate;
+            }
+          });
+          if (closestFeature) {
+            void handlePlaceFeatureClick(closestFeature, e.lngLat);
+            return;
+          }
         }
         const missPadding = 14;
         const bbox = [
           [e.point.x - missPadding, e.point.y - missPadding],
           [e.point.x + missPadding, e.point.y + missPadding]
         ];
-        const nearby = map.queryRenderedFeatures(bbox, { layers: [LAYERS.places, LAYERS.overview] });
+        const nearby = map.queryRenderedFeatures(bbox, { layers: [LAYERS.places] });
         if (nearby && nearby.length) {
           showClickHint("Center");
         } else {
