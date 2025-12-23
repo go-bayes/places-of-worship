@@ -42,5 +42,3 @@ See `docs/architecture.md` and `scripts/` for the current pipeline and tile endp
 - Use Conventional Commits (e.g., `feat: add denomination filter`).
 - Open a PR to `main` with a clear description and screenshots for UI changes.
 
-## Code of conduct
-- Behave.
