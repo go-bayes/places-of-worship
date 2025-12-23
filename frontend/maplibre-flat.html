@@ -24,6 +24,7 @@
   </div>
   <button id="corner-reset" type="button">Reset North</button>
   <button id="compassBtn" class="compass-btn" title="Reset bearing">N</button>
+  <button id="terrain-toggle" type="button">Terrain Off</button>
   <button id="dock-toggle" type="button">Search / Places</button>
   <div id="counts-wrap">
     <button id="counts-toggle" type="button" aria-controls="counts" aria-expanded="false">Show Denomination Key</button>
@@ -86,6 +87,9 @@
     const GOOGLE_MAPS_KEY = window.GOOGLE_MAPS_API_KEY || "";
     const MAPTILER_API_KEY = window.MAPTILER_API_KEY || "";
     const NOMINATIM_EMAIL = window.NOMINATIM_EMAIL || "";
+    const BACKDROP_BASEMAP_ID = "backdrop";
+    let terrainToggle = null;
+    let terrainOn = false;
     let googleMapsReady = false;
     const IS_MOBILE = window.matchMedia && window.matchMedia("(max-width: 640px)").matches;
 
@@ -201,6 +205,27 @@
       map.triggerRepaint();
     }
 
+    function syncTerrainToggleLabel() {
+      if (!terrainToggle) return;
+      terrainToggle.textContent = terrainOn ? "Terrain On" : "Terrain Off";
+    }
+
+    function setTerrainStateFromBasemap(basemapId) {
+      terrainOn = basemapId === BACKDROP_BASEMAP_ID;
+      syncTerrainToggleLabel();
+    }
+
+    function updateTerrainToggleAvailability() {
+      if (!terrainToggle) return;
+      const hasBackdrop = basemapOptions.some((style) => style.id === BACKDROP_BASEMAP_ID);
+      terrainToggle.disabled = !hasBackdrop;
+      terrainToggle.setAttribute("aria-disabled", hasBackdrop ? "false" : "true");
+      if (!hasBackdrop) {
+        terrainOn = false;
+        syncTerrainToggleLabel();
+      }
+    }
+
     function refreshMapLayers() {
       ensureCustomLayers();
       updateCounts();
@@ -258,11 +283,13 @@
         basemapSelect.appendChild(option);
       });
       basemapSelect.value = defaultBasemapId;
+      setTerrainStateFromBasemap(defaultBasemapId);
       // No need to setStyle here; initial style is already chosen above.
       basemapSelect.addEventListener("change", (event) => {
         const selected = basemapOptions.find((style) => style.id === event.target.value);
         if (selected) {
           activeBasemapId = selected.id;
+          setTerrainStateFromBasemap(selected.id);
           map.setStyle(selected.style || selected.url, { diff: false });
           map.once("style.load", () => {
             addCustomLayers();
@@ -286,6 +313,7 @@
         }
       });
       basemapSelect.disabled = basemapOptions.length <= 1;
+      updateTerrainToggleAvailability();
     }
 
     function loadGoogleMaps() {
@@ -976,6 +1004,7 @@
     const searchInput = document.getElementById("searchInput");
     const searchButton = document.getElementById("searchButton");
     const resetButton = document.getElementById("corner-reset");
+    terrainToggle = document.getElementById("terrain-toggle");
     const dock = document.getElementById("dock");
     const dockToggle = document.getElementById("dock-toggle");
     const tileStatus = document.getElementById("tile-status");
@@ -1089,6 +1118,22 @@
       }, true);
     }
 
+    if (terrainToggle) {
+      updateTerrainToggleAvailability();
+      syncTerrainToggleLabel();
+      terrainToggle.addEventListener("click", () => {
+        if (terrainToggle.disabled) {
+          showClickHint("Backdrop Unavailable");
+          return;
+        }
+        const targetId = terrainOn ? cartoStyle.id : BACKDROP_BASEMAP_ID;
+        if (basemapSelect) {
+          basemapSelect.value = targetId;
+          basemapSelect.dispatchEvent(new Event("change"));
+        }
+      });
+    }
+
     resetButton.addEventListener("click", () => {
       map.resetNorth();
     });
@@ -1110,6 +1155,44 @@
       if (!clickHint) return;
       if (clickHintTimer) clearTimeout(clickHintTimer);
       clickHint.classList.remove("visible");
+    }
+
+    function scheduleSearchHintClear(targetCoords) {
+      if (!clickHint || !targetCoords) {
+        hideClickHint();
+        return;
+      }
+      const start = Date.now();
+      const maxWaitMs = 2500;
+      const thresholdPx = 2;
+      const target = { lng: targetCoords[0], lat: targetCoords[1] };
+
+      const check = () => {
+        if (!map || !map.isStyleLoaded()) {
+          if (Date.now() - start < maxWaitMs) {
+            requestAnimationFrame(check);
+          } else {
+            hideClickHint();
+          }
+          return;
+        }
+        const center = map.getCenter();
+        const targetPx = map.project(target);
+        const centerPx = map.project(center);
+        const distance = Math.hypot(targetPx.x - centerPx.x, targetPx.y - centerPx.y);
+        if (distance <= thresholdPx) {
+          hideClickHint();
+          return;
+        }
+        if (Date.now() - start < maxWaitMs) {
+          requestAnimationFrame(check);
+        } else {
+          hideClickHint();
+        }
+      };
+
+      map.once("moveend", check);
+      requestAnimationFrame(check);
     }
 
     function closeInfoMenu() {
@@ -1268,7 +1351,7 @@
         } else {
           flyTo(presetMatch.coords, presetMatch.zoom || 10);
         }
-        map.once("moveend", hideClickHint);
+        scheduleSearchHintClear(presetMatch.coords);
         return;
       }
       try {
@@ -1284,7 +1367,7 @@
         } else {
           flyTo([lon, lat], 13);
         }
-        map.once("moveend", hideClickHint);
+        scheduleSearchHintClear([lon, lat]);
       } catch (error) {
         showClickHint("Search Unavailable, Use Scroll");
       }
