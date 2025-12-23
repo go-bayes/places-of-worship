@@ -8,7 +8,7 @@ The Global Places of Worship Mapping Project visualises the world's diversity an
 
 ## Frequently Asked Questions (FAQ)
 
-### How can I add a missing place of worship to the map?
+### How can I add or correct a place of worship on the map?
 
 This map sources its data from **OpenStreetMap (OSM)**, a collaborative global mapping project. Like Wikipedia, OpenStreetMap is a free, open resource built and maintained by volunteers for the public good. To add a missing religious site, please follow these steps.
 
@@ -16,9 +16,9 @@ First, **create an OpenStreetMap account** at [https://www.openstreetmap.org](ht
 
 Second, **navigate to the location** on the map where the place of worship is situated.
 
-Third, **click "Edit"** to open the editor. 
+Third, **click "Edit"** to open the editor.
 
-Fourth, **add a point** at the correct location and tag it appropriately.
+Fourth, **add a point** at the correct location and tag it appropriately, or select an existing place to revise details or remove incorrect entries.
 
 When tagging the location, use `amenity=place_of_worship`. Add the religion (e.g., `religion=christian`, `religion=buddhist`, `religion=muslim`) and the denomination if applicable (e.g., `denomination=catholic`). Include the name and any other relevant details. If known, please add the construction date using `start_date=YYYY` (e.g., `start_date=1887`); this information is particularly valuable for scientific research on religious landscapes.
 
@@ -30,7 +30,7 @@ For those new to the platform, the [OSM Beginners' Guide](https://wiki.openstree
 
 Please note that all contributions must follow the [OpenStreetMap Licence (ODbL 1.0)](https://opendatacommons.org/licenses/odbl/) and be based on your own knowledge.
 
-The most helpful contribution is fixing errors or adding missing places directly in OpenStreetMap. If you want to contribute to this repository, please see [CONTRIBUTING.md](CONTRIBUTING.md).
+The most helpful contribution is fixing errors, revising details, removing incorrect places, or adding missing places directly in OpenStreetMap. If you want to contribute to this repository, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Who is involved?
 

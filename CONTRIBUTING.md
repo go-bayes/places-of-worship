@@ -13,7 +13,7 @@ python3 -m http.server 8080
 2) Open `http://localhost:8080/maplibre-flat.html`.
 
 Optional local config:
-- Copy `frontend/config.example.js` to `frontend/config.js` for local API base or Google Maps key overrides.
+- Copy `frontend/config.example.js` to `frontend/config.js` only if you can run the local API on your machine; otherwise leave it unset and use the default public endpoints.
 
 ## Where to make changes
 
