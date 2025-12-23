@@ -1385,6 +1385,7 @@
     const countsList = document.getElementById("countsList");
     const countsTotal = document.getElementById("countsTotal");
     const countsToggle = document.getElementById("counts-toggle");
+    const countsHintDefault = countsHint ? countsHint.textContent : "";
     const countLabels = [
       { key: "christian", label: "Christian", color: "#e11d48" },
       { key: "muslim", label: "Muslim", color: "#16a34a" },
@@ -1396,6 +1397,17 @@
       { key: "taoist", label: "Taoist", color: "#06b6d4" },
       { key: "unknown", label: "Unknown", color: "#9ca3af" }
     ];
+    const EMPTY_COUNTS = {
+      christian: 0,
+      muslim: 0,
+      hindu: 0,
+      buddhist: 0,
+      jewish: 0,
+      sikh: 0,
+      shinto: 0,
+      taoist: 0,
+      unknown: 0
+    };
     let countsUserEnabled = false;
     let countsScheduled = false;
 
@@ -1413,6 +1425,21 @@
         syncCountsToggleLabel();
         updateCounts();
       });
+    }
+
+    function renderCounts(counts) {
+      countsList.innerHTML = "";
+      let total = 0;
+      countLabels.forEach(({ key, label, color }) => {
+        const value = counts[key] || 0;
+        total += value;
+        const item = document.createElement("li");
+        item.innerHTML =
+          `<span class="legend"><span class="dot" style="background:${color}"></span>${label}</span>` +
+          `<span>${value.toLocaleString()}</span>`;
+        countsList.appendChild(item);
+      });
+      countsTotal.textContent = `Total: ${total.toLocaleString()}`;
     }
 
     function updateCounts() {
@@ -1442,9 +1469,22 @@
             return;
           }
           countsPanel.style.display = "block";
-          if (countsHint) countsHint.style.display = "block";
-          countsList.style.display = "none";
-          countsTotal.style.display = "none";
+          if (countsHint) {
+            countsHint.style.display = "block";
+            if (IS_MOBILE) {
+              countsHint.textContent = "Zoom in for live counts";
+            } else {
+              countsHint.textContent = countsHintDefault;
+            }
+          }
+          if (IS_MOBILE) {
+            countsList.style.display = "grid";
+            countsTotal.style.display = "block";
+            renderCounts(EMPTY_COUNTS);
+          } else {
+            countsList.style.display = "none";
+            countsTotal.style.display = "none";
+          }
           return;
         }
         if (!countsUserEnabled) {
@@ -1452,23 +1492,16 @@
           return;
         }
         countsPanel.style.display = "block";
-        if (countsHint) countsHint.style.display = "none";
+        if (countsHint) {
+          countsHint.style.display = "none";
+          countsHint.textContent = countsHintDefault;
+        }
         countsList.style.display = "grid";
         countsTotal.style.display = "block";
         const layerId = zoom < 9 ? LAYERS.overview : LAYERS.places;
         if (!map.getLayer(layerId)) return;
         const features = map.queryRenderedFeatures({ layers: [layerId] });
-        const counts = {
-          christian: 0,
-          muslim: 0,
-          hindu: 0,
-          buddhist: 0,
-          jewish: 0,
-          sikh: 0,
-          shinto: 0,
-          taoist: 0,
-          unknown: 0
-        };
+        const counts = { ...EMPTY_COUNTS };
         features.forEach((feature) => {
           const key = feature.properties?.religion || "unknown";
           if (counts[key] === undefined) {
@@ -1477,18 +1510,7 @@
             counts[key] += 1;
           }
         });
-        countsList.innerHTML = "";
-        let total = 0;
-        countLabels.forEach(({ key, label, color }) => {
-          const value = counts[key] || 0;
-          total += value;
-          const item = document.createElement("li");
-          item.innerHTML =
-            `<span class="legend"><span class="dot" style="background:${color}"></span>${label}</span>` +
-            `<span>${value.toLocaleString()}</span>`;
-          countsList.appendChild(item);
-        });
-        countsTotal.textContent = `Total: ${total.toLocaleString()}`;
+        renderCounts(counts);
       });
     }
 
