@@ -8,7 +8,8 @@ Again, our primary interest is science. However, we hope that by allowing users 
 
 ## Quick Links
 
-**Global Map (with links to Data Enhanced Map):** [https://go-bayes.github.io/places-of-worship/index.html](https://go-bayes.github.io/places-of-worship/index.html)
+**Global Map:** [https://go-bayes.github.io/places-of-worship/index.html](https://go-bayes.github.io/places-of-worship/index.html)
+**Enhanced NZ Data Map:** [https://www.placesmap.org/enhanced-places.html](https://www.placesmap.org/enhanced-places.html)
 
 ## Frequently Asked Questions (FAQ)
 
