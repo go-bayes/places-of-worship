@@ -1,10 +1,14 @@
 # Global Places of Worship Mapping Project
 
-The Global Places of Worship Mapping Project visualises the world's diversity and distribution of faiths. Its primary purpose is to foster a sense of interconnection by allowing users to explore religious landscapes across the planet. In the years ahead, we will integrate open data with this resource to facilitate research into how religion affects, and is affected by, its context.
+The Global Places of Worship Mapping Project visualises the world's diversity and distribution of faiths. It does this by allowing users to immersively explore religious landscapes across the planet. 
+
+Its primary purpose is scientific. The project is not linked to any faith or secular tradition. In the years ahead, we will integrate open data with this resource to facilitate research into how religion affects, and is affected by, its context. We have made a start with New Zealand. 
+
+Although our primary interest is science, we hope our work fosters a sense of interconnection.
 
 ## Quick Links
 
-**Stable Map Interface:** [https://go-bayes.github.io/places-of-worship/index.html](https://go-bayes.github.io/places-of-worship/index.html)
+**Global Map (with links to Data Enhanced Map):** [https://go-bayes.github.io/places-of-worship/index.html](https://go-bayes.github.io/places-of-worship/index.html)
 
 ## Frequently Asked Questions (FAQ)
 
@@ -34,11 +38,13 @@ The most helpful contribution is fixing errors, revising details, removing incor
 
 ### Who is involved?
 
-This project is led by Professor Joseph Bulbulia (Victoria University of Wellington, New Zealand) and Dr Joseph Watts (University of Canterbury, New Zealand). We acknowledge the Nick Young at the University of Auckland Centre for eResearch for providing the initial inspiration.
+This project is led by Professor Joseph Bulbulia (Victoria University of Wellington, New Zealand) and Dr Joseph Watts (University of Canterbury, New Zealand). We acknowledge Nick Young at the University of Auckland Centre for eResearch for providing the initial inspiration.
 
 ### Who funds this project?
 
-This research is supported by a subgrant from the **Templeton Religion Trust (TRT-2022-30666)**, aimed at investigating the social consequences of religion.
+This research is supported by a subgrant from the **Templeton Religion Trust (TRT-2022-30666)**, aimed at investigating the social consequences of religion. 
+
+This is an independent, acadameic project. The funders have no roll in the design or implementation of this project. 
 
 ## Technical Architecture
 

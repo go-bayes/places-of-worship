@@ -454,6 +454,20 @@
     body:not(.show-attribution) .maplibregl-ctrl-attrib {
       display: none;
     }
+    .maplibregl-ctrl-attrib-button {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(15, 23, 42, 0.6);
+      color: #e2e8f0;
+      font-size: 12px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+      opacity: 0.85;
+    }
+    .maplibregl-ctrl-attrib-button:hover {
+      opacity: 1;
+    }
     .maplibregl-ctrl-attrib a {
       color: #0f172a;
     }
