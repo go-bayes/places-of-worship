@@ -1,83 +1,55 @@
 # Global Places of Worship Mapping Project
 
-This is a global map for places of faith. It's primary purpose is to provide users with an experience of interconnection with people around the world through an exploration of the diversity and distribution of faiths. In the years a head, we will be integrating open data with this resource so that people can understand how religion affects and is affected by the world around it. 
+The Global Places of Worship Mapping Project visualises the diversity and distribution of faiths worldwide. Its primary purpose is to foster a sense of interconnection by allowing users to explore religious landscapes globally. In the years ahead, we will integrate open data with this resource to facilitate research into how religion interacts with, and is affected by, its environment.
+
+## Quick Links
+
+**Map Interface:** [https://go-bayes.github.io/places-of-worship/index.html](https://go-bayes.github.io/places-of-worship/index.html)
 
 ## Frequently Asked Questions (FAQ)
 
 ### How can I add a missing place of worship to the map?
 
-This map sources its data from **OpenStreetMap (OSM)**, a collaborative global mapping project similar to Wikipedia. Like Wikipedia, OpenStreetMap is a free, open resource with no commercial purposes—it's built and maintained by volunteers worldwide for the public good.
+This map sources its data from **OpenStreetMap (OSM)**, a collaborative global mapping project. Like Wikipedia, OpenStreetMap is a free, open resource built and maintained by volunteers for the public good. To add a missing religious site, please follow these steps.
 
-To add a missing religious site:
+First, **create an OpenStreetMap account** at [https://www.openstreetmap.org](https://www.openstreetmap.org). Second, **navigate to the location** on the map where the place of worship is situated. Third, **click "Edit"** to open the editor. Fourth, **add a point** at the correct location and tag it appropriately.
 
-1. **Create an OpenStreetMap account** at https://www.openstreetmap.org
-2. **Navigate to the location** where the place of worship is located
-3. **Click "Edit"** to open the editor
-4. **Add a point** at the correct location and tag it appropriately:
-   - For the amenity tag, use `amenity=place_of_worship`
-   - Add the religion (e.g., `religion=christian`, `religion=buddhist`, `religion=muslim`)
-   - Add the denomination if applicable (e.g., `denomination=catholic`)
-   - Include the name and any other relevant details
-   - **If known, please add the construction date** using `start_date=YYYY` (e.g., `start_date=1887`). This information is valuable for scientific research on religious landscapes.
-5. **Save your changes** with a brief description
+When tagging the location, use `amenity=place_of_worship`. Add the religion (e.g., `religion=christian`, `religion=buddhist`, `religion=muslim`) and the denomination if applicable (e.g., `denomination=catholic`). Include the name and any other relevant details. If known, please add the construction date using `start_date=YYYY` (e.g., `start_date=1887`); this information is particularly valuable for scientific research on religious landscapes.
 
-Your edits will be reviewed by the OSM community and typically appear on this map within a few days to weeks, depending on data update cycles.
+Finally, **save your changes** with a brief description. Your edits will be reviewed by the OSM community and typically appear on this map within a few days to weeks, depending on data update cycles.
 
-**New to OpenStreetMap?** Check out the [OSM Beginners' Guide](https://wiki.openstreetmap.org/wiki/Beginners%27_guide) for detailed instructions.
-
-**Note**: All contributions to OpenStreetMap must follow the [OpenStreetMap License (ODbL 1.0)](https://opendatacommons.org/licenses/odbl/) and be based on your own knowledge or compatible data sources.
+For those new to the platform, the [OSM Beginners' Guide](https://wiki.openstreetmap.org/wiki/Beginners%27_guide) provides detailed instructions. Please note that all contributions must follow the [OpenStreetMap Licence (ODbL 1.0)](https://opendatacommons.org/licenses/odbl/) and be based on your own knowledge.
 
 ### Who is involved?
 
-- Professor Joseph Bulbulia, Victoria University of Wellington, New Zealand
-- Dr Joseph Watts, University of Canterbury, New Zealand
+The project is led by Professor Joseph Bulbulia (Victoria University of Wellington, New Zealand) and Dr Joseph Watts (University of Canterbury, New Zealand). We acknowledge Nick Young at the University of Auckland Centre for eResearch for providing the initial inspiration.
 
+### Who funds this project?
 
-### Who funds this project? 
+This research is supported by a subgrant from the **Templeton Religion Trust (TRT-2022-30666)**, aimed at investigating the social consequences of religion.
 
-This project is funded through a subgrant funded by the Templeton Religion Trust (TRT-2022-30666) to investigate the social consequences of religion.
+## Technical Architecture
 
+The application utilises a modern, open-source geospatial stack.
 
-## Quick links
+**Frontend and Visualisation:** the map interface is built with MapLibre GL JS, served as static HTML/CSS/JS via GitHub Pages. It features a mobile-friendly dock toggle and utilises Google Maps JS API for Street View integration (inline on desktop, link-only on mobile).
 
-### Data Enhanced Map
-- Enhanced NZ: https://go-bayes.github.io/places-of-worship/index.html
+**Tile Services:** we utilise a custom tile generation workflow. Basemap styles are sourced from MapTiler (using the Backdrop style as default, with CARTO Light as a fallback). Custom data tiles are processed using Tippecanoe and served via `Martin` (running in Docker) from a Google Cloud VM. The underlying tile data (mbtiles/pmtiles) is stored in a Google Cloud Storage bucket.
 
-### Stack (main map)
+**Data Processing:** R and Python utilities are employed for generating counts, manifests, and managing data pipelines.
 
-- **Frontend**: MapLibre GL JS (static HTML/JS/CSS), mobile-friendly dock toggle
-- **Basemap**: MapTiler styles (Backdrop default), CARTO Light fallback
-- **Custom tiles**: Martin (Docker) serving mbtiles/pmtiles from Google Cloud VM + GCS bucket
-- **Street View**: Google Maps JS API (inline desktop, link-only on mobile)
-- **Deployment**: GitHub Pages (static frontend), Martin on GCP VM with tiles from GCS
-- **Data processing**: Tippecanoe for tiles; R/Python utilities for counts and manifests
-
-
-### MapLibre / MapTiler workflow
-
-MapLibre GL renders the map in the browser. Basemap styles are sourced from MapTiler, custom data tiles are served separately via `Martin`.
+## Data Sources and Licensing
 
 ### OpenStreetMap (OSM) Data
 
-This project makes use of OpenStreetMap data. All OSM data and derivative databases are subject to the [Open Database License (ODbL 1.0)](https://opendatacommons.org/licenses/odbl/).
+This project relies on OpenStreetMap data. All OSM data and derivative databases are subject to the [Open Database Licence (ODbL 1.0)](https://opendatacommons.org/licenses/odbl/). Databases derived from OSM are distributed under the ODbL, consistent with OSM licence terms.
 
-### **License Compliance**: 
-
-Databases derived from OSM are distributed under ODbL, consistent with OSM licence terms: **Attribution**: ©OpenStreetMap contributors
-
+**Attribution:** © OpenStreetMap contributors.
 
 ### Additional Data Sources
 
-- **Statistics New Zealand**: CC BY 4.0
-- **Various National Statistical Offices**: As attributed
+We also incorporate data from Statistics New Zealand (CC BY 4.0) and various National Statistical Offices as attributed within the dataset.
 
-## License
+## Licence
 
-This project is licensed under the Open Database License (ODbL 1.0) to maintain compatibility with OpenStreetMap data.
-
-## Thanks
-
-Funding: Templeton Religion Trust (TRT-2022-30666).
-
-Nick Young at the University of Auckland Centre for E-research provided the initial inspiration.
-
+This project is licensed under the Open Database Licence (ODbL 1.0) to maintain compatibility with OpenStreetMap data.
