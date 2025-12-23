@@ -985,10 +985,10 @@
     const infoMenu = document.getElementById("corner-info-menu");
     const cityPresets = [
       { label: "Wellington", coords: [174.7762, -41.2865], zoom: 10 },
-      { label: "LA", coords: [-118.2437, 34.0522], zoom: 9 },
+      { label: "LA", aliases: ["Los Angeles"], coords: [-118.2437, 34.0522], zoom: 9 },
       { label: "Nassau", coords: [-77.3554, 25.0343], zoom: 11 },
       { label: "Atlanta", coords: [-84.388, 33.749], zoom: 11 },
-      { label: "NYC", coords: [-74.006, 40.7128], zoom: 9 },
+      { label: "NYC", aliases: ["New York", "New York City"], coords: [-74.006, 40.7128], zoom: 9 },
       { label: "Buenos Aires", shortLabel: "BA", coords: [-58.3816, -34.6037], zoom: 10 },
       { label: "London", coords: [-0.1276, 51.5072], zoom: 9 },
       { label: "Jerusalem", coords: [35.2137, 31.7683], zoom: 11 },
@@ -998,6 +998,25 @@
 
     function flyTo(coords, zoom) {
       map.flyTo({ center: coords, zoom: zoom || 10, speed: 1.2, curve: 1.4 });
+    }
+
+    function normalizePresetTerm(value) {
+      return value.toLowerCase().replace(/[^a-z0-9]+/g, "");
+    }
+
+    function findCityPresetMatch(query) {
+      const normalizedQuery = normalizePresetTerm(query);
+      if (!normalizedQuery) return null;
+      for (const city of cityPresets) {
+        const terms = [city.label, city.shortLabel, ...(city.aliases || [])].filter(Boolean);
+        for (const term of terms) {
+          const normalizedTerm = normalizePresetTerm(term);
+          if (normalizedQuery === normalizedTerm || normalizedQuery.startsWith(normalizedTerm)) {
+            return city;
+          }
+        }
+      }
+      return null;
     }
 
     cityPresets.forEach((city) => {
@@ -1075,14 +1094,22 @@
     });
 
     let clickHintTimer = null;
-    function showClickHint(message) {
+    function showClickHint(message, options = {}) {
       if (!clickHint) return;
       clickHint.textContent = message;
       clickHint.classList.add("visible");
       if (clickHintTimer) clearTimeout(clickHintTimer);
+      if (options.sticky) return;
+      const durationMs = options.durationMs || 1600;
       clickHintTimer = setTimeout(() => {
         clickHint.classList.remove("visible");
-      }, 1600);
+      }, durationMs);
+    }
+
+    function hideClickHint() {
+      if (!clickHint) return;
+      if (clickHintTimer) clearTimeout(clickHintTimer);
+      clickHint.classList.remove("visible");
     }
 
     function closeInfoMenu() {
@@ -1233,6 +1260,17 @@
     async function runSearch() {
       const query = searchInput.value.trim();
       if (!query) return;
+      showClickHint("SEARCHING", { sticky: true });
+      const presetMatch = findCityPresetMatch(query);
+      if (presetMatch) {
+        if (IS_MOBILE) {
+          map.jumpTo({ center: presetMatch.coords, zoom: presetMatch.zoom || 10 });
+        } else {
+          flyTo(presetMatch.coords, presetMatch.zoom || 10);
+        }
+        map.once("moveend", hideClickHint);
+        return;
+      }
       try {
         const result = await geocode(query);
         if (!result) {
@@ -1246,8 +1284,9 @@
         } else {
           flyTo([lon, lat], 13);
         }
+        map.once("moveend", hideClickHint);
       } catch (error) {
-        showClickHint("Search Unavailable");
+        showClickHint("Search Unavailable, Use Scroll");
       }
     }
 
