@@ -30,6 +30,8 @@ For those new to the platform, the [OSM Beginners' Guide](https://wiki.openstree
 
 Please note that all contributions must follow the [OpenStreetMap Licence (ODbL 1.0)](https://opendatacommons.org/licenses/odbl/) and be based on your own knowledge.
 
+The most helpful contribution is fixing errors or adding missing places directly in OpenStreetMap. If you want to contribute to this repository, please see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ### Who is involved?
 
 This project is led by Professor Joseph Bulbulia (Victoria University of Wellington, New Zealand) and Dr Joseph Watts (University of Canterbury, New Zealand). We acknowledge the Nick Young at the University of Auckland Centre for eResearch for providing the initial inspiration.
