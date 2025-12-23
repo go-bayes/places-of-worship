@@ -247,9 +247,12 @@
       bearing: 0,
       projection: "mercator",
       hash: true,
+      attributionControl: false,
       maxZoom: 18,
       minZoom: IS_MOBILE ? CONFIG.mobileMinZoom : CONFIG.desktopMinZoom
     });
+
+    map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
 
     if (!IS_MOBILE) {
       map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
