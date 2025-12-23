@@ -440,6 +440,23 @@
       font-weight: 600;
       color: #f1f5f9;
     }
+    .maplibregl-ctrl-attrib,
+    .maplibregl-ctrl-attrib.maplibregl-compact {
+      background: rgba(15,23,42,0.72);
+      color: #e2e8f0;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 1px 6px;
+      font-size: 11px;
+      line-height: 1.2;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.28);
+    }
+    .maplibregl-ctrl-attrib a {
+      color: #93c5fd;
+    }
+    .maplibregl-ctrl-attrib a:hover {
+      color: #bfdbfe;
+    }
     .maplibregl-ctrl-bottom-right { bottom: 56px; }
     .compass-btn {
       position: fixed;
