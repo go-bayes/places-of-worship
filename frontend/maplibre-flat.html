@@ -85,6 +85,7 @@
     const BUILDINGS_LAYER = urlParams.get("buildingsLayer") || CONFIG.layerDefaults.buildings;
     const GOOGLE_MAPS_KEY = window.GOOGLE_MAPS_API_KEY || "";
     const MAPTILER_API_KEY = window.MAPTILER_API_KEY || "";
+    const NOMINATIM_EMAIL = window.NOMINATIM_EMAIL || "";
     let googleMapsReady = false;
     const IS_MOBILE = window.matchMedia && window.matchMedia("(max-width: 640px)").matches;
 
@@ -185,7 +186,7 @@
   ]
 : [];
     const basemapOptions = [cartoStyle, ...maptilerStyles];
-    const defaultBasemapId = hasMaptilerKey ? "backdrop" : cartoStyle.id;
+    const defaultBasemapId = cartoStyle.id;
     let activeBasemapId = defaultBasemapId;
 
     const initialBasemap = basemapOptions.find((s) => s.id === defaultBasemapId) || cartoStyle;
@@ -1147,12 +1148,86 @@
       });
     });
 
-    async function geocode(query) {
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
-      const response = await fetch(url, { headers: { "Accept": "application/json" } });
-      if (!response.ok) throw new Error("Geocoding failed");
+    async function fetchWithTimeout(url, options = {}, timeoutMs = 6500) {
+      if (typeof AbortController === "undefined") {
+        return fetch(url, options);
+      }
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        return await fetch(url, { ...options, signal: controller.signal });
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    async function geocodeNominatim(query) {
+      const emailParam = NOMINATIM_EMAIL ? `&email=${encodeURIComponent(NOMINATIM_EMAIL)}` : "";
+      const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&addressdetails=0&q=${encodeURIComponent(query)}${emailParam}`;
+      let response;
+      try {
+        response = await fetchWithTimeout(url, { headers: { "Accept": "application/json" } });
+      } catch (error) {
+        return null;
+      }
+      if (!response.ok) return null;
       const results = await response.json();
-      return results && results.length ? results[0] : null;
+      const result = results && results.length ? results[0] : null;
+      if (!result) return null;
+      return {
+        lon: parseFloat(result.lon),
+        lat: parseFloat(result.lat),
+        name: result.display_name || ""
+      };
+    }
+
+    async function geocodeMaptiler(query) {
+      if (!hasMaptilerKey || !window.USE_MAPTILER_GEOCODE) return null;
+      const url = `https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${encodeURIComponent(MAPTILER_API_KEY)}&limit=1`;
+      let response;
+      try {
+        response = await fetchWithTimeout(url, { headers: { "Accept": "application/json" } });
+      } catch (error) {
+        return null;
+      }
+      if (!response.ok) return null;
+      const payload = await response.json();
+      const feature = payload && payload.features && payload.features[0];
+      const center = feature && (feature.center || feature.geometry?.coordinates);
+      if (!center) return null;
+      return {
+        lon: center[0],
+        lat: center[1],
+        name: feature.place_name || feature.text || ""
+      };
+    }
+
+    async function geocodePhoton(query) {
+      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=1`;
+      let response;
+      try {
+        response = await fetchWithTimeout(url, { headers: { "Accept": "application/json" } });
+      } catch (error) {
+        return null;
+      }
+      if (!response.ok) return null;
+      const payload = await response.json();
+      const feature = payload && payload.features && payload.features[0];
+      const coords = feature && feature.geometry && feature.geometry.coordinates;
+      if (!coords) return null;
+      return {
+        lon: coords[0],
+        lat: coords[1],
+        name: feature.properties?.name || feature.properties?.label || ""
+      };
+    }
+
+    async function geocode(query) {
+      const nominatimResult = await geocodeNominatim(query);
+      if (nominatimResult) return nominatimResult;
+      const maptilerResult = await geocodeMaptiler(query);
+      if (maptilerResult) return maptilerResult;
+      return await geocodePhoton(query);
     }
 
     async function runSearch() {
@@ -1161,6 +1236,7 @@
       try {
         const result = await geocode(query);
         if (!result) {
+          showClickHint("No Results");
           return;
         }
         const lon = parseFloat(result.lon);
@@ -1171,6 +1247,7 @@
           flyTo([lon, lat], 13);
         }
       } catch (error) {
+        showClickHint("Search Unavailable");
       }
     }
 
