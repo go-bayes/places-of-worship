@@ -1201,6 +1201,7 @@
       if (infoMenu.hidden) return;
       infoMenu.hidden = true;
       infoToggle.setAttribute("aria-expanded", "false");
+      document.body.classList.remove("show-attribution");
     }
 
     function syncInfoPosition() {
@@ -1214,6 +1215,7 @@
         const shouldOpen = infoMenu.hidden;
         infoMenu.hidden = !shouldOpen;
         infoToggle.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+        document.body.classList.toggle("show-attribution", shouldOpen);
       });
       document.addEventListener("click", (event) => {
         if (infoMenu.hidden) return;
