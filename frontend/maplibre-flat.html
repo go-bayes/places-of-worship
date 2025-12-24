@@ -422,6 +422,35 @@
       map.once("idle", fillPopupName);
     }
 
+    function clampPopupToViewport(popup, padding = 12) {
+      const popupEl = popup && popup.getElement ? popup.getElement() : null;
+      const mapEl = map && map.getContainer ? map.getContainer() : null;
+      if (!popupEl || !mapEl) return;
+      const popupRect = popupEl.getBoundingClientRect();
+      const mapRect = mapEl.getBoundingClientRect();
+      if (!Number.isFinite(popupRect.width) || !Number.isFinite(popupRect.height)) return;
+      const availableWidth = mapRect.width - padding * 2;
+      const availableHeight = mapRect.height - padding * 2;
+      let dx = 0;
+      let dy = 0;
+      if (popupRect.width <= availableWidth) {
+        const minLeft = mapRect.left + padding;
+        const maxRight = mapRect.right - padding;
+        if (popupRect.left < minLeft) dx = minLeft - popupRect.left;
+        if (popupRect.right > maxRight) dx = maxRight - popupRect.right;
+      }
+      if (popupRect.height <= availableHeight) {
+        const minTop = mapRect.top + padding;
+        const maxBottom = mapRect.bottom - padding;
+        if (popupRect.top < minTop) dy = minTop - popupRect.top;
+        if (popupRect.bottom > maxBottom) dy = maxBottom - popupRect.bottom;
+      }
+      if (!dx && !dy) return;
+      const current = map.project(popup.getLngLat());
+      const next = { x: current.x + dx, y: current.y + dy };
+      popup.setLngLat(map.unproject(next));
+    }
+
     async function handlePlaceFeatureClick(feature, fallbackLngLat) {
       if (!feature) return;
       const props = feature?.properties || {};
@@ -472,6 +501,7 @@
           `</div>`
         )
         .addTo(map);
+      requestAnimationFrame(() => clampPopupToViewport(popup));
 
       const panoContainer = () => document.getElementById(panoId);
       const popupContent = popup.getElement();
@@ -660,6 +690,7 @@
             const expanded = target.classList.toggle("expanded");
             expandButton.textContent = expanded ? "Collapse" : "Expand";
             resizePanorama();
+            requestAnimationFrame(() => clampPopupToViewport(popup));
           });
         }
 
@@ -714,6 +745,7 @@
         loadPanorama("OUTDOOR");
         attachResizeHandle(panoContainer());
         watchResize();
+        requestAnimationFrame(() => clampPopupToViewport(popup));
         popup.on("close", () => {
           if (resizeObserver) resizeObserver.disconnect();
           resizeObserver = null;

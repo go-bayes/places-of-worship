@@ -348,7 +348,8 @@
     #theme-menu {
       position: fixed;
       right: var(--safe-right);
-      top: var(--safe-top);
+      top: auto;
+      bottom: var(--safe-bottom);
       z-index: 13;
       display: flex;
       align-items: center;
