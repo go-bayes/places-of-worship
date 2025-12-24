@@ -609,8 +609,8 @@
         left: 50%;
         right: auto;
         transform: translateX(-50%);
-        width: 46dvw;
-        max-width: 46dvw;
+        width: 86dvw;
+        max-width: 86dvw;
       }
       #corner-info { left: var(--safe-left); bottom: var(--safe-bottom); }
       #onboard {
@@ -639,7 +639,7 @@
       #theme-menu { display: none; }
       #cityChips { display: none; }
       .dock-row { gap: 4px; }
-      .dock-row input { padding: 6px 9px; font-size: 16px; }
+      .dock-row input { padding: 12px 12px; font-size: 19px; }
       .dock-row button { padding: 5px 9px; font-size: clamp(11px, 3vw, 12px); }
       .dock-cities { gap: 6px; }
       .dock-chip { font-size: clamp(9px, 2.1vw, 11px); padding: 3px 6px; }
