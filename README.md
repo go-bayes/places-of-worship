@@ -4,8 +4,8 @@ An open, research‑focused map of global places of worship. Built to support st
 
 ## Quick Links
 
-**Global Map:** [https://go-bayes.github.io/places-of-worship/index.html](https://go-bayes.github.io/places-of-worship/index.html)
-**Enhanced NZ Data Map:** [https://www.placesmap.org/enhanced-places.html](https://www.placesmap.org/enhanced-places.html)
+- **Global Map:** [https://go-bayes.github.io/places-of-worship/index.html](https://go-bayes.github.io/places-of-worship/index.html)
+- **Enhanced NZ Data Map:** [https://www.placesmap.org/enhanced-places.html](https://www.placesmap.org/enhanced-places.html)
 
 ## Frequently Asked Questions (FAQ)
 
