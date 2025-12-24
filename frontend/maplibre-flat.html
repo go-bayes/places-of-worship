@@ -286,7 +286,7 @@
       }
       pinnedLabel
         .setLngLat(coords)
-        .setHTML(`<div style="font-weight:600;color:#111;">${name}</div>`)
+        .setHTML(`<div style="font-weight:600;color:inherit;">${name}</div>`)
         .addTo(map);
       if (pinnedTimer) clearTimeout(pinnedTimer);
       pinnedTimer = setTimeout(() => pinnedLabel.remove(), 2200);
@@ -813,7 +813,7 @@
         if (!coords) return;
         hoverPopup
           .setLngLat(coords)
-          .setHTML(`<div style="font-weight:600;color:#111;">${name}</div>`)
+          .setHTML(`<div style="font-weight:600;color:inherit;">${name}</div>`)
           .addTo(map);
         showPinnedLabel(name, coords);
       });

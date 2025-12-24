@@ -131,11 +131,15 @@
     }
     .maplibregl-popup-content {
       max-width: min(1080px, 92vw);
-      background: rgba(255,255,255,0.9);
-      border: 1px solid rgba(15, 23, 42, 0.18);
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(255,255,255,0.12);
       border-radius: 16px;
       box-shadow: 0 18px 32px rgba(0,0,0,0.22);
+      color: #e2e8f0;
       cursor: grab;
+    }
+    .maplibregl-popup-tip {
+      display: none;
     }
     .maplibregl-popup-content.dragging {
       cursor: grabbing;
@@ -190,7 +194,7 @@
     .popup-header.dragging { cursor: grabbing; }
     .popup-title {
       font-weight: 600;
-      color: #111;
+      color: #e2e8f0;
       font-size: 14px;
     }
     .popup-actions a,
@@ -201,9 +205,9 @@
       gap: 9px;
       padding: 8px 12px;
       border-radius: 12px;
-      border: 1px solid rgba(0,0,0,0.1);
-      background: rgba(15, 23, 42, 0.08);
-      color: #111;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(15, 23, 42, 0.45);
+      color: #e2e8f0;
       font-size: 17px;
       text-decoration: none;
       cursor: pointer;
