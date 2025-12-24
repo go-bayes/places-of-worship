@@ -336,8 +336,10 @@
       cursor: pointer;
     }
     #terrain-toggle {
-      position: static;
-      z-index: 12;
+      position: fixed;
+      right: var(--safe-right);
+      top: calc(var(--safe-top) + 1px);
+      z-index: 13;
       background: rgba(15, 23, 42, 0.6);
       border: 1px solid rgba(255,255,255,0.06);
       color: #e2e8f0;
@@ -662,6 +664,7 @@
         padding: 5px 9px;
       }
       #terrain-toggle {
+        position: static;
         display: inline-flex;
         font-size: 11px;
         padding: 5px 9px;
