@@ -273,7 +273,21 @@
       white-space: nowrap;
       background: rgba(15, 23, 42, 0.45);
     }
+    #corner-info-menu button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 9px 12px;
+      border-radius: 12px;
+      color: #e2e8f0;
+      font-size: 15px;
+      background: rgba(15, 23, 42, 0.45);
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
     #corner-info-menu a:hover,
+    #corner-info-menu button:hover,
     #corner-info-menu a:focus-visible {
       background: rgba(148, 163, 184, 0.28);
     }
@@ -349,6 +363,63 @@
       white-space: nowrap;
     }
     #click-hint.visible { opacity: 0.8; }
+    #onboard {
+      position: fixed;
+      left: var(--safe-left);
+      top: calc(var(--safe-top) + 8px);
+      z-index: 14;
+      display: none;
+      max-width: min(320px, 88vw);
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 12px 14px;
+      color: #e2e8f0;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+    }
+    #onboard.visible { display: block; }
+    #onboard h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    #onboard p {
+      margin: 0 0 8px;
+      font-size: 13px;
+      color: #cbd5f5;
+    }
+    #onboard ul {
+      margin: 0 0 10px;
+      padding-left: 16px;
+      font-size: 13px;
+      color: #cbd5f5;
+    }
+    #onboard li { margin-bottom: 4px; }
+    #onboard .onboard-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    #onboard .onboard-actions a,
+    #onboard .onboard-actions button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(15, 23, 42, 0.35);
+      color: #e2e8f0;
+      font-size: 12px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    #onboard .onboard-actions button {
+      background: rgba(255,255,255,0.9);
+      color: #0b0c10;
+      border-color: rgba(15, 23, 42, 0.35);
+      font-weight: 600;
+    }
     #dock-toggle {
       position: fixed;
       left: 50%;
@@ -499,6 +570,12 @@
         max-width: 46dvw;
       }
       #corner-info { left: var(--safe-left); bottom: var(--safe-bottom); }
+      #onboard {
+        left: 50%;
+        transform: translateX(-50%);
+        top: calc(var(--safe-top) + 10px);
+        max-width: min(88vw, 360px);
+      }
       .dock-cities-row { display: none; }
       .maplibregl-ctrl-bottom-right { bottom: 80px; }
       #counts {

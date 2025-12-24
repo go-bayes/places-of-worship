@@ -11,6 +11,19 @@
   <div id="map"></div>
   <div id="tile-status">Loading tiles…</div>
   <div id="click-hint" role="status" aria-live="polite"></div>
+  <div id="onboard" role="dialog" aria-label="What am I looking at?">
+    <h3>What am I looking at?</h3>
+    <p>Global places of worship from OpenStreetMap.</p>
+    <ul>
+      <li>Colors show broad religion categories.</li>
+      <li>Zoom in to see individual places and Street View.</li>
+      <li>Fix errors by editing OpenStreetMap.</li>
+    </ul>
+    <div class="onboard-actions">
+      <a href="https://github.com/go-bayes/places-of-worship#how-can-i-add-or-correct-a-place-of-worship-on-the-map" target="_blank" rel="noopener">How to fix data</a>
+      <button type="button" id="onboard-dismiss">Got it</button>
+    </div>
+  </div>
   <div id="corner-info">
     <button id="corner-info-toggle" type="button" aria-label="Info" aria-haspopup="true" aria-expanded="false" aria-controls="corner-info-menu">
       <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
@@ -18,6 +31,7 @@
       </svg>
     </button>
     <div id="corner-info-menu" role="menu" hidden>
+      <button type="button" id="onboard-toggle" role="menuitem">What am I looking at?</button>
       <a role="menuitem" href="https://go-bayes.github.io/places-of-worship/enhanced-places.html">Enhanced Data (NZ)</a>
       <a role="menuitem" href="https://github.com/go-bayes/places-of-worship#how-can-i-add-or-correct-a-place-of-worship-on-the-map">Fix Errors in OSM</a>
       <a role="menuitem" href="https://github.com/go-bayes/places-of-worship">GitHub Repo</a>
@@ -1016,6 +1030,10 @@
     const cornerInfo = document.getElementById("corner-info");
     const infoToggle = document.getElementById("corner-info-toggle");
     const infoMenu = document.getElementById("corner-info-menu");
+    const onboard = document.getElementById("onboard");
+    const onboardDismiss = document.getElementById("onboard-dismiss");
+    const onboardToggle = document.getElementById("onboard-toggle");
+    const ONBOARD_STORAGE_KEY = "pow-onboard-dismissed";
     const cityPresets = [
       { label: "Wellington", coords: [174.7762, -41.2865], zoom: 10 },
       { label: "LA", aliases: ["Los Angeles"], coords: [-118.2437, 34.0522], zoom: 9 },
@@ -1207,6 +1225,30 @@
       document.body.classList.remove("show-attribution");
     }
 
+    function showOnboard() {
+      if (!onboard) return;
+      onboard.classList.add("visible");
+    }
+
+    function hideOnboard(persist) {
+      if (!onboard) return;
+      onboard.classList.remove("visible");
+      if (!persist) return;
+      try {
+        localStorage.setItem(ONBOARD_STORAGE_KEY, "1");
+      } catch (error) {
+        // Ignore storage failures (private mode, etc).
+      }
+    }
+
+    function shouldShowOnboard() {
+      try {
+        return !localStorage.getItem(ONBOARD_STORAGE_KEY);
+      } catch (error) {
+        return true;
+      }
+    }
+
     function syncInfoPosition() {
       if (!cornerInfo) return;
       cornerInfo.style.top = "";
@@ -1228,8 +1270,26 @@
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
           closeInfoMenu();
+          hideOnboard(false);
         }
       });
+    }
+
+    if (onboard) {
+      if (shouldShowOnboard()) {
+        setTimeout(showOnboard, 650);
+      }
+      if (onboardDismiss) {
+        onboardDismiss.addEventListener("click", () => {
+          hideOnboard(true);
+        });
+      }
+      if (onboardToggle) {
+        onboardToggle.addEventListener("click", () => {
+          showOnboard();
+          closeInfoMenu();
+        });
+      }
     }
 
     function syncDockToggleLabel(isOpen) {
@@ -1414,7 +1474,9 @@
       taoist: 0,
       unknown: 0
     };
+    const COUNTS_MIN_INTERVAL_MS = 160;
     let countsUserEnabled = false;
+    let countsLastUpdate = 0;
     let countsScheduled = false;
 
     function syncCountsToggleLabel() {
@@ -1451,9 +1513,20 @@
     function updateCounts() {
       if (!map.isStyleLoaded()) return;
       if (countsScheduled) return;
+      const now = performance.now();
+      const elapsed = now - countsLastUpdate;
+      if (elapsed < COUNTS_MIN_INTERVAL_MS) {
+        countsScheduled = true;
+        setTimeout(() => {
+          countsScheduled = false;
+          updateCounts();
+        }, COUNTS_MIN_INTERVAL_MS - elapsed);
+        return;
+      }
       countsScheduled = true;
       requestAnimationFrame(() => {
         countsScheduled = false;
+        countsLastUpdate = performance.now();
         const zoom = map.getZoom();
         const eligibleZoom = zoom >= 4;
         if (countsToggle) {
