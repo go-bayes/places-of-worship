@@ -384,7 +384,7 @@
       if (!coords) return;
       const latFixed = coords[1].toFixed(6);
       const lngFixed = coords[0].toFixed(6);
-      const openStreetViewLink = `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>`;
+      const openStreetViewLink = `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Streetview</a>`;
       const popup = new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
         .setLngLat(coords)
         .setHTML(
@@ -457,13 +457,12 @@
           `</div>` +
           `<div class="streetview" id="${panoId}">Loading Street View…</div>` +
           `<div class="streetview-toolbar">` +
-          `<button type="button" data-mode="interior" data-pano="${panoId}">Interior</button>` +
+          `<button type="button" data-mode="fill" data-pano="${panoId}">Fill screen</button>` +
           `<button type="button" class="streetview-expand" data-mode="expand" data-pano="${panoId}">Expand</button>` +
           `</div>` +
           `<div class="popup-actions">` +
-          `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Try Interior/Exterior</a>` +
+          `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Streetview</a>` +
           `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +
-          `<button type="button" data-mode="interior-alt" data-pano="${panoId}">Try Interior/Exterior</button>` +
           `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
           `</div>`
         )
@@ -537,8 +536,7 @@
         let currentSource = "OUTDOOR";
         const popupEl = popup.getElement();
         const expandButton = popupEl.querySelector(`[data-mode="expand"][data-pano="${panoId}"]`);
-        const interiorButton = popupEl.querySelector(`[data-mode="interior"][data-pano="${panoId}"]`);
-        const interiorAltButton = popupEl.querySelector(`[data-mode="interior-alt"][data-pano="${panoId}"]`);
+        const fillButton = popupEl.querySelector(`[data-mode="fill"][data-pano="${panoId}"]`);
         let panoLoading = false;
         let lastPanoRequest = 0;
         let resizeObserver = null;
@@ -645,7 +643,7 @@
               }
               pendingFailTimer = setTimeout(() => {
                 if (source === "OUTDOOR") {
-                  setMessage("No outdoor Street View. Use “Try Interior/Exterior”.");
+                  setMessage("No outdoor Street View available.");
                 } else {
                   setMessage("No Street View for this location.");
                 }
@@ -658,23 +656,29 @@
           expandButton.addEventListener("click", () => {
             const target = panoContainer();
             if (!target) return;
+            if (target.classList.contains("full")) {
+              target.classList.remove("full");
+              popupEl.classList.remove("popup-full");
+              if (fillButton) fillButton.textContent = "Fill screen";
+            }
             const expanded = target.classList.toggle("expanded");
             expandButton.textContent = expanded ? "Collapse" : "Expand";
             resizePanorama();
           });
         }
 
-        if (interiorButton) {
-          interiorButton.addEventListener("click", () => {
-            const next = currentSource === "OUTDOOR" ? "DEFAULT" : "OUTDOOR";
-            interiorButton.textContent = next === "DEFAULT" ? "Exterior" : "Interior";
-            loadPanorama(next);
-          });
-        }
-        if (interiorAltButton) {
-          interiorAltButton.addEventListener("click", () => {
-            const next = currentSource === "OUTDOOR" ? "DEFAULT" : "OUTDOOR";
-            loadPanorama(next);
+        if (fillButton) {
+          fillButton.addEventListener("click", () => {
+            const target = panoContainer();
+            if (!target) return;
+            const full = target.classList.toggle("full");
+            popupEl.classList.toggle("popup-full", full);
+            if (full) {
+              target.classList.remove("expanded");
+              if (expandButton) expandButton.textContent = "Expand";
+            }
+            fillButton.textContent = full ? "Exit full screen" : "Fill screen";
+            resizePanorama();
           });
         }
         const copyButton = popupEl.querySelector(`[data-copy]`);

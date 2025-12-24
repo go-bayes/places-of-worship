@@ -129,6 +129,10 @@
       width: min(960px, 92vw);
       height: min(630px, 72vh);
     }
+    .streetview.full {
+      width: min(96vw, 1400px);
+      height: min(80vh, 820px);
+    }
     .maplibregl-popup-content {
       max-width: min(1080px, 92vw);
       background: rgba(15, 23, 42, 0.72);
@@ -136,7 +140,11 @@
       border-radius: 16px;
       box-shadow: 0 18px 32px rgba(0,0,0,0.22);
       color: #e2e8f0;
+      overflow: hidden;
       cursor: grab;
+    }
+    .maplibregl-popup.popup-full .maplibregl-popup-content {
+      max-width: min(96vw, 1400px);
     }
     .maplibregl-popup-tip {
       display: none;
