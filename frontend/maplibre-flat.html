@@ -43,7 +43,6 @@
   <div id="counts-wrap">
     <div id="counts-bar">
       <button id="counts-toggle" type="button" aria-controls="counts" aria-expanded="false">Show Denomination Key</button>
-      <button id="terrain-toggle" type="button">Backdrop</button>
     </div>
     <div id="counts">
       <h3>Visible Places</h3>
@@ -52,6 +51,7 @@
       <div class="count-total" id="countsTotal">Total: 0</div>
     </div>
   </div>
+  <button id="terrain-toggle" type="button">Backdrop</button>
     <div id="dock">
       <div class="dock-panel">
         <div class="dock-row">
@@ -1015,8 +1015,10 @@
       { label: "Buenos Aires", shortLabel: "BA", coords: [-58.3816, -34.6037], zoom: 10 },
       { label: "London", coords: [-0.1276, 51.5072], zoom: 9 },
       { label: "Jerusalem", coords: [35.2137, 31.7683], zoom: 11 },
+      { label: "Accra", coords: [-0.187, 5.6037], zoom: 11 },
       { label: "Mauritius", coords: [57.5522, -20.3484], zoom: 10 },
-      { label: "Singapore", coords: [103.8198, 1.3521], zoom: 11 }
+      { label: "Singapore", coords: [103.8198, 1.3521], zoom: 11 },
+      { label: "Tokyo", coords: [139.6917, 35.6895], zoom: 11 }
     ];
 
     function flyTo(coords, zoom) {

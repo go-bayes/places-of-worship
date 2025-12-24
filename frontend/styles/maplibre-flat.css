@@ -35,7 +35,7 @@
     #dock {
       position: fixed; left: 50%; bottom: calc(var(--safe-bottom) + 40px); transform: translateX(-50%);
       display: flex; flex-direction: column; gap: 6px; z-index: 11;
-      width: min(94dvw, 560px);
+      width: min(94dvw, 840px);
       max-width: 94dvw;
     }
     .dock-panel {
@@ -349,11 +349,26 @@
       text-decoration: none;
       opacity: 0.85;
       cursor: pointer;
-      display: inline-flex;
+      display: none;
     }
     #terrain-toggle[disabled] {
       opacity: 0.5;
       cursor: default;
+    }
+    #basemapSelect {
+      position: fixed;
+      right: var(--safe-right);
+      top: var(--safe-top);
+      z-index: 13;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #e2e8f0;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 14px;
+      text-decoration: none;
+      opacity: 0.85;
+      cursor: pointer;
     }
     #tile-status {
       position: fixed;
@@ -466,14 +481,18 @@
     }
     #counts-wrap {
       position: fixed;
-      left: 50%;
+      left: 0;
+      right: 0;
       top: var(--safe-top);
-      transform: translateX(-50%);
       z-index: 13;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 4px;
+      pointer-events: none;
+    }
+    #counts-wrap > * {
+      pointer-events: auto;
     }
     #counts-bar {
       display: flex;
@@ -641,10 +660,9 @@
         transform: translateX(-50%);
       }
       #counts-wrap {
-        left: 50%;
-        right: auto;
+        left: 0;
+        right: 0;
         top: var(--safe-top);
-        transform: translateX(-50%);
       }
       #counts-toggle {
         display: inline-flex;
@@ -663,10 +681,9 @@
         font-size: 11px;
         padding: 5px 9px;
       }
+    }
       #terrain-toggle {
-        position: static;
         display: inline-flex;
         font-size: 11px;
         padding: 5px 9px;
       }
-    }
