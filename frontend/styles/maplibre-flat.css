@@ -131,6 +131,21 @@
     }
     .maplibregl-popup-content {
       max-width: min(1080px, 92vw);
+      background: rgba(255,255,255,0.9);
+      border: 1px solid rgba(15, 23, 42, 0.18);
+      border-radius: 16px;
+      box-shadow: 0 18px 32px rgba(0,0,0,0.22);
+      cursor: grab;
+    }
+    .maplibregl-popup-content.dragging {
+      cursor: grabbing;
+    }
+    .maplibregl-popup-close-button {
+      width: 28px;
+      height: 28px;
+      font-size: 20px;
+      line-height: 26px;
+      border-radius: 999px;
     }
     .streetview-toolbar {
       display: flex;

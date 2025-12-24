@@ -471,16 +471,28 @@
 
       const panoContainer = () => document.getElementById(panoId);
       const popupContent = popup.getElement();
-      const dragHandle = popupContent.querySelector("[data-drag-handle]");
-      if (dragHandle) {
+      const popupBody = popupContent ? popupContent.querySelector(".maplibregl-popup-content") : null;
+      if (popupBody) {
         const mapCanvas = map.getCanvas();
         let dragging = false;
         let startX = 0;
         let startY = 0;
 
-        dragHandle.addEventListener("mousedown", (event) => {
+        const canDragFromTarget = (event) => {
+          if (event.button !== undefined && event.button !== 0) return false;
+          const target = event.target;
+          if (!(target instanceof Element)) return false;
+          if (target.closest(".streetview")) return false;
+          if (target.closest(".popup-actions")) return false;
+          if (target.closest(".maplibregl-popup-close-button")) return false;
+          if (target.closest("button, a, input, select, textarea, label")) return false;
+          return true;
+        };
+
+        popupBody.addEventListener("mousedown", (event) => {
+          if (!canDragFromTarget(event)) return;
           dragging = true;
-          dragHandle.classList.add("dragging");
+          popupBody.classList.add("dragging");
           startX = event.clientX;
           startY = event.clientY;
           mapCanvas.style.cursor = "grabbing";
@@ -505,7 +517,7 @@
         window.addEventListener("mouseup", () => {
           if (!dragging) return;
           dragging = false;
-          dragHandle.classList.remove("dragging");
+          popupBody.classList.remove("dragging");
           mapCanvas.style.cursor = "";
           if (map.dragPan) map.dragPan.enable();
           document.body.style.userSelect = "";
