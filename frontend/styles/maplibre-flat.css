@@ -352,12 +352,6 @@
       text-decoration: none;
       opacity: 0.85;
     }
-    #theme-menu span {
-      font-size: 11px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: rgba(226,232,240,0.7);
-    }
     #basemapSelect {
       background: transparent;
       border: none;
@@ -466,12 +460,12 @@
       top: auto;
       transform: translateX(-50%);
       z-index: 13;
-      padding: 9px 15px;
+      padding: 12px 22px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.08);
       background: rgba(15,23,42,0.72);
       color: #e2e8f0;
-      font-size: 15px;
+      font-size: 18px;
       cursor: pointer;
       box-shadow: 0 6px 14px rgba(0,0,0,0.25);
       opacity: 0.85;
@@ -498,12 +492,12 @@
     }
     #counts-toggle {
       z-index: 12;
-      padding: 6px 15px;
+      padding: 10px 22px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.08);
       background: rgba(15,23,42,0.72);
       color: #e2e8f0;
-      font-size: 14px;
+      font-size: 17px;
       cursor: pointer;
       display: inline-flex;
       width: auto;
