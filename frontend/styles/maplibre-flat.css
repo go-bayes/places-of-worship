@@ -33,9 +33,9 @@
     }
     .chip i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
     #dock {
-      position: fixed; left: 50%; bottom: calc(var(--safe-bottom) + 40px); transform: translateX(-50%);
+      position: fixed; left: 50%; bottom: calc(var(--safe-bottom) + 64px); transform: translateX(-50%);
       display: flex; flex-direction: column; gap: 6px; z-index: 11;
-      width: min(94dvw, 840px);
+      width: min(94dvw, 1120px);
       max-width: 94dvw;
     }
     .dock-panel {
@@ -48,7 +48,7 @@
     .dock-row { display: flex; gap: 6px; flex-wrap: nowrap; align-items: center; min-height: 24px; width: 100%; }
     .dock-row input {
       flex: 1 1 auto; min-width: 0; background: rgba(255,255,255,0.08); border: 1px solid transparent;
-      color: var(--text); padding: 14px 12px; border-radius: 12px; font-size: clamp(16px, 2.2vw, 20px);
+      color: var(--text); padding: 14px 12px; border-radius: 12px; font-size: clamp(18px, 2.4vw, 22px);
     }
     .dock-row select {
       background: rgba(255,255,255,0.08);
@@ -63,8 +63,8 @@
     .dock-row input::placeholder { color: rgba(226,232,240,0.6); }
     .dock-row button {
       background: rgba(226, 232, 240, 0.16); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px; padding: 5px 11px; font-weight: 700; cursor: pointer;
-      transition: transform 120ms ease, box-shadow 120ms ease; font-size: clamp(14px, 3vw, 15px);
+      border-radius: 12px; padding: 7px 14px; font-weight: 700; cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease; font-size: clamp(16px, 3.2vw, 18px);
     }
     .dock-row button.secondary { background: rgba(255,255,255,0.12); color: var(--text); }
     .dock-row button:hover { transform: translateY(-1px); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
@@ -348,7 +348,7 @@
       color: #e2e8f0;
       border-radius: 999px;
       padding: 4px 10px;
-      font-size: 12px;
+      font-size: 14px;
       text-decoration: none;
       opacity: 0.85;
     }
@@ -356,7 +356,7 @@
       background: transparent;
       border: none;
       color: #e2e8f0;
-      font-size: 13px;
+      font-size: 16px;
       cursor: pointer;
       padding: 2px 0;
     }
@@ -497,7 +497,7 @@
       border: 1px solid rgba(255,255,255,0.08);
       background: rgba(15,23,42,0.72);
       color: #e2e8f0;
-      font-size: 17px;
+      font-size: 18px;
       cursor: pointer;
       display: inline-flex;
       width: auto;
