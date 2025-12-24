@@ -40,7 +40,11 @@
   <div id="theme-menu">
     <select id="basemapSelect" aria-label="Theme"></select>
   </div>
-  <button id="corner-reset" type="button">North</button>
+  <button id="corner-reset" type="button" aria-label="Reset North">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M12 3l4 7h-8l4-7zm0 18a9 9 0 1 1 0-18 9 9 0 0 1 0 18zm0-2a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/>
+    </svg>
+  </button>
   <button id="compassBtn" class="compass-btn" title="Reset bearing">N</button>
   <button id="dock-toggle" type="button">Search World</button>
   <div id="counts-wrap">
