@@ -151,6 +151,8 @@
       font-size: 20px;
       line-height: 26px;
       border-radius: 999px;
+      color: #f8fafc;
+      background: rgba(15, 23, 42, 0.6);
     }
     .popup-actions .streetview-expand {
       background: rgba(15, 23, 42, 0.85);

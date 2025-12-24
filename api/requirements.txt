@@ -1,0 +1,9 @@
+fastapi==0.116.1
+starlette==0.47.2
+uvicorn==0.35.0
+geopandas==1.1.1
+pandas==2.3.1
+shapely==2.1.1
+tqdm==4.67.1
+osm2geojson
+pysimdjson
