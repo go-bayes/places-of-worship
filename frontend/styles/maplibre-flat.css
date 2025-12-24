@@ -107,7 +107,7 @@
     .streetview {
       width: 100%;
       height: min(260px, 34vh);
-      min-width: 260px;
+      min-width: 180px;
       min-height: 160px;
       max-width: 100%;
       max-height: 72vh;
