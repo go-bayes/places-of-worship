@@ -48,7 +48,7 @@
     .dock-row { display: flex; gap: 6px; flex-wrap: nowrap; align-items: center; min-height: 24px; width: 100%; }
     .dock-row input {
       flex: 1 1 auto; min-width: 0; background: rgba(255,255,255,0.08); border: 1px solid transparent;
-      color: var(--text); padding: 6px 8px; border-radius: 8px; font-size: clamp(9px, 2vw, 11px);
+      color: var(--text); padding: 14px 12px; border-radius: 12px; font-size: clamp(16px, 2.2vw, 20px);
     }
     .dock-row select {
       background: rgba(255,255,255,0.08);
@@ -335,41 +335,38 @@
       opacity: 0.85;
       cursor: pointer;
     }
-    #terrain-toggle {
-      position: fixed;
-      right: var(--safe-right);
-      top: calc(var(--safe-top) + 1px);
-      z-index: 13;
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(255,255,255,0.06);
-      color: #e2e8f0;
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-size: 14px;
-      text-decoration: none;
-      opacity: 0.85;
-      cursor: pointer;
-      display: none;
-    }
-    #terrain-toggle[disabled] {
-      opacity: 0.5;
-      cursor: default;
-    }
-    #basemapSelect {
+    #theme-menu {
       position: fixed;
       right: var(--safe-right);
       top: var(--safe-top);
       z-index: 13;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       background: rgba(15, 23, 42, 0.6);
       border: 1px solid rgba(255,255,255,0.06);
       color: #e2e8f0;
       border-radius: 999px;
-      padding: 6px 12px;
-      font-size: 14px;
+      padding: 4px 10px;
+      font-size: 12px;
       text-decoration: none;
       opacity: 0.85;
-      cursor: pointer;
     }
+    #theme-menu span {
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(226,232,240,0.7);
+    }
+    #basemapSelect {
+      background: transparent;
+      border: none;
+      color: #e2e8f0;
+      font-size: 13px;
+      cursor: pointer;
+      padding: 2px 0;
+    }
+    #basemapSelect:focus { outline: none; }
     #tile-status {
       position: fixed;
       left: 50%;
@@ -645,7 +642,7 @@
       #counts ul { gap: 6px; }
       #counts li { font-size: 22px; }
       #counts .dot { width: 12px; height: 12px; }
-      #basemapSelect { display: none; }
+      #theme-menu { display: none; }
       #cityChips { display: none; }
       .dock-row { gap: 4px; }
       .dock-row input { padding: 6px 9px; font-size: 16px; }
@@ -682,8 +679,3 @@
         padding: 5px 9px;
       }
     }
-      #terrain-toggle {
-        display: inline-flex;
-        font-size: 11px;
-        padding: 5px 9px;
-      }
