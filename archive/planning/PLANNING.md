@@ -9,6 +9,7 @@
 - Domains: `www.placesmap.org` (frontend), `tiles.placemap.org` (Martin).
 
 ## To do
+- improve north icon. 
 - investigate Mapillary / KartaView for sourcing images
 - Overture Maps (!) REVIEW - `scripts/extract_overture_images` pipleline. 
 - mappillary for images.
