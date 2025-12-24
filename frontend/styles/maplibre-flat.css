@@ -251,8 +251,8 @@
       align-items: flex-end;
     }
     #corner-info-toggle {
-      width: 44px;
-      height: 44px;
+      width: 55px;
+      height: 55px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.08);
       background: rgba(15, 23, 42, 0.6);
@@ -267,8 +267,8 @@
       padding: 0;
     }
     #corner-info-toggle svg {
-      width: 24px;
-      height: 24px;
+      width: 30px;
+      height: 30px;
       display: block;
     }
     #corner-info-toggle:hover {
@@ -329,8 +329,8 @@
       border: 1px solid rgba(255,255,255,0.06);
       color: #e2e8f0;
       border-radius: 999px;
-      width: 44px;
-      height: 44px;
+      width: 55px;
+      height: 55px;
       padding: 0;
       text-decoration: none;
       opacity: 0.85;
@@ -340,8 +340,8 @@
       justify-content: center;
     }
     #corner-reset svg {
-      width: 32px;
-      height: 32px;
+      width: 40px;
+      height: 40px;
       display: block;
     }
     #theme-menu {
@@ -691,19 +691,19 @@
       .maplibregl-ctrl { transform: scale(0.85); transform-origin: bottom right; }
       #corner-reset {
         display: inline-flex;
-        width: 34px;
-        height: 34px;
+        width: 43px;
+        height: 43px;
       }
       #corner-reset svg {
-        width: 28px;
-        height: 28px;
+        width: 35px;
+        height: 35px;
       }
       #corner-info-toggle {
-        width: 40px;
-        height: 40px;
+        width: 50px;
+        height: 50px;
       }
       #corner-info-toggle svg {
-        width: 21px;
-        height: 21px;
+        width: 26px;
+        height: 26px;
       }
     }
