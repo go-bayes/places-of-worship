@@ -456,12 +456,12 @@
           `<div class="streetview" id="${panoId}">Loading Street View…</div>` +
           `<div class="streetview-toolbar">` +
           `<button type="button" data-mode="interior" data-pano="${panoId}">Interior</button>` +
-          `<button type="button" data-mode="expand" data-pano="${panoId}">Expand</button>` +
+          `<button type="button" class="streetview-expand" data-mode="expand" data-pano="${panoId}">Expand</button>` +
           `</div>` +
           `<div class="popup-actions">` +
-          `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>` +
+          `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Try Interior/Exterior</a>` +
           `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +
-          `<button type="button" data-mode="interior-alt" data-pano="${panoId}">Try Interior</button>` +
+          `<button type="button" data-mode="interior-alt" data-pano="${panoId}">Try Interior/Exterior</button>` +
           `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
           `</div>`
         )
@@ -636,7 +636,7 @@
               }
               pendingFailTimer = setTimeout(() => {
                 if (source === "OUTDOOR") {
-                  setMessage("No outdoor Street View. Use “Try Interior”.");
+                  setMessage("No outdoor Street View. Use “Try Interior/Exterior”.");
                 } else {
                   setMessage("No Street View for this location.");
                 }
