@@ -1572,9 +1572,16 @@
         }
         countsList.style.display = "grid";
         countsTotal.style.display = "block";
-        const layerId = zoom < 9 ? LAYERS.overview : LAYERS.places;
-        if (!map.getLayer(layerId)) return;
-        const features = map.queryRenderedFeatures({ layers: [layerId] });
+        const usePlaces = zoom >= 6 && map.getLayer(LAYERS.places);
+        const useOverview = map.getLayer(LAYERS.overview);
+        let features = [];
+        if (usePlaces) {
+          features = map.queryRenderedFeatures({ layers: [LAYERS.places] });
+        }
+        if (!features.length && useOverview) {
+          features = map.queryRenderedFeatures({ layers: [LAYERS.overview] });
+        }
+        if (!features.length) return;
         const counts = { ...EMPTY_COUNTS };
         features.forEach((feature) => {
           const key = feature.properties?.religion || "unknown";
