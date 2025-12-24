@@ -621,9 +621,6 @@
             }
             if (status === "OK") {
               currentSource = source;
-              if (interiorAltButton) {
-                interiorAltButton.textContent = source === "OUTDOOR" ? "Try Interior" : "Try Exterior";
-              }
               panoInstance = new google.maps.StreetViewPanorama(target, {
                 position: { lat: coords[1], lng: coords[0] },
                 pov: { heading: 0, pitch: 0 },
