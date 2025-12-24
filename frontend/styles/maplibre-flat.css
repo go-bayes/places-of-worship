@@ -251,8 +251,8 @@
       align-items: flex-end;
     }
     #corner-info-toggle {
-      width: 39px;
-      height: 39px;
+      width: 44px;
+      height: 44px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.08);
       background: rgba(15, 23, 42, 0.6);
@@ -267,8 +267,8 @@
       padding: 0;
     }
     #corner-info-toggle svg {
-      width: 21px;
-      height: 21px;
+      width: 24px;
+      height: 24px;
       display: block;
     }
     #corner-info-toggle:hover {
@@ -329,8 +329,8 @@
       border: 1px solid rgba(255,255,255,0.06);
       color: #e2e8f0;
       border-radius: 999px;
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       padding: 0;
       text-decoration: none;
       opacity: 0.85;
@@ -340,15 +340,15 @@
       justify-content: center;
     }
     #corner-reset svg {
-      width: 26px;
-      height: 26px;
+      width: 32px;
+      height: 32px;
       display: block;
     }
     #theme-menu {
       position: fixed;
       right: var(--safe-right);
       top: auto;
-      bottom: calc(var(--safe-bottom) + 64px);
+      bottom: var(--safe-bottom);
       z-index: 13;
       display: flex;
       align-items: center;
@@ -652,6 +652,7 @@
         display: flex;
         padding: 2px 5px;
         font-size: 10px;
+        bottom: var(--safe-bottom);
       }
       #basemapSelect {
         font-size: 11px;
@@ -694,7 +695,15 @@
         height: 34px;
       }
       #corner-reset svg {
-        width: 22px;
-        height: 22px;
+        width: 28px;
+        height: 28px;
+      }
+      #corner-info-toggle {
+        width: 40px;
+        height: 40px;
+      }
+      #corner-info-toggle svg {
+        width: 21px;
+        height: 21px;
       }
     }
