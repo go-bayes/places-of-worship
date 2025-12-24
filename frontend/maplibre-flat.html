@@ -425,7 +425,6 @@
       const panoId = `pano-${Date.now()}`;
       const latFixed = coords[1].toFixed(6);
       const lngFixed = coords[0].toFixed(6);
-      const currentZoom = map.getZoom();
       const openStreetViewLink = `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>`;
 
       // Mobile: always allow Street View link at any zoom, with retry to fetch name
@@ -433,17 +432,6 @@
         if (mobileFeatureClickHandled) return;
         markMobileFeatureClickHandled();
         showMobileStreetViewPopup(name, coords, feature?.id);
-        return;
-      }
-      if (currentZoom < CONFIG.streetViewMinZoom) {
-        new maplibregl.Popup({ maxWidth: "320px", closeOnClick: true })
-          .setLngLat(coords)
-          .setHTML(
-            `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
-            `<div style="padding:6px 0;color:#111;font-size:13px;">Move Closer and Center on a Place.</div>`
-          )
-          .addTo(map);
-        showClickHint("Move Closer and Center on a Place");
         return;
       }
       if (IS_MOBILE) {
