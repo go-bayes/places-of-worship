@@ -40,7 +40,7 @@
   <button id="corner-reset" type="button">Reset North</button>
   <button id="compassBtn" class="compass-btn" title="Reset bearing">N</button>
   <button id="terrain-toggle" type="button">Terrain Off</button>
-  <button id="dock-toggle" type="button">Search / Places</button>
+  <button id="dock-toggle" type="button">Search World</button>
   <div id="counts-wrap">
     <button id="counts-toggle" type="button" aria-controls="counts" aria-expanded="false">Show Denomination Key</button>
     <div id="counts">
@@ -543,11 +543,6 @@
         let lastPanoRequest = 0;
         let resizeObserver = null;
         let pendingFailTimer = null;
-
-        if (currentZoom < CONFIG.streetViewMinZoom) {
-          node.textContent = "Move Closer and Center on a Place.";
-          return;
-        }
 
         function attachResizeHandle(target) {
           if (!target || target.querySelector(".sv-resize-handle")) return;
@@ -1294,8 +1289,8 @@
 
     function syncDockToggleLabel(isOpen) {
       if (!dockToggle) return;
-      const showLabel = "Search/Places";
-      const hideLabel = "Hide Search/Places";
+      const showLabel = "Search World";
+      const hideLabel = "Hide Search World";
       dockToggle.textContent = isOpen ? hideLabel : showLabel;
     }
 
