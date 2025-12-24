@@ -457,7 +457,6 @@
           `</div>` +
           `<div class="streetview" id="${panoId}">Loading Street View…</div>` +
           `<div class="streetview-toolbar">` +
-          `<button type="button" data-mode="fill" data-pano="${panoId}">Fill screen</button>` +
           `<button type="button" class="streetview-expand" data-mode="expand" data-pano="${panoId}">Expand</button>` +
           `</div>` +
           `<div class="popup-actions">` +
@@ -536,7 +535,6 @@
         let currentSource = "OUTDOOR";
         const popupEl = popup.getElement();
         const expandButton = popupEl.querySelector(`[data-mode="expand"][data-pano="${panoId}"]`);
-        const fillButton = popupEl.querySelector(`[data-mode="fill"][data-pano="${panoId}"]`);
         let panoLoading = false;
         let lastPanoRequest = 0;
         let resizeObserver = null;
@@ -653,31 +651,12 @@
           expandButton.addEventListener("click", () => {
             const target = panoContainer();
             if (!target) return;
-            if (target.classList.contains("full")) {
-              target.classList.remove("full");
-              popupEl.classList.remove("popup-full");
-              if (fillButton) fillButton.textContent = "Fill screen";
-            }
             const expanded = target.classList.toggle("expanded");
             expandButton.textContent = expanded ? "Collapse" : "Expand";
             resizePanorama();
           });
         }
 
-        if (fillButton) {
-          fillButton.addEventListener("click", () => {
-            const target = panoContainer();
-            if (!target) return;
-            const full = target.classList.toggle("full");
-            popupEl.classList.toggle("popup-full", full);
-            if (full) {
-              target.classList.remove("expanded");
-              if (expandButton) expandButton.textContent = "Expand";
-            }
-            fillButton.textContent = full ? "Exit full screen" : "Fill screen";
-            resizePanorama();
-          });
-        }
         const copyButton = popupEl.querySelector(`[data-copy]`);
         if (copyButton) {
           copyButton.addEventListener("click", async () => {

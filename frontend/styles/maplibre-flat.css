@@ -129,10 +129,6 @@
       width: min(960px, 92vw);
       height: min(630px, 72vh);
     }
-    .streetview.full {
-      width: min(96vw, 1400px);
-      height: min(80vh, 820px);
-    }
     .maplibregl-popup-content {
       max-width: min(1080px, 92vw);
       background: rgba(15, 23, 42, 0.72);
@@ -142,9 +138,6 @@
       color: #e2e8f0;
       overflow: hidden;
       cursor: grab;
-    }
-    .maplibregl-popup.popup-full .maplibregl-popup-content {
-      max-width: min(96vw, 1400px);
     }
     .maplibregl-popup-tip {
       display: none;
@@ -161,7 +154,7 @@
     }
     .streetview-toolbar {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       margin-top: 6px;
       gap: 8px;
     }
