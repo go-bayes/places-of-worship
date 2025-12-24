@@ -453,16 +453,14 @@
         .setHTML(
           `<div class="popup-header" data-drag-handle="true">` +
           `<span class="popup-title">${name}</span>` +
-          `<span style="font-size:11px;color:#64748b;">Drag</span>` +
+          `<span class="popup-drag-hint">Drag</span>` +
           `</div>` +
           `<div class="streetview" id="${panoId}">Loading Street View…</div>` +
-          `<div class="streetview-toolbar">` +
-          `<button type="button" class="streetview-expand" data-mode="expand" data-pano="${panoId}">Expand</button>` +
-          `</div>` +
           `<div class="popup-actions">` +
           `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Streetview</a>` +
           `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +
           `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
+          `<button type="button" class="streetview-expand" data-mode="expand" data-pano="${panoId}">Expand</button>` +
           `</div>`
         )
         .addTo(map);
@@ -655,6 +653,35 @@
             expandButton.textContent = expanded ? "Collapse" : "Expand";
             resizePanorama();
           });
+        }
+
+        if (popupBody) {
+          const DRAG_HINT_KEY = "pow-drag-hint-dismissed";
+          const hint = document.createElement("div");
+          hint.className = "popup-drag-toast";
+          hint.textContent = "Drag to move";
+          const shouldShowHint = () => {
+            try {
+              return !sessionStorage.getItem(DRAG_HINT_KEY);
+            } catch (error) {
+              return true;
+            }
+          };
+          if (shouldShowHint()) {
+            popupBody.appendChild(hint);
+            setTimeout(() => {
+              hint.classList.add("visible");
+            }, 120);
+            setTimeout(() => {
+              hint.classList.remove("visible");
+              hint.remove();
+              try {
+                sessionStorage.setItem(DRAG_HINT_KEY, "1");
+              } catch (error) {
+                // Ignore storage failures.
+              }
+            }, 2600);
+          }
         }
 
         const copyButton = popupEl.querySelector(`[data-copy]`);
@@ -1179,7 +1206,7 @@
       onboard.classList.remove("visible");
       if (!persist) return;
       try {
-        localStorage.setItem(ONBOARD_STORAGE_KEY, "1");
+        sessionStorage.setItem(ONBOARD_STORAGE_KEY, "1");
       } catch (error) {
         // Ignore storage failures (private mode, etc).
       }
@@ -1187,7 +1214,7 @@
 
     function shouldShowOnboard() {
       try {
-        return !localStorage.getItem(ONBOARD_STORAGE_KEY);
+        return !sessionStorage.getItem(ONBOARD_STORAGE_KEY);
       } catch (error) {
         return true;
       }
