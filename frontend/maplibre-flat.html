@@ -712,13 +712,13 @@
 
     let overviewMobileHandlerAttached = false;
     function addOverviewLayer() {
-      map.addSource(SOURCES.overview, { type: "vector", tiles: [CONFIG.tiles.overview], minzoom: 0, maxzoom: 9 });
+      map.addSource(SOURCES.overview, { type: "vector", tiles: [CONFIG.tiles.overview], minzoom: 0, maxzoom: 6 });
       map.addLayer({
         id: LAYERS.overview,
         type: "circle",
         source: SOURCES.overview,
         "source-layer": OVERVIEW_LAYER,
-        maxzoom: 9,
+        maxzoom: 6,
         paint: {
           "circle-radius": [
             "interpolate",
@@ -736,9 +736,8 @@
             ["linear"],
             ["zoom"],
             0, 0.75,
-            7, 0.75,
-            10.5, 0.55,
-            12, 0.0
+            5, 0.75,
+            6, 0.0
           ]
         }
       });
@@ -783,7 +782,7 @@
             "interpolate",
             ["linear"],
             ["zoom"],
-            6, 0.0,
+            6, 0.2,
             9, 0.85,
             12, 0.75,
             18, 0.7
@@ -964,50 +963,20 @@
           );
           if (isUiClick) return;
         }
-        const features = map.queryRenderedFeatures(e.point, { layers: [LAYERS.places, LAYERS.overview] });
-        if (features && features.length) return;
-        const zoom = map.getZoom();
-        if (zoom < 9) {
-          showClickHint("Move Closer and Center on a Place");
+        const directHit = map.queryRenderedFeatures(e.point, { layers: [LAYERS.places, LAYERS.overview] });
+        if (directHit && directHit.length) return;
+        const tapPadding = 12;
+        const bbox = [
+          [e.point.x - tapPadding, e.point.y - tapPadding],
+          [e.point.x + tapPadding, e.point.y + tapPadding]
+        ];
+        const nearby = map.queryRenderedFeatures(bbox, { layers: [LAYERS.places, LAYERS.overview] });
+        if (nearby && nearby.length) {
+          const feature = nearby.find((item) => item.layer && item.layer.id === LAYERS.places) || nearby[0];
+          void handlePlaceFeatureClick(feature, e.lngLat);
           return;
         }
-        const hitPadding = 12;
-        const hitBbox = [
-          [e.point.x - hitPadding, e.point.y - hitPadding],
-          [e.point.x + hitPadding, e.point.y + hitPadding]
-        ];
-        const hitCandidates = map.queryRenderedFeatures(hitBbox, { layers: [LAYERS.places] });
-        if (hitCandidates && hitCandidates.length) {
-          let closestFeature = null;
-          let closestDist = Infinity;
-          hitCandidates.forEach((candidate) => {
-            const candidateLng = candidate.properties?.lng;
-            const candidateLat = candidate.properties?.lat;
-            const candidateCoords = candidate.geometry?.coordinates || (candidateLng && candidateLat ? [candidateLng, candidateLat] : null);
-            if (!candidateCoords) return;
-            const screenPoint = map.project(candidateCoords);
-            const dx = screenPoint.x - e.point.x;
-            const dy = screenPoint.y - e.point.y;
-            const dist = Math.hypot(dx, dy);
-            if (dist <= hitPadding && dist < closestDist) {
-              closestDist = dist;
-              closestFeature = candidate;
-            }
-          });
-          if (closestFeature) {
-            void handlePlaceFeatureClick(closestFeature, e.lngLat);
-            return;
-          }
-        }
-        const missPadding = 14;
-        const bbox = [
-          [e.point.x - missPadding, e.point.y - missPadding],
-          [e.point.x + missPadding, e.point.y + missPadding]
-        ];
-        const nearby = map.queryRenderedFeatures(bbox, { layers: [LAYERS.places] });
-        if (nearby && nearby.length) {
-          showClickHint("Center");
-        } else {
+        if (map.getZoom() >= CONFIG.streetViewMinZoom) {
           showClickHint("Move Closer and Center on a Place");
         }
       });
@@ -1572,16 +1541,9 @@
         }
         countsList.style.display = "grid";
         countsTotal.style.display = "block";
-        const usePlaces = zoom >= 6 && map.getLayer(LAYERS.places);
-        const useOverview = map.getLayer(LAYERS.overview);
-        let features = [];
-        if (usePlaces) {
-          features = map.queryRenderedFeatures({ layers: [LAYERS.places] });
-        }
-        if (!features.length && useOverview) {
-          features = map.queryRenderedFeatures({ layers: [LAYERS.overview] });
-        }
-        if (!features.length) return;
+        const preferredLayer = zoom < 6 ? LAYERS.overview : LAYERS.places;
+        if (!map.getLayer(preferredLayer)) return;
+        const features = map.queryRenderedFeatures({ layers: [preferredLayer] });
         const counts = { ...EMPTY_COUNTS };
         features.forEach((feature) => {
           const key = feature.properties?.religion || "unknown";
