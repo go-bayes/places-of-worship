@@ -105,11 +105,11 @@
     .dock-chip:hover { transform: translateY(-1px); background: rgba(148,163,184,0.28); }
     .dock-row + .dock-row { margin-top: 4px; }
     .streetview {
-      width: min(380px, 70vw);
-      height: min(240px, 32vh);
+      width: 100%;
+      height: min(260px, 34vh);
       min-width: 260px;
       min-height: 160px;
-      max-width: 90vw;
+      max-width: 100%;
       max-height: 72vh;
       border-radius: 10px;
       overflow: hidden;
