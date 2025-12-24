@@ -329,8 +329,8 @@
       border: 1px solid rgba(255,255,255,0.06);
       color: #e2e8f0;
       border-radius: 999px;
-      width: 55px;
-      height: 55px;
+      width: 69px;
+      height: 69px;
       padding: 0;
       text-decoration: none;
       opacity: 0.85;
@@ -340,8 +340,8 @@
       justify-content: center;
     }
     #corner-reset svg {
-      width: 40px;
-      height: 40px;
+      width: 50px;
+      height: 50px;
       display: block;
     }
     #theme-menu {
@@ -691,12 +691,12 @@
       .maplibregl-ctrl { transform: scale(0.85); transform-origin: bottom right; }
       #corner-reset {
         display: inline-flex;
-        width: 43px;
-        height: 43px;
+        width: 54px;
+        height: 54px;
       }
       #corner-reset svg {
-        width: 35px;
-        height: 35px;
+        width: 44px;
+        height: 44px;
       }
       #corner-info-toggle {
         width: 50px;
