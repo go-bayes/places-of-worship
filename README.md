@@ -1,10 +1,6 @@
 # Global Places of Worship Mapping Project
 
-The Global Places of Worship Mapping Project visualises the world's diversity and distribution of faiths. It does this by allowing users to immersively explore religious landscapes across the planet. 
-
-Its primary purpose is scientific. The project is not linked to any faith or secular tradition. In the years ahead, we will integrate open data with this resource to facilitate research into how religion affects, and is affected by, its context. We have made a start with New Zealand. 
-
-Again, our primary interest is science. However, we hope that by allowing users to immersively explore religious landscapes across the planet, this work fosters a sense of interconnection. 
+An open, research‑focused map of global places of worship. Built to support studies of how religion shapes, and is shaped by, its social and natural settings.
 
 ## Quick Links
 
