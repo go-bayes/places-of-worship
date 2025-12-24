@@ -369,6 +369,8 @@
       font-size: 16px;
       cursor: pointer;
       padding: 2px 0;
+      text-align: right;
+      text-align-last: right;
     }
     #basemapSelect:focus { outline: none; }
     #tile-status {
@@ -648,12 +650,12 @@
       #counts .dot { width: 12px; height: 12px; }
       #theme-menu {
         display: flex;
-        padding: 2px 6px;
-        font-size: 11px;
+        padding: 2px 5px;
+        font-size: 10px;
       }
       #basemapSelect {
-        font-size: 12px;
-        max-width: 120px;
+        font-size: 11px;
+        max-width: 110px;
         text-overflow: ellipsis;
       }
       #cityChips { display: none; }
