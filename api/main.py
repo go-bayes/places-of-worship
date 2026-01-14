@@ -791,18 +791,15 @@ def health_check():
     }
 
 # Serve static files (for frontend)
-if Path("frontend").exists():
+frontend_dir = Path("apps/global") if Path("apps/global").exists() else Path("frontend")
+if frontend_dir.exists():
     # Serve frontend under /frontend to avoid route conflicts with API
-    app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="static")
+    app.mount("/frontend", StaticFiles(directory=str(frontend_dir), html=True), name="static")
 
     # Convenience route for the global map
     @app.get("/global-places.html")
     def global_places_page():
-        # Redirect so relative asset paths resolve under /frontend/
-        fp = Path("frontend") / "global-places.html"
-        if fp.exists():
-            return RedirectResponse(url="/frontend/global-places.html", status_code=307)
-        raise HTTPException(status_code=404, detail="global-places.html not found")
+        return RedirectResponse(url="/frontend/", status_code=307)
 
 if __name__ == "__main__":
     import uvicorn

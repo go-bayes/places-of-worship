@@ -58,7 +58,7 @@ services:
       - redis_data:/data
 
   frontend:
-    build: ./frontend
+    build: ./apps/global
     ports:
       - "3000:3000"
     environment:

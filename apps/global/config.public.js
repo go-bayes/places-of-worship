@@ -1,3 +1,2 @@
-// Legacy shim. Source of truth: /apps/global/config.public.js
 window.MAPTILER_API_KEY = "qDn6wbWjxxwy3APNySPP";
 window.GOOGLE_MAPS_API_KEY = "AIzaSyBukdd4zpHYdZHt8iPAKR0NSd8CoScj8Z4";

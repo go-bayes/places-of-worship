@@ -14,6 +14,9 @@ api_key <- "5f3f95fc8ec04a04a852f83bb71cdc6f" # Primary key provided by user
 # API endpoints
 ethnicity_endpoint <- "https://portal.apis.stats.govt.nz/v1/census/ethnicity-profile"
 geography_endpoint <- "https://portal.apis.stats.govt.nz/v1/geography/territorial-authorities"
+output_dir <- "../apps/nz-enhanced/data"
+legacy_output_path <- "../src/ethnicity_density_static.json"
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 cat("Fetching ethnicity and population density data from Stats NZ API...\n")
 
@@ -186,8 +189,9 @@ if (!is.null(ethnicity_raw)) {
   )
 
   # Save as JSON
-  output_path <- "../src/ethnicity_density_static.json"
+  output_path <- file.path(output_dir, "ethnicity_density_static.json")
   write_json(output_data, output_path, pretty = TRUE, auto_unbox = TRUE)
+  file.copy(output_path, legacy_output_path, overwrite = TRUE)
 
   cat("✓ Ethnicity and population density data saved to:", output_path, "\n")
   cat("✓ Contains data for", length(ethnicity_data), "TA areas\n")
@@ -204,11 +208,11 @@ if (!is.null(ethnicity_raw)) {
     data = list()
   )
 
-  output_path <- "../src/ethnicity_density_static.json"
+  output_path <- file.path(output_dir, "ethnicity_density_static.json")
   write_json(output_data, output_path, pretty = TRUE, auto_unbox = TRUE)
+  file.copy(output_path, legacy_output_path, overwrite = TRUE)
 
   cat("Created empty ethnicity/density file to prevent loading errors\n")
 }
 
 cat("Ethnicity and population density data collection completed.\n")
-

@@ -20,12 +20,12 @@ Domains
 ## Components
 
 Frontend (GitHub Pages)
-- File: `frontend/maplibre-flat.html` (+ `config.public.js`, optional `config.js`)
+- File: `apps/global/index.html` (+ `config.public.js`, optional `config.js`)
 - Features: MapLibre layers, desktop Street View, mobile link-out, mobile dock toggle, basemap selector (desktop only), counts (desktop only), city chips/search.
 
 Basemap (MapTiler Cloud)
 - Styles: Backdrop (default), Streets, Aquarelle, Dataviz, Satellite, Toner, Topo, Winter
-- Key: `window.MAPTILER_API_KEY` in `frontend/config.public.js`
+- Key: `window.MAPTILER_API_KEY` in `apps/global/config.public.js`
 - Fallback: CARTO Light raster when MapTiler is unavailable
 
 Custom data tiles (Martin on GCP VM)
@@ -44,7 +44,7 @@ Tile storage (Google Cloud Storage)
 Street View (Google Maps JS API)
 - Inline pano on desktop (zoom gate)
 - External link on mobile
-- Key: `window.GOOGLE_MAPS_API_KEY` in `frontend/config.public.js`
+- Key: `window.GOOGLE_MAPS_API_KEY` in `apps/global/config.public.js`
 
 DNS
 - `www.placesmap.org` -> GitHub Pages (CNAME to `go-bayes.github.io`)

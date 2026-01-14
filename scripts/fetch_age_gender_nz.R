@@ -13,6 +13,9 @@ api_key <- "5f3f95fc8ec04a04a852f83bb71cdc6f" # Primary key provided by user
 
 # API endpoint for age and gender demographics
 endpoint <- "https://portal.apis.stats.govt.nz/v1/census/demographic-profile"
+output_dir <- "../apps/nz-enhanced/data"
+legacy_output_path <- "../src/age_gender_static.json"
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 cat("Fetching age and gender demographics from Stats NZ API...\n")
 
@@ -119,8 +122,9 @@ if (!is.null(raw_data)) {
   )
 
   # Save as JSON
-  output_path <- "../src/age_gender_static.json"
+  output_path <- file.path(output_dir, "age_gender_static.json")
   write_json(output_data, output_path, pretty = TRUE, auto_unbox = TRUE)
+  file.copy(output_path, legacy_output_path, overwrite = TRUE)
 
   cat("✓ Age and gender data saved to:", output_path, "\n")
   cat("✓ Contains data for", length(age_gender_data), "TA areas\n")
@@ -137,11 +141,11 @@ if (!is.null(raw_data)) {
     data = list()
   )
 
-  output_path <- "../src/age_gender_static.json"
+  output_path <- file.path(output_dir, "age_gender_static.json")
   write_json(output_data, output_path, pretty = TRUE, auto_unbox = TRUE)
+  file.copy(output_path, legacy_output_path, overwrite = TRUE)
 
   cat("Created empty age/gender file to prevent loading errors\n")
 }
 
 cat("Age and gender data collection completed.\n")
-
