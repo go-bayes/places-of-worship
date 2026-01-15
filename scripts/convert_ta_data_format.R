@@ -11,7 +11,7 @@ cat("Converting new Stats NZ format to legacy app format...\n")
 
 # read new format data
 new_data <- read_json("../ta_aggregated_data_statsNZ.json")
-output_dir <- "../apps/nz-enhanced/data"
+output_dir <- "../apps/regions/nz/data"
 legacy_output_path <- "../ta_aggregated_data.json"
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 

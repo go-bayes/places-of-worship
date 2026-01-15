@@ -1,3 +1,3 @@
-// Legacy shim. Source of truth: /apps/nz-enhanced/js/enhanced-places-app.js
+// Legacy shim. Source of truth: /apps/regions/nz/js/enhanced-places-app.js
 /* eslint-disable */
-document.write('<script src="../apps/nz-enhanced/js/enhanced-places-app.js"><\\/script>');
+document.write('<script src="../apps/regions/nz/js/enhanced-places-app.js"><\\/script>');

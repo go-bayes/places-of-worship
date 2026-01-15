@@ -7,7 +7,7 @@ console.log('🔥 DEBUG: enhanced-places-app.js file is being loaded');
 
 const DATA_BASE = (() => {
     const prefix = window.location.pathname.includes("/places-of-worship/") ? "/places-of-worship" : "";
-    return `${window.location.origin}${prefix}/apps/nz-enhanced/data/`;
+    return `${window.location.origin}${prefix}/apps/regions/nz/data/`;
 })();
 
 function dataUrl(path) {

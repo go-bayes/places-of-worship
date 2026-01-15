@@ -1,23 +1,24 @@
 # CODEOWNERS file for places-of-worship repository
 # This file defines individuals or teams that are responsible for code in this repository.
 
-# Global ownership - all files require review from repository owner
-* @go-bayes
-
-# Data files require special attention
-/data/ @go-bayes
-/data/global/ @go-bayes
-
-# API and backend code
+# Core areas
 /api/ @go-bayes
+/apps/ @go-bayes
+/data/ @go-bayes
+/docs/ @go-bayes
 /scripts/ @go-bayes
 
-# Frontend applications
-/src/ @go-bayes
+# Legacy and historical content
+/archive/ @go-bayes
 /frontend/ @go-bayes
+/src/ @go-bayes
 
-# Configuration and documentation
-*.md @go-bayes
-*.json @go-bayes
-*.yml @go-bayes
-*.yaml @go-bayes
+# Repo meta
+/.github/ @go-bayes
+/README.md @go-bayes
+/CONTRIBUTING.md @go-bayes
+/PLANNING.md @go-bayes
+/CHANGELOG.md @go-bayes
+
+# Config
+/*.toml @go-bayes

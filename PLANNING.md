@@ -26,7 +26,7 @@ Each entry should include: decision, context, alternatives, risks, and follow-up
 
 ## Current state
 - Global MapLibre storefront at `apps/global/` (GitHub Pages).
-- Enhanced NZ map at `apps/nz-enhanced/` (Leaflet + census overlays).
+- Enhanced NZ map at `apps/regions/nz/` (Leaflet + census overlays).
 - Custom tiles served via Martin on GCP VM (`tiles.placemap.org`).
 - Basemap styles from MapTiler with CARTO fallback (free).
 
@@ -77,5 +77,6 @@ Each entry should include: decision, context, alternatives, risks, and follow-up
 - Performance-first API design.
 
 ## Compatibility notes
-- Legacy URLs are 'shimmed' for redirects; some legacy data files remain for compatibility.
+- Legacy URLs are shimmed for redirects; some legacy data files remain for compatibility.
+- Grace period: keep `enhanced-places.html` and `src/` shims until new regional paths are adopted.
 - Plan to deprecate/remove legacy copies once new paths are widely adopted.

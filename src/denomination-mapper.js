@@ -1,3 +1,3 @@
-// Legacy shim. Source of truth: /apps/nz-enhanced/js/denomination-mapper.js
+// Legacy shim. Source of truth: /apps/regions/nz/js/denomination-mapper.js
 /* eslint-disable */
-document.write('<script src="../apps/nz-enhanced/js/denomination-mapper.js"><\\/script>');
+document.write('<script src="../apps/regions/nz/js/denomination-mapper.js"><\\/script>');

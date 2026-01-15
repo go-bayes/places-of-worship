@@ -13,7 +13,7 @@ api_key <- "5f3f95fc8ec04a04a852f83bb71cdc6f" # Primary key provided by user
 
 # API endpoint for birth rates
 endpoint <- "https://portal.apis.stats.govt.nz/v1/births-deaths/births"
-output_dir <- "../apps/nz-enhanced/data"
+output_dir <- "../apps/regions/nz/data"
 legacy_output_path <- "../src/birth_rates_static.json"
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
