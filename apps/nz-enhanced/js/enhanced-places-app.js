@@ -5,6 +5,15 @@
 
 console.log('🔥 DEBUG: enhanced-places-app.js file is being loaded');
 
+const DATA_BASE = (() => {
+    const prefix = window.location.pathname.includes("/places-of-worship/") ? "/places-of-worship" : "";
+    return `${window.location.origin}${prefix}/apps/nz-enhanced/data/`;
+})();
+
+function dataUrl(path) {
+    return new URL(path, DATA_BASE).toString();
+}
+
 // EMERGENCY TEST: Hide loading screen immediately when this script loads
 setTimeout(() => {
     console.log('🔥 DEBUG: Emergency timeout attempting to hide loading screen');
@@ -389,39 +398,39 @@ class EnhancedPlacesOfWorshipApp {
             
             // Load places, census, and comprehensive demographic data
             console.log('📂 Attempting to fetch all required files...');
-            console.log('  - ./data/nz_places.json');
-            console.log('  - ./data/religion.json');
-            console.log('  - ./data/demographics.json');
-            console.log('  - ./data/sa2.geojson');
-            console.log('  - ./data/territorial_authorities.geojson');
-            console.log('  - ./data/ta_aggregated_data.json');
+            console.log('  - ' + dataUrl('nz_places.json'));
+            console.log('  - ' + dataUrl('religion.json'));
+            console.log('  - ' + dataUrl('demographics.json'));
+            console.log('  - ' + dataUrl('sa2.geojson'));
+            console.log('  - ' + dataUrl('territorial_authorities.geojson'));
+            console.log('  - ' + dataUrl('ta_aggregated_data.json'));
             
             const [placesResponse, censusResponse, demographicResponse, boundariesResponse, territorialAuthorityResponse, taCensusResponse] = await Promise.all([
-                fetch('./data/nz_places.json').then(response => {
+                fetch(dataUrl('nz_places.json')).then(response => {
                     console.log('📄 nz_places.json response:', response.status, response.statusText);
                     return response;
                 }),
-                fetch('./data/religion.json').then(response => {
+                fetch(dataUrl('religion.json')).then(response => {
                     console.log('📄 religion.json response:', response.status, response.statusText);
                     return response;
                 }),
-                fetch('./data/demographics.json').then(response => {
+                fetch(dataUrl('demographics.json')).then(response => {
                     console.log('📄 demographics.json response:', response.status, response.statusText);
                     return response;
                 }),
-                fetch('./data/sa2.geojson').then(response => {
+                fetch(dataUrl('sa2.geojson')).then(response => {
                     console.log('📄 sa2.geojson response:', response.status, response.statusText);
                     return response;
                 }),
-                fetch('./data/territorial_authorities.geojson').then(response => {
+                fetch(dataUrl('territorial_authorities.geojson')).then(response => {
                     console.log('📄 territorial_authorities.geojson response:', response.status, response.statusText);
                     return response;
                 }).catch(e => {
                     console.error('❌ Failed to fetch TA boundaries:', e);
-                    console.log('Resolved TA boundaries URL:', new URL('./data/territorial_authorities.geojson', window.location.href).href);
+                    console.log('Resolved TA boundaries URL:', dataUrl('territorial_authorities.geojson'));
                     throw e;
                 }),
-                fetch('./data/ta_aggregated_data.json').then(response => {
+                fetch(dataUrl('ta_aggregated_data.json')).then(response => {
                     console.log('📄 ta_aggregated_data.json response:', response.status, response.statusText);
                     return response;
                 })
@@ -518,12 +527,12 @@ class EnhancedPlacesOfWorshipApp {
         
         try {
             const [ageGenderResponse, employmentIncomeResponse, ethnicityDensityResponse, birthRatesResponse, migrationResponse, populationChangeResponse] = await Promise.all([
-                fetch('./data/age_gender_static.json').catch(e => null),
-                fetch('./data/employment_income_static.json').catch(e => null),
-                fetch('./data/ethnicity_density_static.json').catch(e => null),
-                fetch('./data/birth_rates_static.json').catch(e => null),
-                fetch('./data/migration_data_static.json').catch(e => null),
-                fetch('./data/population_change_static.json').catch(e => null)
+                fetch(dataUrl('age_gender_static.json')).catch(e => null),
+                fetch(dataUrl('employment_income_static.json')).catch(e => null),
+                fetch(dataUrl('ethnicity_density_static.json')).catch(e => null),
+                fetch(dataUrl('birth_rates_static.json')).catch(e => null),
+                fetch(dataUrl('migration_data_static.json')).catch(e => null),
+                fetch(dataUrl('population_change_static.json')).catch(e => null)
             ]);
             
             // Load age and gender data

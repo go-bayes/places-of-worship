@@ -392,6 +392,24 @@
       });
     }
 
+    function coordsFromFeature(feature, fallbackLngLat) {
+      const props = feature?.properties || {};
+      const hasProps = props.lat !== undefined && props.lng !== undefined;
+      const propCoords = hasProps ? [Number(props.lng), Number(props.lat)] : null;
+      const geomCoords = feature?.geometry?.coordinates;
+      const isValid = (coords) => {
+        if (!Array.isArray(coords) || coords.length < 2) return false;
+        const x = Number(coords[0]);
+        const y = Number(coords[1]);
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
+        return Math.abs(x) <= 180 && Math.abs(y) <= 90;
+      };
+      if (isValid(geomCoords)) return [Number(geomCoords[0]), Number(geomCoords[1])];
+      if (isValid(propCoords)) return propCoords;
+      if (fallbackLngLat) return [fallbackLngLat.lng, fallbackLngLat.lat];
+      return null;
+    }
+
     function showMobileStreetViewPopup(name, coords, featureId) {
       if (!coords) return;
       const latFixed = coords[1].toFixed(6);
@@ -458,10 +476,7 @@
       if (!feature) return;
       const props = feature?.properties || {};
       const name = props["name:en"] || props.name_en || props.name || "Loading place…";
-      const lat = props?.lat;
-      const lng = props?.lng;
-      let coords = feature?.geometry?.coordinates || (lng && lat ? [lng, lat] : null);
-      if (!coords && fallbackLngLat) coords = [fallbackLngLat.lng, fallbackLngLat.lat];
+      const coords = coordsFromFeature(feature, fallbackLngLat);
       if (!coords) return;
       const panoId = `pano-${Date.now()}`;
       const latFixed = coords[1].toFixed(6);
@@ -800,7 +815,7 @@
           if (mobileFeatureClickHandled) return;
           const props = feature.properties || {};
           const name = props["name:en"] || props.name_en || props.name || "Unnamed";
-          const coords = feature.geometry?.coordinates;
+          const coords = coordsFromFeature(feature, e.lngLat);
           if (!coords) return;
           markMobileFeatureClickHandled();
           showMobileStreetViewPopup(name, coords, feature.id);
@@ -857,9 +872,7 @@
         if (!feature) return;
         const props = feature.properties || {};
         const name = props["name:en"] || props.name_en || props.name || "Unnamed";
-        const lat = feature.properties?.lat;
-        const lng = feature.properties?.lng;
-        const coords = feature.geometry?.coordinates || (lng && lat ? [lng, lat] : null);
+        const coords = coordsFromFeature(feature, e.lngLat);
         if (!coords) return;
         hoverPopup
           .setLngLat(coords)
@@ -996,7 +1009,7 @@
         const feature = features.find((item) => item.layer && item.layer.id === LAYERS.places) || features[0];
         const props = feature.properties || {};
         const name = props["name:en"] || props.name_en || props.name || "Unnamed";
-        const coords = feature.geometry?.coordinates;
+        const coords = coordsFromFeature(feature, e.lngLat);
         if (!coords) return;
         markMobileFeatureClickHandled();
         showMobileStreetViewPopup(name, coords, feature.id);
