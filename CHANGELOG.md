@@ -16,6 +16,7 @@
 - Consolidated planning content into `PLANNING.md` and reduced `docs/data-storage.md` to inventory-only.
 - Noted `PLANNING.md` as the single planning source in `README.md`.
 - Allowed `apps/regions/**/data` to be tracked and prepared NZ data files for deployment.
+- Tracked NZ boundary GeoJSON files in `apps/regions/nz/data` to fix 404s.
 - Updated Enhanced NZ data pipeline scripts to emit into `apps/regions/nz/data` while preserving legacy outputs.
 - Switched global map Enhanced NZ link to a relative path for local and production parity.
 - Made Enhanced NZ data loading resilient to `/apps/regions/nz/` and legacy URL entry points.
