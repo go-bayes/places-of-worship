@@ -4,6 +4,7 @@
 - Introduced `apps/global` and `apps/regions/nz` structure for frontends.
 - Added legacy URL shims for `/`, `/enhanced-places.html`, and `frontend/` + `src/` paths.
 - Added root `PLANNING.md` and consolidated planning notes.
+- Added README guides for `apps/`, `apps/regions/nz/`, `data/`, `scripts/`, and `schemas/`.
 - Updated Enhanced NZ data pipeline scripts to emit into `apps/regions/nz/data` while preserving legacy outputs.
 - Switched global map Enhanced NZ link to a relative path for local and production parity.
 - Made Enhanced NZ data loading resilient to `/apps/regions/nz/` and legacy URL entry points.

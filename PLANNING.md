@@ -39,6 +39,7 @@ Each entry should include: decision, context, alternatives, risks, and follow-up
 - Use `scripts/extract_global_data.R` for improved filtering.
 - Update data ingestion plan and track diffs.
 - Global data audit deferred (track scope + cleanup once the Rust stack plan is clearer).
+- After testing, delete legacy NZ files in `data/` (`nz_places.geojson`, `nz_places_optimized.geojson`, `sa2.geojson`).
 
 ## Rust architecture direction (regional data services)
 - Shared types in a `domain` crate used by API, pipelines, and UI.
