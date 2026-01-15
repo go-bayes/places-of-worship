@@ -111,6 +111,11 @@ research/
 !territorial_authorities.geojson
 !sa2.geojson
 
+# Allow region app data to be committed for GitHub Pages
+!apps/regions/**/data/
+!apps/regions/**/data/**
+!apps/regions/**/data/*.geojson
+
 # Geographic and spatial data files
 *.geojson
 *.kml

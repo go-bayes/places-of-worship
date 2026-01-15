@@ -15,6 +15,7 @@
 - Added JSON templates for snapshot and diff manifests.
 - Consolidated planning content into `PLANNING.md` and reduced `docs/data-storage.md` to inventory-only.
 - Noted `PLANNING.md` as the single planning source in `README.md`.
+- Allowed `apps/regions/**/data` to be tracked and prepared NZ data files for deployment.
 - Updated Enhanced NZ data pipeline scripts to emit into `apps/regions/nz/data` while preserving legacy outputs.
 - Switched global map Enhanced NZ link to a relative path for local and production parity.
 - Made Enhanced NZ data loading resilient to `/apps/regions/nz/` and legacy URL entry points.
