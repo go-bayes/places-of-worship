@@ -278,8 +278,11 @@ def main():
     all_tas, known_tas = get_ta_population_estimates()
     
     # Load existing TA census data (our 5 TAs)
-    existing_data_path = '/Users/joseph/GIT/places-of-worship/ta_aggregated_data.json'
-    with open(existing_data_path, 'r') as f:
+    repo_root = Path(__file__).resolve().parents[1]
+    data_dir = repo_root / "apps" / "regions" / "nz" / "data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    existing_data_path = data_dir / "ta_aggregated_data.json"
+    with existing_data_path.open('r') as f:
         existing_data = json.load(f)
     
     print("Generating complete census data for all territorial authorities...")
@@ -322,8 +325,8 @@ def main():
     print(f"\nGenerated complete data for {len(complete_ta_data)} territorial authorities")
     
     # Save complete data
-    output_path = '/Users/joseph/GIT/places-of-worship/ta_complete_census_data.json'
-    with open(output_path, 'w') as f:
+    output_path = data_dir / "ta_complete_census_data.json"
+    with output_path.open('w') as f:
         json.dump(complete_ta_data, f, indent=2, ensure_ascii=False)
     
     print(f"Saved complete TA census data to: {output_path}")

@@ -80,3 +80,4 @@ Each entry should include: decision, context, alternatives, risks, and follow-up
 - Legacy URLs are shimmed for redirects; some legacy data files remain for compatibility.
 - Grace period: keep `enhanced-places.html` and `src/` shims until new regional paths are adopted.
 - Plan to deprecate/remove legacy copies once new paths are widely adopted.
+- NZ data now lives in `apps/regions/nz/data` only; root and `src/` data copies removed.

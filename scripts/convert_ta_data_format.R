@@ -12,7 +12,6 @@ cat("Converting new Stats NZ format to legacy app format...\n")
 # read new format data
 new_data <- read_json("../ta_aggregated_data_statsNZ.json")
 output_dir <- "../apps/regions/nz/data"
-legacy_output_path <- "../ta_aggregated_data.json"
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # function to convert single TA data
@@ -103,7 +102,6 @@ legacy_data <- imap(legacy_data, function(ta_data, ta_code) {
 output_path <- file.path(output_dir, "ta_aggregated_data.json")
 cat("Saving converted data to:", output_path, "\n")
 write_json(legacy_data, output_path, pretty = TRUE, auto_unbox = TRUE)
-file.copy(output_path, legacy_output_path, overwrite = TRUE)
 
 cat("✓ Successfully converted to legacy format\n")
 

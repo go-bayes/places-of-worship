@@ -13,3 +13,4 @@
 - Added an initial open decision entry for the Rust feasibility test (aka 'Spike').
 - Added decision placeholders for regional data storage and portal adapter strategy.
 - Renamed Enhanced NZ app path to `apps/regions/nz` for scalable regional naming.
+- Removed root-level NZ data files and legacy `src/` data copies (now only in `apps/regions/nz/data`).
