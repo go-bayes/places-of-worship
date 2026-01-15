@@ -87,6 +87,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Private ops notes (local only)
+ops/private-ops-notes.md
+
 # ====================================
 # DATA MANAGEMENT - NEVER COMMIT DATA
 # ====================================

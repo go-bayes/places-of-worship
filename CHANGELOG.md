@@ -5,6 +5,16 @@
 - Added legacy URL shims for `/`, `/enhanced-places.html`, and `frontend/` + `src/` paths.
 - Added root `PLANNING.md` and consolidated planning notes.
 - Added README guides for `apps/`, `apps/regions/nz/`, `data/`, `scripts/`, and `schemas/`.
+- Aligned deployment strategy doc with the current static + tile server architecture and Rust plan.
+- Added an operations runbook for GitHub Pages + Martin tile server workflows.
+- Expanded the runbook with a step-by-step tile refresh guide and a forensics checklist.
+- Redacted DNS record values in the runbook and replaced them with placeholders.
+- Added a git-ignored `ops/private-ops-notes.md` template for sensitive details.
+- Documented current data storage locations and an auditable tracking plan.
+- Added an OSM snapshot/diff strategy to the data storage plan.
+- Added JSON templates for snapshot and diff manifests.
+- Consolidated planning content into `PLANNING.md` and reduced `docs/data-storage.md` to inventory-only.
+- Noted `PLANNING.md` as the single planning source in `README.md`.
 - Updated Enhanced NZ data pipeline scripts to emit into `apps/regions/nz/data` while preserving legacy outputs.
 - Switched global map Enhanced NZ link to a relative path for local and production parity.
 - Made Enhanced NZ data loading resilient to `/apps/regions/nz/` and legacy URL entry points.

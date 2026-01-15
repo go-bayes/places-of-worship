@@ -202,4 +202,3 @@ cat("✓ Contains", length(output_data), "territorial authorities\n")
 # ---- preview data ----
 cat("\nPreview of first territorial authority:\n")
 print(output_data[[1]], max.levels = 3)
-

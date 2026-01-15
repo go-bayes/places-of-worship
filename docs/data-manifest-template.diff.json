@@ -1,0 +1,31 @@
+{
+  "type": "diff",
+  "dataset_family": "osm-places",
+  "base_snapshot_id": "YYYY-MM-DD",
+  "target_snapshot_id": "YYYY-MM-DD",
+  "generated_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "pipeline": {
+    "script": "scripts/compute_diffs.py",
+    "commit": "<git-sha>",
+    "parameters": {}
+  },
+  "files": [
+    {
+      "path": "gs://<bucket>/diffs/YYYY-MM-DD_to_YYYY-MM-DD/global_delta.json",
+      "format": "json",
+      "bytes": 0,
+      "sha256": "<sha256>",
+      "content": "summary-metrics"
+    }
+  ],
+  "metrics": {
+    "global_delta": null,
+    "by_country_delta": {},
+    "grid_summary": {
+      "resolution_km": null,
+      "total_cells": null,
+      "cells_changed": null
+    },
+    "notes": ""
+  }
+}

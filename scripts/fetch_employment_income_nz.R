@@ -133,7 +133,7 @@ if (!is.null(raw_data)) {
   cat("✓ Employment and income data saved to:", output_path, "\n")
   cat("✓ Contains data for", length(employment_income_data), "TA areas\n")
 } else {
-  cat("❌ Failed to fetch employment and income data\n")
+  cat("Error: Failed to fetch employment and income data\n")
 
   # Create empty file to prevent loading errors
   output_data <- list(

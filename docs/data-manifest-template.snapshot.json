@@ -1,0 +1,36 @@
+{
+  "type": "snapshot",
+  "dataset_family": "osm-places",
+  "snapshot_id": "YYYY-MM-DD",
+  "generated_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "source": {
+    "name": "OpenStreetMap",
+    "url": "https://planet.openstreetmap.org/",
+    "retrieved_at": "YYYY-MM-DDTHH:MM:SSZ",
+    "license": "ODbL-1.0"
+  },
+  "pipeline": {
+    "script": "scripts/extract_global_data.R",
+    "commit": "<git-sha>",
+    "parameters": {}
+  },
+  "schema": {
+    "version": "1.0.0",
+    "path": "schemas/site.schema.json"
+  },
+  "files": [
+    {
+      "path": "gs://<bucket>/snapshots/YYYY-MM-DD/places.mbtiles",
+      "format": "mbtiles",
+      "bytes": 0,
+      "sha256": "<sha256>",
+      "row_count": null,
+      "content": "vector-tiles"
+    }
+  ],
+  "stats": {
+    "global_count": null,
+    "by_country": {},
+    "notes": ""
+  }
+}

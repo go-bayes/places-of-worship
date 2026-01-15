@@ -41,6 +41,24 @@ Each entry should include: decision, context, alternatives, risks, and follow-up
 - Global data audit deferred (track scope + cleanup once the Rust stack plan is clearer).
 - After testing, delete legacy NZ files in `data/` (`nz_places.geojson`, `nz_places_optimized.geojson`, `sa2.geojson`).
 
+## Data storage and tracking plan (draft)
+- Keep large datasets in object storage; keep small manifests + metadata in-repo.
+- Use `scripts/generate_manifest.py` to emit `data/global/manifest.json`.
+- Add per-dataset manifest entries (source URL, retrieval date, checksums).
+- Record dataset updates in `CHANGELOG.md` with sources + script references.
+- Store sensitive storage details in `ops/private-ops-notes.md` (git-ignored).
+- Define a snapshot cadence for OSM data and produce diff artifacts between snapshots.
+- Keep diff outputs in object storage; commit only summaries/metadata.
+
+### Snapshot and diff details (draft)
+- Snapshot cadence: monthly or quarterly (decision pending).
+- Store raw snapshots in GCS with date-stamped paths (immutable).
+- Generate per-country JSON/Parquet outputs per snapshot.
+- Emit a small manifest per snapshot in-repo (counts, checksums, schema version, source URL, pipeline commit).
+- Compute deltas between snapshots (global, per-country, grid summaries).
+- Store diff artifacts in object storage; commit only summaries/metrics in-repo.
+- Prefer object versioning on GCS buckets when feasible.
+
 ## Rust architecture direction (regional data services)
 - Shared types in a `domain` crate used by API, pipelines, and UI.
 - Versioned public API (`/api/v1/...`) with OpenAPI spec.
