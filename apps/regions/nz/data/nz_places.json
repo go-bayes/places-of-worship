@@ -1,26 +1,5 @@
 [
   {
-    "id": "n279233670",
-    "osm_id": 279233670,
-    "osm_type": "node",
-    "lat": -41.2970489,
-    "lng": 174.7719778,
-    "name": "Moriah Kindergarten",
-    "religion": "jewish",
-    "denomination": "",
-    "confidence": 0.8500000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "https://www.moriahkindergarten.org.nz/",
-    "phone": "+64 4 384 7585",
-    "address": "80 Webb Street, Wellington",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "childcare",
-      "religion": "jewish"
-    }
-  },
-  {
     "id": "n306114295",
     "osm_id": 306114295,
     "osm_type": "node",
@@ -103,27 +82,6 @@
     "tags_raw": {
       "amenity": "place_of_worship",
       "denomination": "interdenominational",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "n911431814",
-    "osm_id": 911431814,
-    "osm_type": "node",
-    "lat": -36.8454943,
-    "lng": 174.7473205,
-    "name": "Bishop's Residence",
-    "religion": "christian",
-    "denomination": "catholic",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "catholic",
       "religion": "christian"
     }
   },
@@ -409,7 +367,7 @@
     "osm_type": "node",
     "lat": -39.9469108,
     "lng": 175.0508542,
-    "name": "St Paul\u2019s Memorial Church, Putiki",
+    "name": "St Paul’s Memorial Church, Putiki",
     "religion": "christian",
     "denomination": "anglican",
     "confidence": 1.0,
@@ -422,28 +380,6 @@
     "tags_raw": {
       "amenity": "place_of_worship",
       "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "n3401510186",
-    "osm_id": 3401510186,
-    "osm_type": "node",
-    "lat": -35.3827484,
-    "lng": 173.4088323,
-    "name": "St Mary\u2019s Church cemetery",
-    "religion": "christian",
-    "denomination": "catholic",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
-      "denomination": "catholic",
       "religion": "christian"
     }
   },
@@ -4866,7 +4802,7 @@
     "osm_type": "node",
     "lat": -43.1931574,
     "lng": 172.7331949,
-    "name": "Our Lady of Fourvi\u00e8re House of Prayer and Retreat",
+    "name": "Our Lady of Fourvière House of Prayer and Retreat",
     "religion": "christian",
     "denomination": "roman_catholic",
     "confidence": 0.9000000000000001,
@@ -4910,7 +4846,7 @@
     "osm_type": "node",
     "lat": -43.1925036,
     "lng": 172.7337638,
-    "name": "Shrine of Our Lady of Fourvi\u00e8re",
+    "name": "Shrine of Our Lady of Fourvière",
     "religion": "christian",
     "denomination": "roman_catholic",
     "confidence": 1.0,
@@ -5909,27 +5845,6 @@
     }
   },
   {
-    "id": "n9285954860",
-    "osm_id": 9285954860,
-    "osm_type": "node",
-    "lat": -43.5195313,
-    "lng": 172.5970899,
-    "name": "Saint Barnabas Church Office",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.8500000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "8 Tui Street, Christchurch",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "n9286911385",
     "osm_id": 9286911385,
     "osm_type": "node",
@@ -6076,7 +5991,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "4 Otuhiwai Crescent, Whang\u0101rei, 0112",
+    "address": "4 Otuhiwai Crescent, Whangārei, 0112",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -7308,7 +7223,7 @@
     "osm_type": "way",
     "lat": -36.850818471428575,
     "lng": 174.81813851428572,
-    "name": "\u014ckahu Bay Urup\u0101",
+    "name": "Ōkahu Bay Urupā",
     "religion": "christian",
     "denomination": "",
     "confidence": 0.8,
@@ -7418,7 +7333,7 @@
     "osm_type": "way",
     "lat": -36.84643673548387,
     "lng": 174.76335022258064,
-    "name": "Saint Patrick\u2019s Cathedral",
+    "name": "Saint Patrick’s Cathedral",
     "religion": "christian",
     "denomination": "roman_catholic",
     "confidence": 1.0,
@@ -7465,7 +7380,7 @@
     "osm_type": "way",
     "lat": -36.979115433333334,
     "lng": 174.82278405,
-    "name": "M\u0101ngere Samoan Seventh-Day Adventist Church",
+    "name": "Māngere Samoan Seventh-Day Adventist Church",
     "religion": "christian",
     "denomination": "seventh_day_adventist",
     "confidence": 1.0,
@@ -7602,7 +7517,7 @@
     "osm_type": "way",
     "lat": -36.9531212483871,
     "lng": 174.79020592580645,
-    "name": "Siasi Tokaikolo \u2018ia Kalaisi - \u2018Api ko Nasaleti",
+    "name": "Siasi Tokaikolo ‘ia Kalaisi - ‘Api ko Nasaleti",
     "religion": "christian",
     "denomination": "mormon",
     "confidence": 1.0,
@@ -7928,27 +7843,6 @@
     }
   },
   {
-    "id": "w38317568",
-    "osm_id": 38317568,
-    "osm_type": "way",
-    "lat": -43.598633725,
-    "lng": 172.723102425,
-    "name": "Lyttelton Anglican Cemetery",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.9000000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "https://www.ccc.govt.nz/services/cemeteries/operational-cemeteries#lytteltonanglican",
-    "phone": "",
-    "address": "79 Canterbury Street, Lyttelton",
-    "start_date": "1850",
-    "tags_raw": {
-      "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w42475928",
     "osm_id": 42475928,
     "osm_type": "way",
@@ -8157,33 +8051,12 @@
     "tags_raw": {}
   },
   {
-    "id": "w50691937",
-    "osm_id": 50691937,
-    "osm_type": "way",
-    "lat": -43.60209692857143,
-    "lng": 172.72564561428572,
-    "name": "Lyttelton Catholic and Public Cemetery",
-    "religion": "christian",
-    "denomination": "catholic",
-    "confidence": 0.8500000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "https://www.ccc.govt.nz/services/cemeteries/operational-cemeteries#lytteltoncatholic",
-    "phone": "",
-    "address": "",
-    "start_date": "1873",
-    "tags_raw": {
-      "denomination": "catholic",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w51112019",
     "osm_id": 51112019,
     "osm_type": "way",
     "lat": -36.87766361176471,
     "lng": 174.86458084117646,
-    "name": "Glen Innes Bah\u00e1'\u00ed Centre",
+    "name": "Glen Innes Bahá'í Centre",
     "religion": "bahai",
     "denomination": "",
     "confidence": 0.95,
@@ -8221,29 +8094,6 @@
       "denomination": "catholic",
       "religion": "christian",
       "service_times": "Tu 09:15; Su 09:00"
-    }
-  },
-  {
-    "id": "w52826912",
-    "osm_id": 52826912,
-    "osm_type": "way",
-    "lat": -43.55968308928571,
-    "lng": 172.63800171785715,
-    "name": "Saint Peter\u2019s Parish Centre",
-    "religion": "christian",
-    "denomination": "catholic",
-    "confidence": 0.9000000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "https://christchurchsouth.org.nz/",
-    "phone": "+64 3 338 8395",
-    "address": "9 Fisher Avenue, Christchurch, 8023",
-    "start_date": "1956",
-    "tags_raw": {
-      "amenity": "community_centre",
-      "building": "yes",
-      "denomination": "catholic",
-      "religion": "christian"
     }
   },
   {
@@ -8438,7 +8288,7 @@
     "osm_type": "way",
     "lat": -36.88771311739131,
     "lng": 174.77762379130436,
-    "name": "Old Girls\u2019 Chapel",
+    "name": "Old Girls’ Chapel",
     "religion": "unknown",
     "denomination": "",
     "confidence": 0.65,
@@ -8494,26 +8344,6 @@
     "tags_raw": {
       "amenity": "place_of_worship",
       "religion": "buddhist"
-    }
-  },
-  {
-    "id": "w71299771",
-    "osm_id": 71299771,
-    "osm_type": "way",
-    "lat": -36.729754722222225,
-    "lng": 174.69760763333335,
-    "name": "Albany Village Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "religion": "christian"
     }
   },
   {
@@ -8806,7 +8636,7 @@
     "type": "churches",
     "website": "https://groups.qldc.govt.nz/groups/show/wanaka-baptist-church/",
     "phone": "",
-    "address": "89 Ardmore Street, W\u0101naka, 9305",
+    "address": "89 Ardmore Street, Wānaka, 9305",
     "start_date": "1998",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -9067,27 +8897,6 @@
     "tags_raw": {}
   },
   {
-    "id": "w99465057",
-    "osm_id": 99465057,
-    "osm_type": "way",
-    "lat": -43.531203375,
-    "lng": 172.63940908333333,
-    "name": "The Church Pub",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.7000000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "https://www.churchpub.co.nz",
-    "phone": "+64 3 595 1533",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "pub",
-      "building": "church"
-    }
-  },
-  {
     "id": "w99998819",
     "osm_id": 99998819,
     "osm_type": "way",
@@ -9293,29 +9102,6 @@
       "denomination": "brethren",
       "religion": "christian",
       "service_times": "Su 10:00"
-    }
-  },
-  {
-    "id": "w101510141",
-    "osm_id": 101510141,
-    "osm_type": "way",
-    "lat": -43.521160466666664,
-    "lng": 172.62894148750001,
-    "name": "Knox Centre",
-    "religion": "christian",
-    "denomination": "presbyterian",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "community_centre",
-      "building": "community_centre",
-      "denomination": "presbyterian",
-      "religion": "christian"
     }
   },
   {
@@ -9813,7 +9599,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "88 Acacia Bay Road, Taup\u014d, 3330",
+    "address": "88 Acacia Bay Road, Taupō, 3330",
     "start_date": "1997",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -9927,28 +9713,6 @@
       "amenity": "place_of_worship",
       "building": "yes",
       "denomination": "seventh_day_adventist",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w115601427",
-    "osm_id": 115601427,
-    "osm_type": "way",
-    "lat": -36.92261799999999,
-    "lng": 174.78459630666666,
-    "name": "Anglican Place of Worship",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.65,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
-      "denomination": "anglican",
       "religion": "christian"
     }
   },
@@ -10703,7 +10467,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "125 King Street, Whakat\u0101ne, 3120",
+    "address": "125 King Street, Whakatāne, 3120",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -11212,28 +10976,6 @@
     }
   },
   {
-    "id": "w153253653",
-    "osm_id": 153253653,
-    "osm_type": "way",
-    "lat": -36.873192784210524,
-    "lng": 174.84090996315788,
-    "name": "College of Saint John the Evangelist",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.8500000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "https://www.stjohnscollege.ac.nz/",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "college",
-      "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w153705703",
     "osm_id": 153705703,
     "osm_type": "way",
@@ -11601,33 +11343,12 @@
     }
   },
   {
-    "id": "w173591572",
-    "osm_id": 173591572,
-    "osm_type": "way",
-    "lat": -36.4020839,
-    "lng": 174.6631553857143,
-    "name": "Warkworth Anglican Cemetery",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.8500000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "42 Percy Street, Warkworth, 0910",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w174293036",
     "osm_id": 174293036,
     "osm_type": "way",
     "lat": -41.177946444444444,
     "lng": 174.95994127777777,
-    "name": "St Michael\u2019s Church Taita / St Michael's Parish",
+    "name": "St Michael’s Church Taita / St Michael's Parish",
     "religion": "christian",
     "denomination": "catholic",
     "confidence": 1.0,
@@ -12285,27 +12006,6 @@
     }
   },
   {
-    "id": "w205032669",
-    "osm_id": 205032669,
-    "osm_type": "way",
-    "lat": -36.8036572,
-    "lng": 174.7246907375,
-    "name": "Pompallier Cemetery",
-    "religion": "christian",
-    "denomination": "anglican;catholic",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "anglican;catholic",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w205731767",
     "osm_id": 205731767,
     "osm_type": "way",
@@ -12849,7 +12549,7 @@
     "osm_type": "way",
     "lat": -40.38612954,
     "lng": 175.61931176000002,
-    "name": "The Centre \u2013 Te Waiora",
+    "name": "The Centre – Te Waiora",
     "religion": "christian",
     "denomination": "",
     "confidence": 0.95,
@@ -12977,7 +12677,7 @@
     "osm_type": "way",
     "lat": -40.74667414545455,
     "lng": 175.14226436363634,
-    "name": "St Mary\u2019s Church Pukekaraka / St Mary's Parish - Otaki",
+    "name": "St Mary’s Church Pukekaraka / St Mary's Parish - Otaki",
     "religion": "christian",
     "denomination": "roman_catholic",
     "confidence": 1.0,
@@ -12985,7 +12685,7 @@
     "type": "churches",
     "website": "http://www.otakiandlevincatholicparish.nz",
     "phone": "+64 6 364 8543",
-    "address": "4 Convent Road, \u014ctaki, 5512",
+    "address": "4 Convent Road, Ōtaki, 5512",
     "start_date": "1859",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -13161,7 +12861,7 @@
     "osm_type": "way",
     "lat": -41.13812910689655,
     "lng": 175.0392675827586,
-    "name": "The King\u2019s Arms Church",
+    "name": "The King’s Arms Church",
     "religion": "christian",
     "denomination": "",
     "confidence": 1.0,
@@ -13537,27 +13237,6 @@
     "tags_raw": {
       "amenity": "place_of_worship",
       "building": "yes",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w221673254",
-    "osm_id": 221673254,
-    "osm_type": "way",
-    "lat": -36.614548766666665,
-    "lng": 174.67756148333333,
-    "name": "Holy Trinity Cemetery",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.8500000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "24 Wainui Road, Silverdale, 0932",
-    "start_date": "1895",
-    "tags_raw": {
-      "denomination": "anglican",
       "religion": "christian"
     }
   },
@@ -15091,27 +14770,6 @@
     }
   },
   {
-    "id": "w251557190",
-    "osm_id": 251557190,
-    "osm_type": "way",
-    "lat": -41.28895602241379,
-    "lng": 174.77020637241378,
-    "name": "Mount Street Cemetery",
-    "religion": "christian",
-    "denomination": "roman_catholic",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "roman_catholic",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w252406215",
     "osm_id": 252406215,
     "osm_type": "way",
@@ -15663,27 +15321,6 @@
     }
   },
   {
-    "id": "w257221462",
-    "osm_id": 257221462,
-    "osm_type": "way",
-    "lat": -37.89028468461539,
-    "lng": 175.4673664,
-    "name": "Good Union",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.65,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "pub",
-      "building": "church"
-    }
-  },
-  {
     "id": "w257228823",
     "osm_id": 257228823,
     "osm_type": "way",
@@ -15795,50 +15432,6 @@
       "amenity": "place_of_worship",
       "building": "church",
       "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w257739186",
-    "osm_id": 257739186,
-    "osm_type": "way",
-    "lat": -37.8300057,
-    "lng": 175.35725402,
-    "name": "Church Hall",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.9000000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "https://www.ststephenstamahere.org.nz/",
-    "phone": "",
-    "address": "14 Tamahere Drive, Tamahere, 3283",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "community_centre",
-      "building": "yes",
-      "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w257739193",
-    "osm_id": 257739193,
-    "osm_type": "way",
-    "lat": -37.82972817142858,
-    "lng": 175.3570101,
-    "name": "Christian Place of Worship",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.6,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
       "religion": "christian"
     }
   },
@@ -16265,7 +15858,7 @@
     "type": "churches",
     "website": "https://www.newlifechurch.co.nz/",
     "phone": "+64 3 319 5924",
-    "address": "203 Beach Road, Kaik\u014dura, 7300",
+    "address": "203 Beach Road, Kaikōura, 7300",
     "start_date": "1976",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -16849,26 +16442,6 @@
       "denomination": "catholic",
       "religion": "christian",
       "service_times": "Sunday: First Mass: 8:30am. Second Mass: 10:00am."
-    }
-  },
-  {
-    "id": "w271030378",
-    "osm_id": 271030378,
-    "osm_type": "way",
-    "lat": -40.685925545454545,
-    "lng": 172.68081307272726,
-    "name": "Collingwood Historic Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "religion": "christian"
     }
   },
   {
@@ -17555,7 +17128,7 @@
     "osm_type": "way",
     "lat": -40.75004452142857,
     "lng": 175.1375549857143,
-    "name": "Rangi\u0101tea Church",
+    "name": "Rangiātea Church",
     "religion": "christian",
     "denomination": "anglican",
     "confidence": 1.0,
@@ -17569,26 +17142,6 @@
       "amenity": "place_of_worship",
       "building": "church",
       "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w279278584",
-    "osm_id": 279278584,
-    "osm_type": "way",
-    "lat": -40.30229868,
-    "lng": 175.45288726,
-    "name": "Rongotea Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
       "religion": "christian"
     }
   },
@@ -17633,27 +17186,6 @@
       "amenity": "place_of_worship",
       "building": "yes",
       "denomination": "catholic",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w281784796",
-    "osm_id": 281784796,
-    "osm_type": "way",
-    "lat": -36.99222964285714,
-    "lng": 175.03683787142856,
-    "name": "Clevedon Presbyterian Cemetery",
-    "religion": "christian",
-    "denomination": "presbyterian",
-    "confidence": 0.8500000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "3 Papakura\u2013Clevedon Road, Clevedon, 2582",
-    "start_date": "1858",
-    "tags_raw": {
-      "denomination": "presbyterian",
       "religion": "christian"
     }
   },
@@ -17759,7 +17291,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "2 Raumati Crescent, Whang\u0101rei, 0110",
+    "address": "2 Raumati Crescent, Whangārei, 0110",
     "start_date": "1952",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -18024,7 +17556,7 @@
     "osm_type": "way",
     "lat": -41.30070288392857,
     "lng": 174.78266797142857,
-    "name": "Saint Joseph\u2019s Catholic Church",
+    "name": "Saint Joseph’s Catholic Church",
     "religion": "christian",
     "denomination": "roman_catholic",
     "confidence": 1.0,
@@ -19351,7 +18883,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "20 Carroll Street, Te K\u016biti, 3910",
+    "address": "20 Carroll Street, Te Kūiti, 3910",
     "start_date": "1990",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -19374,7 +18906,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "15 Tawa Street, Te K\u016biti, 3910",
+    "address": "15 Tawa Street, Te Kūiti, 3910",
     "start_date": "1952",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -19895,7 +19427,7 @@
     "osm_type": "way",
     "lat": -36.84969623333333,
     "lng": 174.64963572222223,
-    "name": "Te Atat\u016b Baptist Church",
+    "name": "Te Atatū Baptist Church",
     "religion": "christian",
     "denomination": "baptist",
     "confidence": 1.0,
@@ -20218,7 +19750,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "33 Whitcombe Road, \u014cpunake, 4645",
+    "address": "33 Whitcombe Road, Ōpunake, 4645",
     "start_date": "1965",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -20448,7 +19980,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "78 Victoria Street, H\u0101wera, 4642",
+    "address": "78 Victoria Street, Hāwera, 4642",
     "start_date": "1978",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -21129,27 +20661,6 @@
     "tags_raw": {}
   },
   {
-    "id": "w305520478",
-    "osm_id": 305520478,
-    "osm_type": "way",
-    "lat": -43.56699842,
-    "lng": 172.40148266,
-    "name": "Weedons Wesleyan Cemetery",
-    "religion": "christian",
-    "denomination": "methodist",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "methodist",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w305526156",
     "osm_id": 305526156,
     "osm_type": "way",
@@ -21364,7 +20875,7 @@
     "osm_type": "way",
     "lat": -43.15712223076923,
     "lng": 172.72844245384616,
-    "name": "Holy Innocents\u2019 Church",
+    "name": "Holy Innocents’ Church",
     "religion": "christian",
     "denomination": "anglican",
     "confidence": 1.0,
@@ -24618,26 +24129,6 @@
     }
   },
   {
-    "id": "w319833420",
-    "osm_id": 319833420,
-    "osm_type": "way",
-    "lat": -36.85089094,
-    "lng": 174.77225714000002,
-    "name": "Saint Andrews Office",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.65,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "building": "church"
-    }
-  },
-  {
     "id": "w320477241",
     "osm_id": 320477241,
     "osm_type": "way",
@@ -24935,27 +24426,6 @@
     }
   },
   {
-    "id": "w321242478",
-    "osm_id": 321242478,
-    "osm_type": "way",
-    "lat": -43.813522761538465,
-    "lng": 172.9564735923077,
-    "name": "Akaroa Anglican Cemetery",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w321409830",
     "osm_id": 321409830,
     "osm_type": "way",
@@ -25042,26 +24512,6 @@
     "tags_raw": {
       "amenity": "place_of_worship",
       "building": "yes"
-    }
-  },
-  {
-    "id": "w322657573",
-    "osm_id": 322657573,
-    "osm_type": "way",
-    "lat": -36.62702642222222,
-    "lng": 174.50137156666668,
-    "name": "Kaukapakapa Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "religion": "christian"
     }
   },
   {
@@ -25338,27 +24788,6 @@
     }
   },
   {
-    "id": "w323890829",
-    "osm_id": 323890829,
-    "osm_type": "way",
-    "lat": -43.290922699999996,
-    "lng": 172.59373839999998,
-    "name": "Rangiora Methodist Cemetery",
-    "religion": "christian",
-    "denomination": "methodist",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "methodist",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w324196897",
     "osm_id": 324196897,
     "osm_type": "way",
@@ -25619,7 +25048,7 @@
     "type": "churches",
     "website": "https://www.ststephenswgp.org.nz/",
     "phone": "",
-    "address": "3 Stanmore Bay Road, Whangapar\u0101oa, 0932",
+    "address": "3 Stanmore Bay Road, Whangaparāoa, 0932",
     "start_date": "2012",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -25673,27 +25102,6 @@
       "denomination": "baptist",
       "religion": "christian",
       "service_times": "Sundays 10am"
-    }
-  },
-  {
-    "id": "w326340885",
-    "osm_id": 326340885,
-    "osm_type": "way",
-    "lat": -36.8641578,
-    "lng": 174.76344950434782,
-    "name": "K\u0101hui St David's",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.7500000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "https://www.kahuistdavids.nz/",
-    "phone": "",
-    "address": "68-70 Khyber Pass Road, Auckland",
-    "start_date": "1920",
-    "tags_raw": {
-      "amenity": "community_centre",
-      "building": "church"
     }
   },
   {
@@ -26109,7 +25517,7 @@
     "osm_type": "way",
     "lat": -36.89531267647059,
     "lng": 174.85621231764705,
-    "name": "T\u0101maki Community Church",
+    "name": "Tāmaki Community Church",
     "religion": "christian",
     "denomination": "nondenominational",
     "confidence": 1.0,
@@ -26132,7 +25540,7 @@
     "osm_type": "way",
     "lat": -36.88209735,
     "lng": 174.85973041666665,
-    "name": "PIPC T\u0101maki",
+    "name": "PIPC Tāmaki",
     "religion": "christian",
     "denomination": "presbyterian",
     "confidence": 1.0,
@@ -27121,7 +26529,7 @@
     "osm_type": "way",
     "lat": -36.96052158,
     "lng": 174.87796317,
-    "name": "East T\u0101maki Samoan Seventh-Day Adventist Church",
+    "name": "East Tāmaki Samoan Seventh-Day Adventist Church",
     "religion": "christian",
     "denomination": "pentecostal",
     "confidence": 1.0,
@@ -28787,7 +28195,7 @@
     "osm_type": "way",
     "lat": -43.80266205294118,
     "lng": 172.9699896117647,
-    "name": "St Patrick\u2019s Akaroa Catholic Parish Church",
+    "name": "St Patrick’s Akaroa Catholic Parish Church",
     "religion": "christian",
     "denomination": "catholic",
     "confidence": 1.0,
@@ -29756,7 +29164,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "128 Thermal Explorer Highway, Ng\u0101ruaw\u0101hia, 3720",
+    "address": "128 Thermal Explorer Highway, Ngāruawāhia, 3720",
     "start_date": "1940",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -30174,7 +29582,7 @@
     "osm_type": "way",
     "lat": -36.979912222222225,
     "lng": 174.82848086666667,
-    "name": "Auckland M\u0101ori Seventh Day Adventist Church",
+    "name": "Auckland Māori Seventh Day Adventist Church",
     "religion": "christian",
     "denomination": "seventh_day_adventist",
     "confidence": 1.0,
@@ -30590,7 +29998,7 @@
     "osm_type": "way",
     "lat": -37.75271519411765,
     "lng": 175.27793522352943,
-    "name": "Chartwell Cooperating Church (St Alban\u2019s)",
+    "name": "Chartwell Cooperating Church (St Alban’s)",
     "religion": "christian",
     "denomination": "anglican;methodist;presbyterian",
     "confidence": 1.0,
@@ -31206,7 +30614,7 @@
     "type": "churches",
     "website": "https://www.helensvillecatholic.org.nz/",
     "phone": "",
-    "address": "380 Main Road, Kume\u016b, 0810",
+    "address": "380 Main Road, Kumeū, 0810",
     "start_date": "1966",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -31221,7 +30629,7 @@
     "osm_type": "way",
     "lat": -36.771324404761906,
     "lng": 174.54543351904763,
-    "name": "St Chad\u2019s Anglican-Methodist Church",
+    "name": "St Chad’s Anglican-Methodist Church",
     "religion": "christian",
     "denomination": "anglican;methodist",
     "confidence": 1.0,
@@ -31267,7 +30675,7 @@
     "osm_type": "way",
     "lat": -36.2637386,
     "lng": 174.72740761818181,
-    "name": "P\u0101kiri Church",
+    "name": "Pākiri Church",
     "religion": "christian",
     "denomination": "",
     "confidence": 0.95,
@@ -31521,7 +30929,7 @@
     "type": "churches",
     "website": "https://www.kumeubaptist.org.nz/",
     "phone": "",
-    "address": "21 Access Road, Kume\u016b, 0810",
+    "address": "21 Access Road, Kumeū, 0810",
     "start_date": "1950",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -31820,7 +31228,7 @@
     "type": "churches",
     "website": "http://www.whangamethparish.org.nz/",
     "phone": "",
-    "address": "945 Whangaparaoa Road, Whangapar\u0101oa, 0930",
+    "address": "945 Whangaparaoa Road, Whangaparāoa, 0930",
     "start_date": "1980",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -31911,7 +31319,7 @@
     "type": "churches",
     "website": "https://www.coast.org.nz/",
     "phone": "",
-    "address": "30 Waiora Road, Whangapar\u0101oa, 0932",
+    "address": "30 Waiora Road, Whangaparāoa, 0932",
     "start_date": "2013",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -31954,7 +31362,7 @@
     "type": "churches",
     "website": "http://www.hbcparish.org.nz/index.html",
     "phone": "",
-    "address": "8 Motutapu Avenue, Whangapar\u0101oa, 0930",
+    "address": "8 Motutapu Avenue, Whangaparāoa, 0930",
     "start_date": "1980",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -32095,7 +31503,7 @@
     "type": "churches",
     "website": "https://orewa.adventist.org.nz/",
     "phone": "",
-    "address": "123-125 Centreway Road, \u014crewa, 0931",
+    "address": "123-125 Centreway Road, Ōrewa, 0931",
     "start_date": "1950",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -32119,7 +31527,7 @@
     "type": "churches",
     "website": "https://www.orewabaptist.com/",
     "phone": "",
-    "address": "2 Loop Road, \u014crewa, 0931",
+    "address": "2 Loop Road, Ōrewa, 0931",
     "start_date": "1980",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -32373,7 +31781,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "139 Rifle Range Road, Taup\u014d, 3330",
+    "address": "139 Rifle Range Road, Taupō, 3330",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -33338,7 +32746,7 @@
     "osm_type": "way",
     "lat": -36.86404040833333,
     "lng": 174.60411705833334,
-    "name": "R\u0101nui Baptist Church",
+    "name": "Rānui Baptist Church",
     "religion": "christian",
     "denomination": "baptist",
     "confidence": 1.0,
@@ -34053,7 +33461,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "67 Main Road, T\u012brau, 3410",
+    "address": "67 Main Road, Tīrau, 3410",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -34482,7 +33890,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "52 Arapuni Street, Put\u0101ruru, 3411",
+    "address": "52 Arapuni Street, Putāruru, 3411",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -35384,7 +34792,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "5 Tuhoro Street, \u014ctorohanga, 3900",
+    "address": "5 Tuhoro Street, Ōtorohanga, 3900",
     "start_date": "2001",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -35430,7 +34838,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "10 Sheridan Street, Te K\u016biti, 3910",
+    "address": "10 Sheridan Street, Te Kūiti, 3910",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -35453,7 +34861,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "24 Seddon Street, Te K\u016biti, 3910",
+    "address": "24 Seddon Street, Te Kūiti, 3910",
     "start_date": "1913",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -36167,47 +35575,6 @@
     }
   },
   {
-    "id": "w351679988",
-    "osm_id": 351679988,
-    "osm_type": "way",
-    "lat": -41.13613566363636,
-    "lng": 175.07472601818182,
-    "name": "Wallaceville Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w351861009",
-    "osm_id": 351861009,
-    "osm_type": "way",
-    "lat": -41.211624199999996,
-    "lng": 174.8969371384615,
-    "name": "Wesleyan Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w351897986",
     "osm_id": 351897986,
     "osm_type": "way",
@@ -36289,7 +35656,7 @@
     "type": "churches",
     "website": "https://www.clevedonchurch.nz/",
     "phone": "+64 9 292 8061",
-    "address": "3 Papakura\u2013Clevedon Road, Clevedon, Auckland, 2582",
+    "address": "3 Papakura–Clevedon Road, Clevedon, Auckland, 2582",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -36297,27 +35664,6 @@
       "denomination": "presbyterian",
       "religion": "christian",
       "service_times": "Su 09:30,11:00"
-    }
-  },
-  {
-    "id": "w352013218",
-    "osm_id": 352013218,
-    "osm_type": "way",
-    "lat": -36.98624281,
-    "lng": 175.04174808,
-    "name": "All Souls Cemetery",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "anglican",
-      "religion": "christian"
     }
   },
   {
@@ -36710,7 +36056,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "139 Hamurana Road, \u014cmokoroa, 3114",
+    "address": "139 Hamurana Road, Ōmokoroa, 3114",
     "start_date": "1972",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -36733,7 +36079,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "334 Omokoroa Road, \u014cmokoroa, 3172",
+    "address": "334 Omokoroa Road, Ōmokoroa, 3172",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -37550,7 +36896,7 @@
     "osm_type": "way",
     "lat": -36.968812766666666,
     "lng": 174.80572474444443,
-    "name": "M\u0101ngere Baptist Church",
+    "name": "Māngere Baptist Church",
     "religion": "christian",
     "denomination": "baptist",
     "confidence": 1.0,
@@ -37610,26 +36956,6 @@
     "tags_raw": {
       "amenity": "place_of_worship",
       "building": "yes"
-    }
-  },
-  {
-    "id": "w356915378",
-    "osm_id": 356915378,
-    "osm_type": "way",
-    "lat": -36.991398281818185,
-    "lng": 174.83709186363635,
-    "name": "Manukau Memorial Gardens Office & Chapel",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.65,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "building": "chapel"
     }
   },
   {
@@ -37758,7 +37084,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "30 Ohuanga Road, T\u016brangi, 3334",
+    "address": "30 Ohuanga Road, Tūrangi, 3334",
     "start_date": "1970",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -38122,7 +37448,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "71 Church Street, \u014cp\u014dtiki, 3122",
+    "address": "71 Church Street, Ōpōtiki, 3122",
     "start_date": "2012",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -38369,7 +37695,7 @@
     "type": "churches",
     "website": "https://sonshinebaptist.org.nz/",
     "phone": "",
-    "address": "56 Domain Road, Whakat\u0101ne, 3120",
+    "address": "56 Domain Road, Whakatāne, 3120",
     "start_date": "2013",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -38392,7 +37718,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "65 Wairaka Road, Whakat\u0101ne, 3120",
+    "address": "65 Wairaka Road, Whakatāne, 3120",
     "start_date": "1973",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -38602,27 +37928,6 @@
       "amenity": "place_of_worship",
       "building": "yes",
       "denomination": "baptist",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w361991552",
-    "osm_id": 361991552,
-    "osm_type": "way",
-    "lat": -36.892989477777775,
-    "lng": 174.93081768888888,
-    "name": "Our Lady Star of the Sea Parish Cemetery",
-    "religion": "christian",
-    "denomination": "roman_catholic",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "roman_catholic",
       "religion": "christian"
     }
   },
@@ -39884,7 +39189,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "7 Mill Bay Road, Mang\u014dnui, 0420",
+    "address": "7 Mill Bay Road, Mangōnui, 0420",
     "start_date": "2002",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -40840,7 +40145,7 @@
     "osm_type": "way",
     "lat": -38.08351876666667,
     "lng": 176.21260592222222,
-    "name": "Ngongotah\u0101 Christian Assembly",
+    "name": "Ngongotahā Christian Assembly",
     "religion": "christian",
     "denomination": "",
     "confidence": 0.95,
@@ -41036,29 +40341,6 @@
       "denomination": "protestant",
       "religion": "christian",
       "service_times": "Su 11:00"
-    }
-  },
-  {
-    "id": "w369786839",
-    "osm_id": 369786839,
-    "osm_type": "way",
-    "lat": -36.868336912,
-    "lng": 174.708328304,
-    "name": "The Homestead Community House",
-    "religion": "christian",
-    "denomination": "presbyterian;church_of_christ",
-    "confidence": 0.9000000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "https://www.ptchevalierhomestead.com/",
-    "phone": "",
-    "address": "92 Point Chevalier Road, Auckland, 1022",
-    "start_date": "1979",
-    "tags_raw": {
-      "amenity": "community_centre",
-      "building": "yes",
-      "denomination": "presbyterian;church_of_christ",
-      "religion": "christian"
     }
   },
   {
@@ -41764,27 +41046,6 @@
     }
   },
   {
-    "id": "w370834951",
-    "osm_id": 370834951,
-    "osm_type": "way",
-    "lat": -36.877907775,
-    "lng": 174.62890885000002,
-    "name": "Old Saint Michael's Church",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.65,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "events_venue",
-      "building": "chapel"
-    }
-  },
-  {
     "id": "w370869018",
     "osm_id": 370869018,
     "osm_type": "way",
@@ -42117,7 +41378,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "29 Egmont Street, P\u0101tea, 4520",
+    "address": "29 Egmont Street, Pātea, 4520",
     "start_date": "1958",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -42140,7 +41401,7 @@
     "type": "churches",
     "website": "https://www.hawerabaptist.org.nz/",
     "phone": "",
-    "address": "6 Surrey Street, H\u0101wera",
+    "address": "6 Surrey Street, Hāwera",
     "start_date": "1928",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -42163,7 +41424,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "20 Turuturu Road, H\u0101wera, 4610",
+    "address": "20 Turuturu Road, Hāwera, 4610",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -42209,7 +41470,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "216 South Road, H\u0101wera, 4610",
+    "address": "216 South Road, Hāwera, 4610",
     "start_date": "1916",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -42297,7 +41558,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "19 Regent Street, H\u0101wera, 4610",
+    "address": "19 Regent Street, Hāwera, 4610",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -43973,7 +43234,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "10 Church Street, Eket\u0101huna, 4900",
+    "address": "10 Church Street, Eketāhuna, 4900",
     "start_date": "1899",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -44761,28 +44022,6 @@
     }
   },
   {
-    "id": "w375871102",
-    "osm_id": 375871102,
-    "osm_type": "way",
-    "lat": -37.6841836,
-    "lng": 176.13602432,
-    "name": "South Pacific Bible College",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.8500000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "https://spbc.org.nz/",
-    "phone": "+64 7 576 9091",
-    "address": "201 Otumoetai Road",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "college",
-      "building": "yes",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w375878549",
     "osm_id": 375878549,
     "osm_type": "way",
@@ -45354,28 +44593,6 @@
     }
   },
   {
-    "id": "w376316502",
-    "osm_id": 376316502,
-    "osm_type": "way",
-    "lat": -41.18410624,
-    "lng": 174.95402198,
-    "name": "Haleema Kindergarten - Haleema Kindergarten Trust",
-    "religion": "muslim",
-    "denomination": "",
-    "confidence": 1.0,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "https://www.haleema.org.nz/",
-    "phone": "+64 4 567 2788",
-    "address": "14-20 Hunter Street, Wellington, 5011",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes",
-      "religion": "muslim"
-    }
-  },
-  {
     "id": "w376319322",
     "osm_id": 376319322,
     "osm_type": "way",
@@ -45495,7 +44712,7 @@
     "osm_type": "way",
     "lat": -41.20132082,
     "lng": 174.95347566,
-    "name": "St Bernadette\u2019s Church Naenae / St Bernadette\u2019s Parish",
+    "name": "St Bernadette’s Church Naenae / St Bernadette’s Parish",
     "religion": "christian",
     "denomination": "catholic",
     "confidence": 1.0,
@@ -45705,7 +44922,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "1 Hunt Street, Whang\u0101rei, 0110",
+    "address": "1 Hunt Street, Whangārei, 0110",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -45728,7 +44945,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "33 Porowini Avenue, Whang\u0101rei, 0110",
+    "address": "33 Porowini Avenue, Whangārei, 0110",
     "start_date": "1970",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -45751,7 +44968,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "2 Tarewa Road, Whang\u0101rei, 0110",
+    "address": "2 Tarewa Road, Whangārei, 0110",
     "start_date": "1977",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -45797,7 +45014,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "14 Mill Road, Whang\u0101rei, 0112",
+    "address": "14 Mill Road, Whangārei, 0112",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -45842,7 +45059,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "452 Kamo Road, Whang\u0101rei, 0112",
+    "address": "452 Kamo Road, Whangārei, 0112",
     "start_date": "1999",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -45917,27 +45134,6 @@
       "amenity": "place_of_worship",
       "building": "yes",
       "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w376788910",
-    "osm_id": 376788910,
-    "osm_type": "way",
-    "lat": -41.13027145,
-    "lng": 175.0440545857143,
-    "name": "St John's Anglican Church Cemetary",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
       "religion": "christian"
     }
   },
@@ -46115,7 +45311,7 @@
     "type": "churches",
     "website": "",
     "phone": "+64 3 319 5552",
-    "address": "11 Deal Street, Kaik\u014dura, 7300",
+    "address": "11 Deal Street, Kaikōura, 7300",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -46138,7 +45334,7 @@
     "type": "churches",
     "website": "",
     "phone": "+64 3 319 5072",
-    "address": "37 Torquay Street, Kaik\u014dura, 7300",
+    "address": "37 Torquay Street, Kaikōura, 7300",
     "start_date": "1903",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -46170,27 +45366,6 @@
     }
   },
   {
-    "id": "w377811629",
-    "osm_id": 377811629,
-    "osm_type": "way",
-    "lat": -36.866522266666664,
-    "lng": 174.6223671,
-    "name": "Chapel",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.85,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "school"
-    }
-  },
-  {
     "id": "w377814473",
     "osm_id": 377814473,
     "osm_type": "way",
@@ -46204,7 +45379,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "65 Lakewood Drive, Taup\u014d, 3330",
+    "address": "65 Lakewood Drive, Taupō, 3330",
     "start_date": "1985",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -47990,7 +47165,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "300 One Tree Point Road, Whang\u0101rei, 0118",
+    "address": "300 One Tree Point Road, Whangārei, 0118",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -48013,7 +47188,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "206 Princes Street, H\u0101wera, 4610",
+    "address": "206 Princes Street, Hāwera, 4610",
     "start_date": "1916",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -49078,7 +48253,7 @@
     "type": "churches",
     "website": "",
     "phone": "+64 3 443 8239",
-    "address": "154 Aubrey Road, W\u0101naka, 9305",
+    "address": "154 Aubrey Road, Wānaka, 9305",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -49302,7 +48477,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "2 Kiddle Drive, Taup\u014d, 3330",
+    "address": "2 Kiddle Drive, Taupō, 3330",
     "start_date": "1990",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -49438,7 +48613,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "202 Bank Street, Whang\u0101rei, 0112",
+    "address": "202 Bank Street, Whangārei, 0112",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -49461,7 +48636,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "149 Kamo Road, Whang\u0101rei, 0112",
+    "address": "149 Kamo Road, Whangārei, 0112",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -49916,7 +49091,7 @@
     "type": "churches",
     "website": "http://www.churchinwhangarei.co.nz/",
     "phone": "",
-    "address": "50 Raumanga Valley Road, Whang\u0101rei, 0110",
+    "address": "50 Raumanga Valley Road, Whangārei, 0110",
     "start_date": "1960",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -50029,7 +49204,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "152 Kiripaka Road, Whang\u0101rei, 0112",
+    "address": "152 Kiripaka Road, Whangārei, 0112",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -50233,7 +49408,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "157 Tasman Road, \u014ctaki, 5512",
+    "address": "157 Tasman Road, Ōtaki, 5512",
     "start_date": "1995",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -50685,27 +49860,6 @@
     "tags_raw": {}
   },
   {
-    "id": "w393576167",
-    "osm_id": 393576167,
-    "osm_type": "way",
-    "lat": -43.814407949999996,
-    "lng": 172.9584018875,
-    "name": "Akaroa Catholic Cemetery",
-    "religion": "christian",
-    "denomination": "catholic",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "catholic",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w394220756",
     "osm_id": 394220756,
     "osm_type": "way",
@@ -51084,48 +50238,6 @@
       "religion": "christian",
       "service_times": "Su 11:00",
       "wheelchair": "limited"
-    }
-  },
-  {
-    "id": "w395246300",
-    "osm_id": 395246300,
-    "osm_type": "way",
-    "lat": -41.106793384,
-    "lng": 174.917856464,
-    "name": "Pauatahanui Burial Ground",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w395246311",
-    "osm_id": 395246311,
-    "osm_type": "way",
-    "lat": -41.1069250625,
-    "lng": 174.9172346625,
-    "name": "Pauatahanui Burial Ground",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "anglican",
-      "religion": "christian"
     }
   },
   {
@@ -52983,7 +52095,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "122 Aranui Road, M\u0101pua, 7005",
+    "address": "122 Aranui Road, Māpua, 7005",
     "start_date": "1994",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -53034,27 +52146,6 @@
     "tags_raw": {
       "amenity": "place_of_worship",
       "building": "yes"
-    }
-  },
-  {
-    "id": "w405263554",
-    "osm_id": 405263554,
-    "osm_type": "way",
-    "lat": -45.024199599999996,
-    "lng": 170.14596858,
-    "name": "Place of Worship 405263554",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.5,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "library",
-      "building": "church"
     }
   },
   {
@@ -53263,27 +52354,6 @@
     "tags_raw": {
       "amenity": "place_of_worship",
       "building": "yes"
-    }
-  },
-  {
-    "id": "w406896683",
-    "osm_id": 406896683,
-    "osm_type": "way",
-    "lat": -43.49217413125,
-    "lng": 172.10809585625,
-    "name": "St Joseph's Cemetery",
-    "religion": "christian",
-    "denomination": "roman_catholic",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "roman_catholic",
-      "religion": "christian"
     }
   },
   {
@@ -53985,7 +53055,7 @@
     "osm_type": "way",
     "lat": -43.304562036363635,
     "lng": 172.58888426363637,
-    "name": "Anglican Life Rangiora / St. John\u2019s Rangiora",
+    "name": "Anglican Life Rangiora / St. John’s Rangiora",
     "religion": "christian",
     "denomination": "anglican",
     "confidence": 1.0,
@@ -54926,7 +53996,7 @@
     "osm_type": "way",
     "lat": -42.52037588461538,
     "lng": 172.8330708076923,
-    "name": "Church of the Epiphany \u2013 Hanmer Springs",
+    "name": "Church of the Epiphany – Hanmer Springs",
     "religion": "christian",
     "denomination": "anglican",
     "confidence": 1.0,
@@ -55268,7 +54338,7 @@
     "osm_type": "way",
     "lat": -44.10449972857143,
     "lng": 170.8277424,
-    "name": "St Patrick's Church - Fairlie / St Patrick\u2019s and All Saints Parish",
+    "name": "St Patrick's Church - Fairlie / St Patrick’s and All Saints Parish",
     "religion": "christian",
     "denomination": "catholic",
     "confidence": 1.0,
@@ -56761,7 +55831,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "172 Tamamutu Street, Taup\u014d, 3330",
+    "address": "172 Tamamutu Street, Taupō, 3330",
     "start_date": "1970",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -56958,7 +56028,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "223 Marsden Point Road, Ruak\u0101k\u0101, 0116",
+    "address": "223 Marsden Point Road, Ruakākā, 0116",
     "start_date": "1980",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -59486,7 +58556,7 @@
     "osm_type": "way",
     "lat": -43.550319772,
     "lng": 172.685719716,
-    "name": "Saint Anne\u2019s Catholic Church",
+    "name": "Saint Anne’s Catholic Church",
     "religion": "christian",
     "denomination": "catholic",
     "confidence": 1.0,
@@ -59857,26 +58927,6 @@
       "denomination": "anglican",
       "religion": "christian",
       "service_times": "Su 8:00; 9:30; 11:00"
-    }
-  },
-  {
-    "id": "w446429736",
-    "osm_id": 446429736,
-    "osm_type": "way",
-    "lat": -43.49960771666667,
-    "lng": 172.68597390000002,
-    "name": "Burwood Anglican Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "religion": "christian"
     }
   },
   {
@@ -60933,7 +59983,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "42 Commercial Street, T\u0101kaka, 7110",
+    "address": "42 Commercial Street, Tākaka, 7110",
     "start_date": "1884",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -64167,7 +63217,7 @@
     "osm_type": "way",
     "lat": -38.04745238571429,
     "lng": 175.77722509999998,
-    "name": "Put\u0101ruru Gospel Chapel",
+    "name": "Putāruru Gospel Chapel",
     "religion": "christian",
     "denomination": "brethren",
     "confidence": 1.0,
@@ -64651,7 +63701,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "65 Kensington Street, Put\u0101ruru, 3411",
+    "address": "65 Kensington Street, Putāruru, 3411",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -64778,7 +63828,7 @@
     "osm_type": "way",
     "lat": -41.311726580000006,
     "lng": 174.78136967999998,
-    "name": "St. Anne\u2019s Catholic Church / St Anne's Parish",
+    "name": "St. Anne’s Catholic Church / St Anne's Parish",
     "religion": "christian",
     "denomination": "catholic",
     "confidence": 1.0,
@@ -65185,7 +64235,7 @@
     "osm_type": "way",
     "lat": -41.28341516363636,
     "lng": 174.74100565454546,
-    "name": "St Ninian\u2019s Uniting Church",
+    "name": "St Ninian’s Uniting Church",
     "religion": "christian",
     "denomination": "presbyterian;methodist",
     "confidence": 1.0,
@@ -65401,26 +64451,6 @@
     "tags_raw": {
       "amenity": "place_of_worship",
       "building": "yes"
-    }
-  },
-  {
-    "id": "w591751032",
-    "osm_id": 591751032,
-    "osm_type": "way",
-    "lat": -46.894130884375,
-    "lng": 168.12466371875,
-    "name": "Halfmoon Bay Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "religion": "christian"
     }
   },
   {
@@ -66487,7 +65517,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "2 Te Manuao Road, \u014ctaki, 5512",
+    "address": "2 Te Manuao Road, Ōtaki, 5512",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -66563,26 +65593,6 @@
       "building": "yes",
       "denomination": "pentecostal",
       "religion": "christian"
-    }
-  },
-  {
-    "id": "w621669114",
-    "osm_id": 621669114,
-    "osm_type": "way",
-    "lat": -41.27698326470588,
-    "lng": 174.74989907647057,
-    "name": "Karori Cemetery Jewish Chapel",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.65,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "building": "chapel"
     }
   },
   {
@@ -66697,29 +65707,6 @@
       "amenity": "place_of_worship",
       "building": "yes",
       "denomination": "christian",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w622929794",
-    "osm_id": 622929794,
-    "osm_type": "way",
-    "lat": -41.222993381818185,
-    "lng": 174.82389591818182,
-    "name": "Newlands Baptist Church Office",
-    "religion": "christian",
-    "denomination": "baptist",
-    "confidence": 1.0,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "http://newlandsbaptist.org.nz/",
-    "phone": "",
-    "address": "6 Bracken Road, Wellington, 6442",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes",
-      "denomination": "baptist",
       "religion": "christian"
     }
   },
@@ -66914,7 +65901,7 @@
     "osm_type": "way",
     "lat": -41.200403449999996,
     "lng": 174.887485325,
-    "name": "St Aidan\u2019s on the Hill",
+    "name": "St Aidan’s on the Hill",
     "religion": "christian",
     "denomination": "methodist;presbyterian",
     "confidence": 1.0,
@@ -67049,7 +66036,7 @@
     "osm_type": "way",
     "lat": -41.19278471111111,
     "lng": 174.9463380888889,
-    "name": "HCUC-St John\u2019s Avalon Uniting",
+    "name": "HCUC-St John’s Avalon Uniting",
     "religion": "christian",
     "denomination": "methodist;presbyterian",
     "confidence": 1.0,
@@ -67174,7 +66161,7 @@
     "type": "churches",
     "website": "http://www.kapitianglican.org.nz",
     "phone": "+64 4 904 7300",
-    "address": "19 Beach Road, Paek\u0101k\u0101riki, 5034",
+    "address": "19 Beach Road, Paekākāriki, 5034",
     "start_date": "1909",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -69428,7 +68415,7 @@
     "osm_type": "way",
     "lat": -43.5150795875,
     "lng": 172.6226093375,
-    "name": "All Souls\u2019 Church (St Mary's Anglican Church)",
+    "name": "All Souls’ Church (St Mary's Anglican Church)",
     "religion": "christian",
     "denomination": "anglican",
     "confidence": 1.0,
@@ -69492,27 +68479,6 @@
     }
   },
   {
-    "id": "w643631721",
-    "osm_id": 643631721,
-    "osm_type": "way",
-    "lat": -38.671739960000004,
-    "lng": 178.03136497999998,
-    "name": "Kaiti Historic Cemetery",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w643643428",
     "osm_id": 643643428,
     "osm_type": "way",
@@ -69531,27 +68497,6 @@
     "tags_raw": {
       "amenity": "place_of_worship",
       "building": "yes",
-      "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w643643429",
-    "osm_id": 643643429,
-    "osm_type": "way",
-    "lat": -38.59180866,
-    "lng": 177.90071206,
-    "name": "Te Urupa of Pakowhai Marae",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
       "denomination": "anglican",
       "religion": "christian"
     }
@@ -69670,29 +68615,6 @@
     }
   },
   {
-    "id": "w644704593",
-    "osm_id": 644704593,
-    "osm_type": "way",
-    "lat": -43.530174200000005,
-    "lng": 172.5920861,
-    "name": "St Paul Chong Hasang",
-    "religion": "christian",
-    "denomination": "catholic",
-    "confidence": 1.0,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "+64 3 348 6456",
-    "address": "8 Puriri Street, Christchurch, 8041",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "school",
-      "denomination": "catholic",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w644807515",
     "osm_id": 644807515,
     "osm_type": "way",
@@ -69788,7 +68710,7 @@
     "osm_type": "way",
     "lat": -42.92669282307692,
     "lng": 172.6426246230769,
-    "name": "St Raphael\u2019s, Hawarden",
+    "name": "St Raphael’s, Hawarden",
     "religion": "christian",
     "denomination": "catholic",
     "confidence": 1.0,
@@ -71425,7 +70347,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "94 Tenby Street, W\u0101naka, 9305",
+    "address": "94 Tenby Street, Wānaka, 9305",
     "start_date": "1874",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -71924,7 +70846,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "16 Motupipi Street, T\u0101kaka, 7110",
+    "address": "16 Motupipi Street, Tākaka, 7110",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -71947,7 +70869,7 @@
     "type": "churches",
     "website": "https://godunlimited.org/index.html",
     "phone": "",
-    "address": "93 Commercial Street, T\u0101kaka, 7110",
+    "address": "93 Commercial Street, Tākaka, 7110",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -72403,7 +71325,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "135 Onerahi Road, Whang\u0101rei, 0110",
+    "address": "135 Onerahi Road, Whangārei, 0110",
     "start_date": "1966",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -72625,7 +71547,7 @@
     "osm_type": "way",
     "lat": -36.83669953333333,
     "lng": 175.70418485555555,
-    "name": "St Andrew\u2019s by the Sea Community Church",
+    "name": "St Andrew’s by the Sea Community Church",
     "religion": "unknown",
     "denomination": "protestant",
     "confidence": 0.7500000000000001,
@@ -73088,7 +72010,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "28 Galileo Street, Ng\u0101ruaw\u0101hia, 3720",
+    "address": "28 Galileo Street, Ngāruawāhia, 3720",
     "start_date": "1928",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -73111,7 +72033,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "8 Ranfurly Street, \u014ctorohanga, 3900",
+    "address": "8 Ranfurly Street, Ōtorohanga, 3900",
     "start_date": "1957",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -73249,7 +72171,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "59 Kensington Street, Put\u0101ruru, 3411",
+    "address": "59 Kensington Street, Putāruru, 3411",
     "start_date": "1925",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -73502,7 +72424,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "102 Saint John Street, \u014cp\u014dtiki, 3122",
+    "address": "102 Saint John Street, Ōpōtiki, 3122",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -73593,7 +72515,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "60 Bridge Street, Whakat\u0101ne, 3120",
+    "address": "60 Bridge Street, Whakatāne, 3120",
     "start_date": "1988",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -73730,7 +72652,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "71 Maraetotara Road, \u014chope, 3121",
+    "address": "71 Maraetotara Road, Ōhope, 3121",
     "start_date": "1995",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -74521,7 +73443,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "57 James Street, Whakat\u0101ne, 3120",
+    "address": "57 James Street, Whakatāne, 3120",
     "start_date": "1985",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -75322,7 +74244,7 @@
     "osm_type": "way",
     "lat": -38.06331521818182,
     "lng": 177.00209982727273,
-    "name": "T\u0101neatua Presbyterian Church",
+    "name": "Tāneatua Presbyterian Church",
     "religion": "christian",
     "denomination": "presbyterian",
     "confidence": 1.0,
@@ -76438,7 +75360,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "25 Stewart Street, Whakat\u0101ne, 3120",
+    "address": "25 Stewart Street, Whakatāne, 3120",
     "start_date": "1950",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -76529,7 +75451,7 @@
     "type": "churches",
     "website": "https://www.whakatanebaptist.org/",
     "phone": "",
-    "address": "67 Keepa Road, Whakat\u0101ne, 3191",
+    "address": "67 Keepa Road, Whakatāne, 3191",
     "start_date": "2010",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -77029,7 +75951,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "40 Brice Street, Taup\u014d, 3330",
+    "address": "40 Brice Street, Taupō, 3330",
     "start_date": "1960",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -77052,7 +75974,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "50 Hinemoa Avenue, Taup\u014d, 3330",
+    "address": "50 Hinemoa Avenue, Taupō, 3330",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -77083,28 +76005,6 @@
       "denomination": "roman_catholic",
       "religion": "christian",
       "service_times": "Mo-Fr 8:00,Su 10:00"
-    }
-  },
-  {
-    "id": "w770699957",
-    "osm_id": 770699957,
-    "osm_type": "way",
-    "lat": -40.07428606,
-    "lng": 176.27579982,
-    "name": "Roman_Catholic Place of Worship",
-    "religion": "christian",
-    "denomination": "roman_catholic",
-    "confidence": 0.65,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
-      "denomination": "roman_catholic",
-      "religion": "christian"
     }
   },
   {
@@ -77162,7 +76062,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "192 High Street, H\u0101wera, 4610",
+    "address": "192 High Street, Hāwera, 4610",
     "start_date": "2012",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -77253,7 +76153,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "4 Oxford Street, P\u0101tea, 4520",
+    "address": "4 Oxford Street, Pātea, 4520",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -77490,7 +76390,7 @@
     "osm_type": "way",
     "lat": -43.19312696,
     "lng": 172.73321511,
-    "name": "Our Lady of Fourvi\u00e8re House of Prayer and Retreat",
+    "name": "Our Lady of Fourvière House of Prayer and Retreat",
     "religion": "christian",
     "denomination": "roman_catholic",
     "confidence": 0.9000000000000001,
@@ -78577,7 +77477,7 @@
     "osm_type": "way",
     "lat": -40.085856885714286,
     "lng": 175.48963,
-    "name": "Te Urup\u0101 o Tokorangi",
+    "name": "Te Urupā o Tokorangi",
     "religion": "christian",
     "denomination": "",
     "confidence": 0.75,
@@ -79419,7 +78319,7 @@
     "osm_type": "way",
     "lat": -40.30635703,
     "lng": 176.60876229000002,
-    "name": "Kaiwhitikitiki Urup\u0101",
+    "name": "Kaiwhitikitiki Urupā",
     "religion": "christian",
     "denomination": "",
     "confidence": 0.75,
@@ -79439,7 +78339,7 @@
     "osm_type": "way",
     "lat": -40.310492616666664,
     "lng": 176.62276058333336,
-    "name": "Waipuna Urup\u0101",
+    "name": "Waipuna Urupā",
     "religion": "christian",
     "denomination": "",
     "confidence": 0.75,
@@ -79881,26 +78781,6 @@
     }
   },
   {
-    "id": "w817017335",
-    "osm_id": 817017335,
-    "osm_type": "way",
-    "lat": -37.6279167,
-    "lng": 178.35169069999998,
-    "name": "Te Araroa Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w817415829",
     "osm_id": 817415829,
     "osm_type": "way",
@@ -80173,7 +79053,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "249 Mill Road, \u014ctaki, 5512",
+    "address": "249 Mill Road, Ōtaki, 5512",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -80628,7 +79508,7 @@
     "osm_type": "way",
     "lat": -35.32626455,
     "lng": 173.75948310625,
-    "name": "Saint Catherine\u2019s Church",
+    "name": "Saint Catherine’s Church",
     "religion": "christian",
     "denomination": "anglican",
     "confidence": 1.0,
@@ -80642,27 +79522,6 @@
       "amenity": "place_of_worship",
       "building": "yes",
       "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w829465210",
-    "osm_id": 829465210,
-    "osm_type": "way",
-    "lat": -35.326262199999995,
-    "lng": 173.75946984285716,
-    "name": "Christian Place of Worship",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.6,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
       "religion": "christian"
     }
   },
@@ -80748,7 +79607,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "123 Aranui Road, M\u0101pua, 7005",
+    "address": "123 Aranui Road, Māpua, 7005",
     "start_date": "1994",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -80795,7 +79654,7 @@
     "type": "churches",
     "website": "",
     "phone": "+64 3 525 9809",
-    "address": "94 Commercial Street, T\u0101kaka, 7110",
+    "address": "94 Commercial Street, Tākaka, 7110",
     "start_date": "1918",
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -81671,7 +80530,7 @@
     "osm_type": "way",
     "lat": -36.89387760769231,
     "lng": 174.83423338461537,
-    "name": "Auckland Theravada Buddhist Vih\u0101ra",
+    "name": "Auckland Theravada Buddhist Vihāra",
     "religion": "buddhist",
     "denomination": "",
     "confidence": 0.95,
@@ -82978,7 +81837,7 @@
     "type": "churches",
     "website": "https://www.treechurch.co.nz/",
     "phone": "",
-    "address": "119 West Road, \u014chaup\u014d",
+    "address": "119 West Road, Ōhaupō",
     "start_date": null,
     "tags_raw": {
       "building": "church"
@@ -84595,7 +83454,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "47 Te Rauparaha Street, \u014ctaki, 5512",
+    "address": "47 Te Rauparaha Street, Ōtaki, 5512",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
@@ -85199,27 +84058,6 @@
     }
   },
   {
-    "id": "w895759831",
-    "osm_id": 895759831,
-    "osm_type": "way",
-    "lat": -40.1057706,
-    "lng": 175.7196848,
-    "name": "Christian Place of Worship",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.6,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w896043944",
     "osm_id": 896043944,
     "osm_type": "way",
@@ -85275,27 +84113,6 @@
       "amenity": "place_of_worship",
       "building": "church",
       "denomination": "mormon",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w898182255",
-    "osm_id": 898182255,
-    "osm_type": "way",
-    "lat": -36.739268573913044,
-    "lng": 174.7416454826087,
-    "name": "Small Fries",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "https://www.smallfries.org.nz/",
-    "phone": "+64 9 477 2879",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "childcare",
       "religion": "christian"
     }
   },
@@ -86276,27 +85093,6 @@
     }
   },
   {
-    "id": "w908994554",
-    "osm_id": 908994554,
-    "osm_type": "way",
-    "lat": -37.18835793636364,
-    "lng": 174.9461170818182,
-    "name": "Christian Place of Worship",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.6,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w908994555",
     "osm_id": 908994555,
     "osm_type": "way",
@@ -86359,26 +85155,6 @@
     "address": "",
     "start_date": null,
     "tags_raw": {}
-  },
-  {
-    "id": "w910682764",
-    "osm_id": 910682764,
-    "osm_type": "way",
-    "lat": -43.758725150000004,
-    "lng": 172.80657756666665,
-    "name": "Little River Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "religion": "christian"
-    }
   },
   {
     "id": "w911418036",
@@ -86957,29 +85733,6 @@
     }
   },
   {
-    "id": "w922989156",
-    "osm_id": 922989156,
-    "osm_type": "way",
-    "lat": -37.637559,
-    "lng": 176.18217731428572,
-    "name": "Saint Peters Church Hall",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.8500000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "https://www.mountanglican.org.nz/",
-    "phone": "+64 7 575 9945",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "community_centre",
-      "building": "yes",
-      "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w923244405",
     "osm_id": 923244405,
     "osm_type": "way",
@@ -87356,28 +86109,6 @@
     }
   },
   {
-    "id": "w931941135",
-    "osm_id": 931941135,
-    "osm_type": "way",
-    "lat": -41.31721438571429,
-    "lng": 173.11279059999998,
-    "name": "Roman_Catholic Place of Worship",
-    "religion": "christian",
-    "denomination": "roman_catholic",
-    "confidence": 0.65,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
-      "denomination": "roman_catholic",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w931941137",
     "osm_id": 931941137,
     "osm_type": "way",
@@ -87460,28 +86191,6 @@
     "tags_raw": {
       "amenity": "place_of_worship",
       "building": "yes",
-      "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w933474361",
-    "osm_id": 933474361,
-    "osm_type": "way",
-    "lat": -41.33829156,
-    "lng": 173.10608624000002,
-    "name": "Anglican Place of Worship",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.65,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
       "denomination": "anglican",
       "religion": "christian"
     }
@@ -87819,32 +86528,12 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "38 Hinewai Street, \u014ctorohanga, 3900",
+    "address": "38 Hinewai Street, Ōtorohanga, 3900",
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
       "building": "yes",
       "denomination": "catholic",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w948307283",
-    "osm_id": 948307283,
-    "osm_type": "way",
-    "lat": -38.61147782,
-    "lng": 176.96627408,
-    "name": "Kainaha Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
       "religion": "christian"
     }
   },
@@ -87885,26 +86574,6 @@
     "tags_raw": {}
   },
   {
-    "id": "w948953011",
-    "osm_id": 948953011,
-    "osm_type": "way",
-    "lat": -38.96511596,
-    "lng": 177.41040788,
-    "name": "Frastertown Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w949111441",
     "osm_id": 949111441,
     "osm_type": "way",
@@ -87928,27 +86597,6 @@
     }
   },
   {
-    "id": "w949111443",
-    "osm_id": 949111443,
-    "osm_type": "way",
-    "lat": -41.56014475384616,
-    "lng": 173.54267266153846,
-    "name": "Christian Place of Worship",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.6,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w952209407",
     "osm_id": 952209407,
     "osm_type": "way",
@@ -87966,27 +86614,6 @@
     "start_date": null,
     "tags_raw": {
       "religion": "buddhist"
-    }
-  },
-  {
-    "id": "w952209414",
-    "osm_id": 952209414,
-    "osm_type": "way",
-    "lat": -37.021437739999996,
-    "lng": 174.92304136,
-    "name": "Porchester Islamic Centre",
-    "religion": "muslim",
-    "denomination": "",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "463 Porchester Road",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "community_centre",
-      "religion": "muslim"
     }
   },
   {
@@ -88034,28 +86661,6 @@
     }
   },
   {
-    "id": "w954916774",
-    "osm_id": 954916774,
-    "osm_type": "way",
-    "lat": -35.36081702,
-    "lng": 173.95048988,
-    "name": "Anglican Place of Worship",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.65,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
-      "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w956983759",
     "osm_id": 956983759,
     "osm_type": "way",
@@ -88093,27 +86698,6 @@
       "amenity": "place_of_worship",
       "building": "yes",
       "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w957865578",
-    "osm_id": 957865578,
-    "osm_type": "way",
-    "lat": -37.63420033333333,
-    "lng": 178.37253553333335,
-    "name": "Christian Place of Worship",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.6,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
       "religion": "christian"
     }
   },
@@ -88157,26 +86741,6 @@
       "amenity": "place_of_worship",
       "building": "yes",
       "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w958861783",
-    "osm_id": 958861783,
-    "osm_type": "way",
-    "lat": -39.579770825,
-    "lng": 175.864311175,
-    "name": "Moawhango Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
       "religion": "christian"
     }
   },
@@ -88496,53 +87060,12 @@
     }
   },
   {
-    "id": "w964613611",
-    "osm_id": 964613611,
-    "osm_type": "way",
-    "lat": -38.127642864516126,
-    "lng": 176.2485139419355,
-    "name": "St Faith's Churchyard",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w964613614",
-    "osm_id": 964613614,
-    "osm_type": "way",
-    "lat": -38.12718031034483,
-    "lng": 176.2481449,
-    "name": "Muruika Soldiers\u2019 Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w964724852",
     "osm_id": 964724852,
     "osm_type": "way",
     "lat": -43.8366698,
     "lng": 172.31492553333334,
-    "name": "Saint Mark\u2019s",
+    "name": "Saint Mark’s",
     "religion": "christian",
     "denomination": "anglican",
     "confidence": 1.0,
@@ -88556,27 +87079,6 @@
       "amenity": "place_of_worship",
       "building": "yes",
       "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w964724854",
-    "osm_id": 964724854,
-    "osm_type": "way",
-    "lat": -43.83669965,
-    "lng": 172.31508277,
-    "name": "Christian Place of Worship",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.6,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
       "religion": "christian"
     }
   },
@@ -88750,27 +87252,6 @@
     }
   },
   {
-    "id": "w967237955",
-    "osm_id": 967237955,
-    "osm_type": "way",
-    "lat": -40.232232483333334,
-    "lng": 175.3194685,
-    "name": "Christian Place of Worship",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.6,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w967238407",
     "osm_id": 967238407,
     "osm_type": "way",
@@ -88928,7 +87409,7 @@
     "osm_type": "way",
     "lat": -41.32204890370371,
     "lng": 174.82870087777778,
-    "name": "St George\u2019s Anglican Church",
+    "name": "St George’s Anglican Church",
     "religion": "christian",
     "denomination": "anglican",
     "confidence": 1.0,
@@ -89054,26 +87535,6 @@
     "address": "",
     "start_date": null,
     "tags_raw": {}
-  },
-  {
-    "id": "w971065489",
-    "osm_id": 971065489,
-    "osm_type": "way",
-    "lat": -41.277969918518515,
-    "lng": 174.75128264444444,
-    "name": "Karori Cemetery Main Chapel",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.7000000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "15 Rosehaugh Avenue, Karori, Wellington, 6012",
-    "start_date": null,
-    "tags_raw": {
-      "building": "chapel"
-    }
   },
   {
     "id": "w972378328",
@@ -89587,28 +88048,6 @@
     "tags_raw": {}
   },
   {
-    "id": "w983382631",
-    "osm_id": 983382631,
-    "osm_type": "way",
-    "lat": -45.82065731764706,
-    "lng": 170.62096250588235,
-    "name": "Roman_Catholic Place of Worship",
-    "religion": "christian",
-    "denomination": "roman_catholic",
-    "confidence": 0.7500000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "https://stjosephsport.co.nz/",
-    "phone": "",
-    "address": "Magnetic Street",
-    "start_date": "1882",
-    "tags_raw": {
-      "building": "school",
-      "denomination": "roman_catholic",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w983419798",
     "osm_id": 983419798,
     "osm_type": "way",
@@ -89626,26 +88065,6 @@
     "start_date": null,
     "tags_raw": {
       "building": "church"
-    }
-  },
-  {
-    "id": "w984680828",
-    "osm_id": 984680828,
-    "osm_type": "way",
-    "lat": -41.09820536666667,
-    "lng": 175.48917351666668,
-    "name": "Papawai Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "religion": "christian"
     }
   },
   {
@@ -89728,26 +88147,6 @@
       "amenity": "place_of_worship",
       "building": "yes",
       "denomination": "methodist",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w984803700",
-    "osm_id": 984803700,
-    "osm_type": "way",
-    "lat": -40.16807145,
-    "lng": 175.79522442500001,
-    "name": "Pohangina Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
       "religion": "christian"
     }
   },
@@ -91321,27 +89720,6 @@
     }
   },
   {
-    "id": "w1023785784",
-    "osm_id": 1023785784,
-    "osm_type": "way",
-    "lat": -39.09877898,
-    "lng": 177.98042318,
-    "name": "Christian Place of Worship",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.6,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w1023791375",
     "osm_id": 1023791375,
     "osm_type": "way",
@@ -91999,26 +90377,6 @@
       "amenity": "place_of_worship",
       "building": "yes",
       "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w1044090859",
-    "osm_id": 1044090859,
-    "osm_type": "way",
-    "lat": -43.81401768333333,
-    "lng": 172.95813438333334,
-    "name": "Akaroa Dissenters Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
       "religion": "christian"
     }
   },
@@ -93126,89 +91484,6 @@
     }
   },
   {
-    "id": "w1072515032",
-    "osm_id": 1072515032,
-    "osm_type": "way",
-    "lat": -36.8582117,
-    "lng": 174.76233155555553,
-    "name": "Jewish cemetery",
-    "religion": "jewish",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "religion": "jewish"
-    }
-  },
-  {
-    "id": "w1072515033",
-    "osm_id": 1072515033,
-    "osm_type": "way",
-    "lat": -36.8586831,
-    "lng": 174.76213448,
-    "name": "Presbyterian cemetery",
-    "religion": "christian",
-    "denomination": "presbyterian",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "presbyterian",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w1072515034",
-    "osm_id": 1072515034,
-    "osm_type": "way",
-    "lat": -36.85966111818181,
-    "lng": 174.76210995454545,
-    "name": "Catholic cemetery",
-    "religion": "christian",
-    "denomination": "roman_catholic",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "roman_catholic",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w1072515035",
-    "osm_id": 1072515035,
-    "osm_type": "way",
-    "lat": -36.859704307142856,
-    "lng": 174.7636786142857,
-    "name": "Anglican cemetery",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w1072579250",
     "osm_id": 1072579250,
     "osm_type": "way",
@@ -93616,26 +91891,6 @@
     "tags_raw": {}
   },
   {
-    "id": "w1081255011",
-    "osm_id": 1081255011,
-    "osm_type": "way",
-    "lat": -42.60447325909091,
-    "lng": 171.70026404545453,
-    "name": "Gloriavale Christian Community Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w1081282944",
     "osm_id": 1081282944,
     "osm_type": "way",
@@ -94016,27 +92271,6 @@
     }
   },
   {
-    "id": "w1091378651",
-    "osm_id": 1091378651,
-    "osm_type": "way",
-    "lat": -37.639019866666665,
-    "lng": 177.87840752222223,
-    "name": "Raukokore Anglican Church Cemetery",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w1093746775",
     "osm_id": 1093746775,
     "osm_type": "way",
@@ -94396,27 +92630,6 @@
     "tags_raw": {}
   },
   {
-    "id": "w1101271782",
-    "osm_id": 1101271782,
-    "osm_type": "way",
-    "lat": -43.78456574,
-    "lng": 172.26885588,
-    "name": "Ellesmere Catholic Cemetery",
-    "religion": "christian",
-    "denomination": "catholic",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "catholic",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w1101345652",
     "osm_id": 1101345652,
     "osm_type": "way",
@@ -94676,7 +92889,7 @@
     "osm_type": "way",
     "lat": -43.672151819999996,
     "lng": 172.65934582,
-    "name": "Saint Peter\u2019s",
+    "name": "Saint Peter’s",
     "religion": "christian",
     "denomination": "anglican",
     "confidence": 1.0,
@@ -94711,27 +92924,6 @@
     "start_date": null,
     "tags_raw": {
       "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w1105627463",
-    "osm_id": 1105627463,
-    "osm_type": "way",
-    "lat": -43.67222916,
-    "lng": 172.65963772,
-    "name": "Christian Place of Worship",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.6,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
       "religion": "christian"
     }
   },
@@ -94776,27 +92968,6 @@
     "start_date": null,
     "tags_raw": {
       "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w1105804403",
-    "osm_id": 1105804403,
-    "osm_type": "way",
-    "lat": -43.701491757142854,
-    "lng": 172.6182206,
-    "name": "Christian Place of Worship",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.6,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
       "religion": "christian"
     }
   },
@@ -94971,27 +93142,6 @@
     "tags_raw": {
       "amenity": "place_of_worship",
       "building": "yes",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w1107880871",
-    "osm_id": 1107880871,
-    "osm_type": "way",
-    "lat": -40.063288060000005,
-    "lng": 175.18190398,
-    "name": "Christian Place of Worship",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.6,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
       "religion": "christian"
     }
   },
@@ -96030,56 +94180,12 @@
     "tags_raw": {}
   },
   {
-    "id": "w1148138757",
-    "osm_id": 1148138757,
-    "osm_type": "way",
-    "lat": -39.68402854722222,
-    "lng": 176.8792458861111,
-    "name": "Chapel of St. Francis of Assisi",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.95,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "school",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w1149332138",
-    "osm_id": 1149332138,
-    "osm_type": "way",
-    "lat": -43.52177444,
-    "lng": 172.56256534,
-    "name": "Avonhead Baptist Church Office",
-    "religion": "christian",
-    "denomination": "baptist",
-    "confidence": 0.8500000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "102 Avonhead Road, Christchurch, 8042",
-    "start_date": null,
-    "tags_raw": {
-      "building": "yes",
-      "denomination": "baptist",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w1150065298",
     "osm_id": 1150065298,
     "osm_type": "way",
     "lat": -37.1697045,
     "lng": 175.06550787333333,
-    "name": "S\u0101la",
+    "name": "Sāla",
     "religion": "buddhist",
     "denomination": "",
     "confidence": 0.95,
@@ -96093,28 +94199,6 @@
       "amenity": "place_of_worship",
       "building": "yes",
       "religion": "buddhist"
-    }
-  },
-  {
-    "id": "w1150122432",
-    "osm_id": 1150122432,
-    "osm_type": "way",
-    "lat": -39.67879567241379,
-    "lng": 176.87869473448276,
-    "name": "St. Martin's Chapel",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.95,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "school",
-      "religion": "christian"
     }
   },
   {
@@ -96482,27 +94566,6 @@
     "start_date": null,
     "tags_raw": {
       "building": "church"
-    }
-  },
-  {
-    "id": "w1167236992",
-    "osm_id": 1167236992,
-    "osm_type": "way",
-    "lat": -35.33238592,
-    "lng": 173.75060463999998,
-    "name": "Christian Place of Worship",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.6,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
-      "religion": "christian"
     }
   },
   {
@@ -97732,28 +95795,6 @@
     "tags_raw": {}
   },
   {
-    "id": "w1215632954",
-    "osm_id": 1215632954,
-    "osm_type": "way",
-    "lat": -40.76538345714285,
-    "lng": 175.68346445714286,
-    "name": "St Francis Lutheran Churchyard",
-    "religion": "christian",
-    "denomination": "lutheran",
-    "confidence": 0.8500000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "260 South Road, Masterton",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
-      "denomination": "lutheran",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w1217000545",
     "osm_id": 1217000545,
     "osm_type": "way",
@@ -97817,7 +95858,7 @@
     "osm_type": "way",
     "lat": -43.91065585384615,
     "lng": 171.2614400153846,
-    "name": "St Stephen\u2019s Church",
+    "name": "St Stephen’s Church",
     "religion": "christian",
     "denomination": "",
     "confidence": 0.95,
@@ -98678,7 +96719,7 @@
     "osm_type": "way",
     "lat": -41.33579422631579,
     "lng": 173.20377427368422,
-    "name": "Whakat\u016b Presbyterian Church",
+    "name": "Whakatū Presbyterian Church",
     "religion": "christian",
     "denomination": "presbyterian",
     "confidence": 1.0,
@@ -98750,26 +96791,6 @@
     "address": "",
     "start_date": null,
     "tags_raw": {}
-  },
-  {
-    "id": "w1296817852",
-    "osm_id": 1296817852,
-    "osm_type": "way",
-    "lat": -39.940821414285715,
-    "lng": 176.58324954285715,
-    "name": "St Peter's Church Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "religion": "christian"
-    }
   },
   {
     "id": "w1298726613",
@@ -99276,27 +97297,6 @@
     "address": "",
     "start_date": null,
     "tags_raw": {}
-  },
-  {
-    "id": "w1337163099",
-    "osm_id": 1337163099,
-    "osm_type": "way",
-    "lat": -39.060642672727276,
-    "lng": 174.07293655909092,
-    "name": "St. Marys Churchyard",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "grave_yard",
-      "religion": "christian"
-    }
   },
   {
     "id": "w1337183281",
@@ -100693,7 +98693,7 @@
     "type": "churches",
     "website": "",
     "phone": "",
-    "address": "3 Stanmore Bay Road, Whangapar\u0101oa, 0932",
+    "address": "3 Stanmore Bay Road, Whangaparāoa, 0932",
     "start_date": "1917",
     "tags_raw": {
       "building": "chapel",
@@ -101174,7 +99174,7 @@
     "osm_type": "way",
     "lat": -36.882114387499996,
     "lng": 174.8594225375,
-    "name": "PIPC T\u0101maki",
+    "name": "PIPC Tāmaki",
     "religion": "christian",
     "denomination": "presbyterian",
     "confidence": 1.0,
@@ -101619,47 +99619,6 @@
     "address": "",
     "start_date": null,
     "tags_raw": {}
-  },
-  {
-    "id": "w1418219091",
-    "osm_id": 1418219091,
-    "osm_type": "way",
-    "lat": -36.51818838,
-    "lng": 174.7204385,
-    "name": "Te Muri Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.75,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": "1860s",
-    "tags_raw": {
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w1418222165",
-    "osm_id": 1418222165,
-    "osm_type": "way",
-    "lat": -36.458813025,
-    "lng": 174.731866075,
-    "name": "Mahurangi Heads Cemetery",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "Ridge Road, Warkworth, 0982",
-    "start_date": "1880",
-    "tags_raw": {
-      "amenity": "grave_yard",
-      "religion": "christian"
-    }
   },
   {
     "id": "w1420057296",

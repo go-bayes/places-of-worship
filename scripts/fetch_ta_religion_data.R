@@ -1,204 +1,217 @@
 # language: R
-# purpose: fetch census religion by territorial authority for 2006, 2013, 2018
-# output: clean JSON data to replace flawed ta_aggregated_data.json
+# purpose: fetch territorial authority religion data and align it to official TA codes
+# output: apps/regions/nz/data/ta_aggregated_data.json
 
-library(readxl)
-library(httr)
-library(dplyr)
-library(janitor)
-library(tidyr)
-library(jsonlite)
-library(purrr)
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(httr)
+  library(janitor)
+  library(jsonlite)
+  library(purrr)
+})
 
-# ---- download paths ----
-# using figure.nz which has processed stats nz data
 url_figure <- "https://figure.nz/table/ITPm3h6kNu9LqEZt/download"
+boundary_path <- "../apps/regions/nz/data/territorial_authorities.geojson"
+output_path <- "../apps/regions/nz/data/ta_aggregated_data.json"
+local_csv_path <- "../archive/stats_nz_religious_affiliation_by_ta.csv"
 
-cat("Fetching census religion data from Figure.NZ...\n")
-# ---- read and clean figure.nz data ----
-path_figure <- tempfile(fileext = ".csv")
-GET(url_figure, write_disk(path_figure, overwrite = TRUE))
+normalise_ta_name <- function(x) {
+  x <- iconv(x, from = "UTF-8", to = "ASCII//TRANSLIT")
+  x <- tolower(x)
+  x <- gsub("['’]", "", x = x)
+  x <- gsub("\\b(district|city|territory|council)\\b", "", x = x)
+  x <- gsub("\\s+", " ", x = x)
+  trimws(x)
+}
 
-# read the figure.nz csv and examine structure
-religion_raw <- read.csv(path_figure) %>%
-  clean_names()
+load_ta_lookup <- function(path) {
+  geojson <- read_json(path, simplifyVector = FALSE)
 
-cat("Column names in downloaded data:\n")
-print(names(religion_raw))
-cat("First few rows:\n")
-print(head(religion_raw))
+  map_dfr(
+    geojson$features,
+    \(feature) {
+      tibble(
+        ta_code = feature$properties$TA2025_V1,
+        ta_name_boundary = feature$properties$TA2025_NAME
+      )
+    }
+  ) |>
+    mutate(ta_name_key = normalise_ta_name(ta_name_boundary))
+}
 
-# extract the data we need using correct column names
-religion_all <- religion_raw %>%
-  # filter for count data only (not percentages)
-  filter(unit == "Count" & !is.na(value)) %>%
-  # select relevant columns
+category_template <- function(name, total_stated, christian, no_religion, buddhism,
+                              hinduism, islam, judaism, maori_religions,
+                              other_religions, spiritualism) {
+  list(
+    name = name,
+    Total = total_stated,
+    `Total stated` = total_stated,
+    Christian = christian,
+    `No religion` = no_religion,
+    Buddhism = buddhism,
+    Hinduism = hinduism,
+    Islam = islam,
+    Judaism = judaism,
+    `Māori Christian` = maori_religions,
+    `Maori religions, beliefs, and philosophies` = maori_religions,
+    `Other religion` = other_religions + spiritualism,
+    `Other religions, beliefs, and philosophies` = other_religions + spiritualism,
+    `Spiritualism and New Age religions` = spiritualism
+  )
+}
+
+empty_year_entry <- function(name) {
+  category_template(
+    name = name,
+    total_stated = 0,
+    christian = 0,
+    no_religion = 0,
+    buddhism = 0,
+    hinduism = 0,
+    islam = 0,
+    judaism = 0,
+    maori_religions = 0,
+    other_religions = 0,
+    spiritualism = 0
+  )
+}
+
+extract_count <- function(df, label) {
+  value <- df |>
+    filter(religion == label) |>
+    pull(count)
+
+  if (length(value) == 0) {
+    return(0)
+  }
+
+  as.numeric(value[[1]])
+}
+
+extract_pattern_count <- function(df, pattern) {
+  value <- df |>
+    filter(grepl(pattern, religion)) |>
+    pull(count)
+
+  if (length(value) == 0) {
+    return(0)
+  }
+
+  sum(as.numeric(value), na.rm = TRUE)
+}
+
+build_year_entry <- function(df, name, year) {
+  year_df <- df |>
+    filter(census_year == year)
+
+  if (nrow(year_df) == 0) {
+    return(empty_year_entry(name))
+  }
+
+  total_stated <- extract_count(year_df, "Total people stated")
+  if (total_stated == 0) {
+    total_stated <- extract_count(year_df, "Total people")
+  }
+
+  category_template(
+    name = name,
+    total_stated = total_stated,
+    christian = extract_count(year_df, "Christianity"),
+    no_religion = extract_count(year_df, "No religion"),
+    buddhism = extract_count(year_df, "Buddhism"),
+    hinduism = extract_count(year_df, "Hinduism"),
+    islam = extract_count(year_df, "Islam"),
+    judaism = extract_count(year_df, "Judaism"),
+    maori_religions = extract_pattern_count(year_df, "^Māori religions, beliefs and philosophies"),
+    other_religions = extract_pattern_count(year_df, "^Other Religions, Beliefs and Philosophies"),
+    spiritualism = extract_pattern_count(year_df, "^Spiritual")
+  )
+}
+
+load_religion_source <- function() {
+  cat("Fetching census religion data from Figure.NZ...\n")
+  path_figure <- tempfile(fileext = ".csv")
+
+  response <- tryCatch(
+    GET(url_figure, write_disk(path_figure, overwrite = TRUE)),
+    error = function(e) NULL
+  )
+
+  if (!is.null(response) && response$status_code == 200) {
+    religion_raw <- read.csv(path_figure) |>
+      clean_names()
+
+    if (all(c("unit", "value", "territorial_authority") %in% names(religion_raw))) {
+      return(religion_raw)
+    }
+  }
+
+  cat("Figure.NZ unavailable. Falling back to local Stats NZ extract at", local_csv_path, "\n")
+  read.csv(local_csv_path, fileEncoding = "UTF-8-BOM") |>
+    clean_names()
+}
+
+ta_lookup <- load_ta_lookup(boundary_path)
+
+religion_raw <- load_religion_source()
+
+religion_all <- religion_raw |>
+  filter(unit == "Count", !is.na(value)) |>
   select(
     census_year,
     ta_name = territorial_authority,
     religion = religious_affiliation,
     count = value
-  ) %>%
-  # CRITICAL FIX: exclude national totals and non-TA entries
+  ) |>
   filter(
     census_year %in% c(2013, 2018),
     !ta_name %in% c("New Zealand", "Area Outside Territorial Authority")
-  ) %>%
-  # clean up the data
+  ) |>
   mutate(
-    ta_name = gsub(" District| City", "", ta_name),
+    ta_name_key = normalise_ta_name(ta_name),
     count = as.numeric(count),
     census_year = as.numeric(census_year)
-  )
+  ) |>
+  group_by(ta_name, ta_name_key, religion, census_year) |>
+  summarise(count = sum(count, na.rm = TRUE), .groups = "drop") |>
+  left_join(ta_lookup, by = "ta_name_key")
 
-# ---- harmonise religion categories across years ----
-# create mapping for consistent religion names
-harmonise_religion <- function(religion) {
-  # keep exact case for key categories to match Stats NZ data
-  case_when(
-    religion == "Total people stated" ~ "Total people stated",
-    religion == "Total people" ~ "Total people",
-    religion == "No religion" ~ "No religion",
-    religion == "Christianity" ~ "Christianity",
-    religion == "Buddhism" ~ "Buddhism",
-    religion == "Hinduism" ~ "Hinduism",
-    religion == "Islam" ~ "Islam",
-    religion == "Judaism" ~ "Judaism",
-    religion == "Object to answering" ~ "Object to answering",
-    grepl("Māori religions", religion) ~ "Māori religions",
-    grepl("Spiritualism", religion) ~ "Spiritualism",
-    grepl("Other Religions", religion) ~ "Other religions",
-    TRUE ~ religion # keep original for all other detailed categories
+unmatched_tas <- religion_all |>
+  filter(is.na(ta_code)) |>
+  distinct(ta_name)
+
+if (nrow(unmatched_tas) > 0) {
+  stop(
+    "Unmatched territorial authorities: ",
+    paste(unmatched_tas$ta_name, collapse = ", ")
   )
 }
 
-# harmonise religion categories
-religion_all$religion <- harmonise_religion(religion_all$religion)
+ta_output <- religion_all |>
+  group_by(ta_code, ta_name_boundary) |>
+  group_split()
 
-# ---- reshape data by year ----
-cat("Reshaping data by census year...\n")
+output_data <- map(
+  ta_output,
+  \(ta_df) {
+    name <- ta_df$ta_name_boundary[[1]]
 
-# check for duplicates first
-cat("Checking for duplicate entries...\n")
-duplicates <- religion_all %>%
-  group_by(ta_name, religion, census_year) %>%
-  summarise(n = n(), .groups = "drop") %>%
-  filter(n > 1)
-
-if (nrow(duplicates) > 0) {
-  cat("Found", nrow(duplicates), "duplicate entries. Summarising...\n")
-  # sum up duplicates
-  religion_all <- religion_all %>%
-    group_by(ta_name, religion, census_year) %>%
-    summarise(count = sum(count, na.rm = TRUE), .groups = "drop")
-}
-
-all_religion <- religion_all %>%
-  pivot_wider(
-    names_from = census_year,
-    values_from = count,
-    names_prefix = "count_",
-    values_fill = 0
-  ) %>%
-  # add 2006 as NA for now (not available in this source)
-  mutate(count_2006 = NA_real_)
-
-# ---- calculate totals and percentages ----
-cat("Calculating totals using Total People Stated (not sum of all religion entries)...\n")
-ta_religion_summary <- all_religion %>%
-  group_by(ta_name) %>%
-  summarise(
-    # use the "Total people stated" figure directly (not sum of all religions)
-    total_stated_2006 = count_2006[religion == "Total people stated"][1],
-    total_stated_2013 = count_2013[religion == "Total people stated"][1],
-    total_stated_2018 = count_2018[religion == "Total people stated"][1],
-    no_religion_2006 = count_2006[religion == "No religion"][1],
-    no_religion_2013 = count_2013[religion == "No religion"][1],
-    no_religion_2018 = count_2018[religion == "No religion"][1],
-    christian_total_2006 = count_2006[religion == "Christianity"][1],
-    christian_total_2013 = count_2013[religion == "Christianity"][1],
-    christian_total_2018 = count_2018[religion == "Christianity"][1],
-    .groups = "drop"
-  ) %>%
-  # handle missing values
-  mutate(
-    total_stated_2006 = ifelse(is.na(total_stated_2006), 0, total_stated_2006),
-    total_stated_2013 = ifelse(is.na(total_stated_2013), 0, total_stated_2013),
-    total_stated_2018 = ifelse(is.na(total_stated_2018), 0, total_stated_2018),
-    no_religion_2006 = ifelse(is.na(no_religion_2006), 0, no_religion_2006),
-    no_religion_2013 = ifelse(is.na(no_religion_2013), 0, no_religion_2013),
-    no_religion_2018 = ifelse(is.na(no_religion_2018), 0, no_religion_2018),
-    christian_total_2006 = ifelse(is.na(christian_total_2006), 0, christian_total_2006),
-    christian_total_2013 = ifelse(is.na(christian_total_2013), 0, christian_total_2013),
-    christian_total_2018 = ifelse(is.na(christian_total_2018), 0, christian_total_2018)
-  ) %>%
-  # calculate religious percentages (total stated minus no religion)
-  mutate(
-    religious_2006 = ifelse(total_stated_2006 > 0, ((total_stated_2006 - no_religion_2006) / total_stated_2006) * 100, 0),
-    religious_2013 = ifelse(total_stated_2013 > 0, ((total_stated_2013 - no_religion_2013) / total_stated_2013) * 100, 0),
-    religious_2018 = ifelse(total_stated_2018 > 0, ((total_stated_2018 - no_religion_2018) / total_stated_2018) * 100, 0)
-  )
-
-# ---- create final dataset structure ----
-cat("Creating final JSON structure...\n")
-# create detailed religion breakdown
-religion_detail <- all_religion %>%
-  group_by(ta_name) %>%
-  summarise(
-    religions = list(
-      data.frame(
-        religion = religion,
-        count_2006 = count_2006,
-        count_2013 = count_2013,
-        count_2018 = count_2018,
-        stringsAsFactors = FALSE
-      )
-    ),
-    .groups = "drop"
-  )
-
-# combine summary with detail
-final_data <- ta_religion_summary %>%
-  left_join(religion_detail, by = "ta_name") %>%
-  # create final structure matching original format
-  mutate(
-    ta_code = row_number(), # temporary - will need proper mapping
-    data = pmap(
-      list(
-        ta_name, total_stated_2006, total_stated_2013, total_stated_2018,
-        religious_2006, religious_2013, religious_2018, religions
-      ),
-      function(name, total06, total13, total18, rel06, rel13, rel18, religions) {
-        list(
-          ta_name = name,
-          population = list(
-            "2006" = total06,
-            "2013" = total13,
-            "2018" = total18
-          ),
-          religious_percentage = list(
-            "2006" = round(rel06, 1),
-            "2013" = round(rel13, 1),
-            "2018" = round(rel18, 1)
-          ),
-          religions = religions
-        )
-      }
+    list(
+      name = name,
+      `2006` = empty_year_entry(name),
+      `2013` = build_year_entry(ta_df, name, 2013),
+      `2018` = build_year_entry(ta_df, name, 2018)
     )
-  )
+  }
+)
 
-# convert to named list for JSON output
-output_data <- setNames(final_data$data, sprintf("%03d", final_data$ta_code))
+output_names <- map_chr(ta_output, \(ta_df) ta_df$ta_code[[1]])
+output_data <- set_names(output_data, output_names)
+output_data <- output_data[order(names(output_data))]
 
-# ---- save as JSON ----
-output_path <- "../ta_aggregated_data_statsNZ.json"
-cat("Saving cleaned data to:", output_path, "\n")
+cat("Saving aligned TA religion data to:", output_path, "\n")
 write_json(output_data, output_path, pretty = TRUE, auto_unbox = TRUE)
 
 cat("✓ Successfully fetched and processed TA religion data\n")
-cat("✓ Data saved to ta_aggregated_data_statsNZ.json\n")
+cat("✓ Data saved to", output_path, "\n")
 cat("✓ Contains", length(output_data), "territorial authorities\n")
-
-# ---- preview data ----
-cat("\nPreview of first territorial authority:\n")
-print(output_data[[1]], max.levels = 3)

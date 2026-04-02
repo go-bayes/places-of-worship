@@ -1006,27 +1006,7 @@ class EnhancedPlacesOfWorshipApp {
     getTAReligiousDensityStyle(feature) {
         let taCode = feature.properties.TA2025_V1 || feature.properties.TA2021_V1_ || feature.properties.TA2021_V1_00;
         const taName = feature.properties.TA2025_NAME || feature.properties.TA2021_V1_NAME || 'Unknown';
-        
-        // handle TA code mapping for mismatched GeoJSON and census codes
-        const taCodeMapping = {
-            '001': '012',  // Far North District -> Far North
-            '068': '058',  // Waitaki District -> Waitaki
-            '069': '006',  // Central Otago District -> Central Otago
-            '070': '038',  // Queenstown-Lakes District -> Queenstown-Lakes
-            '071': '011',  // Dunedin City -> Dunedin
-            '072': '010',  // Clutha District -> Clutha
-            '073': '046',  // Southland District -> Southland
-            '074': '014',  // Gore District -> Gore
-            '075': '021',  // Invercargill City -> Invercargill
-            '076': '002'   // Auckland -> Auckland
-        };
-        
-        // apply mapping if needed
-        if (taCodeMapping[taCode]) {
-            console.log(`🔄 Mapping TA code ${taCode} (${taName}) to census code ${taCodeMapping[taCode]}`);
-            taCode = taCodeMapping[taCode];
-        }
-        
+
         const taData = this.taCensusData[taCode];
         
         // Enhanced debug logging for specific problem TAs
@@ -1176,26 +1156,7 @@ class EnhancedPlacesOfWorshipApp {
         const feature = e.target.feature;
         let taCode = feature.properties.TA2025_V1 || feature.properties.TA2021_V1_ || feature.properties.TA2021_V1_00;
         const taName = feature.properties.TA2025_NAME || feature.properties.TA2021_V1_NAME || 'Unknown Area';
-        
-        // handle TA code mapping for mismatched GeoJSON and census codes
-        const taCodeMapping = {
-            '001': '012',  // Far North District -> Far North
-            '068': '058',  // Waitaki District -> Waitaki
-            '069': '006',  // Central Otago District -> Central Otago
-            '070': '038',  // Queenstown-Lakes District -> Queenstown-Lakes
-            '071': '011',  // Dunedin City -> Dunedin
-            '072': '010',  // Clutha District -> Clutha
-            '073': '046',  // Southland District -> Southland
-            '074': '014',  // Gore District -> Gore
-            '075': '021',  // Invercargill City -> Invercargill
-            '076': '002'   // Auckland -> Auckland
-        };
-        
-        // apply mapping if needed
-        if (taCodeMapping[taCode]) {
-            taCode = taCodeMapping[taCode];
-        }
-        
+
         const taData = this.taCensusData[taCode];
         
         if (!taData) {
@@ -1902,25 +1863,7 @@ class EnhancedPlacesOfWorshipApp {
     // Territorial Authority specific functions (parallel to SA2)
     getTACensusFeatureStyle(feature) {
         let taCode = String(feature.properties.TA2025_V1 || feature.properties.TA2025_NAME);
-        
-        // handle TA code mapping for mismatched GeoJSON and census codes
-        const taCodeMapping = {
-            '001': '012',  // Far North District -> Far North
-            '068': '058',  // Waitaki District -> Waitaki
-            '069': '006',  // Central Otago District -> Central Otago
-            '070': '038',  // Queenstown-Lakes District -> Queenstown-Lakes
-            '071': '011',  // Dunedin City -> Dunedin
-            '072': '010',  // Clutha District -> Clutha
-            '073': '046',  // Southland District -> Southland
-            '074': '014',  // Gore District -> Gore
-            '075': '021',  // Invercargill City -> Invercargill
-            '076': '002'   // Auckland -> Auckland
-        };
-        
-        if (taCodeMapping[taCode]) {
-            taCode = taCodeMapping[taCode];
-        }
-        
+
         const color = this.calculateTACensusColor(taCode);
         
         return {
@@ -1956,25 +1899,7 @@ class EnhancedPlacesOfWorshipApp {
     
     onEachTACensusFeature(feature, layer) {
         let taCode = String(feature.properties.TA2025_V1 || feature.properties.TA2025_NAME);
-        
-        // handle TA code mapping for mismatched GeoJSON and census codes
-        const taCodeMapping = {
-            '001': '012',  // Far North District -> Far North
-            '068': '058',  // Waitaki District -> Waitaki
-            '069': '006',  // Central Otago District -> Central Otago
-            '070': '038',  // Queenstown-Lakes District -> Queenstown-Lakes
-            '071': '011',  // Dunedin City -> Dunedin
-            '072': '010',  // Clutha District -> Clutha
-            '073': '046',  // Southland District -> Southland
-            '074': '014',  // Gore District -> Gore
-            '075': '021',  // Invercargill City -> Invercargill
-            '076': '002'   // Auckland -> Auckland
-        };
-        
-        if (taCodeMapping[taCode]) {
-            taCode = taCodeMapping[taCode];
-        }
-        
+
         const taData = this.taCensusData ? this.taCensusData[taCode] : null;
         
         if (taData) {
@@ -2011,25 +1936,7 @@ class EnhancedPlacesOfWorshipApp {
     createTACensusPopupContent(properties, taData) {
         let taCode = String(properties.TA2025_V1 || properties.TA2025_NAME);
         const taName = properties.TA2025_NAME;
-        
-        // handle TA code mapping for mismatched GeoJSON and census codes
-        const taCodeMapping = {
-            '001': '012',  // Far North District -> Far North
-            '068': '058',  // Waitaki District -> Waitaki
-            '069': '006',  // Central Otago District -> Central Otago
-            '070': '038',  // Queenstown-Lakes District -> Queenstown-Lakes
-            '071': '011',  // Dunedin City -> Dunedin
-            '072': '010',  // Clutha District -> Clutha
-            '073': '046',  // Southland District -> Southland
-            '074': '014',  // Gore District -> Gore
-            '075': '021',  // Invercargill City -> Invercargill
-            '076': '002'   // Auckland -> Auckland
-        };
-        
-        if (taCodeMapping[taCode]) {
-            taCode = taCodeMapping[taCode];
-        }
-        
+
         // Get data for latest year (2018) for basic info
         const latestData = taData[String(2018)] || {};
         

@@ -34,6 +34,14 @@ Please note that all contributions must follow the [OpenStreetMap Licence (ODbL 
 
 The most helpful contribution is fixing errors, revising details, removing incorrect places, or adding missing places directly in OpenStreetMap. If you want to contribute to this repository, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
+### Current NZ scope
+
+For the New Zealand dataset, the primary unit is the mapped place or building used for worship, not the congregation as a social group.
+
+We currently include sites that are explicitly mapped in OpenStreetMap as `amenity=place_of_worship` or as clearly religious buildings. We exclude obviously non-worship records such as cemeteries, offices, residences, schools, childcare sites, and community facilities unless the worship space itself is mapped separately.
+
+The current NZ regional boundary layer follows the official territorial authority geography used in `apps/regions/nz/data/territorial_authorities.geojson`. That includes Chatham Islands Territory. It does not currently extend to Cook Islands, Niue, or Tokelau.
+
 ### Who is involved?
 
 This project is led by Professor Joseph Bulbulia (Victoria University of Wellington, New Zealand) and Dr Joseph Watts (University of Canterbury, New Zealand). 

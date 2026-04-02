@@ -236,6 +236,18 @@ class RealGlobalPlacesExtractor:
     
     def is_place_of_worship(self, tags: Dict) -> bool:
         """Determine if OSM element represents a place of worship"""
+        excluded_amenities = {
+            'school', 'hospital', 'social_facility', 'childcare',
+            'college', 'university', 'kindergarten', 'community_centre',
+            'events_venue', 'library', 'pub', 'grave_yard'
+        }
+        if tags.get('amenity') in excluded_amenities or tags.get('building') == 'school':
+            return False
+
+        name = (tags.get('name') or '').lower()
+        if any(term in name for term in ['cemetery', 'burial', 'urupa', 'office', 'residence', 'pub', 'kindergarten']):
+            return False
+
         # Primary indicators
         if tags.get('amenity') == 'place_of_worship':
             return True
@@ -253,7 +265,7 @@ class RealGlobalPlacesExtractor:
             return True
         
         # Has religion tag (but exclude non-worship uses)
-        if tags.get('religion') and tags.get('amenity') not in ['school', 'hospital', 'social_facility']:
+        if tags.get('religion') and tags.get('amenity') not in excluded_amenities:
             return True
         
         return False

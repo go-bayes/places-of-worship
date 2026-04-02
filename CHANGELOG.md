@@ -1,6 +1,14 @@
 # Changelog
 
 ## Unreleased
+- Added `docs/nz-data-cleanup-audit.md` to record the first NZ false-positive cleanup pass.
+- Added `docs/nz-manual-review-queue.md` and `docs/nz-manual-review-queue.csv` for ambiguous NZ records that need human review.
+- Rebuilt `apps/regions/nz/data/ta_aggregated_data.json` from official TA boundaries and Stats NZ religion data.
+- Removed NZ frontend TA code remapping now that TA keys align with official boundary codes.
+- Added a conservative NZ place-cleaning script and removed obvious non-worship records from published NZ datasets.
+- Added a review-queue generator for staged NZ manual cleanup work.
+- Tightened the legacy OSM extractor to reject obvious non-worship facilities with weak religious tags.
+- Clarified NZ inclusion scope in `README.md`, including Chatham Islands coverage and current exclusions.
 - Introduced `apps/global` and `apps/regions/nz` structure for frontends.
 - Added legacy URL shims for `/`, `/enhanced-places.html`, and `frontend/` + `src/` paths.
 - Added root `PLANNING.md` and consolidated planning notes.
