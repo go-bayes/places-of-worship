@@ -38,7 +38,7 @@ staged Rust roadmap in `PLANNING.md`.
 ## Data Pipeline & Release Flow
 
 ### Global/Regional App Data
-- R and Python scripts generate GeoJSON/JSON for regional apps.
+- R scripts generate the canonical research-facing GeoJSON/JSON outputs for regional apps, with Python retained for supporting services where needed.
 - Outputs land in `apps/regions/<iso2>/data/` for browser use.
 
 ### Tile Pipeline

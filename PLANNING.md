@@ -87,6 +87,8 @@ The working model is:
 - Emit one raw extract per country and one cleaned output per country.
 - Keep the legacy Python extractor only as archive/reference until parity is
   confirmed.
+- Keep the research-facing global pipeline in R so collaborators can review,
+  modify, and rerun it directly.
 
 ### 3. Build a deterministic cleaning pipeline
 
@@ -498,7 +500,7 @@ The backend should support at least these output forms:
 - Context: Rust may be useful for ingestion and API performance, but it is not
   required to complete the data cleanup rebuild.
 - Options:
-  - keep pipeline work in R/Python for now
+  - keep the research pipeline in R and the API/support tooling in Python for now
   - build a Rust ingestion spike after pipeline rules stabilise
   - move directly to a hybrid Rust stack now
 - Risks:
