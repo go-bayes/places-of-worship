@@ -23,7 +23,9 @@ Pass 3 removed 7 `Masonic Centre` records from the `hall_centre_house_site` buck
 
 Pass 4 removed 7 church-hall and parish/community-centre support buildings that duplicated nearby mapped churches, leaving 3,629 records.
 
-Total removed so far: 1,089 records.
+Pass 5 removed 8 generic hall support buildings and one `Masonic Hall` false positive, leaving 3,621 records.
+
+Total removed so far: 1,097 records.
 
 These false positives were OSM-derived features, but many were not mapped in OpenStreetMap as `amenity=place_of_worship`. They entered the dataset through broad inclusion rules around weak religious tags and loosely religious building metadata.
 
@@ -152,12 +154,29 @@ Seven records matched and were removed from the published NZ dataset:
 
 These records looked like adjunct halls or parish facilities rather than the primary place of worship, because a corresponding church was already mapped immediately beside them.
 
-## Current queue after pass 4
+## Pass 5: duplicate generic halls beside mapped churches
 
-The remaining manual review queue contains 730 records:
+This pass extended the duplicate-support-building rule to generic `hall` names, while explicitly excluding genuine worship-hall naming patterns such as `Kingdom Hall`, `Gospel Hall`, `Mission Hall`, `Assembly Hall`, `Church of Christ Hall`, and `Christadelphian Hall`.
+
+Eight records matched and were removed from the published NZ dataset:
+
+- `Youth hall`
+- `Knox Hall`
+- `Masonic Hall`
+- `Holy Trinity Parish Hall`
+- `Church and Hall`
+- `Anglican Parish Hall`
+- `Saint Jude's Hall`
+- `St John's Hall`
+
+These records were treated as duplicate support buildings because they sat beside a separately mapped church and carried only hall-level identity rather than a distinct place-of-worship identity.
+
+## Current queue after pass 5
+
+The remaining manual review queue contains 722 records:
 
 - 280 priority 1
-- 372 priority 2
+- 364 priority 2
 - 78 priority 3
 
 ## What this audit does not settle

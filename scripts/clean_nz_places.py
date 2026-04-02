@@ -51,8 +51,20 @@ NON_WORSHIP_CENTRE_PATTERN = re.compile(
     r"\bmasonic centre\b",
     re.IGNORECASE,
 )
+NON_WORSHIP_HALL_PATTERN = re.compile(
+    r"\bmasonic hall\b",
+    re.IGNORECASE,
+)
 SUPPORT_BUILDING_PATTERN = re.compile(
     r"\b(church hall|parish centre|community centre)\b",
+    re.IGNORECASE,
+)
+GENERIC_HALL_PATTERN = re.compile(
+    r"\bhall\b",
+    re.IGNORECASE,
+)
+GENUINE_HALL_NAME_PATTERN = re.compile(
+    r"\b(kingdom hall|gospel hall|mission hall|assembly hall|church of christ hall|christadelphian hall)\b",
     re.IGNORECASE,
 )
 PRIMARY_WORSHIP_NAME_PATTERN = re.compile(
@@ -118,7 +130,12 @@ def normalise_name_tokens(name: str) -> set[str]:
 
 def is_support_building_duplicate(record: dict, records: list[dict]) -> bool:
     name = record.get("name") or ""
-    if not SUPPORT_BUILDING_PATTERN.search(name):
+    hall_like_name = (
+        GENERIC_HALL_PATTERN.search(name)
+        and not GENUINE_HALL_NAME_PATTERN.search(name)
+    )
+
+    if not SUPPORT_BUILDING_PATTERN.search(name) and not hall_like_name:
         return False
 
     lat = record.get("lat")
@@ -142,7 +159,7 @@ def is_support_building_duplicate(record: dict, records: list[dict]) -> bool:
         if other_lat is None or other_lng is None:
             continue
 
-        if haversine_distance_metres(lat, lng, other_lat, other_lng) > 80:
+        if haversine_distance_metres(lat, lng, other_lat, other_lng) > 100:
             continue
 
         other_tokens = normalise_name_tokens(other_name)
@@ -153,6 +170,9 @@ def is_support_building_duplicate(record: dict, records: list[dict]) -> bool:
         )
 
         if len(shared_tokens) >= 1:
+            return True
+
+        if hall_like_name and denomination_match and len(record_tokens) <= 1:
             return True
 
         if not record_tokens and denomination_match:
@@ -201,6 +221,9 @@ def keep_record(record: dict, records: list[dict]) -> bool:
         return False
 
     if NON_WORSHIP_CENTRE_PATTERN.search(name):
+        return False
+
+    if NON_WORSHIP_HALL_PATTERN.search(name):
         return False
 
     if is_support_building_duplicate(record, records):

@@ -22389,28 +22389,6 @@
     }
   },
   {
-    "id": "w319218001",
-    "osm_id": 319218001,
-    "osm_type": "way",
-    "lat": -37.05855285,
-    "lng": 174.939414875,
-    "name": "Youth hall",
-    "religion": "unknown",
-    "denomination": "presbyterian",
-    "confidence": 0.9500000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "2 Coles Crescent, Papakura, 2110",
-    "start_date": "1958",
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes",
-      "denomination": "presbyterian"
-    }
-  },
-  {
     "id": "w319223185",
     "osm_id": 319223185,
     "osm_type": "way",
@@ -27044,28 +27022,6 @@
     }
   },
   {
-    "id": "w331969804",
-    "osm_id": 331969804,
-    "osm_type": "way",
-    "lat": -36.858264014285716,
-    "lng": 174.78157915714286,
-    "name": "Knox Hall",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 1.0,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "4A Birdwood Crescent",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w331969807",
     "osm_id": 331969807,
     "osm_type": "way",
@@ -30123,29 +30079,6 @@
     }
   },
   {
-    "id": "w339633297",
-    "osm_id": 339633297,
-    "osm_type": "way",
-    "lat": -36.58639633333333,
-    "lng": 174.6921514,
-    "name": "Masonic Hall",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.97,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes",
-      "religion": "christian",
-      "wheelchair": "limited"
-    }
-  },
-  {
     "id": "w339633299",
     "osm_id": 339633299,
     "osm_type": "way",
@@ -30573,28 +30506,6 @@
       "amenity": "place_of_worship",
       "building": "yes",
       "denomination": "pentecostal",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w339842575",
-    "osm_id": 339842575,
-    "osm_type": "way",
-    "lat": -36.82777337272727,
-    "lng": 174.8029314909091,
-    "name": "Holy Trinity Parish Hall",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 1.0,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "4 Vauxhall Road",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes",
       "religion": "christian"
     }
   },
@@ -43413,28 +43324,6 @@
     }
   },
   {
-    "id": "w377262142",
-    "osm_id": 377262142,
-    "osm_type": "way",
-    "lat": -42.40883262,
-    "lng": 173.68391182,
-    "name": "Church and Hall",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 1.0,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "Torquay Street, Kaikoura, 7300",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w377814473",
     "osm_id": 377814473,
     "osm_type": "way",
@@ -47070,28 +46959,6 @@
       "building": "yes",
       "denomination": "nondenominational",
       "religion": "christian"
-    }
-  },
-  {
-    "id": "w390019542",
-    "osm_id": 390019542,
-    "osm_type": "way",
-    "lat": -35.713036699999996,
-    "lng": 174.32269811999998,
-    "name": "Anglican Parish Hall",
-    "religion": "unknown",
-    "denomination": "anglican",
-    "confidence": 0.9,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes",
-      "denomination": "anglican"
     }
   },
   {
@@ -61143,27 +61010,6 @@
       "building": "yes",
       "denomination": "anglican",
       "religion": "christian"
-    }
-  },
-  {
-    "id": "w602723493",
-    "osm_id": 602723493,
-    "osm_type": "way",
-    "lat": -36.898241133333336,
-    "lng": 174.7003420111111,
-    "name": "Saint Jude's Hall",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.85,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": "1907",
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes"
     }
   },
   {
@@ -78285,28 +78131,6 @@
       "amenity": "place_of_worship",
       "building": "yes",
       "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w1040467260",
-    "osm_id": 1040467260,
-    "osm_type": "way",
-    "lat": -43.519865859999996,
-    "lng": 171.94698746666666,
-    "name": "St John's Hall",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.95,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes",
       "religion": "christian"
     }
   },
