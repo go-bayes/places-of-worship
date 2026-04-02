@@ -8,10 +8,10 @@ Source file: `apps/regions/nz/data/nz_places.json`
 
 ## Summary
 
-- current NZ dataset size: 3636
-- queued for manual review: 736
+- current NZ dataset size: 3629
+- queued for manual review: 730
 - priority 1 records: 280
-- priority 2 records: 378
+- priority 2 records: 372
 - priority 3 records: 78
 
 ## Categories
@@ -19,7 +19,7 @@ Source file: `apps/regions/nz/data/nz_places.json`
 - `generic_worship_label`: 78
 - `institutional_site`: 7
 - `placeholder_name`: 195
-- `hall_centre_house_site`: 367
+- `hall_centre_house_site`: 361
 - `retreat_or_prayer_site`: 11
 - `missing_core_tags`: 78
 

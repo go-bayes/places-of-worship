@@ -21,7 +21,9 @@ Pass 2 removed a further 978 low-information and institutional priority-1 record
 
 Pass 3 removed 7 `Masonic Centre` records from the `hall_centre_house_site` bucket, leaving 3,636 records.
 
-Total removed so far: 1,082 records.
+Pass 4 removed 7 church-hall and parish/community-centre support buildings that duplicated nearby mapped churches, leaving 3,629 records.
+
+Total removed so far: 1,089 records.
 
 These false positives were OSM-derived features, but many were not mapped in OpenStreetMap as `amenity=place_of_worship`. They entered the dataset through broad inclusion rules around weak religious tags and loosely religious building metadata.
 
@@ -130,12 +132,32 @@ Seven records matched and were removed from the published NZ dataset:
 
 These records had generally been tagged as `amenity=place_of_worship` in OSM, but they are not places of worship in the project sense and were better treated as false positives than as ambiguous review candidates.
 
-## Current queue after pass 3
+## Pass 4: duplicate support buildings beside mapped churches
 
-The remaining manual review queue contains 736 records:
+This pass removed a narrow class of support-building records from the `hall_centre_house_site` bucket:
+
+- names containing `church hall`, `parish centre`, or `community centre`
+- within 80 metres of a separately mapped worship site
+- with either shared identity tokens or a denomination-only support-building label
+
+Seven records matched and were removed from the published NZ dataset:
+
+- `St Columba Community Centre`
+- `Greyfriars church hall`
+- `St Mark's Parish Centre`
+- `All Saints Church Hall`
+- `St James Church Hall`
+- `Church Hall`
+- `Methodist Church Hall`
+
+These records looked like adjunct halls or parish facilities rather than the primary place of worship, because a corresponding church was already mapped immediately beside them.
+
+## Current queue after pass 4
+
+The remaining manual review queue contains 730 records:
 
 - 280 priority 1
-- 378 priority 2
+- 372 priority 2
 - 78 priority 3
 
 ## What this audit does not settle

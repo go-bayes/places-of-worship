@@ -7,6 +7,7 @@ places of worship, while leaving ambiguous cases for later manual review.
 """
 
 import json
+import math
 import re
 from pathlib import Path
 
@@ -50,6 +51,114 @@ NON_WORSHIP_CENTRE_PATTERN = re.compile(
     r"\bmasonic centre\b",
     re.IGNORECASE,
 )
+SUPPORT_BUILDING_PATTERN = re.compile(
+    r"\b(church hall|parish centre|community centre)\b",
+    re.IGNORECASE,
+)
+PRIMARY_WORSHIP_NAME_PATTERN = re.compile(
+    r"\b(church|cathedral|chapel|temple|mosque|synagogue|gurdwara)\b",
+    re.IGNORECASE,
+)
+GENERIC_NAME_TOKENS = {
+    "and",
+    "anglican",
+    "apostolic",
+    "assembly",
+    "assemblies",
+    "baptist",
+    "catholic",
+    "centre",
+    "centres",
+    "christian",
+    "church",
+    "churches",
+    "community",
+    "corps",
+    "hall",
+    "house",
+    "houses",
+    "methodist",
+    "parish",
+    "place",
+    "presbyterian",
+    "saint",
+    "salvation",
+    "site",
+    "sites",
+    "st",
+    "the",
+    "worship",
+}
+
+
+def haversine_distance_metres(
+    lat_1: float,
+    lng_1: float,
+    lat_2: float,
+    lng_2: float,
+) -> float:
+    lat_1_rad, lng_1_rad, lat_2_rad, lng_2_rad = map(
+        math.radians,
+        [lat_1, lng_1, lat_2, lng_2],
+    )
+    delta_lat = lat_2_rad - lat_1_rad
+    delta_lng = lng_2_rad - lng_1_rad
+    haversine = (
+        math.sin(delta_lat / 2) ** 2
+        + math.cos(lat_1_rad) * math.cos(lat_2_rad) * math.sin(delta_lng / 2) ** 2
+    )
+    return 6371000 * 2 * math.asin(math.sqrt(haversine))
+
+
+def normalise_name_tokens(name: str) -> set[str]:
+    normalised = name.lower().replace("st ", "saint ")
+    tokens = set(re.findall(r"[a-z]+", normalised))
+    return tokens - GENERIC_NAME_TOKENS
+
+
+def is_support_building_duplicate(record: dict, records: list[dict]) -> bool:
+    name = record.get("name") or ""
+    if not SUPPORT_BUILDING_PATTERN.search(name):
+        return False
+
+    lat = record.get("lat")
+    lng = record.get("lng")
+    if lat is None or lng is None:
+        return False
+
+    record_tokens = normalise_name_tokens(name)
+    denomination = record.get("denomination") or ""
+
+    for other in records:
+        if other.get("id") == record.get("id"):
+            continue
+
+        other_name = other.get("name") or ""
+        if not PRIMARY_WORSHIP_NAME_PATTERN.search(other_name):
+            continue
+
+        other_lat = other.get("lat")
+        other_lng = other.get("lng")
+        if other_lat is None or other_lng is None:
+            continue
+
+        if haversine_distance_metres(lat, lng, other_lat, other_lng) > 80:
+            continue
+
+        other_tokens = normalise_name_tokens(other_name)
+        shared_tokens = record_tokens & other_tokens
+        denomination_match = (
+            denomination != ""
+            and denomination == (other.get("denomination") or "")
+        )
+
+        if len(shared_tokens) >= 1:
+            return True
+
+        if not record_tokens and denomination_match:
+            return True
+
+    return False
 
 
 def is_nz_coordinate(lat: float, lng: float) -> bool:
@@ -62,7 +171,7 @@ def is_nz_coordinate(lat: float, lng: float) -> bool:
     return (166 <= lng <= 180) or (-180 <= lng <= -175)
 
 
-def keep_record(record: dict) -> bool:
+def keep_record(record: dict, records: list[dict]) -> bool:
     tags = record.get("tags_raw") or {}
     amenity = tags.get("amenity")
     building = tags.get("building")
@@ -94,6 +203,9 @@ def keep_record(record: dict) -> bool:
     if NON_WORSHIP_CENTRE_PATTERN.search(name):
         return False
 
+    if is_support_building_duplicate(record, records):
+        return False
+
     # Exclude school-like and seminary-like institutional sites unless a worship
     # space is separately mapped as a chapel or explicit place_of_worship.
     if INSTITUTIONAL_NAME_PATTERN.search(name):
@@ -108,7 +220,7 @@ def keep_record(record: dict) -> bool:
 def main() -> None:
     for path in TARGET_FILES:
         records = json.loads(path.read_text())
-        filtered = [record for record in records if keep_record(record)]
+        filtered = [record for record in records if keep_record(record, records)]
         removed = len(records) - len(filtered)
 
         path.write_text(json.dumps(filtered, indent=2, ensure_ascii=False))

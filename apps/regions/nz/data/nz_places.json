@@ -12591,28 +12591,6 @@
     }
   },
   {
-    "id": "w221022133",
-    "osm_id": 221022133,
-    "osm_type": "way",
-    "lat": -36.86243418888889,
-    "lng": 174.73337005555555,
-    "name": "St Columba Community Centre",
-    "religion": "unknown",
-    "denomination": "anglican",
-    "confidence": 1.0,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "https://saintcolumbas.org.nz/",
-    "phone": "",
-    "address": "92 Surrey Crescent, Auckland, 1021",
-    "start_date": "1961",
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes",
-      "denomination": "anglican"
-    }
-  },
-  {
     "id": "w221022138",
     "osm_id": 221022138,
     "osm_type": "way",
@@ -20250,29 +20228,6 @@
     }
   },
   {
-    "id": "w305792479",
-    "osm_id": 305792479,
-    "osm_type": "way",
-    "lat": -36.88583544,
-    "lng": 174.761778,
-    "name": "Greyfriars church hall",
-    "religion": "christian",
-    "denomination": "presbyterian",
-    "confidence": 1.0,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes",
-      "denomination": "presbyterian",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w305795220",
     "osm_id": 305795220,
     "osm_type": "way",
@@ -27021,27 +26976,6 @@
     }
   },
   {
-    "id": "w331777058",
-    "osm_id": 331777058,
-    "osm_type": "way",
-    "lat": -36.87293351428571,
-    "lng": 174.78061361428573,
-    "name": "St Mark's Parish Centre",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.9,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "94 Remuera Road, Auckland, 1050",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes"
-    }
-  },
-  {
     "id": "w331964322",
     "osm_id": 331964322,
     "osm_type": "way",
@@ -29063,29 +28997,6 @@
       "amenity": "place_of_worship",
       "building": "church",
       "denomination": "methodist;anglican",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w338625191",
-    "osm_id": 338625191,
-    "osm_type": "way",
-    "lat": -36.626866060000005,
-    "lng": 174.50141466,
-    "name": "All Saints Church Hall",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 1.0,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "4 Peak Road, Kaukapakapa, 0875",
-    "start_date": "1919",
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes",
-      "denomination": "anglican",
       "religion": "christian"
     }
   },
@@ -40419,26 +40330,6 @@
       "denomination": "presbyterian",
       "religion": "christian",
       "wheelchair": "yes"
-    }
-  },
-  {
-    "id": "w371847893",
-    "osm_id": 371847893,
-    "osm_type": "way",
-    "lat": -39.065119828571426,
-    "lng": 174.0459409285714,
-    "name": "St James Church Hall",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.7000000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "24 Lawry Street, New Plymouth, 4310",
-    "start_date": null,
-    "tags_raw": {
-      "building": "church"
     }
   },
   {
@@ -75121,29 +75012,6 @@
     }
   },
   {
-    "id": "w898919539",
-    "osm_id": 898919539,
-    "osm_type": "way",
-    "lat": -37.05885985555555,
-    "lng": 174.93945532222222,
-    "name": "Church Hall",
-    "religion": "christian",
-    "denomination": "presbyterian",
-    "confidence": 1.0,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "2 Coles Crescent, Auckland, 2110",
-    "start_date": "1859",
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes",
-      "denomination": "presbyterian",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "w900171747",
     "osm_id": 900171747,
     "osm_type": "way",
@@ -81587,28 +81455,6 @@
       "building": "yes",
       "denomination": "methodist",
       "religion": "christian"
-    }
-  },
-  {
-    "id": "w1374939457",
-    "osm_id": 1374939457,
-    "osm_type": "way",
-    "lat": -36.28312886,
-    "lng": 174.44359756,
-    "name": "Methodist Church Hall",
-    "religion": "unknown",
-    "denomination": "methodist",
-    "confidence": 0.9500000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "15 Church Hill Road, Port Albert, 0973",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes",
-      "denomination": "methodist"
     }
   },
   {
