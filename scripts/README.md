@@ -19,5 +19,6 @@ Current global pipeline scaffolding:
 - `scripts/extract_global_data.R`: raw global extractor that writes dated country payloads to `data/raw/osm/<snapshot_date>/`.
 - `scripts/normalize_global_places.R`: normalise raw country payloads into a stable intermediate schema under `data/intermediate/global/<snapshot_date>/`.
 - `scripts/clean_global_places.py`: apply conservative shared cleaning rules to normalised country datasets and write cleaned outputs and manifests under `data/intermediate/global/<snapshot_date>/`.
+- `scripts/deduplicate_global_places.py`: collapse only very likely duplicate cleaned records and write deduplicated outputs and resolution logs under `data/intermediate/global/<snapshot_date>/`.
 - `scripts/build_global_review_queue.py`: classify cleaned country datasets into review queues under `docs/review_queues/<snapshot_date>/`.
 - `docs/global-extractor-audit.md`: audit and staged replacement workflow for the global pipeline.

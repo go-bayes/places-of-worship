@@ -47,6 +47,11 @@ def latest_snapshot_dir() -> Path:
 def iter_cleaned_files(input_path: Path) -> list[Path]:
     if input_path.is_file():
         return [input_path]
+
+    deduplicated_files = sorted(input_path.glob("*_places_deduplicated.json"))
+    if deduplicated_files:
+        return deduplicated_files
+
     return sorted(input_path.glob("*_places_cleaned.json"))
 
 
@@ -118,7 +123,12 @@ def build_queue(records: list[dict], country_code: str) -> list[dict]:
 
 
 def write_country_queue(cleaned_file: Path, output_dir: Path) -> dict:
-    country_code = cleaned_file.name.replace("_places_cleaned.json", "").upper()
+    country_code = (
+        cleaned_file.name
+        .replace("_places_deduplicated.json", "")
+        .replace("_places_cleaned.json", "")
+        .upper()
+    )
     records = json.loads(cleaned_file.read_text(encoding="utf-8"))
     queue = build_queue(records, country_code)
 
@@ -168,10 +178,10 @@ def write_country_queue(cleaned_file: Path, output_dir: Path) -> dict:
 
     return {
         "country_code": country_code,
-        "cleaned_file": str(cleaned_file.relative_to(REPO_ROOT)),
+        "input_file": str(cleaned_file.relative_to(REPO_ROOT)),
         "csv_path": str(csv_path.relative_to(REPO_ROOT)),
         "md_path": str(md_path.relative_to(REPO_ROOT)),
-        "cleaned_count": len(records),
+        "input_count": len(records),
         "review_count": len(queue),
     }
 
@@ -185,7 +195,7 @@ def main() -> None:
 
     cleaned_files = iter_cleaned_files(input_path)
     if not cleaned_files:
-        raise FileNotFoundError(f"No cleaned files found under {input_path}")
+        raise FileNotFoundError(f"No deduplicated or cleaned files found under {input_path}")
 
     snapshot_name = input_path.name if input_path.is_dir() else input_path.parent.name
     output_dir = REPO_ROOT / "docs" / "review_queues" / snapshot_name
