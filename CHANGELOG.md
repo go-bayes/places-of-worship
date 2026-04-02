@@ -1,9 +1,16 @@
 # Changelog
 
 ## Unreleased
-- Added `scripts/deduplicate_global_places.py` as a conservative global deduplication stage ahead of review-queue generation.
+- Added `scripts/deduplicate_global_places.py` as a conservative global deduplication stage between cleaning and review-queue generation.
+- Updated `scripts/build_global_review_queue.py` to consume deduplicated country outputs when present, while still falling back to cleaned outputs.
 - Added `scripts/clean_global_places.py` for conservative deterministic cleaning of normalised global country datasets and `scripts/build_global_review_queue.py` for per-country review queues.
-- Added the first global review-queue outputs under `docs/review_queues/undated/` from the existing NZ normalised snapshot.
+- Added the first global intermediate outputs from the existing NZ normalised snapshot:
+  - `data/intermediate/global/undated/nz_places_cleaned.json`
+  - `data/intermediate/global/undated/nz_places_deduplicated.json`
+  - `data/intermediate/global/undated/nz_duplicate_resolutions.json`
+  - `docs/review_queues/undated/nz_review_queue.csv`
+  - `docs/review_queues/undated/nz_review_queue.md`
+- Recorded the first strict deduplication test result for NZ: `0` records removed from `4,632` cleaned records, indicating that the current rules are not collapsing co-located but distinct congregations.
 - Refactored `scripts/extract_global_data.R` into a raw extractor and added `scripts/normalize_global_places.R` as the first explicit global normalisation stage.
 - Added an audit of `scripts/extract_global_data.R` and a staged draft workflow for global extraction, cleaning, review queues, and publication.
 - Clarified that countries, including NZ, may have multiple coexisting boundary tessellations that are not strictly nested.
