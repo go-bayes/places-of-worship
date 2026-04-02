@@ -208,6 +208,47 @@ Should include:
 - review queue counts
 - override counts
 
+## Proposed NZ pilot defaults
+
+### 1. Boundary comparison default
+
+Use fixed-boundary outputs as the default longitudinal comparison product for
+the NZ pilot.
+
+Rationale:
+
+- it reduces measurement error from changing boundary definitions
+- it keeps year-to-year comparisons easier to interpret
+- it makes the first backend implementation simpler
+
+Native-boundary outputs can be added later as supplementary products, but they
+should not be the primary comparison series in the pilot.
+
+### 2. Site identity default
+
+Use a hybrid site identity strategy:
+
+- deterministic matching as the default
+- reviewed overrides for difficult cases
+
+This means:
+
+- OSM ids remain source references
+- stable longitudinal `site_id` values are assigned by the project
+- difficult merges and splits are handled explicitly in overrides
+
+### 3. Download contract default
+
+The first NZ backend milestone should guarantee three download products:
+
+- cleaned site rows
+- area summaries
+- metadata bundle
+
+Additional products such as raw extracts, review queues, and area-by-religion
+tables are useful, but they should be treated as extensions rather than the
+minimum contract.
+
 ## Key decision points
 
 ### 1. Boundary comparability over time
@@ -222,6 +263,10 @@ Implications:
 - native boundaries preserve official geography
 - both increase complexity but improve interpretability
 
+Recommended NZ pilot default:
+
+- fixed-boundary outputs first
+
 ### 2. Site identity across years
 
 Question:
@@ -232,6 +277,10 @@ Implications:
 - this affects all longitudinal counts
 - OSM ids alone are not sufficient
 - matching rules must be auditable
+
+Recommended NZ pilot default:
+
+- hybrid deterministic matching plus reviewed overrides
 
 ### 3. Status model
 
@@ -267,6 +316,12 @@ Recommended minimum:
 - cleaned site rows
 - one area summary product
 - one metadata product
+
+Recommended NZ pilot default:
+
+- cleaned site rows
+- area summaries
+- metadata bundle
 
 ## NZ pilot implications
 

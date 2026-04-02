@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Added proposed NZ pilot defaults for fixed-boundary comparison outputs, hybrid site matching, and the minimum country download contract.
 - Added a country backend scheme and decision log for country-specific downloads, area assignment, and temporal tracking.
 - Set `1 September` as the planning anchor date for annual longitudinal snapshots and noted Google Drive as temporary holding rather than the long-term record.
 - Rewrote `PLANNING.md` as the active redevelopment roadmap and planning source of truth.

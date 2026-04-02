@@ -257,6 +257,18 @@ The backend should support at least these output forms:
 - One country download path
 - One yearly snapshot comparison path anchored to `1 September`
 
+### Proposed NZ pilot defaults
+
+- Use fixed-boundary outputs as the default longitudinal comparison product.
+- Use a hybrid site-identity strategy:
+  - deterministic matching first
+  - reviewed overrides for difficult cases
+- Publish a minimum three-part NZ download contract:
+  - cleaned site rows
+  - area summaries
+  - metadata bundle
+- Keep richer or alternative products optional until the pilot is stable.
+
 ### Shared contract to define now
 
 - `country_code`
@@ -309,6 +321,33 @@ The backend should support at least these output forms:
 - Area assignment and download products belong in the backend, not only in the
   frontend.
 
+### Decided: NZ pilot boundary comparison default
+
+- The NZ pilot will use fixed-boundary outputs as the default longitudinal
+  comparison product.
+- Native-boundary outputs may be added later as supplementary products, but
+  they will not be the primary comparison series for the pilot.
+- The purpose is to minimise measurement error introduced by changing boundary
+  definitions across years.
+
+### Decided: NZ pilot site identity strategy
+
+- The NZ pilot will use a hybrid site identity strategy:
+  - deterministic matching across years as the default
+  - explicit reviewed overrides for difficult matches
+- OSM ids will be stored as source references, but they will not be treated as
+  the stable longitudinal site identifier.
+
+### Decided: NZ pilot minimum download contract
+
+- Every NZ pilot release should include:
+  - cleaned site rows
+  - area summaries
+  - metadata bundle
+- Additional download products such as raw extracts, review queues, and
+  area-by-religion tables can be added, but they are not required for the first
+  backend milestone.
+
 ## Open decisions
 
 ### Open: historical and demolished places
@@ -326,7 +365,7 @@ The backend should support at least these output forms:
 - Next step:
   - define a location-confidence field and a publication rule.
 
-### Open: boundary comparability over time
+### Open: boundary comparability over time beyond the NZ pilot
 
 - Context: country area units change across years, but longitudinal analysis
   needs comparability.
@@ -339,9 +378,10 @@ The backend should support at least these output forms:
   - complicated interpretation
   - duplicated maintenance burden
 - Next step:
-  - decide the default comparison policy before building longitudinal downloads.
+  - decide whether the NZ fixed-boundary default should generalise to other
+    countries or whether country-specific policies are needed.
 
-### Open: site identity matching across years
+### Open: site identity matching across years beyond the NZ pilot
 
 - Context: OSM objects can split, merge, move, or be renamed, so a stable
   longitudinal site identity cannot rely on a single source id.
@@ -354,9 +394,10 @@ The backend should support at least these output forms:
   - unstable longitudinal counts
   - hidden manual judgement
 - Next step:
-  - define the first site-matching strategy for the NZ pilot.
+  - test the hybrid NZ strategy and document where country-specific matching
+    rules are still required.
 
-### Open: country download contract
+### Open: country download contract beyond the NZ pilot
 
 - Context: country maps will need downloadable data for sites nested within
   country-specific area units.
@@ -369,7 +410,8 @@ The backend should support at least these output forms:
   - unclear provenance
   - inconsistent country coverage
 - Next step:
-  - define the minimum download set for the NZ backend pilot.
+  - decide what should be mandatory across all countries beyond the NZ pilot
+    minimum of cleaned sites, area summaries, and metadata.
 
 ### Open: boundary hierarchy contract
 
