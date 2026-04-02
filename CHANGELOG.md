@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- Rewrote `PLANNING.md` as the active redevelopment roadmap and planning source of truth.
+- Marked `docs/data-pipeline-architecture.md` as technical reference rather than the active roadmap.
 - Added `docs/nz-data-cleanup-audit.md` to record the first NZ false-positive cleanup pass.
 - Added `docs/nz-manual-review-queue.md` and `docs/nz-manual-review-queue.csv` for ambiguous NZ records that need human review.
 - Applied a second NZ cleanup pass to remove low-information placeholder and generic worship-label records.

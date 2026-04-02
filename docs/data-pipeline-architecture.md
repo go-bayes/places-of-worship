@@ -1,5 +1,9 @@
 # Global Data Pipeline Architecture
 
+Planning source of truth: `PLANNING.md`.
+
+This document is a technical reference and idea bank, not the active roadmap.
+
 ## Overview
 
 Scalable data pipeline design that extends from the proven NZ implementation to global coverage, maintaining sub-second query performance while integrating multiple data sources with confidence scoring and temporal versioning.
