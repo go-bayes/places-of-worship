@@ -1,5 +1,9 @@
-# Global Places of Worship Extraction (All Countries Edition)
-# Dependencies: install.packages(c("osmdata", "sf", "dplyr", "jsonlite", "rnaturalearth", "rnaturalearthdata"))
+# Global raw places of worship extraction
+# Usage:
+#   Rscript scripts/extract_global_data.R [snapshot_date] [country_codes_csv] [--force]
+#
+# Example:
+#   Rscript scripts/extract_global_data.R 2026-09-01 NZ,AU --force
 
 suppressPackageStartupMessages({
   library(osmdata)
@@ -10,221 +14,256 @@ suppressPackageStartupMessages({
   library(rnaturalearth)
 })
 
-# --- Configuration ---
-DATA_DIR <- "data/global"
-if (!dir.exists(DATA_DIR)) dir.create(DATA_DIR, recursive = TRUE)
+parse_args <- function(args) {
+  snapshot_date <- format(Sys.Date(), "%Y-%m-%d")
+  country_codes <- NULL
+  force_refresh <- FALSE
 
-# --- 1. Get All Countries ---
-# rnaturalearth provides a clean sf object with ISO codes and names
-world_map <- ne_countries(scale = "medium", returnclass = "sf")
+  positional <- args[!startsWith(args, "--")]
+  flags <- args[startsWith(args, "--")]
 
-# Filter out Antarctica and undefined regions to save time
-target_countries <- world_map %>%
-  filter(!is.na(iso_a2), continent != "Antarctica") %>%
-  select(name = name, code = iso_a2) %>%
-  st_drop_geometry()
+  if (length(positional) >= 1) {
+    snapshot_date <- positional[[1]]
+  }
 
-message(sprintf("Targeting %d countries/territories...", nrow(target_countries)))
+  if (length(positional) >= 2) {
+    country_codes <- positional[[2]] |>
+      strsplit(",", fixed = TRUE) |>
+      unlist() |>
+      trimws() |>
+      toupper()
+  }
 
-# --- 2. Helper Functions (Same as before) ---
+  force_refresh <- any(flags %in% c("--force", "--overwrite"))
 
-normalize_religion <- function(rel) {
-  rel <- tolower(rel)
+  list(
+    snapshot_date = snapshot_date,
+    country_codes = country_codes,
+    force_refresh = force_refresh
+  )
+}
+
+extract_tags <- function(data, row_index) {
+  tag_columns <- setdiff(names(data), c("osm_id", "geometry"))
+
+  tags <- purrr::keep(
+    purrr::map(tag_columns, function(column_name) {
+      value <- data[[column_name]][[row_index]]
+      if (is.null(value) || is.na(value) || identical(value, "")) {
+        return(NULL)
+      }
+
+      list(column_name = column_name, value = as.character(value))
+    }),
+    Negate(is.null)
+  )
+
+  if (length(tags) == 0) {
+    return(list())
+  }
+
+  names(tags) <- purrr::map_chr(tags, "column_name")
+  purrr::map(tags, "value")
+}
+
+build_representative_points <- function(data, source_layer) {
+  if (nrow(data) == 0) {
+    return(data)
+  }
+
+  if (source_layer == "osm_points") {
+    return(data)
+  }
+
+  suppressWarnings(st_point_on_surface(data))
+}
+
+layer_to_osm_type <- function(source_layer) {
   dplyr::case_when(
-    rel %in% c("christian", "catholic", "protestant", "orthodox", "baptist", "methodist", "pentecostal") ~ "christian",
-    rel %in% c("muslim", "islam", "sunni", "shia") ~ "muslim",
-    rel %in% c("jewish", "judaism") ~ "jewish",
-    rel %in% c("hindu", "hinduism") ~ "hindu",
-    rel %in% c("buddhist", "buddhism") ~ "buddhist",
-    rel %in% c("sikh", "sikhism") ~ "sikh",
-    rel %in% c("shinto") ~ "shinto",
-    rel %in% c("taoist", "taoism") ~ "taoist",
+    source_layer == "osm_points" ~ "node",
+    source_layer == "osm_polygons" ~ "way",
+    source_layer == "osm_multipolygons" ~ "relation",
     TRUE ~ "unknown"
   )
 }
 
-calculate_confidence <- function(name, religion, denomination) {
-  score <- 0.5
-  if (!is.na(name) && name != "") score <- score + 0.2
-  if (!is.na(religion) && religion != "unknown") score <- score + 0.1
-  if (!is.na(denomination) && denomination != "") score <- score + 0.1
-  return(min(score, 1.0))
+filter_to_country <- function(data, country_geometry, source_layer) {
+  if (nrow(data) == 0) {
+    return(data[0, ])
+  }
+
+  if (source_layer == "osm_points") {
+    keep_index <- st_within(data, country_geometry, sparse = FALSE)[, 1]
+  } else {
+    keep_index <- st_intersects(data, country_geometry, sparse = FALSE)[, 1]
+  }
+
+  data[keep_index, ]
 }
 
-# --- 3. The Extraction Function ---
+build_layer_records <- function(data, source_layer, country_geometry) {
+  if (is.null(data) || nrow(data) == 0) {
+    return(list())
+  }
 
-extract_country <- function(country_code, country_name) {
-  # Standardize file path
-  safe_name <- gsub("[^a-zA-Z0-9]", "_", tolower(country_code))
-  output_file <- file.path(DATA_DIR, paste0(safe_name, "_places.json"))
+  filtered_data <- filter_to_country(data, country_geometry, source_layer)
 
-  # Skip if file already exists (Remove this check to force refresh)
-  if (file.exists(output_file)) {
+  if (nrow(filtered_data) == 0) {
+    return(list())
+  }
+
+  representative_points <- build_representative_points(filtered_data, source_layer)
+  coords <- st_coordinates(representative_points)
+  osm_type <- layer_to_osm_type(source_layer)
+
+  purrr::map(seq_len(nrow(filtered_data)), function(row_index) {
+    list(
+      source_layer = source_layer,
+      osm_type = osm_type,
+      osm_id = as.character(filtered_data$osm_id[[row_index]]),
+      lat = coords[row_index, 2],
+      lon = coords[row_index, 1],
+      tags = extract_tags(filtered_data, row_index)
+    )
+  })
+}
+
+extract_country <- function(country_code, country_name, country_geometry, output_dir, force_refresh) {
+  output_file <- file.path(
+    output_dir,
+    paste0(tolower(country_code), "_places_raw.json")
+  )
+
+  if (file.exists(output_file) && !force_refresh) {
     message(sprintf("  [%s] Exists. Skipping.", country_code))
-    return(NULL)
+    return(list(
+      country_code = country_code,
+      country_name = country_name,
+      output_file = output_file,
+      skipped = TRUE
+    ))
   }
 
   message(sprintf("  [%s] Fetching %s...", country_code, country_name))
-
-  # Be polite to the API
   Sys.sleep(2)
+
+  query_bbox <- st_bbox(country_geometry)
 
   tryCatch(
     {
-      # Increase timeout for large countries (Russia, China, etc.)
-      q <- opq(bbox = country_name, timeout = 2400) %>%
+      query <- opq(
+        bbox = c(query_bbox[["xmin"]], query_bbox[["ymin"]], query_bbox[["xmax"]], query_bbox[["ymax"]]),
+        timeout = 2400
+      ) |>
         add_osm_feature(key = "amenity", value = "place_of_worship")
 
-      osm_raw <- osmdata_sf(q)
+      osm_raw <- osmdata_sf(query)
 
-      # Collect points and polygon centroids
-      valid_objs <- list()
-      if (!is.null(osm_raw$osm_points) && nrow(osm_raw$osm_points) > 0) {
-        valid_objs[[length(valid_objs) + 1]] <- osm_raw$osm_points
-      }
-      if (!is.null(osm_raw$osm_polygons) && nrow(osm_raw$osm_polygons) > 0) {
-        suppressWarnings(valid_objs[[length(valid_objs) + 1]] <- st_centroid(osm_raw$osm_polygons))
-      }
+      raw_records <- c(
+        build_layer_records(osm_raw$osm_points, "osm_points", country_geometry),
+        build_layer_records(osm_raw$osm_polygons, "osm_polygons", country_geometry),
+        build_layer_records(osm_raw$osm_multipolygons, "osm_multipolygons", country_geometry)
+      )
 
-      if (length(valid_objs) == 0) {
-        message(sprintf("  [%s] No data found.", country_code))
-        # Write empty list to prevent re-querying next time
-        write_json(list(), output_file)
-        return(NULL)
-      }
+      payload <- list(
+        snapshot_date = basename(output_dir),
+        extracted_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
+        source = "osm_overpass",
+        script = "scripts/extract_global_data.R",
+        country_code = country_code,
+        country_name = country_name,
+        query = list(
+          feature_key = "amenity",
+          feature_value = "place_of_worship",
+          bbox = list(
+            xmin = unname(query_bbox[["xmin"]]),
+            ymin = unname(query_bbox[["ymin"]]),
+            xmax = unname(query_bbox[["xmax"]]),
+            ymax = unname(query_bbox[["ymax"]])
+          )
+        ),
+        layer_counts = list(
+          osm_points = sum(purrr::map_chr(raw_records, "source_layer") == "osm_points"),
+          osm_polygons = sum(purrr::map_chr(raw_records, "source_layer") == "osm_polygons"),
+          osm_multipolygons = sum(purrr::map_chr(raw_records, "source_layer") == "osm_multipolygons")
+        ),
+        record_count = length(raw_records),
+        records = raw_records
+      )
 
-      combined <- do.call(dplyr::bind_rows, valid_objs)
+      write_json(payload, output_file, pretty = TRUE, auto_unbox = TRUE, null = "null")
+      message(sprintf("  [%s] Success! Saved %d raw records.", country_code, length(raw_records)))
 
-      # Ensure columns exist
-      cols_check <- c("name", "name:en", "religion", "denomination", "amenity")
-      for (col in cols_check) if (!col %in% names(combined)) combined[[col]] <- NA
-
-      coords <- st_coordinates(combined)
-
-      final_df <- combined %>%
-        st_drop_geometry() %>%
-        mutate(
-          lat = coords[, 2],
-          lng = coords[, 1],
-          country = country_code,
-          name = coalesce(name, `name:en`, "Unnamed Place of Worship"),
-          religion = normalize_religion(religion),
-          denomination = coalesce(denomination, ""),
-          confidence = mapply(calculate_confidence, name, religion, denomination)
-        ) %>%
-        select(lat, lng, name, religion, denomination, country, confidence)
-
-      write_json(final_df, output_file, pretty = TRUE, auto_unbox = TRUE)
-      message(sprintf("  [%s] Success! Saved %d places.", country_code, nrow(final_df)))
+      list(
+        country_code = country_code,
+        country_name = country_name,
+        output_file = output_file,
+        skipped = FALSE,
+        record_count = length(raw_records)
+      )
     },
-    error = function(e) {
-      message(sprintf("  [%s] FAILED: %s", country_code, e$message))
+    error = function(error) {
+      message(sprintf("  [%s] FAILED: %s", country_code, error$message))
+      list(
+        country_code = country_code,
+        country_name = country_name,
+        output_file = output_file,
+        skipped = FALSE,
+        error = error$message
+      )
     }
   )
 }
 
-# --- 4. Main Loop ---
-# Loop through the dataframe rows
-apply(target_countries, 1, function(row) {
-  extract_country(row["code"], row["name"])
-})
+write_snapshot_manifest <- function(results, output_dir) {
+  manifest_path <- file.path(output_dir, "snapshot_manifest.json")
 
+  manifest <- list(
+    snapshot_date = basename(output_dir),
+    generated_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
+    script = "scripts/extract_global_data.R",
+    countries = results
+  )
 
-# # global Places of Worship Extraction Script
-# # replaces: scripts/extract_real_global_data.py
-# # dependencies: install.packages(c("osmdata", "sf", "dplyr", "jsonlite", "purrr"))
-#
-# suppressPackageStartupMessages({
-#   library(osmdata)
-#   library(sf)
-#   library(dplyr)
-#   library(jsonlite)
-#   library(purrr)
-# })
-#
-# # configuration
-# DATA_DIR <- "data/global"
-# if (!dir.exists(DATA_DIR)) dir.create(DATA_DIR, recursive = TRUE)
-#
-# # 1. define schema helper
-# # ensures consistent output format matching README spec
-# format_for_export <- function(sf_obj, country_code) {
-#   coords <- st_coordinates(sf_obj)
-#
-#   sf_obj %>%
-#     st_drop_geometry() %>%
-#     mutate(
-#       lat = coords[, 2],
-#       lng = coords[, 1],
-#       country = country_code,
-#       # Fallbacks for missing names
-#       name = coalesce(name, name.en, "Unnamed Place of Worship"),
-#       religion = coalesce(religion, "unknown"),
-#       denomination = coalesce(denomination, "unknown")
-#     ) %>%
-#     select(lat, lng, name, religion, denomination, country)
-# }
-#
-# # 2. extraction function
-# extract_country <- function(country_name, country_code) {
-#   message(sprintf("Processing %s (%s)...", country_name, country_code))
-#
-#   output_file <- file.path(DATA_DIR, paste0(country_code, "_places.json"))
-#
-#   # build overpass query
-#   # 'timeout' increased for large datasets
-#   q <- opq(bbox = country_name, timeout = 900) %>%
-#     add_osm_feature(key = "amenity", value = "place_of_worship")
-#
-#   # execute query (safely)
-#   tryCatch(
-#     {
-#       # download and convert to sf
-#       osm_data <- osmdata_sf(q)
-#
-#       # combine points and polygons (centroids for polygons)
-#       points <- osm_data$osm_points
-#       polygons <- osm_data$osm_polygons
-#
-#       combined <- list()
-#
-#       if (!is.null(points) && nrow(points) > 0) {
-#         combined[[1]] <- points %>% select(any_of(c("name", "name:en", "religion", "denomination")))
-#       }
-#
-#       if (!is.null(polygons) && nrow(polygons) > 0) {
-#         # Calculate centroids for building footprints
-#         combined[[2]] <- polygons %>%
-#           st_centroid() %>%
-#           select(any_of(c("name", "name:en", "religion", "denomination")))
-#       }
-#
-#       if (length(combined) == 0) {
-#         message(sprintf("  No data found for %s.", country_name))
-#         return(NULL)
-#       }
-#
-#       # merge/ format
-#       final_data <- do.call(rbind, combined) %>%
-#         format_for_export(country_code)
-#
-#       # write JSON
-#       write_json(final_data, output_file, pretty = TRUE, auto_unbox = TRUE)
-#       message(sprintf("  Saved %d places to %s", nrow(final_data), output_file))
-#     },
-#     error = function(e) {
-#       message(sprintf("  Error processing %s: %s", country_name, e$message))
-#     }
-#   )
-# }
-#
-# # 3. execution loop
-# # replace this list with CSV read or 'rnaturalearth' data
-# target_countries <- list(
-#   list(name = "New Zealand", code = "NZ"),
-#   list(name = "Australia", code = "AU")
-#   # Add more countries here
-# )
-#
-# # run extraction
-# walk(target_countries, ~ extract_country(.x$name, .x$code))
+  write_json(manifest, manifest_path, pretty = TRUE, auto_unbox = TRUE, null = "null")
+  message(sprintf("Wrote snapshot manifest: %s", manifest_path))
+}
+
+main <- function() {
+  args <- parse_args(commandArgs(trailingOnly = TRUE))
+
+  output_dir <- file.path("data", "raw", "osm", args$snapshot_date)
+  dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+
+  world_map <- ne_countries(scale = "medium", returnclass = "sf")
+
+  target_countries <- world_map |>
+    filter(!is.na(iso_a2), continent != "Antarctica") |>
+    transmute(code = iso_a2, name = name)
+
+  if (!is.null(args$country_codes)) {
+    target_countries <- target_countries |>
+      filter(code %in% args$country_codes)
+  }
+
+  message(sprintf("Targeting %d countries/territories...", nrow(target_countries)))
+
+  country_rows <- split(target_countries, seq_len(nrow(target_countries)))
+
+  results <- purrr::map(
+    country_rows,
+    function(country_row) {
+      extract_country(
+        country_code = country_row$code[[1]],
+        country_name = country_row$name[[1]],
+        country_geometry = st_geometry(country_row),
+        output_dir = output_dir,
+        force_refresh = args$force_refresh
+      )
+    }
+  )
+
+  write_snapshot_manifest(results, output_dir)
+}
+
+main()

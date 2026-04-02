@@ -358,7 +358,15 @@ The goal is to test whether rules are:
 - too narrow
 - too dependent on one tagging culture
 
+## Current status
+
+The first refactor step is now in place:
+
+- `scripts/extract_global_data.R` has been rewritten as a raw extractor
+- `scripts/normalize_global_places.R` has been added as the first
+  normalisation stage
+
 ## Immediate Next Step
 
-Refactor `scripts/extract_global_data.R` so it does only raw extraction and
-stops pretending to be the full global pipeline.
+Add the first deterministic global cleaning stage behind normalisation, then
+generate per-country review queues from the cleaned residual ambiguity.
