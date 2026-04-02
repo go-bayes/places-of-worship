@@ -499,6 +499,12 @@ The backend should support at least these output forms:
 
 - Context: Rust may be useful for ingestion and API performance, but it is not
   required to complete the data cleanup rebuild.
+- Preferred acceleration path:
+  - keep pipeline orchestration and data policy in R
+  - use `extendr` for targeted Rust acceleration of R bottlenecks when profiling
+    shows a clear need
+  - prefer this over a wholesale rewrite when the goal is to speed up a small
+    number of hot loops such as deduplication or candidate matching
 - Options:
   - keep the research pipeline in R and the API/support tooling in Python for now
   - build a Rust ingestion spike after pipeline rules stabilise
