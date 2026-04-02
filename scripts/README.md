@@ -8,6 +8,11 @@ Outputs:
 
 Run scripts from the repo root so relative paths resolve.
 
+Python environment:
+- Use `uv sync` to install or refresh Python dependencies from `pyproject.toml`.
+- Run Python scripts with `uv run`, for example `uv run python scripts/clean_global_places.py data/intermediate/global/undated --overwrite`.
+- Install the optional `pyarrow` fast path only when needed with `uv sync --extra fast-parquet`.
+
 Current NZ cleanup utilities:
 
 - `scripts/fetch_ta_religion_data.R`: align TA religion data to official TA codes and write `apps/regions/nz/data/ta_aggregated_data.json`.

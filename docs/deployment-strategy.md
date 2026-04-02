@@ -48,7 +48,7 @@ staged Rust roadmap in `PLANNING.md`.
 4. Martin serves updated tiles at `tiles.placemap.org`.
 
 ## Local Development
-- Serve the repo with a static web server (example: `python3 -m http.server`).
+- Serve the repo with a static web server (example: `uv run python -m http.server`).
 - Access the global map at `http://localhost:<port>/apps/global/`.
 - Access the enhanced NZ map at `http://localhost:<port>/apps/regions/nz/`.
 - Keep API keys in `apps/global/config.public.js` (do not commit secrets).

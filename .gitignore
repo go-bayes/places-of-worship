@@ -176,6 +176,7 @@ visualizations/
 
 # Data processing artifacts
 *.lock
+!uv.lock
 *.pid
 *.state
 *.checkpoint

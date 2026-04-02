@@ -7,7 +7,7 @@ Thanks for contributing. This project keeps a *fast*, accessible map of global r
 1) Run a static server from `apps/global/`:
 
 ```bash
-python3 -m http.server 8080
+uv run python -m http.server 8080
 ```
 
 2) Open `http://localhost:8080/`.
@@ -25,7 +25,7 @@ Optional local config:
 
 Only needed if you are touching data/tiles:
 - R 4.2+ for statistical processing and data cleaning.
-- Python 3.14+ for utilities and manifests.
+- `uv` with Python 3.14+ for utilities, manifests, and the API environment.
 - Tippecanoe for tile generation.
 - Docker + Martin for local tile serving.
 

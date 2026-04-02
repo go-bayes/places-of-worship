@@ -1,0 +1,24 @@
+[project]
+name = "places-of-worship"
+version = "0.1.0"
+description = "Data pipelines and API for the Places of Worship project"
+requires-python = ">=3.14"
+dependencies = [
+  "fastapi==0.116.1",
+  "geopandas==1.1.1",
+  "osm2geojson",
+  "pandas==2.3.1",
+  "polars>=1.33.1,<2",
+  "pysimdjson",
+  "shapely==2.1.1",
+  "tqdm==4.67.1",
+  "uvicorn==0.35.0",
+]
+
+[project.optional-dependencies]
+fast-parquet = [
+  "pyarrow>=20,<21",
+]
+
+[tool.uv]
+package = false
