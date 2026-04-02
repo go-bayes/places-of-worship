@@ -19,7 +19,9 @@ Pass 1 removed 97 obvious false positives, leaving 4,621 records.
 
 Pass 2 removed a further 978 low-information and institutional priority-1 records, leaving 3,643 records.
 
-Total removed so far: 1,075 records.
+Pass 3 removed 7 `Masonic Centre` records from the `hall_centre_house_site` bucket, leaving 3,636 records.
+
+Total removed so far: 1,082 records.
 
 These false positives were OSM-derived features, but many were not mapped in OpenStreetMap as `amenity=place_of_worship`. They entered the dataset through broad inclusion rules around weak religious tags and loosely religious building metadata.
 
@@ -110,12 +112,30 @@ These records were not removed because they were definitely not places of worshi
 
 The current manual review queue in `docs/nz-manual-review-queue.md` starts after this second pass.
 
-## Current queue after pass 2
+## Pass 3: obvious non-worship centres in the hall/centre/house bucket
 
-The remaining manual review queue contains 743 records:
+This pass applied one additional narrow exclusion:
+
+- records named `Masonic Centre`
+
+Seven records matched and were removed from the published NZ dataset:
+
+- `Bay of Plenty Masonic Centre`
+- `Whanganui Masonic Centre`
+- `Wairoa Masonic Centre`
+- `Whangarei Masonic Centre`
+- `Morrinsville Masonic Centre`
+- `Northcote Masonic Centre`
+- `Thames Masonic Centre`
+
+These records had generally been tagged as `amenity=place_of_worship` in OSM, but they are not places of worship in the project sense and were better treated as false positives than as ambiguous review candidates.
+
+## Current queue after pass 3
+
+The remaining manual review queue contains 736 records:
 
 - 280 priority 1
-- 385 priority 2
+- 378 priority 2
 - 78 priority 3
 
 ## What this audit does not settle

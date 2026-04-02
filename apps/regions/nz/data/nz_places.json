@@ -37172,27 +37172,6 @@
     }
   },
   {
-    "id": "w364451789",
-    "osm_id": 364451789,
-    "osm_type": "way",
-    "lat": -37.725624381818186,
-    "lng": 176.16839872727272,
-    "name": "Bay of Plenty Masonic Centre",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.85,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes"
-    }
-  },
-  {
     "id": "w364478961",
     "osm_id": 364478961,
     "osm_type": "way",
@@ -39246,27 +39225,6 @@
     }
   },
   {
-    "id": "w370670549",
-    "osm_id": 370670549,
-    "osm_type": "way",
-    "lat": -39.92355868888889,
-    "lng": 175.04741095555556,
-    "name": "Whanganui Masonic Centre",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.85,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes"
-    }
-  },
-  {
     "id": "w370670551",
     "osm_id": 370670551,
     "osm_type": "way",
@@ -40916,27 +40874,6 @@
       "building": "yes",
       "denomination": "catholic",
       "religion": "christian"
-    }
-  },
-  {
-    "id": "w372296073",
-    "osm_id": 372296073,
-    "osm_type": "way",
-    "lat": -39.03388214285714,
-    "lng": 177.41739320000002,
-    "name": "Wairoa Masonic Centre",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.85,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes"
     }
   },
   {
@@ -43147,27 +43084,6 @@
       "building": "yes",
       "denomination": "catholic",
       "religion": "christian"
-    }
-  },
-  {
-    "id": "w376487357",
-    "osm_id": 376487357,
-    "osm_type": "way",
-    "lat": -35.7280016,
-    "lng": 174.3217613,
-    "name": "Whangarei Masonic Centre",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.85,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes"
     }
   },
   {
@@ -46583,27 +46499,6 @@
     }
   },
   {
-    "id": "w388350824",
-    "osm_id": 388350824,
-    "osm_type": "way",
-    "lat": -37.65581854285715,
-    "lng": 175.52812682857143,
-    "name": "Morrinsville Masonic Centre",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.85,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes"
-    }
-  },
-  {
     "id": "w388360735",
     "osm_id": 388360735,
     "osm_type": "way",
@@ -47891,27 +47786,6 @@
       "amenity": "place_of_worship",
       "building": "church",
       "religion": "christian"
-    }
-  },
-  {
-    "id": "w395044544",
-    "osm_id": 395044544,
-    "osm_type": "way",
-    "lat": -36.81533632,
-    "lng": 174.7437541,
-    "name": "Northcote Masonic Centre",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.85,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes"
     }
   },
   {
@@ -58025,27 +57899,6 @@
       "building": "yes",
       "denomination": "protestant",
       "religion": "christian"
-    }
-  },
-  {
-    "id": "w494977685",
-    "osm_id": 494977685,
-    "osm_type": "way",
-    "lat": -37.134723480000005,
-    "lng": 175.54043468,
-    "name": "Thames Masonic Centre",
-    "religion": "unknown",
-    "denomination": "",
-    "confidence": 0.85,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes"
     }
   },
   {

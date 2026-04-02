@@ -46,6 +46,10 @@ INSTITUTIONAL_NAME_PATTERN = re.compile(
     r"\b(school|academy|seminary|college)\b",
     re.IGNORECASE,
 )
+NON_WORSHIP_CENTRE_PATTERN = re.compile(
+    r"\bmasonic centre\b",
+    re.IGNORECASE,
+)
 
 
 def is_nz_coordinate(lat: float, lng: float) -> bool:
@@ -85,6 +89,9 @@ def keep_record(record: dict) -> bool:
 
     # Remove generic worship labels when the record lacks both amenity and building support.
     if GENERIC_WORSHIP_LABEL_PATTERN.search(name) and amenity is None and building is None:
+        return False
+
+    if NON_WORSHIP_CENTRE_PATTERN.search(name):
         return False
 
     # Exclude school-like and seminary-like institutional sites unless a worship

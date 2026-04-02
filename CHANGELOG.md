@@ -4,6 +4,7 @@
 - Added `docs/nz-data-cleanup-audit.md` to record the first NZ false-positive cleanup pass.
 - Added `docs/nz-manual-review-queue.md` and `docs/nz-manual-review-queue.csv` for ambiguous NZ records that need human review.
 - Applied a second NZ cleanup pass to remove low-information placeholder and generic worship-label records.
+- Applied a third NZ cleanup pass to remove seven `Masonic Centre` records from the `hall_centre_house_site` review bucket.
 - Rebuilt `apps/regions/nz/data/ta_aggregated_data.json` from official TA boundaries and Stats NZ religion data.
 - Removed NZ frontend TA code remapping now that TA keys align with official boundary codes.
 - Added a conservative NZ place-cleaning script and removed obvious non-worship records from published NZ datasets.
