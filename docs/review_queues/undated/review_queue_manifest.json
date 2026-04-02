@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-04-02T07:35:42Z",
+  "script": "scripts/build_global_review_queue.py",
+  "input_path": "data/intermediate/global/undated",
+  "countries": [
+    {
+      "country_code": "NZ",
+      "cleaned_file": "data/intermediate/global/undated/nz_places_cleaned.json",
+      "csv_path": "docs/review_queues/undated/nz_review_queue.csv",
+      "md_path": "docs/review_queues/undated/nz_review_queue.md",
+      "cleaned_count": 4632,
+      "review_count": 1438
+    }
+  ]
+}

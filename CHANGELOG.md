@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- Added `scripts/clean_global_places.py` for conservative deterministic cleaning of normalised global country datasets and `scripts/build_global_review_queue.py` for per-country review queues.
+- Added the first global review-queue outputs under `docs/review_queues/undated/` from the existing NZ normalised snapshot.
 - Refactored `scripts/extract_global_data.R` into a raw extractor and added `scripts/normalize_global_places.R` as the first explicit global normalisation stage.
 - Added an audit of `scripts/extract_global_data.R` and a staged draft workflow for global extraction, cleaning, review queues, and publication.
 - Clarified that countries, including NZ, may have multiple coexisting boundary tessellations that are not strictly nested.

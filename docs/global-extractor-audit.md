@@ -185,6 +185,14 @@ The recommended workflow is:
 7. publish
 8. record manifests
 
+Current implementation status:
+
+- stages 1 and 2 are now implemented in `scripts/extract_global_data.R` and
+  `scripts/normalize_global_places.R`
+- stage 3 is now scaffolded in `scripts/clean_global_places.py`
+- stage 5 is now scaffolded in `scripts/build_global_review_queue.py`
+- stages 4, 6, and 7 still need explicit implementation
+
 ## Proposed Stages
 
 ### Stage 1. Raw extraction
