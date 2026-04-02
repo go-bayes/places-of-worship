@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Set `1 September` as the planning anchor date for annual longitudinal snapshots and noted Google Drive as temporary holding rather than the long-term record.
 - Rewrote `PLANNING.md` as the active redevelopment roadmap and planning source of truth.
 - Marked `docs/data-pipeline-architecture.md` as technical reference rather than the active roadmap.
 - Added `docs/nz-data-cleanup-audit.md` to record the first NZ false-positive cleanup pass.

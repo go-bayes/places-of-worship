@@ -35,6 +35,9 @@ As of 2 April 2026:
 - `scripts/extract_global_data.R` is the best starting point for a replacement
   global pipeline, but it still needs explicit cleaning, deduplication, review
   queues, and run manifests.
+- Some source extracts and intermediate files may currently only exist in
+  Google Drive. Treat Google Drive as temporary holding, not the long-term
+  system of record.
 
 ## Redevelopment objective
 
@@ -109,6 +112,8 @@ The working model is:
 - Record retrieval date, source, script path, and pipeline commit for each run.
 - Emit counts and checksums per country.
 - Keep lightweight manifests in-repo.
+- Move from ad hoc Google Drive storage to immutable dated snapshots plus
+  manifests.
 - Store large immutable snapshots and diffs outside the repo when needed.
 - Make it possible to answer:
   - what changed
@@ -118,13 +123,15 @@ The working model is:
 
 ### 5. Define temporal scope before time-slice work begins
 
+- Anchor annual snapshots to `1 September` each year.
 - Decide how to represent:
   - demolished places
   - historical-only places
   - approximate locations
   - renamed congregations in the same structure
   - temporary displacement during reconstruction
-- Choose a snapshot cadence for OSM-based historical analysis.
+- Reprocess all prior annual snapshots whenever the cleaning rules change, so
+  measured differences reflect site change rather than pipeline drift.
 - Keep temporal design compatible with static published outputs and future API
   work.
 
@@ -187,6 +194,14 @@ The deterministic rule classes should be:
 - This includes Chatham Islands Territory.
 - It does not currently include Cook Islands, Niue, or Tokelau.
 
+### Decided: annual snapshot anchor
+
+- Annual longitudinal tracking will be indexed to `1 September`.
+- This is intended to align with the timing of the current data pull, which was
+  likely completed at the end of August.
+- The exact anchor date should remain fixed across years unless there is a
+  documented methodological reason to change it.
+
 ## Open decisions
 
 ### Open: historical and demolished places
@@ -203,6 +218,24 @@ The deterministic rule classes should be:
   - confusion between present and past landscapes
 - Next step:
   - define a location-confidence field and a publication rule.
+
+### Open: long-term snapshot storage
+
+- Context: some current source material may only be stored in Google Drive,
+  which is not suitable as the authoritative long-term archive for yearly
+  tracking.
+- Options:
+  - continue with Google Drive plus manifests
+  - move immutable yearly snapshots to object storage
+  - keep a hybrid model with Drive for working files and object storage for
+    published snapshots
+- Risks:
+  - accidental overwrite
+  - unclear provenance
+  - weak reproducibility
+- Next step:
+  - inventory what currently exists only in Drive and define the canonical
+    snapshot layout.
 
 ### Open: school chapels and institutional worship spaces
 
@@ -251,5 +284,7 @@ The deterministic rule classes should be:
 2. Design the shared global cleaner and review-queue schema.
 3. Refactor `scripts/extract_global_data.R` into explicit extract, normalise,
    clean, and export stages.
-4. Add run manifests and per-country counts.
-5. Pilot the new global pipeline on a small country set before full rollout.
+4. Inventory what is currently stored only in Google Drive and migrate it into
+   a dated snapshot structure.
+5. Add run manifests and per-country counts.
+6. Pilot the new global pipeline on a small country set before full rollout.
