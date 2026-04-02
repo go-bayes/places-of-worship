@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Added an audit of `scripts/extract_global_data.R` and a staged draft workflow for global extraction, cleaning, review queues, and publication.
 - Clarified that countries, including NZ, may have multiple coexisting boundary tessellations that are not strictly nested.
 - Added proposed NZ pilot defaults for fixed-boundary comparison outputs, hybrid site matching, and the minimum country download contract.
 - Added a country backend scheme and decision log for country-specific downloads, area assignment, and temporal tracking.
