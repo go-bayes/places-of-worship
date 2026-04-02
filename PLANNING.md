@@ -148,6 +148,8 @@ The working model is:
 
 - Use NZ as the pilot country, but do not hard-code NZ boundary assumptions into
   the shared data model.
+- Assume that countries may have multiple coexisting tessellations or area
+  systems, including systems that are not strictly nested within one another.
 - Define a generic country backend pattern that separates:
   - site identity
   - yearly site state
@@ -241,6 +243,10 @@ The backend should support at least these output forms:
   richer area and download functionality.
 - Area assignment must be explicit and reproducible. Do not derive it ad hoc in
   the frontend.
+- Countries may have multiple coexisting area tessellations for different
+  purposes such as administration, census, health, education, or electoral
+  analysis.
+- These tessellations may be nested, partially nested, or non-nested.
 - Boundary changes over time must be treated as a methodological issue, not an
   implementation detail.
 - Country-specific geography should be provided by adapters with a shared
@@ -252,7 +258,8 @@ The backend should support at least these output forms:
 ### NZ pilot scope
 
 - One cleaned NZ place dataset
-- One or more NZ boundary sets
+- Multiple NZ boundary sets, including systems that may not be strictly nested
+  within one another
 - One reproducible site-to-area assignment step
 - One country download path
 - One yearly snapshot comparison path anchored to `1 September`
@@ -320,6 +327,16 @@ The backend should support at least these output forms:
 - NZ will be used as the pilot implementation.
 - Area assignment and download products belong in the backend, not only in the
   frontend.
+- The shared model must support multiple coexisting area systems within a
+  country, including non-nested tessellations.
+
+### Decided: multiple area systems within countries
+
+- The project will treat country geography as potentially multi-tessellation.
+- This includes NZ, where different official geographies may coexist for
+  different analytical purposes.
+- A site may therefore need assignments to more than one boundary set for the
+  same snapshot date.
 
 ### Decided: NZ pilot boundary comparison default
 
@@ -416,15 +433,18 @@ The backend should support at least these output forms:
 ### Open: boundary hierarchy contract
 
 - Context: countries have different administrative hierarchies, names, and
-  vintages.
+  vintages, and may also have multiple coexisting tessellations that are not
+  strictly hierarchical.
 - Options:
   - free-form per-country hierarchies
   - standard shared levels plus local aliases
   - strict canonical hierarchy classes with adapter mapping
+  - support parallel boundary families within the same country
 - Risks:
   - loss of country-specific meaning
   - awkward cross-country comparisons
   - brittle backend code
+  - forced false nesting where none exists
 - Next step:
   - choose the boundary metadata fields required across all country adapters.
 

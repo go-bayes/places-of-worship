@@ -22,6 +22,9 @@ Country-specific maps need:
 - demographic and boundary overlays
 - reproducible yearly comparisons
 
+Country geography may involve multiple coexisting tessellations within the same
+country. These may be nested, partially nested, or non-nested.
+
 The backend design should support both without forcing country-specific logic
 into the global storefront.
 
@@ -64,6 +67,9 @@ Minimum fields:
 #### 3. `boundary_set`
 
 Defines a country-specific administrative geography and vintage.
+
+A country may have multiple boundary sets at the same time for different
+purposes. These sets should not be assumed to form one strict hierarchy.
 
 Examples:
 
@@ -147,6 +153,7 @@ The country backend should own:
 - downloadable country extracts
 - provenance and metadata
 - temporal comparison outputs
+- assignment across multiple coexisting boundary sets where needed
 
 The frontend should not be responsible for:
 
@@ -154,6 +161,7 @@ The frontend should not be responsible for:
 - deriving official counts from raw features
 - guessing boundary versions
 - reconstructing provenance
+- inferring false nesting between unrelated boundary systems
 
 ## Recommended country API shape
 
@@ -328,7 +336,7 @@ Recommended NZ pilot default:
 NZ should be used to validate:
 
 - the site and snapshot model
-- one or more boundary sets
+- multiple coexisting boundary sets
 - area assignment logic
 - downloadable extracts
 - yearly `1 September` comparison outputs
