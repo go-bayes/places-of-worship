@@ -144,6 +144,22 @@ The working model is:
 - Treat any Rust API work as a later implementation option, not a prerequisite
   for data cleanup.
 
+### 7. Design the country backend pattern before scaling beyond NZ
+
+- Use NZ as the pilot country, but do not hard-code NZ boundary assumptions into
+  the shared data model.
+- Define a generic country backend pattern that separates:
+  - site identity
+  - yearly site state
+  - boundary definitions
+  - site-to-area assignment
+  - downloadable products
+- Treat country-specific geography as adapter logic, not as the core schema.
+- Make the backend able to serve both:
+  - map-ready responses
+  - downloadable tabular and spatial outputs
+- Keep country-level downloads compatible with future temporal comparisons.
+
 ## Deterministic cleaning strategy
 
 The default policy should be:
@@ -180,6 +196,89 @@ The deterministic rule classes should be:
   - retreat and prayer sites
   - historically ambiguous records
 
+## Country backend scheme
+
+Detailed reference: `docs/country-backend-scheme.md`.
+
+The country-specific backend should be organised around the following entities:
+
+- `site`
+  - stable internal identifier for the place of worship
+  - should not depend solely on a current OSM object id
+- `site_snapshot`
+  - the state of a site as of `1 September YYYY`
+  - includes name, denomination, status, geometry, confidence, and source links
+- `boundary_set`
+  - identifies a country-specific administrative geography and vintage
+  - examples: NZ TA 2025, NZ SA2 2018, UK LAD 2023
+- `area_unit`
+  - a single area within a boundary set
+  - includes code, name, level, parent linkage, and geometry
+- `site_area_assignment`
+  - links a site snapshot to an area unit under a specific boundary set
+  - must be date-aware or boundary-set-aware
+- `manual_override`
+  - reviewed corrections, inclusions, exclusions, and status fixes
+- `run_manifest`
+  - records source snapshot, pipeline version, counts, checksums, and outputs
+
+The backend should produce four kinds of country outputs:
+
+- cleaned site rows
+- area-level summaries
+- downloadable extracts
+- metadata and provenance files
+
+The backend should support at least these output forms:
+
+- CSV for downloads and statistical work
+- GeoJSON or Parquet for spatial work
+- metadata JSON for provenance and reproducibility
+
+## Country backend design principles
+
+- The global map and country maps can share site data, but country backends need
+  richer area and download functionality.
+- Area assignment must be explicit and reproducible. Do not derive it ad hoc in
+  the frontend.
+- Boundary changes over time must be treated as a methodological issue, not an
+  implementation detail.
+- Country-specific geography should be provided by adapters with a shared
+  contract.
+- NZ is the pilot implementation, not the universal template.
+
+## Country backend pilot plan
+
+### NZ pilot scope
+
+- One cleaned NZ place dataset
+- One or more NZ boundary sets
+- One reproducible site-to-area assignment step
+- One country download path
+- One yearly snapshot comparison path anchored to `1 September`
+
+### Shared contract to define now
+
+- `country_code`
+- `boundary_level`
+- `boundary_set_id`
+- `area_unit_id`
+- `site_id`
+- `site_snapshot_id`
+- `snapshot_date`
+- `status`
+- `location_confidence`
+- `assignment_method`
+
+### Backend product types to support
+
+- raw country place download
+- cleaned country place download
+- area summary download
+- area-by-religion summary download
+- review-queue export
+- run manifest and metadata export
+
 ## Scope decisions
 
 ### Decided: unit of analysis
@@ -202,6 +301,14 @@ The deterministic rule classes should be:
 - The exact anchor date should remain fixed across years unless there is a
   documented methodological reason to change it.
 
+### Decided: country backend strategy
+
+- Country-specific backends will be built around a shared schema plus
+  country-specific boundary adapters.
+- NZ will be used as the pilot implementation.
+- Area assignment and download products belong in the backend, not only in the
+  frontend.
+
 ## Open decisions
 
 ### Open: historical and demolished places
@@ -218,6 +325,66 @@ The deterministic rule classes should be:
   - confusion between present and past landscapes
 - Next step:
   - define a location-confidence field and a publication rule.
+
+### Open: boundary comparability over time
+
+- Context: country area units change across years, but longitudinal analysis
+  needs comparability.
+- Options:
+  - use fixed boundary sets for all yearly comparisons
+  - use year-specific boundaries plus crosswalks
+  - publish both fixed-boundary and native-boundary outputs
+- Risks:
+  - false comparability
+  - complicated interpretation
+  - duplicated maintenance burden
+- Next step:
+  - decide the default comparison policy before building longitudinal downloads.
+
+### Open: site identity matching across years
+
+- Context: OSM objects can split, merge, move, or be renamed, so a stable
+  longitudinal site identity cannot rely on a single source id.
+- Options:
+  - derive internal site ids from matching rules
+  - curate manual identity links for difficult cases
+  - hybrid model with deterministic matching plus reviewed overrides
+- Risks:
+  - false splits or false merges
+  - unstable longitudinal counts
+  - hidden manual judgement
+- Next step:
+  - define the first site-matching strategy for the NZ pilot.
+
+### Open: country download contract
+
+- Context: country maps will need downloadable data for sites nested within
+  country-specific area units.
+- Options:
+  - provide raw sites only
+  - provide cleaned sites plus precomputed area summaries
+  - provide both machine-oriented and analyst-oriented download products
+- Risks:
+  - oversized downloads
+  - unclear provenance
+  - inconsistent country coverage
+- Next step:
+  - define the minimum download set for the NZ backend pilot.
+
+### Open: boundary hierarchy contract
+
+- Context: countries have different administrative hierarchies, names, and
+  vintages.
+- Options:
+  - free-form per-country hierarchies
+  - standard shared levels plus local aliases
+  - strict canonical hierarchy classes with adapter mapping
+- Risks:
+  - loss of country-specific meaning
+  - awkward cross-country comparisons
+  - brittle backend code
+- Next step:
+  - choose the boundary metadata fields required across all country adapters.
 
 ### Open: long-term snapshot storage
 
@@ -287,4 +454,6 @@ The deterministic rule classes should be:
 4. Inventory what is currently stored only in Google Drive and migrate it into
    a dated snapshot structure.
 5. Add run manifests and per-country counts.
-6. Pilot the new global pipeline on a small country set before full rollout.
+6. Define the shared country backend schema and NZ boundary adapter contract.
+7. Define the minimum NZ download products and area-summary outputs.
+8. Pilot the new global pipeline on a small country set before full rollout.
