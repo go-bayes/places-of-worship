@@ -37,6 +37,15 @@ EXCLUDED_NAME_PATTERN = re.compile(
     r"\b(cemetery|burial|urupa|office|residence|pub|kindergarten)\b",
     re.IGNORECASE,
 )
+PLACEHOLDER_NAME_PATTERN = re.compile(r"^Place of Worship \d+$")
+GENERIC_WORSHIP_LABEL_PATTERN = re.compile(
+    r"^(Christian|Anglican|Roman_Catholic|Jewish|Sikh|Mormon|Methodist|Lutheran) Place of Worship$",
+    re.IGNORECASE,
+)
+INSTITUTIONAL_NAME_PATTERN = re.compile(
+    r"\b(school|academy|seminary|college)\b",
+    re.IGNORECASE,
+)
 
 
 def is_nz_coordinate(lat: float, lng: float) -> bool:
@@ -69,6 +78,22 @@ def keep_record(record: dict) -> bool:
 
     if EXCLUDED_NAME_PATTERN.search(name):
         return False
+
+    # Remove low-information placeholders that have no supporting OSM tags at all.
+    if PLACEHOLDER_NAME_PATTERN.search(name) and not tags:
+        return False
+
+    # Remove generic worship labels when the record lacks both amenity and building support.
+    if GENERIC_WORSHIP_LABEL_PATTERN.search(name) and amenity is None and building is None:
+        return False
+
+    # Exclude school-like and seminary-like institutional sites unless a worship
+    # space is separately mapped as a chapel or explicit place_of_worship.
+    if INSTITUTIONAL_NAME_PATTERN.search(name):
+        chapel_like = "chapel" in name.lower() or building == "chapel"
+        explicit_worship_space = amenity == "place_of_worship"
+        if not chapel_like and not explicit_worship_space:
+            return False
 
     return True
 

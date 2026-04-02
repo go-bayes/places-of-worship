@@ -8,17 +8,17 @@ Source file: `apps/regions/nz/data/nz_places.json`
 
 ## Summary
 
-- current NZ dataset size: 4621
-- queued for manual review: 1721
-- priority 1 records: 1258
+- current NZ dataset size: 3643
+- queued for manual review: 743
+- priority 1 records: 280
 - priority 2 records: 385
 - priority 3 records: 78
 
 ## Categories
 
-- `generic_worship_label`: 143
-- `institutional_site`: 14
-- `placeholder_name`: 1101
+- `generic_worship_label`: 78
+- `institutional_site`: 7
+- `placeholder_name`: 195
 - `hall_centre_house_site`: 374
 - `retreat_or_prayer_site`: 11
 - `missing_core_tags`: 78
@@ -33,14 +33,14 @@ Source file: `apps/regions/nz/data/nz_places.json`
 
 ### generic_worship_label
 
-- `Anglican Place of Worship` (w1050833846)
-- `Anglican Place of Worship` (w1104946218)
-- `Anglican Place of Worship` (w1105627462)
-- `Anglican Place of Worship` (w1105804402)
-- `Anglican Place of Worship` (w1106120507)
-- `Anglican Place of Worship` (w1257160871)
-- `Anglican Place of Worship` (w1338576724)
-- `Anglican Place of Worship` (w13913942)
+- `Anglican Place of Worship` (w373165224)
+- `Anglican Place of Worship` (w650941166)
+- `Anglican Place of Worship` (w778232407)
+- `Christian Place of Worship` (n3461337567)
+- `Christian Place of Worship` (n4170652906)
+- `Christian Place of Worship` (n4170652907)
+- `Christian Place of Worship` (n5546977389)
+- `Christian Place of Worship` (n7264926466)
 
 ### institutional_site
 
@@ -49,20 +49,19 @@ Source file: `apps/regions/nz/data/nz_places.json`
 - `Catholic Cathedral College Chapel` (w1027560212)
 - `Christ's College Chapel` (w504382170)
 - `Craighead Diocesan School Chapel` (w412567214)
-- `Former Saint Joseph's School` (w985269936)
-- `Fowey Lodge Bible School` (w780385239)
-- `Holy Cross Seminary` (w318679164)
+- `Sacred Heart Chapel (remaining part of Erskine College)` (w670185293)
+- `Saint John's College Chapel` (w289994446)
 
 ### placeholder_name
 
-- `Place of Worship 1004694318` (w1004694318)
-- `Place of Worship 1006463455` (w1006463455)
-- `Place of Worship 1009493628` (w1009493628)
-- `Place of Worship 1009493629` (w1009493629)
-- `Place of Worship 1011543746` (w1011543746)
-- `Place of Worship 1012996500` (w1012996500)
-- `Place of Worship 1013380435` (w1013380435)
-- `Place of Worship 1013380436` (w1013380436)
+- `Place of Worship 1051810034` (w1051810034)
+- `Place of Worship 1205663183` (w1205663183)
+- `Place of Worship 1207073636` (w1207073636)
+- `Place of Worship 128976134` (w128976134)
+- `Place of Worship 1298726613` (w1298726613)
+- `Place of Worship 13078926467` (n13078926467)
+- `Place of Worship 169261262` (w169261262)
+- `Place of Worship 223255811` (w223255811)
 
 ### hall_centre_house_site
 

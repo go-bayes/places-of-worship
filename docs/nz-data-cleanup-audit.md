@@ -2,7 +2,7 @@
 
 ## Scope
 
-This note records the first conservative cleanup pass over the committed New Zealand places dataset in April 2026.
+This note records the staged cleanup passes over the committed New Zealand places dataset in April 2026.
 
 Files affected:
 
@@ -15,11 +15,15 @@ The aim of this pass was narrow: remove obvious false positives while preserving
 
 The pre-cleanup NZ dataset contained 4,718 records.
 
-The cleanup removed 97 records, leaving 4,621 records.
+Pass 1 removed 97 obvious false positives, leaving 4,621 records.
+
+Pass 2 removed a further 978 low-information and institutional priority-1 records, leaving 3,643 records.
+
+Total removed so far: 1,075 records.
 
 These false positives were OSM-derived features, but many were not mapped in OpenStreetMap as `amenity=place_of_worship`. They entered the dataset through broad inclusion rules around weak religious tags and loosely religious building metadata.
 
-## Main false-positive classes
+## Pass 1: obvious false positives
 
 Removal counts by amenity tag:
 
@@ -82,7 +86,7 @@ Other obvious false positives:
 - `Christian Place of Worship`
 - `Kāhui St David's`
 
-## Current rule set
+## Pass 1 rule set
 
 The conservative cleanup pass removes records when any of the following are true:
 
@@ -93,6 +97,26 @@ The conservative cleanup pass removes records when any of the following are true
 - the record name contains one of: `cemetery`, `burial`, `urupa`, `office`, `residence`, `pub`, `kindergarten`
 
 In code, the name-pattern filter uses the ordinary spelling `cemetery`.
+
+## Pass 2: low-information priority-1 records
+
+This pass removed three narrow classes from the retained NZ dataset:
+
+- 906 placeholder-name records of the form `Place of Worship <id>` where `tags_raw` was empty
+- 65 generic labels such as `Christian Place of Worship` or `Anglican Place of Worship` where both `amenity` and `building` were missing
+- 7 school-like or seminary-like institutional sites that were not separately mapped as chapels or explicit `place_of_worship` features
+
+These records were not removed because they were definitely not places of worship. They were removed because they carried too little supporting information to justify keeping them in the published dataset ahead of better-documented sites.
+
+The current manual review queue in `docs/nz-manual-review-queue.md` starts after this second pass.
+
+## Current queue after pass 2
+
+The remaining manual review queue contains 743 records:
+
+- 280 priority 1
+- 385 priority 2
+- 78 priority 3
 
 ## What this audit does not settle
 

@@ -1,53 +1,21 @@
 priority,category,id,name,religion,denomination,address,amenity,building,country_code,lat,lng,tags_raw
-1,generic_worship_label,w1050833846,Anglican Place of Worship,christian,anglican,,,,NZ,-43.51191757,172.56362383,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w1104946218,Anglican Place of Worship,christian,anglican,,,,NZ,-43.83663978571428,172.31499104285714,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w1105627462,Anglican Place of Worship,christian,anglican,,,,NZ,-43.67219446,172.65953566000002,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w1105804402,Anglican Place of Worship,christian,anglican,,,,NZ,-43.701595,172.61821984999997,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w1106120507,Anglican Place of Worship,christian,anglican,,,,NZ,-43.71062224,173.03961532,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w1257160871,Anglican Place of Worship,christian,anglican,,,,NZ,-36.029210539999994,173.92217714,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w1338576724,Anglican Place of Worship,christian,anglican,,,,NZ,-36.92257686923077,174.78471783846152,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w13913942,Anglican Place of Worship,christian,anglican,,,,NZ,-43.29570701111111,172.59528464444443,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w352551485,Anglican Place of Worship,christian,anglican,,,,NZ,-43.601811485714286,172.721284,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w356571382,Anglican Place of Worship,christian,anglican,,,,NZ,-41.27634123571429,174.78034642857142,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
 1,generic_worship_label,w373165224,Anglican Place of Worship,christian,anglican,,place_of_worship,yes,NZ,-39.64161234615384,176.83980355384617,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w392752007,Anglican Place of Worship,christian,anglican,,,,NZ,-36.88501406666666,174.7788179833333,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w466054041,Anglican Place of Worship,christian,anglican,,,,NZ,-41.182049277272725,174.96036724545453,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w518024793,Anglican Place of Worship,christian,anglican,,,,NZ,-37.82967387777777,175.35736663333333,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w547011542,Anglican Place of Worship,christian,anglican,,,,NZ,-42.11783434,171.86683743999998,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w589814675,Anglican Place of Worship,christian,anglican,,,,NZ,-41.18202822272727,174.96033551818184,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
 1,generic_worship_label,w650941166,Anglican Place of Worship,christian,anglican,"12A Cemetery Road, East Taieri, 9024",place_of_worship,yes,NZ,-45.89002964,170.34499638,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""denomination"": ""anglican"", ""religion"": ""christian""}"
 1,generic_worship_label,w778232407,Anglican Place of Worship,christian,anglican,,place_of_worship,yes,NZ,-41.143267675,175.035726355,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w787357115,Anglican Place of Worship,christian,anglican,,,,NZ,-41.1297541375,174.834171375,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w817432223,Anglican Place of Worship,christian,anglican,,,,NZ,-43.552027942857144,172.59850357142858,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w854212691,Anglican Place of Worship,christian,anglican,,,,NZ,-43.55845319375,172.619539825,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w904326451,Anglican Place of Worship,christian,anglican,,,,NZ,-36.97046818888889,174.79650656666666,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,generic_worship_label,w963061687,Anglican Place of Worship,christian,anglican,,,,NZ,-43.53226706785715,172.6431468,"{""denomination"": ""anglican"", ""religion"": ""christian""}"
 1,generic_worship_label,n3461337567,Christian Place of Worship,christian,,,place_of_worship,,NZ,-46.6330164,168.8822447,"{""amenity"": ""place_of_worship"", ""religion"": ""christian""}"
 1,generic_worship_label,n4170652906,Christian Place of Worship,christian,,,place_of_worship,,NZ,-45.4700867,168.6834278,"{""amenity"": ""place_of_worship"", ""religion"": ""christian""}"
 1,generic_worship_label,n4170652907,Christian Place of Worship,christian,,,place_of_worship,,NZ,-45.4690009,168.684248,"{""amenity"": ""place_of_worship"", ""religion"": ""christian""}"
-1,generic_worship_label,n4996041556,Christian Place of Worship,christian,,"280 South Road, Masterton, 5882",,,NZ,-40.7654817,175.6831902,"{""religion"": ""christian""}"
 1,generic_worship_label,n5546977389,Christian Place of Worship,christian,,282 Cuba Street,place_of_worship,,NZ,-40.3549965,175.6093028,"{""amenity"": ""place_of_worship"", ""religion"": ""christian""}"
 1,generic_worship_label,n7264926466,Christian Place of Worship,christian,,,place_of_worship,,NZ,-40.4714208,175.2808504,"{""amenity"": ""place_of_worship"", ""religion"": ""christian""}"
-1,generic_worship_label,w1015345982,Christian Place of Worship,christian,,,,,NZ,-43.53864465,172.68020623333334,"{""religion"": ""christian""}"
-1,generic_worship_label,w1018158945,Christian Place of Worship,christian,,,,,NZ,-43.52624278333334,172.6400166,"{""religion"": ""christian""}"
 1,generic_worship_label,w1031539468,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-41.088047800000005,176.07121716,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
 1,generic_worship_label,w1051964061,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-36.9510788,175.10460558,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
 1,generic_worship_label,w1065720932,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-35.316518493333334,173.87509168,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
-1,generic_worship_label,w1065754637,Christian Place of Worship,christian,,,,,NZ,-35.31620981428571,173.87489607142857,"{""religion"": ""christian""}"
 1,generic_worship_label,w1086030686,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-45.38207753333333,170.42723874444445,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
 1,generic_worship_label,w1097886833,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-37.056804955555556,174.95676781666668,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
 1,generic_worship_label,w1100789591,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-39.02387609090909,177.39437458181817,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
-1,generic_worship_label,w1101443073,Christian Place of Worship,christian,,,,,NZ,-37.70116732,176.15738546,"{""religion"": ""christian""}"
 1,generic_worship_label,w110892198,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-36.97236598,174.84402486000002,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
-1,generic_worship_label,w1162044955,Christian Place of Worship,christian,,,,,NZ,-37.687550075,176.10920627500002,"{""religion"": ""christian""}"
 1,generic_worship_label,w1201555829,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-35.831451828571424,174.04573412857144,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
-1,generic_worship_label,w1217000545,Christian Place of Worship,christian,,,,,NZ,-39.94700972,175.1450419,"{""religion"": ""christian""}"
-1,generic_worship_label,w1221701985,Christian Place of Worship,christian,,,,,NZ,-39.42772436,174.14872788,"{""religion"": ""christian""}"
-1,generic_worship_label,w1263367299,Christian Place of Worship,christian,,,,,NZ,-46.89997758888889,168.12853966666665,"{""religion"": ""christian""}"
-1,generic_worship_label,w1263662055,Christian Place of Worship,christian,,,,,NZ,-46.896502983333335,168.12982848333334,"{""religion"": ""christian""}"
-1,generic_worship_label,w1285783223,Christian Place of Worship,christian,,,,,NZ,-43.508052311111115,172.63086855555557,"{""religion"": ""christian""}"
 1,generic_worship_label,w128973961,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-36.797935018749996,174.752513475,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
-1,generic_worship_label,w1311649498,Christian Place of Worship,christian,,,,,NZ,-43.48372162857142,172.56836807142855,"{""religion"": ""christian""}"
 1,generic_worship_label,w1315621914,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-35.677223088888894,174.3412846,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
 1,generic_worship_label,w1333333885,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-36.88399635555555,174.86010016666668,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
 1,generic_worship_label,w1365681815,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-43.53147159411765,172.6574472882353,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
@@ -81,7 +49,6 @@ priority,category,id,name,religion,denomination,address,amenity,building,country
 1,generic_worship_label,w372296286,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-39.0376493,177.41697104444447,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
 1,generic_worship_label,w374226186,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-40.94647734,175.67608004000002,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
 1,generic_worship_label,w382207476,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-45.8618113,170.48039346000002,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
-1,generic_worship_label,w384923499,Christian Place of Worship,christian,,,,,NZ,-45.01918165,168.7322446,"{""religion"": ""christian""}"
 1,generic_worship_label,w390356751,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-41.26010413333333,174.94069872222224,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
 1,generic_worship_label,w394292965,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-43.67020181111111,172.56367733333335,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
 1,generic_worship_label,w396336797,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-41.17867882,174.8258037,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
@@ -106,535 +73,72 @@ priority,category,id,name,religion,denomination,address,amenity,building,country
 1,generic_worship_label,w754822669,Christian Place of Worship,christian,,2 Devon Street,place_of_worship,yes,NZ,-46.09880702307692,168.94027331538462,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
 1,generic_worship_label,w765545432,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-39.08802834444444,177.91774394444442,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
 1,generic_worship_label,w767997302,Christian Place of Worship,christian,,,place_of_worship,yes,NZ,-37.72487494,176.19336914000002,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""christian""}"
-1,generic_worship_label,w769220754,Christian Place of Worship,christian,,,,,NZ,-44.94040056,168.82866928,"{""religion"": ""christian""}"
-1,generic_worship_label,w828102289,Christian Place of Worship,christian,,,,,NZ,-36.86985458181818,174.76534988181817,"{""religion"": ""christian""}"
-1,generic_worship_label,w844439952,Christian Place of Worship,christian,,,,,NZ,-36.886780779999995,174.77492544,"{""religion"": ""christian""}"
-1,generic_worship_label,w851969150,Christian Place of Worship,christian,,,,,NZ,-36.76434701666667,174.71583240833334,"{""religion"": ""christian""}"
-1,generic_worship_label,w871132972,Christian Place of Worship,christian,,,,,NZ,-36.89780274,174.83947474,"{""religion"": ""christian""}"
-1,generic_worship_label,w871132973,Christian Place of Worship,christian,,,,,NZ,-36.8998866,174.8504549333333,"{""religion"": ""christian""}"
-1,generic_worship_label,w871132977,Christian Place of Worship,christian,,,,,NZ,-36.89526364,174.8563253,"{""religion"": ""christian""}"
-1,generic_worship_label,w871132978,Christian Place of Worship,christian,,,,,NZ,-36.89908688333333,174.85499021666666,"{""religion"": ""christian""}"
-1,generic_worship_label,w888516303,Christian Place of Worship,christian,,,,,NZ,-36.9070119,174.74047642,"{""religion"": ""christian""}"
-1,generic_worship_label,w904086988,Christian Place of Worship,christian,,,,,NZ,-36.949287975,174.90246027499998,"{""religion"": ""christian""}"
-1,generic_worship_label,w908526046,Christian Place of Worship,christian,,,,,NZ,-36.84043305454546,174.5997487,"{""religion"": ""christian""}"
-1,generic_worship_label,w984776648,Christian Place of Worship,christian,,,,,NZ,-37.17883715714286,174.98283847142855,"{""religion"": ""christian""}"
-1,generic_worship_label,w993784485,Christian Place of Worship,christian,,,,,NZ,-40.36819108888889,175.594602,"{""religion"": ""christian""}"
-1,generic_worship_label,w993785191,Christian Place of Worship,christian,,,,,NZ,-40.36983925384615,175.59526963076922,"{""religion"": ""christian""}"
-1,generic_worship_label,w726550121,Jewish Place of Worship,jewish,,,,,NZ,-36.88267048,174.77608402,"{""religion"": ""jewish""}"
-1,generic_worship_label,w44706398,Lutheran Place of Worship,christian,lutheran,,,,NZ,-40.22476305,175.556828,"{""denomination"": ""lutheran"", ""religion"": ""christian""}"
-1,generic_worship_label,w1007281031,Methodist Place of Worship,christian,methodist,,,,NZ,-40.36681490625,175.59654221875,"{""denomination"": ""methodist"", ""religion"": ""christian""}"
-1,generic_worship_label,w851928847,Methodist Place of Worship,christian,methodist,,,,NZ,-37.02312682352941,174.89900510588237,"{""denomination"": ""methodist"", ""religion"": ""christian""}"
-1,generic_worship_label,w1226340481,Mormon Place of Worship,christian,mormon,,,,NZ,-40.452249699999996,175.8438764625,"{""denomination"": ""mormon"", ""religion"": ""christian""}"
 1,generic_worship_label,w374226171,Mormon Place of Worship,christian,mormon,,place_of_worship,yes,NZ,-40.942498763636365,175.67024525454545,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""denomination"": ""mormon"", ""religion"": ""christian""}"
 1,generic_worship_label,w614167470,Mormon Place of Worship,christian,mormon,,place_of_worship,,NZ,-37.7105239625,176.147044375,"{""amenity"": ""place_of_worship"", ""denomination"": ""mormon"", ""religion"": ""christian""}"
 1,generic_worship_label,w756152387,Mormon Place of Worship,christian,mormon,,place_of_worship,yes,NZ,-46.38046988181818,168.34799453636364,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""denomination"": ""mormon"", ""religion"": ""christian""}"
-1,generic_worship_label,w101967206,Roman_Catholic Place of Worship,christian,roman_catholic,,,,NZ,-43.60123488461538,172.72193456923077,"{""denomination"": ""roman_catholic"", ""religion"": ""christian""}"
-1,generic_worship_label,w1026218894,Roman_Catholic Place of Worship,christian,roman_catholic,,,,NZ,-40.22017685714286,175.57156778571428,"{""denomination"": ""roman_catholic"", ""religion"": ""christian""}"
-1,generic_worship_label,w1115095114,Roman_Catholic Place of Worship,christian,roman_catholic,,,,NZ,-37.56339376428571,175.15897492142858,"{""denomination"": ""roman_catholic"", ""religion"": ""christian""}"
-1,generic_worship_label,w1226340480,Roman_Catholic Place of Worship,christian,roman_catholic,,,,NZ,-40.45295115789474,175.84498939473684,"{""denomination"": ""roman_catholic"", ""religion"": ""christian""}"
-1,generic_worship_label,w1348643063,Roman_Catholic Place of Worship,christian,roman_catholic,,,,NZ,-40.54159026,176.1903825,"{""denomination"": ""roman_catholic"", ""religion"": ""christian""}"
-1,generic_worship_label,w1348643064,Roman_Catholic Place of Worship,christian,roman_catholic,,,,NZ,-40.64577833333333,175.70739125,"{""denomination"": ""roman_catholic"", ""religion"": ""christian""}"
-1,generic_worship_label,w547010340,Roman_Catholic Place of Worship,christian,roman_catholic,,,,NZ,-41.75539954285715,171.60233155714286,"{""denomination"": ""roman_catholic"", ""religion"": ""christian""}"
-1,generic_worship_label,w547011541,Roman_Catholic Place of Worship,christian,roman_catholic,,,,NZ,-42.118436880000004,171.86715082,"{""denomination"": ""roman_catholic"", ""religion"": ""christian""}"
-1,generic_worship_label,w730428611,Roman_Catholic Place of Worship,christian,roman_catholic,,,,NZ,-40.35153896052632,175.61677764210526,"{""denomination"": ""roman_catholic"", ""religion"": ""christian""}"
-1,generic_worship_label,w929517959,Roman_Catholic Place of Worship,christian,roman_catholic,,,,NZ,-37.88055179,174.86500617,"{""denomination"": ""roman_catholic"", ""religion"": ""christian""}"
-1,generic_worship_label,w929517960,Roman_Catholic Place of Worship,christian,roman_catholic,,,,NZ,-37.88060204,174.86513196,"{""denomination"": ""roman_catholic"", ""religion"": ""christian""}"
-1,generic_worship_label,w994104771,Roman_Catholic Place of Worship,christian,roman_catholic,,,,NZ,-40.35154810555556,175.6167707222222,"{""denomination"": ""roman_catholic"", ""religion"": ""christian""}"
 1,generic_worship_label,w440933150,Sikh Place of Worship,sikh,,,place_of_worship,yes,NZ,-37.19032957647059,174.9826536117647,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""religion"": ""sikh""}"
-1,generic_worship_label,w993784347,Sikh Place of Worship,sikh,,,,,NZ,-40.372549516666666,175.60105839166667,"{""religion"": ""sikh""}"
 1,institutional_site,w222749634,Arataki School Hall,christian,apostolic,"4 Kaimanawa Street, Tauranga, 3116",place_of_worship,yes,NZ,-37.6752661,176.23128690000001,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""denomination"": ""apostolic"", ""religion"": ""christian""}"
 1,institutional_site,w927686244,Bishop Viard College Chapel,christian,catholic,,place_of_worship,yes,NZ,-41.13904229333333,174.84048207333333,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""denomination"": ""catholic"", ""religion"": ""christian""}"
 1,institutional_site,w1027560212,Catholic Cathedral College Chapel,unknown,,,,chapel,NZ,-43.53852374,172.64841705999999,"{""building"": ""chapel""}"
 1,institutional_site,w504382170,Christ's College Chapel,unknown,,,,chapel,NZ,-43.530431454838705,172.6264819548387,"{""building"": ""chapel""}"
 1,institutional_site,w412567214,Craighead Diocesan School Chapel,christian,anglican,Kitchener Square,place_of_worship,yes,NZ,-44.38748079230769,171.22598973846152,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""denomination"": ""anglican"", ""religion"": ""christian""}"
-1,institutional_site,w985269936,Former Saint Joseph's School,christian,roman_catholic,,,,NZ,-45.82071897894737,170.62124,"{""denomination"": ""roman_catholic"", ""religion"": ""christian""}"
-1,institutional_site,w780385239,Fowey Lodge Bible School,unknown,,"215 Bleakhouse Road, Auckland",,,NZ,-36.880830700000004,174.92548812,{}
-1,institutional_site,w318679164,Holy Cross Seminary,christian,roman_catholic,,seminary,,NZ,-36.85363314285714,174.74299782857142,"{""amenity"": ""seminary"", ""denomination"": ""roman_catholic"", ""religion"": ""christian""}"
-1,institutional_site,w228041771,Maharishi Vedic Academy,unknown,,,,,NZ,-36.60117375,174.65794957307693,{}
-1,institutional_site,n5415651898,Marist School Mt Albert,christian,catholic,"14 Kitenui Avenue, Auckland, 1025",,,NZ,-36.8806798,174.7254233,"{""denomination"": ""catholic"", ""religion"": ""christian""}"
-1,institutional_site,w378209825,Miramar Christian School,christian,,41 Camperdown Road,,,NZ,-41.30641074166667,174.82519306666666,"{""religion"": ""christian""}"
 1,institutional_site,w670185293,Sacred Heart Chapel (remaining part of Erskine College),christian,catholic,"24 Erica Pabst Way, Wellington, 6023",place_of_worship,yes,NZ,-41.333593015999995,174.777701048,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""denomination"": ""catholic"", ""religion"": ""christian""}"
 1,institutional_site,w289994446,Saint John's College Chapel,christian,anglican;methodist,,place_of_worship,yes,NZ,-36.87376665294118,174.84144921764704,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""denomination"": ""anglican;methodist"", ""religion"": ""christian""}"
-1,institutional_site,w370670389,St Anthony's School,christian,roman_catholic,,,yes,NZ,-39.93944967368421,175.0238216105263,"{""building"": ""yes"", ""denomination"": ""roman_catholic"", ""religion"": ""christian""}"
-1,placeholder_name,w1004694318,Place of Worship 1004694318,unknown,,,,,NZ,-34.65753024285714,172.96794764285713,{}
-1,placeholder_name,w1006463455,Place of Worship 1006463455,unknown,,,,,NZ,-43.51943134,172.5964907,{}
-1,placeholder_name,w1009493628,Place of Worship 1009493628,unknown,,,,,NZ,-41.111457085714285,174.8375848,{}
-1,placeholder_name,w1009493629,Place of Worship 1009493629,unknown,,,,,NZ,-41.1112317375,174.8404225875,{}
-1,placeholder_name,w1011543746,Place of Worship 1011543746,unknown,,,,,NZ,-36.9645972,174.783863725,{}
-1,placeholder_name,w1012996500,Place of Worship 1012996500,unknown,,,,,NZ,-40.33633526,175.86672228,{}
-1,placeholder_name,w1013380435,Place of Worship 1013380435,unknown,,,,,NZ,-43.55759732857143,172.64875325714289,{}
-1,placeholder_name,w1013380436,Place of Worship 1013380436,unknown,,,,,NZ,-43.5560775,172.64845545882352,{}
-1,placeholder_name,w1013847461,Place of Worship 1013847461,unknown,,,,,NZ,-43.54925373636364,172.65203808181818,{}
-1,placeholder_name,w1016659794,Place of Worship 1016659794,unknown,,,,,NZ,-43.560640469999996,172.58746873,{}
-1,placeholder_name,w1018477732,Place of Worship 1018477732,unknown,,,,,NZ,-40.450315044444444,175.83890427777777,{}
-1,placeholder_name,w1018683031,Place of Worship 1018683031,unknown,,,,,NZ,-42.94030202857142,171.56181601428574,{}
-1,placeholder_name,w1023791375,Place of Worship 1023791375,unknown,,,,,NZ,-41.02716408,175.52437274,{}
-1,placeholder_name,w1023818105,Place of Worship 1023818105,unknown,,,,,NZ,-40.96300622,175.61977122000002,{}
-1,placeholder_name,w1024110478,Place of Worship 1024110478,unknown,,,,,NZ,-40.94648942,175.6761218,{}
-1,placeholder_name,w1024110492,Place of Worship 1024110492,unknown,,,,,NZ,-40.96268354,175.62309952,{}
-1,placeholder_name,w1024118517,Place of Worship 1024118517,unknown,,,,,NZ,-37.034426841666665,174.86076284166666,{}
-1,placeholder_name,w1024712182,Place of Worship 1024712182,unknown,,,,,NZ,-40.90294625833334,176.22695306666665,{}
-1,placeholder_name,w1028208049,Place of Worship 1028208049,unknown,,,,,NZ,-43.521387742857144,172.53878494285715,{}
-1,placeholder_name,w1031559026,Place of Worship 1031559026,unknown,,,,,NZ,-41.08805603333333,176.07125286666667,{}
-1,placeholder_name,w1035592156,Place of Worship 1035592156,unknown,,,,,NZ,-43.49166658461539,172.10493128461536,{}
-1,placeholder_name,w1039173534,Place of Worship 1039173534,unknown,,,,,NZ,-43.48905952727272,172.11516505454546,{}
-1,placeholder_name,w1039265654,Place of Worship 1039265654,unknown,,,,,NZ,-41.28717472,174.77246945,{}
-1,placeholder_name,w1039457701,Place of Worship 1039457701,unknown,,,,,NZ,-36.9653651,174.81068679999998,{}
-1,placeholder_name,w1040467256,Place of Worship 1040467256,unknown,,,,,NZ,-43.519265358333335,171.94598655000001,{}
-1,placeholder_name,w1041576038,Place of Worship 1041576038,unknown,,,,,NZ,-36.895027962499995,174.701354575,{}
-1,placeholder_name,w1043374268,Place of Worship 1043374268,unknown,,,,,NZ,-36.97213095625,174.8440021,{}
-1,placeholder_name,w1044294151,Place of Worship 1044294151,unknown,,,,,NZ,-43.539579356000004,172.657640012,{}
-1,placeholder_name,w1049606956,Place of Worship 1049606956,unknown,,,,,NZ,-43.514159666666664,172.6334695888889,{}
-1,placeholder_name,w1050692022,Place of Worship 1050692022,unknown,,,,,NZ,-45.90129324,170.42366416,{}
-1,placeholder_name,w1051259641,Place of Worship 1051259641,unknown,,,,,NZ,-37.22777131666667,175.02844926666668,{}
-1,placeholder_name,w1051810033,Place of Worship 1051810033,unknown,,,,,NZ,-43.509821650000006,172.56302404000002,{}
 1,placeholder_name,w1051810034,Place of Worship 1051810034,unknown,,,place_of_worship,yes,NZ,-43.50978335714286,172.56314604285714,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w1054144384,Place of Worship 1054144384,unknown,,,,,NZ,-40.84854148,172.80750236,{}
-1,placeholder_name,w1054636085,Place of Worship 1054636085,unknown,,,,,NZ,-41.22180991111111,174.86818807777777,{}
-1,placeholder_name,w1059394541,Place of Worship 1059394541,unknown,,,,,NZ,-39.670313481818184,176.87866421818183,{}
-1,placeholder_name,w1065099840,Place of Worship 1065099840,unknown,,,,,NZ,-44.396536376190475,171.25120612380954,{}
-1,placeholder_name,w1065099856,Place of Worship 1065099856,unknown,,,,,NZ,-44.39505626363636,171.24961672727272,{}
-1,placeholder_name,w1065099864,Place of Worship 1065099864,unknown,,,,,NZ,-44.39450372,171.2487567,{}
-1,placeholder_name,w1065099865,Place of Worship 1065099865,unknown,,,,,NZ,-44.40215881481481,171.24723645925928,{}
-1,placeholder_name,w1067404955,Place of Worship 1067404955,unknown,,,,,NZ,-36.87445593333334,174.62732143333335,{}
-1,placeholder_name,w1067404956,Place of Worship 1067404956,unknown,,,,,NZ,-36.87452405,174.62793746666668,{}
-1,placeholder_name,w1068483091,Place of Worship 1068483091,unknown,,,,,NZ,-43.564567385714284,172.64338709999998,{}
-1,placeholder_name,w1068579369,Place of Worship 1068579369,unknown,,,,,NZ,-43.51771439230769,172.7029347076923,{}
-1,placeholder_name,w1069109928,Place of Worship 1069109928,unknown,,,,,NZ,-36.8969098,174.8999091,{}
-1,placeholder_name,w1069110285,Place of Worship 1069110285,unknown,,,,,NZ,-36.899379744444445,174.9003424888889,{}
-1,placeholder_name,w1069457602,Place of Worship 1069457602,unknown,,,,,NZ,-36.88962909999999,174.75565388571428,{}
-1,placeholder_name,w1070499968,Place of Worship 1070499968,unknown,,,,,NZ,-36.92822949259259,174.9104748925926,{}
-1,placeholder_name,w1071216643,Place of Worship 1071216643,unknown,,,,,NZ,-36.96100318,174.8249096,{}
-1,placeholder_name,w1071217073,Place of Worship 1071217073,unknown,,,,,NZ,-36.77519278,174.67033348,{}
-1,placeholder_name,w1071231334,Place of Worship 1071231334,unknown,,,,,NZ,-37.988440833333335,175.2016308,{}
-1,placeholder_name,w1071490573,Place of Worship 1071490573,unknown,,,,,NZ,-37.01481394285714,174.88941062857143,{}
-1,placeholder_name,w1071490593,Place of Worship 1071490593,unknown,,,,,NZ,-37.0161474,174.8847124,{}
-1,placeholder_name,w1071803514,Place of Worship 1071803514,unknown,,,,,NZ,-40.912186850000005,175.0116471166667,{}
-1,placeholder_name,w1072579250,Place of Worship 1072579250,unknown,,,,,NZ,-36.91328676,174.90121044,{}
-1,placeholder_name,w1072579252,Place of Worship 1072579252,unknown,,,,,NZ,-36.914599280000004,174.8990489,{}
-1,placeholder_name,w1077860353,Place of Worship 1077860353,unknown,,,,,NZ,-36.96687324,174.8207496,{}
-1,placeholder_name,w1077860354,Place of Worship 1077860354,unknown,,,,,NZ,-36.9637206,174.82075278,{}
-1,placeholder_name,w1077860355,Place of Worship 1077860355,unknown,,,,,NZ,-36.96519596666667,174.82761359999998,{}
-1,placeholder_name,w1077860356,Place of Worship 1077860356,unknown,,,,,NZ,-36.9673723,174.82307493333334,{}
-1,placeholder_name,w1077860357,Place of Worship 1077860357,unknown,,,,,NZ,-36.96394592,174.82728068,{}
-1,placeholder_name,w1077860358,Place of Worship 1077860358,unknown,,,,,NZ,-36.96380393333333,174.82670911666665,{}
-1,placeholder_name,w1077860359,Place of Worship 1077860359,unknown,,,,,NZ,-36.96396652,174.82803696000002,{}
-1,placeholder_name,w1077860361,Place of Worship 1077860361,unknown,,,,,NZ,-36.96251454,174.83114447,{}
-1,placeholder_name,w1077860362,Place of Worship 1077860362,unknown,,,,,NZ,-36.9705959,174.81674055,{}
-1,placeholder_name,w1077860363,Place of Worship 1077860363,unknown,,,,,NZ,-36.97225420769231,174.82523483846154,{}
-1,placeholder_name,w1077892664,Place of Worship 1077892664,unknown,,,,,NZ,-40.75685851428572,175.16371157142856,{}
-1,placeholder_name,w1078347288,Place of Worship 1078347288,unknown,,,,,NZ,-36.89693668666666,174.70167451333333,{}
-1,placeholder_name,w1078349885,Place of Worship 1078349885,unknown,,,,,NZ,-36.89416252857143,174.697867,{}
-1,placeholder_name,w1078374886,Place of Worship 1078374886,unknown,,,,,NZ,-36.85592053333333,174.62509864444442,{}
-1,placeholder_name,w1080843178,Place of Worship 1080843178,unknown,,,,,NZ,-37.03712507777778,174.90251527777775,{}
-1,placeholder_name,w1080871685,Place of Worship 1080871685,unknown,,,,,NZ,-37.77588935833333,175.30375970833333,{}
-1,placeholder_name,w1081282944,Place of Worship 1081282944,unknown,,,,,NZ,-37.32137143333333,175.06834376666666,{}
-1,placeholder_name,w1082235733,Place of Worship 1082235733,unknown,,,,,NZ,-39.472166487500004,175.6742422875,{}
-1,placeholder_name,w1082261734,Place of Worship 1082261734,unknown,,,,,NZ,-39.47835716,175.67018972,{}
-1,placeholder_name,w1085281540,Place of Worship 1085281540,unknown,,,,,NZ,-37.687408,176.16574070666667,{}
-1,placeholder_name,w1085592999,Place of Worship 1085592999,unknown,,,,,NZ,-36.96183216,174.8897034,{}
-1,placeholder_name,w1085706257,Place of Worship 1085706257,unknown,,,,,NZ,-36.94875717,174.79714361999999,{}
-1,placeholder_name,w1085708652,Place of Worship 1085708652,unknown,,,,,NZ,-36.979878285714285,174.78144101428572,{}
-1,placeholder_name,w1085778680,Place of Worship 1085778680,unknown,,,,,NZ,-36.914249033333334,174.9021979833333,{}
-1,placeholder_name,w1085778681,Place of Worship 1085778681,unknown,,,,,NZ,-36.91574193333333,174.90210161666667,{}
-1,placeholder_name,w1085778699,Place of Worship 1085778699,unknown,,,,,NZ,-36.91717387777778,174.89910386666668,{}
-1,placeholder_name,w1093746775,Place of Worship 1093746775,unknown,,,,,NZ,-36.97963284285714,174.87382011428573,{}
-1,placeholder_name,w1096956433,Place of Worship 1096956433,unknown,,,,,NZ,-36.980433955555554,174.88888046666665,{}
-1,placeholder_name,w1096956442,Place of Worship 1096956442,unknown,,,,,NZ,-36.977148183333334,174.8917306666667,{}
-1,placeholder_name,w1098240068,Place of Worship 1098240068,unknown,,,,,NZ,-37.71155936666667,176.1134208,{}
-1,placeholder_name,w1099481859,Place of Worship 1099481859,unknown,,,,,NZ,-37.06765782,174.95891392000001,{}
-1,placeholder_name,w1099481860,Place of Worship 1099481860,unknown,,,,,NZ,-37.06653404285714,174.9616335,{}
-1,placeholder_name,w1099481861,Place of Worship 1099481861,unknown,,,,,NZ,-37.06648783333333,174.9595437111111,{}
-1,placeholder_name,w1099779039,Place of Worship 1099779039,unknown,,,,,NZ,-36.96646166666667,174.87742841666667,{}
-1,placeholder_name,w1100938109,Place of Worship 1100938109,unknown,,,,,NZ,-36.95982266666667,174.8328543,{}
-1,placeholder_name,w1101345658,Place of Worship 1101345658,unknown,,,,,NZ,-37.00631198333333,174.93520038333335,{}
-1,placeholder_name,w1102239968,Place of Worship 1102239968,unknown,,,,,NZ,-36.99313105555555,174.84854445555555,{}
-1,placeholder_name,w1103149947,Place of Worship 1103149947,unknown,,,,,NZ,-43.6576048,172.19013697999998,{}
-1,placeholder_name,w1103293188,Place of Worship 1103293188,unknown,,,,,NZ,-37.01390701666667,174.8893669,{}
-1,placeholder_name,w1105412037,Place of Worship 1105412037,unknown,,,,,NZ,-37.690925559374996,176.167453684375,{}
-1,placeholder_name,w1105480229,Place of Worship 1105480229,unknown,,,,,NZ,-36.76702065714286,174.73168702857143,{}
-1,placeholder_name,w1105918558,Place of Worship 1105918558,unknown,,,,,NZ,-37.07996355454546,174.93712986363636,{}
-1,placeholder_name,w1105969947,Place of Worship 1105969947,unknown,,,,,NZ,-37.65825355,176.2064556875,{}
-1,placeholder_name,w1106214627,Place of Worship 1106214627,unknown,,,,,NZ,-37.67461136666667,176.22636703333333,{}
-1,placeholder_name,w1106962441,Place of Worship 1106962441,unknown,,,,,NZ,-39.19218336666666,173.88050273333332,{}
-1,placeholder_name,w1106964083,Place of Worship 1106964083,unknown,,,,,NZ,-36.75518404,175.50230744,{}
-1,placeholder_name,w1107027744,Place of Worship 1107027744,unknown,,,,,NZ,-36.974050875,174.795136475,{}
-1,placeholder_name,w1108100314,Place of Worship 1108100314,unknown,,,,,NZ,-35.939585775,173.8646948875,{}
-1,placeholder_name,w1108100319,Place of Worship 1108100319,unknown,,,,,NZ,-35.936047175,173.8811031125,{}
-1,placeholder_name,w1110457919,Place of Worship 1110457919,unknown,,,,,NZ,-35.8799773,174.46443824,{}
-1,placeholder_name,w1115388964,Place of Worship 1115388964,unknown,,,,,NZ,-36.40170508333333,174.66468268333333,{}
-1,placeholder_name,w1115596381,Place of Worship 1115596381,unknown,,,,,NZ,-36.9717124,174.79927753333334,{}
-1,placeholder_name,w1117565251,Place of Worship 1117565251,unknown,,,,,NZ,-36.87695858,174.8513103,{}
-1,placeholder_name,w1119105047,Place of Worship 1119105047,unknown,,,,,NZ,-36.8954986,174.7316823,{}
-1,placeholder_name,w1119105050,Place of Worship 1119105050,unknown,,,,,NZ,-36.894381555555555,174.7351946,{}
-1,placeholder_name,w1119106851,Place of Worship 1119106851,unknown,,,,,NZ,-36.90802523999999,174.79769034,{}
-1,placeholder_name,w1119783524,Place of Worship 1119783524,unknown,,,,,NZ,-37.40748564285714,175.14510815714286,{}
-1,placeholder_name,w1120026495,Place of Worship 1120026495,unknown,,,,,NZ,-39.93941126666667,175.01450558333332,{}
-1,placeholder_name,w1120686238,Place of Worship 1120686238,unknown,,,,,NZ,-45.22452066666667,170.78525848333334,{}
-1,placeholder_name,w1123567132,Place of Worship 1123567132,unknown,,,,,NZ,-36.82640722,174.62352077999998,{}
-1,placeholder_name,w1124024312,Place of Worship 1124024312,unknown,,,,,NZ,-36.78449245714285,175.01280217142858,{}
-1,placeholder_name,w1124025952,Place of Worship 1124025952,unknown,,,,,NZ,-37.035787066666664,174.89564918333335,{}
-1,placeholder_name,w1124890018,Place of Worship 1124890018,unknown,,,,,NZ,-40.95814778571429,175.6422049,{}
-1,placeholder_name,w1124890019,Place of Worship 1124890019,unknown,,,,,NZ,-40.95919325555556,175.6426619111111,{}
-1,placeholder_name,w1124890020,Place of Worship 1124890020,unknown,,,,,NZ,-40.95876049230769,175.64154055384614,{}
-1,placeholder_name,w1124901863,Place of Worship 1124901863,unknown,,,,,NZ,-36.9760722625,174.8954906375,{}
-1,placeholder_name,w1124901866,Place of Worship 1124901866,unknown,,,,,NZ,-36.97634574,174.89363198,{}
-1,placeholder_name,w1124901870,Place of Worship 1124901870,unknown,,,,,NZ,-36.9731701,174.89070518333332,{}
-1,placeholder_name,w1124901873,Place of Worship 1124901873,unknown,,,,,NZ,-36.97257261666667,174.88916635,{}
-1,placeholder_name,w1125331981,Place of Worship 1125331981,unknown,,,,,NZ,-40.94543363333333,175.67285164999998,{}
-1,placeholder_name,w1125346689,Place of Worship 1125346689,unknown,,,,,NZ,-40.337932939999995,175.86681662,{}
-1,placeholder_name,w1125346691,Place of Worship 1125346691,unknown,,,,,NZ,-40.33982898,175.86926192,{}
-1,placeholder_name,w1125359389,Place of Worship 1125359389,unknown,,,,,NZ,-38.23256842,175.85445105000002,{}
-1,placeholder_name,w1126873905,Place of Worship 1126873905,unknown,,,,,NZ,-36.9803864,174.8503544818182,{}
-1,placeholder_name,w1127939915,Place of Worship 1127939915,unknown,,,,,NZ,-37.036194816666665,174.99941415,{}
-1,placeholder_name,w1127940967,Place of Worship 1127940967,unknown,,,,,NZ,-37.095772700000005,174.58127034166668,{}
-1,placeholder_name,w1128139124,Place of Worship 1128139124,unknown,,,,,NZ,-36.97837925,174.8536184125,{}
-1,placeholder_name,w1129739404,Place of Worship 1129739404,unknown,,,,,NZ,-36.91775295555556,174.64843706666667,{}
-1,placeholder_name,w1130567309,Place of Worship 1130567309,unknown,,,,,NZ,-40.0828532,175.38828684,{}
-1,placeholder_name,w1131860241,Place of Worship 1131860241,unknown,,,,,NZ,-36.83934182,174.61906801,{}
-1,placeholder_name,w1134670402,Place of Worship 1134670402,unknown,,,,,NZ,-36.977216118181815,174.85575846363636,{}
-1,placeholder_name,w113912030,Place of Worship 113912030,unknown,,,,,NZ,-36.91262143636364,174.78119641818182,{}
-1,placeholder_name,w1144213264,Place of Worship 1144213264,unknown,,,,,NZ,-36.90886035,174.7748060125,{}
-1,placeholder_name,w1147307049,Place of Worship 1147307049,unknown,,,,,NZ,-37.775150925,175.28449893333334,{}
-1,placeholder_name,w1147307070,Place of Worship 1147307070,unknown,,,,,NZ,-37.76667177142857,175.27403944285714,{}
-1,placeholder_name,w1147307087,Place of Worship 1147307087,unknown,,,,,NZ,-37.76791440769231,175.2801380076923,{}
-1,placeholder_name,w1150602384,Place of Worship 1150602384,unknown,,,,,NZ,-37.05408018333333,174.93230731666668,{}
-1,placeholder_name,w1153171341,Place of Worship 1153171341,unknown,,,,,NZ,-43.5394016,172.6559431,{}
-1,placeholder_name,w1153631165,Place of Worship 1153631165,unknown,,,,,NZ,-37.00589907777778,174.91562213333333,{}
-1,placeholder_name,w1158907300,Place of Worship 1158907300,unknown,,,,,NZ,-40.67784566666667,172.68199060555557,{}
-1,placeholder_name,w1160785989,Place of Worship 1160785989,unknown,,,,,NZ,-36.796884639999995,175.0477766,{}
-1,placeholder_name,w1162812866,Place of Worship 1162812866,unknown,,,,,NZ,-36.6273374,174.736093175,{}
-1,placeholder_name,w1163145682,Place of Worship 1163145682,unknown,,,,,NZ,-36.974075219999996,174.88474105,{}
-1,placeholder_name,w1164413588,Place of Worship 1164413588,unknown,,,,,NZ,-40.33995364285715,175.6297030285714,{}
-1,placeholder_name,w1167250263,Place of Worship 1167250263,unknown,,,,,NZ,-41.309955663636366,174.79269268181818,{}
-1,placeholder_name,w1169749338,Place of Worship 1169749338,unknown,,,,,NZ,-36.97528312,174.84518450000002,{}
-1,placeholder_name,w1175803815,Place of Worship 1175803815,unknown,,,,,NZ,-36.84943919230769,174.64978278461538,{}
-1,placeholder_name,w1176368271,Place of Worship 1176368271,unknown,,,,,NZ,-36.97499742,174.83714623999998,{}
-1,placeholder_name,w1176370385,Place of Worship 1176370385,unknown,,,,,NZ,-36.9791957375,174.8226191625,{}
-1,placeholder_name,w1177218535,Place of Worship 1177218535,unknown,,,,,NZ,-36.404661084615384,174.65021703846153,{}
-1,placeholder_name,w1178662264,Place of Worship 1178662264,unknown,,,,,NZ,-36.9666639,174.80232898,{}
-1,placeholder_name,w1178662265,Place of Worship 1178662265,unknown,,,,,NZ,-36.9675441625,174.8042924,{}
-1,placeholder_name,w1179613064,Place of Worship 1179613064,unknown,,,,,NZ,-36.98638495714285,174.8709512285714,{}
-1,placeholder_name,w1179613065,Place of Worship 1179613065,unknown,,,,,NZ,-36.9856064,174.87022991999999,{}
-1,placeholder_name,w1179886350,Place of Worship 1179886350,unknown,,,,,NZ,-41.13141326666667,175.0656076888889,{}
-1,placeholder_name,w1180407470,Place of Worship 1180407470,unknown,,,,,NZ,-36.96044308,174.87798521999997,{}
-1,placeholder_name,w1181329827,Place of Worship 1181329827,unknown,,,,,NZ,-36.62812367272727,174.66528496363637,{}
-1,placeholder_name,w1183818028,Place of Worship 1183818028,unknown,,,,,NZ,-36.97540072727273,174.86790297272728,{}
-1,placeholder_name,w1183844277,Place of Worship 1183844277,unknown,,,,,NZ,-36.40075327272727,174.66419535454546,{}
-1,placeholder_name,w1184207581,Place of Worship 1184207581,unknown,,,,,NZ,-36.4015625375,174.6602774375,{}
-1,placeholder_name,w1184553877,Place of Worship 1184553877,unknown,,,,,NZ,-37.10002392857143,174.87754305714287,{}
-1,placeholder_name,w1185662565,Place of Worship 1185662565,unknown,,,,,NZ,-36.90934537142857,174.8387151857143,{}
-1,placeholder_name,w1185926552,Place of Worship 1185926552,unknown,,,,,NZ,-36.87674466,174.6297396,{}
-1,placeholder_name,w1186121661,Place of Worship 1186121661,unknown,,,,,NZ,-37.060130720000004,174.95011736,{}
-1,placeholder_name,w1190306783,Place of Worship 1190306783,unknown,,,,,NZ,-37.80060151818182,174.87161740909093,{}
-1,placeholder_name,w1190934790,Place of Worship 1190934790,unknown,,,,,NZ,-37.22881536,174.9270452,{}
-1,placeholder_name,w1191333313,Place of Worship 1191333313,unknown,,,,,NZ,-36.899466342857146,174.91437447142857,{}
-1,placeholder_name,w1193699037,Place of Worship 1193699037,unknown,,,,,NZ,-39.450297355555556,173.86083855555555,{}
-1,placeholder_name,w1196025874,Place of Worship 1196025874,unknown,,,,,NZ,-36.835367485714286,175.7000993714286,{}
-1,placeholder_name,w1196314379,Place of Worship 1196314379,unknown,,,,,NZ,-38.13066407,176.22310359,{}
-1,placeholder_name,w1196749458,Place of Worship 1196749458,unknown,,,,,NZ,-36.7891490625,174.6932559,{}
-1,placeholder_name,w1198858797,Place of Worship 1198858797,unknown,,,,,NZ,-36.63045627142857,174.76637318571426,{}
-1,placeholder_name,w1200036841,Place of Worship 1200036841,unknown,,,,,NZ,-41.308979275,174.7636654125,{}
-1,placeholder_name,w1200705252,Place of Worship 1200705252,unknown,,,,,NZ,-36.8367898125,175.7044514,{}
-1,placeholder_name,w1201240246,Place of Worship 1201240246,unknown,,,,,NZ,-38.14979956,176.25328288,{}
-1,placeholder_name,w1204343473,Place of Worship 1204343473,unknown,,,,,NZ,-41.293927329999995,174.77898889,{}
-1,placeholder_name,w1204353011,Place of Worship 1204353011,unknown,,,,,NZ,-41.26135914,174.77298416,{}
-1,placeholder_name,w1204353023,Place of Worship 1204353023,unknown,,,,,NZ,-41.2614938,174.775546775,{}
-1,placeholder_name,w1204641315,Place of Worship 1204641315,unknown,,,,,NZ,-37.752024975,175.2952832,{}
 1,placeholder_name,w1205663183,Place of Worship 1205663183,unknown,,,place_of_worship,yes,NZ,-43.4804733,172.6574968230769,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w1207052897,Place of Worship 1207052897,unknown,,,,,NZ,-37.698243671428564,176.11212587142856,{}
 1,placeholder_name,w1207073636,Place of Worship 1207073636,unknown,,,place_of_worship,yes,NZ,-43.54803588888889,172.62139873333334,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w1207081381,Place of Worship 1207081381,unknown,,,,,NZ,-43.508240042857146,172.66335287142857,{}
-1,placeholder_name,w1208966569,Place of Worship 1208966569,unknown,,,,,NZ,-36.794196688235296,175.02498372352943,{}
-1,placeholder_name,w1211104731,Place of Worship 1211104731,unknown,,,,,NZ,-37.196031041666664,174.91974103333334,{}
-1,placeholder_name,w1211129110,Place of Worship 1211129110,unknown,,,,,NZ,-37.82160398,175.22686726,{}
-1,placeholder_name,w1211129134,Place of Worship 1211129134,unknown,,,,,NZ,-37.82212066,175.22370297,{}
-1,placeholder_name,w1212002996,Place of Worship 1212002996,unknown,,,,,NZ,-43.313670957142854,172.66958681428574,{}
-1,placeholder_name,w1213206638,Place of Worship 1213206638,unknown,,,,,NZ,-41.31266702307692,173.23508853076922,{}
-1,placeholder_name,w1214950294,Place of Worship 1214950294,unknown,,,,,NZ,-44.7019951,169.13489768,{}
-1,placeholder_name,w1215294370,Place of Worship 1215294370,unknown,,,,,NZ,-36.92458954,174.89443956,{}
-1,placeholder_name,w1215301715,Place of Worship 1215301715,unknown,,,,,NZ,-36.929473808333334,174.91676716666666,{}
-1,placeholder_name,w1215306289,Place of Worship 1215306289,unknown,,,,,NZ,-36.91430705,174.8826854625,{}
-1,placeholder_name,w1215340240,Place of Worship 1215340240,unknown,,,,,NZ,-37.11694894,174.94835010000003,{}
-1,placeholder_name,w1215496581,Place of Worship 1215496581,unknown,,,,,NZ,-37.2022368625,174.89909492499999,{}
-1,placeholder_name,w1215496582,Place of Worship 1215496582,unknown,,,,,NZ,-37.20190925,174.90046504,{}
-1,placeholder_name,w1217273143,Place of Worship 1217273143,unknown,,,,,NZ,-36.979463224999996,174.827480475,{}
-1,placeholder_name,w1224919315,Place of Worship 1224919315,unknown,,,,,NZ,-41.33186069,174.81979998,{}
-1,placeholder_name,w1230983301,Place of Worship 1230983301,unknown,,,,,NZ,-40.36000119285715,175.64076089285714,{}
-1,placeholder_name,w1237407027,Place of Worship 1237407027,unknown,,,,,NZ,-37.20034612857143,174.89973965714287,{}
-1,placeholder_name,w1254499337,Place of Worship 1254499337,unknown,,,,,NZ,-36.54502318,174.70847656,{}
-1,placeholder_name,w1259548738,Place of Worship 1259548738,unknown,,,,,NZ,-37.18820624,174.8303142,{}
-1,placeholder_name,w1262455281,Place of Worship 1262455281,unknown,,,,,NZ,-41.12610624090909,174.88126574545456,{}
-1,placeholder_name,w1265465274,Place of Worship 1265465274,unknown,,,,,NZ,-39.07611685,174.10692028333332,{}
-1,placeholder_name,w1265465277,Place of Worship 1265465277,unknown,,,,,NZ,-39.58260052222222,174.26972025555557,{}
-1,placeholder_name,w1265465280,Place of Worship 1265465280,unknown,,,,,NZ,-38.88467275,175.26058965000001,{}
-1,placeholder_name,w1265465281,Place of Worship 1265465281,unknown,,,,,NZ,-38.34215899090909,175.1659731090909,{}
-1,placeholder_name,w1265465282,Place of Worship 1265465282,unknown,,,,,NZ,-37.997795833333335,175.325609,{}
-1,placeholder_name,w1265465283,Place of Worship 1265465283,unknown,,,,,NZ,-37.82175661363636,175.28986299545454,{}
-1,placeholder_name,w1265465286,Place of Worship 1265465286,unknown,,,,,NZ,-37.79607803571429,175.25987950714287,{}
-1,placeholder_name,w1265465287,Place of Worship 1265465287,unknown,,,,,NZ,-37.799776638888886,175.24813964999998,{}
-1,placeholder_name,w1265465288,Place of Worship 1265465288,unknown,,,,,NZ,-37.78123998181818,175.28620632727274,{}
-1,placeholder_name,w1265465289,Place of Worship 1265465289,unknown,,,,,NZ,-37.74909868,175.24535398999998,{}
-1,placeholder_name,w1265465290,Place of Worship 1265465290,unknown,,,,,NZ,-37.7348815,175.25819402,{}
-1,placeholder_name,w1265465291,Place of Worship 1265465291,unknown,,,,,NZ,-37.64949738333333,175.5414058166667,{}
-1,placeholder_name,w1268090314,Place of Worship 1268090314,unknown,,,,,NZ,-38.641536529411766,178.0016188764706,{}
-1,placeholder_name,w1270345792,Place of Worship 1270345792,unknown,,,,,NZ,-36.91412046,174.8725074,{}
-1,placeholder_name,w1282062855,Place of Worship 1282062855,unknown,,,,,NZ,-36.9545660125,174.8901867125,{}
-1,placeholder_name,w128973974,Place of Worship 128973974,unknown,,,,,NZ,-36.798204641666665,174.75307643333335,{}
 1,placeholder_name,w128976134,Place of Worship 128976134,unknown,,,place_of_worship,yes,NZ,-36.791498321052636,174.7013083894737,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w1294662516,Place of Worship 1294662516,unknown,,,,,NZ,-41.3276184125,173.173501725,{}
-1,placeholder_name,w1294938726,Place of Worship 1294938726,unknown,,,,,NZ,-41.334846772727275,173.19906950909092,{}
-1,placeholder_name,w1294939081,Place of Worship 1294939081,unknown,,,,,NZ,-41.349596659999996,173.14762842,{}
 1,placeholder_name,w1298726613,Place of Worship 1298726613,unknown,,,place_of_worship,yes,NZ,-43.56323690588235,172.5913086882353,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w1300405230,Place of Worship 1300405230,unknown,,,,,NZ,-38.113177799999995,176.22808747500002,{}
-1,placeholder_name,w1300405231,Place of Worship 1300405231,unknown,,,,,NZ,-38.132335172727274,176.29527007272728,{}
-1,placeholder_name,w1300405239,Place of Worship 1300405239,unknown,,,,,NZ,-38.133993499999995,176.28894218,{}
-1,placeholder_name,w1301624693,Place of Worship 1301624693,unknown,,,,,NZ,-36.87410616666667,174.64533081666664,{}
 1,placeholder_name,n13078926467,Place of Worship 13078926467,unknown,,,place_of_worship,,NZ,-38.3572909,177.534408,"{""amenity"": ""place_of_worship""}"
-1,placeholder_name,w1311144361,Place of Worship 1311144361,unknown,,,,,NZ,-36.88393034,174.7855084,{}
-1,placeholder_name,w1316954187,Place of Worship 1316954187,unknown,,,,,NZ,-40.8750985875,175.05982345,{}
-1,placeholder_name,w1321778674,Place of Worship 1321778674,unknown,,,,,NZ,-36.89600614,174.841598,{}
-1,placeholder_name,w1322819228,Place of Worship 1322819228,unknown,,,,,NZ,-45.903454358333335,170.42591605833334,{}
-1,placeholder_name,w1333333886,Place of Worship 1333333886,unknown,,,,,NZ,-36.8840291,174.8601267,{}
-1,placeholder_name,w1337183281,Place of Worship 1337183281,unknown,,,,,NZ,-37.7168347,176.1388822,{}
-1,placeholder_name,w1339455269,Place of Worship 1339455269,unknown,,,,,NZ,-37.1387312625,175.5447399,{}
-1,placeholder_name,w1339462109,Place of Worship 1339462109,unknown,,,,,NZ,-37.13870424545455,175.5431527090909,{}
-1,placeholder_name,w1341661774,Place of Worship 1341661774,unknown,,,,,NZ,-38.144940840000004,176.23218894,{}
-1,placeholder_name,w1341662144,Place of Worship 1341662144,unknown,,,,,NZ,-38.142290525,176.23598105,{}
-1,placeholder_name,w1343274183,Place of Worship 1343274183,unknown,,,,,NZ,-38.12959336818182,176.24980630000002,{}
-1,placeholder_name,w1346822672,Place of Worship 1346822672,unknown,,,,,NZ,-35.93712458,173.87743252,{}
-1,placeholder_name,w1347516261,Place of Worship 1347516261,unknown,,,,,NZ,-36.8922898,174.6282544125,{}
-1,placeholder_name,w1348383876,Place of Worship 1348383876,unknown,,,,,NZ,-41.37034665555555,173.10403474444445,{}
-1,placeholder_name,w1350303722,Place of Worship 1350303722,unknown,,,,,NZ,-46.601376833333326,168.34354301666667,{}
-1,placeholder_name,w135136871,Place of Worship 135136871,unknown,,,,,NZ,-36.88805676,174.74631331999998,{}
-1,placeholder_name,w1351521595,Place of Worship 1351521595,unknown,,,,,NZ,-35.81570718333333,174.50446528333336,{}
-1,placeholder_name,w1351523026,Place of Worship 1351523026,unknown,,,,,NZ,-45.53539454,169.30620893999998,{}
-1,placeholder_name,w1352072640,Place of Worship 1352072640,unknown,,,,,NZ,-41.13516145789474,174.86740443157893,{}
-1,placeholder_name,w1352072645,Place of Worship 1352072645,unknown,,,,,NZ,-41.138871375,174.863842775,{}
-1,placeholder_name,w1352077771,Place of Worship 1352077771,unknown,,,,,NZ,-41.14587607,174.845277075,{}
-1,placeholder_name,w1352501918,Place of Worship 1352501918,unknown,,,,,NZ,-41.1408019,174.87681422727272,{}
-1,placeholder_name,w1352501919,Place of Worship 1352501919,unknown,,,,,NZ,-41.13660285454545,174.87286197272726,{}
-1,placeholder_name,w1352503545,Place of Worship 1352503545,unknown,,,,,NZ,-41.13147528333334,174.8721916,{}
-1,placeholder_name,w1352878886,Place of Worship 1352878886,unknown,,,,,NZ,-41.20836382142857,174.87909640714287,{}
-1,placeholder_name,w1358898498,Place of Worship 1358898498,unknown,,,,,NZ,-38.14484801428572,176.2455094,{}
-1,placeholder_name,w1359557190,Place of Worship 1359557190,unknown,,,,,NZ,-42.43704462857143,171.2105403142857,{}
-1,placeholder_name,w1362267235,Place of Worship 1362267235,unknown,,,,,NZ,-43.528073500000005,172.63306721666666,{}
-1,placeholder_name,w1362821776,Place of Worship 1362821776,unknown,,,,,NZ,-40.9511400125,175.66422005625,{}
-1,placeholder_name,w1362821803,Place of Worship 1362821803,unknown,,,,,NZ,-40.952219344444444,175.66559078888886,{}
-1,placeholder_name,w1364255703,Place of Worship 1364255703,unknown,,,,,NZ,-39.5823657875,176.760966575,{}
-1,placeholder_name,w1364255709,Place of Worship 1364255709,unknown,,,,,NZ,-39.583439675,176.760348325,{}
-1,placeholder_name,w1367076443,Place of Worship 1367076443,unknown,,,,,NZ,-37.81246911666667,175.77863726666666,{}
-1,placeholder_name,w1367536152,Place of Worship 1367536152,unknown,,,,,NZ,-36.89753674,174.82322716,{}
-1,placeholder_name,w1368050611,Place of Worship 1368050611,unknown,,,,,NZ,-35.71624582222222,174.3228938777778,{}
-1,placeholder_name,w1368050622,Place of Worship 1368050622,unknown,,,,,NZ,-35.713093199999996,174.32277838,{}
-1,placeholder_name,w1368050623,Place of Worship 1368050623,unknown,,,,,NZ,-35.71368814,174.32303951333333,{}
-1,placeholder_name,w1368053268,Place of Worship 1368053268,unknown,,,,,NZ,-35.71431883,174.32368449,{}
-1,placeholder_name,w1370010703,Place of Worship 1370010703,unknown,,,,,NZ,-37.79620632222222,175.28258100000002,{}
-1,placeholder_name,w1374940894,Place of Worship 1374940894,unknown,,,,,NZ,-36.92454294,174.78595575,{}
-1,placeholder_name,w1375437397,Place of Worship 1375437397,unknown,,,,,NZ,-36.959388714285716,174.78767755714287,{}
-1,placeholder_name,w1375590129,Place of Worship 1375590129,unknown,,,,,NZ,-43.5337046875,172.5214732125,{}
-1,placeholder_name,w1375590142,Place of Worship 1375590142,unknown,,,,,NZ,-43.540585185714285,172.51581845714284,{}
-1,placeholder_name,w1375590162,Place of Worship 1375590162,unknown,,,,,NZ,-43.54526503333333,172.52351853333334,{}
-1,placeholder_name,w1375590165,Place of Worship 1375590165,unknown,,,,,NZ,-43.54393364285714,172.52219812857143,{}
-1,placeholder_name,w1375606921,Place of Worship 1375606921,unknown,,,,,NZ,-43.498778519999995,172.68262787999998,{}
-1,placeholder_name,w1375606940,Place of Worship 1375606940,unknown,,,,,NZ,-43.49962173,172.68694428999999,{}
-1,placeholder_name,w1375606945,Place of Worship 1375606945,unknown,,,,,NZ,-43.496255325,172.6891521875,{}
-1,placeholder_name,w1375606953,Place of Worship 1375606953,unknown,,,,,NZ,-43.49137686153846,172.6847700769231,{}
-1,placeholder_name,w1376729227,Place of Worship 1376729227,unknown,,,,,NZ,-43.572719514285716,172.6306472714286,{}
-1,placeholder_name,w1376729235,Place of Worship 1376729235,unknown,,,,,NZ,-43.56976182222222,172.63322237777777,{}
-1,placeholder_name,w1377169766,Place of Worship 1377169766,unknown,,,,,NZ,-43.534687965,172.572424345,{}
-1,placeholder_name,w1377181684,Place of Worship 1377181684,unknown,,,,,NZ,-43.56225714,172.73808048,{}
-1,placeholder_name,w1377451603,Place of Worship 1377451603,unknown,,,,,NZ,-43.496219828571434,172.7139479,{}
-1,placeholder_name,w1377471788,Place of Worship 1377471788,unknown,,,,,NZ,-43.445096209999996,172.63177617,{}
-1,placeholder_name,w1377471799,Place of Worship 1377471799,unknown,,,,,NZ,-43.44671296,172.63180608,{}
-1,placeholder_name,w1377687419,Place of Worship 1377687419,unknown,,,,,NZ,-36.90706875555556,174.8242619,{}
-1,placeholder_name,w1377769466,Place of Worship 1377769466,unknown,,,,,NZ,-43.55762878571429,172.59071857142857,{}
-1,placeholder_name,w1377769487,Place of Worship 1377769487,unknown,,,,,NZ,-43.5480756,172.62121977777778,{}
-1,placeholder_name,w1377777310,Place of Worship 1377777310,unknown,,,,,NZ,-43.574293985714284,172.5666064857143,{}
-1,placeholder_name,w1377781899,Place of Worship 1377781899,unknown,,,,,NZ,-43.58437827142858,172.5695288142857,{}
-1,placeholder_name,w1378327436,Place of Worship 1378327436,unknown,,,,,NZ,-43.51500225,172.55470511666667,{}
-1,placeholder_name,w1382576631,Place of Worship 1382576631,unknown,,,,,NZ,-39.03329791666667,174.15355058333333,{}
-1,placeholder_name,w1383225277,Place of Worship 1383225277,unknown,,,,,NZ,-36.898870957142854,174.82511304285714,{}
-1,placeholder_name,w1384006425,Place of Worship 1384006425,unknown,,,,,NZ,-43.49824751666667,172.65883028333334,{}
-1,placeholder_name,w1384006447,Place of Worship 1384006447,unknown,,,,,NZ,-43.50318656190476,172.6507107,{}
-1,placeholder_name,w1384029995,Place of Worship 1384029995,unknown,,,,,NZ,-43.478497000000004,172.617168,{}
-1,placeholder_name,w1384030040,Place of Worship 1384030040,unknown,,,,,NZ,-43.478702077777776,172.61030134444445,{}
-1,placeholder_name,w1384030045,Place of Worship 1384030045,unknown,,,,,NZ,-43.480078633333335,172.61616793333334,{}
-1,placeholder_name,w1384037502,Place of Worship 1384037502,unknown,,,,,NZ,-43.4982046375,172.60943535,{}
-1,placeholder_name,w1384037505,Place of Worship 1384037505,unknown,,,,,NZ,-43.49780646000001,172.61037966,{}
-1,placeholder_name,w1384057107,Place of Worship 1384057107,unknown,,,,,NZ,-43.48485665454546,172.58684016363637,{}
-1,placeholder_name,w1384057118,Place of Worship 1384057118,unknown,,,,,NZ,-43.483146008333335,172.59271331666665,{}
-1,placeholder_name,w1384057131,Place of Worship 1384057131,unknown,,,,,NZ,-43.48542334545454,172.6032039,{}
-1,placeholder_name,w1384318205,Place of Worship 1384318205,unknown,,,,,NZ,-43.49849164444444,172.58765426666665,{}
-1,placeholder_name,w1384318222,Place of Worship 1384318222,unknown,,,,,NZ,-43.49501635714286,172.57729037142855,{}
-1,placeholder_name,w1384318234,Place of Worship 1384318234,unknown,,,,,NZ,-43.491559575,172.58638253750001,{}
-1,placeholder_name,w1384318240,Place of Worship 1384318240,unknown,,,,,NZ,-43.49081517142857,172.59291671428574,{}
-1,placeholder_name,w1384318255,Place of Worship 1384318255,unknown,,,,,NZ,-43.48812882727273,172.57789959090908,{}
-1,placeholder_name,w1384326980,Place of Worship 1384326980,unknown,,,,,NZ,-43.49148068888889,172.57089591481483,{}
-1,placeholder_name,w1384335917,Place of Worship 1384335917,unknown,,,,,NZ,-43.5114296,172.60324126,{}
-1,placeholder_name,w1384335921,Place of Worship 1384335921,unknown,,,,,NZ,-43.51173135714286,172.606317,{}
-1,placeholder_name,w1384335924,Place of Worship 1384335924,unknown,,,,,NZ,-43.517968228571426,172.6063850095238,{}
-1,placeholder_name,w1384335976,Place of Worship 1384335976,unknown,,,,,NZ,-43.505359355555555,172.5904596111111,{}
-1,placeholder_name,w1384335995,Place of Worship 1384335995,unknown,,,,,NZ,-43.501178485714284,172.57711772857144,{}
-1,placeholder_name,w1384336008,Place of Worship 1384336008,unknown,,,,,NZ,-43.5076293,172.58816475555557,{}
-1,placeholder_name,w1384336009,Place of Worship 1384336009,unknown,,,,,NZ,-43.50873315,172.58470689,{}
-1,placeholder_name,w1385485106,Place of Worship 1385485106,unknown,,,,,NZ,-37.022364442857146,174.87257334285712,{}
-1,placeholder_name,w1385777732,Place of Worship 1385777732,unknown,,,,,NZ,-35.739629719999996,174.30521404,{}
-1,placeholder_name,w1385787642,Place of Worship 1385787642,unknown,,,,,NZ,-35.75185261666667,174.36834915,{}
-1,placeholder_name,w1385801274,Place of Worship 1385801274,unknown,,,,,NZ,-35.68167206,174.30237164,{}
-1,placeholder_name,w1385801282,Place of Worship 1385801282,unknown,,,,,NZ,-35.68069082857143,174.30020785714285,{}
-1,placeholder_name,w1386937109,Place of Worship 1386937109,unknown,,,,,NZ,-36.877450875,174.8651454,{}
-1,placeholder_name,w1388779017,Place of Worship 1388779017,unknown,,,,,NZ,-36.87742781428572,174.8646816857143,{}
-1,placeholder_name,w1389701214,Place of Worship 1389701214,unknown,,,,,NZ,-36.96717646111111,174.8597795388889,{}
-1,placeholder_name,w1395049680,Place of Worship 1395049680,unknown,,,,,NZ,-43.5314946625,172.6574684875,{}
-1,placeholder_name,w1395172013,Place of Worship 1395172013,unknown,,,,,NZ,-36.89279418666667,174.83872858,{}
-1,placeholder_name,w1395321010,Place of Worship 1395321010,unknown,,,,,NZ,-43.55744425,172.63762863333332,{}
-1,placeholder_name,w1409120889,Place of Worship 1409120889,unknown,,,,,NZ,-40.291590899999996,175.7541135,{}
-1,placeholder_name,w1409120890,Place of Worship 1409120890,unknown,,,,,NZ,-40.289064322222224,175.75602532222223,{}
-1,placeholder_name,w1409120891,Place of Worship 1409120891,unknown,,,,,NZ,-40.29385895714285,175.75257304285716,{}
-1,placeholder_name,w1410552153,Place of Worship 1410552153,unknown,,,,,NZ,-43.53292404736842,172.61159714736843,{}
-1,placeholder_name,w1413033496,Place of Worship 1413033496,unknown,,,,,NZ,-43.4939668,172.70340546666665,{}
-1,placeholder_name,w1414241776,Place of Worship 1414241776,unknown,,,,,NZ,-45.90930046923077,170.47386062307694,{}
-1,placeholder_name,w1414377976,Place of Worship 1414377976,unknown,,,,,NZ,-45.872637311111106,170.47992779999998,{}
-1,placeholder_name,w1414390975,Place of Worship 1414390975,unknown,,,,,NZ,-45.84945446,170.52922122,{}
-1,placeholder_name,w1416904322,Place of Worship 1416904322,unknown,,,,,NZ,-36.9068599,174.68251385,{}
-1,placeholder_name,w1420057296,Place of Worship 1420057296,unknown,,,,,NZ,-36.91304574166667,174.71521075833334,{}
-1,placeholder_name,w1420802343,Place of Worship 1420802343,unknown,,,,,NZ,-35.40929612857143,173.79530474285713,{}
-1,placeholder_name,w1420805970,Place of Worship 1420805970,unknown,,,,,NZ,-35.40325586470588,173.8051207235294,{}
-1,placeholder_name,w1421556115,Place of Worship 1421556115,unknown,,,,,NZ,-41.10717925882353,174.84185190588235,{}
-1,placeholder_name,w1421556117,Place of Worship 1421556117,unknown,,,,,NZ,-41.107684778571425,174.84198065714284,{}
-1,placeholder_name,w1422759496,Place of Worship 1422759496,unknown,,,,,NZ,-36.96161090909091,174.90817483636363,{}
-1,placeholder_name,w1422760640,Place of Worship 1422760640,unknown,,,,,NZ,-37.06482354285714,174.96477382857142,{}
-1,placeholder_name,w1422960859,Place of Worship 1422960859,unknown,,,,,NZ,-36.8520242,174.84989106,{}
 1,placeholder_name,w169261262,Place of Worship 169261262,unknown,,,place_of_worship,yes,NZ,-46.39312336,169.01764616,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w215508141,Place of Worship 215508141,unknown,,,,,NZ,-36.91447553333333,174.76853361666667,{}
-1,placeholder_name,w220083072,Place of Worship 220083072,unknown,,,,,NZ,-40.916046875,175.01005343125,{}
 1,placeholder_name,w223255811,Place of Worship 223255811,unknown,,,place_of_worship,yes,NZ,-38.64490122857143,177.99416987142857,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w224203566,Place of Worship 224203566,unknown,,,place_of_worship,yes,NZ,-35.937891785714285,173.86948214285715,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w253923552,Place of Worship 253923552,unknown,,,place_of_worship,yes,NZ,-37.209648779999995,174.8947321,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w27811316,Place of Worship 27811316,unknown,,,,,NZ,-36.94224342857143,174.7833234857143,{}
 1,placeholder_name,w290280225,Place of Worship 290280225,unknown,,,place_of_worship,yes,NZ,-37.80172852,175.80689650000002,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w293604735,Place of Worship 293604735,unknown,,,,,NZ,-36.908643760000004,174.67893873,{}
 1,placeholder_name,w294799803,Place of Worship 294799803,unknown,,,place_of_worship,yes,NZ,-36.90520314285715,174.70094999999998,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w29544404,Place of Worship 29544404,unknown,,"4 Birdwood Crescent, Auckland, 1052",,,NZ,-36.85820477,174.78143733,{}
 1,placeholder_name,w300381302,Place of Worship 300381302,unknown,,,place_of_worship,yes,NZ,-38.00909334000001,175.32788388,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w302221122,Place of Worship 302221122,unknown,,,,,NZ,-36.893750499999996,174.7656375,{}
 1,placeholder_name,w304206971,Place of Worship 304206971,unknown,,,place_of_worship,yes,NZ,-36.87460123333333,174.6279592777778,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w304749233,Place of Worship 304749233,unknown,,,,,NZ,-36.90486462857143,174.74097498571427,{}
-1,placeholder_name,w304749279,Place of Worship 304749279,unknown,,,,,NZ,-36.91894552857143,174.7865153,{}
-1,placeholder_name,w304749302,Place of Worship 304749302,unknown,,,,,NZ,-36.918852566666665,174.7853158,{}
 1,placeholder_name,w304965742,Place of Worship 304965742,unknown,,,place_of_worship,yes,NZ,-40.20019134117647,176.10715080588236,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w305487504,Place of Worship 305487504,unknown,,,,,NZ,-36.9100704,174.82733208333332,{}
-1,placeholder_name,w305789775,Place of Worship 305789775,unknown,,,,,NZ,-36.897019050000004,174.76938006666668,{}
-1,placeholder_name,w305792184,Place of Worship 305792184,unknown,,,,,NZ,-36.88591838,174.76176916,{}
-1,placeholder_name,w306059096,Place of Worship 306059096,unknown,,,,,NZ,-36.90873304,174.79779622,{}
-1,placeholder_name,w306062320,Place of Worship 306062320,unknown,,,,,NZ,-36.92180389,174.78810187000002,{}
-1,placeholder_name,w306192157,Place of Worship 306192157,unknown,,,,,NZ,-36.91383871666667,174.7679424888889,{}
-1,placeholder_name,w306192158,Place of Worship 306192158,unknown,,,,,NZ,-36.9164305,174.8005832166667,{}
-1,placeholder_name,w306192505,Place of Worship 306192505,unknown,,,,,NZ,-36.89807746,174.85471436,{}
-1,placeholder_name,w306193337,Place of Worship 306193337,unknown,,,,,NZ,-36.882483799999996,174.807427,{}
-1,placeholder_name,w306193338,Place of Worship 306193338,unknown,,,,,NZ,-36.88163216666667,174.80205215,{}
-1,placeholder_name,w306630606,Place of Worship 306630606,unknown,,"148 Coronation Road, Manukau, 2022",,,NZ,-36.95290331875,174.79021068125,{}
-1,placeholder_name,w306630607,Place of Worship 306630607,unknown,,,,,NZ,-36.9540981125,174.7896064625,{}
-1,placeholder_name,w306631159,Place of Worship 306631159,unknown,,,,,NZ,-36.961116833333335,174.7938485777778,{}
-1,placeholder_name,w306631701,Place of Worship 306631701,unknown,,,,,NZ,-36.95868344,174.7882341,{}
-1,placeholder_name,w306951978,Place of Worship 306951978,unknown,,,,,NZ,-36.899453599999994,174.73512589999999,{}
-1,placeholder_name,w306954939,Place of Worship 306954939,unknown,,,,,NZ,-36.896219280000004,174.73369538,{}
-1,placeholder_name,w307063661,Place of Worship 307063661,unknown,,,,,NZ,-36.89983513333333,174.7943690333333,{}
-1,placeholder_name,w307072723,Place of Worship 307072723,unknown,,,,,NZ,-36.905770733333334,174.79066226666666,{}
-1,placeholder_name,w307077821,Place of Worship 307077821,unknown,,,,,NZ,-36.88998427692308,174.74678345384615,{}
-1,placeholder_name,w307084831,Place of Worship 307084831,unknown,,,,,NZ,-36.88607025714286,174.74078545714286,{}
-1,placeholder_name,w307084832,Place of Worship 307084832,unknown,,,,,NZ,-36.88617457142857,174.74158035714285,{}
-1,placeholder_name,w307391268,Place of Worship 307391268,unknown,,,,,NZ,-36.89134904,174.74574539999998,{}
-1,placeholder_name,w307500752,Place of Worship 307500752,unknown,,,,,NZ,-36.89605322,174.77521006,{}
-1,placeholder_name,w307982436,Place of Worship 307982436,unknown,,,,,NZ,-36.90572968,174.74576258,{}
-1,placeholder_name,w309990003,Place of Worship 309990003,unknown,,,,,NZ,-36.90171952,174.72436982,{}
 1,placeholder_name,w309992306,Place of Worship 309992306,unknown,,,place_of_worship,yes,NZ,-35.1160895,173.27279746,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w310010801,Place of Worship 310010801,unknown,,,,,NZ,-36.881693911111114,174.71898223333335,{}
-1,placeholder_name,w310147379,Place of Worship 310147379,unknown,,,,,NZ,-36.909628659999996,174.75626032,{}
-1,placeholder_name,w31090276,Place of Worship 31090276,unknown,,,,,NZ,-36.893376777777775,174.73903743333332,{}
-1,placeholder_name,w312319191,Place of Worship 312319191,unknown,,,,,NZ,-36.92525626,174.78024141999998,{}
-1,placeholder_name,w312350772,Place of Worship 312350772,unknown,,,,,NZ,-36.91622504,174.7145196,{}
-1,placeholder_name,w313180617,Place of Worship 313180617,unknown,,,,,NZ,-36.912948300000004,174.80114565,{}
-1,placeholder_name,w313316818,Place of Worship 313316818,unknown,,,,,NZ,-36.8798481,174.72720587272727,{}
-1,placeholder_name,w313742174,Place of Worship 313742174,unknown,,,,,NZ,-36.916493571428575,174.75965094285715,{}
-1,placeholder_name,w313743369,Place of Worship 313743369,unknown,,,,,NZ,-36.89648238333333,174.71691771666667,{}
-1,placeholder_name,w313763527,Place of Worship 313763527,unknown,,,,,NZ,-36.90945288333334,174.7745246833333,{}
-1,placeholder_name,w313763598,Place of Worship 313763598,unknown,,,,,NZ,-36.91290405,174.77524033333336,{}
-1,placeholder_name,w313763741,Place of Worship 313763741,unknown,,,,,NZ,-36.91587362,174.78015238,{}
-1,placeholder_name,w313763941,Place of Worship 313763941,unknown,,,,,NZ,-36.9163025,174.78394303333334,{}
-1,placeholder_name,w315670327,Place of Worship 315670327,unknown,,,,,NZ,-36.88397282,174.7480909,{}
-1,placeholder_name,w317607800,Place of Worship 317607800,unknown,,,,,NZ,-36.85739718333333,174.74988308333332,{}
-1,placeholder_name,w317608749,Place of Worship 317608749,unknown,,,,,NZ,-36.85899615454545,174.7441226,{}
-1,placeholder_name,w317610420,Place of Worship 317610420,unknown,,,,,NZ,-36.85270488,174.74376372,{}
-1,placeholder_name,w318679127,Place of Worship 318679127,unknown,,,,,NZ,-36.85351398,174.74418602,{}
 1,placeholder_name,w321093342,Place of Worship 321093342,unknown,,,place_of_worship,yes,NZ,-36.769975009090906,174.73456377272726,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w321790690,Place of Worship 321790690,unknown,,,place_of_worship,yes,NZ,-36.886557657894734,174.63248798947367,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w323014062,Place of Worship 323014062,unknown,,,place_of_worship,yes,NZ,-36.78206254285715,174.72049634285713,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w324695348,Place of Worship 324695348,unknown,,,,,NZ,-36.790301371428576,174.7614794,{}
 1,placeholder_name,w327375779,Place of Worship 327375779,unknown,,,place_of_worship,yes,NZ,-37.57423086,175.14622298,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w327722628,Place of Worship 327722628,unknown,,,place_of_worship,yes,NZ,-37.402583019999994,175.14345896,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w329287801,Place of Worship 329287801,unknown,,,place_of_worship,yes,NZ,-36.95074376,174.80602807999998,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w330201025,Place of Worship 330201025,unknown,,,place_of_worship,yes,NZ,-36.975098499999994,174.79275868333332,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w331326944,Place of Worship 331326944,unknown,,,,,NZ,-36.909400420000004,174.79800236,{}
-1,placeholder_name,w333353419,Place of Worship 333353419,unknown,,,,,NZ,-36.89648978333333,174.80944588333332,{}
 1,placeholder_name,w336630317,Place of Worship 336630317,unknown,,,place_of_worship,yes,NZ,-36.88022514444444,174.7614011111111,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w336630319,Place of Worship 336630319,unknown,,"1 Valley Road, Auckland, 1024",place_of_worship,yes,NZ,-36.880160133333334,174.76099246666666,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w336815212,Place of Worship 336815212,unknown,,,place_of_worship,yes,NZ,-37.20813982,174.89673929999998,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w337166150,Place of Worship 337166150,unknown,,,,,NZ,-36.949550325000004,174.81414325,{}
 1,placeholder_name,w337769582,Place of Worship 337769582,unknown,,,place_of_worship,yes,NZ,-36.96220614,174.83095074,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w338724688,Place of Worship 338724688,unknown,,,,,NZ,-39.49922278571428,176.90143007142856,{}
-1,placeholder_name,w338886576,Place of Worship 338886576,unknown,,33 Hardinge Road,,,NZ,-39.4794584,176.90161306666667,{}
 1,placeholder_name,w338963461,Place of Worship 338963461,unknown,,,place_of_worship,yes,NZ,-37.06763966,174.95904502000002,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w339470521,Place of Worship 339470521,unknown,,,place_of_worship,yes,NZ,-36.871184715384615,174.72689655384616,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w339893035,Place of Worship 339893035,unknown,,,place_of_worship,yes,NZ,-36.90921526363636,174.6625694818182,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w339893767,Place of Worship 339893767,unknown,,,place_of_worship,yes,NZ,-36.90959985714286,174.6622136190476,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w34264220,Place of Worship 34264220,unknown,,,,,NZ,-36.88464404,174.71701092,{}
 1,placeholder_name,w342914985,Place of Worship 342914985,unknown,,,place_of_worship,yes,NZ,-37.60229345714286,175.6283033,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w343109201,Place of Worship 343109201,unknown,,,,,NZ,-39.51154502857143,176.86852525714286,{}
-1,placeholder_name,w343330687,Place of Worship 343330687,unknown,,,,,NZ,-39.502146419999995,176.8924273,{}
-1,placeholder_name,w343375494,Place of Worship 343375494,unknown,,,,,NZ,-39.49954322,176.90501108,{}
-1,placeholder_name,w344451888,Place of Worship 344451888,unknown,,,,,NZ,-36.98848518,174.86025554,{}
-1,placeholder_name,w344611797,Place of Worship 344611797,unknown,,,,,NZ,-39.52046784545455,176.90121146363637,{}
-1,placeholder_name,w345647705,Place of Worship 345647705,unknown,,,,,NZ,-39.58427226,176.91875064,{}
 1,placeholder_name,w352252979,Place of Worship 352252979,unknown,,,place_of_worship,yes,NZ,-37.18690492857143,174.99105882857143,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w352282579,Place of Worship 352282579,unknown,,,place_of_worship,yes,NZ,-37.230581719999996,175.63816781999998,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w353576442,Place of Worship 353576442,unknown,,,,,NZ,-39.6246687,176.84139881666667,{}
 1,placeholder_name,w356910461,Place of Worship 356910461,unknown,,,place_of_worship,yes,NZ,-37.18711878,174.83382386,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w358128319,Place of Worship 358128319,unknown,,,place_of_worship,yes,NZ,-38.90772952,175.92285711999997,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w360117162,Place of Worship 360117162,unknown,,,,,NZ,-36.95215848461539,174.84452692307693,{}
 1,placeholder_name,w360974371,Place of Worship 360974371,unknown,,,place_of_worship,yes,NZ,-45.419455420000006,167.71423536,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w362748342,Place of Worship 362748342,unknown,,,,,NZ,-37.7301289,176.13923979999998,{}
-1,placeholder_name,w365025183,Place of Worship 365025183,unknown,,,,,NZ,-39.48962337272727,176.91574086363636,{}
-1,placeholder_name,w365025184,Place of Worship 365025184,unknown,,,,,NZ,-39.488935825,176.917157625,{}
 1,placeholder_name,w366054661,Place of Worship 366054661,unknown,,,place_of_worship,yes,NZ,-35.40475310000001,173.7943889,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w366055746,Place of Worship 366055746,unknown,,,place_of_worship,yes,NZ,-35.0455506,173.25544628,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w366058747,Place of Worship 366058747,unknown,,,place_of_worship,yes,NZ,-35.10412742,173.26078968000002,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w366058772,Place of Worship 366058772,unknown,,,place_of_worship,yes,NZ,-35.10673142857143,173.2607572,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w366243641,Place of Worship 366243641,unknown,,,,,NZ,-35.2224375,173.95651382222223,{}
 1,placeholder_name,w366403819,Place of Worship 366403819,unknown,,,place_of_worship,yes,NZ,-35.109928415384616,173.2595452769231,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w366596922,Place of Worship 366596922,unknown,,,place_of_worship,yes,NZ,-35.173594959999996,173.1528985,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w366606563,Place of Worship 366606563,unknown,,,place_of_worship,yes,NZ,-40.62337656363636,175.2877609,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w367914759,Place of Worship 367914759,unknown,,,,,NZ,-40.33658223333333,175.63509514999998,{}
-1,placeholder_name,w367922868,Place of Worship 367922868,unknown,,,,,NZ,-40.33597686,175.63473798,{}
 1,placeholder_name,w368410025,Place of Worship 368410025,unknown,,,place_of_worship,yes,NZ,-40.35248084705882,175.61352134705882,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w371298373,Place of Worship 371298373,unknown,,,place_of_worship,yes,NZ,-39.577016119999996,174.27791412,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w371298418,Place of Worship 371298418,unknown,,,place_of_worship,yes,NZ,-39.57590056666666,174.2781773,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w371319616,Place of Worship 371319616,unknown,,,place_of_worship,yes,NZ,-39.42739742,174.29740682,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w371319642,Place of Worship 371319642,unknown,,,place_of_worship,yes,NZ,-39.43129525555556,174.29425895555556,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w371562975,Place of Worship 371562975,unknown,,,place_of_worship,yes,NZ,-39.00140042,174.23544426,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w37228828,Place of Worship 37228828,unknown,,,,,NZ,-36.92043764666666,174.75653693333334,{}
 1,placeholder_name,w372932456,Place of Worship 372932456,unknown,,,place_of_worship,yes,NZ,-39.6304563,176.87168222,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w372932524,Place of Worship 372932524,unknown,,,place_of_worship,yes,NZ,-39.62779891428572,176.84935545714285,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w374045991,Place of Worship 374045991,unknown,,,place_of_worship,yes,NZ,-40.644782199999995,175.7060931,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w37583805,Place of Worship 37583805,unknown,,,place_of_worship,,NZ,-43.3320015,172.64347859999998,"{""amenity"": ""place_of_worship""}"
 1,placeholder_name,w376175823,Place of Worship 376175823,unknown,,,place_of_worship,yes,NZ,-37.9688739,176.97698906,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w376175839,Place of Worship 376175839,unknown,,,,,NZ,-39.034938319999995,177.42341821999997,{}
-1,placeholder_name,w376175840,Place of Worship 376175840,unknown,,,,,NZ,-39.03766664,177.41703984,{}
-1,placeholder_name,w376175842,Place of Worship 376175842,unknown,,,,,NZ,-39.03565691666667,177.4190826,{}
-1,placeholder_name,w376175843,Place of Worship 376175843,unknown,,,,,NZ,-39.037734628571435,177.43032987142857,{}
-1,placeholder_name,w379469778,Place of Worship 379469778,unknown,,,,,NZ,-40.207076920000006,176.10058371999997,{}
-1,placeholder_name,w379997322,Place of Worship 379997322,unknown,,,,,NZ,-36.91368924,174.73916084,{}
 1,placeholder_name,w381878678,Place of Worship 381878678,unknown,,,place_of_worship,yes,NZ,-45.90288832,170.4286033,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w383040954,Place of Worship 383040954,unknown,,,place_of_worship,yes,NZ,-46.155181850000005,168.32836380999998,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w383202839,Place of Worship 383202839,unknown,,,place_of_worship,yes,NZ,-46.111013763636365,168.93623565454547,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
@@ -666,22 +170,9 @@ priority,category,id,name,religion,denomination,address,amenity,building,country
 1,placeholder_name,w388344290,Place of Worship 388344290,unknown,,,place_of_worship,yes,NZ,-38.03570508,175.34919122000002,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w388652259,Place of Worship 388652259,unknown,,,place_of_worship,yes,NZ,-39.42791269047619,174.14942301904762,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w388977713,Place of Worship 388977713,unknown,,,place_of_worship,yes,NZ,-36.027971642857146,173.91907450000002,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w390403766,Place of Worship 390403766,unknown,,,,,NZ,-39.49278622222222,176.91459930000002,{}
-1,placeholder_name,w390730157,Place of Worship 390730157,unknown,,,,,NZ,-39.53224686666667,176.85330092222222,{}
-1,placeholder_name,w390731342,Place of Worship 390731342,unknown,,,,,NZ,-39.52726503,176.85855128,{}
-1,placeholder_name,w390736180,Place of Worship 390736180,unknown,,,,,NZ,-39.51217981666667,176.89269221666666,{}
 1,placeholder_name,w390786823,Place of Worship 390786823,unknown,,,place_of_worship,yes,NZ,-40.661340055555556,175.24738235555554,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w390962638,Place of Worship 390962638,unknown,,,,,NZ,-40.54813258,175.41844156,{}
-1,placeholder_name,w391080789,Place of Worship 391080789,unknown,,,,,NZ,-39.513417266666664,176.86540271111113,{}
-1,placeholder_name,w391115949,Place of Worship 391115949,unknown,,,,,NZ,-39.664297166666664,176.88343566666666,{}
-1,placeholder_name,w391302850,Place of Worship 391302850,unknown,,,,,NZ,-39.627946225,176.7876756625,{}
-1,placeholder_name,w391724041,Place of Worship 391724041,unknown,,,,,NZ,-40.86351884,175.02438282,{}
-1,placeholder_name,w391734508,Place of Worship 391734508,unknown,,,,,NZ,-39.64830135714286,176.8637618,{}
 1,placeholder_name,w392424014,Place of Worship 392424014,unknown,,,place_of_worship,yes,NZ,-40.92602174545454,174.99666684545454,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w392575169,Place of Worship 392575169,unknown,,,place_of_worship,yes,NZ,-40.914371253846156,175.0112582153846,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w393396453,Place of Worship 393396453,unknown,,,,,NZ,-43.526088990909095,172.3705169181818,{}
-1,placeholder_name,w394509712,Place of Worship 394509712,unknown,,,,,NZ,-39.52206527,176.87175637,{}
-1,placeholder_name,w395240353,Place of Worship 395240353,unknown,,,,,NZ,-41.13691796,174.87221555000002,{}
 1,placeholder_name,w396340159,Place of Worship 396340159,unknown,,,place_of_worship,,NZ,-41.17182405454545,174.82432163636363,"{""amenity"": ""place_of_worship""}"
 1,placeholder_name,w397452743,Place of Worship 397452743,unknown,,,place_of_worship,yes,NZ,-41.76089728,171.59942596000002,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w397452778,Place of Worship 397452778,unknown,,,place_of_worship,yes,NZ,-41.752729699999996,171.60149875714288,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
@@ -697,13 +188,9 @@ priority,category,id,name,religion,denomination,address,amenity,building,country
 1,placeholder_name,w400732699,Place of Worship 400732699,unknown,,,place_of_worship,yes,NZ,-37.89191703636364,178.3199021909091,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w400732752,Place of Worship 400732752,unknown,,,place_of_worship,yes,NZ,-37.888390900000005,178.34420546,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w400732764,Place of Worship 400732764,unknown,,,place_of_worship,yes,NZ,-37.88960907142857,178.31970045714283,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w400908664,Place of Worship 400908664,unknown,,,,,NZ,-39.62446375454545,176.78743146363638,{}
-1,placeholder_name,w400908669,Place of Worship 400908669,unknown,,,,,NZ,-39.62474695,176.7846989125,{}
-1,placeholder_name,w400909817,Place of Worship 400909817,unknown,,,,,NZ,-39.62412316666667,176.78584978333333,{}
 1,placeholder_name,w403005260,Place of Worship 403005260,unknown,,,place_of_worship,yes,NZ,-43.367935777777774,171.53225864444445,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w403008740,Place of Worship 403008740,unknown,,,place_of_worship,yes,NZ,-43.63540594,171.63988544,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w403008787,Place of Worship 403008787,unknown,,,place_of_worship,yes,NZ,-43.628396418181815,171.63730142727272,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w403542494,Place of Worship 403542494,unknown,,,,,NZ,-39.64668856666667,176.84771418333332,{}
 1,placeholder_name,w404170770,Place of Worship 404170770,unknown,,,place_of_worship,yes,NZ,-41.404293519999996,173.04215218,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w404170786,Place of Worship 404170786,unknown,,,place_of_worship,yes,NZ,-41.406749985714285,173.0441669,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w405263511,Place of Worship 405263511,unknown,,,place_of_worship,yes,NZ,-45.13451502,170.09645157999998,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
@@ -748,514 +235,49 @@ priority,category,id,name,religion,denomination,address,amenity,building,country
 1,placeholder_name,w424672672,Place of Worship 424672672,unknown,,,place_of_worship,yes,NZ,-37.738736540000005,175.15298944,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w424676209,Place of Worship 424676209,unknown,,,place_of_worship,yes,NZ,-37.74317908,175.15208744,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w425465284,Place of Worship 425465284,unknown,,,place_of_worship,yes,NZ,-37.73894482,175.73812734,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w426234038,Place of Worship 426234038,unknown,,,,,NZ,-42.276954720000006,171.67994186,{}
 1,placeholder_name,w426529623,Place of Worship 426529623,unknown,,,place_of_worship,yes,NZ,-38.56429515999999,174.98515584,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w426562434,Place of Worship 426562434,unknown,,,place_of_worship,yes,NZ,-37.88117477142857,174.8677753142857,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w426750644,Place of Worship 426750644,unknown,,,place_of_worship,yes,NZ,-38.06324906,177.00666977999998,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w427528959,Place of Worship 427528959,unknown,,,place_of_worship,yes,NZ,-40.422987039999995,175.43898972,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w427531708,Place of Worship 427531708,unknown,,,place_of_worship,yes,NZ,-40.34717574,175.53269016,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w428153595,Place of Worship 428153595,unknown,,,place_of_worship,yes,NZ,-35.81570572,174.50440269999999,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w428341725,Place of Worship 428341725,unknown,,,,,NZ,-39.51776366153846,176.88219133846152,{}
-1,placeholder_name,w430125733,Place of Worship 430125733,unknown,,,,,NZ,-39.491490549999995,176.91451949285715,{}
-1,placeholder_name,w430467919,Place of Worship 430467919,unknown,,,,,NZ,-37.79023835833333,175.30995365833334,{}
-1,placeholder_name,w430739004,Place of Worship 430739004,unknown,,,,,NZ,-39.509089249999995,176.86778683333333,{}
 1,placeholder_name,w430882162,Place of Worship 430882162,unknown,,,place_of_worship,yes,NZ,-36.75515207777778,175.5022388111111,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w432047195,Place of Worship 432047195,unknown,,,place_of_worship,yes,NZ,-39.960361514285715,175.20443681428574,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w434835699,Place of Worship 434835699,unknown,,,place_of_worship,yes,NZ,-37.632534979999996,175.76323356,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w434949319,Place of Worship 434949319,unknown,,,,,NZ,-39.52950042222222,176.85991265555555,{}
 1,placeholder_name,w435225367,Place of Worship 435225367,unknown,,,place_of_worship,yes,NZ,-41.38432254,172.82279432,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w435227928,Place of Worship 435227928,unknown,,,place_of_worship,yes,NZ,-41.80136396,172.32496364,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w435258754,Place of Worship 435258754,unknown,,,place_of_worship,yes,NZ,-42.27701576,171.67993622,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w435590042,Place of Worship 435590042,unknown,,,place_of_worship,yes,NZ,-42.83738898,171.04499892,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w435591829,Place of Worship 435591829,unknown,,,place_of_worship,yes,NZ,-43.14375482,170.5523034,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w435592111,Place of Worship 435592111,unknown,,,place_of_worship,yes,NZ,-43.26047102,170.35889292,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w436478327,Place of Worship 436478327,unknown,,,,,NZ,-39.50605028,176.90653998,{}
-1,placeholder_name,w437683219,Place of Worship 437683219,unknown,,,,,NZ,-39.51237928333333,176.89734251666667,{}
-1,placeholder_name,w439826876,Place of Worship 439826876,unknown,,129 Latham Street,,,NZ,-39.50788204705882,176.90000049411765,{}
-1,placeholder_name,w439826877,Place of Worship 439826877,unknown,,,,,NZ,-39.50721420000001,176.8996310285714,{}
-1,placeholder_name,w440105751,Place of Worship 440105751,unknown,,110 Charles Street,,,NZ,-39.47776915,176.88181103333332,{}
-1,placeholder_name,w442997632,Place of Worship 442997632,unknown,,,,,NZ,-39.538279511111114,176.85977365555556,{}
-1,placeholder_name,w444097404,Place of Worship 444097404,unknown,,,,,NZ,-39.50901338571428,176.8997447714286,{}
 1,placeholder_name,w444247599,Place of Worship 444247599,unknown,,,place_of_worship,yes,NZ,-41.47471879230769,173.96496803076923,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w451791356,Place of Worship 451791356,unknown,,,,,NZ,-39.4893185,176.90260374,{}
 1,placeholder_name,w455888967,Place of Worship 455888967,unknown,,,place_of_worship,yes,NZ,-38.238688238461535,176.17482655384615,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w459485358,Place of Worship 459485358,unknown,,,,,NZ,-39.670131536363634,176.91978547272728,{}
-1,placeholder_name,w474487044,Place of Worship 474487044,unknown,,,,,NZ,-39.6766852625,176.86368299999998,{}
 1,placeholder_name,w474734777,Place of Worship 474734777,unknown,,,place_of_worship,yes,NZ,-38.57003946,178.22963108,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w47653440,Place of Worship 47653440,unknown,,,,,NZ,-36.921394035714286,174.70008695714287,{}
-1,placeholder_name,w483335696,Place of Worship 483335696,unknown,,,,,NZ,-39.615296210000004,176.77312915,{}
-1,placeholder_name,w483569944,Place of Worship 483569944,unknown,,,,,NZ,-39.80413468,176.9843828,{}
 1,placeholder_name,w485633213,Place of Worship 485633213,unknown,,,place_of_worship,yes,NZ,-37.777122211111106,175.28585047777779,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w487893221,Place of Worship 487893221,unknown,,,,,NZ,-38.063237428571426,177.00655515714286,{}
-1,placeholder_name,w488155583,Place of Worship 488155583,unknown,,,,,NZ,-41.12561066,175.05496060000002,{}
-1,placeholder_name,w488155584,Place of Worship 488155584,unknown,,,,,NZ,-41.12537099,175.05738431,{}
-1,placeholder_name,w48880144,Place of Worship 48880144,unknown,,,,,NZ,-36.943609925000004,174.84111992500002,{}
-1,placeholder_name,w489500462,Place of Worship 489500462,unknown,,,,,NZ,-36.90317854,174.69989727,{}
-1,placeholder_name,w491870572,Place of Worship 491870572,unknown,,,,,NZ,-38.15311028,176.2398028066667,{}
-1,placeholder_name,w491870597,Place of Worship 491870597,unknown,,,,,NZ,-38.15037627777778,176.2424637888889,{}
-1,placeholder_name,w491870598,Place of Worship 491870598,unknown,,,,,NZ,-38.15076525,176.24000231666665,{}
-1,placeholder_name,w491887683,Place of Worship 491887683,unknown,,,,,NZ,-38.150640870000004,176.25311010000001,{}
-1,placeholder_name,w492902038,Place of Worship 492902038,unknown,,,,,NZ,-38.1426886875,176.247506475,{}
-1,placeholder_name,w493570199,Place of Worship 493570199,unknown,,,,,NZ,-38.98206175,175.8075630333333,{}
-1,placeholder_name,w493775890,Place of Worship 493775890,unknown,,,,,NZ,-38.687633579999996,176.08871095,{}
-1,placeholder_name,w494033313,Place of Worship 494033313,unknown,,,,,NZ,-38.69368659,176.09137424,{}
-1,placeholder_name,w494543965,Place of Worship 494543965,unknown,,,,,NZ,-37.958979758333335,176.984365375,{}
-1,placeholder_name,w494559299,Place of Worship 494559299,unknown,,,,,NZ,-37.96722652222222,176.97151815555557,{}
-1,placeholder_name,w494559309,Place of Worship 494559309,unknown,,,,,NZ,-37.96605054285715,176.9752050142857,{}
-1,placeholder_name,w494560036,Place of Worship 494560036,unknown,,,,,NZ,-37.96869916666667,176.9769494666667,{}
-1,placeholder_name,w494573858,Place of Worship 494573858,unknown,,,,,NZ,-37.9581154,176.98689256,{}
-1,placeholder_name,w495298674,Place of Worship 495298674,unknown,,,,,NZ,-38.33299908,175.16229882,{}
-1,placeholder_name,w495298689,Place of Worship 495298689,unknown,,,,,NZ,-38.3372612,175.16992554285713,{}
-1,placeholder_name,w495298690,Place of Worship 495298690,unknown,,,,,NZ,-38.33658798333333,175.16330101666668,{}
 1,placeholder_name,w495825147,Place of Worship 495825147,unknown,,,place_of_worship,yes,NZ,-43.761577,172.29804168,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w495825165,Place of Worship 495825165,unknown,,,place_of_worship,yes,NZ,-43.75814296666667,172.29081106666666,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w495842239,Place of Worship 495842239,unknown,,,place_of_worship,yes,NZ,-44.18334888571428,171.27825800000002,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w495978762,Place of Worship 495978762,unknown,,,,,NZ,-40.20029615,176.10699933333333,{}
-1,placeholder_name,w497037919,Place of Worship 497037919,unknown,,,,,NZ,-39.641594411111114,176.83990985555556,{}
-1,placeholder_name,w498400959,Place of Worship 498400959,unknown,,,,,NZ,-40.94299614285715,174.97656122857143,{}
 1,placeholder_name,w502644517,Place of Worship 502644517,unknown,,,place_of_worship,yes,NZ,-45.155459480000005,170.87900606,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w502796009,Place of Worship 502796009,unknown,,,place_of_worship,yes,NZ,-44.95059706666667,170.75094230000002,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w503044958,Place of Worship 503044958,unknown,,,place_of_worship,yes,NZ,-46.29910528888889,168.16188267777778,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w50336844,Place of Worship 50336844,unknown,,,,,NZ,-36.87254104666667,174.85334064666668,{}
 1,placeholder_name,w503960695,Place of Worship 503960695,unknown,,,place_of_worship,yes,NZ,-44.5244586,171.08350328,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w503974814,Place of Worship 503974814,unknown,,,place_of_worship,yes,NZ,-45.65166307777778,170.6481399888889,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w506427560,Place of Worship 506427560,unknown,,,place_of_worship,yes,NZ,-39.3242732,173.8029708,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w507253650,Place of Worship 507253650,unknown,,,place_of_worship,yes,NZ,-40.036494340000004,176.48992436,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w507292124,Place of Worship 507292124,unknown,,,place_of_worship,yes,NZ,-40.25739332,176.67015728,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w517503393,Place of Worship 517503393,unknown,,,place_of_worship,yes,NZ,-37.91998478,175.13528888000002,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w520455162,Place of Worship 520455162,unknown,,,,,NZ,-36.86353484,174.73077401999998,{}
-1,placeholder_name,w520492084,Place of Worship 520492084,unknown,,,,,NZ,-36.85776452857142,174.7308076857143,{}
-1,placeholder_name,w523949659,Place of Worship 523949659,unknown,,,,,NZ,-36.8725991,174.7533233,{}
-1,placeholder_name,w524517981,Place of Worship 524517981,unknown,,,,,NZ,-46.24073941666666,169.7379057,{}
 1,placeholder_name,w537874470,Place of Worship 537874470,unknown,,,place_of_worship,yes,NZ,-44.818214639999994,171.10976472,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w537874475,Place of Worship 537874475,unknown,,,place_of_worship,yes,NZ,-44.818198100000004,171.10943882,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w543058410,Place of Worship 543058410,unknown,,,place_of_worship,yes,NZ,-37.67080054,175.67823848,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 1,placeholder_name,w543466226,Place of Worship 543466226,unknown,,,place_of_worship,yes,NZ,-38.06468648,175.5604513,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w546993586,Place of Worship 546993586,unknown,,,,,NZ,-41.28074038,173.76609518,{}
-1,placeholder_name,w546996475,Place of Worship 546996475,unknown,,,,,NZ,-41.51194485714286,173.82986262857142,{}
-1,placeholder_name,w546998911,Place of Worship 546998911,unknown,,,,,NZ,-41.34279406,173.19392221,{}
-1,placeholder_name,w547002110,Place of Worship 547002110,unknown,,,,,NZ,-41.3171306625,173.112219475,{}
 1,placeholder_name,w549685281,Place of Worship 549685281,unknown,,,place_of_worship,yes,NZ,-43.54390945555556,172.52205354444445,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w554765915,Place of Worship 554765915,unknown,,,,,NZ,-45.9027108,170.50956216,{}
-1,placeholder_name,w593265749,Place of Worship 593265749,unknown,,,,,NZ,-45.90105725,170.45700676153848,{}
-1,placeholder_name,w597585283,Place of Worship 597585283,unknown,,,,,NZ,-45.50594024,170.12257094,{}
 1,placeholder_name,w604211537,Place of Worship 604211537,unknown,,,place_of_worship,yes,NZ,-42.96892308571428,172.69539284285716,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w618727006,Place of Worship 618727006,unknown,,,,,NZ,-45.87351060526316,170.5024686736842,{}
-1,placeholder_name,w659020444,Place of Worship 659020444,unknown,,,,,NZ,-43.47873414,172.55796404,{}
 1,placeholder_name,w667587255,Place of Worship 667587255,unknown,,"Hamilton, 3204",place_of_worship,yes,NZ,-37.79608024736842,175.28244407368422,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w690860476,Place of Worship 690860476,unknown,,,,,NZ,-36.86308082666667,174.60177057333334,{}
-1,placeholder_name,w690860477,Place of Worship 690860477,unknown,,,,,NZ,-36.8624382875,174.60178865,{}
-1,placeholder_name,w690860485,Place of Worship 690860485,unknown,,,,,NZ,-36.8636743625,174.5999067,{}
-1,placeholder_name,w693471845,Place of Worship 693471845,unknown,,,,,NZ,-43.63558934,171.64355108,{}
-1,placeholder_name,w693633207,Place of Worship 693633207,unknown,,,,,NZ,-43.63315705,171.64438816666666,{}
-1,placeholder_name,w693672641,Place of Worship 693672641,unknown,,,,,NZ,-45.85232901052632,170.52215943684212,{}
-1,placeholder_name,w710602298,Place of Worship 710602298,unknown,,"10R Iona Place, Auckland",,,NZ,-36.99915857857143,174.8853515214286,{}
-1,placeholder_name,w712631018,Place of Worship 712631018,unknown,,,,,NZ,-37.236797100000004,175.02133126,{}
-1,placeholder_name,w714977530,Place of Worship 714977530,unknown,,,,,NZ,-36.79852138,174.7775964,{}
-1,placeholder_name,w715222752,Place of Worship 715222752,unknown,,,,,NZ,-37.60221954,175.62838196,{}
-1,placeholder_name,w717031035,Place of Worship 717031035,unknown,,,,,NZ,-36.83593828000001,175.7032577,{}
-1,placeholder_name,w718256560,Place of Worship 718256560,unknown,,,,,NZ,-44.25769820909091,170.10047029999998,{}
-1,placeholder_name,w718781610,Place of Worship 718781610,unknown,,,,,NZ,-36.852513542857146,174.83592405714285,{}
-1,placeholder_name,w718781611,Place of Worship 718781611,unknown,,,,,NZ,-36.8530052375,174.83688717500002,{}
-1,placeholder_name,w730068537,Place of Worship 730068537,unknown,,,,,NZ,-37.0166334,174.92039803333333,{}
-1,placeholder_name,w731008448,Place of Worship 731008448,unknown,,,,,NZ,-36.878134249999995,174.7292687,{}
-1,placeholder_name,w737186524,Place of Worship 737186524,unknown,,,,,NZ,-45.098215971428566,170.97196837142857,{}
-1,placeholder_name,w737757432,Place of Worship 737757432,unknown,,,,,NZ,-45.084564060000005,170.97822062,{}
-1,placeholder_name,w737764891,Place of Worship 737764891,unknown,,,,,NZ,-36.958086933333334,174.8608674666667,{}
-1,placeholder_name,w738092525,Place of Worship 738092525,unknown,,,,,NZ,-36.98167011785714,174.82060965,{}
-1,placeholder_name,w738960574,Place of Worship 738960574,unknown,,,,,NZ,-43.523945021428574,172.6359906,{}
-1,placeholder_name,w738970927,Place of Worship 738970927,unknown,,,,,NZ,-36.97859553333333,174.82364686666665,{}
-1,placeholder_name,w738997482,Place of Worship 738997482,unknown,,,,,NZ,-36.97179755714286,174.7950280285714,{}
-1,placeholder_name,w739000995,Place of Worship 739000995,unknown,,,,,NZ,-36.80593105714286,174.7898668,{}
-1,placeholder_name,w739486241,Place of Worship 739486241,unknown,,,,,NZ,-35.70597544615384,174.3190113076923,{}
-1,placeholder_name,w740568078,Place of Worship 740568078,unknown,,,,,NZ,-36.87673056,174.75542464,{}
-1,placeholder_name,w743701325,Place of Worship 743701325,unknown,,,,,NZ,-36.868365340000004,174.708294,{}
-1,placeholder_name,w743701327,Place of Worship 743701327,unknown,,,,,NZ,-36.8696584125,174.7093929,{}
-1,placeholder_name,w744501600,Place of Worship 744501600,unknown,,,,,NZ,-36.87433388888889,174.74861167777777,{}
-1,placeholder_name,w745461849,Place of Worship 745461849,unknown,,,,,NZ,-36.78350651428572,174.77224741428572,{}
-1,placeholder_name,w746517543,Place of Worship 746517543,unknown,,,,,NZ,-37.20352466666667,174.8920485,{}
-1,placeholder_name,w746925212,Place of Worship 746925212,unknown,,,,,NZ,-46.11117136,168.93613729999998,{}
-1,placeholder_name,w747285368,Place of Worship 747285368,unknown,,,,,NZ,-36.8506474375,174.7450937625,{}
-1,placeholder_name,w747427980,Place of Worship 747427980,unknown,,,,,NZ,-36.99000255,174.85465545,{}
-1,placeholder_name,w747462982,Place of Worship 747462982,unknown,,,,,NZ,-36.96839303125,174.88329735625,{}
-1,placeholder_name,w749798343,Place of Worship 749798343,unknown,,,,,NZ,-36.85411660909091,174.74892523636365,{}
-1,placeholder_name,w751207513,Place of Worship 751207513,unknown,,,,,NZ,-36.8820362,174.74962227142856,{}
-1,placeholder_name,w759308261,Place of Worship 759308261,unknown,,,,,NZ,-36.863701979999995,174.76813934,{}
-1,placeholder_name,w761849055,Place of Worship 761849055,unknown,,,,,NZ,-38.6566312,177.99280442857142,{}
-1,placeholder_name,w761850250,Place of Worship 761850250,unknown,,,,,NZ,-38.657977585714285,178.01517074285715,{}
-1,placeholder_name,w761852621,Place of Worship 761852621,unknown,,,,,NZ,-38.65559292,178.01677085333333,{}
-1,placeholder_name,w761852917,Place of Worship 761852917,unknown,,,,,NZ,-38.67184837999999,178.04369448,{}
-1,placeholder_name,w762161581,Place of Worship 762161581,unknown,,,,,NZ,-36.878616418181814,174.86672577272728,{}
-1,placeholder_name,w764331464,Place of Worship 764331464,unknown,,,,,NZ,-37.55612926,175.16061482,{}
-1,placeholder_name,w765139126,Place of Worship 765139126,unknown,,,,,NZ,-36.908958857142856,174.6717870285714,{}
-1,placeholder_name,w765606303,Place of Worship 765606303,unknown,,,,,NZ,-36.980045,174.85753671666666,{}
-1,placeholder_name,w765620926,Place of Worship 765620926,unknown,,,,,NZ,-36.91457593,174.92896314,{}
-1,placeholder_name,w766369539,Place of Worship 766369539,unknown,,,,,NZ,-36.92547112,174.78749832,{}
 1,placeholder_name,w768002963,Place of Worship 768002963,unknown,,,place_of_worship,yes,NZ,-38.651715977777776,177.99532356666666,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w769201021,Place of Worship 769201021,unknown,,,,,NZ,-41.141468628571424,174.8456126857143,{}
-1,placeholder_name,w769855419,Place of Worship 769855419,unknown,,,,,NZ,-36.88814445,174.7942037,{}
-1,placeholder_name,w769867256,Place of Worship 769867256,unknown,,,,,NZ,-36.841577029999996,174.65123155,{}
-1,placeholder_name,w769867268,Place of Worship 769867268,unknown,,,,,NZ,-36.83327371111111,174.65586828888888,{}
-1,placeholder_name,w770173510,Place of Worship 770173510,unknown,,,,,NZ,-37.24814254545454,174.7439116181818,{}
-1,placeholder_name,w770228725,Place of Worship 770228725,unknown,,,,,NZ,-37.25021894545454,174.73035118181818,{}
-1,placeholder_name,w770228726,Place of Worship 770228726,unknown,,,,,NZ,-37.25060426666666,174.73063841666666,{}
-1,placeholder_name,w770228730,Place of Worship 770228730,unknown,,,,,NZ,-37.25399248,174.7337356,{}
-1,placeholder_name,w770228731,Place of Worship 770228731,unknown,,,,,NZ,-37.254840699999995,174.7311014,{}
-1,placeholder_name,w770780386,Place of Worship 770780386,unknown,,,,,NZ,-41.31633925,174.8004244,{}
-1,placeholder_name,w773077980,Place of Worship 773077980,unknown,,,,,NZ,-36.88433492,174.73657294,{}
-1,placeholder_name,w774903322,Place of Worship 774903322,unknown,,,,,NZ,-36.841362261538464,174.64176389230767,{}
-1,placeholder_name,w774940909,Place of Worship 774940909,unknown,,,,,NZ,-36.88208648,174.7010534,{}
-1,placeholder_name,w775665658,Place of Worship 775665658,unknown,,,,,NZ,-36.70750176666667,174.73721022083336,{}
-1,placeholder_name,w780860315,Place of Worship 780860315,unknown,,,,,NZ,-36.86408177142857,174.76344165714286,{}
-1,placeholder_name,w781271741,Place of Worship 781271741,unknown,,,,,NZ,-36.887088600000006,174.77115724285713,{}
-1,placeholder_name,w785441386,Place of Worship 785441386,unknown,,,,,NZ,-36.87692234285714,174.72062322857144,{}
-1,placeholder_name,w790617863,Place of Worship 790617863,unknown,,,,,NZ,-36.85922683333334,174.70324233333335,{}
-1,placeholder_name,w790617865,Place of Worship 790617865,unknown,,,,,NZ,-36.86036016,174.70305112,{}
-1,placeholder_name,w790625831,Place of Worship 790625831,unknown,,,,,NZ,-36.84950730714286,174.74373127142857,{}
-1,placeholder_name,w790662028,Place of Worship 790662028,unknown,,,,,NZ,-37.053105,174.95351706000002,{}
-1,placeholder_name,w791897697,Place of Worship 791897697,unknown,,,,,NZ,-36.76016732222222,174.73978799999998,{}
-1,placeholder_name,w793168251,Place of Worship 793168251,unknown,,,,,NZ,-37.103018057142855,174.9506115714286,{}
-1,placeholder_name,w795492500,Place of Worship 795492500,unknown,,,,,NZ,-36.72225807894737,174.72175403157894,{}
-1,placeholder_name,w798277249,Place of Worship 798277249,unknown,,,,,NZ,-37.052445524,174.959777508,{}
-1,placeholder_name,w804481237,Place of Worship 804481237,unknown,,,,,NZ,-36.92188039230769,174.7039789,{}
-1,placeholder_name,w805132341,Place of Worship 805132341,unknown,,,,,NZ,-43.54905034285714,172.60895754285713,{}
-1,placeholder_name,w805627455,Place of Worship 805627455,unknown,,,,,NZ,-36.88177405,174.91058801666668,{}
-1,placeholder_name,w808613888,Place of Worship 808613888,unknown,,,,,NZ,-43.52154659090909,172.56219472727273,{}
-1,placeholder_name,w808751730,Place of Worship 808751730,unknown,,,,,NZ,-43.563027579999996,172.62591426,{}
-1,placeholder_name,w809399479,Place of Worship 809399479,unknown,,,,,NZ,-36.8712316,174.72692541666666,{}
-1,placeholder_name,w812728247,Place of Worship 812728247,unknown,,,,,NZ,-37.3945345,175.84584972,{}
-1,placeholder_name,w812734783,Place of Worship 812734783,unknown,,,,,NZ,-37.54060946,175.71080356,{}
-1,placeholder_name,w814022538,Place of Worship 814022538,unknown,,,,,NZ,-36.854439766666665,174.76826935,{}
-1,placeholder_name,w814798948,Place of Worship 814798948,unknown,,,,,NZ,-37.72578324285714,175.2200727857143,{}
-1,placeholder_name,w815551142,Place of Worship 815551142,unknown,,,,,NZ,-37.78417691428571,175.28692527142857,{}
-1,placeholder_name,w815798260,Place of Worship 815798260,unknown,,,,,NZ,-36.794368865,174.75251314500002,{}
-1,placeholder_name,w815799520,Place of Worship 815799520,unknown,,,,,NZ,-36.797918572727276,174.74553197272726,{}
-1,placeholder_name,w817415829,Place of Worship 817415829,unknown,,,,,NZ,-36.8502735375,174.76113945,{}
-1,placeholder_name,w817429382,Place of Worship 817429382,unknown,,,,,NZ,-38.68250345714286,176.05960891428572,{}
-1,placeholder_name,w817985073,Place of Worship 817985073,unknown,,,,,NZ,-36.955672183333334,174.80439516666664,{}
-1,placeholder_name,w817985090,Place of Worship 817985090,unknown,,,,,NZ,-36.963432169230764,174.8139021923077,{}
-1,placeholder_name,w818024322,Place of Worship 818024322,unknown,,,,,NZ,-36.953782114285715,174.80175688571427,{}
-1,placeholder_name,w820117786,Place of Worship 820117786,unknown,,,,,NZ,-37.01904155,174.88862036999998,{}
-1,placeholder_name,w820895068,Place of Worship 820895068,unknown,,,,,NZ,-36.98564297142857,174.9056425642857,{}
-1,placeholder_name,w822806222,Place of Worship 822806222,unknown,,,,,NZ,-36.810194585714285,174.7400981,{}
-1,placeholder_name,w822806223,Place of Worship 822806223,unknown,,,,,NZ,-36.81050824444444,174.74135503333335,{}
-1,placeholder_name,w822811289,Place of Worship 822811289,unknown,,,,,NZ,-36.8116104625,174.7426388375,{}
-1,placeholder_name,w822811399,Place of Worship 822811399,unknown,,,,,NZ,-36.81530934,174.7437575,{}
-1,placeholder_name,w822811402,Place of Worship 822811402,unknown,,,,,NZ,-36.81628608571429,174.74582468571427,{}
-1,placeholder_name,w822839604,Place of Worship 822839604,unknown,,,,,NZ,-36.84595186666667,174.742617,{}
-1,placeholder_name,w822841230,Place of Worship 822841230,unknown,,,,,NZ,-36.84533379,174.7418964,{}
-1,placeholder_name,w822863201,Place of Worship 822863201,unknown,,,,,NZ,-36.884235187499996,174.7474380875,{}
-1,placeholder_name,w824104582,Place of Worship 824104582,unknown,,,,,NZ,-36.86520465,174.74675911666668,{}
-1,placeholder_name,w824105953,Place of Worship 824105953,unknown,,,,,NZ,-36.86735195,174.73934433333332,{}
-1,placeholder_name,w824109738,Place of Worship 824109738,unknown,,,,,NZ,-36.866167483333335,174.7384465,{}
-1,placeholder_name,w825312798,Place of Worship 825312798,unknown,,,,,NZ,-36.751678971428575,174.72541595714284,{}
-1,placeholder_name,w825338615,Place of Worship 825338615,unknown,,,,,NZ,-36.718922825,174.72313094999998,{}
-1,placeholder_name,w825531021,Place of Worship 825531021,unknown,,,,,NZ,-36.86948346,174.75347019999998,{}
-1,placeholder_name,w826103900,Place of Worship 826103900,unknown,,,,,NZ,-36.76249596,174.76335458,{}
-1,placeholder_name,w826870272,Place of Worship 826870272,unknown,,,,,NZ,-36.86702262,174.7559938,{}
-1,placeholder_name,w826870273,Place of Worship 826870273,unknown,,,,,NZ,-36.8655417,174.75965404,{}
-1,placeholder_name,w828316759,Place of Worship 828316759,unknown,,,,,NZ,-36.86721046,174.70750234,{}
-1,placeholder_name,w829053379,Place of Worship 829053379,unknown,,,,,NZ,-36.86109426666667,174.76045832222223,{}
-1,placeholder_name,w829059241,Place of Worship 829059241,unknown,,,,,NZ,-36.85746272,174.74636433999999,{}
-1,placeholder_name,w833047130,Place of Worship 833047130,unknown,,,,,NZ,-36.92234922,174.7895301,{}
-1,placeholder_name,w835647704,Place of Worship 835647704,unknown,,,,,NZ,-36.9011939,174.77313978749999,{}
-1,placeholder_name,w836241672,Place of Worship 836241672,unknown,,,,,NZ,-36.90324724166667,174.8567307666667,{}
-1,placeholder_name,w836293164,Place of Worship 836293164,unknown,,,,,NZ,-36.8612953,174.72816984285714,{}
-1,placeholder_name,w836293168,Place of Worship 836293168,unknown,,,,,NZ,-36.86260056,174.7334971,{}
-1,placeholder_name,w836293169,Place of Worship 836293169,unknown,,,,,NZ,-36.8609194,174.73325001999999,{}
-1,placeholder_name,w836296123,Place of Worship 836296123,unknown,,,,,NZ,-36.69657718571428,174.75189357142858,{}
-1,placeholder_name,w837659995,Place of Worship 837659995,unknown,,,,,NZ,-36.825666437500004,174.6067360125,{}
-1,placeholder_name,w837659997,Place of Worship 837659997,unknown,,,,,NZ,-36.82635146,174.60815404,{}
-1,placeholder_name,w837661474,Place of Worship 837661474,unknown,,,,,NZ,-36.832574135,174.614854635,{}
-1,placeholder_name,w837661475,Place of Worship 837661475,unknown,,,,,NZ,-36.8323090875,174.61565325,{}
-1,placeholder_name,w838176813,Place of Worship 838176813,unknown,,,,,NZ,-36.795247188888894,174.73609496666666,{}
-1,placeholder_name,w838392283,Place of Worship 838392283,unknown,,,,,NZ,-36.80496258,174.7047197,{}
-1,placeholder_name,w838392286,Place of Worship 838392286,unknown,,,,,NZ,-36.8058611,174.70635466000002,{}
-1,placeholder_name,w839145549,Place of Worship 839145549,unknown,,,,,NZ,-36.85729525714286,174.76090804285715,{}
-1,placeholder_name,w839156902,Place of Worship 839156902,unknown,,,,,NZ,-36.858719959999995,174.75159172,{}
-1,placeholder_name,w839224215,Place of Worship 839224215,unknown,,,,,NZ,-36.90946584,174.66215168,{}
-1,placeholder_name,w839224216,Place of Worship 839224216,unknown,,,,,NZ,-36.90918498333333,174.66248855,{}
-1,placeholder_name,w839224217,Place of Worship 839224217,unknown,,,,,NZ,-36.912355385714285,174.66160349999998,{}
-1,placeholder_name,w839224224,Place of Worship 839224224,unknown,,,,,NZ,-36.90898814,174.6614574,{}
-1,placeholder_name,w839542665,Place of Worship 839542665,unknown,,,,,NZ,-36.85721912666667,174.75949762,{}
-1,placeholder_name,w839544357,Place of Worship 839544357,unknown,,,,,NZ,-36.92282122222222,174.70063574444444,{}
-1,placeholder_name,w839544359,Place of Worship 839544359,unknown,,,,,NZ,-36.92250014,174.7011034,{}
-1,placeholder_name,w839544362,Place of Worship 839544362,unknown,,,,,NZ,-36.9205159,174.70204117142856,{}
-1,placeholder_name,w839547032,Place of Worship 839547032,unknown,,,,,NZ,-36.8964559,174.832892525,{}
-1,placeholder_name,w839547036,Place of Worship 839547036,unknown,,,,,NZ,-36.9060292,174.8332769625,{}
-1,placeholder_name,w839776416,Place of Worship 839776416,unknown,,,,,NZ,-36.8693806,174.75991614999998,{}
-1,placeholder_name,w839776417,Place of Worship 839776417,unknown,,,,,NZ,-36.875618216666666,174.7613194666667,{}
-1,placeholder_name,w839777227,Place of Worship 839777227,unknown,,,,,NZ,-36.881158479999996,174.72521,{}
-1,placeholder_name,w839789587,Place of Worship 839789587,unknown,,,,,NZ,-36.8980686,174.70007234,{}
-1,placeholder_name,w839992358,Place of Worship 839992358,unknown,,,,,NZ,-36.84640166470588,174.76322777352942,{}
-1,placeholder_name,w840711326,Place of Worship 840711326,unknown,,,,,NZ,-36.85331836666666,174.75961038333332,{}
-1,placeholder_name,w840711331,Place of Worship 840711331,unknown,,,,,NZ,-36.8616738,174.75676038,{}
-1,placeholder_name,w840727526,Place of Worship 840727526,unknown,,,,,NZ,-36.882608160000004,174.7617035,{}
-1,placeholder_name,w840727546,Place of Worship 840727546,unknown,,,,,NZ,-36.89508906,174.75860912000002,{}
-1,placeholder_name,w840764695,Place of Worship 840764695,unknown,,,,,NZ,-36.80764,174.78941455714286,{}
-1,placeholder_name,w840869835,Place of Worship 840869835,unknown,,,,,NZ,-36.93864624285714,174.85157565714286,{}
-1,placeholder_name,w840869847,Place of Worship 840869847,unknown,,,,,NZ,-36.94058476,174.84532264,{}
-1,placeholder_name,w840869848,Place of Worship 840869848,unknown,,,,,NZ,-36.941025259999996,174.84554668,{}
-1,placeholder_name,w840869855,Place of Worship 840869855,unknown,,,,,NZ,-36.94674548888889,174.8533084111111,{}
-1,placeholder_name,w840886731,Place of Worship 840886731,unknown,,,,,NZ,-36.78681101666667,174.76977551666664,{}
-1,placeholder_name,w840886742,Place of Worship 840886742,unknown,,,,,NZ,-36.792124336363635,174.77401593636364,{}
-1,placeholder_name,w840886749,Place of Worship 840886749,unknown,,,,,NZ,-36.7888027625,174.7612294625,{}
-1,placeholder_name,w841068539,Place of Worship 841068539,unknown,,,,,NZ,-37.01954017,174.89525293,{}
-1,placeholder_name,w841068540,Place of Worship 841068540,unknown,,,,,NZ,-37.020421533333334,174.89259587777778,{}
-1,placeholder_name,w841068542,Place of Worship 841068542,unknown,,,,,NZ,-37.02328301111111,174.89284816666668,{}
-1,placeholder_name,w841068544,Place of Worship 841068544,unknown,,,,,NZ,-37.02414718,174.89219988,{}
-1,placeholder_name,w841068545,Place of Worship 841068545,unknown,,,,,NZ,-37.02493596,174.89340284,{}
-1,placeholder_name,w841089909,Place of Worship 841089909,unknown,,,,,NZ,-36.85750157,174.74055094,{}
-1,placeholder_name,w842893434,Place of Worship 842893434,unknown,,,,,NZ,-36.85477915,174.63589535000003,{}
-1,placeholder_name,w842893438,Place of Worship 842893438,unknown,,,,,NZ,-36.85435314,174.63336614,{}
-1,placeholder_name,w843311388,Place of Worship 843311388,unknown,,,,,NZ,-36.8242547625,174.6069550375,{}
-1,placeholder_name,w844434282,Place of Worship 844434282,unknown,,,,,NZ,-36.87325238571429,174.78379089999999,{}
-1,placeholder_name,w844434283,Place of Worship 844434283,unknown,,,,,NZ,-36.8741495375,174.7842750125,{}
-1,placeholder_name,w844434285,Place of Worship 844434285,unknown,,,,,NZ,-36.872948862499996,174.7803713125,{}
-1,placeholder_name,w844445630,Place of Worship 844445630,unknown,,,,,NZ,-36.87020122,174.87398767999997,{}
-1,placeholder_name,w844455379,Place of Worship 844455379,unknown,,,,,NZ,-36.82403586666667,174.7978284333333,{}
-1,placeholder_name,w844455382,Place of Worship 844455382,unknown,,,,,NZ,-36.825720361538465,174.7973449307692,{}
-1,placeholder_name,w844455383,Place of Worship 844455383,unknown,,,,,NZ,-36.82729763333334,174.79715257777778,{}
-1,placeholder_name,w844455384,Place of Worship 844455384,unknown,,,,,NZ,-36.82793818888889,174.80307596666665,{}
-1,placeholder_name,w844879218,Place of Worship 844879218,unknown,,,,,NZ,-36.63496488,174.74834152,{}
-1,placeholder_name,w844879222,Place of Worship 844879222,unknown,,,,,NZ,-36.6369903125,174.748777075,{}
-1,placeholder_name,w844912739,Place of Worship 844912739,unknown,,,,,NZ,-36.6145407875,174.67768025,{}
-1,placeholder_name,w845626584,Place of Worship 845626584,unknown,,,,,NZ,-36.87198695,174.8258550125,{}
-1,placeholder_name,w845626586,Place of Worship 845626586,unknown,,,,,NZ,-36.86076604,174.82124706,{}
-1,placeholder_name,w845626587,Place of Worship 845626587,unknown,,,,,NZ,-36.861223566666666,174.82338331666665,{}
-1,placeholder_name,w845626589,Place of Worship 845626589,unknown,,,,,NZ,-36.86138057777778,174.8227443222222,{}
-1,placeholder_name,w845634957,Place of Worship 845634957,unknown,,,,,NZ,-36.85690032,174.82348248,{}
-1,placeholder_name,w846244318,Place of Worship 846244318,unknown,,,,,NZ,-36.8663345,174.76177468,{}
-1,placeholder_name,w846244319,Place of Worship 846244319,unknown,,,,,NZ,-36.86493196666667,174.76292721666667,{}
-1,placeholder_name,w846244321,Place of Worship 846244321,unknown,,,,,NZ,-36.86578346,174.76045224,{}
-1,placeholder_name,w846281391,Place of Worship 846281391,unknown,,,,,NZ,-41.108544244444445,174.9022219111111,{}
-1,placeholder_name,w848860414,Place of Worship 848860414,unknown,,,,,NZ,-36.95631688333333,174.81215743333334,{}
-1,placeholder_name,w848860427,Place of Worship 848860427,unknown,,,,,NZ,-36.960315120000004,174.80587206,{}
-1,placeholder_name,w849180883,Place of Worship 849180883,unknown,,,,,NZ,-36.91281691818182,174.62770683636364,{}
-1,placeholder_name,w849184596,Place of Worship 849184596,unknown,,,,,NZ,-36.92596026666667,174.65213110000002,{}
-1,placeholder_name,w849186908,Place of Worship 849186908,unknown,,,,,NZ,-36.909660827272724,174.6477025,{}
-1,placeholder_name,w849186915,Place of Worship 849186915,unknown,,,,,NZ,-36.910373666666665,174.64916866666667,{}
-1,placeholder_name,w849186916,Place of Worship 849186916,unknown,,,,,NZ,-36.9097215,174.6492741,{}
-1,placeholder_name,w849186920,Place of Worship 849186920,unknown,,,,,NZ,-36.9095151,174.6535081,{}
-1,placeholder_name,w849375630,Place of Worship 849375630,unknown,,,,,NZ,-37.7527527,175.27786419999998,{}
-1,placeholder_name,w851930931,Place of Worship 851930931,unknown,,,,,NZ,-36.85978166666667,174.78367812777776,{}
-1,placeholder_name,w851964962,Place of Worship 851964962,unknown,,,,,NZ,-36.58783777,174.69181791,{}
-1,placeholder_name,w851969175,Place of Worship 851969175,unknown,,,,,NZ,-36.7618569,174.7123922,{}
-1,placeholder_name,w852537793,Place of Worship 852537793,unknown,,,,,NZ,-36.86488951666667,174.73684661666667,{}
-1,placeholder_name,w853075604,Place of Worship 853075604,unknown,,,,,NZ,-36.8994365125,174.69669525,{}
-1,placeholder_name,w853197769,Place of Worship 853197769,unknown,,,,,NZ,-36.87597642,174.82636445999998,{}
-1,placeholder_name,w853198667,Place of Worship 853198667,unknown,,,,,NZ,-36.8677556,174.84608325,{}
-1,placeholder_name,w853219246,Place of Worship 853219246,unknown,,,,,NZ,-36.98200969,174.78754726,{}
-1,placeholder_name,w853219248,Place of Worship 853219248,unknown,,,,,NZ,-36.97516986666667,174.79291325,{}
-1,placeholder_name,w853219256,Place of Worship 853219256,unknown,,,,,NZ,-36.97696096,174.80150264,{}
-1,placeholder_name,w854362597,Place of Worship 854362597,unknown,,,,,NZ,-38.145978750000005,176.24778911666667,{}
-1,placeholder_name,w857390021,Place of Worship 857390021,unknown,,,,,NZ,-37.060652041666664,174.94055482500002,{}
-1,placeholder_name,w857390024,Place of Worship 857390024,unknown,,,,,NZ,-37.05837402666667,174.9396124,{}
-1,placeholder_name,w857450432,Place of Worship 857450432,unknown,,,,,NZ,-36.91330871428571,174.67795964285713,{}
-1,placeholder_name,w857450434,Place of Worship 857450434,unknown,,,,,NZ,-36.9133807,174.67911373333334,{}
-1,placeholder_name,w857450436,Place of Worship 857450436,unknown,,,,,NZ,-36.914287325000004,174.6822606625,{}
-1,placeholder_name,w857450442,Place of Worship 857450442,unknown,,,,,NZ,-36.90885136,174.67250102,{}
-1,placeholder_name,w857456417,Place of Worship 857456417,unknown,,,,,NZ,-36.900251960000006,174.73065416,{}
-1,placeholder_name,w859065531,Place of Worship 859065531,unknown,,,,,NZ,-36.88892312,174.67774714,{}
-1,placeholder_name,w860018960,Place of Worship 860018960,unknown,,,,,NZ,-36.81352294,174.72866158,{}
-1,placeholder_name,w860018961,Place of Worship 860018961,unknown,,,,,NZ,-36.81373872,174.72796236,{}
-1,placeholder_name,w860018962,Place of Worship 860018962,unknown,,,,,NZ,-36.81387514,174.72523606,{}
-1,placeholder_name,w860018989,Place of Worship 860018989,unknown,,,,,NZ,-36.80959409230769,174.72602124615383,{}
-1,placeholder_name,w862941932,Place of Worship 862941932,unknown,,,,,NZ,-36.924830115999995,174.885658836,{}
-1,placeholder_name,w868248371,Place of Worship 868248371,unknown,,,,,NZ,-36.942668319999996,174.84123228,{}
-1,placeholder_name,w868248372,Place of Worship 868248372,unknown,,,,,NZ,-36.94392404285714,174.83983807142857,{}
-1,placeholder_name,w868248379,Place of Worship 868248379,unknown,,,,,NZ,-36.944279449999996,174.8387117,{}
-1,placeholder_name,w868248382,Place of Worship 868248382,unknown,,,,,NZ,-36.945499846153844,174.83842283076925,{}
-1,placeholder_name,w868248385,Place of Worship 868248385,unknown,,,,,NZ,-36.9471597,174.84081042,{}
-1,placeholder_name,w868248388,Place of Worship 868248388,unknown,,,,,NZ,-36.94780623333333,174.84344193333334,{}
-1,placeholder_name,w868248391,Place of Worship 868248391,unknown,,,,,NZ,-36.94403104444444,174.84230132222223,{}
-1,placeholder_name,w868248394,Place of Worship 868248394,unknown,,,,,NZ,-36.94498548,174.84586217999998,{}
-1,placeholder_name,w868248395,Place of Worship 868248395,unknown,,,,,NZ,-36.94638922,174.847028,{}
-1,placeholder_name,w868248396,Place of Worship 868248396,unknown,,,,,NZ,-36.9474954,174.84615283333332,{}
-1,placeholder_name,w868248397,Place of Worship 868248397,unknown,,,,,NZ,-36.94212935714285,174.84649597142857,{}
-1,placeholder_name,w868248398,Place of Worship 868248398,unknown,,,,,NZ,-36.941367760000006,174.844173,{}
-1,placeholder_name,w868248405,Place of Worship 868248405,unknown,,,,,NZ,-36.93760326666667,174.8485561888889,{}
-1,placeholder_name,w871132983,Place of Worship 871132983,unknown,,,,,NZ,-36.89371461,174.85388241,{}
-1,placeholder_name,w871532314,Place of Worship 871532314,unknown,,,,,NZ,-36.800110749999995,174.75762864545456,{}
-1,placeholder_name,w872850421,Place of Worship 872850421,unknown,,,,,NZ,-36.88878854,174.79258584,{}
-1,placeholder_name,w872850431,Place of Worship 872850431,unknown,,,,,NZ,-36.89145166,174.79360162,{}
-1,placeholder_name,w872850432,Place of Worship 872850432,unknown,,,,,NZ,-36.891091339999996,174.79419574000002,{}
-1,placeholder_name,w872885562,Place of Worship 872885562,unknown,,,,,NZ,-36.771307542857144,174.54549252857143,{}
 1,placeholder_name,w875348160,Place of Worship 875348160,unknown,,,place_of_worship,yes,NZ,-40.06550856,175.37809714,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w879108860,Place of Worship 879108860,unknown,,,,,NZ,-36.77267102222223,174.76369185555555,{}
-1,placeholder_name,w879108862,Place of Worship 879108862,unknown,,,,,NZ,-36.77362943333333,174.76567995555556,{}
-1,placeholder_name,w879108873,Place of Worship 879108873,unknown,,,,,NZ,-36.77412328571428,174.76404708571428,{}
-1,placeholder_name,w880459871,Place of Worship 880459871,unknown,,,,,NZ,-37.0854453375,174.92794285,{}
-1,placeholder_name,w881756122,Place of Worship 881756122,unknown,,,,,NZ,-36.856533657142855,174.76138768571428,{}
-1,placeholder_name,w883378540,Place of Worship 883378540,unknown,,,,,NZ,-36.82872884,174.78630046,{}
-1,placeholder_name,w884247356,Place of Worship 884247356,unknown,,,,,NZ,-36.792596341666666,174.68994923333332,{}
-1,placeholder_name,w884480493,Place of Worship 884480493,unknown,,,,,NZ,-36.73881139,174.75146067999998,{}
-1,placeholder_name,w884480507,Place of Worship 884480507,unknown,,,,,NZ,-36.74147205714286,174.74705114285715,{}
-1,placeholder_name,w884480529,Place of Worship 884480529,unknown,,,,,NZ,-36.74467138,174.75825932,{}
-1,placeholder_name,w885030524,Place of Worship 885030524,unknown,,,,,NZ,-36.76916485555555,174.71943443333333,{}
-1,placeholder_name,w885030542,Place of Worship 885030542,unknown,,,,,NZ,-36.770406683333334,174.72263259444446,{}
-1,placeholder_name,w886146018,Place of Worship 886146018,unknown,,,,,NZ,-36.80140073333334,174.74267406666667,{}
-1,placeholder_name,w886350314,Place of Worship 886350314,unknown,,,,,NZ,-36.6075940125,174.6985799375,{}
-1,placeholder_name,w886361834,Place of Worship 886361834,unknown,,,,,NZ,-36.776148222222226,174.72187083333336,{}
-1,placeholder_name,w886574735,Place of Worship 886574735,unknown,,,,,NZ,-36.85590374,174.75997751,{}
-1,placeholder_name,w886581588,Place of Worship 886581588,unknown,,,,,NZ,-36.850363737500004,174.78956215,{}
-1,placeholder_name,w886590330,Place of Worship 886590330,unknown,,,,,NZ,-36.60194735,174.6952725375,{}
-1,placeholder_name,w886590422,Place of Worship 886590422,unknown,,,,,NZ,-36.59572166363636,174.69833563636365,{}
-1,placeholder_name,w886633676,Place of Worship 886633676,unknown,,,,,NZ,-36.756054588235294,174.6862584882353,{}
-1,placeholder_name,w886862553,Place of Worship 886862553,unknown,,,,,NZ,-36.90464862,174.66081038,{}
-1,placeholder_name,w886863082,Place of Worship 886863082,unknown,,,,,NZ,-36.90511936,174.70115228,{}
-1,placeholder_name,w886863244,Place of Worship 886863244,unknown,,,,,NZ,-36.8785541,174.67384678333335,{}
-1,placeholder_name,w887397607,Place of Worship 887397607,unknown,,,,,NZ,-36.85413136,174.82996282,{}
-1,placeholder_name,w887429856,Place of Worship 887429856,unknown,,,,,NZ,-36.91289435833333,174.86862049166666,{}
-1,placeholder_name,w887437332,Place of Worship 887437332,unknown,,,,,NZ,-36.935700614285714,174.91527969999999,{}
-1,placeholder_name,w887672607,Place of Worship 887672607,unknown,,,,,NZ,-36.83106488888889,174.62158525555554,{}
-1,placeholder_name,w887753079,Place of Worship 887753079,unknown,,,,,NZ,-36.798209444444446,174.69011908888888,{}
-1,placeholder_name,w888779233,Place of Worship 888779233,unknown,,,,,NZ,-36.739553595833335,174.74015193749997,{}
-1,placeholder_name,w889439392,Place of Worship 889439392,unknown,,,,,NZ,-41.291513599999995,174.00558791999998,{}
-1,placeholder_name,w891198104,Place of Worship 891198104,unknown,,,,,NZ,-44.09257331428571,171.24560784285714,{}
-1,placeholder_name,w891198106,Place of Worship 891198106,unknown,,,,,NZ,-44.09235682,171.24342912,{}
-1,placeholder_name,w891198122,Place of Worship 891198122,unknown,,,,,NZ,-44.091009488888886,171.24069565555556,{}
-1,placeholder_name,w892148700,Place of Worship 892148700,unknown,,,,,NZ,-36.89296682857143,174.9310434,{}
-1,placeholder_name,w892148701,Place of Worship 892148701,unknown,,,,,NZ,-36.89342137142857,174.92966674285714,{}
-1,placeholder_name,w892148702,Place of Worship 892148702,unknown,,,,,NZ,-36.89502625,174.92877101666667,{}
-1,placeholder_name,w892148706,Place of Worship 892148706,unknown,,,,,NZ,-36.895824969230766,174.93408632307694,{}
-1,placeholder_name,w892161452,Place of Worship 892161452,unknown,,,,,NZ,-36.851258316666666,174.86912498333334,{}
-1,placeholder_name,w892446167,Place of Worship 892446167,unknown,,,,,NZ,-37.39010262000001,175.84554612,{}
-1,placeholder_name,w892524779,Place of Worship 892524779,unknown,,,,,NZ,-37.134689328571426,174.7064264,{}
-1,placeholder_name,w892541826,Place of Worship 892541826,unknown,,,,,NZ,-36.8617765,174.87453521111112,{}
-1,placeholder_name,w893238988,Place of Worship 893238988,unknown,,,,,NZ,-36.85458665,174.8605098125,{}
-1,placeholder_name,w893238989,Place of Worship 893238989,unknown,,,,,NZ,-36.853933,174.8597746,{}
-1,placeholder_name,w893238992,Place of Worship 893238992,unknown,,,,,NZ,-36.85082572,174.84018548,{}
-1,placeholder_name,w894819743,Place of Worship 894819743,unknown,,,,,NZ,-37.196527950000004,174.90650678333336,{}
-1,placeholder_name,w894826241,Place of Worship 894826241,unknown,,,,,NZ,-37.0307287125,174.875533,{}
-1,placeholder_name,w894826242,Place of Worship 894826242,unknown,,,,,NZ,-37.02966105454545,174.8755338090909,{}
-1,placeholder_name,w894826243,Place of Worship 894826243,unknown,,,,,NZ,-37.03145797142857,174.87469907142855,{}
-1,placeholder_name,w894827366,Place of Worship 894827366,unknown,,,,,NZ,-37.0298741625,174.8649917125,{}
-1,placeholder_name,w895110676,Place of Worship 895110676,unknown,,,,,NZ,-36.88160644,174.86280404,{}
-1,placeholder_name,w895111165,Place of Worship 895111165,unknown,,,,,NZ,-36.882149475,174.8596831625,{}
-1,placeholder_name,w895160753,Place of Worship 895160753,unknown,,,,,NZ,-36.905857960000006,174.67443514,{}
-1,placeholder_name,w895161963,Place of Worship 895161963,unknown,,,,,NZ,-36.89282988,174.65419546,{}
-1,placeholder_name,w895162301,Place of Worship 895162301,unknown,,,,,NZ,-36.88658621764706,174.64591608823528,{}
-1,placeholder_name,w895752783,Place of Worship 895752783,unknown,,,,,NZ,-36.90177835,174.93285253333332,{}
-1,placeholder_name,w895754325,Place of Worship 895754325,unknown,,,,,NZ,-37.20207968571429,174.90141894285713,{}
-1,placeholder_name,w896043944,Place of Worship 896043944,unknown,,,,,NZ,-36.69970932857143,174.71800632857142,{}
-1,placeholder_name,w896043950,Place of Worship 896043950,unknown,,,,,NZ,-36.69425261111111,174.72873222777778,{}
-1,placeholder_name,w898234831,Place of Worship 898234831,unknown,,,,,NZ,-36.89906024,174.81001443999997,{}
-1,placeholder_name,w898234832,Place of Worship 898234832,unknown,,,,,NZ,-36.8994048,174.81109074,{}
-1,placeholder_name,w898234833,Place of Worship 898234833,unknown,,,,,NZ,-36.89875902,174.81101454,{}
-1,placeholder_name,w900283888,Place of Worship 900283888,unknown,,,,,NZ,-38.68850332857143,176.08485934285713,{}
-1,placeholder_name,w900813100,Place of Worship 900813100,unknown,,,,,NZ,-43.551223011764705,172.66248052941177,{}
-1,placeholder_name,w900878373,Place of Worship 900878373,unknown,,,,,NZ,-43.55449859666667,172.66767829666665,{}
-1,placeholder_name,w900978422,Place of Worship 900978422,unknown,,,,,NZ,-36.77851843333334,174.55605509999998,{}
-1,placeholder_name,w901018482,Place of Worship 901018482,unknown,,,,,NZ,-36.899113066666665,174.92024228333332,{}
-1,placeholder_name,w901594896,Place of Worship 901594896,unknown,,,,,NZ,-36.9024686,174.81821736,{}
-1,placeholder_name,w901597390,Place of Worship 901597390,unknown,,,,,NZ,-36.88959021428571,174.8573151142857,{}
-1,placeholder_name,w901819752,Place of Worship 901819752,unknown,,,,,NZ,-36.87951988,174.63620584,{}
-1,placeholder_name,w901828156,Place of Worship 901828156,unknown,,,,,NZ,-36.84568364117647,174.74698025882353,{}
-1,placeholder_name,w901855359,Place of Worship 901855359,unknown,,,,,NZ,-36.881706916666666,174.6410864833333,{}
-1,placeholder_name,w901855519,Place of Worship 901855519,unknown,,,,,NZ,-36.88215452307692,174.6395931076923,{}
-1,placeholder_name,w901856535,Place of Worship 901856535,unknown,,,,,NZ,-36.86850712857143,174.62785662857144,{}
-1,placeholder_name,w902944912,Place of Worship 902944912,unknown,,,,,NZ,-43.5077238625,172.65649458125,{}
-1,placeholder_name,w903657389,Place of Worship 903657389,unknown,,,,,NZ,-36.9436643,174.78439775714287,{}
-1,placeholder_name,w903697365,Place of Worship 903697365,unknown,,,,,NZ,-36.973906066666665,174.82831255,{}
-1,placeholder_name,w903697370,Place of Worship 903697370,unknown,,,,,NZ,-36.97985062222222,174.8283218888889,{}
-1,placeholder_name,w903967410,Place of Worship 903967410,unknown,,,,,NZ,-36.9816256,174.86479119999998,{}
 1,placeholder_name,w904069461,Place of Worship 904069461,unknown,,,place_of_worship,yes,NZ,-45.97139902,168.03021212,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w904326445,Place of Worship 904326445,unknown,,,,,NZ,-36.972258807692306,174.79812513846153,{}
-1,placeholder_name,w904326452,Place of Worship 904326452,unknown,,,,,NZ,-36.969749433333334,174.79606399166667,{}
-1,placeholder_name,w904573033,Place of Worship 904573033,unknown,,,,,NZ,-46.599491949999994,168.33518115,{}
-1,placeholder_name,w905663016,Place of Worship 905663016,unknown,,,,,NZ,-36.96898253888889,174.80564922222223,{}
-1,placeholder_name,w906074664,Place of Worship 906074664,unknown,,,,,NZ,-36.901225041176474,174.89713469999998,{}
-1,placeholder_name,w906075012,Place of Worship 906075012,unknown,,,,,NZ,-36.88048416,174.81589202,{}
-1,placeholder_name,w907191324,Place of Worship 907191324,unknown,,,,,NZ,-37.82446264827586,175.2261015724138,{}
-1,placeholder_name,w907192888,Place of Worship 907192888,unknown,,,,,NZ,-36.853642037499995,174.7654960875,{}
-1,placeholder_name,w907598807,Place of Worship 907598807,unknown,,,,,NZ,-36.92261468888889,174.75431546666667,{}
-1,placeholder_name,w907598808,Place of Worship 907598808,unknown,,,,,NZ,-36.925885433333335,174.7451743833333,{}
-1,placeholder_name,w907598809,Place of Worship 907598809,unknown,,,,,NZ,-36.92558495714286,174.74058899285714,{}
-1,placeholder_name,w907598812,Place of Worship 907598812,unknown,,,,,NZ,-36.91557473333334,174.72973547499998,{}
-1,placeholder_name,w907598814,Place of Worship 907598814,unknown,,,,,NZ,-36.89782698333334,174.74354813333332,{}
-1,placeholder_name,w907631034,Place of Worship 907631034,unknown,,,,,NZ,-36.846311639999996,174.76271752,{}
-1,placeholder_name,w907996393,Place of Worship 907996393,unknown,,,,,NZ,-36.85118304,174.75723406,{}
-1,placeholder_name,w909753604,Place of Worship 909753604,unknown,,,,,NZ,-36.784387585714285,175.01526541428572,{}
-1,placeholder_name,w911600226,Place of Worship 911600226,unknown,,,,,NZ,-37.0024876625,174.88909573749999,{}
-1,placeholder_name,w913110072,Place of Worship 913110072,unknown,,,,,NZ,-36.983248023076925,174.8756988,{}
-1,placeholder_name,w913110077,Place of Worship 913110077,unknown,,,,,NZ,-36.98046696,174.87944368,{}
-1,placeholder_name,w913729305,Place of Worship 913729305,unknown,,,,,NZ,-36.83763211,174.61777876000002,{}
-1,placeholder_name,w914080202,Place of Worship 914080202,unknown,,,,,NZ,-36.951382349999996,174.80652403333332,{}
-1,placeholder_name,w914492050,Place of Worship 914492050,unknown,,,,,NZ,-36.94360096,174.96736891,{}
-1,placeholder_name,w914522539,Place of Worship 914522539,unknown,,,,,NZ,-41.143269,175.0358043,{}
-1,placeholder_name,w914538256,Place of Worship 914538256,unknown,,,,,NZ,-43.62779524545454,172.49351004545454,{}
 1,placeholder_name,w915720118,Place of Worship 915720118,unknown,,,place_of_worship,,NZ,-43.63715144444444,172.4887923,"{""amenity"": ""place_of_worship""}"
-1,placeholder_name,w916000377,Place of Worship 916000377,unknown,,,,,NZ,-36.922221414285715,174.9125835,{}
-1,placeholder_name,w917175391,Place of Worship 917175391,unknown,,,,,NZ,-37.19022528461539,174.98265796923076,{}
-1,placeholder_name,w917175393,Place of Worship 917175393,unknown,,,,,NZ,-37.18680094285714,174.9910466714286,{}
-1,placeholder_name,w917322778,Place of Worship 917322778,unknown,,,,,NZ,-43.474520059999996,172.65849892,{}
-1,placeholder_name,w917322779,Place of Worship 917322779,unknown,,,,,NZ,-43.4751414,172.65877473999998,{}
-1,placeholder_name,w922790861,Place of Worship 922790861,unknown,,,,,NZ,-46.422830285714284,168.35944427142857,{}
-1,placeholder_name,w922793219,Place of Worship 922793219,unknown,,,,,NZ,-46.41596834,168.35126852000002,{}
-1,placeholder_name,w923244405,Place of Worship 923244405,unknown,,,,,NZ,-43.93260634285714,-176.52825257142857,{}
-1,placeholder_name,w923605361,Place of Worship 923605361,unknown,,,,,NZ,-37.04253284166666,174.91893725833333,{}
-1,placeholder_name,w923605381,Place of Worship 923605381,unknown,,,,,NZ,-37.04189645,174.9198843833333,{}
-1,placeholder_name,w927209358,Place of Worship 927209358,unknown,,,,,NZ,-46.1976883923077,168.86838879230768,{}
-1,placeholder_name,w930187693,Place of Worship 930187693,unknown,,,,,NZ,-37.682035516666666,176.226221775,{}
 1,placeholder_name,w931352056,Place of Worship 931352056,unknown,,,place_of_worship,yes,NZ,-40.005795536363635,176.56022446363636,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
-1,placeholder_name,w932225771,Place of Worship 932225771,unknown,,,,,NZ,-35.229682933333336,173.9495049,{}
-1,placeholder_name,w936284881,Place of Worship 936284881,unknown,,,,,NZ,-36.850723442857145,174.7722533857143,{}
-1,placeholder_name,w938716895,Place of Worship 938716895,unknown,,,,,NZ,-36.759098916666666,174.5928382333333,{}
-1,placeholder_name,w940957548,Place of Worship 940957548,unknown,,,,,NZ,-39.034691210344825,177.42006774827587,{}
-1,placeholder_name,w942588062,Place of Worship 942588062,unknown,,,,,NZ,-46.19250472857143,168.86645395714285,{}
-1,placeholder_name,w943520581,Place of Worship 943520581,unknown,,,,,NZ,-41.22637845714286,174.8835662142857,{}
-1,placeholder_name,w943675493,Place of Worship 943675493,unknown,,,,,NZ,-41.244698722222225,174.79142145555556,{}
-1,placeholder_name,w943768260,Place of Worship 943768260,unknown,,,,,NZ,-41.12197035416667,174.83573971666667,{}
-1,placeholder_name,w943856054,Place of Worship 943856054,unknown,,,,,NZ,-36.926180457142856,174.8570567,{}
-1,placeholder_name,w948321097,Place of Worship 948321097,unknown,,,,,NZ,-36.817253388888886,174.62273352222223,{}
-1,placeholder_name,w948321102,Place of Worship 948321102,unknown,,,,,NZ,-36.819420433333335,174.62968014166665,{}
-1,placeholder_name,w956983759,Place of Worship 956983759,unknown,,,,,NZ,-36.85366544,174.75812946000002,{}
-1,placeholder_name,w960038561,Place of Worship 960038561,unknown,,,,,NZ,-36.60148312,174.59348024,{}
-1,placeholder_name,w960045376,Place of Worship 960045376,unknown,,,,,NZ,-41.26019317142857,174.94074867142857,{}
-1,placeholder_name,w960045395,Place of Worship 960045395,unknown,,,,,NZ,-41.2605182125,174.9415156875,{}
-1,placeholder_name,w960045396,Place of Worship 960045396,unknown,,,,,NZ,-41.260992800000004,174.94329392,{}
-1,placeholder_name,w960045398,Place of Worship 960045398,unknown,,,,,NZ,-41.262105,174.94750363333333,{}
-1,placeholder_name,w960683658,Place of Worship 960683658,unknown,,,,,NZ,-36.85832736,174.78344132,{}
-1,placeholder_name,w962169228,Place of Worship 962169228,unknown,,,,,NZ,-41.26925213076923,174.95222534615385,{}
-1,placeholder_name,w962174810,Place of Worship 962174810,unknown,,,,,NZ,-41.27492968,174.94850522,{}
-1,placeholder_name,w962553933,Place of Worship 962553933,unknown,,,,,NZ,-37.03880828,174.91836124000002,{}
-1,placeholder_name,w962751116,Place of Worship 962751116,unknown,,,,,NZ,-45.87224484,170.49894484,{}
-1,placeholder_name,w965158100,Place of Worship 965158100,unknown,,,,,NZ,-37.3761997,175.67673028,{}
-1,placeholder_name,w966687483,Place of Worship 966687483,unknown,,,,,NZ,-38.15142646,176.25685632,{}
-1,placeholder_name,w968386726,Place of Worship 968386726,unknown,,,,,NZ,-36.99849208333333,174.89382256666667,{}
-1,placeholder_name,w970538402,Place of Worship 970538402,unknown,,,,,NZ,-45.84324636,170.50365656,{}
-1,placeholder_name,w974475863,Place of Worship 974475863,unknown,,,,,NZ,-39.55026406,174.12129099999999,{}
-1,placeholder_name,w975107561,Place of Worship 975107561,unknown,,,,,NZ,-37.03552921428571,174.9206498,{}
-1,placeholder_name,w975365477,Place of Worship 975365477,unknown,,,,,NZ,-41.27077383333333,174.7805321111111,{}
-1,placeholder_name,w975492878,Place of Worship 975492878,unknown,,,,,NZ,-41.17863644285715,174.82578897142858,{}
-1,placeholder_name,w976827535,Place of Worship 976827535,unknown,,,,,NZ,-36.770735079999994,174.59591462,{}
-1,placeholder_name,w977104490,Place of Worship 977104490,unknown,,,,,NZ,-36.8775981,174.7361995625,{}
-1,placeholder_name,w980476606,Place of Worship 980476606,unknown,,,,,NZ,-36.911836883333336,174.6539356333333,{}
-1,placeholder_name,w981416332,Place of Worship 981416332,unknown,,,,,NZ,-43.802737388888886,172.9699945111111,{}
-1,placeholder_name,w984776646,Place of Worship 984776646,unknown,,,,,NZ,-37.17850471111112,174.9827784888889,{}
-1,placeholder_name,w984841930,Place of Worship 984841930,unknown,,,,,NZ,-40.8969872,175.01025032222222,{}
-1,placeholder_name,w985100905,Place of Worship 985100905,unknown,,,,,NZ,-36.9004770875,174.69630575,{}
-1,placeholder_name,w987819116,Place of Worship 987819116,unknown,,,,,NZ,-37.889697544444445,175.4658971111111,{}
-1,placeholder_name,w988816357,Place of Worship 988816357,unknown,,,,,NZ,-42.3938702,171.25788924,{}
-1,placeholder_name,w988816359,Place of Worship 988816359,unknown,,,,,NZ,-42.39762366666667,171.2522905,{}
-1,placeholder_name,w989291269,Place of Worship 989291269,unknown,,,,,NZ,-44.68003787142857,169.1377773642857,{}
-1,placeholder_name,w98988658,Place of Worship 98988658,unknown,,,,,NZ,-36.89695094285714,174.80894045714285,{}
-1,placeholder_name,w991591768,Place of Worship 991591768,unknown,,,,,NZ,-41.24896196666666,173.09223086666668,{}
-1,placeholder_name,w991592553,Place of Worship 991592553,unknown,,,,,NZ,-41.249148000000005,173.09140562,{}
-1,placeholder_name,w993776412,Place of Worship 993776412,unknown,,,,,NZ,-40.37401478181818,175.59420946363636,{}
-1,placeholder_name,w993777261,Place of Worship 993777261,unknown,,,,,NZ,-40.338570242857145,175.62186561428572,{}
-1,placeholder_name,w995747591,Place of Worship 995747591,unknown,,,,,NZ,-43.494135299999996,172.2177937,{}
-1,placeholder_name,w995977444,Place of Worship 995977444,unknown,,,,,NZ,-43.48099217,171.93180311999998,{}
-1,placeholder_name,w995994984,Place of Worship 995994984,unknown,,,,,NZ,-43.481336725,171.935581825,{}
-1,placeholder_name,w997065075,Place of Worship 997065075,unknown,,,,,NZ,-37.40257555,175.14356725000002,{}
-1,placeholder_name,w997070783,Place of Worship 997070783,unknown,,,,,NZ,-36.88043078333333,174.91185256666665,{}
-1,placeholder_name,w997608702,Place of Worship 997608702,unknown,,,,,NZ,-36.88431292,174.62190723999998,{}
-1,placeholder_name,w997610465,Place of Worship 997610465,unknown,,,,,NZ,-36.91702664,174.83689027333332,{}
-1,placeholder_name,w997796672,Place of Worship 997796672,unknown,,,,,NZ,-41.128279885714285,174.88053994285715,{}
-1,placeholder_name,w997796681,Place of Worship 997796681,unknown,,,,,NZ,-41.1329686375,174.87650103750002,{}
-1,placeholder_name,w999855404,Place of Worship 999855404,unknown,,,,,NZ,-36.742867483333335,174.721551,{}
-1,placeholder_name,w999855420,Place of Worship 999855420,unknown,,,,,NZ,-36.743302140000004,174.7218863,{}
 1,placeholder_name,w99998819,Place of Worship 99998819,unknown,,"Te Irirangi Drive, Auckland, 2013",place_of_worship,yes,NZ,-36.959345633333335,174.90469648666667,"{""amenity"": ""place_of_worship"", ""building"": ""yes""}"
 2,hall_centre_house_site,w256521526,Abundant Life Centre / Abundant Life Church Wellington,christian,nondenominational,"71 Abel Smith Street, Wellington, 6011",place_of_worship,yes,NZ,-41.296020320000004,174.7727647,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""denomination"": ""nondenominational"", ""religion"": ""christian""}"
 2,hall_centre_house_site,w673517317,Abundant Life Community Church,christian,evangelical,"36 Sutherland Road, Tauranga, 3110",place_of_worship,yes,NZ,-37.69174095714286,176.14462564285714,"{""amenity"": ""place_of_worship"", ""building"": ""yes"", ""denomination"": ""evangelical"", ""religion"": ""christian""}"
