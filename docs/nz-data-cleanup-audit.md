@@ -25,7 +25,9 @@ Pass 4 removed 7 church-hall and parish/community-centre support buildings that 
 
 Pass 5 removed 8 generic hall support buildings and one `Masonic Hall` false positive, leaving 3,621 records.
 
-Total removed so far: 1,097 records.
+Pass 6 removed 3 weak generic centre records that duplicated nearby mapped worship sites, leaving 3,618 records.
+
+Total removed so far: 1,100 records.
 
 These false positives were OSM-derived features, but many were not mapped in OpenStreetMap as `amenity=place_of_worship`. They entered the dataset through broad inclusion rules around weak religious tags and loosely religious building metadata.
 
@@ -171,12 +173,24 @@ Eight records matched and were removed from the published NZ dataset:
 
 These records were treated as duplicate support buildings because they sat beside a separately mapped church and carried only hall-level identity rather than a distinct place-of-worship identity.
 
-## Current queue after pass 5
+## Pass 6: weak generic centres beside mapped worship sites
 
-The remaining manual review queue contains 722 records:
+This pass extended the duplicate-support-building rule to a narrow set of `centre` names that were not explicit worship-style names such as `Christian Centre`, `Islamic Centre`, `Worship Centre`, or `Church Centre`.
+
+Three records matched and were removed from the published NZ dataset:
+
+- `Anglican Centre`
+- `Catholic Centre`
+- `Waihi Youth Centre`
+
+These records were treated as duplicate support buildings because they sat beside a separately mapped cathedral or church and carried only weak centre-level identity rather than a distinct place-of-worship identity.
+
+## Current queue after pass 6
+
+The remaining manual review queue contains 719 records:
 
 - 280 priority 1
-- 364 priority 2
+- 361 priority 2
 - 78 priority 3
 
 ## What this audit does not settle

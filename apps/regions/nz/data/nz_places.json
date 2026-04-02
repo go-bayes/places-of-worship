@@ -5739,27 +5739,6 @@
     }
   },
   {
-    "id": "n8601090266",
-    "osm_id": 8601090266,
-    "osm_type": "node",
-    "lat": -40.3513937,
-    "lng": 175.6164066,
-    "name": "Catholic Centre",
-    "religion": "christian",
-    "denomination": "roman_catholic",
-    "confidence": 0.8,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "denomination": "roman_catholic",
-      "religion": "christian"
-    }
-  },
-  {
     "id": "n9192750588",
     "osm_id": 9192750588,
     "osm_type": "node",
@@ -33685,28 +33664,6 @@
       "amenity": "place_of_worship",
       "building": "yes",
       "denomination": "brethren",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w350554179",
-    "osm_id": 350554179,
-    "osm_type": "way",
-    "lat": -37.39132904,
-    "lng": 175.84372628,
-    "name": "Waihi Youth Centre",
-    "religion": "christian",
-    "denomination": "",
-    "confidence": 0.95,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "",
-    "phone": "",
-    "address": "",
-    "start_date": null,
-    "tags_raw": {
-      "amenity": "place_of_worship",
-      "building": "yes",
       "religion": "christian"
     }
   },
@@ -75026,28 +74983,6 @@
     "start_date": null,
     "tags_raw": {
       "amenity": "place_of_worship",
-      "building": "yes",
-      "denomination": "anglican",
-      "religion": "christian"
-    }
-  },
-  {
-    "id": "w908234827",
-    "osm_id": 908234827,
-    "osm_type": "way",
-    "lat": -41.27581383636363,
-    "lng": 174.77688785454546,
-    "name": "Anglican Centre",
-    "religion": "christian",
-    "denomination": "anglican",
-    "confidence": 0.9000000000000001,
-    "country_code": "NZ",
-    "type": "churches",
-    "website": "https://www.anglican.org.nz/",
-    "phone": "",
-    "address": "18 Eccleston Hill, Wellington, 6011",
-    "start_date": null,
-    "tags_raw": {
       "building": "yes",
       "denomination": "anglican",
       "religion": "christian"

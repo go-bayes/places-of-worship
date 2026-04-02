@@ -7,6 +7,7 @@
 - Applied a third NZ cleanup pass to remove seven `Masonic Centre` records from the `hall_centre_house_site` review bucket.
 - Applied a fourth NZ cleanup pass to remove church-hall and parish/community-centre support buildings that duplicated nearby mapped churches.
 - Applied a fifth NZ cleanup pass to remove generic hall support buildings that duplicated nearby mapped churches, plus one `Masonic Hall` false positive.
+- Applied a sixth NZ cleanup pass to remove weak generic centre records that duplicated nearby mapped worship sites.
 - Rebuilt `apps/regions/nz/data/ta_aggregated_data.json` from official TA boundaries and Stats NZ religion data.
 - Removed NZ frontend TA code remapping now that TA keys align with official boundary codes.
 - Added a conservative NZ place-cleaning script and removed obvious non-worship records from published NZ datasets.

@@ -63,8 +63,16 @@ GENERIC_HALL_PATTERN = re.compile(
     r"\bhall\b",
     re.IGNORECASE,
 )
+GENERIC_CENTRE_PATTERN = re.compile(
+    r"\bcentre\b",
+    re.IGNORECASE,
+)
 GENUINE_HALL_NAME_PATTERN = re.compile(
     r"\b(kingdom hall|gospel hall|mission hall|assembly hall|church of christ hall|christadelphian hall)\b",
+    re.IGNORECASE,
+)
+GENUINE_CENTRE_NAME_PATTERN = re.compile(
+    r"\b(church|christian|islamic|baha'i|bahai|bahá'í|worship|life|gospel|masjid|mosque|faith|revival|outreach|breakthrough|hope|buddhist|temple|celebration|family|heritage|mission|charity)\b",
     re.IGNORECASE,
 )
 PRIMARY_WORSHIP_NAME_PATTERN = re.compile(
@@ -100,6 +108,7 @@ GENERIC_NAME_TOKENS = {
     "st",
     "the",
     "worship",
+    "youth",
 }
 
 
@@ -134,8 +143,16 @@ def is_support_building_duplicate(record: dict, records: list[dict]) -> bool:
         GENERIC_HALL_PATTERN.search(name)
         and not GENUINE_HALL_NAME_PATTERN.search(name)
     )
+    centre_like_name = (
+        GENERIC_CENTRE_PATTERN.search(name)
+        and not GENUINE_CENTRE_NAME_PATTERN.search(name)
+    )
 
-    if not SUPPORT_BUILDING_PATTERN.search(name) and not hall_like_name:
+    if (
+        not SUPPORT_BUILDING_PATTERN.search(name)
+        and not hall_like_name
+        and not centre_like_name
+    ):
         return False
 
     lat = record.get("lat")
@@ -173,6 +190,9 @@ def is_support_building_duplicate(record: dict, records: list[dict]) -> bool:
             return True
 
         if hall_like_name and denomination_match and len(record_tokens) <= 1:
+            return True
+
+        if centre_like_name and denomination_match and len(record_tokens) <= 1:
             return True
 
         if not record_tokens and denomination_match:
