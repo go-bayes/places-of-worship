@@ -1,14 +1,40 @@
-# Global Places of Worship Mapping Project
+# Global Places of Worship Project
 
-An open, research‑focused map of global places of worship. Built to support studies of how religion shapes, and is shaped by, its social and natural settings.
+An open, research-focused project for mapping and studying places of worship. The long-term aim is to build a reproducible research portal for tracking religious change over time at the level of the place itself.
 
 ## Quick Links
 
 - **Global Map:** [https://go-bayes.github.io/places-of-worship/index.html](https://go-bayes.github.io/places-of-worship/index.html)
-- **Enhanced NZ Data Map:** [https://www.placesmap.org/enhanced-places.html](https://www.placesmap.org/enhanced-places.html)
+- **New Zealand Regional Map:** [https://www.placesmap.org/enhanced-places.html](https://www.placesmap.org/enhanced-places.html)
 - **Planning (single source of truth):** [PLANNING.md](PLANNING.md)
 
-## Frequently Asked Questions (FAQ)
+## Overview
+
+This project combines open geospatial data, regional boundary systems, and reproducible data pipelines to study places of worship across countries and across time. In the near term, we are improving the quality of the global map and the New Zealand regional case study. In the longer term, we aim to support research on opening, closure, persistence, relocation, rebuilding, and repurposing at the level of the place of worship.
+
+The current public map should be understood as an active research prototype rather than a finished reference product. Some country-level data are cleaner than others, and the global data pipeline is being rebuilt to improve precision, provenance, and temporal comparability.
+
+## Current NZ Scope
+
+For the New Zealand dataset, the primary unit is the mapped place or building used for worship, not the congregation as a social group.
+
+We currently include sites that are explicitly mapped in OpenStreetMap as `amenity=place_of_worship` or as clearly religious buildings. We exclude obviously non-worship records such as cemeteries, offices, residences, schools, childcare sites, and community facilities unless the worship space itself is mapped separately.
+
+The current NZ regional boundary layer follows the official territorial authority geography used in `apps/regions/nz/data/territorial_authorities.geojson`. That includes Chatham Islands Territory. It does not currently extend to Cook Islands, Niue, or Tokelau.
+
+## Who Is Involved?
+
+This project is led by Professor Joseph Bulbulia (Victoria University of Wellington, New Zealand) and Dr Joseph Watts (University of Canterbury, New Zealand).
+
+We acknowledge Nick Young at the University of Auckland Centre for eResearch for providing the initial inspiration.
+
+## Who Funds This Project?
+
+This research is supported by a subgrant from the **Templeton Religion Trust (TRT-2022-30666)**, aimed at investigating the social consequences of religion.
+
+This is an independent, academic project. The funders have no role in the design or implementation of this project.
+
+## Contributing Data Corrections
 
 ### How can I add or correct a place of worship on the map?
 
@@ -34,31 +60,11 @@ Please note that all contributions must follow the [OpenStreetMap Licence (ODbL 
 
 The most helpful contribution is fixing errors, revising details, removing incorrect places, or adding missing places directly in OpenStreetMap. If you want to contribute to this repository, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-### Current NZ scope
-
-For the New Zealand dataset, the primary unit is the mapped place or building used for worship, not the congregation as a social group.
-
-We currently include sites that are explicitly mapped in OpenStreetMap as `amenity=place_of_worship` or as clearly religious buildings. We exclude obviously non-worship records such as cemeteries, offices, residences, schools, childcare sites, and community facilities unless the worship space itself is mapped separately.
-
-The current NZ regional boundary layer follows the official territorial authority geography used in `apps/regions/nz/data/territorial_authorities.geojson`. That includes Chatham Islands Territory. It does not currently extend to Cook Islands, Niue, or Tokelau.
-
-### Who is involved?
-
-This project is led by Professor Joseph Bulbulia (Victoria University of Wellington, New Zealand) and Dr Joseph Watts (University of Canterbury, New Zealand). 
-
-We acknowledge Nick Young at the University of Auckland Centre for eResearch for providing the initial inspiration.
-
-### Who funds this project?
-
-This research is supported by a subgrant from the **Templeton Religion Trust (TRT-2022-30666)**, aimed at investigating the social consequences of religion. 
-
-This is an independent, acadameic project. The funders have no roll in the design or implementation of this project. 
-
 ## Technical Architecture
 
-The application utilises an open-source geospatial stack.
+The application uses an open-source geospatial stack.
 
-**Frontend and Visualisation:** the map interface is built with MapLibre GL JS, served as static HTML/CSS/JS via GitHub Pages. It features a mobile-friendly dock toggle and utilises Google Maps JS API for Street View integration (inline on desktop, link-only on mobile).
+**Frontend and Visualisation:** the map interface is built with MapLibre GL JS, served as static HTML/CSS/JS via GitHub Pages. It features a mobile-friendly dock toggle and uses Google Maps JS API for Street View integration (inline on desktop, link-only on mobile).
 
 **Tile Services:** we use a custom tile generation workflow. Basemap styles are sourced from MapTiler (using the CARTO Light style as default, with Backdrop (and other themes, depending on whether you access via mobile or desktop) as fallbacks. Custom data tiles are processed using Tippecanoe and served via `Martin` (built in Rust) running in Docker from a Google Cloud VM. The underlying tile data (mbtiles/pmtiles) is stored in a Google Cloud Storage bucket.
 
