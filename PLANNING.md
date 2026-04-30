@@ -407,6 +407,73 @@ religion denominators are census-year specific. Until dated site snapshots are
 available, temporal overlays should therefore be interpreted as changes in
 census religion composition and rates against a current place inventory.
 
+### Historical NZ place-density problem
+
+True 2013 and 2018 place density requires a dated count of places of worship in
+each area at those dates. The current `area_summary_ta.json` product does not
+have that. It calculates `place_density_per_sq_km` from the current committed
+`nz_places.json` count divided by fixed territorial-authority land area. This is
+useful as a current inventory density, but it should not be interpreted as the
+number of places of worship that existed in 2013 or 2018.
+
+For New Zealand, the practical reconstruction path should be evidence-tiered:
+
+- Start with OpenStreetMap full-history data or the ohsome/OSHDB toolchain to
+  recover features that were already mapped as places of worship at census
+  dates. This gives a reproducible lower-bound series for "known in OSM at the
+  date", but not real-world existence.
+- Link current and historical OSM candidates to the Charities Services open
+  data service where possible. The Charities Register provides registration
+  status, registration and deregistration dates, annual returns, activities,
+  and address fields, but it describes organisations rather than worship sites.
+  One charity may run multiple sites, one site may house several congregations,
+  and some worship communities will not be registered charities.
+- Use the Incorporated Societies Register as a secondary organisation-history
+  source. It can supply incorporation date, status, registered office address,
+  documents, annual financial statements and change-of-address filings for
+  societies, including many religious or cultural associations. It is still an
+  organisation register, so it needs careful site matching and does not cover
+  all places of worship.
+- Use LINZ NZ Building Outlines, especially the "All Sources" and lifecycle
+  tables, to test whether a matched building was visible in aerial imagery near
+  the target period. This helps verify built-form existence and changes over
+  time, but building outlines do not identify worship use reliably and imagery
+  dates vary by region.
+- Investigate restricted or application-based property sources, especially the
+  National District Valuation Roll / NZ Properties data through LINZ, for land
+  use or rating categories. This may be the best national administrative source
+  for property-use classification, but access is limited and would require a
+  clear research-use request and licence review.
+- Add denominational yearbooks, directories, archived websites, local council
+  records, and heritage lists as targeted validation sources for ambiguous or
+  high-value cases. These sources are likely to be uneven across traditions and
+  regions, so they should enrich confidence rather than silently define the
+  national denominator.
+
+The preferred pilot is a 2018 reconstruction for one or two territorial
+authorities with mixed urban and rural coverage. Build a `site_observation`
+table with `site_id`, `observation_date`, `evidence_source_id`, `evidence_type`,
+`matched_address`, `matched_geometry`, `existence_status`, `worship_use_status`,
+and `quality_flag`. Then aggregate only observations that meet a stated
+evidence rule into historical `place_count`, `places_per_10000_residents`, and
+`place_density_per_sq_km`. The area summary should preserve separate quality
+flags such as `osm_known_at_date`, `administrative_org_matched`,
+`building_visible_use_unconfirmed`, `directory_confirmed`, and
+`current_inventory_back_projected`.
+
+Candidate source references to evaluate:
+
+- OpenStreetMap full history:
+  <https://wiki.openstreetmap.org/wiki/Planet.osm/full>
+- Charities Services open data:
+  <https://www.charities.govt.nz/charities-in-new-zealand/the-charities-register/open-data/>
+- Incorporated Societies Register search:
+  <https://is-register.companiesoffice.govt.nz/help-centre/searching-the-incorporated-societies-register/how-to-search/>
+- LINZ NZ Building Outlines data dictionary:
+  <https://nz-buildings.readthedocs.io/en/latest/>
+- LINZ New Zealand Property Spine and NZ Properties access:
+  <https://www.linz.govt.nz/our-work/property-information-system/new-zealand-property-spine>
+
 ### Map presentation modes
 
 - Site mode:

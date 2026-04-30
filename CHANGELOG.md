@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- Added a planning note on the problem of reconstructing true 2013 and 2018 NZ
+  place density, including evidence-tiered source paths through OSM history,
+  Charities Services, Incorporated Societies, LINZ building/property data, and
+  denominational or local records.
 - Added a planning rationale for the first NZ `area_summary_ta.json` frontend
   wiring, documenting why overlays now consume a provenance-rich analytical
   product rather than browser-derived legacy census tables.
