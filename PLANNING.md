@@ -560,14 +560,20 @@ Minimum `site_observation` fields:
   - `organisation_founded_date`
   - `site_opened_date`
   - `building_opened_or_dedicated_date`
+  - `origin_not_earlier_than_date`
+  - `origin_not_later_than_date`
   - `first_seen_date`
   - `last_seen_date`
   - `site_closed_date`
+  - `closure_not_earlier_than_date`
+  - `closure_not_later_than_date`
   - `building_demolished_date`
   - `use_changed_date`
   - `relocated_date`
   - separate precision fields and raw source wording for each date where
     needed
+  - `not_later_than` means the event is known by that date; `not_earlier_than`
+    means the event cannot have occurred before that date
 - Site matching:
   - `name_raw`
   - `name_standardised`
@@ -617,22 +623,25 @@ RA workflow:
    matching. Record all source-backed founding, first-seen, opening, closure,
    last-seen, demolition, change-of-use, and relocation evidence rather than
    collapsing it into a single birth or death date.
-4. Do not transcribe officer names, private email addresses, phone numbers, or
+4. Use bounded date fields when a source supports an interval or limit, such as
+   "opened by 2013" or "closed after 2018", without giving an exact event date.
+   Do not invent exact dates to make these cases fit a single date field.
+5. Do not transcribe officer names, private email addresses, phone numbers, or
    other personal contact details unless a specific approved source contract
    requires them.
-5. Normalise names and addresses lightly, preserving raw values beside the
+6. Normalise names and addresses lightly, preserving raw values beside the
    cleaned fields.
-6. Preserve historical addresses separately from modern/geocoded
+7. Preserve historical addresses separately from modern/geocoded
    interpretation. If streets have been renamed, road alignments have shifted,
    localities have changed, or buildings have been demolished, record the
    address-change note, geocoding basis, and geocoding confidence rather than
    silently replacing the historical address with a modern one.
-7. Assign provisional match confidence and review status. Low-confidence
+8. Assign provisional match confidence and review status. Low-confidence
    matches should go to the review queue, not directly into site counts.
-8. A second reviewer should resolve rows that affect historical counts. The
+9. A second reviewer should resolve rows that affect historical counts. The
    reviewer should record whether the evidence confirms a physical site, only
    an organisation, only a building, or neither.
-9. Aggregation scripts should count only observations satisfying the declared
+10. Aggregation scripts should count only observations satisfying the declared
    evidence rule for that product. For example, a conservative 2018 count might
    require `worship_use_status` in `confirmed_worship` or `probable_worship`,
    `existence_status = present`, and `review_status = accepted`.

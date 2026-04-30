@@ -13,6 +13,9 @@
 - Added historical-address and geocoding-basis fields to the RA evidence
   templates so changed streets, renamed localities, demolished buildings, and
   uncertain modern matches can be reviewed explicitly.
+- Added bounded origin and closure date fields so sources that establish
+  "not earlier than" or "not later than" evidence can be recorded without
+  inventing exact dates.
 - Added `docs/community-ingestion-api-plan.md` to plan Google Sheets, web,
   bulk-upload, API, and AI-agent contribution paths through staging,
   validation, review, adjudication, and master ingestion.

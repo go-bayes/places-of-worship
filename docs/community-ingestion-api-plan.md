@@ -318,6 +318,8 @@ Minimum checks before review:
 - required fields are present
 - controlled vocabulary values are valid
 - dates parse and include precision or basis
+- bounded date fields are internally consistent, with `not_earlier_than` not
+  later than `not_later_than` when both are present
 - source dataset exists or is submitted in the same batch
 - licence and access fields are present
 - raw source snapshot or evidence reference exists
