@@ -16,6 +16,9 @@
 - Added bounded origin and closure date fields so sources that establish
   "not earlier than" or "not later than" evidence can be recorded without
   inventing exact dates.
+- Added OpenStreetMap lifecycle-tag, visual-verification, and target-year
+  probability fields to support later temporal verification of 2013, 2018, and
+  2023 place existence.
 - Added `docs/community-ingestion-api-plan.md` to plan Google Sheets, web,
   bulk-upload, API, and AI-agent contribution paths through staging,
   validation, review, adjudication, and master ingestion.

@@ -327,6 +327,10 @@ Minimum checks before review:
 - historical addresses are preserved separately from modern address candidates
   when streets, localities, road alignments, or buildings may have changed
 - candidate site matches include confidence and method
+- OpenStreetMap object versions, lifecycle tags, and visual-verification fields
+  are retained when they support target-year status claims
+- target-year probability values, where present, are numeric and bounded between
+  0 and 1
 - private personal contact details are absent from public-ready fields
 - duplicate source rows are flagged
 - likely duplicate site observations are grouped

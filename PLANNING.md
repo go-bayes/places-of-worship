@@ -479,6 +479,33 @@ For New Zealand, the practical reconstruction path should be evidence-tiered:
   regions, so they should enrich confidence rather than silently define the
   national denominator.
 
+### OSM temporal verification subproject
+
+OpenStreetMap should become a separate but related temporal verification work
+stream. The aim is to estimate whether candidate places of worship existed and
+were in worship use in target years such as 2013, 2018, and 2023. This should
+not be treated as a direct count from current OSM. It should combine OSM object
+history, OSM lifecycle tags, visual evidence, and human or model-assisted review.
+
+Evidence to retain:
+
+- OSM full-history object versions and timestamps for `node`, `way`, and
+  `relation` objects tagged as places of worship or likely worship buildings
+- OSM lifecycle tags, especially `start_date=*`, `old_start_date=*`, and, where
+  used carefully, `end_date=*`
+- the fact that previous map iterations used OSM-supplied birth dates, so these
+  values should be migrated or re-extracted rather than discarded
+- visual aids such as street maps, street-level imagery, aerial imagery, and
+  historical maps, with capture dates and source references where available
+- target-year state judgements for 2013, 2018, and 2023, with optional
+  probabilities and review notes
+
+The output should be a staged evidence layer, not an automatic master update.
+For each candidate site and target year, store the evidence basis, OSM version
+or tag source, visual verification source, target-year status, optional
+probability, and reviewer decision. OSM evidence can then contribute to area
+summaries only through the same validation and review gates as other sources.
+
 The preferred pilot is a 2018 reconstruction for one or two territorial
 authorities with mixed urban and rural coverage. Build a `site_observation`
 table with `site_id`, `observation_date`, `evidence_source_id`, `evidence_type`,
@@ -494,6 +521,12 @@ Candidate source references to evaluate:
 
 - OpenStreetMap full history:
   <https://wiki.openstreetmap.org/wiki/Planet.osm/full>
+- OpenStreetMap places of worship tagging:
+  <https://wiki.openstreetmap.org/wiki/Tag:amenity%3Dplace_of_worship>
+- OpenStreetMap lifecycle date tags:
+  <https://wiki.openstreetmap.org/wiki/Key:start_date>
+  <https://wiki.openstreetmap.org/wiki/Key:old_start_date>
+  <https://wiki.openstreetmap.org/wiki/Key:end_date>
 - Charities Services open data:
   <https://www.charities.govt.nz/charities-in-new-zealand/the-charities-register/open-data/>
 - Incorporated Societies Register search:
@@ -593,9 +626,19 @@ Minimum `site_observation` fields:
   - `longitude`
   - `geometry_wkt` or `geometry_geojson`
   - `matched_osm_id`
+  - `osm_object_type`
+  - `osm_version_timestamp`
+  - `osm_tags_raw`
+  - `osm_start_date`
+  - `osm_old_start_date`
+  - `osm_end_date`
   - `matched_current_site_id`
   - `match_method`
   - `match_confidence`
+  - `visual_verification_source`
+  - `visual_verification_url_or_file`
+  - `visual_verification_capture_date`
+  - `visual_verification_summary`
 - Status coding:
   - `existence_status` (`present`, `absent`, `uncertain`)
   - `worship_use_status` (`confirmed_worship`, `probable_worship`,
@@ -606,6 +649,8 @@ Minimum `site_observation` fields:
   - `quality_flag`
   - `review_status` (`unreviewed`, `needs_review`, `accepted`, `excluded`,
     `deferred`)
+  - optional `target_year_probability` for probabilistic review outputs, scaled
+    from 0 to 1 and left blank when no explicit probability has been assigned
 - Audit fields:
   - `extracted_by`
   - `extracted_at`
@@ -668,6 +713,8 @@ Validation before aggregation:
 - conflicting evidence is retained but flagged for review
 - all outputs report counts by `source_dataset_id`, evidence type, quality flag,
   and review status before replacing `area_summary` products
+- any target-year probabilities are bounded between 0 and 1 and trace back to a
+  declared evidence rule, reviewer decision, or model-assisted review record
 
 ### Map presentation modes
 
@@ -1007,16 +1054,19 @@ map do not drift apart.
    `docs/templates/ra-historical-site-evidence/` with one or two NZ 2018 source
    batches, then refine the controlled vocabularies and validation rules before
    broader data entry.
-9. Draft the Google Sheets to staging API pilot described in
+9. Scope the OSM temporal verification subproject for 2013, 2018, and 2023,
+   including OSM history extraction, lifecycle-tag parsing, visual evidence
+   review, and target-year probability rules.
+10. Draft the Google Sheets to staging API pilot described in
    `docs/community-ingestion-api-plan.md`.
-10. Extend the NZ `area_summary` product to SA2 geography after checking
+11. Extend the NZ `area_summary` product to SA2 geography after checking
    boundary metadata and point-to-area assignment quality.
-11. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
+12. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
    legends, popups, and export metadata.
-12. Align the NZ map interface with the global map after the data overlay is
+13. Align the NZ map interface with the global map after the data overlay is
    stable, preserving NZ-specific analysis controls.
-13. Prototype site, area, and comparison modes using precomputed layers before
+14. Prototype site, area, and comparison modes using precomputed layers before
     adding live portal queries.
-14. Pilot the new global pipeline on a small country set before full rollout.
-15. Expand `research/` into a country-source matrix for global feasibility
+15. Pilot the new global pipeline on a small country set before full rollout.
+16. Expand `research/` into a country-source matrix for global feasibility
     assessment.

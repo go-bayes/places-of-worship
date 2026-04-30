@@ -1,5 +1,8 @@
 field,allowed_value,meaning
 source_type,osm_history,Historical OpenStreetMap evidence or extract
+source_type,osm_lifecycle_tags,OpenStreetMap lifecycle tags such as start_date or old_start_date
+source_type,street_imagery,Street-level imagery used for visual verification
+source_type,aerial_imagery,Aerial or satellite imagery used for visual verification
 source_type,charities_register,Charities Services register or related charity record
 source_type,incorporated_societies,Incorporated societies register evidence
 source_type,linz_building_outlines,Land Information New Zealand building outline evidence
@@ -25,6 +28,8 @@ observation_date_basis,directory_year,Date comes from a directory or yearbook ye
 observation_date_basis,registration_date,Date comes from an organisation registration record
 observation_date_basis,deregistration_date,Date comes from an organisation deregistration record
 observation_date_basis,imagery_capture_date,Date comes from aerial or street imagery capture
+observation_date_basis,osm_version_timestamp,Date comes from an OpenStreetMap object version timestamp
+observation_date_basis,osm_lifecycle_tag,Date comes from an OpenStreetMap lifecycle tag
 observation_date_basis,annual_return_year,Date comes from an annual return or filing year
 observation_date_basis,web_archive_date,Date comes from a web archive capture date
 observation_date_basis,source_publication_date,Date comes from source publication date
@@ -57,6 +62,9 @@ site_type,multi_use,Multi-use site
 site_type,other,Other site type
 site_type,unknown,Site type is unknown
 quality_flag,osm_known_at_date,OpenStreetMap object was known at the relevant date
+quality_flag,osm_lifecycle_date_used,OpenStreetMap lifecycle date was used as evidence
+quality_flag,visual_confirmation,Visual evidence supports site existence or status
+quality_flag,target_year_probability_estimated,Target-year status includes an explicit probability estimate
 quality_flag,administrative_org_matched,Administrative organisation has been matched to a site
 quality_flag,building_visible_use_unconfirmed,Building evidence exists but worship use is unconfirmed
 quality_flag,directory_confirmed,Directory evidence confirms site or organisation
@@ -93,6 +101,13 @@ geocoding_confidence,high,Strong evidence for coordinates or modern address
 geocoding_confidence,medium,Plausible geocoding requiring normal review
 geocoding_confidence,low,Weak geocoding requiring careful review
 geocoding_confidence,none,No geocoding confidence assigned
+visual_verification_source,osm_cartography,OpenStreetMap cartographic or object-history evidence
+visual_verification_source,street_imagery,Street-level imagery
+visual_verification_source,aerial_imagery,Aerial or satellite imagery
+visual_verification_source,street_map,Street map or road map
+visual_verification_source,historical_map,Historical map
+visual_verification_source,none,No visual verification used
+visual_verification_source,other,Other visual verification source
 target_year_status,present,Source supports presence or active worship in the target year
 target_year_status,absent,Source supports absence or non-use in the target year
 target_year_status,uncertain,Source is relevant but status is unclear
