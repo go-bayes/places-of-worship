@@ -322,6 +322,8 @@ Minimum checks before review:
 - licence and access fields are present
 - raw source snapshot or evidence reference exists
 - coordinates are valid, or address geocoding/matching is marked as needed
+- historical addresses are preserved separately from modern address candidates
+  when streets, localities, road alignments, or buildings may have changed
 - candidate site matches include confidence and method
 - private personal contact details are absent from public-ready fields
 - duplicate source rows are flagged

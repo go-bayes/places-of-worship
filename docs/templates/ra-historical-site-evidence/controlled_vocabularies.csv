@@ -61,6 +61,8 @@ quality_flag,administrative_org_matched,Administrative organisation has been mat
 quality_flag,building_visible_use_unconfirmed,Building evidence exists but worship use is unconfirmed
 quality_flag,directory_confirmed,Directory evidence confirms site or organisation
 quality_flag,current_inventory_back_projected,Current inventory was projected back using external evidence
+quality_flag,historical_address_changed,Historical address may differ from current address
+quality_flag,geocoding_uncertain,Location requires geocoding review
 quality_flag,needs_review,Row requires reviewer attention
 quality_flag,other,Other quality flag
 review_status,unreviewed,Extracted but not checked
@@ -79,6 +81,18 @@ match_confidence,high,Strong evidence for match
 match_confidence,medium,Plausible match requiring normal review
 match_confidence,low,Weak match requiring careful review
 match_confidence,none,No match confidence assigned
+geocoding_basis,source_coordinates,Coordinates are given directly by the source
+geocoding_basis,historical_map,Location was inferred from a historical map
+geocoding_basis,modern_geocoder,Location was inferred from a modern address geocoder
+geocoding_basis,manual_match,Location was inferred by manual matching
+geocoding_basis,existing_osm_site,Location was inferred from an existing OpenStreetMap site
+geocoding_basis,gazetteer_or_road_rename,Location was inferred from a gazetteer or road-renaming source
+geocoding_basis,property_record,Location was inferred from a property or parcel record
+geocoding_basis,unknown,Geocoding basis is unknown
+geocoding_confidence,high,Strong evidence for coordinates or modern address
+geocoding_confidence,medium,Plausible geocoding requiring normal review
+geocoding_confidence,low,Weak geocoding requiring careful review
+geocoding_confidence,none,No geocoding confidence assigned
 target_year_status,present,Source supports presence or active worship in the target year
 target_year_status,absent,Source supports absence or non-use in the target year
 target_year_status,uncertain,Source is relevant but status is unclear

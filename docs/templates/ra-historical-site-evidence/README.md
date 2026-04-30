@@ -25,10 +25,11 @@ The template is for source evidence, not final counts. Each row should record wh
 1. Use `site_evidence_wide.csv` as the main working tab. It is intentionally wide so human data entry can happen in one place.
 2. Add one row per source-place record. If one source gives evidence for several distinct sites, use one row per site. If a source gives conflicting evidence for the same site, use separate rows and flag them for review.
 3. Record all source-backed lifecycle evidence you find: organisation founding, first sighting, opening or dedication, relocation, closure, last sighting, change of use, and demolition.
-4. Use the 2013, 2018, and 2023 status/evidence columns only when the source helps determine whether the place existed or was in worship use in those years.
-5. Use `sources.csv`, `site_observations.csv`, and `candidate_matches.csv` as reference or downstream-normalised tabs when the team is ready to split the wide sheet into ingestion tables.
-6. Use `review_notes.csv` for reviewer decisions, unresolved problems, and follow-up tasks.
-7. Leave uncertain cases as `needs_review` rather than forcing a match.
+4. Preserve historical addresses as evidence. Put any modern address or coordinates in the matching/geocoding fields and note the basis for that interpretation.
+5. Use the 2013, 2018, and 2023 status/evidence columns only when the source helps determine whether the place existed or was in worship use in those years.
+6. Use `sources.csv`, `site_observations.csv`, and `candidate_matches.csv` as reference or downstream-normalised tabs when the team is ready to split the wide sheet into ingestion tables.
+7. Use `review_notes.csv` for reviewer decisions, unresolved problems, and follow-up tasks.
+8. Leave uncertain cases as `needs_review` rather than forcing a match.
 
 ## Data rules
 
@@ -36,6 +37,7 @@ The template is for source evidence, not final counts. Each row should record wh
 - Do not collect personal contact details, office-holder names, private email addresses, phone numbers, or pastoral notes unless they are essential to source identification and approved for use.
 - Keep restricted or licensed source files outside Git. Use `raw_file_location` to point to the controlled storage location.
 - Prefer stable identifiers and URLs. If a source was downloaded, record the retrieval date and checksum when available.
+- Treat changed streets, renamed localities, demolished buildings, and shifted road alignments as matching problems. Record the historical address separately from any modern address candidate, explain the address change, and lower `geocoding_confidence` where the location is uncertain.
 - Do not collapse all lifecycle evidence into one birthday or death date. Use the specific date fields for organisation founding, site opening, building opening or dedication, first seen, last seen, closure, demolition, change of use, and relocation.
 - Use date precision fields to distinguish exact dates from month-only, year-only, range-based, or uncertain dates.
 - Use the target-year columns to record whether the source supports `present`, `absent`, `uncertain`, or `not_assessed` for 2013, 2018, and 2023.

@@ -573,7 +573,16 @@ Minimum `site_observation` fields:
   - `name_standardised`
   - `denomination_or_tradition_raw`
   - `address_raw`
+  - `historical_address_raw`
+  - `historical_locality_raw`
+  - `modern_address_candidate`
   - `address_standardised`
+  - `locality_raw`
+  - `address_change_note`
+  - `geocoding_basis` (`source_coordinates`, `historical_map`,
+    `modern_geocoder`, `manual_match`, `existing_osm_site`,
+    `gazetteer_or_road_rename`, `property_record`, `unknown`)
+  - `geocoding_confidence`
   - `latitude`
   - `longitude`
   - `geometry_wkt` or `geometry_geojson`
@@ -613,12 +622,17 @@ RA workflow:
    requires them.
 5. Normalise names and addresses lightly, preserving raw values beside the
    cleaned fields.
-6. Assign provisional match confidence and review status. Low-confidence
+6. Preserve historical addresses separately from modern/geocoded
+   interpretation. If streets have been renamed, road alignments have shifted,
+   localities have changed, or buildings have been demolished, record the
+   address-change note, geocoding basis, and geocoding confidence rather than
+   silently replacing the historical address with a modern one.
+7. Assign provisional match confidence and review status. Low-confidence
    matches should go to the review queue, not directly into site counts.
-7. A second reviewer should resolve rows that affect historical counts. The
+8. A second reviewer should resolve rows that affect historical counts. The
    reviewer should record whether the evidence confirms a physical site, only
    an organisation, only a building, or neither.
-8. Aggregation scripts should count only observations satisfying the declared
+9. Aggregation scripts should count only observations satisfying the declared
    evidence rule for that product. For example, a conservative 2018 count might
    require `worship_use_status` in `confirmed_worship` or `probable_worship`,
    `existence_status = present`, and `review_status = accepted`.
