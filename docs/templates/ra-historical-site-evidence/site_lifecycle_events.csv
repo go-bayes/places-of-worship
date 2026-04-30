@@ -1,0 +1,1 @@
+lifecycle_event_id,candidate_site_id,matched_current_site_id,source_dataset_id,source_record_id,source_url_or_file,lifecycle_event_type,event_date,event_start_date,event_end_date,date_precision,date_basis,date_raw,event_summary,match_confidence,review_status,extracted_by,extracted_at,reviewed_by,reviewed_at,review_note

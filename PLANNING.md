@@ -54,9 +54,9 @@ As of 30 April 2026:
   scripted, community, and AI-agent contributions.
 - Initial RA-facing historical site evidence templates now live in
   `docs/templates/ra-historical-site-evidence/`. They provide Google
-  Sheets-ready CSV tabs for source metadata, source-backed site observations,
-  candidate matches, review notes, controlled vocabularies, and privacy/licence
-  instructions.
+  Sheets-ready CSV tabs, including a wide human-entry sheet for source-backed
+  lifecycle evidence, source metadata, site observations, candidate matches,
+  review notes, controlled vocabularies, and privacy/licence instructions.
 
 ## Redevelopment objective
 
@@ -526,6 +526,11 @@ Proposed storage layout:
 - Extracted evidence table:
   - `data/intermediate/nz/historical_site_evidence/<retrieval_date>/site_observations.csv`
   - one row per source claim about one site at one date, before aggregation
+- Extracted lifecycle event table:
+  - `data/intermediate/nz/historical_site_evidence/<retrieval_date>/site_lifecycle_events.csv`
+  - optional normalised split from the wide RA intake sheet when source evidence
+    supports distinct founding, opening, first-seen, last-seen, closure,
+    demolition, change-of-use, or relocation events
 - Review queue:
   - `docs/review_queues/historical_site_evidence/<retrieval_date>/`
   - used for uncertain site matches, ambiguous addresses, conflicting dates,
@@ -551,6 +556,18 @@ Minimum `site_observation` fields:
   - `evidence_start_date`
   - `evidence_end_date`
   - `date_precision` (`day`, `month`, `year`, `range`, `unknown`)
+- Lifecycle evidence, where available:
+  - `organisation_founded_date`
+  - `site_opened_date`
+  - `building_opened_or_dedicated_date`
+  - `first_seen_date`
+  - `last_seen_date`
+  - `site_closed_date`
+  - `building_demolished_date`
+  - `use_changed_date`
+  - `relocated_date`
+  - separate precision fields and raw source wording for each date where
+    needed
 - Site matching:
   - `name_raw`
   - `name_standardised`
@@ -587,18 +604,21 @@ RA workflow:
 1. Create or update the `source_dataset` metadata before extracting rows.
 2. Save raw downloads, screenshots, PDFs, or exported tables in the dated raw
    source folder, or outside Git with a manifest if the source is restricted.
-3. Extract only the fields needed for site existence, worship use, dating, and
-   matching. Do not transcribe officer names, private email addresses, phone
-   numbers, or other personal contact details unless a specific approved source
-   contract requires them.
-4. Normalise names and addresses lightly, preserving raw values beside the
+3. Extract fields needed for site existence, worship use, lifecycle dating, and
+   matching. Record all source-backed founding, first-seen, opening, closure,
+   last-seen, demolition, change-of-use, and relocation evidence rather than
+   collapsing it into a single birth or death date.
+4. Do not transcribe officer names, private email addresses, phone numbers, or
+   other personal contact details unless a specific approved source contract
+   requires them.
+5. Normalise names and addresses lightly, preserving raw values beside the
    cleaned fields.
-5. Assign provisional match confidence and review status. Low-confidence
+6. Assign provisional match confidence and review status. Low-confidence
    matches should go to the review queue, not directly into site counts.
-6. A second reviewer should resolve rows that affect historical counts. The
+7. A second reviewer should resolve rows that affect historical counts. The
    reviewer should record whether the evidence confirms a physical site, only
    an organisation, only a building, or neither.
-7. Aggregation scripts should count only observations satisfying the declared
+8. Aggregation scripts should count only observations satisfying the declared
    evidence rule for that product. For example, a conservative 2018 count might
    require `worship_use_status` in `confirmed_worship` or `probable_worship`,
    `existence_status = present`, and `review_status = accepted`.
@@ -606,9 +626,12 @@ RA workflow:
 Template support:
 
 - Use `docs/templates/ra-historical-site-evidence/` as the first spreadsheet
-  scaffold for RA evidence collection. The CSV tabs are intended for Google
-  Sheets import and should be treated as a working adapter to this ingestion
-  spec, rather than as the durable database.
+  scaffold for RA evidence collection. `site_evidence_wide.csv` is the primary
+  human-entry sheet because it keeps source, place, lifecycle, target-year,
+  matching, and review fields in one row. The more normalised CSV tabs are
+  reference scaffolds for later ingestion and review splitting. All CSV tabs
+  should be treated as a working adapter to this ingestion spec, rather than as
+  the durable database.
 
 Validation before aggregation:
 

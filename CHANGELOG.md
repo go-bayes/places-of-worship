@@ -5,6 +5,11 @@
   `docs/templates/ra-historical-site-evidence/` for Google Sheets import,
   including source metadata, site observations, candidate matches, review notes,
   controlled vocabularies, and privacy/licence instructions.
+- Added a wide RA evidence-entry template with first-class lifecycle date
+  fields for founding, opening, first seen, last seen, closure, demolition,
+  change of use, relocation, and target-year status checks.
+- Added a normalised lifecycle-event CSV scaffold for later ingestion once the
+  wide RA entry sheet is split into backend tables.
 - Added `docs/community-ingestion-api-plan.md` to plan Google Sheets, web,
   bulk-upload, API, and AI-agent contribution paths through staging,
   validation, review, adjudication, and master ingestion.

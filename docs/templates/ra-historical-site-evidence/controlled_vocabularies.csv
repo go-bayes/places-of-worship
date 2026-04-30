@@ -9,6 +9,17 @@ source_type,archived_website,Archived website or web page evidence
 source_type,local_council,Local council register or planning evidence
 source_type,heritage_list,Heritage list or protected-place evidence
 source_type,other,Other source type
+lifecycle_event_type,organisation_founded,Religious organisation or congregation began
+lifecycle_event_type,site_opened,Worship began at the physical location
+lifecycle_event_type,building_opened_or_dedicated,Building was opened or dedicated
+lifecycle_event_type,first_seen,First source evidence that the place existed or was active
+lifecycle_event_type,last_seen,Last source evidence that the place existed or was active
+lifecycle_event_type,site_closed,Worship use ended at the physical location
+lifecycle_event_type,building_demolished,Building was demolished
+lifecycle_event_type,use_changed,Building remains but use changed away from worship
+lifecycle_event_type,relocated,Congregation or organisation moved to another site
+lifecycle_event_type,other,Other lifecycle event
+lifecycle_event_type,unknown,Lifecycle event type is not clear
 observation_date_basis,census_date,Observation is intended to represent census-year status
 observation_date_basis,directory_year,Date comes from a directory or yearbook year
 observation_date_basis,registration_date,Date comes from an organisation registration record
@@ -68,6 +79,16 @@ match_confidence,high,Strong evidence for match
 match_confidence,medium,Plausible match requiring normal review
 match_confidence,low,Weak match requiring careful review
 match_confidence,none,No match confidence assigned
+target_year_status,present,Source supports presence or active worship in the target year
+target_year_status,absent,Source supports absence or non-use in the target year
+target_year_status,uncertain,Source is relevant but status is unclear
+target_year_status,not_assessed,Source has not been assessed for this target year
+privacy_flag,clear,No obvious privacy issue in extracted fields
+privacy_flag,needs_review,Potential privacy concern requires review
+privacy_flag,restricted,Contains restricted or sensitive information outside public release
+licence_flag,clear,Licence appears compatible with internal extraction
+licence_flag,needs_review,Licence or redistribution status requires review
+licence_flag,restricted,Licence restricts storage or redistribution
 decision,accept,Accept the row for ingestion
 decision,exclude,Exclude the row from ingestion
 decision,defer,Defer the row

@@ -97,8 +97,10 @@ templates rather than treated as a free-form database.
 Recommended template tabs:
 
 - `instructions`
+- `site_evidence_wide`
 - `sources`
 - `site_observations`
+- `site_lifecycle_events`
 - `candidate_matches`
 - `review_notes`
 - `controlled_vocabularies`
@@ -114,7 +116,9 @@ Recommended spreadsheet controls:
 - data validation for enumerated fields
 - protected formula/check columns
 - hidden stable ids where needed
-- one row per source claim, not one row per final site
+- a wide human-entry sheet with one row per source-place record
+- normalised reference tabs for later ingestion into source, observation,
+  lifecycle, match, and review tables
 - source URLs or file references required for factual claims
 - "do not enter private contact details" warning in the instructions tab
 

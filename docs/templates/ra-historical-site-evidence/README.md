@@ -1,29 +1,34 @@
 # RA historical site evidence template
 
-This folder contains Google Sheets-ready CSV tabs for collecting evidence about historical places of worship, starting with New Zealand 2013 and 2018 place-density reconstruction.
+This folder contains Google Sheets-ready CSV tabs for collecting evidence about historical places of worship, starting with New Zealand lifecycle evidence and 2013, 2018, and 2023 place-density reconstruction.
 
-The template is for source evidence, not final counts. Each row should record a claim from a source, how it was dated, how it may match to a site, and what review status it currently has. Final ingestion should only use rows that pass review.
+The template is for source evidence, not final counts. Each row should record what a source says about a place, how the evidence was dated, how it may match to a site, and what review status it currently has. Final ingestion should only use rows that pass review.
 
 ## How to set up the sheet
 
 1. Create a Google Sheet named `NZ historical site evidence - working`.
-2. Import each CSV in this folder as a separate tab:
+2. For the first RA pass, import:
+   - `site_evidence_wide.csv`
+   - `controlled_vocabularies.csv`
+3. For a fuller ingestion pilot, also import the normalised reference tabs:
    - `sources.csv`
    - `site_observations.csv`
+   - `site_lifecycle_events.csv`
    - `candidate_matches.csv`
    - `review_notes.csv`
-   - `controlled_vocabularies.csv`
-3. Freeze the first row on each tab.
-4. Use `controlled_vocabularies.csv` for drop-down validation where practical.
-5. Share the sheet with the project team only. Do not make the sheet public unless source licences and privacy checks permit public release.
+4. Freeze the first row on each tab.
+5. Use `controlled_vocabularies.csv` for drop-down validation where practical.
+6. Share the sheet with the project team only. Do not make the sheet public unless source licences and privacy checks permit public release.
 
 ## RA workflow
 
-1. Add one row to `sources.csv` for each dataset, directory, archive, register, or file inspected.
-2. Add one row to `site_observations.csv` for each site claim found in a source.
-3. Use `candidate_matches.csv` when a source claim may match one or more existing places on the map.
-4. Use `review_notes.csv` for reviewer decisions, unresolved problems, and follow-up tasks.
-5. Leave uncertain cases as `needs_review` rather than forcing a match.
+1. Use `site_evidence_wide.csv` as the main working tab. It is intentionally wide so human data entry can happen in one place.
+2. Add one row per source-place record. If one source gives evidence for several distinct sites, use one row per site. If a source gives conflicting evidence for the same site, use separate rows and flag them for review.
+3. Record all source-backed lifecycle evidence you find: organisation founding, first sighting, opening or dedication, relocation, closure, last sighting, change of use, and demolition.
+4. Use the 2013, 2018, and 2023 status/evidence columns only when the source helps determine whether the place existed or was in worship use in those years.
+5. Use `sources.csv`, `site_observations.csv`, and `candidate_matches.csv` as reference or downstream-normalised tabs when the team is ready to split the wide sheet into ingestion tables.
+6. Use `review_notes.csv` for reviewer decisions, unresolved problems, and follow-up tasks.
+7. Leave uncertain cases as `needs_review` rather than forcing a match.
 
 ## Data rules
 
@@ -31,8 +36,9 @@ The template is for source evidence, not final counts. Each row should record a 
 - Do not collect personal contact details, office-holder names, private email addresses, phone numbers, or pastoral notes unless they are essential to source identification and approved for use.
 - Keep restricted or licensed source files outside Git. Use `raw_file_location` to point to the controlled storage location.
 - Prefer stable identifiers and URLs. If a source was downloaded, record the retrieval date and checksum when available.
-- Use `target_year` for the census year the observation is intended to inform, usually `2013` or `2018`.
-- Use `observation_date_basis` and `date_precision` to distinguish precise evidence from year-only or range-based evidence.
+- Do not collapse all lifecycle evidence into one birthday or death date. Use the specific date fields for organisation founding, site opening, building opening or dedication, first seen, last seen, closure, demolition, change of use, and relocation.
+- Use date precision fields to distinguish exact dates from month-only, year-only, range-based, or uncertain dates.
+- Use the target-year columns to record whether the source supports `present`, `absent`, `uncertain`, or `not_assessed` for 2013, 2018, and 2023.
 
 ## Review statuses
 
