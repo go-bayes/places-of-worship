@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Added a planned NZ interface-alignment pass so the regional map can adopt
+  the global map's basemap, control, legend, popup, and attribution style after
+  the area-summary overlay stabilises.
 - Wired the New Zealand territorial-authority map overlay to
   `area_summary_ta.json`, including census-year controls, area-summary metrics,
   and denominator/source/boundary/quality context in popups and legends.

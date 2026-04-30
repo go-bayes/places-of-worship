@@ -411,6 +411,14 @@ For the NZ app, remove the current 2018-specific assumptions from overlays,
 labels, and popups before presenting 2023 data. Users should always be able to
 see which census year, boundary set, and denominator are being displayed.
 
+After the NZ area-summary overlay is stable, align the NZ map interface with
+the global map. This should be a restrained UI pass rather than a rewrite:
+reuse the global map's basemap defaults, control density, typography, legend
+treatment, popup styling, and attribution patterns while preserving the
+country-specific TA/SA2 controls and census-year selector. Longer term, extract
+shared map-shell CSS and small frontend helpers so country apps and the global
+map do not drift apart.
+
 ## Country backend pilot plan
 
 ### NZ pilot scope
@@ -717,9 +725,11 @@ see which census year, boundary set, and denominator are being displayed.
 8. Extend the NZ `area_summary` product to SA2 geography after checking
    boundary metadata and point-to-area assignment quality.
 9. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
-    legends, popups, and export metadata.
-10. Prototype site, area, and comparison modes using precomputed layers before
+   legends, popups, and export metadata.
+10. Align the NZ map interface with the global map after the data overlay is
+   stable, preserving NZ-specific analysis controls.
+11. Prototype site, area, and comparison modes using precomputed layers before
     adding live portal queries.
-11. Pilot the new global pipeline on a small country set before full rollout.
-12. Expand `research/` into a country-source matrix for global feasibility
+12. Pilot the new global pipeline on a small country set before full rollout.
+13. Expand `research/` into a country-source matrix for global feasibility
     assessment.
