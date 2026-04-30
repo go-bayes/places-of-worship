@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Wired the New Zealand territorial-authority map overlay to
+  `area_summary_ta.json`, including census-year controls, area-summary metrics,
+  and denominator/source/boundary/quality context in popups and legends.
 - Defaulted the global map on `placesmap.org` to the MapTiler Backdrop basemap
   when available, with CARTO retained as the fallback.
 - Made `AGENTS.md` the canonical repo-local agent guidance and removed the

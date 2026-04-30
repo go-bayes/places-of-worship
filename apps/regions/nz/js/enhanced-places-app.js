@@ -46,12 +46,15 @@ class EnhancedPlacesOfWorshipApp {
         this.boundariesData = null;
         this.territorialAuthorityData = null;
         this.taCensusData = null;
+        this.areaSummaryData = null;
+        this.areaSummaryRowsByTaYear = {};
+        this.areaSummaryYears = [2013, 2018, 2023];
         this.showReligiousDensity = false;
         this.showCensusOverlay = false; // Keep for backward compatibility
         this.currentDemographicMode = 'religious_percentage';
         this.currentCensusMetric = 'no_religion_change'; // Keep for backward compatibility
         this.currentDemographic = 'none'; // Demographic toggle selection
-        this.overlayYear = 2018;  // Fixed year for overlay colors
+        this.overlayYear = 2023;
         this.useDetailedBoundaries = false;  // Default to TA boundaries (simplified view)
         
         // Additional demographic data containers
@@ -235,26 +238,40 @@ class EnhancedPlacesOfWorshipApp {
             censusOverlayToggle.addEventListener('change', (e) => {
                 console.log('Census overlay toggle changed:', e.target.checked);
                 this.showReligiousDensity = e.target.checked;
+                const censusControls = document.getElementById('censusControls');
+                if (censusControls) {
+                    censusControls.classList.toggle('active', e.target.checked);
+                }
                 
                 if (e.target.checked) {
-                    // When enabling demographics, default to SA-2 level (more detailed)
-                    this.useDetailedBoundaries = true;
+                    // The new area-summary product is currently available at TA level.
+                    this.useDetailedBoundaries = false;
                     
-                    // Update the geographic resolution toggle to reflect SA-2 default
+                    // Update the geographic resolution toggle to reflect TA default
                     const geographicToggle = document.getElementById('geographicResolutionToggle');
                     const geographicLabel = document.getElementById('geographicResolutionLabel');
                     if (geographicToggle) {
-                        geographicToggle.checked = false; // Unchecked = SA-2 level
+                        geographicToggle.checked = true; // Checked = TA level
                         if (geographicLabel) {
-                            geographicLabel.textContent = 'Statistical Area 2 (Detailed)';
+                            geographicLabel.textContent = 'Territorial Authority (Overview)';
                         }
                     }
+
+                    const overlayYearSelect = document.getElementById('overlayYearSelect');
+                    if (overlayYearSelect) {
+                        overlayYearSelect.disabled = false;
+                    }
+
+                    const demographicMetricSelect = document.getElementById('demographicMetricSelect');
+                    if (demographicMetricSelect) {
+                        demographicMetricSelect.disabled = false;
+                    }
                     
-                    // Refresh the overlay to show SA-2 level immediately
+                    // Refresh the overlay to show TA level immediately
                     this.removeReligiousDensityOverlay();
                     setTimeout(() => {
                         this.addReligiousDensityOverlay();
-                        this.showDemographicLegend(this.getReligiousDensityLegendData());
+                        this.updateDemographicLegend();
                     }, 50);
                     return; // Don't call toggleReligiousDensityOverlay again below
                 } else {
@@ -280,9 +297,28 @@ class EnhancedPlacesOfWorshipApp {
                         geographicLabel.textContent = 'Statistical Area 2 (Detailed)';
                     }
                 }
+
+                const overlayYearSelect = document.getElementById('overlayYearSelect');
+                if (overlayYearSelect) {
+                    overlayYearSelect.disabled = this.useDetailedBoundaries;
+                    if (this.useDetailedBoundaries) {
+                        this.overlayYear = 2018;
+                        overlayYearSelect.value = '2018';
+                    }
+                }
+
+                const demographicMetricSelect = document.getElementById('demographicMetricSelect');
+                if (demographicMetricSelect) {
+                    demographicMetricSelect.disabled = this.useDetailedBoundaries;
+                    if (this.useDetailedBoundaries) {
+                        this.currentDemographicMode = 'religious_percentage';
+                        demographicMetricSelect.value = 'religious_percentage';
+                    }
+                }
                 
                 // Refresh overlays if currently shown
                 if (this.showReligiousDensity) {
+                    this.updateColorScale();
                     this.removeReligiousDensityOverlay();
                     this.addReligiousDensityOverlay();
                     this.updateDemographicLegend();
@@ -300,6 +336,7 @@ class EnhancedPlacesOfWorshipApp {
             
             // Show/hide demographic controls
             const demographicControls = document.getElementById('demographicControls');
+            if (!demographicControls) return;
             if (e.target.checked) {
                 demographicControls.classList.add('active');
             } else {
@@ -317,6 +354,18 @@ class EnhancedPlacesOfWorshipApp {
             this.updateColorScale(); // Update color scale for new mode
             this.updateReligiousDensityVisualization(); // Refresh visualization
             this.updateDemographicLegend(); // Update legend
+            });
+        }
+
+        const overlayYearSelect = document.getElementById('overlayYearSelect');
+        if (overlayYearSelect) {
+            overlayYearSelect.value = String(this.overlayYear);
+            overlayYearSelect.addEventListener('change', (e) => {
+                this.overlayYear = Number(e.target.value);
+                console.log('Overlay census year changed to:', this.overlayYear);
+                this.updateColorScale();
+                this.updateReligiousDensityVisualization();
+                this.updateDemographicLegend();
             });
         }
         
@@ -404,8 +453,9 @@ class EnhancedPlacesOfWorshipApp {
             console.log('  - ' + dataUrl('sa2.geojson'));
             console.log('  - ' + dataUrl('territorial_authorities.geojson'));
             console.log('  - ' + dataUrl('ta_aggregated_data.json'));
+            console.log('  - ' + dataUrl('area_summary_ta.json'));
             
-            const [placesResponse, censusResponse, demographicResponse, boundariesResponse, territorialAuthorityResponse, taCensusResponse] = await Promise.all([
+            const [placesResponse, censusResponse, demographicResponse, boundariesResponse, territorialAuthorityResponse, taCensusResponse, areaSummaryResponse] = await Promise.all([
                 fetch(dataUrl('nz_places.json')).then(response => {
                     console.log('📄 nz_places.json response:', response.status, response.statusText);
                     return response;
@@ -433,6 +483,10 @@ class EnhancedPlacesOfWorshipApp {
                 fetch(dataUrl('ta_aggregated_data.json')).then(response => {
                     console.log('📄 ta_aggregated_data.json response:', response.status, response.statusText);
                     return response;
+                }),
+                fetch(dataUrl('area_summary_ta.json')).then(response => {
+                    console.log('📄 area_summary_ta.json response:', response.status, response.statusText);
+                    return response;
                 })
             ]);
             
@@ -442,7 +496,8 @@ class EnhancedPlacesOfWorshipApp {
                 demographic: demographicResponse.status,
                 boundaries: boundariesResponse.status,
                 territorialAuthority: territorialAuthorityResponse.status,
-                taCensus: taCensusResponse.status
+                taCensus: taCensusResponse.status,
+                areaSummary: areaSummaryResponse.status
             });
             
             // Check each response individually for better error reporting
@@ -464,6 +519,9 @@ class EnhancedPlacesOfWorshipApp {
             if (!taCensusResponse.ok) {
                 throw new Error(`Failed to load TA census data: ${taCensusResponse.status} ${taCensusResponse.statusText}`);
             }
+            if (!areaSummaryResponse.ok) {
+                throw new Error(`Failed to load TA area summary: ${areaSummaryResponse.status} ${areaSummaryResponse.statusText}`);
+            }
             
             this.placesData = await placesResponse.json();
             this.censusData = await censusResponse.json();
@@ -471,6 +529,9 @@ class EnhancedPlacesOfWorshipApp {
             this.boundariesData = await boundariesResponse.json();
             this.territorialAuthorityData = await territorialAuthorityResponse.json();
             this.taCensusData = await taCensusResponse.json();
+            this.areaSummaryData = await areaSummaryResponse.json();
+            this.buildAreaSummaryIndex();
+            this.populateOverlayYearSelect();
             
             console.log('Loaded data:', {
                 places: this.placesData.length,
@@ -478,7 +539,8 @@ class EnhancedPlacesOfWorshipApp {
                 demographicRegions: Object.keys(this.demographicData).length,
                 boundaries: this.boundariesData.features.length,
                 territorialAuthorityFeatures: this.territorialAuthorityData.features.length,
-                taCensusRegions: Object.keys(this.taCensusData).length
+                taCensusRegions: Object.keys(this.taCensusData).length,
+                areaSummaryRows: this.areaSummaryData.rows.length
             });
             
             // Debug TA boundaries - check if they're real or rectangular
@@ -520,6 +582,69 @@ class EnhancedPlacesOfWorshipApp {
             this.hideLoading();
             this.showError(`Failed to load data files: ${error.message}. Please check the browser console for detailed error information.`);
         }
+    }
+
+    buildAreaSummaryIndex() {
+        const rows = Array.isArray(this.areaSummaryData?.rows) ? this.areaSummaryData.rows : [];
+        this.areaSummaryRowsByTaYear = {};
+        this.areaSummaryYears = [...new Set(rows.map(row => Number(row.year)).filter(Number.isFinite))].sort((a, b) => a - b);
+
+        rows.forEach(row => {
+            const areaCode = String(row.area_code);
+            const year = String(row.year);
+            if (!this.areaSummaryRowsByTaYear[areaCode]) {
+                this.areaSummaryRowsByTaYear[areaCode] = {};
+            }
+            this.areaSummaryRowsByTaYear[areaCode][year] = row;
+        });
+    }
+
+    getTAAreaSummaryRow(taCode, year = this.overlayYear) {
+        return this.areaSummaryRowsByTaYear[String(taCode)]?.[String(year)] || null;
+    }
+
+    getTAAreaSummaryRows(taCode) {
+        const rowsByYear = this.areaSummaryRowsByTaYear[String(taCode)] || {};
+        return Object.values(rowsByYear).sort((a, b) => Number(a.year) - Number(b.year));
+    }
+
+    getPreviousAreaSummaryYear(year = this.overlayYear) {
+        const numericYear = Number(year);
+        const previousYears = this.areaSummaryYears.filter(candidate => candidate < numericYear);
+        return previousYears.length ? previousYears[previousYears.length - 1] : null;
+    }
+
+    getLatestAreaSummaryYear() {
+        return this.areaSummaryYears.length ? this.areaSummaryYears[this.areaSummaryYears.length - 1] : this.overlayYear;
+    }
+
+    populateOverlayYearSelect() {
+        const overlayYearSelect = document.getElementById('overlayYearSelect');
+        if (!overlayYearSelect || this.areaSummaryYears.length === 0) return;
+
+        const selectedYear = this.areaSummaryYears.includes(Number(this.overlayYear)) ?
+            Number(this.overlayYear) :
+            this.getLatestAreaSummaryYear();
+
+        overlayYearSelect.innerHTML = '';
+        [...this.areaSummaryYears].sort((a, b) => b - a).forEach(year => {
+            const option = document.createElement('option');
+            option.value = String(year);
+            option.textContent = String(year);
+            overlayYearSelect.appendChild(option);
+        });
+
+        this.overlayYear = selectedYear;
+        overlayYearSelect.value = String(this.overlayYear);
+        overlayYearSelect.disabled = this.useDetailedBoundaries;
+    }
+
+    getAreaSummarySourceNames(sourceIds = []) {
+        const sources = Array.isArray(this.areaSummaryData?.source_datasets) ? this.areaSummaryData.source_datasets : [];
+        return sourceIds
+            .map(id => sources.find(source => source.source_dataset_id === id))
+            .filter(Boolean)
+            .map(source => source.name || source.provider || source.source_dataset_id);
     }
     
     async loadAdditionalDemographicData() {
@@ -894,9 +1019,21 @@ class EnhancedPlacesOfWorshipApp {
                 domain = [30, 65]; // Percentage range
                 colors = ['#5e4fa2', '#3288bd', '#66c2a5', '#abdda4', '#e6f598', '#ffffbf', '#fee08b', '#fdae61', '#f46d43', '#d53e4f', '#9e0142'];
                 break;
+            case 'no_religion_percentage':
+                domain = [35, 70];
+                colors = ['#ffffcc', '#c7e9b4', '#7fcdbb', '#41b6c4', '#2c7fb8', '#253494'];
+                break;
             case 'religious_counts':
                 domain = [10, 50]; // Log-scaled count range
                 colors = ['#f7f7f7', '#cccccc', '#969696', '#636363', '#252525']; // Grayscale for counts
+                break;
+            case 'places_per_10000':
+                domain = [0, 20];
+                colors = ['#f7fbff', '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#3182bd', '#08519c'];
+                break;
+            case 'place_density':
+                domain = [0, 1];
+                colors = ['#f7fcf5', '#e5f5e0', '#c7e9c0', '#a1d99b', '#74c476', '#31a354', '#006d2c'];
                 break;
             case 'temporal_change':
                 domain = [0, 40]; // Change range (-20 to +20, shifted to 0-40)
@@ -945,7 +1082,7 @@ class EnhancedPlacesOfWorshipApp {
     
     addReligiousDensityOverlay() {
         // Check if we have the required data and layer doesn't already exist
-        if (!this.useDetailedBoundaries && this.taCensusData && this.territorialAuthorityData) {
+        if (!this.useDetailedBoundaries && this.areaSummaryData && this.territorialAuthorityData) {
             this.addTAReligiousDensityOverlay();
         } else if (this.useDetailedBoundaries && this.censusData && this.boundariesData) {
             this.addSA2ReligiousDensityOverlay();
@@ -1007,21 +1144,21 @@ class EnhancedPlacesOfWorshipApp {
         let taCode = feature.properties.TA2025_V1 || feature.properties.TA2021_V1_ || feature.properties.TA2021_V1_00;
         const taName = feature.properties.TA2025_NAME || feature.properties.TA2021_V1_NAME || 'Unknown';
 
-        const taData = this.taCensusData[taCode];
+        const summaryRow = this.getTAAreaSummaryRow(taCode);
         
         // Enhanced debug logging for specific problem TAs
-        if (!taData) {
-            console.log(`❌ No TA data found for ${taName} (${taCode})`);
-            console.log('Available TA codes in census data:', Object.keys(this.taCensusData));
+        if (!summaryRow) {
+            console.log(`❌ No TA area summary found for ${taName} (${taCode}) in ${this.overlayYear}`);
+            console.log('Available TA codes in area summary:', Object.keys(this.areaSummaryRowsByTaYear));
             console.log('Feature properties:', feature.properties);
         } else {
             // Log successful matches for key areas
             if (['Queenstown', 'Southland', 'Gore', 'Dunedin'].some(name => taName.includes(name))) {
-                console.log(`✅ Found data for ${taName} (${taCode}):`, Object.keys(taData));
+                console.log(`✅ Found area summary for ${taName} (${taCode}) ${this.overlayYear}:`, summaryRow);
             }
         }
         
-        if (!taData || !taData[String(2018)]) {
+        if (!summaryRow) {
             return {
                 fillColor: '#cccccc',
                 weight: 1,
@@ -1031,7 +1168,6 @@ class EnhancedPlacesOfWorshipApp {
             };
         }
         
-        const yearData = taData[String(2018)];
         let colorValue = null;
         let fillColor = '#cccccc';
         let fillOpacity = 0.1;
@@ -1039,13 +1175,23 @@ class EnhancedPlacesOfWorshipApp {
         // Apply different color calculation based on display mode
         switch (this.currentDemographicMode) {
             case 'religious_percentage':
-                colorValue = this.calculateReligiousPercentage(yearData);
+                colorValue = summaryRow.religious_affiliation_percent;
+                break;
+            case 'no_religion_percentage':
+                colorValue = summaryRow.no_religion_percent;
                 break;
             case 'religious_counts':
-                colorValue = this.calculateReligiousCounts(yearData);
+                colorValue = summaryRow.religious_affiliation_count > 0 ?
+                    Math.log10(summaryRow.religious_affiliation_count + 1) * 10 : 0;
+                break;
+            case 'places_per_10000':
+                colorValue = summaryRow.places_per_10000_residents;
+                break;
+            case 'place_density':
+                colorValue = summaryRow.place_density_per_sq_km;
                 break;
             case 'temporal_change':
-                colorValue = this.calculateTemporalChange(taData);
+                colorValue = this.calculateAreaSummaryTemporalChange(taCode);
                 break;
         }
         
@@ -1132,17 +1278,52 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     calculateTemporalChange(taData) {
-        // Calculate change in religious percentage from 2013 to 2018 (2006 data not available)
-        if (!taData['2013'] || !taData['2018']) return null;
+        const previousYear = this.getPreviousAreaSummaryYear();
+        const selectedYear = String(this.overlayYear);
+        if (!previousYear || !taData[String(previousYear)] || !taData[selectedYear]) return null;
         
-        const pct2013 = this.calculateReligiousPercentage(taData['2013']);
-        const pct2018 = this.calculateReligiousPercentage(taData['2018']);
+        const pctPrevious = this.calculateReligiousPercentage(taData[String(previousYear)]);
+        const pctSelected = this.calculateReligiousPercentage(taData[selectedYear]);
         
-        if (pct2013 === null || pct2018 === null) return null;
+        if (pctPrevious === null || pctSelected === null) return null;
         
         // Return percentage point change, clamped to reasonable range for color scaling
-        const change = pct2018 - pct2013;
+        const change = pctSelected - pctPrevious;
         return Math.max(-20, Math.min(20, change)) + 20; // Shift to positive range (0-40) for color scale
+    }
+
+    calculateAreaSummaryTemporalChange(taCode) {
+        const selectedRow = this.getTAAreaSummaryRow(taCode);
+        const previousYear = this.getPreviousAreaSummaryYear();
+        const previousRow = previousYear ? this.getTAAreaSummaryRow(taCode, previousYear) : null;
+
+        if (!selectedRow || !previousRow) return null;
+
+        const selectedPct = Number(selectedRow.religious_affiliation_percent);
+        const previousPct = Number(previousRow.religious_affiliation_percent);
+        if (!Number.isFinite(selectedPct) || !Number.isFinite(previousPct)) return null;
+
+        const change = selectedPct - previousPct;
+        return Math.max(-20, Math.min(20, change)) + 20;
+    }
+
+    formatNumber(value) {
+        if (value === null || value === undefined || Number.isNaN(Number(value))) {
+            return 'N/A';
+        }
+        return Number(value).toLocaleString();
+    }
+
+    formatPercent(value) {
+        if (value === null || value === undefined || Number.isNaN(Number(value))) {
+            return 'N/A';
+        }
+        return `${Number(value).toFixed(1)}%`;
+    }
+
+    formatQualityFlag(flag) {
+        if (!flag) return 'none';
+        return String(flag).replace(/_/g, ' ');
     }
     
     updateReligiousDensityVisualization() {
@@ -1157,26 +1338,82 @@ class EnhancedPlacesOfWorshipApp {
         let taCode = feature.properties.TA2025_V1 || feature.properties.TA2021_V1_ || feature.properties.TA2021_V1_00;
         const taName = feature.properties.TA2025_NAME || feature.properties.TA2021_V1_NAME || 'Unknown Area';
 
-        const taData = this.taCensusData[taCode];
+        const summaryRow = this.getTAAreaSummaryRow(taCode);
+        const summaryRows = this.getTAAreaSummaryRows(taCode);
         
-        if (!taData) {
+        if (!summaryRow) {
             e.target.bindPopup(`
                 <div class="census-popup">
                     <h3>${taName}</h3>
                     <p><strong>TA Code:</strong> ${taCode}</p>
-                    <p><em>No census data available</em></p>
+                    <p><em>No area-summary data available for ${this.overlayYear}</em></p>
                 </div>
             `);
             return;
         }
         
-        const popupContent = this.formatReligiousDensityPopup(taData, taName, taCode, 'TA');
+        const popupContent = this.formatTAAreaSummaryPopup(summaryRow, summaryRows, taName, taCode);
         e.target.bindPopup(popupContent, {minWidth: 900, maxWidth: 1000});
-        
-        // Add popup event handler for creating histogram
-        e.target.on('popupopen', (popupEvent) => {
-            this.createReligiousHistogram(taData, taName);
-        });
+    }
+
+    formatTAAreaSummaryPopup(row, rows, areaName, areaCode) {
+        const previousYear = this.getPreviousAreaSummaryYear(row.year);
+        const previousRow = previousYear ? rows.find(candidate => Number(candidate.year) === previousYear) : null;
+        const affiliationChange = previousRow ?
+            Number(row.religious_affiliation_percent) - Number(previousRow.religious_affiliation_percent) :
+            null;
+        const changeText = Number.isFinite(affiliationChange) ?
+            `${affiliationChange >= 0 ? '+' : ''}${affiliationChange.toFixed(1)} percentage points since ${previousYear}` :
+            'N/A';
+        const sourceNames = this.getAreaSummarySourceNames(row.source_dataset_ids);
+        const timelineRows = rows.map(candidate => `
+            <tr>
+                <td style="padding: 6px; border: 1px solid #ddd;">${candidate.year}</td>
+                <td style="padding: 6px; border: 1px solid #ddd; text-align: right;">${this.formatNumber(candidate.population_total)}</td>
+                <td style="padding: 6px; border: 1px solid #ddd; text-align: right;">${this.formatPercent(candidate.religious_affiliation_percent)}</td>
+                <td style="padding: 6px; border: 1px solid #ddd; text-align: right;">${this.formatPercent(candidate.no_religion_percent)}</td>
+                <td style="padding: 6px; border: 1px solid #ddd; text-align: right;">${this.formatNumber(candidate.places_per_10000_residents)}</td>
+            </tr>
+        `).join('');
+
+        return `
+            <div class="census-popup">
+                <h3>${areaName}</h3>
+                <p><strong>TA Code:</strong> ${areaCode}</p>
+                <p><strong>Boundary Set:</strong> ${row.boundary_set_id}</p>
+                <p><strong>Selected Census Year:</strong> ${row.year}</p>
+                <p><strong>Denominator:</strong> ${row.population_total_basis}</p>
+
+                <h4>${row.year} Summary</h4>
+                <p><strong>Religion-response denominator:</strong> ${this.formatNumber(row.population_total)}</p>
+                <p><strong>Religious affiliation:</strong> ${this.formatNumber(row.religious_affiliation_count)} (${this.formatPercent(row.religious_affiliation_percent)})</p>
+                <p><strong>No religion:</strong> ${this.formatNumber(row.no_religion_count)} (${this.formatPercent(row.no_religion_percent)})</p>
+                <p><strong>Current places of worship:</strong> ${this.formatNumber(row.place_count)}</p>
+                <p><strong>Places per 10,000 residents:</strong> ${this.formatNumber(row.places_per_10000_residents)}</p>
+                <p><strong>Place density:</strong> ${this.formatNumber(row.place_density_per_sq_km)} per km²</p>
+                <p><strong>Religious-affiliation change:</strong> ${changeText}</p>
+
+                <h4>Timeline</h4>
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                    <thead>
+                        <tr style="background: #34495e; color: white;">
+                            <th style="padding: 6px; border: 1px solid #ddd; text-align: left;">Year</th>
+                            <th style="padding: 6px; border: 1px solid #ddd; text-align: right;">Denominator</th>
+                            <th style="padding: 6px; border: 1px solid #ddd; text-align: right;">Religious %</th>
+                            <th style="padding: 6px; border: 1px solid #ddd; text-align: right;">No religion %</th>
+                            <th style="padding: 6px; border: 1px solid #ddd; text-align: right;">Places / 10k</th>
+                        </tr>
+                    </thead>
+                    <tbody>${timelineRows}</tbody>
+                </table>
+
+                <div style="margin-top: 15px; padding: 8px; background: #f8f9fa; border-left: 3px solid #17a2b8; font-size: 0.85em; color: #555;">
+                    <p><strong>Quality flag:</strong> ${this.formatQualityFlag(row.quality_flag)}</p>
+                    <p><strong>Place count basis:</strong> ${row.place_count_basis}</p>
+                    <p><strong>Sources:</strong> ${sourceNames.length ? sourceNames.join('; ') : 'N/A'}</p>
+                </div>
+            </div>
+        `;
     }
     
     showSA2ReligiousDensityPopup(e) {
@@ -2517,7 +2754,12 @@ class EnhancedPlacesOfWorshipApp {
         this.currentDenomination = 'all';
         
         // Reset religious density overlay
-        document.getElementById('religiousDensityToggle').checked = false;
+        const censusOverlayToggle = document.getElementById('censusOverlayToggle');
+        if (censusOverlayToggle) censusOverlayToggle.checked = false;
+        const religiousDensityToggle = document.getElementById('religiousDensityToggle');
+        if (religiousDensityToggle) religiousDensityToggle.checked = false;
+        const censusControls = document.getElementById('censusControls');
+        if (censusControls) censusControls.classList.remove('active');
         this.showReligiousDensity = false;
         this.removeReligiousDensityOverlay();
         
@@ -2652,15 +2894,27 @@ class EnhancedPlacesOfWorshipApp {
         
         switch (this.currentDemographicMode) {
             case 'religious_percentage':
-                title = 'Religious Identification %';
-                content = this.createColorScaleLegend('% of population with religious identification');
+                title = `Religious Affiliation % (${this.overlayYear})`;
+                content = this.createColorScaleLegend('% of stated religion-response denominator');
+                break;
+            case 'no_religion_percentage':
+                title = `No Religion % (${this.overlayYear})`;
+                content = this.createColorScaleLegend('% of stated religion-response denominator');
                 break;
             case 'religious_counts':
-                title = 'Religious Population Counts';  
+                title = `Religious Population Counts (${this.overlayYear})`;
                 content = this.createCountBasedLegend();
                 break;
+            case 'places_per_10000':
+                title = `Places per 10,000 (${this.overlayYear})`;
+                content = this.createColorScaleLegend('Current places per 10,000 people in the selected census denominator');
+                break;
+            case 'place_density':
+                title = 'Place Density';
+                content = this.createColorScaleLegend('Current places per square kilometre');
+                break;
             case 'temporal_change':
-                title = 'Religious Change (2013→2018)';
+                title = `Religious Change (${this.getPreviousAreaSummaryYear() || 'previous'}→${this.overlayYear})`;
                 content = this.createTemporalChangeLegend();
                 break;
         }
@@ -2669,8 +2923,12 @@ class EnhancedPlacesOfWorshipApp {
         content += `
             <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.8em; color: #666;">
                 <strong>Data Sources:</strong><br>
-                Statistics New Zealand (CC BY 4.0)<br>
-                Census 2006, 2013, 2018
+                Stats NZ via Figure.NZ (CC BY 4.0)<br>
+                OpenStreetMap contributors (ODbL)<br>
+                Boundary: ${this.areaSummaryData?.boundary_set?.boundary_set_id || 'NZ TA'}<br>
+                Census year: ${this.overlayYear}<br>
+                Denominator: Total stated religion response<br>
+                Quality: current place counts repeated across census years
             </div>
         `;
         
@@ -2808,12 +3066,24 @@ class EnhancedPlacesOfWorshipApp {
                 thresholds = [30, 35, 40, 45, 50, 55, 60, 65];
                 formatValue = (val) => `${val}%`;
                 break;
+            case 'no_religion_percentage':
+                thresholds = [35, 40, 45, 50, 55, 60, 65, 70];
+                formatValue = (val) => `${val}%`;
+                break;
             case 'religious_counts':
                 thresholds = [10, 20, 30, 40, 50];
                 formatValue = (val) => {
                     const actualCount = Math.round(Math.pow(10, val/10) - 1);
                     return actualCount >= 1000 ? `${Math.round(actualCount/1000)}k` : actualCount.toString();
                 };
+                break;
+            case 'places_per_10000':
+                thresholds = [0, 4, 8, 12, 16, 20];
+                formatValue = (val) => val.toString();
+                break;
+            case 'place_density':
+                thresholds = [0, 0.1, 0.25, 0.5, 0.75, 1];
+                formatValue = (val) => val.toString();
                 break;
             case 'temporal_change':
                 thresholds = [5, 15, 20, 25, 35]; // Representing -15, -5, 0, +5, +15 percentage points
@@ -2866,8 +3136,13 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     createTemporalChangeLegend() {
+        const previousYear = this.getPreviousAreaSummaryYear();
+        if (!previousYear) {
+            return `<p style="font-size: 0.9em; margin-bottom: 10px;">No earlier census year is available for ${this.overlayYear}.</p>`;
+        }
+
         return `
-            <p style="font-size: 0.9em; margin-bottom: 10px;">Change in religious identification 2013→2018</p>
+            <p style="font-size: 0.9em; margin-bottom: 10px;">Change in religious affiliation ${previousYear}→${this.overlayYear}</p>
             <div class="legend-item">
                 <div class="legend-dot" style="background-color: #1a9850; width: 16px; height: 16px;"></div>
                 Large decrease (&gt;-5 points) - More secular
@@ -3186,6 +3461,32 @@ class EnhancedPlacesOfWorshipApp {
     }
     
     prepareTADataForExport() {
+        const areaSummaryRows = Array.isArray(this.areaSummaryData?.rows) ? this.areaSummaryData.rows : [];
+        if (areaSummaryRows.length > 0) {
+            return areaSummaryRows.map(row => ({
+                'Country_Code': row.country_code,
+                'Boundary_Set': row.boundary_set_id,
+                'Boundary_Level': row.boundary_level,
+                'Area_Unit_ID': row.area_unit_id,
+                'TA_Code': row.area_code,
+                'TA_Name': row.area_name,
+                'Year': row.year,
+                'Population_Total': row.population_total,
+                'Population_Total_Basis': row.population_total_basis,
+                'Religious_Affiliation_Count': row.religious_affiliation_count,
+                'Religious_Affiliation_Percent': row.religious_affiliation_percent,
+                'No_Religion_Count': row.no_religion_count,
+                'No_Religion_Percent': row.no_religion_percent,
+                'Place_Count': row.place_count,
+                'Places_Per_10000_Residents': row.places_per_10000_residents,
+                'Place_Density_Per_Sq_Km': row.place_density_per_sq_km,
+                'Land_Area_Sq_Km': row.land_area_sq_km,
+                'Place_Count_Basis': row.place_count_basis,
+                'Quality_Flag': row.quality_flag,
+                'Source_Dataset_IDs': Array.isArray(row.source_dataset_ids) ? row.source_dataset_ids.join(';') : ''
+            }));
+        }
+
         const exportData = [];
         
         Object.entries(this.taCensusData).forEach(([taCode, taData]) => {
