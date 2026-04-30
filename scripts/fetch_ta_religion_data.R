@@ -10,10 +10,17 @@ suppressPackageStartupMessages({
   library(purrr)
 })
 
+repo_root <- normalizePath(
+  if (basename(getwd()) == "scripts") ".." else ".",
+  mustWork = TRUE
+)
+
 url_figure <- "https://figure.nz/table/ITPm3h6kNu9LqEZt/download"
-boundary_path <- "../apps/regions/nz/data/territorial_authorities.geojson"
-output_path <- "../apps/regions/nz/data/ta_aggregated_data.json"
-local_csv_path <- "../archive/stats_nz_religious_affiliation_by_ta.csv"
+census_years <- c(2013, 2018, 2023)
+legacy_empty_years <- 2006
+boundary_path <- file.path(repo_root, "apps/regions/nz/data/territorial_authorities.geojson")
+output_path <- file.path(repo_root, "apps/regions/nz/data/ta_aggregated_data.json")
+local_csv_path <- file.path(repo_root, "archive/stats_nz_religious_affiliation_by_ta.csv")
 
 normalise_ta_name <- function(x) {
   x <- iconv(x, from = "UTF-8", to = "ASCII//TRANSLIT")
@@ -164,7 +171,7 @@ religion_all <- religion_raw |>
     count = value
   ) |>
   filter(
-    census_year %in% c(2013, 2018),
+    census_year %in% census_years,
     !ta_name %in% c("New Zealand", "Area Outside Territorial Authority")
   ) |>
   mutate(
@@ -196,12 +203,19 @@ output_data <- map(
   \(ta_df) {
     name <- ta_df$ta_name_boundary[[1]]
 
-    list(
-      name = name,
-      `2006` = empty_year_entry(name),
-      `2013` = build_year_entry(ta_df, name, 2013),
-      `2018` = build_year_entry(ta_df, name, 2018)
+    year_entries <- map(
+      c(legacy_empty_years, census_years),
+      \(year) {
+        if (year %in% legacy_empty_years) {
+          empty_year_entry(name)
+        } else {
+          build_year_entry(ta_df, name, year)
+        }
+      }
     )
+    year_entries <- set_names(year_entries, as.character(c(legacy_empty_years, census_years)))
+
+    c(list(name = name), year_entries)
   }
 )
 
@@ -215,3 +229,4 @@ write_json(output_data, output_path, pretty = TRUE, auto_unbox = TRUE)
 cat("✓ Successfully fetched and processed TA religion data\n")
 cat("✓ Data saved to", output_path, "\n")
 cat("✓ Contains", length(output_data), "territorial authorities\n")
+cat("✓ Census years:", paste(c(legacy_empty_years, census_years), collapse = ", "), "\n")

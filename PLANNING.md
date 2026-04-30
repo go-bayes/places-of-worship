@@ -38,6 +38,9 @@ As of 2 April 2026:
 - Some source extracts and intermediate files may currently only exist in
   Google Drive. Treat Google Drive as temporary holding, not the long-term
   system of record.
+- The original grant materials are stored locally in `grant/`, which is ignored
+  by Git. Use them as the reporting reference when planning deliverables,
+  country expansion, and justified shifts in scope.
 
 ## Redevelopment objective
 
@@ -58,7 +61,9 @@ The working model is:
 4. deduplicate obvious support buildings and weak duplicates
 5. emit review queues for ambiguous residual cases
 6. apply explicit reviewed overrides
-7. publish app-ready outputs plus run metadata
+7. attach research indicators to spatial and temporal units
+8. publish app-ready outputs plus run metadata
+9. present selected indicators through map layers, downloads, and portal views
 
 ## Immediate priorities
 
@@ -164,6 +169,36 @@ The working model is:
   - downloadable tabular and spatial outputs
 - Keep country-level downloads compatible with future temporal comparisons.
 
+### 8. Align country expansion with the grant
+
+- Maintain `research/` as the working directory for country-source audits and
+  global feasibility notes.
+- Evaluate candidate countries by:
+  - places-of-worship coverage
+  - religious affiliation, practice, membership, or congregation data
+  - area-level social, demographic, economic, health, charity, conflict, or
+    fertility data
+  - temporal depth
+  - boundary availability and stability
+  - licence and access constraints
+  - collaborator or validation feasibility
+- Record when the project shifts away from an anticipated grant pathway, and
+  explain whether the change follows from data access, measurement quality,
+  ethics, collaborator availability, or technical feasibility.
+- Keep New Zealand as the proof-of-concept country while the global survey
+  identifies viable next countries.
+
+### 9. Update NZ census inputs
+
+- Add 2023 Census data to the existing New Zealand territorial-authority
+  religion workflow.
+- Prefer direct Stats NZ API access for the durable pipeline, but use the
+  existing Figure.NZ extract as a short-term bridge where it preserves
+  provenance and reproducibility.
+- Treat 2023 as an added snapshot rather than a replacement for 2013 and 2018.
+- Update the map interface after the data are available so users can select or
+  clearly see the census year used in overlays and exports.
+
 ## Deterministic cleaning strategy
 
 The default policy should be:
@@ -225,19 +260,58 @@ The country-specific backend should be organised around the following entities:
   - reviewed corrections, inclusions, exclusions, and status fixes
 - `run_manifest`
   - records source snapshot, pipeline version, counts, checksums, and outputs
+- `source_dataset`
+  - records source name, provider, licence, URL, retrieval date, citation,
+    access limits, redistribution limits, and local snapshot reference
+- `indicator`
+  - defines a measured quantity, unit, denominator, method, temporal coverage,
+    spatial coverage, and quality notes
+- `indicator_observation`
+  - links an indicator value to a `site`, `site_snapshot`, `area_unit`,
+    country, or grid cell for a specific time period
+  - records value, denominator where relevant, quality flag, suppression flag,
+    and `source_dataset_id`
+- `visual_layer`
+  - defines how an indicator is exposed on the map or portal
+  - records layer type, legend, colour scale, time control, aggregation rule,
+    uncertainty display, and default visibility
 
-The backend should produce four kinds of country outputs:
+The backend should produce these kinds of country outputs:
 
 - cleaned site rows
+- source and indicator catalogues
+- site-to-area assignments
 - area-level summaries
+- area-level indicator observations
+- map layer products
 - downloadable extracts
 - metadata and provenance files
 
 The backend should support at least these output forms:
 
 - CSV for downloads and statistical work
-- GeoJSON or Parquet for spatial work
+- GeoJSON for simple browser-facing spatial layers
+- Parquet or GeoParquet for analytical spatial outputs
+- precomputed JSON or vector tiles for map layers where this is faster or
+  smaller than live queries
 - metadata JSON for provenance and reproducibility
+
+## Storage and serving defaults
+
+- Keep immutable raw source snapshots outside the Git repository when they are
+  too large, sensitive, or licence-restricted for Git.
+- Keep lightweight manifests, schema definitions, source citations, checksums,
+  and transformation code in Git.
+- Treat Google Drive as working storage only. The durable system of record
+  should be immutable dated snapshots plus manifests.
+- Use CSV for analyst-facing downloads where tabular structure is enough.
+- Use GeoParquet for spatial analytical products once outputs are larger or
+  richer than simple GeoJSON.
+- Use static JSON, GeoJSON, or vector tiles for the map while the required
+  products can be precomputed reproducibly.
+- Add PostGIS only when the portal needs live spatial queries, authenticated
+  research workspaces, or query combinations that are too expensive to
+  precompute.
 
 ## Country backend design principles
 
@@ -254,6 +328,81 @@ The backend should support at least these output forms:
 - Country-specific geography should be provided by adapters with a shared
   contract.
 - NZ is the pilot implementation, not the universal template.
+- Research indicators should attach to explicit units and time periods rather
+  than being hard-coded into country frontends.
+- Visual layers should be generated from backend metadata so the same indicator
+  can appear consistently in map, portal, and download contexts.
+
+## Research data and visualisation layer
+
+The portal should treat research data as observations on explicit units of
+analysis. The lowest-level unit remains the place of worship, but the same
+model should also support observations on site snapshots, area units, countries,
+and regular grids where appropriate.
+
+### Initial source families
+
+- Places of worship:
+  - OSM and OSM-derived extracts as the global site backbone
+  - Geofabrik/current extracts for efficient country snapshots
+  - ohsome or equivalent historical OSM services for later temporal work
+- Boundaries:
+  - official national boundary products where available
+  - geoBoundaries as a global fallback where licensing and quality permit
+- Population and settlement context:
+  - national censuses for country pilots
+  - WorldPop and Global Human Settlement Layer (GHSL) for global covariates
+- Religion and social indicators:
+  - official census or statistical-office tables where available
+  - research-use survey or administrative sources only when licensing,
+    geography, and comparability are clear
+
+### Initial NZ product target
+
+Build an `area_summary` product for New Zealand that joins cleaned places of
+worship to territorial authority and Statistical Area 2 geographies, then adds
+2013, 2018, and 2023 Census religion indicators where available.
+
+Minimum fields:
+
+- `country_code`
+- `boundary_set_id`
+- `area_unit_id`
+- `area_name`
+- `year`
+- `population_total`
+- `religious_affiliation_count`
+- `religious_affiliation_percent`
+- `no_religion_count`
+- `no_religion_percent`
+- `place_count`
+- `places_per_10000_residents`
+- `place_density_per_sq_km`
+- `source_dataset_id`
+- `quality_flag`
+
+### Map presentation modes
+
+- Site mode:
+  - point map of places of worship
+  - filters for religion, denomination, confidence, status, source, and
+    snapshot date
+  - popups that show site provenance and available area assignments
+- Area mode:
+  - choropleth or bivariate overlays for area-level indicators
+  - initial layers should include religious affiliation percentage,
+    no-religion percentage, population density, places per 10,000 residents,
+    and place density per square kilometre
+  - legends should expose census year, denominator, source, and suppression or
+    quality flags
+- Comparison mode:
+  - time slider or year selector for changes across census or snapshot years
+  - difference layers for area-level change
+  - optional uncertainty or coverage overlays where source quality varies
+
+For the NZ app, remove the current 2018-specific assumptions from overlays,
+labels, and popups before presenting 2023 data. Users should always be able to
+see which census year, boundary set, and denominator are being displayed.
 
 ## Country backend pilot plan
 
@@ -297,6 +446,10 @@ The backend should support at least these output forms:
 - cleaned country place download
 - area summary download
 - area-by-religion summary download
+- source catalogue download
+- indicator catalogue download
+- indicator-observation download
+- map-layer metadata export
 - review-queue export
 - run manifest and metadata export
 
@@ -366,6 +519,33 @@ The backend should support at least these output forms:
 - Additional download products such as raw extracts, review queues, and
   area-by-religion tables can be added, but they are not required for the first
   backend milestone.
+
+### Decided: research indicator model
+
+- Research data will be represented as indicators observed on explicit spatial
+  and temporal units.
+- Indicators will be defined separately from their observations so that
+  denominators, methods, sources, and quality flags remain visible.
+- This model will support site-level, area-level, country-level, and grid-based
+  data without forcing all countries into a single geography.
+
+### Decided: first portal visualisation modes
+
+- The initial map interface should support:
+  - site mode for point-level places of worship
+  - area mode for choropleth and bivariate indicator overlays
+  - comparison mode for time and change views
+- Layer metadata should come from backend `visual_layer` definitions rather
+  than one-off frontend constants.
+
+### Decided: pilot storage and serving strategy
+
+- Use static, precomputed map products for the first portal-facing milestones.
+- Use CSV and metadata JSON for minimum downloads.
+- Use GeoJSON for small browser-facing spatial products.
+- Move larger analytical spatial products to GeoParquet as the data volume and
+  country coverage grow.
+- Defer PostGIS until live query requirements justify the operational cost.
 
 ## Open decisions
 
@@ -525,5 +705,15 @@ The backend should support at least these output forms:
    a dated snapshot structure.
 5. Add run manifests and per-country counts.
 6. Define the shared country backend schema and NZ boundary adapter contract.
-7. Define the minimum NZ download products and area-summary outputs.
-8. Pilot the new global pipeline on a small country set before full rollout.
+7. Define `source_dataset`, `indicator`, `indicator_observation`, and
+   `visual_layer` schemas.
+8. Define the minimum NZ download products and `area_summary` outputs.
+9. Build the NZ `area_summary` product for TA and SA2 geographies using 2013,
+   2018, and 2023 Census religion data plus current site assignments.
+10. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
+    legends, popups, and export metadata.
+11. Prototype site, area, and comparison modes using precomputed layers before
+    adding live portal queries.
+12. Pilot the new global pipeline on a small country set before full rollout.
+13. Expand `research/` into a country-source matrix for global feasibility
+    assessment.

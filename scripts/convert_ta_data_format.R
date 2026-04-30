@@ -22,7 +22,7 @@ convert_ta_data <- function(ta_data) {
   # prepare data for each year
   years_data <- list()
 
-  for (year in c("2006", "2013", "2018")) {
+  for (year in c("2006", "2013", "2018", "2023")) {
     year_data <- list()
     count_col <- paste0("count_", year)
 

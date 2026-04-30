@@ -90,6 +90,9 @@ yarn-error.log*
 # Private ops notes (local only)
 ops/private-ops-notes.md
 
+# Private grant materials and reporting references
+grant/
+
 # ====================================
 # DATA MANAGEMENT - NEVER COMMIT DATA
 # ====================================
@@ -102,7 +105,6 @@ raw_data/
 processed_data/
 exports/
 research_data/
-research/
 
 # EXCEPTIONS: Allow small essential files for GitHub Pages deployment
 !data/nz_places.geojson
