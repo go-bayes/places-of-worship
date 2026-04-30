@@ -1,6 +1,18 @@
 # Changelog
 
 ## Unreleased
+- Made `AGENTS.md` the canonical repo-local agent guidance and removed the
+  repo-root `CLAUDE.md` symlink.
+- Added the first New Zealand territorial-authority `area_summary` contract,
+  generator, and static JSON/CSV outputs for portal layers and downloads.
+- Added JSON Schemas for `source_dataset`, `indicator`,
+  `indicator_observation`, `visual_layer`, and `area_summary`.
+- Added 2023 Census religious-affiliation data to the New Zealand territorial
+  authority workflow while preserving 2013 and 2018 snapshots.
+- Added grant-aligned planning notes and a versioned `research/` workspace for
+  global country-source feasibility audits.
+- Ignored local `grant/` materials while allowing lightweight `research/` notes
+  to be tracked.
 - Reworked the top of `README.md` to better describe the project as a research portal in development, fixed external-facing wording errors, and moved OpenStreetMap editing guidance lower in the document.
 - Added a planning note that `extendr` is the preferred optimisation path for future R bottlenecks, rather than rewriting the research pipeline away from R.
 - Ported the global cleaning, deduplication, and review-queue stages to R as `scripts/clean_global_places.R`, `scripts/deduplicate_global_places.R`, and `scripts/build_global_review_queue.R`.
