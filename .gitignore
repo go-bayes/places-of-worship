@@ -90,6 +90,11 @@ yarn-error.log*
 # Private ops notes (local only)
 ops/private-ops-notes.md
 
+# Local assistant instruction files
+/AGENT.md
+/AGENTS.md
+/CLAUDE.md
+
 # Private grant materials and reporting references
 grant/
 
