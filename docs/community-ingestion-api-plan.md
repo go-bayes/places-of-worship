@@ -2,6 +2,8 @@
 
 Planning source of truth: `PLANNING.md`.
 
+Related verification design: `docs/master-verification-workflow-plan.md`.
+
 This document sketches a future contribution system for research assistants,
 community contributors, scripts, and AI agents. The aim is to make broad
 community contribution possible without allowing any contributor interface to
@@ -24,6 +26,12 @@ The durable design should be interface-neutral:
 - AI agents can contribute extracted evidence and perform independent review.
 
 All of these should feed the same staging contract.
+
+This plan is mainly about incoming evidence and contribution. Verification of
+records already in the master database is covered separately in
+`docs/master-verification-workflow-plan.md`, because master verification needs
+read-only site bundles, automated checks, review queues, and staged master
+change proposals.
 
 ## Guiding Principles
 

@@ -52,6 +52,11 @@ As of 30 April 2026:
   `docs/community-ingestion-api-plan.md`. It treats Google Sheets as a first
   research-assistant adapter and defines a future staging API for human,
   scripted, community, and AI-agent contributions.
+- A separate master-data verification plan now lives in
+  `docs/master-verification-workflow-plan.md`. It defines read-only site
+  bundles, automated checks, review queues, staged verification decisions,
+  agent-readable data dumps, and map verification layers for NZ and global
+  scale.
 - Initial RA-facing historical site evidence templates now live in
   `docs/templates/ra-historical-site-evidence/`. They provide Google
   Sheets-ready CSV tabs, including a wide human-entry sheet for source-backed
@@ -234,6 +239,29 @@ The working model is:
 - Require raw source snapshots, source metadata, validation results, review
   states, adjudication decisions, and run manifests before accepted rows affect
   published outputs.
+
+### 11. Build a scalable master-verification layer
+
+- Use `docs/master-verification-workflow-plan.md` as the supporting design note
+  for verifying records already in the master dataset.
+- Expose master data through read-only site bundles rather than editable master
+  rows.
+- Generate automated checks for geometry, area assignment, duplicates, OSM
+  history, source references, lifecycle consistency, target-year status,
+  licence flags, and privacy flags.
+- Write verification decisions to staging or audit tables before any master
+  change is proposed.
+- Support:
+  - NZ reviewer workflows for roughly 3,000+ sites
+  - country and tile partitions for global verification
+  - agent-readable data dumps for offline or asynchronous review
+  - map layers that show verification status, uncertainty, duplicate risk, and
+    temporal evidence coverage
+- Treat automated "no-action" decisions as auditable review outcomes, not as
+  silent passes.
+- Keep AI agents read-only against the master database. They may propose
+  decisions with source citations, confidence, and rationale, but master changes
+  require the same adjudication path as human reviews.
 
 ## Deterministic cleaning strategy
 
@@ -1054,19 +1082,22 @@ map do not drift apart.
    `docs/templates/ra-historical-site-evidence/` with one or two NZ 2018 source
    batches, then refine the controlled vocabularies and validation rules before
    broader data entry.
-9. Scope the OSM temporal verification subproject for 2013, 2018, and 2023,
+9. Define the first read-only NZ master site-bundle export and automated
+   verification checks described in
+   `docs/master-verification-workflow-plan.md`.
+10. Scope the OSM temporal verification subproject for 2013, 2018, and 2023,
    including OSM history extraction, lifecycle-tag parsing, visual evidence
    review, and target-year probability rules.
-10. Draft the Google Sheets to staging API pilot described in
+11. Draft the Google Sheets to staging API pilot described in
    `docs/community-ingestion-api-plan.md`.
-11. Extend the NZ `area_summary` product to SA2 geography after checking
+12. Extend the NZ `area_summary` product to SA2 geography after checking
    boundary metadata and point-to-area assignment quality.
-12. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
+13. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
    legends, popups, and export metadata.
-13. Align the NZ map interface with the global map after the data overlay is
+14. Align the NZ map interface with the global map after the data overlay is
    stable, preserving NZ-specific analysis controls.
-14. Prototype site, area, and comparison modes using precomputed layers before
+15. Prototype site, area, and comparison modes using precomputed layers before
     adding live portal queries.
-15. Pilot the new global pipeline on a small country set before full rollout.
-16. Expand `research/` into a country-source matrix for global feasibility
+16. Pilot the new global pipeline on a small country set before full rollout.
+17. Expand `research/` into a country-source matrix for global feasibility
     assessment.

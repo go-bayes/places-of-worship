@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- Added `docs/master-verification-workflow-plan.md` to plan read-only master
+  site bundles, automated verification checks, review queues, staged decisions,
+  agent-readable data dumps, and map verification layers for NZ and global
+  scale.
 - Added RA-facing historical site evidence CSV templates in
   `docs/templates/ra-historical-site-evidence/` for Google Sheets import,
   including source metadata, site observations, candidate matches, review notes,
