@@ -90,7 +90,7 @@
 
 ## Frontend
 
-- Keep the map usable as the first screen; avoid marketing-style landing pages.
+- Keep the map usable as the first screen. 
 - Preserve mobile behaviour and dock/toggle ergonomics when editing the NZ map.
 - Use restrained, accessible styling and colour-blind-friendly map overlays.
 - Prefer layer metadata from generated data products over one-off frontend
@@ -112,6 +112,3 @@
 ## Prose
 
 - Use New Zealand English.
-- Write direct sentences with minimal throat-clearing.
-- Avoid contrastive corrections of the form `X is not Y, but Z`; state the
-  positive claim directly.
