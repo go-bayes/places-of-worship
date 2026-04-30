@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Added `docs/community-ingestion-api-plan.md` to plan Google Sheets, web,
+  bulk-upload, API, and AI-agent contribution paths through staging,
+  validation, review, adjudication, and master ingestion.
 - Added a proposed ingestion spec for historical NZ place-density evidence so
   research assistants can source data while the pipeline preserves manifests,
   site-observation fields, review states, privacy checks, and aggregation rules.

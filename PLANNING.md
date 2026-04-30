@@ -48,6 +48,10 @@ As of 30 April 2026:
   current committed place counts with 2013, 2018, and 2023 Census religion
   denominators, and flags that the place counts are current rather than
   historical.
+- A separate community and agent-assisted ingestion plan now lives in
+  `docs/community-ingestion-api-plan.md`. It treats Google Sheets as a first
+  research-assistant adapter and defines a future staging API for human,
+  scripted, community, and AI-agent contributions.
 
 ## Redevelopment objective
 
@@ -205,6 +209,26 @@ The working model is:
 - Treat 2023 as an added snapshot rather than a replacement for 2013 and 2018.
 - Update the map interface after the data are available so users can select or
   clearly see the census year used in overlays and exports.
+
+### 10. Plan community and agent-assisted ingestion
+
+- Use `docs/community-ingestion-api-plan.md` as the supporting design note for
+  contribution workflows.
+- Treat Google Sheets as the first contributor interface for research
+  assistants, but keep the durable contract in a staging API and validated data
+  model.
+- Make the ingestion path support:
+  - human research assistants
+  - community contributors
+  - trusted scripts
+  - institutional bulk uploads
+  - AI agents that submit source-backed draft evidence
+  - AI agents that review source-backed submissions
+- Do not allow any contributor interface or AI agent to write directly to the
+  master dataset.
+- Require raw source snapshots, source metadata, validation results, review
+  states, adjudication decisions, and run manifests before accepted rows affect
+  published outputs.
 
 ## Deterministic cleaning strategy
 
@@ -924,14 +948,16 @@ map do not drift apart.
 8. Draft RA-facing historical evidence templates for `source_dataset`
    manifests, `site_observation` rows, review queues, and privacy/licence
    checks.
-9. Extend the NZ `area_summary` product to SA2 geography after checking
+9. Draft the Google Sheets to staging API pilot described in
+   `docs/community-ingestion-api-plan.md`.
+10. Extend the NZ `area_summary` product to SA2 geography after checking
    boundary metadata and point-to-area assignment quality.
-10. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
+11. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
    legends, popups, and export metadata.
-11. Align the NZ map interface with the global map after the data overlay is
+12. Align the NZ map interface with the global map after the data overlay is
    stable, preserving NZ-specific analysis controls.
-12. Prototype site, area, and comparison modes using precomputed layers before
+13. Prototype site, area, and comparison modes using precomputed layers before
     adding live portal queries.
-13. Pilot the new global pipeline on a small country set before full rollout.
-14. Expand `research/` into a country-source matrix for global feasibility
+14. Pilot the new global pipeline on a small country set before full rollout.
+15. Expand `research/` into a country-source matrix for global feasibility
     assessment.
