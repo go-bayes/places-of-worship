@@ -388,6 +388,25 @@ Minimum fields:
 - `source_dataset_id`
 - `quality_flag`
 
+### Rationale for the first NZ overlay wiring
+
+The first territorial-authority overlay now reads from
+`apps/regions/nz/data/area_summary_ta.json`. This wiring gives every mapped
+area value an explicit unit, census year, boundary set, denominator, source
+dataset, and quality flag. That makes the NZ app a test of the portal contract
+we need globally: map layers should consume reproducible, validated analytical
+products that can also support downloads, citations, and grant reporting.
+
+The previous frontend path drew directly from legacy census-shaped files and
+kept several 2018-specific assumptions in controls, legends, and popups. The
+new path moves those assumptions into a named data product and makes the
+frontend consume the same fields researchers would download. It also keeps the
+current limitation visible: place counts come from the current committed
+`nz_places.json` snapshot and are repeated across census years, while the
+religion denominators are census-year specific. Until dated site snapshots are
+available, temporal overlays should therefore be interpreted as changes in
+census religion composition and rates against a current place inventory.
+
 ### Map presentation modes
 
 - Site mode:

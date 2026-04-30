@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Added a planning rationale for the first NZ `area_summary_ta.json` frontend
+  wiring, documenting why overlays now consume a provenance-rich analytical
+  product rather than browser-derived legacy census tables.
 - Added a planned NZ interface-alignment pass so the regional map can adopt
   the global map's basemap, control, legend, popup, and attribution style after
   the area-summary overlay stabilises.
