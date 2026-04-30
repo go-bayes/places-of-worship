@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Added a proposed ingestion spec for historical NZ place-density evidence so
+  research assistants can source data while the pipeline preserves manifests,
+  site-observation fields, review states, privacy checks, and aggregation rules.
 - Added a planning note on the problem of reconstructing true 2013 and 2018 NZ
   place density, including evidence-tiered source paths through OSM history,
   Charities Services, Incorporated Societies, LINZ building/property data, and

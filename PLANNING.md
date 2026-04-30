@@ -474,6 +474,119 @@ Candidate source references to evaluate:
 - LINZ New Zealand Property Spine and NZ Properties access:
   <https://www.linz.govt.nz/our-work/property-information-system/new-zealand-property-spine>
 
+### Historical source ingestion spec
+
+Once research assistants source candidate historical evidence, ingestion should
+separate raw capture, source metadata, extracted site observations, human review,
+and aggregation. The aim is to let RAs collect heterogeneous evidence while the
+pipeline preserves a narrow, reproducible contract.
+
+Proposed storage layout:
+
+- Raw or restricted source files:
+  - `data/raw/nz/historical_site_evidence/<source_dataset_id>/<retrieval_date>/`
+  - keep out of Git when files are large, licence-restricted, or contain
+    personal contact details
+  - store only a manifest in Git when the raw data cannot be committed
+- Source manifests:
+  - `data/raw/nz/historical_site_evidence/<source_dataset_id>/<retrieval_date>/manifest.json`
+  - fields: `source_dataset_id`, `provider`, `url`, `retrieval_date`,
+    `retrieved_by`, `licence`, `access_limits`, `redistribution_limits`,
+    `raw_file_names`, `checksums`, `coverage_dates`, `coverage_geography`,
+    `contact_person_or_request_id`, and `notes`
+- Extracted evidence table:
+  - `data/intermediate/nz/historical_site_evidence/<retrieval_date>/site_observations.csv`
+  - one row per source claim about one site at one date, before aggregation
+- Review queue:
+  - `docs/review_queues/historical_site_evidence/<retrieval_date>/`
+  - used for uncertain site matches, ambiguous addresses, conflicting dates,
+    and evidence that confirms an organisation but not a physical worship site
+- Publication-ready products:
+  - `apps/regions/nz/data/site_observations_YYYY.json` only after review
+  - updated `area_summary_ta.json` rows with historical `site_snapshot_date`,
+    `place_count_basis`, and quality flags
+
+Minimum `site_observation` fields:
+
+- Identifiers:
+  - `site_observation_id`
+  - `site_id` or `candidate_site_id`
+  - `source_dataset_id`
+  - `source_record_id`
+  - `source_url_or_file`
+  - `retrieval_date`
+- Temporal evidence:
+  - `observation_date`
+  - `observation_date_basis` (for example `census_date`, `directory_year`,
+    `registration_date`, `imagery_capture_date`, `annual_return_year`)
+  - `evidence_start_date`
+  - `evidence_end_date`
+  - `date_precision` (`day`, `month`, `year`, `range`, `unknown`)
+- Site matching:
+  - `name_raw`
+  - `name_standardised`
+  - `denomination_or_tradition_raw`
+  - `address_raw`
+  - `address_standardised`
+  - `latitude`
+  - `longitude`
+  - `geometry_wkt` or `geometry_geojson`
+  - `matched_osm_id`
+  - `matched_current_site_id`
+  - `match_method`
+  - `match_confidence`
+- Status coding:
+  - `existence_status` (`present`, `absent`, `uncertain`)
+  - `worship_use_status` (`confirmed_worship`, `probable_worship`,
+    `organisation_only`, `building_only`, `not_worship`, `uncertain`)
+  - `public_access_status` where available
+  - `site_type` (`place_of_worship`, `chapel`, `mosque`, `temple`,
+    `synagogue`, `marae_church`, `multi_use`, `other`)
+  - `quality_flag`
+  - `review_status` (`unreviewed`, `needs_review`, `accepted`, `excluded`,
+    `deferred`)
+- Audit fields:
+  - `extracted_by`
+  - `extracted_at`
+  - `reviewed_by`
+  - `reviewed_at`
+  - `review_note`
+  - `exclusion_reason`
+
+RA workflow:
+
+1. Create or update the `source_dataset` metadata before extracting rows.
+2. Save raw downloads, screenshots, PDFs, or exported tables in the dated raw
+   source folder, or outside Git with a manifest if the source is restricted.
+3. Extract only the fields needed for site existence, worship use, dating, and
+   matching. Do not transcribe officer names, private email addresses, phone
+   numbers, or other personal contact details unless a specific approved source
+   contract requires them.
+4. Normalise names and addresses lightly, preserving raw values beside the
+   cleaned fields.
+5. Assign provisional match confidence and review status. Low-confidence
+   matches should go to the review queue, not directly into site counts.
+6. A second reviewer should resolve rows that affect historical counts. The
+   reviewer should record whether the evidence confirms a physical site, only
+   an organisation, only a building, or neither.
+7. Aggregation scripts should count only observations satisfying the declared
+   evidence rule for that product. For example, a conservative 2018 count might
+   require `worship_use_status` in `confirmed_worship` or `probable_worship`,
+   `existence_status = present`, and `review_status = accepted`.
+
+Validation before aggregation:
+
+- every row has a valid `source_dataset_id` and manifest reference
+- every accepted row has a date basis and date precision
+- coordinates or matched site identifiers are present for accepted site-level
+  rows
+- organisation-only evidence is not counted as a place unless linked to a
+  physical site
+- duplicate evidence from the same source is collapsed before counting
+- conflicting evidence is retained but flagged for review
+- all outputs report counts by `source_dataset_id`, evidence type, quality flag,
+  and review status before replacing `area_summary` products
+
 ### Map presentation modes
 
 - Site mode:
@@ -808,14 +921,17 @@ map do not drift apart.
 6. Define the shared country backend schema and NZ boundary adapter contract.
 7. Validate the first NZ territorial-authority `area_summary` product against
    frontend layer and download needs.
-8. Extend the NZ `area_summary` product to SA2 geography after checking
+8. Draft RA-facing historical evidence templates for `source_dataset`
+   manifests, `site_observation` rows, review queues, and privacy/licence
+   checks.
+9. Extend the NZ `area_summary` product to SA2 geography after checking
    boundary metadata and point-to-area assignment quality.
-9. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
+10. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
    legends, popups, and export metadata.
-10. Align the NZ map interface with the global map after the data overlay is
+11. Align the NZ map interface with the global map after the data overlay is
    stable, preserving NZ-specific analysis controls.
-11. Prototype site, area, and comparison modes using precomputed layers before
+12. Prototype site, area, and comparison modes using precomputed layers before
     adding live portal queries.
-12. Pilot the new global pipeline on a small country set before full rollout.
-13. Expand `research/` into a country-source matrix for global feasibility
+13. Pilot the new global pipeline on a small country set before full rollout.
+14. Expand `research/` into a country-source matrix for global feasibility
     assessment.
