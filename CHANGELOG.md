@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- Defaulted the global map on `placesmap.org` to the MapTiler Backdrop basemap
+  when available, with CARTO retained as the fallback.
 - Made `AGENTS.md` the canonical repo-local agent guidance and removed the
   repo-root `CLAUDE.md` symlink.
 - Added the first New Zealand territorial-authority `area_summary` contract,
