@@ -52,6 +52,11 @@ As of 30 April 2026:
   `docs/community-ingestion-api-plan.md`. It treats Google Sheets as a first
   research-assistant adapter and defines a future staging API for human,
   scripted, community, and AI-agent contributions.
+- Initial RA-facing historical site evidence templates now live in
+  `docs/templates/ra-historical-site-evidence/`. They provide Google
+  Sheets-ready CSV tabs for source metadata, source-backed site observations,
+  candidate matches, review notes, controlled vocabularies, and privacy/licence
+  instructions.
 
 ## Redevelopment objective
 
@@ -598,6 +603,13 @@ RA workflow:
    require `worship_use_status` in `confirmed_worship` or `probable_worship`,
    `existence_status = present`, and `review_status = accepted`.
 
+Template support:
+
+- Use `docs/templates/ra-historical-site-evidence/` as the first spreadsheet
+  scaffold for RA evidence collection. The CSV tabs are intended for Google
+  Sheets import and should be treated as a working adapter to this ingestion
+  spec, rather than as the durable database.
+
 Validation before aggregation:
 
 - every row has a valid `source_dataset_id` and manifest reference
@@ -945,9 +957,10 @@ map do not drift apart.
 6. Define the shared country backend schema and NZ boundary adapter contract.
 7. Validate the first NZ territorial-authority `area_summary` product against
    frontend layer and download needs.
-8. Draft RA-facing historical evidence templates for `source_dataset`
-   manifests, `site_observation` rows, review queues, and privacy/licence
-   checks.
+8. Pilot the RA-facing historical evidence templates in
+   `docs/templates/ra-historical-site-evidence/` with one or two NZ 2018 source
+   batches, then refine the controlled vocabularies and validation rules before
+   broader data entry.
 9. Draft the Google Sheets to staging API pilot described in
    `docs/community-ingestion-api-plan.md`.
 10. Extend the NZ `area_summary` product to SA2 geography after checking

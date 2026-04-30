@@ -103,6 +103,11 @@ Recommended template tabs:
 - `review_notes`
 - `controlled_vocabularies`
 
+The first repo scaffold for this adapter lives in
+`docs/templates/ra-historical-site-evidence/`. It is deliberately a CSV-based
+Google Sheets import template so the RA can start immediately while the backend
+staging API and workbook automation remain separate implementation steps.
+
 Recommended spreadsheet controls:
 
 - locked header rows

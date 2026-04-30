@@ -1,0 +1,75 @@
+field,allowed_value,meaning
+source_type,osm_history,Historical OpenStreetMap evidence or extract
+source_type,charities_register,Charities Services register or related charity record
+source_type,incorporated_societies,Incorporated societies register evidence
+source_type,linz_building_outlines,Land Information New Zealand building outline evidence
+source_type,linz_property,Land Information New Zealand property or address evidence
+source_type,denominational_directory,Denominational directory or yearbook evidence
+source_type,archived_website,Archived website or web page evidence
+source_type,local_council,Local council register or planning evidence
+source_type,heritage_list,Heritage list or protected-place evidence
+source_type,other,Other source type
+observation_date_basis,census_date,Observation is intended to represent census-year status
+observation_date_basis,directory_year,Date comes from a directory or yearbook year
+observation_date_basis,registration_date,Date comes from an organisation registration record
+observation_date_basis,deregistration_date,Date comes from an organisation deregistration record
+observation_date_basis,imagery_capture_date,Date comes from aerial or street imagery capture
+observation_date_basis,annual_return_year,Date comes from an annual return or filing year
+observation_date_basis,web_archive_date,Date comes from a web archive capture date
+observation_date_basis,source_publication_date,Date comes from source publication date
+observation_date_basis,unknown,Date basis is not clear
+date_precision,day,Exact day is known
+date_precision,month,Month and year are known
+date_precision,year,Only year is known
+date_precision,range,Only a date range is known
+date_precision,unknown,Date precision is not known
+existence_status,present,Source indicates the site existed at the relevant time
+existence_status,absent,Source indicates the site did not exist at the relevant time
+existence_status,uncertain,Source does not clearly establish existence
+worship_use_status,confirmed_worship,Source confirms worship use
+worship_use_status,probable_worship,Source makes worship use probable
+worship_use_status,organisation_only,Source identifies an organisation but not a worship site
+worship_use_status,building_only,Source identifies a building but not worship use
+worship_use_status,not_worship,Source indicates the site is not a place of worship
+worship_use_status,uncertain,Worship use is unclear
+public_access_status,public,Source indicates ordinary public access
+public_access_status,private,Source indicates private or restricted access
+public_access_status,unknown,Access status is unknown
+site_type,place_of_worship,Generic place of worship
+site_type,chapel,Chapel
+site_type,church,Church
+site_type,mosque,Mosque
+site_type,temple,Temple
+site_type,synagogue,Synagogue
+site_type,marae_church,Marae church or church associated with marae
+site_type,multi_use,Multi-use site
+site_type,other,Other site type
+site_type,unknown,Site type is unknown
+quality_flag,osm_known_at_date,OpenStreetMap object was known at the relevant date
+quality_flag,administrative_org_matched,Administrative organisation has been matched to a site
+quality_flag,building_visible_use_unconfirmed,Building evidence exists but worship use is unconfirmed
+quality_flag,directory_confirmed,Directory evidence confirms site or organisation
+quality_flag,current_inventory_back_projected,Current inventory was projected back using external evidence
+quality_flag,needs_review,Row requires reviewer attention
+quality_flag,other,Other quality flag
+review_status,unreviewed,Extracted but not checked
+review_status,needs_review,Requires reviewer decision
+review_status,accepted,Accepted for ingestion
+review_status,excluded,Excluded from ingestion
+review_status,deferred,Deferred to later ingestion round
+match_method,exact_identifier,Matched by exact stable identifier
+match_method,osm_id,Matched by OpenStreetMap identifier
+match_method,name_address,Matched by name and address
+match_method,geocoded_address,Matched by geocoded address
+match_method,spatial_proximity,Matched by spatial proximity
+match_method,manual_review,Matched by manual review
+match_method,unmatched,No candidate match found
+match_confidence,high,Strong evidence for match
+match_confidence,medium,Plausible match requiring normal review
+match_confidence,low,Weak match requiring careful review
+match_confidence,none,No match confidence assigned
+decision,accept,Accept the row for ingestion
+decision,exclude,Exclude the row from ingestion
+decision,defer,Defer the row
+decision,revise,Revise and resubmit the row
+decision,needs_source,Obtain more source evidence

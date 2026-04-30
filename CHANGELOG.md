@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- Added RA-facing historical site evidence CSV templates in
+  `docs/templates/ra-historical-site-evidence/` for Google Sheets import,
+  including source metadata, site observations, candidate matches, review notes,
+  controlled vocabularies, and privacy/licence instructions.
 - Added `docs/community-ingestion-api-plan.md` to plan Google Sheets, web,
   bulk-upload, API, and AI-agent contribution paths through staging,
   validation, review, adjudication, and master ingestion.

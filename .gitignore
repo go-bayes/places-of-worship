@@ -193,6 +193,10 @@ visualizations/
 *_complete.csv
 data_*.csv
 
+# Lightweight documentation templates
+!docs/templates/
+!docs/templates/**
+
 # Jupyter notebook outputs (keep notebooks, ignore large outputs)
 *.ipynb_checkpoints/
 
