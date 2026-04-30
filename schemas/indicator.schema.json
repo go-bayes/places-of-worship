@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://go-bayes.github.io/places-of-worship/schemas/indicator.schema.json",
+  "title": "Indicator",
+  "description": "A measured quantity that can be observed for a site, area, country, or grid cell.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "indicator_id",
+    "label",
+    "description",
+    "unit",
+    "method"
+  ],
+  "properties": {
+    "indicator_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "label": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "unit": {
+      "type": "string",
+      "examples": ["count", "percent", "places_per_10000_residents", "places_per_sq_km"]
+    },
+    "denominator_indicator_id": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "method": {
+      "type": "string"
+    },
+    "temporal_coverage": {
+      "type": ["string", "null"]
+    },
+    "spatial_coverage": {
+      "type": ["string", "null"]
+    },
+    "quality_notes": {
+      "type": ["string", "null"]
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://go-bayes.github.io/places-of-worship/schemas/source-dataset.schema.json",
+  "title": "Source Dataset",
+  "description": "A source dataset used to derive sites, boundaries, indicators, or map layers.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_dataset_id",
+    "name",
+    "provider",
+    "licence",
+    "citation"
+  ],
+  "properties": {
+    "source_dataset_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "name": {
+      "type": "string"
+    },
+    "provider": {
+      "type": "string"
+    },
+    "url": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "retrieval_date": {
+      "type": ["string", "null"],
+      "format": "date"
+    },
+    "local_path": {
+      "type": ["string", "null"]
+    },
+    "licence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": ["string", "null"],
+          "format": "uri"
+        },
+        "attribution": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "citation": {
+      "type": "string"
+    },
+    "access_limits": {
+      "type": ["string", "null"]
+    },
+    "redistribution_limits": {
+      "type": ["string", "null"]
+    },
+    "notes": {
+      "type": ["string", "null"]
+    }
+  }
+}

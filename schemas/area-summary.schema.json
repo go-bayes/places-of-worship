@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://go-bayes.github.io/places-of-worship/schemas/area-summary.schema.json",
+  "title": "Area Summary Product",
+  "description": "A country area-summary product for map layers, downloads, and portal views.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "country_code",
+    "boundary_set",
+    "site_snapshot",
+    "source_datasets",
+    "indicators",
+    "visual_layers",
+    "rows"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "generated_by": {
+      "type": "string"
+    },
+    "country_code": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$"
+    },
+    "boundary_set": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "boundary_set_id",
+        "country_code",
+        "level",
+        "vintage",
+        "source_dataset_id"
+      ],
+      "properties": {
+        "boundary_set_id": {
+          "type": "string"
+        },
+        "country_code": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "level": {
+          "type": "string"
+        },
+        "vintage": {
+          "type": "string"
+        },
+        "source_dataset_id": {
+          "type": "string"
+        }
+      }
+    },
+    "site_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_dataset_id",
+        "snapshot_date",
+        "basis"
+      ],
+      "properties": {
+        "source_dataset_id": {
+          "type": "string"
+        },
+        "snapshot_date": {
+          "type": ["string", "null"],
+          "format": "date"
+        },
+        "basis": {
+          "type": "string"
+        },
+        "notes": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "source_datasets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "source-dataset.schema.json"
+      }
+    },
+    "indicators": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "indicator.schema.json"
+      }
+    },
+    "visual_layers": {
+      "type": "array",
+      "items": {
+        "$ref": "visual-layer.schema.json"
+      }
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/AreaSummaryRow"
+      }
+    }
+  },
+  "$defs": {
+    "AreaSummaryRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "country_code",
+        "boundary_set_id",
+        "boundary_level",
+        "area_unit_id",
+        "area_code",
+        "area_name",
+        "year",
+        "population_total",
+        "population_total_basis",
+        "religious_affiliation_count",
+        "religious_affiliation_percent",
+        "no_religion_count",
+        "no_religion_percent",
+        "place_count",
+        "places_per_10000_residents",
+        "place_density_per_sq_km",
+        "land_area_sq_km",
+        "site_snapshot_date",
+        "place_count_basis",
+        "source_dataset_ids",
+        "quality_flag"
+      ],
+      "properties": {
+        "country_code": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "boundary_set_id": {
+          "type": "string"
+        },
+        "boundary_level": {
+          "type": "string"
+        },
+        "area_unit_id": {
+          "type": "string"
+        },
+        "area_code": {
+          "type": "string"
+        },
+        "area_name": {
+          "type": "string"
+        },
+        "year": {
+          "type": "integer"
+        },
+        "population_total": {
+          "type": ["integer", "null"]
+        },
+        "population_total_basis": {
+          "type": "string"
+        },
+        "religious_affiliation_count": {
+          "type": ["integer", "null"]
+        },
+        "religious_affiliation_percent": {
+          "type": ["number", "null"]
+        },
+        "no_religion_count": {
+          "type": ["integer", "null"]
+        },
+        "no_religion_percent": {
+          "type": ["number", "null"]
+        },
+        "place_count": {
+          "type": "integer"
+        },
+        "places_per_10000_residents": {
+          "type": ["number", "null"]
+        },
+        "place_density_per_sq_km": {
+          "type": ["number", "null"]
+        },
+        "land_area_sq_km": {
+          "type": ["number", "null"]
+        },
+        "site_snapshot_date": {
+          "type": ["string", "null"],
+          "format": "date"
+        },
+        "place_count_basis": {
+          "type": "string"
+        },
+        "source_dataset_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "quality_flag": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

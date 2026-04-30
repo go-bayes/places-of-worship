@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://go-bayes.github.io/places-of-worship/schemas/visual-layer.schema.json",
+  "title": "Visual Layer",
+  "description": "A map or portal layer derived from one or more indicators.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "visual_layer_id",
+    "label",
+    "layer_type",
+    "indicator_ids",
+    "geometry_unit_type",
+    "default_visibility"
+  ],
+  "properties": {
+    "visual_layer_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "label": {
+      "type": "string"
+    },
+    "description": {
+      "type": ["string", "null"]
+    },
+    "layer_type": {
+      "type": "string",
+      "enum": ["point", "choropleth", "proportional_symbol", "bivariate", "difference", "coverage"]
+    },
+    "indicator_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+      }
+    },
+    "geometry_unit_type": {
+      "type": "string",
+      "enum": ["site", "site_snapshot", "area_unit", "country", "grid_cell"]
+    },
+    "legend": {
+      "type": ["object", "null"],
+      "additionalProperties": true
+    },
+    "colour_scale": {
+      "type": ["string", "null"]
+    },
+    "time_control": {
+      "type": ["string", "null"],
+      "enum": ["none", "year_selector", "time_slider", null]
+    },
+    "aggregation_rule": {
+      "type": ["string", "null"]
+    },
+    "uncertainty_display": {
+      "type": ["string", "null"]
+    },
+    "default_visibility": {
+      "type": "boolean"
+    },
+    "notes": {
+      "type": ["string", "null"]
+    }
+  }
+}

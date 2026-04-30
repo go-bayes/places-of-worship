@@ -18,7 +18,7 @@ docs focused on implementation detail, operations, or reference material.
 
 ## Current state
 
-As of 2 April 2026:
+As of 30 April 2026:
 
 - The global static app lives in `apps/global/`.
 - The NZ regional app lives in `apps/regions/nz/`.
@@ -41,6 +41,13 @@ As of 2 April 2026:
 - The original grant materials are stored locally in `grant/`, which is ignored
   by Git. Use them as the reporting reference when planning deliverables,
   country expansion, and justified shifts in scope.
+- A first New Zealand territorial-authority `area_summary` contract now exists
+  through `schemas/area-summary.schema.json`,
+  `scripts/build_nz_area_summary.R`, and
+  `apps/regions/nz/data/area_summary_ta.json`. This first product combines
+  current committed place counts with 2013, 2018, and 2023 Census religion
+  denominators, and flags that the place counts are current rather than
+  historical.
 
 ## Redevelopment objective
 
@@ -705,15 +712,14 @@ see which census year, boundary set, and denominator are being displayed.
    a dated snapshot structure.
 5. Add run manifests and per-country counts.
 6. Define the shared country backend schema and NZ boundary adapter contract.
-7. Define `source_dataset`, `indicator`, `indicator_observation`, and
-   `visual_layer` schemas.
-8. Define the minimum NZ download products and `area_summary` outputs.
-9. Build the NZ `area_summary` product for TA and SA2 geographies using 2013,
-   2018, and 2023 Census religion data plus current site assignments.
-10. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
+7. Validate the first NZ territorial-authority `area_summary` product against
+   frontend layer and download needs.
+8. Extend the NZ `area_summary` product to SA2 geography after checking
+   boundary metadata and point-to-area assignment quality.
+9. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
     legends, popups, and export metadata.
-11. Prototype site, area, and comparison modes using precomputed layers before
+10. Prototype site, area, and comparison modes using precomputed layers before
     adding live portal queries.
-12. Pilot the new global pipeline on a small country set before full rollout.
-13. Expand `research/` into a country-source matrix for global feasibility
+11. Pilot the new global pipeline on a small country set before full rollout.
+12. Expand `research/` into a country-source matrix for global feasibility
     assessment.
