@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Fixed the NZ verification popup `Open task` control so it binds through the
+  app code and focuses the sidebar task detail instead of relying on an inline
+  handler.
 - Added an explicit `?demo=1` mode for the NZ verification page so the RA can
   inspect draft decision and nomination controls while the default public page
   remains read-only and no demo data is saved or submitted.

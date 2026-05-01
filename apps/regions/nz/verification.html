@@ -201,6 +201,11 @@
             flex: 1;
         }
 
+        .detail-panel:focus {
+            outline: 2px solid #1f618d;
+            outline-offset: -2px;
+        }
+
         .detail-panel h2 {
             margin: 0 0 8px 0;
             font-size: 18px;
@@ -405,7 +410,7 @@
 
             <section id="taskList" class="task-list" aria-label="Verification tasks"></section>
             <section id="nominationPanel" class="nomination-panel"></section>
-            <section id="detailPanel" class="detail-panel"></section>
+            <section id="detailPanel" class="detail-panel" tabindex="-1"></section>
         </aside>
 
         <div id="map"></div>
@@ -414,6 +419,6 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
-    <script src="js/verification-map.js?v=20260501-demo-preview"></script>
+    <script src="js/verification-map.js?v=20260501-open-task"></script>
 </body>
 </html>

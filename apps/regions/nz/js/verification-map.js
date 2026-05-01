@@ -152,6 +152,7 @@ class NzVerificationMap {
 
             marker.on("click", () => this.selectTask(feature, true));
             marker.bindPopup(this.popupHtml(props), { maxWidth: 360 });
+            marker.on("popupopen", event => this.bindPopupOpenTask(event.popup));
             this.markerLayer.addLayer(marker);
             this.markersByTaskId.set(props.task_id, marker);
         });
@@ -174,8 +175,16 @@ class NzVerificationMap {
             <span>${escapeHtml(cap(props.religion))}${props.denomination ? ` | ${escapeHtml(cap(props.denomination))}` : ""}</span><br>
             <span>Priority: ${escapeHtml(props.verification_priority)}</span><br>
             <span>Action: ${escapeHtml(props.automated_suggested_action)}</span><br>
-            <button type="button" onclick="window.nzVerificationMap.selectTaskById('${escapeHtml(props.task_id)}')">Open task</button>
+            <button class="popup-open-task" type="button" data-task-id="${escapeHtml(props.task_id)}">Open task</button>
         `;
+    }
+
+    bindPopupOpenTask(popup) {
+        const button = popup.getElement()?.querySelector(".popup-open-task");
+        if (!button) return;
+        button.addEventListener("click", () => {
+            this.selectTaskById(button.dataset.taskId, { focusDetail: true });
+        });
     }
 
     renderTaskList() {
@@ -224,14 +233,14 @@ class NzVerificationMap {
         document.getElementById("noActionCount").textContent = noAction.toLocaleString();
     }
 
-    selectTaskById(taskId) {
+    selectTaskById(taskId, options = {}) {
         const task = this.tasks.find(feature => feature.properties?.task_id === taskId);
         if (task) {
-            this.selectTask(task, false);
+            this.selectTask(task, false, options);
         }
     }
 
-    selectTask(feature, fromMarker) {
+    selectTask(feature, fromMarker, options = {}) {
         this.selectedTask = feature;
         const props = feature.properties || {};
         const [lng, lat] = feature.geometry.coordinates;
@@ -246,6 +255,17 @@ class NzVerificationMap {
 
         this.renderTaskList();
         this.renderDetail(feature);
+        if (options.focusDetail) {
+            this.focusDetailPanel();
+        }
+    }
+
+    focusDetailPanel() {
+        const panel = document.getElementById("detailPanel");
+        if (!panel) return;
+        panel.scrollTop = 0;
+        panel.focus({ preventScroll: true });
+        panel.scrollIntoView({ block: "nearest", behavior: "smooth" });
     }
 
     renderDetail(feature) {
