@@ -34,6 +34,12 @@ privacy checks, spam or abuse screening, and human or rule-based review. No
 incoming workflow should write directly to the master dataset or to public map
 products.
 
+Authentication should be delegated to a managed auth service. The project should
+not implement password storage, password reset, multi-factor authentication, or
+session management itself. The ingestion API should accept standards-based
+identity tokens from the provider and enforce project-level authorisation
+against internal permission scopes.
+
 This plan is mainly about incoming evidence and contribution. Verification of
 records already in the master database is covered separately in
 `docs/master-verification-workflow-plan.md`, because master verification needs
@@ -70,7 +76,7 @@ Contributor interfaces
         v
 
 Staging ingestion API
-  - authenticate contributor
+  - verify managed-auth identity token
   - authorise action
   - enforce rate and size limits
   - snapshot raw submission
@@ -165,15 +171,17 @@ Possible Google Cloud pilot:
 - Cloud Run for ingestion and validation services
 - Pub/Sub or Cloud Tasks for asynchronous validation and review jobs
 - BigQuery or Cloud SQL/Postgres for staging and audit tables
+- managed authentication provider for contributor identity
 - Secret Manager for API credentials
 - IAM service accounts for least-privilege access
 
 Possible vendor-neutral equivalents:
 
+- managed OpenID Connect or OAuth2 authentication provider
 - object storage for raw submissions and evidence artifacts
 - Postgres/PostGIS for staging and master tables
 - scheduled workers for validation and aggregation
-- OAuth/API keys for contributor authentication
+- API keys or service accounts only for scripts and trusted machine clients
 - static exports for map products and downloads
 
 ## Core Staging Tables
@@ -182,6 +190,8 @@ Possible vendor-neutral equivalents:
 
 - `contributor_id`
 - `contributor_type` (`ra`, `community`, `script`, `ai_agent`, `partner`)
+- `auth_provider`
+- `auth_subject_id`
 - `display_name`
 - `affiliation`
 - `contact_reference`
@@ -306,6 +316,11 @@ permissions. File uploads need allow-listed types, size limits, content scanning
 private object storage, checksum logging, and a decision about whether derived
 fields can be redistributed.
 
+The API should separate authentication from authorisation. The managed provider
+establishes identity. The project maps that identity to contributor records,
+permission scopes, batch ownership, and audit records. Scripts and AI agents
+should use scoped machine credentials rather than shared human accounts.
+
 ## AI Contribution and Review
 
 AI agents can help in two distinct roles.
@@ -392,8 +407,10 @@ data harvesting.
 - Validate content types, file sizes, row counts, geometry bounds, URL schemes,
   and controlled vocabularies before writing rows beyond quarantine.
 - Scan uploaded files before reviewer access where feasible.
-- Require authentication for direct API submission.
+- Require managed authentication for direct API submission.
 - Use permission scopes: submit-only, review, adjudicate, master-commit.
+- Store provider subject ids and permission grants, not passwords or session
+  secrets.
 - Quarantine submissions from new or low-trust contributors until reviewed.
 - Preserve abuse reports and moderator decisions.
 - Log who submitted, reviewed, adjudicated, retracted, superseded, or committed

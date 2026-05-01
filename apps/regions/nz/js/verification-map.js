@@ -3,7 +3,9 @@ const DATA_BASE = (() => {
     return `${window.location.origin}${prefix}/apps/regions/nz/data/`;
 })();
 
-const INTAKE_ENABLED = false;
+const SEARCH_PARAMS = new URLSearchParams(window.location.search);
+const DEMO_MODE = SEARCH_PARAMS.get("demo") === "1";
+const INTAKE_ENABLED = DEMO_MODE;
 
 function dataUrl(path) {
     return new URL(path, DATA_BASE).toString();
@@ -44,6 +46,7 @@ class NzVerificationMap {
 
     async init() {
         this.setupMap();
+        this.setupPageMode();
         this.setupFilters();
         await this.loadTasks();
         this.applyFilters();
@@ -59,6 +62,26 @@ class NzVerificationMap {
 
         this.markerLayer = L.layerGroup();
         this.map.addLayer(this.markerLayer);
+    }
+
+    setupPageMode() {
+        const notice = document.getElementById("modeNotice");
+        if (notice) {
+            notice.classList.toggle("demo-warning", DEMO_MODE);
+            notice.textContent = DEMO_MODE
+                ? "Demo mode: draft controls are shown for UI inspection only. Nothing is saved or submitted. Do not enter private or sensitive data."
+                : "Feedback pilot: this page is read-only until secure staging is available.";
+            notice.setAttribute("role", DEMO_MODE ? "alert" : "note");
+        }
+
+        const nominationPanel = document.getElementById("nominationPanel");
+        if (nominationPanel) {
+            nominationPanel.innerHTML = DEMO_MODE ? this.nominationFormHtml() : `
+                <div class="disabled-panel">
+                    Nominations are disabled for this feedback pilot. Use the map for inspection and send notes separately.
+                </div>
+            `;
+        }
     }
 
     setupFilters() {
@@ -284,6 +307,9 @@ class NzVerificationMap {
         return `
             <h3>Review decision</h3>
             <div class="review-form">
+                <div class="demo-warning" role="alert">
+                    Demo only. This will generate local JSON for inspection; it will not save or submit data. Do not enter private or sensitive data.
+                </div>
                 <label>
                     Decision
                     <select id="decisionSelect">
@@ -304,12 +330,64 @@ class NzVerificationMap {
                 </label>
                 <label>
                     Note
-                    <textarea id="decisionNote" rows="3" placeholder="Short evidence note"></textarea>
+                    <textarea id="decisionNote" rows="3" placeholder="Short evidence note">Demo only: inspect source links and record what should be checked.</textarea>
                 </label>
-                <button id="copyDecisionButton" type="button">Copy staged decision JSON</button>
+                <button id="copyDecisionButton" type="button">Generate demo decision JSON</button>
                 <div id="copyStatus" class="copy-status"></div>
                 <textarea id="decisionJsonOutput" class="json-output" rows="5" readonly></textarea>
             </div>
+        `;
+    }
+
+    nominationFormHtml() {
+        return `
+            <div class="demo-warning" role="alert">
+                Demo only. These fields are not saved, submitted, or linked to the master database. Do not enter private or sensitive data.
+            </div>
+            <details open>
+                <summary>Draft nomination or complication</summary>
+                <div class="nomination-form">
+                    <label>
+                        Type
+                        <select id="nominationType">
+                            <option value="current_place_missing_from_osm">Current place missing from OSM</option>
+                            <option value="lost_2013_place_of_worship">Lost 2013 place of worship</option>
+                            <option value="lost_2018_place_of_worship">Lost 2018 place of worship</option>
+                            <option value="denomination_switch_or_reuse">Denomination switch or reuse</option>
+                            <option value="shared_building_multiple_congregations">Shared building with multiple congregations</option>
+                            <option value="split_or_merged_site_records">Split or merged site records</option>
+                            <option value="charity_record_for_site_matching">Charity record for site matching</option>
+                        </select>
+                    </label>
+                    <label>
+                        Name
+                        <input id="nominationName" type="text" value="Demo missing worship site">
+                    </label>
+                    <label>
+                        Address or locality
+                        <input id="nominationAddress" type="text" value="Example locality only">
+                    </label>
+                    <label>
+                        Location note
+                        <input id="nominationLocation" type="text" value="Demo: nearest known site or approximate area">
+                    </label>
+                    <label>
+                        Target years
+                        <input id="nominationYears" type="text" value="current">
+                    </label>
+                    <label>
+                        Source URL
+                        <input id="nominationSourceUrl" type="url" placeholder="Evidence link">
+                    </label>
+                    <label>
+                        Evidence note
+                        <textarea id="nominationNote" rows="3">Demo only: describe what source-backed evidence would go here.</textarea>
+                    </label>
+                    <button id="copyNominationButton" type="button">Generate demo nomination JSON</button>
+                    <div id="nominationCopyStatus" class="copy-status"></div>
+                    <textarea id="nominationJsonOutput" class="json-output" rows="5" readonly></textarea>
+                </div>
+            </details>
         `;
     }
 
@@ -345,9 +423,9 @@ class NzVerificationMap {
         this.writeJsonOutput("decisionJsonOutput", payload);
         try {
             await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
-            if (status) status.textContent = "Copied staged decision JSON.";
+            if (status) status.textContent = "Copied demo JSON. Nothing was saved or submitted.";
         } catch (error) {
-            if (status) status.textContent = "Clipboard unavailable; staged JSON is shown below.";
+            if (status) status.textContent = "Demo JSON is shown below. Nothing was saved or submitted.";
         }
     }
 
@@ -369,9 +447,9 @@ class NzVerificationMap {
         this.writeJsonOutput("nominationJsonOutput", payload);
         try {
             await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
-            if (status) status.textContent = "Copied staged nomination JSON.";
+            if (status) status.textContent = "Copied demo JSON. Nothing was saved or submitted.";
         } catch (error) {
-            if (status) status.textContent = "Clipboard unavailable; staged JSON is shown below.";
+            if (status) status.textContent = "Demo JSON is shown below. Nothing was saved or submitted.";
         }
     }
 

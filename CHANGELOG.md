@@ -1,6 +1,12 @@
 # Changelog
 
 ## Unreleased
+- Added an explicit `?demo=1` mode for the NZ verification page so the RA can
+  inspect draft decision and nomination controls while the default public page
+  remains read-only and no demo data is saved or submitted.
+- Recorded the decision to use a managed authentication service for future
+  intake and audit workflows rather than implementing password or session
+  handling in the project.
 - Added security and trust-boundary requirements for any future data intake
   path, including authentication, permissions, rate limits, upload controls,
   quarantine, validation, privacy/licence checks, abuse handling, and audit

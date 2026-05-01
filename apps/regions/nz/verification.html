@@ -274,7 +274,8 @@
         }
 
         .pilot-note,
-        .disabled-panel {
+        .disabled-panel,
+        .demo-warning {
             border: 1px solid #d8dee4;
             border-radius: 4px;
             background: #f8fafc;
@@ -282,6 +283,13 @@
             font-size: 12px;
             line-height: 1.4;
             padding: 8px;
+        }
+
+        .demo-warning {
+            border-color: #d68910;
+            background: #fff7e6;
+            color: #5f4200;
+            font-weight: 700;
         }
 
         .pilot-note {
@@ -361,9 +369,7 @@
                     <a href="./">NZ map</a>
                     <a href="../../global/">Global map</a>
                 </div>
-                <div class="pilot-note">
-                    Feedback pilot: this page is read-only until secure staging is available.
-                </div>
+                <div id="modeNotice" class="pilot-note"></div>
             </header>
 
             <section class="filters">
@@ -398,11 +404,7 @@
             </section>
 
             <section id="taskList" class="task-list" aria-label="Verification tasks"></section>
-            <section class="nomination-panel">
-                <div class="disabled-panel">
-                    Nominations are disabled for this feedback pilot. Use the map for inspection and send notes separately.
-                </div>
-            </section>
+            <section id="nominationPanel" class="nomination-panel"></section>
             <section id="detailPanel" class="detail-panel"></section>
         </aside>
 
@@ -412,6 +414,6 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
-    <script src="js/verification-map.js?v=20260501-readonly"></script>
+    <script src="js/verification-map.js?v=20260501-demo-preview"></script>
 </body>
 </html>

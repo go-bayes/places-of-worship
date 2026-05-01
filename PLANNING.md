@@ -55,6 +55,10 @@ As of 30 April 2026:
 - Any workflow that accepts incoming data must be designed with an explicit
   security and trust boundary. Submissions are untrusted input until validated,
   reviewed, permission-checked, and accepted through a staged audit path.
+- The NZ verification page is read-only by default. A `?demo=1` mode may expose
+  draft controls for RA interface inspection, but it must clearly state that
+  data is not saved or submitted and should not contain private or sensitive
+  information.
 - A separate master-data verification plan now lives in
   `docs/master-verification-workflow-plan.md`. It defines read-only site
   bundles, automated checks, review queues, staged verification decisions,
@@ -244,6 +248,11 @@ The working model is:
   limits, spam/abuse handling, file-type and size limits, malware scanning for
   uploads, structured validation, logging, and a review quarantine for new or
   low-trust contributors.
+- Use a managed authentication service for identity. Do not build or store
+  passwords, password reset flows, multi-factor authentication, or login
+  sessions ourselves. The project should consume standards-based identity
+  tokens, then map authenticated contributors to project permission scopes such
+  as submit-only, review, adjudicate, and master-commit.
 - Keep private contact details, credentials, restricted source files, and raw
   uploads out of Git and public static products unless a reviewed source
   contract explicitly permits publication.

@@ -21,6 +21,10 @@ read-only master export plus staged submissions that pass authentication,
 authorisation, validation, privacy/licence checks, rate limits, and review
 before they can affect published products.
 
+Authentication should be delegated to a managed auth service. Verification tools
+should consume provider-issued identity tokens and enforce project permission
+scopes, not implement password handling or login sessions.
+
 The system should answer:
 
 - what the master currently says about a site
@@ -361,6 +365,9 @@ legible.
 - What authentication, authorisation, rate-limiting, upload quarantine, and
   abuse-review controls are required before any verification intake endpoint is
   exposed beyond the core team?
+- Which managed authentication provider best fits the first staging deployment,
+  given the Google Sheets adapter, hosting choice, contributor types, and need
+  for standards-based identity tokens?
 - Which fields must be visible in a public verification view, and which should
   remain reviewer-only because of licence or privacy constraints?
 - What threshold should let automated checks mark a record as no-action?

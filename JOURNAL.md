@@ -157,6 +157,11 @@ exists. The earlier draft decision and nomination controls generated only local
 browser JSON, which was useful for a smoke test but too easy to confuse with a
 real submission path.
 
+Demo-mode exception:
+The RA may inspect draft decision and nomination controls through an explicit
+`?demo=1` URL. Demo mode must show clear warnings that nothing is saved or
+submitted, and it must keep the normal public verification URL read-only.
+
 ## 2026-05-01: Missing sites and building complications require first-class staging
 
 Decision:
@@ -247,3 +252,22 @@ upload type and size limits, malware scanning where feasible, privacy and
 licence checks, validation, quarantine for low-trust submissions, audit logs,
 abuse handling, and reviewed promotion into accepted data. No intake path should
 write directly to the master or to public map products.
+
+## 2026-05-01: Use managed authentication
+
+Decision:
+Use a managed authentication service. Do not build authentication ourselves.
+
+Rationale:
+Password storage, password reset, multi-factor authentication, login sessions,
+token refresh, and account recovery are security-sensitive systems. The project
+needs staged evidence, permission scopes, and audit records, but it should not
+carry the operational risk of custom authentication.
+
+Consequences:
+The future staging API should verify provider-issued identity tokens and then
+map authenticated identities to project permissions such as submit-only, review,
+adjudicate, and master-commit. Scripts and AI agents should use scoped machine
+credentials. The project should store provider subject ids, contributor records,
+permission grants, and audit events, not passwords or session secrets. Provider
+selection remains a later deployment decision.
