@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- Added a static NZ OSM verification map and generated
+  `verification_tasks.geojson` layer so reviewers can inspect current master
+  sites against OSM links, automated checks, priority filters, and copyable
+  staged review decisions.
 - Added `docs/master-verification-workflow-plan.md` to plan read-only master
   site bundles, automated verification checks, review queues, staged decisions,
   agent-readable data dumps, and map verification layers for NZ and global

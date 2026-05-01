@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NZ OSM Verification Tasks</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #17202a;
+            background: #f4f6f7;
+        }
+
+        .app-shell {
+            display: grid;
+            grid-template-columns: minmax(320px, 390px) 1fr;
+            height: 100vh;
+            min-height: 680px;
+        }
+
+        .sidebar {
+            background: #ffffff;
+            border-right: 1px solid #d8dee4;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid #d8dee4;
+        }
+
+        .sidebar-header h1 {
+            margin: 0 0 6px 0;
+            font-size: 20px;
+            line-height: 1.2;
+            color: #1f2d3d;
+        }
+
+        .sidebar-header p {
+            margin: 0;
+            color: #5d6d7e;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .nav-links a {
+            color: #1f618d;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .filters {
+            display: grid;
+            gap: 10px;
+            padding: 14px 16px;
+            border-bottom: 1px solid #d8dee4;
+        }
+
+        label {
+            display: grid;
+            gap: 4px;
+            color: #34495e;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            width: 100%;
+            border: 1px solid #ccd3da;
+            border-radius: 4px;
+            font: inherit;
+            font-size: 13px;
+            padding: 8px 10px;
+            background: #ffffff;
+        }
+
+        button {
+            border-color: #1f618d;
+            background: #1f618d;
+            color: #ffffff;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        button.secondary {
+            background: #ffffff;
+            color: #1f618d;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 12px 16px;
+            border-bottom: 1px solid #d8dee4;
+        }
+
+        .stat {
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            background: #f8fafc;
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 17px;
+            color: #17202a;
+        }
+
+        .stat span {
+            display: block;
+            margin-top: 2px;
+            color: #566573;
+            font-size: 11px;
+        }
+
+        .task-list {
+            overflow: auto;
+            padding: 8px;
+            border-bottom: 1px solid #d8dee4;
+            min-height: 150px;
+            max-height: 34vh;
+        }
+
+        .task-row {
+            display: grid;
+            gap: 4px;
+            width: 100%;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #17202a;
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 6px;
+            cursor: pointer;
+        }
+
+        .task-row:hover,
+        .task-row.active {
+            border-color: #1f618d;
+            background: #f2f8fc;
+        }
+
+        .task-row-title {
+            font-weight: 700;
+            font-size: 13px;
+            overflow-wrap: anywhere;
+        }
+
+        .task-row-meta {
+            color: #566573;
+            font-size: 12px;
+        }
+
+        .priority-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .priority-high {
+            background: #c0392b;
+        }
+
+        .priority-medium {
+            background: #d68910;
+        }
+
+        .priority-low {
+            background: #1e8449;
+        }
+
+        .detail-panel {
+            overflow: auto;
+            padding: 14px 16px;
+            flex: 1;
+        }
+
+        .detail-panel h2 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            color: #17202a;
+        }
+
+        .detail-section {
+            margin-top: 14px;
+        }
+
+        .detail-section h3 {
+            margin: 0 0 6px 0;
+            font-size: 13px;
+            color: #34495e;
+            text-transform: uppercase;
+        }
+
+        .kv {
+            display: grid;
+            grid-template-columns: 112px 1fr;
+            gap: 6px 10px;
+            font-size: 13px;
+            line-height: 1.35;
+        }
+
+        .kv dt {
+            color: #5d6d7e;
+            font-weight: 700;
+        }
+
+        .kv dd {
+            margin: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .link-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .link-grid a {
+            border: 1px solid #d8dee4;
+            border-radius: 4px;
+            padding: 7px;
+            color: #1f618d;
+            text-align: center;
+            text-decoration: none;
+            font-size: 12px;
+            background: #ffffff;
+        }
+
+        .check-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .check-list li {
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 7px;
+            margin-bottom: 6px;
+            font-size: 12px;
+            background: #f8fafc;
+        }
+
+        .review-form {
+            display: grid;
+            gap: 8px;
+        }
+
+        .copy-status {
+            min-height: 18px;
+            font-size: 12px;
+            color: #1e8449;
+        }
+
+        #map {
+            height: 100vh;
+            min-height: 680px;
+        }
+
+        .verification-marker {
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.45);
+        }
+
+        @media (max-width: 900px) {
+            .app-shell {
+                grid-template-columns: 1fr;
+                grid-template-rows: 48vh 52vh;
+                min-height: 100vh;
+            }
+
+            .sidebar {
+                grid-row: 2;
+                border-right: 0;
+                border-top: 1px solid #d8dee4;
+            }
+
+            #map {
+                grid-row: 1;
+                height: 48vh;
+                min-height: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="app-shell">
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <h1>NZ OSM Verification</h1>
+                <p><span id="snapshotId">Loading snapshot</span></p>
+                <div class="nav-links">
+                    <a href="./">NZ map</a>
+                    <a href="../../global/">Global map</a>
+                </div>
+            </header>
+
+            <section class="filters">
+                <label>
+                    Search
+                    <input id="searchInput" type="search" placeholder="Name, address, OSM id">
+                </label>
+                <label>
+                    Priority
+                    <select id="priorityFilter">
+                        <option value="all">All priorities</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </label>
+                <label>
+                    Suggested action
+                    <select id="actionFilter">
+                        <option value="all">All actions</option>
+                        <option value="needs_human_review">Needs human review</option>
+                        <option value="review_when_sampling">Review when sampling</option>
+                        <option value="candidate_no_action">Candidate no action</option>
+                    </select>
+                </label>
+            </section>
+
+            <section class="stats" aria-live="polite">
+                <div class="stat"><strong id="shownCount">0</strong><span>shown</span></div>
+                <div class="stat"><strong id="highCount">0</strong><span>high</span></div>
+                <div class="stat"><strong id="noActionCount">0</strong><span>no-action</span></div>
+            </section>
+
+            <section id="taskList" class="task-list" aria-label="Verification tasks"></section>
+            <section id="detailPanel" class="detail-panel"></section>
+        </aside>
+
+        <div id="map"></div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script src="js/verification-map.js"></script>
+</body>
+</html>

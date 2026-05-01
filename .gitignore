@@ -133,6 +133,10 @@ research_data/
 *.cpg
 *.qpj
 
+# App entry points and deployment data
+!apps/**/*.html
+!apps/regions/**/data/*.geojson
+
 # Compressed geographic data
 *.geojson.gz
 *.kml.gz
