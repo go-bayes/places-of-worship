@@ -52,6 +52,9 @@ As of 30 April 2026:
   `docs/community-ingestion-api-plan.md`. It treats Google Sheets as a first
   research-assistant adapter and defines a future staging API for human,
   scripted, community, and AI-agent contributions.
+- Any workflow that accepts incoming data must be designed with an explicit
+  security and trust boundary. Submissions are untrusted input until validated,
+  reviewed, permission-checked, and accepted through a staged audit path.
 - A separate master-data verification plan now lives in
   `docs/master-verification-workflow-plan.md`. It defines read-only site
   bundles, automated checks, review queues, staged verification decisions,
@@ -236,6 +239,14 @@ The working model is:
   - AI agents that review source-backed submissions
 - Do not allow any contributor interface or AI agent to write directly to the
   master dataset.
+- Treat every intake channel as a security surface. Before any public or
+  semi-public write path exists, define authentication, authorisation, rate
+  limits, spam/abuse handling, file-type and size limits, malware scanning for
+  uploads, structured validation, logging, and a review quarantine for new or
+  low-trust contributors.
+- Keep private contact details, credentials, restricted source files, and raw
+  uploads out of Git and public static products unless a reviewed source
+  contract explicitly permits publication.
 - Require raw source snapshots, source metadata, validation results, review
   states, adjudication decisions, and run manifests before accepted rows affect
   published outputs.

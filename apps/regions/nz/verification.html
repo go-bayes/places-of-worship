@@ -273,6 +273,21 @@
             gap: 8px;
         }
 
+        .pilot-note,
+        .disabled-panel {
+            border: 1px solid #d8dee4;
+            border-radius: 4px;
+            background: #f8fafc;
+            color: #34495e;
+            font-size: 12px;
+            line-height: 1.4;
+            padding: 8px;
+        }
+
+        .pilot-note {
+            margin-top: 12px;
+        }
+
         .nomination-panel {
             padding: 14px 16px;
             border-bottom: 1px solid #d8dee4;
@@ -346,6 +361,9 @@
                     <a href="./">NZ map</a>
                     <a href="../../global/">Global map</a>
                 </div>
+                <div class="pilot-note">
+                    Feedback pilot: this page is read-only until secure staging is available.
+                </div>
             </header>
 
             <section class="filters">
@@ -381,50 +399,9 @@
 
             <section id="taskList" class="task-list" aria-label="Verification tasks"></section>
             <section class="nomination-panel">
-                <details>
-                    <summary>Nominate site or complication</summary>
-                    <div class="nomination-form">
-                        <label>
-                            Type
-                            <select id="nominationType">
-                                <option value="current_place_missing_from_osm">Current place missing from OSM</option>
-                                <option value="lost_2013_place_of_worship">Lost 2013 place of worship</option>
-                                <option value="lost_2018_place_of_worship">Lost 2018 place of worship</option>
-                                <option value="denomination_switch_or_reuse">Denomination switch or reuse</option>
-                                <option value="shared_building_multiple_congregations">Shared building with multiple congregations</option>
-                                <option value="split_or_merged_site_records">Split or merged site records</option>
-                                <option value="charity_record_for_site_matching">Charity record for site matching</option>
-                            </select>
-                        </label>
-                        <label>
-                            Name
-                            <input id="nominationName" type="text" placeholder="Candidate name">
-                        </label>
-                        <label>
-                            Address or locality
-                            <input id="nominationAddress" type="text" placeholder="Address, suburb, town">
-                        </label>
-                        <label>
-                            Location note
-                            <input id="nominationLocation" type="text" placeholder="Coordinates, map note, or nearby master id">
-                        </label>
-                        <label>
-                            Target years
-                            <input id="nominationYears" type="text" placeholder="2013, 2018, 2023, current">
-                        </label>
-                        <label>
-                            Source URL
-                            <input id="nominationSourceUrl" type="url" placeholder="Evidence link">
-                        </label>
-                        <label>
-                            Evidence note
-                            <textarea id="nominationNote" rows="3" placeholder="Short source-backed note"></textarea>
-                        </label>
-                        <button id="copyNominationButton" type="button">Copy staged nomination JSON</button>
-                        <div id="nominationCopyStatus" class="copy-status"></div>
-                        <textarea id="nominationJsonOutput" class="json-output" rows="5" readonly></textarea>
-                    </div>
-                </details>
+                <div class="disabled-panel">
+                    Nominations are disabled for this feedback pilot. Use the map for inspection and send notes separately.
+                </div>
             </section>
             <section id="detailPanel" class="detail-panel"></section>
         </aside>

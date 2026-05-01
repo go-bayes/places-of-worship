@@ -3,6 +3,8 @@ const DATA_BASE = (() => {
     return `${window.location.origin}${prefix}/apps/regions/nz/data/`;
 })();
 
+const INTAKE_ENABLED = false;
+
 function dataUrl(path) {
     return new URL(path, DATA_BASE).toString();
 }
@@ -66,7 +68,9 @@ class NzVerificationMap {
             element?.addEventListener("change", () => this.applyFilters());
         });
 
-        document.getElementById("copyNominationButton")?.addEventListener("click", () => this.copyNomination());
+        if (INTAKE_ENABLED) {
+            document.getElementById("copyNominationButton")?.addEventListener("click", () => this.copyNomination());
+        }
     }
 
     async loadTasks() {
@@ -267,38 +271,55 @@ class NzVerificationMap {
             </div>
 
             <div class="detail-section">
-                <h3>Review decision</h3>
-                <div class="review-form">
-                    <label>
-                        Decision
-                        <select id="decisionSelect">
-                            <option value="accept_current_record">Accept current record</option>
-                            <option value="needs_more_evidence">Needs more evidence</option>
-                            <option value="wrong_location">Wrong location</option>
-                            <option value="duplicate_or_merge_candidate">Duplicate or merge candidate</option>
-                            <option value="not_place_of_worship">Not a place of worship</option>
-                            <option value="closed_or_changed_use">Closed or changed use</option>
-                            <option value="moved_or_relocated">Moved or relocated</option>
-                            <option value="historical_only">Historical only</option>
-                            <option value="target_year_status_uncertain">Target-year status uncertain</option>
-                            <option value="denomination_changed">Denomination changed</option>
-                            <option value="shared_or_multi_congregation_building">Shared or multi-congregation building</option>
-                            <option value="split_site_or_building_records_needed">Split site or building records needed</option>
-                            <option value="charity_record_needs_site_match">Charity record needs site match</option>
-                        </select>
-                    </label>
-                    <label>
-                        Note
-                        <textarea id="decisionNote" rows="3" placeholder="Short evidence note"></textarea>
-                    </label>
-                    <button id="copyDecisionButton" type="button">Copy staged decision JSON</button>
-                    <div id="copyStatus" class="copy-status"></div>
-                    <textarea id="decisionJsonOutput" class="json-output" rows="5" readonly></textarea>
-                </div>
+                ${INTAKE_ENABLED ? this.reviewFormHtml() : this.disabledIntakeHtml()}
             </div>
         `;
 
-        document.getElementById("copyDecisionButton")?.addEventListener("click", () => this.copyDecision(props));
+        if (INTAKE_ENABLED) {
+            document.getElementById("copyDecisionButton")?.addEventListener("click", () => this.copyDecision(props));
+        }
+    }
+
+    reviewFormHtml() {
+        return `
+            <h3>Review decision</h3>
+            <div class="review-form">
+                <label>
+                    Decision
+                    <select id="decisionSelect">
+                        <option value="accept_current_record">Accept current record</option>
+                        <option value="needs_more_evidence">Needs more evidence</option>
+                        <option value="wrong_location">Wrong location</option>
+                        <option value="duplicate_or_merge_candidate">Duplicate or merge candidate</option>
+                        <option value="not_place_of_worship">Not a place of worship</option>
+                        <option value="closed_or_changed_use">Closed or changed use</option>
+                        <option value="moved_or_relocated">Moved or relocated</option>
+                        <option value="historical_only">Historical only</option>
+                        <option value="target_year_status_uncertain">Target-year status uncertain</option>
+                        <option value="denomination_changed">Denomination changed</option>
+                        <option value="shared_or_multi_congregation_building">Shared or multi-congregation building</option>
+                        <option value="split_site_or_building_records_needed">Split site or building records needed</option>
+                        <option value="charity_record_needs_site_match">Charity record needs site match</option>
+                    </select>
+                </label>
+                <label>
+                    Note
+                    <textarea id="decisionNote" rows="3" placeholder="Short evidence note"></textarea>
+                </label>
+                <button id="copyDecisionButton" type="button">Copy staged decision JSON</button>
+                <div id="copyStatus" class="copy-status"></div>
+                <textarea id="decisionJsonOutput" class="json-output" rows="5" readonly></textarea>
+            </div>
+        `;
+    }
+
+    disabledIntakeHtml() {
+        return `
+            <h3>Audit intake disabled</h3>
+            <div class="disabled-panel">
+                This pilot is read-only. Record the site name or master id when sending feedback.
+            </div>
+        `;
     }
 
     linkHtml(label, url) {

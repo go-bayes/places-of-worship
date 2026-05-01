@@ -151,6 +151,12 @@ For RA feedback, the verification map should show individual points by default
 rather than clustered markers. Clustering is useful for public browsing, but it
 hides co-located or nearby records that reviewers need to notice.
 
+Follow-up decision:
+The public RA feedback page should be read-only until a secure staging sink
+exists. The earlier draft decision and nomination controls generated only local
+browser JSON, which was useful for a smoke test but too easy to confuse with a
+real submission path.
+
 ## 2026-05-01: Missing sites and building complications require first-class staging
 
 Decision:
@@ -220,3 +226,24 @@ Expose the NZ verification draft to the RA for feedback first. Avoid exposing
 the global map as an input surface until staging, moderation, and abuse controls
 exist. Keep any input as draft staged JSON or a test-only endpoint that is not
 linked to the master.
+
+## 2026-05-01: Treat data intake as a security boundary
+
+Decision:
+Any workflow that accepts incoming data must be designed as an untrusted-input
+surface from the beginning.
+
+Rationale:
+RA spreadsheets, public forms, direct API clients, file uploads, partner bulk
+submissions, and AI-agent contributions can introduce bad data, spam, malicious
+files, private information, licence violations, or attempts to alter published
+outputs. Security cannot be added only after the intake path exists.
+
+Consequences:
+The default architecture is read-only master exports plus staged submissions.
+Before any intake endpoint is exposed beyond the core team, define
+authentication or contributor identification, permission scopes, rate limits,
+upload type and size limits, malware scanning where feasible, privacy and
+licence checks, validation, quarantine for low-trust submissions, audit logs,
+abuse handling, and reviewed promotion into accepted data. No intake path should
+write directly to the master or to public map products.

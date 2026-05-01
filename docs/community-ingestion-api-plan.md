@@ -27,6 +27,13 @@ The durable design should be interface-neutral:
 
 All of these should feed the same staging contract.
 
+Security is part of the design, not a later operational detail. Every intake
+channel should be treated as untrusted until a submission has passed
+authentication or contributor identification, schema validation, licence and
+privacy checks, spam or abuse screening, and human or rule-based review. No
+incoming workflow should write directly to the master dataset or to public map
+products.
+
 This plan is mainly about incoming evidence and contribution. Verification of
 records already in the master database is covered separately in
 `docs/master-verification-workflow-plan.md`, because master verification needs
@@ -42,6 +49,9 @@ change proposals.
 - Separate contribution, validation, review, adjudication, and master ingestion.
 - Preserve an audit trail for raw input, parsed rows, validation output, AI
   suggestions, reviewer decisions, and final master changes.
+- Threat-model each intake path before launch: Google Sheets imports, web
+  forms, file uploads, direct APIs, bulk partner uploads, and AI-agent
+  submissions have different attack and misuse patterns.
 - Keep sensitive or restricted data out of public repositories.
 - Let AI assist with extraction, matching, summarising, and review, but never
   write accepted records directly to the master.
@@ -61,8 +71,11 @@ Contributor interfaces
 
 Staging ingestion API
   - authenticate contributor
+  - authorise action
+  - enforce rate and size limits
   - snapshot raw submission
   - validate schema
+  - quarantine low-trust or risky inputs
   - write staging rows
   - enqueue checks
 
@@ -287,6 +300,12 @@ Master ingestion endpoints or jobs:
 The commit endpoint should be restricted to maintainers or service accounts. It
 should require that all rows are accepted and that the dry run has no blockers.
 
+For a public or semi-public pilot, default endpoint behaviour should be
+submit-only. Review, adjudication, and commit actions require separate
+permissions. File uploads need allow-listed types, size limits, content scanning,
+private object storage, checksum logging, and a decision about whether derived
+fields can be redistributed.
+
 ## AI Contribution and Review
 
 AI agents can help in two distinct roles.
@@ -361,6 +380,8 @@ Minimum checks before master ingestion:
 The system should be designed for public-interest research, not uncontrolled
 data harvesting.
 
+- Maintain a threat model for every intake surface before it is exposed beyond
+  the core team.
 - Do not collect officer names, private emails, phone numbers, or personal
   addresses unless the source contract and research need are explicit.
 - Store raw files with personal contact information outside public Git.
@@ -368,10 +389,15 @@ data harvesting.
   public product.
 - Keep source artifacts and accepted derived fields separate.
 - Rate-limit public and agent submissions.
+- Validate content types, file sizes, row counts, geometry bounds, URL schemes,
+  and controlled vocabularies before writing rows beyond quarantine.
+- Scan uploaded files before reviewer access where feasible.
 - Require authentication for direct API submission.
 - Use permission scopes: submit-only, review, adjudicate, master-commit.
 - Quarantine submissions from new or low-trust contributors until reviewed.
 - Preserve abuse reports and moderator decisions.
+- Log who submitted, reviewed, adjudicated, retracted, superseded, or committed
+  each record, without exposing private contributor details publicly.
 
 ## Master Ingestion Contract
 

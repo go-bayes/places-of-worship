@@ -15,6 +15,12 @@ reviewers, contributors, scripts, or AI agents edit master records directly.
 Verification should generate staged decisions, evidence, and proposed changes.
 Only accepted and audited decisions should alter the master dataset.
 
+Any verification path that accepts incoming decisions, nominations, files, or
+API submissions must treat those inputs as untrusted. The safe default is a
+read-only master export plus staged submissions that pass authentication,
+authorisation, validation, privacy/licence checks, rate limits, and review
+before they can affect published products.
+
 The system should answer:
 
 - what the master currently says about a site
@@ -35,6 +41,11 @@ historical source references, geometry, area assignments, OSM metadata,
 lifecycle evidence, target-year status, review history, and automated check
 results. Review outputs should be written to staging or audit tables, not back
 to the master row.
+
+Security follows from this boundary: expose evidence bundles for inspection,
+then accept only proposed changes into staging. Do not expose editable master
+rows, unrestricted upload paths, or public endpoints that can alter published
+data without moderation.
 
 ## Candidate Nominations And Building Complications
 
@@ -347,6 +358,9 @@ legible.
 
 - Should NZ verification begin with a static export, a local SQLite/PostGIS
   database, or a cloud-backed staging database?
+- What authentication, authorisation, rate-limiting, upload quarantine, and
+  abuse-review controls are required before any verification intake endpoint is
+  exposed beyond the core team?
 - Which fields must be visible in a public verification view, and which should
   remain reviewer-only because of licence or privacy constraints?
 - What threshold should let automated checks mark a record as no-action?

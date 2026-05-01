@@ -1,6 +1,12 @@
 # Changelog
 
 ## Unreleased
+- Added security and trust-boundary requirements for any future data intake
+  path, including authentication, permissions, rate limits, upload controls,
+  quarantine, validation, privacy/licence checks, abuse handling, and audit
+  logs.
+- Made the public NZ verification feedback pilot read-only until secure staging
+  exists.
 - Added `JOURNAL.md` as a decision log for methodological and architectural
   choices that need rationale beyond the release changelog.
 - Disabled clustering on the NZ verification map so RA review shows individual
