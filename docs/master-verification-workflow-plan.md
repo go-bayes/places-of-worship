@@ -23,6 +23,8 @@ The system should answer:
 - whether the site needs human review, AI review, or no review
 - what proposed change would result from review
 - why a master record changed, if it changes
+- which current or historical worship sites are missing from the master or OSM
+- whether one building contains changing, shared, split, or merged worship uses
 
 ## Core Principle
 
@@ -33,6 +35,52 @@ historical source references, geometry, area assignments, OSM metadata,
 lifecycle evidence, target-year status, review history, and automated check
 results. Review outputs should be written to staging or audit tables, not back
 to the master row.
+
+## Candidate Nominations And Building Complications
+
+The verification workflow must handle evidence that does not attach neatly to
+one current OSM-derived site. Reviewers and agents should be able to submit
+staged nominations for:
+
+- current places of worship that are absent from OSM or from the current master
+  snapshot
+- lost places of worship that were present in a target year, especially 2013,
+  but no longer function as places of worship
+- cases where a building changed denomination, tradition, name, or worship
+  community over time
+- shared buildings with multiple congregations, traditions, or time-specific
+  worship uses
+- split or merged records, where a single building, organisation, or OSM object
+  represents multiple analytical sites, or several records represent one site
+- organisation-level evidence, including charity records, that may support a
+  site match but should not automatically be treated as building-level evidence
+
+These nominations should be stored in staging with their own ids, even when
+they are linked to an existing master site. Minimum fields:
+
+- `nomination_id`
+- `nomination_type`
+- `candidate_site_name`
+- `address_or_locality`
+- `candidate_geometry`
+- `target_years`
+- `existence_status`
+- `worship_use_status`
+- `evidence_source_refs`
+- `evidence_note`
+- `linked_master_site_ids`
+- `linked_osm_object_refs`
+- `linked_building_refs`
+- `linked_organisation_refs`
+- `proposed_master_action`
+- `review_status`
+
+Charity records should be treated as organisation observations. Annual return,
+registration, deregistration, activity, and address details can be valuable for
+temporal inference, but they often describe an organisation rather than a
+building. The durable model should therefore link charity observations to
+organisations first, then attach those organisations to site observations with
+explicit match confidence and date bounds.
 
 ## Verification Architecture
 
@@ -84,6 +132,9 @@ Staged verification decisions
   - merge/split candidate
   - exclude or defer
   - request evidence
+  - nominate missing current site
+  - nominate lost target-year site
+  - flag building or organisation matching problem
 
         |
         v
@@ -242,7 +293,10 @@ The map should eventually expose verification layers:
 
 - verified current sites
 - needs-review sites
+- nominated current sites not yet in the master or OSM
+- nominated lost target-year sites
 - duplicate-risk clusters
+- building, denomination-switch, sharing, split, and merge complications
 - target-year uncertainty
 - OSM temporal evidence
 - visual-verification coverage
@@ -251,6 +305,10 @@ The map should eventually expose verification layers:
 For NZ, this can begin as a reviewer-only layer. For the global map, it should
 be served as precomputed tiles and summary overlays, not as live per-site
 queries across millions of records.
+
+Reviewer maps should use a quiet greyscale basemap where possible, so coloured
+verification markers, uncertainty layers, and nominated-site overlays remain
+legible.
 
 ## Phased Implementation
 
@@ -265,6 +323,8 @@ queries across millions of records.
 
 - add a map-backed review layer or simple dashboard
 - write verification decisions to staging
+- capture missing-site, lost-site, and building-complication nominations in
+  staging
 - dry-run master diffs before accepting any change
 
 ### Phase 3: OSM temporal verification
@@ -273,6 +333,8 @@ queries across millions of records.
 - attach OSM full-history and lifecycle-tag evidence
 - add visual verification where possible
 - estimate target-year states and optional probabilities
+- distinguish OSM object history from real-world site, building, congregation,
+  and organisation histories
 
 ### Phase 4: Global partitioned verification
 
@@ -292,3 +354,7 @@ queries across millions of records.
   review priority?
 - How should reviewer time be allocated between random audit samples and
   high-risk queued cases?
+- What is the right unit model for buildings that host multiple congregations,
+  change denomination, or map to one charity across several sites?
+- Which charity details can be exposed publicly, which must remain
+  reviewer-only, and which belong only in organisation-level tables?

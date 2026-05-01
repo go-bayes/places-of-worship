@@ -97,6 +97,9 @@ ops/private-ops-notes.md
 # Private grant materials and reporting references
 grant/
 
+# Local source PDFs that are evidence inputs, not repo artifacts
+research/darbyshire_thesis_anglian_churches.pdf
+
 # ====================================
 # DATA MANAGEMENT - NEVER COMMIT DATA
 # ====================================

@@ -1,6 +1,16 @@
 # Changelog
 
 ## Unreleased
+- Added `JOURNAL.md` as a decision log for methodological and architectural
+  choices that need rationale beyond the release changelog.
+- Disabled clustering on the NZ verification map so RA review shows individual
+  candidate points by default.
+- Ignored the local Darbyshire thesis PDF and noted that congregation-rich
+  historical sources without addresses may later support fuzzy regional
+  placement or uncertain back-propagated maps.
+- Switched the NZ verification map to a greyscale basemap and added staged
+  nomination controls for current places missing from OSM, lost target-year
+  places, denomination/building complications, and charity-record site matching.
 - Added a static NZ OSM verification map and generated
   `verification_tasks.geojson` layer so reviewers can inspect current master
   sites against OSM links, automated checks, priority filters, and copyable

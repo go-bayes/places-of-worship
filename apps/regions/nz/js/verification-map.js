@@ -31,7 +31,7 @@ function priorityColor(priority) {
 class NzVerificationMap {
     constructor() {
         this.map = null;
-        this.cluster = null;
+        this.markerLayer = null;
         this.tasks = [];
         this.filteredTasks = [];
         this.markersByTaskId = new Map();
@@ -49,17 +49,14 @@ class NzVerificationMap {
 
     setupMap() {
         this.map = L.map("map", { preferCanvas: true }).setView([-41.235726, 172.5118422], 6);
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
             maxZoom: 19,
             minZoom: 5,
         }).addTo(this.map);
 
-        this.cluster = L.markerClusterGroup({
-            chunkedLoading: true,
-            maxClusterRadius: 48,
-        });
-        this.map.addLayer(this.cluster);
+        this.markerLayer = L.layerGroup();
+        this.map.addLayer(this.markerLayer);
     }
 
     setupFilters() {
@@ -68,6 +65,8 @@ class NzVerificationMap {
             element?.addEventListener("input", () => this.applyFilters());
             element?.addEventListener("change", () => this.applyFilters());
         });
+
+        document.getElementById("copyNominationButton")?.addEventListener("click", () => this.copyNomination());
     }
 
     async loadTasks() {
@@ -113,7 +112,7 @@ class NzVerificationMap {
     }
 
     renderMarkers() {
-        this.cluster.clearLayers();
+        this.markerLayer.clearLayers();
         this.markersByTaskId.clear();
 
         this.filteredTasks.forEach(feature => {
@@ -126,7 +125,7 @@ class NzVerificationMap {
 
             marker.on("click", () => this.selectTask(feature, true));
             marker.bindPopup(this.popupHtml(props), { maxWidth: 360 });
-            this.cluster.addLayer(marker);
+            this.markerLayer.addLayer(marker);
             this.markersByTaskId.set(props.task_id, marker);
         });
     }
@@ -282,6 +281,10 @@ class NzVerificationMap {
                             <option value="moved_or_relocated">Moved or relocated</option>
                             <option value="historical_only">Historical only</option>
                             <option value="target_year_status_uncertain">Target-year status uncertain</option>
+                            <option value="denomination_changed">Denomination changed</option>
+                            <option value="shared_or_multi_congregation_building">Shared or multi-congregation building</option>
+                            <option value="split_site_or_building_records_needed">Split site or building records needed</option>
+                            <option value="charity_record_needs_site_match">Charity record needs site match</option>
                         </select>
                     </label>
                     <label>
@@ -290,6 +293,7 @@ class NzVerificationMap {
                     </label>
                     <button id="copyDecisionButton" type="button">Copy staged decision JSON</button>
                     <div id="copyStatus" class="copy-status"></div>
+                    <textarea id="decisionJsonOutput" class="json-output" rows="5" readonly></textarea>
                 </div>
             </div>
         `;
@@ -317,12 +321,45 @@ class NzVerificationMap {
         };
 
         const status = document.getElementById("copyStatus");
+        this.writeJsonOutput("decisionJsonOutput", payload);
         try {
             await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
             if (status) status.textContent = "Copied staged decision JSON.";
         } catch (error) {
-            if (status) status.textContent = "Clipboard unavailable; select and copy from console.";
-            console.log("Staged decision JSON:", payload);
+            if (status) status.textContent = "Clipboard unavailable; staged JSON is shown below.";
+        }
+    }
+
+    async copyNomination() {
+        const payload = {
+            nomination_type: document.getElementById("nominationType")?.value || "",
+            candidate_site_name: document.getElementById("nominationName")?.value || "",
+            address_or_locality: document.getElementById("nominationAddress")?.value || "",
+            coordinates_or_map_note: document.getElementById("nominationLocation")?.value || "",
+            target_years: document.getElementById("nominationYears")?.value || "",
+            evidence_source_url: document.getElementById("nominationSourceUrl")?.value || "",
+            evidence_note: document.getElementById("nominationNote")?.value || "",
+            linked_master_site_id: this.selectedTask?.properties?.master_site_id || "",
+            linked_task_id: this.selectedTask?.properties?.task_id || "",
+            source: "nz_verification_static_map_nomination",
+        };
+
+        const status = document.getElementById("nominationCopyStatus");
+        this.writeJsonOutput("nominationJsonOutput", payload);
+        try {
+            await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+            if (status) status.textContent = "Copied staged nomination JSON.";
+        } catch (error) {
+            if (status) status.textContent = "Clipboard unavailable; staged JSON is shown below.";
+        }
+    }
+
+    writeJsonOutput(elementId, payload) {
+        const output = document.getElementById(elementId);
+        if (output) {
+            const json = JSON.stringify(payload, null, 2);
+            output.value = json;
+            output.textContent = json;
         }
     }
 }

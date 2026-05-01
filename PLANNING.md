@@ -534,6 +534,33 @@ or tag source, visual verification source, target-year status, optional
 probability, and reviewer decision. OSM evidence can then contribute to area
 summaries only through the same validation and review gates as other sources.
 
+The verification interface also needs a nomination path for evidence that is
+not already represented by a current master/OSM row. This covers current places
+of worship absent from OSM, lost places of worship that were present in 2013 or
+another target year, and building-level cases where denominations switch,
+several congregations share one building, or one building needs to be split
+into multiple analytical site records. These nominations should enter staging
+with their own ids, source evidence, target-year status, proposed master action,
+and links to any nearby master, OSM, building, or organisation records.
+
+Annual charity details may become useful temporal evidence, but they should be
+handled as organisation-level observations rather than building-level facts.
+Registration, deregistration, annual return, activity, and address fields can
+support a site match, yet one charity may operate multiple sites and one
+building may host several communities. The ingestion model should therefore
+link charity observations to organisations first, then link organisations to
+site observations with explicit match confidence and date bounds.
+
+Some historical sources, including theses, denominational histories, and
+regional church histories, may contain substantial congregation evidence without
+street addresses. These sources should not be forced into precise point
+geometry. They may support fuzzy regional placement, such as territorial
+authority, parish, town, or locality, and may help back-propagated maps show
+probable historical coverage or regional counts. Treat this as a later
+evidence-modelling problem: preserve source wording and regional cues now, but
+do not let fuzzy placement enter site-level density products until we have
+explicit confidence rules and uncertainty visualisation.
+
 The preferred pilot is a 2018 reconstruction for one or two territorial
 authorities with mixed urban and rural coverage. Build a `site_observation`
 table with `site_id`, `observation_date`, `evidence_source_id`, `evidence_type`,
@@ -1085,19 +1112,22 @@ map do not drift apart.
 9. Define the first read-only NZ master site-bundle export and automated
    verification checks described in
    `docs/master-verification-workflow-plan.md`.
-10. Scope the OSM temporal verification subproject for 2013, 2018, and 2023,
+10. Pilot the NZ verification map nomination path for current non-OSM sites,
+   lost 2013 sites, and building-level complications before wiring it to a
+   backend staging table.
+11. Scope the OSM temporal verification subproject for 2013, 2018, and 2023,
    including OSM history extraction, lifecycle-tag parsing, visual evidence
    review, and target-year probability rules.
-11. Draft the Google Sheets to staging API pilot described in
+12. Draft the Google Sheets to staging API pilot described in
    `docs/community-ingestion-api-plan.md`.
-12. Extend the NZ `area_summary` product to SA2 geography after checking
+13. Extend the NZ `area_summary` product to SA2 geography after checking
    boundary metadata and point-to-area assignment quality.
-13. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
+14. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
    legends, popups, and export metadata.
-14. Align the NZ map interface with the global map after the data overlay is
+15. Align the NZ map interface with the global map after the data overlay is
    stable, preserving NZ-specific analysis controls.
-15. Prototype site, area, and comparison modes using precomputed layers before
+16. Prototype site, area, and comparison modes using precomputed layers before
     adding live portal queries.
-16. Pilot the new global pipeline on a small country set before full rollout.
-17. Expand `research/` into a country-source matrix for global feasibility
+17. Pilot the new global pipeline on a small country set before full rollout.
+18. Expand `research/` into a country-source matrix for global feasibility
     assessment.
