@@ -11,6 +11,10 @@ function dataUrl(path) {
     return new URL(path, DATA_BASE).toString();
 }
 
+function demoUrl() {
+    return `${window.location.pathname}?demo=1`;
+}
+
 function escapeHtml(value) {
     return String(value ?? "")
         .replaceAll("&", "&amp;")
@@ -75,9 +79,9 @@ class NzVerificationMap {
         const notice = document.getElementById("modeNotice");
         if (notice) {
             notice.classList.toggle("demo-warning", DEMO_MODE);
-            notice.textContent = DEMO_MODE
+            notice.innerHTML = DEMO_MODE
                 ? "Demo mode: draft controls are shown for UI inspection only. Nothing is saved or submitted. Do not enter private or sensitive data."
-                : "Feedback pilot: this page is read-only until secure staging is available.";
+                : `Feedback pilot: this page is read-only until secure staging is available. <a href="${escapeHtml(demoUrl())}">Open demo entry preview</a>.`;
             notice.setAttribute("role", DEMO_MODE ? "alert" : "note");
         }
 
@@ -86,9 +90,12 @@ class NzVerificationMap {
             nominationPanel.innerHTML = DEMO_MODE ? this.nominationFormHtml() : `
                 <div class="disabled-panel">
                     Nominations are disabled for this feedback pilot. Use the map for inspection and send notes separately.
+                    To inspect mock entry fields, <a href="${escapeHtml(demoUrl())}">open demo mode</a>.
                 </div>
             `;
         }
+
+        this.renderInitialDetail();
     }
 
     setupFilters() {
@@ -273,6 +280,35 @@ class NzVerificationMap {
         panel.scrollTop = 0;
         panel.focus({ preventScroll: true });
         panel.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+
+    renderInitialDetail() {
+        const panel = document.getElementById("detailPanel");
+        if (!panel) return;
+        panel.innerHTML = DEMO_MODE ? `
+            <h2>Mock entry preview</h2>
+            <div class="demo-warning" role="alert">
+                Nothing entered here is saved or submitted. Do not enter private or sensitive data.
+            </div>
+            <div class="detail-section">
+                <h3>Task review</h3>
+                <div class="disabled-panel">
+                    Select any task from the list or map to open the mock review-decision fields.
+                </div>
+            </div>
+            <div class="detail-section">
+                <h3>New or missing sites</h3>
+                <div class="disabled-panel">
+                    Use the draft nomination form above to inspect fields for a missing, lost, shared, or changed site.
+                </div>
+            </div>
+        ` : `
+            <h2>Read-only pilot</h2>
+            <div class="disabled-panel">
+                Select a task to inspect the current record. Entry controls are available only in
+                <a href="${escapeHtml(demoUrl())}">demo mode</a>, where nothing is saved or submitted.
+            </div>
+        `;
     }
 
     renderDetail(feature) {

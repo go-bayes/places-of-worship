@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Made the NZ verification demo-entry path more visible by linking to demo mode
+  from the read-only page and showing an initial mock-entry preview panel before
+  a task is selected.
 - Renamed the visible NZ verification action label from "Review when sampling"
   to "Spot-check in sample" while preserving the stored
   `review_when_sampling` value.
