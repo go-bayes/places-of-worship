@@ -32,6 +32,13 @@ function priorityColor(priority) {
     return "#1e8449";
 }
 
+function actionLabel(action) {
+    if (action === "needs_human_review") return "Needs human review";
+    if (action === "review_when_sampling") return "Spot-check in sample";
+    if (action === "candidate_no_action") return "Candidate no action";
+    return cap(action);
+}
+
 class NzVerificationMap {
     constructor() {
         this.map = null;
@@ -174,7 +181,7 @@ class NzVerificationMap {
             <strong>${escapeHtml(props.name || "Unnamed site")}</strong><br>
             <span>${escapeHtml(cap(props.religion))}${props.denomination ? ` | ${escapeHtml(cap(props.denomination))}` : ""}</span><br>
             <span>Priority: ${escapeHtml(props.verification_priority)}</span><br>
-            <span>Action: ${escapeHtml(props.automated_suggested_action)}</span><br>
+            <span>Action: ${escapeHtml(actionLabel(props.automated_suggested_action))}</span><br>
             <button class="popup-open-task" type="button" data-task-id="${escapeHtml(props.task_id)}">Open task</button>
         `;
     }
@@ -202,7 +209,7 @@ class NzVerificationMap {
                         ${escapeHtml(props.name || "Unnamed site")}
                     </span>
                     <span class="task-row-meta">${escapeHtml(cap(props.religion)) || "Unknown"} | ${escapeHtml(props.master_site_id)}</span>
-                    <span class="task-row-meta">${escapeHtml(props.automated_suggested_action)} | ${props.automated_check_count} checks</span>
+                    <span class="task-row-meta">${escapeHtml(actionLabel(props.automated_suggested_action))} | ${props.automated_check_count} checks</span>
                 </button>
             `;
         }).join("");
@@ -279,7 +286,7 @@ class NzVerificationMap {
             <h2>${escapeHtml(props.name || "Unnamed site")}</h2>
             <dl class="kv">
                 <dt>Priority</dt><dd>${escapeHtml(props.verification_priority)}</dd>
-                <dt>Action</dt><dd>${escapeHtml(props.automated_suggested_action)}</dd>
+                <dt>Action</dt><dd>${escapeHtml(actionLabel(props.automated_suggested_action))}</dd>
                 <dt>Master id</dt><dd>${escapeHtml(props.master_site_id)}</dd>
                 <dt>OSM</dt><dd>${escapeHtml(props.osm_type || "")} ${escapeHtml(props.osm_id || "")}</dd>
                 <dt>Religion</dt><dd>${escapeHtml(cap(props.religion)) || "Unknown"}</dd>

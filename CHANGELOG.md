@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Renamed the visible NZ verification action label from "Review when sampling"
+  to "Spot-check in sample" while preserving the stored
+  `review_when_sampling` value.
 - Fixed the NZ verification popup `Open task` control so it binds through the
   app code and focuses the sidebar task detail instead of relying on an inline
   handler.
