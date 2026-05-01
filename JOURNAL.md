@@ -271,3 +271,32 @@ adjudicate, and master-commit. Scripts and AI agents should use scoped machine
 credentials. The project should store provider subject ids, contributor records,
 permission grants, and audit events, not passwords or session secrets. Provider
 selection remains a later deployment decision.
+
+## 2026-05-01: Use Rust for governed data modification
+
+Decision:
+Use Rust as the preferred systems layer for data modification, validation,
+staging, event application, master rebuilding, and export generation. Keep R as
+the primary investigator-facing layer for analysis, summaries, plots, and
+reports.
+
+Rationale:
+The project needs strict contracts around data changes: immutable inputs,
+typed validation, reproducible diffs, auditable acceptance, and explainable
+master snapshots. Rust is well suited to this governed state-change layer.
+R remains better for collaborator-facing research work, data exploration, and
+statistical reporting, and it is already the canonical research pipeline.
+
+Consequences:
+Rust should not become a general rewrite of the research workflow. It should
+begin with explicit invariants and an event model: staged proposals, validation
+results, review decisions, accepted changes, and rebuild manifests. The first
+implementation should be a local CLI that validates and diffs a small NZ staged
+batch without writing to the master. Future API work can reuse the same typed
+contracts once authentication, permissions, and staging storage are ready.
+
+Open questions:
+The repository still needs a concrete event schema, storage choice for staged
+and accepted events, and a migration path from current static JSON outputs to
+event-rebuilt master snapshots. These should be specified before a Rust service
+or public write endpoint is built.

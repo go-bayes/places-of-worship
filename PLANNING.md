@@ -283,6 +283,57 @@ The working model is:
   decisions with source citations, confidence, and rationale, but master changes
   require the same adjudication path as human reviews.
 
+### 12. Define a Rust-backed data-modification pipeline
+
+- Use Rust where strictness, auditability, and reproducible state changes matter:
+  validation, staging, identity, event application, master rebuilding, and
+  export generation.
+- Keep R as the investigator-facing layer for research analysis, summaries,
+  plots, reports, and exploratory workflows. Rust should support the research
+  pipeline rather than replace it.
+- Do not mutate the master directly. Incoming records, RA spreadsheets,
+  community submissions, uploaded files, scripts, and AI proposals should become
+  staged proposals with source evidence and validation output.
+- Treat raw inputs as immutable snapshots. Preserve the source file or export,
+  retrieval metadata, checksum, parser version, and schema version before any
+  parsed row is accepted.
+- Define typed contracts before implementation. First-class entities should
+  include `site`, `site_snapshot`, `source_dataset`, `site_observation`,
+  `lifecycle_event`, `review_decision`, `change_proposal`, `accepted_change`,
+  and `run_manifest`.
+- Prefer append-only change events over silent row overwrites. Examples include
+  `site_created`, `site_location_corrected`, `site_closed`,
+  `denomination_changed`, `duplicate_merged`, `proposal_retracted`, and
+  `proposal_superseded`.
+- Require dry-run and diff output before accepting a batch. The system should
+  show records added, modified, retired, validation warnings, source coverage,
+  area/year count changes, and expected map/export effects.
+- Separate evidence from conclusions. A source observation can state what a
+  directory, OSM history, charity record, or visual check shows; a reviewed
+  conclusion can then assign target-year status, confidence, and analytical
+  meaning.
+- Make temporal state first-class. The model must support exact and bounded
+  dates, target-year status, openings, closures, moves, shared buildings,
+  denomination changes, changed use, demolition, and uncertain locations.
+- Keep outputs researcher-friendly: CSV for simple downloads, GeoJSON for
+  browser layers, GeoParquet or Parquet for larger analytical products, and
+  plain validation reports that R can consume.
+
+First Rust CLI sketch:
+
+```sh
+pow validate batch.csv
+pow stage batch.csv
+pow diff staged_batch_id
+pow accept staged_batch_id
+pow rebuild-master
+pow export nz --format geojson
+```
+
+Start with invariants and event models before writing the implementation. The
+first useful implementation target is a local CLI that validates and diffs a
+small staged NZ evidence batch without writing to the master.
+
 ## Deterministic cleaning strategy
 
 The default policy should be:

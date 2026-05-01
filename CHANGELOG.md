@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- Added planning and journal notes for a Rust-backed data-modification pipeline
+  that governs validation, staged proposals, append-only change events, dry-run
+  diffs, master rebuilds, and researcher-friendly exports while keeping R as the
+  investigator-facing analysis layer.
 - Made the NZ verification demo-entry path more visible by linking to demo mode
   from the read-only page and showing an initial mock-entry preview panel before
   a task is selected.
