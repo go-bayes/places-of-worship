@@ -93,6 +93,7 @@ ops/private-ops-notes.md
 # Local assistant instruction files
 /AGENT.md
 /CLAUDE.md
+.claude/
 
 # Private grant materials and reporting references
 grant/
