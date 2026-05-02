@@ -26,7 +26,7 @@
       "description": "ISO 3166-1 alpha-2 country code.",
       "pattern": "^[A-Z]{2}$"
     },
-    "status": { "type": "string", "enum": ["active", "closed", "demolished", "relocated", "proposed", "unknown"] },
+    "status": { "$ref": "#/$defs/Status" },
     "valid_from": { "type": "string", "format": "date" },
     "valid_to": { "type": ["string", "null"], "format": "date" },
     "sameAs": { "type": "array", "items": { "type": "string", "format": "uri" } },
@@ -45,6 +45,10 @@
     }
   },
   "$defs": {
+    "Status": {
+      "type": "string",
+      "enum": ["active", "closed", "demolished", "relocated", "proposed", "unknown"]
+    },
     "Geometry": {
       "type": "object",
       "required": ["type", "coordinates"],

@@ -30,6 +30,7 @@
     },
     "event_type": {
       "type": "string",
+      "description": "Event type drives both the payload shape and the allowed event_intent values via the top-level allOf. structure_created is reserved: payload coupling is deferred until the structure-create payload is defined.",
       "enum": [
         "site_created",
         "site_location_corrected",
@@ -53,7 +54,7 @@
     },
     "event_intent": {
       "type": "string",
-      "description": "Correction means the previous project record was wrong. Change means the world changed.",
+      "description": "Correction means the previous project record was wrong. Observed_change means the world changed. Lifecycle covers creation, closure, reopening, demolition, and relocation events with bounded effective dates. Review_state covers proposal lifecycle changes. Per-event_type constraints are enforced under the top-level allOf.",
       "enum": ["correction", "observed_change", "lifecycle", "review_state"]
     },
     "target": { "$ref": "#/$defs/EventTarget" },
@@ -70,7 +71,7 @@
     "review": { "$ref": "#/$defs/ReviewRef" },
     "taxonomy_version": {
       "type": ["string", "null"],
-      "description": "Required by validation for denomination events once schemas/denomination-taxonomy.json exists."
+      "description": "Authoritative taxonomy version for the whole event. Required by validation for denomination events once schemas/denomination-taxonomy.json exists. Do not duplicate inside payloads."
     },
     "supersedes_event_ids": {
       "type": "array",
@@ -87,11 +88,66 @@
         { "$ref": "#/$defs/RelocationPayload" },
         { "$ref": "#/$defs/DenominationPayload" },
         { "$ref": "#/$defs/StatusPayload" },
+        { "$ref": "#/$defs/NamePayload" },
         { "$ref": "#/$defs/DuplicatePayload" },
         { "$ref": "#/$defs/ProposalPayload" }
       ]
     }
   },
+  "allOf": [
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "const": "site_created" } } },
+      "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "site_created" } } } } }
+    },
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["site_location_corrected", "structure_geometry_corrected"] } } },
+      "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "geometry_update" } } } } }
+    },
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "const": "site_relocated" } } },
+      "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "site_relocation" } } } } }
+    },
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["site_closed", "site_reopened", "site_status_corrected", "site_status_changed", "structure_demolished"] } } },
+      "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "status_update" } } } } }
+    },
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["denomination_corrected", "denomination_changed"] } } },
+      "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "denomination_update" } } } } }
+    },
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["site_name_corrected", "site_name_changed"] } } },
+      "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "name_update" } } } } }
+    },
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["duplicate_merged", "duplicate_split"] } } },
+      "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "duplicate_resolution" } } } } }
+    },
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["proposal_retracted", "proposal_superseded"] } } },
+      "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "proposal_state" } } } } }
+    },
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["site_location_corrected", "structure_geometry_corrected", "site_status_corrected", "denomination_corrected", "site_name_corrected", "duplicate_merged", "duplicate_split"] } } },
+      "then": { "properties": { "event_intent": { "const": "correction" } } }
+    },
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["site_status_changed", "denomination_changed", "site_name_changed"] } } },
+      "then": { "properties": { "event_intent": { "const": "observed_change" } } }
+    },
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "const": "site_relocated" } } },
+      "then": { "properties": { "event_intent": { "enum": ["observed_change", "lifecycle"] } } }
+    },
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["site_created", "structure_created", "site_closed", "site_reopened", "structure_demolished"] } } },
+      "then": { "properties": { "event_intent": { "const": "lifecycle" } } }
+    },
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["proposal_retracted", "proposal_superseded"] } } },
+      "then": { "properties": { "event_intent": { "const": "review_state" } } }
+    }
+  ],
   "$defs": {
     "Uuid": {
       "type": "string",
@@ -210,7 +266,7 @@
           "pattern": "^[A-Z]{2}$"
         },
         "geometry": { "$ref": "site.schema.json#/$defs/Geometry" },
-        "status": { "type": "string" },
+        "status": { "$ref": "site.schema.json#/$defs/Status" },
         "name": { "type": ["string", "null"] }
       }
     },
@@ -259,11 +315,10 @@
       "required": ["payload_type", "denomination_code"],
       "properties": {
         "payload_type": { "type": "string", "const": "denomination_update" },
-        "denomination_code": { "type": "string" },
+        "denomination_code": { "type": "string", "pattern": "^[a-z][a-z0-9._-]*$" },
         "denomination_raw": { "type": ["string", "null"] },
         "religion_code": { "type": ["string", "null"] },
-        "taxonomy_version": { "type": ["string", "null"] },
-        "previous_denomination_code": { "type": ["string", "null"] }
+        "previous_denomination_code": { "type": ["string", "null"], "pattern": "^[a-z][a-z0-9._-]*$" }
       }
     },
     "StatusPayload": {
@@ -272,9 +327,30 @@
       "required": ["payload_type", "new_status"],
       "properties": {
         "payload_type": { "type": "string", "const": "status_update" },
-        "previous_status": { "type": ["string", "null"] },
-        "new_status": { "type": "string" },
+        "previous_status": {
+          "anyOf": [
+            { "$ref": "site.schema.json#/$defs/Status" },
+            { "type": "null" }
+          ]
+        },
+        "new_status": { "$ref": "site.schema.json#/$defs/Status" },
         "status_note": { "type": ["string", "null"] }
+      }
+    },
+    "NamePayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_type", "new_name"],
+      "properties": {
+        "payload_type": { "type": "string", "const": "name_update" },
+        "new_name": { "type": "string" },
+        "previous_name": { "type": ["string", "null"] },
+        "name_type": {
+          "type": ["string", "null"],
+          "enum": ["official", "local", "alt", "historic", null]
+        },
+        "name_lang": { "type": ["string", "null"], "description": "BCP-47 language tag, if known." },
+        "name_script": { "type": ["string", "null"], "description": "ISO 15924 script code, if known." }
       }
     },
     "DuplicatePayload": {
