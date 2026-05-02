@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Updated Python API dependencies to clear Dependabot alerts for `geopandas`
+  and `starlette`, including the FastAPI bump required by the patched Starlette
+  release.
 - Merged the revisions-pipeline critique and added initial change-event and
   geometry-history schemas for RA-submitted location and denomination revisions.
 - Recorded the identity-on-relocation rule: `site_id` tracks the mappable place,
