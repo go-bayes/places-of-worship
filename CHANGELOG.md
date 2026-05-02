@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Moved heavy Python packages out of the default `uv` environment into explicit
+  `api`, `fast-parquet`, and `legacy` extras, and documented the narrower Python
+  scope.
 - Updated Python API dependencies to clear Dependabot alerts for `geopandas`
   and `starlette`, including the FastAPI bump required by the patched Starlette
   release.

@@ -13,9 +13,15 @@ Canonical workflow:
 - Keep Python for the API and supporting utilities where there is a clear advantage.
 
 Python environment:
-- Use `uv sync` to install or refresh Python dependencies from `pyproject.toml`.
-- Run Python scripts with `uv run` when needed.
-- Install the optional `pyarrow` fast path only when needed with `uv sync --extra fast-parquet`.
+- Use `uv sync` for the lightweight default Python environment.
+- Run standard-library support scripts with `uv run` when needed.
+- Install the API prototype stack only when needed with `uv sync --extra api`.
+- Run the Parquet-backed API path with both extras:
+  `uv sync --extra api --extra fast-parquet`.
+- Install the optional `pyarrow` fast path only when needed with
+  `uv sync --extra fast-parquet`.
+- Install archived legacy Python dependencies only when inspecting old code with
+  `uv sync --extra legacy`.
 
 Current NZ cleanup utilities:
 

@@ -356,3 +356,27 @@ bitemporal replay. `schemas/geometry-history.schema.json` records time-bounded
 geometry states for a site or structure. `site_snapshot` rows should be treated
 as derived caches rebuilt from accepted change events, not as directly edited
 records.
+
+## 2026-05-02: Keep Python narrow and optional
+
+Decision:
+Keep Python as a lightweight support layer, not as the default research or
+governed-ingestion stack. The default `uv` environment should stay minimal.
+Install the FastAPI/GeoPandas API prototype only through an explicit `api` extra,
+keep Parquet acceleration in the existing `fast-parquet` extra, and keep
+archive-only dependencies in a `legacy` extra.
+
+Rationale:
+The active research pipeline is R-first, and the governed mutation layer is
+planned for Rust. Most current Python scripts under `scripts/` use only the
+standard library. Keeping FastAPI, Starlette, GeoPandas, Pandas, Polars,
+OSM conversion, and legacy parser packages in the default environment increases
+security surface and maintenance cost without supporting routine RA or research
+work.
+
+Consequences:
+Routine Python utility work should use `uv sync` and `uv run`. API prototype work
+should use `uv sync --extra api`; Parquet fast-path work should add
+`--extra fast-parquet`; archived legacy inspection should use `--extra legacy`.
+New canonical data-cleaning, event-replay, and master-rebuild work should go to
+R or Rust rather than expanding the default Python dependency set.

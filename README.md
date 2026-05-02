@@ -68,7 +68,7 @@ The application uses an open-source geospatial stack.
 
 **Tile Services:** we use a custom tile generation workflow. Basemap styles are sourced from MapTiler (using the CARTO Light style as default, with Backdrop (and other themes, depending on whether you access via mobile or desktop) as fallbacks. Custom data tiles are processed using Tippecanoe and served via `Martin` (built in Rust) running in Docker from a Google Cloud VM. The underlying tile data (mbtiles/pmtiles) is stored in a Google Cloud Storage bucket.
 
-**Data Processing:** R is the canonical language for the research-facing data pipeline. Python is retained for the API and supporting utilities, with Python environments and commands managed through `uv`.
+**Data Processing:** R is the canonical language for the research-facing data pipeline. Python is retained for lightweight support utilities and the temporary API prototype, with heavy Python dependencies installed only through explicit `uv` extras.
 
 ## Data Sources and Licensing
 

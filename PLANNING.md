@@ -134,6 +134,9 @@ The working model is:
   confirmed.
 - Keep the research-facing global pipeline in R so collaborators can review,
   modify, and rerun it directly.
+- Keep the default Python environment lightweight. Install the API prototype,
+  Parquet fast path, or archived legacy dependencies only through explicit `uv`
+  extras.
 
 ### 3. Build a deterministic cleaning pipeline
 
