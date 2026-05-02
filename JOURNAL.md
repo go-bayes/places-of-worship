@@ -512,3 +512,25 @@ The immediate schema work can tighten rules and rename vocabulary where needed.
 The project should still avoid gratuitous churn, but if a schema shape prevents
 direct representation of worship-function change, it should be corrected now
 rather than worked around in `pow diff`.
+
+## 2026-05-03: Scope `pow diff` v1 to the reviewer report
+
+Decision:
+The first `pow diff` implementation should produce the reviewer report only:
+per-site changesets, per-target-year affects, validation and warning rollups,
+source coverage, and identity-decision flags for one staged batch.
+
+Rationale:
+Those outputs can be derived directly from staged change events using the new
+`previous_*` fields and `target_year_affects`. Full `before.geojson`,
+`after.geojson`, `area_summary_diff.csv`, density estimates, and map/export
+effects require complete state reconstruction. That work fits naturally with
+`pow rebuild-master` and later export commands.
+
+Consequences:
+`pow diff` v1 should still emit machine-readable JSON, but the JSON should
+describe reviewer-facing event effects. Full rebuilt snapshot comparisons
+belong in the rebuild/export layer. The security and audit issues raised in
+review, including cryptographic identity binding, source content hashes,
+batch-hash linkage, `client_event_id` uniqueness, licence policy, and takedown
+semantics, remain a separate pre-portal audit pass.

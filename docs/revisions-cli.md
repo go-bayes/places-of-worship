@@ -76,6 +76,25 @@ pow export nz --format geojson
 Until `pow diff` exists, `pow validate` and `pow stage` are the safe handoff
 points for RA evidence batches and agent-produced event proposals.
 
+First `pow diff` scope:
+
+- Produce a reviewer report for one staged batch.
+- Derive per-site changesets directly from staged event payloads, especially
+  `previous_*` fields, denomination and purpose sets, organisation links,
+  geometry payloads, and status payloads.
+- Derive per-target-year affect from `payload.target_year_affects`; do not
+  infer target-year state from prose.
+- Include validation and warning rollups, source coverage, licence warnings,
+  and identity-decision flags.
+- Emit a machine-readable `diff.json` report alongside the text report.
+
+Deferred until `pow rebuild-master` and export commands:
+
+- `before.geojson` and `after.geojson` reconstructed snapshots
+- `area_summary_diff.csv`
+- density estimates
+- full map-layer and download effects
+
 ## Local staging store
 
 The SQLite staging database stores:

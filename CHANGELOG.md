@@ -13,6 +13,9 @@
   payloads for appeared/disappeared worship use, multi-denomination,
   multi-purpose use, organisation-site links, split/merge cases, and
   target-year effects, plus fixtures and CLI tests for the new contract.
+- Scoped the first `pow diff` milestone to a reviewer report derived from staged
+  events, with reconstructed snapshots, area summaries, density estimates, and
+  map/export effects deferred to `pow rebuild-master` and export commands.
 - Added the first Rust `pow` CLI scaffold with `validate` and `stage` commands
   for RA evidence CSVs and staged revision JSON/JSONL files, including
   schema-backed change-event and geometry-history validation,

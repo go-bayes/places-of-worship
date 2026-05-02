@@ -326,9 +326,11 @@ The working model is:
   `site_created`, `site_location_corrected`, `site_closed`,
   `denomination_changed`, `duplicate_merged`, `proposal_retracted`, and
   `proposal_superseded`.
-- Require dry-run and diff output before accepting a batch. The system should
-  show records added, modified, retired, validation warnings, source coverage,
-  area/year count changes, and expected map/export effects.
+- Require dry-run and diff output before accepting a batch. The first `pow diff`
+  should show reviewer-facing consequences that can be derived directly from
+  staged events: records added, modified, retired, validation warnings, source
+  coverage, per-site changesets, target-year affects, and identity-decision
+  flags.
 - Treat changes in worship function as analytical data, not only database
   maintenance. A diff that establishes that a place of worship appeared, ceased
   worship use, changed denomination, became multi-denominational, became
@@ -379,14 +381,20 @@ Static map products should continue to consume reviewed exports. The first
 local staging database is plain SQLite at `.pow/staging.sqlite` by default.
 
 Near-term decision: defer web-based data management and make the CLI contracts
-excellent first. The next priority is for `pow diff` to surface the analytical
-consequences of staged evidence: target-year appeared/disappeared states,
-denomination and tradition changes, multi-denomination and multi-purpose use,
-area counts, density estimates, map-layer changes, download changes, and
-uncertainty or warning summaries. These outputs should be available as plain
-reports plus JSON/CSV/GeoJSON artefacts that R workflows can consume. Once
-those contracts are stable, a terminal review workbench or authenticated web
-portal can reuse them without changing the underlying governance model.
+excellent first. The next priority is `pow diff` v1 as a reviewer report, with
+full state reconstruction deferred. It should read staged events from SQLite
+and derive the report from the new `previous_*` fields and
+`target_year_affects`: per-site changesets, per-target-year
+appeared/disappeared effects, denomination and tradition changes,
+multi-denomination and multi-purpose use, organisation links, geometry changes,
+validation warnings, source coverage, and uncertainty summaries.
+
+Full reconstructed research artefacts such as `before.geojson`,
+`after.geojson`, `area_summary_diff.csv`, density estimates, and map/export
+effects belong with `pow rebuild-master` and later export commands, because
+they require replaying accepted events into complete site snapshots. `pow diff`
+v1 should still produce machine-readable JSON alongside the human report so the
+later rebuild/export layer can reuse the same event interpretation.
 
 Because this contract is still pre-release, do not preserve awkward schema
 shapes for backward compatibility. Update examples, tests, and templates

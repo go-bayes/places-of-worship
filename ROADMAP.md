@@ -105,9 +105,10 @@ Evidence And Governance:
 
 - `[x]` `pow validate` for RA CSVs and change-event or geometry-history JSON.
 - `[x]` `pow stage` for writing validated batches into local SQLite staging.
-- `[ ]` `pow diff` with functional, geometry, source, target-year, and area-count
-  effects.
-- `[ ]` Explicit functional-state schema or payloads for worship use,
+- `[ ]` `pow diff` v1 reviewer report with per-site changesets,
+  per-target-year affects, validation/warning rollups, source coverage, and
+  identity-decision flags derived directly from staged events.
+- `[x]` Initial functional-state payloads for worship use,
   denomination sets, multi-denomination, multi-purpose use, organisation-site
   links, and target-year appeared/disappeared states.
 - `[ ]` Deterministic payload hashing and accepted-event replay checks.
@@ -118,10 +119,12 @@ Research Outputs And Analysis:
 - `[ ]` Staged-batch summaries that R workflows can read without inspecting the
   SQLite store manually.
 - `[ ]` First `pow diff` reports showing proposed changes to target-year
-  worship-function states, area counts, densities, denomination summaries, and
-  map/export products.
+  worship-function states and denomination, purpose, organisation, geometry, and
+  uncertainty fields carried by staged events.
 - `[ ]` Clear labelling of provisional outputs so investigators can inspect
   effects without mistaking staged data for reviewed data.
+- `[ ]` Defer `before.geojson`, `after.geojson`, `area_summary_diff.csv`, and
+  full map/export effects until `pow rebuild-master` can reconstruct state.
 
 Non-goals:
 
