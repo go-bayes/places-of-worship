@@ -559,3 +559,29 @@ Repository documentation can still invite public OpenStreetMap corrections, but
 it should not invite GitHub pull requests until contribution, review, security,
 and licensing policies are stable. Future agents should not recreate
 `CONTRIBUTING.md` unless the project explicitly reopens GitHub contribution.
+
+## 2026-05-03: Keep the repository public but narrow GitHub intake
+
+Decision:
+Keep the GitHub repository public because the public map links to it and the
+project benefits from transparent source, licensing, and provenance. During the
+single-maintainer pilot, disable GitHub Issues, Discussions, and Wiki, and add
+minimal `main` branch protection that prevents force-pushes and branch deletion
+without requiring pull requests.
+
+Rationale:
+Making the repository private would reduce transparency and complicate the
+public map's source trail. The main risks are not public read access; they are
+premature contribution channels, accidental private or restricted data intake,
+and destructive repository operations. Those risks are better handled by
+keeping raw RA evidence outside Git, disabling public GitHub intake surfaces,
+and protecting `main` while preserving efficient maintainer pushes.
+
+Consequences:
+For now, documentation, planning, small schema-contract changes, and narrow CLI
+patches can be committed directly to `main` when reviewed locally. Use short
+branches only for risky code, multi-file migrations, experiments that may be
+discarded, or work that needs explicit review before landing. Public users
+should still be directed to correct OpenStreetMap where appropriate; project
+evidence intake should wait for the staged RA workflow and later authenticated
+portal/API.

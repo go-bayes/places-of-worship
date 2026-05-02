@@ -28,6 +28,9 @@
   project aim and RA role.
 - Removed the repository contributor guide while development remains
   single-maintainer.
+- Recorded the repository governance baseline: keep the repo public, disable
+  GitHub Issues/Discussions/Wiki during the pilot, and protect `main` against
+  force-pushes and deletion while allowing direct maintainer commits.
 - Added the first Rust `pow` CLI scaffold with `validate` and `stage` commands
   for RA evidence CSVs and staged revision JSON/JSONL files, including
   schema-backed change-event and geometry-history validation,

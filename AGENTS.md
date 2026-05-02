@@ -31,6 +31,9 @@
   data contracts, RA validation workflow, and map products are still
   stabilising. Do not recreate `CONTRIBUTING.md` unless the user explicitly
   reopens GitHub contribution.
+- GitHub Issues, Discussions, and Wiki are intentionally disabled during the
+  pilot. `main` is protected against force-pushes and deletion, but direct
+  maintainer commits remain acceptable for small, reviewed changes.
 
 ## Core Model
 
