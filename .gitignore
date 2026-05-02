@@ -209,6 +209,7 @@ data_*.csv
 # Lightweight documentation templates
 !docs/templates/
 !docs/templates/**
+!docs/examples/revisions/*.csv
 
 # Jupyter notebook outputs (keep notebooks, ignore large outputs)
 *.ipynb_checkpoints/

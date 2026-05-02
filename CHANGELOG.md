@@ -16,6 +16,11 @@
 - Scoped the first `pow diff` milestone to a reviewer report derived from staged
   events, with reconstructed snapshots, area summaries, density estimates, and
   map/export effects deferred to `pow rebuild-master` and export commands.
+- Added an RA-facing CLI tutorial for validating and staging exported evidence
+  CSV batches without editing repository templates or changing the public map.
+- Added the first `pow propose` bridge and mapping contract for translating
+  staged RA evidence rows into draft change-event JSONL before `pow diff`,
+  including a golden CSV-to-JSONL fixture.
 - Added the first Rust `pow` CLI scaffold with `validate` and `stage` commands
   for RA evidence CSVs and staged revision JSON/JSONL files, including
   schema-backed change-event and geometry-history validation,

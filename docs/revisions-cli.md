@@ -4,11 +4,15 @@ The first ingestion milestone is a local command-line tool named `pow`. It is
 intended to validate research-assistant evidence batches and staged revision
 events before any portal or backend writes exist.
 
+For a research-assistant walkthrough, see `docs/ra-cli-tutorial.md`.
+For the staged CSV to draft event mapping, see `docs/ra-propose-mapping.md`.
+
 ## Current commands
 
 ```sh
 cargo run -p pow-cli -- validate docs/templates/ra-historical-site-evidence/site_evidence_wide.csv
 cargo run -p pow-cli -- stage docs/examples/revisions/nz-sample-change-events.jsonl
+cargo run -p pow-cli -- propose <staged_batch_id>
 ```
 
 This command is not intended to be called directly from the HTML map. The CLI is
@@ -75,6 +79,11 @@ pow export nz --format geojson
 
 Until `pow diff` exists, `pow validate` and `pow stage` are the safe handoff
 points for RA evidence batches and agent-produced event proposals.
+
+`pow propose <staged_batch_id>` bridges real RA CSV evidence to draft
+`change-event.v1` JSONL. It reads one staged batch, translates supported RA
+template rows using `docs/ra-propose-mapping.md`, validates every generated
+event, prints JSONL to stdout, and prints mapping warnings to stderr.
 
 First `pow diff` scope:
 

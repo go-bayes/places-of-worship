@@ -14,6 +14,8 @@ use serde::Serialize;
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 
+const PROPOSE_VERSION: &str = "pow-propose.v1";
+
 #[derive(Parser, Debug)]
 #[command(name = "pow")]
 #[command(about = "Places of Worship data revision tooling")]
@@ -28,6 +30,8 @@ enum Commands {
     Validate(ValidateArgs),
     /// Validate and write a batch into the local staging database.
     Stage(StageArgs),
+    /// Emit draft change-event JSONL from a staged RA evidence batch.
+    Propose(ProposeArgs),
 }
 
 #[derive(Parser, Debug)]
@@ -76,6 +80,20 @@ struct StageArgs {
     /// Report format.
     #[arg(long, value_enum, default_value_t = ReportFormat::Text)]
     report: ReportFormat,
+}
+
+#[derive(Parser, Debug)]
+struct ProposeArgs {
+    /// Staged batch id to translate into draft change events.
+    batch_id: String,
+
+    /// Local SQLite staging database.
+    #[arg(long, default_value = ".pow/staging.sqlite")]
+    db: PathBuf,
+
+    /// Directory containing JSON Schemas.
+    #[arg(long, default_value = "schemas")]
+    schema_dir: PathBuf,
 }
 
 #[derive(Clone, Copy, Debug, ValueEnum)]
@@ -236,6 +254,13 @@ fn run(cli: Cli) -> Result<bool> {
             }
             Ok(matches!(outcome, StageOutcome::Rejected(_)))
         }
+        Commands::Propose(args) => {
+            let events = propose(args)?;
+            for event in events {
+                println!("{}", serde_json::to_string(&event)?);
+            }
+            Ok(false)
+        }
     }
 }
 
@@ -288,6 +313,511 @@ fn stage(args: StageArgs) -> Result<StageOutcome> {
 
     write_stage_batch(&args.db, &summary, &validation, raw_input, &records)?;
     Ok(StageOutcome::Staged(summary))
+}
+
+#[derive(Debug)]
+struct StagedBatch {
+    batch_id: String,
+    input_sha256: String,
+    staged_at: String,
+}
+
+#[derive(Debug)]
+struct StagedJsonRecord {
+    record_index: usize,
+    parsed_json: Value,
+}
+
+struct WorshipObservationDraft<'a> {
+    batch: &'a StagedBatch,
+    record_index: usize,
+    row: &'a serde_json::Map<String, Value>,
+    recorded_at: &'a str,
+    target_year_affects: Vec<Value>,
+    original_row_id: Option<&'a str>,
+    evidence_note: Option<&'a str>,
+}
+
+fn propose(args: ProposeArgs) -> Result<Vec<Value>> {
+    let conn = Connection::open(&args.db)
+        .with_context(|| format!("failed to open staging database {}", args.db.display()))?;
+    initialise_staging_schema(&conn)?;
+    let batch = load_staged_batch(&conn, &args.batch_id)?;
+    let records = load_staged_records(&conn, &args.batch_id)?;
+    if records.is_empty() {
+        bail!("staged batch {} has no records", args.batch_id);
+    }
+
+    let recorded_at = batch.staged_at.clone();
+    let mut events = Vec::new();
+    let mut warnings = Vec::new();
+    for record in records {
+        let mut record_events = propose_record_events(&batch, &record, &recorded_at, &mut warnings)
+            .with_context(|| {
+                format!(
+                    "failed to propose events for record {}",
+                    record.record_index
+                )
+            })?;
+        events.append(&mut record_events);
+    }
+    if events.is_empty() {
+        bail!(
+            "staged batch {} produced no draft change events",
+            args.batch_id
+        );
+    }
+
+    validate_proposed_events(&events, &args.schema_dir)?;
+    for warning in warnings {
+        print_diagnostic_to_stderr("WARN", &warning);
+    }
+    Ok(events)
+}
+
+fn load_staged_batch(conn: &Connection, batch_id: &str) -> Result<StagedBatch> {
+    let mut stmt = conn.prepare(
+        "SELECT batch_id, input_sha256, staged_at
+         FROM stage_batches
+         WHERE batch_id = ?1",
+    )?;
+    let mut rows = stmt.query(params![batch_id])?;
+    let Some(row) = rows.next()? else {
+        bail!("no staged batch found for {batch_id}");
+    };
+    Ok(StagedBatch {
+        batch_id: row.get(0)?,
+        input_sha256: row.get(1)?,
+        staged_at: row.get(2)?,
+    })
+}
+
+fn load_staged_records(conn: &Connection, batch_id: &str) -> Result<Vec<StagedJsonRecord>> {
+    let mut stmt = conn.prepare(
+        "SELECT record_index, parsed_json
+         FROM stage_records
+         WHERE batch_id = ?1
+         ORDER BY record_index",
+    )?;
+    let rows = stmt.query_map(params![batch_id], |row| {
+        let record_index: i64 = row.get(0)?;
+        let parsed_json: String = row.get(1)?;
+        Ok((record_index, parsed_json))
+    })?;
+
+    let mut records = Vec::new();
+    for row in rows {
+        let (record_index, parsed_json) = row?;
+        let parsed_json = serde_json::from_str::<Value>(&parsed_json)
+            .with_context(|| format!("stage record {record_index} is not valid JSON"))?;
+        records.push(StagedJsonRecord {
+            record_index: record_index as usize,
+            parsed_json,
+        });
+    }
+    Ok(records)
+}
+
+fn propose_record_events(
+    batch: &StagedBatch,
+    record: &StagedJsonRecord,
+    recorded_at: &str,
+    warnings: &mut Vec<Diagnostic>,
+) -> Result<Vec<Value>> {
+    let row = record
+        .parsed_json
+        .as_object()
+        .context("staged record is not a JSON object")?;
+    if row.contains_key("site_observation_id") {
+        Ok(vec![propose_site_observation_event(
+            batch,
+            record.record_index,
+            row,
+            recorded_at,
+            warnings,
+        )?])
+    } else if row.contains_key("evidence_row_id") {
+        Ok(vec![propose_wide_evidence_event(
+            batch,
+            record.record_index,
+            row,
+            recorded_at,
+            warnings,
+        )?])
+    } else {
+        bail!(
+            "unsupported staged CSV template; pow propose v1 supports site_observations.csv and site_evidence_wide.csv"
+        );
+    }
+}
+
+fn propose_site_observation_event(
+    batch: &StagedBatch,
+    record_index: usize,
+    row: &serde_json::Map<String, Value>,
+    recorded_at: &str,
+    warnings: &mut Vec<Diagnostic>,
+) -> Result<Value> {
+    let target_year = required_field(row, "target_year")?;
+    let target_date = target_year_to_snapshot_date(target_year)?;
+    let existence_status = optional_field(row, "existence_status");
+    let worship_use_status = optional_field(row, "worship_use_status");
+    let target_year_status = derive_target_year_status(existence_status, worship_use_status)?;
+    let confidence = optional_probability(row, "target_year_probability")?;
+    let target_year_affects = vec![target_year_affect(
+        &target_date,
+        &target_year_status,
+        worship_use_status,
+        confidence,
+        optional_field(row, "evidence_summary"),
+    )];
+
+    build_worship_observation_event(
+        WorshipObservationDraft {
+            batch,
+            record_index,
+            row,
+            recorded_at,
+            target_year_affects,
+            original_row_id: optional_field(row, "site_observation_id"),
+            evidence_note: optional_field(row, "evidence_summary"),
+        },
+        warnings,
+    )
+}
+
+fn propose_wide_evidence_event(
+    batch: &StagedBatch,
+    record_index: usize,
+    row: &serde_json::Map<String, Value>,
+    recorded_at: &str,
+    warnings: &mut Vec<Diagnostic>,
+) -> Result<Value> {
+    let mut target_year_affects = Vec::new();
+    for year in ["2013", "2018", "2023"] {
+        let status_field = format!("target_year_{year}_status");
+        let status = optional_field(row, &status_field).unwrap_or_default();
+        if status.is_empty() || status == "not_assessed" {
+            continue;
+        }
+        let probability_field = format!("target_year_{year}_probability");
+        let evidence_field = format!("target_year_{year}_evidence");
+        let target_date = format!("{year}-09-01");
+        target_year_affects.push(target_year_affect(
+            &target_date,
+            status,
+            optional_field(row, "worship_use_status"),
+            optional_probability(row, &probability_field)?,
+            optional_field(row, &evidence_field),
+        ));
+    }
+    if target_year_affects.is_empty() {
+        bail!("target_year_affects would be empty; enter at least one assessed target-year status");
+    }
+
+    build_worship_observation_event(
+        WorshipObservationDraft {
+            batch,
+            record_index,
+            row,
+            recorded_at,
+            target_year_affects,
+            original_row_id: optional_field(row, "evidence_row_id"),
+            evidence_note: optional_field(row, "date_evidence_summary")
+                .or_else(|| optional_field(row, "source_notes")),
+        },
+        warnings,
+    )
+}
+
+fn build_worship_observation_event(
+    draft: WorshipObservationDraft<'_>,
+    warnings: &mut Vec<Diagnostic>,
+) -> Result<Value> {
+    let WorshipObservationDraft {
+        batch,
+        record_index,
+        row,
+        recorded_at,
+        target_year_affects,
+        original_row_id,
+        evidence_note,
+    } = draft;
+    if target_year_affects.is_empty() {
+        bail!("target_year_affects would be empty");
+    }
+    let matched_current_site_id = required_field(row, "matched_current_site_id")?;
+    if let Some(raw_denomination) = optional_field(row, "denomination_or_tradition_raw") {
+        warnings.push(Diagnostic {
+            record: Some(record_index),
+            field: Some("denomination_or_tradition_raw".to_owned()),
+            path: None,
+            message: format!(
+                "raw denomination/tradition {raw_denomination:?} was not mapped; denomination_set is deferred until the taxonomy exists"
+            ),
+        });
+    }
+
+    let seed = format!(
+        "{}:{record_index}:{PROPOSE_VERSION}:worship_function_observed",
+        batch.batch_id
+    );
+    let event_id = deterministic_uuid(&seed);
+    let client_event_id = format!(
+        "{PROPOSE_VERSION}:{}:{record_index}:worship_function_observed",
+        batch.batch_id
+    );
+    let effective_date = target_year_affects
+        .first()
+        .and_then(|value| value.get("target_year"))
+        .and_then(Value::as_str)
+        .context("target_year_affects missing target_year")?
+        .to_owned();
+
+    let mut source_ref = serde_json::Map::new();
+    source_ref.insert(
+        "source_ref_type".to_owned(),
+        Value::String("evidence_row".to_owned()),
+    );
+    source_ref.insert(
+        "evidence_row_id".to_owned(),
+        Value::String(format!("stage_record:{}:{record_index}", batch.batch_id)),
+    );
+    source_ref.insert(
+        "stage_batch_id".to_owned(),
+        Value::String(batch.batch_id.clone()),
+    );
+    source_ref.insert(
+        "stage_record_index".to_owned(),
+        Value::Number(serde_json::Number::from(record_index as u64)),
+    );
+    source_ref.insert(
+        "stage_input_sha256".to_owned(),
+        Value::String(batch.input_sha256.clone()),
+    );
+    if let Some(value) = optional_field(row, "source_dataset_id") {
+        source_ref.insert(
+            "source_dataset_id".to_owned(),
+            Value::String(value.to_owned()),
+        );
+    }
+    if let Some(value) = optional_field(row, "source_record_id") {
+        source_ref.insert(
+            "source_record_id".to_owned(),
+            Value::String(value.to_owned()),
+        );
+    }
+    if let Some(value) = optional_field(row, "source_url_or_file") {
+        source_ref.insert("url_or_file".to_owned(), Value::String(value.to_owned()));
+    }
+    if let Some(value) = optional_field(row, "site_observation_id") {
+        source_ref.insert(
+            "site_observation_id".to_owned(),
+            Value::String(value.to_owned()),
+        );
+    }
+    source_ref.insert(
+        "licence_status".to_owned(),
+        Value::String(source_licence_status(optional_field(row, "licence_flag"))),
+    );
+    if let Some(note) = evidence_note.or(original_row_id) {
+        source_ref.insert(
+            "evidence_summary".to_owned(),
+            Value::String(note.to_owned()),
+        );
+    }
+
+    let mut target = serde_json::Map::new();
+    target.insert("target_type".to_owned(), Value::String("site".to_owned()));
+    target.insert(
+        "matched_current_site_id".to_owned(),
+        Value::String(matched_current_site_id.to_owned()),
+    );
+    if let Some(value) = optional_field(row, "candidate_site_id") {
+        target.insert(
+            "candidate_site_id".to_owned(),
+            Value::String(value.to_owned()),
+        );
+    }
+
+    let mut payload = serde_json::Map::new();
+    payload.insert(
+        "payload_type".to_owned(),
+        Value::String("worship_function_update".to_owned()),
+    );
+    if let Some(value) = optional_field(row, "worship_use_status") {
+        payload.insert(
+            "worship_use_status".to_owned(),
+            Value::String(value.to_owned()),
+        );
+    }
+    if let Some(value) = optional_field(row, "site_type") {
+        payload.insert("site_type".to_owned(), Value::String(value.to_owned()));
+    }
+    payload.insert(
+        "target_year_affects".to_owned(),
+        Value::Array(target_year_affects),
+    );
+    if let Some(note) = evidence_note {
+        payload.insert("function_note".to_owned(), Value::String(note.to_owned()));
+    }
+
+    Ok(serde_json::json!({
+        "schema_version": "change-event.v1",
+        "event_id": event_id,
+        "client_event_id": client_event_id,
+        "event_type": "worship_function_observed",
+        "event_intent": "evidence_observation",
+        "target": Value::Object(target),
+        "effective": {
+            "effective_date": effective_date,
+            "date_precision": "day",
+            "basis": "source_observation",
+            "note": "Draft event generated from staged RA evidence by pow propose."
+        },
+        "recorded_at": recorded_at,
+        "source_refs": [Value::Object(source_ref)],
+        "review": {
+            "review_status": "staged",
+            "rationale": "Draft event generated from staged RA evidence."
+        },
+        "payload_hash": null,
+        "payload": Value::Object(payload)
+    }))
+}
+
+fn target_year_affect(
+    target_year: &str,
+    target_year_status: &str,
+    worship_use_status: Option<&str>,
+    confidence: Option<f64>,
+    note: Option<&str>,
+) -> Value {
+    let mut object = serde_json::Map::new();
+    object.insert(
+        "target_year".to_owned(),
+        Value::String(target_year.to_owned()),
+    );
+    object.insert(
+        "target_year_status".to_owned(),
+        Value::String(target_year_status.to_owned()),
+    );
+    if let Some(value) = worship_use_status {
+        object.insert(
+            "worship_use_status".to_owned(),
+            Value::String(value.to_owned()),
+        );
+    }
+    if let Some(value) = confidence.and_then(serde_json::Number::from_f64) {
+        object.insert("confidence".to_owned(), Value::Number(value));
+    }
+    object.insert(
+        "basis".to_owned(),
+        Value::String("source_observation".to_owned()),
+    );
+    if let Some(value) = note {
+        object.insert("note".to_owned(), Value::String(value.to_owned()));
+    }
+    Value::Object(object)
+}
+
+fn validate_proposed_events(events: &[Value], schema_dir: &Path) -> Result<()> {
+    let validators = SchemaValidators::load(schema_dir)?;
+    let mut summary = ValidationSummary::new(Path::new("pow propose"), "jsonl");
+    for (index, event) in events.iter().enumerate() {
+        validate_json_record(event, index + 1, &validators, &mut summary);
+    }
+    if !summary.errors.is_empty() {
+        for diagnostic in &summary.errors {
+            print_diagnostic_to_stderr("ERROR", diagnostic);
+        }
+        bail!("pow propose generated invalid change events");
+    }
+    Ok(())
+}
+
+fn required_field<'a>(row: &'a serde_json::Map<String, Value>, field: &str) -> Result<&'a str> {
+    optional_field(row, field).with_context(|| format!("{field} is required for pow propose v1"))
+}
+
+fn optional_field<'a>(row: &'a serde_json::Map<String, Value>, field: &str) -> Option<&'a str> {
+    row.get(field)
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+}
+
+fn optional_probability(row: &serde_json::Map<String, Value>, field: &str) -> Result<Option<f64>> {
+    let Some(value) = optional_field(row, field) else {
+        return Ok(None);
+    };
+    let probability = value
+        .parse::<f64>()
+        .with_context(|| format!("{field}={value:?} is not numeric"))?;
+    if !(0.0..=1.0).contains(&probability) {
+        bail!("{field}={probability} is outside 0..1");
+    }
+    Ok(Some(probability))
+}
+
+fn target_year_to_snapshot_date(value: &str) -> Result<String> {
+    let value = value.trim();
+    if value.len() == 4 && value.chars().all(|ch| ch.is_ascii_digit()) {
+        return Ok(format!("{value}-09-01"));
+    }
+    if parse_full_date(value).is_some() {
+        return Ok(value.to_owned());
+    }
+    bail!("{value:?} is not a valid target_year; use YYYY or YYYY-MM-DD")
+}
+
+fn derive_target_year_status(
+    existence_status: Option<&str>,
+    worship_use_status: Option<&str>,
+) -> Result<String> {
+    if matches!(existence_status, Some("absent"))
+        && matches!(
+            worship_use_status,
+            Some("confirmed_worship" | "probable_worship")
+        )
+    {
+        bail!("existence_status=absent conflicts with worship_use_status indicating worship");
+    }
+    if matches!(
+        worship_use_status,
+        Some("confirmed_worship" | "probable_worship")
+    ) {
+        return Ok("present".to_owned());
+    }
+    if matches!(existence_status, Some("absent"))
+        || matches!(worship_use_status, Some("not_worship"))
+    {
+        return Ok("absent".to_owned());
+    }
+    Ok("uncertain".to_owned())
+}
+
+fn source_licence_status(value: Option<&str>) -> String {
+    match value {
+        Some("clear") => "accepted",
+        Some("needs_review") => "needs_review",
+        Some("restricted") => "restricted",
+        _ => "unknown",
+    }
+    .to_owned()
+}
+
+fn deterministic_uuid(seed: &str) -> String {
+    let digest = Sha256::digest(seed.as_bytes());
+    let hex = bytes_to_hex(&digest);
+    format!(
+        "{}-{}-{}-{}-{}",
+        &hex[0..8],
+        &hex[8..12],
+        &hex[12..16],
+        &hex[16..20],
+        &hex[20..32]
+    )
 }
 
 fn detect_format(input: &Path, format: InputFormat) -> Result<InputFormat> {
@@ -1382,6 +1912,14 @@ fn print_text_summary(summary: &ValidationSummary) -> Result<()> {
 }
 
 fn print_diagnostic(kind: &str, diagnostic: &Diagnostic) {
+    println!("{}", format_diagnostic(kind, diagnostic));
+}
+
+fn print_diagnostic_to_stderr(kind: &str, diagnostic: &Diagnostic) {
+    eprintln!("{}", format_diagnostic(kind, diagnostic));
+}
+
+fn format_diagnostic(kind: &str, diagnostic: &Diagnostic) -> String {
     let mut parts = Vec::new();
     if let Some(record) = diagnostic.record {
         parts.push(format!("record {record}"));
@@ -1393,9 +1931,9 @@ fn print_diagnostic(kind: &str, diagnostic: &Diagnostic) {
         parts.push(format!("path {path}"));
     }
     if parts.is_empty() {
-        println!("{kind}: {}", diagnostic.message);
+        format!("{kind}: {}", diagnostic.message)
     } else {
-        println!("{kind} [{}]: {}", parts.join(", "), diagnostic.message);
+        format!("{kind} [{}]: {}", parts.join(", "), diagnostic.message)
     }
 }
 
@@ -1702,6 +2240,84 @@ mod tests {
             .expect("record count");
         assert_eq!(batch_count, 1);
         assert_eq!(record_count, 1);
+
+        let _ = fs::remove_file(db);
+    }
+
+    #[test]
+    fn propose_site_observation_matches_golden_fixture() {
+        let repo_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let input = repo_root.join("docs/examples/revisions/ra-propose-site-observation.csv");
+        let expected =
+            repo_root.join("docs/examples/revisions/ra-propose-site-observation.expected.jsonl");
+        let db = std::env::temp_dir().join(format!(
+            "pow-propose-test-{}.sqlite",
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .expect("clock")
+                .as_nanos()
+        ));
+
+        let records = extract_csv_stage_records(&input).expect("extract fixture records");
+        let conn = Connection::open(&db).expect("open temp db");
+        initialise_staging_schema(&conn).expect("initialise staging schema");
+        conn.execute(
+            "INSERT INTO stage_batches (
+                batch_id, input_path, input_format, input_sha256, input_bytes,
+                staged_at, records_checked, records_stored, error_count,
+                warning_count, validation_summary_json, raw_input
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
+            params![
+                "batch-test-001",
+                input.display().to_string(),
+                "csv",
+                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                0_i64,
+                "2026-05-03T00:00:00Z",
+                records.len() as i64,
+                records.len() as i64,
+                0_i64,
+                0_i64,
+                "{}",
+                Vec::<u8>::new(),
+            ],
+        )
+        .expect("insert stage batch");
+        for record in records {
+            let parsed_json = record
+                .parsed_json
+                .as_ref()
+                .map(serde_json::to_string)
+                .transpose()
+                .expect("serialize parsed json");
+            conn.execute(
+                "INSERT INTO stage_records (
+                    batch_id, record_index, record_kind, raw_record, parsed_json
+                ) VALUES (?1, ?2, ?3, ?4, ?5)",
+                params![
+                    "batch-test-001",
+                    record.record_index as i64,
+                    record.record_kind,
+                    record.raw_record,
+                    parsed_json,
+                ],
+            )
+            .expect("insert stage record");
+        }
+
+        let events = propose(ProposeArgs {
+            batch_id: "batch-test-001".to_owned(),
+            db: db.clone(),
+            schema_dir: repo_root.join("schemas"),
+        })
+        .expect("propose succeeds");
+        let expected_events = fs::read_to_string(expected)
+            .expect("read expected jsonl")
+            .lines()
+            .map(|line| serde_json::from_str::<Value>(line).expect("parse expected jsonl"))
+            .collect::<Vec<_>>();
+
+        assert_eq!(events, expected_events);
 
         let _ = fs::remove_file(db);
     }

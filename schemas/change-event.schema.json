@@ -45,6 +45,7 @@
         "denomination_removed",
         "purpose_added",
         "purpose_removed",
+        "worship_function_observed",
         "worship_use_appeared",
         "worship_use_disappeared",
         "worship_use_split",
@@ -64,8 +65,8 @@
     },
     "event_intent": {
       "type": "string",
-      "description": "Correction means the previous project record was wrong. Observed_change means the world changed. Lifecycle covers creation, closure, reopening, demolition, and relocation events with bounded effective dates. Review_state covers proposal lifecycle changes. Per-event_type constraints are enforced under the top-level allOf.",
-      "enum": ["correction", "observed_change", "lifecycle", "review_state"]
+      "description": "Correction means the previous project record was wrong. Evidence_observation means a staged source row records evidence that needs review. Observed_change means the world changed. Lifecycle covers creation, closure, reopening, demolition, and relocation events with bounded effective dates. Review_state covers proposal lifecycle changes. Per-event_type constraints are enforced under the top-level allOf.",
+      "enum": ["correction", "evidence_observation", "observed_change", "lifecycle", "review_state"]
     },
     "target": { "$ref": "#/$defs/EventTarget" },
     "effective": { "$ref": "#/$defs/EffectiveTime" },
@@ -133,7 +134,7 @@
       "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "denomination_update" } } } } }
     },
     {
-      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["denomination_added", "denomination_removed", "purpose_added", "purpose_removed", "worship_use_appeared", "worship_use_disappeared", "worship_use_split", "worship_use_merged"] } } },
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["denomination_added", "denomination_removed", "purpose_added", "purpose_removed", "worship_function_observed", "worship_use_appeared", "worship_use_disappeared", "worship_use_split", "worship_use_merged"] } } },
       "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "worship_function_update" } } } } }
     },
     {
@@ -159,6 +160,10 @@
     {
       "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["site_status_changed", "denomination_changed", "denomination_added", "denomination_removed", "purpose_added", "purpose_removed", "site_name_changed"] } } },
       "then": { "properties": { "event_intent": { "const": "observed_change" } } }
+    },
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "const": "worship_function_observed" } } },
+      "then": { "properties": { "event_intent": { "const": "evidence_observation" } } }
     },
     {
       "if": { "required": ["event_type"], "properties": { "event_type": { "const": "site_relocated" } } },
@@ -204,6 +209,14 @@
           "enum": ["site", "structure", "organisation", "proposal", "batch"]
         },
         "site_id": { "$ref": "#/$defs/Uuid" },
+        "matched_current_site_id": {
+          "type": "string",
+          "description": "Temporary reference to the current map/master candidate id while accepted site UUIDs are not yet available."
+        },
+        "candidate_site_id": {
+          "type": "string",
+          "description": "Temporary candidate-site reference from RA evidence templates."
+        },
         "structure_id": { "$ref": "#/$defs/Uuid" },
         "org_id": { "$ref": "#/$defs/Uuid" },
         "proposal_id": { "$ref": "#/$defs/Uuid" },
@@ -258,6 +271,9 @@
         "source_record_id": { "type": ["string", "null"] },
         "evidence_row_id": { "type": ["string", "null"] },
         "site_observation_id": { "type": ["string", "null"] },
+        "stage_batch_id": { "type": ["string", "null"] },
+        "stage_record_index": { "type": ["integer", "null"], "minimum": 1 },
+        "stage_input_sha256": { "type": ["string", "null"] },
         "url_or_file": { "type": ["string", "null"] },
         "licence_status": {
           "type": ["string", "null"],

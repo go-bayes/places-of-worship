@@ -17,6 +17,10 @@
   scripts, data products, or deployment behaviour.
 - `CRITIQUE.md`: review notes that motivated the revision-event pipeline.
 - `schemas/`: data contracts. Update schemas before changing dependent shapes.
+- `docs/ra-cli-tutorial.md`: RA-facing walkthrough for validating and staging
+  evidence batches.
+- `docs/ra-propose-mapping.md`: mapping from staged RA evidence rows to draft
+  change-event proposals.
 - `docs/revisions-cli.md`: current `pow` CLI and staging behaviour.
 - `docs/templates/ra-historical-site-evidence/`: RA evidence-entry templates.
 - `docs/master-verification-workflow-plan.md`: master verification and review.
