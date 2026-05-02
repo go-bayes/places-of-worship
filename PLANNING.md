@@ -76,6 +76,11 @@ As of 30 April 2026:
   Cloud SQL/PostGIS for staging and review data, Cloud Storage for quarantined
   images and raw submissions, no direct master writes, and GitHub only as an
   optional audit mirror.
+- `CRITIQUE.md` records a critical review of the revisions pipeline for
+  RA-submitted location and denomination evidence. The first schema response is
+  `schemas/change-event.schema.json` plus
+  `schemas/geometry-history.schema.json`, after deciding that `site_id` tracks
+  a mappable place rather than a congregation that relocates.
 
 ## Redevelopment objective
 
@@ -306,8 +311,8 @@ The working model is:
   parsed row is accepted.
 - Define typed contracts before implementation. First-class entities should
   include `site`, `site_snapshot`, `source_dataset`, `site_observation`,
-  `lifecycle_event`, `review_decision`, `change_proposal`, `accepted_change`,
-  and `run_manifest`.
+  `lifecycle_event`, `change_event`, `geometry_history`, `review_decision`,
+  `change_proposal`, `accepted_change`, and `run_manifest`.
 - Prefer append-only change events over silent row overwrites. Examples include
   `site_created`, `site_location_corrected`, `site_closed`,
   `denomination_changed`, `duplicate_merged`, `proposal_retracted`, and
@@ -322,6 +327,9 @@ The working model is:
 - Make temporal state first-class. The model must support exact and bounded
   dates, target-year status, openings, closures, moves, shared buildings,
   denomination changes, changed use, demolition, and uncertain locations.
+- Treat `site_snapshot` rows as derived caches. Accepted change events should be
+  replayed into snapshots by `pow rebuild-master`; consumers should not edit
+  snapshots directly.
 - Keep outputs researcher-friendly: CSV for simple downloads, GeoJSON for
   browser layers, GeoParquet or Parquet for larger analytical products, and
   plain validation reports that R can consume.
@@ -1014,6 +1022,23 @@ map do not drift apart.
 - OSM ids will be stored as source references, but they will not be treated as
   the stable longitudinal site identifier.
 
+### Decided: identity on relocation and geometry correction
+
+- `site_id` identifies a mappable place of worship: a building, parcel,
+  compound, or otherwise locatable worship site.
+- If a congregation, organisation, or worship community relocates to a
+  materially different place, create a new `site_id` for the destination and
+  link the origin and destination through a `site_relocated` change event,
+  `successor_of` relation, and organisation evidence where available.
+- If the physical place is the same but the project geometry improves, an
+  address is renumbered, a street is renamed, or the building outline is refined,
+  keep the same `site_id` and append a geometry-history state.
+- If a building is demolished and rebuilt on the same site, preserve the
+  `site_id` when the place-level worship use is continuous enough, and use
+  `structure_id` or geometry-history records to represent the physical change.
+- Ambiguous cases should be routed to review rather than forced into a same-site
+  or new-site decision.
+
 ### Decided: NZ pilot minimum download contract
 
 - Every NZ pilot release should include:
@@ -1244,17 +1269,21 @@ map do not drift apart.
    review, and target-year probability rules.
 12. Draft the Google Sheets to staging API pilot described in
    `docs/community-ingestion-api-plan.md`.
-13. Draft the authenticated NZ portal staging pilot described in
+13. Prototype the CLI-first RA revisions pipeline from `CRITIQUE.md`, using
+   `schemas/change-event.schema.json` and
+   `schemas/geometry-history.schema.json` as the first event and geometry
+   contracts.
+14. Draft the authenticated NZ portal staging pilot described in
    `docs/portal-data-entry-plan.md`, starting with the UI, auth/security,
    database/storage, and review contracts before implementation.
-14. Extend the NZ `area_summary` product to SA2 geography after checking
+15. Extend the NZ `area_summary` product to SA2 geography after checking
    boundary metadata and point-to-area assignment quality.
-15. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
+16. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
    legends, popups, and export metadata.
-16. Align the NZ map interface with the global map after the data overlay is
+17. Align the NZ map interface with the global map after the data overlay is
    stable, preserving NZ-specific analysis controls.
-17. Prototype site, area, and comparison modes using precomputed layers before
+18. Prototype site, area, and comparison modes using precomputed layers before
     adding live portal queries.
-18. Pilot the new global pipeline on a small country set before full rollout.
-19. Expand `research/` into a country-source matrix for global feasibility
+19. Pilot the new global pipeline on a small country set before full rollout.
+20. Expand `research/` into a country-source matrix for global feasibility
     assessment.

@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+- Merged the revisions-pipeline critique and added initial change-event and
+  geometry-history schemas for RA-submitted location and denomination revisions.
+- Recorded the identity-on-relocation rule: `site_id` tracks the mappable place,
+  while congregations that move to materially different places are linked through
+  relocation events and organisation evidence.
 - Added a portal data-entry planning hub and focused UI, database/storage,
   submission-review, auth/security, media, and provider-evaluation plans for the
   first authenticated New Zealand staging pilot.

@@ -1,0 +1,307 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://go-bayes.github.io/places-of-worship/schemas/change-event.schema.json",
+  "title": "Place of Worship — Change Event",
+  "description": "Append-only event envelope for accepted or staged changes to places of worship. Events are bitemporal: effective dates describe the world, recorded_at describes when the project logged the event.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_id",
+    "client_event_id",
+    "event_type",
+    "event_intent",
+    "target",
+    "effective",
+    "recorded_at",
+    "source_refs",
+    "review",
+    "payload"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^change-event\\.v[0-9]+$"
+    },
+    "event_id": { "$ref": "#/$defs/Uuid" },
+    "client_event_id": {
+      "type": "string",
+      "description": "Stable submitter-side idempotency key. Replays must not apply the same client_event_id twice for the same source batch."
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "site_created",
+        "site_location_corrected",
+        "site_relocated",
+        "site_closed",
+        "site_reopened",
+        "site_status_corrected",
+        "site_status_changed",
+        "denomination_corrected",
+        "denomination_changed",
+        "site_name_corrected",
+        "site_name_changed",
+        "duplicate_merged",
+        "duplicate_split",
+        "structure_created",
+        "structure_geometry_corrected",
+        "structure_demolished",
+        "proposal_retracted",
+        "proposal_superseded"
+      ]
+    },
+    "event_intent": {
+      "type": "string",
+      "description": "Correction means the previous project record was wrong. Change means the world changed.",
+      "enum": ["correction", "observed_change", "lifecycle", "review_state"]
+    },
+    "target": { "$ref": "#/$defs/EventTarget" },
+    "effective": { "$ref": "#/$defs/EffectiveTime" },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/SourceRef" }
+    },
+    "review": { "$ref": "#/$defs/ReviewRef" },
+    "taxonomy_version": {
+      "type": ["string", "null"],
+      "description": "Required by validation for denomination events once schemas/denomination-taxonomy.json exists."
+    },
+    "supersedes_event_ids": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Uuid" }
+    },
+    "payload_hash": {
+      "type": ["string", "null"],
+      "description": "Optional hash of the normalised payload used for replay and audit checks."
+    },
+    "payload": {
+      "oneOf": [
+        { "$ref": "#/$defs/SiteCreatedPayload" },
+        { "$ref": "#/$defs/GeometryPayload" },
+        { "$ref": "#/$defs/RelocationPayload" },
+        { "$ref": "#/$defs/DenominationPayload" },
+        { "$ref": "#/$defs/StatusPayload" },
+        { "$ref": "#/$defs/DuplicatePayload" },
+        { "$ref": "#/$defs/ProposalPayload" }
+      ]
+    }
+  },
+  "$defs": {
+    "Uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F-]{36}$"
+    },
+    "DatasetId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "EventTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_type"],
+      "properties": {
+        "target_type": {
+          "type": "string",
+          "enum": ["site", "structure", "organisation", "proposal", "batch"]
+        },
+        "site_id": { "$ref": "#/$defs/Uuid" },
+        "structure_id": { "$ref": "#/$defs/Uuid" },
+        "org_id": { "$ref": "#/$defs/Uuid" },
+        "proposal_id": { "$ref": "#/$defs/Uuid" },
+        "submission_batch_id": { "$ref": "#/$defs/Uuid" }
+      }
+    },
+    "EffectiveTime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date_precision", "basis"],
+      "anyOf": [
+        { "required": ["effective_date"] },
+        { "required": ["not_earlier_than"] },
+        { "required": ["not_later_than"] }
+      ],
+      "properties": {
+        "effective_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "not_earlier_than": {
+          "type": "string",
+          "format": "date"
+        },
+        "not_later_than": {
+          "type": "string",
+          "format": "date"
+        },
+        "date_precision": {
+          "type": "string",
+          "enum": ["day", "month", "year", "bounded", "unknown"]
+        },
+        "basis": {
+          "type": "string",
+          "enum": ["source_statement", "source_observation", "reviewer_inference", "system_recorded"]
+        },
+        "note": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "SourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_ref_type"],
+      "properties": {
+        "source_ref_type": {
+          "type": "string",
+          "enum": ["source_dataset", "source_record", "evidence_row", "site_observation", "contributor_attestation", "review_note"]
+        },
+        "source_dataset_id": { "$ref": "#/$defs/DatasetId" },
+        "source_record_id": { "type": ["string", "null"] },
+        "evidence_row_id": { "type": ["string", "null"] },
+        "site_observation_id": { "type": ["string", "null"] },
+        "url_or_file": { "type": ["string", "null"] },
+        "licence_status": {
+          "type": ["string", "null"],
+          "enum": ["accepted", "needs_review", "restricted", "unknown", null]
+        },
+        "evidence_summary": { "type": ["string", "null"] }
+      }
+    },
+    "ReviewRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["review_status"],
+      "properties": {
+        "staged_proposal_id": { "$ref": "#/$defs/Uuid" },
+        "review_decision_id": { "$ref": "#/$defs/Uuid" },
+        "contributor_id": { "$ref": "#/$defs/Uuid" },
+        "reviewer_id": { "$ref": "#/$defs/Uuid" },
+        "reviewed_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "review_status": {
+          "type": "string",
+          "enum": ["staged", "accepted", "rejected", "superseded", "retracted", "adjudication_required"]
+        },
+        "confidence": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "rationale": { "type": ["string", "null"] }
+      }
+    },
+    "SiteCreatedPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_type", "site_id", "country_code", "geometry", "status"],
+      "properties": {
+        "payload_type": { "type": "string", "const": "site_created" },
+        "site_id": { "$ref": "#/$defs/Uuid" },
+        "country_code": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "geometry": { "$ref": "site.schema.json#/$defs/Geometry" },
+        "status": { "type": "string" },
+        "name": { "type": ["string", "null"] }
+      }
+    },
+    "GeometryPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_type", "geometry", "geometry_role", "geometry_basis"],
+      "properties": {
+        "payload_type": { "type": "string", "const": "geometry_update" },
+        "geometry_history_id": { "$ref": "#/$defs/Uuid" },
+        "previous_geometry_history_id": { "$ref": "#/$defs/Uuid" },
+        "geometry": { "$ref": "site.schema.json#/$defs/Geometry" },
+        "geometry_role": {
+          "type": "string",
+          "enum": ["site_location", "structure_outline", "parcel_or_compound", "approximate_point", "historical_locality", "inferred_region"]
+        },
+        "geometry_basis": {
+          "type": "string",
+          "enum": ["osm_object", "building_outline", "geocoded_address", "street_imagery", "aerial_imagery", "historical_map", "directory_address", "reviewer_point", "inferred_locality", "corrected_coordinate", "other"]
+        },
+        "distance_from_previous_m": { "type": ["number", "null"], "minimum": 0 }
+      }
+    },
+    "RelocationPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_type", "from_site_id", "to_site_id", "relation_type"],
+      "properties": {
+        "payload_type": { "type": "string", "const": "site_relocation" },
+        "from_site_id": { "$ref": "#/$defs/Uuid" },
+        "to_site_id": { "$ref": "#/$defs/Uuid" },
+        "org_id": { "$ref": "#/$defs/Uuid" },
+        "relation_type": {
+          "type": "string",
+          "enum": ["successor_of", "relocated_from", "relocated_to"]
+        },
+        "previous_geometry_history_id": { "$ref": "#/$defs/Uuid" },
+        "new_geometry_history_id": { "$ref": "#/$defs/Uuid" },
+        "distance_m": { "type": ["number", "null"], "minimum": 0 },
+        "identity_note": { "type": ["string", "null"] }
+      }
+    },
+    "DenominationPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_type", "denomination_code"],
+      "properties": {
+        "payload_type": { "type": "string", "const": "denomination_update" },
+        "denomination_code": { "type": "string" },
+        "denomination_raw": { "type": ["string", "null"] },
+        "religion_code": { "type": ["string", "null"] },
+        "taxonomy_version": { "type": ["string", "null"] },
+        "previous_denomination_code": { "type": ["string", "null"] }
+      }
+    },
+    "StatusPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_type", "new_status"],
+      "properties": {
+        "payload_type": { "type": "string", "const": "status_update" },
+        "previous_status": { "type": ["string", "null"] },
+        "new_status": { "type": "string" },
+        "status_note": { "type": ["string", "null"] }
+      }
+    },
+    "DuplicatePayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_type", "survivor_site_id", "duplicate_site_ids"],
+      "properties": {
+        "payload_type": { "type": "string", "const": "duplicate_resolution" },
+        "survivor_site_id": { "$ref": "#/$defs/Uuid" },
+        "duplicate_site_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Uuid" }
+        },
+        "resolution_note": { "type": ["string", "null"] }
+      }
+    },
+    "ProposalPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_type", "proposal_id", "reason"],
+      "properties": {
+        "payload_type": { "type": "string", "const": "proposal_state" },
+        "proposal_id": { "$ref": "#/$defs/Uuid" },
+        "reason": { "type": "string" },
+        "superseded_by_proposal_id": { "$ref": "#/$defs/Uuid" }
+      }
+    }
+  }
+}

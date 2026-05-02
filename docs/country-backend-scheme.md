@@ -245,6 +245,15 @@ This means:
 - stable longitudinal `site_id` values are assigned by the project
 - difficult merges and splits are handled explicitly in overrides
 
+Relocation rule:
+
+- `site_id` identifies a mappable place of worship.
+- A congregation or organisation that relocates to a materially different place
+  receives a new destination `site_id`, linked to the origin by a relocation
+  event and successor relation.
+- Geometry corrections, address renumbering, and refined building outlines keep
+  the same `site_id` and update geometry history.
+
 ### 3. Download contract default
 
 The first NZ backend milestone should guarantee three download products:

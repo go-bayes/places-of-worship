@@ -330,3 +330,29 @@ relevant if the portal needs Rust-first realtime state or reducer-style governed
 updates. Convex may become relevant if rapid realtime review tooling outweighs
 the Rust-first backend preference. Neither should displace the Google/PostGIS
 baseline until it solves a concrete problem better than the planned contracts.
+
+## 2026-05-02: Treat relocation as new site identity when place changes
+
+Decision:
+Use `site_id` for the mappable place of worship, not for a congregation or
+organisation that may move between places. If a worship community relocates to a
+materially different place, create a new `site_id` for the destination and link
+the records through a relocation event, successor relation, and organisation
+evidence where available. Geometry corrections, address renumbering, street
+renaming, and better building outlines should preserve `site_id` and append
+geometry-history states.
+
+Rationale:
+The project reports places located in space and time. Treating a moving
+congregation as one site would blur place-based density, area assignment, and
+historical map products. Treating every corrected coordinate as a new site would
+inflate counts and break longitudinal continuity. The stable rule is therefore
+place continuity first, organisation continuity second.
+
+Consequences:
+`schemas/change-event.schema.json` is the append-only event envelope for
+accepted or staged changes, with both effective dates and `recorded_at` for
+bitemporal replay. `schemas/geometry-history.schema.json` records time-bounded
+geometry states for a site or structure. `site_snapshot` rows should be treated
+as derived caches rebuilt from accepted change events, not as directly edited
+records.
