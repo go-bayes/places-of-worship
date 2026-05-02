@@ -21,6 +21,11 @@
 - Added the first `pow propose` bridge and mapping contract for translating
   staged RA evidence rows into draft change-event JSONL before `pow diff`,
   including a golden CSV-to-JSONL fixture.
+- Expanded the RA CLI tutorial into a step-by-step walkthrough with
+  screenshot-style figures and explicit instructions not to submit pull
+  requests or edit repository templates during the pilot.
+- Removed the repository contributor guide while development remains
+  single-maintainer.
 - Added the first Rust `pow` CLI scaffold with `validate` and `stage` commands
   for RA evidence CSVs and staged revision JSON/JSONL files, including
   schema-backed change-event and geometry-history validation,

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="360" viewBox="0 0 920 360" role="img" aria-labelledby="title desc">
+  <title id="title">Open a terminal</title>
+  <desc id="desc">A terminal window showing the command to move into the project folder.</desc>
+  <rect width="920" height="360" fill="#f5f7fa"/>
+  <rect x="70" y="54" width="780" height="252" rx="10" fill="#111827"/>
+  <rect x="70" y="54" width="780" height="34" rx="10" fill="#374151"/>
+  <circle cx="94" cy="71" r="6" fill="#ef4444"/>
+  <circle cx="116" cy="71" r="6" fill="#f59e0b"/>
+  <circle cx="138" cy="71" r="6" fill="#22c55e"/>
+  <text x="86" y="132" fill="#d1d5db" font-family="Menlo, Consolas, monospace" font-size="20">$ cd /path/to/places-of-worship</text>
+  <text x="86" y="176" fill="#9ca3af" font-family="Menlo, Consolas, monospace" font-size="18">Replace this path with the folder on your computer.</text>
+  <text x="86" y="220" fill="#d1d5db" font-family="Menlo, Consolas, monospace" font-size="20">$ git pull --ff-only</text>
+  <text x="86" y="264" fill="#9ca3af" font-family="Menlo, Consolas, monospace" font-size="18">Use this only if you have a Git copy of the repository.</text>
+</svg>

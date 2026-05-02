@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="360" viewBox="0 0 920 360" role="img" aria-labelledby="title desc">
+  <title id="title">Do not open pull requests</title>
+  <desc id="desc">A browser-style panel saying not to open pull requests during the pilot.</desc>
+  <rect width="920" height="360" fill="#f5f7fa"/>
+  <rect x="100" y="58" width="720" height="244" rx="12" fill="#ffffff" stroke="#d1d5db"/>
+  <rect x="100" y="58" width="720" height="42" rx="12" fill="#e5e7eb"/>
+  <circle cx="126" cy="79" r="6" fill="#ef4444"/>
+  <circle cx="148" cy="79" r="6" fill="#f59e0b"/>
+  <circle cx="170" cy="79" r="6" fill="#22c55e"/>
+  <text x="140" y="150" fill="#111827" font-family="Arial, sans-serif" font-size="30" font-weight="700">RA pilot rule</text>
+  <text x="140" y="198" fill="#374151" font-family="Arial, sans-serif" font-size="22">Do not open pull requests or submit GitHub changes.</text>
+  <text x="140" y="236" fill="#374151" font-family="Arial, sans-serif" font-size="22">Send the exported CSV, validation output, and notes.</text>
+  <rect x="620" y="126" width="130" height="52" rx="8" fill="#9ca3af"/>
+  <text x="644" y="160" fill="#ffffff" font-family="Arial, sans-serif" font-size="18" font-weight="700">New PR</text>
+  <line x1="612" y1="118" x2="760" y2="188" stroke="#dc2626" stroke-width="8"/>
+</svg>

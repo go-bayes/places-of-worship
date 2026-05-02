@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="400" viewBox="0 0 920 400" role="img" aria-labelledby="title desc">
+  <title id="title">Check the pow tool</title>
+  <desc id="desc">A terminal window showing pow help output with validate, stage, and propose commands.</desc>
+  <rect width="920" height="400" fill="#f5f7fa"/>
+  <rect x="70" y="44" width="780" height="306" rx="10" fill="#111827"/>
+  <rect x="70" y="44" width="780" height="34" rx="10" fill="#374151"/>
+  <circle cx="94" cy="61" r="6" fill="#ef4444"/>
+  <circle cx="116" cy="61" r="6" fill="#f59e0b"/>
+  <circle cx="138" cy="61" r="6" fill="#22c55e"/>
+  <text x="86" y="116" fill="#d1d5db" font-family="Menlo, Consolas, monospace" font-size="18">$ cargo run -p pow-cli -- --help</text>
+  <text x="86" y="160" fill="#9ca3af" font-family="Menlo, Consolas, monospace" font-size="17">Places of Worship data revision tooling</text>
+  <text x="86" y="198" fill="#9ca3af" font-family="Menlo, Consolas, monospace" font-size="17">Commands:</text>
+  <text x="112" y="230" fill="#d1d5db" font-family="Menlo, Consolas, monospace" font-size="17">validate  Validate RA evidence CSVs</text>
+  <text x="112" y="262" fill="#d1d5db" font-family="Menlo, Consolas, monospace" font-size="17">stage     Validate and stage a batch</text>
+  <text x="112" y="294" fill="#d1d5db" font-family="Menlo, Consolas, monospace" font-size="17">propose   Emit draft change-event JSONL</text>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="430" viewBox="0 0 920 430" role="img" aria-labelledby="title desc">
+  <title id="title">Stage a valid batch</title>
+  <desc id="desc">A terminal window showing pow stage output and the batch id to copy.</desc>
+  <rect width="920" height="430" fill="#f5f7fa"/>
+  <rect x="70" y="44" width="780" height="336" rx="10" fill="#111827"/>
+  <rect x="70" y="44" width="780" height="34" rx="10" fill="#374151"/>
+  <circle cx="94" cy="61" r="6" fill="#ef4444"/>
+  <circle cx="116" cy="61" r="6" fill="#f59e0b"/>
+  <circle cx="138" cy="61" r="6" fill="#22c55e"/>
+  <text x="86" y="116" fill="#d1d5db" font-family="Menlo, Consolas, monospace" font-size="17">$ cargo run -p pow-cli -- stage "/path/to/NZ pilot batch.csv"</text>
+  <text x="86" y="160" fill="#9ca3af" font-family="Menlo, Consolas, monospace" font-size="17">pow stage: /path/to/NZ pilot batch.csv</text>
+  <text x="86" y="192" fill="#9ca3af" font-family="Menlo, Consolas, monospace" font-size="17">database: .pow/staging.sqlite</text>
+  <text x="86" y="224" fill="#fbbf24" font-family="Menlo, Consolas, monospace" font-size="17">batch id: batch_1234567890_abcdef123456</text>
+  <text x="86" y="256" fill="#9ca3af" font-family="Menlo, Consolas, monospace" font-size="17">records checked: 25</text>
+  <text x="86" y="288" fill="#9ca3af" font-family="Menlo, Consolas, monospace" font-size="17">records stored: 25</text>
+  <text x="86" y="332" fill="#d1d5db" font-family="Menlo, Consolas, monospace" font-size="17">Copy the batch id if asked to run propose.</text>
+</svg>

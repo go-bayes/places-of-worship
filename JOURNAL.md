@@ -534,3 +534,28 @@ belong in the rebuild/export layer. The security and audit issues raised in
 review, including cryptographic identity binding, source content hashes,
 batch-hash linkage, `client_event_id` uniqueness, licence policy, and takedown
 semantics, remain a separate pre-portal audit pass.
+
+## 2026-05-03: Keep RA validation explicit and single-maintainer
+
+Decision:
+For the current New Zealand RA pilot, make the command-line workflow extremely
+explicit and step-by-step, with screenshot-style figures, and instruct RAs not
+to open pull requests, commit changes, edit repository templates, or submit
+GitHub changes. Remove the general contributor guide while Joseph remains the
+single developer until the data contracts, validation workflow, and map products
+are stable.
+
+Rationale:
+The RA task is evidence checking, not software contribution. A detailed tutorial
+reduces avoidable support friction and lowers the chance that evidence work is
+mixed with repository changes. Keeping development single-maintainer also
+protects the still-moving schema, CLI, staging, and review contracts from
+premature external workflow commitments.
+
+Consequences:
+RA-facing documentation should direct assistants to the agreed spreadsheet,
+CSV export, `pow validate`, optional local staging, and project-team review.
+Repository documentation can still invite public OpenStreetMap corrections, but
+it should not invite GitHub pull requests until contribution, review, security,
+and licensing policies are stable. Future agents should not recreate
+`CONTRIBUTING.md` unless the project explicitly reopens GitHub contribution.

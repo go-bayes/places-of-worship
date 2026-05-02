@@ -41,7 +41,7 @@ This is an independent, academic project. The funders have no role in the design
 
 This map sources its data from **OpenStreetMap (OSM)**, a collaborative global mapping project. Like Wikipedia, OpenStreetMap is a free, open resource built and maintained by volunteers for the public good. To add a missing religious site, please follow these steps.
 
-First, **create an OpenStreetMap account** at [https://www.openstreetmap.org](https://www.openstreetmap.org). 
+First, **create an OpenStreetMap account** at [https://www.openstreetmap.org](https://www.openstreetmap.org).
 
 Second, **navigate to the location** on the map where the place of worship is situated.
 
@@ -51,15 +51,21 @@ Fourth, **add a point** at the correct location and tag it appropriately, or sel
 
 When tagging the location, use `amenity=place_of_worship`. Add the religion (e.g., `religion=christian`, `religion=buddhist`, `religion=muslim`) and the denomination if applicable (e.g., `denomination=catholic`). Include the name and any other relevant details. If known, please add the construction date using `start_date=YYYY` (e.g., `start_date=1887`); this information is particularly valuable for scientific research on religious landscapes.
 
-Finally, **save your changes** with a brief description. 
+Finally, **save your changes** with a brief description.
 
 Your edits will be reviewed by the OSM community and typically appear on this map within a few days to weeks, depending on data update cycles.
 
-For those new to the platform, the [OSM Beginners' Guide](https://wiki.openstreetmap.org/wiki/Beginners%27_guide) provides detailed instructions. 
+For those new to the platform, the [OSM Beginners' Guide](https://wiki.openstreetmap.org/wiki/Beginners%27_guide) provides detailed instructions.
 
 Please note that all contributions must follow the [OpenStreetMap Licence (ODbL 1.0)](https://opendatacommons.org/licenses/odbl/) and be based on your own knowledge.
 
-The most helpful contribution is fixing errors, revising details, removing incorrect places, or adding missing places directly in OpenStreetMap. If you want to contribute to this repository, please see [CONTRIBUTING.md](CONTRIBUTING.md).
+The most helpful public contribution is fixing errors, revising details,
+removing incorrect places, or adding missing places directly in OpenStreetMap.
+
+This repository is not currently accepting pull requests. We are keeping
+development single-maintainer until the data contracts, RA validation workflow,
+and map products are stable. Research assistants should follow the agreed
+spreadsheet and CLI workflow rather than submitting GitHub changes.
 
 ## Technical Architecture
 

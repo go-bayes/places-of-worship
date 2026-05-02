@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="450" viewBox="0 0 920 450" role="img" aria-labelledby="title desc">
+  <title id="title">Propose draft events</title>
+  <desc id="desc">A terminal window showing pow propose output with a warning and JSONL.</desc>
+  <rect width="920" height="450" fill="#f5f7fa"/>
+  <rect x="70" y="44" width="780" height="356" rx="10" fill="#111827"/>
+  <rect x="70" y="44" width="780" height="34" rx="10" fill="#374151"/>
+  <circle cx="94" cy="61" r="6" fill="#ef4444"/>
+  <circle cx="116" cy="61" r="6" fill="#f59e0b"/>
+  <circle cx="138" cy="61" r="6" fill="#22c55e"/>
+  <text x="86" y="116" fill="#d1d5db" font-family="Menlo, Consolas, monospace" font-size="17">$ cargo run -p pow-cli -- propose batch_1234567890_abcdef123456</text>
+  <text x="86" y="160" fill="#fbbf24" font-family="Menlo, Consolas, monospace" font-size="16">WARN [record 2, field denomination_or_tradition_raw]</text>
+  <text x="86" y="190" fill="#fbbf24" font-family="Menlo, Consolas, monospace" font-size="16">raw denomination text was not mapped; taxonomy is deferred</text>
+  <text x="86" y="236" fill="#9ca3af" font-family="Menlo, Consolas, monospace" font-size="16">{"schema_version":"change-event.v1", ...}</text>
+  <text x="86" y="282" fill="#d1d5db" font-family="Menlo, Consolas, monospace" font-size="17">Send this output only if the project team asks for it.</text>
+  <text x="86" y="326" fill="#9ca3af" font-family="Menlo, Consolas, monospace" font-size="16">This does not approve the data or change the public map.</text>
+</svg>
