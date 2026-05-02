@@ -9,6 +9,10 @@
   research outputs, and recorded that web-based data management is deferred
   while the `pow` CLI, local staging, diff reports, and R-readable exports are
   stabilised first.
+- Extended `change-event.schema.json` with pre-release worship-function event
+  payloads for appeared/disappeared worship use, multi-denomination,
+  multi-purpose use, organisation-site links, split/merge cases, and
+  target-year effects, plus fixtures and CLI tests for the new contract.
 - Added the first Rust `pow` CLI scaffold with `validate` and `stage` commands
   for RA evidence CSVs and staged revision JSON/JSONL files, including
   schema-backed change-event and geometry-history validation,

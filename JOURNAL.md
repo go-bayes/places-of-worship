@@ -494,3 +494,21 @@ analysis workflows. A later TUI or authenticated portal should call the same
 contracts rather than invent its own data-management path. Public web products
 should consume reviewed or explicitly provisional exports, not live unreviewed
 submissions.
+
+## 2026-05-03: Treat change-event schemas as pre-release contracts
+
+Decision:
+Do not preserve backward compatibility for awkward change-event shapes before
+`pow diff`, portal intake, or master rebuilds exist. Preserve internal coherence
+instead: update schemas, examples, tests, and RA vocabularies together.
+
+Rationale:
+The schema is currently a design contract, not a public API or accepted master
+data format. Carrying forward early modelling mistakes would make the later
+diff, review, and export surfaces harder to reason about.
+
+Consequences:
+The immediate schema work can tighten rules and rename vocabulary where needed.
+The project should still avoid gratuitous churn, but if a schema shape prevents
+direct representation of worship-function change, it should be corrected now
+rather than worked around in `pow diff`.

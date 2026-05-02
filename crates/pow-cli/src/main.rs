@@ -738,19 +738,6 @@ fn validate_change_event_replay_rules(
             "accepted change events must include payload_hash for deterministic replay",
         );
     }
-
-    let is_denomination = value
-        .get("event_type")
-        .and_then(Value::as_str)
-        .is_some_and(|event_type| event_type.starts_with("denomination_"));
-    if is_denomination && value.get("taxonomy_version").is_none_or(Value::is_null) {
-        summary.warning(
-            Some(record),
-            Some("taxonomy_version"),
-            Some("/taxonomy_version"),
-            "denomination events should pin taxonomy_version once the taxonomy is available",
-        );
-    }
 }
 
 fn validate_json_temporal_rules(value: &Value, record: usize, summary: &mut ValidationSummary) {
@@ -1572,6 +1559,101 @@ mod tests {
                 .iter()
                 .any(|error| error.field.as_deref() == Some("payload_hash"))
         );
+    }
+
+    #[test]
+    fn worship_function_event_passes_schema_and_extra_checks() {
+        let validators = validators();
+        let mut summary = ValidationSummary::new(Path::new("event.json"), "json");
+        let event = json!({
+            "schema_version": "change-event.v1",
+            "event_id": "33333333-3333-3333-3333-333333333333",
+            "client_event_id": "ra-batch-1-row-2",
+            "event_type": "denomination_added",
+            "event_intent": "observed_change",
+            "target": {
+                "target_type": "site",
+                "site_id": "22222222-2222-2222-2222-222222222222"
+            },
+            "effective": {
+                "effective_date": "2018-09-01",
+                "date_precision": "day",
+                "basis": "source_observation"
+            },
+            "recorded_at": "2026-05-03T09:00:00Z",
+            "source_refs": [{
+                "source_ref_type": "evidence_row",
+                "evidence_row_id": "row-2",
+                "licence_status": "accepted"
+            }],
+            "review": {
+                "review_status": "staged",
+                "confidence": 0.8
+            },
+            "taxonomy_version": "denomination-taxonomy.draft",
+            "payload_hash": null,
+            "payload": {
+                "payload_type": "worship_function_update",
+                "worship_use_status": "confirmed_worship",
+                "denomination_set": ["anglican", "methodist"],
+                "purpose_set": ["worship"],
+                "target_year_affects": [{
+                    "target_year": "2018-09-01",
+                    "target_year_status": "present",
+                    "worship_use_status": "confirmed_worship",
+                    "confidence": 0.8,
+                    "basis": "source_observation"
+                }]
+            }
+        });
+
+        validate_json_record(&event, 1, &validators, &mut summary);
+        assert!(summary.errors.is_empty(), "{:#?}", summary.errors);
+        assert!(summary.warnings.is_empty(), "{:#?}", summary.warnings);
+    }
+
+    #[test]
+    fn denomination_event_without_taxonomy_version_is_rejected() {
+        let validators = validators();
+        let mut summary = ValidationSummary::new(Path::new("event.json"), "json");
+        let event = json!({
+            "schema_version": "change-event.v1",
+            "event_id": "33333333-3333-3333-3333-333333333333",
+            "client_event_id": "ra-batch-1-row-2",
+            "event_type": "denomination_added",
+            "event_intent": "observed_change",
+            "target": {
+                "target_type": "site",
+                "site_id": "22222222-2222-2222-2222-222222222222"
+            },
+            "effective": {
+                "effective_date": "2018-09-01",
+                "date_precision": "day",
+                "basis": "source_observation"
+            },
+            "recorded_at": "2026-05-03T09:00:00Z",
+            "source_refs": [{
+                "source_ref_type": "evidence_row",
+                "evidence_row_id": "row-2",
+                "licence_status": "accepted"
+            }],
+            "review": {
+                "review_status": "staged",
+                "confidence": 0.8
+            },
+            "payload": {
+                "payload_type": "worship_function_update",
+                "worship_use_status": "confirmed_worship",
+                "denomination_set": ["anglican"],
+                "target_year_affects": [{
+                    "target_year": "2018-09-01",
+                    "target_year_status": "present"
+                }]
+            }
+        });
+
+        validate_json_record(&event, 1, &validators, &mut summary);
+        assert!(!summary.errors.is_empty());
     }
 
     #[test]

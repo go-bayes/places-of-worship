@@ -41,6 +41,16 @@
         "site_status_changed",
         "denomination_corrected",
         "denomination_changed",
+        "denomination_added",
+        "denomination_removed",
+        "purpose_added",
+        "purpose_removed",
+        "worship_use_appeared",
+        "worship_use_disappeared",
+        "worship_use_split",
+        "worship_use_merged",
+        "organisation_use_started",
+        "organisation_use_ended",
         "site_name_corrected",
         "site_name_changed",
         "duplicate_merged",
@@ -71,7 +81,7 @@
     "review": { "$ref": "#/$defs/ReviewRef" },
     "taxonomy_version": {
       "type": ["string", "null"],
-      "description": "Authoritative taxonomy version for the whole event. Required by validation for denomination events once schemas/denomination-taxonomy.json exists. Do not duplicate inside payloads."
+      "description": "Authoritative taxonomy version for the whole event. Required for denomination events. Do not duplicate inside payloads."
     },
     "supersedes_event_ids": {
       "type": "array",
@@ -79,7 +89,7 @@
     },
     "payload_hash": {
       "type": ["string", "null"],
-      "description": "Optional hash of the normalised payload used for replay and audit checks."
+      "description": "Hash of the normalised payload used for replay and audit checks. May be null while staged; required once review.review_status is accepted."
     },
     "payload": {
       "oneOf": [
@@ -88,6 +98,8 @@
         { "$ref": "#/$defs/GeometryPayload" },
         { "$ref": "#/$defs/RelocationPayload" },
         { "$ref": "#/$defs/DenominationPayload" },
+        { "$ref": "#/$defs/WorshipFunctionPayload" },
+        { "$ref": "#/$defs/OrganisationLinkPayload" },
         { "$ref": "#/$defs/StatusPayload" },
         { "$ref": "#/$defs/NamePayload" },
         { "$ref": "#/$defs/DuplicatePayload" },
@@ -121,6 +133,14 @@
       "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "denomination_update" } } } } }
     },
     {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["denomination_added", "denomination_removed", "purpose_added", "purpose_removed", "worship_use_appeared", "worship_use_disappeared", "worship_use_split", "worship_use_merged"] } } },
+      "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "worship_function_update" } } } } }
+    },
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["organisation_use_started", "organisation_use_ended"] } } },
+      "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "organisation_link_update" } } } } }
+    },
+    {
       "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["site_name_corrected", "site_name_changed"] } } },
       "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "name_update" } } } } }
     },
@@ -137,7 +157,7 @@
       "then": { "properties": { "event_intent": { "const": "correction" } } }
     },
     {
-      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["site_status_changed", "denomination_changed", "site_name_changed"] } } },
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["site_status_changed", "denomination_changed", "denomination_added", "denomination_removed", "purpose_added", "purpose_removed", "site_name_changed"] } } },
       "then": { "properties": { "event_intent": { "const": "observed_change" } } }
     },
     {
@@ -145,12 +165,24 @@
       "then": { "properties": { "event_intent": { "enum": ["observed_change", "lifecycle"] } } }
     },
     {
-      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["site_created", "structure_created", "site_closed", "site_reopened", "structure_demolished"] } } },
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["organisation_use_started", "organisation_use_ended"] } } },
+      "then": { "properties": { "event_intent": { "enum": ["observed_change", "lifecycle"] } } }
+    },
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["site_created", "structure_created", "site_closed", "site_reopened", "structure_demolished", "worship_use_appeared", "worship_use_disappeared", "worship_use_split", "worship_use_merged"] } } },
       "then": { "properties": { "event_intent": { "const": "lifecycle" } } }
     },
     {
       "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["proposal_retracted", "proposal_superseded"] } } },
       "then": { "properties": { "event_intent": { "const": "review_state" } } }
+    },
+    {
+      "if": { "required": ["review"], "properties": { "review": { "required": ["review_status"], "properties": { "review_status": { "const": "accepted" } } } } },
+      "then": { "required": ["payload_hash"], "properties": { "payload_hash": { "type": "string", "minLength": 1 } } }
+    },
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "pattern": "^denomination_" } } },
+      "then": { "required": ["taxonomy_version"], "properties": { "taxonomy_version": { "type": "string", "minLength": 1 } } }
     }
   ],
   "$defs": {
@@ -340,6 +372,221 @@
         "denomination_raw": { "type": ["string", "null"] },
         "religion_code": { "type": ["string", "null"] },
         "previous_denomination_code": { "type": ["string", "null"], "pattern": "^[a-z][a-z0-9._-]*$" }
+      }
+    },
+    "WorshipUseStatus": {
+      "type": "string",
+      "enum": [
+        "confirmed_worship",
+        "probable_worship",
+        "organisation_only",
+        "building_only",
+        "not_worship",
+        "uncertain"
+      ]
+    },
+    "TargetYearStatus": {
+      "type": "string",
+      "enum": ["present", "absent", "uncertain", "not_assessed"]
+    },
+    "SiteType": {
+      "type": "string",
+      "enum": [
+        "place_of_worship",
+        "chapel",
+        "church",
+        "mosque",
+        "temple",
+        "synagogue",
+        "marae_church",
+        "multi_use",
+        "other",
+        "unknown"
+      ]
+    },
+    "PurposeCode": {
+      "type": "string",
+      "enum": [
+        "worship",
+        "community",
+        "education",
+        "social_services",
+        "office",
+        "heritage",
+        "residential",
+        "commercial",
+        "other",
+        "unknown"
+      ]
+    },
+    "DenominationCodeSet": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9._-]*$" }
+    },
+    "PurposeCodeSet": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/PurposeCode" }
+    },
+    "OrganisationRole": {
+      "type": "string",
+      "enum": ["primary", "host", "tenant", "shared"]
+    },
+    "OrganisationLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["org_id", "role"],
+      "properties": {
+        "org_id": { "$ref": "#/$defs/Uuid" },
+        "role": { "$ref": "#/$defs/OrganisationRole" },
+        "link_confidence": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "note": { "type": ["string", "null"] }
+      }
+    },
+    "TargetYearAffect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_year", "target_year_status"],
+      "properties": {
+        "target_year": {
+          "type": "string",
+          "format": "date",
+          "description": "Snapshot date affected by the event, for example 2018-09-01."
+        },
+        "previous_target_year_status": {
+          "anyOf": [
+            { "$ref": "#/$defs/TargetYearStatus" },
+            { "type": "null" }
+          ]
+        },
+        "target_year_status": { "$ref": "#/$defs/TargetYearStatus" },
+        "worship_use_status": {
+          "anyOf": [
+            { "$ref": "#/$defs/WorshipUseStatus" },
+            { "type": "null" }
+          ]
+        },
+        "confidence": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "basis": {
+          "type": ["string", "null"],
+          "enum": ["source_statement", "source_observation", "reviewer_inference", "system_recorded", null]
+        },
+        "note": { "type": ["string", "null"] }
+      }
+    },
+    "WorshipFunctionPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_type"],
+      "anyOf": [
+        { "required": ["worship_use_status"] },
+        { "required": ["denomination_set"] },
+        { "required": ["purpose_set"] },
+        { "required": ["site_type"] },
+        { "required": ["organisation_links"] },
+        { "required": ["target_year_affects"] },
+        { "required": ["split_from_site_ids"] },
+        { "required": ["split_to_site_ids"] },
+        { "required": ["merged_from_site_ids"] }
+      ],
+      "properties": {
+        "payload_type": { "type": "string", "const": "worship_function_update" },
+        "worship_use_status": { "$ref": "#/$defs/WorshipUseStatus" },
+        "previous_worship_use_status": {
+          "anyOf": [
+            { "$ref": "#/$defs/WorshipUseStatus" },
+            { "type": "null" }
+          ]
+        },
+        "denomination_set": { "$ref": "#/$defs/DenominationCodeSet" },
+        "previous_denomination_set": {
+          "anyOf": [
+            { "$ref": "#/$defs/DenominationCodeSet" },
+            { "type": "null" }
+          ]
+        },
+        "purpose_set": { "$ref": "#/$defs/PurposeCodeSet" },
+        "previous_purpose_set": {
+          "anyOf": [
+            { "$ref": "#/$defs/PurposeCodeSet" },
+            { "type": "null" }
+          ]
+        },
+        "site_type": { "$ref": "#/$defs/SiteType" },
+        "previous_site_type": {
+          "anyOf": [
+            { "$ref": "#/$defs/SiteType" },
+            { "type": "null" }
+          ]
+        },
+        "organisation_links": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/OrganisationLink" }
+        },
+        "target_year_affects": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/TargetYearAffect" }
+        },
+        "split_from_site_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Uuid" }
+        },
+        "split_to_site_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Uuid" }
+        },
+        "merged_from_site_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Uuid" }
+        },
+        "merged_to_site_id": { "$ref": "#/$defs/Uuid" },
+        "function_note": { "type": ["string", "null"] }
+      }
+    },
+    "OrganisationLinkPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_type", "site_id", "org_id", "role"],
+      "properties": {
+        "payload_type": { "type": "string", "const": "organisation_link_update" },
+        "site_id": { "$ref": "#/$defs/Uuid" },
+        "org_id": { "$ref": "#/$defs/Uuid" },
+        "role": { "$ref": "#/$defs/OrganisationRole" },
+        "previous_role": {
+          "anyOf": [
+            { "$ref": "#/$defs/OrganisationRole" },
+            { "type": "null" }
+          ]
+        },
+        "started_at": {
+          "type": ["string", "null"],
+          "format": "date"
+        },
+        "ended_at": {
+          "type": ["string", "null"],
+          "format": "date"
+        },
+        "target_year_affects": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TargetYearAffect" }
+        },
+        "link_note": { "type": ["string", "null"] }
       }
     },
     "StatusPayload": {

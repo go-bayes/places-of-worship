@@ -45,7 +45,7 @@ The template is for source evidence, not final counts. Each row should record wh
 - Read `not_later_than` as "known by this date" and `not_earlier_than` as "cannot have occurred before this date". Use the closure equivalents for closure or end-of-use evidence.
 - OpenStreetMap lifecycle tags such as `start_date`, `old_start_date`, and `end_date` are useful evidence, but they are not final truth. Preserve the raw tags and explain how they were interpreted.
 - Visual checks from street maps, street-level imagery, aerial imagery, or historical maps should record the source, capture date where known, URL or file reference, and a short summary.
-- Use date precision fields to distinguish exact dates from month-only, year-only, range-based, or uncertain dates.
+- Use date precision fields to distinguish exact dates from month-only, year-only, bounded, or uncertain dates.
 - Use the target-year columns to record whether the source supports `present`, `absent`, `uncertain`, or `not_assessed` for 2013, 2018, and 2023.
 
 ## Review statuses

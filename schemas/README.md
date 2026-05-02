@@ -4,7 +4,8 @@ JSON Schemas that define the core data structures used across the project.
 
 - organisation.schema.json: organisation-level metadata.
 - area-summary.schema.json: area-level portal/download product.
-- change-event.schema.json: append-only staged or accepted revision event.
+- change-event.schema.json: append-only staged or accepted revision event,
+  including worship-function state changes needed for `pow diff`.
 - geometry-history.schema.json: time-bounded site or structure geometry state.
 - indicator.schema.json: reusable indicator definitions.
 - indicator-observation.schema.json: indicator values attached to spatial and

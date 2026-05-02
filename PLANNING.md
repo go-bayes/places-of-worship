@@ -388,6 +388,12 @@ reports plus JSON/CSV/GeoJSON artefacts that R workflows can consume. Once
 those contracts are stable, a terminal review workbench or authenticated web
 portal can reuse them without changing the underlying governance model.
 
+Because this contract is still pre-release, do not preserve awkward schema
+shapes for backward compatibility. Update examples, tests, and templates
+together while `pow diff`, portal intake, and master rebuilds are still absent.
+The priority is a coherent event model that can represent worship-function
+change directly.
+
 ### 13. Plan the authenticated portal data-entry pilot
 
 - Use `docs/portal-data-entry-plan.md` as the hub for the authenticated

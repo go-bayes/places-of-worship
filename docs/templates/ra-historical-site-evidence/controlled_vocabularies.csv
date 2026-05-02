@@ -37,7 +37,7 @@ observation_date_basis,unknown,Date basis is not clear
 date_precision,day,Exact day is known
 date_precision,month,Month and year are known
 date_precision,year,Only year is known
-date_precision,range,Only a date range is known
+date_precision,bounded,Only a bounded or range-based date is known
 date_precision,unknown,Date precision is not known
 existence_status,present,Source indicates the site existed at the relevant time
 existence_status,absent,Source indicates the site did not exist at the relevant time
@@ -61,6 +61,16 @@ site_type,marae_church,Marae church or church associated with marae
 site_type,multi_use,Multi-use site
 site_type,other,Other site type
 site_type,unknown,Site type is unknown
+purpose_code,worship,Worship use
+purpose_code,community,Community use
+purpose_code,education,Education use
+purpose_code,social_services,Social services use
+purpose_code,office,Office or administration use
+purpose_code,heritage,Heritage or museum use
+purpose_code,residential,Residential use
+purpose_code,commercial,Commercial use
+purpose_code,other,Other purpose
+purpose_code,unknown,Purpose is unknown
 quality_flag,osm_known_at_date,OpenStreetMap object was known at the relevant date
 quality_flag,osm_lifecycle_date_used,OpenStreetMap lifecycle date was used as evidence
 quality_flag,visual_confirmation,Visual evidence supports site existence or status

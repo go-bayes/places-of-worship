@@ -35,7 +35,32 @@ The validator currently supports:
 - JSON Schema validation against `schemas/change-event.schema.json` and
   `schemas/geometry-history.schema.json`
 - first replay-safety checks that JSON Schema cannot express, including date
-  ordering and required `payload_hash` values on accepted change events
+  ordering and bounded-date consistency
+- schema-enforced `payload_hash` values on accepted change events and
+  `taxonomy_version` values on denomination events
+
+The change-event schema is still pre-release, so internal fixtures and tests may
+change when the contract becomes clearer. We should not preserve awkward legacy
+shapes merely for compatibility before `pow diff`, portal intake, or master
+rebuilds exist.
+
+Current schema decisions for `pow diff`:
+
+- `site_created` records creation of a project site record; it does not by
+  itself prove worship use began.
+- `worship_use_appeared` and `worship_use_disappeared` record analytical
+  worship-function onset and end, even when the building existed before or
+  remains afterward.
+- `denomination_added` and `denomination_removed` support concurrent
+  multi-denominational site state. `denomination_changed` remains available for
+  simple replacement events.
+- `purpose_added` and `purpose_removed` support multi-purpose site state.
+- `organisation_use_started` and `organisation_use_ended` record organisation
+  use of a site separately from site identity and geometry.
+- `target_year_affects` records which snapshot dates are affected by an event,
+  so `pow diff` can report target-year state changes without inferring every
+  consequence from prose.
+- `date_precision` uses `bounded` for interval or one-sided date evidence.
 
 ## Intended next commands
 
