@@ -35,10 +35,16 @@
       }
     },
     "capacity_estimate": { "type": ["integer", "null"] },
-    "status": { "type": "string", "enum": ["active", "repurposed", "derelict", "demolished", "unknown"] },
+    "status": { "$ref": "#/$defs/Status" },
     "sameAs": { "type": "array", "items": { "type": "string", "format": "uri" } },
     "tags_raw": { "type": "object", "additionalProperties": { "type": ["string", "number", "boolean", "null"] } },
     "sources": { "type": "array", "minItems": 1, "items": { "$ref": "site.schema.json#/$defs/Source" } }
+  },
+  "$defs": {
+    "Status": {
+      "type": "string",
+      "enum": ["active", "repurposed", "derelict", "demolished", "unknown"]
+    }
   },
   "x_crosswalk": {
     "osm": {

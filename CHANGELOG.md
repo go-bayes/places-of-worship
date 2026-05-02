@@ -1,6 +1,16 @@
 # Changelog
 
 ## Unreleased
+- Tightened `change-event.schema.json` so `event_type` discriminates the
+  required `payload.payload_type` and the allowed `event_intent` via top-level
+  `if/then` rules; added `name_update` and `structure_created` payloads so the
+  full `event_type` enum has a coupled payload; promoted `Status` to `$defs` in
+  `site.schema.json` and `structure.schema.json` and referenced the site
+  variant from `SiteCreatedPayload.status` and `StatusPayload.{previous,new}_status`,
+  and the structure variant from `StructureCreatedPayload.status`; removed the
+  duplicated `taxonomy_version` from `DenominationPayload` so the top-level
+  field is authoritative; and added a `^[a-z][a-z0-9._-]*$` pattern on
+  `denomination_code` pending the taxonomy schema.
 - Moved heavy Python packages out of the default `uv` environment into explicit
   `api`, `fast-parquet`, and `legacy` extras, and documented the narrower Python
   scope.
