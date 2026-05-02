@@ -23,7 +23,9 @@
   including a golden CSV-to-JSONL fixture.
 - Expanded the RA CLI tutorial into a step-by-step walkthrough with
   screenshot-style figures and explicit instructions not to submit pull
-  requests or edit repository templates during the pilot.
+  requests, edit repository templates, or run staging/proposal steps without a
+  project-team request during the pilot, plus a plain-language overview of the
+  project aim and RA role.
 - Removed the repository contributor guide while development remains
   single-maintainer.
 - Added the first Rust `pow` CLI scaffold with `validate` and `stage` commands

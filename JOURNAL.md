@@ -542,8 +542,8 @@ For the current New Zealand RA pilot, make the command-line workflow extremely
 explicit and step-by-step, with screenshot-style figures, and instruct RAs not
 to open pull requests, commit changes, edit repository templates, or submit
 GitHub changes. Remove the general contributor guide while Joseph remains the
-single developer until the data contracts, validation workflow, and map products
-are stable.
+single developer until the data contracts, RA validation workflow, and map
+products are stable.
 
 Rationale:
 The RA task is evidence checking, not software contribution. A detailed tutorial

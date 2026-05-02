@@ -27,9 +27,10 @@
 - `docs/portal-data-entry-plan.md`: authenticated portal planning hub.
 - `research/`: lightweight country-source feasibility notes only.
 - `grant/`: ignored local reporting reference; do not commit it.
-- The repository is not currently accepting external pull requests. Do not
-  recreate `CONTRIBUTING.md` unless the user explicitly reopens GitHub
-  contribution.
+- The repository is not currently accepting external pull requests while the
+  data contracts, RA validation workflow, and map products are still
+  stabilising. Do not recreate `CONTRIBUTING.md` unless the user explicitly
+  reopens GitHub contribution.
 
 ## Core Model
 
