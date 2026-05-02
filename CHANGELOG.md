@@ -1,6 +1,17 @@
 # Changelog
 
 ## Unreleased
+- Added the first Rust `pow` CLI scaffold with `validate` and `stage` commands
+  for RA evidence CSVs and staged revision JSON/JSONL files, including
+  schema-backed change-event and geometry-history validation,
+  controlled-vocabulary checks, date/coordinate/probability checks,
+  replay-safety checks, text/JSON reports, and a local SQLite staging store.
+- Added `docs/revisions-cli.md` and a small NZ sample change-event batch to
+  document how the local CLI relates to later map/API staging ergonomics.
+- Recorded journal decisions that the edit/review maps should submit through an
+  authenticated API rather than call the CLI directly, and that the first
+  staging store should use SQLite-compatible tables while Turso remains a later
+  evaluation candidate.
 - Tightened `change-event.schema.json` so `event_type` discriminates the
   required `payload.payload_type` and the allowed `event_intent` via top-level
   `if/then` rules; added `name_update` and `structure_created` payloads so the

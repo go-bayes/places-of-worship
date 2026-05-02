@@ -352,6 +352,14 @@ Start with invariants and event models before writing the implementation. The
 first useful implementation target is a local CLI that validates and diffs a
 small staged NZ evidence batch without writing to the master.
 
+Implementation note: the first `pow validate` and `pow stage` scaffolds now
+exist under `crates/pow-cli`. They are local and CI-facing validation and
+staging surfaces, not something the static HTML map should call directly. The
+eventual authenticated map should submit to a backend API that reuses the same
+validation rules, stages submissions, and returns reviewable proposal records.
+Static map products should continue to consume reviewed exports. The first
+local staging database is plain SQLite at `.pow/staging.sqlite` by default.
+
 ### 13. Plan the authenticated portal data-entry pilot
 
 - Use `docs/portal-data-entry-plan.md` as the hub for the authenticated
@@ -1272,10 +1280,11 @@ map do not drift apart.
    review, and target-year probability rules.
 12. Draft the Google Sheets to staging API pilot described in
    `docs/community-ingestion-api-plan.md`.
-13. Prototype the CLI-first RA revisions pipeline from `CRITIQUE.md`, using
-   `schemas/change-event.schema.json` and
+13. Extend the initial CLI-first RA revisions pipeline from `CRITIQUE.md`,
+   using `schemas/change-event.schema.json` and
    `schemas/geometry-history.schema.json` as the first event and geometry
-   contracts.
+   contracts. The first scaffolds are `pow validate` and `pow stage`; next add
+   dry-run diff output from the local SQLite staging store.
 14. Draft the authenticated NZ portal staging pilot described in
    `docs/portal-data-entry-plan.md`, starting with the UI, auth/security,
    database/storage, and review contracts before implementation.

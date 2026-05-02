@@ -2,36 +2,34 @@
 
 ## Scope And Precedence
 
-- These instructions apply to the `places-of-worship` repository.
-- Direct user requests take precedence over this file.
-- This file is the canonical repo-local agent guidance. Do not create or rely on
-  a repo-root `CLAUDE.md`.
+- instructions apply to the `places-of-worship` repository.
+- user requests take precedence over this file.
+- this file is the canonical repo-local agent guidance. 
 - `PLANNING.md` is the planning source of truth. Update it when priorities,
   scope decisions, or sequencing change.
 - `CHANGELOG.md` tracks durable project progress. Update it when a change adds
-  or revises user-visible data products, schemas, scripts, documentation, or
-  deployment behaviour.
+  or revises schemas, scripts, documentation, or deployment behaviour.
 
-## Project Shape
+## Project
 
-- The project is a research-facing geospatial portal for places of worship and
+- the project is a research-facing geospatial portal for places of worship and
   related spatial and temporal indicators.
-- The lowest-level unit of analysis is the mapped place or building used for
+- the lowest-level unit of analysis is the mapped place or building used for
   worship.
-- Higher-level units are country-specific area systems such as territorial
+- higher-level units are country-specific area systems such as territorial
   authorities, Statistical Area 2 units, counties, municipalities, regions, or
   other documented boundary sets.
-- The local `grant/` directory is ignored by Git and should be treated as a
+- the local `grant/` directory is ignored by Git and should be treated as a
   reporting reference, not as source material to commit.
-- Use `research/` for lightweight, versioned country-source audits and global
+- use `research/` for lightweight, versioned country-source audits and global
   feasibility notes. Keep raw downloads, restricted data, and large extracts out
   of that directory.
 
 ## Stack
 
-- Frontend: static HTML, CSS, JavaScript, Leaflet/MapLibre-era map code, and
+- frontend: static HTML, CSS, JavaScript, Leaflet/MapLibre-era map code, and
   static JSON/GeoJSON products served through GitHub Pages.
-- Backend/API: Python with FastAPI and Uvicorn when API work is required.
+- backend/API: TBA. Currently Python with FastAPI and Uvicorn when API work is required.
 - Data pipelines: R and Python; R is canonical for research-facing pipeline
   logic, source transformations, and country data products.
 - Python environments and commands use `uv`. Prefer `uv run` over direct

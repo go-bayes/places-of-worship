@@ -9,6 +9,7 @@ database/dumps/
 .env
 .env.local
 .env.*.local
+.pow/
 frontend/config.js
 config/local.yml
 config/secrets.yml
@@ -59,6 +60,9 @@ yarn-debug.log*
 yarn-error.log*
 package-lock.json
 yarn.lock
+
+# Rust
+target/
 
 # Docker
 docker-compose.override.yml
@@ -191,6 +195,7 @@ visualizations/
 # Data processing artifacts
 *.lock
 !uv.lock
+!Cargo.lock
 *.pid
 *.state
 *.checkpoint

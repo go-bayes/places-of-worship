@@ -380,3 +380,60 @@ should use `uv sync --extra api`; Parquet fast-path work should add
 `--extra fast-parquet`; archived legacy inspection should use `--extra legacy`.
 New canonical data-cleaning, event-replay, and master-rebuild work should go to
 R or Rust rather than expanding the default Python dependency set.
+
+## 2026-05-02: Keep edit and review maps API-backed, not CLI-backed
+
+Decision:
+The edit map should remain map-first and should not call the Rust CLI directly.
+The first `pow validate` CLI is the local and CI validation surface for exported
+RA spreadsheets, bulk evidence files, and agent-produced event proposals. A
+future authenticated map should submit proposals to a backend API that reuses the
+same Rust validation rules, writes only to staging, and returns clear submission
+states: staged, rejected by validation, or saved only locally in demo mode.
+
+Rationale:
+The working map needs to feel fast and spatial. Large explanatory panels would
+make the core task harder: selecting a site, building, or point and entering the
+smallest relevant correction or nomination. The safety boundary belongs at the
+API and staging layer, not inside a static HTML page. Keeping the CLI and API on
+the same validation contracts means RA spreadsheets, map submissions, bulk
+uploads, and AI-assisted proposals can converge on one governed path without
+allowing direct master writes.
+
+Consequences:
+The entry UI should use concise controls, disabled states, and confirmation
+messages that identify the true persistence state. The reviewer UI should show
+the same map and site context, plus validation warnings, nearby duplicate
+candidates, linked OSM objects, linked building geometry, existing master
+values, proposed values, and the evidence trail. Review decisions should emit
+accepted or rejected change events; public map layers should still be derived
+from reviewed exports and rebuilt snapshots rather than live unreviewed
+submissions.
+
+## 2026-05-02: Use SQLite-compatible staging first, evaluate Turso later
+
+Decision:
+Use a plain SQLite-compatible staging design for the next local `pow stage` and
+`pow diff` milestone. Treat Turso as a possible later spike, not the default
+database choice for the first staging implementation.
+
+Rationale:
+The immediate need is a small, auditable local staging store for RA batches:
+raw-input snapshots, parsed rows, validation diagnostics, staged proposals,
+review decisions, accepted change events, and diff reports. SQLite is sufficient
+for that milestone, is easy to inspect, and keeps the database contract simple.
+The linked Turso project is promising because it is written in Rust, is
+SQLite-compatible, and advertises features relevant to future collaboration
+such as change data capture, improved write concurrency, multi-language
+bindings, and WebAssembly support. However, its repository currently describes
+the software as beta and advises caution with production data. That makes it a
+candidate for evaluation after the schema, staging, and review contracts are
+stable, not the foundation for the first governed intake path.
+
+Consequences:
+Design the next staging tables in standard SQLite terms and avoid relying on
+provider-specific extensions. Keep exports explicit enough to migrate later to
+Turso, libSQL, Cloud SQL/PostgreSQL/PostGIS, or another backend. Turso should be
+evaluated only when we have concrete pressure for SQLite-compatible sync, change
+data capture, browser/WASM workflows, or agent-friendly local database
+inspection that plain SQLite cannot handle well.
