@@ -437,3 +437,60 @@ Turso, libSQL, Cloud SQL/PostgreSQL/PostGIS, or another backend. Turso should be
 evaluated only when we have concrete pressure for SQLite-compatible sync, change
 data capture, browser/WASM workflows, or agent-friendly local database
 inspection that plain SQLite cannot handle well.
+
+## 2026-05-03: Treat functional changes as data
+
+Decision:
+The project should treat changes in place-of-worship function as first-class
+data. The mission-critical diffs are whether a site functioned as a place of
+worship at a specified time, whether that worship use appeared or disappeared,
+and whether the use changed denomination, became multi-denominational, became
+multi-purpose, split across several worship uses, or merged previously separate
+uses.
+
+Rationale:
+The research objective is spatial and temporal analysis of worship places, not
+only inventory management for buildings. A building may exist before worship use
+begins and may remain after worship use ends. Building outlines, demolition,
+rebuilding, imagery, and property evidence are therefore supporting evidence and
+structure history. The analytical state is the function of the site at a time:
+worship use, denomination or tradition set, organisation links, confidence, and
+target-year status.
+
+Consequences:
+`pow diff` must report functional transitions separately from geometry or
+structure changes. Accepted changes should preserve effective time, evidence,
+review status, confidence, and target-year implications. The current
+`change-event` schema is a start, but it still needs an explicit functional
+state model before review decisions depend on it: worship-use status,
+denomination sets, multi-denomination, multi-purpose use, organisation-site
+links, and appeared/disappeared target-year states should be specified rather
+than squeezed into a single status or denomination field.
+
+## 2026-05-03: Surface research outputs through CLI contracts first
+
+Decision:
+Defer web-based data management and make the local governed data-modification
+contracts strong first. The near-term surface for data modification,
+verification, and analytical consequences is the `pow` CLI plus SQLite staging,
+plain reports, and R-readable exports.
+
+Rationale:
+The key research-facing outputs must be efficient, safe, and robust. A web
+portal can make contribution easier, but it should not decide the underlying
+semantics of validation, staging, review, diffing, replay, or export. Building
+`pow diff` first lets the project show exactly how a proposed batch would change
+target-year worship-function states, appeared/disappeared counts, denomination
+or tradition summaries, multi-use classifications, area densities, map layers,
+downloads, and uncertainty statements before any interactive editor can submit
+to a backend.
+
+Consequences:
+The roadmap should keep evidence governance and research outputs coupled in
+each phase. The next CLI milestone should produce both review-facing and
+investigator-facing artefacts: text summaries for humans, JSON for audit and
+API reuse, CSV/GeoJSON for maps and downloads, and R-readable outputs for
+analysis workflows. A later TUI or authenticated portal should call the same
+contracts rather than invent its own data-management path. Public web products
+should consume reviewed or explicitly provisional exports, not live unreviewed
+submissions.

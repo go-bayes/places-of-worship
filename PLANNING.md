@@ -1,13 +1,19 @@
 # Planning
 
-This file is the planning source of truth for the repository.
+This file is the active planning source for the repository.
 
-Use it for priorities, decisions, sequencing, and open questions. Keep other
-docs focused on implementation detail, operations, or reference material.
+Use it for current priorities, design detail, sequencing, and open questions.
+Use `ROADMAP.md` for high-level phases, `JOURNAL.md` for decisions and
+rationale, and `CHANGELOG.md` for durable progress.
 
 ## Planning rules
 
 - Put active priorities here before changing roadmap-related docs elsewhere.
+- Keep `ROADMAP.md` directional. It should explain phases and non-goals, not
+  duplicate this file's task list.
+- Keep evidence governance and research outputs coupled. New ingestion or
+  review work should also explain how the resulting changes will appear in
+  maps, downloads, visualisations, and reproducible analysis workflows.
 - Treat `docs/` as supporting reference unless a document explicitly replaces a
   section here.
 - Prefer deterministic pipelines over one-off manual cleanup.
@@ -323,6 +329,13 @@ The working model is:
 - Require dry-run and diff output before accepting a batch. The system should
   show records added, modified, retired, validation warnings, source coverage,
   area/year count changes, and expected map/export effects.
+- Treat changes in worship function as analytical data, not only database
+  maintenance. A diff that establishes that a place of worship appeared, ceased
+  worship use, changed denomination, became multi-denominational, became
+  multi-purpose, split across several worship uses, or merged uses within one
+  site must be preserved as a reviewed event with effective time and evidence.
+  These functional transitions are mission-critical for density estimates,
+  target-year reconstructions, and longitudinal analysis.
 - Separate evidence from conclusions. A source observation can state what a
   directory, OSM history, charity record, or visual check shows; a reviewed
   conclusion can then assign target-year status, confidence, and analytical
@@ -330,6 +343,11 @@ The working model is:
 - Make temporal state first-class. The model must support exact and bounded
   dates, target-year status, openings, closures, moves, shared buildings,
   denomination changes, changed use, demolition, and uncertain locations.
+- Focus lifecycle and diff semantics on worship use at a site, not merely on
+  whether a building exists. Building existence, demolition, and rebuilding are
+  evidence and structure-history facts; the analytical question is whether the
+  site functioned as a place of worship for specified traditions, organisations,
+  and target years.
 - Treat `site_snapshot` rows as derived caches. Accepted change events should be
   replayed into snapshots by `pow rebuild-master`; consumers should not edit
   snapshots directly.
@@ -359,6 +377,16 @@ eventual authenticated map should submit to a backend API that reuses the same
 validation rules, stages submissions, and returns reviewable proposal records.
 Static map products should continue to consume reviewed exports. The first
 local staging database is plain SQLite at `.pow/staging.sqlite` by default.
+
+Near-term decision: defer web-based data management and make the CLI contracts
+excellent first. The next priority is for `pow diff` to surface the analytical
+consequences of staged evidence: target-year appeared/disappeared states,
+denomination and tradition changes, multi-denomination and multi-purpose use,
+area counts, density estimates, map-layer changes, download changes, and
+uncertainty or warning summaries. These outputs should be available as plain
+reports plus JSON/CSV/GeoJSON artefacts that R workflows can consume. Once
+those contracts are stable, a terminal review workbench or authenticated web
+portal can reuse them without changing the underlying governance model.
 
 ### 13. Plan the authenticated portal data-entry pilot
 
@@ -667,6 +695,14 @@ several congregations share one building, or one building needs to be split
 into multiple analytical site records. These nominations should enter staging
 with their own ids, source evidence, target-year status, proposed master action,
 and links to any nearby master, OSM, building, or organisation records.
+
+For this subproject, "appeared" and "disappeared" should mean appeared or
+disappeared as a worship-function observation at the relevant site and time.
+A building may continue to exist after worship use ends, and a building may be
+visible before a documented worship use begins. Diffs should therefore report
+functional changes separately from structure changes: worship use present or
+absent, denomination or tradition set, multi-denominational use,
+multi-purpose use, organisation links, and confidence for each target year.
 
 Annual charity details may become useful temporal evidence, but they should be
 handled as organisation-level observations rather than building-level facts.
@@ -1049,6 +1085,24 @@ map do not drift apart.
   `structure_id` or geometry-history records to represent the physical change.
 - Ambiguous cases should be routed to review rather than forced into a same-site
   or new-site decision.
+
+### Decided: functional change events are data
+
+- The project treats changes in place-of-worship function as first-class data
+  for analysis. The most important diffs are not only row additions or edits,
+  but reviewed claims that a site began worship use, ceased worship use, changed
+  denomination or tradition, became shared by several worship communities,
+  became multi-purpose, split into several analytical worship uses, or merged
+  previously separate uses.
+- These events should carry effective time, source evidence, review status,
+  confidence, and target-year implications.
+- Building existence is a related but distinct evidence stream. Structure
+  history can support a worship-use claim, but the analytical state is the
+  worship function at the site for a specified time.
+- The current `change-event` schema is a start. Before `pow diff` becomes a
+  decision surface, we should add or specify functional-state payloads for
+  worship use, denomination sets, multi-denomination, multi-purpose use,
+  organisation-site links, and target-year state changes.
 
 ### Decided: NZ pilot minimum download contract
 

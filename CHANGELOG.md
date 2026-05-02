@@ -1,6 +1,14 @@
 # Changelog
 
 ## Unreleased
+- Added `ROADMAP.md` as a directional phase map for the project and simplified
+  `AGENTS.md` so future agents can find the roadmap, active planning, decision
+  log, schemas, revision CLI docs, RA templates, verification plan, and portal
+  plans quickly.
+- Revised the roadmap and planning notes to pair evidence governance with
+  research outputs, and recorded that web-based data management is deferred
+  while the `pow` CLI, local staging, diff reports, and R-readable exports are
+  stabilised first.
 - Added the first Rust `pow` CLI scaffold with `validate` and `stage` commands
   for RA evidence CSVs and staged revision JSON/JSONL files, including
   schema-backed change-event and geometry-history validation,
@@ -12,6 +20,10 @@
   authenticated API rather than call the CLI directly, and that the first
   staging store should use SQLite-compatible tables while Turso remains a later
   evaluation candidate.
+- Clarified in planning and the journal that functional changes in worship use
+  are first-class analytical data: appeared/disappeared target-year states,
+  denomination changes, multi-denomination, multi-purpose use, and split or
+  merged worship uses must be preserved separately from building existence.
 - Tightened `change-event.schema.json` so `event_type` discriminates the
   required `payload.payload_type` and the allowed `event_intent` via top-level
   `if/then` rules; added `name_update` and `structure_created` payloads so the

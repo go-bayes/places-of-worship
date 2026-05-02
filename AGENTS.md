@@ -1,112 +1,71 @@
 # AGENTS.md
 
-## Scope And Precedence
+## Scope
 
-- instructions apply to the `places-of-worship` repository.
-- user requests take precedence over this file.
-- this file is the canonical repo-local agent guidance. 
-- `PLANNING.md` is the planning source of truth. Update it when priorities,
-  scope decisions, or sequencing change.
-- `CHANGELOG.md` tracks durable project progress. Update it when a change adds
-  or revises schemas, scripts, documentation, or deployment behaviour.
+- Applies to the `places-of-worship` repository.
+- Direct user requests take precedence over this file.
+- This is the canonical repo-local agent guidance. Do not create or rely on a
+  repo-root `CLAUDE.md`.
+- Use New Zealand English.
 
-## Project
+## Where To Look
 
-- the project is a research-facing geospatial portal for places of worship and
-  related spatial and temporal indicators.
-- the lowest-level unit of analysis is the mapped place or building used for
-  worship.
-- higher-level units are country-specific area systems such as territorial
-  authorities, Statistical Area 2 units, counties, municipalities, regions, or
-  other documented boundary sets.
-- the local `grant/` directory is ignored by Git and should be treated as a
-  reporting reference, not as source material to commit.
-- use `research/` for lightweight, versioned country-source audits and global
-  feasibility notes. Keep raw downloads, restricted data, and large extracts out
-  of that directory.
+- `ROADMAP.md`: high-level phases, non-goals, and long-horizon direction.
+- `PLANNING.md`: active design, priorities, next steps, and open questions.
+- `JOURNAL.md`: decisions and rationale that should be traceable later.
+- `CHANGELOG.md`: durable progress. Update it for user-visible docs, schemas,
+  scripts, data products, or deployment behaviour.
+- `CRITIQUE.md`: review notes that motivated the revision-event pipeline.
+- `schemas/`: data contracts. Update schemas before changing dependent shapes.
+- `docs/revisions-cli.md`: current `pow` CLI and staging behaviour.
+- `docs/templates/ra-historical-site-evidence/`: RA evidence-entry templates.
+- `docs/master-verification-workflow-plan.md`: master verification and review.
+- `docs/portal-data-entry-plan.md`: authenticated portal planning hub.
+- `research/`: lightweight country-source feasibility notes only.
+- `grant/`: ignored local reporting reference; do not commit it.
 
-## Stack
+## Core Model
 
-- frontend: static HTML, CSS, JavaScript, Leaflet/MapLibre-era map code, and
-  static JSON/GeoJSON products served through GitHub Pages.
-- backend/API: TBA. Currently Python with FastAPI and Uvicorn when API work is required.
-- Data pipelines: R and Python; R is canonical for research-facing pipeline
-  logic, source transformations, and country data products.
-- Python environments and commands use `uv`. Prefer `uv run` over direct
-  `python` invocation unless using the checked-in virtual environment is needed
-  to work around local cache permissions.
-- Prefer `extendr` for targeted acceleration of hot R bottlenecks after
-  profiling. Do not move the research pipeline wholesale to Rust without an
-  explicit planning decision.
+- The project maps places of worship in space and time.
+- The lowest-level analytical unit is a mappable site with worship-function
+  state, not merely a building record.
+- Functional changes are data: appeared/disappeared worship use, denomination
+  changes, multi-denominational use, multi-purpose use, shared buildings, and
+  split or merged worship uses must be preserved with evidence and time bounds.
+- `site_id` tracks the mappable place. Moving congregations normally create a
+  new `site_id` linked by relocation and organisation evidence.
+- New Zealand is the proof-of-concept country, not the universal template.
 
-## Commands
+## Stack Defaults
 
-- Install Python dependencies with `uv sync`.
-- Run Python scripts with `uv run <script>` where possible.
-- Start the API with `uv run uvicorn api.main:app --reload` from the repo root.
-- Run R scripts from the repo root unless the script explicitly supports
-  another working directory. New scripts should resolve paths from either the
-  repo root or `scripts/`.
-- Serve static files with a simple local server when testing frontend pages.
+- Research-facing pipelines and analysis: R.
+- Governed data modification: Rust (`pow validate`, `pow stage`, later diff,
+  review, replay, and export).
+- Python: support/API tooling only; use `uv`.
+- Frontend: static HTML/CSS/JavaScript map products until a secure backend is
+  ready.
+- Backend baseline for the portal: managed auth plus Rust API and staged
+  storage; no direct master writes from public or RA interfaces.
+- Defer web-based data management until `pow` validation, staging, diff, review,
+  replay, and export contracts are stable.
 
-## Data Contracts
+## Working Rules
 
-- Update schemas in `schemas/` before changing dataset shapes that depend on
-  them.
-- Current research-layer contracts include:
-  - `source_dataset`
-  - `indicator`
-  - `indicator_observation`
-  - `visual_layer`
-  - `area_summary`
-- Preserve provenance for OpenStreetMap, Statistics New Zealand, national
-  statistical offices, boundary providers, and any survey or administrative
-  sources.
-- Keep source name, URL, licence, retrieval date, local snapshot reference,
-  citation, and access limits visible in generated metadata where possible.
-- Do not mix raw, intermediate, and publication-ready data without clear
-  filenames, manifests, or metadata notes.
-- Keep large, restricted, or raw source snapshots out of Git unless the repo
+- Keep large, restricted, raw, or private data out of Git unless the repo
   already tracks that class of artefact and the licence permits it.
-
-## New Zealand Reference Implementation
-
-- Treat New Zealand as the proof-of-concept country, not as the universal
-  template for all countries.
-- The current territorial-authority religion workflow includes 2013, 2018, and
-  2023 Census data aligned to official TA boundary codes.
-- Do not hard-code 2018 as the map overlay year. New frontend work should be
-  year-aware and should display the census year, denominator, source, boundary
-  set, and quality flag.
-- The first TA `area_summary` product combines current committed place counts
-  with census-year religion denominators. Preserve the quality flag that makes
-  this limitation explicit.
-- Site-to-area assignment belongs in reproducible backend or pipeline code, not
-  as ad hoc frontend logic.
-- Boundary vintages and non-assigned places should be documented in output
-  metadata.
-
-## Frontend
-
-- Keep the map usable as the first screen. 
-- Preserve mobile behaviour and dock/toggle ergonomics when editing the NZ map.
-- Use restrained, accessible styling and colour-blind-friendly map overlays.
-- Prefer layer metadata from generated data products over one-off frontend
-  constants.
-- Test changed map pages in a browser and verify that tiles, controls, popups,
-  legends, and overlays render.
-
-## API And Scripts
-
-- Prefer Polars for new tabular Python work unless an existing script uses
-  another library.
-- Keep API responses stable unless the user asks for a schema change.
+- Preserve source provenance: name, URL or file reference, licence, retrieval
+  date, access limits, and source notes where possible.
+- Treat incoming data as untrusted until validated, reviewed, and accepted
+  through staging.
 - Validate generated JSON, GeoJSON, manifests, schemas, review queues, and area
   summaries before replacing existing artefacts.
-- For R outputs, prefer deterministic row ordering and explicit rounding.
-- Record any unresolved data-quality issue in the product metadata or planning
-  notes rather than silently hiding it.
+- For frontend changes, test the affected map page in a browser and check tiles,
+  controls, legends, popups, and overlays.
 
-## Prose
+## Useful Commands
 
-- Use New Zealand English.
+- Rust checks: `cargo fmt --all`, `cargo test`, `cargo clippy --all-targets -- -D warnings`.
+- Python setup: `uv sync`; run scripts with `uv run <script>`.
+- API prototype: `uv run uvicorn api.main:app --reload`.
+- R scripts: run from the repo root unless the script documents another working
+  directory.
