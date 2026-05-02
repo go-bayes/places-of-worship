@@ -30,7 +30,7 @@
     },
     "event_type": {
       "type": "string",
-      "description": "Event type drives both the payload shape and the allowed event_intent values via the top-level allOf. structure_created is reserved: payload coupling is deferred until the structure-create payload is defined.",
+      "description": "Event type drives both the payload shape and the allowed event_intent values via the top-level allOf.",
       "enum": [
         "site_created",
         "site_location_corrected",
@@ -84,6 +84,7 @@
     "payload": {
       "oneOf": [
         { "$ref": "#/$defs/SiteCreatedPayload" },
+        { "$ref": "#/$defs/StructureCreatedPayload" },
         { "$ref": "#/$defs/GeometryPayload" },
         { "$ref": "#/$defs/RelocationPayload" },
         { "$ref": "#/$defs/DenominationPayload" },
@@ -98,6 +99,10 @@
     {
       "if": { "required": ["event_type"], "properties": { "event_type": { "const": "site_created" } } },
       "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "site_created" } } } } }
+    },
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "const": "structure_created" } } },
+      "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "structure_created" } } } } }
     },
     {
       "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["site_location_corrected", "structure_geometry_corrected"] } } },
@@ -268,6 +273,22 @@
         "geometry": { "$ref": "site.schema.json#/$defs/Geometry" },
         "status": { "$ref": "site.schema.json#/$defs/Status" },
         "name": { "type": ["string", "null"] }
+      }
+    },
+    "StructureCreatedPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_type", "structure_id", "site_id", "status"],
+      "properties": {
+        "payload_type": { "type": "string", "const": "structure_created" },
+        "structure_id": { "$ref": "#/$defs/Uuid" },
+        "site_id": { "$ref": "#/$defs/Uuid" },
+        "geometry": { "$ref": "site.schema.json#/$defs/Geometry" },
+        "building_type": {
+          "type": ["string", "null"],
+          "description": "OSM building=* value if known (e.g., church, mosque, synagogue, temple, chapel, cathedral, monastery, shrine, pagoda, gurdwara, religious)."
+        },
+        "status": { "$ref": "structure.schema.json#/$defs/Status" }
       }
     },
     "GeometryPayload": {
