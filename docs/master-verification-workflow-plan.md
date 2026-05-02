@@ -2,6 +2,8 @@
 
 Planning source of truth: `PLANNING.md`.
 
+Related portal design: `docs/portal-data-entry-plan.md`.
+
 This document sketches how the project should expose data from the master
 database for verification. The immediate New Zealand problem is roughly 3,000+
 sites. The global problem may be around 2 million sites. At that scale,

@@ -300,3 +300,33 @@ The repository still needs a concrete event schema, storage choice for staged
 and accepted events, and a migration path from current static JSON outputs to
 event-rebuilt master snapshots. These should be specified before a Rust service
 or public write endpoint is built.
+
+## 2026-05-02: Use Google Cloud for the first portal staging baseline
+
+Decision:
+Use Google Cloud as the reference backend for the first authenticated New
+Zealand portal staging pilot. Defer Convex and SpacetimeDB evaluation until the
+submission, review, audit, and master-ingestion contracts are stable.
+
+Rationale:
+The immediate problem is safe, auditable intake: managed authentication,
+permission scopes, staged submissions, geospatial validation, image quarantine,
+reviewer decisions, and dry-run master diffs. Google Cloud provides mature
+pieces for this path:
+Identity Platform for managed OAuth and multi-factor authentication support,
+Cloud Run for a Rust API, Cloud SQL/PostgreSQL with PostGIS for staging and
+review geometry, Cloud Storage for raw submissions and quarantined images, and a
+durable ecosystem that is likely to remain available over the long horizon.
+
+Consequences:
+The planning docs should treat Google Cloud as the baseline implementation, while
+keeping provider-neutral contracts for identity claims, SQL/GeoJSON exports,
+object storage references, audit records, and master-change manifests. GitHub
+may be used as an audit or export mirror, but not as the primary review backend.
+
+Open questions:
+Convex and SpacetimeDB remain possible later spikes. SpacetimeDB may become
+relevant if the portal needs Rust-first realtime state or reducer-style governed
+updates. Convex may become relevant if rapid realtime review tooling outweighs
+the Rust-first backend preference. Neither should displace the Google/PostGIS
+baseline until it solves a concrete problem better than the planned contracts.

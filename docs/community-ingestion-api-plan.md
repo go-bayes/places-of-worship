@@ -4,6 +4,8 @@ Planning source of truth: `PLANNING.md`.
 
 Related verification design: `docs/master-verification-workflow-plan.md`.
 
+Related portal design: `docs/portal-data-entry-plan.md`.
+
 This document sketches a future contribution system for research assistants,
 community contributors, scripts, and AI agents. The aim is to make broad
 community contribution possible without allowing any contributor interface to

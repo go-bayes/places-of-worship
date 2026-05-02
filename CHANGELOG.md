@@ -1,6 +1,13 @@
 # Changelog
 
 ## Unreleased
+- Added a portal data-entry planning hub and focused UI, database/storage,
+  submission-review, auth/security, media, and provider-evaluation plans for the
+  first authenticated New Zealand staging pilot.
+- Recorded Google Cloud as the first portal backend baseline, with Google
+  OAuth/Identity Platform, Cloud Run, Cloud SQL/PostGIS, Cloud Storage, no direct
+  master writes, GitHub only as an audit mirror, and Convex/SpacetimeDB deferred
+  until contracts are stable.
 - Added planning and journal notes for a Rust-backed data-modification pipeline
   that governs validation, staged proposals, append-only change events, dry-run
   diffs, master rebuilds, and researcher-friendly exports while keeping R as the

@@ -69,6 +69,13 @@ As of 30 April 2026:
   Sheets-ready CSV tabs, including a wide human-entry sheet for source-backed
   lifecycle evidence, source metadata, site observations, candidate matches,
   review notes, controlled vocabularies, and privacy/licence instructions.
+- A separate portal data-entry planning hub now lives in
+  `docs/portal-data-entry-plan.md`. It defines the first authenticated
+  New Zealand staging pilot, with Google Cloud as the backend baseline, managed
+  Google OAuth/Identity Platform for auth, Cloud Run for a Rust API,
+  Cloud SQL/PostGIS for staging and review data, Cloud Storage for quarantined
+  images and raw submissions, no direct master writes, and GitHub only as an
+  optional audit mirror.
 
 ## Redevelopment objective
 
@@ -333,6 +340,34 @@ pow export nz --format geojson
 Start with invariants and event models before writing the implementation. The
 first useful implementation target is a local CLI that validates and diffs a
 small staged NZ evidence batch without writing to the master.
+
+### 13. Plan the authenticated portal data-entry pilot
+
+- Use `docs/portal-data-entry-plan.md` as the hub for the authenticated
+  contribution portal.
+- Split the design into focused supporting plans:
+  - `docs/portal-entry-ui-plan.md`
+  - `docs/portal-database-storage-plan.md`
+  - `docs/portal-submission-review-plan.md`
+  - `docs/portal-auth-security-plan.md`
+  - `docs/portal-media-and-provider-evaluation-plan.md`
+- Treat the first milestone as an invite-only New Zealand staging pilot.
+- Replace the current external correction route with a project "Fix or modify
+  data" path that sends authorised users through managed auth before reaching a
+  global-map-style edit surface.
+- Let contributors search by address, place name, locality, or coordinates;
+  select an existing point or clear building outline; and fall back to a point
+  when building selection is absent or ambiguous.
+- Allow image uploads only into private quarantine in the first version. Defer
+  video until upload security, review, storage cost, licence, and moderation
+  rules are proven.
+- Use Google Cloud as the backend baseline: Google OAuth/Identity Platform,
+  Cloud Run, Cloud SQL/PostgreSQL with PostGIS, Cloud Storage, and asynchronous
+  validation jobs through Pub/Sub or Cloud Tasks.
+- Defer Convex and SpacetimeDB evaluation until the submission, review, audit,
+  and master-ingestion contracts are stable.
+- Keep public map products downstream of reviewed exports. Unreviewed portal
+  submissions should not appear on the public map or in the master database.
 
 ## Deterministic cleaning strategy
 
@@ -1014,7 +1049,25 @@ map do not drift apart.
 - Use GeoJSON for small browser-facing spatial products.
 - Move larger analytical spatial products to GeoParquet as the data volume and
   country coverage grow.
-- Defer PostGIS until live query requirements justify the operational cost.
+- Defer PostGIS for public map products until live query requirements justify
+  the operational cost.
+
+### Decided: authenticated portal backend baseline
+
+- Use Google Cloud as the reference backend for the first authenticated
+  New Zealand staging pilot.
+- Use managed Google OAuth/Identity Platform for contributor identity and
+  project permission mapping.
+- Use a Rust API on Cloud Run for staging, validation, review, and audit
+  endpoints.
+- Use Cloud SQL/PostgreSQL with PostGIS for authenticated staging and review
+  data, where live geometry checks and queue queries are useful.
+- Use Cloud Storage for immutable raw submissions, source snapshots, and
+  quarantined images.
+- Keep GitHub as an optional audit or export mirror, not the primary review
+  backend.
+- Defer Convex and SpacetimeDB evaluation until the project has stable
+  submission, review, audit, and master-ingestion contracts.
 
 ## Open decisions
 
@@ -1191,14 +1244,17 @@ map do not drift apart.
    review, and target-year probability rules.
 12. Draft the Google Sheets to staging API pilot described in
    `docs/community-ingestion-api-plan.md`.
-13. Extend the NZ `area_summary` product to SA2 geography after checking
+13. Draft the authenticated NZ portal staging pilot described in
+   `docs/portal-data-entry-plan.md`, starting with the UI, auth/security,
+   database/storage, and review contracts before implementation.
+14. Extend the NZ `area_summary` product to SA2 geography after checking
    boundary metadata and point-to-area assignment quality.
-14. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
+15. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
    legends, popups, and export metadata.
-15. Align the NZ map interface with the global map after the data overlay is
+16. Align the NZ map interface with the global map after the data overlay is
    stable, preserving NZ-specific analysis controls.
-16. Prototype site, area, and comparison modes using precomputed layers before
+17. Prototype site, area, and comparison modes using precomputed layers before
     adding live portal queries.
-17. Pilot the new global pipeline on a small country set before full rollout.
-18. Expand `research/` into a country-source matrix for global feasibility
+18. Pilot the new global pipeline on a small country set before full rollout.
+19. Expand `research/` into a country-source matrix for global feasibility
     assessment.

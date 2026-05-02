@@ -1,0 +1,78 @@
+# Portal Auth And Security Plan
+
+Planning source of truth: `PLANNING.md`.
+
+Portal hub: `docs/portal-data-entry-plan.md`.
+
+## Baseline
+
+Use a managed authentication service. Do not build password storage, password
+reset, multi-factor authentication, login sessions, or account recovery in this
+project.
+
+The first baseline is Google OAuth through Google Identity Platform. The portal
+API should verify provider-issued identity tokens and then enforce project
+permission scopes in the backend.
+
+## Pilot Access Model
+
+The first authenticated pilot should be invite-only.
+
+Minimum roles:
+
+- `submitter`: can create staged submissions
+- `reviewer`: can inspect queue items and record review decisions
+- `adjudicator`: can resolve conflicting or high-impact decisions
+- `admin`: can manage roles, provider settings, and launch gates
+- `service`: can run trusted ingestion or export jobs with scoped credentials
+
+Authentication answers who the user is. Authorisation answers what the user can
+do in the project. Keep these separate in the implementation and audit logs.
+
+## Assets And Threats
+
+Assets:
+
+- master site records and accepted change history
+- raw submissions and source snapshots
+- contributor identities and role grants
+- private or restricted source files
+- quarantined images
+- public map exports and downloads
+- API credentials and service accounts
+
+Primary threats:
+
+- spam or automated bulk submissions
+- malicious uploads
+- private information in source notes or media
+- licence-incompatible evidence
+- forged geometry or duplicate nominations
+- attempts to bypass review and affect public outputs
+- compromised contributor or service accounts
+- AI-generated claims without source support
+
+## Required Controls
+
+Before exposing a real intake endpoint beyond the core team, implement:
+
+- provider token verification
+- invite allowlist or equivalent access policy
+- project-level permission scopes
+- rate limits and request size limits
+- structured schema validation
+- geometry bounds and plausibility checks
+- upload file-type and size limits
+- media quarantine and private default access
+- malware scanning where feasible
+- privacy and licence checks before public display
+- append-only audit logs
+- dry-run diffs before master ingestion
+- no direct master writes from public, RA, script, or AI submission paths
+
+## Launch Gates
+
+The pilot should not leave demo status until unauthorised users cannot submit,
+invited submitters cannot review, reviewers cannot mutate the master directly,
+uploads remain private by default, and every accepted decision has a traceable
+raw submission, validation result, reviewer identity, and proposed master diff.
