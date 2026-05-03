@@ -1136,13 +1136,17 @@ fn persist_proposed_batch(
 
     for (index, event) in events.iter().enumerate() {
         let serialised = serde_json::to_string(event)?;
+        // One-based numbering: aligns derived stage records with how
+        // `pow validate`/`pow stage` report record positions, so a reviewer
+        // running `pow diff` sees the first event as record 1, not record 0.
+        let record_index = (index + 1) as i64;
         tx.execute(
             "INSERT INTO stage_records (
                 batch_id, record_index, record_kind, raw_record, parsed_json
             ) VALUES (?1, ?2, ?3, ?4, ?5)",
             params![
                 &derived_batch_id,
-                index as i64,
+                record_index,
                 "proposed_event",
                 &serialised,
                 Some(&serialised),
@@ -1701,10 +1705,25 @@ fn reduce_target_year_affects(events: &[&ProposedEvent]) -> Vec<TargetYearAffect
 }
 
 fn aggregate_target_years(events: &[ProposedEvent]) -> BTreeMap<String, TargetYearAggregate> {
-    let mut by_year: BTreeMap<String, TargetYearAggregate> = BTreeMap::new();
-    let mut sites_per_year: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+    // Collapse to one net transition per (target_year, site_key) so a site with
+    // multiple events at the same target year is counted once. The "before"
+    // state is the earliest event's previous_target_year_status; the "after"
+    // state is the latest event's target_year_status (chronological by
+    // recorded_at, falling back to record_index for ties).
+    struct PerPair {
+        first_at: String,
+        first_index: usize,
+        previous: Option<String>,
+        last_at: String,
+        last_index: usize,
+        next: String,
+    }
+
+    let mut per_pair: BTreeMap<(String, String), PerPair> = BTreeMap::new();
     for event in events {
         let (site_key, _, _, _) = site_key_for_event(&event.event);
+        let recorded_at = event_recorded_at(&event.event).to_owned();
+        let record_index = event.record_index;
         let Some(list) = event
             .event
             .pointer("/payload/target_year_affects")
@@ -1722,29 +1741,49 @@ fn aggregate_target_years(events: &[ProposedEvent]) -> BTreeMap<String, TargetYe
             let previous_status = entry
                 .get("previous_target_year_status")
                 .and_then(Value::as_str)
-                .unwrap_or("<none>");
-            let key = format!("{previous_status} -> {next_status}");
-            let aggregate =
-                by_year
-                    .entry(target_year.to_owned())
-                    .or_insert_with(|| TargetYearAggregate {
-                        affected_sites: 0,
-                        transitions: BTreeMap::new(),
-                        final_status_counts: BTreeMap::new(),
-                    });
-            *aggregate.transitions.entry(key).or_insert(0) += 1;
-            *aggregate
-                .final_status_counts
-                .entry(next_status.to_owned())
-                .or_insert(0) += 1;
-            sites_per_year
-                .entry(target_year.to_owned())
-                .or_default()
-                .insert(site_key.clone());
+                .map(str::to_owned);
+            let key = (target_year.to_owned(), site_key.clone());
+            per_pair
+                .entry(key)
+                .and_modify(|state| {
+                    let earlier = recorded_at < state.first_at
+                        || (recorded_at == state.first_at && record_index < state.first_index);
+                    let later = recorded_at > state.last_at
+                        || (recorded_at == state.last_at && record_index > state.last_index);
+                    if earlier {
+                        state.first_at = recorded_at.clone();
+                        state.first_index = record_index;
+                        state.previous = previous_status.clone();
+                    }
+                    if later {
+                        state.last_at = recorded_at.clone();
+                        state.last_index = record_index;
+                        state.next = next_status.to_owned();
+                    }
+                })
+                .or_insert_with(|| PerPair {
+                    first_at: recorded_at.clone(),
+                    first_index: record_index,
+                    previous: previous_status.clone(),
+                    last_at: recorded_at.clone(),
+                    last_index: record_index,
+                    next: next_status.to_owned(),
+                });
         }
     }
-    for (year, aggregate) in by_year.iter_mut() {
-        aggregate.affected_sites = sites_per_year.get(year).map(BTreeSet::len).unwrap_or(0);
+
+    let mut by_year: BTreeMap<String, TargetYearAggregate> = BTreeMap::new();
+    for ((year, _site_key), state) in per_pair {
+        let aggregate = by_year.entry(year).or_insert_with(|| TargetYearAggregate {
+            affected_sites: 0,
+            transitions: BTreeMap::new(),
+            final_status_counts: BTreeMap::new(),
+        });
+        let prev = state.previous.as_deref().unwrap_or("<none>");
+        let transition_key = format!("{prev} -> {}", state.next);
+        aggregate.affected_sites += 1;
+        *aggregate.transitions.entry(transition_key).or_insert(0) += 1;
+        *aggregate.final_status_counts.entry(state.next).or_insert(0) += 1;
     }
     by_year
 }
@@ -3489,10 +3528,16 @@ mod tests {
             .target_years
             .get("2018-09-01")
             .expect("2018 aggregate present");
+        // One site, two same-year events: site-level aggregate must collapse
+        // to a single transition and final-status entry, not double-count.
         assert_eq!(aggregate.affected_sites, 1);
         assert_eq!(
             aggregate.transitions.get("<none> -> present").copied(),
-            Some(2)
+            Some(1)
+        );
+        assert_eq!(
+            aggregate.final_status_counts.get("present").copied(),
+            Some(1)
         );
 
         let _ = fs::remove_file(db);
@@ -3622,6 +3667,16 @@ mod tests {
             Some("persist-source-1")
         );
         assert!(!outcome.sites.is_empty());
+        // Persisted proposed events use one-based record numbering so
+        // reviewer-facing record references read 1..N, not 0..N-1.
+        let first_record_index = outcome
+            .sites
+            .iter()
+            .flat_map(|site| site.events.iter())
+            .map(|summary| summary.record_index)
+            .min()
+            .expect("at least one event summary");
+        assert_eq!(first_record_index, 1);
 
         let _ = fs::remove_file(db);
     }
