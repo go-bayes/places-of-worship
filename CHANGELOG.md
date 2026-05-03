@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- Clarified the RA session JSON export as a local reconstruction/debug log,
+  changed active RA-facing instructions from "the project team" to "JB", and
+  tightened the NZ place-density colour domain so low per-km² values render
+  visibly on the map.
 - Added a first-session briefing and post-session capture protocol to
   `docs/ra-nz-pilot-task.md`, including 5-10 varied demo-map cases, paste
   alignment checks, session JSON export, and five feedback questions.

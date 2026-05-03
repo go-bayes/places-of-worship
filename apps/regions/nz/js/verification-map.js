@@ -516,7 +516,7 @@ class NzVerificationMap {
         const current = this.getRaInitials();
         if (!force && current) return current;
         const value = window.prompt(
-            "Enter your initials so the project team knows who recorded each row (max 8 characters). Stored only on this browser.",
+            "Enter your initials so JB knows who recorded each row (max 8 characters). Stored only on this browser.",
             current || ""
         );
         if (value === null) return current;
@@ -588,6 +588,7 @@ class NzVerificationMap {
                         <button type="button" id="sessionExportButton">Export session JSON</button>
                         <button type="button" class="danger" id="sessionClearButton">Clear session</button>
                     </div>
+                    <div class="session-empty">The JSON export is a local session log for JB to reconstruct copied or skipped cases. It does not upload or submit data.</div>
                 `}
             </details>
         `;
@@ -1160,7 +1161,7 @@ class NzVerificationMap {
             <h3>2. Choose what your evidence shows</h3>
             <div class="review-form">
                 <div class="demo-warning" role="alert">
-                    Demo only. This generates local text to paste into the working sheet or send to the project team; it does not save or submit data. Do not enter private or sensitive data.
+                    Demo only. This generates local text to paste into the working sheet or send to JB; it does not save or submit data. Do not enter private or sensitive data.
                 </div>
                 <label>
                     What did you find?

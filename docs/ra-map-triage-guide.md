@@ -14,17 +14,17 @@ The short version is:
 4. Record the evidence in the agreed spreadsheet. If the map demo action
    builder is enabled, you may use it to generate a draft spreadsheet row for
    pasting into the sheet.
-5. Tell the project team when the spreadsheet rows are ready, and include
+5. Tell JB when the spreadsheet rows are ready, and include
    unresolved questions.
 
 The current pilot is map-assisted, but not yet a secure submission portal. The
 map is a search and triage surface. In demo mode, it can generate a local
 spreadsheet-ready evidence row and a local review JSON preview for feedback.
 The spreadsheet remains the evidence-entry surface. For the NZ pilot, this is a
-project-controlled Google Sheet in the project team's private Google Drive
-workspace. The project team sends the link directly; it should not be committed
-to GitHub. The project team handles validation, staging, and review unless they
-explicitly ask otherwise. Nothing entered in the demo map is saved or submitted.
+project-controlled Google Sheet in the private Google Drive workspace. JB sends
+the link directly; it should not be committed to GitHub. JB handles validation,
+staging, and review unless he explicitly asks otherwise. Nothing entered in the
+demo map is saved or submitted.
 Your work is saved in the shared working spreadsheet, not in the map.
 
 The verification map also has target-year controls for 2013, 2018, and 2023.
@@ -50,7 +50,7 @@ Current pilot:
 - The demo controls can generate a local spreadsheet row and review JSON for
   discussion, but they do not save or submit data.
 - The working spreadsheet records evidence.
-- The project team handles command-line validation and staging outside the
+- JB handles command-line validation and staging outside the
   default RA workflow.
 
 Target workflow:
@@ -79,7 +79,7 @@ an intake system.
    relevant, and a source-backed evidence note.
 7. Click `Copy spreadsheet row` if you were asked to paste a draft row into the
    wide evidence sheet.
-8. Click `Copy review JSON` if the project team asks for a compact feedback
+8. Click `Copy review JSON` if JB asks for a compact feedback
    payload.
 
 The copied spreadsheet row is a single tab-separated row matching the wide
@@ -136,12 +136,11 @@ Street View`. Record the image or panorama link in `source_url_or_file`, the
 displayed capture date in `visual_verification_capture_date`, and a short
 visual claim in `visual_verification_summary`.
 
-Use `source_type = field_observation` for an RA or project-team site visit. Put
+Use `source_type = field_observation` for an RA or JB-approved site visit. Put
 the visit date in `visual_verification_capture_date`, write `field_observation`
 in `visual_verification_source`, and summarise only the site-level observation.
 Do not record private conversations, personal contact details, photographs, or
-videos unless the project team has explicitly approved the collection and
-storage path.
+videos unless JB has explicitly approved the collection and storage path.
 
 Do not store or republish Street View screenshots in the repository or public
 outputs. Record the provider, link or agreed file reference, capture date, and
@@ -309,8 +308,7 @@ single final denomination if the source shows concurrent use.
 
 The NZ verification map uses automated priority labels.
 
-1. Start with `high` priority tasks unless the project team assigns another
-   batch.
+1. Start with `high` priority tasks unless JB assigns another batch.
 2. Use `medium` priority tasks for spot-checking in sample.
 3. Leave `low` priority tasks until asked.
 4. Choose the target year you are checking: 2013, 2018, or 2023.

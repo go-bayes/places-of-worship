@@ -10,12 +10,12 @@ Zealand verification map, inspect one case at a time, find source evidence, and
 record what the evidence supports in the working spreadsheet.
 
 The command-line tool is not part of the default RA workflow for this pilot.
-The project team will handle validation unless they explicitly ask otherwise.
+JB will handle validation unless he explicitly asks otherwise.
 
 In practical terms:
 
 1. Open the NZ verification task map.
-2. Open the shared working spreadsheet link supplied by the project team. This
+2. Open the shared working spreadsheet link supplied by JB. This
    is where your work is saved.
 3. Choose a target year: 2013, 2018, or 2023.
 4. Sample one task from the demo map, using the map, filters, or priority list.
@@ -28,7 +28,7 @@ In practical terms:
 8. If a place is missing from the map, use the draft nomination panel to
    capture the candidate details and record the evidence in the spreadsheet.
 9. Mark uncertain cases `needs_review` and move on.
-10. Tell the project team when the spreadsheet rows are ready, and include notes
+10. Tell JB when the spreadsheet rows are ready, and include notes
    on confusing cases.
 
 Do not submit pull requests, commit files, edit repository templates, or put
@@ -44,7 +44,7 @@ sites, one or two duplicates, one closed or lifecycle case, and one or two
 deliberate skips for control. Do not worry about coverage; pick cases that are
 informative.
 
-This is the first real test of the page. Tell the project team anything that
+This is the first real test of the page. Tell JB anything that
 confuses you: labels you did not trust, fields you were not sure how to fill,
 a moment when you were not sure where to click next, or anything that made you
 slow down. A note in the session-log `Reason` field, or a message after the
@@ -52,7 +52,7 @@ session, both work.
 
 When you paste a row into the Sheet, glance at the first two columns to make
 sure they line up with the headers `evidence_row_id` and `collection_batch`.
-If they do not, stop and contact the project team before pasting more rows.
+If they do not, stop and contact JB before pasting more rows.
 
 ## Where Your Work Is Saved
 
@@ -60,9 +60,8 @@ The map demo does not save anything. It only helps you inspect a case and, in
 demo mode, copy a draft row.
 
 Your saved work lives in a project-controlled Google Sheet in the project
-team's private Google Drive workspace. The project team will send you the sheet
-link directly. Do not look for the sheet in GitHub, and do not add the link to
-GitHub.
+workspace. JB will send you the sheet link directly. Do not look for the sheet
+in GitHub, and do not add the link to GitHub.
 
 Each case you work on should become one row in that spreadsheet. For the NZ
 pilot, expect a project-owned sheet named `NZ PoW RA Pilot Working Sheet` with
@@ -70,7 +69,7 @@ pilot, expect a project-owned sheet named `NZ PoW RA Pilot Working Sheet` with
 
 At the end of the work period, either:
 
-1. leave the completed rows in the shared spreadsheet and tell the project team
+1. leave the completed rows in the shared spreadsheet and tell JB
    they are ready, or
 2. if asked, export the active sheet/tab as CSV and send that file through the
    agreed project channel.
@@ -80,9 +79,9 @@ In Google Sheets, CSV export is:
 1. open the evidence-entry tab,
 2. choose `File > Download > Comma-separated values (.csv)`,
 3. save the file,
-4. send the CSV to the project team if requested.
+4. send the CSV to JB if requested.
 
-Do not upload the CSV to GitHub. The project team will validate, stage, and
+Do not upload the CSV to GitHub. JB will validate, stage, and
 review the data separately.
 
 ## What This Pilot Is For
@@ -99,8 +98,8 @@ changed-use sites.
 
 ## Goal
 
-Sample a small, high-value set of demo-map tasks that helps the project team
-design the save, evaluate, review, and merge-track flow. Do not try to
+Sample a small, high-value set of demo-map tasks that helps JB design the save,
+evaluate, review, and merge-track flow. Do not try to
 exhaustively check New Zealand yet.
 
 A useful pilot row has:
@@ -117,7 +116,7 @@ A useful pilot row has:
 Start from the map, not the CLI.
 
 Use the UI and working spreadsheet. Do not run command-line validation,
-staging, or proposal commands unless the project team explicitly asks.
+staging, or proposal commands unless JB explicitly asks.
 
 ## Links
 
@@ -130,7 +129,7 @@ staging, or proposal commands unless the project team explicitly asks.
 
 ## Sampling Tasks From The Demo Map
 
-Unless the project team assigns a specific set of sites, sample tasks directly
+Unless JB assigns a specific set of sites, sample tasks directly
 from the demo map. Prioritise variety over volume. A useful session might
 include:
 
@@ -150,7 +149,7 @@ Mark it `needs_review`, explain the uncertainty, and move on.
 
 1. Open the NZ verification task map.
 2. Use the default action-builder view. If the page opens in read-only mode,
-   ask the project team before continuing.
+   ask JB before continuing.
 3. Choose the target year you are checking: 2013, 2018, or 2023.
 4. Use the map, priority list, and target-year status filters to choose one
    case.
@@ -209,7 +208,7 @@ Use public or project-approved sources:
 - OpenStreetMap object and history,
 - street-level imagery such as Google Street View, Apple Look Around,
   Mapillary, KartaView, or similar services,
-- RA field observations where the project team has approved the visit and
+- RA field observations where JB has approved the visit and
   storage rules,
 - aerial imagery,
 - Charities Services or incorporated-society records,
@@ -232,14 +231,17 @@ material into GitHub or the public repository.
 
 ## What To Send Back
 
-At the end of the assigned work period, send the project team:
+At the end of the assigned work period, send JB:
 
 1. the updated working spreadsheet or exported CSV,
 2. a short list of confusing cases,
 3. a short list of map or spreadsheet fields that slowed you down,
 4. any cases that seem important but require reviewer judgement.
 5. the exported session JSON from the `Export session JSON` button at the
-   bottom of the `My session` panel.
+   bottom of the `My session` panel. This file is a local session log, not a
+   map submission. It records copied and skipped cases, action choices, reason
+   notes, timestamps, and the generated TSV rows so JB can reconstruct what
+   happened if a paste goes wrong or a case is confusing.
 
 After the first sampling session, answer these five questions:
 
@@ -255,7 +257,7 @@ Do not send a pull request. Do not commit files to the repository.
 
 ## When To Stop And Ask
 
-Stop and ask the project team if:
+Stop and ask JB if:
 
 - a source appears private, restricted, or licence-sensitive,
 - the only evidence is personal information,

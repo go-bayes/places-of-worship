@@ -1032,8 +1032,10 @@ class EnhancedPlacesOfWorshipApp {
                 colors = ['#f7fbff', '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#3182bd', '#08519c'];
                 break;
             case 'place_density':
-                domain = [0, 1];
-                colors = ['#f7fcf5', '#e5f5e0', '#c7e9c0', '#a1d99b', '#74c476', '#31a354', '#006d2c'];
+                // Place density values are small and rounded; use a compressed
+                // domain so rural and urban TAs separate visibly on the map.
+                domain = [0, 0.01, 0.02, 0.05, 0.1, 0.25, 0.5, 0.9];
+                colors = ['#fff7bc', '#d9f0a3', '#addd8e', '#78c679', '#41b6c4', '#2b8cbe', '#225ea8', '#081d58'];
                 break;
             case 'temporal_change':
                 domain = [0, 40]; // Change range (-20 to +20, shifted to 0-40)
@@ -1197,7 +1199,7 @@ class EnhancedPlacesOfWorshipApp {
         
         if (this.colorScale && colorValue !== null) {
             fillColor = this.colorScale(colorValue).hex();
-            fillOpacity = 0.6;
+            fillOpacity = this.currentDemographicMode === 'place_density' ? 0.72 : 0.6;
         }
         
         return {
@@ -2910,7 +2912,7 @@ class EnhancedPlacesOfWorshipApp {
                 content = this.createColorScaleLegend('Current places per 10,000 people in the selected census denominator');
                 break;
             case 'place_density':
-                title = 'Place Density';
+                title = `Place Density (${this.overlayYear})`;
                 content = this.createColorScaleLegend('Current places per square kilometre');
                 break;
             case 'temporal_change':
@@ -3082,8 +3084,8 @@ class EnhancedPlacesOfWorshipApp {
                 formatValue = (val) => val.toString();
                 break;
             case 'place_density':
-                thresholds = [0, 0.1, 0.25, 0.5, 0.75, 1];
-                formatValue = (val) => val.toString();
+                thresholds = [0, 0.01, 0.02, 0.05, 0.1, 0.25, 0.5, 0.9];
+                formatValue = (val) => val.toFixed(2);
                 break;
             case 'temporal_change':
                 thresholds = [5, 15, 20, 25, 35]; // Representing -15, -5, 0, +5, +15 percentage points
