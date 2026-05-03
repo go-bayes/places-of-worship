@@ -972,8 +972,9 @@ class NzVerificationMap {
             <div class="detail-section">
                 <h3>New or missing sites</h3>
                 <div class="disabled-panel">
-                    Use the draft nomination form above to inspect fields for a missing, lost, shared, or changed site.
+                    Use the draft nomination form in the sidebar to inspect fields for a missing, lost, shared, or changed site.
                 </div>
+                <button type="button" class="secondary" id="openNominationPanelButton">Open draft nomination form</button>
             </div>
         ` : `
             <h2>Read-only pilot</h2>
@@ -982,6 +983,19 @@ class NzVerificationMap {
                 <a href="${escapeHtml(demoUrl())}">demo mode</a>, where nothing is saved or submitted.
             </div>
         `;
+        document.getElementById("openNominationPanelButton")?.addEventListener("click", () => {
+            this.focusNominationPanel();
+        });
+    }
+
+    focusNominationPanel() {
+        const panel = document.getElementById("nominationPanel");
+        const details = document.getElementById("nominationDetails");
+        if (!panel) return;
+        if (details) details.open = true;
+        panel.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        const firstInput = panel.querySelector("select, input, textarea, button");
+        firstInput?.focus({ preventScroll: true });
     }
 
     renderDetail(feature) {
@@ -1527,8 +1541,8 @@ class NzVerificationMap {
             <div class="demo-warning" role="alert">
                 Demo only. These fields are not saved, submitted, or linked to the master database. Do not enter private or sensitive data.
             </div>
-            <details open>
-                <summary>Draft nomination or complication</summary>
+            <details id="nominationDetails" open>
+                <summary>Draft nomination form: new, missing, or complicated site</summary>
                 <div class="nomination-form">
                     <label>
                         Type

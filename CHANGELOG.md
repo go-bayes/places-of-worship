@@ -4,6 +4,9 @@
 
 ### 2026-05-03
 
+- Clarified the NZ verification map's missing-site prompt by adding an
+  `Open draft nomination form` button and renaming the sidebar panel so RAs
+  are not pointed to an ambiguous "form above".
 - Clarified the RA session JSON export as a local reconstruction/debug log,
   changed active RA-facing instructions from "the project team" to "JB", and
   tightened the NZ place-density colour domain so low per-km² values render
