@@ -1,6 +1,12 @@
 # Changelog
 
 ## Unreleased
+- Added a first-session briefing and post-session capture protocol to
+  `docs/ra-nz-pilot-task.md`, including 5-10 varied demo-map cases, paste
+  alignment checks, session JSON export, and five feedback questions.
+- Treated `site_evidence_wide` header order as a data contract: protected the
+  live Sheet header with an edit warning, clarified paste instructions, added a
+  FAQ entry, and made `pow validate` reject known-template header reordering.
 - Simplified `docs/ra-nz-pilot-task.md` so the current RA instruction is to
   sample varied tasks from the demo map rather than complete a fixed 50-row
   pilot batch.

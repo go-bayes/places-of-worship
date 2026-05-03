@@ -2559,7 +2559,8 @@ fn validate_csv(input: &Path, template_dir: &Path) -> Result<ValidationSummary> 
         .headers()
         .with_context(|| format!("failed to read CSV headers from {}", input.display()))?
         .clone();
-    let template = templates.detect(headers.iter());
+    let input_headers: Vec<&str> = headers.iter().collect();
+    let template = templates.detect(input_headers.iter().copied());
 
     match template {
         Some(template) => {
@@ -2584,12 +2585,18 @@ fn validate_csv(input: &Path, template_dir: &Path) -> Result<ValidationSummary> 
                 }
             }
         }
-        None => summary.warning(
-            None,
-            None,
-            None,
-            "CSV header does not exactly match a known RA template; applying generic checks only",
-        ),
+        None => {
+            if let Some(message) = templates.header_mismatch_message(&input_headers) {
+                summary.error(None, None, None, message);
+            } else {
+                summary.warning(
+                    None,
+                    None,
+                    None,
+                    "CSV header does not exactly match a known RA template; applying generic checks only",
+                );
+            }
+        }
     }
 
     for (index, row) in reader.records().enumerate() {
@@ -2691,6 +2698,58 @@ impl CsvTemplates {
                         .all(|(left, right)| left == right)
             })
         })
+    }
+
+    fn header_mismatch_message(&self, input_headers: &[&str]) -> Option<String> {
+        let input_set: BTreeSet<&str> = input_headers.iter().copied().collect();
+        let mut best_match: Option<(&'static CsvTemplate, usize, Vec<String>, Vec<&str>)> = None;
+
+        for template in CSV_TEMPLATES {
+            let expected = self.headers.get(template.filename)?;
+            let expected_set: BTreeSet<&str> = expected.iter().map(String::as_str).collect();
+            let shared_count = input_set.intersection(&expected_set).count();
+            let missing: Vec<String> = expected_set
+                .difference(&input_set)
+                .map(|value| (*value).to_owned())
+                .collect();
+            let extra: Vec<&str> = input_set.difference(&expected_set).copied().collect();
+
+            if expected.len() == input_headers.len() && missing.is_empty() && extra.is_empty() {
+                return Some(format!(
+                    "CSV header has the same columns as {} but in a different order; generated map rows must be pasted under the exact template header order",
+                    template.name
+                ));
+            }
+
+            let replace_best = best_match
+                .as_ref()
+                .is_none_or(|(_, best_count, _, _)| shared_count > *best_count);
+            if replace_best {
+                best_match = Some((template, shared_count, missing, extra));
+            }
+        }
+
+        let (template, shared_count, missing, extra) = best_match?;
+        let expected_count = self.headers.get(template.filename)?.len();
+        if shared_count * 100 < expected_count * 80 {
+            return None;
+        }
+
+        Some(format!(
+            "CSV header appears to be {} but does not match the template exactly; missing columns: {}; extra columns: {}; do not paste or ingest generated rows until the sheet header is restored",
+            template.name,
+            preview_values(missing.iter().map(String::as_str)),
+            preview_values(extra.iter().copied())
+        ))
+    }
+}
+
+fn preview_values<'a>(values: impl Iterator<Item = &'a str>) -> String {
+    let collected: Vec<&str> = values.take(6).collect();
+    if collected.is_empty() {
+        "none".to_owned()
+    } else {
+        collected.join(", ")
     }
 }
 
@@ -3268,6 +3327,41 @@ mod tests {
         assert!(is_valid_partial_date("2013-09-01"));
         assert!(!is_valid_partial_date("2013-99"));
         assert!(!is_valid_partial_date("2013-02-31"));
+    }
+
+    #[test]
+    fn reordered_ra_csv_header_is_rejected() {
+        let repo_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let template_dir = repo_root.join("docs/templates/ra-historical-site-evidence");
+        let template_path = template_dir.join("site_evidence_wide.csv");
+        let mut reader = csv::Reader::from_path(&template_path).expect("open template");
+        let mut headers: Vec<String> = reader
+            .headers()
+            .expect("read template headers")
+            .iter()
+            .map(str::to_owned)
+            .collect();
+        headers.swap(0, 1);
+
+        let input = std::env::temp_dir().join(format!(
+            "pow-reordered-header-test-{}.csv",
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .expect("clock")
+                .as_nanos()
+        ));
+        fs::write(&input, format!("{}\n", headers.join(","))).expect("write test csv");
+
+        let summary = validate_csv(&input, &template_dir).expect("validate csv");
+        assert!(
+            summary.errors.iter().any(|error| error
+                .message
+                .contains("same columns as wide RA evidence but in a different order")),
+            "{:#?}",
+            summary.errors
+        );
+
+        let _ = fs::remove_file(input);
     }
 
     #[test]

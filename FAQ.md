@@ -67,6 +67,17 @@ Rows from the Sheet should later be exported or ingested, validated, staged,
 reviewed, and converted into accepted change events. Only accepted events affect
 rebuilt master outputs.
 
+## Can the RA spreadsheet columns be reordered?
+
+No. The `site_evidence_wide` header order is a data contract. The map copies a
+tab-separated row in that exact order, so reordered, renamed, or missing
+columns can put correct evidence into the wrong cells.
+
+Editors should paste generated rows into column A of the next empty row under
+the unchanged header. The project-owned pilot Sheet warns before header edits,
+and `pow validate` should reject exported CSVs whose headers look like a known
+template but no longer match its exact order.
+
 ## Will the map generate tasks automatically?
 
 That is the target workflow. A deterministic task generator should read the

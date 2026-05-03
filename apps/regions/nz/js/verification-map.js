@@ -1248,7 +1248,7 @@ class NzVerificationMap {
                 </label>
                 <h3>4. Copy the row to your spreadsheet</h3>
                 <div class="copy-help">
-                    <strong>What this does:</strong> Copies one tab-separated row to your clipboard. Switch to the working evidence spreadsheet, click the next empty row under the header, and paste with <kbd>Cmd</kbd>+<kbd>V</kbd> (Mac) or <kbd>Ctrl</kbd>+<kbd>V</kbd> (Windows). Nothing is uploaded.
+                    <strong>What this does:</strong> Copies one tab-separated row to your clipboard. Switch to the working evidence spreadsheet, click column A in the next empty row under the unchanged header, and paste with <kbd>Cmd</kbd>+<kbd>V</kbd> (Mac) or <kbd>Ctrl</kbd>+<kbd>V</kbd> (Windows). Nothing is uploaded.
                 </div>
                 <div class="button-row">
                     <button id="copyEvidenceRowButton" type="button">Copy spreadsheet row</button>

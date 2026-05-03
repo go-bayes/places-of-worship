@@ -35,6 +35,25 @@ Do not submit pull requests, commit files, edit repository templates, or put
 private/restricted source material into GitHub. Nothing entered in the demo map
 is saved or submitted.
 
+## First Sampling Brief
+
+Open <https://www.placesmap.org/apps/regions/nz/verification.html>, sample
+5 to 10 varied cases, and paste the generated TSV rows under the header in the
+shared Sheet. Aim for variety: some confirm-current cases, one or two missing
+sites, one or two duplicates, one closed or lifecycle case, and one or two
+deliberate skips for control. Do not worry about coverage; pick cases that are
+informative.
+
+This is the first real test of the page. Tell the project team anything that
+confuses you: labels you did not trust, fields you were not sure how to fill,
+a moment when you were not sure where to click next, or anything that made you
+slow down. A note in the session-log `Reason` field, or a message after the
+session, both work.
+
+When you paste a row into the Sheet, glance at the first two columns to make
+sure they line up with the headers `evidence_row_id` and `collection_batch`.
+If they do not, stop and contact the project team before pasting more rows.
+
 ## Where Your Work Is Saved
 
 The map demo does not save anything. It only helps you inspect a case and, in
@@ -141,8 +160,8 @@ Mark it `needs_review`, explain the uncertainty, and move on.
 7. Open source links in new tabs and search for evidence.
 8. Decide which action best fits the evidence.
 9. Record the evidence in the working spreadsheet. If using demo mode, click
-   `Copy spreadsheet row`, paste it under the spreadsheet header, and review
-   the pasted row.
+   `Copy spreadsheet row`, click column A in the next empty row under the
+   unchanged spreadsheet header, paste, and review the pasted row.
 10. For a place missing from the map, use the draft nomination panel and record
     the same source evidence in the spreadsheet.
 11. Mark unclear cases `needs_review`.
@@ -219,6 +238,18 @@ At the end of the assigned work period, send the project team:
 2. a short list of confusing cases,
 3. a short list of map or spreadsheet fields that slowed you down,
 4. any cases that seem important but require reviewer judgement.
+5. the exported session JSON from the `Export session JSON` button at the
+   bottom of the `My session` panel.
+
+After the first sampling session, answer these five questions:
+
+1. Where did you stop or hesitate?
+2. Were any field labels unclear or surprising?
+3. Did the workflow steps, `Inspect`, `Decide`, `Evidence`, and `Copy row`,
+   match how you actually worked?
+4. Did you skip anything for control sampling rather than because you were
+   unsure? Include a count and how you communicated it.
+5. Did anything paste wrong into the Sheet? If yes, include row numbers.
 
 Do not send a pull request. Do not commit files to the repository.
 

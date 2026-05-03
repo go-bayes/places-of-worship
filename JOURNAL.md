@@ -845,3 +845,23 @@ Consequences:
 The FAQ is explanatory, not the only source of truth. Authoritative contracts
 remain in schemas and planning documents, but the README should link to the FAQ
 so RAs, collaborators, and future agents can quickly find the project model.
+
+## 2026-05-03: Treat RA sheet header order as a contract
+
+Decision:
+Treat the `site_evidence_wide` column order as a data contract between the map
+action builder, the Google Sheet, CSV export, and `pow validate`. The map emits
+tab-separated rows in this exact order, so generated rows should be pasted into
+column A under the unchanged header.
+
+Rationale:
+If the Sheet header is reordered, renamed, or missing columns, a copied row can
+paste valid-looking values into the wrong cells. That would waste RA work and
+could silently corrupt staged evidence.
+
+Consequences:
+The live pilot Sheet has a warning protection on the header row. RA guidance
+now says to paste into column A under the unchanged header. The CLI validator
+should error when an exported CSV has the same known template columns in a
+different order, or appears to be a known template but no longer matches the
+template header exactly.
