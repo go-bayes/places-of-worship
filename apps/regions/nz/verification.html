@@ -562,6 +562,175 @@
             min-width: 0;
         }
 
+        .ra-initials {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: #e8f1fb;
+            color: #1f4e79;
+            font-size: 12px;
+            font-weight: 700;
+            vertical-align: middle;
+        }
+
+        .ra-initials button {
+            background: none;
+            border: none;
+            color: #1f4e79;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 0 0 0 6px;
+            min-height: 0;
+            width: auto;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .session-panel {
+            padding: 12px 16px 16px 16px;
+            border-bottom: 1px solid #d8dee4;
+            font-size: 13px;
+        }
+
+        .session-panel summary {
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            color: #1f2d3d;
+            padding: 4px 0;
+        }
+
+        .session-empty {
+            color: #5d6d7e;
+            font-style: italic;
+            margin-top: 6px;
+        }
+
+        .session-entries {
+            display: grid;
+            gap: 8px;
+            margin-top: 10px;
+            max-height: 32vh;
+            overflow: auto;
+        }
+
+        .session-entry {
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            padding: 8px 10px;
+            background: #ffffff;
+            display: grid;
+            gap: 4px;
+            line-height: 1.4;
+        }
+
+        .session-entry.skipped {
+            background: #f8fafc;
+            border-style: dashed;
+        }
+
+        .session-entry .entry-title {
+            font-weight: 700;
+            color: #17202a;
+        }
+
+        .session-entry .entry-meta {
+            color: #5d6d7e;
+            font-size: 12px;
+        }
+
+        .session-entry .entry-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .session-entry button {
+            width: auto;
+            min-height: 32px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .session-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .session-buttons button {
+            flex: 1;
+            min-height: 36px;
+            padding: 6px 10px;
+            font-size: 13px;
+            font-weight: 700;
+            background: #ffffff;
+            color: #1f618d;
+            border: 1px solid #1f618d;
+        }
+
+        .session-buttons button.danger {
+            color: #b03a2e;
+            border-color: #b03a2e;
+        }
+
+        .next-task-bar {
+            margin-top: 10px;
+            display: grid;
+            gap: 6px;
+        }
+
+        .next-task-bar button {
+            background: #1e8449;
+            border-color: #1e8449;
+            min-height: 44px;
+        }
+
+        .skip-form {
+            margin-top: 14px;
+            padding: 10px 12px;
+            border: 1px dashed #b6c2cf;
+            border-radius: 5px;
+            background: #f8fafc;
+            display: grid;
+            gap: 6px;
+        }
+
+        .skip-form label {
+            font-size: 13px;
+        }
+
+        .skip-form button.skip-confirm {
+            background: #d68910;
+            border-color: #d68910;
+        }
+
+        .skip-badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 1px 6px;
+            border-radius: 3px;
+            background: #fff7e6;
+            color: #5f4200;
+            border: 1px solid #d68910;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .copied-badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 1px 6px;
+            border-radius: 3px;
+            background: #d7f1df;
+            color: #145a32;
+            border: 1px solid #1e8449;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
         #map {
             height: 100vh;
             min-height: 680px;
@@ -674,6 +843,7 @@
             </section>
 
             <section id="taskList" class="task-list" aria-label="Verification tasks"></section>
+            <section id="sessionPanel" class="session-panel"></section>
             <section id="nominationPanel" class="nomination-panel"></section>
             <section id="detailPanel" class="detail-panel" tabindex="-1"></section>
         </aside>
@@ -684,6 +854,6 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
-    <script src="js/verification-map.js?v=20260504-tier-1-ergonomics"></script>
+    <script src="js/verification-map.js?v=20260504-tier-2-session-log"></script>
 </body>
 </html>
