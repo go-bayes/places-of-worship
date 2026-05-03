@@ -71,31 +71,50 @@ Current schema decisions for `pow diff`:
 The later pipeline should add:
 
 ```sh
-pow diff <staged_batch_id>
 pow accept <staged_batch_id>
 pow rebuild-master
 pow export nz --format geojson
 ```
-
-Until `pow diff` exists, `pow validate` and `pow stage` are the safe handoff
-points for RA evidence batches and agent-produced event proposals.
 
 `pow propose <staged_batch_id>` bridges real RA CSV evidence to draft
 `change-event.v1` JSONL. It reads one staged batch, translates supported RA
 template rows using `docs/ra-propose-mapping.md`, validates every generated
 event, prints JSONL to stdout, and prints mapping warnings to stderr.
 
-First `pow diff` scope:
+`pow propose --persist <staged_batch_id>` additionally writes the emitted
+events back into the staging database as a derived batch (one stage record per
+event with `record_kind = 'proposed_event'`). The new derived batch links to
+its source via `stage_batches.parent_batch_id`. The derived batch id is
+printed to stderr so the reviewer can pass it to `pow diff`.
 
-- Produce a reviewer report for one staged batch.
-- Derive per-site changesets directly from staged event payloads, especially
-  `previous_*` fields, denomination and purpose sets, organisation links,
-  geometry payloads, and status payloads.
-- Derive per-target-year affect from `payload.target_year_affects`; do not
-  infer target-year state from prose.
-- Include validation and warning rollups, source coverage, licence warnings,
-  and identity-decision flags.
-- Emit a machine-readable `diff.json` report alongside the text report.
+`pow diff <batch_id>` produces a reviewer report for one batch of staged or
+proposed change events (a derived batch from `pow propose --persist`, or any
+batch staged directly as JSONL change events). It groups events by site,
+renders per-site before/after using the schema's `previous_*` fields and
+`target_year_affects`, aggregates per-target-year transitions, and reports
+validation warnings and source coverage. Use `--report json` for a stable,
+machine-readable artefact alongside the default text report.
+
+The full RA → reviewer round-trip:
+
+```sh
+pow stage path/to/ra-batch.csv
+# -> prints a `batch id`. Copy it.
+
+pow propose <stage_batch_id> --persist
+# -> prints draft JSONL events to stdout and a derived batch id to stderr.
+
+pow diff <derived_batch_id>
+# -> per-site changesets, per-target-year aggregate, warnings rollup.
+
+pow diff <derived_batch_id> --report json > diff.json
+# -> machine-readable artefact for downstream analysis.
+```
+
+`pow diff` v1 is intentionally narrow: it fails loudly on any
+`worship_function_update` payload whose `target_year_affects` is empty, and it
+will not infer target-year state from prose. It does not yet emit identity
+decisions from `geometry-history` records.
 
 Deferred until `pow rebuild-master` and export commands:
 

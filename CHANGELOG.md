@@ -1,6 +1,12 @@
 # Changelog
 
 ## Unreleased
+- Added `pow propose --persist` so emitted draft change events are written
+  back into the local staging database as a derived batch linked to its
+  source via `stage_batches.parent_batch_id`, and added `pow diff <batch_id>`
+  reviewer report (text and JSON) covering per-site changesets, per-target-year
+  transitions, validation warnings, and source coverage. Migration is
+  idempotent for existing `.pow/staging.sqlite` files.
 - Added `ROADMAP.md` as a directional phase map for the project and simplified
   `AGENTS.md` so future agents can find the roadmap, active planning, decision
   log, schemas, revision CLI docs, RA templates, verification plan, and portal

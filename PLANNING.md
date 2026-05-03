@@ -397,22 +397,25 @@ Start with invariants and event models before writing the implementation. The
 first useful implementation target is a local CLI that validates and diffs a
 small staged NZ evidence batch without writing to the master.
 
-Implementation note: the first `pow validate` and `pow stage` scaffolds now
-exist under `crates/pow-cli`. They are local and CI-facing validation and
-staging surfaces, not something the static HTML map should call directly. The
-eventual authenticated map should submit to a backend API that reuses the same
-validation rules, stages submissions, and returns reviewable proposal records.
-Static map products should continue to consume reviewed exports. The first
-local staging database is plain SQLite at `.pow/staging.sqlite` by default.
+Implementation note: `pow validate`, `pow stage`, `pow propose`, and the
+first `pow diff` reviewer report now exist under `crates/pow-cli`. They are
+local and CI-facing validation, staging, propose, and diff surfaces, not
+something the static HTML map should call directly. The eventual authenticated
+map should submit to a backend API that reuses the same validation rules,
+stages submissions, and returns reviewable proposal records. Static map
+products should continue to consume reviewed exports. The first local staging
+database is plain SQLite at `.pow/staging.sqlite` by default.
 
-Near-term decision: defer web-based data management and make the CLI contracts
-excellent first. The next priority is `pow diff` v1 as a reviewer report, with
-full state reconstruction deferred. It should read staged events from SQLite
-and derive the report from the new `previous_*` fields and
-`target_year_affects`: per-site changesets, per-target-year
-appeared/disappeared effects, denomination and tradition changes,
-multi-denomination and multi-purpose use, organisation links, geometry changes,
-validation warnings, source coverage, and uncertainty summaries.
+`pow propose --persist` writes its emitted events as a derived batch in the
+same staging database, with each event stored as a `stage_records` row
+(`record_kind = 'proposed_event'`) and the new batch linked to its source via
+`stage_batches.parent_batch_id`. `pow diff <batch_id>` reads any batch whose
+records are change events (proposed or staged JSONL) and produces a
+reviewer-facing report covering per-site changesets, per-target-year
+transitions, validation warnings, and source coverage; with `--report json`
+it also produces a stable machine-readable artefact for downstream R
+workflows. The `pow diff` v1 contract intentionally stops short of full
+state reconstruction and identity-decision rendering.
 
 Full reconstructed research artefacts such as `before.geojson`,
 `after.geojson`, `area_summary_diff.csv`, density estimates, and map/export

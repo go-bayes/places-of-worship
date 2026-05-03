@@ -32,6 +32,8 @@ enum Commands {
     Stage(StageArgs),
     /// Emit draft change-event JSONL from a staged RA evidence batch.
     Propose(ProposeArgs),
+    /// Render a reviewer report for a batch of staged or proposed change events.
+    Diff(DiffArgs),
 }
 
 #[derive(Parser, Debug)]
@@ -94,6 +96,31 @@ struct ProposeArgs {
     /// Directory containing JSON Schemas.
     #[arg(long, default_value = "schemas")]
     schema_dir: PathBuf,
+
+    /// Persist the emitted events as a derived stage batch so `pow diff`
+    /// can read them. Without this flag, events go to stdout only.
+    #[arg(long)]
+    persist: bool,
+}
+
+#[derive(Parser, Debug)]
+struct DiffArgs {
+    /// Batch id whose change events should be diffed.
+    /// Use the derived batch id printed by `pow propose --persist`,
+    /// or the id of any batch staged as JSONL change events.
+    batch_id: String,
+
+    /// Local SQLite staging database.
+    #[arg(long, default_value = ".pow/staging.sqlite")]
+    db: PathBuf,
+
+    /// Directory containing JSON Schemas.
+    #[arg(long, default_value = "schemas")]
+    schema_dir: PathBuf,
+
+    /// Report format.
+    #[arg(long, value_enum, default_value_t = ReportFormat::Text)]
+    report: ReportFormat,
 }
 
 #[derive(Clone, Copy, Debug, ValueEnum)]
@@ -255,9 +282,30 @@ fn run(cli: Cli) -> Result<bool> {
             Ok(matches!(outcome, StageOutcome::Rejected(_)))
         }
         Commands::Propose(args) => {
+            let persist = args.persist;
+            let db_path = args.db.clone();
+            let source_batch_id = args.batch_id.clone();
             let events = propose(args)?;
-            for event in events {
-                println!("{}", serde_json::to_string(&event)?);
+            for event in &events {
+                println!("{}", serde_json::to_string(event)?);
+            }
+            if persist {
+                let derived_batch_id = persist_proposed_batch(&db_path, &source_batch_id, &events)?;
+                eprintln!(
+                    "pow propose: persisted {} event(s) as derived batch {} (source {})",
+                    events.len(),
+                    derived_batch_id,
+                    source_batch_id
+                );
+            }
+            Ok(false)
+        }
+        Commands::Diff(args) => {
+            let report = args.report;
+            let outcome = diff(args)?;
+            match report {
+                ReportFormat::Text => print_diff_text_report(&outcome)?,
+                ReportFormat::Json => print_diff_json_report(&outcome)?,
             }
             Ok(false)
         }
@@ -1022,6 +1070,996 @@ fn write_stage_batch(
     Ok(())
 }
 
+fn persist_proposed_batch(
+    db_path: &Path,
+    source_batch_id: &str,
+    events: &[Value],
+) -> Result<String> {
+    if events.is_empty() {
+        bail!("no proposed events to persist");
+    }
+
+    let mut jsonl = String::new();
+    for event in events {
+        jsonl.push_str(&serde_json::to_string(event)?);
+        jsonl.push('\n');
+    }
+    let raw_input = jsonl.into_bytes();
+    let input_sha256 = sha256_hex(&raw_input);
+    let derived_batch_id = make_derived_batch_id(source_batch_id)?;
+    let staged_at = Utc::now().to_rfc3339();
+
+    if let Some(parent) = db_path
+        .parent()
+        .filter(|parent| !parent.as_os_str().is_empty())
+    {
+        fs::create_dir_all(parent)
+            .with_context(|| format!("failed to create {}", parent.display()))?;
+    }
+    let mut conn = Connection::open(db_path)
+        .with_context(|| format!("failed to open staging database {}", db_path.display()))?;
+    initialise_staging_schema(&conn)?;
+    let tx = conn.transaction()?;
+
+    let validation_summary_json = serde_json::json!({
+        "input": format!("<derived from {source_batch_id}>"),
+        "format": "jsonl",
+        "records_checked": events.len(),
+        "errors": [],
+        "warnings": []
+    })
+    .to_string();
+    let synthetic_path = format!("<derived from {source_batch_id}>");
+
+    tx.execute(
+        "INSERT INTO stage_batches (
+            batch_id, input_path, input_format, input_sha256, input_bytes,
+            staged_at, records_checked, records_stored, error_count,
+            warning_count, validation_summary_json, raw_input, parent_batch_id
+        ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",
+        params![
+            &derived_batch_id,
+            &synthetic_path,
+            "jsonl",
+            &input_sha256,
+            raw_input.len() as i64,
+            &staged_at,
+            events.len() as i64,
+            events.len() as i64,
+            0i64,
+            0i64,
+            validation_summary_json,
+            raw_input,
+            source_batch_id,
+        ],
+    )?;
+
+    for (index, event) in events.iter().enumerate() {
+        let serialised = serde_json::to_string(event)?;
+        // One-based numbering: aligns derived stage records with how
+        // `pow validate`/`pow stage` report record positions, so a reviewer
+        // running `pow diff` sees the first event as record 1, not record 0.
+        let record_index = (index + 1) as i64;
+        tx.execute(
+            "INSERT INTO stage_records (
+                batch_id, record_index, record_kind, raw_record, parsed_json
+            ) VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![
+                &derived_batch_id,
+                record_index,
+                "proposed_event",
+                &serialised,
+                Some(&serialised),
+            ],
+        )?;
+    }
+
+    tx.commit()?;
+    Ok(derived_batch_id)
+}
+
+fn make_derived_batch_id(source_batch_id: &str) -> Result<String> {
+    let nanos = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .context("system clock is before Unix epoch")?
+        .as_nanos();
+    let digest = Sha256::digest(source_batch_id.as_bytes());
+    let hex = bytes_to_hex(&digest);
+    Ok(format!("proposed_{nanos}_{}", &hex[..12]))
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct DiffOutcome {
+    summary: DiffSummary,
+    sites: Vec<SiteChangeset>,
+    target_years: BTreeMap<String, TargetYearAggregate>,
+    warnings: Vec<DiffWarning>,
+    source_coverage: SourceCoverage,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct DiffSummary {
+    batch_id: String,
+    parent_batch_id: Option<String>,
+    event_count: usize,
+    site_count: usize,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct SiteChangeset {
+    site_key: String,
+    site_id: Option<String>,
+    matched_current_site_id: Option<String>,
+    candidate_site_id: Option<String>,
+    event_count: usize,
+    events: Vec<EventSummary>,
+    worship_use_status: Option<Transition<String>>,
+    denomination_set: Option<Transition<Vec<String>>>,
+    purpose_set: Option<Transition<Vec<String>>>,
+    site_type: Option<Transition<String>>,
+    organisation_links_added: Vec<Value>,
+    organisation_links_removed: Vec<Value>,
+    geometry_changes: Vec<GeometryChange>,
+    target_year_affects: Vec<TargetYearAffect>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct EventSummary {
+    record_index: usize,
+    event_id: String,
+    event_type: String,
+    recorded_at: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct Transition<T> {
+    previous: Option<T>,
+    next: T,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct TargetYearAffect {
+    target_year: String,
+    previous_target_year_status: Option<String>,
+    target_year_status: String,
+    worship_use_status: Option<String>,
+    basis: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct TargetYearAggregate {
+    affected_sites: usize,
+    transitions: BTreeMap<String, usize>,
+    final_status_counts: BTreeMap<String, usize>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct DiffWarning {
+    record_index: usize,
+    event_id: Option<String>,
+    kind: String,
+    message: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct SourceCoverage {
+    by_basis: BTreeMap<String, usize>,
+    by_event_type: BTreeMap<String, BTreeMap<String, usize>>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct GeometryChange {
+    record_index: usize,
+    geometry_role: Option<String>,
+    geometry_basis: Option<String>,
+    distance_from_previous_m: Option<f64>,
+}
+
+#[derive(Clone, Debug)]
+struct ProposedEvent {
+    record_index: usize,
+    event: Value,
+}
+
+fn diff(args: DiffArgs) -> Result<DiffOutcome> {
+    let conn = Connection::open(&args.db)
+        .with_context(|| format!("failed to open staging database {}", args.db.display()))?;
+    initialise_staging_schema(&conn)?;
+    let parent_batch_id = load_parent_batch_id(&conn, &args.batch_id)?;
+    let events = load_proposed_events(&conn, &args.batch_id)?;
+    if events.is_empty() {
+        bail!(
+            "batch {} contains no change-event records; stage JSONL change events or run `pow propose --persist` first",
+            args.batch_id
+        );
+    }
+    revalidate_events(&events, &args.schema_dir)?;
+    enforce_target_year_affects(&events)?;
+
+    let warnings = build_warnings(&events);
+    let source_coverage = build_source_coverage(&events);
+    let target_years = aggregate_target_years(&events);
+    let sites = build_site_changesets(&events);
+
+    Ok(DiffOutcome {
+        summary: DiffSummary {
+            batch_id: args.batch_id,
+            parent_batch_id,
+            event_count: events.len(),
+            site_count: sites.len(),
+        },
+        sites,
+        target_years,
+        warnings,
+        source_coverage,
+    })
+}
+
+fn load_parent_batch_id(conn: &Connection, batch_id: &str) -> Result<Option<String>> {
+    let mut stmt = conn.prepare("SELECT parent_batch_id FROM stage_batches WHERE batch_id = ?1")?;
+    let mut rows = stmt.query(params![batch_id])?;
+    let Some(row) = rows.next()? else {
+        bail!("no staged batch found for {batch_id}");
+    };
+    let value: Option<String> = row.get(0)?;
+    Ok(value)
+}
+
+fn load_proposed_events(conn: &Connection, batch_id: &str) -> Result<Vec<ProposedEvent>> {
+    let mut stmt = conn.prepare(
+        "SELECT record_index, parsed_json
+         FROM stage_records
+         WHERE batch_id = ?1
+           AND record_kind IN ('proposed_event', 'jsonl_line', 'json_record')
+         ORDER BY record_index",
+    )?;
+    let rows = stmt.query_map(params![batch_id], |row| {
+        let record_index: i64 = row.get(0)?;
+        let parsed_json: Option<String> = row.get(1)?;
+        Ok((record_index, parsed_json))
+    })?;
+    let mut events = Vec::new();
+    for row in rows {
+        let (record_index, parsed_json) = row?;
+        let parsed_json = parsed_json
+            .with_context(|| format!("stage record {record_index} has no parsed_json"))?;
+        let event = serde_json::from_str::<Value>(&parsed_json)
+            .with_context(|| format!("stage record {record_index} is not valid JSON"))?;
+        events.push(ProposedEvent {
+            record_index: record_index as usize,
+            event,
+        });
+    }
+    Ok(events)
+}
+
+fn revalidate_events(events: &[ProposedEvent], schema_dir: &Path) -> Result<()> {
+    let validators = SchemaValidators::load(schema_dir)?;
+    let mut summary = ValidationSummary::new(Path::new("pow diff"), "jsonl");
+    for event in events {
+        validate_json_record(&event.event, event.record_index, &validators, &mut summary);
+    }
+    if !summary.errors.is_empty() {
+        for diagnostic in &summary.errors {
+            print_diagnostic_to_stderr("ERROR", diagnostic);
+        }
+        bail!("staged events failed re-validation against change-event schema");
+    }
+    Ok(())
+}
+
+fn enforce_target_year_affects(events: &[ProposedEvent]) -> Result<()> {
+    for event in events {
+        if event_payload_type(&event.event) != Some("worship_function_update") {
+            continue;
+        }
+        let affects = event
+            .event
+            .pointer("/payload/target_year_affects")
+            .and_then(Value::as_array);
+        if affects.is_none_or(|values| values.is_empty()) {
+            bail!(
+                "record {} carries a worship_function_update payload with empty target_year_affects; pow diff v1 refuses to infer target-year state from prose",
+                event.record_index
+            );
+        }
+    }
+    Ok(())
+}
+
+fn event_payload_type(event: &Value) -> Option<&str> {
+    event
+        .pointer("/payload/payload_type")
+        .and_then(Value::as_str)
+}
+
+fn event_event_type(event: &Value) -> &str {
+    event
+        .get("event_type")
+        .and_then(Value::as_str)
+        .unwrap_or("<unknown>")
+}
+
+fn event_event_id(event: &Value) -> Option<&str> {
+    event.get("event_id").and_then(Value::as_str)
+}
+
+fn event_recorded_at(event: &Value) -> &str {
+    event
+        .get("recorded_at")
+        .and_then(Value::as_str)
+        .unwrap_or("")
+}
+
+fn site_key_for_event(event: &Value) -> (String, Option<String>, Option<String>, Option<String>) {
+    let target = event.get("target");
+    let site_id = target
+        .and_then(|t| t.get("site_id"))
+        .and_then(Value::as_str)
+        .map(str::to_owned);
+    if let Some(value) = site_id.as_ref() {
+        return (
+            format!("site:{value}"),
+            Some(value.clone()),
+            target
+                .and_then(|t| t.get("matched_current_site_id"))
+                .and_then(Value::as_str)
+                .map(str::to_owned),
+            target
+                .and_then(|t| t.get("candidate_site_id"))
+                .and_then(Value::as_str)
+                .map(str::to_owned),
+        );
+    }
+    let matched = target
+        .and_then(|t| t.get("matched_current_site_id"))
+        .and_then(Value::as_str)
+        .map(str::to_owned);
+    if let Some(value) = matched.as_ref() {
+        return (
+            format!("matched:{value}"),
+            None,
+            Some(value.clone()),
+            target
+                .and_then(|t| t.get("candidate_site_id"))
+                .and_then(Value::as_str)
+                .map(str::to_owned),
+        );
+    }
+    let candidate = target
+        .and_then(|t| t.get("candidate_site_id"))
+        .and_then(Value::as_str)
+        .map(str::to_owned);
+    if let Some(value) = candidate.as_ref() {
+        return (
+            format!("candidate:{value}"),
+            None,
+            None,
+            Some(value.clone()),
+        );
+    }
+    ("<unknown>".to_owned(), None, None, None)
+}
+
+type SiteIdTuple = (Option<String>, Option<String>, Option<String>);
+
+fn build_site_changesets(events: &[ProposedEvent]) -> Vec<SiteChangeset> {
+    let mut grouped: BTreeMap<String, Vec<&ProposedEvent>> = BTreeMap::new();
+    let mut keys_to_ids: BTreeMap<String, SiteIdTuple> = BTreeMap::new();
+    for event in events {
+        let (key, site_id, matched, candidate) = site_key_for_event(&event.event);
+        keys_to_ids
+            .entry(key.clone())
+            .or_insert((site_id, matched, candidate));
+        grouped.entry(key).or_default().push(event);
+    }
+
+    grouped
+        .into_iter()
+        .map(|(key, list)| {
+            let mut events_sorted = list;
+            events_sorted.sort_by(|a, b| {
+                event_recorded_at(&a.event)
+                    .cmp(event_recorded_at(&b.event))
+                    .then(a.record_index.cmp(&b.record_index))
+            });
+            let (site_id, matched_current_site_id, candidate_site_id) =
+                keys_to_ids.remove(&key).unwrap_or((None, None, None));
+            let mut summaries = Vec::with_capacity(events_sorted.len());
+            for event in &events_sorted {
+                summaries.push(EventSummary {
+                    record_index: event.record_index,
+                    event_id: event_event_id(&event.event)
+                        .unwrap_or("<missing>")
+                        .to_owned(),
+                    event_type: event_event_type(&event.event).to_owned(),
+                    recorded_at: event_recorded_at(&event.event).to_owned(),
+                });
+            }
+            let worship_use_status = reduce_string_transition(
+                &events_sorted,
+                "/payload/previous_worship_use_status",
+                "/payload/worship_use_status",
+            );
+            let denomination_set = reduce_string_array_transition(
+                &events_sorted,
+                "/payload/previous_denomination_set",
+                "/payload/denomination_set",
+            );
+            let purpose_set = reduce_string_array_transition(
+                &events_sorted,
+                "/payload/previous_purpose_set",
+                "/payload/purpose_set",
+            );
+            let site_type = reduce_string_transition(
+                &events_sorted,
+                "/payload/previous_site_type",
+                "/payload/site_type",
+            );
+            let (organisation_links_added, organisation_links_removed) =
+                reduce_organisation_links(&events_sorted);
+            let geometry_changes = reduce_geometry_changes(&events_sorted);
+            let target_year_affects = reduce_target_year_affects(&events_sorted);
+
+            SiteChangeset {
+                site_key: key,
+                site_id,
+                matched_current_site_id,
+                candidate_site_id,
+                event_count: events_sorted.len(),
+                events: summaries,
+                worship_use_status,
+                denomination_set,
+                purpose_set,
+                site_type,
+                organisation_links_added,
+                organisation_links_removed,
+                geometry_changes,
+                target_year_affects,
+            }
+        })
+        .collect()
+}
+
+fn reduce_string_transition(
+    events: &[&ProposedEvent],
+    previous_pointer: &str,
+    next_pointer: &str,
+) -> Option<Transition<String>> {
+    let previous = events
+        .iter()
+        .find_map(|event| {
+            event
+                .event
+                .pointer(previous_pointer)
+                .and_then(Value::as_str)
+                .map(str::to_owned)
+        })
+        .or(None);
+    let next = events.iter().rev().find_map(|event| {
+        event
+            .event
+            .pointer(next_pointer)
+            .and_then(Value::as_str)
+            .map(str::to_owned)
+    })?;
+    if previous.as_deref() == Some(next.as_str()) {
+        return None;
+    }
+    Some(Transition { previous, next })
+}
+
+fn reduce_string_array_transition(
+    events: &[&ProposedEvent],
+    previous_pointer: &str,
+    next_pointer: &str,
+) -> Option<Transition<Vec<String>>> {
+    let previous: Option<Vec<String>> = events.iter().find_map(|event| {
+        event
+            .event
+            .pointer(previous_pointer)
+            .and_then(Value::as_array)
+            .map(|values| string_array(values))
+    });
+    let next: Vec<String> = events.iter().rev().find_map(|event| {
+        event
+            .event
+            .pointer(next_pointer)
+            .and_then(Value::as_array)
+            .map(|values| string_array(values))
+    })?;
+    if previous.as_deref() == Some(next.as_slice()) {
+        return None;
+    }
+    Some(Transition { previous, next })
+}
+
+fn string_array(values: &[Value]) -> Vec<String> {
+    let mut out: Vec<String> = values
+        .iter()
+        .filter_map(|value| value.as_str().map(str::to_owned))
+        .collect();
+    out.sort();
+    out.dedup();
+    out
+}
+
+fn reduce_organisation_links(events: &[&ProposedEvent]) -> (Vec<Value>, Vec<Value>) {
+    let mut added = Vec::new();
+    let mut removed = Vec::new();
+    for event in events {
+        if event_payload_type(&event.event) == Some("organisation_link_update")
+            && let Some(value) = event
+                .event
+                .pointer("/payload/organisation_link")
+                .or_else(|| event.event.pointer("/payload"))
+        {
+            let event_type = event_event_type(&event.event);
+            if event_type == "organisation_use_started" {
+                added.push(value.clone());
+            } else if event_type == "organisation_use_ended" {
+                removed.push(value.clone());
+            }
+        }
+        if let Some(links) = event
+            .event
+            .pointer("/payload/organisation_links")
+            .and_then(Value::as_array)
+        {
+            for link in links {
+                added.push(link.clone());
+            }
+        }
+        if let Some(links) = event
+            .event
+            .pointer("/payload/previous_organisation_links")
+            .and_then(Value::as_array)
+        {
+            for link in links {
+                removed.push(link.clone());
+            }
+        }
+    }
+    (added, removed)
+}
+
+fn reduce_geometry_changes(events: &[&ProposedEvent]) -> Vec<GeometryChange> {
+    events
+        .iter()
+        .filter_map(|event| {
+            let payload_type = event_payload_type(&event.event)?;
+            if payload_type != "geometry_update" && payload_type != "site_relocation" {
+                return None;
+            }
+            Some(GeometryChange {
+                record_index: event.record_index,
+                geometry_role: event
+                    .event
+                    .pointer("/payload/geometry_role")
+                    .and_then(Value::as_str)
+                    .map(str::to_owned),
+                geometry_basis: event
+                    .event
+                    .pointer("/payload/geometry_basis")
+                    .and_then(Value::as_str)
+                    .map(str::to_owned),
+                distance_from_previous_m: event
+                    .event
+                    .pointer("/payload/distance_from_previous_m")
+                    .and_then(Value::as_f64)
+                    .or_else(|| {
+                        event
+                            .event
+                            .pointer("/payload/distance_m")
+                            .and_then(Value::as_f64)
+                    }),
+            })
+        })
+        .collect()
+}
+
+fn reduce_target_year_affects(events: &[&ProposedEvent]) -> Vec<TargetYearAffect> {
+    let mut affects = Vec::new();
+    for event in events {
+        let Some(list) = event
+            .event
+            .pointer("/payload/target_year_affects")
+            .and_then(Value::as_array)
+        else {
+            continue;
+        };
+        for entry in list {
+            let target_year = entry
+                .get("target_year")
+                .and_then(Value::as_str)
+                .unwrap_or("")
+                .to_owned();
+            let target_year_status = entry
+                .get("target_year_status")
+                .and_then(Value::as_str)
+                .unwrap_or("")
+                .to_owned();
+            let previous = entry
+                .get("previous_target_year_status")
+                .and_then(Value::as_str)
+                .map(str::to_owned);
+            let worship_use_status = entry
+                .get("worship_use_status")
+                .and_then(Value::as_str)
+                .map(str::to_owned);
+            let basis = entry
+                .get("basis")
+                .and_then(Value::as_str)
+                .map(str::to_owned);
+            affects.push(TargetYearAffect {
+                target_year,
+                previous_target_year_status: previous,
+                target_year_status,
+                worship_use_status,
+                basis,
+            });
+        }
+    }
+    affects.sort_by(|a, b| a.target_year.cmp(&b.target_year));
+    affects
+}
+
+fn aggregate_target_years(events: &[ProposedEvent]) -> BTreeMap<String, TargetYearAggregate> {
+    // Collapse to one net transition per (target_year, site_key) so a site with
+    // multiple events at the same target year is counted once. The "before"
+    // state is the earliest event's previous_target_year_status; the "after"
+    // state is the latest event's target_year_status (chronological by
+    // recorded_at, falling back to record_index for ties).
+    struct PerPair {
+        first_at: String,
+        first_index: usize,
+        previous: Option<String>,
+        last_at: String,
+        last_index: usize,
+        next: String,
+    }
+
+    let mut per_pair: BTreeMap<(String, String), PerPair> = BTreeMap::new();
+    for event in events {
+        let (site_key, _, _, _) = site_key_for_event(&event.event);
+        let recorded_at = event_recorded_at(&event.event).to_owned();
+        let record_index = event.record_index;
+        let Some(list) = event
+            .event
+            .pointer("/payload/target_year_affects")
+            .and_then(Value::as_array)
+        else {
+            continue;
+        };
+        for entry in list {
+            let Some(target_year) = entry.get("target_year").and_then(Value::as_str) else {
+                continue;
+            };
+            let Some(next_status) = entry.get("target_year_status").and_then(Value::as_str) else {
+                continue;
+            };
+            let previous_status = entry
+                .get("previous_target_year_status")
+                .and_then(Value::as_str)
+                .map(str::to_owned);
+            let key = (target_year.to_owned(), site_key.clone());
+            per_pair
+                .entry(key)
+                .and_modify(|state| {
+                    let earlier = recorded_at < state.first_at
+                        || (recorded_at == state.first_at && record_index < state.first_index);
+                    let later = recorded_at > state.last_at
+                        || (recorded_at == state.last_at && record_index > state.last_index);
+                    if earlier {
+                        state.first_at = recorded_at.clone();
+                        state.first_index = record_index;
+                        state.previous = previous_status.clone();
+                    }
+                    if later {
+                        state.last_at = recorded_at.clone();
+                        state.last_index = record_index;
+                        state.next = next_status.to_owned();
+                    }
+                })
+                .or_insert_with(|| PerPair {
+                    first_at: recorded_at.clone(),
+                    first_index: record_index,
+                    previous: previous_status.clone(),
+                    last_at: recorded_at.clone(),
+                    last_index: record_index,
+                    next: next_status.to_owned(),
+                });
+        }
+    }
+
+    let mut by_year: BTreeMap<String, TargetYearAggregate> = BTreeMap::new();
+    for ((year, _site_key), state) in per_pair {
+        let aggregate = by_year.entry(year).or_insert_with(|| TargetYearAggregate {
+            affected_sites: 0,
+            transitions: BTreeMap::new(),
+            final_status_counts: BTreeMap::new(),
+        });
+        let prev = state.previous.as_deref().unwrap_or("<none>");
+        let transition_key = format!("{prev} -> {}", state.next);
+        aggregate.affected_sites += 1;
+        *aggregate.transitions.entry(transition_key).or_insert(0) += 1;
+        *aggregate.final_status_counts.entry(state.next).or_insert(0) += 1;
+    }
+    by_year
+}
+
+fn build_warnings(events: &[ProposedEvent]) -> Vec<DiffWarning> {
+    let mut warnings = Vec::new();
+    for event in events {
+        let event_id = event_event_id(&event.event).map(str::to_owned);
+        let event_type = event_event_type(&event.event);
+
+        if event_type.starts_with("denomination_") {
+            let taxonomy_version = event.event.get("taxonomy_version").and_then(Value::as_str);
+            if taxonomy_version.is_none_or(str::is_empty) {
+                warnings.push(DiffWarning {
+                    record_index: event.record_index,
+                    event_id: event_id.clone(),
+                    kind: "missing_taxonomy_version".to_owned(),
+                    message: format!(
+                        "denomination event lacks taxonomy_version (record {})",
+                        event.record_index
+                    ),
+                });
+            }
+        }
+
+        if event
+            .event
+            .pointer("/effective/basis")
+            .and_then(Value::as_str)
+            == Some("reviewer_inference")
+        {
+            warnings.push(DiffWarning {
+                record_index: event.record_index,
+                event_id: event_id.clone(),
+                kind: "weak_basis".to_owned(),
+                message: format!(
+                    "event basis is reviewer_inference; reviewer should confirm the underlying source (record {})",
+                    event.record_index
+                ),
+            });
+        }
+
+        if let Some(refs) = event.event.get("source_refs").and_then(Value::as_array) {
+            for source_ref in refs {
+                let licence = source_ref
+                    .get("licence_status")
+                    .and_then(Value::as_str)
+                    .unwrap_or("");
+                if matches!(licence, "needs_review" | "restricted") {
+                    warnings.push(DiffWarning {
+                        record_index: event.record_index,
+                        event_id: event_id.clone(),
+                        kind: "licence_attention".to_owned(),
+                        message: format!(
+                            "source ref licence_status={licence:?} requires reviewer attention (record {})",
+                            event.record_index
+                        ),
+                    });
+                }
+            }
+        }
+
+        if event
+            .event
+            .pointer("/review/review_status")
+            .and_then(Value::as_str)
+            == Some("accepted")
+            && event
+                .event
+                .get("payload_hash")
+                .map(Value::is_null)
+                .unwrap_or(true)
+        {
+            warnings.push(DiffWarning {
+                record_index: event.record_index,
+                event_id,
+                kind: "missing_payload_hash".to_owned(),
+                message: format!(
+                    "accepted event is missing payload_hash (record {})",
+                    event.record_index
+                ),
+            });
+        }
+    }
+    warnings
+}
+
+fn build_source_coverage(events: &[ProposedEvent]) -> SourceCoverage {
+    let mut by_basis: BTreeMap<String, usize> = BTreeMap::new();
+    let mut by_event_type: BTreeMap<String, BTreeMap<String, usize>> = BTreeMap::new();
+    for event in events {
+        let basis = event
+            .event
+            .pointer("/effective/basis")
+            .and_then(Value::as_str)
+            .unwrap_or("<missing>")
+            .to_owned();
+        let event_type = event_event_type(&event.event).to_owned();
+        *by_basis.entry(basis.clone()).or_insert(0) += 1;
+        *by_event_type
+            .entry(event_type)
+            .or_default()
+            .entry(basis)
+            .or_insert(0) += 1;
+    }
+    SourceCoverage {
+        by_basis,
+        by_event_type,
+    }
+}
+
+fn print_diff_text_report(outcome: &DiffOutcome) -> Result<()> {
+    println!("pow diff: {}", outcome.summary.batch_id);
+    if let Some(parent) = &outcome.summary.parent_batch_id {
+        println!("source batch: {parent}");
+    }
+    println!("events: {}", outcome.summary.event_count);
+    println!("sites: {}", outcome.summary.site_count);
+    println!();
+
+    println!("Per-site changesets:");
+    if outcome.sites.is_empty() {
+        println!("  (no sites)");
+    }
+    for site in &outcome.sites {
+        println!();
+        println!("  Site {}", site.site_key);
+        if let Some(value) = &site.matched_current_site_id
+            && site.site_id.is_none()
+        {
+            println!("    matched current site id: {value}");
+        }
+        if let Some(value) = &site.candidate_site_id {
+            println!("    candidate site id: {value}");
+        }
+        println!("    events: {}", site.event_count);
+        for summary in &site.events {
+            println!(
+                "      - record {} {} ({}) at {}",
+                summary.record_index, summary.event_id, summary.event_type, summary.recorded_at
+            );
+        }
+        if let Some(transition) = &site.worship_use_status {
+            println!(
+                "    worship_use_status: {} -> {}",
+                option_or_none(&transition.previous),
+                transition.next
+            );
+        }
+        if let Some(transition) = &site.denomination_set {
+            println!(
+                "    denomination_set: {} -> {}",
+                option_array_or_none(&transition.previous),
+                array_inline(&transition.next)
+            );
+        }
+        if let Some(transition) = &site.purpose_set {
+            println!(
+                "    purpose_set: {} -> {}",
+                option_array_or_none(&transition.previous),
+                array_inline(&transition.next)
+            );
+        }
+        if let Some(transition) = &site.site_type {
+            println!(
+                "    site_type: {} -> {}",
+                option_or_none(&transition.previous),
+                transition.next
+            );
+        }
+        if !site.organisation_links_added.is_empty() {
+            println!(
+                "    organisation links added: {}",
+                site.organisation_links_added.len()
+            );
+        }
+        if !site.organisation_links_removed.is_empty() {
+            println!(
+                "    organisation links removed: {}",
+                site.organisation_links_removed.len()
+            );
+        }
+        for change in &site.geometry_changes {
+            println!(
+                "    geometry change (record {}): role={}, basis={}, distance_m={}",
+                change.record_index,
+                change.geometry_role.as_deref().unwrap_or("<none>"),
+                change.geometry_basis.as_deref().unwrap_or("<none>"),
+                change
+                    .distance_from_previous_m
+                    .map(|value| format!("{value:.1}"))
+                    .unwrap_or_else(|| "<none>".to_owned())
+            );
+        }
+        if !site.target_year_affects.is_empty() {
+            println!("    target year affects:");
+            for affect in &site.target_year_affects {
+                let prev = affect
+                    .previous_target_year_status
+                    .as_deref()
+                    .unwrap_or("<none>");
+                let worship = affect.worship_use_status.as_deref().unwrap_or("<unset>");
+                let basis = affect.basis.as_deref().unwrap_or("<unset>");
+                println!(
+                    "      {}: {} -> {} (worship_use_status={}, basis={})",
+                    affect.target_year, prev, affect.target_year_status, worship, basis
+                );
+            }
+        }
+    }
+
+    println!();
+    println!("Per-target-year summary:");
+    if outcome.target_years.is_empty() {
+        println!("  (no target-year affects)");
+    }
+    for (year, aggregate) in &outcome.target_years {
+        println!("  {year}: {} affected site(s)", aggregate.affected_sites);
+        for (transition, count) in &aggregate.transitions {
+            println!("    {transition}: {count}");
+        }
+    }
+
+    println!();
+    println!("Warnings:");
+    if outcome.warnings.is_empty() {
+        println!("  (no warnings)");
+    }
+    for warning in &outcome.warnings {
+        println!(
+            "  [{}] record {}: {}",
+            warning.kind, warning.record_index, warning.message
+        );
+    }
+
+    println!();
+    println!("Source coverage (event basis):");
+    if outcome.source_coverage.by_basis.is_empty() {
+        println!("  (no events)");
+    }
+    let total: usize = outcome.source_coverage.by_basis.values().sum();
+    for (basis, count) in &outcome.source_coverage.by_basis {
+        let pct = if total > 0 {
+            (*count as f64 / total as f64) * 100.0
+        } else {
+            0.0
+        };
+        println!("  {basis}: {count} ({pct:.0}%)");
+    }
+    Ok(())
+}
+
+fn print_diff_json_report(outcome: &DiffOutcome) -> Result<()> {
+    println!("{}", serde_json::to_string_pretty(outcome)?);
+    Ok(())
+}
+
+fn option_or_none(value: &Option<String>) -> &str {
+    value.as_deref().unwrap_or("<none>")
+}
+
+fn option_array_or_none(value: &Option<Vec<String>>) -> String {
+    match value {
+        Some(values) => array_inline(values),
+        None => "<none>".to_owned(),
+    }
+}
+
+fn array_inline(values: &[String]) -> String {
+    if values.is_empty() {
+        "[]".to_owned()
+    } else {
+        format!("[{}]", values.join(", "))
+    }
+}
+
 fn initialise_staging_schema(conn: &Connection) -> Result<()> {
     conn.execute_batch(
         "
@@ -1039,7 +2077,8 @@ fn initialise_staging_schema(conn: &Connection) -> Result<()> {
             error_count INTEGER NOT NULL,
             warning_count INTEGER NOT NULL,
             validation_summary_json TEXT NOT NULL,
-            raw_input BLOB NOT NULL
+            raw_input BLOB NOT NULL,
+            parent_batch_id TEXT REFERENCES stage_batches(batch_id)
         );
 
         CREATE TABLE IF NOT EXISTS stage_records (
@@ -1071,8 +2110,36 @@ fn initialise_staging_schema(conn: &Connection) -> Result<()> {
 
         CREATE INDEX IF NOT EXISTS idx_validation_diagnostics_batch
             ON validation_diagnostics(batch_id, severity);
+
+        CREATE INDEX IF NOT EXISTS idx_stage_batches_parent
+            ON stage_batches(parent_batch_id);
         ",
     )?;
+    ensure_stage_batches_columns(conn)?;
+    Ok(())
+}
+
+fn ensure_stage_batches_columns(conn: &Connection) -> Result<()> {
+    let mut has_parent = false;
+    let mut stmt = conn.prepare("PRAGMA table_info(stage_batches)")?;
+    let rows = stmt.query_map([], |row| row.get::<_, String>(1))?;
+    for row in rows {
+        if row? == "parent_batch_id" {
+            has_parent = true;
+            break;
+        }
+    }
+    drop(stmt);
+    if !has_parent {
+        conn.execute(
+            "ALTER TABLE stage_batches ADD COLUMN parent_batch_id TEXT REFERENCES stage_batches(batch_id)",
+            [],
+        )?;
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_stage_batches_parent ON stage_batches(parent_batch_id)",
+            [],
+        )?;
+    }
     Ok(())
 }
 
@@ -2309,6 +3376,7 @@ mod tests {
             batch_id: "batch-test-001".to_owned(),
             db: db.clone(),
             schema_dir: repo_root.join("schemas"),
+            persist: false,
         })
         .expect("propose succeeds");
         let expected_events = fs::read_to_string(expected)
@@ -2318,6 +3386,297 @@ mod tests {
             .collect::<Vec<_>>();
 
         assert_eq!(events, expected_events);
+
+        let _ = fs::remove_file(db);
+    }
+
+    fn temp_db_path(label: &str) -> PathBuf {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("clock")
+            .as_nanos();
+        std::env::temp_dir().join(format!("pow-{label}-{nanos}.sqlite"))
+    }
+
+    fn insert_proposed_events(
+        conn: &Connection,
+        batch_id: &str,
+        parent_batch_id: Option<&str>,
+        events: &[Value],
+    ) {
+        conn.execute(
+            "INSERT INTO stage_batches (
+                batch_id, input_path, input_format, input_sha256, input_bytes,
+                staged_at, records_checked, records_stored, error_count,
+                warning_count, validation_summary_json, raw_input, parent_batch_id
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",
+            params![
+                batch_id,
+                "<test fixture>",
+                "jsonl",
+                "0".repeat(64),
+                0_i64,
+                "2026-05-03T00:00:00Z",
+                events.len() as i64,
+                events.len() as i64,
+                0_i64,
+                0_i64,
+                "{}",
+                Vec::<u8>::new(),
+                parent_batch_id,
+            ],
+        )
+        .expect("insert stage batch");
+        for (index, event) in events.iter().enumerate() {
+            let serialised = serde_json::to_string(event).expect("serialize event");
+            conn.execute(
+                "INSERT INTO stage_records (
+                    batch_id, record_index, record_kind, raw_record, parsed_json
+                ) VALUES (?1, ?2, ?3, ?4, ?5)",
+                params![
+                    batch_id,
+                    index as i64,
+                    "proposed_event",
+                    &serialised,
+                    Some(&serialised),
+                ],
+            )
+            .expect("insert stage record");
+        }
+    }
+
+    #[test]
+    fn diff_rejects_worship_function_update_without_target_year_affects() {
+        let event = json!({
+            "schema_version": "change-event.v1",
+            "event_id": "55555555-5555-4555-8555-555555555555",
+            "client_event_id": "no-affects-1",
+            "event_type": "worship_function_observed",
+            "event_intent": "evidence_observation",
+            "target": {
+                "target_type": "site",
+                "site_id": "66666666-6666-4666-8666-666666666666"
+            },
+            "effective": {
+                "effective_date": "2018-09-01",
+                "date_precision": "day",
+                "basis": "source_observation"
+            },
+            "recorded_at": "2026-05-03T09:00:00Z",
+            "source_refs": [{
+                "source_ref_type": "evidence_row",
+                "evidence_row_id": "row-1",
+                "licence_status": "accepted"
+            }],
+            "review": {"review_status": "staged"},
+            "payload_hash": null,
+            "payload": {
+                "payload_type": "worship_function_update",
+                "worship_use_status": "confirmed_worship"
+            }
+        });
+        let proposed = vec![ProposedEvent {
+            record_index: 1,
+            event,
+        }];
+        let err = enforce_target_year_affects(&proposed)
+            .expect_err("should reject empty target_year_affects");
+        assert!(err.to_string().contains("target_year_affects"));
+    }
+
+    #[test]
+    fn diff_pipeline_runs_against_multi_denomination_fixture() {
+        let repo_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let fixture = repo_root.join("docs/examples/revisions/nz-multi-denomination.jsonl");
+        let raw = fs::read_to_string(&fixture).expect("read fixture");
+        let events: Vec<Value> = raw
+            .lines()
+            .map(|line| serde_json::from_str(line).expect("parse jsonl"))
+            .collect();
+
+        let db = temp_db_path("diff-multi-denom");
+        let conn = Connection::open(&db).expect("open temp db");
+        initialise_staging_schema(&conn).expect("schema init");
+        insert_proposed_events(&conn, "diff-test-multi", None, &events);
+        drop(conn);
+
+        let outcome = diff(DiffArgs {
+            batch_id: "diff-test-multi".to_owned(),
+            db: db.clone(),
+            schema_dir: repo_root.join("schemas"),
+            report: ReportFormat::Text,
+        })
+        .expect("diff succeeds");
+
+        assert_eq!(outcome.summary.event_count, 2);
+        assert_eq!(outcome.summary.site_count, 1);
+        let site = &outcome.sites[0];
+        assert_eq!(site.site_key, "site:44444444-4444-4444-8444-444444444444");
+        let denomination = site
+            .denomination_set
+            .as_ref()
+            .expect("denomination_set transition");
+        assert_eq!(
+            denomination.previous.as_deref().unwrap_or(&[]),
+            ["anglican".to_owned()].as_slice()
+        );
+        assert_eq!(
+            denomination.next,
+            vec!["anglican".to_owned(), "methodist".to_owned()]
+        );
+        let aggregate = outcome
+            .target_years
+            .get("2018-09-01")
+            .expect("2018 aggregate present");
+        // One site, two same-year events: site-level aggregate must collapse
+        // to a single transition and final-status entry, not double-count.
+        assert_eq!(aggregate.affected_sites, 1);
+        assert_eq!(
+            aggregate.transitions.get("<none> -> present").copied(),
+            Some(1)
+        );
+        assert_eq!(
+            aggregate.final_status_counts.get("present").copied(),
+            Some(1)
+        );
+
+        let _ = fs::remove_file(db);
+    }
+
+    #[test]
+    fn diff_pipeline_runs_against_use_changed_fixture() {
+        let repo_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let fixture =
+            repo_root.join("docs/examples/revisions/nz-use-changed-building-remains.jsonl");
+        let raw = fs::read_to_string(&fixture).expect("read fixture");
+        let events: Vec<Value> = raw
+            .lines()
+            .map(|line| serde_json::from_str(line).expect("parse jsonl"))
+            .collect();
+
+        let db = temp_db_path("diff-use-changed");
+        let conn = Connection::open(&db).expect("open temp db");
+        initialise_staging_schema(&conn).expect("schema init");
+        insert_proposed_events(&conn, "diff-test-use-changed", None, &events);
+        drop(conn);
+
+        let outcome = diff(DiffArgs {
+            batch_id: "diff-test-use-changed".to_owned(),
+            db: db.clone(),
+            schema_dir: repo_root.join("schemas"),
+            report: ReportFormat::Text,
+        })
+        .expect("diff succeeds");
+
+        let site = &outcome.sites[0];
+        let worship = site
+            .worship_use_status
+            .as_ref()
+            .expect("worship_use_status transition");
+        assert_eq!(worship.previous.as_deref(), Some("confirmed_worship"));
+        assert_eq!(worship.next, "not_worship");
+        let aggregate_2023 = outcome
+            .target_years
+            .get("2023-09-01")
+            .expect("2023 aggregate");
+        assert_eq!(
+            aggregate_2023.transitions.get("present -> absent").copied(),
+            Some(1)
+        );
+
+        let _ = fs::remove_file(db);
+    }
+
+    #[test]
+    fn propose_persist_creates_derived_batch_readable_by_diff() {
+        let repo_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let csv = repo_root.join("docs/examples/revisions/ra-propose-site-observation.csv");
+        let db = temp_db_path("persist-then-diff");
+        let records = extract_csv_stage_records(&csv).expect("extract csv records");
+
+        let conn = Connection::open(&db).expect("open temp db");
+        initialise_staging_schema(&conn).expect("init schema");
+        conn.execute(
+            "INSERT INTO stage_batches (
+                batch_id, input_path, input_format, input_sha256, input_bytes,
+                staged_at, records_checked, records_stored, error_count,
+                warning_count, validation_summary_json, raw_input
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
+            params![
+                "persist-source-1",
+                csv.display().to_string(),
+                "csv",
+                "1".repeat(64),
+                0_i64,
+                "2026-05-03T00:00:00Z",
+                records.len() as i64,
+                records.len() as i64,
+                0_i64,
+                0_i64,
+                "{}",
+                Vec::<u8>::new(),
+            ],
+        )
+        .expect("insert source batch");
+        for record in records {
+            let parsed_json = record
+                .parsed_json
+                .as_ref()
+                .map(serde_json::to_string)
+                .transpose()
+                .expect("serialise parsed json");
+            conn.execute(
+                "INSERT INTO stage_records (
+                    batch_id, record_index, record_kind, raw_record, parsed_json
+                ) VALUES (?1, ?2, ?3, ?4, ?5)",
+                params![
+                    "persist-source-1",
+                    record.record_index as i64,
+                    record.record_kind,
+                    record.raw_record,
+                    parsed_json,
+                ],
+            )
+            .expect("insert source record");
+        }
+        drop(conn);
+
+        let events = propose(ProposeArgs {
+            batch_id: "persist-source-1".to_owned(),
+            db: db.clone(),
+            schema_dir: repo_root.join("schemas"),
+            persist: false,
+        })
+        .expect("propose succeeds");
+        assert!(!events.is_empty());
+
+        let derived =
+            persist_proposed_batch(&db, "persist-source-1", &events).expect("persist succeeds");
+        assert!(derived.starts_with("proposed_"));
+
+        let outcome = diff(DiffArgs {
+            batch_id: derived.clone(),
+            db: db.clone(),
+            schema_dir: repo_root.join("schemas"),
+            report: ReportFormat::Text,
+        })
+        .expect("diff over derived batch succeeds");
+        assert_eq!(outcome.summary.event_count, events.len());
+        assert_eq!(
+            outcome.summary.parent_batch_id.as_deref(),
+            Some("persist-source-1")
+        );
+        assert!(!outcome.sites.is_empty());
+        // Persisted proposed events use one-based record numbering so
+        // reviewer-facing record references read 1..N, not 0..N-1.
+        let first_record_index = outcome
+            .sites
+            .iter()
+            .flat_map(|site| site.events.iter())
+            .map(|summary| summary.record_index)
+            .min()
+            .expect("at least one event summary");
+        assert_eq!(first_record_index, 1);
 
         let _ = fs::remove_file(db);
     }
