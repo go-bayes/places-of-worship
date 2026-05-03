@@ -1291,7 +1291,7 @@ class NzVerificationMap {
         row.source_type = values.sourceType;
         row.provider = "Places of Worship NZ verification map";
         row.source_title = values.sourceTitle || "NZ map verification task";
-        row.source_url_or_file = values.sourceUrl || props.osm_object_url || props.osm_map_url || "";
+        row.source_url_or_file = values.sourceUrl;
         row.source_record_id = sourceRecordId;
         row.retrieval_date = todayIsoDate();
         row.licence = "needs_review";
