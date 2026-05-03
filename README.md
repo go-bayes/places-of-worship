@@ -6,8 +6,10 @@ An open, research-focused project for mapping and studying places of worship. Th
 
 - **Global Map:** [https://go-bayes.github.io/places-of-worship/index.html](https://go-bayes.github.io/places-of-worship/index.html)
 - **New Zealand Regional Map:** [https://www.placesmap.org/enhanced-places.html](https://www.placesmap.org/enhanced-places.html)
+- **NZ Verification Task Map:** [https://www.placesmap.org/apps/regions/nz/verification.html](https://www.placesmap.org/apps/regions/nz/verification.html)
 - **Planning (single source of truth):** [PLANNING.md](PLANNING.md)
 - **RA CLI tutorial:** [docs/ra-cli-tutorial.md](docs/ra-cli-tutorial.md)
+- **RA map triage guide:** [docs/ra-map-triage-guide.md](docs/ra-map-triage-guide.md)
 
 ## Overview
 

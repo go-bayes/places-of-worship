@@ -19,6 +19,9 @@
 - `schemas/`: data contracts. Update schemas before changing dependent shapes.
 - `docs/ra-cli-tutorial.md`: RA-facing walkthrough for validating and staging
   evidence batches.
+- `docs/ra-map-triage-guide.md`: RA-facing map-to-spreadsheet triage
+  instructions for missing sites, duplicates, disappeared sites, priority
+  tasks, and target-year states.
 - `docs/ra-propose-mapping.md`: mapping from staged RA evidence rows to draft
   change-event proposals.
 - `docs/revisions-cli.md`: current `pow` CLI and staging behaviour.

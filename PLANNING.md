@@ -75,6 +75,25 @@ As of 30 April 2026:
   Sheets-ready CSV tabs, including a wide human-entry sheet for source-backed
   lifecycle evidence, source metadata, site observations, candidate matches,
   review notes, controlled vocabularies, and privacy/licence instructions.
+- `docs/ra-map-triage-guide.md` now defines the interim RA map-to-spreadsheet
+  workflow for missing current sites, duplicate records, disappeared sites,
+  complicated worship functions, NZ verification priorities, and
+  2013/2018/2023 target-year states. This is the current bridge until the map
+  can accept authenticated staged proposals directly.
+- The NZ verification map now includes provisional 2013, 2018, and 2023
+  target-year controls. These controls use explicit target-year fields when
+  available and otherwise derive a provisional status from OSM `start_date`,
+  `old_start_date`, and `end_date`. This is an RA triage aid, not an accepted
+  historical reconstruction.
+- In demo mode, the NZ verification map now includes a local RA action builder
+  that turns the selected task, target-year statuses, source details, related
+  ids, and evidence note into a spreadsheet-ready wide evidence row plus review
+  JSON. This is a usability bridge only: it does not save, submit, authenticate,
+  or write to staging.
+- Frontend path: prototype the RA workbench as controls on the current static
+  map before committing to a Leptos or equivalent authenticated application.
+  Revisit Leptos once the action vocabulary, staged event contract, and review
+  ergonomics are stable enough to justify a persistent portal.
 - A separate portal data-entry planning hub now lives in
   `docs/portal-data-entry-plan.md`. It defines the first authenticated
   New Zealand staging pilot, with Google Cloud as the backend baseline, managed
@@ -1340,9 +1359,12 @@ map do not drift apart.
 9. Define the first read-only NZ master site-bundle export and automated
    verification checks described in
    `docs/master-verification-workflow-plan.md`.
-10. Pilot the NZ verification map nomination path for current non-OSM sites,
-   lost 2013 sites, and building-level complications before wiring it to a
-   backend staging table.
+10. Continue converting the RA map-triage guide into the first map-first
+   workflow design: current non-OSM sites, duplicate/merge candidates, lost
+   2013 sites, 2013-present/2018-absent cases, denomination or shared-building
+   complications, and target-year status changes should be selectable from the
+   map. The static demo can generate local rows for testing; authenticated
+   staging remains a later backend step.
 11. Scope the OSM temporal verification subproject for 2013, 2018, and 2023,
    including OSM history extraction, lifecycle-tag parsing, visual evidence
    review, and target-year probability rules.

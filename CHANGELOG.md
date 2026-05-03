@@ -25,7 +25,17 @@
   screenshot-style figures and explicit instructions not to submit pull
   requests, edit repository templates, or run staging/proposal steps without a
   project-team request during the pilot, plus a plain-language overview of the
-  project aim and RA role.
+  project aim and RA role. A fixture-based demo pass now aligns the tutorial
+  with actual Cargo, validation, staging, and proposal output.
+- Added `docs/ra-map-triage-guide.md` to give RAs step-by-step instructions for
+  missing sites, duplicate records, disappeared sites, complicated worship
+  functions, NZ priority tasks, and the intended 2013/2018/2023 map workflow.
+- Added provisional 2013/2018/2023 target-year controls to the NZ verification
+  map, colouring markers by target-year status derived from reviewed status
+  fields where available and otherwise from OSM lifecycle tags.
+- Added a no-save RA action builder to the NZ verification map demo so selected
+  tasks can produce a spreadsheet-ready evidence row and review JSON locally
+  while secure authenticated staging remains future work.
 - Removed the repository contributor guide while development remains
   single-maintainer.
 - Recorded the repository governance baseline: keep the repo public, disable

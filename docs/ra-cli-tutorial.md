@@ -16,10 +16,12 @@ can review.
 
 The workflow is deliberately cautious:
 
-1. Enter evidence in the agreed spreadsheet.
-2. Export the spreadsheet tab as CSV.
-3. Use the `pow` command to check whether the CSV follows the project template.
-4. Send the checked evidence and any confusing cases back to the project team.
+1. Use the map and source links to identify the case.
+2. Enter evidence in the agreed spreadsheet. If the demo map action builder is
+   enabled, it can help generate a draft row for pasting into the sheet.
+3. Export the spreadsheet tab as CSV.
+4. Use the `pow` command to check whether the CSV follows the project template.
+5. Send the checked evidence and any confusing cases back to the project team.
 
 This matters because small data-entry differences can change historical counts,
 regional densities, and maps of religious change. The command-line checks catch
@@ -28,6 +30,10 @@ uncertainty, and difficult cases.
 
 This tutorial explains how to check a small New Zealand places-of-worship
 evidence batch with the local `pow` command.
+
+If you are starting from the map and need to decide what to record for a
+missing site, duplicate, closure, or priority task, read
+`docs/ra-map-triage-guide.md` first.
 
 The command-line tool is a safety check. It does not approve data, upload data,
 or change the public map. It checks whether an exported CSV follows the project
@@ -118,8 +124,9 @@ Among the listed commands, you should see at least `validate`, `stage`, and
 `propose`.
 
 On the first run, Cargo may print build messages. Wait for the prompt to return.
-For validation, staging, or proposal, the project-specific section begins with
-`pow validate:`, `pow stage:`, or `pow propose:`.
+For validation and staging, the project-specific section begins with
+`pow validate:` or `pow stage:`. Proposal output may begin with a warning or a
+JSON line.
 
 ![Check the pow tool](assets/ra-cli-tutorial/02-help-command.svg)
 
@@ -213,6 +220,10 @@ Warnings about raw denomination or tradition text are expected at this stage.
 Coded denomination mapping is deferred until the project taxonomy exists. Save
 or copy the full propose output, including any warnings, and send it with your
 other materials.
+
+If a warning mentions a record number, treat it as the CSV line number. For
+example, `record 2` usually means the first data row because row 1 is the
+header.
 
 ## Step 8: What To Send Back
 

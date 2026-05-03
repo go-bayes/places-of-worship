@@ -6,6 +6,46 @@ const DATA_BASE = (() => {
 const SEARCH_PARAMS = new URLSearchParams(window.location.search);
 const DEMO_MODE = SEARCH_PARAMS.get("demo") === "1";
 const INTAKE_ENABLED = DEMO_MODE;
+const TARGET_YEARS = ["2013", "2018", "2023"];
+const WIDE_EVIDENCE_FIELDS = [
+    "evidence_row_id", "collection_batch", "country_code", "area_hint",
+    "source_dataset_id", "source_type", "provider", "source_title",
+    "source_url_or_file", "source_record_id", "retrieval_date", "retrieved_by",
+    "licence", "access_limits", "redistribution_limits", "raw_file_location",
+    "source_notes", "name_raw", "name_standardised",
+    "denomination_or_tradition_raw", "site_type", "address_raw",
+    "historical_address_raw", "historical_locality_raw",
+    "modern_address_candidate", "address_standardised", "locality_raw",
+    "territorial_authority_hint", "address_change_note", "geocoding_basis",
+    "geocoding_confidence", "latitude", "longitude", "geometry_wkt_or_geojson",
+    "matched_osm_id", "osm_object_type", "osm_version_timestamp",
+    "osm_tags_raw", "osm_start_date", "osm_old_start_date", "osm_end_date",
+    "osm_lifecycle_date_notes", "matched_current_site_id", "candidate_site_id",
+    "match_method", "match_confidence", "candidate_match_notes",
+    "visual_verification_source", "visual_verification_url_or_file",
+    "visual_verification_capture_date", "visual_verification_summary",
+    "organisation_founded_date", "organisation_founded_date_precision",
+    "site_opened_date", "site_opened_date_precision",
+    "building_opened_or_dedicated_date",
+    "building_opened_or_dedicated_date_precision",
+    "origin_not_earlier_than_date", "origin_not_earlier_than_date_precision",
+    "origin_not_later_than_date", "origin_not_later_than_date_precision",
+    "first_seen_date", "first_seen_date_precision", "last_seen_date",
+    "last_seen_date_precision", "site_closed_date", "site_closed_date_precision",
+    "closure_not_earlier_than_date", "closure_not_earlier_than_date_precision",
+    "closure_not_later_than_date", "closure_not_later_than_date_precision",
+    "building_demolished_date", "building_demolished_date_precision",
+    "use_changed_date", "use_changed_date_precision", "relocated_date",
+    "relocated_date_precision", "date_evidence_raw", "date_evidence_summary",
+    "existence_status", "worship_use_status", "public_access_status",
+    "target_year_2013_status", "target_year_2013_probability",
+    "target_year_2013_evidence", "target_year_2018_status",
+    "target_year_2018_probability", "target_year_2018_evidence",
+    "target_year_2023_status", "target_year_2023_probability",
+    "target_year_2023_evidence", "quality_flag", "review_status",
+    "privacy_flag", "licence_flag", "extracted_by", "extracted_at",
+    "reviewed_by", "reviewed_at", "review_note", "exclusion_reason",
+];
 
 function dataUrl(path) {
     return new URL(path, DATA_BASE).toString();
@@ -30,10 +70,289 @@ function cap(value) {
         .replace(/\b\w/g, letter => letter.toUpperCase());
 }
 
+function slug(value, maxLength = 44) {
+    return String(value || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, maxLength);
+}
+
+function todayIsoDate() {
+    return new Date().toISOString().slice(0, 10);
+}
+
+function nowIso() {
+    return new Date().toISOString();
+}
+
+function cleanCell(value) {
+    return String(value ?? "").replace(/[\t\r\n]+/g, " ").trim();
+}
+
+function tsvRowFromObject(row) {
+    return WIDE_EVIDENCE_FIELDS.map(field => cleanCell(row[field])).join("\t");
+}
+
 function priorityColor(priority) {
     if (priority === "high") return "#c0392b";
     if (priority === "medium") return "#d68910";
     return "#1e8449";
+}
+
+function statusLabel(status) {
+    if (status === "present") return "Present";
+    if (status === "absent") return "Absent";
+    if (status === "uncertain") return "Uncertain";
+    return "Not assessed";
+}
+
+function statusColor(status) {
+    if (status === "present") return "#1e8449";
+    if (status === "absent") return "#6b7280";
+    if (status === "uncertain") return "#d68910";
+    return "#2874a6";
+}
+
+function statusClass(status) {
+    if (status === "present") return "status-present";
+    if (status === "absent") return "status-absent";
+    if (status === "uncertain") return "status-uncertain";
+    return "status-not-assessed";
+}
+
+function parseLifecycleDate(value) {
+    const text = String(value || "").trim();
+    if (!text) return null;
+
+    const century = text.match(/\b[Cc](\d{1,2})\b/);
+    if (century) {
+        const centuryNumber = Number(century[1]);
+        if (Number.isFinite(centuryNumber) && centuryNumber > 0) {
+            return {
+                year: (centuryNumber - 1) * 100,
+                month: null,
+                day: null,
+                precision: "century",
+                raw: text,
+            };
+        }
+    }
+
+    const fullDate = text.match(/\b(1[0-9]{3}|20[0-9]{2})[-/.](\d{1,2})[-/.](\d{1,2})\b/);
+    if (fullDate) {
+        return {
+            year: Number(fullDate[1]),
+            month: Number(fullDate[2]),
+            day: Number(fullDate[3]),
+            precision: "day",
+            raw: text,
+        };
+    }
+
+    const dayFirstDate = text.match(/\b(\d{1,2})[-/.](\d{1,2})[-/.](1[0-9]{3}|20[0-9]{2})\b/);
+    if (dayFirstDate) {
+        return {
+            year: Number(dayFirstDate[3]),
+            month: Number(dayFirstDate[2]),
+            day: Number(dayFirstDate[1]),
+            precision: "day",
+            raw: text,
+        };
+    }
+
+    const monthDate = text.match(/\b(1[0-9]{3}|20[0-9]{2})[-/.](\d{1,2})\b/);
+    if (monthDate) {
+        return {
+            year: Number(monthDate[1]),
+            month: Number(monthDate[2]),
+            day: null,
+            precision: "month",
+            raw: text,
+        };
+    }
+
+    const year = text.match(/\b(1[0-9]{3}|20[0-9]{2})\b/);
+    if (year) {
+        return {
+            year: Number(year[1]),
+            month: null,
+            day: null,
+            precision: "year",
+            raw: text,
+        };
+    }
+
+    return null;
+}
+
+function compareLifecycleDateToTarget(parsed, targetYear) {
+    const target = { year: Number(targetYear), month: 9, day: 1 };
+    if (!parsed || !Number.isFinite(target.year)) return null;
+    if (parsed.year < target.year) return -1;
+    if (parsed.year > target.year) return 1;
+
+    if (parsed.precision === "day") {
+        if (parsed.month < target.month) return -1;
+        if (parsed.month > target.month) return 1;
+        if (parsed.day < target.day) return -1;
+        if (parsed.day > target.day) return 1;
+        return -1;
+    }
+
+    if (parsed.precision === "month") {
+        if (parsed.month < target.month) return -1;
+        if (parsed.month > target.month) return 1;
+    }
+
+    return 0;
+}
+
+function lifecycleDateSummary(props) {
+    const start = props.osm_start_date || "";
+    const oldStart = props.osm_old_start_date || "";
+    const end = props.osm_end_date || "";
+    return [
+        start ? `start_date=${start}` : "",
+        oldStart ? `old_start_date=${oldStart}` : "",
+        end ? `end_date=${end}` : "",
+    ].filter(Boolean).join("; ");
+}
+
+function normaliseSiteType(value) {
+    const text = String(value || "").toLowerCase();
+    if (text.includes("chapel")) return "chapel";
+    if (text.includes("mosque")) return "mosque";
+    if (text.includes("synagogue")) return "synagogue";
+    if (text.includes("temple")) return "temple";
+    if (text.includes("marae")) return "marae_church";
+    if (text.includes("church") || text.includes("cathedral")) return "church";
+    if (text.includes("multi")) return "multi_use";
+    return "place_of_worship";
+}
+
+function statusDefaultsForAction(action, targetYear, props) {
+    const statuses = {
+        "2013": "not_assessed",
+        "2018": "not_assessed",
+        "2023": "not_assessed",
+    };
+
+    if (action === "confirm_current_record" || action === "denomination_or_shared_use") {
+        statuses[targetYear] = "present";
+    } else if (action === "missing_current_site") {
+        statuses["2023"] = "present";
+    } else if (action === "present_2013_absent_2018") {
+        statuses["2013"] = "present";
+        statuses["2018"] = "absent";
+        statuses["2023"] = "not_assessed";
+    } else if (action === "closed_or_changed_use") {
+        statuses[targetYear] = "absent";
+    } else if (action === "needs_review" || action === "possible_duplicate") {
+        statuses[targetYear] = "uncertain";
+    } else {
+        statuses[targetYear] = deriveTargetYearStatus(props, targetYear).status;
+    }
+
+    return statuses;
+}
+
+function actionLabelForRa(action) {
+    if (action === "confirm_current_record") return "Confirm current site";
+    if (action === "missing_current_site") return "Missing current site";
+    if (action === "possible_duplicate") return "Possible duplicate";
+    if (action === "present_2013_absent_2018") return "Present in 2013, absent in 2018";
+    if (action === "closed_or_changed_use") return "Closed or changed use";
+    if (action === "denomination_or_shared_use") return "Denomination/shared use";
+    return "Needs review";
+}
+
+function reviewNoteForAction(action) {
+    if (action === "confirm_current_record") return "RA source check supports current worship-site record.";
+    if (action === "missing_current_site") return "Possible current PoW missing from the map; reviewer to decide whether to create a new site.";
+    if (action === "possible_duplicate") return "Possible duplicate or merge candidate; reviewer to compare linked ids and site identity.";
+    if (action === "present_2013_absent_2018") return "Evidence appears to support worship use in 2013 and absence by 2018; reviewer to confirm dates and status.";
+    if (action === "closed_or_changed_use") return "Evidence suggests worship use closed or changed; reviewer to distinguish building existence from worship function.";
+    if (action === "denomination_or_shared_use") return "Evidence suggests denomination change, shared use, or multi-use building; reviewer to preserve concurrent uses if present.";
+    return "Needs reviewer decision.";
+}
+
+function hasMissingLifecycleCheck(props) {
+    return (props.automated_checks || []).some(check => check.check_id === "missing_osm_lifecycle_date");
+}
+
+function deriveTargetYearStatus(props, targetYear) {
+    const explicitStatus = props[`target_year_${targetYear}_status`];
+    if (explicitStatus && explicitStatus !== "not_assessed") {
+        return {
+            status: explicitStatus,
+            basis: "review target-year field",
+            note: props[`target_year_${targetYear}_evidence`] || "Target-year status has been recorded in the task data.",
+        };
+    }
+
+    const startCandidates = [
+        parseLifecycleDate(props.osm_start_date),
+        parseLifecycleDate(props.osm_old_start_date),
+    ].filter(Boolean).sort((left, right) => left.year - right.year);
+    const start = startCandidates[0] || null;
+    const end = parseLifecycleDate(props.osm_end_date);
+    const lifecycleSummary = lifecycleDateSummary(props);
+
+    if (!start && !end) {
+        return {
+            status: "not_assessed",
+            basis: "missing lifecycle evidence",
+            note: "No OSM start_date, old_start_date, or end_date is recorded. Seek source-backed lifecycle evidence.",
+        };
+    }
+
+    if (end) {
+        const endCompare = compareLifecycleDateToTarget(end, targetYear);
+        if (endCompare < 0) {
+            return {
+                status: "absent",
+                basis: "OSM lifecycle tag",
+                note: `${lifecycleSummary}. OSM end_date falls before ${targetYear}-09-01.`,
+            };
+        }
+        if (endCompare === 0) {
+            return {
+                status: "uncertain",
+                basis: "OSM lifecycle tag",
+                note: `${lifecycleSummary}. OSM end_date is not precise enough to settle status on ${targetYear}-09-01.`,
+            };
+        }
+    }
+
+    if (start) {
+        const startCompare = compareLifecycleDateToTarget(start, targetYear);
+        if (startCompare < 0) {
+            return {
+                status: "present",
+                basis: "OSM lifecycle tag",
+                note: `${lifecycleSummary}. OSM start evidence falls before ${targetYear}-09-01.`,
+            };
+        }
+        if (startCompare > 0) {
+            return {
+                status: "absent",
+                basis: "OSM lifecycle tag",
+                note: `${lifecycleSummary}. OSM start evidence falls after ${targetYear}-09-01.`,
+            };
+        }
+        return {
+            status: "uncertain",
+            basis: "OSM lifecycle tag",
+            note: `${lifecycleSummary}. OSM start evidence falls in ${targetYear} but is not precise enough to settle status on ${targetYear}-09-01.`,
+        };
+    }
+
+    return {
+        status: "uncertain",
+        basis: "OSM lifecycle tag",
+        note: `${lifecycleSummary}. OSM end evidence exists but no start evidence is recorded.`,
+    };
 }
 
 function actionLabel(action) {
@@ -52,6 +371,7 @@ class NzVerificationMap {
         this.markersByTaskId = new Map();
         this.selectedTask = null;
         this.visibleLimit = 80;
+        this.targetYear = "2023";
         this.init();
     }
 
@@ -99,11 +419,23 @@ class NzVerificationMap {
     }
 
     setupFilters() {
-        ["searchInput", "priorityFilter", "actionFilter"].forEach(id => {
+        ["searchInput", "priorityFilter", "actionFilter", "statusFilter"].forEach(id => {
             const element = document.getElementById(id);
             element?.addEventListener("input", () => this.applyFilters());
             element?.addEventListener("change", () => this.applyFilters());
         });
+
+        const targetYearSelect = document.getElementById("targetYearSelect");
+        if (targetYearSelect) {
+            targetYearSelect.value = this.targetYear;
+            targetYearSelect.addEventListener("change", () => {
+                this.targetYear = TARGET_YEARS.includes(targetYearSelect.value) ? targetYearSelect.value : "2023";
+                this.applyFilters();
+                if (this.selectedTask) {
+                    this.renderDetail(this.selectedTask);
+                }
+            });
+        }
 
         if (INTAKE_ENABLED) {
             document.getElementById("copyNominationButton")?.addEventListener("click", () => this.copyNomination());
@@ -129,9 +461,11 @@ class NzVerificationMap {
         const search = document.getElementById("searchInput")?.value.trim().toLowerCase() || "";
         const priority = document.getElementById("priorityFilter")?.value || "all";
         const action = document.getElementById("actionFilter")?.value || "all";
+        const status = document.getElementById("statusFilter")?.value || "all";
 
         this.filteredTasks = this.tasks.filter(feature => {
             const props = feature.properties || {};
+            const temporal = deriveTargetYearStatus(props, this.targetYear);
             const searchText = [
                 props.name,
                 props.address,
@@ -144,6 +478,7 @@ class NzVerificationMap {
             if (search && !searchText.includes(search)) return false;
             if (priority !== "all" && props.verification_priority !== priority) return false;
             if (action !== "all" && props.automated_suggested_action !== action) return false;
+            if (status !== "all" && temporal.status !== status) return false;
             return true;
         });
 
@@ -159,8 +494,9 @@ class NzVerificationMap {
         this.filteredTasks.forEach(feature => {
             const [lng, lat] = feature.geometry.coordinates;
             const props = feature.properties || {};
+            const temporal = deriveTargetYearStatus(props, this.targetYear);
             const marker = L.marker([lat, lng], {
-                icon: this.createIcon(props.verification_priority),
+                icon: this.createIcon(props.verification_priority, temporal.status),
                 title: props.name || props.master_site_id,
             });
 
@@ -172,9 +508,9 @@ class NzVerificationMap {
         });
     }
 
-    createIcon(priority) {
+    createIcon(priority, status) {
         const size = priority === "high" ? 15 : priority === "medium" ? 13 : 11;
-        const color = priorityColor(priority);
+        const color = statusColor(status);
         return L.divIcon({
             className: "",
             html: `<div class="verification-marker" style="width:${size}px;height:${size}px;background:${color};"></div>`,
@@ -184,10 +520,12 @@ class NzVerificationMap {
     }
 
     popupHtml(props) {
+        const temporal = deriveTargetYearStatus(props, this.targetYear);
         return `
             <strong>${escapeHtml(props.name || "Unnamed site")}</strong><br>
             <span>${escapeHtml(cap(props.religion))}${props.denomination ? ` | ${escapeHtml(cap(props.denomination))}` : ""}</span><br>
             <span>Priority: ${escapeHtml(props.verification_priority)}</span><br>
+            <span>${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))} (${escapeHtml(temporal.basis)})</span><br>
             <span>Action: ${escapeHtml(actionLabel(props.automated_suggested_action))}</span><br>
             <button class="popup-open-task" type="button" data-task-id="${escapeHtml(props.task_id)}">Open task</button>
         `;
@@ -208,6 +546,7 @@ class NzVerificationMap {
         const visible = this.filteredTasks.slice(0, this.visibleLimit);
         taskList.innerHTML = visible.map(feature => {
             const props = feature.properties || {};
+            const temporal = deriveTargetYearStatus(props, this.targetYear);
             const activeClass = this.selectedTask?.properties?.task_id === props.task_id ? " active" : "";
             return `
                 <button class="task-row${activeClass}" type="button" data-task-id="${escapeHtml(props.task_id)}">
@@ -215,6 +554,7 @@ class NzVerificationMap {
                         <span class="priority-dot priority-${escapeHtml(props.verification_priority)}"></span>
                         ${escapeHtml(props.name || "Unnamed site")}
                     </span>
+                    <span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))}</span>
                     <span class="task-row-meta">${escapeHtml(cap(props.religion)) || "Unknown"} | ${escapeHtml(props.master_site_id)}</span>
                     <span class="task-row-meta">${escapeHtml(actionLabel(props.automated_suggested_action))} | ${props.automated_check_count} checks</span>
                 </button>
@@ -241,10 +581,12 @@ class NzVerificationMap {
     updateStats() {
         const shown = this.filteredTasks.length;
         const high = this.filteredTasks.filter(feature => feature.properties?.verification_priority === "high").length;
-        const noAction = this.filteredTasks.filter(feature => feature.properties?.automated_suggested_action === "candidate_no_action").length;
+        const present = this.filteredTasks.filter(feature => deriveTargetYearStatus(feature.properties || {}, this.targetYear).status === "present").length;
+        const missingLifecycle = this.filteredTasks.filter(feature => hasMissingLifecycleCheck(feature.properties || {})).length;
         document.getElementById("shownCount").textContent = shown.toLocaleString();
         document.getElementById("highCount").textContent = high.toLocaleString();
-        document.getElementById("noActionCount").textContent = noAction.toLocaleString();
+        document.getElementById("presentCount").textContent = present.toLocaleString();
+        document.getElementById("lifecycleNeededCount").textContent = missingLifecycle.toLocaleString();
     }
 
     selectTaskById(taskId, options = {}) {
@@ -291,9 +633,9 @@ class NzVerificationMap {
                 Nothing entered here is saved or submitted. Do not enter private or sensitive data.
             </div>
             <div class="detail-section">
-                <h3>Task review</h3>
+                <h3>RA action builder</h3>
                 <div class="disabled-panel">
-                    Select any task from the list or map to open the mock review-decision fields.
+                    Select any task from the list or map to generate a spreadsheet-ready evidence row and review JSON.
                 </div>
             </div>
             <div class="detail-section">
@@ -329,7 +671,13 @@ class NzVerificationMap {
                 <dt>Denom.</dt><dd>${escapeHtml(cap(props.denomination)) || "Unknown"}</dd>
                 <dt>Address</dt><dd>${escapeHtml(props.address || "Missing")}</dd>
                 <dt>Start date</dt><dd>${escapeHtml(props.osm_start_date || "Missing")}</dd>
+                <dt>Old start</dt><dd>${escapeHtml(props.osm_old_start_date || "Missing")}</dd>
+                <dt>End date</dt><dd>${escapeHtml(props.osm_end_date || "Missing")}</dd>
             </dl>
+
+            <div class="detail-section">
+                ${this.temporalSummaryHtml(props)}
+            </div>
 
             <div class="detail-section">
                 <h3>Links</h3>
@@ -362,44 +710,289 @@ class NzVerificationMap {
         `;
 
         if (INTAKE_ENABLED) {
-            document.getElementById("copyDecisionButton")?.addEventListener("click", () => this.copyDecision(props));
+            this.bindRaActionForm(props);
         }
+    }
+
+    temporalSummaryHtml(props) {
+        const temporal = deriveTargetYearStatus(props, this.targetYear);
+        const lifecycle = lifecycleDateSummary(props) || "No OSM lifecycle date recorded.";
+        const missingLifecycle = hasMissingLifecycleCheck(props);
+        const status = statusLabel(temporal.status);
+        return `
+            <h3>Target-year status</h3>
+            <div class="temporal-summary">
+                <div><span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(status)}</span></div>
+                <div><strong>Basis:</strong> ${escapeHtml(temporal.basis)}</div>
+                <div><strong>Lifecycle tags:</strong> ${escapeHtml(lifecycle)}</div>
+                <div><strong>Interpretation:</strong> ${escapeHtml(temporal.note)}</div>
+                ${missingLifecycle ? "<div><strong>RA task:</strong> seek source-backed lifecycle evidence for opening, first seen, closure, or changed use.</div>" : ""}
+                <div><strong>Status:</strong> provisional map aid only; reviewer decisions must be source-backed.</div>
+            </div>
+        `;
     }
 
     reviewFormHtml() {
         return `
-            <h3>Review decision</h3>
+            <h3>RA action builder</h3>
             <div class="review-form">
                 <div class="demo-warning" role="alert">
-                    Demo only. This will generate local JSON for inspection; it will not save or submit data. Do not enter private or sensitive data.
+                    Demo only. This generates local text to paste into the working sheet or send to the project team; it does not save or submit data. Do not enter private or sensitive data.
                 </div>
                 <label>
-                    Decision
-                    <select id="decisionSelect">
-                        <option value="accept_current_record">Accept current record</option>
-                        <option value="needs_more_evidence">Needs more evidence</option>
-                        <option value="wrong_location">Wrong location</option>
-                        <option value="duplicate_or_merge_candidate">Duplicate or merge candidate</option>
-                        <option value="not_place_of_worship">Not a place of worship</option>
+                    What did you find?
+                    <select id="raActionSelect">
+                        <option value="needs_review">Needs review</option>
+                        <option value="confirm_current_record">Confirm current site</option>
+                        <option value="missing_current_site">Missing current site</option>
+                        <option value="possible_duplicate">Possible duplicate</option>
+                        <option value="present_2013_absent_2018">Present in 2013, absent in 2018</option>
                         <option value="closed_or_changed_use">Closed or changed use</option>
-                        <option value="moved_or_relocated">Moved or relocated</option>
-                        <option value="historical_only">Historical only</option>
-                        <option value="target_year_status_uncertain">Target-year status uncertain</option>
-                        <option value="denomination_changed">Denomination changed</option>
-                        <option value="shared_or_multi_congregation_building">Shared or multi-congregation building</option>
-                        <option value="split_site_or_building_records_needed">Split site or building records needed</option>
-                        <option value="charity_record_needs_site_match">Charity record needs site match</option>
+                        <option value="denomination_or_shared_use">Denomination/shared use</option>
                     </select>
                 </label>
+                <div class="field-grid">
+                    <label>
+                        2013 status
+                        <select id="status2013">
+                            <option value="not_assessed">Not assessed</option>
+                            <option value="present">Present</option>
+                            <option value="absent">Absent</option>
+                            <option value="uncertain">Uncertain</option>
+                        </select>
+                    </label>
+                    <label>
+                        2018 status
+                        <select id="status2018">
+                            <option value="not_assessed">Not assessed</option>
+                            <option value="present">Present</option>
+                            <option value="absent">Absent</option>
+                            <option value="uncertain">Uncertain</option>
+                        </select>
+                    </label>
+                    <label>
+                        2023 status
+                        <select id="status2023">
+                            <option value="not_assessed">Not assessed</option>
+                            <option value="present">Present</option>
+                            <option value="absent">Absent</option>
+                            <option value="uncertain">Uncertain</option>
+                        </select>
+                    </label>
+                    <label>
+                        Source type
+                        <select id="sourceTypeSelect">
+                            <option value="osm_lifecycle_tags">OSM lifecycle tags</option>
+                            <option value="street_imagery">Street imagery</option>
+                            <option value="aerial_imagery">Aerial imagery</option>
+                            <option value="denominational_directory">Denominational directory</option>
+                            <option value="charities_register">Charities register</option>
+                            <option value="archived_website">Archived website</option>
+                            <option value="local_council">Local council</option>
+                            <option value="heritage_list">Heritage list</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </label>
+                </div>
                 <label>
-                    Note
-                    <textarea id="decisionNote" rows="3" placeholder="Short evidence note">Demo only: inspect source links and record what should be checked.</textarea>
+                    Source title
+                    <input id="sourceTitleInput" type="text" placeholder="Short source name">
                 </label>
-                <button id="copyDecisionButton" type="button">Generate demo decision JSON</button>
+                <label>
+                    Source URL or file reference
+                    <input id="sourceUrlInput" type="text" placeholder="Evidence link or agreed storage reference">
+                </label>
+                <label>
+                    Related ids or duplicate note
+                    <input id="relatedIdsInput" type="text" placeholder="Other master/OSM ids, if relevant">
+                </label>
+                <label>
+                    Evidence note
+                    <textarea id="decisionNote" rows="3" placeholder="Short source-backed note">Inspect source links and record what should be checked.</textarea>
+                </label>
+                <div class="button-row">
+                    <button id="copyEvidenceRowButton" type="button">Copy spreadsheet row</button>
+                    <button id="copyDecisionButton" type="button">Copy review JSON</button>
+                </div>
                 <div id="copyStatus" class="copy-status"></div>
+                <textarea id="evidenceRowOutput" class="json-output wide-output" rows="4" readonly></textarea>
                 <textarea id="decisionJsonOutput" class="json-output" rows="5" readonly></textarea>
             </div>
         `;
+    }
+
+    bindRaActionForm(props) {
+        const actionSelect = document.getElementById("raActionSelect");
+        const sourceTitle = document.getElementById("sourceTitleInput");
+        const sourceUrl = document.getElementById("sourceUrlInput");
+        const note = document.getElementById("decisionNote");
+
+        if (sourceTitle && !sourceTitle.value) {
+            sourceTitle.value = "NZ map verification task";
+        }
+        if (sourceUrl && !sourceUrl.value) {
+            sourceUrl.value = props.osm_object_url || props.osm_map_url || "";
+        }
+
+        const applyDefaults = () => {
+            this.applyRaActionDefaults(props);
+        };
+        actionSelect?.addEventListener("change", applyDefaults);
+        applyDefaults();
+
+        if (note && note.value === "Inspect source links and record what should be checked.") {
+            note.value = reviewNoteForAction(actionSelect?.value || "needs_review");
+        }
+
+        document.getElementById("copyEvidenceRowButton")?.addEventListener("click", () => this.copyEvidenceRow(props));
+        document.getElementById("copyDecisionButton")?.addEventListener("click", () => this.copyDecision(props));
+    }
+
+    applyRaActionDefaults(props) {
+        const action = document.getElementById("raActionSelect")?.value || "needs_review";
+        const statuses = statusDefaultsForAction(action, this.targetYear, props);
+        TARGET_YEARS.forEach(year => {
+            const select = document.getElementById(`status${year}`);
+            if (select) select.value = statuses[year] || "not_assessed";
+        });
+
+        const note = document.getElementById("decisionNote");
+        if (note && (!note.dataset.touched || note.value.startsWith("RA source check") || note.value.startsWith("Possible") || note.value.startsWith("Evidence") || note.value.startsWith("Needs reviewer"))) {
+            note.value = reviewNoteForAction(action);
+        }
+        if (note) {
+            note.addEventListener("input", () => {
+                note.dataset.touched = "1";
+            }, { once: true });
+        }
+    }
+
+    currentFormValues() {
+        return {
+            action: document.getElementById("raActionSelect")?.value || "needs_review",
+            status2013: document.getElementById("status2013")?.value || "not_assessed",
+            status2018: document.getElementById("status2018")?.value || "not_assessed",
+            status2023: document.getElementById("status2023")?.value || "not_assessed",
+            sourceType: document.getElementById("sourceTypeSelect")?.value || "other",
+            sourceTitle: document.getElementById("sourceTitleInput")?.value || "",
+            sourceUrl: document.getElementById("sourceUrlInput")?.value || "",
+            relatedIds: document.getElementById("relatedIdsInput")?.value || "",
+            note: document.getElementById("decisionNote")?.value || "",
+        };
+    }
+
+    buildWideEvidenceRow(props) {
+        const values = this.currentFormValues();
+        const row = Object.fromEntries(WIDE_EVIDENCE_FIELDS.map(field => [field, ""]));
+        const coordinates = this.selectedTask?.geometry?.coordinates || [];
+        const [lng, lat] = coordinates;
+        const sourceSlug = slug(values.sourceUrl || values.sourceTitle || values.note || "source", 32);
+        const evidenceSlug = slug([
+            props.task_id || props.master_site_id || "candidate",
+            values.action,
+            values.status2013,
+            values.status2018,
+            values.status2023,
+            sourceSlug,
+        ].join("-"), 96);
+        const sourceRecordId = props.task_id || props.master_site_id || props.osm_id || "";
+        const lifecycle = lifecycleDateSummary(props);
+        const targetEvidence = values.note || deriveTargetYearStatus(props, this.targetYear).note;
+        const isMissing = values.action === "missing_current_site";
+        const isDuplicate = values.action === "possible_duplicate";
+        const isShared = values.action === "denomination_or_shared_use";
+        const isClosed = values.action === "closed_or_changed_use" || values.action === "present_2013_absent_2018";
+        const anyPresent = [values.status2013, values.status2018, values.status2023].includes("present");
+        const anyAbsent = [values.status2013, values.status2018, values.status2023].includes("absent");
+
+        row.evidence_row_id = `map-${evidenceSlug || slug(`${values.action}-${todayIsoDate()}`)}`;
+        row.collection_batch = "nz-map-workbench-demo";
+        row.country_code = "NZ";
+        row.source_dataset_id = "nz_static_verification_map";
+        row.source_type = values.sourceType;
+        row.provider = "Places of Worship NZ verification map";
+        row.source_title = values.sourceTitle || "NZ map verification task";
+        row.source_url_or_file = values.sourceUrl || props.osm_object_url || props.osm_map_url || "";
+        row.source_record_id = sourceRecordId;
+        row.retrieval_date = todayIsoDate();
+        row.retrieved_by = "ra";
+        row.licence = "needs_review";
+        row.access_limits = "public_or_project_review";
+        row.redistribution_limits = "needs_review";
+        row.source_notes = `Generated locally from the static RA workbench. Action: ${actionLabelForRa(values.action)}.`;
+        row.name_raw = props.name || "";
+        row.name_standardised = props.name || "";
+        row.denomination_or_tradition_raw = props.denomination || "";
+        row.site_type = isShared ? "multi_use" : normaliseSiteType(props.site_type || props.name || "");
+        row.address_raw = props.address || "";
+        row.modern_address_candidate = props.address || "";
+        row.address_standardised = props.address || "";
+        row.geocoding_basis = isMissing ? "manual_match" : "existing_osm_site";
+        row.geocoding_confidence = isMissing ? "medium" : "high";
+        row.latitude = lat ?? "";
+        row.longitude = lng ?? "";
+        row.matched_osm_id = props.osm_id || "";
+        row.osm_object_type = props.osm_type || "";
+        row.osm_tags_raw = props.osm_tags_summary || (props.osm_tags_raw ? JSON.stringify(props.osm_tags_raw) : "");
+        row.osm_start_date = props.osm_start_date || "";
+        row.osm_old_start_date = props.osm_old_start_date || "";
+        row.osm_end_date = props.osm_end_date || "";
+        row.osm_lifecycle_date_notes = lifecycle
+            ? `${lifecycle}. Treat OSM lifecycle tags as evidence to check, not final truth.`
+            : "No OSM lifecycle tags visible in the verification task.";
+        row.matched_current_site_id = isMissing ? "" : (props.master_site_id || "");
+        row.candidate_site_id = isMissing ? `candidate-${evidenceSlug || slug(`${values.action}-${todayIsoDate()}`)}` : "";
+        row.match_method = isMissing ? "unmatched" : isDuplicate ? "manual_review" : "osm_id";
+        row.match_confidence = isMissing ? "none" : isDuplicate ? "medium" : "high";
+        row.candidate_match_notes = values.relatedIds || "";
+        row.visual_verification_source = "osm_cartography";
+        row.visual_verification_url_or_file = props.osm_map_url || "";
+        row.visual_verification_summary = "Static map task selected by RA; source evidence still requires review.";
+        row.date_evidence_raw = lifecycle;
+        row.date_evidence_summary = targetEvidence;
+        row.existence_status = anyPresent ? "present" : anyAbsent ? "absent" : "uncertain";
+        row.worship_use_status = anyPresent ? "confirmed_worship" : isClosed ? "not_worship" : "uncertain";
+        row.public_access_status = "unknown";
+        row.target_year_2013_status = values.status2013;
+        row.target_year_2013_evidence = values.status2013 === "not_assessed" ? "" : targetEvidence;
+        row.target_year_2018_status = values.status2018;
+        row.target_year_2018_evidence = values.status2018 === "not_assessed" ? "" : targetEvidence;
+        row.target_year_2023_status = values.status2023;
+        row.target_year_2023_evidence = values.status2023 === "not_assessed" ? "" : targetEvidence;
+        row.quality_flag = values.action === "confirm_current_record" ? "directory_confirmed" : "needs_review";
+        row.review_status = values.action === "confirm_current_record" ? "unreviewed" : "needs_review";
+        row.privacy_flag = "clear";
+        row.licence_flag = "needs_review";
+        row.extracted_by = "ra";
+        row.extracted_at = nowIso();
+        row.review_note = `${reviewNoteForAction(values.action)} ${values.relatedIds ? `Related ids: ${values.relatedIds}.` : ""}`.trim();
+
+        return row;
+    }
+
+    buildDecisionPayload(props) {
+        const values = this.currentFormValues();
+        return {
+            task_id: props.task_id,
+            master_snapshot_id: props.master_snapshot_id,
+            master_site_id: props.master_site_id,
+            osm_id: props.osm_id,
+            selected_target_year: this.targetYear,
+            action: values.action,
+            action_label: actionLabelForRa(values.action),
+            target_year_statuses: {
+                2013: values.status2013,
+                2018: values.status2018,
+                2023: values.status2023,
+            },
+            source_type: values.sourceType,
+            source_title: values.sourceTitle,
+            source_url_or_file: values.sourceUrl,
+            related_ids_or_note: values.relatedIds,
+            evidence_note: values.note,
+            source: "nz_verification_static_map_workbench",
+            saved_or_submitted: false,
+        };
     }
 
     nominationFormHtml() {
@@ -470,25 +1063,32 @@ class NzVerificationMap {
         return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`;
     }
 
-    async copyDecision(props) {
-        const decision = document.getElementById("decisionSelect")?.value || "";
-        const note = document.getElementById("decisionNote")?.value || "";
-        const payload = {
-            task_id: props.task_id,
-            master_snapshot_id: props.master_snapshot_id,
-            master_site_id: props.master_site_id,
-            decision,
-            note,
-            source: "nz_verification_static_map",
-        };
+    async copyEvidenceRow(props) {
+        const row = this.buildWideEvidenceRow(props);
+        const tsv = tsvRowFromObject(row);
+        const status = document.getElementById("copyStatus");
+        const output = document.getElementById("evidenceRowOutput");
+        if (output) {
+            output.value = tsv;
+            output.textContent = tsv;
+        }
+        try {
+            await navigator.clipboard.writeText(tsv);
+            if (status) status.textContent = "Copied spreadsheet row. Nothing was saved or submitted.";
+        } catch (error) {
+            if (status) status.textContent = "Spreadsheet row is shown below. Nothing was saved or submitted.";
+        }
+    }
 
+    async copyDecision(props) {
+        const payload = this.buildDecisionPayload(props);
         const status = document.getElementById("copyStatus");
         this.writeJsonOutput("decisionJsonOutput", payload);
         try {
             await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
-            if (status) status.textContent = "Copied demo JSON. Nothing was saved or submitted.";
+            if (status) status.textContent = "Copied review JSON. Nothing was saved or submitted.";
         } catch (error) {
-            if (status) status.textContent = "Demo JSON is shown below. Nothing was saved or submitted.";
+            if (status) status.textContent = "Review JSON is shown below. Nothing was saved or submitted.";
         }
     }
 

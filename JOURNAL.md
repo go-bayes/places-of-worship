@@ -585,3 +585,52 @@ discarded, or work that needs explicit review before landing. Public users
 should still be directed to correct OpenStreetMap where appropriate; project
 evidence intake should wait for the staged RA workflow and later authenticated
 portal/API.
+
+## 2026-05-03: Treat the map-first RA workflow as the product target
+
+Decision:
+Clarify that the current RA pilot uses the NZ map for search and triage, the
+spreadsheet for evidence entry, and `pow validate` for checking exported CSVs.
+The product target is a map-first workflow in which an authenticated RA can
+select 2013, 2018, or 2023, click a site or empty location, and propose a
+missing site, duplicate/merge, closure, changed use, denomination change,
+shared-building case, or uncertain target-year state.
+
+Rationale:
+The CLI tutorial explained validation mechanics but not how an RA should move
+from a map finding to a concrete evidence row. Missing current sites, duplicate
+points, and places present in 2013 but absent in 2018 are the core temporal and
+identity problems the system must handle. Documenting those cases now gives RAs
+a usable interim procedure and gives the later portal a concrete interaction
+specification.
+
+Consequences:
+Until authenticated map intake exists, RAs should record these cases in the
+wide spreadsheet and send validated CSVs for review. The map demo remains
+non-saving and unsuitable for private or restricted data. The future portal
+should expose time-point controls for 2013, 2018, and 2023 and route every
+proposal through staging and review rather than writing directly to the master
+database.
+
+Implementation note:
+The first static version of this idea now appears on the NZ verification map as
+provisional 2013, 2018, and 2023 target-year controls. It uses explicit
+target-year fields when available and otherwise derives a visible provisional
+status from OSM lifecycle tags. This makes missing or ambiguous lifecycle
+evidence visible to RAs without treating OSM dates as accepted historical truth.
+In demo mode, the map also now includes a local RA action builder that can
+produce a tab-separated wide evidence row and a review JSON preview from the
+selected task. This is deliberately no-save and no-submit: it tests the
+ergonomics of a map-first workflow while leaving authentication, staging,
+validation, and master writes outside the static page.
+
+Design note:
+Use the current static verification map for the first RA workbench controls
+before committing to a Leptos or other Rust frontend. The immediate problem is
+interaction design: which actions should be selectable, what evidence fields
+are genuinely needed, how target-year states should be shown, and where RAs get
+confused. A static no-save workbench can answer those questions quickly. Once
+the actions and staged event contracts are stable, a Leptos frontend remains a
+reasonable candidate for an authenticated Rust-oriented portal, provided it
+uses the same validation contracts and API rather than inventing a parallel
+data path.
