@@ -4,6 +4,11 @@
 
 ### 2026-05-03
 
+- Updated the NZ verification map action builder to keep RAs on the map after
+  copy/skip actions, mark copied tasks as tentatively closed in the local
+  session, and expose controlled fields for existence status, worship-use
+  status, assessment confidence, site-match confidence, and location
+  confidence.
 - Clarified the NZ verification map's missing-site prompt by adding an
   `Open draft nomination form` button and renaming the sidebar panel so RAs
   are not pointed to an ambiguous "form above".
@@ -59,9 +64,8 @@
   client-side session log at `localStorage.pow_ra_session_v1` capturing every
   copied or skipped task with the full TSV; a collapsible "My session" panel
   in the sidebar with re-copy, open-task, export-JSON, and clear-session
-  controls; a Skip task collapsible with optional reason that auto-advances
-  to the next unhandled task; an "Open next task" button shown after a
-  successful copy; and copied/skipped status pills on the sidebar task list.
+  controls; a Skip task collapsible with optional reason; and
+  tentatively-closed/skipped status pills on the sidebar task list.
   All client-side; no schema or backend changes.
 - Added a Tier 1 ergonomics pass to the NZ verification map demo: a numbered
   4-step indicator (Inspect, Decide, Evidence, Copy row) at the top of the

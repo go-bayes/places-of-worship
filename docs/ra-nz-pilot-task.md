@@ -158,9 +158,12 @@ Mark it `needs_review`, explain the uncertainty, and move on.
    denomination or tradition, lifecycle tags, automated checks, and links.
 7. Open source links in new tabs and search for evidence.
 8. Decide which action best fits the evidence.
-9. Record the evidence in the working spreadsheet. If using demo mode, click
+9. Use the dropdown fields to record status and confidence. Then record the
+   evidence in the working spreadsheet. If using demo mode, click
    `Copy spreadsheet row`, click column A in the next empty row under the
-   unchanged spreadsheet header, paste, and review the pasted row.
+   unchanged spreadsheet header, paste, and review the pasted row. The map
+   will mark the task as tentatively closed in this browser; then choose
+   another task from the map or list.
 10. For a place missing from the map, use the draft nomination panel and record
     the same source evidence in the spreadsheet.
 11. Mark unclear cases `needs_review`.

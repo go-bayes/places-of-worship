@@ -49,6 +49,31 @@ const WIDE_EVIDENCE_FIELDS = [
     "privacy_flag", "licence_flag", "extracted_by", "extracted_at",
     "reviewed_by", "reviewed_at", "review_note", "exclusion_reason",
 ];
+const EXISTENCE_STATUS_OPTIONS = [
+    ["present", "Present"],
+    ["absent", "Absent"],
+    ["uncertain", "Uncertain"],
+];
+const WORSHIP_USE_STATUS_OPTIONS = [
+    ["confirmed_worship", "Confirmed worship"],
+    ["probable_worship", "Probable worship"],
+    ["organisation_only", "Organisation only"],
+    ["building_only", "Building only"],
+    ["not_worship", "Not worship"],
+    ["uncertain", "Uncertain"],
+];
+const CONFIDENCE_OPTIONS = [
+    ["high", "High"],
+    ["medium", "Medium"],
+    ["low", "Low"],
+    ["none", "None"],
+];
+const ASSESSMENT_CONFIDENCE_OPTIONS = [
+    ["", "Not assessed"],
+    ["0.9", "High (0.90)"],
+    ["0.7", "Medium (0.70)"],
+    ["0.5", "Low (0.50)"],
+];
 
 function dataUrl(path) {
     return new URL(path, DATA_BASE).toString();
@@ -95,6 +120,12 @@ function cleanCell(value) {
 
 function tsvRowFromObject(row) {
     return WIDE_EVIDENCE_FIELDS.map(field => cleanCell(row[field])).join("\t");
+}
+
+function selectOptionsHtml(options, selectedValue) {
+    return options.map(([value, label]) => `
+        <option value="${escapeHtml(value)}"${value === selectedValue ? " selected" : ""}>${escapeHtml(label)}</option>
+    `).join("");
 }
 
 function priorityColor(priority) {
@@ -258,6 +289,33 @@ function statusDefaultsForAction(action, targetYear, props) {
     }
 
     return statuses;
+}
+
+function assessmentDefaultsForAction(action, statuses = {}) {
+    const statusValues = TARGET_YEARS.map(year => statuses[year]);
+    const anyPresent = statusValues.includes("present");
+    const anyAbsent = statusValues.includes("absent");
+    const isMissing = action === "missing_current_site";
+    const isDuplicate = action === "possible_duplicate";
+    const isClosed = action === "closed_or_changed_use" || action === "present_2013_absent_2018";
+    const needsReview = action === "needs_review";
+
+    let worshipUseStatus = "uncertain";
+    if (isClosed) {
+        worshipUseStatus = "not_worship";
+    } else if (action === "missing_current_site") {
+        worshipUseStatus = "probable_worship";
+    } else if (anyPresent) {
+        worshipUseStatus = "confirmed_worship";
+    }
+
+    return {
+        existenceStatus: anyPresent ? "present" : anyAbsent ? "absent" : "uncertain",
+        worshipUseStatus,
+        assessmentConfidence: needsReview ? "0.5" : isDuplicate || isMissing || isClosed ? "0.7" : "0.9",
+        matchConfidence: isMissing ? "none" : isDuplicate ? "medium" : needsReview ? "low" : "high",
+        geocodingConfidence: isMissing || isDuplicate ? "medium" : needsReview ? "low" : "high",
+    };
 }
 
 function actionLabelForRa(action) {
@@ -576,7 +634,7 @@ class NzVerificationMap {
         panel.innerHTML = `
             <details ${total > 0 ? "open" : ""}>
                 <summary>My session
-                    <span class="ra-initials">${escapeHtml(`${total} entr${total === 1 ? "y" : "ies"}: ${copied} copied, ${skipped} skipped`)}</span>
+                    <span class="ra-initials">${escapeHtml(`${total} entr${total === 1 ? "y" : "ies"}: ${copied} tentatively closed, ${skipped} skipped`)}</span>
                 </summary>
                 ${total === 0 ? `
                     <div class="session-empty">No rows copied or skipped yet on this browser.</div>
@@ -653,35 +711,6 @@ class NzVerificationMap {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-    }
-
-    findNextTask(currentTaskId) {
-        if (!this.filteredTasks.length) return null;
-        const filtered = this.filteredTasks;
-        let startIndex = 0;
-        if (currentTaskId) {
-            const i = filtered.findIndex(f => f.properties?.task_id === currentTaskId);
-            startIndex = i >= 0 ? i + 1 : 0;
-        }
-        for (let offset = 0; offset < filtered.length; offset += 1) {
-            const idx = (startIndex + offset) % filtered.length;
-            const candidate = filtered[idx];
-            const id = candidate.properties?.task_id;
-            if (id === currentTaskId) continue;
-            if (this.sessionTaskOutcome(id)) continue;
-            return candidate;
-        }
-        return null;
-    }
-
-    openNextTask() {
-        const currentId = this.selectedTask?.properties?.task_id;
-        const next = this.findNextTask(currentId);
-        if (!next) {
-            window.alert("No more unhandled tasks match the current filters. Adjust the filters or take a break.");
-            return;
-        }
-        this.selectTask(next, false, { focusDetail: true });
     }
 
     setupMap() {
@@ -877,7 +906,7 @@ class NzVerificationMap {
             const outcomeBadge = outcome
                 ? (outcome.type === "skipped"
                     ? `<span class="skip-badge">skipped</span>`
-                    : `<span class="copied-badge">copied</span>`)
+                    : `<span class="closed-badge">tentatively closed</span>`)
                 : "";
             return `
                 <button class="task-row${activeClass}" type="button" data-task-id="${escapeHtml(props.task_id)}">
@@ -1220,16 +1249,50 @@ class NzVerificationMap {
                     <label>
                         Source type
                         <select id="sourceTypeSelect">
+                            <option value="osm_history">OSM history</option>
                             <option value="osm_lifecycle_tags">OSM lifecycle tags</option>
                             <option value="street_imagery">Street imagery / Street View</option>
                             <option value="aerial_imagery">Aerial imagery</option>
                             <option value="field_observation">Field observation</option>
                             <option value="denominational_directory">Denominational directory</option>
                             <option value="charities_register">Charities register</option>
+                            <option value="incorporated_societies">Incorporated societies</option>
+                            <option value="linz_building_outlines">LINZ building outlines</option>
+                            <option value="linz_property">LINZ property/address</option>
                             <option value="archived_website">Archived website</option>
                             <option value="local_council">Local council</option>
                             <option value="heritage_list">Heritage list</option>
                             <option value="other">Other</option>
+                        </select>
+                    </label>
+                    <label>
+                        Existence status
+                        <select id="existenceStatusSelect">
+                            ${selectOptionsHtml(EXISTENCE_STATUS_OPTIONS, "uncertain")}
+                        </select>
+                    </label>
+                    <label>
+                        Worship-use status
+                        <select id="worshipUseStatusSelect">
+                            ${selectOptionsHtml(WORSHIP_USE_STATUS_OPTIONS, "uncertain")}
+                        </select>
+                    </label>
+                    <label>
+                        Assessment confidence
+                        <select id="assessmentConfidenceSelect">
+                            ${selectOptionsHtml(ASSESSMENT_CONFIDENCE_OPTIONS, "0.7")}
+                        </select>
+                    </label>
+                    <label>
+                        Site-match confidence
+                        <select id="matchConfidenceSelect">
+                            ${selectOptionsHtml(CONFIDENCE_OPTIONS, "medium")}
+                        </select>
+                    </label>
+                    <label>
+                        Location confidence
+                        <select id="geocodingConfidenceSelect">
+                            ${selectOptionsHtml(CONFIDENCE_OPTIONS, "medium")}
                         </select>
                     </label>
                 </div>
@@ -1278,7 +1341,7 @@ class NzVerificationMap {
                         Reason (optional)
                         <input id="skipReasonInput" type="text" placeholder="e.g. evidence already covered by another task">
                     </label>
-                    <button type="button" class="skip-confirm" id="skipTaskButton">Skip this task and open next</button>
+                    <button type="button" class="skip-confirm" id="skipTaskButton">Skip this task</button>
                 </details>
             </div>
         `;
@@ -1335,12 +1398,32 @@ class NzVerificationMap {
             });
         }
 
-        ["sourceProviderInput", "sourceUrlInput", "sourceTitleInput", "sourceDateInput", "relatedIdsInput", "sourceTypeSelect"].forEach(id => {
+        [
+            "sourceProviderInput",
+            "sourceUrlInput",
+            "sourceTitleInput",
+            "sourceDateInput",
+            "relatedIdsInput",
+            "sourceTypeSelect",
+            "existenceStatusSelect",
+            "worshipUseStatusSelect",
+            "assessmentConfidenceSelect",
+            "matchConfidenceSelect",
+            "geocodingConfidenceSelect",
+        ].forEach(id => {
             document.getElementById(id)?.addEventListener("input", () => this.updateWorkflowSteps());
-            document.getElementById(id)?.addEventListener("change", () => this.updateWorkflowSteps());
+            document.getElementById(id)?.addEventListener("change", event => {
+                if (id.endsWith("Select") && !id.startsWith("source")) {
+                    event.target.dataset.touched = "1";
+                }
+                this.updateWorkflowSteps();
+            });
         });
         TARGET_YEARS.forEach(year => {
-            document.getElementById(`status${year}`)?.addEventListener("change", () => this.updateWorkflowSteps());
+            document.getElementById(`status${year}`)?.addEventListener("change", () => {
+                this.applyControlledAssessmentDefaults();
+                this.updateWorkflowSteps();
+            });
         });
 
         document.getElementById("copyEvidenceRowButton")?.addEventListener("click", () => this.copyEvidenceRow(props));
@@ -1368,6 +1451,29 @@ class NzVerificationMap {
         if (note && note.dataset.touched !== "1" && !note.value.trim()) {
             note.placeholder = reviewNoteForAction(action);
         }
+
+        this.applyControlledAssessmentDefaults();
+    }
+
+    applyControlledAssessmentDefaults() {
+        const action = document.getElementById("raActionSelect")?.value || "needs_review";
+        const statuses = Object.fromEntries(TARGET_YEARS.map(year => [
+            year,
+            document.getElementById(`status${year}`)?.value || "not_assessed",
+        ]));
+        const defaults = assessmentDefaultsForAction(action, statuses);
+        [
+            ["existenceStatusSelect", defaults.existenceStatus],
+            ["worshipUseStatusSelect", defaults.worshipUseStatus],
+            ["assessmentConfidenceSelect", defaults.assessmentConfidence],
+            ["matchConfidenceSelect", defaults.matchConfidence],
+            ["geocodingConfidenceSelect", defaults.geocodingConfidence],
+        ].forEach(([id, value]) => {
+            const select = document.getElementById(id);
+            if (select && select.dataset.touched !== "1") {
+                select.value = value;
+            }
+        });
     }
 
     currentFormValues() {
@@ -1377,6 +1483,11 @@ class NzVerificationMap {
             status2018: document.getElementById("status2018")?.value || "not_assessed",
             status2023: document.getElementById("status2023")?.value || "not_assessed",
             sourceType: document.getElementById("sourceTypeSelect")?.value || "other",
+            existenceStatus: document.getElementById("existenceStatusSelect")?.value || "uncertain",
+            worshipUseStatus: document.getElementById("worshipUseStatusSelect")?.value || "uncertain",
+            assessmentConfidence: document.getElementById("assessmentConfidenceSelect")?.value || "",
+            matchConfidence: document.getElementById("matchConfidenceSelect")?.value || "medium",
+            geocodingConfidence: document.getElementById("geocodingConfidenceSelect")?.value || "medium",
             sourceProvider: document.getElementById("sourceProviderInput")?.value || "",
             sourceTitle: document.getElementById("sourceTitleInput")?.value || "",
             sourceDate: document.getElementById("sourceDateInput")?.value || "",
@@ -1426,9 +1537,6 @@ class NzVerificationMap {
         const isMissing = values.action === "missing_current_site";
         const isDuplicate = values.action === "possible_duplicate";
         const isShared = values.action === "denomination_or_shared_use";
-        const isClosed = values.action === "closed_or_changed_use" || values.action === "present_2013_absent_2018";
-        const anyPresent = [values.status2013, values.status2018, values.status2023].includes("present");
-        const anyAbsent = [values.status2013, values.status2018, values.status2023].includes("absent");
 
         row.evidence_row_id = `map-${evidenceSlug || slug(`${values.action}-${todayIsoDate()}`)}`;
         row.collection_batch = "nz-map-workbench-demo";
@@ -1453,7 +1561,7 @@ class NzVerificationMap {
         row.modern_address_candidate = props.address || "";
         row.address_standardised = props.address || "";
         row.geocoding_basis = isMissing ? "manual_match" : "existing_osm_site";
-        row.geocoding_confidence = isMissing ? "medium" : "high";
+        row.geocoding_confidence = values.geocodingConfidence;
         row.latitude = lat ?? "";
         row.longitude = lng ?? "";
         row.matched_osm_id = props.osm_id || "";
@@ -1468,7 +1576,7 @@ class NzVerificationMap {
         row.matched_current_site_id = isMissing ? "" : (props.master_site_id || "");
         row.candidate_site_id = isMissing ? `candidate-${evidenceSlug || slug(`${values.action}-${todayIsoDate()}`)}` : "";
         row.match_method = isMissing ? "unmatched" : isDuplicate ? "manual_review" : "osm_id";
-        row.match_confidence = isMissing ? "none" : isDuplicate ? "medium" : "high";
+        row.match_confidence = values.matchConfidence;
         row.candidate_match_notes = values.relatedIds || "";
         row.visual_verification_source = this.visualVerificationSource(values.sourceType);
         row.visual_verification_url_or_file = ["street_imagery", "aerial_imagery"].includes(values.sourceType)
@@ -1484,14 +1592,17 @@ class NzVerificationMap {
             : "Static map task selected by RA; source evidence still requires review.";
         row.date_evidence_raw = [values.sourceDate ? `source/capture date: ${values.sourceDate}` : "", lifecycle].filter(Boolean).join("; ");
         row.date_evidence_summary = targetEvidence;
-        row.existence_status = anyPresent ? "present" : anyAbsent ? "absent" : "uncertain";
-        row.worship_use_status = anyPresent ? "confirmed_worship" : isClosed ? "not_worship" : "uncertain";
+        row.existence_status = values.existenceStatus;
+        row.worship_use_status = values.worshipUseStatus;
         row.public_access_status = "unknown";
         row.target_year_2013_status = values.status2013;
+        row.target_year_2013_probability = values.status2013 === "not_assessed" ? "" : values.assessmentConfidence;
         row.target_year_2013_evidence = values.status2013 === "not_assessed" ? "" : targetEvidence;
         row.target_year_2018_status = values.status2018;
+        row.target_year_2018_probability = values.status2018 === "not_assessed" ? "" : values.assessmentConfidence;
         row.target_year_2018_evidence = values.status2018 === "not_assessed" ? "" : targetEvidence;
         row.target_year_2023_status = values.status2023;
+        row.target_year_2023_probability = values.status2023 === "not_assessed" ? "" : values.assessmentConfidence;
         row.target_year_2023_evidence = values.status2023 === "not_assessed" ? "" : targetEvidence;
         row.quality_flag = ["street_imagery", "aerial_imagery", "field_observation"].includes(values.sourceType)
             ? "visual_confirmation"
@@ -1524,6 +1635,11 @@ class NzVerificationMap {
                 2018: values.status2018,
                 2023: values.status2023,
             },
+            existence_status: values.existenceStatus,
+            worship_use_status: values.worshipUseStatus,
+            assessment_confidence: values.assessmentConfidence,
+            match_confidence: values.matchConfidence,
+            geocoding_confidence: values.geocodingConfidence,
             source_type: values.sourceType,
             source_provider: values.sourceProvider,
             source_title: values.sourceTitle,
@@ -1627,7 +1743,7 @@ class NzVerificationMap {
             await navigator.clipboard.writeText(tsv);
             if (status) {
                 status.textContent =
-                    "✓ Copied. Switch to your project spreadsheet and paste with Cmd/Ctrl+V as the next row under the header. Nothing was uploaded.";
+                    "✓ Copied. This task is marked tentatively closed in this browser. Paste the row into the spreadsheet, then pick another task from the map or list.";
             }
         } catch (error) {
             if (status) {
@@ -1650,6 +1766,11 @@ class NzVerificationMap {
                 2018: values.status2018,
                 2023: values.status2023,
             },
+            existence_status: values.existenceStatus,
+            worship_use_status: values.worshipUseStatus,
+            assessment_confidence: values.assessmentConfidence,
+            match_confidence: values.matchConfidence,
+            geocoding_confidence: values.geocodingConfidence,
             source_provider: values.sourceProvider,
             source_title: values.sourceTitle,
             source_date_or_capture_date: values.sourceDate,
@@ -1657,20 +1778,6 @@ class NzVerificationMap {
             tsv,
         });
         this.updateWorkflowSteps();
-        this.showNextTaskBar();
-    }
-
-    showNextTaskBar() {
-        const existing = document.getElementById("nextTaskBar");
-        if (existing) existing.remove();
-        const status = document.getElementById("copyStatus");
-        if (!status) return;
-        const bar = document.createElement("div");
-        bar.id = "nextTaskBar";
-        bar.className = "next-task-bar";
-        bar.innerHTML = `<button type="button" id="openNextTaskButton">Open next task in current filters →</button>`;
-        status.insertAdjacentElement("afterend", bar);
-        document.getElementById("openNextTaskButton")?.addEventListener("click", () => this.openNextTask());
     }
 
     skipCurrentTask(props, reason) {
@@ -1683,7 +1790,10 @@ class NzVerificationMap {
             ra_initials: this.getRaInitials(),
             reason: String(reason || "").slice(0, 240),
         });
-        this.openNextTask();
+        const status = document.getElementById("copyStatus");
+        if (status) {
+            status.textContent = "Skipped in this browser. Pick another task from the map or list.";
+        }
     }
 
     async copyDecision(props) {

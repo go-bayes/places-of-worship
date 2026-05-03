@@ -75,17 +75,20 @@ an intake system.
 3. Click a task from the map or priority list.
 4. In "What did you find?", choose the closest action.
 5. Check or adjust the 2013, 2018, and 2023 statuses.
-6. Add a short source title, source URL or agreed file reference, related ids if
+6. Check or adjust the controlled status and confidence dropdowns.
+7. Add a short source title, source URL or agreed file reference, related ids if
    relevant, and a source-backed evidence note.
-7. Click `Copy spreadsheet row` if you were asked to paste a draft row into the
+8. Click `Copy spreadsheet row` if you were asked to paste a draft row into the
    wide evidence sheet.
-8. Click `Copy review JSON` if JB asks for a compact feedback
+9. Click `Copy review JSON` if JB asks for a compact feedback
    payload.
 
 The copied spreadsheet row is a single tab-separated row matching the wide
 evidence sheet columns. Paste it into the sheet under the existing header row.
-Review it before sending it back. Do not enter private contact details,
-restricted source material, or raw uploaded files into the map.
+Review it before sending it back. The map marks copied tasks as tentatively
+closed only in this browser; choose the next task from the map or list. Do not
+enter private contact details, restricted source material, or raw uploaded files
+into the map.
 
 ## Common Fields
 
