@@ -4,6 +4,11 @@
 
 ### 2026-05-03
 
+- Documented how RAs should avoid accidental duplicate work during the NZ
+  pilot: local map badges are browser-only, the shared Sheet is the durable
+  pilot record, multiple rows for one place are allowed when they carry
+  different evidence, and the target design needs a shared provisional task
+  store outside the master database.
 - Updated the NZ verification map action builder to keep RAs on the map after
   copy/skip actions, mark copied tasks as tentatively closed in the local
   session, and expose controlled fields for existence status, worship-use

@@ -865,3 +865,26 @@ now says to paste into column A under the unchanged header. The CLI validator
 should error when an exported CSV has the same known template columns in a
 different order, or appears to be a known template but no longer matches the
 template header exactly.
+
+## 2026-05-03: Separate shared task state from the master
+
+Decision:
+The RA map's `tentatively closed` state is only a local browser aid for the
+current demo. The durable target is a shared task store outside the master
+database that defines task assignment and provisional closure until review.
+
+Rationale:
+The shared Sheet can legitimately contain multiple rows for the same place when
+each row contributes different evidence: a different source, target year,
+identity judgement, duplicate judgement, or worship-function claim. That is not
+the same problem as duplicate labour. Avoiding accidental duplicate work
+requires shared task status, while preserving multiple evidence rows requires a
+one-to-many relationship from task or site to evidence rows.
+
+Consequences:
+RA-facing guidance now tells assistants that browser task badges are local only
+and that the shared Sheet is the durable pilot record. Planning now calls for a
+shared task store with statuses such as `open`, `in_progress`,
+`provisionally_closed`, `needs_review`, `reviewed`, and `reopened`. Accepted
+review decisions become change events for the master; provisional task statuses
+do not mutate the master directly.

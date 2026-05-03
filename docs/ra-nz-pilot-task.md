@@ -84,6 +84,23 @@ In Google Sheets, CSV export is:
 Do not upload the CSV to GitHub. JB will validate, stage, and
 review the data separately.
 
+## Avoiding Accidental Duplicate Work
+
+The map can mark a task as `tentatively closed` or `skipped`, but only in the
+same browser. This is a local reminder, not a shared saved status.
+
+The shared Sheet is the record of work completed in this pilot. Before spending
+time on a task, check whether the Sheet already has a row for the same
+`source_record_id` (the map task id), `matched_current_site_id`,
+`candidate_site_id`, or `matched_osm_id`.
+
+It is OK for the Sheet to contain more than one row for the same place when the
+rows add different evidence. For example, one row might support 2013 status, a
+second might support 2018 status, and a third might record a duplicate or
+shared-use issue. Do not add another row that repeats the same source and same
+claim. If you add another row for a place already in the Sheet, explain what is
+new in the evidence note.
+
 ## What This Pilot Is For
 
 We are not trying to finish New Zealand in this first pass. We are trying to

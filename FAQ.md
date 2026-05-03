@@ -67,6 +67,31 @@ Rows from the Sheet should later be exported or ingested, validated, staged,
 reviewed, and converted into accepted change events. Only accepted events affect
 rebuilt master outputs.
 
+## How can RAs avoid duplicating task work?
+
+For the current demo, the map only remembers copied or skipped tasks in the
+same browser. A `tentatively closed` badge means the browser has copied a row
+for that task. It is not a shared review decision, and it is not visible to
+another browser or collaborator.
+
+The shared Sheet is the durable pilot record. Before spending time on a task,
+check whether the Sheet already has a row with the same `source_record_id`
+(the map task id), `matched_current_site_id`, `candidate_site_id`, or
+`matched_osm_id`.
+
+Multiple rows for the same place can be correct when they capture different
+evidence: for example, one row for a 2013 directory, one row for 2018 Street
+View, one row for a duplicate judgement, or one row for a denomination/shared
+use finding. Avoid adding a second row that repeats the same source and same
+claim. When adding another row for the same place, make the new evidence or
+reason clear in the evidence note.
+
+The planned fix is a shared task store outside the master database. The map or
+portal should read and update task status there, marking tasks as open,
+assigned, provisionally closed, reviewed, or reopened. Accepted review decisions
+then become change events and rebuild the master; the task store itself is not
+the master.
+
 ## Can the RA spreadsheet columns be reordered?
 
 No. The `site_evidence_wide` header order is a data contract. The map copies a
