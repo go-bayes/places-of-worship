@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- Simplified `docs/ra-nz-pilot-task.md` so the current RA instruction is to
+  sample varied tasks from the demo map rather than complete a fixed 50-row
+  pilot batch.
+- Added a second README pointer to `FAQ.md` near the project orientation links.
 - Clarified the identity conflict lifecycle: accepted user-nominated sites keep
   durable project `site_id` values, later OSM matches attach as source
   identifiers after review, and conflicts become proposed change events rather

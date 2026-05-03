@@ -67,6 +67,16 @@
 
 - Keep large, restricted, raw, or private data out of Git unless the repo
   already tracks that class of artefact and the licence permits it.
+- When editing or reviewing planning, schema, RA, roadmap, FAQ, or changelog
+  documents, check nearby cross-references for drift. If documents disagree on
+  identity rules, RA workflow, data ownership, source/licence handling,
+  backend direction, or task/review lifecycle, either reconcile the documents
+  in the same change or flag the inconsistency clearly for the user.
+- When the user asks a question whose answer clarifies durable project
+  behaviour, especially around identity, task generation, RA workflow, staging,
+  review, source handling, or master rebuilds, consider whether the answer
+  should be added to `FAQ.md`. Add it when it would likely help future RAs,
+  collaborators, reviewers, or agents; otherwise note the reason not to.
 - Preserve source provenance: name, URL or file reference, licence, retrieval
   date, access limits, and source notes where possible.
 - Treat incoming data as untrusted until validated, reviewed, and accepted

@@ -18,7 +18,7 @@ In practical terms:
 2. Open the shared working spreadsheet link supplied by the project team. This
    is where your work is saved.
 3. Choose a target year: 2013, 2018, or 2023.
-4. Select one task from the map or priority list.
+4. Sample one task from the demo map, using the map, filters, or priority list.
 5. Check the links and search for source evidence.
 6. Decide what kind of case it is: confirmed site, missing site, duplicate,
    closure, changed use, shared use, or uncertain.
@@ -72,16 +72,17 @@ We are not trying to finish New Zealand in this first pass. We are trying to
 learn how the save, evaluate, review, and merge-track workflow should work
 before we scale up.
 
-The best use of RA time is a small, varied set of real cases. We need examples
-that test the full workflow: straightforward confirmations, missing lifecycle
-dates, duplicates, missing current sites, places present in 2013 but absent by
-2018, and shared or changed-use sites.
+The best use of RA time is to sample real tasks from the demo map and tell us
+where the workflow is clear or slow. We need examples that test the full
+workflow: straightforward confirmations, missing lifecycle dates, duplicates,
+missing current sites, places present in 2013 but absent by 2018, and shared or
+changed-use sites.
 
 ## Goal
 
-Build a small, high-value test batch that helps the project team design the
-save, evaluate, review, and merge-track flow. Do not try to exhaustively check
-New Zealand yet.
+Sample a small, high-value set of demo-map tasks that helps the project team
+design the save, evaluate, review, and merge-track flow. Do not try to
+exhaustively check New Zealand yet.
 
 A useful pilot row has:
 
@@ -108,21 +109,21 @@ staging, or proposal commands unless the project team explicitly asks.
 - Detailed case guide:
   `docs/ra-map-triage-guide.md`
 
-## First Pilot Batch
+## Sampling Tasks From The Demo Map
 
-Unless the project team assigns a different batch, aim for 50 usable rows.
+Unless the project team assigns a specific set of sites, sample tasks directly
+from the demo map. Prioritise variety over volume. A useful session might
+include:
 
-Prioritise variety over volume:
+- a few high-priority current map records,
+- a few records with missing or ambiguous lifecycle dates,
+- an apparent duplicate if one is easy to find,
+- a current place of worship missing from the map if evidence appears quickly,
+- a possible site present in 2013 but absent by 2018,
+- a denomination-change, shared-building, or multi-use case,
+- one or two low- or medium-priority controls.
 
-1. 15 high-priority current map records: confirm, correct, or flag.
-2. 10 records with missing or ambiguous lifecycle dates.
-3. 5 apparent duplicates.
-4. 5 current places of worship missing from the map.
-5. 5 sites present in 2013 but absent by 2018.
-6. 5 denomination changes, shared buildings, or multi-use cases.
-7. 5 random low- or medium-priority controls.
-
-If time remains, extend the same categories toward 100 rows. Do not spend a
+There is no fixed row target for the demo-map sampling phase. Do not spend a
 large amount of time on one difficult case unless it is unusually important.
 Mark it `needs_review`, explain the uncertainty, and move on.
 
@@ -132,7 +133,8 @@ Mark it `needs_review`, explain the uncertainty, and move on.
 2. Use the default action-builder view. If the page opens in read-only mode,
    ask the project team before continuing.
 3. Choose the target year you are checking: 2013, 2018, or 2023.
-4. Use the priority and target-year status filters to choose one case.
+4. Use the map, priority list, and target-year status filters to choose one
+   case.
 5. Click the task on the map or in the list.
 6. Inspect the task panel: name, master id, OpenStreetMap id, address,
    denomination or tradition, lifecycle tags, automated checks, and links.

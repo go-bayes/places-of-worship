@@ -72,5 +72,6 @@ Public corrections to places of worship should generally be made through
 OpenStreetMap itself, following OpenStreetMap's own contribution rules and
 licence requirements.
 
-See [ROADMAP.md](ROADMAP.md) for planned phases and [PLANNING.md](PLANNING.md)
-for current implementation priorities.
+See [ROADMAP.md](ROADMAP.md) for planned phases, [PLANNING.md](PLANNING.md)
+for current implementation priorities, and [FAQ.md](FAQ.md) for plain-language
+answers about site identity, task generation, and staged review.
