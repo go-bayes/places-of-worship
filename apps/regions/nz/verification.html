@@ -343,6 +343,47 @@
             background: #f8fafc;
         }
 
+        .task-brief {
+            display: grid;
+            gap: 8px;
+            border: 1px solid #cfe1ef;
+            border-left: 4px solid #1f618d;
+            border-radius: 5px;
+            background: #f2f8fc;
+            padding: 10px 12px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .task-brief-header {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .task-focus {
+            font-weight: 700;
+            color: #1f4e79;
+        }
+
+        .task-brief p,
+        .task-brief ol {
+            margin: 0;
+        }
+
+        .task-brief ol {
+            padding-left: 20px;
+            display: grid;
+            gap: 4px;
+        }
+
+        .task-brief-footer {
+            color: #566573;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
         .temporal-summary {
             display: grid;
             gap: 8px;
@@ -854,6 +895,6 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
-    <script src="js/verification-map.js?v=20260504-tier-2-session-log"></script>
+    <script src="js/verification-map.js?v=20260503-task-brief"></script>
 </body>
 </html>

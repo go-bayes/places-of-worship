@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Added a selected-site task brief to the NZ verification map demo. The detail
+  panel now turns priority, suggested action, target year, and automated checks
+  into a concrete RA checklist before the findings form.
 - Defaulted the NZ verification map to demo mode while the RA action builder
   is the only functional state. The page now lands with the action builder,
   session log, and nomination controls available; appending `?demo=0` opts in

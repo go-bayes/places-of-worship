@@ -280,6 +280,70 @@ function reviewNoteForAction(action) {
     return "Needs reviewer decision.";
 }
 
+function taskFocusForAction(action, priority) {
+    if (action === "needs_human_review") {
+        return {
+            label: priority === "high" ? "High-priority review" : "Human review",
+            text: "Resolve whether this record is a source-backed place of worship at this location and whether its target-year status can be assessed.",
+        };
+    }
+    if (action === "review_when_sampling") {
+        return {
+            label: "Spot-check sample",
+            text: "Check the record against independent source evidence and capture any lifecycle, address, denomination, duplicate, or uncertainty finding.",
+        };
+    }
+    if (action === "candidate_no_action") {
+        return {
+            label: "Control check",
+            text: "Confirm the record looks plausible. Record a row only if you find a correction, date evidence, duplicate, changed use, or uncertainty worth review.",
+        };
+    }
+    return {
+        label: "Review task",
+        text: "Check the record against source evidence and record the strongest finding supported by that evidence.",
+    };
+}
+
+function checklistItemForCheck(check) {
+    const id = check?.check_id || "";
+    if (id === "missing_osm_lifecycle_date") {
+        return "Look for opening, first-seen, closure, or changed-use evidence that helps assess 2013, 2018, or 2023 worship use.";
+    }
+    if (id === "missing_address") {
+        return "Find a source-backed street address or locality, and note if the location remains approximate.";
+    }
+    if (id === "missing_denomination") {
+        return "Find the denomination, tradition, or religion-specific affiliation if a reliable source states it.";
+    }
+    if (id === "generic_name") {
+        return "Find the real site name or evidence that the generic name is all the source supports.";
+    }
+    if (id === "weak_worship_tags") {
+        return "Check that this is active worship use, not only a building, office, school, hall, or organisation record.";
+    }
+    if (id === "low_confidence") {
+        return "Confirm the map point, name, and source record refer to the same site; mark uncertainty if the match is weak.";
+    }
+    if (id === "near_duplicate_name" || id === "same_coordinate_cluster") {
+        return "Compare nearby or similarly named records and record related ids if this may be a duplicate, shared building, or separate congregation.";
+    }
+    if (id === "coordinate_outside_nz_bounds") {
+        return "Check the coordinates and record a location problem if the point is outside New Zealand or clearly misplaced.";
+    }
+    return check?.message || "Review the automated flag and record source-backed evidence if it changes the site assessment.";
+}
+
+function uniqueItems(items) {
+    const seen = new Set();
+    return items.filter(item => {
+        const key = String(item || "").trim();
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+
 function hasMissingLifecycleCheck(props) {
     return (props.automated_checks || []).some(check => check.check_id === "missing_osm_lifecycle_date");
 }
@@ -931,6 +995,10 @@ class NzVerificationMap {
             ${INTAKE_ENABLED ? this.workflowStepsHtml("inspect") : ""}
 
             <div class="detail-section">
+                ${this.siteTaskBriefHtml(props)}
+            </div>
+
+            <div class="detail-section">
                 <h3>1. Open source links</h3>
                 <div class="link-grid">
                     ${this.linkHtml("OSM object", props.osm_object_url)}
@@ -983,6 +1051,35 @@ class NzVerificationMap {
         if (INTAKE_ENABLED) {
             this.bindRaActionForm(props);
         }
+    }
+
+    siteTaskBriefHtml(props) {
+        const checks = props.automated_checks || [];
+        const focus = taskFocusForAction(props.automated_suggested_action, props.verification_priority);
+        const temporal = deriveTargetYearStatus(props, this.targetYear);
+        const checklist = uniqueItems([
+            "Confirm that the source evidence refers to this site, not only a similarly named organisation or nearby building.",
+            `Assess worship-use status for ${this.targetYear}. The current map aid says ${statusLabel(temporal.status).toLowerCase()}; verify with sources.`,
+            ...checks.map(checklistItemForCheck),
+            "Record the closest supported action, target-year statuses, source title, URL or file reference, and a short evidence note.",
+        ]);
+        const actionHint = actionLabel(props.automated_suggested_action);
+        return `
+            <h3>Your task for this site</h3>
+            <div class="task-brief">
+                <div class="task-brief-header">
+                    <span class="task-focus">${escapeHtml(focus.label)}</span>
+                    <span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))}</span>
+                </div>
+                <p>${escapeHtml(focus.text)}</p>
+                <ol>
+                    ${checklist.map(item => `<li>${escapeHtml(item)}</li>`).join("")}
+                </ol>
+                <div class="task-brief-footer">
+                    Suggested queue: ${escapeHtml(actionHint)} | Priority: ${escapeHtml(props.verification_priority || "unknown")}
+                </div>
+            </div>
+        `;
     }
 
     workflowStepsHtml(currentStep, doneSteps = []) {
