@@ -802,3 +802,46 @@ capture or visit date, and a short site-level visual claim. Do not store or
 republish Street View screenshots, RA photos, videos, private conversations, or
 personal contact details in Git or public outputs unless a later approved media
 workflow covers consent, licensing, quarantine, and review.
+
+## 2026-05-03: Project ids outrank external ids
+
+Decision:
+Accepted places of worship receive durable project-owned `site_id` values.
+RA, community, or map-generated suggestions use provisional `candidate_site_id`
+values until review. OSM object ids, charity ids, directory ids, and other
+provider record ids are source identifiers attached to a project site; they do
+not define project site identity.
+
+Rationale:
+The master must remain stable when upstream sources change. A trusted user may
+nominate a missing place before the next OSM refresh supplies the same site
+with an OSM id. In that case, OSM should enrich or challenge the existing
+project site after review, not replace the project identity or create an
+unreviewed duplicate.
+
+Consequences:
+The August/September OSM refresh should generate identity-link and conflict
+tasks against the current master. If OSM matches an accepted project site,
+review can attach the OSM id and source metadata to the existing `site_id`. If
+OSM conflicts with accepted evidence, it should create proposed change events
+against the existing site unless review decides that the record is a distinct
+site, duplicate, split, merge, or relocation. Accepted events then rebuild the
+master and produce diffs; OSM and user suggestions never overwrite the master
+directly.
+
+## 2026-05-03: Add a project FAQ
+
+Decision:
+Create a root `FAQ.md` for plain-language operational rules that cut across
+planning, RA guidance, schemas, and future backend work.
+
+Rationale:
+Several important design choices are easy to ask in ordinary language but hard
+to find in long planning documents: whether the Sheet is shared, whether OSM
+ids define sites, how accepted candidates handle later OSM matches, and how
+tasks become master changes.
+
+Consequences:
+The FAQ is explanatory, not the only source of truth. Authoritative contracts
+remain in schemas and planning documents, but the README should link to the FAQ
+so RAs, collaborators, and future agents can quickly find the project model.

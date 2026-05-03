@@ -1,6 +1,13 @@
 # Changelog
 
 ## Unreleased
+- Clarified the identity conflict lifecycle: accepted user-nominated sites keep
+  durable project `site_id` values, later OSM matches attach as source
+  identifiers after review, and conflicts become proposed change events rather
+  than direct master overwrites.
+- Added `FAQ.md` as a plain-language guide to site identity, candidate ids,
+  OSM conflicts, RA spreadsheets, task generation, staged review, and visual
+  evidence.
 - Moved CLI and staging support docs into `docs/development/`, removed the CLI
   tutorial from the default RA task path, and added planning notes for
   UI-generated new PoW nominations and explicit 2013/2018/2023 evidence

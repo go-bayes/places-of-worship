@@ -1211,6 +1211,30 @@ map do not drift apart.
   - explicit reviewed overrides for difficult matches
 - OSM ids will be stored as source references, but they will not be treated as
   the stable longitudinal site identifier.
+- Accepted places receive durable project-owned `site_id` values. Provisional
+  RA, community, or map-generated suggestions use `candidate_site_id` until a
+  reviewer accepts or rejects them.
+- External identifiers, including OSM object ids, charity ids, directory ids,
+  and provider-specific record ids, attach to project sites as source
+  identifiers. They do not define project identity.
+- If a trusted user nominates a missing place and it is accepted before OSM
+  later supplies the same site, the OSM refresh should generate an
+  identity-link review task, not a new master site by default. Accepting that
+  task attaches the OSM id and source metadata to the existing project
+  `site_id`.
+- If later OSM evidence conflicts with the accepted project site, such as a
+  different denomination, moved geometry, changed worship-use tags, or an
+  apparent closure, it should create proposed change events against the
+  existing `site_id` unless review determines that it is a distinct site,
+  duplicate, split, merge, or relocation.
+- Duplicate OSM or user-generated candidates should be resolved through
+  reviewed candidate rejection, identity-link, duplicate-merge, split, or
+  successor/predecessor events, with provenance preserved.
+
+This is the default conflict lifecycle for the August/September OSM refresh:
+source snapshots produce tasks; review resolves identity and functional state;
+accepted events rebuild the master; the master is not overwritten directly by
+OSM ids or user suggestions.
 
 ### Decided: identity on relocation and geometry correction
 
