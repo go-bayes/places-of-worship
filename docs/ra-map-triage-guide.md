@@ -90,6 +90,13 @@ closed only in this browser; choose the next task from the map or list. Do not
 enter private contact details, restricted source material, or raw uploaded files
 into the map.
 
+The target-year fields are for 2013, 2018, and 2023. Use the optional
+lifecycle/change fields for dates outside those waves, such as site opening,
+closure, relocation, demolition, first/last seen evidence, or a later shared-use
+or multi-denominational change. The map records one structured lifecycle/change
+date per copied row; copy an additional row if the same site has another
+distinct source-backed date worth preserving.
+
 ## Common Fields
 
 Use these fields consistently in the wide evidence sheet:
@@ -108,6 +115,9 @@ Use these fields consistently in the wide evidence sheet:
   `not_assessed`.
 - `target_year_*_evidence`: short explanation of the source evidence for that
   year.
+- `site_opened_date`, `site_closed_date`, `first_seen_date`,
+  `last_seen_date`, `use_changed_date`, and related precision fields:
+  lifecycle or later-change evidence that may fall outside the target years.
 - `existence_status`: whether the source supports site or building existence at
   the relevant time.
 - `worship_use_status`: whether the source supports worship use at the relevant

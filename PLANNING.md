@@ -87,9 +87,9 @@ As of 30 April 2026:
   historical reconstruction.
 - In demo mode, the NZ verification map now includes a local RA action builder
   that turns the selected task, target-year statuses, source details, related
-  ids, and evidence note into a spreadsheet-ready wide evidence row plus review
-  JSON. This is a usability bridge only: it does not save, submit, authenticate,
-  or write to staging.
+  ids, one optional lifecycle or later-change date, and evidence note into a
+  spreadsheet-ready wide evidence row plus review JSON. This is a usability
+  bridge only: it does not save, submit, authenticate, or write to staging.
 - Street-level imagery and direct field observations are first-class RA
   evidence sources. Use `source_type = street_imagery` for dated imagery
   providers such as Google Street View, Apple Look Around, Mapillary, KartaView,
@@ -231,7 +231,11 @@ target years explicit:
 5. Capture date precision and evidence basis with each lifecycle date. Exact
    dates, years, bounded intervals, and source inferences should remain
    distinguishable for later reconstruction.
-6. For future analysis, keep raw denomination/tradition, shared-use,
+6. The map action builder should capture one structured lifecycle or
+   later-change date per generated row. If one source supports several distinct
+   lifecycle claims, multiple evidence rows for the same site are acceptable
+   when the note makes the repeated site intentional.
+7. For future analysis, keep raw denomination/tradition, shared-use,
    multi-purpose, and organisation-site link evidence even if the current pilot
    cannot yet translate it into accepted schema events.
 

@@ -228,6 +228,33 @@ For 2013, 2018, and 2023, use:
 Do not treat a visible building as proof of worship use. We are tracking the
 worship function of the site, not only whether a building exists.
 
+## Lifecycle And Later Changes
+
+Record useful dates even when they are outside 2013, 2018, and 2023. The
+target-year fields answer the census-wave question; the lifecycle/change fields
+preserve evidence for later reconstruction.
+
+Use the optional lifecycle or later-change section when a source gives evidence
+such as:
+
+- the organisation or congregation was founded,
+- worship began at the site,
+- the building was opened or dedicated,
+- the site was first seen or last seen in a source,
+- worship use ended,
+- the building was demolished,
+- the congregation relocated,
+- the site became shared, multi-use, or multi-denominational.
+
+For example, if a source says a church became shared Anglican/Methodist in
+2024, choose `Use changed / shared use began`, enter `2024`, set precision to
+`Year`, and explain the claim in the lifecycle/change note.
+
+The map can put one structured lifecycle or change date into each copied row.
+If the same source gives several distinct dates, copy one row for the main
+task, then copy another row for each additional date worth preserving. Use the
+note to make clear that the repeated site is intentional.
+
 ## Sources To Try First
 
 Use public or project-approved sources:

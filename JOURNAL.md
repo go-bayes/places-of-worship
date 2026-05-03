@@ -888,3 +888,25 @@ shared task store with statuses such as `open`, `in_progress`,
 `provisionally_closed`, `needs_review`, `reviewed`, and `reopened`. Accepted
 review decisions become change events for the master; provisional task statuses
 do not mutate the master directly.
+
+## 2026-05-03: Capture lifecycle and later changes during target-year triage
+
+Decision:
+Keep the 2013, 2018, and 2023 target-year fields as the New Zealand estimation
+spine, but let each RA-generated map row carry one structured lifecycle or
+later worship-function change date when a source supports it.
+
+Rationale:
+Sources often answer more than the immediate target-year question. A directory,
+Street View capture, field observation, or denominational record may show that
+worship began before a target year, ended after a target year, or changed to a
+shared or multi-denominational use later, such as in 2024. Losing that evidence
+would make later reconstruction and denomination/use-change analysis harder.
+
+Consequences:
+The RA action builder now exposes optional lifecycle/change controls before row
+copying and maps the selected event into the existing wide evidence date and
+precision fields. If one source supports several distinct lifecycle claims,
+multiple evidence rows for the same site are acceptable when the notes make the
+repeat intentional. Review and later ingestion still decide whether those rows
+become accepted change events.

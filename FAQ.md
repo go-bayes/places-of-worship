@@ -116,6 +116,21 @@ record the interpretation in the date field only when it can be expressed in
 one of those formats, set the matching precision field where available, and
 preserve the original wording in the evidence note or raw-date field.
 
+## How do we record dates outside 2013, 2018, and 2023?
+
+Use the target-year columns for the three census-wave questions. Use lifecycle
+or later-change fields for other useful evidence, such as when worship began at
+a site, when a building was opened, when worship use ended, when a site was
+first or last seen in a source, or when a later shared-use or
+multi-denominational change occurred.
+
+For example, if a source says a site became multi-denominational in 2024, record
+the target years that the source supports, then use the lifecycle/change fields
+with `use_changed_date = 2024`, date precision `year`, and an evidence note
+explaining the claim. If one source gives several distinct lifecycle dates, it
+is acceptable to create more than one evidence row when each row carries a
+different source-backed claim.
+
 ## Will the map generate tasks automatically?
 
 That is the target workflow. A deterministic task generator should read the

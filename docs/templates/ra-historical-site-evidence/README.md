@@ -59,6 +59,9 @@ sheet public unless source licences and privacy checks permit public release.
 - Prefer stable identifiers and URLs. If a source was downloaded, record the retrieval date and checksum when available.
 - Treat changed streets, renamed localities, demolished buildings, and shifted road alignments as matching problems. Record the historical address separately from any modern address candidate, explain the address change, and lower `geocoding_confidence` where the location is uncertain.
 - Do not collapse all lifecycle evidence into one birthday or death date. Use the specific date fields for organisation founding, site opening, building opening or dedication, first seen, last seen, closure, demolition, change of use, and relocation.
+- Use `use_changed_date` for later worship-function changes that do not fit a
+  simple opening or closure field, including evidence that a site became shared,
+  multi-use, or multi-denominational.
 - Use bounded date fields when the source only gives a limit. For example, if a source proves the site existed before or by 2013 but gives no opening date, leave the exact opening fields blank and enter `2013` in `origin_not_later_than_date` with `origin_not_later_than_date_precision` set to `year`.
 - Read `not_later_than` as "known by this date" and `not_earlier_than` as "cannot have occurred before this date". Use the closure equivalents for closure or end-of-use evidence.
 - Enter dates only as `YYYY`, `YYYY-MM`, or `YYYY-MM-DD`. Do not enter prose

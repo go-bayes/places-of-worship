@@ -4,6 +4,10 @@
 
 ### 2026-05-03
 
+- Added optional lifecycle/later-change fields to the NZ verification map so RA
+  rows can capture source-backed dates outside 2013/2018/2023, including site
+  opening, closure, first/last seen, relocation, demolition, and later
+  shared-use or multi-denominational changes.
 - Clarified that RAs should leave missing cells blank rather than entering
   `NA`/`N/A`, documented accepted date formats as `YYYY`, `YYYY-MM`, or
   `YYYY-MM-DD`, added map-side date checks for source/capture dates, and made

@@ -74,6 +74,47 @@ const ASSESSMENT_CONFIDENCE_OPTIONS = [
     ["0.7", "Medium (0.70)"],
     ["0.5", "Low (0.50)"],
 ];
+const DATE_PRECISION_OPTIONS = [
+    ["day", "Day"],
+    ["month", "Month"],
+    ["year", "Year"],
+    ["bounded", "Bounded / inferred"],
+    ["unknown", "Unknown"],
+];
+const LIFECYCLE_EVENT_OPTIONS = [
+    ["", "No extra lifecycle/change date"],
+    ["organisation_founded", "Organisation/congregation founded"],
+    ["site_opened", "Worship began at this site"],
+    ["building_opened_or_dedicated", "Building opened or dedicated"],
+    ["origin_not_earlier_than", "Origin not earlier than"],
+    ["origin_not_later_than", "Origin not later than"],
+    ["first_seen", "First seen in source"],
+    ["last_seen", "Last seen in source"],
+    ["site_closed", "Worship ended at this site"],
+    ["closure_not_earlier_than", "Closure not earlier than"],
+    ["closure_not_later_than", "Closure not later than"],
+    ["building_demolished", "Building demolished"],
+    ["use_changed", "Use changed / shared use began"],
+    ["relocated", "Organisation relocated"],
+];
+const LIFECYCLE_FIELD_BY_EVENT = {
+    organisation_founded: ["organisation_founded_date", "organisation_founded_date_precision"],
+    site_opened: ["site_opened_date", "site_opened_date_precision"],
+    building_opened_or_dedicated: [
+        "building_opened_or_dedicated_date",
+        "building_opened_or_dedicated_date_precision",
+    ],
+    origin_not_earlier_than: ["origin_not_earlier_than_date", "origin_not_earlier_than_date_precision"],
+    origin_not_later_than: ["origin_not_later_than_date", "origin_not_later_than_date_precision"],
+    first_seen: ["first_seen_date", "first_seen_date_precision"],
+    last_seen: ["last_seen_date", "last_seen_date_precision"],
+    site_closed: ["site_closed_date", "site_closed_date_precision"],
+    closure_not_earlier_than: ["closure_not_earlier_than_date", "closure_not_earlier_than_date_precision"],
+    closure_not_later_than: ["closure_not_later_than_date", "closure_not_later_than_date_precision"],
+    building_demolished: ["building_demolished_date", "building_demolished_date_precision"],
+    use_changed: ["use_changed_date", "use_changed_date_precision"],
+    relocated: ["relocated_date", "relocated_date_precision"],
+};
 
 function dataUrl(path) {
     return new URL(path, DATA_BASE).toString();
@@ -135,10 +176,22 @@ function isValidPartialDateText(value) {
         && date.getUTCDate() === Number(fullDate[3]);
 }
 
+function precisionForPartialDate(value) {
+    const text = String(value || "").trim();
+    if (/^\d{4}$/.test(text)) return "year";
+    if (/^\d{4}-(0[1-9]|1[0-2])$/.test(text)) return "month";
+    if (/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(text)) return "day";
+    return "unknown";
+}
+
 function selectOptionsHtml(options, selectedValue) {
     return options.map(([value, label]) => `
         <option value="${escapeHtml(value)}"${value === selectedValue ? " selected" : ""}>${escapeHtml(label)}</option>
     `).join("");
+}
+
+function optionLabel(options, selectedValue) {
+    return options.find(([value]) => value === selectedValue)?.[1] || selectedValue;
 }
 
 function priorityColor(priority) {
@@ -1322,6 +1375,32 @@ class NzVerificationMap {
                     Source date or imagery capture date
                     <input id="sourceDateInput" type="text" placeholder="e.g. 2018-09, 2023, or 2026-05-03 for a field visit">
                 </label>
+                <h3>Optional lifecycle or later change</h3>
+                <div class="copy-help">
+                    Use this when the source gives an opening, closure, first/last seen, relocation, demolition, or later worship-function change. For example, use <em>Use changed / shared use began</em> for evidence that a site became multi-denominational in 2024.
+                </div>
+                <div class="field-grid">
+                    <label>
+                        Event type
+                        <select id="lifecycleEventSelect">
+                            ${selectOptionsHtml(LIFECYCLE_EVENT_OPTIONS, "")}
+                        </select>
+                    </label>
+                    <label>
+                        Event date
+                        <input id="lifecycleDateInput" type="text" placeholder="YYYY, YYYY-MM, or YYYY-MM-DD">
+                    </label>
+                    <label>
+                        Date precision
+                        <select id="lifecycleDatePrecisionSelect">
+                            ${selectOptionsHtml(DATE_PRECISION_OPTIONS, "year")}
+                        </select>
+                    </label>
+                    <label>
+                        Lifecycle/change note
+                        <input id="lifecycleNoteInput" type="text" placeholder="e.g. source says shared Anglican/Methodist use began in 2024">
+                    </label>
+                </div>
                 <div class="source-url-row">
                     <label>
                         Source URL or file reference
@@ -1416,6 +1495,10 @@ class NzVerificationMap {
             "sourceUrlInput",
             "sourceTitleInput",
             "sourceDateInput",
+            "lifecycleEventSelect",
+            "lifecycleDateInput",
+            "lifecycleDatePrecisionSelect",
+            "lifecycleNoteInput",
             "relatedIdsInput",
             "sourceTypeSelect",
             "existenceStatusSelect",
@@ -1431,6 +1514,16 @@ class NzVerificationMap {
                 }
                 this.updateWorkflowSteps();
             });
+        });
+        const lifecycleDate = document.getElementById("lifecycleDateInput");
+        const lifecyclePrecision = document.getElementById("lifecycleDatePrecisionSelect");
+        lifecycleDate?.addEventListener("input", () => {
+            if (lifecyclePrecision && lifecyclePrecision.dataset.touched !== "1") {
+                lifecyclePrecision.value = precisionForPartialDate(lifecycleDate.value);
+            }
+        });
+        lifecyclePrecision?.addEventListener("change", () => {
+            lifecyclePrecision.dataset.touched = "1";
         });
         TARGET_YEARS.forEach(year => {
             document.getElementById(`status${year}`)?.addEventListener("change", () => {
@@ -1504,6 +1597,10 @@ class NzVerificationMap {
             sourceProvider: document.getElementById("sourceProviderInput")?.value || "",
             sourceTitle: document.getElementById("sourceTitleInput")?.value || "",
             sourceDate: document.getElementById("sourceDateInput")?.value || "",
+            lifecycleEvent: document.getElementById("lifecycleEventSelect")?.value || "",
+            lifecycleDate: document.getElementById("lifecycleDateInput")?.value || "",
+            lifecycleDatePrecision: document.getElementById("lifecycleDatePrecisionSelect")?.value || "unknown",
+            lifecycleNote: document.getElementById("lifecycleNoteInput")?.value || "",
             sourceUrl: document.getElementById("sourceUrlInput")?.value || "",
             relatedIds: document.getElementById("relatedIdsInput")?.value || "",
             note: document.getElementById("decisionNote")?.value || "",
@@ -1515,6 +1612,16 @@ class NzVerificationMap {
         if (values.note.trim().length < 5) return "Add a short evidence note.";
         if (values.sourceDate.trim() && !isValidPartialDateText(values.sourceDate)) {
             return "Use YYYY, YYYY-MM, or YYYY-MM-DD for source and capture dates. If the date is unknown, leave it blank and explain in the note.";
+        }
+        const hasLifecycleDetail = values.lifecycleEvent || values.lifecycleDate.trim() || values.lifecycleNote.trim();
+        if (hasLifecycleDetail && !values.lifecycleEvent) {
+            return "Choose a lifecycle/change event type, or leave the optional lifecycle fields blank.";
+        }
+        if (values.lifecycleEvent && !values.lifecycleDate.trim()) {
+            return "Add a lifecycle/change date, or leave the optional lifecycle fields blank.";
+        }
+        if (values.lifecycleDate.trim() && !isValidPartialDateText(values.lifecycleDate)) {
+            return "Use YYYY, YYYY-MM, or YYYY-MM-DD for lifecycle/change dates. Preserve prose dates in the note.";
         }
         if (values.sourceType === "field_observation" && !values.sourceDate.trim()) {
             return "Add the field observation date.";
@@ -1606,8 +1713,28 @@ class NzVerificationMap {
         row.visual_verification_summary = ["street_imagery", "aerial_imagery", "field_observation"].includes(values.sourceType)
             ? values.note
             : "Static map task selected by RA; source evidence still requires review.";
-        row.date_evidence_raw = [values.sourceDate ? `source/capture date: ${values.sourceDate}` : "", lifecycle].filter(Boolean).join("; ");
-        row.date_evidence_summary = targetEvidence;
+        const lifecycleLabel = optionLabel(LIFECYCLE_EVENT_OPTIONS, values.lifecycleEvent);
+        const lifecycleEvidence = values.lifecycleEvent
+            ? [
+                `lifecycle/change event: ${lifecycleLabel}`,
+                `date: ${values.lifecycleDate}`,
+                `precision: ${values.lifecycleDatePrecision}`,
+                values.lifecycleNote ? `note: ${values.lifecycleNote}` : "",
+            ].filter(Boolean).join("; ")
+            : "";
+        if (values.lifecycleEvent) {
+            const lifecycleFields = LIFECYCLE_FIELD_BY_EVENT[values.lifecycleEvent];
+            if (lifecycleFields) {
+                row[lifecycleFields[0]] = values.lifecycleDate;
+                row[lifecycleFields[1]] = values.lifecycleDatePrecision;
+            }
+        }
+        row.date_evidence_raw = [
+            values.sourceDate ? `source/capture date: ${values.sourceDate}` : "",
+            lifecycle,
+            lifecycleEvidence,
+        ].filter(Boolean).join("; ");
+        row.date_evidence_summary = [targetEvidence, values.lifecycleNote].filter(Boolean).join(" ");
         row.existence_status = values.existenceStatus;
         row.worship_use_status = values.worshipUseStatus;
         row.public_access_status = "unknown";
@@ -1651,6 +1778,11 @@ class NzVerificationMap {
                 2018: values.status2018,
                 2023: values.status2023,
             },
+            lifecycle_event: values.lifecycleEvent,
+            lifecycle_event_label: values.lifecycleEvent ? optionLabel(LIFECYCLE_EVENT_OPTIONS, values.lifecycleEvent) : "",
+            lifecycle_date: values.lifecycleDate,
+            lifecycle_date_precision: values.lifecycleEvent ? values.lifecycleDatePrecision : "",
+            lifecycle_note: values.lifecycleNote,
             existence_status: values.existenceStatus,
             worship_use_status: values.worshipUseStatus,
             assessment_confidence: values.assessmentConfidence,
@@ -1782,6 +1914,11 @@ class NzVerificationMap {
                 2018: values.status2018,
                 2023: values.status2023,
             },
+            lifecycle_event: values.lifecycleEvent,
+            lifecycle_event_label: values.lifecycleEvent ? optionLabel(LIFECYCLE_EVENT_OPTIONS, values.lifecycleEvent) : "",
+            lifecycle_date: values.lifecycleDate,
+            lifecycle_date_precision: values.lifecycleEvent ? values.lifecycleDatePrecision : "",
+            lifecycle_note: values.lifecycleNote,
             existence_status: values.existenceStatus,
             worship_use_status: values.worshipUseStatus,
             assessment_confidence: values.assessmentConfidence,
