@@ -4,6 +4,9 @@
 
 ### 2026-05-03
 
+- Removed implementation-facing command-line references from the RA pilot task
+  guide so the first-pass instructions stay focused on the map and shared
+  working Sheet.
 - Updated portal and task-map planning to make Convex the preferred near-term
   backend spike for shared live RA/reviewer task state, while keeping accepted
   events, master rebuilds, and public map exports outside Convex.

@@ -9,9 +9,6 @@ Your main task is to test the map-first evidence workflow. Start with the New
 Zealand verification map, inspect one case at a time, find source evidence, and
 record what the evidence supports in the working spreadsheet.
 
-The command-line tool is not part of the default RA workflow for this pilot.
-JB will handle validation unless he explicitly asks otherwise.
-
 In practical terms:
 
 1. Open the NZ verification task map.
@@ -91,8 +88,7 @@ In Google Sheets, CSV export is:
 3. save the file,
 4. send the CSV to JB if requested.
 
-Do not upload the CSV to GitHub. JB will validate, stage, and
-review the data separately.
+Do not upload the CSV to GitHub. JB will review the data separately.
 
 ## Avoiding Accidental Duplicate Work
 
@@ -140,10 +136,8 @@ A useful pilot row has:
 
 ## Main Rule
 
-Start from the map, not the CLI.
-
-Use the UI and working spreadsheet. Do not run command-line validation,
-staging, or proposal commands unless JB explicitly asks.
+Start from the map and use the working spreadsheet. Do not edit GitHub files or
+repository templates.
 
 ## Links
 
