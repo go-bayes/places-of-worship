@@ -48,6 +48,68 @@ export const bootstrapFirstAdmin = mutation({
   },
 });
 
+export const bootstrapPendingInvites = mutation({
+  args: {
+    adminEmail: v.string(),
+    adminInitials: v.optional(v.string()),
+    adminDisplayName: v.optional(v.string()),
+    raInvites: v.optional(
+      v.array(
+        v.object({
+          email: v.string(),
+          initials: v.optional(v.string()),
+          displayName: v.optional(v.string()),
+        }),
+      ),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db.query("users").first();
+    if (existing !== null) {
+      throw new Error("Project users already exist; use inviteUser instead.");
+    }
+
+    const adminEmail = normaliseEmail(args.adminEmail);
+    if (adminEmail === undefined) {
+      throw new Error("Admin email is required.");
+    }
+
+    const now = Date.now();
+    const inserted = [];
+    inserted.push(
+      await ctx.db.insert("users", {
+        email: adminEmail,
+        display_name: args.adminDisplayName,
+        initials: args.adminInitials?.trim().slice(0, 12) || "JB",
+        roles: ["admin", "curator", "reviewer", "ra"],
+        status: "pending",
+        created_at: now,
+        updated_at: now,
+      }),
+    );
+
+    for (const invite of args.raInvites ?? []) {
+      const email = normaliseEmail(invite.email);
+      if (email === undefined || email === adminEmail) {
+        continue;
+      }
+      inserted.push(
+        await ctx.db.insert("users", {
+          email,
+          display_name: invite.displayName,
+          initials: invite.initials?.trim().slice(0, 12) || email.slice(0, 2).toUpperCase(),
+          roles: ["ra"],
+          status: "pending",
+          created_at: now,
+          updated_at: now,
+        }),
+      );
+    }
+
+    return { inserted_user_count: inserted.length };
+  },
+});
+
 export const inviteUser = mutation({
   args: {
     email: v.string(),
@@ -144,9 +206,10 @@ export const listUsers = query({
   handler: async (ctx, args) => {
     await requireUser(ctx, ["admin"]);
     if (args.status !== undefined) {
+      const status = args.status;
       return await ctx.db
         .query("users")
-        .withIndex("by_status", (q) => q.eq("status", args.status))
+        .withIndex("by_status", (q) => q.eq("status", status))
         .collect();
     }
     return await ctx.db.query("users").collect();

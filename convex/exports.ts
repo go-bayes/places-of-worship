@@ -29,9 +29,11 @@ export const listExportBatches = query({
     await requireUser(ctx, ["curator", "admin"]);
     const limit = Math.min(Math.max(args.limit ?? 50, 1), 200);
     if (args.countryCode !== undefined && args.status !== undefined) {
+      const countryCode = args.countryCode;
+      const status = args.status;
       return await ctx.db
         .query("export_batches")
-        .withIndex("by_country_status", (q) => q.eq("country_code", args.countryCode).eq("status", args.status))
+        .withIndex("by_country_status", (q) => q.eq("country_code", countryCode).eq("status", status))
         .take(limit);
     }
     return await ctx.db.query("export_batches").withIndex("by_created_time").order("desc").take(limit);

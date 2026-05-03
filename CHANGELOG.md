@@ -12,6 +12,9 @@
   bootstrapped a local admin identity, seeded five NZ tasks, created a manual
   candidate task, saved/submitted/reviewed an evidence draft, and froze an
   export bundle.
+- Added hosted-pilot onboarding support for Convex: a one-time pending-invite
+  bootstrap mutation and Google OpenID Connect auth configuration example,
+  so real users can claim project roles with their own identities.
 - Added `docs/convex-task-layer-spec.md` as the implementation contract for the
   live RA/reviewer task map: Convex-owned task state, evidence drafts,
   review decisions, event logs, curator exports, and the export boundary to

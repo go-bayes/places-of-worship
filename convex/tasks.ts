@@ -38,10 +38,11 @@ export const listTasks = query({
     const limit = Math.min(Math.max(args.limit ?? 250, 1), 1000);
     let tasks: Doc<"tasks">[];
     if (args.status !== undefined) {
+      const status = args.status;
       tasks = await ctx.db
         .query("tasks")
         .withIndex("by_country_status", (q) =>
-          q.eq("country_code", args.countryCode).eq("status", args.status),
+          q.eq("country_code", args.countryCode).eq("status", status),
         )
         .take(limit);
     } else {

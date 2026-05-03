@@ -59,9 +59,10 @@ export const listReviewQueue = query({
     const limit = Math.min(Math.max(args.limit ?? 100, 1), 500);
     let tasks: Doc<"tasks">[];
     if (args.countryCode !== undefined) {
+      const countryCode = args.countryCode;
       tasks = await ctx.db
         .query("tasks")
-        .withIndex("by_country_status", (q) => q.eq("country_code", args.countryCode).eq("status", status))
+        .withIndex("by_country_status", (q) => q.eq("country_code", countryCode).eq("status", status))
         .take(limit);
     } else {
       tasks = await ctx.db

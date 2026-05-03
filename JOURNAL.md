@@ -1008,3 +1008,25 @@ and proved the save-submit-review-export path. The next implementation step is
 frontend wiring behind a clear development/demo gate: read tasks from Convex
 first, then write claim/skip/provisional-close states, then save evidence
 drafts. The local smoke data are test-only and do not enter the master.
+
+## 2026-05-03: Prefer pending invites for hosted Convex onboarding
+
+Decision:
+For the hosted RA pilot, bootstrap pending project-user invites rather than
+creating active users from mocked command-line identities.
+
+Rationale:
+The local smoke test used a mocked identity, which is fine for proving the
+backend loop but wrong for real RA work. Andre should claim a pending `ra`
+invite using his own Google-authenticated identity, and JB should likewise
+claim the admin role with a real identity. That gives the task-event log a
+stable identity chain before any evidence is saved.
+
+Consequences:
+`users:bootstrapPendingInvites` can initialise a fresh deployment with a
+pending admin and one or more pending RA invites. The Google OpenID Connect
+auth config is kept as a development example until the hosted deployment has a
+real `GOOGLE_CLIENT_ID`; this avoids breaking local Convex checks with a
+missing environment variable. The remaining work is hosted deployment setup,
+Google client configuration, and frontend sign-in/wiring behind the Convex demo
+gate.
