@@ -4,6 +4,10 @@
 
 ### 2026-05-03
 
+- Added `docs/convex-task-layer-spec.md` as the implementation contract for the
+  live RA/reviewer task map: Convex-owned task state, evidence drafts,
+  review decisions, event logs, curator exports, and the export boundary to
+  `pow`.
 - Removed implementation-facing command-line references from the RA pilot task
   guide so the first-pass instructions stay focused on the map and shared
   working Sheet.

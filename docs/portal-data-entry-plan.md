@@ -5,6 +5,7 @@ Planning source of truth: `PLANNING.md`.
 Related designs:
 
 - `docs/community-ingestion-api-plan.md`
+- `docs/convex-task-layer-spec.md`
 - `docs/master-verification-workflow-plan.md`
 - `docs/portal-entry-ui-plan.md`
 - `docs/portal-database-storage-plan.md`
@@ -104,6 +105,10 @@ Master change proposal
 `docs/portal-entry-ui-plan.md` defines the contributor and reviewer map
 experience: the login handoff, global-style map, search, building or point
 selection, form ergonomics, and submit confirmation.
+
+`docs/convex-task-layer-spec.md` defines the near-term live task-map backend:
+Convex-owned task state, evidence drafts, review decisions, curator exports,
+security boundaries, and the export contract to `pow`.
 
 `docs/portal-database-storage-plan.md` defines the split backend direction:
 Convex for live task/review state, with Cloud Run, Cloud SQL/PostGIS, Cloud

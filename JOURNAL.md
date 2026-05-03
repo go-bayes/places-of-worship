@@ -473,6 +473,11 @@ than squeezed into a single status or denomination field.
 
 ## 2026-05-03: Surface research outputs through CLI contracts first
 
+Status:
+Superseded in part by the later Convex task-layer decision. The `pow` contracts
+remain authoritative for accepted data changes, but provisional web-based task
+coordination can now proceed through Convex.
+
 Decision:
 Defer web-based data management and make the local governed data-modification
 contracts strong first. The near-term surface for data modification,
@@ -938,3 +943,23 @@ the durable staging and storage reference for heavier geospatial queries,
 quarantined media, and provider-neutral archival exports if the task pilot
 outgrows Convex. Convex task state must not mutate the master directly or appear
 on public maps except through reviewed exports.
+
+## 2026-05-03: Specify the Convex task layer before implementation
+
+Decision:
+Write the Convex task-layer contract before adding a backend dependency or
+rewiring the NZ verification map.
+
+Rationale:
+Convex can reduce the RA workflow friction, but only if its responsibilities
+are narrow: live task state, evidence drafts, review decisions, and curator
+exports. Without a contract, it would be easy for the live workbench to blur
+into canonical storage or public publication.
+
+Consequences:
+`docs/convex-task-layer-spec.md` is now the implementation reference for the
+first Convex spike. It defines roles, statuses, tables, task events, evidence
+drafts, review decisions, export batches, security boundaries, and the
+Convex-to-`pow` export contract. Implementation should start with the smallest
+slice that replaces browser-local task/session state while preserving the Sheet
+and `pow` export fallback.

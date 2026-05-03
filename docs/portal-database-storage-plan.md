@@ -4,6 +4,8 @@ Planning source of truth: `PLANNING.md`.
 
 Portal hub: `docs/portal-data-entry-plan.md`.
 
+Task-layer contract: `docs/convex-task-layer-spec.md`.
+
 ## Baseline
 
 Use a split backend for the authenticated New Zealand staging pilot:

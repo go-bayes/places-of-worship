@@ -215,6 +215,8 @@ Evidence And Governance:
 - `[ ]` Managed auth, likely Google OAuth or Identity Platform.
 - `[ ]` Convex task-map spike for shared assignments, provisional closures,
   evidence drafts, reviewer comments, review decisions, and curator queues.
+- `[ ]` Implement the task/event/evidence/review/export contract in
+  `docs/convex-task-layer-spec.md`.
 - `[ ]` Weekly or curator-triggered export from Convex task state into `pow`
   validation, diff, replay, and reviewed map-output workflows.
 - `[ ]` Rust API on Cloud Run or an equivalent backend where schema validation,

@@ -124,6 +124,10 @@ As of 30 April 2026:
   reference if the project needs heavier geospatial storage, quarantined media,
   or provider-neutral exports. No live task backend should write directly to
   the master.
+- The Convex task-layer contract now lives in
+  `docs/convex-task-layer-spec.md`. It defines Convex-owned task state,
+  evidence drafts, review decisions, task-event logs, curator exports, and the
+  boundary from live task coordination into the `pow` validation/rebuild path.
 - `CRITIQUE.md` records a critical review of the revisions pipeline for
   RA-submitted location and denomination evidence. The first schema response is
   `schemas/change-event.schema.json` plus
@@ -190,6 +194,8 @@ Google Drive as a native Sheet, then share the project-owned Sheet directly
 with the RA. Keep the private Sheet URL out of repository docs.
 
 ### Shared provisional task state
+
+Detailed reference: `docs/convex-task-layer-spec.md`.
 
 The current map marks copied and skipped tasks only in browser `localStorage`.
 That is useful for one RA in one session, but it cannot coordinate multiple
@@ -584,6 +590,7 @@ decision. This still must not write directly to the master database.
 - Use `docs/portal-data-entry-plan.md` as the hub for the authenticated
   contribution portal.
 - Split the design into focused supporting plans:
+  - `docs/convex-task-layer-spec.md`
   - `docs/portal-entry-ui-plan.md`
   - `docs/portal-database-storage-plan.md`
   - `docs/portal-submission-review-plan.md`

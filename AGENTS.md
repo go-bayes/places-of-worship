@@ -29,6 +29,9 @@
 - `docs/templates/ra-historical-site-evidence/`: RA evidence-entry templates.
 - `docs/master-verification-workflow-plan.md`: master verification and review.
 - `docs/portal-data-entry-plan.md`: authenticated portal planning hub.
+- `docs/convex-task-layer-spec.md`: near-term Convex task-map backend contract
+  for shared RA/reviewer task state, evidence drafts, review decisions, and
+  exports to `pow`.
 - `research/`: lightweight country-source feasibility notes only.
 - `grant/`: ignored local reporting reference; do not commit it.
 - The repository is not currently accepting external pull requests while the
@@ -59,10 +62,15 @@
 - Python: support/API tooling only; use `uv`.
 - Frontend: static HTML/CSS/JavaScript map products until a secure backend is
   ready.
-- Backend baseline for the portal: managed auth plus Rust API and staged
-  storage; no direct master writes from public or RA interfaces.
-- Defer web-based data management until `pow` validation, staging, diff, review,
-  replay, and export contracts are stable.
+- Backend direction for the RA task map: Convex spike for shared live
+  task/review state, exported into `pow`; no direct master writes from public
+  or RA interfaces.
+- Durable staging/storage reference: managed auth plus Rust API,
+  PostgreSQL/PostGIS, and object storage when Convex is not sufficient for
+  geospatial storage, media quarantine, or archival exports.
+- Web-based task management may proceed only as a provisional task/review layer;
+  accepted data changes still flow through `pow` validation, staging, diff,
+  replay, and export contracts.
 
 ## Working Rules
 
