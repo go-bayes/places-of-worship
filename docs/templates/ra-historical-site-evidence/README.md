@@ -36,7 +36,7 @@ sheet public unless source licences and privacy checks permit public release.
 
 1. Use `site_evidence_wide.csv` as the main working tab. It is intentionally wide so human data entry can happen in one place.
 2. Add one row per source-place record. If one source gives evidence for several distinct sites, use one row per site. If a source gives conflicting evidence for the same site, use separate rows and flag them for review.
-3. Record all source-backed lifecycle evidence you find: organisation founding, first sighting, opening or dedication, relocation, closure, last sighting, change of use, and demolition.
+3. Record all source-backed lifecycle evidence you find: organisation founding, first sighting, opening or dedication, relocation, closure, last sighting, change of use, and demolition. Here, lifecycle means dated evidence about the history of the worship site, organisation, building, or worship function; keep building dates and worship-use dates separate where possible.
 4. Preserve historical addresses as evidence. Put any modern address or coordinates in the matching/geocoding fields and note the basis for that interpretation.
 5. Preserve OpenStreetMap object ids, version timestamps, lifecycle tags, and visual verification notes where they are used as evidence.
 6. Use `source_type = street_imagery` for dated street-level imagery such as Google Street View, Apple Look Around, Mapillary, KartaView, Bing Streetside, or comparable services. Record the provider, URL or agreed reference, displayed capture date, and a short summary of what the image shows. Do not store screenshots in Git.
@@ -57,6 +57,9 @@ sheet public unless source licences and privacy checks permit public release.
 - Do not collect personal contact details, office-holder names, private email addresses, phone numbers, or pastoral notes unless they are essential to source identification and approved for use.
 - Keep restricted or licensed source files outside Git. Use `raw_file_location` to point to the controlled storage location.
 - Prefer stable identifiers and URLs. If a source was downloaded, record the retrieval date and checksum when available.
+- A place missing from the project map may already have an OSM candidate object.
+  Record that OSM id and object type as source or matching evidence; do not
+  treat it as the project site id.
 - Treat changed streets, renamed localities, demolished buildings, and shifted road alignments as matching problems. Record the historical address separately from any modern address candidate, explain the address change, and lower `geocoding_confidence` where the location is uncertain.
 - Do not collapse all lifecycle evidence into one birthday or death date. Use the specific date fields for organisation founding, site opening, building opening or dedication, first seen, last seen, closure, demolition, change of use, and relocation.
 - Use `use_changed_date` for later worship-function changes that do not fit a

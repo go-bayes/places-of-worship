@@ -97,6 +97,12 @@ or multi-denominational change. The map records one structured lifecycle/change
 date per copied row; copy an additional row if the same site has another
 distinct source-backed date worth preserving.
 
+Here, lifecycle means dated evidence about a worship site's history: when an
+organisation began, worship began at the site, a building opened, the site was
+first or last seen, worship ended, the building was demolished, the organisation
+relocated, or the worship function changed. Keep building existence separate
+from worship use where the source allows.
+
 ## Common Fields
 
 Use these fields consistently in the wide evidence sheet:
@@ -191,36 +197,43 @@ Example:
   2018-09-01. Mark the 2018 target-year status `uncertain` unless another
   source gives a clearer date.
 
-## Case 1: A Current PoW Is Missing From The Map
+## Case 1: A Current PoW Is Missing From The Project Map
 
-Use this when you find a current place of worship that is not on the map.
+Use this when you find a current place of worship that is not represented on
+the project map or master list. It may still have an OSM object or another
+upstream source record; preserve those identifiers as candidate or matching
+evidence.
 
 1. Check that the place appears to be a worship site, not only an office,
    cemetery, school, childcare centre, or generic community facility.
 2. Search for source evidence: official website, directory, charity register,
    denominational directory, council or heritage record, street imagery, or
-   other approved source.
+   other approved source. Also search OSM or inspect nearby OSM candidates when
+   relevant.
 3. Use the draft nomination panel in the map to capture the candidate details
    if that helps, but remember that the panel does not save anything.
 4. In the wide evidence sheet, add one row for the source-place record.
 5. Set `candidate_site_id` to a temporary id, for example
    `candidate-missing-001`.
 6. Leave `matched_current_site_id` blank if there is no current mapped site.
-7. Set `match_method` to `unmatched`.
-8. Set `match_confidence` to `none` unless there is a plausible nearby match
+7. If there is an OSM object for the candidate, record `matched_osm_id` and
+   `osm_object_type`. This does not make the OSM id the project site id.
+8. Set `match_method` to `unmatched`, or `manual_review` if there is a plausible
+   nearby project or OSM candidate that needs reviewer judgement.
+9. Set `match_confidence` to `none` unless there is a plausible nearby match
    that needs review.
-9. Record `name_raw`, `name_standardised`, `denomination_or_tradition_raw`,
+10. Record `name_raw`, `name_standardised`, `denomination_or_tradition_raw`,
    `site_type`, `address_raw`, `locality_raw`, and source fields where known.
-10. If you can locate the place, record `latitude`, `longitude`,
+11. If you can locate the place, record `latitude`, `longitude`,
    `geocoding_basis`, and `geocoding_confidence`.
-11. If the source supports current worship use, set:
+12. If the source supports current worship use, set:
     - `target_year_2023_status`: `present`
     - `worship_use_status`: `confirmed_worship` or `probable_worship`
     - `existence_status`: `present`
-12. Fill 2013 and 2018 target-year fields only if the source supports them.
-13. Set `quality_flag` to `needs_review`.
-14. Set `review_status` to `needs_review`.
-15. In `review_note`, write: `Current PoW appears missing from map; reviewer to
+13. Fill 2013 and 2018 target-year fields only if the source supports them.
+14. Set `quality_flag` to `needs_review`.
+15. Set `review_status` to `needs_review`.
+16. In `review_note`, write: `Current PoW appears missing from project map; reviewer to
     confirm whether this should become a new site.`
 
 Current limitation: the demo map can generate a candidate row, but it does not

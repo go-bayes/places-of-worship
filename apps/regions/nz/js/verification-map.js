@@ -386,7 +386,7 @@ function assessmentDefaultsForAction(action, statuses = {}) {
 
 function actionLabelForRa(action) {
     if (action === "confirm_current_record") return "Confirm current site";
-    if (action === "missing_current_site") return "Missing current site";
+    if (action === "missing_current_site") return "Missing from project map";
     if (action === "possible_duplicate") return "Possible duplicate";
     if (action === "present_2013_absent_2018") return "Present in 2013, absent in 2018";
     if (action === "closed_or_changed_use") return "Closed or changed use";
@@ -396,7 +396,7 @@ function actionLabelForRa(action) {
 
 function reviewNoteForAction(action) {
     if (action === "confirm_current_record") return "RA source check supports current worship-site record.";
-    if (action === "missing_current_site") return "Possible current PoW missing from the map; reviewer to decide whether to create a new site.";
+    if (action === "missing_current_site") return "Possible current PoW missing from the project map; OSM may already have a candidate object. Reviewer to decide whether to create or link a site.";
     if (action === "possible_duplicate") return "Possible duplicate or merge candidate; reviewer to compare linked ids and site identity.";
     if (action === "present_2013_absent_2018") return "Evidence appears to support worship use in 2013 and absence by 2018; reviewer to confirm dates and status.";
     if (action === "closed_or_changed_use") return "Evidence suggests worship use closed or changed; reviewer to distinguish building existence from worship function.";
@@ -1067,7 +1067,7 @@ class NzVerificationMap {
             <div class="detail-section">
                 <h3>New or missing sites</h3>
                 <div class="disabled-panel">
-                    Use the draft nomination form in the sidebar to inspect fields for a missing, lost, shared, or changed site.
+                    Use the draft nomination form in the sidebar to inspect fields for a site missing from the project map, a lost site, or a shared or changed site. OSM may already have a candidate object; record that id as evidence rather than as the project site id.
                 </div>
                 <button type="button" class="secondary" id="openNominationPanelButton">Open draft nomination form</button>
             </div>
@@ -1277,7 +1277,7 @@ class NzVerificationMap {
                     <select id="raActionSelect">
                         <option value="needs_review">Needs review</option>
                         <option value="confirm_current_record">Confirm current site</option>
-                        <option value="missing_current_site">Missing current site</option>
+                        <option value="missing_current_site">Missing from project map</option>
                         <option value="possible_duplicate">Possible duplicate</option>
                         <option value="present_2013_absent_2018">Present in 2013, absent in 2018</option>
                         <option value="closed_or_changed_use">Closed or changed use</option>
@@ -1377,7 +1377,7 @@ class NzVerificationMap {
                 </label>
                 <h3>Optional lifecycle or later change</h3>
                 <div class="copy-help">
-                    Use this when the source gives an opening, closure, first/last seen, relocation, demolition, or later worship-function change. For example, use <em>Use changed / shared use began</em> for evidence that a site became multi-denominational in 2024.
+                    Lifecycle means dated evidence about the history of the worship site, organisation, building, or worship function. Use this when the source gives an opening, closure, first/last seen, relocation, demolition, or later worship-function change. For example, use <em>Use changed / shared use began</em> for evidence that a site became multi-denominational in 2024.
                 </div>
                 <div class="field-grid">
                     <label>
@@ -1811,7 +1811,7 @@ class NzVerificationMap {
                     <label>
                         Type
                         <select id="nominationType">
-                            <option value="current_place_missing_from_osm">Current place missing from OSM</option>
+                            <option value="current_place_missing_from_project_map">Current place missing from project map</option>
                             <option value="lost_2013_place_of_worship">Lost 2013 place of worship</option>
                             <option value="lost_2018_place_of_worship">Lost 2018 place of worship</option>
                             <option value="denomination_switch_or_reuse">Denomination switch or reuse</option>

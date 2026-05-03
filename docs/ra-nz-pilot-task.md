@@ -20,13 +20,14 @@ In practical terms:
 3. Choose a target year: 2013, 2018, or 2023.
 4. Sample one task from the demo map, using the map, filters, or priority list.
 5. Check the links and search for source evidence.
-6. Decide what kind of case it is: confirmed site, missing site, duplicate,
-   closure, changed use, shared use, or uncertain.
+6. Decide what kind of case it is: confirmed site, missing from the project
+   map, duplicate, closure, changed use, shared use, or uncertain.
 7. Record the evidence in the working spreadsheet. If you are using demo mode,
    use `Copy spreadsheet row` to create a draft row, then review it in the
    sheet.
-8. If a place is missing from the map, use the draft nomination panel to
-   capture the candidate details and record the evidence in the spreadsheet.
+8. If a place is missing from the project map, use the draft nomination panel
+   to capture the candidate details and record the evidence in the spreadsheet.
+   It may still have an OSM object; record that id where available.
 9. Mark uncertain cases `needs_review` and move on.
 10. Tell JB when the spreadsheet rows are ready, and include notes
    on confusing cases.
@@ -233,6 +234,10 @@ worship function of the site, not only whether a building exists.
 Record useful dates even when they are outside 2013, 2018, and 2023. The
 target-year fields answer the census-wave question; the lifecycle/change fields
 preserve evidence for later reconstruction.
+
+In this project, lifecycle means dated evidence about the history of a worship
+site, organisation, building, or worship function. The key point is to keep
+building history and worship-use history separate where the source allows.
 
 Use the optional lifecycle or later-change section when a source gives evidence
 such as:

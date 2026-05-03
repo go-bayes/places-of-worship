@@ -11,6 +11,20 @@ or otherwise locatable site where worship use occurs or occurred. It is not
 simply a building record and it is not always the same as a congregation or
 organisation.
 
+## What does lifecycle mean here?
+
+Lifecycle means source-backed dates and changes in the history of a worship
+site, organisation, building, or worship function. Examples include
+organisation founding, worship beginning at a site, building opening or
+dedication, first or last sighting in a source, closure or end of worship use,
+demolition, relocation, or a later change such as shared or
+multi-denominational use.
+
+For this project, lifecycle evidence is mainly about worship use at a mappable
+site. A building may exist before worship begins and may remain after worship
+ends, so building dates and worship-use dates should stay separate where the
+source allows.
+
 ## Does an OpenStreetMap id define a project site?
 
 No. The project uses durable internal `site_id` values for accepted places.
@@ -24,8 +38,12 @@ identity.
 ## What happens when a user suggests a missing place of worship?
 
 The suggestion starts as a candidate, with a provisional `candidate_site_id`.
-It should include source evidence, location evidence, target-year status where
-known, and review notes.
+Here, "missing" usually means missing from the project map or master list. OSM
+may already contain a candidate object, and that OSM id should be recorded as
+source or matching evidence rather than treated as the project identity.
+
+The candidate should include source evidence, location evidence, target-year
+status where known, any relevant OSM object ids, and review notes.
 
 A reviewer can then reject it, link it to an existing site, request more
 evidence, or accept it as a new project site. Acceptance mints or assigns a

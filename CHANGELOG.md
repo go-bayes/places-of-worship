@@ -4,6 +4,9 @@
 
 ### 2026-05-03
 
+- Defined `lifecycle` in RA-facing guidance and clarified that missing-place
+  candidates may already exist in OSM; OSM ids should be recorded as source or
+  matching evidence, not treated as project site ids.
 - Added optional lifecycle/later-change fields to the NZ verification map so RA
   rows can capture source-backed dates outside 2013/2018/2023, including site
   opening, closure, first/last seen, relocation, demolition, and later
