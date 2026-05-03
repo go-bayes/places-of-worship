@@ -660,3 +660,32 @@ minimal save/evaluate/review loop rather than waiting for exhaustive NZ
 coverage. Until backend save exists, the shared working spreadsheet is the
 persistent working store; the map demo is only an inspection and copy-helper
 surface.
+
+## 2026-05-03: Proposed events live as derived stage batches
+
+Decision:
+`pow propose --persist` writes its emitted change events back into
+`.pow/staging.sqlite` as a new derived batch, with each event stored as one
+row in the existing `stage_records` table (`record_kind = 'proposed_event'`)
+and the new batch linked to its source via `stage_batches.parent_batch_id`.
+`pow diff <batch_id>` reads any batch whose stored records are change events,
+whether they came from `pow propose --persist` or from `pow stage` of a JSONL
+batch.
+
+Rationale:
+The reviewer needs a canonical place to read proposed events from. Stdout-only
+output is fine for inspection but cannot be diffed without an external file.
+A dedicated `proposed_events` table would have duplicated `stage_records`
+behaviour (raw + parsed JSON, indexed by batch and record). Reusing the
+existing tables keeps the read path uniform: a `record_kind` filter is enough
+to distinguish proposed events from raw RA evidence rows, and the new
+`parent_batch_id` column makes the source lineage navigable in plain SQL.
+
+Consequences:
+`pow diff` v1 is implemented around this storage convention. The migration
+adds one nullable column to `stage_batches` and one composite index. Existing
+`.pow/staging.sqlite` files upgrade idempotently on the next CLI run. The
+deferred audit/security pass (cryptographic identity binding, source content
+hashes, immutability enforcement, client-event uniqueness, licence blocking,
+takedown semantics) and the future review/accept commands remain on the
+checklist; nothing in this storage decision pre-commits the portal contract.
