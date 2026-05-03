@@ -4,7 +4,7 @@ const DATA_BASE = (() => {
 })();
 
 const SEARCH_PARAMS = new URLSearchParams(window.location.search);
-const DEMO_MODE = SEARCH_PARAMS.get("demo") === "1";
+const DEMO_MODE = SEARCH_PARAMS.get("demo") !== "0";
 const INTAKE_ENABLED = DEMO_MODE;
 const TARGET_YEARS = ["2013", "2018", "2023"];
 const SESSION_LOG_KEY = "pow_ra_session_v1";
@@ -55,7 +55,7 @@ function dataUrl(path) {
 }
 
 function demoUrl() {
-    return `${window.location.pathname}?demo=1`;
+    return window.location.pathname;
 }
 
 function escapeHtml(value) {

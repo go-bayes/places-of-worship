@@ -689,3 +689,67 @@ deferred audit/security pass (cryptographic identity binding, source content
 hashes, immutability enforcement, client-event uniqueness, licence blocking,
 takedown semantics) and the future review/accept commands remain on the
 checklist; nothing in this storage decision pre-commits the portal contract.
+
+## 2026-05-03: Treat the RA action builder as the default verification surface
+
+Decision:
+For the current pilot, the NZ verification map should land in demo mode: the
+RA action builder, session log, and nomination controls are visible on first
+paint, and `?demo=0` opts in to the read-only feedback view. This was
+implemented as a single-line flip of the `DEMO_MODE` parser plus updates to
+the NZ README and `docs/ra-nz-pilot-task.md` so the bare URL is the canonical
+demo entry.
+
+Rationale:
+The non-demo state is read-only with no functional path behind it; gating the
+only working surface behind a small inline "Open demo mode" link added
+friction without protecting anything. The Tier 1 demo banner already tells
+the visitor that nothing is saved or submitted and that private data should
+not be entered, so the safety framing is preserved by making demo the
+default. While the RA workflow is the only audience and there is no real
+read-only product yet, defaulting to demo matches what the page is actually
+for.
+
+Consequences:
+External reviewers landing on the page will see draft controls immediately
+rather than a read-only view; this is acceptable while the pilot audience is
+known but the default should flip back once a secure-staged read-only product
+exists. The `pow_ra_session_v1`, `pow_ra_initials`, and
+`pow_ra_quickstart_dismissed_v1` keys remain client-side and namespaced, so
+the future flip back can migrate or warn cleanly. The Tier 3 PR carries the
+documentation updates (NZ README and RA pilot task) so any reviewer following
+the docs lands in the same state the code produces.
+
+## 2026-05-03: Stage the RA verification UI in three small tiers
+
+Decision:
+Land the RA-facing verification map ergonomics work as three small,
+revertable PRs against `main` rather than a single large UI rewrite. Tier 1
+is a pure ergonomics pass (clearer steps, bigger fonts and tap targets,
+safer source defaults). Tier 2 adds a self-audit and recovery layer
+(session log, skip task, next task, RA initials), built on top of Tier 1 so
+its diff stays scoped. Tier 3 defaults the page to demo mode and updates the
+docs.
+
+Rationale:
+The map demo is the first surface a research assistant actually touches, and
+the Tier 1 ergonomics issues (small fonts, hidden Copy button intent,
+auto-filled tautological source rows, fragile note-overwrite heuristic) are
+independent from the Tier 2 recovery layer. Splitting the work keeps each
+diff small enough to review and `git revert` in one commit, lets the phone
+smoke check happen between tiers, and keeps the localStorage namespace
+(`pow_ra_*_v1`) unchanged across the three PRs so a future migration or
+rollback only has to deal with one storage shape.
+
+Consequences:
+Three branches (`claude/ra-ui-tier-1`, `claude/ra-ui-tier-2`,
+`claude/ra-ui-tier-3-demo-default`) form a stack; each PR initially targets
+the prior tier so its diff is scoped. After a lower tier is squash-merged to
+`main`, the next branch must be rebased or otherwise restacked onto current
+`main` and the PR retargeted before merge. Do not assume GitHub's stacked diff
+is current after a squash merge. No backend writes, no schema changes, and no
+new evidence-row columns were introduced; `WIDE_EVIDENCE_FIELDS` is
+unchanged. The `navigator.clipboard.writeText` HTTPS-and-user-gesture caveat
+on some mobile browsers is documented in the PR descriptions; the existing
+fallback (textarea select-and-copy) covers the failure path without code
+changes.
