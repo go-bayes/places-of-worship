@@ -400,9 +400,33 @@ class NzVerificationMap {
         if (notice) {
             notice.classList.toggle("demo-warning", DEMO_MODE);
             notice.innerHTML = DEMO_MODE
-                ? "Demo mode: draft controls are shown for UI inspection only. Nothing is saved or submitted. Do not enter private or sensitive data."
-                : `Feedback pilot: this page is read-only until secure staging is available. <a href="${escapeHtml(demoUrl())}">Open demo entry preview</a>.`;
+                ? "Demo mode: draft controls only. Nothing is uploaded or saved to the database. Do not enter private or sensitive data."
+                : `Inspection only: form controls live in <a href="${escapeHtml(demoUrl())}">demo mode</a>. Nothing is uploaded either way.`;
             notice.setAttribute("role", DEMO_MODE ? "alert" : "note");
+        }
+
+        const quickstart = document.getElementById("quickstartBanner");
+        if (quickstart && DEMO_MODE && localStorage.getItem("pow_ra_quickstart_dismissed_v1") !== "1") {
+            quickstart.innerHTML = `
+                <div class="quickstart" role="note">
+                    <strong>How this pilot works</strong>
+                    <ol>
+                        <li>Set <em>Target year</em> and <em>Priority</em> in the filters above.</li>
+                        <li>Click a task in the list or on the map.</li>
+                        <li>Open the source links in step 1 of the task panel.</li>
+                        <li>In step 2, choose what your evidence shows and confirm year statuses.</li>
+                        <li>In step 3, paste a short evidence note and the source URL or file reference.</li>
+                        <li>In step 4, click <em>Copy spreadsheet row</em> and paste into the working evidence sheet.</li>
+                    </ol>
+                    <button type="button" class="quickstart-dismiss" id="quickstartDismiss">Hide this guide</button>
+                </div>
+            `;
+            document.getElementById("quickstartDismiss")?.addEventListener("click", () => {
+                quickstart.innerHTML = "";
+                localStorage.setItem("pow_ra_quickstart_dismissed_v1", "1");
+            });
+        } else if (quickstart) {
+            quickstart.innerHTML = "";
         }
 
         const nominationPanel = document.getElementById("nominationPanel");
@@ -662,25 +686,10 @@ class NzVerificationMap {
 
         panel.innerHTML = `
             <h2>${escapeHtml(props.name || "Unnamed site")}</h2>
-            <dl class="kv">
-                <dt>Priority</dt><dd>${escapeHtml(props.verification_priority)}</dd>
-                <dt>Action</dt><dd>${escapeHtml(actionLabel(props.automated_suggested_action))}</dd>
-                <dt>Master id</dt><dd>${escapeHtml(props.master_site_id)}</dd>
-                <dt>OSM</dt><dd>${escapeHtml(props.osm_type || "")} ${escapeHtml(props.osm_id || "")}</dd>
-                <dt>Religion</dt><dd>${escapeHtml(cap(props.religion)) || "Unknown"}</dd>
-                <dt>Denom.</dt><dd>${escapeHtml(cap(props.denomination)) || "Unknown"}</dd>
-                <dt>Address</dt><dd>${escapeHtml(props.address || "Missing")}</dd>
-                <dt>Start date</dt><dd>${escapeHtml(props.osm_start_date || "Missing")}</dd>
-                <dt>Old start</dt><dd>${escapeHtml(props.osm_old_start_date || "Missing")}</dd>
-                <dt>End date</dt><dd>${escapeHtml(props.osm_end_date || "Missing")}</dd>
-            </dl>
+            ${INTAKE_ENABLED ? this.workflowStepsHtml("inspect") : ""}
 
             <div class="detail-section">
-                ${this.temporalSummaryHtml(props)}
-            </div>
-
-            <div class="detail-section">
-                <h3>Links</h3>
+                <h3>1. Open source links</h3>
                 <div class="link-grid">
                     ${this.linkHtml("OSM object", props.osm_object_url)}
                     ${this.linkHtml("OSM history", props.osm_history_url)}
@@ -689,6 +698,30 @@ class NzVerificationMap {
                     ${this.linkHtml("Street View", props.street_view_url)}
                     ${this.linkHtml("Name search", searches.name_locality?.google_url)}
                 </div>
+            </div>
+
+            <div class="detail-section">
+                ${INTAKE_ENABLED ? this.reviewFormHtml() : this.disabledIntakeHtml()}
+            </div>
+
+            <div class="detail-section">
+                ${this.temporalSummaryHtml(props)}
+            </div>
+
+            <div class="detail-section">
+                <h3>Reference</h3>
+                <dl class="kv">
+                    <dt>Priority</dt><dd>${escapeHtml(props.verification_priority)}</dd>
+                    <dt>Map suggestion</dt><dd>${escapeHtml(actionLabel(props.automated_suggested_action))}</dd>
+                    <dt>Master id</dt><dd>${escapeHtml(props.master_site_id)}</dd>
+                    <dt>OSM</dt><dd>${escapeHtml(props.osm_type || "")} ${escapeHtml(props.osm_id || "")}</dd>
+                    <dt>Religion</dt><dd>${escapeHtml(cap(props.religion)) || "Unknown"}</dd>
+                    <dt>Denom.</dt><dd>${escapeHtml(cap(props.denomination)) || "Unknown"}</dd>
+                    <dt>Address</dt><dd>${escapeHtml(props.address || "Missing")}</dd>
+                    <dt>Start date</dt><dd>${escapeHtml(props.osm_start_date || "Missing")}</dd>
+                    <dt>Old start</dt><dd>${escapeHtml(props.osm_old_start_date || "Missing")}</dd>
+                    <dt>End date</dt><dd>${escapeHtml(props.osm_end_date || "Missing")}</dd>
+                </dl>
             </div>
 
             <div class="detail-section">
@@ -703,15 +736,68 @@ class NzVerificationMap {
                     `).join("") : "<li><strong>info | no_flags</strong><br>No automated checks flagged this record.</li>"}
                 </ul>
             </div>
-
-            <div class="detail-section">
-                ${INTAKE_ENABLED ? this.reviewFormHtml() : this.disabledIntakeHtml()}
-            </div>
         `;
 
         if (INTAKE_ENABLED) {
             this.bindRaActionForm(props);
         }
+    }
+
+    workflowStepsHtml(currentStep, doneSteps = []) {
+        const steps = [
+            { id: "inspect", title: "1. Inspect", subtitle: "Open links" },
+            { id: "decide", title: "2. Decide", subtitle: "Choose action" },
+            { id: "evidence", title: "3. Evidence", subtitle: "Source + note" },
+            { id: "copy", title: "4. Copy row", subtitle: "Paste to sheet" },
+        ];
+        return `
+            <div class="workflow-steps" id="workflowSteps">
+                ${steps.map(step => {
+                    const isDone = doneSteps.includes(step.id);
+                    const isActive = step.id === currentStep && !isDone;
+                    const cls = isDone ? "done" : isActive ? "active" : "";
+                    return `
+                        <div class="workflow-step ${cls}" data-step="${step.id}">
+                            <strong>${step.title}</strong>
+                            <span>${step.subtitle}</span>
+                        </div>
+                    `;
+                }).join("")}
+            </div>
+        `;
+    }
+
+    updateWorkflowSteps() {
+        const stepsEl = document.getElementById("workflowSteps");
+        if (!stepsEl) return;
+        const action = document.getElementById("raActionSelect")?.value || "needs_review";
+        const sourceUrl = (document.getElementById("sourceUrlInput")?.value || "").trim();
+        const sourceTitle = (document.getElementById("sourceTitleInput")?.value || "").trim();
+        const note = (document.getElementById("decisionNote")?.value || "").trim();
+        const noteTouched = document.getElementById("decisionNote")?.dataset.touched === "1";
+        const copied = stepsEl.dataset.copied === "1";
+
+        const decided = action !== "needs_review";
+        const evidenced = sourceUrl !== "" && sourceTitle !== "" && note.length >= 5 && noteTouched;
+
+        const order = ["inspect", "decide", "evidence", "copy"];
+        const done = [];
+        if (true) done.push("inspect");
+        if (decided) done.push("decide");
+        if (evidenced) done.push("evidence");
+        if (copied) done.push("copy");
+
+        let active = "inspect";
+        for (const id of order) {
+            if (!done.includes(id)) { active = id; break; }
+            active = "copy";
+        }
+
+        stepsEl.querySelectorAll(".workflow-step").forEach(el => {
+            const id = el.dataset.step;
+            el.classList.toggle("done", done.includes(id) && id !== active);
+            el.classList.toggle("active", id === active && !done.includes(id) || (id === "copy" && copied));
+        });
     }
 
     temporalSummaryHtml(props) {
@@ -734,7 +820,7 @@ class NzVerificationMap {
 
     reviewFormHtml() {
         return `
-            <h3>RA action builder</h3>
+            <h3>2. Choose what your evidence shows</h3>
             <div class="review-form">
                 <div class="demo-warning" role="alert">
                     Demo only. This generates local text to paste into the working sheet or send to the project team; it does not save or submit data. Do not enter private or sensitive data.
@@ -794,27 +880,35 @@ class NzVerificationMap {
                         </select>
                     </label>
                 </div>
+                <h3>3. Evidence: where did the answer come from?</h3>
                 <label>
                     Source title
-                    <input id="sourceTitleInput" type="text" placeholder="Short source name">
+                    <input id="sourceTitleInput" type="text" placeholder="e.g. Anglican Diocese of Wellington directory 2018">
                 </label>
-                <label>
-                    Source URL or file reference
-                    <input id="sourceUrlInput" type="text" placeholder="Evidence link or agreed storage reference">
-                </label>
+                <div class="source-url-row">
+                    <label>
+                        Source URL or file reference
+                        <input id="sourceUrlInput" type="text" placeholder="https:// link to the evidence page, archive, or agreed storage path">
+                    </label>
+                    <button id="useOsmUrlButton" type="button" class="tertiary" title="Fill the URL field with the OSM record link if your evidence is the OSM record itself">Use OSM URL</button>
+                </div>
                 <label>
                     Related ids or duplicate note
                     <input id="relatedIdsInput" type="text" placeholder="Other master/OSM ids, if relevant">
                 </label>
                 <label>
                     Evidence note
-                    <textarea id="decisionNote" rows="3" placeholder="Short source-backed note">Inspect source links and record what should be checked.</textarea>
+                    <textarea id="decisionNote" rows="3" placeholder="One or two sentences explaining what the source says about this site at the target year."></textarea>
                 </label>
+                <h3>4. Copy the row to your spreadsheet</h3>
+                <div class="copy-help">
+                    <strong>What this does:</strong> Copies one tab-separated row to your clipboard. Switch to the working evidence spreadsheet, click the next empty row under the header, and paste with <kbd>Cmd</kbd>+<kbd>V</kbd> (Mac) or <kbd>Ctrl</kbd>+<kbd>V</kbd> (Windows). Nothing is uploaded.
+                </div>
                 <div class="button-row">
                     <button id="copyEvidenceRowButton" type="button">Copy spreadsheet row</button>
                     <button id="copyDecisionButton" type="button">Copy review JSON</button>
                 </div>
-                <div id="copyStatus" class="copy-status"></div>
+                <div id="copyStatus" class="copy-status" aria-live="polite"></div>
                 <textarea id="evidenceRowOutput" class="json-output wide-output" rows="4" readonly></textarea>
                 <textarea id="decisionJsonOutput" class="json-output" rows="5" readonly></textarea>
             </div>
@@ -823,29 +917,62 @@ class NzVerificationMap {
 
     bindRaActionForm(props) {
         const actionSelect = document.getElementById("raActionSelect");
-        const sourceTitle = document.getElementById("sourceTitleInput");
         const sourceUrl = document.getElementById("sourceUrlInput");
+        const sourceTitle = document.getElementById("sourceTitleInput");
         const note = document.getElementById("decisionNote");
 
-        if (sourceTitle && !sourceTitle.value) {
-            sourceTitle.value = "NZ map verification task";
-        }
-        if (sourceUrl && !sourceUrl.value) {
-            sourceUrl.value = props.osm_object_url || props.osm_map_url || "";
-        }
+        // Source URL and title are intentionally NOT pre-filled. The OSM
+        // record is the verification subject, not evidence; pre-filling it
+        // produces tautological rows. The "Use OSM URL" button below lets
+        // the RA explicitly opt in when their evidence really is OSM itself.
 
         const applyDefaults = () => {
             this.applyRaActionDefaults(props);
+            this.updateWorkflowSteps();
         };
         actionSelect?.addEventListener("change", applyDefaults);
         applyDefaults();
 
-        if (note && note.value === "Inspect source links and record what should be checked.") {
-            note.value = reviewNoteForAction(actionSelect?.value || "needs_review");
+        const useOsmButton = document.getElementById("useOsmUrlButton");
+        if (useOsmButton) {
+            useOsmButton.addEventListener("click", () => {
+                if (sourceUrl) {
+                    sourceUrl.value = props.osm_object_url || props.osm_map_url || "";
+                    sourceUrl.dispatchEvent(new Event("input", { bubbles: true }));
+                }
+                if (sourceTitle && !sourceTitle.value) {
+                    sourceTitle.value = `OSM ${props.osm_type || ""} ${props.osm_id || ""}`.trim();
+                    sourceTitle.dispatchEvent(new Event("input", { bubbles: true }));
+                }
+                const sourceTypeSelect = document.getElementById("sourceTypeSelect");
+                if (sourceTypeSelect) {
+                    sourceTypeSelect.value = "osm_lifecycle_tags";
+                }
+                this.updateWorkflowSteps();
+            });
         }
+
+        // Track touch state on the note so action changes never silently
+        // overwrite RA-typed text.
+        if (note) {
+            note.addEventListener("input", () => {
+                note.dataset.touched = "1";
+                this.updateWorkflowSteps();
+            });
+        }
+
+        ["sourceUrlInput", "sourceTitleInput", "relatedIdsInput", "sourceTypeSelect"].forEach(id => {
+            document.getElementById(id)?.addEventListener("input", () => this.updateWorkflowSteps());
+            document.getElementById(id)?.addEventListener("change", () => this.updateWorkflowSteps());
+        });
+        TARGET_YEARS.forEach(year => {
+            document.getElementById(`status${year}`)?.addEventListener("change", () => this.updateWorkflowSteps());
+        });
 
         document.getElementById("copyEvidenceRowButton")?.addEventListener("click", () => this.copyEvidenceRow(props));
         document.getElementById("copyDecisionButton")?.addEventListener("click", () => this.copyDecision(props));
+
+        this.updateWorkflowSteps();
     }
 
     applyRaActionDefaults(props) {
@@ -856,14 +983,12 @@ class NzVerificationMap {
             if (select) select.value = statuses[year] || "not_assessed";
         });
 
+        // Only suggest a note if the RA has not typed anything. Touching the
+        // textarea sets dataset.touched and locks it from auto-rewrite, so
+        // RA-typed text is never silently overwritten by action changes.
         const note = document.getElementById("decisionNote");
-        if (note && (!note.dataset.touched || note.value.startsWith("RA source check") || note.value.startsWith("Possible") || note.value.startsWith("Evidence") || note.value.startsWith("Needs reviewer"))) {
-            note.value = reviewNoteForAction(action);
-        }
-        if (note) {
-            note.addEventListener("input", () => {
-                note.dataset.touched = "1";
-            }, { once: true });
+        if (note && note.dataset.touched !== "1" && !note.value.trim()) {
+            note.placeholder = reviewNoteForAction(action);
         }
     }
 
@@ -1072,12 +1197,21 @@ class NzVerificationMap {
             output.value = tsv;
             output.textContent = tsv;
         }
+        const stepsEl = document.getElementById("workflowSteps");
+        if (stepsEl) stepsEl.dataset.copied = "1";
         try {
             await navigator.clipboard.writeText(tsv);
-            if (status) status.textContent = "Copied spreadsheet row. Nothing was saved or submitted.";
+            if (status) {
+                status.textContent =
+                    "✓ Copied. Switch to your project spreadsheet and paste with Cmd/Ctrl+V as the next row under the header. Nothing was uploaded.";
+            }
         } catch (error) {
-            if (status) status.textContent = "Spreadsheet row is shown below. Nothing was saved or submitted.";
+            if (status) {
+                status.textContent =
+                    "Could not access the clipboard. Select all text in the box below, copy it manually, and paste into your spreadsheet. Nothing was uploaded.";
+            }
         }
+        this.updateWorkflowSteps();
     }
 
     async copyDecision(props) {
