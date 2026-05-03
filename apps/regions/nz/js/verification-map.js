@@ -7,6 +7,9 @@ const SEARCH_PARAMS = new URLSearchParams(window.location.search);
 const DEMO_MODE = SEARCH_PARAMS.get("demo") === "1";
 const INTAKE_ENABLED = DEMO_MODE;
 const TARGET_YEARS = ["2013", "2018", "2023"];
+const SESSION_LOG_KEY = "pow_ra_session_v1";
+const RA_INITIALS_KEY = "pow_ra_initials";
+const SESSION_RECENT_LIMIT = 25;
 const WIDE_EVIDENCE_FIELDS = [
     "evidence_row_id", "collection_batch", "country_code", "area_hint",
     "source_dataset_id", "source_type", "provider", "source_title",
@@ -372,7 +375,111 @@ class NzVerificationMap {
         this.selectedTask = null;
         this.visibleLimit = 80;
         this.targetYear = "2023";
+        this.sessionEntries = this.readSessionLog();
         this.init();
+    }
+
+    readSessionLog() {
+        try {
+            const raw = localStorage.getItem(SESSION_LOG_KEY);
+            if (!raw) return [];
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+            console.warn("Could not read session log:", error);
+            return [];
+        }
+    }
+
+    writeSessionLog() {
+        try {
+            localStorage.setItem(SESSION_LOG_KEY, JSON.stringify(this.sessionEntries));
+        } catch (error) {
+            console.warn("Could not save session log:", error);
+        }
+    }
+
+    appendSessionEntry(entry) {
+        this.sessionEntries.push(entry);
+        this.writeSessionLog();
+        this.renderSessionPanel();
+        this.renderTaskList();
+    }
+
+    clearSessionLog() {
+        const ok = window.confirm(
+            "Clear your session log? This removes the local record of every row you have copied or skipped. Your project spreadsheet is not affected."
+        );
+        if (!ok) return;
+        this.sessionEntries = [];
+        this.writeSessionLog();
+        this.renderSessionPanel();
+        this.renderTaskList();
+    }
+
+    sessionTaskOutcome(taskId) {
+        if (!taskId) return null;
+        for (let i = this.sessionEntries.length - 1; i >= 0; i -= 1) {
+            const entry = this.sessionEntries[i];
+            if (entry?.task_id === taskId) return entry;
+        }
+        return null;
+    }
+
+    getRaInitials() {
+        try {
+            return localStorage.getItem(RA_INITIALS_KEY) || "";
+        } catch (error) {
+            return "";
+        }
+    }
+
+    setRaInitials(value) {
+        const trimmed = String(value || "").trim().slice(0, 8);
+        try {
+            if (trimmed) {
+                localStorage.setItem(RA_INITIALS_KEY, trimmed);
+            } else {
+                localStorage.removeItem(RA_INITIALS_KEY);
+            }
+        } catch (error) {
+            console.warn("Could not save RA initials:", error);
+        }
+        this.renderRaInitialsBadge();
+    }
+
+    promptForRaInitials(force) {
+        const current = this.getRaInitials();
+        if (!force && current) return current;
+        const value = window.prompt(
+            "Enter your initials so the project team knows who recorded each row (max 8 characters). Stored only on this browser.",
+            current || ""
+        );
+        if (value === null) return current;
+        this.setRaInitials(value);
+        return this.getRaInitials();
+    }
+
+    renderRaInitialsBadge() {
+        const host = document.getElementById("modeNotice");
+        if (!host) return;
+        let badge = document.getElementById("raInitialsBadge");
+        if (!DEMO_MODE) {
+            if (badge) badge.remove();
+            return;
+        }
+        const initials = this.getRaInitials();
+        const text = initials ? `RA: ${initials}` : "RA: not set";
+        if (!badge) {
+            badge = document.createElement("span");
+            badge.id = "raInitialsBadge";
+            badge.className = "ra-initials";
+            host.appendChild(badge);
+        }
+        badge.innerHTML = `${escapeHtml(text)}<button type="button" id="raInitialsEdit" title="Change RA initials stored on this browser">Change</button>`;
+        document.getElementById("raInitialsEdit")?.addEventListener("click", () => {
+            this.promptForRaInitials(true);
+        });
     }
 
     async init() {
@@ -381,6 +488,135 @@ class NzVerificationMap {
         this.setupFilters();
         await this.loadTasks();
         this.applyFilters();
+        this.renderSessionPanel();
+        if (DEMO_MODE) {
+            this.renderRaInitialsBadge();
+            // Defer the initials prompt so the map paints first.
+            setTimeout(() => this.promptForRaInitials(false), 250);
+        }
+    }
+
+    renderSessionPanel() {
+        const panel = document.getElementById("sessionPanel");
+        if (!panel) return;
+        if (!DEMO_MODE) {
+            panel.innerHTML = "";
+            return;
+        }
+        const entries = this.sessionEntries.slice().reverse();
+        const recent = entries.slice(0, SESSION_RECENT_LIMIT);
+        const total = entries.length;
+        const copied = entries.filter(e => e?.type === "copied").length;
+        const skipped = entries.filter(e => e?.type === "skipped").length;
+
+        panel.innerHTML = `
+            <details ${total > 0 ? "open" : ""}>
+                <summary>My session
+                    <span class="ra-initials">${escapeHtml(`${total} entr${total === 1 ? "y" : "ies"}: ${copied} copied, ${skipped} skipped`)}</span>
+                </summary>
+                ${total === 0 ? `
+                    <div class="session-empty">No rows copied or skipped yet on this browser.</div>
+                ` : `
+                    <div class="session-entries" role="list">
+                        ${recent.map((entry, idx) => this.sessionEntryHtml(entry, idx)).join("")}
+                    </div>
+                    <div class="session-buttons">
+                        <button type="button" id="sessionExportButton">Export session JSON</button>
+                        <button type="button" class="danger" id="sessionClearButton">Clear session</button>
+                    </div>
+                `}
+            </details>
+        `;
+
+        document.getElementById("sessionExportButton")?.addEventListener("click", () => this.exportSession());
+        document.getElementById("sessionClearButton")?.addEventListener("click", () => this.clearSessionLog());
+        panel.querySelectorAll(".session-recopy").forEach(btn => {
+            btn.addEventListener("click", () => this.recopyEntry(Number(btn.dataset.entryIndex)));
+        });
+        panel.querySelectorAll(".session-open").forEach(btn => {
+            btn.addEventListener("click", () => this.selectTaskById(btn.dataset.taskId));
+        });
+    }
+
+    sessionEntryHtml(entry, displayIndex) {
+        const when = (entry.copied_at || entry.skipped_at || "").slice(11, 19);
+        const isSkipped = entry.type === "skipped";
+        const cls = isSkipped ? "session-entry skipped" : "session-entry";
+        const label = isSkipped ? "skipped" : (entry.action_label || entry.action || "copied");
+        const initials = entry.ra_initials ? ` · ${escapeHtml(entry.ra_initials)}` : "";
+        const reason = isSkipped && entry.reason ? `<div class="entry-meta">Reason: ${escapeHtml(entry.reason)}</div>` : "";
+        const reissue = isSkipped ? "" : `
+            <button type="button" class="secondary session-recopy" data-entry-index="${displayIndex}">Re-copy row</button>
+        `;
+        const open = entry.task_id ? `
+            <button type="button" class="tertiary session-open" data-task-id="${escapeHtml(entry.task_id)}">Open task</button>
+        ` : "";
+        return `
+            <div class="${cls}" role="listitem">
+                <span class="entry-title">${escapeHtml(entry.name || "Unnamed site")}</span>
+                <span class="entry-meta">${escapeHtml(when)} · ${escapeHtml(label)}${initials}</span>
+                ${reason}
+                <div class="entry-actions">${reissue}${open}</div>
+            </div>
+        `;
+    }
+
+    async recopyEntry(displayIndex) {
+        // Reverse-display index back into the absolute index.
+        const reversed = this.sessionEntries.slice().reverse();
+        const entry = reversed[displayIndex];
+        if (!entry || entry.type !== "copied" || !entry.tsv) {
+            window.alert("This session entry has no copyable row.");
+            return;
+        }
+        try {
+            await navigator.clipboard.writeText(entry.tsv);
+            window.alert("Copied the previous row again. Paste with Cmd/Ctrl+V into the spreadsheet.");
+        } catch (error) {
+            window.prompt("Could not auto-copy. Select and copy manually:", entry.tsv);
+        }
+    }
+
+    exportSession() {
+        const blob = new Blob([JSON.stringify(this.sessionEntries, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+        link.download = `pow-ra-session-${stamp}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
+    findNextTask(currentTaskId) {
+        if (!this.filteredTasks.length) return null;
+        const filtered = this.filteredTasks;
+        let startIndex = 0;
+        if (currentTaskId) {
+            const i = filtered.findIndex(f => f.properties?.task_id === currentTaskId);
+            startIndex = i >= 0 ? i + 1 : 0;
+        }
+        for (let offset = 0; offset < filtered.length; offset += 1) {
+            const idx = (startIndex + offset) % filtered.length;
+            const candidate = filtered[idx];
+            const id = candidate.properties?.task_id;
+            if (id === currentTaskId) continue;
+            if (this.sessionTaskOutcome(id)) continue;
+            return candidate;
+        }
+        return null;
+    }
+
+    openNextTask() {
+        const currentId = this.selectedTask?.properties?.task_id;
+        const next = this.findNextTask(currentId);
+        if (!next) {
+            window.alert("No more unhandled tasks match the current filters. Adjust the filters or take a break.");
+            return;
+        }
+        this.selectTask(next, false, { focusDetail: true });
     }
 
     setupMap() {
@@ -572,11 +808,17 @@ class NzVerificationMap {
             const props = feature.properties || {};
             const temporal = deriveTargetYearStatus(props, this.targetYear);
             const activeClass = this.selectedTask?.properties?.task_id === props.task_id ? " active" : "";
+            const outcome = this.sessionTaskOutcome(props.task_id);
+            const outcomeBadge = outcome
+                ? (outcome.type === "skipped"
+                    ? `<span class="skip-badge">skipped</span>`
+                    : `<span class="copied-badge">copied</span>`)
+                : "";
             return `
                 <button class="task-row${activeClass}" type="button" data-task-id="${escapeHtml(props.task_id)}">
                     <span class="task-row-title">
                         <span class="priority-dot priority-${escapeHtml(props.verification_priority)}"></span>
-                        ${escapeHtml(props.name || "Unnamed site")}
+                        ${escapeHtml(props.name || "Unnamed site")}${outcomeBadge}
                     </span>
                     <span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))}</span>
                     <span class="task-row-meta">${escapeHtml(cap(props.religion)) || "Unknown"} | ${escapeHtml(props.master_site_id)}</span>
@@ -911,6 +1153,14 @@ class NzVerificationMap {
                 <div id="copyStatus" class="copy-status" aria-live="polite"></div>
                 <textarea id="evidenceRowOutput" class="json-output wide-output" rows="4" readonly></textarea>
                 <textarea id="decisionJsonOutput" class="json-output" rows="5" readonly></textarea>
+                <details class="skip-form">
+                    <summary>Nothing to record for this task — skip it</summary>
+                    <label>
+                        Reason (optional)
+                        <input id="skipReasonInput" type="text" placeholder="e.g. evidence already covered by another task">
+                    </label>
+                    <button type="button" class="skip-confirm" id="skipTaskButton">Skip this task and open next</button>
+                </details>
             </div>
         `;
     }
@@ -971,6 +1221,10 @@ class NzVerificationMap {
 
         document.getElementById("copyEvidenceRowButton")?.addEventListener("click", () => this.copyEvidenceRow(props));
         document.getElementById("copyDecisionButton")?.addEventListener("click", () => this.copyDecision(props));
+        document.getElementById("skipTaskButton")?.addEventListener("click", () => {
+            const reason = (document.getElementById("skipReasonInput")?.value || "").trim();
+            this.skipCurrentTask(props, reason);
+        });
 
         this.updateWorkflowSteps();
     }
@@ -1040,11 +1294,11 @@ class NzVerificationMap {
         row.source_url_or_file = values.sourceUrl || props.osm_object_url || props.osm_map_url || "";
         row.source_record_id = sourceRecordId;
         row.retrieval_date = todayIsoDate();
-        row.retrieved_by = "ra";
         row.licence = "needs_review";
         row.access_limits = "public_or_project_review";
         row.redistribution_limits = "needs_review";
-        row.source_notes = `Generated locally from the static RA workbench. Action: ${actionLabelForRa(values.action)}.`;
+        const raInitials = this.getRaInitials();
+        row.source_notes = `Generated locally from the static RA workbench${raInitials ? ` by ${raInitials}` : ""}. Action: ${actionLabelForRa(values.action)}.`;
         row.name_raw = props.name || "";
         row.name_standardised = props.name || "";
         row.denomination_or_tradition_raw = props.denomination || "";
@@ -1088,7 +1342,8 @@ class NzVerificationMap {
         row.review_status = values.action === "confirm_current_record" ? "unreviewed" : "needs_review";
         row.privacy_flag = "clear";
         row.licence_flag = "needs_review";
-        row.extracted_by = "ra";
+        row.retrieved_by = raInitials || "ra";
+        row.extracted_by = raInitials || "ra";
         row.extracted_at = nowIso();
         row.review_note = `${reviewNoteForAction(values.action)} ${values.relatedIds ? `Related ids: ${values.relatedIds}.` : ""}`.trim();
 
@@ -1191,6 +1446,7 @@ class NzVerificationMap {
     async copyEvidenceRow(props) {
         const row = this.buildWideEvidenceRow(props);
         const tsv = tsvRowFromObject(row);
+        const values = this.currentFormValues();
         const status = document.getElementById("copyStatus");
         const output = document.getElementById("evidenceRowOutput");
         if (output) {
@@ -1211,7 +1467,53 @@ class NzVerificationMap {
                     "Could not access the clipboard. Select all text in the box below, copy it manually, and paste into your spreadsheet. Nothing was uploaded.";
             }
         }
+
+        this.appendSessionEntry({
+            type: "copied",
+            copied_at: nowIso(),
+            task_id: props.task_id || "",
+            master_site_id: props.master_site_id || "",
+            name: props.name || "Unnamed site",
+            ra_initials: this.getRaInitials(),
+            action: values.action,
+            action_label: actionLabelForRa(values.action),
+            target_year_statuses: {
+                2013: values.status2013,
+                2018: values.status2018,
+                2023: values.status2023,
+            },
+            source_title: values.sourceTitle,
+            source_url_or_file: values.sourceUrl,
+            tsv,
+        });
         this.updateWorkflowSteps();
+        this.showNextTaskBar();
+    }
+
+    showNextTaskBar() {
+        const existing = document.getElementById("nextTaskBar");
+        if (existing) existing.remove();
+        const status = document.getElementById("copyStatus");
+        if (!status) return;
+        const bar = document.createElement("div");
+        bar.id = "nextTaskBar";
+        bar.className = "next-task-bar";
+        bar.innerHTML = `<button type="button" id="openNextTaskButton">Open next task in current filters →</button>`;
+        status.insertAdjacentElement("afterend", bar);
+        document.getElementById("openNextTaskButton")?.addEventListener("click", () => this.openNextTask());
+    }
+
+    skipCurrentTask(props, reason) {
+        this.appendSessionEntry({
+            type: "skipped",
+            skipped_at: nowIso(),
+            task_id: props.task_id || "",
+            master_site_id: props.master_site_id || "",
+            name: props.name || "Unnamed site",
+            ra_initials: this.getRaInitials(),
+            reason: String(reason || "").slice(0, 240),
+        });
+        this.openNextTask();
     }
 
     async copyDecision(props) {
