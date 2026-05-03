@@ -723,33 +723,17 @@ the docs lands in the same state the code produces.
 ## 2026-05-03: Stage the RA verification UI in three small tiers
 
 Decision:
-Land the RA-facing verification map ergonomics work as three small,
-revertable PRs against `main` rather than a single large UI rewrite. Tier 1
-is a pure ergonomics pass (clearer steps, bigger fonts and tap targets,
-safer source defaults). Tier 2 adds a self-audit and recovery layer
-(session log, skip task, next task, RA initials), built on top of Tier 1 so
-its diff stays scoped. Tier 3 defaults the page to demo mode and updates the
-docs.
+The RA-facing verification map work landed as three small pull requests
+rather than one large UI rewrite: ergonomics first, session workflow second,
+and demo-by-default documentation third.
 
 Rationale:
-The map demo is the first surface a research assistant actually touches, and
-the Tier 1 ergonomics issues (small fonts, hidden Copy button intent,
-auto-filled tautological source rows, fragile note-overwrite heuristic) are
-independent from the Tier 2 recovery layer. Splitting the work keeps each
-diff small enough to review and `git revert` in one commit, lets the phone
-smoke check happen between tiers, and keeps the localStorage namespace
-(`pow_ra_*_v1`) unchanged across the three PRs so a future migration or
-rollback only has to deal with one storage shape.
+Small, focused PRs made the RA pilot surface easier to review and revert.
+This was appropriate for an active pilot, where usability fixes needed to land
+without broad backend, schema, or evidence-template changes.
 
 Consequences:
-Three branches (`claude/ra-ui-tier-1`, `claude/ra-ui-tier-2`,
-`claude/ra-ui-tier-3-demo-default`) form a stack; each PR initially targets
-the prior tier so its diff is scoped. After a lower tier is squash-merged to
-`main`, the next branch must be rebased or otherwise restacked onto current
-`main` and the PR retargeted before merge. Do not assume GitHub's stacked diff
-is current after a squash merge. No backend writes, no schema changes, and no
-new evidence-row columns were introduced; `WIDE_EVIDENCE_FIELDS` is
-unchanged. The `navigator.clipboard.writeText` HTTPS-and-user-gesture caveat
-on some mobile browsers is documented in the PR descriptions; the existing
-fallback (textarea select-and-copy) covers the failure path without code
-changes.
+Stacked PRs require care after squash merges. Before merging the next branch
+in a stack, rebase or restack it onto current `main` and retarget the PR so the
+diff is real. The durable coordination rule belongs in `AGENTS.md`; the
+journal only needs to preserve the decision and the lesson.

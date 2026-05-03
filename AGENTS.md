@@ -78,6 +78,19 @@
 - For frontend changes, test the affected map page in a browser and check tiles,
   controls, legends, popups, and overlays.
 
+## Agent And PR Coordination
+
+- Prefer one focused branch or pull request from current `origin/main`.
+- Do not stack pull requests unless the user explicitly asks for a stack.
+- If a stack is necessary, state the stack order, base branch, changed files,
+  and test plan in each pull request. After a lower branch is squash-merged,
+  rebase or otherwise restack the next branch onto current `main` and retarget
+  it before merge.
+- Give agents narrow, non-overlapping ownership. A useful default is: one agent
+  drafts an implementation PR; another performs a read-only review.
+- Do not mix implementation and review on the same files at the same time
+  unless the user asks for that coordination explicitly.
+
 ## Useful Commands
 
 - Rust checks: `cargo fmt --all`, `cargo test`, `cargo clippy --all-targets -- -D warnings`.
