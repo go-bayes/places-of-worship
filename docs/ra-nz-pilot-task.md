@@ -54,6 +54,15 @@ When you paste a row into the Sheet, glance at the first two columns to make
 sure they line up with the headers `evidence_row_id` and `collection_batch`.
 If they do not, stop and contact JB before pasting more rows.
 
+Use blanks for missing information. Do not type `NA`, `N/A`, or similar
+placeholders into open cells. Use dropdown values such as `unknown`,
+`uncertain`, `none`, or `not_assessed` only where the Sheet or map gives that
+option.
+
+Use date formats exactly: `YYYY`, `YYYY-MM`, or `YYYY-MM-DD`. For example,
+`2018`, `2018-09`, or `2018-09-01`. If a date is unknown, leave the date cell
+blank and explain the uncertainty in the evidence note.
+
 ## Where Your Work Is Saved
 
 The map demo does not save anything. It only helps you inspect a case and, in
@@ -241,7 +250,8 @@ source type, source title, URL or agreed file reference, retrieval date, and a
 short evidence note.
 
 For street-level imagery, record the provider, URL, displayed capture date, and
-what was visible. Do not save or upload screenshots. For RA field observations,
+what was visible. Use `YYYY`, `YYYY-MM`, or `YYYY-MM-DD` for capture and visit
+dates. Do not save or upload screenshots. For RA field observations,
 record the visit date and site-level observation only; do not record private
 conversations, personal contact details, photos, or videos unless explicitly
 approved.

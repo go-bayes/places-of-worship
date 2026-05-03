@@ -2830,6 +2830,15 @@ fn validate_csv_row(
             continue;
         }
 
+        if is_missing_placeholder(value) {
+            summary.error(
+                Some(record_number),
+                Some(field),
+                None,
+                format!("{value:?} is a placeholder for missing data; leave the cell blank"),
+            );
+        }
+
         if vocabularies.vocab_key_for_field(field).is_some()
             && !vocabularies.is_allowed(field, value)
         {
@@ -2982,6 +2991,13 @@ fn validate_review_flags(
 
 fn should_parse_partial_date(field: &str) -> bool {
     field.ends_with("_date") || field == "retrieval_date"
+}
+
+fn is_missing_placeholder(value: &str) -> bool {
+    matches!(
+        value.trim().to_ascii_lowercase().as_str(),
+        "na" | "n/a" | "n.a." | "not applicable"
+    )
 }
 
 fn should_parse_timestamp(field: &str) -> bool {
@@ -3357,6 +3373,59 @@ mod tests {
             summary.errors.iter().any(|error| error
                 .message
                 .contains("same columns as wide RA evidence but in a different order")),
+            "{:#?}",
+            summary.errors
+        );
+
+        let _ = fs::remove_file(input);
+    }
+
+    #[test]
+    fn na_placeholders_are_rejected_in_ra_csv() {
+        let repo_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let template_dir = repo_root.join("docs/templates/ra-historical-site-evidence");
+        let template_path = template_dir.join("site_evidence_wide.csv");
+        let mut reader = csv::Reader::from_path(&template_path).expect("open template");
+        let headers: Vec<String> = reader
+            .headers()
+            .expect("read template headers")
+            .iter()
+            .map(str::to_owned)
+            .collect();
+        let mut values = vec![String::new(); headers.len()];
+        for (index, header) in headers.iter().enumerate() {
+            values[index] = match header.as_str() {
+                "evidence_row_id" => "row-001".to_owned(),
+                "country_code" => "NZ".to_owned(),
+                "source_dataset_id" => "source-001".to_owned(),
+                "source_type" => "other".to_owned(),
+                "review_status" => "unreviewed".to_owned(),
+                "privacy_flag" => "clear".to_owned(),
+                "licence_flag" => "needs_review".to_owned(),
+                "source_notes" => "N/A".to_owned(),
+                _ => String::new(),
+            };
+        }
+
+        let input = std::env::temp_dir().join(format!(
+            "pow-na-placeholder-test-{}.csv",
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .expect("clock")
+                .as_nanos()
+        ));
+        fs::write(
+            &input,
+            format!("{}\n{}\n", headers.join(","), values.join(",")),
+        )
+        .expect("write test csv");
+
+        let summary = validate_csv(&input, &template_dir).expect("validate csv");
+        assert!(
+            summary
+                .errors
+                .iter()
+                .any(|error| error.message.contains("placeholder for missing data")),
             "{:#?}",
             summary.errors
         );

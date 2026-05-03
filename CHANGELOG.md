@@ -4,6 +4,10 @@
 
 ### 2026-05-03
 
+- Clarified that RAs should leave missing cells blank rather than entering
+  `NA`/`N/A`, documented accepted date formats as `YYYY`, `YYYY-MM`, or
+  `YYYY-MM-DD`, added map-side date checks for source/capture dates, and made
+  `pow validate` reject common missing-value placeholders.
 - Documented how RAs should avoid accidental duplicate work during the NZ
   pilot: local map badges are browser-only, the shared Sheet is the durable
   pilot record, multiple rows for one place are allowed when they carry

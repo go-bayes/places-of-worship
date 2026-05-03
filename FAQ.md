@@ -103,6 +103,19 @@ the unchanged header. The project-owned pilot Sheet warns before header edits,
 and `pow validate` should reject exported CSVs whose headers look like a known
 template but no longer match its exact order.
 
+## Should RAs type NA when a field is not applicable?
+
+No. Leave the cell blank. Blank means missing, not applicable, or not collected
+unless the field has a specific controlled value. Use values such as `unknown`,
+`uncertain`, `none`, or `not_assessed` only where they appear in a dropdown or
+controlled vocabulary.
+
+Dates should use `YYYY`, `YYYY-MM`, or `YYYY-MM-DD`: for example, `2018`,
+`2018-09`, or `2018-09-01`. If the source gives an imprecise or prose date,
+record the interpretation in the date field only when it can be expressed in
+one of those formats, set the matching precision field where available, and
+preserve the original wording in the evidence note or raw-date field.
+
 ## Will the map generate tasks automatically?
 
 That is the target workflow. A deterministic task generator should read the

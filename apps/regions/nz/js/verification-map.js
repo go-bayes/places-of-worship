@@ -122,6 +122,19 @@ function tsvRowFromObject(row) {
     return WIDE_EVIDENCE_FIELDS.map(field => cleanCell(row[field])).join("\t");
 }
 
+function isValidPartialDateText(value) {
+    const text = String(value || "").trim();
+    if (!text) return true;
+    if (/^\d{4}$/.test(text)) return true;
+    if (/^\d{4}-(0[1-9]|1[0-2])$/.test(text)) return true;
+    const fullDate = text.match(/^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/);
+    if (!fullDate) return false;
+    const date = new Date(`${text}T00:00:00Z`);
+    return date.getUTCFullYear() === Number(fullDate[1])
+        && date.getUTCMonth() + 1 === Number(fullDate[2])
+        && date.getUTCDate() === Number(fullDate[3]);
+}
+
 function selectOptionsHtml(options, selectedValue) {
     return options.map(([value, label]) => `
         <option value="${escapeHtml(value)}"${value === selectedValue ? " selected" : ""}>${escapeHtml(label)}</option>
@@ -1500,6 +1513,9 @@ class NzVerificationMap {
     evidenceInputError(values) {
         if (!values.sourceTitle.trim()) return "Add a source title.";
         if (values.note.trim().length < 5) return "Add a short evidence note.";
+        if (values.sourceDate.trim() && !isValidPartialDateText(values.sourceDate)) {
+            return "Use YYYY, YYYY-MM, or YYYY-MM-DD for source and capture dates. If the date is unknown, leave it blank and explain in the note.";
+        }
         if (values.sourceType === "field_observation" && !values.sourceDate.trim()) {
             return "Add the field observation date.";
         }

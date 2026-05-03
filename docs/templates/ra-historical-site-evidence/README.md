@@ -46,6 +46,10 @@ sheet public unless source licences and privacy checks permit public release.
 10. Use `sources.csv`, `site_observations.csv`, and `candidate_matches.csv` as reference or downstream-normalised tabs when the team is ready to split the wide sheet into ingestion tables.
 11. Use `review_notes.csv` for reviewer decisions, unresolved problems, and follow-up tasks.
 12. Leave uncertain cases as `needs_review` rather than forcing a match.
+13. Leave unknown or non-applicable open cells blank. Do not type `NA`, `N/A`,
+    or similar placeholders. Use controlled values such as `unknown`,
+    `uncertain`, `none`, and `not_assessed` only in fields where those values
+    are offered.
 
 ## Data rules
 
@@ -57,6 +61,9 @@ sheet public unless source licences and privacy checks permit public release.
 - Do not collapse all lifecycle evidence into one birthday or death date. Use the specific date fields for organisation founding, site opening, building opening or dedication, first seen, last seen, closure, demolition, change of use, and relocation.
 - Use bounded date fields when the source only gives a limit. For example, if a source proves the site existed before or by 2013 but gives no opening date, leave the exact opening fields blank and enter `2013` in `origin_not_later_than_date` with `origin_not_later_than_date_precision` set to `year`.
 - Read `not_later_than` as "known by this date" and `not_earlier_than` as "cannot have occurred before this date". Use the closure equivalents for closure or end-of-use evidence.
+- Enter dates only as `YYYY`, `YYYY-MM`, or `YYYY-MM-DD`. Do not enter prose
+  dates such as `Sept 2018`, seasons, circa notation, or `NA`; preserve that
+  detail in `date_evidence_raw` or the evidence note.
 - OpenStreetMap lifecycle tags such as `start_date`, `old_start_date`, and `end_date` are useful evidence, but they are not final truth. Preserve the raw tags and explain how they were interpreted.
 - Visual checks from street maps, street-level imagery, aerial imagery, historical maps, or field observations should record the provider or observer type, capture or visit date where known, URL or agreed file reference, and a short summary.
 - Street-level imagery and field observations can strongly support visible worship-use claims, but absence of visible signage should usually be treated as weak or uncertain evidence for absence.
