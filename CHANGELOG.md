@@ -4,6 +4,9 @@
 
 ### 2026-05-03
 
+- Updated portal and task-map planning to make Convex the preferred near-term
+  backend spike for shared live RA/reviewer task state, while keeping accepted
+  events, master rebuilds, and public map exports outside Convex.
 - Defined `lifecycle` in RA-facing guidance and clarified that missing-place
   candidates may already exist in OSM; OSM ids should be recorded as source or
   matching evidence, not treated as project site ids.

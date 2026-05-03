@@ -10,9 +10,11 @@ Use a managed authentication service. Do not build password storage, password
 reset, multi-factor authentication, login sessions, or account recovery in this
 project.
 
-The first baseline is Google OAuth through Google Identity Platform. The portal
-API should verify provider-issued identity tokens and then enforce project
-permission scopes in the backend.
+For the Convex task-map spike, use an OpenID Connect-compatible managed auth
+provider, with Google sign-in likely for the RA pilot. Backend functions should
+verify provider-issued identity claims and then enforce project permission
+scopes. If the project later adds a Rust API on Cloud Run, it should use the
+same identity and role model rather than a separate account system.
 
 ## Pilot Access Model
 

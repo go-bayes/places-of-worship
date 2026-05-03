@@ -33,9 +33,12 @@ Minimum image metadata:
 Public display should use reviewed derivatives, not original uploads. Strip
 metadata such as EXIF where feasible before publication.
 
-## Google Cloud Baseline
+## Google Cloud Durable Staging Baseline
 
-Use Google Cloud as the first backend baseline.
+Use Google Cloud as the durable staging and storage reference, especially for
+private media quarantine, geospatial staging, and provider-neutral archival
+exports. Convex is the near-term backend spike for live task-map state, not for
+quarantined media or canonical master storage.
 
 Rationale:
 
@@ -61,20 +64,23 @@ Useful reference docs:
 - Cloud Storage signed URLs:
   https://docs.cloud.google.com/storage/docs/access-control/signed-urls
 
-## Deferred Providers
+## Provider Direction
 
-Do not evaluate Convex or SpacetimeDB deeply before the project has stable
-submission, review, audit, and master-ingestion contracts.
+Convex is no longer deferred for the task-map layer. It is the preferred
+near-term spike for shared live RA/reviewer state: assignments, provisional
+closures, evidence drafts, reviewer comments, review decisions, and curator
+queues. The spike must still export reviewed task state into the Rust/R
+validation and rebuild path, and it must not publish directly to the master or
+public maps.
 
 SpacetimeDB is promising because it is Rust-oriented, transactional, realtime,
 and compatible with OpenID Connect authentication. It may be worth a later spike
 if the portal needs collaborative realtime state or reducer-style governed
 updates.
 
-Convex is promising for rapid realtime application development and supports
-OpenID Connect-based authentication and file storage. It may be worth a later
-spike if the review interface needs rapid app iteration that outweighs the
-project's Rust-first backend preference.
+Google Cloud/PostgreSQL/PostGIS/Cloud Storage remains the durable staging,
+geospatial storage, media quarantine, and provider-neutral export reference if
+the task-map pilot needs responsibilities beyond Convex coordination.
 
 Cloudflare remains useful to track as an alternate edge, access, and object
 storage path, especially for static hosting, access policy, R2 storage, Images,

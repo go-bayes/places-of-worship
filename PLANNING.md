@@ -118,12 +118,12 @@ As of 30 April 2026:
   Revisit Leptos once the action vocabulary, staged event contract, and review
   ergonomics are stable enough to justify a persistent portal.
 - A separate portal data-entry planning hub now lives in
-  `docs/portal-data-entry-plan.md`. It defines the first authenticated
-  New Zealand staging pilot, with Google Cloud as the backend baseline, managed
-  Google OAuth/Identity Platform for auth, Cloud Run for a Rust API,
-  Cloud SQL/PostGIS for staging and review data, Cloud Storage for quarantined
-  images and raw submissions, no direct master writes, and GitHub only as an
-  optional audit mirror.
+  `docs/portal-data-entry-plan.md`. The current direction is to spike Convex as
+  the live shared task-map and reviewer-workbench backend for the New Zealand
+  RA pilot. Google Cloud/PostGIS remains the durable staging and storage
+  reference if the project needs heavier geospatial storage, quarantined media,
+  or provider-neutral exports. No live task backend should write directly to
+  the master.
 - `CRITIQUE.md` records a critical review of the revisions pipeline for
   RA-submitted location and denomination evidence. The first schema response is
   `schemas/change-event.schema.json` plus
@@ -199,8 +199,11 @@ when each row carries different source evidence, target-year evidence, or
 identity-review notes.
 
 The next durable design should introduce a shared task store outside the master
-database. It should define tasks and provisional task state without accepting
-data into the master. A minimal task record should include:
+database. Convex is now the preferred near-term spike for this layer because the
+task map needs live multi-user state more urgently than it needs canonical
+geospatial storage. The task backend should define tasks and provisional task
+state without accepting data into the master. A minimal task record should
+include:
 
 1. stable `task_id`,
 2. `matched_current_site_id` or `candidate_site_id`,
@@ -215,6 +218,12 @@ The map should read this task state to prevent accidental duplicate labour and
 write provisional closures when an RA copies or submits a row. Review then
 decides whether linked evidence becomes accepted change events. Master rebuilds
 consume accepted events, not provisional task statuses.
+
+Convex task state should be exportable to the existing validation path. A
+weekly or curator-triggered export should produce staged evidence rows,
+review-decision records, or change-event proposals that `pow validate`,
+`pow propose`, `pow diff`, and later master rebuild commands can consume.
+Convex should not become the canonical master database.
 
 ### Target-year and lifecycle evidence
 
@@ -590,11 +599,17 @@ decision. This still must not write directly to the master database.
 - Allow image uploads only into private quarantine in the first version. Defer
   video until upload security, review, storage cost, licence, and moderation
   rules are proven.
-- Use Google Cloud as the backend baseline: Google OAuth/Identity Platform,
-  Cloud Run, Cloud SQL/PostgreSQL with PostGIS, Cloud Storage, and asynchronous
-  validation jobs through Pub/Sub or Cloud Tasks.
-- Defer Convex and SpacetimeDB evaluation until the submission, review, audit,
-  and master-ingestion contracts are stable.
+- Use Convex as the preferred near-term backend spike for the shared task map
+  and reviewer workbench: live task status, assignments, provisional closures,
+  evidence drafts, review decisions, and curator queues.
+- Keep the Rust/R master path authoritative. Convex exports should feed staged
+  evidence and accepted-review records into `pow` validation, diff, replay, and
+  reviewed map exports.
+- Keep Google Cloud/PostGIS as the durable staging and storage reference if the
+  pilot needs heavier geospatial queries, quarantined media, object storage, or
+  provider-neutral archival exports.
+- Defer SpacetimeDB evaluation until the task/review contracts are stable or
+  until a Rust-first realtime backend becomes a concrete need.
 - Keep public map products downstream of reviewed exports. Unreviewed portal
   submissions should not appear on the public map or in the master database.
 
@@ -1348,22 +1363,23 @@ OSM ids or user suggestions.
 - Defer PostGIS for public map products until live query requirements justify
   the operational cost.
 
-### Decided: authenticated portal backend baseline
+### Decided: authenticated task-map backend direction
 
-- Use Google Cloud as the reference backend for the first authenticated
-  New Zealand staging pilot.
-- Use managed Google OAuth/Identity Platform for contributor identity and
-  project permission mapping.
-- Use a Rust API on Cloud Run for staging, validation, review, and audit
-  endpoints.
-- Use Cloud SQL/PostgreSQL with PostGIS for authenticated staging and review
-  data, where live geometry checks and queue queries are useful.
-- Use Cloud Storage for immutable raw submissions, source snapshots, and
-  quarantined images.
+- Spike Convex as the first live backend for the New Zealand task map and
+  reviewer workbench.
+- Use Convex for shared task state, assignment, provisional closure, evidence
+  drafts, reviewer comments, review decisions, and curator queues.
+- Keep managed authentication and invite-only access. Use an OpenID
+  Connect-compatible provider and enforce project roles in backend functions.
+- Export reviewed Convex task data into the Rust validation and replay path;
+  do not let Convex mutate the master or public map products directly.
+- Keep Google Cloud/PostgreSQL/PostGIS/Cloud Storage as the durable staging,
+  geospatial storage, media quarantine, and provider-neutral export reference if
+  Convex proves insufficient for those responsibilities.
 - Keep GitHub as an optional audit or export mirror, not the primary review
   backend.
-- Defer Convex and SpacetimeDB evaluation until the project has stable
-  submission, review, audit, and master-ingestion contracts.
+- Defer SpacetimeDB evaluation until the task/review contracts are stable or a
+  Rust-first realtime backend becomes a specific requirement.
 
 ## Open decisions
 

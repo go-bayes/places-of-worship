@@ -29,17 +29,20 @@ change proposal.
 
 Default choices:
 
-- Use managed authentication, likely Google OAuth through Google Identity
-  Platform.
-- Use a Rust API on Cloud Run for validation, staging, review, and audit
-  endpoints.
-- Use Cloud SQL for PostgreSQL with PostGIS for staged submissions, review
-  queues, audit records, and geospatial queries.
-- Use Cloud Storage for immutable raw submissions and quarantined images.
+- Use managed authentication, likely an OpenID Connect-compatible provider with
+  Google sign-in for the RA pilot.
+- Spike Convex as the first live backend for shared task-map and reviewer
+  workbench state: assignments, provisional closures, evidence drafts,
+  reviewer comments, review decisions, and curator queues.
+- Export reviewed Convex state weekly, or on curator request, into the Rust
+  validation, proposal, diff, replay, and research-output path.
+- Keep Google Cloud/PostgreSQL/PostGIS/Cloud Storage as the durable staging,
+  geospatial storage, media quarantine, and provider-neutral export reference
+  if the pilot needs responsibilities beyond Convex task coordination.
 - Keep GitHub as an optional audit or export mirror, not the review backend or
   source of truth.
-- Defer Convex and SpacetimeDB evaluation until the submission, review, audit,
-  and master-ingestion contracts are stable.
+- Defer SpacetimeDB evaluation until task/review contracts are stable or a
+  Rust-first realtime backend becomes a concrete need.
 - Do not allow portal submissions, scripts, or AI agents to mutate the master
   database directly.
 
@@ -102,9 +105,10 @@ Master change proposal
 experience: the login handoff, global-style map, search, building or point
 selection, form ergonomics, and submit confirmation.
 
-`docs/portal-database-storage-plan.md` defines the staging and storage baseline:
-Cloud Run, Cloud SQL/PostGIS, Cloud Storage, immutable raw submissions, audit
-tables, and provider-neutral contracts.
+`docs/portal-database-storage-plan.md` defines the split backend direction:
+Convex for live task/review state, with Cloud Run, Cloud SQL/PostGIS, Cloud
+Storage, immutable raw submissions, audit tables, and provider-neutral contracts
+retained for durable staging and storage when needed.
 
 `docs/portal-submission-review-plan.md` defines review states, reviewer queue
 behaviour, audit decisions, undo semantics, and the optional GitHub audit mirror.
@@ -114,8 +118,9 @@ permission scopes, rate limits, validation, upload controls, quarantine, logs,
 and launch gates.
 
 `docs/portal-media-and-provider-evaluation-plan.md` defines image quarantine for
-the pilot and records why Google Cloud is the reference backend while Convex,
-SpacetimeDB, and Cloudflare remain later evaluation paths.
+the pilot and records why Convex is now the near-term task-map spike while
+Google Cloud/PostGIS, SpacetimeDB, and Cloudflare remain provider options for
+other responsibilities.
 
 ## Scope Boundaries
 

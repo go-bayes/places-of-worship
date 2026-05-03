@@ -66,8 +66,11 @@ reported, audited, or rebuilt.
 ## GitHub Audit Mirror
 
 GitHub can be useful for community visibility and durable public snapshots, but
-it should not be the primary review backend. The portal database and storage
-layer should be the source of truth. Optional GitHub exports may include:
+it should not be the primary review backend. For the live task-map spike,
+Convex should be the source of truth for task state and reviewer decisions until
+they are exported into the `pow` pipeline. Durable storage layers should remain
+the source of truth for raw submissions, quarantined media, and reviewed export
+manifests. Optional GitHub exports may include:
 
 - signed or checksummed batch manifests
 - reviewed change summaries

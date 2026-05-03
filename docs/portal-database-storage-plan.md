@@ -6,31 +6,46 @@ Portal hub: `docs/portal-data-entry-plan.md`.
 
 ## Baseline
 
-Use Google Cloud as the first backend baseline for the authenticated New Zealand
-staging pilot.
+Use a split backend for the authenticated New Zealand staging pilot:
 
-This choice is conservative. Google Cloud gives the project mature managed auth,
-Rust-friendly container deployment, PostgreSQL/PostGIS, private object storage,
-service accounts, and long-term operational durability. The design should still
-use provider-neutral contracts so the project can migrate later if needed.
+- Convex is the preferred near-term spike for live task-map and reviewer
+  workbench state.
+- Google Cloud/PostgreSQL/PostGIS/Cloud Storage remains the durable staging and
+  storage reference when the project needs heavy geospatial checks, raw
+  snapshots, quarantined media, or provider-neutral archival exports.
+
+This split is pragmatic. The immediate RA problem is shared task coordination:
+multiple users need to see assignments, provisional closures, evidence drafts,
+and review decisions update live. Convex fits that surface. Canonical master
+state, accepted events, and public map products still need reproducible exports
+and should remain downstream of the Rust/R pipeline.
 
 ## Reference Architecture
 
 ```text
 Authenticated browser
+  -> Convex task/review backend
+  -> live task map and reviewer workbench
+  -> weekly or curator-triggered export
+  -> pow validate/propose/diff/replay
+  -> reviewed exports for static map and downloads
+
+Durable staging/storage path when needed:
   -> Rust staging API on Cloud Run
   -> Cloud SQL PostgreSQL/PostGIS
   -> Cloud Storage quarantine and raw snapshots
-  -> Pub/Sub or Cloud Tasks validation jobs
   -> reviewed exports for static map and downloads
 ```
 
-Cloud Run should host the Rust API and any small validation or review services
-that need HTTP endpoints. Cloud SQL/PostGIS should hold staged submissions,
-review queues, contributor permissions, geometry references, and audit records.
-Cloud Storage should hold immutable raw submission payloads, source exports,
-quarantined images, and reviewed public derivatives where publication is
-permitted.
+Convex should hold shared task records, task-event logs, evidence drafts,
+reviewer comments, provisional closures, review decisions, role metadata, and
+curator export manifests. Cloud Run should host Rust services when validation,
+heavy geospatial checks, export verification, or master-rebuild integration need
+HTTP endpoints. Cloud SQL/PostGIS should hold durable staged submissions,
+geometry references, and audit records only when Convex is not sufficient for
+those responsibilities. Cloud Storage should hold immutable raw submission
+payloads, source exports, quarantined images, and reviewed public derivatives
+where publication is permitted.
 
 ## Data Boundary
 
@@ -39,6 +54,8 @@ The portal backend is a governed staging layer for the master database.
 Minimum persisted record groups:
 
 - contributor and permission records
+- shared task records and task-event logs
+- evidence drafts and linked spreadsheet/source row ids
 - submission batches and raw payload snapshots
 - staged site proposals
 - staged source and evidence references
@@ -53,6 +70,9 @@ Accepted submissions should become reviewed change proposals. A separate master
 ingestion job should dry-run, diff, and apply accepted changes through audited
 events.
 
+For the Convex spike, "accepted" should mean accepted for export into the `pow`
+pipeline, not accepted directly into the master.
+
 ## Provider-Neutral Contracts
 
 Keep the contracts portable:
@@ -65,6 +85,8 @@ Keep the contracts portable:
 - keep raw snapshots immutable and addressable by manifest
 - avoid making GitHub, Google Sheets, Convex, or SpacetimeDB the only readable
   form of a submission
+- make Convex exports explicit enough that the same accepted task/review state
+  can be replayed by `pow` without calling Convex
 
 ## Public Map Separation
 

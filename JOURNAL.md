@@ -303,10 +303,16 @@ or public write endpoint is built.
 
 ## 2026-05-02: Use Google Cloud for the first portal staging baseline
 
+Status:
+Superseded in part by the 2026-05-03 Convex task-map decision below. Google
+Cloud remains the durable staging, geospatial storage, media quarantine, and
+provider-neutral export reference; Convex is now the preferred near-term spike
+for live shared task/review state.
+
 Decision:
-Use Google Cloud as the reference backend for the first authenticated New
-Zealand portal staging pilot. Defer Convex and SpacetimeDB evaluation until the
-submission, review, audit, and master-ingestion contracts are stable.
+Use Google Cloud as the reference backend for durable authenticated staging,
+geospatial storage, private media quarantine, and provider-neutral archival
+exports in the New Zealand portal pilot.
 
 Rationale:
 The immediate problem is safe, auditable intake: managed authentication,
@@ -325,11 +331,9 @@ object storage references, audit records, and master-change manifests. GitHub
 may be used as an audit or export mirror, but not as the primary review backend.
 
 Open questions:
-Convex and SpacetimeDB remain possible later spikes. SpacetimeDB may become
-relevant if the portal needs Rust-first realtime state or reducer-style governed
-updates. Convex may become relevant if rapid realtime review tooling outweighs
-the Rust-first backend preference. Neither should displace the Google/PostGIS
-baseline until it solves a concrete problem better than the planned contracts.
+SpacetimeDB remains a possible later spike if the portal needs Rust-first
+realtime state or reducer-style governed updates. Convex is now handled by the
+2026-05-03 task-map decision below.
 
 ## 2026-05-02: Treat relocation as new site identity when place changes
 
@@ -910,3 +914,27 @@ precision fields. If one source supports several distinct lifecycle claims,
 multiple evidence rows for the same site are acceptable when the notes make the
 repeat intentional. Review and later ingestion still decide whether those rows
 become accepted change events.
+
+## 2026-05-03: Spike Convex for shared task-map state
+
+Decision:
+Use Convex as the preferred near-term backend spike for the live New Zealand
+task map and reviewer workbench. Keep the master database, accepted change
+events, rebuilds, and public map exports outside Convex.
+
+Rationale:
+The immediate bottleneck is coordination, not canonical storage. Browser-local
+task badges cannot coordinate multiple RAs, devices, or curator review passes.
+Convex is built for live application state and can support shared assignments,
+provisional closures, evidence drafts, reviewer comments, and curator queues
+with less custom infrastructure than a Rust/PostGIS portal.
+
+Consequences:
+The next backend prototype should model tasks, task events, evidence drafts,
+review decisions, user roles, and weekly curator exports in Convex. A
+curator-triggered or scheduled export must feed the existing `pow` validation,
+proposal, diff, replay, and research-output path. Google Cloud/PostGIS remains
+the durable staging and storage reference for heavier geospatial queries,
+quarantined media, and provider-neutral archival exports if the task pilot
+outgrows Convex. Convex task state must not mutate the master directly or appear
+on public maps except through reviewed exports.

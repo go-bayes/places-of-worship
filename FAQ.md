@@ -110,6 +110,19 @@ assigned, provisionally closed, reviewed, or reopened. Accepted review decisions
 then become change events and rebuild the master; the task store itself is not
 the master.
 
+## Will Convex be the master database?
+
+No. Convex is a strong candidate for the shared live task map: assignments,
+task status, evidence drafts, reviewer comments, provisional closures, and
+weekly curator review queues. It should help multiple RAs and reviewers see the
+same task state without relying on browser-local storage or a manually checked
+spreadsheet.
+
+The master database should still be rebuilt from accepted change events through
+the Rust validation and replay pipeline and the research-facing R outputs.
+Convex task state should export staged evidence and review decisions; it should
+not directly publish to the public map or mutate canonical site records.
+
 ## Can the RA spreadsheet columns be reordered?
 
 No. The `site_evidence_wide` header order is a data contract. The map copies a

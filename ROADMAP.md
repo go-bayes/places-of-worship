@@ -207,15 +207,22 @@ Status: `[ ]` not started.
 
 Goal:
 Create an invite-only New Zealand staging pilot with managed authentication,
-map-first entry, API validation, secure storage, and reviewer workflows.
+live shared task state, map-first entry, validation exports, secure storage
+boundaries, and reviewer workflows.
 
 Evidence And Governance:
 
 - `[ ]` Managed auth, likely Google OAuth or Identity Platform.
-- `[ ]` Rust API on Cloud Run or an equivalent backend.
+- `[ ]` Convex task-map spike for shared assignments, provisional closures,
+  evidence drafts, reviewer comments, review decisions, and curator queues.
+- `[ ]` Weekly or curator-triggered export from Convex task state into `pow`
+  validation, diff, replay, and reviewed map-output workflows.
+- `[ ]` Rust API on Cloud Run or an equivalent backend where schema validation,
+  heavy geospatial checks, or durable staging need a separate service.
 - `[ ]` Staged submissions in Cloud SQL/PostgreSQL/PostGIS or a compatible
-  provider-neutral schema.
-- `[ ]` Raw submissions and media in quarantined object storage.
+  provider-neutral schema if Convex is not sufficient for canonical staging.
+- `[ ]` Raw submissions and media in quarantined object storage before any
+  public display.
 - `[ ]` Map-first edit UI with clear staged/rejected/demo-only states.
 - `[ ]` Reviewer map with validation warnings, evidence trail, existing and
   proposed values, linked geometry, and duplicate risk.
@@ -285,6 +292,8 @@ Evidence And Governance:
   credentials and audit.
 - `[ ]` Provider migration options, including SQLite-compatible, PostGIS, and
   object-storage backends.
+- `[ ]` Convex-to-`pow` export contract for task state, evidence drafts, and
+  reviewed decisions.
 
 Research Outputs And Analysis:
 

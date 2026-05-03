@@ -166,7 +166,16 @@ Cloud implementation is natural because Google Sheets and Cloud Storage fit the
 first workflow, but the same contract should work with another cloud or a
 self-hosted stack.
 
-Possible Google Cloud pilot:
+Near-term task-map pilot:
+
+- Convex for shared RA/reviewer task state, assignments, provisional closure,
+  evidence drafts, comments, and review decisions
+- OpenID Connect-compatible managed auth with invite-only access
+- scheduled or curator-triggered export into `pow validate`, `pow diff`, and
+  later accepted-event replay
+- no direct writes from Convex to the master database or public map products
+
+Possible Google Cloud durable staging path:
 
 - Google Sheets API for RA templates
 - Cloud Storage for immutable raw submissions and evidence files
