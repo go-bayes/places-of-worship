@@ -94,10 +94,10 @@ Do not run `pow stage` or `pow propose` unless the project team explicitly asks.
 
 ## Links
 
-- NZ verification task map:
+- NZ verification task map (lands in demo mode by default):
   <https://www.placesmap.org/apps/regions/nz/verification.html>
-- Demo map action builder:
-  <https://www.placesmap.org/apps/regions/nz/verification.html?demo=1>
+- Read-only feedback view (no action builder):
+  <https://www.placesmap.org/apps/regions/nz/verification.html?demo=0>
 - Detailed case guide:
   `docs/ra-map-triage-guide.md`
 - CLI validation tutorial:

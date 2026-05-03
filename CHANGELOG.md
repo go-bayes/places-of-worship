@@ -1,6 +1,31 @@
 # Changelog
 
 ## Unreleased
+- Defaulted the NZ verification map to demo mode while the RA action builder
+  is the only functional state. The page now lands with the action builder,
+  session log, and nomination controls available; appending `?demo=0` opts in
+  to the read-only feedback view that will become the default once secure
+  staging exists. Updated the NZ README and RA pilot task doc to point at the
+  bare URL as the canonical demo entry and to document the `?demo=0` opt-out.
+- Added a Tier 2 self-audit and recovery layer to the NZ verification map
+  demo: an RA-initials prompt and badge persisted at
+  `localStorage.pow_ra_initials` and stamped on emitted evidence rows; a
+  client-side session log at `localStorage.pow_ra_session_v1` capturing every
+  copied or skipped task with the full TSV; a collapsible "My session" panel
+  in the sidebar with re-copy, open-task, export-JSON, and clear-session
+  controls; a Skip task collapsible with optional reason that auto-advances
+  to the next unhandled task; an "Open next task" button shown after a
+  successful copy; and copied/skipped status pills on the sidebar task list.
+  All client-side; no schema or backend changes.
+- Added a Tier 1 ergonomics pass to the NZ verification map demo: a numbered
+  4-step indicator (Inspect, Decide, Evidence, Copy row) at the top of the
+  detail panel; a reordered detail panel so the action builder sits directly
+  below the source links; a dismissable quickstart banner explaining the
+  6-step workflow; an explicit "Use OSM URL" button so the source URL no
+  longer auto-fills with the OSM record itself; clearer post-copy clipboard
+  guidance; larger body, label, input, button, and link fonts with primary
+  buttons at least 44 to 48 pixels tall; and removal of the fragile
+  note-overwrite heuristic so action changes never overwrite a touched note.
 - Shortened the public README, added a direct roadmap link, and removed the
   detailed OpenStreetMap editing instructions while retaining OpenStreetMap
   attribution and contribution-status guidance.
