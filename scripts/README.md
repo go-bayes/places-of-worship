@@ -29,6 +29,7 @@ Current NZ cleanup utilities:
 - `scripts/build_nz_area_summary.R`: build the first territorial-authority `area_summary` product from current NZ places, TA boundaries, and 2013/2018/2023 religion data.
 - `scripts/clean_nz_places.py`: remove obvious non-worship records from the committed NZ places datasets.
 - `scripts/build_nz_review_queue.py`: build `docs/nz-manual-review-queue.md` and `docs/nz-manual-review-queue.csv` for manual review.
+- `scripts/build_ra_working_sheet.py`: build the project-owned RA Google Sheets import workbook from `docs/templates/ra-historical-site-evidence/`; the generated `.xlsx` goes under gitignored `exports/` and should be imported into Google Drive as a native Sheet. The workbook includes frozen headers, filters, and dropdown validation for the main controlled fields.
 
 Current global pipeline scaffolding:
 

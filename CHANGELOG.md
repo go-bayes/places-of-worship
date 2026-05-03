@@ -5,6 +5,18 @@
   tutorial from the default RA task path, and added planning notes for
   UI-generated new PoW nominations and explicit 2013/2018/2023 evidence
   capture.
+- Clarified that RA working spreadsheets should be project-owned Google Sheets,
+  with later automated provisioning from a locked project template rather than
+  RA-owned copies.
+- Added `scripts/build_ra_working_sheet.py` to build the multi-tab RA working
+  workbook from the repository templates for native Google Sheets import,
+  including frozen headers, filters, and main-tab controlled-field dropdowns.
+- Added `field_observation` to the RA evidence vocabulary and documented
+  street-level imagery providers, capture dates, and RA field observations as
+  explicit visual evidence sources.
+- Updated the NZ verification map action builder to capture source provider,
+  source/capture date, Street View or other street-imagery sources, and field
+  observation rows without silently falling back to OSM as evidence.
 - Added a selected-site task brief to the NZ verification map demo. The detail
   panel now turns priority, suggested action, target year, and automated checks
   into a concrete RA checklist before the findings form.

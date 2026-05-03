@@ -758,3 +758,47 @@ nominate missing places, and how to mark 2013, 2018, and 2023 target-year
 states. Development docs can still document `pow validate`, `pow stage`,
 `pow propose`, and staging internals, but they should not be linked as the
 default RA workflow.
+
+## 2026-05-03: Project-owned RA working sheets
+
+Decision:
+Use project-owned Google Sheets as the temporary RA evidence store, not
+RA-owned copies. The immediate pilot can share one project-controlled working
+sheet directly with the RA. A later provisioning step should create per-RA or
+per-batch sheets from a locked project-owned template and grant RA access.
+
+Rationale:
+Project ownership keeps the evidence store retrievable, permissioned,
+offboardable, and auditable. RA-owned copies would remove the manual
+sheet-supply step but would make access control and long-term custody harder.
+
+Consequences:
+Sheet links should be supplied directly and kept out of GitHub. Planning should
+favour automated provisioning within the project Google Drive workspace, with
+locked headers, batch metadata, RA access grants, and later portal integration.
+The first helper is `scripts/build_ra_working_sheet.py`, which builds the
+multi-tab workbook from the repository CSV templates for import into Google
+Drive as a native project-owned Sheet, with frozen headers, filters, and
+main-tab controlled-field dropdowns.
+
+## 2026-05-03: Street imagery and field observation evidence
+
+Decision:
+Treat dated street-level imagery and approved field observations as explicit
+RA evidence types. Use `source_type = street_imagery` for providers such as
+Google Street View, Apple Look Around, Mapillary, KartaView, Bing Streetside,
+or similar services, and `source_type = field_observation` for approved RA or
+project-team site visits.
+
+Rationale:
+Visual evidence can have low measurement error for visible worship-use claims,
+such as signs, service boards, and named place-of-worship markers. It is weaker
+for absence because missing visible signage does not prove that worship use was
+absent.
+
+Consequences:
+Rows should record provider or observer type, source link or agreed reference,
+capture or visit date, and a short site-level visual claim. Do not store or
+republish Street View screenshots, RA photos, videos, private conversations, or
+personal contact details in Git or public outputs unless a later approved media
+workflow covers consent, licensing, quarantine, and review.

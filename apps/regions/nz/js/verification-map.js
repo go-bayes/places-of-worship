@@ -1110,14 +1110,12 @@ class NzVerificationMap {
         const stepsEl = document.getElementById("workflowSteps");
         if (!stepsEl) return;
         const action = document.getElementById("raActionSelect")?.value || "needs_review";
-        const sourceUrl = (document.getElementById("sourceUrlInput")?.value || "").trim();
-        const sourceTitle = (document.getElementById("sourceTitleInput")?.value || "").trim();
-        const note = (document.getElementById("decisionNote")?.value || "").trim();
+        const values = this.currentFormValues();
         const noteTouched = document.getElementById("decisionNote")?.dataset.touched === "1";
         const copied = stepsEl.dataset.copied === "1";
 
         const decided = action !== "needs_review";
-        const evidenced = sourceUrl !== "" && sourceTitle !== "" && note.length >= 5 && noteTouched;
+        const evidenced = !this.evidenceInputError(values) && noteTouched;
 
         const order = ["inspect", "decide", "evidence", "copy"];
         const done = [];
@@ -1208,8 +1206,9 @@ class NzVerificationMap {
                         Source type
                         <select id="sourceTypeSelect">
                             <option value="osm_lifecycle_tags">OSM lifecycle tags</option>
-                            <option value="street_imagery">Street imagery</option>
+                            <option value="street_imagery">Street imagery / Street View</option>
                             <option value="aerial_imagery">Aerial imagery</option>
+                            <option value="field_observation">Field observation</option>
                             <option value="denominational_directory">Denominational directory</option>
                             <option value="charities_register">Charities register</option>
                             <option value="archived_website">Archived website</option>
@@ -1221,13 +1220,21 @@ class NzVerificationMap {
                 </div>
                 <h3>3. Evidence: where did the answer come from?</h3>
                 <label>
+                    Provider or observer
+                    <input id="sourceProviderInput" type="text" placeholder="e.g. Google Street View, Apple Look Around, Mapillary, RA field observation">
+                </label>
+                <label>
                     Source title
-                    <input id="sourceTitleInput" type="text" placeholder="e.g. Anglican Diocese of Wellington directory 2018">
+                    <input id="sourceTitleInput" type="text" placeholder="e.g. Anglican Diocese of Wellington directory 2018, Google Street View imagery">
+                </label>
+                <label>
+                    Source date or imagery capture date
+                    <input id="sourceDateInput" type="text" placeholder="e.g. 2018-09, 2023, or 2026-05-03 for a field visit">
                 </label>
                 <div class="source-url-row">
                     <label>
                         Source URL or file reference
-                        <input id="sourceUrlInput" type="text" placeholder="https:// link to the evidence page, archive, or agreed storage path">
+                        <input id="sourceUrlInput" type="text" placeholder="https:// link, Street View link, archive, or agreed storage path">
                     </label>
                     <button id="useOsmUrlButton" type="button" class="tertiary" title="Fill the URL field with the OSM record link if your evidence is the OSM record itself">Use OSM URL</button>
                 </div>
@@ -1291,6 +1298,11 @@ class NzVerificationMap {
                     sourceTitle.value = `OSM ${props.osm_type || ""} ${props.osm_id || ""}`.trim();
                     sourceTitle.dispatchEvent(new Event("input", { bubbles: true }));
                 }
+                const sourceProvider = document.getElementById("sourceProviderInput");
+                if (sourceProvider && !sourceProvider.value) {
+                    sourceProvider.value = "OpenStreetMap";
+                    sourceProvider.dispatchEvent(new Event("input", { bubbles: true }));
+                }
                 const sourceTypeSelect = document.getElementById("sourceTypeSelect");
                 if (sourceTypeSelect) {
                     sourceTypeSelect.value = "osm_lifecycle_tags";
@@ -1308,7 +1320,7 @@ class NzVerificationMap {
             });
         }
 
-        ["sourceUrlInput", "sourceTitleInput", "relatedIdsInput", "sourceTypeSelect"].forEach(id => {
+        ["sourceProviderInput", "sourceUrlInput", "sourceTitleInput", "sourceDateInput", "relatedIdsInput", "sourceTypeSelect"].forEach(id => {
             document.getElementById(id)?.addEventListener("input", () => this.updateWorkflowSteps());
             document.getElementById(id)?.addEventListener("change", () => this.updateWorkflowSteps());
         });
@@ -1350,11 +1362,33 @@ class NzVerificationMap {
             status2018: document.getElementById("status2018")?.value || "not_assessed",
             status2023: document.getElementById("status2023")?.value || "not_assessed",
             sourceType: document.getElementById("sourceTypeSelect")?.value || "other",
+            sourceProvider: document.getElementById("sourceProviderInput")?.value || "",
             sourceTitle: document.getElementById("sourceTitleInput")?.value || "",
+            sourceDate: document.getElementById("sourceDateInput")?.value || "",
             sourceUrl: document.getElementById("sourceUrlInput")?.value || "",
             relatedIds: document.getElementById("relatedIdsInput")?.value || "",
             note: document.getElementById("decisionNote")?.value || "",
         };
+    }
+
+    evidenceInputError(values) {
+        if (!values.sourceTitle.trim()) return "Add a source title.";
+        if (values.note.trim().length < 5) return "Add a short evidence note.";
+        if (values.sourceType === "field_observation" && !values.sourceDate.trim()) {
+            return "Add the field observation date.";
+        }
+        if (values.sourceType !== "field_observation" && !values.sourceUrl.trim()) {
+            return "Add a source URL or agreed file reference. Use the OSM button only when OSM itself is the evidence.";
+        }
+        return "";
+    }
+
+    visualVerificationSource(sourceType) {
+        if (sourceType === "street_imagery") return "street_imagery";
+        if (sourceType === "aerial_imagery") return "aerial_imagery";
+        if (sourceType === "field_observation") return "field_observation";
+        if (sourceType === "osm_lifecycle_tags" || sourceType === "osm_history") return "osm_cartography";
+        return "none";
     }
 
     buildWideEvidenceRow(props) {
@@ -1386,7 +1420,7 @@ class NzVerificationMap {
         row.country_code = "NZ";
         row.source_dataset_id = "nz_static_verification_map";
         row.source_type = values.sourceType;
-        row.provider = "Places of Worship NZ verification map";
+        row.provider = values.sourceProvider || "unspecified";
         row.source_title = values.sourceTitle || "NZ map verification task";
         row.source_url_or_file = values.sourceUrl;
         row.source_record_id = sourceRecordId;
@@ -1395,7 +1429,7 @@ class NzVerificationMap {
         row.access_limits = "public_or_project_review";
         row.redistribution_limits = "needs_review";
         const raInitials = this.getRaInitials();
-        row.source_notes = `Generated locally from the static RA workbench${raInitials ? ` by ${raInitials}` : ""}. Action: ${actionLabelForRa(values.action)}.`;
+        row.source_notes = `Generated locally from the static RA workbench${raInitials ? ` by ${raInitials}` : ""}. Action: ${actionLabelForRa(values.action)}.${values.sourceDate ? ` Source/capture date: ${values.sourceDate}.` : ""}`;
         row.name_raw = props.name || "";
         row.name_standardised = props.name || "";
         row.denomination_or_tradition_raw = props.denomination || "";
@@ -1421,10 +1455,19 @@ class NzVerificationMap {
         row.match_method = isMissing ? "unmatched" : isDuplicate ? "manual_review" : "osm_id";
         row.match_confidence = isMissing ? "none" : isDuplicate ? "medium" : "high";
         row.candidate_match_notes = values.relatedIds || "";
-        row.visual_verification_source = "osm_cartography";
-        row.visual_verification_url_or_file = props.osm_map_url || "";
-        row.visual_verification_summary = "Static map task selected by RA; source evidence still requires review.";
-        row.date_evidence_raw = lifecycle;
+        row.visual_verification_source = this.visualVerificationSource(values.sourceType);
+        row.visual_verification_url_or_file = ["street_imagery", "aerial_imagery"].includes(values.sourceType)
+            ? values.sourceUrl
+            : values.sourceType === "osm_lifecycle_tags"
+                ? values.sourceUrl
+                : "";
+        row.visual_verification_capture_date = ["street_imagery", "aerial_imagery", "field_observation"].includes(values.sourceType)
+            ? values.sourceDate
+            : "";
+        row.visual_verification_summary = ["street_imagery", "aerial_imagery", "field_observation"].includes(values.sourceType)
+            ? values.note
+            : "Static map task selected by RA; source evidence still requires review.";
+        row.date_evidence_raw = [values.sourceDate ? `source/capture date: ${values.sourceDate}` : "", lifecycle].filter(Boolean).join("; ");
         row.date_evidence_summary = targetEvidence;
         row.existence_status = anyPresent ? "present" : anyAbsent ? "absent" : "uncertain";
         row.worship_use_status = anyPresent ? "confirmed_worship" : isClosed ? "not_worship" : "uncertain";
@@ -1435,7 +1478,11 @@ class NzVerificationMap {
         row.target_year_2018_evidence = values.status2018 === "not_assessed" ? "" : targetEvidence;
         row.target_year_2023_status = values.status2023;
         row.target_year_2023_evidence = values.status2023 === "not_assessed" ? "" : targetEvidence;
-        row.quality_flag = values.action === "confirm_current_record" ? "directory_confirmed" : "needs_review";
+        row.quality_flag = ["street_imagery", "aerial_imagery", "field_observation"].includes(values.sourceType)
+            ? "visual_confirmation"
+            : values.action === "confirm_current_record"
+                ? "directory_confirmed"
+                : "needs_review";
         row.review_status = values.action === "confirm_current_record" ? "unreviewed" : "needs_review";
         row.privacy_flag = "clear";
         row.licence_flag = "needs_review";
@@ -1463,7 +1510,9 @@ class NzVerificationMap {
                 2023: values.status2023,
             },
             source_type: values.sourceType,
+            source_provider: values.sourceProvider,
             source_title: values.sourceTitle,
+            source_date_or_capture_date: values.sourceDate,
             source_url_or_file: values.sourceUrl,
             related_ids_or_note: values.relatedIds,
             evidence_note: values.note,
@@ -1541,10 +1590,17 @@ class NzVerificationMap {
     }
 
     async copyEvidenceRow(props) {
-        const row = this.buildWideEvidenceRow(props);
-        const tsv = tsvRowFromObject(row);
         const values = this.currentFormValues();
         const status = document.getElementById("copyStatus");
+        const inputError = this.evidenceInputError(values);
+        if (inputError) {
+            if (status) {
+                status.textContent = `${inputError} Nothing was copied.`;
+            }
+            return;
+        }
+        const row = this.buildWideEvidenceRow(props);
+        const tsv = tsvRowFromObject(row);
         const output = document.getElementById("evidenceRowOutput");
         if (output) {
             output.value = tsv;
@@ -1579,7 +1635,9 @@ class NzVerificationMap {
                 2018: values.status2018,
                 2023: values.status2023,
             },
+            source_provider: values.sourceProvider,
             source_title: values.sourceTitle,
+            source_date_or_capture_date: values.sourceDate,
             source_url_or_file: values.sourceUrl,
             tsv,
         });

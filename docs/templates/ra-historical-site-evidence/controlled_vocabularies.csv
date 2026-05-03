@@ -3,6 +3,7 @@ source_type,osm_history,Historical OpenStreetMap evidence or extract
 source_type,osm_lifecycle_tags,OpenStreetMap lifecycle tags such as start_date or old_start_date
 source_type,street_imagery,Street-level imagery used for visual verification
 source_type,aerial_imagery,Aerial or satellite imagery used for visual verification
+source_type,field_observation,Direct field observation by an RA or project team member
 source_type,charities_register,Charities Services register or related charity record
 source_type,incorporated_societies,Incorporated societies register evidence
 source_type,linz_building_outlines,Land Information New Zealand building outline evidence
@@ -28,6 +29,7 @@ observation_date_basis,directory_year,Date comes from a directory or yearbook ye
 observation_date_basis,registration_date,Date comes from an organisation registration record
 observation_date_basis,deregistration_date,Date comes from an organisation deregistration record
 observation_date_basis,imagery_capture_date,Date comes from aerial or street imagery capture
+observation_date_basis,field_observation_date,Date comes from direct field observation
 observation_date_basis,osm_version_timestamp,Date comes from an OpenStreetMap object version timestamp
 observation_date_basis,osm_lifecycle_tag,Date comes from an OpenStreetMap lifecycle tag
 observation_date_basis,annual_return_year,Date comes from an annual return or filing year
@@ -114,6 +116,7 @@ geocoding_confidence,none,No geocoding confidence assigned
 visual_verification_source,osm_cartography,OpenStreetMap cartographic or object-history evidence
 visual_verification_source,street_imagery,Street-level imagery
 visual_verification_source,aerial_imagery,Aerial or satellite imagery
+visual_verification_source,field_observation,Direct field observation
 visual_verification_source,street_map,Street map or road map
 visual_verification_source,historical_map,Historical map
 visual_verification_source,none,No visual verification used

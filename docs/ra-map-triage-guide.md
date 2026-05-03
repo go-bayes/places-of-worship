@@ -20,10 +20,12 @@ The short version is:
 The current pilot is map-assisted, but not yet a secure submission portal. The
 map is a search and triage surface. In demo mode, it can generate a local
 spreadsheet-ready evidence row and a local review JSON preview for feedback.
-The spreadsheet remains the evidence-entry surface. The project team handles
-validation, staging, and review unless they explicitly ask otherwise. Nothing
-entered in the demo map is saved or submitted. Your work is saved in the shared
-working spreadsheet, not in the map.
+The spreadsheet remains the evidence-entry surface. For the NZ pilot, this is a
+project-controlled Google Sheet in the project team's private Google Drive
+workspace. The project team sends the link directly; it should not be committed
+to GitHub. The project team handles validation, staging, and review unless they
+explicitly ask otherwise. Nothing entered in the demo map is saved or submitted.
+Your work is saved in the shared working spreadsheet, not in the map.
 
 The verification map also has target-year controls for 2013, 2018, and 2023.
 These colours are provisional. They use reviewed target-year fields when
@@ -118,6 +120,32 @@ Use these fields consistently in the wide evidence sheet:
 
 Do not paste private contact details, restricted source files, or raw uploaded
 material into GitHub.
+
+## Street-Level Imagery And Field Observations
+
+Street-level imagery can be strong evidence when the capture date is visible
+and the visual claim is specific: for example, a worship-service sign, a
+denominational sign, a named church noticeboard, or a building sign that clearly
+identifies current worship use. It is weaker evidence for absence: no visible
+sign does not prove that worship use was absent.
+
+Use `source_type = street_imagery` for Google Street View, Apple Look Around,
+Mapillary, KartaView, Bing Streetside, local-council street imagery, or similar
+street-level services. Put the service in `provider`, for example `Google
+Street View`. Record the image or panorama link in `source_url_or_file`, the
+displayed capture date in `visual_verification_capture_date`, and a short
+visual claim in `visual_verification_summary`.
+
+Use `source_type = field_observation` for an RA or project-team site visit. Put
+the visit date in `visual_verification_capture_date`, write `field_observation`
+in `visual_verification_source`, and summarise only the site-level observation.
+Do not record private conversations, personal contact details, photographs, or
+videos unless the project team has explicitly approved the collection and
+storage path.
+
+Do not store or republish Street View screenshots in the repository or public
+outputs. Record the provider, link or agreed file reference, capture date, and
+what the image supports.
 
 ## Using OSM Lifecycle Dates
 

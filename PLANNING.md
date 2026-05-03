@@ -90,6 +90,14 @@ As of 30 April 2026:
   ids, and evidence note into a spreadsheet-ready wide evidence row plus review
   JSON. This is a usability bridge only: it does not save, submit, authenticate,
   or write to staging.
+- Street-level imagery and direct field observations are first-class RA
+  evidence sources. Use `source_type = street_imagery` for dated imagery
+  providers such as Google Street View, Apple Look Around, Mapillary, KartaView,
+  Bing Streetside, or equivalent services, and use
+  `source_type = field_observation` for approved RA or project-team site visits.
+  Record provider, link or agreed reference, capture or visit date, and a
+  short site-level visual claim; do not store screenshots, photos, videos, or
+  private observations in Git.
 - Selected NZ verification tasks now display a concrete task brief before the
   findings form. The brief turns priority, suggested action, target year, and
   automated checks into an RA-facing checklist.
@@ -97,8 +105,11 @@ As of 30 April 2026:
   start from the NZ verification map, build a small mixed pilot batch, use the
   action builder and spreadsheet for evidence, and leave command-line
   validation and staging to the project team unless explicitly asked. Until
-  authenticated save exists, the shared working spreadsheet is the persistent
-  store; CSV export comes from that spreadsheet only when requested.
+  authenticated save exists, the persistent working surface is a
+  project-controlled Google Sheet in the project team's private Google Drive
+  workspace. The sheet link should be supplied directly to the RA and should
+  not be committed to GitHub. CSV export comes from that spreadsheet only when
+  requested.
 - CLI and staging support docs that are not essential to RA map work now live
   under `docs/development/` so the RA path stays focused on the UI and working
   spreadsheet.
@@ -145,6 +156,35 @@ iteration should make it behave like the selected-site action builder:
    match exists, and `review_status = needs_review`.
 6. Keep all output local until authenticated staging exists. Future backend
    staging should mint durable candidate ids only after validation and review.
+
+### Working spreadsheet provisioning
+
+The pilot should use project-owned Google Sheets, not RA-owned copies, as the
+temporary evidence store. The simplest version is one project-controlled
+working sheet shared directly with the RA. The next iteration should automate
+sheet provisioning from a locked project-owned template:
+
+1. Create one workbook or tab per RA, batch, or assigned work period in the
+   project Google Drive workspace.
+2. Keep project ownership and grant the RA edit access.
+3. Lock headers and validation columns where possible so the wide evidence
+   schema is not accidentally changed.
+4. Prefill batch metadata such as RA id, batch id, assignment date, target
+   country, and target-year set.
+5. Keep the sheet link out of GitHub and revoke access when the work period
+   ends.
+6. Later, let the authenticated map/portal request or assign a project-owned
+   working sheet automatically.
+
+Avoid making RA-owned sheets the default system of record. RA-owned copies make
+offboarding, retrieval, permissions, and audit trails harder.
+
+The first provisioning helper is `scripts/build_ra_working_sheet.py`, which
+builds a gitignored `.xlsx` import workbook from
+`docs/templates/ra-historical-site-evidence/`, including frozen headers,
+filters, and main-tab controlled-field dropdowns. Import that workbook into
+Google Drive as a native Sheet, then share the project-owned Sheet directly
+with the RA. Keep the private Sheet URL out of repository docs.
 
 ### Target-year and lifecycle evidence
 

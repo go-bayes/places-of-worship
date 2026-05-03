@@ -6,19 +6,31 @@ The template is for source evidence, not final counts. Each row should record wh
 
 ## How to set up the sheet
 
-1. Create a Google Sheet named `NZ historical site evidence - working`.
-2. For the first RA pass, import:
-   - `site_evidence_wide.csv`
-   - `controlled_vocabularies.csv`
-3. For a fuller ingestion pilot, also import the normalised reference tabs:
-   - `sources.csv`
-   - `site_observations.csv`
-   - `site_lifecycle_events.csv`
-   - `candidate_matches.csv`
-   - `review_notes.csv`
-4. Freeze the first row on each tab.
-5. Use `controlled_vocabularies.csv` for drop-down validation where practical.
-6. Share the sheet with the project team only. Do not make the sheet public unless source licences and privacy checks permit public release.
+The pilot should use a project-owned Google Sheet, not an RA-owned copy. To
+build the import workbook from these CSV tabs, run from the repo root:
+
+```sh
+uv run scripts/build_ra_working_sheet.py
+```
+
+The script writes an `.xlsx` workbook under `exports/`, which is gitignored.
+Import that workbook into Google Drive as a native Google Sheet, then share the
+Google Sheet directly with the RA. Do not commit the private sheet link to
+GitHub. The workbook includes frozen header rows, filters, and dropdown
+validation for the main controlled fields in `site_evidence_wide`.
+
+The generated workbook includes:
+
+- `site_evidence_wide.csv`, the main RA working tab
+- `controlled_vocabularies.csv`
+- `sources.csv`
+- `site_observations.csv`
+- `site_lifecycle_events.csv`
+- `candidate_matches.csv`
+- `review_notes.csv`
+
+Share the sheet with the project team and assigned RA only. Do not make the
+sheet public unless source licences and privacy checks permit public release.
 
 ## RA workflow
 
@@ -27,11 +39,13 @@ The template is for source evidence, not final counts. Each row should record wh
 3. Record all source-backed lifecycle evidence you find: organisation founding, first sighting, opening or dedication, relocation, closure, last sighting, change of use, and demolition.
 4. Preserve historical addresses as evidence. Put any modern address or coordinates in the matching/geocoding fields and note the basis for that interpretation.
 5. Preserve OpenStreetMap object ids, version timestamps, lifecycle tags, and visual verification notes where they are used as evidence.
-6. Use the 2013, 2018, and 2023 status/evidence columns only when the source helps determine whether the place existed or was in worship use in those years.
-7. Use target-year probability columns only when a reviewer or pipeline has made an explicit probability judgement. Enter values from `0` to `1`; leave blank otherwise.
-8. Use `sources.csv`, `site_observations.csv`, and `candidate_matches.csv` as reference or downstream-normalised tabs when the team is ready to split the wide sheet into ingestion tables.
-9. Use `review_notes.csv` for reviewer decisions, unresolved problems, and follow-up tasks.
-10. Leave uncertain cases as `needs_review` rather than forcing a match.
+6. Use `source_type = street_imagery` for dated street-level imagery such as Google Street View, Apple Look Around, Mapillary, KartaView, Bing Streetside, or comparable services. Record the provider, URL or agreed reference, displayed capture date, and a short summary of what the image shows. Do not store screenshots in Git.
+7. Use `source_type = field_observation` for direct RA or project-team site visits. Record the visit date and site-level observation, but do not record private conversations, personal contact details, photos, or videos unless the project team has explicitly approved the collection and storage path.
+8. Use the 2013, 2018, and 2023 status/evidence columns only when the source helps determine whether the place existed or was in worship use in those years.
+9. Use target-year probability columns only when a reviewer or pipeline has made an explicit probability judgement. Enter values from `0` to `1`; leave blank otherwise.
+10. Use `sources.csv`, `site_observations.csv`, and `candidate_matches.csv` as reference or downstream-normalised tabs when the team is ready to split the wide sheet into ingestion tables.
+11. Use `review_notes.csv` for reviewer decisions, unresolved problems, and follow-up tasks.
+12. Leave uncertain cases as `needs_review` rather than forcing a match.
 
 ## Data rules
 
@@ -44,7 +58,8 @@ The template is for source evidence, not final counts. Each row should record wh
 - Use bounded date fields when the source only gives a limit. For example, if a source proves the site existed before or by 2013 but gives no opening date, leave the exact opening fields blank and enter `2013` in `origin_not_later_than_date` with `origin_not_later_than_date_precision` set to `year`.
 - Read `not_later_than` as "known by this date" and `not_earlier_than` as "cannot have occurred before this date". Use the closure equivalents for closure or end-of-use evidence.
 - OpenStreetMap lifecycle tags such as `start_date`, `old_start_date`, and `end_date` are useful evidence, but they are not final truth. Preserve the raw tags and explain how they were interpreted.
-- Visual checks from street maps, street-level imagery, aerial imagery, or historical maps should record the source, capture date where known, URL or file reference, and a short summary.
+- Visual checks from street maps, street-level imagery, aerial imagery, historical maps, or field observations should record the provider or observer type, capture or visit date where known, URL or agreed file reference, and a short summary.
+- Street-level imagery and field observations can strongly support visible worship-use claims, but absence of visible signage should usually be treated as weak or uncertain evidence for absence.
 - Use date precision fields to distinguish exact dates from month-only, year-only, bounded, or uncertain dates.
 - Use the target-year columns to record whether the source supports `present`, `absent`, `uncertain`, or `not_assessed` for 2013, 2018, and 2023.
 

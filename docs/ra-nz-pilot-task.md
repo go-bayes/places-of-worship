@@ -15,8 +15,8 @@ The project team will handle validation unless they explicitly ask otherwise.
 In practical terms:
 
 1. Open the NZ verification task map.
-2. Open the shared working spreadsheet supplied by the project team. This is
-   where your work is saved.
+2. Open the shared working spreadsheet link supplied by the project team. This
+   is where your work is saved.
 3. Choose a target year: 2013, 2018, or 2023.
 4. Select one task from the map or priority list.
 5. Check the links and search for source evidence.
@@ -40,9 +40,14 @@ is saved or submitted.
 The map demo does not save anything. It only helps you inspect a case and, in
 demo mode, copy a draft row.
 
-Your saved work lives in the shared working spreadsheet supplied by the project
-team, usually a Google Sheet. Each case you work on should become one row in
-that spreadsheet.
+Your saved work lives in a project-controlled Google Sheet in the project
+team's private Google Drive workspace. The project team will send you the sheet
+link directly. Do not look for the sheet in GitHub, and do not add the link to
+GitHub.
+
+Each case you work on should become one row in that spreadsheet. For the NZ
+pilot, expect a project-owned sheet named `NZ PoW RA Pilot Working Sheet` with
+`site_evidence_wide` as the main evidence-entry tab.
 
 At the end of the work period, either:
 
@@ -181,7 +186,11 @@ Use public or project-approved sources:
 - official place or congregation website,
 - denominational directory or yearbook,
 - OpenStreetMap object and history,
-- street or aerial imagery,
+- street-level imagery such as Google Street View, Apple Look Around,
+  Mapillary, KartaView, or similar services,
+- RA field observations where the project team has approved the visit and
+  storage rules,
+- aerial imagery,
 - Charities Services or incorporated-society records,
 - local council, heritage, or property records,
 - archived web pages,
@@ -190,6 +199,12 @@ Use public or project-approved sources:
 For each source, record enough information for someone else to find it again:
 source type, source title, URL or agreed file reference, retrieval date, and a
 short evidence note.
+
+For street-level imagery, record the provider, URL, displayed capture date, and
+what was visible. Do not save or upload screenshots. For RA field observations,
+record the visit date and site-level observation only; do not record private
+conversations, personal contact details, photos, or videos unless explicitly
+approved.
 
 Do not paste private contact details, restricted files, or raw uploaded source
 material into GitHub or the public repository.
