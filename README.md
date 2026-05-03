@@ -1,98 +1,75 @@
-# Global Places of Worship Project
+# Places of Worship
 
-An open, research-focused project for mapping and studying places of worship. The long-term aim is to build a reproducible research portal for tracking religious change over time at the level of the place itself.
+An open research project for mapping places of worship and studying religious
+change across space and time.
 
-## Quick Links
+The long-term aim is a reproducible research portal that can track opening,
+closure, persistence, relocation, shared use, and repurposing at the level of
+the place itself. The public map is an active prototype, not a finished
+reference product.
 
-- **Global Map:** [https://go-bayes.github.io/places-of-worship/index.html](https://go-bayes.github.io/places-of-worship/index.html)
-- **New Zealand Regional Map:** [https://www.placesmap.org/enhanced-places.html](https://www.placesmap.org/enhanced-places.html)
-- **NZ Verification Task Map:** [https://www.placesmap.org/apps/regions/nz/verification.html](https://www.placesmap.org/apps/regions/nz/verification.html)
-- **Planning (single source of truth):** [PLANNING.md](PLANNING.md)
-- **RA NZ web pilot task:** [docs/ra-nz-pilot-task.md](docs/ra-nz-pilot-task.md)
-- **RA CLI tutorial:** [docs/ra-cli-tutorial.md](docs/ra-cli-tutorial.md)
-- **RA map triage guide:** [docs/ra-map-triage-guide.md](docs/ra-map-triage-guide.md)
+## Links
 
-## Overview
+- [Global map](https://go-bayes.github.io/places-of-worship/index.html)
+- [New Zealand regional map](https://www.placesmap.org/enhanced-places.html)
+- [New Zealand verification task map](https://www.placesmap.org/apps/regions/nz/verification.html)
+- [Roadmap](ROADMAP.md)
+- [Planning](PLANNING.md)
+- [RA NZ web pilot task](docs/ra-nz-pilot-task.md)
 
-This project combines open geospatial data, regional boundary systems, and reproducible data pipelines to study places of worship across countries and across time. In the near term, we are improving the quality of the global map and the New Zealand regional case study. In the longer term, we aim to support research on opening, closure, persistence, relocation, rebuilding, and repurposing at the level of the place of worship.
+## Current Work
 
-The current public map should be understood as an active research prototype rather than a finished reference product. Some country-level data are cleaner than others, and the global data pipeline is being rebuilt to improve precision, provenance, and temporal comparability.
+New Zealand is the proof-of-concept country for temporal validation. The pilot
+uses the verification map and a shared working spreadsheet to collect
+source-backed evidence about:
 
-## Current NZ Scope
+- places of worship present or absent in 2013, 2018, and 2023,
+- missing or duplicate mapped sites,
+- closures and changes of use,
+- denomination or tradition changes,
+- shared buildings and multi-purpose sites,
+- uncertainty that requires reviewer judgement.
 
-For the New Zealand dataset, the primary unit is the mapped place or building used for worship, not the congregation as a social group.
+The `pow` Rust CLI provides local validation, staging, proposal, and reviewer
+diff reports. The map does not yet save directly to a backend; authenticated
+save, review, and merge tracking are planned next.
 
-We currently include sites that are explicitly mapped in OpenStreetMap as `amenity=place_of_worship` or as clearly religious buildings. We exclude obviously non-worship records such as cemeteries, offices, residences, schools, childcare sites, and community facilities unless the worship space itself is mapped separately.
+## Scope
 
-The current NZ regional boundary layer follows the official territorial authority geography used in `apps/regions/nz/data/territorial_authorities.geojson`. That includes Chatham Islands Territory. It does not currently extend to Cook Islands, Niue, or Tokelau.
+The lowest-level analytical unit is a mappable place of worship with
+worship-function state, not merely a building record and not necessarily a
+congregation as a social group.
 
-## Who Is Involved?
+## Data
 
-This project is led by Professor Joseph Bulbulia (Victoria University of Wellington, New Zealand) and Dr Joseph Watts (University of Canterbury, New Zealand).
+The project uses OpenStreetMap data and thanks the OpenStreetMap community for
+the base global places-of-worship data. We also use public statistical and
+boundary data, including Statistics New Zealand data where documented in the
+relevant data products.
 
-We acknowledge Nick Young at the University of Auckland Centre for eResearch for providing the initial inspiration.
+OpenStreetMap-derived databases are distributed under the Open Database Licence
+(ODbL 1.0), consistent with OSM licence terms.
 
-## Who Funds This Project?
+## Project Team
 
-This research is supported by a subgrant from the **Templeton Religion Trust (TRT-2022-30666)**, aimed at investigating the social consequences of religion.
+The project is led by Professor Joseph Bulbulia (Victoria University of
+Wellington, New Zealand) and Dr Joseph Watts (University of Canterbury, New
+Zealand). We thank Nick Young at the University of Auckland Centre for
+eResearch for the initial inspiration.
 
-This is an independent, academic project. The funders have no role in the design or implementation of this project.
+This work is supported by a Templeton Religion Trust subgrant
+(TRT-2022-30666).
 
-## Contributing Data Corrections
+## Contribution Status
 
-### How can I add or correct a place of worship on the map?
+This repository is not currently accepting pull requests while the data
+contracts, research-assistant workflow, and map products are stabilising.
+Research assistants should follow the agreed map-first pilot, spreadsheet, and
+validation workflow rather than submitting GitHub changes.
 
-This map sources its data from **OpenStreetMap (OSM)**, a collaborative global mapping project. Like Wikipedia, OpenStreetMap is a free, open resource built and maintained by volunteers for the public good. To add a missing religious site, please follow these steps.
+Public corrections to places of worship should generally be made through
+OpenStreetMap itself, following OpenStreetMap's own contribution rules and
+licence requirements.
 
-First, **create an OpenStreetMap account** at [https://www.openstreetmap.org](https://www.openstreetmap.org).
-
-Second, **navigate to the location** on the map where the place of worship is situated.
-
-Third, **click "Edit"** to open the editor.
-
-Fourth, **add a point** at the correct location and tag it appropriately, or select an existing place to revise details or remove incorrect entries.
-
-When tagging the location, use `amenity=place_of_worship`. Add the religion (e.g., `religion=christian`, `religion=buddhist`, `religion=muslim`) and the denomination if applicable (e.g., `denomination=catholic`). Include the name and any other relevant details. If known, please add the construction date using `start_date=YYYY` (e.g., `start_date=1887`); this information is particularly valuable for scientific research on religious landscapes.
-
-Finally, **save your changes** with a brief description.
-
-Your edits will be reviewed by the OSM community and typically appear on this map within a few days to weeks, depending on data update cycles.
-
-For those new to the platform, the [OSM Beginners' Guide](https://wiki.openstreetmap.org/wiki/Beginners%27_guide) provides detailed instructions.
-
-Please note that all contributions must follow the [OpenStreetMap Licence (ODbL 1.0)](https://opendatacommons.org/licenses/odbl/) and be based on your own knowledge.
-
-The most helpful public contribution is fixing errors, revising details,
-removing incorrect places, or adding missing places directly in OpenStreetMap.
-
-This repository is not currently accepting pull requests. We are keeping
-development single-maintainer until the data contracts, RA validation workflow,
-and map products are stable. Research assistants should follow the agreed
-map-first pilot, spreadsheet, and validation workflow rather than submitting
-GitHub changes.
-
-## Technical Architecture
-
-The application uses an open-source geospatial stack.
-
-**Frontend and Visualisation:** the map interface is built with MapLibre GL JS, served as static HTML/CSS/JS via GitHub Pages. It features a mobile-friendly dock toggle and uses Google Maps JS API for Street View integration (inline on desktop, link-only on mobile).
-
-**Tile Services:** we use a custom tile generation workflow. Basemap styles are sourced from MapTiler (using the CARTO Light style as default, with Backdrop (and other themes, depending on whether you access via mobile or desktop) as fallbacks. Custom data tiles are processed using Tippecanoe and served via `Martin` (built in Rust) running in Docker from a Google Cloud VM. The underlying tile data (mbtiles/pmtiles) is stored in a Google Cloud Storage bucket.
-
-**Data Processing:** R is the canonical language for the research-facing data pipeline. Python is retained for lightweight support utilities and the temporary API prototype, with heavy Python dependencies installed only through explicit `uv` extras.
-
-## Data Sources and Licensing
-
-### OpenStreetMap (OSM) Data
-
-This project relies on OpenStreetMap data. All OSM data and derivative databases are subject to the [Open Database Licence (ODbL 1.0)](https://opendatacommons.org/licenses/odbl/). Databases derived from OSM are distributed under the ODbL, consistent with OSM licence terms.
-
-**Attribution:** ©OpenStreetMap contributors.
-
-### Additional Data Sources
-
-We also incorporate data from Statistics New Zealand (CC BY 4.0) and various National Statistical Offices as attributed within the dataset.
-
-## Licence
-
-This project is licensed under the Open Database Licence (ODbL 1.0) to maintain compatibility with OpenStreetMap data.
+See [ROADMAP.md](ROADMAP.md) for planned phases and [PLANNING.md](PLANNING.md)
+for current implementation priorities.
