@@ -31,6 +31,9 @@ uncertainty, and difficult cases.
 This tutorial explains how to check a small New Zealand places-of-worship
 evidence batch with the local `pow` command.
 
+For the current New Zealand pilot, start with `docs/ra-nz-pilot-task.md`.
+The CLI is a validation tool for exported evidence, not the main RA workflow.
+
 If you are starting from the map and need to decide what to record for a
 missing site, duplicate, closure, or priority task, read
 `docs/ra-map-triage-guide.md` first.

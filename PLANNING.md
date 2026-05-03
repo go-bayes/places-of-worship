@@ -90,6 +90,12 @@ As of 30 April 2026:
   ids, and evidence note into a spreadsheet-ready wide evidence row plus review
   JSON. This is a usability bridge only: it does not save, submit, authenticate,
   or write to staging.
+- `docs/ra-nz-pilot-task.md` now defines the current time-bounded RA task:
+  start from the NZ verification map, build a small mixed pilot batch, use the
+  action builder and spreadsheet for evidence, and use the CLI only as a
+  validation support step when asked. Until authenticated save exists, the
+  shared working spreadsheet is the persistent store; CSV export comes from
+  that spreadsheet only when requested.
 - Frontend path: prototype the RA workbench as controls on the current static
   map before committing to a Leptos or equivalent authenticated application.
   Revisit Leptos once the action vocabulary, staged event contract, and review

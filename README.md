@@ -8,6 +8,7 @@ An open, research-focused project for mapping and studying places of worship. Th
 - **New Zealand Regional Map:** [https://www.placesmap.org/enhanced-places.html](https://www.placesmap.org/enhanced-places.html)
 - **NZ Verification Task Map:** [https://www.placesmap.org/apps/regions/nz/verification.html](https://www.placesmap.org/apps/regions/nz/verification.html)
 - **Planning (single source of truth):** [PLANNING.md](PLANNING.md)
+- **RA NZ web pilot task:** [docs/ra-nz-pilot-task.md](docs/ra-nz-pilot-task.md)
 - **RA CLI tutorial:** [docs/ra-cli-tutorial.md](docs/ra-cli-tutorial.md)
 - **RA map triage guide:** [docs/ra-map-triage-guide.md](docs/ra-map-triage-guide.md)
 
@@ -67,7 +68,8 @@ removing incorrect places, or adding missing places directly in OpenStreetMap.
 This repository is not currently accepting pull requests. We are keeping
 development single-maintainer until the data contracts, RA validation workflow,
 and map products are stable. Research assistants should follow the agreed
-spreadsheet and CLI workflow rather than submitting GitHub changes.
+map-first pilot, spreadsheet, and validation workflow rather than submitting
+GitHub changes.
 
 ## Technical Architecture
 

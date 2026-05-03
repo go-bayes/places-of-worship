@@ -17,6 +17,8 @@
   scripts, data products, or deployment behaviour.
 - `CRITIQUE.md`: review notes that motivated the revision-event pipeline.
 - `schemas/`: data contracts. Update schemas before changing dependent shapes.
+- `docs/ra-nz-pilot-task.md`: current RA-facing task instructions for the
+  time-bounded New Zealand web/map-first pilot.
 - `docs/ra-cli-tutorial.md`: RA-facing walkthrough for validating and staging
   evidence batches.
 - `docs/ra-map-triage-guide.md`: RA-facing map-to-spreadsheet triage

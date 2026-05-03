@@ -634,3 +634,29 @@ the actions and staged event contracts are stable, a Leptos frontend remains a
 reasonable candidate for an authenticated Rust-oriented portal, provided it
 uses the same validation contracts and API rather than inventing a parallel
 data path.
+
+## 2026-05-03: Make the current RA task map-first and time-bounded
+
+Decision:
+For the current New Zealand pilot, direct the RA to start from the verification
+map and produce a small mixed evidence batch rather than treating the CLI as
+the centre of the work. The pilot target is a varied set of high-value cases:
+high-priority records, missing lifecycle dates, duplicates, missing current
+sites, 2013-present/2018-absent cases, shared or changed-use sites, and a small
+control sample.
+
+Rationale:
+RA time is limited. A broad search or a CLI-first workflow would produce
+volume before the save, evaluate, review, and merge-track flow has been tested.
+A compact map-first batch gives the project real examples across the categories
+the future portal must support, while still keeping evidence in the
+spreadsheet and validation contracts.
+
+Consequences:
+`docs/ra-nz-pilot-task.md` is now the first RA-facing document for the current
+pilot. The CLI tutorial remains important, but as a validation and support
+guide. The next engineering step should use these pilot rows to wire the
+minimal save/evaluate/review loop rather than waiting for exhaustive NZ
+coverage. Until backend save exists, the shared working spreadsheet is the
+persistent working store; the map demo is only an inspection and copy-helper
+surface.

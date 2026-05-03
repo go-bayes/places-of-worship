@@ -36,6 +36,12 @@
 - Added a no-save RA action builder to the NZ verification map demo so selected
   tasks can produce a spreadsheet-ready evidence row and review JSON locally
   while secure authenticated staging remains future work.
+- Added `docs/ra-nz-pilot-task.md` as the current RA-facing New Zealand web
+  pilot tutorial, making the pilot map-first, time-bounded, and focused on a
+  mixed validation batch rather than CLI-first data entry.
+- Clarified for RAs that the map demo does not save work: pilot evidence is
+  saved in the shared working spreadsheet, with CSV export from that sheet only
+  when requested.
 - Removed the repository contributor guide while development remains
   single-maintainer.
 - Recorded the repository governance baseline: keep the repo public, disable

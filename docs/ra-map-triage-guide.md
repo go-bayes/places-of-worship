@@ -6,15 +6,17 @@ place of worship.
 
 The short version is:
 
-1. Use the map to find and inspect the case.
-2. Use source links, searches, street maps, directories, or other approved
+1. If you are working on the current NZ pilot, start with
+   `docs/ra-nz-pilot-task.md`.
+2. Use the map to find and inspect the case.
+3. Use source links, searches, street maps, directories, or other approved
    sources to check the evidence.
-3. Record the evidence in the agreed spreadsheet. If the map demo action
+4. Record the evidence in the agreed spreadsheet. If the map demo action
    builder is enabled, you may use it to generate a draft spreadsheet row for
    pasting into the sheet.
-4. Export the spreadsheet tab as CSV.
-5. Run `pow validate`.
-6. Send the CSV, validation output, and unresolved questions back to the project
+5. Export the spreadsheet tab as CSV.
+6. Run `pow validate` only if the project team asks.
+7. Send the CSV, validation output, and unresolved questions back to the project
    team.
 
 The current pilot is map-assisted, but not yet a secure submission portal. The
@@ -22,6 +24,7 @@ map is a search and triage surface. In demo mode, it can generate a local
 spreadsheet-ready evidence row and a local review JSON preview for feedback.
 The spreadsheet remains the evidence-entry surface. The command-line tool
 checks the exported CSV. Nothing entered in the demo map is saved or submitted.
+Your work is saved in the shared working spreadsheet, not in the map.
 
 The verification map also has target-year controls for 2013, 2018, and 2023.
 These colours are provisional. They use reviewed target-year fields when
