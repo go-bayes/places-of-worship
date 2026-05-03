@@ -743,11 +743,13 @@ rollback only has to deal with one storage shape.
 
 Consequences:
 Three branches (`claude/ra-ui-tier-1`, `claude/ra-ui-tier-2`,
-`claude/ra-ui-tier-3-demo-default`) form a stack; each PR targets the prior
-tier so its diff is scoped. Once Tier 1 merges to `main`, GitHub retargets
-Tier 2 to `main` automatically; the same will happen for Tier 3 after Tier 2
-merges. No backend writes, no schema changes, and no new evidence-row
-columns were introduced; `WIDE_EVIDENCE_FIELDS` is unchanged. The
-`navigator.clipboard.writeText` HTTPS-and-user-gesture caveat on some mobile
-browsers is documented in the PR descriptions; the existing fallback
-(textarea select-and-copy) covers the failure path without code changes.
+`claude/ra-ui-tier-3-demo-default`) form a stack; each PR initially targets
+the prior tier so its diff is scoped. After a lower tier is squash-merged to
+`main`, the next branch must be rebased or otherwise restacked onto current
+`main` and the PR retargeted before merge. Do not assume GitHub's stacked diff
+is current after a squash merge. No backend writes, no schema changes, and no
+new evidence-row columns were introduced; `WIDE_EVIDENCE_FIELDS` is
+unchanged. The `navigator.clipboard.writeText` HTTPS-and-user-gesture caveat
+on some mobile browsers is documented in the PR descriptions; the existing
+fallback (textarea select-and-copy) covers the failure path without code
+changes.
