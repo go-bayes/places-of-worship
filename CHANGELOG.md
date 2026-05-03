@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- Moved CLI and staging support docs into `docs/development/`, removed the CLI
+  tutorial from the default RA task path, and added planning notes for
+  UI-generated new PoW nominations and explicit 2013/2018/2023 evidence
+  capture.
 - Added a selected-site task brief to the NZ verification map demo. The detail
   panel now turns priority, suggested action, target year, and automated checks
   into a concrete RA checklist before the findings form.
@@ -92,8 +96,9 @@
   schema-backed change-event and geometry-history validation,
   controlled-vocabulary checks, date/coordinate/probability checks,
   replay-safety checks, text/JSON reports, and a local SQLite staging store.
-- Added `docs/revisions-cli.md` and a small NZ sample change-event batch to
-  document how the local CLI relates to later map/API staging ergonomics.
+- Added `docs/development/revisions-cli.md` and a small NZ sample change-event
+  batch to document how the local CLI relates to later map/API staging
+  ergonomics.
 - Recorded journal decisions that the edit/review maps should submit through an
   authenticated API rather than call the CLI directly, and that the first
   staging store should use SQLite-compatible tables while Turso remains a later

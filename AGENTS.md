@@ -19,14 +19,12 @@
 - `schemas/`: data contracts. Update schemas before changing dependent shapes.
 - `docs/ra-nz-pilot-task.md`: current RA-facing task instructions for the
   time-bounded New Zealand web/map-first pilot.
-- `docs/ra-cli-tutorial.md`: RA-facing walkthrough for validating and staging
-  evidence batches.
 - `docs/ra-map-triage-guide.md`: RA-facing map-to-spreadsheet triage
   instructions for missing sites, duplicates, disappeared sites, priority
   tasks, and target-year states.
-- `docs/ra-propose-mapping.md`: mapping from staged RA evidence rows to draft
-  change-event proposals.
-- `docs/revisions-cli.md`: current `pow` CLI and staging behaviour.
+- `docs/development/`: implementation-facing CLI, staging, and proposal
+  mapping notes. Keep these out of the default RA task path unless explicitly
+  requested.
 - `docs/templates/ra-historical-site-evidence/`: RA evidence-entry templates.
 - `docs/master-verification-workflow-plan.md`: master verification and review.
 - `docs/portal-data-entry-plan.md`: authenticated portal planning hub.

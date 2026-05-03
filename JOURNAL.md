@@ -737,3 +737,24 @@ Stacked PRs require care after squash merges. Before merging the next branch
 in a stack, rebase or restack it onto current `main` and retarget the PR so the
 diff is real. The durable coordination rule belongs in `AGENTS.md`; the
 journal only needs to preserve the decision and the lesson.
+
+## 2026-05-03: Keep the RA pilot UI-first
+
+Decision:
+Move CLI tutorials, staging notes, and proposal-mapping docs that are not
+essential for the research-assistant pilot into `docs/development/`. The
+default RA path is now the NZ verification map plus the shared working
+spreadsheet; command-line validation and staging remain project-team or
+developer tasks unless explicitly assigned.
+
+Rationale:
+RA time is limited, and the pilot is testing whether a map-first evidence
+workflow can support useful New Zealand validation. Surfacing CLI material in
+the RA start path split attention away from the UI tasks we need tested now.
+
+Consequences:
+RA-facing docs should explain what to inspect, how to record evidence, how to
+nominate missing places, and how to mark 2013, 2018, and 2023 target-year
+states. Development docs can still document `pow validate`, `pow stage`,
+`pow propose`, and staging internals, but they should not be linked as the
+default RA workflow.

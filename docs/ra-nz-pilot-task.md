@@ -9,8 +9,8 @@ Your main task is to test the map-first evidence workflow. Start with the New
 Zealand verification map, inspect one case at a time, find source evidence, and
 record what the evidence supports in the working spreadsheet.
 
-The command-line tool is not the main workflow for this pilot. Use it only if
-the project team asks you to validate an exported CSV.
+The command-line tool is not part of the default RA workflow for this pilot.
+The project team will handle validation unless they explicitly ask otherwise.
 
 In practical terms:
 
@@ -25,9 +25,11 @@ In practical terms:
 7. Record the evidence in the working spreadsheet. If you are using demo mode,
    use `Copy spreadsheet row` to create a draft row, then review it in the
    sheet.
-8. Mark uncertain cases `needs_review` and move on.
-9. Send the project team the spreadsheet or CSV, any requested validation
-   output, and notes on confusing cases.
+8. If a place is missing from the map, use the draft nomination panel to
+   capture the candidate details and record the evidence in the spreadsheet.
+9. Mark uncertain cases `needs_review` and move on.
+10. Tell the project team when the spreadsheet rows are ready, and include notes
+   on confusing cases.
 
 Do not submit pull requests, commit files, edit repository templates, or put
 private/restricted source material into GitHub. Nothing entered in the demo map
@@ -89,8 +91,8 @@ A useful pilot row has:
 
 Start from the map, not the CLI.
 
-Use the CLI only when the project team asks you to validate an exported CSV.
-Do not run `pow stage` or `pow propose` unless the project team explicitly asks.
+Use the UI and working spreadsheet. Do not run command-line validation,
+staging, or proposal commands unless the project team explicitly asks.
 
 ## Links
 
@@ -100,8 +102,6 @@ Do not run `pow stage` or `pow propose` unless the project team explicitly asks.
   <https://www.placesmap.org/apps/regions/nz/verification.html?demo=0>
 - Detailed case guide:
   `docs/ra-map-triage-guide.md`
-- CLI validation tutorial:
-  `docs/ra-cli-tutorial.md`
 
 ## First Pilot Batch
 
@@ -124,7 +124,8 @@ Mark it `needs_review`, explain the uncertainty, and move on.
 ## Step-By-Step Workflow
 
 1. Open the NZ verification task map.
-2. Open demo mode if the project team has asked you to use the action builder.
+2. Use the default action-builder view. If the page opens in read-only mode,
+   ask the project team before continuing.
 3. Choose the target year you are checking: 2013, 2018, or 2023.
 4. Use the priority and target-year status filters to choose one case.
 5. Click the task on the map or in the list.
@@ -135,9 +136,11 @@ Mark it `needs_review`, explain the uncertainty, and move on.
 9. Record the evidence in the working spreadsheet. If using demo mode, click
    `Copy spreadsheet row`, paste it under the spreadsheet header, and review
    the pasted row.
-10. Mark unclear cases `needs_review`.
-11. Add a short note on any confusing user-interface or source problem.
-12. Move to the next case.
+10. For a place missing from the map, use the draft nomination panel and record
+    the same source evidence in the spreadsheet.
+11. Mark unclear cases `needs_review`.
+12. Add a short note on any confusing user-interface or source problem.
+13. Move to the next case.
 
 ## Choosing The Action
 
@@ -196,10 +199,9 @@ material into GitHub or the public repository.
 At the end of the assigned work period, send the project team:
 
 1. the updated working spreadsheet or exported CSV,
-2. any validation output if you were asked to run `pow validate`,
-3. a short list of confusing cases,
-4. a short list of map or spreadsheet fields that slowed you down,
-5. any cases that seem important but require reviewer judgement.
+2. a short list of confusing cases,
+3. a short list of map or spreadsheet fields that slowed you down,
+4. any cases that seem important but require reviewer judgement.
 
 Do not send a pull request. Do not commit files to the repository.
 

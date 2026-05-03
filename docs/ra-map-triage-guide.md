@@ -14,17 +14,16 @@ The short version is:
 4. Record the evidence in the agreed spreadsheet. If the map demo action
    builder is enabled, you may use it to generate a draft spreadsheet row for
    pasting into the sheet.
-5. Export the spreadsheet tab as CSV.
-6. Run `pow validate` only if the project team asks.
-7. Send the CSV, validation output, and unresolved questions back to the project
-   team.
+5. Tell the project team when the spreadsheet rows are ready, and include
+   unresolved questions.
 
 The current pilot is map-assisted, but not yet a secure submission portal. The
 map is a search and triage surface. In demo mode, it can generate a local
 spreadsheet-ready evidence row and a local review JSON preview for feedback.
-The spreadsheet remains the evidence-entry surface. The command-line tool
-checks the exported CSV. Nothing entered in the demo map is saved or submitted.
-Your work is saved in the shared working spreadsheet, not in the map.
+The spreadsheet remains the evidence-entry surface. The project team handles
+validation, staging, and review unless they explicitly ask otherwise. Nothing
+entered in the demo map is saved or submitted. Your work is saved in the shared
+working spreadsheet, not in the map.
 
 The verification map also has target-year controls for 2013, 2018, and 2023.
 These colours are provisional. They use reviewed target-year fields when
@@ -49,8 +48,8 @@ Current pilot:
 - The demo controls can generate a local spreadsheet row and review JSON for
   discussion, but they do not save or submit data.
 - The working spreadsheet records evidence.
-- `pow validate` checks the exported CSV.
-- `pow stage` and `pow propose` are run only if the project team asks.
+- The project team handles command-line validation and staging outside the
+  default RA workflow.
 
 Target workflow:
 
@@ -161,30 +160,32 @@ Use this when you find a current place of worship that is not on the map.
 2. Search for source evidence: official website, directory, charity register,
    denominational directory, council or heritage record, street imagery, or
    other approved source.
-3. In the wide evidence sheet, add one row for the source-place record.
-4. Set `candidate_site_id` to a temporary id, for example
+3. Use the draft nomination panel in the map to capture the candidate details
+   if that helps, but remember that the panel does not save anything.
+4. In the wide evidence sheet, add one row for the source-place record.
+5. Set `candidate_site_id` to a temporary id, for example
    `candidate-missing-001`.
-5. Leave `matched_current_site_id` blank if there is no current mapped site.
-6. Set `match_method` to `unmatched`.
-7. Set `match_confidence` to `none` unless there is a plausible nearby match
+6. Leave `matched_current_site_id` blank if there is no current mapped site.
+7. Set `match_method` to `unmatched`.
+8. Set `match_confidence` to `none` unless there is a plausible nearby match
    that needs review.
-8. Record `name_raw`, `name_standardised`, `denomination_or_tradition_raw`,
+9. Record `name_raw`, `name_standardised`, `denomination_or_tradition_raw`,
    `site_type`, `address_raw`, `locality_raw`, and source fields where known.
-9. If you can locate the place, record `latitude`, `longitude`,
+10. If you can locate the place, record `latitude`, `longitude`,
    `geocoding_basis`, and `geocoding_confidence`.
-10. If the source supports current worship use, set:
+11. If the source supports current worship use, set:
     - `target_year_2023_status`: `present`
     - `worship_use_status`: `confirmed_worship` or `probable_worship`
     - `existence_status`: `present`
-11. Fill 2013 and 2018 target-year fields only if the source supports them.
-12. Set `quality_flag` to `needs_review`.
-13. Set `review_status` to `needs_review`.
-14. In `review_note`, write: `Current PoW appears missing from map; reviewer to
+12. Fill 2013 and 2018 target-year fields only if the source supports them.
+13. Set `quality_flag` to `needs_review`.
+14. Set `review_status` to `needs_review`.
+15. In `review_note`, write: `Current PoW appears missing from map; reviewer to
     confirm whether this should become a new site.`
 
-Current limitation: `pow propose` v1 does not mint new accepted site ids for
-unmatched candidates. The row can be validated and reviewed, but it needs a
-reviewer decision before it can become a staged master change.
+Current limitation: the demo map can generate a candidate row, but it does not
+mint accepted site ids or write to staging. A reviewer must decide whether the
+candidate becomes a new site.
 
 ## Case 2: Two Map Points Appear To Be One Site
 
