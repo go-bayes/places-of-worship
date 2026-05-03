@@ -105,20 +105,24 @@ Evidence And Governance:
 
 - `[x]` `pow validate` for RA CSVs and change-event or geometry-history JSON.
 - `[x]` `pow stage` for writing validated batches into local SQLite staging.
-- `[ ]` `pow diff` v1 reviewer report with per-site changesets,
+- `[x]` `pow propose --persist` for writing draft change events back into
+  SQLite as a derived stage batch.
+- `[x]` `pow diff` v1 reviewer report with per-site changesets,
   per-target-year affects, validation/warning rollups, source coverage, and
-  identity-decision flags derived directly from staged events.
+  JSON output derived directly from staged or proposed events.
 - `[x]` Initial functional-state payloads for worship use,
   denomination sets, multi-denomination, multi-purpose use, organisation-site
   links, and target-year appeared/disappeared states.
+- `[ ]` Reviewer decision events and accept/reject/defer/revise semantics.
 - `[ ]` Deterministic payload hashing and accepted-event replay checks.
 
 Research Outputs And Analysis:
 
-- `[ ]` Text and JSON validation reports suitable for RA feedback and audit.
-- `[ ]` Staged-batch summaries that R workflows can read without inspecting the
+- `[~]` Text and JSON validation, proposal, and diff reports suitable for RA
+  feedback, reviewer inspection, and audit.
+- `[~]` Staged-batch summaries that R workflows can read without inspecting the
   SQLite store manually.
-- `[ ]` First `pow diff` reports showing proposed changes to target-year
+- `[x]` First `pow diff` reports showing proposed changes to target-year
   worship-function states and denomination, purpose, organisation, geometry, and
   uncertainty fields carried by staged events.
 - `[ ]` Clear labelling of provisional outputs so investigators can inspect
@@ -129,8 +133,8 @@ Research Outputs And Analysis:
 Non-goals:
 
 - Do not accept direct master writes.
-- Do not build rich terminal or web-based data management before the diff
-  surface is useful.
+- Do not build rich terminal or web-based data management before the save,
+  review, and accepted-event contracts are clear.
 
 ## Phase 2: Human Review Workbench
 

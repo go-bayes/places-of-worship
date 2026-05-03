@@ -4,6 +4,9 @@
 - Shortened the public README, added a direct roadmap link, and removed the
   detailed OpenStreetMap editing instructions while retaining OpenStreetMap
   attribution and contribution-status guidance.
+- Updated the roadmap and planning notes after the `pow diff` v1 merge so the
+  next priority is the minimal save/evaluate/review loop rather than the
+  completed diff groundwork.
 - Added `pow propose --persist` so emitted draft change events are written
   back into the local staging database as a derived batch linked to its
   source via `stage_batches.parent_batch_id`, and added `pow diff <batch_id>`

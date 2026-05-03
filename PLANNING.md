@@ -426,9 +426,15 @@ later rebuild/export layer can reuse the same event interpretation.
 
 Because this contract is still pre-release, do not preserve awkward schema
 shapes for backward compatibility. Update examples, tests, and templates
-together while `pow diff`, portal intake, and master rebuilds are still absent.
-The priority is a coherent event model that can represent worship-function
-change directly.
+together while portal intake, review decisions, accepted-event replay, and
+master rebuilds are still absent. The priority is a coherent event model that
+can represent worship-function change directly.
+
+Next priority after `pow diff` v1:
+wire the minimal save/evaluate/review loop for the New Zealand RA pilot. The
+near-term flow is shared spreadsheet or map-assisted row -> `pow stage` ->
+`pow propose --persist` -> `pow diff` reviewer report -> explicit reviewer
+decision. This still must not write directly to the master database.
 
 ### 13. Plan the authenticated portal data-entry pilot
 
