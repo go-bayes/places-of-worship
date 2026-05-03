@@ -32,6 +32,11 @@
 - `docs/convex-task-layer-spec.md`: near-term Convex task-map backend contract
   for shared RA/reviewer task state, evidence drafts, review decisions, and
   exports to `pow`.
+- `docs/development/convex-task-layer-setup.md`: maintainer setup notes for
+  the Convex task-layer scaffold, seeding static NZ tasks, and testing export
+  boundaries.
+- `convex/`: provisional task-map backend scaffold. It owns live task state
+  only and must not write to the master database or public map exports.
 - `research/`: lightweight country-source feasibility notes only.
 - `grant/`: ignored local reporting reference; do not commit it.
 - The repository is not currently accepting external pull requests while the
@@ -113,5 +118,7 @@
 - Rust checks: `cargo fmt --all`, `cargo test`, `cargo clippy --all-targets -- -D warnings`.
 - Python setup: `uv sync`; run scripts with `uv run <script>`.
 - API prototype: `uv run uvicorn api.main:app --reload`.
+- Convex task layer: `npm install`, `npm run convex:dev`, and
+  `uv run scripts/build_convex_task_seed.py --limit 100 --output exports/convex-task-seed/nz-sample.json`.
 - R scripts: run from the repo root unless the script documents another working
   directory.

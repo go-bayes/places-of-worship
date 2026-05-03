@@ -963,3 +963,27 @@ drafts, review decisions, export batches, security boundaries, and the
 Convex-to-`pow` export contract. Implementation should start with the smallest
 slice that replaces browser-local task/session state while preserving the Sheet
 and `pow` export fallback.
+
+## 2026-05-03: Scaffold the Convex task database
+
+Decision:
+Add an initial Convex backend scaffold for shared New Zealand RA task state
+before wiring the live verification map to backend writes.
+
+Rationale:
+The immediate product risk is wasting RA time through browser-local task state
+and manual Sheet/session-JSON coordination. A narrow Convex scaffold lets us
+test shared task exposure, provisional closure, evidence drafts, reviewer
+decisions, export batches, and user-nominated candidates without changing the
+master database or public map. Keeping the frontend disconnected for this first
+step preserves the current RA demo while backend contracts are checked.
+
+Consequences:
+`convex/` now contains the provisional schema and role-checked functions.
+`scripts/build_convex_task_seed.py` converts the current NZ verification
+GeoJSON into a Convex import payload, and
+`docs/development/convex-task-layer-setup.md` explains how to run a local
+deployment and seed a sample. The next steps are dependency install/codegen,
+sample import, function-runner smoke tests, and then small frontend wiring for
+task reads and provisional status writes. Convex still cannot mutate the master
+or public map products directly.

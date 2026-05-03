@@ -4,6 +4,10 @@
 
 ### 2026-05-03
 
+- Added the initial Convex task-layer scaffold: package scripts, project
+  config, schema tables for users/tasks/task events/evidence drafts/reviews/
+  exports, role-checked functions for live task state and manual candidate
+  tasks, a static NZ task seed builder, and maintainer setup notes.
 - Added `docs/convex-task-layer-spec.md` as the implementation contract for the
   live RA/reviewer task map: Convex-owned task state, evidence drafts,
   review decisions, event logs, curator exports, and the export boundary to

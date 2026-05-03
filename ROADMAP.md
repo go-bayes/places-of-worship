@@ -213,9 +213,9 @@ boundaries, and reviewer workflows.
 Evidence And Governance:
 
 - `[ ]` Managed auth, likely Google OAuth or Identity Platform.
-- `[ ]` Convex task-map spike for shared assignments, provisional closures,
+- `[~]` Convex task-map spike for shared assignments, provisional closures,
   evidence drafts, reviewer comments, review decisions, and curator queues.
-- `[ ]` Implement the task/event/evidence/review/export contract in
+- `[~]` Implement the task/event/evidence/review/export contract in
   `docs/convex-task-layer-spec.md`.
 - `[ ]` Weekly or curator-triggered export from Convex task state into `pow`
   validation, diff, replay, and reviewed map-output workflows.
@@ -294,7 +294,7 @@ Evidence And Governance:
   credentials and audit.
 - `[ ]` Provider migration options, including SQLite-compatible, PostGIS, and
   object-storage backends.
-- `[ ]` Convex-to-`pow` export contract for task state, evidence drafts, and
+- `[~]` Convex-to-`pow` export contract for task state, evidence drafts, and
   reviewed decisions.
 
 Research Outputs And Analysis:

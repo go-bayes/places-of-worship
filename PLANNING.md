@@ -128,6 +128,11 @@ As of 30 April 2026:
   `docs/convex-task-layer-spec.md`. It defines Convex-owned task state,
   evidence drafts, review decisions, task-event logs, curator exports, and the
   boundary from live task coordination into the `pow` validation/rebuild path.
+- The initial Convex scaffold now lives in `convex/`, with maintainer setup in
+  `docs/development/convex-task-layer-setup.md` and a static NZ seed builder in
+  `scripts/build_convex_task_seed.py`. This is a backend spike only: the live
+  NZ map is not yet wired to Convex writes, and Convex still has no authority
+  to mutate the master.
 - `CRITIQUE.md` records a critical review of the revisions pipeline for
   RA-submitted location and denomination evidence. The first schema response is
   `schemas/change-event.schema.json` plus
@@ -1387,6 +1392,11 @@ OSM ids or user suggestions.
   backend.
 - Defer SpacetimeDB evaluation until the task/review contracts are stable or a
   Rust-first realtime backend becomes a specific requirement.
+- Initial implementation lives in `convex/`: schema, role-checked functions,
+  static task import, provisional closure, evidence draft submission, review
+  decisions, export bundles, and manual candidate tasks for sites not yet on
+  OSM or the project map. Frontend wiring, file export actions, and `pow`
+  validation of exported bundles remain next steps.
 
 ## Open decisions
 

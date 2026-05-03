@@ -511,6 +511,30 @@ Phase 4: Remove Sheet as default
 - Sheet becomes an optional export/checking format, not Andre's primary working
   surface.
 
+## Initial Scaffold
+
+The first implementation scaffold lives in `convex/`:
+
+- `schema.ts`: users, task batches, tasks, task events, evidence drafts, review
+  decisions, and export batches.
+- `users.ts`: first-admin bootstrap, invite creation, invite claiming, and
+  user lookup.
+- `tasks.ts`: static task import, task claiming, skipping, provisional closure,
+  reopening, notes, and manual candidate task creation for places not on OSM or
+  not on the project map.
+- `evidence.ts`: evidence draft save and submit mutations.
+- `reviews.ts`: reviewer queue and review-decision mutations.
+- `exports.ts`: curator export batch creation, freezing, and bundle retrieval.
+
+The seed bridge is `scripts/build_convex_task_seed.py`, which converts the
+current static NZ verification GeoJSON into the argument shape expected by
+`tasks:upsertTasksFromStaticMap`.
+
+Setup details live in `docs/development/convex-task-layer-setup.md`.
+
+This scaffold is not yet wired to the public NZ map and has no master-write
+path.
+
 ## Definition Of Done For The First Spike
 
 The first Convex spike is complete when:
