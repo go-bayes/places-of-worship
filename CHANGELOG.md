@@ -8,6 +8,10 @@
   config, schema tables for users/tasks/task events/evidence drafts/reviews/
   exports, role-checked functions for live task state and manual candidate
   tasks, a static NZ task seed builder, and maintainer setup notes.
+- Ran the first local Convex task-layer smoke test: generated Convex types,
+  bootstrapped a local admin identity, seeded five NZ tasks, created a manual
+  candidate task, saved/submitted/reviewed an evidence draft, and froze an
+  export bundle.
 - Added `docs/convex-task-layer-spec.md` as the implementation contract for the
   live RA/reviewer task map: Convex-owned task state, evidence drafts,
   review decisions, event logs, curator exports, and the export boundary to

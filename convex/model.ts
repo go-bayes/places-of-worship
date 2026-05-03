@@ -153,17 +153,9 @@ export const sourceType = v.union(
   v.literal("other"),
 );
 
-export const targetYearStatusSet = v.object({
-  "2013": v.optional(targetYearStatus),
-  "2018": v.optional(targetYearStatus),
-  "2023": v.optional(targetYearStatus),
-});
+export const targetYearStatusSet = v.record(v.string(), targetYearStatus);
 
-export const targetYearEvidenceSet = v.object({
-  "2013": v.optional(v.string()),
-  "2018": v.optional(v.string()),
-  "2023": v.optional(v.string()),
-});
+export const targetYearEvidenceSet = v.record(v.string(), v.string());
 
 export const targetYearAffect = v.object({
   target_year: v.number(),

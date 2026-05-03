@@ -987,3 +987,24 @@ deployment and seed a sample. The next steps are dependency install/codegen,
 sample import, function-runner smoke tests, and then small frontend wiring for
 task reads and provisional status writes. Convex still cannot mutate the master
 or public map products directly.
+
+## 2026-05-03: Smoke-test the local Convex task loop
+
+Decision:
+Use a local Convex deployment to smoke-test the scaffold before wiring the NZ
+verification map to it.
+
+Rationale:
+The first risk was whether the provisional task-store model could actually
+carry the loop we need: task import, manual candidate creation, task claiming,
+evidence draft save, submission for review, reviewer decision, export bundle
+creation, and export freezing. Testing that loop locally keeps the current RA
+page stable and avoids exposing unfinished backend writes.
+
+Consequences:
+The local smoke test generated Convex `_generated` files, imported a five-task
+NZ sample, created one manual candidate task for a site not on OSM/project map,
+and proved the save-submit-review-export path. The next implementation step is
+frontend wiring behind a clear development/demo gate: read tasks from Convex
+first, then write claim/skip/provisional-close states, then save evidence
+drafts. The local smoke data are test-only and do not enter the master.
