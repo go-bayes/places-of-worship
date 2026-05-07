@@ -1548,50 +1548,58 @@ OSM ids or user suggestions.
 
 ## Next concrete steps
 
-1. Finish the next NZ cleanup slices from the remaining review queue.
-2. Design the shared global cleaner and review-queue schema.
-3. Refactor `scripts/extract_global_data.R` into explicit extract, normalise,
+1. Generate cleaned New Zealand OpenStreetMap temporal candidate diffs for
+   2013, 2018, and 2023 before asking RAs to verify OSM-history changes. Use
+   the existing cleaning rules on each dated snapshot, treat most apparent
+   differences as likely mapping artefacts, and give André only curated rows
+   for non-OSM verification.
+2. Ask André to contact selected church bodies for source-backed records of
+   active worship sites, openings, closures, relocations, mergers, shared-use
+   buildings, and changed-use sites at or around 2013, 2018, and 2023.
+3. Finish the next NZ cleanup slices from the remaining review queue.
+4. Design the shared global cleaner and review-queue schema.
+5. Refactor `scripts/extract_global_data.R` into explicit extract, normalise,
    clean, and export stages.
-4. Inventory what is currently stored only in Google Drive and migrate it into
+6. Inventory what is currently stored only in Google Drive and migrate it into
    a dated snapshot structure.
-5. Add run manifests and per-country counts.
-6. Define the shared country backend schema and NZ boundary adapter contract.
-7. Validate the first NZ territorial-authority `area_summary` product against
+7. Add run manifests and per-country counts.
+8. Define the shared country backend schema and NZ boundary adapter contract.
+9. Validate the first NZ territorial-authority `area_summary` product against
    frontend layer and download needs.
-8. Pilot the RA-facing historical evidence templates in
+10. Pilot the RA-facing historical evidence templates in
    `docs/templates/ra-historical-site-evidence/` with one or two NZ 2018 source
    batches, then refine the controlled vocabularies and validation rules before
    broader data entry.
-9. Define the first read-only NZ master site-bundle export and automated
+11. Define the first read-only NZ master site-bundle export and automated
    verification checks described in
    `docs/master-verification-workflow-plan.md`.
-10. Continue converting the RA map-triage guide into the first map-first
+12. Continue converting the RA map-triage guide into the first map-first
    workflow design: current non-OSM sites, duplicate/merge candidates, lost
    2013 sites, 2013-present/2018-absent cases, denomination or shared-building
    complications, and target-year status changes should be selectable from the
    map. The static demo can generate local rows for testing; authenticated
    staging remains a later backend step.
-11. Scope the OSM temporal verification subproject for 2013, 2018, and 2023,
+13. Scope the OSM temporal verification subproject for 2013, 2018, and 2023,
    including OSM history extraction, lifecycle-tag parsing, visual evidence
    review, and target-year probability rules.
-12. Draft the Google Sheets to staging API pilot described in
+14. Draft the Google Sheets to staging API pilot described in
    `docs/community-ingestion-api-plan.md`.
-13. Extend the initial CLI-first RA revisions pipeline from `CRITIQUE.md`,
+15. Extend the initial CLI-first RA revisions pipeline from `CRITIQUE.md`,
    using `schemas/change-event.schema.json` and
    `schemas/geometry-history.schema.json` as the first event and geometry
    contracts. The first scaffolds are `pow validate` and `pow stage`; next add
    dry-run diff output from the local SQLite staging store.
-14. Draft the authenticated NZ portal staging pilot described in
+16. Draft the authenticated NZ portal staging pilot described in
    `docs/portal-data-entry-plan.md`, starting with the UI, auth/security,
    database/storage, and review contracts before implementation.
-15. Extend the NZ `area_summary` product to SA2 geography after checking
+17. Extend the NZ `area_summary` product to SA2 geography after checking
    boundary metadata and point-to-area assignment quality.
-16. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
+18. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
    legends, popups, and export metadata.
-17. Align the NZ map interface with the global map after the data overlay is
+19. Align the NZ map interface with the global map after the data overlay is
    stable, preserving NZ-specific analysis controls.
-18. Prototype site, area, and comparison modes using precomputed layers before
+20. Prototype site, area, and comparison modes using precomputed layers before
     adding live portal queries.
-19. Pilot the new global pipeline on a small country set before full rollout.
-20. Expand `research/` into a country-source matrix for global feasibility
+21. Pilot the new global pipeline on a small country set before full rollout.
+22. Expand `research/` into a country-source matrix for global feasibility
     assessment.

@@ -21,6 +21,34 @@ Consequences:
 Future entries should summarise context, decision, rationale, consequences, and
 open questions. The changelog should stay concise and release-oriented.
 
+## 2026-05-07: Give RAs curated OSM-history leads, not raw diffs
+
+Decision:
+For the New Zealand temporal reconstruction pilot, ask André to contact church
+bodies for source-backed records while the project generates cleaned
+OpenStreetMap snapshot diffs for 2013, 2018, and 2023. André should review
+curated candidate rows after cleaning, not raw OpenStreetMap history.
+
+Rationale:
+The project has already done substantial current New Zealand cleanup. Raw OSM
+history will contain false positives, support buildings, deleted or replaced
+objects, node-to-way churn, tag corrections, and features that were simply not
+mapped in earlier years. Most apparent 2013/2018/2023 differences should be
+expected to be mapping artefacts until checked against non-OSM sources.
+
+Consequences:
+The near-horizon workflow is: generate dated OSM snapshots, apply the existing
+project cleaning rules to each snapshot, produce candidate diffs, and then ask
+André to verify selected rows against church-body records, directories,
+archived websites, annual reports, visual evidence, or local records. Apparent
+OSM additions/removals are treated as leads for staged evidence, not as accepted
+historical place-density inputs.
+
+Open questions:
+We still need to decide how much church-body data can be cited or redistributed,
+how to prioritise denominations and regions, and how cleaned OSM candidate rows
+should enter Convex or `pow` once the first generated sample has been inspected.
+
 ## 2026-05-01: Treat the grant as a reporting reference, not a tracked source
 
 Decision:

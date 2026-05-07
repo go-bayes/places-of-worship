@@ -348,4 +348,6 @@ main <- function() {
   write_cleaning_manifest(results, output_dir, input_path)
 }
 
-main()
+if (sys.nframe() == 0) {
+  main()
+}

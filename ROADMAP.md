@@ -179,7 +179,11 @@ reconstruction.
 
 Evidence And Governance:
 
-- `[ ]` Pilot RA evidence collection for one or two 2018 source batches.
+- `[~]` Generate cleaned OpenStreetMap temporal candidate diffs for 2013,
+  2018, and 2023 before RA review.
+- `[~]` Ask RAs to contact church bodies for source-backed site records,
+  openings, closures, relocations, mergers, and changed-use cases.
+- `[ ]` Pilot RA evidence collection for one or two curated source batches.
 - `[ ]` Reconstruct 2013, 2018, and 2023 target-year worship-function states.
 - `[ ]` Preserve appeared/disappeared states separately from building existence.
 - `[ ]` Track denomination changes, multi-denominational use, multi-purpose use,

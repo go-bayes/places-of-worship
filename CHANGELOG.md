@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### 2026-05-07
+
+- Recorded the New Zealand temporal-reconstruction pilot decision: RAs should
+  contact church bodies and review only curated, cleaned OpenStreetMap-history
+  candidate diffs, not raw 2013/2018/2023 OSM differences.
+- Added the first `scripts/build_nz_osm_temporal_candidates.R` workflow to
+  fetch dated New Zealand OSM snapshots through ohsome, apply the existing
+  project cleaning rules to each snapshot, and emit candidate CSV/GeoJSON diffs
+  for maintainer inspection before RA review. The strict default now starts
+  with `amenity=place_of_worship` and node/way objects; broader tags and
+  relation geometry are explicit slower options.
+- Added maintainer-facing notes for the NZ OSM temporal-cleaning workflow and
+  updated the near-horizon plan and roadmap to put cleaned OSM snapshot diffs
+  and church-body record requests ahead of RA verification.
+
 ### 2026-05-03
 
 - Added the initial Convex task-layer scaffold: package scripts, project
