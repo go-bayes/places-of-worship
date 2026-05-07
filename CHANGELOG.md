@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### 2026-05-08
+
+- Added a separate tracked `raw_source` manifest for the New Zealand
+  2013-2025 raw OSM/ohsome annual snapshot archive stored in project Google
+  Drive.
+
 ### 2026-05-07
 
 - Recorded the New Zealand temporal-reconstruction pilot decision: RAs should

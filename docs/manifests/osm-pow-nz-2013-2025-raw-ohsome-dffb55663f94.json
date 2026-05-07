@@ -1,0 +1,111 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:osm-pow:nz:2013-2025:raw-ohsome:dffb55663f94",
+  "dataset_id": "osm-pow:nz:2013-2025:raw-ohsome",
+  "dataset_version_id": "osm-pow:nz:2013-2025:raw-ohsome:dffb55663f94",
+  "manifest_sha256": "248fa80419516dca6151c21c19a1d129599feed26d4efe7e8724c6a63203f25c",
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "osm-pow",
+  "dataset_role": "raw_source",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "NZ"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": "09-01",
+    "pipeline_stage": "raw"
+  },
+  "created_at": "2026-05-07T10:20:02Z",
+  "created_by": "scripts/build_nz_osm_temporal_candidates.R",
+  "pipeline": {
+    "script": "scripts/build_nz_osm_temporal_candidates.R",
+    "git_commit": "d8ef6d820c75a028471b24c61a2a81255c51b725",
+    "command": "Rscript scripts/build_nz_osm_temporal_candidates.R --years 2013:2025 --task-years 2013,2018,2023",
+    "parameters": {
+      "years": "2013:2025",
+      "task_years": "2013,2018,2023",
+      "snapshot_anchor": "09-01",
+      "types": "node,way",
+      "filter": "amenity=place_of_worship",
+      "provider_endpoint": "https://api.ohsome.org/v1/elements/centroid"
+    },
+    "software_versions": {
+      "R": "4.6.0"
+    }
+  },
+  "source": {
+    "provider": "OpenStreetMap via ohsome API",
+    "source_dataset_ids": [
+      "osm-ohsome-elements-centroid"
+    ],
+    "source_urls": [
+      "https://api.ohsome.org/v1/elements/centroid"
+    ],
+    "retrieved_at": "2026-05-07T10:20:02Z",
+    "licence": "ODbL-1.0",
+    "citation": "OpenStreetMap contributors; ohsome API."
+  },
+  "input_manifests": [],
+  "durable_files": [
+    {
+      "uri": "https://drive.google.com/file/d/1fo5ayanVch8zrG0FONScTLaumURLbQcj/view?usp=drivesdk",
+      "storage_provider": "google_drive",
+      "format": "tar.gz",
+      "bytes": 2290670,
+      "sha256": "dffb55663f94e416ab858deb7ee40128706c5654557a9e61b8d665ab8a20822d",
+      "content_sha256": null,
+      "row_count": null,
+      "feature_count": 31439,
+      "content": "Packaged raw ohsome GeoJSON snapshots for NZ OSM places of worship, 1 September snapshots for 2013-2025.",
+      "privacy": "project_private",
+      "licence_status": "accepted"
+    }
+  ],
+  "partitions": [
+    {
+      "partition_id": "NZ",
+      "partition_type": "country",
+      "country_code": "NZ",
+      "file_uri": "https://drive.google.com/file/d/1fo5ayanVch8zrG0FONScTLaumURLbQcj/view?usp=drivesdk",
+      "sha256": "dffb55663f94e416ab858deb7ee40128706c5654557a9e61b8d665ab8a20822d",
+      "row_count": null,
+      "feature_count": 31439
+    }
+  ],
+  "stats": {
+    "raw_snapshot_count": 13,
+    "raw_feature_total": 31439,
+    "raw_2013_features": 780,
+    "raw_2014_features": 916,
+    "raw_2015_features": 1242,
+    "raw_2016_features": 1701,
+    "raw_2017_features": 1865,
+    "raw_2018_features": 2025,
+    "raw_2019_features": 2922,
+    "raw_2020_features": 3265,
+    "raw_2021_features": 3316,
+    "raw_2022_features": 3326,
+    "raw_2023_features": 3353,
+    "raw_2024_features": 3351,
+    "raw_2025_features": 3377
+  },
+  "local_cache_hint": "data/intermediate/nz_osm_temporal/raw/",
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "tar -tzf exports/nz_osm_raw_snapshots_2026-05-07/nz_osm_raw_snapshots_2013-2025_2026-05-07.tar.gz",
+      "shasum -a 256 exports/nz_osm_raw_snapshots_2026-05-07/nz_osm_raw_snapshots_2013-2025_2026-05-07.tar.gz"
+    ],
+    "warnings": [
+      "Raw OSM snapshots are source extracts, not cleaned places of worship and not accepted historical worship-use evidence."
+    ],
+    "notes": "Copied to project Google Drive and checked against the local archive SHA-256."
+  },
+  "privacy": "project_private",
+  "licence_status": "accepted",
+  "downstream_status": "lead",
+  "notes": "Drive folder: https://drive.google.com/drive/folders/1VApaAYbTDYvSAcmLgodThEO-F5HdFokj. Use this as the raw source package for the NZ 2013-2025 OSM temporal places-to-check workflow."
+}

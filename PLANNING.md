@@ -58,10 +58,11 @@ As of 30 April 2026:
   `apps/regions/nz/data/`: `nz_places.json`, `verification_tasks.geojson`,
   `ta_aggregated_data.json`, `territorial_authorities.geojson`, and
   `area_summary_ta.json`/`.csv`. The annual New Zealand OSM history run lives
-  under ignored temporary working files at `data/intermediate/nz_osm_temporal/`
-  and is not durable storage. Do not use those annual OSM outputs for Convex
-  tasks, RA assignments, density plots, or reporting until they are copied to
-  project-owned storage, hashed, and described by a tracked file record.
+  under ignored temporary working files at `data/intermediate/nz_osm_temporal/`.
+  The raw OSM/ohsome snapshots and the generated places-to-check archive now
+  have separate Google Drive copies and tracked manifests. Do not use annual
+  OSM outputs for Convex tasks, RA assignments, density plots, or reporting
+  unless the relevant Drive archive and tracked manifest are cited.
 - A separate community and agent-assisted ingestion plan now lives in
   `docs/community-ingestion-api-plan.md`. It treats Google Sheets as a first
   research-assistant adapter and defines a future staging API for human,

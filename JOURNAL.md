@@ -21,6 +21,25 @@ Consequences:
 Future entries should summarise context, decision, rationale, consequences, and
 open questions. The changelog should stay concise and release-oriented.
 
+## 2026-05-08: Save raw OSM snapshots as their own source package
+
+Decision:
+Store the New Zealand 2013-2025 raw OpenStreetMap/ohsome annual snapshots as a
+separate project Google Drive archive with a tracked `raw_source` file record.
+
+Rationale:
+The first places-to-check archive already contains the raw snapshots, but it is
+an intermediate review package. Raw source snapshots need their own durable
+record so the source extraction can be audited separately from later cleaning,
+date-tag parsing, task generation, and accepted change decisions.
+
+Consequences:
+The raw archive is now distinct from the generated places-to-check archive.
+Downstream manifests can cite the raw-source manifest as an input, while the
+places-to-check manifest remains an `intermediate_lead` product. The raw
+snapshots remain source extracts under the ODbL: they are not cleaned places of
+worship and do not establish accepted historical worship-use states.
+
 ## 2026-05-07: Make current data locations explicit
 
 Decision:
