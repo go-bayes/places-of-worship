@@ -72,6 +72,15 @@ while allowing curators to collapse them into a smaller set of New Zealand
 tasks around 2013, 2018, and 2023. The 2026 annual anchor should not be used
 until `2026-09-01` has passed.
 
+First strict national run:
+The first strict New Zealand node/way extraction completed on 2026-05-07 and
+wrote ignored local outputs under `data/intermediate/nz_osm_temporal/`. It
+produced 4,777 candidate rows. Cleaned snapshot counts were 775 for 2013, 2,012
+for 2018, 3,335 for 2023, and 3,350 for 2025. These figures are OSM-history
+lead counts only. They are not currently used for the NZ data-page density
+plots, which still use the committed current-place `area_summary_ta.json`
+product and should not be interpreted as historical place-density estimates.
+
 ## 2026-05-01: Treat the grant as a reporting reference, not a tracked source
 
 Decision:
