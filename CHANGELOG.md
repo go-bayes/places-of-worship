@@ -6,7 +6,13 @@
 
 - Recorded the New Zealand temporal-reconstruction pilot decision: RAs should
   contact church bodies and review only curated, cleaned OpenStreetMap-history
-  candidate diffs, not raw 2013/2018/2023 OSM differences.
+  candidate leads, not raw annual OSM differences.
+- Extended the temporal OSM lead generator to use annual `1 September`
+  snapshots from 2013 through 2025 by default, while retaining 2013, 2018, and
+  2023 as highlighted New Zealand RA/research task years.
+- Recorded the first strict national annual OSM run: 4,777 local candidate rows
+  from the ignored 2013-2025 node/way extraction, confirming the direct ohsome
+  route is viable but needs curator collapse before RA review.
 - Added the first `scripts/build_nz_osm_temporal_candidates.R` workflow to
   fetch dated New Zealand OSM snapshots through ohsome, apply the existing
   project cleaning rules to each snapshot, and emit candidate CSV/GeoJSON diffs

@@ -179,8 +179,9 @@ reconstruction.
 
 Evidence And Governance:
 
-- `[~]` Generate cleaned OpenStreetMap temporal candidate diffs for 2013,
-  2018, and 2023 before RA review.
+- `[~]` Generate cleaned annual OpenStreetMap temporal candidate leads from
+  2013 through 2025, then collapse them into curated 2013, 2018, and 2023 RA
+  review tasks.
 - `[~]` Ask RAs to contact church bodies for source-backed site records,
   openings, closures, relocations, mergers, and changed-use cases.
 - `[ ]` Pilot RA evidence collection for one or two curated source batches.

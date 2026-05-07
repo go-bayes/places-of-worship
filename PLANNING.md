@@ -1242,6 +1242,9 @@ map do not drift apart.
   likely completed at the end of August.
 - The exact anchor date should remain fixed across years unless there is a
   documented methodological reason to change it.
+- The first OSM-history lead generator should use every completed annual anchor
+  from `2013-09-01` through `2025-09-01`; `2026-09-01` should wait until that
+  date exists.
 
 ### Decided: country backend strategy
 
@@ -1548,11 +1551,12 @@ OSM ids or user suggestions.
 
 ## Next concrete steps
 
-1. Generate cleaned New Zealand OpenStreetMap temporal candidate diffs for
-   2013, 2018, and 2023 before asking RAs to verify OSM-history changes. Use
-   the existing cleaning rules on each dated snapshot, treat most apparent
+1. Generate cleaned New Zealand OpenStreetMap temporal candidate leads from
+   annual `1 September` snapshots, starting with 2013 through 2025. Use the
+   existing cleaning rules on each dated snapshot, treat most apparent
    differences as likely mapping artefacts, and give André only curated rows
-   for non-OSM verification.
+   centred on the 2013, 2018, and 2023 estimation years for non-OSM
+   verification.
 2. Ask André to contact selected church bodies for source-backed records of
    active worship sites, openings, closures, relocations, mergers, shared-use
    buildings, and changed-use sites at or around 2013, 2018, and 2023.
@@ -1579,9 +1583,10 @@ OSM ids or user suggestions.
    complications, and target-year status changes should be selectable from the
    map. The static demo can generate local rows for testing; authenticated
    staging remains a later backend step.
-13. Scope the OSM temporal verification subproject for 2013, 2018, and 2023,
-   including OSM history extraction, lifecycle-tag parsing, visual evidence
-   review, and target-year probability rules.
+13. Scope the OSM temporal verification subproject as an annual-snapshot
+   protocol from 2013 onward, with New Zealand RA tasks collapsed around 2013,
+   2018, and 2023. Include OSM history extraction, lifecycle-tag parsing,
+   visual evidence review, and target-year probability rules.
 14. Draft the Google Sheets to staging API pilot described in
    `docs/community-ingestion-api-plan.md`.
 15. Extend the initial CLI-first RA revisions pipeline from `CRITIQUE.md`,

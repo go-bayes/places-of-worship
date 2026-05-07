@@ -26,8 +26,9 @@ open questions. The changelog should stay concise and release-oriented.
 Decision:
 For the New Zealand temporal reconstruction pilot, ask André to contact church
 bodies for source-backed records while the project generates cleaned
-OpenStreetMap snapshot diffs for 2013, 2018, and 2023. André should review
-curated candidate rows after cleaning, not raw OpenStreetMap history.
+OpenStreetMap-history leads centred on the 2013, 2018, and 2023 target years.
+André should review curated candidate rows after cleaning, not raw
+OpenStreetMap history.
 
 Rationale:
 The project has already done substantial current New Zealand cleanup. Raw OSM
@@ -38,16 +39,38 @@ expected to be mapping artefacts until checked against non-OSM sources.
 
 Consequences:
 The near-horizon workflow is: generate dated OSM snapshots, apply the existing
-project cleaning rules to each snapshot, produce candidate diffs, and then ask
-André to verify selected rows against church-body records, directories,
-archived websites, annual reports, visual evidence, or local records. Apparent
-OSM additions/removals are treated as leads for staged evidence, not as accepted
-historical place-density inputs.
+project cleaning rules to each snapshot, produce candidate diffs centred on
+target-year state questions, and then ask André to verify selected rows against
+church-body records, directories, archived websites, annual reports, visual
+evidence, or local records. Apparent OSM additions/removals are treated as
+leads for staged evidence, not as accepted historical place-density inputs.
 
 Open questions:
 We still need to decide how much church-body data can be cited or redistributed,
 how to prioritise denominations and regions, and how cleaned OSM candidate rows
 should enter Convex or `pow` once the first generated sample has been inspected.
+
+## 2026-05-07: Generate annual OSM snapshot leads from 2013
+
+Decision:
+Use annual OpenStreetMap snapshots as the default temporal lead-generation
+protocol. For the first New Zealand implementation, build `1 September`
+snapshots from 2013 through the latest completed annual anchor, currently 2025.
+Keep the RA-facing and estimation focus on 2013, 2018, and 2023.
+
+Rationale:
+Annual snapshots make the method reusable for other countries, where census,
+survey, and administrative target years will differ from New Zealand. They also
+help distinguish real candidate changes from OpenStreetMap mapping artefacts:
+single-year blips, node-to-way replacements, and delayed mapping are easier to
+spot when the full annual sequence is visible.
+
+Consequences:
+Annual OSM differences are an internal candidate generator, not a yearly RA
+work queue. Candidate rows should preserve adjacent-year transition windows
+while allowing curators to collapse them into a smaller set of New Zealand
+tasks around 2013, 2018, and 2023. The 2026 annual anchor should not be used
+until `2026-09-01` has passed.
 
 ## 2026-05-01: Treat the grant as a reporting reference, not a tracked source
 

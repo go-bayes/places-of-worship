@@ -18,8 +18,9 @@ repo_root <- normalizePath(
 
 source(file.path(repo_root, "scripts", "clean_global_places.R"), local = FALSE)
 
-target_years <- c(2013L, 2018L, 2023L)
-target_dates <- setNames(paste0(target_years, "-09-01"), as.character(target_years))
+default_snapshot_years <- 2013L:2025L
+default_task_years <- c(2013L, 2018L, 2023L)
+default_snapshot_month_day <- "09-01"
 default_osm_object_types <- c("node", "way")
 default_bboxes <- "main_nz:166,-53,180,-28|chatham:-180,-53,-175,-28"
 broad_filter <- paste(
@@ -31,6 +32,36 @@ broad_filter <- paste(
 )
 strict_filter <- "amenity=place_of_worship"
 
+parse_years <- function(value) {
+  pieces <- unlist(strsplit(value, ",", fixed = TRUE), use.names = FALSE) |>
+    trimws()
+  years <- map(pieces, \(piece) {
+    range_match <- regexec("^(\\d{4})(:|-)(\\d{4})$", piece)
+    matched <- regmatches(piece, range_match)[[1]]
+    if (length(matched) == 4) {
+      from <- as.integer(matched[[2]])
+      to <- as.integer(matched[[4]])
+      return(seq.int(from, to))
+    }
+
+    as.integer(piece)
+  }) |>
+    unlist(use.names = FALSE)
+
+  if (length(years) == 0 || any(is.na(years))) {
+    stop("Could not parse years: ", value)
+  }
+  sort(unique(years))
+}
+
+build_snapshot_dates <- function(years, snapshot_month_day) {
+  if (!grepl("^\\d{2}-\\d{2}$", snapshot_month_day)) {
+    stop("--snapshot-month-day must use MM-DD format")
+  }
+
+  setNames(paste0(years, "-", snapshot_month_day), as.character(years))
+}
+
 parse_args <- function(args) {
   output_dir <- file.path("data", "intermediate", "nz_osm_temporal")
   bboxes <- default_bboxes
@@ -38,6 +69,9 @@ parse_args <- function(args) {
   osm_filter <- strict_filter
   osm_object_types <- default_osm_object_types
   timeout_seconds <- 180
+  snapshot_years <- default_snapshot_years
+  task_years <- default_task_years
+  snapshot_month_day <- default_snapshot_month_day
 
   index <- 1
   while (index <= length(args)) {
@@ -59,9 +93,18 @@ parse_args <- function(args) {
     } else if (arg == "--timeout-seconds") {
       index <- index + 1
       timeout_seconds <- as.numeric(args[[index]])
+    } else if (arg == "--years" || arg == "--snapshot-years") {
+      index <- index + 1
+      snapshot_years <- parse_years(args[[index]])
+    } else if (arg == "--task-years") {
+      index <- index + 1
+      task_years <- parse_years(args[[index]])
+    } else if (arg == "--snapshot-month-day") {
+      index <- index + 1
+      snapshot_month_day <- args[[index]]
     } else if (arg == "--help" || arg == "-h") {
       cat(
-        "Build cleaned NZ OSM temporal candidate diffs.\n\n",
+        "Build cleaned NZ OSM temporal candidate leads.\n\n",
         "Options:\n",
         "  --output-dir DIR   Output directory (default: data/intermediate/nz_osm_temporal)\n",
         "  --bbox BBOXES      ohsome bboxes string; use for small-area smoke tests\n",
@@ -69,6 +112,9 @@ parse_args <- function(args) {
         "  --broad            Include building and religion-tag candidates; slower/noisier\n",
         "  --types CSV        OSM object types, default node,way; add relation explicitly\n",
         "  --timeout-seconds N  Per-request timeout, default 180\n",
+        "  --years SPEC       Snapshot years, default 2013:2025; accepts 2013:2025 or CSV\n",
+        "  --task-years SPEC  Target years to highlight for RA review, default 2013,2018,2023\n",
+        "  --snapshot-month-day MM-DD  Annual anchor, default 09-01\n",
         "  --help             Show this help text\n",
         sep = ""
       )
@@ -79,13 +125,22 @@ parse_args <- function(args) {
     index <- index + 1
   }
 
+  snapshot_dates <- build_snapshot_dates(snapshot_years, snapshot_month_day)
+  if (!all(task_years %in% snapshot_years)) {
+    stop("--task-years must be included in --years")
+  }
+
   list(
     output_dir = output_dir,
     bboxes = bboxes,
     fetch = fetch,
     osm_filter = osm_filter,
     osm_object_types = osm_object_types,
-    timeout_seconds = timeout_seconds
+    timeout_seconds = timeout_seconds,
+    snapshot_years = snapshot_years,
+    snapshot_dates = snapshot_dates,
+    task_years = task_years,
+    snapshot_month_day = snapshot_month_day
   )
 }
 
@@ -317,19 +372,77 @@ latest_present_record <- function(records_by_year) {
   present[[length(present)]]
 }
 
-classify_transition <- function(present_by_year, changed_tags) {
-  p2013 <- present_by_year[["2013"]] %||% FALSE
-  p2018 <- present_by_year[["2018"]] %||% FALSE
-  p2023 <- present_by_year[["2023"]] %||% FALSE
+collapse_presence_values <- function(present_by_year, years = names(present_by_year)) {
+  paste(
+    map_chr(years, \(year) {
+      value <- present_by_year[[as.character(year)]] %||% FALSE
+      state <- if (isTRUE(value)) "present" else "absent"
+      paste0(year, "=", state)
+    }),
+    collapse = " | "
+  )
+}
 
-  categories <- c()
-  if (p2013 && !p2018) categories <- c(categories, "osm_present_2013_absent_2018")
-  if (!p2013 && p2018) categories <- c(categories, "osm_absent_2013_present_2018")
-  if (p2018 && !p2023) categories <- c(categories, "osm_present_2018_absent_2023")
-  if (!p2018 && p2023) categories <- c(categories, "osm_absent_2018_present_2023")
-  if (all(c(p2013, p2018, p2023)) && changed_tags) categories <- c(categories, "osm_tags_changed")
+detect_presence_transitions <- function(present_by_year, snapshot_dates) {
+  years <- names(present_by_year)
+  if (length(years) < 2) return(data.frame())
 
-  if (length(categories) == 0) "no_cleaned_osm_diff" else paste(categories, collapse = ";")
+  rows <- map(seq_len(length(years) - 1), \(index) {
+    from_year <- years[[index]]
+    to_year <- years[[index + 1]]
+    from_present <- present_by_year[[from_year]] %||% FALSE
+    to_present <- present_by_year[[to_year]] %||% FALSE
+
+    if (isTRUE(from_present) && !isTRUE(to_present)) {
+      return(data.frame(
+        from_year = as.integer(from_year),
+        to_year = as.integer(to_year),
+        transition_type = "osm_present_then_absent",
+        diff_category = paste0("osm_present_", from_year, "_absent_", to_year),
+        transition_window = paste0(snapshot_dates[[from_year]], "/", snapshot_dates[[to_year]]),
+        stringsAsFactors = FALSE
+      ))
+    }
+
+    if (!isTRUE(from_present) && isTRUE(to_present)) {
+      return(data.frame(
+        from_year = as.integer(from_year),
+        to_year = as.integer(to_year),
+        transition_type = "osm_absent_then_present",
+        diff_category = paste0("osm_absent_", from_year, "_present_", to_year),
+        transition_window = paste0(snapshot_dates[[from_year]], "/", snapshot_dates[[to_year]]),
+        stringsAsFactors = FALSE
+      ))
+    }
+
+    NULL
+  }) |>
+    compact()
+
+  if (length(rows) == 0) return(data.frame())
+  bind_rows(rows)
+}
+
+classify_transition <- function(present_by_year, changed_tags, snapshot_dates) {
+  transitions <- detect_presence_transitions(present_by_year, snapshot_dates)
+  categories <- transitions$diff_category %||% c()
+  transition_types <- transitions$transition_type %||% c()
+
+  if (isTRUE(changed_tags)) {
+    categories <- c(categories, "osm_tags_changed")
+    transition_types <- c(transition_types, "osm_tags_changed")
+  }
+
+  if (length(categories) == 0) {
+    categories <- "no_cleaned_osm_diff"
+  }
+
+  list(
+    category = paste(unique(categories), collapse = ";"),
+    transition_types = paste(unique(transition_types), collapse = ";"),
+    transition_windows = paste(unique(transitions$transition_window %||% c()), collapse = ";"),
+    transitions = transitions
+  )
 }
 
 current_map_index <- function() {
@@ -378,45 +491,58 @@ find_nearby_replacement <- function(row_record, candidates) {
   matches[[which.min(map_dbl(matches, "distance_m"))]]
 }
 
-build_candidate_rows <- function(snapshot_results) {
+build_candidate_rows <- function(snapshot_results, task_years) {
   by_year <- set_names(map(snapshot_results, "records"), as.character(map_int(snapshot_results, "year")))
   by_key_year <- map(by_year, \(records) set_names(records, map_chr(records, osm_key)))
   keys <- sort(unique(unlist(map(by_key_year, names))))
   current_index <- current_map_index()
+  snapshot_years <- names(by_year)
+  snapshot_dates <- set_names(map_chr(snapshot_results, "date"), snapshot_years)
+  task_years <- as.character(task_years)
 
   rows <- map(keys, \(key) {
     records_by_year <- map(by_key_year, \(records) records[[key]])
     names(records_by_year) <- names(by_key_year)
     present_by_year <- map_lgl(records_by_year, Negate(is.null))
     changed_tags <- has_tag_change(compact(records_by_year))
-    category <- classify_transition(as.list(present_by_year), changed_tags)
+    transition <- classify_transition(as.list(present_by_year), changed_tags, snapshot_dates)
+    category <- transition$category
     if (category == "no_cleaned_osm_diff") return(NULL)
 
     latest <- latest_present_record(records_by_year)
     current_match <- current_index[[key]]
 
-    disappeared_record <- records_by_year[["2018"]] %||% records_by_year[["2013"]]
+    disappeared_record <- NULL
     replacement_candidates <- list()
-    if ((present_by_year[["2013"]] %||% FALSE) && !(present_by_year[["2018"]] %||% FALSE)) {
-      replacement_candidates <- c(
-        replacement_candidates,
-        by_year[["2018"]][!map_chr(by_year[["2018"]], osm_key) %in% names(by_key_year[["2013"]])]
-      )
+    if (nrow(transition$transitions) > 0) {
+      disappeared_transitions <- transition$transitions |>
+        filter(transition_type == "osm_present_then_absent")
+
+      for (index in seq_len(nrow(disappeared_transitions))) {
+        from_year <- as.character(disappeared_transitions$from_year[[index]])
+        to_year <- as.character(disappeared_transitions$to_year[[index]])
+        disappeared_record <- disappeared_record %||% records_by_year[[from_year]]
+        appearing_keys <- setdiff(names(by_key_year[[to_year]]), names(by_key_year[[from_year]]))
+        replacement_candidates <- c(
+          replacement_candidates,
+          by_year[[to_year]][map_chr(by_year[[to_year]], osm_key) %in% appearing_keys]
+        )
+      }
     }
-    if ((present_by_year[["2018"]] %||% FALSE) && !(present_by_year[["2023"]] %||% FALSE)) {
-      replacement_candidates <- c(
-        replacement_candidates,
-        by_year[["2023"]][!map_chr(by_year[["2023"]], osm_key) %in% names(by_key_year[["2018"]])]
-      )
+
+    if (length(replacement_candidates) > 0) {
+      replacement_candidates <- replacement_candidates |>
+        set_names(map_chr(replacement_candidates, osm_key))
+      replacement_candidates <- replacement_candidates[!duplicated(names(replacement_candidates))]
     }
     replacement <- find_nearby_replacement(disappeared_record, replacement_candidates)
 
-    if (!is.null(replacement) && grepl("absent", category, fixed = TRUE)) {
+    if (!is.null(replacement) && grepl("osm_present_then_absent", transition$transition_types, fixed = TRUE)) {
       category <- paste(category, "possible_osm_object_replacement", sep = ";")
     }
 
-    has_disappearance <- grepl("present_2013_absent_2018|present_2018_absent_2023", category)
-    has_appearance <- grepl("absent_2013_present_2018|absent_2018_present_2023", category)
+    has_disappearance <- grepl("osm_present_then_absent", transition$transition_types, fixed = TRUE)
+    has_appearance <- grepl("osm_absent_then_present", transition$transition_types, fixed = TRUE)
 
     instruction <- if (has_disappearance && has_appearance) {
       "Check whether this is OSM object churn, replacement mapping, or a short-lived real worship-use change."
@@ -428,15 +554,22 @@ build_candidate_rows <- function(snapshot_results) {
       "Check whether name, religion, denomination, or building-use tags changed in a way that matters analytically."
     }
 
-    data.frame(
+    present_years <- names(present_by_year)[present_by_year]
+    first_present_year <- if (length(present_years) == 0) NA_integer_ else as.integer(present_years[[1]])
+    last_present_year <- if (length(present_years) == 0) NA_integer_ else as.integer(present_years[[length(present_years)]])
+
+    base_row <- data.frame(
       candidate_id = paste0("nz-osm-temporal-", gsub("/", "-", key)),
       osm_key = key,
       matched_current_project_id = current_match$id %||% "",
       matched_current_name = current_match$name %||% "",
       diff_category = category,
-      present_in_cleaned_osm_2013 = present_by_year[["2013"]] %||% FALSE,
-      present_in_cleaned_osm_2018 = present_by_year[["2018"]] %||% FALSE,
-      present_in_cleaned_osm_2023 = present_by_year[["2023"]] %||% FALSE,
+      transition_types = transition$transition_types,
+      transition_windows = transition$transition_windows,
+      snapshot_presence = collapse_presence_values(as.list(present_by_year), snapshot_years),
+      task_year_presence = collapse_presence_values(as.list(present_by_year), task_years),
+      first_present_snapshot_year = first_present_year,
+      last_present_snapshot_year = last_present_year,
       latest_name = latest$name %||% "",
       latest_religion = latest$religion %||% "",
       latest_denomination = latest$denomination %||% "",
@@ -454,6 +587,16 @@ build_candidate_rows <- function(snapshot_results) {
       andre_check = instruction,
       stringsAsFactors = FALSE
     )
+
+    present_columns <- as.data.frame(
+      as.list(setNames(
+        map_lgl(snapshot_years, \(year) present_by_year[[year]] %||% FALSE),
+        paste0("present_in_cleaned_osm_", snapshot_years)
+      )),
+      check.names = FALSE
+    )
+
+    cbind(base_row, present_columns)
   }) |>
     compact()
 
@@ -492,7 +635,10 @@ write_manifest <- function(snapshot_results, candidates, args, output_dir) {
   manifest <- list(
     generated_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
     generated_by = "scripts/build_nz_osm_temporal_candidates.R",
-    target_dates = as.list(target_dates),
+    snapshot_years = as.list(args$snapshot_years),
+    snapshot_month_day = args$snapshot_month_day,
+    snapshot_dates = as.list(args$snapshot_dates),
+    task_years = as.list(args$task_years),
     bboxes = args$bboxes,
     filter = args$osm_filter,
     osm_object_types = as.list(args$osm_object_types),
@@ -528,7 +674,7 @@ main <- function() {
   raw_dir <- file.path(output_dir, "raw")
   dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
 
-  snapshot_results <- imap(target_dates, \(snapshot_date, snapshot_year) {
+  snapshot_results <- imap(args$snapshot_dates, \(snapshot_date, snapshot_year) {
     raw_path <- file.path(raw_dir, paste0("nz_osm_pows_", snapshot_date, ".geojson"))
     if (args$fetch || !file.exists(raw_path)) {
       fetch_snapshot(
@@ -543,7 +689,7 @@ main <- function() {
     normalise_snapshot(raw_path, as.integer(snapshot_year), snapshot_date, output_dir)
   })
 
-  candidates <- build_candidate_rows(snapshot_results)
+  candidates <- build_candidate_rows(snapshot_results, args$task_years)
   csv_path <- file.path(output_dir, "nz_osm_temporal_candidates.csv")
   geojson_path <- file.path(output_dir, "nz_osm_temporal_candidates.geojson")
 
@@ -556,4 +702,6 @@ main <- function() {
   message("Candidate rows: ", nrow(candidates))
 }
 
-main()
+if (sys.nframe() == 0) {
+  main()
+}
