@@ -75,6 +75,22 @@ Review decides whether the conflict is a correction, observed change, duplicate,
 split, merge, relocation, or source error. Accepted decisions become change
 events and are included in later rebuilds and diffs.
 
+## Can OSM lifecycle tags tell us whether a place was alive in 2013, 2018, or 2023?
+
+They can provide useful first-pass evidence. Tags such as `start_date`,
+`old_start_date`, and `end_date` can seed provisional target-year statuses and
+candidate gain/loss tasks. For example, a `start_date` before 2013 with no
+earlier `end_date` is a lead that the site may have been present in 2013,
+2018, and 2023. A start date between 2013 and 2018 is a candidate gain window.
+An end date between 2018 and 2023 is a candidate loss window.
+
+These tags still need review. OSM lifecycle values may refer to a building, an
+organisation, a previous mapper's interpretation, or an imprecise local memory,
+while the project needs worship use at a mappable site. OSM lifecycle tags
+therefore create tasks and evidence rows. Accepted gain/loss data comes later,
+through reviewed change events with source references, target-year affects,
+hashes, and manifests.
+
 ## How does the shared RA spreadsheet fit in?
 
 For the current pilot, the project uses a project-owned Google Sheet as the

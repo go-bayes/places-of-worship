@@ -922,6 +922,29 @@ Evidence to retain:
 - target-year state judgements for 2013, 2018, and 2023, with optional
   probabilities and review notes
 
+Lifecycle-tag lead contract:
+
+1. Parse OSM lifecycle tags into source-backed date bounds, preserving the raw
+   tag value, parsed value, date precision, and parser warning if the value is
+   ambiguous.
+2. Treat `start_date` and `old_start_date` as possible lower-bound evidence
+   that worship use or the relevant structure existed, not as a confirmed
+   project birth date until reviewed.
+3. Treat `end_date` and former-use lifecycle tags as possible upper-bound or
+   changed-use evidence, not as a confirmed closure until reviewed.
+4. Derive provisional `target_year_2013_status`,
+   `target_year_2018_status`, and `target_year_2023_status` from the parsed
+   bounds using `present`, `absent`, `uncertain`, or `not_assessed`.
+5. Emit candidate gain/loss windows when the provisional status changes between
+   target years or adjacent annual snapshots. These windows are review tasks,
+   not accepted diffs.
+6. Keep the basis explicit: `osm_lifecycle_tags`, `osm_object_history`,
+   `independent_directory`, `street_imagery`, `denominational_record`, or
+   `reviewer_inference`.
+7. Convert a lifecycle lead into accepted longitudinal data only after review
+   creates a change event with `target_year_affects`, source references,
+   confidence, payload hash, and manifest linkage.
+
 The output should be a staged evidence layer, not an automatic master update.
 For each candidate site and target year, store the evidence basis, OSM version
 or tag source, visual verification source, target-year status, optional
@@ -1045,7 +1068,7 @@ Minimum `site_observation` fields:
     `registration_date`, `imagery_capture_date`, `annual_return_year`)
   - `evidence_start_date`
   - `evidence_end_date`
-  - `date_precision` (`day`, `month`, `year`, `range`, `unknown`)
+  - `date_precision` (`day`, `month`, `year`, `bounded`, `unknown`)
 - Lifecycle evidence, where available:
   - `organisation_founded_date`
   - `site_opened_date`
@@ -1631,7 +1654,8 @@ OSM ids or user suggestions.
 13. Scope the OSM temporal verification subproject as an annual-snapshot
    protocol from 2013 onward, with New Zealand RA tasks collapsed around 2013,
    2018, and 2023. Include OSM history extraction, lifecycle-tag parsing,
-   visual evidence review, and target-year probability rules.
+   provisional target-year statuses, gain/loss lead windows, visual evidence
+   review, and target-year probability rules.
 14. Draft the Google Sheets to staging API pilot described in
    `docs/community-ingestion-api-plan.md`.
 15. Extend the initial CLI-first RA revisions pipeline from `CRITIQUE.md`,

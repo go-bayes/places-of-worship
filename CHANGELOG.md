@@ -16,6 +16,11 @@
 - Documented accepted diffs as primary longitudinal data: losses, gains,
   target-year states, density changes, and appeared/disappeared map layers must
   be derived from accepted change events and accepted-diff manifests.
+- Documented the OSM lifecycle lead contract: `start_date`, `old_start_date`,
+  `end_date`, and related former-use tags seed provisional target-year statuses
+  and gain/loss tasks, while accepted events remain the longitudinal data.
+- Added an FAQ entry explaining how OSM lifecycle tags can indicate whether a
+  place of worship may have been alive at 2013, 2018, or 2023.
 - Clarified provider planning so Cloudflare is not part of the active storage
   path unless that choice is explicitly reopened.
 - Extended the temporal OSM lead generator to use annual `1 September`

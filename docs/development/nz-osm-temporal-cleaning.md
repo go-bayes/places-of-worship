@@ -84,6 +84,43 @@ generation, analysis, or public products:
 - `nz_osm_temporal_candidates.geojson`
 - `manifest.json`
 
+## OSM Lifecycle Lead Contract
+
+OpenStreetMap lifecycle tags are a first-pass entry point for deciding whether
+a place of worship was functionally alive at a target year. They are leads, not
+accepted loss/gain data.
+
+The temporal workflow should retain and expose:
+
+- raw lifecycle tags, including `start_date`, `old_start_date`, `end_date`, and
+  any later supported former-use tags such as `disused:*`, `abandoned:*`,
+  `was:*`, or `historic=*`;
+- parsed date values and date precision (`day`, `month`, `year`, `bounded`, or
+  `unknown`);
+- parser warnings for prose dates, multiple dates, approximate values, or
+  values whose target-year implication is ambiguous;
+- provisional `2013`, `2018`, and `2023` target-year statuses using
+  `present`, `absent`, `uncertain`, or `not_assessed`;
+- candidate gain/loss windows derived from provisional status changes;
+- the evidence basis that produced each provisional status.
+
+Minimum target-year rules:
+
+- start evidence before the target anchor, with no end evidence before that
+  anchor, gives a provisional `present`;
+- start evidence after the target anchor gives a provisional `absent`;
+- end evidence before the target anchor gives a provisional `absent`;
+- start or end evidence during the target year, without enough precision to
+  resolve the `1 September` anchor, gives `uncertain`;
+- OSM object appearance or disappearance without lifecycle tags gives an
+  `osm_object_history` lead, because it may be mapping lag or object churn;
+- no lifecycle evidence gives `not_assessed`.
+
+The accepted longitudinal record remains downstream of review. A lifecycle lead
+can support a `worship_use_appeared`, `worship_use_disappeared`, or
+`worship_function_update` event only after review records source references,
+confidence, `target_year_affects`, payload hash, and manifest linkage.
+
 ## Review Columns
 
 The candidate CSV records:
@@ -91,6 +128,8 @@ The candidate CSV records:
 - whether each object is present in each cleaned annual snapshot;
 - target-year presence for the highlighted RA/research years;
 - the apparent diff category and adjacent-year transition window;
+- raw lifecycle tags, parsed lifecycle bounds, provisional target-year status,
+  and lifecycle parser warnings once the lifecycle-lead table is added;
 - the latest name, religion, denomination, and location;
 - year-by-year name, religion, denomination, amenity, and building tags;
 - any current-map match by OpenStreetMap object key;

@@ -120,6 +120,9 @@ Evidence And Governance:
 - `[ ]` Deterministic payload hashing and accepted-event replay checks.
 - `[ ]` Hash-backed accepted diff manifests with event ids, input manifests,
   target years, country/area partitions, output hashes, and replay command.
+- `[ ]` OSM lifecycle-lead table with raw tags, parsed date bounds,
+  provisional target-year statuses, gain/loss windows, and reviewer
+  instructions before RA task seeding.
 
 Research Outputs And Analysis:
 

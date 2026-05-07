@@ -151,6 +151,38 @@ next `pow` design step should add accepted-diff manifests and deterministic
 loss/gain summaries before density products or map layers consume temporal
 changes.
 
+## 2026-05-07: Use OSM lifetimes as target-year lead evidence
+
+Decision:
+Treat OpenStreetMap lifecycle tags, especially `start_date`, `old_start_date`,
+and `end_date`, as first-pass lead evidence for whether a place of worship was
+functionally alive at New Zealand target years. These tags should seed
+provisional 2013, 2018, and 2023 statuses and gain/loss review tasks, then flow
+through RA or curator review before becoming accepted change events.
+
+Rationale:
+OSM lifetimes are cheap to extract at scale and often encode useful local
+knowledge that previous versions of the map already relied on. They can point
+directly to likely openings, closures, and ambiguous temporal windows. They are
+also uneven, user-supplied, and sometimes describe a building, organisation, or
+OSM mapping history rather than worship use at a site. Their value is therefore
+as structured lead evidence that makes target-year uncertainty visible.
+
+Consequences:
+The temporal OSM workflow should emit a lifecycle-lead table with raw lifecycle
+tags, parsed date bounds, provisional target-year statuses, candidate gain/loss
+windows, basis flags, and reviewer instructions. A lead derived only from OSM
+lifecycle tags remains provisional. A research-grade gain or loss still needs
+an accepted event with source references, `target_year_affects`, payload hash,
+review decision, and manifest linkage.
+
+Open questions:
+We need to define the exact parser for partial and messy OSM date strings,
+decide how to handle nonstandard lifecycle tags such as `disused:*`,
+`abandoned:*`, `was:*`, or `historic=*`, and choose how much OSM-only evidence
+is enough for low-risk confirmations compared with candidate losses or gains
+that affect estimates.
+
 ## 2026-05-01: Treat the grant as a reporting reference, not a tracked source
 
 Decision:
