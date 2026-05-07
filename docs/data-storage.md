@@ -1,7 +1,12 @@
 # Data Storage and Tracking
 
-This document inventories where data lives today and outlines a plan for
-auditable, diff-friendly data tracking over time.
+This document inventories where data lives today.
+
+The operational storage pipeline is defined in
+`docs/data-storage-pipeline.md`. That document is authoritative for the rule
+that ignored local data is cache only and must be promoted to durable
+project-controlled storage before it is used for analysis, review, or task
+generation.
 
 ## Current Data Locations
 
@@ -46,8 +51,9 @@ auditable, diff-friendly data tracking over time.
 
 ## Planning Source of Truth
 
-Data tracking and diff strategy decisions live in `PLANNING.md`. This document
-is an inventory and operational reference only.
+Data tracking and diff strategy decisions live in `PLANNING.md`. The active
+storage workflow lives in `docs/data-storage-pipeline.md`. This document is an
+inventory reference only.
 
 Related templates:
 - `docs/data-manifest-template.snapshot.json`

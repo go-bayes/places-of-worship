@@ -82,10 +82,8 @@ Google Cloud/PostgreSQL/PostGIS/Cloud Storage remains the durable staging,
 geospatial storage, media quarantine, and provider-neutral export reference if
 the task-map pilot needs responsibilities beyond Convex coordination.
 
-Cloudflare remains useful to track as an alternate edge, access, and object
-storage path, especially for static hosting, access policy, R2 storage, Images,
-or Stream. It should not displace the Google baseline unless it solves a
-specific operational problem better.
+Cloudflare is not part of the active storage plan. Revisit it only if the user
+explicitly reopens that provider choice for a specific operational problem.
 
 Reference docs:
 
@@ -97,7 +95,3 @@ Reference docs:
   https://docs.convex.dev/auth
 - Convex file storage:
   https://docs.convex.dev/file-storage
-- Cloudflare Access identity providers:
-  https://developers.cloudflare.com/cloudflare-one/integrations/identity-providers/
-- Cloudflare R2:
-  https://developers.cloudflare.com/r2/

@@ -7,6 +7,11 @@
 - Recorded the New Zealand temporal-reconstruction pilot decision: RAs should
   contact church bodies and review only curated, cleaned OpenStreetMap-history
   candidate leads, not raw annual OSM differences.
+- Added `docs/data-storage-pipeline.md` to make ignored local data a cache only:
+  reusable datasets now require durable project-controlled storage plus tracked
+  manifests with checksums, counts, provenance, and licence/privacy status.
+- Clarified provider planning so Cloudflare is not part of the active storage
+  path unless that choice is explicitly reopened.
 - Extended the temporal OSM lead generator to use annual `1 September`
   snapshots from 2013 through 2025 by default, while retaining 2013, 2018, and
   2023 as highlighted New Zealand RA/research task years.

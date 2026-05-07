@@ -32,6 +32,8 @@
 - `docs/convex-task-layer-spec.md`: near-term Convex task-map backend contract
   for shared RA/reviewer task state, evidence drafts, review decisions, and
   exports to `pow`.
+- `docs/data-storage-pipeline.md`: storage policy for local caches, durable
+  project-controlled copies, tracked manifests, checksums, and provenance.
 - `docs/development/convex-task-layer-setup.md`: maintainer setup notes for
   the Convex task-layer scaffold, seeding static NZ tasks, and testing export
   boundaries.
@@ -81,6 +83,10 @@
 
 - Keep large, restricted, raw, or private data out of Git unless the repo
   already tracks that class of artefact and the licence permits it.
+- Treat ignored local data as cache only. Before using generated data for RA
+  tasks, analysis, public products, or publication, make sure it has durable
+  project-controlled storage and a tracked manifest as described in
+  `docs/data-storage-pipeline.md`.
 - When editing or reviewing planning, schema, RA, roadmap, FAQ, or changelog
   documents, check nearby cross-references for drift. If documents disagree on
   identity rules, RA workflow, data ownership, source/licence handling,

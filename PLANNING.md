@@ -1245,6 +1245,10 @@ map do not drift apart.
 - The first OSM-history lead generator should use every completed annual anchor
   from `2013-09-01` through `2025-09-01`; `2026-09-01` should wait until that
   date exists.
+- Local ignored outputs from this generator are cache only. Promote reusable
+  outputs to durable project-controlled storage and commit a manifest before
+  they are used for RA task generation, analysis, density products, or
+  publication.
 
 ### Decided: country backend strategy
 
@@ -1487,20 +1491,22 @@ OSM ids or user suggestions.
 ### Open: long-term snapshot storage
 
 - Context: some current source material may only be stored in Google Drive,
-  which is not suitable as the authoritative long-term archive for yearly
-  tracking.
+  and some generated outputs currently exist only in ignored local folders.
+  Neither is sufficient as the sole copy for yearly tracking.
 - Options:
-  - continue with Google Drive plus manifests
-  - move immutable yearly snapshots to object storage
+  - continue with project-controlled Google Drive plus manifests for the pilot
+  - move immutable yearly snapshots to Google Cloud object storage
   - keep a hybrid model with Drive for working files and object storage for
-    published snapshots
+    accepted or published snapshots
 - Risks:
+  - laptop loss
   - accidental overwrite
   - unclear provenance
   - weak reproducibility
 - Next step:
-  - inventory what currently exists only in Drive and define the canonical
-    snapshot layout.
+  - use `docs/data-storage-pipeline.md` as the immediate policy: ignored local
+    files are cache only, reusable outputs require durable storage plus a
+    tracked manifest.
 
 ### Open: school chapels and institutional worship spaces
 
@@ -1564,8 +1570,10 @@ OSM ids or user suggestions.
 4. Design the shared global cleaner and review-queue schema.
 5. Refactor `scripts/extract_global_data.R` into explicit extract, normalise,
    clean, and export stages.
-6. Inventory what is currently stored only in Google Drive and migrate it into
-   a dated snapshot structure.
+6. Promote any reusable ignored local outputs and any Drive-only project data
+   into the data-storage pipeline: durable project-controlled copy, tracked
+   manifest, checksums, counts, licence/privacy status, and rebuild
+   instructions.
 7. Add run manifests and per-country counts.
 8. Define the shared country backend schema and NZ boundary adapter contract.
 9. Validate the first NZ territorial-authority `area_summary` product against

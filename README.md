@@ -51,6 +51,11 @@ relevant data products.
 OpenStreetMap-derived databases are distributed under the Open Database Licence
 (ODbL 1.0), consistent with OSM licence terms.
 
+Large, private, or generated data are not tracked directly in Git. See
+[docs/data-storage-pipeline.md](docs/data-storage-pipeline.md) for the storage
+policy: local ignored data is cache only, and reusable datasets need durable
+project-controlled storage plus tracked manifests.
+
 ## Project Team
 
 The project is led by Professor Joseph Bulbulia (Victoria University of

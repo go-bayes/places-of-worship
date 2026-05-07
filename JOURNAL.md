@@ -81,6 +81,29 @@ lead counts only. They are not currently used for the NZ data-page density
 plots, which still use the committed current-place `area_summary_ta.json`
 product and should not be interpreted as historical place-density estimates.
 
+## 2026-05-07: Treat local ignored data as cache, not storage
+
+Decision:
+Add `docs/data-storage-pipeline.md` as the operational storage policy. Local
+ignored folders such as `data/raw/`, `data/intermediate/`, `data/derived/`, and
+`exports/` are cache only. Any dataset that may be reused for analysis, review,
+publication, or task generation must have a durable project-controlled copy and
+a tracked manifest.
+
+Rationale:
+A laptop can fail, be lost, or diverge from the project record. Keeping large
+or restricted data out of Git is still correct, but local-only ignored files are
+not recoverable enough for an auditable research pipeline.
+
+Consequences:
+The immediate storage pattern is local cache plus durable project-controlled
+storage plus tracked manifest. For the pilot, project Google Drive can hold
+working source files and exported review artefacts; Google Cloud remains the
+durable storage reference for immutable snapshots, media quarantine, and future
+geospatial staging. The 2026-05-07 NZ annual OSM extraction should be promoted
+to this pipeline before it is used for Convex task generation, analysis, or
+public map products.
+
 ## 2026-05-01: Treat the grant as a reporting reference, not a tracked source
 
 Decision:

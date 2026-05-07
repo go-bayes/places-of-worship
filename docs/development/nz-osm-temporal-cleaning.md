@@ -73,7 +73,9 @@ The default per-request timeout is 180 seconds. Use `--timeout-seconds N` to
 raise or lower it for exploratory runs.
 
 Outputs are written under `data/intermediate/nz_osm_temporal/`, which is
-gitignored by default:
+gitignored by default. These files are local cache only; promote reusable
+outputs through `docs/data-storage-pipeline.md` before using them for RA task
+generation, analysis, or public products:
 
 - `raw/nz_osm_pows_<date>.geojson`
 - `nz_osm_<year>_normalised.json`

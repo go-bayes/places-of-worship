@@ -124,8 +124,8 @@ and launch gates.
 
 `docs/portal-media-and-provider-evaluation-plan.md` defines image quarantine for
 the pilot and records why Convex is now the near-term task-map spike while
-Google Cloud/PostGIS, SpacetimeDB, and Cloudflare remain provider options for
-other responsibilities.
+Google Cloud/PostGIS remains the durable storage reference. SpacetimeDB is
+deferred, and Cloudflare is not in the active plan.
 
 ## Scope Boundaries
 
