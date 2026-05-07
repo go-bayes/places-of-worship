@@ -104,6 +104,30 @@ geospatial staging. The 2026-05-07 NZ annual OSM extraction should be promoted
 to this pipeline before it is used for Convex task generation, analysis, or
 public map products.
 
+## 2026-05-07: Make global data versioning hash-backed
+
+Decision:
+Add `schemas/data-manifest.schema.json` and extend the storage pipeline so every
+reusable data artefact has stable logical IDs, immutable version IDs, per-file
+SHA-256 hashes, row or feature counts, and a manifest hash. Global data should
+be partitioned by dataset family, snapshot date, pipeline stage, and country
+before any larger tile or grid partitioning is introduced.
+
+Rationale:
+The project is moving toward global longitudinal data. At that scale, informal
+local folders and prose-only manifests will not be enough to recover data, audit
+changes, compare country partitions, or let agents review versioned dumps.
+Hashing must happen at source export, raw snapshot, stage output, durable
+storage, and accepted-publication boundaries.
+
+Consequences:
+Before the NZ OSM annual extraction is used for Convex task generation or
+analysis, create a tracked manifest that validates against
+`schemas/data-manifest.schema.json`. Then wire the same hash-backed manifest
+contract into the global extract, normalise, clean, deduplicate, review-queue,
+and export stages. Native Google files must be exported to stable bytes before
+hashing.
+
 ## 2026-05-01: Treat the grant as a reporting reference, not a tracked source
 
 Decision:

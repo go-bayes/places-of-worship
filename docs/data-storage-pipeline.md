@@ -118,6 +118,125 @@ The tracked manifest is the recovery handle. If the laptop dies, a maintainer
 should be able to use the manifest to find the durable files, verify their
 checksums, and rerun the relevant pipeline.
 
+## Versioning And Hashing
+
+Hashing is part of the storage contract, not a later verification step. The
+global pipeline will eventually contain millions of sites and many country,
+year, and processing-stage partitions, so version identifiers must be stable,
+machine-readable, and cheap to compare.
+
+### Identifier Levels
+
+Use three related identifiers:
+
+- `dataset_id`: stable logical dataset name, such as
+  `osm-pow:nz:2025-09-01:cleaned` or `osm-pow:global:2025-09-01:raw`.
+- `dataset_version_id`: immutable version of that dataset, formed from the
+  `dataset_id` plus a short manifest hash, for example
+  `osm-pow:nz:2025-09-01:cleaned:4f8a91c2d3aa`.
+- `manifest_id`: stable manifest record for the run, usually matching the
+  `dataset_version_id` with a `manifest:` prefix.
+
+The `dataset_id` is human-facing and can be reused when a dataset is superseded.
+The `dataset_version_id` and `manifest_id` are immutable.
+
+### Required Hashes
+
+Each manifest must record:
+
+- `sha256` for every durable file, computed from the exact bytes that would be
+  downloaded or restored;
+- `manifest_sha256`, computed from a canonical JSON representation of the
+  manifest with `manifest_sha256` itself set to `null`;
+- input hashes for source files, raw exports, or previous-stage manifests;
+- output hashes for each generated partition;
+- the Git commit and command or parameters used to generate the outputs.
+
+Native Google Sheets, Docs, or Slides are not hashable as live mutable objects.
+Before ingestion, export them to a stable file format such as CSV, TSV, XLSX,
+JSON, or PDF, then hash the exported bytes and record the Drive file ID plus the
+export MIME type.
+
+### Hash Timing
+
+Hash at these boundaries:
+
+1. immediately after downloading or exporting a source file;
+2. after writing each raw snapshot;
+3. after each normalise, clean, deduplicate, review-queue, or export stage;
+4. after copying or uploading to durable storage, using the durable bytes where
+   possible;
+5. before any accepted dataset changes a public map, density product, or master
+   rebuild.
+
+If a file is compressed, hash the stored compressed bytes and record the
+compression format. If downstream code needs the uncompressed record stream, add
+an optional `content_sha256` for a canonical uncompressed representation.
+
+### Global Partitioning
+
+Global data should be partitioned before it becomes large enough to be awkward:
+
+- by `dataset_family`, for example `osm-pow`;
+- by snapshot date, using the fixed annual anchor where applicable;
+- by pipeline stage: `raw`, `normalised`, `cleaned`, `deduplicated`,
+  `review_queue`, `accepted`, or `public`;
+- by `country_code` for country products;
+- by tile or grid only when country partitioning is too coarse for review or
+  map serving.
+
+Each country partition needs its own file hashes and row/feature counts. A
+global rollup manifest should list all country partition manifests and aggregate
+counts, rather than storing one opaque global file as the only recovery unit.
+
+### Supersession
+
+Never overwrite an immutable version. If a script, source, cleaning rule,
+schema, or manual decision changes, create a new `dataset_version_id` and mark
+the old manifest as superseded by the new one. The old durable files may be
+retained or lifecycle-managed later, but the manifest must remain sufficient to
+explain what changed.
+
+### Near-Term Requirement
+
+Before the next serious data run is used for Convex task generation, RA review,
+analysis, or public products, add manifest validation around the run. The first
+implementation can be small: compute file SHA-256 values, row/feature counts,
+the generating Git commit, and a manifest hash for the NZ OSM annual extraction.
+The same convention should then be applied to global country partitions.
+
+## Implementation Milestones
+
+### Milestone 1: NZ Hash Manifest
+
+Before the 2026-05-07 NZ OSM annual extraction is used for any task generation,
+create a tracked manifest that validates against
+`schemas/data-manifest.schema.json`. The manifest should record the candidate
+CSV, candidate GeoJSON, generated manifest, and any retained raw snapshot files.
+It should include byte counts, SHA-256 hashes, row or feature counts, the
+generating Git commit, command, and validation notes.
+
+### Milestone 2: Manifest Validation Command
+
+Add a repository command that validates data manifests against
+`schemas/data-manifest.schema.json`. The command should be usable locally and in
+continuous integration once CI is configured. The current templates have valid
+JSON syntax, but schema validation is not yet automated in the repository.
+
+### Milestone 3: Pipeline Integration
+
+Update extract, normalise, clean, deduplicate, review-queue, and export scripts
+so each stage emits or updates a manifest. A stage may consume local cache
+files, but it must record input manifest IDs and output hashes. This makes the
+global pipeline replayable by country and stage.
+
+### Milestone 4: Global Rollup Manifests
+
+Once country manifests exist, add a global rollup manifest per snapshot date.
+The rollup should contain aggregate counts and references to country partition
+manifests, not a single unpartitioned global artefact as the only recovery
+handle.
+
 ## NZ OSM Annual Extraction
 
 The 2026-05-07 strict New Zealand annual OSM extraction currently exists as

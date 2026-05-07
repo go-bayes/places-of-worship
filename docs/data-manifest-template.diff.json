@@ -1,31 +1,94 @@
 {
-  "type": "diff",
-  "dataset_family": "osm-places",
-  "base_snapshot_id": "YYYY-MM-DD",
-  "target_snapshot_id": "YYYY-MM-DD",
-  "generated_at": "YYYY-MM-DDTHH:MM:SSZ",
-  "pipeline": {
-    "script": "scripts/compute_diffs.py",
-    "commit": "<git-sha>",
-    "parameters": {}
+  "$schema": "../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:osm-pow:global:2024-09-01-to-2025-09-01:diff:4f8a91c2d3aa",
+  "dataset_id": "osm-pow:global:2024-09-01-to-2025-09-01:diff",
+  "dataset_version_id": "osm-pow:global:2024-09-01-to-2025-09-01:diff:4f8a91c2d3aa",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "osm-pow",
+  "dataset_role": "intermediate_lead",
+  "scope": {
+    "level": "global",
+    "country_codes": [],
+    "snapshot_date": "2025-09-01",
+    "snapshot_anchor": "09-01",
+    "pipeline_stage": "review_queue"
   },
-  "files": [
+  "created_at": "2026-05-07T00:00:00Z",
+  "created_by": "scripts/compute_global_diffs.R",
+  "pipeline": {
+    "script": "scripts/compute_global_diffs.R",
+    "git_commit": "abcdef1",
+    "command": "Rscript scripts/compute_global_diffs.R --base 2024-09-01 --target 2025-09-01",
+    "parameters": {
+      "base_snapshot_date": "2024-09-01",
+      "target_snapshot_date": "2025-09-01"
+    },
+    "software_versions": {
+      "R": "4.3.0"
+    }
+  },
+  "source": {
+    "provider": "Places of Worship pipeline",
+    "source_dataset_ids": ["osm-pow"],
+    "source_urls": [],
+    "retrieved_at": null,
+    "licence": "ODbL-1.0",
+    "citation": "Derived from OpenStreetMap contributors and Places of Worship pipeline manifests."
+  },
+  "input_manifests": [
     {
-      "path": "gs://<bucket>/diffs/YYYY-MM-DD_to_YYYY-MM-DD/global_delta.json",
-      "format": "json",
-      "bytes": 0,
-      "sha256": "<sha256>",
-      "content": "summary-metrics"
+      "manifest_id": "manifest:osm-pow:global:2024-09-01:cleaned:111111111111",
+      "dataset_version_id": "osm-pow:global:2024-09-01:cleaned:111111111111",
+      "manifest_sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    {
+      "manifest_id": "manifest:osm-pow:global:2025-09-01:cleaned:222222222222",
+      "dataset_version_id": "osm-pow:global:2025-09-01:cleaned:222222222222",
+      "manifest_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
     }
   ],
-  "metrics": {
-    "global_delta": null,
-    "by_country_delta": {},
-    "grid_summary": {
-      "resolution_km": null,
-      "total_cells": null,
-      "cells_changed": null
-    },
-    "notes": ""
-  }
+  "durable_files": [
+    {
+      "uri": "gs://<bucket>/osm-pow/diffs/2024-09-01_to_2025-09-01/global_delta.json",
+      "storage_provider": "google_cloud_storage",
+      "format": "json",
+      "bytes": 0,
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "content_sha256": null,
+      "row_count": null,
+      "feature_count": null,
+      "content": "global diff summary and country manifest references",
+      "privacy": "project_private",
+      "licence_status": "accepted"
+    }
+  ],
+  "partitions": [
+    {
+      "partition_id": "NZ",
+      "partition_type": "country",
+      "country_code": "NZ",
+      "file_uri": "gs://<bucket>/osm-pow/diffs/2024-09-01_to_2025-09-01/NZ_delta.parquet",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "row_count": 0,
+      "feature_count": null
+    }
+  ],
+  "stats": {
+    "global_delta": 0,
+    "country_partition_count": 1
+  },
+  "local_cache_hint": "data/intermediate/global/diffs/2024-09-01_to_2025-09-01/",
+  "validation": {
+    "status": "not_run",
+    "commands": [],
+    "warnings": [],
+    "notes": null
+  },
+  "privacy": "project_private",
+  "licence_status": "accepted",
+  "downstream_status": "lead",
+  "notes": "Template only. Replace placeholder hashes, counts, URI, commit, and dates before use."
 }

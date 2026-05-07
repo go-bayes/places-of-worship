@@ -87,6 +87,10 @@
   tasks, analysis, public products, or publication, make sure it has durable
   project-controlled storage and a tracked manifest as described in
   `docs/data-storage-pipeline.md`.
+- Use `schemas/data-manifest.schema.json` for reusable data artefacts. Global
+  outputs should be partitioned by snapshot date, pipeline stage, and country,
+  with SHA-256 hashes, row or feature counts, immutable version IDs, and
+  supersession links.
 - When editing or reviewing planning, schema, RA, roadmap, FAQ, or changelog
   documents, check nearby cross-references for drift. If documents disagree on
   identity rules, RA workflow, data ownership, source/licence handling,

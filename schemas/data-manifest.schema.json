@@ -1,0 +1,344 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://go-bayes.github.io/places-of-worship/schemas/data-manifest.schema.json",
+  "title": "Data Manifest",
+  "description": "Recoverable, checksummed manifest for raw, intermediate, staged, accepted, or public data artefacts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "manifest_id",
+    "dataset_id",
+    "dataset_version_id",
+    "dataset_family",
+    "dataset_role",
+    "scope",
+    "created_at",
+    "created_by",
+    "pipeline",
+    "durable_files",
+    "validation",
+    "downstream_status"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "data-manifest.v1"
+    },
+    "manifest_id": {
+      "type": "string",
+      "pattern": "^manifest:[a-z0-9][a-z0-9._:-]*$"
+    },
+    "dataset_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "dataset_version_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]*:[a-f0-9]{12,64}$"
+    },
+    "manifest_sha256": {
+      "type": ["string", "null"],
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "supersedes_manifest_id": {
+      "type": ["string", "null"],
+      "pattern": "^manifest:[a-z0-9][a-z0-9._:-]*$"
+    },
+    "superseded_by_manifest_id": {
+      "type": ["string", "null"],
+      "pattern": "^manifest:[a-z0-9][a-z0-9._:-]*$"
+    },
+    "dataset_family": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "dataset_role": {
+      "enum": [
+        "raw_source",
+        "intermediate_lead",
+        "staged_evidence",
+        "accepted_export",
+        "public_product"
+      ]
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level"],
+      "properties": {
+        "level": {
+          "enum": ["global", "country", "area", "site", "grid", "batch"]
+        },
+        "country_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$"
+          },
+          "uniqueItems": true
+        },
+        "area_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "snapshot_date": {
+          "type": ["string", "null"],
+          "format": "date"
+        },
+        "snapshot_anchor": {
+          "type": ["string", "null"],
+          "pattern": "^\\d{2}-\\d{2}$"
+        },
+        "pipeline_stage": {
+          "enum": [
+            "raw",
+            "normalised",
+            "cleaned",
+            "deduplicated",
+            "review_queue",
+            "staged",
+            "accepted",
+            "public"
+          ]
+        }
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "created_by": {
+      "type": "string"
+    },
+    "pipeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["script", "git_commit", "command"],
+      "properties": {
+        "script": {
+          "type": "string"
+        },
+        "git_commit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{7,40}$"
+        },
+        "command": {
+          "type": "string"
+        },
+        "parameters": {
+          "type": "object"
+        },
+        "software_versions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "type": ["string", "null"]
+        },
+        "source_dataset_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+          },
+          "uniqueItems": true
+        },
+        "source_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "uniqueItems": true
+        },
+        "retrieved_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "licence": {
+          "type": ["string", "null"]
+        },
+        "citation": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "input_manifests": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ManifestRef"
+      }
+    },
+    "durable_files": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/DurableFile"
+      }
+    },
+    "partitions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Partition"
+      }
+    },
+    "stats": {
+      "type": "object",
+      "additionalProperties": {
+        "type": ["string", "number", "integer", "boolean", "null"]
+      }
+    },
+    "local_cache_hint": {
+      "type": ["string", "null"]
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "enum": ["not_run", "passed", "passed_with_warnings", "failed"]
+        },
+        "commands": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "privacy": {
+      "enum": ["public", "project_private", "restricted", "sensitive"]
+    },
+    "licence_status": {
+      "enum": ["accepted", "needs_review", "restricted", "unknown"]
+    },
+    "downstream_status": {
+      "enum": ["lead", "staged", "accepted", "exported", "public", "superseded", "discarded"]
+    },
+    "notes": {
+      "type": ["string", "null"]
+    }
+  },
+  "$defs": {
+    "ManifestRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["manifest_id"],
+      "properties": {
+        "manifest_id": {
+          "type": "string",
+          "pattern": "^manifest:[a-z0-9][a-z0-9._:-]*$"
+        },
+        "dataset_version_id": {
+          "type": ["string", "null"],
+          "pattern": "^[a-z0-9][a-z0-9._:-]*:[a-f0-9]{12,64}$"
+        },
+        "manifest_sha256": {
+          "type": ["string", "null"],
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "DurableFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uri", "storage_provider", "format", "bytes", "sha256", "content"],
+      "properties": {
+        "uri": {
+          "type": "string"
+        },
+        "storage_provider": {
+          "enum": ["google_drive", "google_cloud_storage", "github_release", "other"]
+        },
+        "format": {
+          "type": "string"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "content_sha256": {
+          "type": ["string", "null"],
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "row_count": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "feature_count": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "content": {
+          "type": "string"
+        },
+        "privacy": {
+          "enum": ["public", "project_private", "restricted", "sensitive"]
+        },
+        "licence_status": {
+          "enum": ["accepted", "needs_review", "restricted", "unknown"]
+        }
+      }
+    },
+    "Partition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["partition_id", "partition_type", "file_uri", "sha256"],
+      "properties": {
+        "partition_id": {
+          "type": "string"
+        },
+        "partition_type": {
+          "enum": ["country", "tile", "grid", "area", "batch"]
+        },
+        "country_code": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Z]{2}$"
+        },
+        "file_uri": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "row_count": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "feature_count": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

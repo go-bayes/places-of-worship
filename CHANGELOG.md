@@ -10,6 +10,9 @@
 - Added `docs/data-storage-pipeline.md` to make ignored local data a cache only:
   reusable datasets now require durable project-controlled storage plus tracked
   manifests with checksums, counts, provenance, and licence/privacy status.
+- Added `schemas/data-manifest.schema.json` and updated the manifest templates
+  for hash-backed dataset versions, country/global partitions, supersession, and
+  durable-file checksums.
 - Clarified provider planning so Cloudflare is not part of the active storage
   path unless that choice is explicitly reopened.
 - Extended the temporal OSM lead generator to use annual `1 September`

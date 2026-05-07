@@ -1,36 +1,85 @@
 {
-  "type": "snapshot",
-  "dataset_family": "osm-places",
-  "snapshot_id": "YYYY-MM-DD",
-  "generated_at": "YYYY-MM-DDTHH:MM:SSZ",
-  "source": {
-    "name": "OpenStreetMap",
-    "url": "https://planet.openstreetmap.org/",
-    "retrieved_at": "YYYY-MM-DDTHH:MM:SSZ",
-    "license": "ODbL-1.0"
+  "$schema": "../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:osm-pow:nz:2025-09-01:cleaned:4f8a91c2d3aa",
+  "dataset_id": "osm-pow:nz:2025-09-01:cleaned",
+  "dataset_version_id": "osm-pow:nz:2025-09-01:cleaned:4f8a91c2d3aa",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "osm-pow",
+  "dataset_role": "intermediate_lead",
+  "scope": {
+    "level": "country",
+    "country_codes": ["NZ"],
+    "snapshot_date": "2025-09-01",
+    "snapshot_anchor": "09-01",
+    "pipeline_stage": "cleaned"
   },
+  "created_at": "2026-05-07T00:00:00Z",
+  "created_by": "scripts/build_nz_osm_temporal_candidates.R",
   "pipeline": {
-    "script": "scripts/extract_global_data.R",
-    "commit": "<git-sha>",
-    "parameters": {}
+    "script": "scripts/build_nz_osm_temporal_candidates.R",
+    "git_commit": "abcdef1",
+    "command": "Rscript scripts/build_nz_osm_temporal_candidates.R --years 2013:2025 --task-years 2013,2018,2023",
+    "parameters": {
+      "years": "2013:2025",
+      "task_years": "2013,2018,2023",
+      "snapshot_anchor": "09-01",
+      "types": "node,way"
+    },
+    "software_versions": {
+      "R": "4.3.0"
+    }
   },
-  "schema": {
-    "version": "1.0.0",
-    "path": "schemas/site.schema.json"
+  "source": {
+    "provider": "OpenStreetMap via ohsome API",
+    "source_dataset_ids": ["osm-ohsome-elements-centroid"],
+    "source_urls": ["https://api.ohsome.org/v1/elements/centroid"],
+    "retrieved_at": "2026-05-07T00:00:00Z",
+    "licence": "ODbL-1.0",
+    "citation": "OpenStreetMap contributors; ohsome API."
   },
-  "files": [
+  "input_manifests": [],
+  "durable_files": [
     {
-      "path": "gs://<bucket>/snapshots/YYYY-MM-DD/places.mbtiles",
-      "format": "mbtiles",
+      "uri": "gs://<bucket>/osm-pow/2025-09-01/cleaned/NZ/nz_osm_temporal_candidates.csv",
+      "storage_provider": "google_cloud_storage",
+      "format": "csv",
       "bytes": 0,
-      "sha256": "<sha256>",
-      "row_count": null,
-      "content": "vector-tiles"
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "content_sha256": null,
+      "row_count": 0,
+      "feature_count": null,
+      "content": "cleaned annual OSM temporal candidate rows",
+      "privacy": "project_private",
+      "licence_status": "accepted"
+    }
+  ],
+  "partitions": [
+    {
+      "partition_id": "NZ",
+      "partition_type": "country",
+      "country_code": "NZ",
+      "file_uri": "gs://<bucket>/osm-pow/2025-09-01/cleaned/NZ/nz_osm_temporal_candidates.csv",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "row_count": 0,
+      "feature_count": null
     }
   ],
   "stats": {
-    "global_count": null,
-    "by_country": {},
-    "notes": ""
-  }
+    "candidate_count": 0,
+    "cleaned_count": 0
+  },
+  "local_cache_hint": "data/intermediate/nz_osm_temporal/",
+  "validation": {
+    "status": "not_run",
+    "commands": [],
+    "warnings": [],
+    "notes": null
+  },
+  "privacy": "project_private",
+  "licence_status": "accepted",
+  "downstream_status": "lead",
+  "notes": "Template only. Replace placeholder hashes, counts, URI, commit, and dates before use."
 }

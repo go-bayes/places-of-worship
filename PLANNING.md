@@ -315,6 +315,10 @@ The working model is:
     `synagogue`, `chapel`, `cathedral`, `shrine`, and other clearly religious
     building types where justified
 - Emit one raw extract per country and one cleaned output per country.
+- Use `schemas/data-manifest.schema.json` for every reusable raw,
+  intermediate, accepted, or public artefact. Each partitioned output needs a
+  SHA-256 hash, row or feature count, `dataset_version_id`, and manifest link
+  before it can feed downstream review, analysis, or public products.
 - Keep the legacy Python extractor only as archive/reference until parity is
   confirmed.
 - Keep the research-facing global pipeline in R so collaborators can review,
@@ -346,7 +350,7 @@ The working model is:
 
 - Record retrieval date, source, script path, and pipeline commit for each run.
 - Emit counts and checksums per country.
-- Keep lightweight manifests in-repo.
+- Keep lightweight hash-backed manifests in-repo.
 - Move from ad hoc Google Drive storage to immutable dated snapshots plus
   manifests.
 - Store large immutable snapshots and diffs outside the repo when needed.
@@ -1574,7 +1578,9 @@ OSM ids or user suggestions.
    into the data-storage pipeline: durable project-controlled copy, tracked
    manifest, checksums, counts, licence/privacy status, and rebuild
    instructions.
-7. Add run manifests and per-country counts.
+7. Add hash-backed data manifests and per-country counts. Start with the NZ OSM
+   annual extraction, then wire the same manifest schema into extract,
+   normalise, clean, deduplicate, review-queue, and export stages.
 8. Define the shared country backend schema and NZ boundary adapter contract.
 9. Validate the first NZ territorial-authority `area_summary` product against
    frontend layer and download needs.
