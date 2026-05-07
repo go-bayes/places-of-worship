@@ -128,6 +128,29 @@ contract into the global extract, normalise, clean, deduplicate, review-queue,
 and export stages. Native Google files must be exported to stable bytes before
 hashing.
 
+## 2026-05-07: Treat accepted diffs as primary longitudinal data
+
+Decision:
+Validated and accepted diffs are the key longitudinal research data. Site
+snapshots, area summaries, density layers, and appeared/disappeared maps should
+be derived from accepted change events and accepted-diff manifests, not from
+unreviewed snapshot comparisons.
+
+Rationale:
+The substantive research questions depend on gains and losses: whether worship
+use appeared or disappeared at a place, when that affects target-year states,
+and how the transitions change counts, densities, denominations, and uncertainty
+within areas. If those differences are not stored as auditable, replayable data,
+we cannot support serious longitudinal analysis.
+
+Consequences:
+OSM annual comparisons remain leads until reviewed. A research-grade gain or
+loss must be represented as an accepted event with source references,
+target-year affects, payload hash, review decision, and manifest linkage. The
+next `pow` design step should add accepted-diff manifests and deterministic
+loss/gain summaries before density products or map layers consume temporal
+changes.
+
 ## 2026-05-01: Treat the grant as a reporting reference, not a tracked source
 
 Decision:

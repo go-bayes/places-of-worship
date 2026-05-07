@@ -57,6 +57,10 @@
 - Functional changes are data: appeared/disappeared worship use, denomination
   changes, multi-denominational use, multi-purpose use, shared buildings, and
   split or merged worship uses must be preserved with evidence and time bounds.
+- Accepted diffs are primary longitudinal data. Losses, gains, target-year
+  states, density changes, and appeared/disappeared map layers must be derived
+  from accepted change events and accepted-diff manifests, not from unreviewed
+  snapshot comparisons alone.
 - `site_id` tracks the mappable place. Moving congregations normally create a
   new `site_id` linked by relocation and organisation evidence.
 - New Zealand is the proof-of-concept country, not the universal template.

@@ -95,6 +95,12 @@ renders per-site before/after using the schema's `previous_*` fields and
 validation warnings and source coverage. Use `--report json` for a stable,
 machine-readable artefact alongside the default text report.
 
+The JSON diff report is not just reviewer convenience. Once reviewed and
+accepted, the corresponding accepted diff is a primary longitudinal dataset.
+Losses and gains for research must be derived from accepted change events and
+their `target_year_affects`, not from comparing unreviewed OSM snapshots.
+Snapshot comparisons can generate leads; accepted diff events are the data.
+
 The full RA → reviewer round-trip:
 
 ```sh
@@ -122,6 +128,27 @@ Deferred until `pow rebuild-master` and export commands:
 - `area_summary_diff.csv`
 - density estimates
 - full map-layer and download effects
+
+Before accepted diffs are used for research estimates, the pipeline needs a
+hash-backed accepted-diff manifest that records:
+
+- accepted event ids and payload hashes;
+- input source or stage manifests;
+- target years and country/area partitions covered;
+- the command, Git commit, and schema versions used to generate the diff;
+- output hashes for the text/JSON reports and any later CSV or GeoJSON
+  derivatives;
+- loss/gain summary fields derived deterministically from replay.
+
+Minimum loss/gain semantics:
+
+- gain: target-year worship-function status changes from absent, unknown, or no
+  prior accepted state to present;
+- loss: target-year worship-function status changes from present to absent;
+- status change: a target-year state changes without a clear gain or loss, such
+  as present to uncertain or uncertain to absent;
+- density changes: derived after accepted-event replay into before/after
+  snapshots, never from unreviewed OSM lead comparisons alone.
 
 ## Local staging store
 

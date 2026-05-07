@@ -237,6 +237,27 @@ The rollup should contain aggregate counts and references to country partition
 manifests, not a single unpartitioned global artefact as the only recovery
 handle.
 
+### Milestone 5: Accepted Diff Manifests
+
+Validated, accepted diffs are primary research data because gains, losses,
+target-year states, density changes, and appeared/disappeared map layers must be
+derived from them. Add an accepted-diff manifest before any diff is used for
+research estimates.
+
+An accepted-diff manifest must record:
+
+- accepted event IDs;
+- payload hashes and source-manifest links for every accepted event;
+- target years covered;
+- country, area, or grid partitions covered;
+- the command, Git commit, schema versions, and taxonomy versions used;
+- output hashes for reviewer JSON, summary CSVs, and any map/export artefacts;
+- loss/gain/status-change summaries derived from accepted event replay.
+
+Snapshot comparisons, including OSM annual comparisons, may produce leads. They
+are not accepted loss/gain data until represented as reviewed change events and
+included in an accepted-diff manifest.
+
 ## NZ OSM Annual Extraction
 
 The 2026-05-07 strict New Zealand annual OSM extraction currently exists as

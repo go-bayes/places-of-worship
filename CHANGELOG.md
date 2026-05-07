@@ -13,6 +13,9 @@
 - Added `schemas/data-manifest.schema.json` and updated the manifest templates
   for hash-backed dataset versions, country/global partitions, supersession, and
   durable-file checksums.
+- Documented accepted diffs as primary longitudinal data: losses, gains,
+  target-year states, density changes, and appeared/disappeared map layers must
+  be derived from accepted change events and accepted-diff manifests.
 - Clarified provider planning so Cloudflare is not part of the active storage
   path unless that choice is explicitly reopened.
 - Extended the temporal OSM lead generator to use annual `1 September`

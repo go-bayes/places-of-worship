@@ -59,6 +59,9 @@ are stable enough to protect the master database and explain analytical changes.
   denomination or tradition changed, whether a site became multi-denominational
   or multi-purpose, and how these changes alter area counts, densities, map
   layers, downloads, and uncertainty statements.
+- Treat validated accepted diffs as the central longitudinal data product.
+  Snapshots are derived caches; gains, losses, and density changes must be
+  reproducible from accepted events and their manifests.
 - Keep web maps as consumers of reviewed or explicitly provisional products.
   They should not become direct write surfaces for the master database.
 - Treat public, RA, community, and AI-assisted inputs as untrusted until they
@@ -115,11 +118,15 @@ Evidence And Governance:
   links, and target-year appeared/disappeared states.
 - `[ ]` Reviewer decision events and accept/reject/defer/revise semantics.
 - `[ ]` Deterministic payload hashing and accepted-event replay checks.
+- `[ ]` Hash-backed accepted diff manifests with event ids, input manifests,
+  target years, country/area partitions, output hashes, and replay command.
 
 Research Outputs And Analysis:
 
 - `[~]` Text and JSON validation, proposal, and diff reports suitable for RA
   feedback, reviewer inspection, and audit.
+- `[ ]` Loss/gain summary tables derived only from accepted events, not from
+  unreviewed snapshot comparisons.
 - `[~]` Staged-batch summaries that R workflows can read without inspecting the
   SQLite store manually.
 - `[x]` First `pow diff` reports showing proposed changes to target-year

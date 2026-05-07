@@ -521,6 +521,15 @@ The working model is:
   site must be preserved as a reviewed event with effective time and evidence.
   These functional transitions are mission-critical for density estimates,
   target-year reconstructions, and longitudinal analysis.
+- Treat validated diff artefacts as primary research data. Once a diff is
+  accepted, its loss/gain assertions are not temporary review output: they are
+  the auditable event stream from which appeared/disappeared counts, target-year
+  site states, density changes, and map layers must be derived.
+- Never derive serious loss/gain estimates from comparing two unreviewed
+  snapshots alone. Snapshot comparisons may generate leads. Accepted gains and
+  losses must come from validated change events with `target_year_affects`,
+  previous/current status where available, source references, review decisions,
+  payload hashes, and data-manifest links.
 - Separate evidence from conclusions. A source observation can state what a
   directory, OSM history, charity record, or visual check shows; a reviewed
   conclusion can then assign target-year status, confidence, and analytical
@@ -581,6 +590,25 @@ effects belong with `pow rebuild-master` and later export commands, because
 they require replaying accepted events into complete site snapshots. `pow diff`
 v1 should still produce machine-readable JSON alongside the human report so the
 later rebuild/export layer can reuse the same event interpretation.
+
+Accepted-diff contract:
+the project must be able to recompute every reported gain or loss from accepted
+events alone. For each target year and area, the replay layer should derive:
+
+- `gain_count`: sites whose worship-function target-year status changes from
+  `absent`, `unknown`, or no prior accepted state to `present`;
+- `loss_count`: sites whose status changes from `present` to `absent`;
+- `status_change_count`: sites whose status changes among `present`, `absent`,
+  `uncertain`, and `not_assessed` without a clear gain/loss interpretation;
+- denominator counts and density changes from reconstructed before/after
+  snapshots, never from unreviewed OSM candidate diffs;
+- uncertainty and source-coverage summaries by evidence basis and review
+  confidence.
+
+Every accepted diff artefact should have a data manifest, input manifest refs,
+event ids, payload hashes, target-year set, country/area partition, command,
+Git commit, and output hashes. If any of those are missing, the diff may be used
+for reviewer triage but not for research estimates.
 
 Because this contract is still pre-release, do not preserve awkward schema
 shapes for backward compatibility. Update examples, tests, and templates
@@ -1338,15 +1366,18 @@ OSM ids or user suggestions.
   denomination or tradition, became shared by several worship communities,
   became multi-purpose, split into several analytical worship uses, or merged
   previously separate uses.
+- Validated and accepted diffs are the central longitudinal data product. They
+  should be stored, hashed, manifested, replayable, and citable in the same way
+  as site snapshots.
 - These events should carry effective time, source evidence, review status,
   confidence, and target-year implications.
 - Building existence is a related but distinct evidence stream. Structure
   history can support a worship-use claim, but the analytical state is the
   worship function at the site for a specified time.
-- The current `change-event` schema is a start. Before `pow diff` becomes a
-  decision surface, we should add or specify functional-state payloads for
-  worship use, denomination sets, multi-denomination, multi-purpose use,
-  organisation-site links, and target-year state changes.
+- The current `change-event` schema and `pow diff` implementation are a start.
+  Before diffs support research estimates, accepted-event replay must enforce
+  payload hashes, source-manifest links, target-year affects, and deterministic
+  loss/gain derivation.
 
 ### Decided: NZ pilot minimum download contract
 
