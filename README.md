@@ -16,6 +16,7 @@ reference product.
 - [Roadmap](ROADMAP.md)
 - [Planning](PLANNING.md)
 - [FAQ](FAQ.md)
+- [Lexicon](LEXICON.md)
 - [RA NZ web pilot task](docs/ra-nz-pilot-task.md)
 
 ## Current Work
@@ -78,5 +79,6 @@ OpenStreetMap itself, following OpenStreetMap's own contribution rules and
 licence requirements.
 
 See [ROADMAP.md](ROADMAP.md) for planned phases, [PLANNING.md](PLANNING.md)
-for current implementation priorities, and [FAQ.md](FAQ.md) for plain-language
-answers about site identity, task generation, and staged review.
+for current implementation priorities, [FAQ.md](FAQ.md) for plain-language
+answers about site identity, task generation, and staged review, and
+[LEXICON.md](LEXICON.md) for preferred project terms.

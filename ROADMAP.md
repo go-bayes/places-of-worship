@@ -120,9 +120,12 @@ Evidence And Governance:
 - `[ ]` Deterministic payload hashing and accepted-event replay checks.
 - `[ ]` Hash-backed accepted diff manifests with event ids, input manifests,
   target years, country/area partitions, output hashes, and replay command.
-- `[ ]` OSM lifecycle-lead table with raw tags, parsed date bounds,
-  provisional target-year statuses, gain/loss windows, and reviewer
-  instructions before RA task seeding.
+- `[~]` OSM date-tag list: places with OSM opening or closure date tags, parsed
+  date bounds, provisional target-year statuses, possible gain/loss windows,
+  and reviewer instructions before RA task seeding.
+- `[ ]` Storage and service setup decision: price-check Convex, project Drive,
+  Google Cloud Storage, and deferred PostgreSQL/PostGIS before OSM
+  places-to-check files or RA tasks depend on hosted infrastructure.
 
 Research Outputs And Analysis:
 
@@ -189,7 +192,7 @@ reconstruction.
 
 Evidence And Governance:
 
-- `[~]` Generate cleaned annual OpenStreetMap temporal candidate leads from
+- `[~]` Generate cleaned annual OpenStreetMap lists of places to check from
   2013 through 2025, then collapse them into curated 2013, 2018, and 2023 RA
   review tasks.
 - `[~]` Ask RAs to contact church bodies for source-backed site records,
@@ -222,17 +225,18 @@ Status: `[ ]` not started.
 
 Goal:
 Create an invite-only New Zealand staging pilot with managed authentication,
-live shared task state, map-first entry, validation exports, secure storage
+shared online task status, map-first entry, validation exports, secure storage
 boundaries, and reviewer workflows.
 
 Evidence And Governance:
 
 - `[ ]` Managed auth, likely Google OAuth or Identity Platform.
 - `[~]` Convex task-map spike for shared assignments, provisional closures,
-  evidence drafts, reviewer comments, review decisions, and curator queues.
+  evidence drafts, reviewer comments, review decisions, and project-review
+  queues.
 - `[~]` Implement the task/event/evidence/review/export contract in
   `docs/convex-task-layer-spec.md`.
-- `[ ]` Weekly or curator-triggered export from Convex task state into `pow`
+- `[ ]` Weekly or reviewer-triggered export from Convex task status into `pow`
   validation, diff, replay, and reviewed map-output workflows.
 - `[ ]` Rust API on Cloud Run or an equivalent backend where schema validation,
   heavy geospatial checks, or durable staging need a separate service.

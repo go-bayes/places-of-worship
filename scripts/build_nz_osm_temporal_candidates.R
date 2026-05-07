@@ -1,4 +1,4 @@
-# Build cleaned New Zealand OSM temporal candidate diffs.
+# Build cleaned New Zealand OSM temporal lists of places to check.
 # Usage:
 #   Rscript scripts/build_nz_osm_temporal_candidates.R
 #   Rscript scripts/build_nz_osm_temporal_candidates.R --bbox 174.6,-41.4,175.1,-41.0
@@ -104,7 +104,7 @@ parse_args <- function(args) {
       snapshot_month_day <- args[[index]]
     } else if (arg == "--help" || arg == "-h") {
       cat(
-        "Build cleaned NZ OSM temporal candidate leads.\n\n",
+        "Build cleaned NZ OSM temporal lists of places to check.\n\n",
         "Options:\n",
         "  --output-dir DIR   Output directory (default: data/intermediate/nz_osm_temporal)\n",
         "  --bbox BBOXES      ohsome bboxes string; use for small-area smoke tests\n",
@@ -324,6 +324,416 @@ tag_value <- function(record, field) {
   tags <- record$tags_raw %||% list()
   value <- tags[[field]] %||% ""
   if (length(value) == 0 || is.na(value)) "" else as.character(value)
+}
+
+has_value <- function(value) {
+  !is.null(value) &&
+    length(value) > 0 &&
+    !is.na(value) &&
+    trimws(as.character(value)) != ""
+}
+
+format_date_or_blank <- function(value) {
+  if (is.null(value) || length(value) == 0 || is.na(value)) {
+    return("")
+  }
+  format(as.Date(value), "%Y-%m-%d")
+}
+
+last_day_of_month <- function(year, month) {
+  if (month == 12L) {
+    return(as.Date(sprintf("%04d-12-31", year)))
+  }
+  as.Date(sprintf("%04d-%02d-01", year, month + 1L)) - 1L
+}
+
+parse_calendar_date <- function(value) {
+  text <- trimws(value)
+  if (grepl("^\\d{4}-\\d{2}-\\d{2}$", text)) {
+    parsed <- suppressWarnings(as.Date(text))
+    if (!is.na(parsed)) {
+      return(list(lower = parsed, upper = parsed, precision = "day", warning = ""))
+    }
+  }
+
+  month_match <- regexec("^(\\d{4})-(\\d{2})$", text)
+  month_parts <- regmatches(text, month_match)[[1]]
+  if (length(month_parts) == 3) {
+    year <- as.integer(month_parts[[2]])
+    month <- as.integer(month_parts[[3]])
+    if (!is.na(year) && !is.na(month) && month >= 1L && month <= 12L) {
+      return(list(
+        lower = as.Date(sprintf("%04d-%02d-01", year, month)),
+        upper = last_day_of_month(year, month),
+        precision = "month",
+        warning = ""
+      ))
+    }
+  }
+
+  if (grepl("^\\d{4}$", text)) {
+    year <- as.integer(text)
+    return(list(
+      lower = as.Date(sprintf("%04d-01-01", year)),
+      upper = as.Date(sprintf("%04d-12-31", year)),
+      precision = "year",
+      warning = ""
+    ))
+  }
+
+  decade_match <- regexec("^(\\d{3})0s$", text)
+  decade_parts <- regmatches(text, decade_match)[[1]]
+  if (length(decade_parts) == 2) {
+    decade <- as.integer(paste0(decade_parts[[2]], "0"))
+    return(list(
+      lower = as.Date(sprintf("%04d-01-01", decade)),
+      upper = as.Date(sprintf("%04d-12-31", decade + 9L)),
+      precision = "bounded",
+      warning = "decade_date"
+    ))
+  }
+
+  NULL
+}
+
+empty_lifecycle_parse <- function(raw = "", tag = "", source_year = "") {
+  list(
+    raw = raw,
+    tag = tag,
+    source_year = source_year,
+    lower = as.Date(NA),
+    upper = as.Date(NA),
+    precision = "unknown",
+    warning = if (has_value(raw)) "unsupported_date" else ""
+  )
+}
+
+combine_warnings <- function(warnings) {
+  paste(unique(warnings[warnings != ""]), collapse = ";")
+}
+
+parse_lifecycle_date_value <- function(value, tag, source_year = "") {
+  raw <- trimws(as.character(value %||% ""))
+  if (!has_value(raw)) {
+    return(empty_lifecycle_parse(tag = tag, source_year = source_year))
+  }
+
+  text <- tolower(raw)
+  warnings <- character()
+
+  if (grepl("[;,]", text)) {
+    pieces <- unlist(strsplit(text, "[;,]", perl = TRUE), use.names = FALSE)
+    text <- trimws(pieces[[1]])
+    warnings <- c(warnings, "multiple_values_first_used")
+  }
+
+  if (grepl("^(c\\.?|ca\\.?|circa|about|approx\\.?|approximately|~)\\s+", text)) {
+    text <- sub("^(c\\.?|ca\\.?|circa|about|approx\\.?|approximately|~)\\s+", "", text)
+    warnings <- c(warnings, "approximate_date")
+  }
+
+  range_match <- regexec("^(\\d{4})\\s*[-–/]\\s*(\\d{4})$", text)
+  range_parts <- regmatches(text, range_match)[[1]]
+  if (length(range_parts) == 3) {
+    start_year <- as.integer(range_parts[[2]])
+    end_year <- as.integer(range_parts[[3]])
+    if (!is.na(start_year) && !is.na(end_year) && start_year <= end_year) {
+      return(list(
+        raw = raw,
+        tag = tag,
+        source_year = source_year,
+        lower = as.Date(sprintf("%04d-01-01", start_year)),
+        upper = as.Date(sprintf("%04d-12-31", end_year)),
+        precision = "bounded",
+        warning = combine_warnings(c(warnings, "bounded_range"))
+      ))
+    }
+  }
+
+  before_match <- regexec("^before\\s+(.+)$", text)
+  before_parts <- regmatches(text, before_match)[[1]]
+  if (length(before_parts) == 2) {
+    parsed <- parse_calendar_date(before_parts[[2]])
+    if (!is.null(parsed)) {
+      return(list(
+        raw = raw,
+        tag = tag,
+        source_year = source_year,
+        lower = as.Date(NA),
+        upper = parsed$lower - 1L,
+        precision = "bounded",
+        warning = combine_warnings(c(warnings, "before_date"))
+      ))
+    }
+  }
+
+  after_match <- regexec("^after\\s+(.+)$", text)
+  after_parts <- regmatches(text, after_match)[[1]]
+  if (length(after_parts) == 2) {
+    parsed <- parse_calendar_date(after_parts[[2]])
+    if (!is.null(parsed)) {
+      return(list(
+        raw = raw,
+        tag = tag,
+        source_year = source_year,
+        lower = parsed$upper + 1L,
+        upper = as.Date(NA),
+        precision = "bounded",
+        warning = combine_warnings(c(warnings, "after_date"))
+      ))
+    }
+  }
+
+  parsed <- parse_calendar_date(text)
+  if (!is.null(parsed)) {
+    return(list(
+      raw = raw,
+      tag = tag,
+      source_year = source_year,
+      lower = parsed$lower,
+      upper = parsed$upper,
+      precision = parsed$precision,
+      warning = combine_warnings(c(warnings, parsed$warning))
+    ))
+  }
+
+  parse <- empty_lifecycle_parse(raw, tag, source_year)
+  parse$warning <- combine_warnings(c(warnings, parse$warning))
+  parse
+}
+
+date_for_ordering <- function(parse) {
+  if (!is.na(parse$lower)) return(parse$lower)
+  if (!is.na(parse$upper)) return(parse$upper)
+  as.Date(NA)
+}
+
+choose_earliest_parse <- function(parses) {
+  parses <- keep(parses, \(parse) has_value(parse$raw))
+  if (length(parses) == 0) return(empty_lifecycle_parse())
+
+  order_values <- map_dbl(parses, \(parse) {
+    date <- date_for_ordering(parse)
+    if (is.na(date)) Inf else as.numeric(date)
+  })
+  if (all(is.infinite(order_values))) return(parses[[1]])
+
+  parses[[which.min(order_values)]]
+}
+
+collapse_lifecycle_tag_values <- function(records_by_year, fields) {
+  paste(
+    map_chr(names(records_by_year), \(year) {
+      record <- records_by_year[[year]]
+      values <- map_chr(fields, \(field) {
+        value <- tag_value(record, field)
+        if (value == "") return("")
+        paste0(field, "=", value)
+      })
+      values <- values[values != ""]
+      paste0(year, "=", if (length(values) == 0) "" else paste(values, collapse = ";"))
+    }),
+    collapse = " | "
+  )
+}
+
+former_use_tags <- function(record) {
+  if (is.null(record)) return(character())
+  tags <- record$tags_raw %||% list()
+  tag_names <- names(tags) %||% character()
+  tag_names <- tag_names[!is.na(tag_names) & tag_names != ""]
+  former_names <- tag_names[grepl("^(disused|abandoned|was|demolished):", tag_names)]
+  if (length(former_names) == 0) return(character())
+  values <- map_chr(former_names, \(name) as.character(tags[[name]] %||% ""))
+  keep <- values != ""
+  if (!any(keep)) return(character())
+  paste0(former_names[keep], "=", values[keep])
+}
+
+collect_lifecycle_parses <- function(records_by_year, fields) {
+  parses <- list()
+  for (year in names(records_by_year)) {
+    record <- records_by_year[[year]]
+    for (field in fields) {
+      value <- tag_value(record, field)
+      if (has_value(value)) {
+        parses <- c(parses, list(parse_lifecycle_date_value(value, field, year)))
+      }
+    }
+  }
+  parses
+}
+
+collect_former_use_parse <- function(records_by_year) {
+  for (year in names(records_by_year)) {
+    record <- records_by_year[[year]]
+    tags <- former_use_tags(record)
+    if (length(tags) > 0) {
+      snapshot_date <- record$snapshot_date %||% paste0(year, "-", default_snapshot_month_day)
+      return(list(
+        raw = paste(tags, collapse = ";"),
+        tag = "former_use_tags",
+        source_year = year,
+        lower = as.Date(NA),
+        upper = as.Date(snapshot_date),
+        precision = "bounded",
+        warning = "former_use_observation_not_later_than_snapshot"
+      ))
+    }
+  }
+  empty_lifecycle_parse()
+}
+
+derive_lifecycle_target_status <- function(origin, closure, target_year, snapshot_month_day) {
+  target_anchor <- as.Date(paste0(target_year, "-", snapshot_month_day))
+
+  if (has_value(closure$raw)) {
+    if (!is.na(closure$upper) && closure$upper < target_anchor) {
+      return(list(
+        status = "absent",
+        basis = "osm_date_tags",
+        evidence = paste0(closure$tag, "=", closure$raw, " suggests worship use ended before ", target_anchor)
+      ))
+    }
+    if (
+      (!is.na(closure$lower) && closure$lower <= target_anchor) &&
+        (!is.na(closure$upper) && closure$upper >= target_anchor)
+    ) {
+      return(list(
+        status = "uncertain",
+        basis = "osm_date_tags",
+        evidence = paste0(closure$tag, "=", closure$raw, " overlaps ", target_anchor)
+      ))
+    }
+  }
+
+  if (has_value(origin$raw)) {
+    if (!is.na(origin$upper) && origin$upper < target_anchor) {
+      return(list(
+        status = "present",
+        basis = "osm_date_tags",
+        evidence = paste0(origin$tag, "=", origin$raw, " suggests worship use or structure existed before ", target_anchor)
+      ))
+    }
+    if (!is.na(origin$lower) && origin$lower > target_anchor) {
+      return(list(
+        status = "absent",
+        basis = "osm_date_tags",
+        evidence = paste0(origin$tag, "=", origin$raw, " suggests onset after ", target_anchor)
+      ))
+    }
+    return(list(
+      status = "uncertain",
+      basis = "osm_date_tags",
+      evidence = paste0(origin$tag, "=", origin$raw, " is not precise enough to settle ", target_anchor)
+    ))
+  }
+
+  if (has_value(closure$raw)) {
+    return(list(
+      status = "uncertain",
+      basis = "osm_date_tags",
+      evidence = paste0(closure$tag, "=", closure$raw, " exists, but no start evidence is recorded")
+    ))
+  }
+
+  list(
+    status = "not_assessed",
+    basis = "missing_osm_date_evidence",
+    evidence = "No OSM date tag supports target-year status."
+  )
+}
+
+detect_lifecycle_windows <- function(status_by_year, snapshot_dates) {
+  years <- names(status_by_year)
+  if (length(years) < 2) return("")
+
+  windows <- map_chr(seq_len(length(years) - 1), \(index) {
+    from_year <- years[[index]]
+    to_year <- years[[index + 1]]
+    from_status <- status_by_year[[from_year]]
+    to_status <- status_by_year[[to_year]]
+    window <- paste0(snapshot_dates[[from_year]], "/", snapshot_dates[[to_year]])
+
+    if (from_status == "absent" && to_status == "present") {
+      return(paste0("candidate_gain:", window))
+    }
+    if (from_status == "present" && to_status == "absent") {
+      return(paste0("candidate_loss:", window))
+    }
+    if (from_status != to_status) {
+      return(paste0("candidate_status_change:", from_status, "_to_", to_status, ":", window))
+    }
+    ""
+  })
+
+  paste(windows[windows != ""], collapse = ";")
+}
+
+instruction_for_lifecycle <- function(status_by_year, windows, parser_warnings) {
+  windows <- windows %||% ""
+  if (grepl("candidate_loss", windows, fixed = TRUE)) {
+    return("Check whether worship use really ended in the candidate window, or whether OSM describes mapping churn, building history, or a changed tag.")
+  }
+  if (grepl("candidate_gain", windows, fixed = TRUE)) {
+    return("Check whether worship use really began in the candidate window, or whether OSM records a late mapping or building date.")
+  }
+  if (any(status_by_year == "uncertain")) {
+    return("Check sources that can resolve the uncertain target-year status.")
+  }
+  if (parser_warnings != "") {
+    return("Check the raw OSM date tag because the parser treated it as approximate, bounded, or otherwise ambiguous.")
+  }
+  "Check whether independent evidence supports the OSM date-tag-derived target-year statuses."
+}
+
+date_tag_row_column_names <- function(task_years) {
+  c(
+    "date_tag_row_id",
+    "osm_key",
+    "matched_current_project_id",
+    "matched_current_name",
+    "latest_name",
+    "latest_religion",
+    "latest_denomination",
+    "latest_lat",
+    "latest_lng",
+    "osm_date_tags_by_year",
+    "former_use_tags_by_year",
+    "origin_tag",
+    "origin_raw",
+    "origin_source_year",
+    "origin_not_earlier_than",
+    "origin_not_later_than",
+    "origin_date_precision",
+    "origin_parser_warning",
+    "closure_tag",
+    "closure_raw",
+    "closure_source_year",
+    "closure_not_earlier_than",
+    "closure_not_later_than",
+    "closure_date_precision",
+    "closure_parser_warning",
+    "candidate_date_tag_windows",
+    "evidence_basis",
+    "andre_check",
+    unlist(map(as.character(task_years), \(year) {
+      c(
+        paste0("target_year_", year, "_status"),
+        paste0("target_year_", year, "_basis"),
+        paste0("target_year_", year, "_evidence")
+      )
+    }), use.names = FALSE)
+  )
+}
+
+empty_date_tag_rows <- function(task_years) {
+  columns <- date_tag_row_column_names(task_years)
+  as.data.frame(
+    setNames(replicate(length(columns), character(), simplify = FALSE), columns),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
 }
 
 repo_relative <- function(path) {
@@ -583,7 +993,7 @@ build_candidate_rows <- function(snapshot_results, task_years) {
       nearby_replacement_osm_key = replacement$key %||% "",
       nearby_replacement_name = replacement$name %||% "",
       nearby_replacement_distance_m = replacement$distance_m %||% NA_real_,
-      evidence_basis = "cleaned OSM snapshot diff only; not accepted historical worship-use evidence",
+      evidence_basis = "cleaned OSM year-to-year comparison only; not accepted historical worship-use evidence",
       andre_check = instruction,
       stringsAsFactors = FALSE
     )
@@ -606,6 +1016,107 @@ build_candidate_rows <- function(snapshot_results, task_years) {
 
   bind_rows(rows) |>
     arrange(diff_category, latest_name, osm_key)
+}
+
+build_date_tag_rows <- function(snapshot_results, task_years, snapshot_month_day) {
+  by_year <- set_names(map(snapshot_results, "records"), as.character(map_int(snapshot_results, "year")))
+  by_key_year <- map(by_year, \(records) set_names(records, map_chr(records, osm_key)))
+  keys <- sort(unique(unlist(map(by_key_year, names))))
+  current_index <- current_map_index()
+  snapshot_years <- names(by_year)
+  snapshot_dates <- set_names(map_chr(snapshot_results, "date"), snapshot_years)
+  task_years <- as.character(task_years)
+
+  rows <- map(keys, \(key) {
+    records_by_year <- map(by_key_year, \(records) records[[key]])
+    names(records_by_year) <- names(by_key_year)
+    origin_parses <- collect_lifecycle_parses(records_by_year, c("old_start_date", "start_date"))
+    closure_parses <- collect_lifecycle_parses(records_by_year, "end_date")
+    former_parse <- collect_former_use_parse(records_by_year)
+    date_tag_present <- length(origin_parses) > 0 ||
+      length(closure_parses) > 0 ||
+      has_value(former_parse$raw)
+    if (!date_tag_present) return(NULL)
+
+    origin <- choose_earliest_parse(origin_parses)
+    closure <- choose_earliest_parse(c(closure_parses, list(former_parse)))
+    latest <- latest_present_record(records_by_year)
+    current_match <- current_index[[key]]
+
+    status_details <- set_names(
+      map(task_years, \(year) derive_lifecycle_target_status(origin, closure, year, snapshot_month_day)),
+      task_years
+    )
+    status_by_year <- map_chr(status_details, "status")
+    windows <- detect_lifecycle_windows(as.list(status_by_year), snapshot_dates)
+    parser_warnings <- combine_warnings(c(origin$warning, closure$warning))
+
+    base_row <- data.frame(
+      date_tag_row_id = paste0("nz-osm-date-tag-", gsub("/", "-", key)),
+      osm_key = key,
+      matched_current_project_id = current_match$id %||% "",
+      matched_current_name = current_match$name %||% "",
+      latest_name = latest$name %||% "",
+      latest_religion = latest$religion %||% "",
+      latest_denomination = latest$denomination %||% "",
+      latest_lat = latest$lat %||% NA_real_,
+      latest_lng = latest$lng %||% NA_real_,
+      osm_date_tags_by_year = collapse_lifecycle_tag_values(
+        records_by_year,
+        c("old_start_date", "start_date", "end_date")
+      ),
+      former_use_tags_by_year = paste(
+        map_chr(names(records_by_year), \(year) {
+          tags <- former_use_tags(records_by_year[[year]])
+          paste0(year, "=", if (length(tags) == 0) "" else paste(tags, collapse = ";"))
+        }),
+        collapse = " | "
+      ),
+      origin_tag = origin$tag %||% "",
+      origin_raw = origin$raw %||% "",
+      origin_source_year = origin$source_year %||% "",
+      origin_not_earlier_than = format_date_or_blank(origin$lower),
+      origin_not_later_than = format_date_or_blank(origin$upper),
+      origin_date_precision = origin$precision %||% "unknown",
+      origin_parser_warning = origin$warning %||% "",
+      closure_tag = closure$tag %||% "",
+      closure_raw = closure$raw %||% "",
+      closure_source_year = closure$source_year %||% "",
+      closure_not_earlier_than = format_date_or_blank(closure$lower),
+      closure_not_later_than = format_date_or_blank(closure$upper),
+      closure_date_precision = closure$precision %||% "unknown",
+      closure_parser_warning = closure$warning %||% "",
+      candidate_date_tag_windows = windows,
+      evidence_basis = "osm_date_tags; not accepted historical worship-use evidence",
+      andre_check = instruction_for_lifecycle(status_by_year, windows, parser_warnings),
+      stringsAsFactors = FALSE
+    )
+
+    status_columns <- as.data.frame(
+      as.list(unlist(map(task_years, \(year) {
+        detail <- status_details[[year]]
+        setNames(
+          c(detail$status, detail$basis, detail$evidence),
+          c(
+            paste0("target_year_", year, "_status"),
+            paste0("target_year_", year, "_basis"),
+            paste0("target_year_", year, "_evidence")
+          )
+        )
+      }))),
+      check.names = FALSE
+    )
+
+    cbind(base_row, status_columns)
+  }) |>
+    compact()
+
+  if (length(rows) == 0) {
+    return(empty_date_tag_rows(task_years))
+  }
+
+  bind_rows(rows) |>
+    arrange(candidate_date_tag_windows, latest_name, osm_key)
 }
 
 candidate_geojson <- function(candidates) {
@@ -631,7 +1142,7 @@ candidate_geojson <- function(candidates) {
   )
 }
 
-write_manifest <- function(snapshot_results, candidates, args, output_dir) {
+write_manifest <- function(snapshot_results, candidates, date_tag_rows, args, output_dir) {
   manifest <- list(
     generated_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
     generated_by = "scripts/build_nz_osm_temporal_candidates.R",
@@ -644,7 +1155,7 @@ write_manifest <- function(snapshot_results, candidates, args, output_dir) {
     osm_object_types = as.list(args$osm_object_types),
     timeout_seconds = args$timeout_seconds,
     source = "ohsome API elements/centroid endpoint",
-    caveat = "Outputs are cleaned OSM-history leads, not accepted real-world worship-use states.",
+    caveat = "Outputs are cleaned OSM-history lists of places to check, not accepted real-world worship-use states.",
     snapshots = map(snapshot_results, \(result) {
       list(
         year = result$year,
@@ -656,7 +1167,8 @@ write_manifest <- function(snapshot_results, candidates, args, output_dir) {
         cleaned_count = result$cleaned_count
       )
     }),
-    candidate_count = nrow(candidates)
+    candidate_count = nrow(candidates),
+    date_tag_places_to_check_count = nrow(date_tag_rows)
   )
 
   write_json(
@@ -690,16 +1202,28 @@ main <- function() {
   })
 
   candidates <- build_candidate_rows(snapshot_results, args$task_years)
+  date_tag_rows <- build_date_tag_rows(
+    snapshot_results,
+    args$task_years,
+    args$snapshot_month_day
+  )
   csv_path <- file.path(output_dir, "nz_osm_temporal_candidates.csv")
   geojson_path <- file.path(output_dir, "nz_osm_temporal_candidates.geojson")
+  date_tag_csv_path <- file.path(output_dir, "nz_osm_date_tag_places_to_check.csv")
+  date_tag_geojson_path <- file.path(output_dir, "nz_osm_date_tag_places_to_check.geojson")
 
   write.csv(candidates, csv_path, row.names = FALSE, na = "")
   write_json(candidate_geojson(candidates), geojson_path, pretty = TRUE, auto_unbox = TRUE, null = "null")
-  write_manifest(snapshot_results, candidates, args, output_dir)
+  write.csv(date_tag_rows, date_tag_csv_path, row.names = FALSE, na = "")
+  write_json(candidate_geojson(date_tag_rows), date_tag_geojson_path, pretty = TRUE, auto_unbox = TRUE, null = "null")
+  write_manifest(snapshot_results, candidates, date_tag_rows, args, output_dir)
 
   message("Wrote candidate CSV: ", repo_relative(csv_path))
   message("Wrote candidate GeoJSON: ", repo_relative(geojson_path))
+  message("Wrote OSM date-tag CSV: ", repo_relative(date_tag_csv_path))
+  message("Wrote OSM date-tag GeoJSON: ", repo_relative(date_tag_geojson_path))
   message("Candidate rows: ", nrow(candidates))
+  message("OSM date-tag rows: ", nrow(date_tag_rows))
 }
 
 if (sys.nframe() == 0) {

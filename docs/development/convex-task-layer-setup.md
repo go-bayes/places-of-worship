@@ -1,20 +1,21 @@
-# Convex Task Layer Setup
+# Convex Task-Map Backend Setup
 
 This is the maintainer setup note for the first Convex task-map backend spike.
 It is not RA-facing guidance.
 
 ## Scope
 
-The Convex layer is for live task coordination: assignments, provisional task
-closure, evidence drafts, review decisions, and export batches. It must not
-write to the master map, accepted change-event store, or public map data.
+The Convex backend is for shared task coordination: assignments, provisional
+task closure, evidence drafts, review decisions, and export batches. It must
+not write to the master map, accepted change-event store, or public map data.
 
 The first spike should prove four behaviours:
 
 1. an invited user can sign in and claim an NZ task,
 2. task status updates are visible to other signed-in sessions,
 3. an RA can create a draft for an existing task or a candidate not on OSM,
-4. a reviewer can record a decision and a curator can freeze an export bundle.
+4. a reviewer can record a decision and a person with export permission can
+   freeze an export file set.
 
 ## Install
 
@@ -178,7 +179,8 @@ candidate id is not a master `site_id`.
 
 ## Export Boundary
 
-Curators can create and freeze export batches from reviewed decisions:
+A person with export permission can create and freeze export batches from
+reviewed decisions:
 
 ```json
 exports:createExportBatch({
@@ -186,6 +188,8 @@ exports:createExportBatch({
   "exportFormat": "bundle"
 })
 ```
+
+Here `bundle` is the provisional code value for "all export files together".
 
 ```json
 exports:freezeExportBatch({
@@ -195,7 +199,8 @@ exports:freezeExportBatch({
 
 The export query returns JSON documents for tasks, task events, evidence drafts,
 and review decisions. The next implementation step is a file-export action that
-turns this bundle into `site_evidence_wide.csv` plus JSONL artefacts for `pow`.
+turns this file set into `site_evidence_wide.csv` plus JSONL artefacts for
+`pow`.
 
 ## Recovery
 

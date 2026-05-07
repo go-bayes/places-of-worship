@@ -1,6 +1,6 @@
 field,allowed_value,meaning
 source_type,osm_history,Historical OpenStreetMap evidence or extract
-source_type,osm_lifecycle_tags,OpenStreetMap lifecycle tags such as start_date or old_start_date
+source_type,osm_date_tags,OpenStreetMap date tags such as start_date or old_start_date
 source_type,street_imagery,Street-level imagery used for visual verification
 source_type,aerial_imagery,Aerial or satellite imagery used for visual verification
 source_type,field_observation,Direct field observation by an RA or project team member

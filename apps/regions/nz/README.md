@@ -7,7 +7,7 @@ reviewer-facing OSM verification surface.
 - verification.html is the static NZ OSM verification task map. It uses a
   greyscale basemap and individual review markers. It includes provisional
   2013, 2018, and 2023 target-year controls derived from reviewed status fields
-  or OSM lifecycle tags.
+  or OSM date tags.
 - The page lands in demo mode while the RA workflow is the only functional
   state: the local action builder, session log, and nomination controls are
   on by default. Demo mode generates a spreadsheet-ready evidence row and
@@ -21,7 +21,7 @@ reviewer-facing OSM verification surface.
 Regenerate inputs via the scripts in `scripts/` (R and Python), which write to
 `apps/regions/nz/data`.
 
-Regenerate the verification task layer with:
+Regenerate the verification task file with:
 
 ```sh
 uv run scripts/build_nz_verification_tasks.py

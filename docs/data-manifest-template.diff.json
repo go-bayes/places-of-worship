@@ -90,5 +90,5 @@
   "privacy": "project_private",
   "licence_status": "accepted",
   "downstream_status": "lead",
-  "notes": "Template only. Replace placeholder hashes, counts, URI, commit, and dates before use."
+  "notes": "Template only. Replace placeholder hashes, counts, cloud path or Drive file ID, commit, and dates before use."
 }

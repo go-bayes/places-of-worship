@@ -82,19 +82,26 @@ generation, analysis, or public products:
 - `nz_osm_<year>_cleaned.json`
 - `nz_osm_temporal_candidates.csv`
 - `nz_osm_temporal_candidates.geojson`
+- `nz_osm_date_tag_places_to_check.csv`
+- `nz_osm_date_tag_places_to_check.geojson`
 - `manifest.json`
 
-## OSM Lifecycle Lead Contract
+## OSM Date-Tag Rows
 
-OpenStreetMap lifecycle tags are a first-pass entry point for deciding whether
-a place of worship was functionally alive at a target year. They are leads, not
-accepted loss/gain data.
+OpenStreetMap has date and former-use tags that can give a first clue about
+whether a place of worship was in use at a target year. These rows are places
+to check, not accepted loss/gain data.
+
+In plain language, this output is a spreadsheet of places where OSM contains an
+opening-like date or closure-like date. A row might mean "OSM says this site
+started in 2015, so check whether it is a real 2013-2018 gain." It is a list of
+places to check, not a research result.
 
 The temporal workflow should retain and expose:
 
-- raw lifecycle tags, including `start_date`, `old_start_date`, `end_date`, and
-  any later supported former-use tags such as `disused:*`, `abandoned:*`,
-  `was:*`, or `historic=*`;
+- raw OSM date and former-use tags, including `start_date`, `old_start_date`,
+  `end_date`, and any later supported former-use tags such as `disused:*`,
+  `abandoned:*`, `was:*`, or `historic=*`;
 - parsed date values and date precision (`day`, `month`, `year`, `bounded`, or
   `unknown`);
 - parser warnings for prose dates, multiple dates, approximate values, or
@@ -112,12 +119,13 @@ Minimum target-year rules:
 - end evidence before the target anchor gives a provisional `absent`;
 - start or end evidence during the target year, without enough precision to
   resolve the `1 September` anchor, gives `uncertain`;
-- OSM object appearance or disappearance without lifecycle tags gives an
-  `osm_object_history` lead, because it may be mapping lag or object churn;
-- no lifecycle evidence gives `not_assessed`.
+- OSM object appearance or disappearance without date tags gives an
+  `osm_object_history` review reason, because it may be mapping lag or object
+  churn;
+- no date evidence gives `not_assessed`.
 
-The accepted longitudinal record remains downstream of review. A lifecycle lead
-can support a `worship_use_appeared`, `worship_use_disappeared`, or
+The accepted longitudinal record remains downstream of review. An OSM date-tag
+row can support a `worship_use_appeared`, `worship_use_disappeared`, or
 `worship_function_update` event only after review records source references,
 confidence, `target_year_affects`, payload hash, and manifest linkage.
 
@@ -128,8 +136,9 @@ The candidate CSV records:
 - whether each object is present in each cleaned annual snapshot;
 - target-year presence for the highlighted RA/research years;
 - the apparent diff category and adjacent-year transition window;
-- raw lifecycle tags, parsed lifecycle bounds, provisional target-year status,
-  and lifecycle parser warnings once the lifecycle-lead table is added;
+- raw OSM date and former-use tags, parsed date bounds, provisional target-year
+  status, candidate gain/loss windows, and parser warnings in
+  `nz_osm_date_tag_places_to_check.csv`;
 - the latest name, religion, denomination, and location;
 - year-by-year name, religion, denomination, amenity, and building tags;
 - any current-map match by OpenStreetMap object key;
@@ -138,9 +147,9 @@ The candidate CSV records:
   only;
 - a short instruction for the research assistant.
 
-Before these candidates enter Convex or `pow`, a curator should inspect the
-manifest and sample rows to check whether the broad query and cleaner are
-producing useful leads rather than noise.
+Before these candidates enter Convex or `pow`, a project reviewer should inspect
+the file record and sample rows to check whether the broad query and cleaner
+are producing useful places to check rather than noise.
 
 ## First Strict National Run
 
@@ -150,7 +159,14 @@ On 2026-05-07, the strict node/way run for `2013:2025` completed with
 snapshot counts were 775 for 2013, 2,012 for 2018, 3,335 for 2023, and 3,350
 for 2025.
 
+After the OSM date-tag list was added, rerunning the cached strict extraction
+with `--no-fetch` produced 1,438 rows with opening or closure date tags.
+Provisional target-year statuses were mostly `present`; 35 rows contained
+possible gain windows, and no rows contained date-tag-derived loss windows.
+This reflects the current OSM pattern: start-date evidence is much more common
+than end-date evidence.
+
 This confirms that the direct ohsome route is viable for the strict national
 pilot, though the candidate volume is much too large for direct RA review.
-Curators should sample and collapse these leads before exposing tasks through
-the RA map or Convex task layer.
+Project reviewers should sample and reduce these rows to a smaller task set
+before exposing tasks through the RA map or Convex.

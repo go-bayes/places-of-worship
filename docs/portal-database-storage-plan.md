@@ -81,7 +81,8 @@ Keep the contracts portable:
 
 - use OpenID Connect identity claims rather than provider-specific account state
 - store geometries as PostGIS types with GeoJSON export support
-- store object references as URI plus checksum, not as provider-only handles
+- store object references as cloud path or file ID plus checksum, not as
+  provider-only handles
 - export reviewed products as CSV, GeoJSON, metadata JSON, vector tiles, or
   GeoParquet as appropriate
 - keep raw snapshots immutable and addressable by manifest

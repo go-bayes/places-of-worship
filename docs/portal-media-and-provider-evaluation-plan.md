@@ -23,12 +23,12 @@ Minimum image metadata:
 - content type
 - file size
 - checksum
-- storage URI
+- cloud storage path or Drive file ID
 - scan status
 - licence status
 - privacy status
 - review status
-- public derivative URI, if approved
+- public derivative path or file ID, if approved
 
 Public display should use reviewed derivatives, not original uploads. Strip
 metadata such as EXIF where feasible before publication.

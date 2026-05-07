@@ -21,13 +21,77 @@ Consequences:
 Future entries should summarise context, decision, rationale, consequences, and
 open questions. The changelog should stay concise and release-oriented.
 
-## 2026-05-07: Give RAs curated OSM-history leads, not raw diffs
+## 2026-05-07: Make current data locations explicit
+
+Decision:
+Document where the already-ingested New Zealand OpenStreetMap and Census-linked
+data currently live, and distinguish committed map data from temporary working
+files that still need promotion to project-owned storage.
+
+Rationale:
+The project now has several data products with different levels of durability.
+Some are committed app files used by the public map. Others are ignored working
+outputs from the annual OpenStreetMap history run. Reporting, RA task
+generation, and future storage decisions require a plain answer to where each
+dataset went and whether it can be recovered without depending on a personal
+working checkout.
+
+Current flow:
+
+```mermaid
+flowchart TD
+  A["Current OSM places"] --> B["Cleaned current NZ places<br/>apps/regions/nz/data/nz_places.json"]
+  B --> C["Verification tasks<br/>apps/regions/nz/data/verification_tasks.geojson"]
+  B --> D["Area summary builder"]
+  E["Stats NZ religion counts<br/>via Figure.NZ"] --> F["apps/regions/nz/data/ta_aggregated_data.json"]
+  G["Stats NZ TA boundaries"] --> H["apps/regions/nz/data/territorial_authorities.geojson"]
+  F --> D
+  H --> D
+  D --> I["NZ area summary<br/>apps/regions/nz/data/area_summary_ta.json and .csv"]
+  J["Annual OSM history run"] --> K["data/intermediate/nz_osm_temporal/<br/>temporary working files only"]
+  K --> L["Promote before use:<br/>project-owned storage, hashes,<br/>file record"]
+```
+
+Consequences:
+The current NZ map and data page can be traced to committed files under
+`apps/regions/nz/data/`. The 2013-2025 OSM history extraction has not yet been
+made durable: it sits under `data/intermediate/nz_osm_temporal/`, which is
+ignored and should be treated as temporary working output. Before those rows
+seed Convex tasks, RA assignments, or longitudinal estimates, the useful files
+must be copied to project-owned storage, hashed, and described by a tracked
+file record. Older demographic demo files in the app data folder should be
+audited before they are used in reporting.
+
+## 2026-05-07: Treat Convex as a low-cost pilot service, with limits
+
+Decision:
+Use the current Convex pricing page as the first pricing check for the task-map
+pilot. The one-RA New Zealand pilot should start on Free/Starter if the hosted
+account and collaborator model fits. Professional should be considered only
+when daily backups, log streaming, exception reporting, support, or usage
+limits justify the cost.
+
+Rationale:
+The pricing page checked on 2026-05-07 lists Free/Starter for prototypes with
+1-6 developers, Professional at $25 per developer per month, and
+Business/Enterprise at a $2,500 monthly minimum. This supports using Convex for
+shared task status and evidence drafts without committing the project to a
+large backend spend.
+
+Consequences:
+Convex remains the near-term coordination service, not the storage system of
+record. Raw OpenStreetMap snapshots, annual history outputs, media, accepted
+diffs, and public map products should stay outside Convex unless a later
+pricing and governance review changes that boundary. Recheck the pricing page
+before enabling a paid deployment.
+
+## 2026-05-07: Give RAs selected OSM-history rows, not raw differences
 
 Decision:
 For the New Zealand temporal reconstruction pilot, ask André to contact church
 bodies for source-backed records while the project generates cleaned
-OpenStreetMap-history leads centred on the 2013, 2018, and 2023 target years.
-André should review curated candidate rows after cleaning, not raw
+OpenStreetMap-history rows centred on the 2013, 2018, and 2023 target years.
+André should review selected candidate rows after cleaning, not raw
 OpenStreetMap history.
 
 Rationale:
@@ -39,22 +103,24 @@ expected to be mapping artefacts until checked against non-OSM sources.
 
 Consequences:
 The near-horizon workflow is: generate dated OSM snapshots, apply the existing
-project cleaning rules to each snapshot, produce candidate diffs centred on
+project cleaning rules to each snapshot, produce lists of places to check for
 target-year state questions, and then ask André to verify selected rows against
 church-body records, directories, archived websites, annual reports, visual
 evidence, or local records. Apparent OSM additions/removals are treated as
-leads for staged evidence, not as accepted historical place-density inputs.
+places to check for staged evidence, not as accepted historical place-density
+inputs.
 
 Open questions:
 We still need to decide how much church-body data can be cited or redistributed,
 how to prioritise denominations and regions, and how cleaned OSM candidate rows
 should enter Convex or `pow` once the first generated sample has been inspected.
 
-## 2026-05-07: Generate annual OSM snapshot leads from 2013
+## 2026-05-07: Generate annual OSM lists of places to check from 2013
 
 Decision:
-Use annual OpenStreetMap snapshots as the default temporal lead-generation
-protocol. For the first New Zealand implementation, build `1 September`
+Use annual OpenStreetMap snapshots as the default way to generate lists of
+places to check over time. For the first New Zealand implementation, build
+`1 September`
 snapshots from 2013 through the latest completed annual anchor, currently 2025.
 Keep the RA-facing and estimation focus on 2013, 2018, and 2023.
 
@@ -68,18 +134,25 @@ spot when the full annual sequence is visible.
 Consequences:
 Annual OSM differences are an internal candidate generator, not a yearly RA
 work queue. Candidate rows should preserve adjacent-year transition windows
-while allowing curators to collapse them into a smaller set of New Zealand
-tasks around 2013, 2018, and 2023. The 2026 annual anchor should not be used
-until `2026-09-01` has passed.
+while allowing project reviewers to reduce them into a smaller set of New
+Zealand tasks around 2013, 2018, and 2023. The 2026 annual anchor should not
+be used until `2026-09-01` has passed.
 
 First strict national run:
 The first strict New Zealand node/way extraction completed on 2026-05-07 and
 wrote ignored local outputs under `data/intermediate/nz_osm_temporal/`. It
 produced 4,777 candidate rows. Cleaned snapshot counts were 775 for 2013, 2,012
-for 2018, 3,335 for 2023, and 3,350 for 2025. These figures are OSM-history
-lead counts only. They are not currently used for the NZ data-page density
-plots, which still use the committed current-place `area_summary_ta.json`
-product and should not be interpreted as historical place-density estimates.
+for 2018, 3,335 for 2023, and 3,350 for 2025. These figures are counts from
+the cleaned OSM extracts only. They are not currently used for the NZ data-page
+density plots, which still use the committed current-place
+`area_summary_ta.json` product and should not be interpreted as historical
+place-density estimates.
+After the OSM date-tag list was added, rerunning the cached strict extraction
+produced 1,438 rows for places with OSM opening or closure date tags. The
+provisional target-year statuses were mostly `present`, with 35 possible gain
+windows and no date-tag-derived loss windows. This confirms that OSM date tags
+are currently more useful for possible openings and back-propagated presence
+than for closure detection.
 
 ## 2026-05-07: Treat local ignored data as cache, not storage
 
@@ -88,7 +161,7 @@ Add `docs/data-storage-pipeline.md` as the operational storage policy. Local
 ignored folders such as `data/raw/`, `data/intermediate/`, `data/derived/`, and
 `exports/` are cache only. Any dataset that may be reused for analysis, review,
 publication, or task generation must have a durable project-controlled copy and
-a tracked manifest.
+a tracked file record (manifest).
 
 Rationale:
 A laptop can fail, be lost, or diverge from the project record. Keeping large
@@ -96,13 +169,13 @@ or restricted data out of Git is still correct, but local-only ignored files are
 not recoverable enough for an auditable research pipeline.
 
 Consequences:
-The immediate storage pattern is local cache plus durable project-controlled
-storage plus tracked manifest. For the pilot, project Google Drive can hold
-working source files and exported review artefacts; Google Cloud remains the
-durable storage reference for immutable snapshots, media quarantine, and future
-geospatial staging. The 2026-05-07 NZ annual OSM extraction should be promoted
-to this pipeline before it is used for Convex task generation, analysis, or
-public map products.
+The immediate storage pattern is temporary working files plus named
+project-controlled storage plus a tracked file record (manifest). For the
+pilot, project Google Drive can hold working source files and exported review
+artefacts; Google Cloud remains the durable storage reference for fixed source
+snapshots, media quarantine, and future spatial database storage. The
+2026-05-07 NZ annual OSM extraction should be promoted to this pipeline before
+it is used for Convex task generation, analysis, or public map products.
 
 ## 2026-05-07: Make global data versioning hash-backed
 
@@ -122,8 +195,8 @@ storage, and accepted-publication boundaries.
 
 Consequences:
 Before the NZ OSM annual extraction is used for Convex task generation or
-analysis, create a tracked manifest that validates against
-`schemas/data-manifest.schema.json`. Then wire the same hash-backed manifest
+analysis, create a tracked file record (manifest) that validates against
+`schemas/data-manifest.schema.json`. Then wire the same hash-backed file-record
 contract into the global extract, normalise, clean, deduplicate, review-queue,
 and export stages. Native Google files must be exported to stable bytes before
 hashing.
@@ -144,44 +217,130 @@ within areas. If those differences are not stored as auditable, replayable data,
 we cannot support serious longitudinal analysis.
 
 Consequences:
-OSM annual comparisons remain leads until reviewed. A research-grade gain or
-loss must be represented as an accepted event with source references,
-target-year affects, payload hash, review decision, and manifest linkage. The
-next `pow` design step should add accepted-diff manifests and deterministic
-loss/gain summaries before density products or map layers consume temporal
-changes.
+OSM annual comparisons remain lists of places to check until reviewed. A
+research-grade gain or loss must be represented as an accepted event with source
+references, target-year affects, payload hash, review decision, and file-record
+linkage. The next `pow` design step should add accepted-diff manifests and
+deterministic loss/gain summaries before density products or map layers consume
+temporal changes.
 
-## 2026-05-07: Use OSM lifetimes as target-year lead evidence
+## 2026-05-07: Use OSM opening and closure dates as target-year clues
 
 Decision:
-Treat OpenStreetMap lifecycle tags, especially `start_date`, `old_start_date`,
-and `end_date`, as first-pass lead evidence for whether a place of worship was
-functionally alive at New Zealand target years. These tags should seed
+Treat OpenStreetMap date and former-use tags, especially `start_date`,
+`old_start_date`, and `end_date`, as first-pass clues for whether a place of
+worship was in use at New Zealand target years. These tags should seed
 provisional 2013, 2018, and 2023 statuses and gain/loss review tasks, then flow
-through RA or curator review before becoming accepted change events.
+through RA or project review before becoming accepted change events.
 
 Rationale:
-OSM lifetimes are cheap to extract at scale and often encode useful local
-knowledge that previous versions of the map already relied on. They can point
+OSM opening and closure dates are cheap to extract at scale and often encode
+useful local knowledge that previous versions of the map already relied on.
+They can point
 directly to likely openings, closures, and ambiguous temporal windows. They are
 also uneven, user-supplied, and sometimes describe a building, organisation, or
 OSM mapping history rather than worship use at a site. Their value is therefore
-as structured lead evidence that makes target-year uncertainty visible.
+as structured evidence to review, making target-year uncertainty visible.
 
 Consequences:
-The temporal OSM workflow should emit a lifecycle-lead table with raw lifecycle
-tags, parsed date bounds, provisional target-year statuses, candidate gain/loss
-windows, basis flags, and reviewer instructions. A lead derived only from OSM
-lifecycle tags remains provisional. A research-grade gain or loss still needs
-an accepted event with source references, `target_year_affects`, payload hash,
-review decision, and manifest linkage.
+The temporal OSM workflow should emit a spreadsheet-style list of places with
+OSM opening or closure date tags. Each row should preserve the raw tag, parsed
+date bounds, provisional target-year statuses, possible gain/loss window,
+evidence basis, and reviewer instruction. A row based only on OSM date tags
+remains provisional. A research-grade gain or loss still needs an accepted
+event with source references, `target_year_affects`, payload hash, review
+decision, and manifest linkage.
 
 Open questions:
 We need to define the exact parser for partial and messy OSM date strings,
-decide how to handle nonstandard lifecycle tags such as `disused:*`,
+decide how to handle nonstandard former-use tags such as `disused:*`,
 `abandoned:*`, `was:*`, or `historic=*`, and choose how much OSM-only evidence
 is enough for low-risk confirmations compared with candidate losses or gains
 that affect estimates.
+
+Plain-language translation:
+An "OSM year-difference row" says, for example, "this mapped place of worship
+appears in the 2018 OSM extract but not the 2013 extract." That row does not
+yet tell us whether the place really opened, whether OSM only mapped it late,
+or whether an OSM node became a building outline. An "OSM date-tag row" says,
+for example, "OSM gives `start_date=2015`, so this is a place to check as a
+possible 2013-2018 gain." Both are simply lists of places for a person or
+reviewer to check before any research estimate changes.
+
+## 2026-05-07: Separate the shared task map from durable research storage
+
+Decision:
+Use a three-part workflow: an online map/list for shared RA and reviewer task
+status; project-controlled storage for reusable files; and `pow`-reviewed
+changes for research-grade longitudinal data.
+
+Rationale:
+The project needs an ergonomic shared task map soon, but the task backend should
+not become the master database. The mission-critical data are the validated
+diffs and accepted change events from which gains, losses, target-year states,
+density changes, and map layers can be replayed. Storage decisions therefore
+need to distinguish live coordination, durable evidence storage, and accepted
+research artefacts.
+
+Data workflow, in plain language:
+
+```mermaid
+flowchart TD
+  A["Things we inspect<br/>OSM history and date tags,<br/>church records, directories,<br/>Street View, RA notes"] --> B["Temporary working files<br/>ignored and disposable<br/>not the project record"]
+  B --> C["Clean the data<br/>remove obvious noise<br/>put columns in one shape"]
+  C --> D["Lists of places to check<br/>1. places present in one OSM year<br/>but not another<br/>2. places with OSM opening or closure dates"]
+  D --> E["Project-owned storage<br/>Google Drive file/folder ID<br/>or cloud storage path<br/>plus a file record"]
+  E --> F["Shared online task map/list<br/>who is checking what,<br/>notes, draft rows,<br/>provisional done status"]
+  F --> G["Reviewer download<br/>frozen CSV/JSON files<br/>for checking"]
+  G --> H["Validation tools<br/>check format, stage rows,<br/>show proposed changes"]
+  H --> I["Project review<br/>accept, reject, ask for more,<br/>or mark for later"]
+  I --> J["Approved changes<br/>openings, closures,<br/>corrections, date changes"]
+  J --> K["Approved change summary<br/>inputs, hashes,<br/>gain/loss counts"]
+  K --> L["Research and map outputs<br/>site lists, area summaries,<br/>density layers, downloads"]
+```
+
+Storage and action decision tree:
+
+```mermaid
+flowchart TD
+  Q["What are we trying to store<br/>or coordinate?"] --> T["Do several people need to see<br/>the same task status?"]
+  T -->|yes| Cvx["Use Convex<br/>shared online task map/list,<br/>Google sign-in, roles,<br/>weekly reviewer download,<br/>price check first"]
+  T -->|no| D1["Is this a file we may use again?"]
+  D1 -->|small file people inspect or edit| Drive["Use project-owned Google Drive<br/>stable folder and file IDs,<br/>export to CSV/JSON/PDF before hashing"]
+  D1 -->|large file or rebuild input| GCS["Use private Google Cloud Storage<br/>stable cloud storage path,<br/>checksums, file record,<br/>access roles, price check first"]
+  D1 -->|no| D2["Is this already approved research data<br/>or a public map/download?"]
+  D2 -->|yes| Pow["Use the validation/rebuild path<br/>approved changes,<br/>approved change summary,<br/>rebuilt outputs"]
+  D2 -->|needs live spatial searches| PG["Consider PostgreSQL/PostGIS<br/>only after files and Convex<br/>are not enough"]
+  D2 -->|no| Local["Keep as temporary working files<br/>do not cite or give to RAs"]
+```
+
+Immediate actions implied:
+
+1. Price-check Convex for the pilot online task map/list: seats, hosted project
+   limits, storage, backend actions/functions run, bandwidth, backups, and
+   export access.
+2. Price-check Google Cloud Storage for durable snapshots and places-to-check
+   files:
+   storage, operation counts, download/transfer costs, file-retention rules,
+   object versioning, and access-control needs.
+3. Keep project Google Drive for near-term working evidence, but export native
+   files to stable bytes before hashing or ingestion.
+4. Defer PostgreSQL/PostGIS or Cloud SQL until static files plus Convex exports
+   cannot support review and staging.
+5. Before any OSM places-to-check file seeds Convex or RA tasks, promote it
+   from temporary working files to durable storage and commit a tracked file
+   record.
+6. The durable location must be outside any personal laptop and named in the
+   file record: a Drive file or folder ID, a cloud storage path, or a database
+   name. Repo-relative `data/...` paths are execution hints only.
+
+Consequences:
+Convex can move the RA pilot forward, especially for shared task status and
+provisional closure, but it remains an online work queue, not the research
+record. Google Drive and cloud storage are recovery layers for source files and
+generated lists of
+places to check. The canonical research record is still accepted events and
+accepted-diff manifests generated through `pow` review and replay.
 
 ## 2026-05-01: Treat the grant as a reporting reference, not a tracked source
 
@@ -190,8 +349,10 @@ Keep original grant materials in the ignored local `grant/` folder and use them
 as the document we report against.
 
 Rationale:
-The grant sets objectives and accountability, but it may contain private or
-administrative material that should not be committed.
+The grant remains the reference point for objectives, reporting, and
+accountability. Keeping the original file outside Git lets the public
+repository describe project direction while avoiding dependence on a local
+administrative document.
 
 Consequences:
 Planning notes should remain mindful of grant aims and explain justified shifts
@@ -243,7 +404,7 @@ answer that question alone.
 
 Consequences:
 Historical density should be reconstructed through evidence layers such as OSM
-history, lifecycle tags, visual evidence, directories, denominational sources,
+history, OSM date tags, visual evidence, directories, denominational sources,
 charity or organisation records, building evidence, and reviewed target-year
 status.
 
@@ -636,9 +797,9 @@ than squeezed into a single status or denomination field.
 ## 2026-05-03: Surface research outputs through CLI contracts first
 
 Status:
-Superseded in part by the later Convex task-layer decision. The `pow` contracts
-remain authoritative for accepted data changes, but provisional web-based task
-coordination can now proceed through Convex.
+Superseded in part by the later Convex task-map backend decision. The `pow`
+contracts remain authoritative for accepted data changes, but provisional
+web-based task coordination can now proceed through Convex.
 
 Decision:
 Defer web-based data management and make the local governed data-modification
@@ -787,8 +948,9 @@ Implementation note:
 The first static version of this idea now appears on the NZ verification map as
 provisional 2013, 2018, and 2023 target-year controls. It uses explicit
 target-year fields when available and otherwise derives a visible provisional
-status from OSM lifecycle tags. This makes missing or ambiguous lifecycle
-evidence visible to RAs without treating OSM dates as accepted historical truth.
+status from OSM date tags. This makes missing or ambiguous opening, closure, or
+change-date evidence visible to RAs without treating OSM dates as accepted
+historical truth.
 In demo mode, the map also now includes a local RA action builder that can
 produce a tab-separated wide evidence row and a review JSON preview from the
 selected task. This is deliberately no-save and no-submit: it tests the
@@ -812,9 +974,9 @@ Decision:
 For the current New Zealand pilot, direct the RA to start from the verification
 map and produce a small mixed evidence batch rather than treating the CLI as
 the centre of the work. The pilot target is a varied set of high-value cases:
-high-priority records, missing lifecycle dates, duplicates, missing current
-sites, 2013-present/2018-absent cases, shared or changed-use sites, and a small
-control sample.
+high-priority records, missing opening/closure/change-date evidence, duplicates,
+missing current sites, 2013-present/2018-absent cases, shared or changed-use
+sites, and a small control sample.
 
 Rationale:
 RA time is limited. A broad search or a CLI-first workflow would produce
@@ -1060,12 +1222,12 @@ shared task store with statuses such as `open`, `in_progress`,
 review decisions become change events for the master; provisional task statuses
 do not mutate the master directly.
 
-## 2026-05-03: Capture lifecycle and later changes during target-year triage
+## 2026-05-03: Capture opening, closure, and later changes during target-year triage
 
 Decision:
 Keep the 2013, 2018, and 2023 target-year fields as the New Zealand estimation
-spine, but let each RA-generated map row carry one structured lifecycle or
-later worship-function change date when a source supports it.
+spine, but let each RA-generated map row carry one structured opening, closure,
+or later worship-function change date when a source supports it.
 
 Rationale:
 Sources often answer more than the immediate target-year question. A directory,
@@ -1075,14 +1237,14 @@ shared or multi-denominational use later, such as in 2024. Losing that evidence
 would make later reconstruction and denomination/use-change analysis harder.
 
 Consequences:
-The RA action builder now exposes optional lifecycle/change controls before row
-copying and maps the selected event into the existing wide evidence date and
-precision fields. If one source supports several distinct lifecycle claims,
-multiple evidence rows for the same site are acceptable when the notes make the
-repeat intentional. Review and later ingestion still decide whether those rows
-become accepted change events.
+The RA action builder now exposes optional opening/closure/change controls
+before row copying and maps the selected event into the existing wide evidence
+date and precision fields. If one source supports several distinct dated
+claims, multiple evidence rows for the same site are acceptable when the notes
+make the repeat intentional. Review and later ingestion still decide whether
+those rows become accepted change events.
 
-## 2026-05-03: Spike Convex for shared task-map state
+## 2026-05-03: Spike Convex for the shared task map
 
 Decision:
 Use Convex as the preferred near-term backend spike for the live New Zealand
@@ -1091,31 +1253,31 @@ events, rebuilds, and public map exports outside Convex.
 
 Rationale:
 The immediate bottleneck is coordination, not canonical storage. Browser-local
-task badges cannot coordinate multiple RAs, devices, or curator review passes.
+task badges cannot coordinate multiple RAs, devices, or project-review passes.
 Convex is built for live application state and can support shared assignments,
-provisional closures, evidence drafts, reviewer comments, and curator queues
+provisional closures, evidence drafts, reviewer comments, and review queues
 with less custom infrastructure than a Rust/PostGIS portal.
 
 Consequences:
 The next backend prototype should model tasks, task events, evidence drafts,
-review decisions, user roles, and weekly curator exports in Convex. A
-curator-triggered or scheduled export must feed the existing `pow` validation,
+review decisions, user roles, and weekly reviewer downloads in Convex. A
+reviewer-triggered or scheduled export must feed the existing `pow` validation,
 proposal, diff, replay, and research-output path. Google Cloud/PostGIS remains
 the durable staging and storage reference for heavier geospatial queries,
 quarantined media, and provider-neutral archival exports if the task pilot
 outgrows Convex. Convex task state must not mutate the master directly or appear
 on public maps except through reviewed exports.
 
-## 2026-05-03: Specify the Convex task layer before implementation
+## 2026-05-03: Specify the Convex task-map backend before implementation
 
 Decision:
-Write the Convex task-layer contract before adding a backend dependency or
+Write the Convex task-map backend contract before adding a backend dependency or
 rewiring the NZ verification map.
 
 Rationale:
 Convex can reduce the RA workflow friction, but only if its responsibilities
-are narrow: live task state, evidence drafts, review decisions, and curator
-exports. Without a contract, it would be easy for the live workbench to blur
+are narrow: shared task status, evidence drafts, review decisions, and reviewer
+downloads. Without a contract, it would be easy for the live workbench to blur
 into canonical storage or public publication.
 
 Consequences:
@@ -1159,7 +1321,7 @@ verification map to it.
 Rationale:
 The first risk was whether the provisional task-store model could actually
 carry the loop we need: task import, manual candidate creation, task claiming,
-evidence draft save, submission for review, reviewer decision, export bundle
+evidence draft save, submission for review, reviewer decision, export file-set
 creation, and export freezing. Testing that loop locally keeps the current RA
 page stable and avoids exposing unfinished backend writes.
 

@@ -11,19 +11,18 @@ or otherwise locatable site where worship use occurs or occurred. It is not
 simply a building record and it is not always the same as a congregation or
 organisation.
 
-## What does lifecycle mean here?
+## What do opening, closure, and change dates mean here?
 
-Lifecycle means source-backed dates and changes in the history of a worship
-site, organisation, building, or worship function. Examples include
-organisation founding, worship beginning at a site, building opening or
-dedication, first or last sighting in a source, closure or end of worship use,
-demolition, relocation, or a later change such as shared or
-multi-denominational use.
+These are source-backed dates and changes in the history of a worship site,
+organisation, building, or worship function. Examples include organisation
+founding, worship beginning at a site, building opening or dedication, first or
+last sighting in a source, closure or end of worship use, demolition,
+relocation, or a later change such as shared or multi-denominational use.
 
-For this project, lifecycle evidence is mainly about worship use at a mappable
-site. A building may exist before worship begins and may remain after worship
-ends, so building dates and worship-use dates should stay separate where the
-source allows.
+For this project, the most important dates are dates about worship use at a
+mappable site. A building may exist before worship begins and may remain after
+worship ends, so building dates and worship-use dates should stay separate
+where the source allows.
 
 ## Does an OpenStreetMap id define a project site?
 
@@ -69,25 +68,26 @@ proposed change events. Examples include:
 - OSM supplies a different denomination,
 - OSM geometry moves beyond the expected tolerance,
 - an OSM object disappears,
-- OSM adds a lifecycle date that conflicts with accepted evidence.
+- OSM adds an opening, closure, or change date that conflicts with accepted
+  evidence.
 
 Review decides whether the conflict is a correction, observed change, duplicate,
 split, merge, relocation, or source error. Accepted decisions become change
 events and are included in later rebuilds and diffs.
 
-## Can OSM lifecycle tags tell us whether a place was alive in 2013, 2018, or 2023?
+## Can OSM date tags tell us whether a place was alive in 2013, 2018, or 2023?
 
 They can provide useful first-pass evidence. Tags such as `start_date`,
 `old_start_date`, and `end_date` can seed provisional target-year statuses and
 candidate gain/loss tasks. For example, a `start_date` before 2013 with no
-earlier `end_date` is a lead that the site may have been present in 2013,
-2018, and 2023. A start date between 2013 and 2018 is a candidate gain window.
-An end date between 2018 and 2023 is a candidate loss window.
+earlier `end_date` is a clue that the site may have been present in 2013, 2018,
+and 2023. A start date between 2013 and 2018 is a possible gain window. An end
+date between 2018 and 2023 is a possible loss window.
 
-These tags still need review. OSM lifecycle values may refer to a building, an
+These tags still need review. OSM date values may refer to a building, an
 organisation, a previous mapper's interpretation, or an imprecise local memory,
-while the project needs worship use at a mappable site. OSM lifecycle tags
-therefore create tasks and evidence rows. Accepted gain/loss data comes later,
+while the project needs worship use at a mappable site. OSM date tags therefore
+create tasks and evidence rows. Accepted gain/loss data comes later,
 through reviewed change events with source references, target-year affects,
 hashes, and manifests.
 
@@ -130,9 +130,9 @@ the master.
 
 No. Convex is a strong candidate for the shared live task map: assignments,
 task status, evidence drafts, reviewer comments, provisional closures, and
-weekly curator review queues. It should help multiple RAs and reviewers see the
-same task state without relying on browser-local storage or a manually checked
-spreadsheet.
+weekly project-review queues. It should help multiple RAs and reviewers see
+the same task status without relying on browser-local storage or a manually
+checked spreadsheet.
 
 The master database should still be rebuilt from accepted change events through
 the Rust validation and replay pipeline and the research-facing R outputs.
@@ -165,16 +165,17 @@ preserve the original wording in the evidence note or raw-date field.
 
 ## How do we record dates outside 2013, 2018, and 2023?
 
-Use the target-year columns for the three census-wave questions. Use lifecycle
-or later-change fields for other useful evidence, such as when worship began at
-a site, when a building was opened, when worship use ended, when a site was
-first or last seen in a source, or when a later shared-use or
+Use the target-year columns for the three census-wave questions. Use opening,
+closure, or later-change fields for other useful evidence, such as when worship
+began at a site, when a building was opened, when worship use ended, when a
+site was first or last seen in a source, or when a later shared-use or
 multi-denominational change occurred.
 
 For example, if a source says a site became multi-denominational in 2024, record
-the target years that the source supports, then use the lifecycle/change fields
+the target years that the source supports, then use the opening/closure/change fields
 with `use_changed_date = 2024`, date precision `year`, and an evidence note
-explaining the claim. If one source gives several distinct lifecycle dates, it
+explaining the claim. If one source gives several distinct opening, closure, or
+change dates, it
 is acceptable to create more than one evidence row when each row carries a
 different source-backed claim.
 
@@ -184,7 +185,7 @@ That is the target workflow. A deterministic task generator should read the
 current master, OSM snapshots, RA evidence, and other source batches, then emit
 review tasks such as:
 
-- missing lifecycle evidence,
+- missing opening, closure, or change-date evidence,
 - missing 2013, 2018, or 2023 status,
 - possible duplicate sites,
 - new OSM place-of-worship candidates,

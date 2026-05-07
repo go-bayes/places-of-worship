@@ -5,69 +5,111 @@
 ### 2026-05-07
 
 - Recorded the New Zealand temporal-reconstruction pilot decision: RAs should
-  contact church bodies and review only curated, cleaned OpenStreetMap-history
-  candidate leads, not raw annual OSM differences.
-- Added `docs/data-storage-pipeline.md` to make ignored local data a cache only:
-  reusable datasets now require durable project-controlled storage plus tracked
-  manifests with checksums, counts, provenance, and licence/privacy status.
+  contact church bodies and review only curated, cleaned OpenStreetMap lists of
+  places to check, not raw annual OSM differences.
+- Added a current-data-flow chart and inventory explaining where the already
+  ingested OSM and NZ Census-linked files live, separating committed NZ app
+  data from ignored temporary working outputs, plus a current-action checklist
+  for promotion, audit, or disposal.
+- Added a dated Convex pricing snapshot to the storage and task-map planning:
+  start the one-RA pilot on Free/Starter if possible, consider Professional
+  only for backups/logs/support or usage limits, and keep raw snapshots,
+  media, accepted diffs, and public products outside Convex.
+- Added `docs/data-storage-pipeline.md` to make ignored generated files
+  temporary working files only: reusable datasets now require durable
+  project-controlled storage plus tracked manifests with checksums, counts,
+  provenance, and licence/privacy status.
 - Added `schemas/data-manifest.schema.json` and updated the manifest templates
   for hash-backed dataset versions, country/global partitions, supersession, and
   durable-file checksums.
 - Documented accepted diffs as primary longitudinal data: losses, gains,
   target-year states, density changes, and appeared/disappeared map layers must
   be derived from accepted change events and accepted-diff manifests.
-- Documented the OSM lifecycle lead contract: `start_date`, `old_start_date`,
-  `end_date`, and related former-use tags seed provisional target-year statuses
+- Documented how OSM opening and closure date tags, such as `start_date`,
+  `old_start_date`, and `end_date`, can seed provisional target-year statuses
   and gain/loss tasks, while accepted events remain the longitudinal data.
-- Added an FAQ entry explaining how OSM lifecycle tags can indicate whether a
+- Added an FAQ entry explaining how OSM date tags can indicate whether a
   place of worship may have been alive at 2013, 2018, or 2023.
+- Added a journal data-workflow graph and storage/action decision tree covering
+  the shared online task map/list, project Drive working files, Google Cloud
+  Storage durable artefacts, deferred PostgreSQL/PostGIS, and `pow`
+  accepted-event outputs.
+- Updated planning and storage guidance with the account and pricing checks
+  needed before enabling Convex, Google Cloud Storage, or queryable geospatial
+  staging.
+- Clarified that temporary working files mean ignored, disposable, recomputable
+  run output only; reusable datasets need named non-local project locations
+  such as Drive file IDs, cloud storage paths, or database names.
+- Reworded the OSM temporal workflow docs in plainer terms: the generated
+  files are lists of places to check, such as places present in one OSM year but
+  not another or places with OSM opening/closure date tags.
+- Replaced ambiguous workflow labels with concrete terms such as OSM date tags,
+  shared online task map/list, reviewer download, file set, and cloud storage
+  path.
+- Added `LEXICON.md` as a plain-language glossary for project reporting,
+  RA-facing docs, diagrams, and future agent work, and linked it from the
+  README and agent guidance.
+- Clarified that `JOURNAL.md` is public-facing project history and rewrote the
+  grant-reference entry to avoid internal agent-style wording.
+- Renamed the OSM date-tag places-to-check output to
+  `nz_osm_date_tag_places_to_check.csv`/`.geojson` and renamed the RA source
+  type value to `osm_date_tags`.
 - Clarified provider planning so Cloudflare is not part of the active storage
   path unless that choice is explicitly reopened.
-- Extended the temporal OSM lead generator to use annual `1 September`
+- Extended the temporal OSM places-to-check generator to use annual `1 September`
   snapshots from 2013 through 2025 by default, while retaining 2013, 2018, and
   2023 as highlighted New Zealand RA/research task years.
 - Recorded the first strict national annual OSM run: 4,777 local candidate rows
   from the ignored 2013-2025 node/way extraction, confirming the direct ohsome
-  route is viable but needs curator collapse before RA review.
+  route is viable but needs a smaller reviewer-selected task set before RA
+  review.
 - Added the first `scripts/build_nz_osm_temporal_candidates.R` workflow to
   fetch dated New Zealand OSM snapshots through ohsome, apply the existing
   project cleaning rules to each snapshot, and emit candidate CSV/GeoJSON diffs
   for maintainer inspection before RA review. The strict default now starts
   with `amenity=place_of_worship` and node/way objects; broader tags and
   relation geometry are explicit slower options.
+- Extended the NZ temporal OSM workflow to emit CSV/GeoJSON files listing
+  places with OSM opening or closure date tags, including raw tags, parsed date
+  bounds, provisional target-year statuses, possible gain/loss windows, parser
+  warnings, and reviewer instructions.
+- Reran the cached strict New Zealand temporal OSM extraction locally after the
+  OSM date-tag update: 4,777 year-difference rows and 1,438 date-tag rows, with
+  35 possible gain windows and no date-tag-derived loss windows.
 - Added maintainer-facing notes for the NZ OSM temporal-cleaning workflow and
-  updated the near-horizon plan and roadmap to put cleaned OSM snapshot diffs
-  and church-body record requests ahead of RA verification.
+  updated the near-horizon plan and roadmap to put cleaned OSM places-to-check
+  files and church-body record requests ahead of RA verification.
 
 ### 2026-05-03
 
-- Added the initial Convex task-layer scaffold: package scripts, project
+- Added the initial Convex task-map backend scaffold: package scripts, project
   config, schema tables for users/tasks/task events/evidence drafts/reviews/
-  exports, role-checked functions for live task state and manual candidate
+  exports, role-checked functions for shared task status and manual candidate
   tasks, a static NZ task seed builder, and maintainer setup notes.
-- Ran the first local Convex task-layer smoke test: generated Convex types,
+- Ran the first local Convex task-map backend smoke test: generated Convex types,
   bootstrapped a local admin identity, seeded five NZ tasks, created a manual
   candidate task, saved/submitted/reviewed an evidence draft, and froze an
-  export bundle.
+  export file set.
 - Added hosted-pilot onboarding support for Convex: a one-time pending-invite
   bootstrap mutation and Google OpenID Connect auth configuration example,
   so real users can claim project roles with their own identities.
 - Added `docs/convex-task-layer-spec.md` as the implementation contract for the
-  live RA/reviewer task map: Convex-owned task state, evidence drafts,
-  review decisions, event logs, curator exports, and the export boundary to
+  live RA/reviewer task map: Convex-owned task status, evidence drafts,
+  review decisions, event logs, reviewer exports, and the export boundary to
   `pow`.
 - Removed implementation-facing command-line references from the RA pilot task
   guide so the first-pass instructions stay focused on the map and shared
   working Sheet.
 - Updated portal and task-map planning to make Convex the preferred near-term
-  backend spike for shared live RA/reviewer task state, while keeping accepted
+  backend spike for shared RA/reviewer task status, while keeping accepted
   events, master rebuilds, and public map exports outside Convex.
-- Defined `lifecycle` in RA-facing guidance and clarified that missing-place
-  candidates may already exist in OSM; OSM ids should be recorded as source or
-  matching evidence, not treated as project site ids.
-- Added optional lifecycle/later-change fields to the NZ verification map so RA
-  rows can capture source-backed dates outside 2013/2018/2023, including site
-  opening, closure, first/last seen, relocation, demolition, and later
+- Defined opening, closure, and change-date evidence in RA-facing guidance and
+  clarified that missing-place candidates may already exist in OSM; OSM ids
+  should be recorded as source or matching evidence, not treated as project
+  site ids.
+- Added optional opening/closure/later-change fields to the NZ verification map
+  so RA rows can capture source-backed dates outside 2013/2018/2023, including
+  site opening, closure, first/last seen, relocation, demolition, and later
   shared-use or multi-denominational changes.
 - Clarified that RAs should leave missing cells blank rather than entering
   `NA`/`N/A`, documented accepted date formats as `YYYY`, `YYYY-MM`, or
@@ -100,7 +142,7 @@
   sample varied tasks from the demo map rather than complete a fixed 50-row
   pilot batch.
 - Added a second README pointer to `FAQ.md` near the project orientation links.
-- Clarified the identity conflict lifecycle: accepted user-nominated sites keep
+- Clarified the identity conflict process: accepted user-nominated sites keep
   durable project `site_id` values, later OSM matches attach as source
   identifiers after review, and conflicts become proposed change events rather
   than direct master overwrites.
@@ -193,7 +235,7 @@
   functions, NZ priority tasks, and the intended 2013/2018/2023 map workflow.
 - Added provisional 2013/2018/2023 target-year controls to the NZ verification
   map, colouring markers by target-year status derived from reviewed status
-  fields where available and otherwise from OSM lifecycle tags.
+  fields where available and otherwise from OSM date tags.
 - Added a no-save RA action builder to the NZ verification map demo so selected
   tasks can produce a spreadsheet-ready evidence row and review JSON locally
   while secure authenticated staging remains future work.
@@ -292,25 +334,25 @@
   sites against OSM links, automated checks, priority filters, and copyable
   staged review decisions.
 - Added `docs/master-verification-workflow-plan.md` to plan read-only master
-  site bundles, automated verification checks, review queues, staged decisions,
+  site data files, automated verification checks, review queues, staged decisions,
   agent-readable data dumps, and map verification layers for NZ and global
   scale.
 - Added RA-facing historical site evidence CSV templates in
   `docs/templates/ra-historical-site-evidence/` for Google Sheets import,
   including source metadata, site observations, candidate matches, review notes,
   controlled vocabularies, and privacy/licence instructions.
-- Added a wide RA evidence-entry template with first-class lifecycle date
+- Added a wide RA evidence-entry template with first-class opening/closure/change date
   fields for founding, opening, first seen, last seen, closure, demolition,
   change of use, relocation, and target-year status checks.
-- Added a normalised lifecycle-event CSV scaffold for later ingestion once the
-  wide RA entry sheet is split into backend tables.
+- Added a normalised opening/closure/change-event CSV scaffold for later
+  ingestion once the wide RA entry sheet is split into backend tables.
 - Added historical-address and geocoding-basis fields to the RA evidence
   templates so changed streets, renamed localities, demolished buildings, and
   uncertain modern matches can be reviewed explicitly.
 - Added bounded origin and closure date fields so sources that establish
   "not earlier than" or "not later than" evidence can be recorded without
   inventing exact dates.
-- Added OpenStreetMap lifecycle-tag, visual-verification, and target-year
+- Added OpenStreetMap date-tag, visual-verification, and target-year
   probability fields to support later temporal verification of 2013, 2018, and
   2023 place existence.
 - Added `docs/community-ingestion-api-plan.md` to plan Google Sheets, web,

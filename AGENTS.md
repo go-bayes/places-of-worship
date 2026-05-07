@@ -13,6 +13,10 @@
 - `ROADMAP.md`: high-level phases, non-goals, and long-horizon direction.
 - `PLANNING.md`: active design, priorities, next steps, and open questions.
 - `JOURNAL.md`: decisions and rationale that should be traceable later.
+  Treat it as public-facing project history: write for collaborators,
+  funders, and future readers, not as private agent instructions.
+- `LEXICON.md`: plain-language project terms. Use it when editing reports,
+  RA-facing docs, README copy, diagrams, and planning summaries.
 - `CHANGELOG.md`: durable progress. Update it for user-visible docs, schemas,
   scripts, data products, or deployment behaviour. Add dated entries under
   `## Unreleased`, using ISO dates such as `### 2026-05-03`.
@@ -30,14 +34,14 @@
 - `docs/master-verification-workflow-plan.md`: master verification and review.
 - `docs/portal-data-entry-plan.md`: authenticated portal planning hub.
 - `docs/convex-task-layer-spec.md`: near-term Convex task-map backend contract
-  for shared RA/reviewer task state, evidence drafts, review decisions, and
+  for shared RA/reviewer task status, evidence drafts, review decisions, and
   exports to `pow`.
 - `docs/data-storage-pipeline.md`: storage policy for local caches, durable
   project-controlled copies, tracked manifests, checksums, and provenance.
 - `docs/development/convex-task-layer-setup.md`: maintainer setup notes for
-  the Convex task-layer scaffold, seeding static NZ tasks, and testing export
+  the Convex task-map backend scaffold, seeding static NZ tasks, and testing export
   boundaries.
-- `convex/`: provisional task-map backend scaffold. It owns live task state
+- `convex/`: provisional task-map backend scaffold. It owns shared task status
   only and must not write to the master database or public map exports.
 - `research/`: lightweight country-source feasibility notes only.
 - `grant/`: ignored local reporting reference; do not commit it.
@@ -98,7 +102,7 @@
 - When editing or reviewing planning, schema, RA, roadmap, FAQ, or changelog
   documents, check nearby cross-references for drift. If documents disagree on
   identity rules, RA workflow, data ownership, source/licence handling,
-  backend direction, or task/review lifecycle, either reconcile the documents
+  backend direction, or task/review process, either reconcile the documents
   in the same change or flag the inconsistency clearly for the user.
 - When the user asks a question whose answer clarifies durable project
   behaviour, especially around identity, task generation, RA workflow, staging,
@@ -132,7 +136,7 @@
 - Rust checks: `cargo fmt --all`, `cargo test`, `cargo clippy --all-targets -- -D warnings`.
 - Python setup: `uv sync`; run scripts with `uv run <script>`.
 - API prototype: `uv run uvicorn api.main:app --reload`.
-- Convex task layer: `npm install`, `npm run convex:dev`, and
+- Convex task-map backend: `npm install`, `npm run convex:dev`, and
   `uv run scripts/build_convex_task_seed.py --limit 100 --output exports/convex-task-seed/nz-sample.json`.
 - R scripts: run from the repo root unless the script documents another working
   directory.

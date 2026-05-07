@@ -54,6 +54,14 @@ As of 30 April 2026:
   current committed place counts with 2013, 2018, and 2023 Census religion
   denominators, and flags that the place counts are current rather than
   historical.
+- Current New Zealand map data lives in committed app files under
+  `apps/regions/nz/data/`: `nz_places.json`, `verification_tasks.geojson`,
+  `ta_aggregated_data.json`, `territorial_authorities.geojson`, and
+  `area_summary_ta.json`/`.csv`. The annual New Zealand OSM history run lives
+  under ignored temporary working files at `data/intermediate/nz_osm_temporal/`
+  and is not durable storage. Do not use those annual OSM outputs for Convex
+  tasks, RA assignments, density plots, or reporting until they are copied to
+  project-owned storage, hashed, and described by a tracked file record.
 - A separate community and agent-assisted ingestion plan now lives in
   `docs/community-ingestion-api-plan.md`. It treats Google Sheets as a first
   research-assistant adapter and defines a future staging API for human,
@@ -66,15 +74,16 @@ As of 30 April 2026:
   continue to state clearly that data is not saved or submitted and should not
   contain private or sensitive information.
 - A separate master-data verification plan now lives in
-  `docs/master-verification-workflow-plan.md`. It defines read-only site
-  bundles, automated checks, review queues, staged verification decisions,
+  `docs/master-verification-workflow-plan.md`. It defines read-only site data
+  files, automated checks, review queues, staged verification decisions,
   agent-readable data dumps, and map verification layers for NZ and global
   scale.
 - Initial RA-facing historical site evidence templates now live in
   `docs/templates/ra-historical-site-evidence/`. They provide Google
   Sheets-ready CSV tabs, including a wide human-entry sheet for source-backed
-  lifecycle evidence, source metadata, site observations, candidate matches,
-  review notes, controlled vocabularies, and privacy/licence instructions.
+  opening, closure, and change-date evidence; source metadata; site
+  observations; candidate matches; review notes; controlled vocabularies; and
+  privacy/licence instructions.
 - `docs/ra-map-triage-guide.md` now defines the interim RA map-to-spreadsheet
   workflow for missing current sites, duplicate records, disappeared sites,
   complicated worship functions, NZ verification priorities, and
@@ -87,7 +96,7 @@ As of 30 April 2026:
   historical reconstruction.
 - In demo mode, the NZ verification map now includes a local RA action builder
   that turns the selected task, target-year statuses, source details, related
-  ids, one optional lifecycle or later-change date, and evidence note into a
+  ids, one optional opening, closure, or later-change date, and evidence note into a
   spreadsheet-ready wide evidence row plus review JSON. This is a usability
   bridge only: it does not save, submit, authenticate, or write to staging.
 - Street-level imagery and direct field observations are first-class RA
@@ -119,14 +128,14 @@ As of 30 April 2026:
   ergonomics are stable enough to justify a persistent portal.
 - A separate portal data-entry planning hub now lives in
   `docs/portal-data-entry-plan.md`. The current direction is to spike Convex as
-  the live shared task-map and reviewer-workbench backend for the New Zealand
+  the shared online task map and reviewer-workbench backend for the New Zealand
   RA pilot. Google Cloud/PostGIS remains the durable staging and storage
   reference if the project needs heavier geospatial storage, quarantined media,
   or provider-neutral exports. No live task backend should write directly to
   the master.
-- The Convex task-layer contract now lives in
-  `docs/convex-task-layer-spec.md`. It defines Convex-owned task state,
-  evidence drafts, review decisions, task-event logs, curator exports, and the
+- The Convex task-map backend contract now lives in
+  `docs/convex-task-layer-spec.md`. It defines Convex-owned task status,
+  evidence drafts, review decisions, task-event logs, reviewer exports, and the
   boundary from live task coordination into the `pow` validation/rebuild path.
 - The initial Convex scaffold now lives in `convex/`, with maintainer setup in
   `docs/development/convex-task-layer-setup.md` and a static NZ seed builder in
@@ -230,21 +239,21 @@ write provisional closures when an RA copies or submits a row. Review then
 decides whether linked evidence becomes accepted change events. Master rebuilds
 consume accepted events, not provisional task statuses.
 
-Convex task state should be exportable to the existing validation path. A
-weekly or curator-triggered export should produce staged evidence rows,
+Convex task status should be exportable to the existing validation path. A
+weekly or reviewer-triggered export should produce staged evidence rows,
 review-decision records, or change-event proposals that `pow validate`,
 `pow propose`, `pow diff`, and later master rebuild commands can consume.
 Convex should not become the canonical master database.
 
-### Target-year and lifecycle evidence
+### Target-Year And Opening/Closure/Change-Date Evidence
 
 For NZ estimation work, every row generated by the map should make the three
 target years explicit:
 
-Here, lifecycle means source-backed dates and changes in the history of a
-worship site, organisation, building, or worship function. Building existence
-and worship use should remain separable because a building may predate worship
-use and may persist after worship use ends.
+Opening, closure, and change-date evidence means source-backed dates and
+changes in the history of a worship site, organisation, building, or worship
+function. Building existence and worship use should remain separable because a
+building may predate worship use and may persist after worship use ends.
 
 1. For 2013, 2018, and 2023, record one of `present`, `absent`, `uncertain`, or
    `not_assessed`.
@@ -252,16 +261,17 @@ use and may persist after worship use ends.
    `absent`, or `uncertain`; do not infer target-year state from prose alone.
 3. Keep building existence separate from worship use. A visible church building
    does not prove active worship use at a target date.
-4. Preserve lifecycle evidence even when it does not settle a target year:
+4. Preserve opening, closure, and change-date evidence even when it does not
+   settle a target year:
    organisation founded date, site opened date, building opened or dedicated
    date, first seen, last seen, closure, changed use, relocation, demolition,
    and the not-earlier-than/not-later-than bounds for origin and closure.
-5. Capture date precision and evidence basis with each lifecycle date. Exact
-   dates, years, bounded intervals, and source inferences should remain
-   distinguishable for later reconstruction.
-6. The map action builder should capture one structured lifecycle or
+5. Capture date precision and evidence basis with each opening, closure, or
+   change date. Exact dates, years, bounded intervals, and source inferences
+   should remain distinguishable for later reconstruction.
+6. The map action builder should capture one structured opening, closure, or
    later-change date per generated row. If one source supports several distinct
-   lifecycle claims, multiple evidence rows for the same site are acceptable
+   date/change claims, multiple evidence rows for the same site are acceptable
    when the note makes the repeated site intentional.
 7. For future analysis, keep raw denomination/tradition, shared-use,
    multi-purpose, and organisation-site link evidence even if the current pilot
@@ -468,10 +478,10 @@ The working model is:
 
 - Use `docs/master-verification-workflow-plan.md` as the supporting design note
   for verifying records already in the master dataset.
-- Expose master data through read-only site bundles rather than editable master
+- Expose master data through read-only site data files rather than editable master
   rows.
 - Generate automated checks for geometry, area assignment, duplicates, OSM
-  history, source references, lifecycle consistency, target-year status,
+  history, source references, opening/closure date consistency, target-year status,
   licence flags, and privacy flags.
 - Write verification decisions to staging or audit tables before any master
   change is proposed.
@@ -526,10 +536,10 @@ The working model is:
   the auditable event stream from which appeared/disappeared counts, target-year
   site states, density changes, and map layers must be derived.
 - Never derive serious loss/gain estimates from comparing two unreviewed
-  snapshots alone. Snapshot comparisons may generate leads. Accepted gains and
-  losses must come from validated change events with `target_year_affects`,
-  previous/current status where available, source references, review decisions,
-  payload hashes, and data-manifest links.
+  snapshots alone. Snapshot comparisons may generate lists of places to check.
+  Accepted gains and losses must come from validated change events with
+  `target_year_affects`, previous/current status where available, source
+  references, review decisions, payload hashes, and data-manifest links.
 - Separate evidence from conclusions. A source observation can state what a
   directory, OSM history, charity record, or visual check shows; a reviewed
   conclusion can then assign target-year status, confidence, and analytical
@@ -537,9 +547,10 @@ The working model is:
 - Make temporal state first-class. The model must support exact and bounded
   dates, target-year status, openings, closures, moves, shared buildings,
   denomination changes, changed use, demolition, and uncertain locations.
-- Focus lifecycle and diff semantics on worship use at a site, not merely on
-  whether a building exists. Building existence, demolition, and rebuilding are
-  evidence and structure-history facts; the analytical question is whether the
+- Focus opening/closure/change and diff semantics on worship use at a site, not
+  merely on whether a building exists. Building existence, demolition, and
+  rebuilding are evidence and structure-history facts; the analytical question
+  is whether the
   site functioned as a place of worship for specified traditions, organisations,
   and target years.
 - Treat `site_snapshot` rows as derived caches. Accepted change events should be
@@ -622,6 +633,46 @@ near-term flow is shared spreadsheet or map-assisted row -> `pow stage` ->
 `pow propose --persist` -> `pow diff` reviewer report -> explicit reviewer
 decision. This still must not write directly to the master database.
 
+Infrastructure decision rules for that loop:
+
+- Local execution cache means ignored, recomputable files under repo-relative
+  working folders such as `data/` or `exports/`. It is not a storage location,
+  should not appear as a durable source in a manifest, and must not be the
+  place André or another collaborator depends on.
+- Use Convex when RAs or reviewers need the same online task map/list:
+  assignments, task locks, provisional closure, draft evidence, session
+  history, or review comments visible across browsers.
+- Use project Google Drive for near-term working evidence and collaborator
+  handoff, especially source files or Sheets that humans need to inspect.
+- Use Google Cloud Storage for immutable OSM snapshots, generated
+  places-to-check files, reviewed exports, and rebuild inputs once they matter
+  beyond local testing.
+- Use PostgreSQL/PostGIS or Cloud SQL only when the portal or review workbench
+  needs live spatial searches that files plus Convex exports cannot handle.
+- Keep accepted events and accepted diffs in the `pow` path. Convex exports may
+  feed `pow`; Convex must not become the canonical research database.
+
+Pricing and account checks before action:
+
+- Convex: pricing checked on 2026-05-07 at `https://www.convex.dev/pricing`.
+  Use Free/Starter for the one-RA pilot if possible. The page currently lists
+  Free/Starter for 1-6 developers, Professional at $25 per developer per month
+  with daily backups, log streaming, exception reporting, custom domains, and
+  email support, and Business/Enterprise at a $2,500 monthly minimum. Recheck
+  before paid signup, and keep raw OSM snapshots, media, accepted diffs, and
+  public map products outside Convex.
+- Google Cloud Storage: bucket region, storage class, object versioning,
+  operations, download/transfer costs, file-retention policies, service accounts, audit logs, and
+  backup/retention needs.
+- Google Drive: project ownership, file sharing, export formats, auditability,
+  and whether Drive alone is enough for a working file or only an intake layer.
+- Cloud SQL/PostGIS: defer pricing until live spatial searches over stored data
+  are needed; include instance uptime, storage, backups, connections, and
+  maintenance.
+- Every reusable dataset must have a named non-local project location before
+  downstream use: Drive file/folder ID, cloud storage path, or database name.
+  A repo-relative `data/...` path is only a cache hint.
+
 ### 13. Plan the authenticated portal data-entry pilot
 
 - Use `docs/portal-data-entry-plan.md` as the hub for the authenticated
@@ -645,7 +696,7 @@ decision. This still must not write directly to the master database.
   rules are proven.
 - Use Convex as the preferred near-term backend spike for the shared task map
   and reviewer workbench: live task status, assignments, provisional closures,
-  evidence drafts, review decisions, and curator queues.
+  evidence drafts, review decisions, and project-review queues.
 - Keep the Rust/R master path authoritative. Convex exports should feed staged
   evidence and accepted-review records into `pow` validation, diff, replay, and
   reviewed map exports.
@@ -885,7 +936,7 @@ For New Zealand, the practical reconstruction path should be evidence-tiered:
   societies, including many religious or cultural associations. It is still an
   organisation register, so it needs careful site matching and does not cover
   all places of worship.
-- Use LINZ NZ Building Outlines, especially the "All Sources" and lifecycle
+- Use LINZ NZ Building Outlines, especially the "All Sources" and building-date
   tables, to test whether a matched building was visible in aerial imagery near
   the target period. This helps verify built-form existence and changes over
   time, but building outlines do not identify worship use reliably and imagery
@@ -907,13 +958,14 @@ OpenStreetMap should become a separate but related temporal verification work
 stream. The aim is to estimate whether candidate places of worship existed and
 were in worship use in target years such as 2013, 2018, and 2023. This should
 not be treated as a direct count from current OSM. It should combine OSM object
-history, OSM lifecycle tags, visual evidence, and human or model-assisted review.
+history, OSM date and former-use tags, visual evidence, and human or
+model-assisted review.
 
 Evidence to retain:
 
 - OSM full-history object versions and timestamps for `node`, `way`, and
   `relation` objects tagged as places of worship or likely worship buildings
-- OSM lifecycle tags, especially `start_date=*`, `old_start_date=*`, and, where
+- OSM date and former-use tags, especially `start_date=*`, `old_start_date=*`, and, where
   used carefully, `end_date=*`
 - the fact that previous map iterations used OSM-supplied birth dates, so these
   values should be migrated or re-extracted rather than discarded
@@ -922,15 +974,15 @@ Evidence to retain:
 - target-year state judgements for 2013, 2018, and 2023, with optional
   probabilities and review notes
 
-Lifecycle-tag lead contract:
+OSM date-tag review contract:
 
-1. Parse OSM lifecycle tags into source-backed date bounds, preserving the raw
-   tag value, parsed value, date precision, and parser warning if the value is
-   ambiguous.
+1. Parse OSM date and former-use tags into source-backed date bounds,
+   preserving the raw tag value, parsed value, date precision, and parser
+   warning if the value is ambiguous.
 2. Treat `start_date` and `old_start_date` as possible lower-bound evidence
    that worship use or the relevant structure existed, not as a confirmed
    project birth date until reviewed.
-3. Treat `end_date` and former-use lifecycle tags as possible upper-bound or
+3. Treat `end_date` and former-use tags as possible upper-bound or
    changed-use evidence, not as a confirmed closure until reviewed.
 4. Derive provisional `target_year_2013_status`,
    `target_year_2018_status`, and `target_year_2023_status` from the parsed
@@ -938,10 +990,10 @@ Lifecycle-tag lead contract:
 5. Emit candidate gain/loss windows when the provisional status changes between
    target years or adjacent annual snapshots. These windows are review tasks,
    not accepted diffs.
-6. Keep the basis explicit: `osm_lifecycle_tags`, `osm_object_history`,
+6. Keep the basis explicit: `osm_date_tags`, `osm_object_history`,
    `independent_directory`, `street_imagery`, `denominational_record`, or
    `reviewer_inference`.
-7. Convert a lifecycle lead into accepted longitudinal data only after review
+7. Convert an OSM date-tag row into accepted longitudinal data only after review
    creates a change event with `target_year_affects`, source references,
    confidence, payload hash, and manifest linkage.
 
@@ -1003,7 +1055,7 @@ Candidate source references to evaluate:
   <https://wiki.openstreetmap.org/wiki/Planet.osm/full>
 - OpenStreetMap places of worship tagging:
   <https://wiki.openstreetmap.org/wiki/Tag:amenity%3Dplace_of_worship>
-- OpenStreetMap lifecycle date tags:
+- OpenStreetMap opening and closure date tags:
   <https://wiki.openstreetmap.org/wiki/Key:start_date>
   <https://wiki.openstreetmap.org/wiki/Key:old_start_date>
   <https://wiki.openstreetmap.org/wiki/Key:end_date>
@@ -1039,7 +1091,7 @@ Proposed storage layout:
 - Extracted evidence table:
   - `data/intermediate/nz/historical_site_evidence/<retrieval_date>/site_observations.csv`
   - one row per source claim about one site at one date, before aggregation
-- Extracted lifecycle event table:
+- Extracted opening/closure/change event table:
   - `data/intermediate/nz/historical_site_evidence/<retrieval_date>/site_lifecycle_events.csv`
   - optional normalised split from the wide RA intake sheet when source evidence
     supports distinct founding, opening, first-seen, last-seen, closure,
@@ -1144,7 +1196,7 @@ RA workflow:
 1. Create or update the `source_dataset` metadata before extracting rows.
 2. Save raw downloads, screenshots, PDFs, or exported tables in the dated raw
    source folder, or outside Git with a manifest if the source is restricted.
-3. Extract fields needed for site existence, worship use, lifecycle dating, and
+3. Extract fields needed for site existence, worship use, dated changes, and
    matching. Record all source-backed founding, first-seen, opening, closure,
    last-seen, demolition, change-of-use, and relocation evidence rather than
    collapsing it into a single birth or death date.
@@ -1167,15 +1219,15 @@ RA workflow:
    reviewer should record whether the evidence confirms a physical site, only
    an organisation, only a building, or neither.
 10. Aggregation scripts should count only observations satisfying the declared
-   evidence rule for that product. For example, a conservative 2018 count might
-   require `worship_use_status` in `confirmed_worship` or `probable_worship`,
-   `existence_status = present`, and `review_status = accepted`.
+    evidence rule for that product. For example, a conservative 2018 count might
+    require `worship_use_status` in `confirmed_worship` or `probable_worship`,
+    `existence_status = present`, and `review_status = accepted`.
 
 Template support:
 
 - Use `docs/templates/ra-historical-site-evidence/` as the first spreadsheet
   scaffold for RA evidence collection. `site_evidence_wide.csv` is the primary
-  human-entry sheet because it keeps source, place, lifecycle, target-year,
+  human-entry sheet because it keeps source, place, date/change, target-year,
   matching, and review fields in one row. The more normalised CSV tabs are
   reference scaffolds for later ingestion and review splitting. All CSV tabs
   should be treated as a working adapter to this ingestion spec, rather than as
@@ -1247,7 +1299,7 @@ map do not drift apart.
 - Publish a minimum three-part NZ download contract:
   - cleaned site rows
   - area summaries
-  - metadata bundle
+  - metadata file
 - Keep richer or alternative products optional until the pilot is stable.
 
 ### Shared contract to define now
@@ -1297,9 +1349,9 @@ map do not drift apart.
   likely completed at the end of August.
 - The exact anchor date should remain fixed across years unless there is a
   documented methodological reason to change it.
-- The first OSM-history lead generator should use every completed annual anchor
-  from `2013-09-01` through `2025-09-01`; `2026-09-01` should wait until that
-  date exists.
+- The first OSM-history places-to-check generator should use every completed
+  annual anchor from `2013-09-01` through `2025-09-01`; `2026-09-01` should
+  wait until that date exists.
 - Local ignored outputs from this generator are cache only. Promote reusable
   outputs to durable project-controlled storage and commit a manifest before
   they are used for RA task generation, analysis, density products, or
@@ -1359,7 +1411,7 @@ map do not drift apart.
   reviewed candidate rejection, identity-link, duplicate-merge, split, or
   successor/predecessor events, with provenance preserved.
 
-This is the default conflict lifecycle for the August/September OSM refresh:
+This is the default conflict process for the August/September OSM refresh:
 source snapshots produce tasks; review resolves identity and functional state;
 accepted events rebuild the master; the master is not overwritten directly by
 OSM ids or user suggestions.
@@ -1407,7 +1459,7 @@ OSM ids or user suggestions.
 - Every NZ pilot release should include:
   - cleaned site rows
   - area summaries
-  - metadata bundle
+  - metadata file
 - Additional download products such as raw extracts, review queues, and
   area-by-religion tables can be added, but they are not required for the first
   backend milestone.
@@ -1444,8 +1496,8 @@ OSM ids or user suggestions.
 
 - Spike Convex as the first live backend for the New Zealand task map and
   reviewer workbench.
-- Use Convex for shared task state, assignment, provisional closure, evidence
-  drafts, reviewer comments, review decisions, and curator queues.
+- Use Convex for shared task status, assignment, provisional closure, evidence
+  drafts, reviewer comments, review decisions, and project-review queues.
 - Keep managed authentication and invite-only access. Use an OpenID
   Connect-compatible provider and enforce project roles in backend functions.
 - Export reviewed Convex task data into the Rust validation and replay path;
@@ -1459,9 +1511,9 @@ OSM ids or user suggestions.
   Rust-first realtime backend becomes a specific requirement.
 - Initial implementation lives in `convex/`: schema, role-checked functions,
   static task import, provisional closure, evidence draft submission, review
-  decisions, export bundles, and manual candidate tasks for sites not yet on
+  decisions, export file sets, and manual candidate tasks for sites not yet on
   OSM or the project map. Frontend wiring, file export actions, and `pow`
-  validation of exported bundles remain next steps.
+  validation of exported file sets remain next steps.
 
 ## Open decisions
 
@@ -1615,65 +1667,79 @@ OSM ids or user suggestions.
 
 ## Next concrete steps
 
-1. Generate cleaned New Zealand OpenStreetMap temporal candidate leads from
-   annual `1 September` snapshots, starting with 2013 through 2025. Use the
-   existing cleaning rules on each dated snapshot, treat most apparent
-   differences as likely mapping artefacts, and give André only curated rows
-   centred on the 2013, 2018, and 2023 estimation years for non-OSM
-   verification.
-2. Ask André to contact selected church bodies for source-backed records of
+1. Finish and commit the OSM date-tag implementation with an automated
+   parser/gain/loss fixture so the target-year derivation is protected against
+   regressions.
+2. Promote the two New Zealand OSM "places to check" files from local execution
+   cache into the data-storage pipeline before they seed Convex or RA review:
+   the list of places present in one OSM year but not another, and the list of
+   places with OSM opening or closure date tags. Record named non-local project
+   location, SHA-256 hashes, row/feature counts, manifest, source caveats, and
+   `intermediate_lead` status.
+3. Price-check and, if acceptable, configure the Convex pilot project for
+   shared task state with Google sign-in, project roles, invite workflow, and a
+   weekly frozen export path to `pow`.
+4. Decide whether the first durable storage action is a project Google Drive
+   folder only or a private Google Cloud Storage bucket for immutable OSM
+   places-to-check files. Use the decision tree in
+   `docs/data-storage-pipeline.md`.
+5. Curate a small RA-ready set of places to check from the 4,777 OSM
+   year-difference rows and 1,438 OSM date-tag rows, prioritising the 35
+   possible openings between target years, uncertain target-year cases, matched
+   current sites, and likely object-churn losses needing non-OSM verification.
+6. Ask André to contact selected church bodies for source-backed records of
    active worship sites, openings, closures, relocations, mergers, shared-use
    buildings, and changed-use sites at or around 2013, 2018, and 2023.
-3. Finish the next NZ cleanup slices from the remaining review queue.
-4. Design the shared global cleaner and review-queue schema.
-5. Refactor `scripts/extract_global_data.R` into explicit extract, normalise,
+7. Finish the next NZ cleanup slices from the remaining review queue.
+8. Design the shared global cleaner and review-queue schema.
+9. Refactor `scripts/extract_global_data.R` into explicit extract, normalise,
    clean, and export stages.
-6. Promote any reusable ignored local outputs and any Drive-only project data
-   into the data-storage pipeline: durable project-controlled copy, tracked
-   manifest, checksums, counts, licence/privacy status, and rebuild
-   instructions.
-7. Add hash-backed data manifests and per-country counts. Start with the NZ OSM
-   annual extraction, then wire the same manifest schema into extract,
-   normalise, clean, deduplicate, review-queue, and export stages.
-8. Define the shared country backend schema and NZ boundary adapter contract.
-9. Validate the first NZ territorial-authority `area_summary` product against
-   frontend layer and download needs.
-10. Pilot the RA-facing historical evidence templates in
-   `docs/templates/ra-historical-site-evidence/` with one or two NZ 2018 source
-   batches, then refine the controlled vocabularies and validation rules before
-   broader data entry.
-11. Define the first read-only NZ master site-bundle export and automated
-   verification checks described in
-   `docs/master-verification-workflow-plan.md`.
-12. Continue converting the RA map-triage guide into the first map-first
-   workflow design: current non-OSM sites, duplicate/merge candidates, lost
-   2013 sites, 2013-present/2018-absent cases, denomination or shared-building
-   complications, and target-year status changes should be selectable from the
-   map. The static demo can generate local rows for testing; authenticated
-   staging remains a later backend step.
-13. Scope the OSM temporal verification subproject as an annual-snapshot
-   protocol from 2013 onward, with New Zealand RA tasks collapsed around 2013,
-   2018, and 2023. Include OSM history extraction, lifecycle-tag parsing,
-   provisional target-year statuses, gain/loss lead windows, visual evidence
-   review, and target-year probability rules.
-14. Draft the Google Sheets to staging API pilot described in
-   `docs/community-ingestion-api-plan.md`.
-15. Extend the initial CLI-first RA revisions pipeline from `CRITIQUE.md`,
-   using `schemas/change-event.schema.json` and
-   `schemas/geometry-history.schema.json` as the first event and geometry
-   contracts. The first scaffolds are `pow validate` and `pow stage`; next add
-   dry-run diff output from the local SQLite staging store.
-16. Draft the authenticated NZ portal staging pilot described in
-   `docs/portal-data-entry-plan.md`, starting with the UI, auth/security,
-   database/storage, and review contracts before implementation.
-17. Extend the NZ `area_summary` product to SA2 geography after checking
-   boundary metadata and point-to-area assignment quality.
-18. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
-   legends, popups, and export metadata.
-19. Align the NZ map interface with the global map after the data overlay is
-   stable, preserving NZ-specific analysis controls.
-20. Prototype site, area, and comparison modes using precomputed layers before
+10. Promote any reusable ignored local outputs and any Drive-only project data
+    into the data-storage pipeline: durable project-controlled copy, tracked
+    manifest, checksums, counts, licence/privacy status, and rebuild
+    instructions.
+11. Add hash-backed data manifests and per-country counts. Start with the NZ OSM
+    annual extraction, then wire the same manifest schema into extract,
+    normalise, clean, deduplicate, review-queue, and export stages.
+12. Define the shared country backend schema and NZ boundary adapter contract.
+13. Validate the first NZ territorial-authority `area_summary` product against
+    frontend layer and download needs.
+14. Pilot the RA-facing historical evidence templates in
+    `docs/templates/ra-historical-site-evidence/` with one or two NZ 2018 source
+    batches, then refine the controlled vocabularies and validation rules before
+    broader data entry.
+15. Define the first read-only NZ master site-data export and automated
+    verification checks described in
+    `docs/master-verification-workflow-plan.md`.
+16. Continue converting the RA map-triage guide into the first map-first
+    workflow design: current non-OSM sites, duplicate/merge candidates, lost
+    2013 sites, 2013-present/2018-absent cases, denomination or shared-building
+    complications, and target-year status changes should be selectable from the
+    map. The static demo can generate local rows for testing; authenticated
+    staging remains a later backend step.
+17. Scope the OSM temporal verification subproject as an annual-snapshot
+    protocol from 2013 onward, with New Zealand RA tasks collapsed around 2013,
+    2018, and 2023. Include OSM history extraction, OSM date-tag parsing,
+    provisional target-year statuses, possible gain/loss windows, visual
+    evidence review, and target-year probability rules.
+18. Draft the Google Sheets to staging API pilot described in
+    `docs/community-ingestion-api-plan.md`.
+19. Extend the initial CLI-first RA revisions pipeline from `CRITIQUE.md`,
+    using `schemas/change-event.schema.json` and
+    `schemas/geometry-history.schema.json` as the first event and geometry
+    contracts. The first scaffolds are `pow validate` and `pow stage`; next add
+    dry-run diff output from the local SQLite staging store.
+20. Draft the authenticated NZ portal staging pilot described in
+    `docs/portal-data-entry-plan.md`, starting with the UI, auth/security,
+    database/storage, and review contracts before implementation.
+21. Extend the NZ `area_summary` product to SA2 geography after checking
+    boundary metadata and point-to-area assignment quality.
+22. Replace 2018-specific NZ overlay assumptions with year-aware map controls,
+    legends, popups, and export metadata.
+23. Align the NZ map interface with the global map after the data overlay is
+    stable, preserving NZ-specific analysis controls.
+24. Prototype site, area, and comparison modes using precomputed layers before
     adding live portal queries.
-21. Pilot the new global pipeline on a small country set before full rollout.
-22. Expand `research/` into a country-source matrix for global feasibility
+25. Pilot the new global pipeline on a small country set before full rollout.
+26. Expand `research/` into a country-source matrix for global feasibility
     assessment.

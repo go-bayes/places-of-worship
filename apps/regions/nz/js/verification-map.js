@@ -82,7 +82,7 @@ const DATE_PRECISION_OPTIONS = [
     ["unknown", "Unknown"],
 ];
 const LIFECYCLE_EVENT_OPTIONS = [
-    ["", "No extra lifecycle/change date"],
+    ["", "No extra opening/closure/change date"],
     ["organisation_founded", "Organisation/congregation founded"],
     ["site_opened", "Worship began at this site"],
     ["building_opened_or_dedicated", "Building opened or dedicated"],
@@ -414,7 +414,7 @@ function taskFocusForAction(action, priority) {
     if (action === "review_when_sampling") {
         return {
             label: "Spot-check sample",
-            text: "Check the record against independent source evidence and capture any lifecycle, address, denomination, duplicate, or uncertainty finding.",
+            text: "Check the record against independent source evidence and capture any opening/closure/change, address, denomination, duplicate, or uncertainty finding.",
         };
     }
     if (action === "candidate_no_action") {
@@ -493,8 +493,8 @@ function deriveTargetYearStatus(props, targetYear) {
     if (!start && !end) {
         return {
             status: "not_assessed",
-            basis: "missing lifecycle evidence",
-            note: "No OSM start_date, old_start_date, or end_date is recorded. Seek source-backed lifecycle evidence.",
+            basis: "missing opening/closure/change-date evidence",
+            note: "No OSM start_date, old_start_date, or end_date is recorded. Seek source-backed opening, closure, or changed-use evidence.",
         };
     }
 
@@ -503,14 +503,14 @@ function deriveTargetYearStatus(props, targetYear) {
         if (endCompare < 0) {
             return {
                 status: "absent",
-                basis: "OSM lifecycle tag",
+                basis: "OSM date tag",
                 note: `${lifecycleSummary}. OSM end_date falls before ${targetYear}-09-01.`,
             };
         }
         if (endCompare === 0) {
             return {
                 status: "uncertain",
-                basis: "OSM lifecycle tag",
+                basis: "OSM date tag",
                 note: `${lifecycleSummary}. OSM end_date is not precise enough to settle status on ${targetYear}-09-01.`,
             };
         }
@@ -521,27 +521,27 @@ function deriveTargetYearStatus(props, targetYear) {
         if (startCompare < 0) {
             return {
                 status: "present",
-                basis: "OSM lifecycle tag",
+                basis: "OSM date tag",
                 note: `${lifecycleSummary}. OSM start evidence falls before ${targetYear}-09-01.`,
             };
         }
         if (startCompare > 0) {
             return {
                 status: "absent",
-                basis: "OSM lifecycle tag",
+                basis: "OSM date tag",
                 note: `${lifecycleSummary}. OSM start evidence falls after ${targetYear}-09-01.`,
             };
         }
         return {
             status: "uncertain",
-            basis: "OSM lifecycle tag",
+            basis: "OSM date tag",
             note: `${lifecycleSummary}. OSM start evidence falls in ${targetYear} but is not precise enough to settle status on ${targetYear}-09-01.`,
         };
     }
 
     return {
         status: "uncertain",
-        basis: "OSM lifecycle tag",
+        basis: "OSM date tag",
         note: `${lifecycleSummary}. OSM end evidence exists but no start evidence is recorded.`,
     };
 }
@@ -1249,7 +1249,7 @@ class NzVerificationMap {
 
     temporalSummaryHtml(props) {
         const temporal = deriveTargetYearStatus(props, this.targetYear);
-        const lifecycle = lifecycleDateSummary(props) || "No OSM lifecycle date recorded.";
+        const lifecycle = lifecycleDateSummary(props) || "No OSM date tag recorded.";
         const missingLifecycle = hasMissingLifecycleCheck(props);
         const status = statusLabel(temporal.status);
         return `
@@ -1257,9 +1257,9 @@ class NzVerificationMap {
             <div class="temporal-summary">
                 <div><span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(status)}</span></div>
                 <div><strong>Basis:</strong> ${escapeHtml(temporal.basis)}</div>
-                <div><strong>Lifecycle tags:</strong> ${escapeHtml(lifecycle)}</div>
+                <div><strong>OSM date tags:</strong> ${escapeHtml(lifecycle)}</div>
                 <div><strong>Interpretation:</strong> ${escapeHtml(temporal.note)}</div>
-                ${missingLifecycle ? "<div><strong>RA task:</strong> seek source-backed lifecycle evidence for opening, first seen, closure, or changed use.</div>" : ""}
+                ${missingLifecycle ? "<div><strong>RA task:</strong> seek source-backed opening, first seen, closure, or changed-use evidence.</div>" : ""}
                 <div><strong>Status:</strong> provisional map aid only; reviewer decisions must be source-backed.</div>
             </div>
         `;
@@ -1316,7 +1316,7 @@ class NzVerificationMap {
                         Source type
                         <select id="sourceTypeSelect">
                             <option value="osm_history">OSM history</option>
-                            <option value="osm_lifecycle_tags">OSM lifecycle tags</option>
+                            <option value="osm_date_tags">OSM date tags</option>
                             <option value="street_imagery">Street imagery / Street View</option>
                             <option value="aerial_imagery">Aerial imagery</option>
                             <option value="field_observation">Field observation</option>
@@ -1375,9 +1375,9 @@ class NzVerificationMap {
                     Source date or imagery capture date
                     <input id="sourceDateInput" type="text" placeholder="e.g. 2018-09, 2023, or 2026-05-03 for a field visit">
                 </label>
-                <h3>Optional lifecycle or later change</h3>
+                <h3>Optional opening, closure, or later change</h3>
                 <div class="copy-help">
-                    Lifecycle means dated evidence about the history of the worship site, organisation, building, or worship function. Use this when the source gives an opening, closure, first/last seen, relocation, demolition, or later worship-function change. For example, use <em>Use changed / shared use began</em> for evidence that a site became multi-denominational in 2024.
+                    Use this when the source gives a dated opening, closure, first/last seen, relocation, demolition, or later worship-function change. For example, use <em>Use changed / shared use began</em> for evidence that a site became multi-denominational in 2024.
                 </div>
                 <div class="field-grid">
                     <label>
@@ -1397,7 +1397,7 @@ class NzVerificationMap {
                         </select>
                     </label>
                     <label>
-                        Lifecycle/change note
+                        Opening/closure/change note
                         <input id="lifecycleNoteInput" type="text" placeholder="e.g. source says shared Anglican/Methodist use began in 2024">
                     </label>
                 </div>
@@ -1475,7 +1475,7 @@ class NzVerificationMap {
                 }
                 const sourceTypeSelect = document.getElementById("sourceTypeSelect");
                 if (sourceTypeSelect) {
-                    sourceTypeSelect.value = "osm_lifecycle_tags";
+                    sourceTypeSelect.value = "osm_date_tags";
                 }
                 this.updateWorkflowSteps();
             });
@@ -1615,13 +1615,13 @@ class NzVerificationMap {
         }
         const hasLifecycleDetail = values.lifecycleEvent || values.lifecycleDate.trim() || values.lifecycleNote.trim();
         if (hasLifecycleDetail && !values.lifecycleEvent) {
-            return "Choose a lifecycle/change event type, or leave the optional lifecycle fields blank.";
+            return "Choose an opening/closure/change event type, or leave the optional date fields blank.";
         }
         if (values.lifecycleEvent && !values.lifecycleDate.trim()) {
-            return "Add a lifecycle/change date, or leave the optional lifecycle fields blank.";
+            return "Add an opening/closure/change date, or leave the optional date fields blank.";
         }
         if (values.lifecycleDate.trim() && !isValidPartialDateText(values.lifecycleDate)) {
-            return "Use YYYY, YYYY-MM, or YYYY-MM-DD for lifecycle/change dates. Preserve prose dates in the note.";
+            return "Use YYYY, YYYY-MM, or YYYY-MM-DD for opening/closure/change dates. Preserve prose dates in the note.";
         }
         if (values.sourceType === "field_observation" && !values.sourceDate.trim()) {
             return "Add the field observation date.";
@@ -1636,7 +1636,7 @@ class NzVerificationMap {
         if (sourceType === "street_imagery") return "street_imagery";
         if (sourceType === "aerial_imagery") return "aerial_imagery";
         if (sourceType === "field_observation") return "field_observation";
-        if (sourceType === "osm_lifecycle_tags" || sourceType === "osm_history") return "osm_cartography";
+        if (sourceType === "osm_date_tags" || sourceType === "osm_history") return "osm_cartography";
         return "none";
     }
 
@@ -1694,8 +1694,8 @@ class NzVerificationMap {
         row.osm_old_start_date = props.osm_old_start_date || "";
         row.osm_end_date = props.osm_end_date || "";
         row.osm_lifecycle_date_notes = lifecycle
-            ? `${lifecycle}. Treat OSM lifecycle tags as evidence to check, not final truth.`
-            : "No OSM lifecycle tags visible in the verification task.";
+            ? `${lifecycle}. Treat OSM date tags as evidence to check, not final truth.`
+            : "No OSM date tags visible in the verification task.";
         row.matched_current_site_id = isMissing ? "" : (props.master_site_id || "");
         row.candidate_site_id = isMissing ? `candidate-${evidenceSlug || slug(`${values.action}-${todayIsoDate()}`)}` : "";
         row.match_method = isMissing ? "unmatched" : isDuplicate ? "manual_review" : "osm_id";
@@ -1704,7 +1704,7 @@ class NzVerificationMap {
         row.visual_verification_source = this.visualVerificationSource(values.sourceType);
         row.visual_verification_url_or_file = ["street_imagery", "aerial_imagery"].includes(values.sourceType)
             ? values.sourceUrl
-            : values.sourceType === "osm_lifecycle_tags"
+            : values.sourceType === "osm_date_tags"
                 ? values.sourceUrl
                 : "";
         row.visual_verification_capture_date = ["street_imagery", "aerial_imagery", "field_observation"].includes(values.sourceType)
@@ -1716,7 +1716,7 @@ class NzVerificationMap {
         const lifecycleLabel = optionLabel(LIFECYCLE_EVENT_OPTIONS, values.lifecycleEvent);
         const lifecycleEvidence = values.lifecycleEvent
             ? [
-                `lifecycle/change event: ${lifecycleLabel}`,
+                `opening/closure/change event: ${lifecycleLabel}`,
                 `date: ${values.lifecycleDate}`,
                 `precision: ${values.lifecycleDatePrecision}`,
                 values.lifecycleNote ? `note: ${values.lifecycleNote}` : "",

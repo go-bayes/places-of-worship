@@ -29,7 +29,7 @@ Your work is saved in the shared working spreadsheet, not in the map.
 
 The verification map also has target-year controls for 2013, 2018, and 2023.
 These colours are provisional. They use reviewed target-year fields when
-available and otherwise fall back to OpenStreetMap lifecycle tags such as
+available and otherwise fall back to OpenStreetMap date tags such as
 `start_date`, `old_start_date`, and `end_date`. Treat those tags as evidence to
 check, not as final truth.
 
@@ -90,18 +90,18 @@ closed only in this browser; choose the next task from the map or list. Do not
 enter private contact details, restricted source material, or raw uploaded files
 into the map.
 
-The target-year fields are for 2013, 2018, and 2023. Use the optional
-lifecycle/change fields for dates outside those waves, such as site opening,
-closure, relocation, demolition, first/last seen evidence, or a later shared-use
-or multi-denominational change. The map records one structured lifecycle/change
-date per copied row; copy an additional row if the same site has another
-distinct source-backed date worth preserving.
+The target-year fields are for 2013, 2018, and 2023. Use the optional opening,
+closure, and change-date fields for dates outside those waves, such as site
+opening, closure, relocation, demolition, first/last seen evidence, or a later
+shared-use or multi-denominational change. The map records one structured
+opening, closure, or change date per copied row; copy an additional row if the
+same site has another distinct source-backed date worth preserving.
 
-Here, lifecycle means dated evidence about a worship site's history: when an
+These dates are dated evidence about a worship site's history: when an
 organisation began, worship began at the site, a building opened, the site was
-first or last seen, worship ended, the building was demolished, the organisation
-relocated, or the worship function changed. Keep building existence separate
-from worship use where the source allows.
+first or last seen, worship ended, the building was demolished, the
+organisation relocated, or the worship function changed. Keep building
+existence separate from worship use where the source allows.
 
 ## Common Fields
 
@@ -123,7 +123,8 @@ Use these fields consistently in the wide evidence sheet:
   year.
 - `site_opened_date`, `site_closed_date`, `first_seen_date`,
   `last_seen_date`, `use_changed_date`, and related precision fields:
-  lifecycle or later-change evidence that may fall outside the target years.
+  opening, closure, or later-change evidence that may fall outside the target
+  years.
 - `existence_status`: whether the source supports site or building existence at
   the relevant time.
 - `worship_use_status`: whether the source supports worship use at the relevant
@@ -132,7 +133,7 @@ Use these fields consistently in the wide evidence sheet:
 - `review_status`: usually `unreviewed` or `needs_review` for RA-entered rows.
 - `privacy_flag` and `licence_flag`: use `clear`, `needs_review`, or
   `restricted`.
-- `osm_start_date`, `osm_old_start_date`, and `osm_end_date`: preserve lifecycle
+- `osm_start_date`, `osm_old_start_date`, and `osm_end_date`: preserve OSM date
   tags exactly as OpenStreetMap gives them.
 - `osm_lifecycle_date_notes`: explain what the OSM date appears to mean and
   whether it is supported by another source.
@@ -165,20 +166,20 @@ Do not store or republish Street View screenshots in the repository or public
 outputs. Record the provider, link or agreed file reference, capture date, and
 what the image supports.
 
-## Using OSM Lifecycle Dates
+## Using OSM Date Tags
 
-OpenStreetMap lifecycle tags are useful but incomplete. They may refer to a
-building, a worship site, a congregation, a dedication, or an editor's best
-guess. Use them as evidence, not as a final answer.
+OpenStreetMap date tags are useful but incomplete. They may refer to a building,
+a worship site, a congregation, a dedication, or an editor's best guess. Use
+them as evidence, not as a final answer.
 
 When OSM supplies `start_date`, `old_start_date`, or `end_date`:
 
-1. Copy the raw value into the matching OSM lifecycle field.
+1. Copy the raw value into the matching OSM date field.
 2. Record the OSM object id, object type, version timestamp, and raw tags if
    available.
 3. In `osm_lifecycle_date_notes`, state what the date might mean, for example:
    `OSM start_date may refer to building construction; worship-use date still
-   needs confirmation.`
+needs confirmation.`
 4. Use stronger source fields when another source is clearer:
    - `site_opened_date` for worship beginning at the physical location,
    - `building_opened_or_dedicated_date` for the building or dedication,
@@ -223,9 +224,9 @@ evidence.
 9. Set `match_confidence` to `none` unless there is a plausible nearby match
    that needs review.
 10. Record `name_raw`, `name_standardised`, `denomination_or_tradition_raw`,
-   `site_type`, `address_raw`, `locality_raw`, and source fields where known.
+    `site_type`, `address_raw`, `locality_raw`, and source fields where known.
 11. If you can locate the place, record `latitude`, `longitude`,
-   `geocoding_basis`, and `geocoding_confidence`.
+    `geocoding_basis`, and `geocoding_confidence`.
 12. If the source supports current worship use, set:
     - `target_year_2023_status`: `present`
     - `worship_use_status`: `confirmed_worship` or `probable_worship`
@@ -234,7 +235,7 @@ evidence.
 14. Set `quality_flag` to `needs_review`.
 15. Set `review_status` to `needs_review`.
 16. In `review_note`, write: `Current PoW appears missing from project map; reviewer to
-    confirm whether this should become a new site.`
+confirm whether this should become a new site.`
 
 Current limitation: the demo map can generate a candidate row, but it does not
 mint accepted site ids or write to staging. A reviewer must decide whether the
@@ -264,7 +265,7 @@ worship.
 9. Set `quality_flag` to `needs_review`.
 10. Set `review_status` to `needs_review`.
 11. In `review_note`, write: `Possible duplicate: [id A] and [id B] appear to
-    refer to one site; reviewer to decide whether to merge or retain both.`
+refer to one site; reviewer to decide whether to merge or retain both.`
 
 If you cannot tell which id should survive, leave `matched_current_site_id`
 blank and record both ids in `candidate_match_notes` and `review_note`.
@@ -304,7 +305,7 @@ Use this when evidence suggests a place was active as a place of worship in
 13. Set `review_status` to `needs_review`.
 14. In `review_note`, write what needs reviewer judgement, for example:
     `Evidence supports worship in 2013 and non-worship by 2018; closure date is
-    bounded but not exact.`
+bounded but not exact.`
 
 Do not treat "building still visible" as evidence of worship use. The research
 question is whether worship use was active at the site in the target year.
@@ -339,10 +340,10 @@ The NZ verification map uses automated priority labels.
 3. Leave `low` priority tasks until asked.
 4. Choose the target year you are checking: 2013, 2018, or 2023.
 5. Use the target-year status filter if you are assigned a specific kind of
-   work, such as missing lifecycle evidence, uncertain status, or apparent
+   work, such as missing opening/closure/change-date evidence, uncertain status, or apparent
    absences.
 6. Open one task at a time.
-7. Copy the task id, master id, OSM id, name, address, lifecycle tags, and
+7. Copy the task id, master id, OSM id, name, address, OSM date tags, and
    suggested action into
    your notes or evidence row.
 8. Use the links in the task panel to inspect OSM, OSM history, Google Maps,

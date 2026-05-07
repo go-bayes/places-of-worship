@@ -1,4 +1,4 @@
-# Convex Task Layer Specification
+# Convex Task-Map Backend Specification
 
 Planning source of truth: `PLANNING.md`.
 
@@ -14,7 +14,7 @@ Related designs:
 
 ## Purpose
 
-The Convex task layer is the live coordination backend for the New Zealand
+The Convex task-map backend is the live coordination backend for the New Zealand
 places of worship task map and reviewer workbench.
 
 It exists to remove the current clunky pilot workflow:
@@ -24,18 +24,18 @@ Browser-local task badge
   + copied TSV row
   + shared Google Sheet
   + session JSON export
-  + manual curator review
+  + manual project review
 ```
 
 and replace it with:
 
 ```text
 RA opens task
-  -> Convex records live task state
+  -> Convex records shared task status
   -> RA saves evidence draft
   -> RA marks task complete, skipped, or needs review
   -> reviewer sees evidence and task history
-  -> curator exports reviewed decisions to pow
+  -> reviewer downloads reviewed decisions for pow
   -> pow validates, diffs, and feeds reviewed rebuilds
 ```
 
@@ -47,14 +47,14 @@ database.
 
 Convex owns:
 
-- live task state for the task map,
+- shared task status for the task map,
 - assignments and claims,
 - RA evidence drafts,
 - task-event logs,
 - skip and reopen reasons,
 - reviewer comments,
 - review decisions,
-- curator export manifests,
+- reviewer download records,
 - lightweight user profile and role metadata.
 
 Convex does not own:
@@ -70,7 +70,7 @@ Convex does not own:
 
 The master remains event-rebuilt. Accepted Convex review decisions should be
 exported into the `pow` pipeline and become accepted only after validation,
-diff, replay, and curator sign-off.
+diff, replay, and project sign-off.
 
 ## Design Principles
 
@@ -83,6 +83,26 @@ diff, replay, and curator sign-off.
 7. Keep the user interface map-first and low-friction.
 8. Keep the first implementation narrow enough to replace the current Sheet and
    session JSON clunkiness for one RA.
+9. Keep cost exposure narrow: task status and draft evidence belong in Convex;
+   raw OSM snapshots, media, and accepted master data do not.
+
+## Pricing Assumption
+
+Checked against `https://www.convex.dev/pricing` on 2026-05-07. Recheck before
+paid signup.
+
+The current pilot should assume Free/Starter unless a concrete need forces
+Professional. The pricing page currently lists Free and Starter for prototypes
+with 1-6 developers, while Professional is $25 per developer per month and adds
+log streaming, exception reporting, daily backups, custom domains, and email
+support. Business and Enterprise has a $2,500 monthly minimum and is not a
+pilot target.
+
+This reinforces the scope boundary: Convex is appropriate for shared task
+coordination, evidence drafts, comments, review status, and reviewer downloads.
+Large OSM history files, source snapshots, media, accepted diffs, and public
+map products should remain outside Convex unless a later pricing and
+governance review explicitly changes that boundary.
 
 ## Users And Roles
 
@@ -91,9 +111,10 @@ Roles are project roles, not merely authentication identities.
 - `ra`: can claim tasks, save evidence drafts, skip tasks, and mark tasks ready
   for review.
 - `reviewer`: can inspect evidence drafts, comment, request changes, reject, or
-  accept a task for curator export.
-- `curator`: can create export batches, freeze review decisions for export, and
-  mark exported batches as handed to `pow`.
+  accept a task for download into `pow`.
+- `curator`: technical role name for the person who creates reviewer downloads,
+  freezes review decisions for export, and marks exported batches as handed to
+  `pow`.
 - `admin`: can manage users, role grants, country/batch configuration, and
   launch gates.
 - `service`: can run imports, task generation, scheduled checks, and exports
@@ -115,8 +136,8 @@ Task statuses:
 - `needs_review`: ready for reviewer attention or flagged by validation.
 - `changes_requested`: reviewer asks for more evidence or a correction.
 - `reviewed`: reviewer has made a decision.
-- `exported`: curator included the reviewed decision in an export batch.
-- `reopened`: curator or reviewer returned the task to active work.
+- `exported`: the reviewed decision was included in an export batch.
+- `reopened`: a reviewer returned the task to active work.
 
 Review decision statuses:
 
@@ -320,7 +341,7 @@ Indexes:
 
 ### `export_batches`
 
-Curator-controlled exports from Convex to the governed pipeline.
+Reviewer-controlled downloads from Convex to the governed pipeline.
 
 Fields:
 
@@ -333,7 +354,8 @@ Fields:
 - `included_review_decision_ids`.
 - `schema_version`.
 - `export_format`: `site_evidence_wide_csv`, `change_events_jsonl`,
-  `review_decisions_jsonl`, or `bundle`.
+  `review_decisions_jsonl`, or `bundle` (the code value for all export files
+  together).
 - `output_manifest`: optional object with filenames, hashes, and counts.
 - `pow_validation_status`: optional `not_run`, `passed`, `failed`.
 - `notes`.
@@ -356,7 +378,7 @@ external side effects such as exports or calls to validation services.
 - `listMyTasks(statuses)`: RA or reviewer queue.
 - `listReviewQueue(filters)`: reviewer work queue.
 - `getEvidenceDraft(draftId)`: one evidence draft.
-- `listExportBatches(filters)`: curator export history.
+- `listExportBatches(filters)`: reviewer download history.
 
 ### Mutations
 
@@ -386,11 +408,11 @@ Every mutation must:
 
 - `generateTasksFromStaticMap(manifest)`: import tasks from current static
   verification data.
-- `exportBatch(exportBatchId)`: produce CSV/JSONL bundle for `pow`.
+- `exportBatch(exportBatchId)`: produce a CSV/JSONL file set for `pow`.
 - `runValidationExport(exportBatchId)`: optional call to a Rust validation
   service when available.
-- `weeklyCuratorExport()`: scheduled draft export for reviewed tasks, requiring
-  curator confirmation before handoff to `pow`.
+- `weeklyCuratorExport()`: technical function name for a scheduled draft export
+  of reviewed tasks, requiring reviewer confirmation before handoff to `pow`.
 
 Scheduled functions may prepare export drafts, but should not silently mark data
 as accepted into the master.
@@ -414,11 +436,12 @@ Minimum RA behaviours:
 Minimum reviewer behaviours:
 
 1. view review queue,
-2. inspect task, evidence draft, source links, target-year states, lifecycle
-   claims, nearby duplicates, and OSM candidate links,
+2. inspect task, evidence draft, source links, target-year states,
+   opening/closure/change-date claims, nearby duplicates, and OSM candidate
+   links,
 3. record decision,
 4. request changes or reopen task,
-5. include accepted decisions in curator export.
+5. include accepted decisions in a reviewer download for `pow`.
 
 The frontend should keep the current spreadsheet row preview during the
 transition, but it should become a secondary export/debug view once Convex is
@@ -429,7 +452,7 @@ trusted.
 Convex exports are the boundary between live task coordination and governed
 data modification.
 
-The first export bundle should include:
+The first export file set should include:
 
 - `export_manifest.json`,
 - `tasks.jsonl`,
@@ -503,8 +526,8 @@ Phase 2: Evidence drafts
 Phase 3: Review and export
 
 - Reviewers make decisions in the task workbench.
-- Curators freeze export batches.
-- Export bundle is validated by `pow`.
+- A person with export permission freezes the reviewed file set.
+- The exported file set is validated by `pow`.
 
 Phase 4: Remove Sheet as default
 
@@ -524,7 +547,7 @@ The first implementation scaffold lives in `convex/`:
   not on the project map.
 - `evidence.ts`: evidence draft save and submit mutations.
 - `reviews.ts`: reviewer queue and review-decision mutations.
-- `exports.ts`: curator export batch creation, freezing, and bundle retrieval.
+- `exports.ts`: reviewer export batch creation, freezing, and file-set retrieval.
 
 The seed bridge is `scripts/build_convex_task_seed.py`, which converts the
 current static NZ verification GeoJSON into the argument shape expected by
@@ -544,7 +567,8 @@ The first Convex spike is complete when:
 3. task status updates live across two browser sessions,
 4. an RA can claim, skip, save draft evidence, and submit for review,
 5. a reviewer can see submitted evidence and record a decision,
-6. a curator can export reviewed decisions and evidence drafts,
+6. a person with export permission can export reviewed decisions and evidence
+   drafts,
 7. the export contains a manifest and a `site_evidence_wide.csv`,
 8. `pow validate` can run on the exported CSV,
 9. no Convex mutation can write to the master or public map data,
@@ -560,7 +584,7 @@ The first Convex spike is complete when:
   draft per user, or many drafts with reviewer choice?
 - How much duplicate/nearby-site context should be precomputed into tasks
   versus queried from a separate spatial service?
-- Should curator export be weekly by schedule, manual only, or scheduled draft
+- Should reviewer export be weekly by schedule, manual only, or scheduled draft
   plus manual freeze?
 - What is the rollback procedure if a reviewed Convex export is later found to
   contain sensitive or incorrect evidence?
