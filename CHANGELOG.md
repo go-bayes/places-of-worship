@@ -11,6 +11,8 @@
   ingested OSM and NZ Census-linked files live, separating committed NZ app
   data from ignored temporary working outputs, plus a current-action checklist
   for promotion, audit, or disposal.
+- Added the first tracked data manifest for the New Zealand 2013-2025 OSM
+  places-to-check archive stored in project Google Drive.
 - Added a dated Convex pricing snapshot to the storage and task-map planning:
   start the one-RA pilot on Free/Starter if possible, consider Professional
   only for backups/logs/support or usage limits, and keep raw snapshots,
