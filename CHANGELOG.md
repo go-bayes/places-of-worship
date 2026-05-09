@@ -4,6 +4,9 @@
 
 ### 2026-05-08
 
+- Added `BRAINSTORMING.md` for tool and architecture ideas still being weighed,
+  including Graphite, JSON diff/tree rendering libraries, Convex boundaries,
+  PostGIS, and Rust-first web UI options, with migration-path notes.
 - Added a separate tracked `raw_source` manifest for the New Zealand
   2013-2025 raw OSM/ohsome annual snapshot archive stored in project Google
   Drive.

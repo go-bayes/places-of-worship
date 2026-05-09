@@ -15,6 +15,7 @@ reference product.
 - [New Zealand verification task map](https://www.placesmap.org/apps/regions/nz/verification.html)
 - [Roadmap](ROADMAP.md)
 - [Planning](PLANNING.md)
+- [Brainstorming](BRAINSTORMING.md)
 - [FAQ](FAQ.md)
 - [Lexicon](LEXICON.md)
 - [RA NZ web pilot task](docs/ra-nz-pilot-task.md)

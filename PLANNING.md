@@ -3,8 +3,9 @@
 This file is the active planning source for the repository.
 
 Use it for current priorities, design detail, sequencing, and open questions.
-Use `ROADMAP.md` for high-level phases, `JOURNAL.md` for decisions and
-rationale, and `CHANGELOG.md` for durable progress.
+Use `ROADMAP.md` for high-level phases, `BRAINSTORMING.md` for tool and
+architecture ideas that are still being considered, `JOURNAL.md` for decisions
+and rationale, and `CHANGELOG.md` for durable progress.
 
 ## Planning rules
 
@@ -21,6 +22,8 @@ rationale, and `CHANGELOG.md` for durable progress.
   rule.
 - Record scope decisions here when they affect inclusion, exclusion, or
   interpretation of data.
+- Keep unchosen tooling ideas in `BRAINSTORMING.md` until they have a clear
+  role, migration path, and adoption decision.
 
 ## Current state
 
@@ -143,6 +146,10 @@ As of 30 April 2026:
   `scripts/build_convex_task_seed.py`. This is a backend spike only: the live
   NZ map is not yet wired to Convex writes, and Convex still has no authority
   to mutate the master.
+- Tool and architecture ideas we are still weighing now live in
+  `BRAINSTORMING.md`. Current candidates include Graphite for implementation
+  pull-request coordination and JSON diff/tree renderers for replaceable
+  reviewer displays. These tools must not define research data semantics.
 - `CRITIQUE.md` records a critical review of the revisions pipeline for
   RA-submitted location and denomination evidence. The first schema response is
   `schemas/change-event.schema.json` plus

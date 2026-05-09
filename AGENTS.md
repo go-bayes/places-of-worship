@@ -12,6 +12,9 @@
 
 - `ROADMAP.md`: high-level phases, non-goals, and long-horizon direction.
 - `PLANNING.md`: active design, priorities, next steps, and open questions.
+- `BRAINSTORMING.md`: tool and architecture ideas still being considered.
+  Treat entries as options, not decisions, until they move into planning or the
+  journal.
 - `JOURNAL.md`: decisions and rationale that should be traceable later.
   Treat it as public-facing project history: write for collaborators,
   funders, and future readers, not as private agent instructions.

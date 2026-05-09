@@ -40,6 +40,26 @@ places-to-check manifest remains an `intermediate_lead` product. The raw
 snapshots remain source extracts under the ODbL: they are not cleaned places of
 worship and do not establish accepted historical worship-use states.
 
+## 2026-05-08: Separate brainstorming from project decisions
+
+Decision:
+Create `BRAINSTORMING.md` as a place to hold tool and architecture ideas before
+they become planning, roadmap, or implementation decisions.
+
+Rationale:
+The project needs room to compare tools such as Graphite, Convex, JSON diff
+renderers, PostgreSQL/PostGIS, and Rust-first web frameworks without making
+every interesting option sound like a commitment. The practical test for each
+tool is whether the project can preserve its data, decisions, and review
+history if the tool becomes unsuitable or disappears.
+
+Consequences:
+Future tool ideas should first record their possible role, limits, migration
+path, and decision status in `BRAINSTORMING.md`. Once a tool is adopted, the
+actual decision should move into `PLANNING.md` and `JOURNAL.md`. Research data
+semantics remain defined by the schemas, `pow`, manifests, and accepted change
+events, not by developer workflow or display tools.
+
 ## 2026-05-07: Make current data locations explicit
 
 Decision:
