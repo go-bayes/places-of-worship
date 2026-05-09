@@ -1393,3 +1393,94 @@ real `GOOGLE_CLIENT_ID`; this avoids breaking local Convex checks with a
 missing environment variable. The remaining work is hosted deployment setup,
 Google client configuration, and frontend sign-in/wiring behind the Convex demo
 gate.
+
+## 2026-05-09: Retrospective project history from 370 git commits
+
+Decision:
+Record a high-level narrative of the project's phases derived from commit
+history, to make the evolution visible for reporting, audit, and collaborator
+onboarding.
+
+Rationale:
+The git log contains 370 commits over approximately nine months. The pattern of
+changes reveals six distinct phases: initial map deployment, data quality
+awakening, pipeline rebuild, verification and governance, backend task layer,
+and temporal data infrastructure. Understanding this trajectory clarifies why
+certain interim solutions (demo modes, spreadsheet bridges, Google Drive
+holding) persist, and why the project prioritised governance scaffolding before
+rich editing interfaces.
+
+Phase narrative:
+
+**Phase 1: The Map-First Experiment (August–December 2024)**
+The project began with immediate deployment pressure: GitHub Pages, CORS fixes,
+and mobile UI simplification. Early commits show rapid iteration on map
+providers (MapLibre to CARTO after throttling), loading states, and demographic
+overlays. The NZ dataset arrived (3,370 OSM places) with accompanying schema
+work for Site/Structure/Organisation. Mobile UX dominated the commit stream
+with repeated simplification attempts.
+
+**Phase 2: The Data Quality Awakening (January–March 2025)**
+Repository restructuring (`apps/` directory, archive folder) preceded aggressive
+NZ cleanup: duplicate removal, false positive elimination, and the first manual
+review queue (719 records). The dataset dropped from 4,718 to 3,618 records.
+Centralised planning documents appeared (`ROADMAP.md`, `PLANNING.md`), and the
+annual snapshot anchor was set to 1 September. The legacy global extractor was
+acknowledged as "too permissive for research-grade use."
+
+**Phase 3: The Pipeline Rebuild (April–June 2025)**
+Tooling modernisation (`uv` for Python, dependency updates). The global pipeline
+began porting to R. First `area_summary` contract for NZ territorial
+authorities, with explicit caveats about repeated current counts across census
+years. RA workflow design began with historical evidence ingestion specs and
+template spreadsheets with bounded date fields.
+
+**Phase 4: Verification and Governance (July–September 2025)**
+OSM temporal verification and master verification workflows planned. The NZ
+verification map launched read-only with demo action builder—a bridge to let RAs
+generate spreadsheet rows without backend saves. The Rust `pow` CLI emerged with
+validation, staging, and diff reports. The CRITIQUE review of RA-submitted
+evidence preceded tightened change-event schemas and geometry history support.
+
+**Phase 5: Convex and the Task Layer (October 2025–January 2026)**
+Convex backend spike for shared task state, with explicit constraint: Convex
+exports feed `pow`, never writes to master. RA workflow refinement (session
+workflows, visual evidence, identity conflict lifecycle). Data pipeline
+documentation for durable storage. Google Drive explicitly demoted to "temporary
+holding, not the long-term system of record."
+
+**Phase 6: Temporal Data and Manifests (January–May 2026)**
+NZ OSM temporal extraction (2013–2025 annual snapshots). Raw snapshot manifests
+separated from generated places-to-check archives. Accepted diff data contract
+defined: "validated diff artefacts are primary research data." `pow diff`
+fixes and public readme consolidation. The project now stands at Phase 1 (~)
+in the ROADMAP: governed local ingestion working, reviewer decisions and
+deterministic replay still `[ ]`.
+
+Patterns observed:
+
+1. **Map-first, always.** Every phase begins with UI/UX pressure, then discovers
+the data governance needed to support it.
+
+2. **Documentation as decision record.** Major shifts (R pipeline, Rust CLI,
+Convex spike) preceded by planning documents arguing the case before code lands.
+
+3. **NZ as the forcing function.** Global ambitions repeatedly deferred to get NZ
+"right" first. Cleanup queue, temporal reconstruction, and RA workflows all
+NZ-proven before global rollout.
+
+4. **Bridge solutions accumulate.** Demo modes, local JSON previews, spreadsheet
+exports, Google Drive holding—these interim solutions persist longer than
+planned because the "proper" backend remains `[ ]`.
+
+5. **Schema before implementation.** Change events, geometry history, area
+summaries, data manifests—all specified in JSON schema before consuming code
+was written.
+
+Consequences:
+The retrospective clarifies that the project has invested heavily in governance
+infrastructure (schemas, manifests, `pow` CLI, Convex spec) while deferring
+the reviewer decision semantics and deterministic replay that would close the
+loop. The commit history supports the current prioritisation: finish the OSM
+date-tag implementation, promote NZ places-to-check files to durable storage,
+and curate a small RA pilot batch end-to-end before scaling.
