@@ -876,6 +876,19 @@
             .button-row {
                 grid-template-columns: 1fr;
             }
+
+            body.assignment-mode .app-shell {
+                grid-template-rows: auto 50vh;
+            }
+
+            body.assignment-mode .sidebar {
+                grid-row: 1;
+            }
+
+            body.assignment-mode #map {
+                grid-row: 2;
+                height: 50vh;
+            }
         }
     </style>
 </head>
@@ -884,7 +897,7 @@
         <aside class="sidebar">
             <header class="sidebar-header">
                 <h1>NZ OSM Verification</h1>
-                <p><span id="snapshotId">Loading snapshot</span></p>
+                <p><span id="snapshotId">Connecting...</span></p>
                 <div class="nav-links">
                     <a href="./">NZ map</a>
                     <a href="../../global/">Global map</a>
@@ -967,8 +980,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
-    <script src="js/convex-config.js?v=20260514-default-assignment"></script>
-    <script src="js/convex-task-client.js?v=20260514-default-assignment"></script>
-    <script src="js/verification-map.js?v=20260514-default-assignment"></script>
+    <script src="js/convex-config.js?v=20260514-ra-review-fixes"></script>
+    <script src="js/convex-task-client.js?v=20260514-ra-review-fixes"></script>
+    <script src="js/verification-map.js?v=20260514-ra-review-fixes"></script>
 </body>
 </html>

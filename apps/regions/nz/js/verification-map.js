@@ -787,6 +787,7 @@ class NzVerificationMap {
             : null;
         this.backendUser = null;
         this.backendTasksById = new Map();
+        this.latestDraftsByTaskId = new Map();
         this.backendLastError = "";
         this.init();
     }
@@ -987,7 +988,7 @@ class NzVerificationMap {
                 ${assignmentLabel}
                 <span>Signed in as ${escapeHtml(label)}. ${ASSIGNMENT_MODE ? `${this.backendTasksById.size} assigned task${this.backendTasksById.size === 1 ? "" : "s"} loaded.` : "Saves and submissions go to Convex for reviewer follow-up."}</span>
                 <div class="backend-actions">
-                    <button type="button" class="secondary" id="refreshBackendTasksButton">Refresh task state</button>
+                    <button type="button" class="secondary" id="refreshBackendTasksButton">Refresh task list</button>
                     <button type="button" class="tertiary" id="signOutButton">Sign out</button>
                 </div>
             </div>
@@ -1006,7 +1007,8 @@ class NzVerificationMap {
         this.backend?.signOut();
         this.backendUser = null;
         this.backendTasksById.clear();
-        this.backendLastError = "";
+        this.latestDraftsByTaskId.clear();
+        this.backendLastError = "Signed out here. On a shared computer, also sign out of Google in the browser.";
         if (ASSIGNMENT_MODE) {
             this.tasks = [];
             this.filteredTasks = [];
@@ -1031,7 +1033,7 @@ class NzVerificationMap {
         await this.refreshBackendTasks();
         this.applyFilters();
         this.renderSessionPanel();
-        if (DEMO_MODE) {
+        if (DEMO_MODE && !ASSIGNMENT_MODE) {
             this.renderRaInitialsBadge();
             // Defer the initials prompt so the map paints first.
             setTimeout(() => this.promptForRaInitials(false), 250);
@@ -1147,10 +1149,13 @@ class NzVerificationMap {
     }
 
     setupPageMode() {
+        document.body.classList.toggle("assignment-mode", ASSIGNMENT_MODE);
         document.title = `${COUNTRY_CONFIG.countryName} OSM Verification Tasks`;
         const title = document.querySelector(".sidebar-header h1");
         if (title) {
-            title.textContent = `${COUNTRY_CONFIG.countryName} OSM Verification`;
+            title.textContent = ASSIGNMENT_MODE
+                ? `${COUNTRY_CONFIG.countryName} verification · workpack 001`
+                : `${COUNTRY_CONFIG.countryName} OSM Verification`;
         }
 
         const notice = document.getElementById("modeNotice");
@@ -1178,7 +1183,7 @@ class NzVerificationMap {
                     <strong>${ASSIGNMENT_MODE ? "How this assignment works" : "How this pilot works"}</strong>
                     ${ASSIGNMENT_MODE ? `
                         <ol>
-                            <li>Sign in with Google at the top of the sidebar.</li>
+                            <li>Sign in with Google at the top of this panel.</li>
                             <li>Work down the assigned task list. Start with the first 15 rows or about 90 minutes.</li>
                             <li>Open the source links, especially the OSM object as context, then look for non-OSM evidence where possible.</li>
                             <li>Record 2013, 2018, and 2023 status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
@@ -1298,9 +1303,13 @@ class NzVerificationMap {
                 if (snapshotEl) {
                     snapshotEl.textContent = `${ASSIGNMENT_BATCH_ID} | ${this.tasks.length} assigned task${this.tasks.length === 1 ? "" : "s"}`;
                 }
-                if (this.selectedTask && !this.backendTasksById.has(this.selectedTask.properties?.task_id)) {
+                const selectedId = this.selectedTask?.properties?.task_id;
+                if (selectedId && !this.backendTasksById.has(selectedId)) {
                     this.selectedTask = null;
                     this.renderInitialDetail();
+                } else if (selectedId) {
+                    this.selectedTask = this.tasks.find(feature => feature.properties?.task_id === selectedId)
+                        || this.selectedTask;
                 }
             }
             this.backendLastError = "";
@@ -1408,7 +1417,7 @@ class NzVerificationMap {
                 <div class="disabled-panel">
                     ${ASSIGNMENT_MODE
                         ? (this.backend?.configured && this.backendUser
-                            ? "No assigned tasks are currently visible. Refresh task state or clear filters."
+                            ? "No assigned tasks are currently visible. Refresh the task list or clear filters."
                             : "Sign in with Google to load this assigned workpack.")
                         : "No tasks match the current filters."}
                 </div>
@@ -1493,8 +1502,36 @@ class NzVerificationMap {
 
         this.renderTaskList();
         this.renderDetail(feature);
+        if (this.backend?.signedIn && props.task_id && !this.latestDraftsByTaskId.has(props.task_id)) {
+            this.loadLatestDraftForTask(props.task_id).then(() => {
+                if (this.selectedTask?.properties?.task_id === props.task_id) {
+                    this.renderDetail(this.selectedTask);
+                    if (options.focusDetail) {
+                        this.focusDetailPanel();
+                    }
+                }
+            });
+        }
         if (options.focusDetail) {
             this.focusDetailPanel();
+        }
+    }
+
+    async loadLatestDraftForTask(taskId) {
+        if (!this.backend?.signedIn || !taskId) return null;
+        try {
+            const drafts = await this.backend.listTaskEvidence({ taskId, limit: 1 });
+            const latestDraft = Array.isArray(drafts) && drafts.length ? drafts[0] : null;
+            this.latestDraftsByTaskId.set(taskId, latestDraft);
+            return latestDraft;
+        } catch (error) {
+            if (error.authExpired) {
+                this.backendUser = null;
+                this.backendLastError = error.message;
+                this.renderBackendPanel();
+            }
+            console.warn("Could not load latest evidence draft:", error);
+            return null;
         }
     }
 
@@ -1514,7 +1551,7 @@ class NzVerificationMap {
                 <h2>Assigned web workpack</h2>
                 <div class="${this.backend?.configured ? "pilot-note" : "demo-warning"}" role="${this.backend?.configured ? "note" : "alert"}">
                     ${this.backend?.configured
-                        ? `Sign in with Google at the top of the sidebar, then work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Use <em>Save draft</em> while working and <em>Submit for review</em> when a case is ready for JB.`
+                        ? `Sign in with Google at the top of this panel, then work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Use <em>Save draft</em> while working and <em>Submit for review</em> when a case is ready for JB.`
                         : `This link points to <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>, but this deployment does not yet have the shared backend enabled.`}
                 </div>
                 <div class="detail-section">
@@ -1619,7 +1656,7 @@ class NzVerificationMap {
             </div>
 
             <div class="detail-section">
-                ${INTAKE_ENABLED ? this.reviewFormHtml() : this.disabledIntakeHtml()}
+                ${INTAKE_ENABLED ? this.reviewFormHtml(props) : this.disabledIntakeHtml()}
             </div>
 
             <div class="detail-section">
@@ -1699,7 +1736,7 @@ class NzVerificationMap {
             { id: "inspect", title: "1. Inspect", subtitle: "Open links" },
             { id: "decide", title: "2. Decide", subtitle: "Choose action" },
             { id: "evidence", title: "3. Evidence", subtitle: "Source + note" },
-            { id: "copy", title: "4. Save", subtitle: this.backend?.configured ? "Backend review" : "Fallback copy" },
+            { id: "copy", title: "4. Save", subtitle: this.backend?.configured ? "Save & submit" : "Fallback copy" },
         ];
         return `
             <div class="workflow-steps" id="workflowSteps">
@@ -1767,11 +1804,24 @@ class NzVerificationMap {
         `;
     }
 
-    formModeNoticeHtml() {
+    latestDraftForTask(taskId) {
+        return this.latestDraftsByTaskId.get(taskId) || null;
+    }
+
+    formModeNoticeHtml(props) {
+        const draft = props?.task_id ? this.latestDraftForTask(props.task_id) : null;
         if (this.backend?.configured && this.backendUser) {
             return `
                 <div class="pilot-note">
                     Shared backend enabled. Use <strong>Save draft</strong> or <strong>Submit for review</strong> to record this evidence for review.
+                    ${draft ? `<br><strong>Draft loaded:</strong> showing the latest saved draft for this task.` : ""}
+                </div>
+            `;
+        }
+        if (ASSIGNMENT_MODE) {
+            return `
+                <div class="demo-warning" role="alert">
+                    Sign in with Google at the top of this panel before recording this assignment.
                 </div>
             `;
         }
@@ -1782,11 +1832,52 @@ class NzVerificationMap {
         `;
     }
 
-    reviewFormHtml() {
+    reviewFormHtml(props) {
+        const taskId = props?.task_id || "";
+        if (ASSIGNMENT_MODE && !this.backendUser) {
+            return `
+                <h3>2. Sign in first</h3>
+                <div class="demo-warning" role="alert">
+                    Sign in with Google at the top of this panel before recording this assignment.
+                </div>
+            `;
+        }
+        const assignmentTaskAvailable = this.backend?.configured
+            && this.backendUser
+            && this.backendTasksById.has(taskId);
+        if (ASSIGNMENT_MODE && this.backendUser && !assignmentTaskAvailable) {
+            return `
+                <h3>2. Recording disabled</h3>
+                <div class="demo-warning" role="alert">
+                    This task is not available in the shared assignment. Refresh the task list, then choose a task from the assigned list.
+                </div>
+            `;
+        }
+        const skipControl = ASSIGNMENT_MODE
+            ? (assignmentTaskAvailable ? `
+                <details class="skip-form">
+                    <summary>Nothing to record for this task — skip it</summary>
+                    <label>
+                        Reason (optional)
+                        <input id="skipReasonInput" type="text" placeholder="e.g. evidence already covered by another task">
+                    </label>
+                    <button type="button" class="skip-confirm" id="skipTaskButton">Skip this task</button>
+                </details>
+            ` : "")
+            : `
+                <details class="skip-form">
+                    <summary>Nothing to record for this task — skip it</summary>
+                    <label>
+                        Reason (optional)
+                        <input id="skipReasonInput" type="text" placeholder="e.g. evidence already covered by another task">
+                    </label>
+                    <button type="button" class="skip-confirm" id="skipTaskButton">Skip this task</button>
+                </details>
+            `;
         return `
             <h3>2. Choose what your evidence shows</h3>
             <div class="review-form">
-                ${this.formModeNoticeHtml()}
+                ${this.formModeNoticeHtml(props)}
                 <label>
                     What did you find?
                     <select id="raActionSelect">
@@ -1892,7 +1983,7 @@ class NzVerificationMap {
                     Evidence note
                     <textarea id="decisionNote" rows="3" placeholder="One or two sentences explaining what the source says about this site at the target year."></textarea>
                 </label>
-                <h3>4. Save for review</h3>
+                <h3>4. Save or submit</h3>
                 ${this.backend?.configured && this.backendUser ? `
                     <div class="copy-help">
                         Save the evidence to the shared backend. Submitted cases move into JB's review queue.
@@ -1903,7 +1994,7 @@ class NzVerificationMap {
                     </div>
                 ` : ASSIGNMENT_MODE ? `
                     <div class="demo-warning" role="alert">
-                        Sign in with Google at the top of the sidebar before recording this assignment.
+                        Sign in with Google at the top of this panel before recording this assignment.
                     </div>
                 ` : `
                     <div class="copy-help">
@@ -1919,14 +2010,7 @@ class NzVerificationMap {
                     <textarea id="decisionJsonOutput" class="json-output" rows="5" readonly></textarea>
                 `}
                 <div id="copyStatus" class="copy-status" aria-live="polite"></div>
-                <details class="skip-form">
-                    <summary>Nothing to record for this task — skip it</summary>
-                    <label>
-                        Reason (optional)
-                        <input id="skipReasonInput" type="text" placeholder="e.g. evidence already covered by another task">
-                    </label>
-                    <button type="button" class="skip-confirm" id="skipTaskButton">Skip this task</button>
-                </details>
+                ${skipControl}
             </div>
         `;
     }
@@ -1948,6 +2032,10 @@ class NzVerificationMap {
         };
         actionSelect?.addEventListener("change", applyDefaults);
         applyDefaults();
+        const latestDraft = this.latestDraftForTask(props.task_id);
+        if (latestDraft) {
+            this.applyDraftToForm(latestDraft);
+        }
 
         const useOsmButton = document.getElementById("useOsmUrlButton");
         if (useOsmButton) {
@@ -2033,6 +2121,37 @@ class NzVerificationMap {
             this.skipCurrentTask(props, reason);
         });
 
+        this.updateWorkflowSteps();
+    }
+
+    applyDraftToForm(draft) {
+        const setValue = (id, value, markTouched = true) => {
+            const element = document.getElementById(id);
+            if (!element || value === undefined || value === null) return;
+            element.value = String(value);
+            if (markTouched) element.dataset.touched = "1";
+        };
+
+        setValue("raActionSelect", draft.action, false);
+        TARGET_YEARS.forEach(year => {
+            setValue(`status${year}`, draft.target_year_statuses?.[year], false);
+        });
+        setValue("sourceTypeSelect", draft.source_type);
+        setValue("existenceStatusSelect", draft.existence_status);
+        setValue("worshipUseStatusSelect", draft.worship_use_status);
+        setValue("assessmentConfidenceSelect", draft.assessment_confidence);
+        setValue("matchConfidenceSelect", draft.match_confidence);
+        setValue("geocodingConfidenceSelect", draft.geocoding_confidence);
+        setValue("sourceProviderInput", draft.provider, false);
+        setValue("sourceTitleInput", draft.source_title, false);
+        setValue("sourceDateInput", draft.source_date_or_capture_date, false);
+        setValue("lifecycleEventSelect", draft.lifecycle_event);
+        setValue("lifecycleDateInput", draft.lifecycle_date, false);
+        setValue("lifecycleDatePrecisionSelect", draft.lifecycle_date_precision);
+        setValue("lifecycleNoteInput", draft.lifecycle_note, false);
+        setValue("sourceUrlInput", draft.source_url_or_file, false);
+        setValue("relatedIdsInput", draft.related_ids_or_note, false);
+        setValue("decisionNote", draft.evidence_note, true);
         this.updateWorkflowSteps();
     }
 
@@ -2335,6 +2454,12 @@ class NzVerificationMap {
                     note: values.note || undefined,
                 });
             }
+            this.latestDraftsByTaskId.set(props.task_id, {
+                ...draft,
+                task_id: props.task_id,
+                evidence_draft_id: saved.evidence_draft_id,
+                draft_status: options.submit ? "submitted" : "draft",
+            });
             await this.refreshBackendTasks();
             if (ASSIGNMENT_MODE) {
                 const refreshed = this.tasks.find(feature => feature.properties?.task_id === props.task_id);
@@ -2350,6 +2475,11 @@ class NzVerificationMap {
                     : "Draft saved to the shared backend. Submit for review when the row is ready.";
             }
         } catch (error) {
+            if (error.authExpired) {
+                this.backendUser = null;
+                this.backendLastError = error.message;
+                this.renderBackendPanel();
+            }
             if (status) status.textContent = `${error.message || "Backend save failed."} Nothing was saved.`;
         }
     }
@@ -2524,10 +2654,28 @@ class NzVerificationMap {
                 }
                 return;
             } catch (error) {
+                if (error.authExpired) {
+                    this.backendUser = null;
+                    this.backendLastError = error.message;
+                    this.renderBackendPanel();
+                }
+                if (ASSIGNMENT_MODE) {
+                    if (status) {
+                        status.textContent = `${error.message || "Could not skip in the shared backend."} Nothing was saved. Tell JB which task you wanted to skip.`;
+                    }
+                    return;
+                }
                 if (status) {
                     status.textContent = `${error.message || "Could not skip in backend."} Falling back to local skip.`;
                 }
             }
+        }
+
+        if (ASSIGNMENT_MODE) {
+            if (status) {
+                status.textContent = "Sign in to the shared backend before skipping this assignment.";
+            }
+            return;
         }
 
         this.appendSessionEntry({

@@ -4,6 +4,11 @@
 
 ### 2026-05-14
 
+- Applied the first RA assignment UI review fixes: prevented assignment-mode
+  skip from falling back to hidden local storage, removed the pre-sign-in
+  initials prompt, improved phone layout, clarified save/submit labels,
+  added sign-in-expiry handling, and reloaded the latest saved draft when a
+  task is reopened.
 - Moved the NZ assignment sign-in card to the top of the sidebar, enlarged the
   Google sign-in prompt, added a sign-out control, and hid old local
   copy/session guidance during backend assignments.

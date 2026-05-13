@@ -119,11 +119,21 @@
             } catch (error) {
                 throw new Error(text || `Convex ${kind} failed.`);
             }
+            const message = payload.errorMessage || text || `Convex ${kind} failed.`;
+            if (
+                response.status === 401
+                || /Authentication required|Unauthenticated|JWT|token/i.test(message)
+            ) {
+                this.signOut();
+                const authError = new Error("Your sign-in expired. Sign in again, then retry.");
+                authError.authExpired = true;
+                throw authError;
+            }
             if (!response.ok && response.status !== 560) {
-                throw new Error(payload.errorMessage || text || `Convex ${kind} failed.`);
+                throw new Error(message);
             }
             if (payload.status === "error") {
-                throw new Error(payload.errorMessage || `Convex ${kind} failed.`);
+                throw new Error(message);
             }
             return payload.value;
         }
@@ -140,6 +150,10 @@
 
         async listTasks(args) {
             return await this.request("query", "tasks:listTasks", args);
+        }
+
+        async listTaskEvidence(args) {
+            return await this.request("query", "evidence:listTaskEvidence", args);
         }
 
         async saveEvidenceDraft(args) {
