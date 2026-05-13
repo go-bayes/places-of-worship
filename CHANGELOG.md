@@ -4,6 +4,10 @@
 
 ### 2026-05-14
 
+- Added clearer street-level imagery support to the RA verification map:
+  marker popups now expose Street View, the source-link panel prioritises
+  Street View and Google Maps, and the evidence form can explicitly fill a
+  Google Street View source URL for street-imagery checks.
 - Polished the RA assignment page with a collapsible quickstart guide,
   optional invited-account hint, lifecycle-date prompt for closure/change
   actions, clearer post-submit/skip filter guidance, and a pre-paint mobile

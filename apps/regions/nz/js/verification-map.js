@@ -899,10 +899,16 @@ class NzVerificationMap {
     promptForRaInitials(force) {
         const current = this.getRaInitials();
         if (!force && current) return current;
-        const value = window.prompt(
-            "Enter your initials so JB knows who recorded each row (max 8 characters). Stored only on this browser.",
-            current || ""
-        );
+        let value = current;
+        try {
+            value = window.prompt(
+                "Enter your initials so JB knows who recorded each row (max 8 characters). Stored only on this browser.",
+                current || ""
+            );
+        } catch (error) {
+            console.warn("Could not show RA initials prompt:", error);
+            return current;
+        }
         if (value === null) return current;
         this.setRaInitials(value);
         return this.getRaInitials();
@@ -1191,7 +1197,7 @@ class NzVerificationMap {
                             <li>Sign in with Google at the top of this panel.</li>
                             <li>Work down the assigned task list in order. Stop at a natural stopping point and tell JB where you stopped.</li>
                             <li>How the list was made: <a href="https://github.com/go-bayes/places-of-worship/blob/main/scripts/build_nz_temporal_ra_workpack.R" target="_blank" rel="noopener">this R script</a> first selects every date-tag row whose <code>candidate_date_tag_windows</code> contains <code>candidate_gain</code>; then, after excluding used <code>osm_key</code>s, adds five OSM-present-then-absent rows with a nearby replacement object, five rows with parser warnings, uncertain target-year status, or <code>candidate_status_change</code>, and five present-present-present controls with no candidate window or parser warning. Treat OSM as the prompt to check, not as final evidence.</li>
-                            <li>Open the source links, especially the OSM object as context, then look for non-OSM evidence where possible.</li>
+                            <li>Open Street View or Google Maps to look around the site, and use the OSM object only as context. Record the imagery capture date if Street View is your evidence.</li>
                             <li>Record 2013, 2018, and 2023 status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
                             <li>Use <em>Save draft</em> while working. Use <em>Submit for review</em> when the case is ready for JB.</li>
                         </ol>
@@ -1367,7 +1373,9 @@ class NzVerificationMap {
             const coordinates = feature.geometry?.coordinates || [];
             if (coordinates.length < 2) return;
             const [lng, lat] = coordinates;
-            const props = feature.properties || {};
+            const props = { ...(feature.properties || {}) };
+            props.google_maps_url = mapUrlForCoordinates(coordinates) || props.google_maps_url || "";
+            props.street_view_url = streetViewUrlForCoordinates(coordinates) || props.street_view_url || "";
             const temporal = deriveTargetYearStatus(props, this.targetYear);
             const marker = L.marker([lat, lng], {
                 icon: this.createIcon(props.verification_priority, temporal.status),
@@ -1401,7 +1409,10 @@ class NzVerificationMap {
             <span>Priority: ${escapeHtml(props.verification_priority)}</span><br>
             <span>${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))} (${escapeHtml(temporal.basis)})</span><br>
             <span>Action: ${escapeHtml(actionLabel(props.automated_suggested_action))}</span><br>
-            <button class="popup-open-task" type="button" data-task-id="${escapeHtml(props.task_id)}">Open task</button>
+            <div class="popup-actions">
+                <button class="popup-open-task" type="button" data-task-id="${escapeHtml(props.task_id)}">Open task</button>
+                ${this.linkHtml("Street View", props.street_view_url, "popup-link")}
+            </div>
         `;
     }
 
@@ -1634,7 +1645,10 @@ class NzVerificationMap {
     }
 
     renderDetail(feature) {
-        const props = feature.properties || {};
+        const props = { ...(feature.properties || {}) };
+        const coordinates = feature.geometry?.coordinates || [];
+        props.google_maps_url = mapUrlForCoordinates(coordinates) || props.google_maps_url || "";
+        props.street_view_url = streetViewUrlForCoordinates(coordinates) || props.street_view_url || "";
         const checks = props.automated_checks || [];
         const searches = props.search_queries || {};
         const panel = document.getElementById("detailPanel");
@@ -1651,12 +1665,15 @@ class NzVerificationMap {
 
             <div class="detail-section">
                 <h3>1. Open source links</h3>
+                <div class="copy-help">
+                    Use OSM to identify why this case was flagged. Use Street View or other non-OSM sources to check what is visible, and record the imagery capture date when Google shows one.
+                </div>
                 <div class="link-grid">
+                    ${this.linkHtml("Street View", props.street_view_url, "source-link-primary")}
+                    ${this.linkHtml("Google Maps", props.google_maps_url, "source-link-primary")}
                     ${this.linkHtml("OSM object", props.osm_object_url)}
                     ${this.linkHtml("OSM history", props.osm_history_url)}
                     ${this.linkHtml("OSM map", props.osm_map_url)}
-                    ${this.linkHtml("Google Maps", props.google_maps_url)}
-                    ${this.linkHtml("Street View", props.street_view_url)}
                     ${this.linkHtml("Name search", searches.name_locality?.google_url)}
                 </div>
             </div>
@@ -2007,7 +2024,10 @@ class NzVerificationMap {
                         Source URL or file reference
                         <input id="sourceUrlInput" type="text" placeholder="https:// link, Street View link, archive, or agreed storage path">
                     </label>
-                    <button id="useOsmUrlButton" type="button" class="tertiary" title="Fill the URL field with the OSM record link if your evidence is the OSM record itself">Use OSM URL</button>
+                    <div class="source-url-actions">
+                        <button id="useStreetViewUrlButton" type="button" class="tertiary" title="Fill the URL field with the Google Street View link if street-level imagery is your evidence">Use Street View URL</button>
+                        <button id="useOsmUrlButton" type="button" class="tertiary" title="Fill the URL field with the OSM record link if your evidence is the OSM record itself">Use OSM URL</button>
+                    </div>
                 </div>
                 <label>
                     Related ids or duplicate note
@@ -2092,6 +2112,34 @@ class NzVerificationMap {
                 const sourceTypeSelect = document.getElementById("sourceTypeSelect");
                 if (sourceTypeSelect && !String(sourceTypeSelect.value || "").startsWith("osm_")) {
                     sourceTypeSelect.value = "osm_history";
+                }
+                this.updateWorkflowSteps();
+            });
+        }
+
+        const useStreetViewButton = document.getElementById("useStreetViewUrlButton");
+        if (useStreetViewButton) {
+            useStreetViewButton.addEventListener("click", () => {
+                if (sourceUrl) {
+                    sourceUrl.value = props.street_view_url || "";
+                    sourceUrl.dispatchEvent(new Event("input", { bubbles: true }));
+                }
+                if (sourceTitle && !sourceTitle.value) {
+                    sourceTitle.value = "Google Street View imagery";
+                    sourceTitle.dispatchEvent(new Event("input", { bubbles: true }));
+                }
+                const sourceProvider = document.getElementById("sourceProviderInput");
+                if (sourceProvider && !sourceProvider.value) {
+                    sourceProvider.value = "Google Street View";
+                    sourceProvider.dispatchEvent(new Event("input", { bubbles: true }));
+                }
+                const sourceTypeSelect = document.getElementById("sourceTypeSelect");
+                if (sourceTypeSelect) {
+                    sourceTypeSelect.value = "street_imagery";
+                }
+                const sourceDate = document.getElementById("sourceDateInput");
+                if (sourceDate && !sourceDate.value) {
+                    sourceDate.placeholder = "Enter the capture date shown in Street View, e.g. 2023-10";
                 }
                 this.updateWorkflowSteps();
             });
@@ -2608,11 +2656,11 @@ class NzVerificationMap {
         `;
     }
 
-    linkHtml(label, url) {
+    linkHtml(label, url, className = "") {
         if (!url) {
             return `<span></span>`;
         }
-        return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`;
+        return `<a${className ? ` class="${escapeHtml(className)}"` : ""} href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`;
     }
 
     async copyEvidenceRow(props) {

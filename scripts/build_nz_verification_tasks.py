@@ -53,6 +53,18 @@ def osm_object_url(osm_type: str | None, osm_id: object) -> str:
     return f"https://www.openstreetmap.org/{clean_type}/{osm_id}"
 
 
+def google_maps_url(lat: float, lng: float) -> str:
+    # builds a keyless Google Maps URL for opening the candidate coordinates.
+    query = quote_plus(f"{lat},{lng}")
+    return f"https://www.google.com/maps/search/?api=1&query={query}"
+
+
+def google_street_view_url(lat: float, lng: float) -> str:
+    # builds a keyless Google Street View URL using the nearest panorama.
+    viewpoint = quote_plus(f"{lat},{lng}")
+    return f"https://www.google.com/maps/@?api=1&map_action=pano&viewpoint={viewpoint}"
+
+
 def tags_summary(tags: dict) -> str:
     keys = [
         "amenity",
@@ -209,8 +221,8 @@ def feature_for_record(record: dict, checks: list[dict], master_snapshot_id: str
             "osm_end_date": tags.get("end_date") or "",
             "osm_tags_summary": tags_summary(tags),
             "osm_tags_raw": tags,
-            "google_maps_url": f"https://www.google.com/maps?q={lat},{lng}",
-            "street_view_url": f"https://www.google.com/maps/@{lat},{lng},3a,75y,0h,90t/data=!3m4!1e1!3m2!1s0x0:0x0!2e0",
+            "google_maps_url": google_maps_url(lat, lng),
+            "street_view_url": google_street_view_url(lat, lng),
             "osm_map_url": f"https://www.openstreetmap.org/?mlat={lat}&mlon={lng}#map=18/{lat}/{lng}",
             "search_queries": build_search_queries(record),
             "verification_priority": priority,

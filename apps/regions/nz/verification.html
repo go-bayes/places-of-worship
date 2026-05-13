@@ -327,6 +327,39 @@
             background: #f2f8fc;
         }
 
+        .link-grid a.source-link-primary {
+            border-color: #1f618d;
+            background: #eaf4fb;
+            color: #174d72;
+        }
+
+        .popup-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .popup-actions .popup-open-task,
+        .popup-actions .popup-link {
+            min-height: 36px;
+        }
+
+        .popup-actions .popup-link {
+            border: 1px solid #1f618d;
+            border-radius: 5px;
+            padding: 8px 10px;
+            color: #1f618d;
+            text-align: center;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .check-list {
             margin: 0;
             padding: 0;
@@ -614,6 +647,13 @@
 
         .source-url-row label {
             min-width: 0;
+        }
+
+        .source-url-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-start;
         }
 
         .ra-initials {
@@ -1011,8 +1051,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
-    <script src="js/convex-config.js?v=20260514-polish-fixes"></script>
-    <script src="js/convex-task-client.js?v=20260514-polish-fixes"></script>
-    <script src="js/verification-map.js?v=20260514-polish-fixes"></script>
+    <script src="js/convex-config.js?v=20260514-street-view-links"></script>
+    <script src="js/convex-task-client.js?v=20260514-street-view-links"></script>
+    <script src="js/verification-map.js?v=20260514-street-view-links"></script>
 </body>
 </html>
