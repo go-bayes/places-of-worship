@@ -4,6 +4,10 @@
 
 ### 2026-05-14
 
+- Polished the RA assignment page with a collapsible quickstart guide,
+  optional invited-account hint, lifecycle-date prompt for closure/change
+  actions, clearer post-submit/skip filter guidance, and a pre-paint mobile
+  assignment layout guard.
 - Clarified the RA workpack instructions: André should work through assigned
   tasks in order, stop at a natural stopping point, and understand that the
   50-case list comes from the documented R selection algorithm rather than

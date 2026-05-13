@@ -62,6 +62,9 @@ const ASSIGNMENT_BATCH_ID = FULL_MAP_MODE
     ? ""
     : (REQUESTED_ASSIGNMENT_BATCH_ID || (BACKEND_CONFIGURED ? DEFAULT_ASSIGNMENT_BATCH_ID : ""));
 const ASSIGNMENT_MODE = ASSIGNMENT_BATCH_ID.length > 0;
+// optional personalised hint: invitation links may include ?email=ra@example.com
+// so the sign-in card can name the specific invited account
+const INVITED_EMAIL_HINT = (SEARCH_PARAMS.get("email") || "").trim();
 const ASSIGNMENT_SESSION_SEGMENT = ASSIGNMENT_BATCH_ID
     ? `:${ASSIGNMENT_BATCH_ID.toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-|-$/g, "").slice(0, 64)}`
     : "";
@@ -952,7 +955,9 @@ class NzVerificationMap {
                     <strong>${ASSIGNMENT_MODE ? "1. Sign in to start" : "Shared task backend"}</strong>
                     ${assignmentLabel}
                     <span>${ASSIGNMENT_MODE
-                        ? "Use the Google account JB invited. Your assigned tasks load after sign-in, and saved work goes straight to the shared review queue."
+                        ? `${INVITED_EMAIL_HINT
+                            ? `Use ${escapeHtml(INVITED_EMAIL_HINT)}, the Google account JB invited.`
+                            : "Use the Google account JB invited (check the invitation email if you're not sure which one)."} Your assigned tasks load after sign-in, and saved work goes straight to the shared review queue.`
                         : "Sign in with Google to load assigned tasks and save evidence directly for review."}</span>
                     <div id="googleSignInButton" class="google-sign-in-host"></div>
                     <span class="backend-help">The Google button shows accounts already signed into this browser. If the wrong name appears, choose another Google account or use a browser profile signed into the invited account.</span>
@@ -1179,8 +1184,8 @@ class NzVerificationMap {
             : "pow_ra_quickstart_dismissed_v1";
         if (quickstart && DEMO_MODE && localStorage.getItem(quickstartKey) !== "1") {
             quickstart.innerHTML = `
-                <div class="quickstart" role="note">
-                    <strong>${ASSIGNMENT_MODE ? "How this assignment works" : "How this pilot works"}</strong>
+                <details class="quickstart" role="note" open>
+                    <summary><strong>${ASSIGNMENT_MODE ? "How this assignment works" : "How this pilot works"}</strong></summary>
                     ${ASSIGNMENT_MODE ? `
                         <ol>
                             <li>Sign in with Google at the top of this panel.</li>
@@ -1200,8 +1205,8 @@ class NzVerificationMap {
                             <li>In step 4, use <em>Save draft</em> or <em>Submit for review</em> when the shared backend is enabled. Use <em>Copy spreadsheet row</em> only as the fallback.</li>
                         </ol>
                     `}
-                    <button type="button" class="quickstart-dismiss" id="quickstartDismiss">Hide this guide</button>
-                </div>
+                    <button type="button" class="quickstart-dismiss" id="quickstartDismiss">Hide this guide for this workpack</button>
+                </details>
             `;
             document.getElementById("quickstartDismiss")?.addEventListener("click", () => {
                 quickstart.innerHTML = "";
@@ -1809,13 +1814,38 @@ class NzVerificationMap {
         return this.latestDraftsByTaskId.get(taskId) || null;
     }
 
+    // shows the lifecycle-date hint when the chosen action implies closure or
+    // worship-function change; lets RAs see the prompt without forcing a value
+    updateClosureLifecycleHint() {
+        const hint = document.getElementById("closureLifecycleHint");
+        if (!hint) return;
+        const action = document.getElementById("raActionSelect")?.value || "";
+        const closureActions = new Set([
+            "closed_or_changed_use",
+            "denomination_or_shared_use",
+            COUNTRY_CONFIG.temporalLossAction.value,
+        ]);
+        hint.hidden = !closureActions.has(action);
+    }
+
+    // returns " If your filters hide the next task, clear them above the list."
+    // when any sidebar filter is non-default; otherwise empty string
+    filterActiveHint() {
+        const search = (document.getElementById("searchInput")?.value || "").trim();
+        const priority = document.getElementById("priorityFilter")?.value || "all";
+        const action = document.getElementById("actionFilter")?.value || "all";
+        const statusFilter = document.getElementById("statusFilter")?.value || "all";
+        const active = Boolean(search) || priority !== "all" || action !== "all" || statusFilter !== "all";
+        return active ? " If your filters hide the next task, clear them above the list." : "";
+    }
+
     formModeNoticeHtml(props) {
         const draft = props?.task_id ? this.latestDraftForTask(props.task_id) : null;
         if (this.backend?.configured && this.backendUser) {
             return `
                 <div class="pilot-note">
                     Shared backend enabled. Use <strong>Save draft</strong> or <strong>Submit for review</strong> to record this evidence for review.
-                    ${draft ? `<br><strong>Draft loaded:</strong> showing the latest saved draft for this task.` : ""}
+                    ${draft ? `<br><strong>Draft loaded:</strong> showing the latest saved draft for this task. Change the action above if you want to recompute defaults.` : ""}
                 </div>
             `;
         }
@@ -1947,6 +1977,9 @@ class NzVerificationMap {
                 <div class="copy-help">
                     Use this when the source gives a dated opening, closure, first/last seen, relocation, demolition, or later worship-function change. For example, use <em>Use changed / shared use began</em> for evidence that a site became multi-denominational in 2024.
                 </div>
+                <div class="copy-help action-closure-hint" id="closureLifecycleHint" hidden>
+                    <strong>Lifecycle date helps:</strong> for this action, please record an opening, closure, or changed-use date if the source gives one. If the date is bracketed, use <em>not earlier than</em> or <em>not later than</em> in the event note. If only a year is supported, set the precision to <em>Year</em> or <em>Bounded / inferred</em>.
+                </div>
                 <div class="field-grid">
                     <label>
                         Event type
@@ -2029,6 +2062,7 @@ class NzVerificationMap {
 
         const applyDefaults = () => {
             this.applyRaActionDefaults(props);
+            this.updateClosureLifecycleHint();
             this.updateWorkflowSteps();
         };
         actionSelect?.addEventListener("change", applyDefaults);
@@ -2037,6 +2071,7 @@ class NzVerificationMap {
         if (latestDraft) {
             this.applyDraftToForm(latestDraft);
         }
+        this.updateClosureLifecycleHint();
 
         const useOsmButton = document.getElementById("useOsmUrlButton");
         if (useOsmButton) {
@@ -2472,7 +2507,7 @@ class NzVerificationMap {
             this.updateWorkflowSteps();
             if (status) {
                 status.textContent = options.submit
-                    ? "Saved to the shared backend and submitted for review. Pick another task from the map or list."
+                    ? `Saved to the shared backend and submitted for review. Pick another task from the map or list.${this.filterActiveHint()}`
                     : "Draft saved to the shared backend. Submit for review when the row is ready.";
             }
         } catch (error) {
@@ -2651,7 +2686,7 @@ class NzVerificationMap {
                 await this.refreshBackendTasks();
                 this.applyFilters();
                 if (status) {
-                    status.textContent = "Skipped in the shared backend. Pick another task from the map or list.";
+                    status.textContent = `Skipped in the shared backend. Pick another task from the map or list.${this.filterActiveHint()}`;
                 }
                 return;
             } catch (error) {
@@ -2689,7 +2724,7 @@ class NzVerificationMap {
             reason: String(reason || "").slice(0, 240),
         });
         if (status) {
-            status.textContent = "Skipped in this browser. Pick another task from the map or list.";
+            status.textContent = `Skipped in this browser. Pick another task from the map or list.${this.filterActiveHint()}`;
         }
     }
 

@@ -521,10 +521,23 @@
         }
 
         .quickstart strong {
-            display: block;
+            display: inline;
             margin-bottom: 6px;
             color: #1f4e79;
             font-size: 14px;
+        }
+
+        .quickstart > summary {
+            cursor: pointer;
+            color: #1f4e79;
+            font-size: 14px;
+            font-weight: 700;
+            list-style-position: inside;
+            padding: 2px 0;
+        }
+
+        .quickstart[open] > summary {
+            margin-bottom: 6px;
         }
 
         .quickstart ol {
@@ -893,6 +906,24 @@
     </style>
 </head>
 <body>
+    <script>
+        // set body.assignment-mode before first paint so the mobile sidebar-on-top
+        // layout applies without a one-frame flash. mirrors the JS rule below: any
+        // URL other than ?full=1 or ?batch=all is assumed to be an assignment in
+        // the production NZ deployment (Convex backend is configured). the JS
+        // toggle in setupPageMode authoritatively corrects this after init.
+        (function () {
+            try {
+                var params = new URLSearchParams(window.location.search);
+                var fullMap = params.get("full") === "1" || params.get("batch") === "all";
+                if (!fullMap) {
+                    document.body.classList.add("assignment-mode");
+                }
+            } catch (error) {
+                // URLSearchParams missing on very old browsers; skip and let JS handle it
+            }
+        })();
+    </script>
     <main class="app-shell">
         <aside class="sidebar">
             <header class="sidebar-header">
@@ -980,8 +1011,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
-    <script src="js/convex-config.js?v=20260514-workpack-algorithm"></script>
-    <script src="js/convex-task-client.js?v=20260514-workpack-algorithm"></script>
-    <script src="js/verification-map.js?v=20260514-workpack-algorithm"></script>
+    <script src="js/convex-config.js?v=20260514-polish-fixes"></script>
+    <script src="js/convex-task-client.js?v=20260514-polish-fixes"></script>
+    <script src="js/verification-map.js?v=20260514-polish-fixes"></script>
 </body>
 </html>
