@@ -10,16 +10,14 @@ reference product.
 
 ## Links
 
+- **[RA assignment: New Zealand 50-case workpack](https://www.placesmap.org/apps/regions/nz/verification.html)**
+- **[RA task guide](docs/ra-nz-pilot-task.md)**
 - [Global map](https://go-bayes.github.io/places-of-worship/index.html)
 - [New Zealand regional map](https://www.placesmap.org/enhanced-places.html)
-- [New Zealand verification task map](https://www.placesmap.org/apps/regions/nz/verification.html)
 - [Roadmap](ROADMAP.md)
 - [System map](docs/system-map.md)
-- [Planning](PLANNING.md)
-- [Brainstorming](BRAINSTORMING.md)
 - [FAQ](FAQ.md)
 - [Lexicon](LEXICON.md)
-- [RA NZ web pilot task](docs/ra-nz-pilot-task.md)
 
 ## Current Work
 
