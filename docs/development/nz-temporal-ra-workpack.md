@@ -7,6 +7,9 @@ records to check, not to expose raw OpenStreetMap (OSM) history rows directly.
 The workpack asks one narrow evidence question per row: what can a non-OSM
 source tell us about worship use at the target years 2013, 2018, and 2023?
 
+The generating script is
+[`scripts/build_nz_temporal_ra_workpack.R`](https://github.com/go-bayes/places-of-worship/blob/main/scripts/build_nz_temporal_ra_workpack.R).
+
 ## Inputs
 
 The workpack is built from the generated New Zealand OSM temporal outputs:
@@ -22,12 +25,23 @@ are recorded in:
 
 ## Selection Rule
 
-The first workpack contains 50 rows. The script selects them in this order:
+The first workpack contains 50 rows. The script selects them in this exact
+order:
 
-1. all OSM date-tag rows with possible opening windows between target years;
-2. five likely OSM object-churn losses with nearby replacement objects;
-3. five ambiguous date-tag or target-year status cases;
-4. five clear present-present-present controls.
+1. all rows from `nz_osm_date_tag_places_to_check.csv` whose
+   `candidate_date_tag_windows` field contains `candidate_gain`, sorted by
+   `candidate_date_tag_windows`, `latest_name`, and `osm_key`;
+2. after excluding already-used `osm_key`s, the first five rows from
+   `nz_osm_temporal_candidates.csv` where `transition_types` contains
+   `osm_present_then_absent` and `nearby_replacement_osm_key` is present,
+   sorted by `diff_category`, `latest_name`, and `osm_key`;
+3. after excluding already-used `osm_key`s, the first five remaining date-tag
+   rows with an origin or closure parser warning, an uncertain 2013/2018/2023
+   status, or a `candidate_status_change` window, sorted by warning presence,
+   `candidate_date_tag_windows`, `latest_name`, and `osm_key`;
+4. after excluding already-used `osm_key`s, the first five remaining date-tag
+   rows that are present in 2013, 2018, and 2023, with no candidate window and
+   no parser warning, sorted by `latest_name` and `osm_key`.
 
 Within each category, rows are sorted deterministically by case information
 such as candidate window, difference category, latest name, and OSM key. No

@@ -1185,7 +1185,7 @@ class NzVerificationMap {
                         <ol>
                             <li>Sign in with Google at the top of this panel.</li>
                             <li>Work down the assigned task list in order. Stop at a natural stopping point and tell JB where you stopped.</li>
-                            <li>This list was built from cleaned OSM temporal leads: likely opening-date cases, likely object-replacement losses, ambiguous cases, and a few confirmation controls. Treat OSM as the prompt to check, not as final evidence.</li>
+                            <li>How the list was made: <a href="https://github.com/go-bayes/places-of-worship/blob/main/scripts/build_nz_temporal_ra_workpack.R" target="_blank" rel="noopener">this R script</a> first selects every date-tag row whose <code>candidate_date_tag_windows</code> contains <code>candidate_gain</code>; then, after excluding used <code>osm_key</code>s, adds five OSM-present-then-absent rows with a nearby replacement object, five rows with parser warnings, uncertain target-year status, or <code>candidate_status_change</code>, and five present-present-present controls with no candidate window or parser warning. Treat OSM as the prompt to check, not as final evidence.</li>
                             <li>Open the source links, especially the OSM object as context, then look for non-OSM evidence where possible.</li>
                             <li>Record 2013, 2018, and 2023 status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
                             <li>Use <em>Save draft</em> while working. Use <em>Submit for review</em> when the case is ready for JB.</li>

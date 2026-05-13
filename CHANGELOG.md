@@ -6,8 +6,8 @@
 
 - Clarified the RA workpack instructions: André should work through assigned
   tasks in order, stop at a natural stopping point, and understand that the
-  50-case list comes from cleaned OSM temporal leads rather than hand-picked
-  map sampling.
+  50-case list comes from the documented R selection algorithm rather than
+  hand-picked map sampling.
 - Applied the first RA assignment UI review fixes: prevented assignment-mode
   skip from falling back to hidden local storage, removed the pre-sign-in
   initials prompt, improved phone layout, clarified save/submit labels,
