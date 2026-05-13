@@ -93,8 +93,8 @@ the RA assignment link is:
 
 André should work from the curated web assignment, not from raw OSM history and
 not from a spreadsheet unless JB explicitly chooses the fallback path. The first
-handoff should ask him to work down the assigned tasks in order, starting with
-the first 15 cases or 90 minutes before continuing.
+handoff should ask him to work down the assigned tasks in order, stop at a
+natural stopping point, and tell JB where he stopped.
 
 For each row:
 

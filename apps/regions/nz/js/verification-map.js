@@ -1184,7 +1184,8 @@ class NzVerificationMap {
                     ${ASSIGNMENT_MODE ? `
                         <ol>
                             <li>Sign in with Google at the top of this panel.</li>
-                            <li>Work down the assigned task list. Start with the first 15 rows or about 90 minutes.</li>
+                            <li>Work down the assigned task list in order. Stop at a natural stopping point and tell JB where you stopped.</li>
+                            <li>This list was built from cleaned OSM temporal leads: likely opening-date cases, likely object-replacement losses, ambiguous cases, and a few confirmation controls. Treat OSM as the prompt to check, not as final evidence.</li>
                             <li>Open the source links, especially the OSM object as context, then look for non-OSM evidence where possible.</li>
                             <li>Record 2013, 2018, and 2023 status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
                             <li>Use <em>Save draft</em> while working. Use <em>Submit for review</em> when the case is ready for JB.</li>

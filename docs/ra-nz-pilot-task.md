@@ -26,8 +26,8 @@ In practical terms:
 
 1. Open the assigned workpack link from JB.
 2. Sign in with Google in the shared task backend panel.
-3. Work down the visible task list, starting with the first 15 cases or about
-   90 minutes.
+3. Work down the visible task list in order. Stop at a natural stopping point
+   and tell JB where you stopped.
 4. Choose a target year: 2013, 2018, or 2023, when inspecting the map aid.
 5. Select one task from the assigned list or map.
 6. Check the links and search for source evidence.
@@ -88,8 +88,14 @@ blank and explain the uncertainty in the evidence note.
 
 If JB sends you a named workpack, such as `NZ Temporal RA Workpack 001`, use
 that workpack as the assignment instead of sampling freely from the task map.
-For the current web workpack, work down the assigned list in order. Start with
-the first 15 cases, or about 90 minutes, before deciding whether to continue.
+For the current web workpack, work down the assigned list in order. Stop at a
+natural stopping point and tell JB where you stopped.
+
+The current list was generated from cleaned OpenStreetMap (OSM) temporal leads,
+not chosen by hand. It combines likely opening-date cases between the target
+years, likely OSM object-replacement losses, ambiguous cases, and a few
+straightforward confirmation controls. Treat OSM as the prompt to check, not as
+final evidence.
 
 For each assigned case:
 
