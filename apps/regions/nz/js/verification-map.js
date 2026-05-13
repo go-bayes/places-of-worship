@@ -1762,7 +1762,7 @@ class NzVerificationMap {
         if (this.backend?.configured && this.backendUser) {
             return `
                 <div class="pilot-note">
-                    Shared backend enabled. Use <strong>Save draft</strong> or <strong>Submit for review</strong> to record this evidence without spreadsheet copy/paste.
+                    Shared backend enabled. Use <strong>Save draft</strong> or <strong>Submit for review</strong> to record this evidence for review.
                 </div>
             `;
         }
@@ -1894,7 +1894,7 @@ class NzVerificationMap {
                     </div>
                 ` : ASSIGNMENT_MODE ? `
                     <div class="demo-warning" role="alert">
-                        Sign in with Google from the shared backend panel before recording this assignment. Spreadsheet copy is disabled for the assigned web workpack.
+                        Sign in with Google at the top of the sidebar before recording this assignment.
                     </div>
                 ` : `
                     <div class="copy-help">
