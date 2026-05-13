@@ -819,7 +819,7 @@ class NzVerificationMap {
 
     clearSessionLog() {
         const ok = window.confirm(
-            "Clear your session log? This removes the local record of every row you have copied or skipped. Your project spreadsheet is not affected."
+            "Clear your session log? This removes the local record of copied or skipped demo rows."
         );
         if (!ok) return;
         this.sessionEntries = [];
@@ -927,7 +927,7 @@ class NzVerificationMap {
         if (!this.backend?.configured) {
             panel.innerHTML = `
                 <div class="backend-card disabled">
-                    <strong>Shared task backend</strong>
+                    <strong>${ASSIGNMENT_MODE ? "Sign-in required" : "Shared task backend"}</strong>
                     ${assignmentLabel}
                     <span>${ASSIGNMENT_MODE
                         ? "This assignment needs the shared backend. Ask JB for the backend-enabled link before starting."
@@ -939,11 +939,13 @@ class NzVerificationMap {
 
         if (!this.backendUser) {
             panel.innerHTML = `
-                <div class="backend-card">
-                    <strong>Shared task backend</strong>
+                <div class="backend-card auth-required">
+                    <strong>${ASSIGNMENT_MODE ? "1. Sign in to start" : "Shared task backend"}</strong>
                     ${assignmentLabel}
-                    <span>Sign in with Google to load assigned tasks and save evidence directly for review.</span>
-                    <div id="googleSignInButton"></div>
+                    <span>${ASSIGNMENT_MODE
+                        ? "Use the Google account JB invited. Your assigned tasks load after sign-in, and saved work goes straight to the shared review queue."
+                        : "Sign in with Google to load assigned tasks and save evidence directly for review."}</span>
+                    <div id="googleSignInButton" class="google-sign-in-host"></div>
                     ${this.backendLastError ? `<span class="copy-status">${escapeHtml(this.backendLastError)}</span>` : ""}
                 </div>
             `;
@@ -971,12 +973,13 @@ class NzVerificationMap {
 
         const label = this.backendUser.initials || this.backendUser.email || "signed in";
         panel.innerHTML = `
-            <div class="backend-card">
-                <strong>Shared task backend</strong>
+            <div class="backend-card signed-in">
+                <strong>${ASSIGNMENT_MODE ? "Signed in. Choose a task below." : "Shared task backend"}</strong>
                 ${assignmentLabel}
                 <span>Signed in as ${escapeHtml(label)}. ${ASSIGNMENT_MODE ? `${this.backendTasksById.size} assigned task${this.backendTasksById.size === 1 ? "" : "s"} loaded.` : "Saves and submissions go to Convex for reviewer follow-up."}</span>
                 <div class="backend-actions">
                     <button type="button" class="secondary" id="refreshBackendTasksButton">Refresh task state</button>
+                    <button type="button" class="tertiary" id="signOutButton">Sign out</button>
                 </div>
             </div>
         `;
@@ -987,6 +990,27 @@ class NzVerificationMap {
                 this.renderDetail(this.selectedTask);
             }
         });
+        document.getElementById("signOutButton")?.addEventListener("click", () => this.signOutBackend());
+    }
+
+    signOutBackend() {
+        this.backend?.signOut();
+        this.backendUser = null;
+        this.backendTasksById.clear();
+        this.backendLastError = "";
+        if (ASSIGNMENT_MODE) {
+            this.tasks = [];
+            this.filteredTasks = [];
+            this.selectedTask = null;
+            this.markerLayer?.clearLayers();
+            const snapshotEl = document.getElementById("snapshotId");
+            if (snapshotEl) {
+                snapshotEl.textContent = `${ASSIGNMENT_BATCH_ID} | sign in to load assigned tasks`;
+            }
+            this.renderInitialDetail();
+        }
+        this.renderBackendPanel();
+        this.applyFilters();
     }
 
     async init() {
@@ -1008,7 +1032,7 @@ class NzVerificationMap {
     renderSessionPanel() {
         const panel = document.getElementById("sessionPanel");
         if (!panel) return;
-        if (!DEMO_MODE) {
+        if (!DEMO_MODE || ASSIGNMENT_MODE) {
             panel.innerHTML = "";
             return;
         }
@@ -1033,7 +1057,7 @@ class NzVerificationMap {
                         <button type="button" id="sessionExportButton">Export session JSON</button>
                         <button type="button" class="danger" id="sessionClearButton">Clear session</button>
                     </div>
-                    <div class="session-empty">The JSON export is a local session log for JB to reconstruct copied or skipped cases. It does not upload or submit data.</div>
+                    <div class="session-empty">The JSON export is a local demo log. It does not upload or submit data.</div>
                 `}
             </details>
         `;
@@ -1081,7 +1105,7 @@ class NzVerificationMap {
         }
         try {
             await navigator.clipboard.writeText(entry.tsv);
-            window.alert("Copied the previous row again. Paste with Cmd/Ctrl+V into the spreadsheet.");
+            window.alert("Copied the previous row again.");
         } catch (error) {
             window.prompt("Could not auto-copy. Select and copy manually:", entry.tsv);
         }
@@ -1145,11 +1169,11 @@ class NzVerificationMap {
                     <strong>${ASSIGNMENT_MODE ? "How this assignment works" : "How this pilot works"}</strong>
                     ${ASSIGNMENT_MODE ? `
                         <ol>
-                            <li>Sign in with Google in the shared task backend panel.</li>
+                            <li>Sign in with Google at the top of the sidebar.</li>
                             <li>Work down the assigned task list. Start with the first 15 rows or about 90 minutes.</li>
                             <li>Open the source links, especially the OSM object as context, then look for non-OSM evidence where possible.</li>
                             <li>Record 2013, 2018, and 2023 status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
-                            <li>Use <em>Save draft</em> while working and <em>Submit for review</em> when the case is ready for JB to inspect.</li>
+                            <li>Use <em>Save draft</em> while working. Use <em>Submit for review</em> when the case is ready for JB.</li>
                         </ol>
                     ` : `
                         <ol>
@@ -1481,7 +1505,7 @@ class NzVerificationMap {
                 <h2>Assigned web workpack</h2>
                 <div class="${this.backend?.configured ? "pilot-note" : "demo-warning"}" role="${this.backend?.configured ? "note" : "alert"}">
                     ${this.backend?.configured
-                        ? `Sign in with Google, then work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong> from the task list. Use <em>Save draft</em> while working and <em>Submit for review</em> when a case is ready for JB.`
+                        ? `Sign in with Google at the top of the sidebar, then work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Use <em>Save draft</em> while working and <em>Submit for review</em> when a case is ready for JB.`
                         : `This link points to <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>, but this deployment does not yet have the shared backend enabled.`}
                 </div>
                 <div class="detail-section">
@@ -1862,7 +1886,7 @@ class NzVerificationMap {
                 <h3>4. Save for review</h3>
                 ${this.backend?.configured && this.backendUser ? `
                     <div class="copy-help">
-                        <strong>Preferred:</strong> Save the evidence to the shared backend. Submitted cases move into JB's review queue.
+                        Save the evidence to the shared backend. Submitted cases move into JB's review queue.
                     </div>
                     <div class="button-row">
                         <button id="saveDraftButton" type="button">Save draft</button>

@@ -635,24 +635,44 @@
         }
 
         .backend-panel {
-            padding: 12px 16px;
+            padding: 14px 16px;
             border-bottom: 1px solid #d8dee4;
-            font-size: 13px;
+            font-size: 14px;
         }
 
         .backend-card {
             display: grid;
-            gap: 8px;
-            border: 1px solid #cfe1ef;
-            border-radius: 5px;
-            background: #f2f8fc;
-            padding: 10px 12px;
+            gap: 10px;
+            border: 1px solid #b8d3e8;
+            border-radius: 6px;
+            background: #eef6fc;
+            padding: 14px;
             line-height: 1.45;
             color: #1f2d3d;
         }
 
         .backend-card strong {
+            display: block;
             color: #1f4e79;
+            font-size: 18px;
+            line-height: 1.25;
+        }
+
+        .backend-card.auth-required {
+            border-color: #1f618d;
+            background: #e8f1fb;
+            box-shadow: 0 1px 4px rgba(31, 97, 141, 0.18);
+        }
+
+        .backend-card.signed-in {
+            border-color: #1e8449;
+            background: #eef9f1;
+        }
+
+        .google-sign-in-host {
+            min-height: 44px;
+            display: flex;
+            align-items: center;
         }
 
         .backend-card.disabled {
@@ -670,6 +690,12 @@
         .backend-actions button {
             min-height: 42px;
             font-size: 14px;
+        }
+
+        .backend-actions button.tertiary {
+            background: #ffffff;
+            color: #34495e;
+            border-color: #b6c2cf;
         }
 
         .backend-badge {
@@ -860,6 +886,8 @@
                 <div id="modeNotice" class="pilot-note"></div>
             </header>
 
+            <section id="backendPanel" class="backend-panel"></section>
+
             <div id="quickstartBanner"></div>
 
             <section class="filters">
@@ -922,7 +950,6 @@
             </section>
 
             <section id="taskList" class="task-list" aria-label="Verification tasks"></section>
-            <section id="backendPanel" class="backend-panel"></section>
             <section id="sessionPanel" class="session-panel"></section>
             <section id="nominationPanel" class="nomination-panel"></section>
             <section id="detailPanel" class="detail-panel" tabindex="-1"></section>
@@ -934,8 +961,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
-    <script src="js/convex-config.js?v=20260513-convex-task-layer"></script>
-    <script src="js/convex-task-client.js?v=20260513-convex-task-layer"></script>
-    <script src="js/verification-map.js?v=20260513-convex-task-layer"></script>
+    <script src="js/convex-config.js?v=20260514-ra-auth-ui"></script>
+    <script src="js/convex-task-client.js?v=20260514-ra-auth-ui"></script>
+    <script src="js/verification-map.js?v=20260514-ra-auth-ui"></script>
 </body>
 </html>

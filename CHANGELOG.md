@@ -4,6 +4,9 @@
 
 ### 2026-05-14
 
+- Moved the NZ assignment sign-in card to the top of the sidebar, enlarged the
+  Google sign-in prompt, added a sign-out control, and hid old local
+  copy/session guidance during backend assignments.
 - Updated `urllib3` in `uv.lock` from 2.6.3 to 2.7.0 to address the current
   Dependabot security alerts for urllib3.
 - Enabled the hosted Convex-backed NZ assignment client for

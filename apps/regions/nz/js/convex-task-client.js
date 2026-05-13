@@ -47,6 +47,14 @@
             return Boolean(this.authToken && this.user);
         }
 
+        signOut() {
+            this.authToken = "";
+            this.user = null;
+            if (window.google?.accounts?.id?.disableAutoSelect) {
+                window.google.accounts.id.disableAutoSelect();
+            }
+        }
+
         async renderSignInButton(container, options = {}) {
             if (!this.configured || !container) return;
             await loadScriptOnce("https://accounts.google.com/gsi/client");
@@ -79,7 +87,7 @@
                 theme: "outline",
                 size: "large",
                 text: "signin_with",
-                width: 260,
+                width: 300,
             });
         }
 
