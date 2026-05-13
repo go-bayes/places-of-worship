@@ -946,6 +946,7 @@ class NzVerificationMap {
                         ? "Use the Google account JB invited. Your assigned tasks load after sign-in, and saved work goes straight to the shared review queue."
                         : "Sign in with Google to load assigned tasks and save evidence directly for review."}</span>
                     <div id="googleSignInButton" class="google-sign-in-host"></div>
+                    <span class="backend-help">The Google button shows accounts already signed into this browser. If the wrong name appears, choose another Google account or use a browser profile signed into the invited account.</span>
                     ${this.backendLastError ? `<span class="copy-status">${escapeHtml(this.backendLastError)}</span>` : ""}
                 </div>
             `;

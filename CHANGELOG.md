@@ -7,6 +7,9 @@
 - Moved the NZ assignment sign-in card to the top of the sidebar, enlarged the
   Google sign-in prompt, added a sign-out control, and hid old local
   copy/session guidance during backend assignments.
+- Clarified that the Google sign-in button shows the account already signed
+  into the current browser, so RAs should choose or switch to their invited
+  account if a different name appears.
 - Updated `urllib3` in `uv.lock` from 2.6.3 to 2.7.0 to address the current
   Dependabot security alerts for urllib3.
 - Enabled the hosted Convex-backed NZ assignment client for
