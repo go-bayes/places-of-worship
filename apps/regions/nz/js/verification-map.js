@@ -14,6 +14,7 @@ const COUNTRY_CONFIGS = {
         sourceDatasetId: "nz_static_verification_map",
         mapSource: "nz_verification_static_map_workbench",
         nominationSource: "nz_verification_static_map_nomination",
+        defaultAssignmentBatchId: "nz-temporal-ra-workpack-001",
         temporalLossAction: {
             value: "present_2013_absent_2018",
             label: "Present in 2013, absent in 2018",
@@ -52,7 +53,14 @@ const COUNTRY_KEY = SEARCH_PARAMS.get("country") === "vu" ? "vu" : "nz";
 const COUNTRY_CONFIG = COUNTRY_CONFIGS[COUNTRY_KEY];
 const TARGET_YEARS = COUNTRY_CONFIG.targetYears;
 const DEFAULT_TARGET_YEAR = COUNTRY_CONFIG.defaultTargetYear || TARGET_YEARS[TARGET_YEARS.length - 1];
-const ASSIGNMENT_BATCH_ID = (SEARCH_PARAMS.get("batch") || "").trim();
+const BACKEND_CONFIG = window.POW_CONVEX_CONFIG || {};
+const BACKEND_CONFIGURED = Boolean(BACKEND_CONFIG.enabled && BACKEND_CONFIG.url && BACKEND_CONFIG.googleClientId);
+const FULL_MAP_MODE = SEARCH_PARAMS.get("full") === "1" || SEARCH_PARAMS.get("batch") === "all";
+const REQUESTED_ASSIGNMENT_BATCH_ID = (SEARCH_PARAMS.get("batch") || "").trim();
+const DEFAULT_ASSIGNMENT_BATCH_ID = COUNTRY_CONFIG.defaultAssignmentBatchId || "";
+const ASSIGNMENT_BATCH_ID = FULL_MAP_MODE
+    ? ""
+    : (REQUESTED_ASSIGNMENT_BATCH_ID || (BACKEND_CONFIGURED ? DEFAULT_ASSIGNMENT_BATCH_ID : ""));
 const ASSIGNMENT_MODE = ASSIGNMENT_BATCH_ID.length > 0;
 const ASSIGNMENT_SESSION_SEGMENT = ASSIGNMENT_BATCH_ID
     ? `:${ASSIGNMENT_BATCH_ID.toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-|-$/g, "").slice(0, 64)}`

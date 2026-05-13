@@ -7,6 +7,9 @@
 - Moved the NZ assignment sign-in card to the top of the sidebar, enlarged the
   Google sign-in prompt, added a sign-out control, and hid old local
   copy/session guidance during backend assignments.
+- Defaulted the hosted NZ verification page to the 50-case
+  `nz-temporal-ra-workpack-001` assignment when the shared backend is enabled,
+  so RAs do not accidentally load the full task map from the bare URL.
 - Clarified that the Google sign-in button shows the account already signed
   into the current browser, so RAs should choose or switch to their invited
   account if a different name appears.
