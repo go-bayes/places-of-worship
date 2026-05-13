@@ -4,6 +4,8 @@
 
 ### 2026-05-14
 
+- Updated `urllib3` in `uv.lock` from 2.6.3 to 2.7.0 to address the current
+  Dependabot security alerts for urllib3.
 - Enabled the hosted Convex-backed NZ assignment client for
   `placesmap.org`, using the public Convex deployment URL and public Google
   OAuth client id.
