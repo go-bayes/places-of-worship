@@ -21,9 +21,9 @@ Status markers:
 - `[~]` in progress or partially proven
 - `[ ]` not started or not yet stable
 
-Use this file for the broad phase map. Use `PLANNING.md` for active design and
-next steps, `JOURNAL.md` for decisions and rationale, and `CHANGELOG.md` for
-durable progress.
+Use this file for the broad phase map. Use `docs/system-map.md` for the module
+map, `PLANNING.md` for active design and next steps, `JOURNAL.md` for decisions
+and rationale, and `CHANGELOG.md` for durable progress.
 
 Each phase should advance both tracks where possible. A data-management phase is
 not complete merely because intake works; it must also make the consequences of
@@ -197,7 +197,8 @@ Evidence And Governance:
   review tasks.
 - `[~]` Ask RAs to contact church bodies for source-backed site records,
   openings, closures, relocations, mergers, and changed-use cases.
-- `[ ]` Pilot RA evidence collection for one or two curated source batches.
+- `[~]` Pilot RA evidence collection for one or two curated source batches,
+  beginning with the 50-case Convex-backed New Zealand temporal web assignment.
 - `[ ]` Reconstruct 2013, 2018, and 2023 target-year worship-function states.
 - `[ ]` Preserve appeared/disappeared states separately from building existence.
 - `[ ]` Track denomination changes, multi-denominational use, multi-purpose use,
@@ -221,7 +222,7 @@ Non-goals:
 
 ## Phase 4: Authenticated Portal Pilot
 
-Status: `[ ]` not started.
+Status: `[~]` first Convex-backed task-map bridge in progress.
 
 Goal:
 Create an invite-only New Zealand staging pilot with managed authentication,
@@ -230,10 +231,13 @@ boundaries, and reviewer workflows.
 
 Evidence And Governance:
 
-- `[ ]` Managed auth, likely Google OAuth or Identity Platform.
+- `[~]` Managed auth, starting with Google sign-in for the Convex pilot.
 - `[~]` Convex task-map spike for shared assignments, provisional closures,
   evidence drafts, reviewer comments, review decisions, and project-review
   queues.
+- `[~]` First assigned web batch:
+  `nz-temporal-ra-workpack-001` exposes 50 curated New Zealand temporal cases
+  through the verification map once the hosted backend is seeded.
 - `[~]` Implement the task/event/evidence/review/export contract in
   `docs/convex-task-layer-spec.md`.
 - `[ ]` Weekly or reviewer-triggered export from Convex task status into `pow`
@@ -306,6 +310,8 @@ Zealand pilot.
 Evidence And Governance:
 
 - `[ ]` Country-source matrix and feasibility survey.
+- `[~]` Vanuatu source-first country case protocol, using 1989, 1999, 2009,
+  and 2020 target years while preserving lifecycle dates from 1600 onward.
 - `[ ]` Country adapters for boundaries, sources, licences, and denominational
   taxonomies.
 - `[ ]` Community and partner contribution paths.
@@ -319,6 +325,9 @@ Evidence And Governance:
 Research Outputs And Analysis:
 
 - `[ ]` Country-level feasibility and coverage reports.
+- `[~]` First Vanuatu case-analysis brief identifying source anchors,
+  administrative geography, likely denominations, and interface requirements
+  before map validation at scale.
 - `[ ]` Comparable cross-country site-state and area-summary products where
   source quality permits them.
 - `[ ]` Global and country-specific map layers that expose uncertainty rather

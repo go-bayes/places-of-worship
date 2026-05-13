@@ -29,6 +29,7 @@ async function getTaskOrThrow(ctx: QueryCtx | MutationCtx, taskId: string): Prom
 export const listTasks = query({
   args: {
     countryCode: v.string(),
+    batchId: v.optional(v.string()),
     status: v.optional(taskStatus),
     priority: v.optional(taskPriority),
     limit: v.optional(v.number()),
@@ -36,8 +37,20 @@ export const listTasks = query({
   handler: async (ctx, args) => {
     await requireUser(ctx, ["ra", "reviewer", "curator", "admin", "service"]);
     const limit = Math.min(Math.max(args.limit ?? 250, 1), 1000);
+    const batchId = args.batchId;
     let tasks: Doc<"tasks">[];
-    if (args.status !== undefined) {
+    if (batchId !== undefined && args.status !== undefined) {
+      const status = args.status;
+      tasks = await ctx.db
+        .query("tasks")
+        .withIndex("by_batch_status", (q) => q.eq("batch_id", batchId).eq("status", status))
+        .take(limit);
+    } else if (batchId !== undefined) {
+      tasks = await ctx.db
+        .query("tasks")
+        .withIndex("by_batch_status", (q) => q.eq("batch_id", batchId))
+        .take(limit);
+    } else if (args.status !== undefined) {
       const status = args.status;
       tasks = await ctx.db
         .query("tasks")
@@ -50,6 +63,10 @@ export const listTasks = query({
         .query("tasks")
         .filter((q) => q.eq(q.field("country_code"), args.countryCode))
         .take(limit);
+    }
+
+    if (batchId !== undefined) {
+      tasks = tasks.filter((task) => task.country_code === args.countryCode);
     }
 
     if (args.priority !== undefined) {
@@ -180,6 +197,7 @@ export const upsertTasksFromStaticMap = mutation({
           claimed_at: existing.claimed_at,
           nearby_site_refs: taskRecord.nearby_site_refs ?? existing.nearby_site_refs,
           automated_checks: taskRecord.automated_checks ?? existing.automated_checks,
+          source_context: taskRecord.source_context ?? existing.source_context,
           updated_at: now,
         });
         updated += 1;
@@ -380,6 +398,7 @@ export const createManualCandidateTask = mutation({
     longitude: v.number(),
     priority: v.optional(taskPriority),
     taskType: v.optional(taskType),
+    targetYears: v.optional(v.array(v.number())),
     taskBrief: v.optional(v.string()),
     sourceNote: v.optional(v.string()),
   },
@@ -402,7 +421,7 @@ export const createManualCandidateTask = mutation({
       assigned_to: user._id,
       claimed_by: user._id,
       claimed_at: now,
-      target_years: [2013, 2018, 2023],
+      target_years: args.targetYears ?? (args.countryCode === "VU" ? [1989, 1999, 2009, 2020] : [2013, 2018, 2023]),
       candidate_site_id: candidateSiteId,
       name: args.name,
       address: args.address,

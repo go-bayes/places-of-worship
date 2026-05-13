@@ -1,6 +1,10 @@
 # RA historical site evidence template
 
-This folder contains Google Sheets-ready CSV tabs for collecting evidence about historical places of worship, starting with New Zealand lifecycle evidence and 2013, 2018, and 2023 place-density reconstruction.
+This folder contains Google Sheets-ready CSV tabs for collecting evidence about
+historical places of worship. The default template starts with New Zealand
+lifecycle evidence and 2013, 2018, and 2023 place-density reconstruction.
+Other countries should use the same evidence logic with country-specific target
+years. For Vanuatu, the first target-year set is 1989, 1999, 2009, and 2020.
 
 The template is for source evidence, not final counts. Each row should record what a source says about a place, how the evidence was dated, how it may match to a site, and what review status it currently has. Final ingestion should only use rows that pass review.
 
@@ -41,7 +45,10 @@ sheet public unless source licences and privacy checks permit public release.
 5. Preserve OpenStreetMap object ids, version timestamps, lifecycle tags, and visual verification notes where they are used as evidence.
 6. Use `source_type = street_imagery` for dated street-level imagery such as Google Street View, Apple Look Around, Mapillary, KartaView, Bing Streetside, or comparable services. Record the provider, URL or agreed reference, displayed capture date, and a short summary of what the image shows. Do not store screenshots in Git.
 7. Use `source_type = field_observation` for direct RA or project-team site visits. Record the visit date and site-level observation, but do not record private conversations, personal contact details, photos, or videos unless the project team has explicitly approved the collection and storage path.
-8. Use the 2013, 2018, and 2023 status/evidence columns only when the source helps determine whether the place existed or was in worship use in those years.
+8. Use target-year status/evidence columns only when the source helps
+   determine whether the place existed or was in worship use in those years.
+   The default New Zealand sheet uses 2013, 2018, and 2023; country-specific
+   sheets may replace these with the relevant census or research years.
 9. Use target-year probability columns only when a reviewer or pipeline has made an explicit probability judgement. Enter values from `0` to `1`; leave blank otherwise.
 10. Use `sources.csv`, `site_observations.csv`, and `candidate_matches.csv` as reference or downstream-normalised tabs when the team is ready to split the wide sheet into ingestion tables.
 11. Use `review_notes.csv` for reviewer decisions, unresolved problems, and follow-up tasks.
@@ -74,7 +81,13 @@ sheet public unless source licences and privacy checks permit public release.
 - Visual checks from street maps, street-level imagery, aerial imagery, historical maps, or field observations should record the provider or observer type, capture or visit date where known, URL or agreed file reference, and a short summary.
 - Street-level imagery and field observations can strongly support visible worship-use claims, but absence of visible signage should usually be treated as weak or uncertain evidence for absence.
 - Use date precision fields to distinguish exact dates from month-only, year-only, bounded, or uncertain dates.
-- Use the target-year columns to record whether the source supports `present`, `absent`, `uncertain`, or `not_assessed` for 2013, 2018, and 2023.
+- Use the target-year columns to record whether the source supports `present`,
+  `absent`, `uncertain`, or `not_assessed` for the country-specific target
+  years. Preserve other useful dates in the lifecycle fields rather than
+  forcing them into a target year.
+- Country protocols may need much earlier lifecycle dates. For Vanuatu, the
+  evidence-entry interface should accept valid `YYYY`, `YYYY-MM`, and
+  `YYYY-MM-DD` dates from 1600 onward.
 
 ## Review statuses
 

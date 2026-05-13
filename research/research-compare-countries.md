@@ -156,8 +156,10 @@ being promoted.
 - **India**: census religion has high potential for area-level analysis, but
   access, sensitivity, and boundary harmonisation need careful handling.
 - **Vanuatu and Pacific partners**: grant-relevant, likely collaborator-driven,
-  and important for community data collection, but open administrative data may
-  be thinner than in OECD cases.
+  and important for community data collection. Vanuatu is now an active
+  source-first case; see `vanuatu-case-analysis.md`. The first protocol uses
+  1989, 1999, 2009, and 2020 census-linked target years, while preserving
+  lifecycle evidence from 1600 onward.
 - **Bahamas and Atlanta, Georgia**: grant-relevant validation and outreach sites.
   Atlanta can use U.S. county/metropolitan data; the Bahamas needs a national
   source and collaborator audit.

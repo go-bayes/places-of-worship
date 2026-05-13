@@ -86,23 +86,61 @@ diff, replay, and project sign-off.
 9. Keep cost exposure narrow: task status and draft evidence belong in Convex;
    raw OSM snapshots, media, and accepted master data do not.
 
-## Pricing Assumption
+## Pricing And Capacity Assumption
 
-Checked against `https://www.convex.dev/pricing` on 2026-05-07. Recheck before
-paid signup.
+Checked against `https://www.convex.dev/pricing` and
+`https://docs.convex.dev/production/state/limits` on 2026-05-13. Recheck before
+paid signup or a larger country rollout.
 
-The current pilot should assume Free/Starter unless a concrete need forces
-Professional. The pricing page currently lists Free and Starter for prototypes
-with 1-6 developers, while Professional is $25 per developer per month and adds
-log streaming, exception reporting, daily backups, custom domains, and email
-support. Business and Enterprise has a $2,500 monthly minimum and is not a
-pilot target.
+Start the New Zealand pilot on Free. Move to Starter only if a real quota is
+approaching or trips. Move to Professional when the project needs daily managed
+backups, log streaming, exception reporting, email support, compliance reports,
+or consistently high usage that makes Starter overage less attractive.
+
+Current limits and prices make the first New Zealand pilot small relative to
+Free-plan capacity:
+
+| Resource | Free/Starter included | NZ pilot estimate | Planning note |
+| --- | ---: | ---: | --- |
+| Database storage | 0.5 GB | roughly 10-20 MB | 3,618 tasks plus indexes and an event/draft log should stay well inside Free. |
+| Function calls | 1,000,000/month | roughly 100K-600K/month | Depends on RA count and whether the frontend uses periodic refreshes or reactive subscriptions. Watch this first. |
+| Database I/O | 1 GB/month | under 200 MB/month | Should be modest if task lists are filtered and exports are batched. |
+| File storage | 1 GB | 0 GB planned | The first spike should not use Convex file storage. |
+| Developers | 1-6 | 1-2 | This counts Convex dashboard/CLI developers, not invited RAs using Google sign-in. |
+
+A four-country pilot should still be plausible on Free or Starter if Convex
+stores only task state and evidence drafts. A global master-scale load does not
+belong in Convex. The project may eventually track around two million global
+places of worship, but those records should remain in the master/rebuild and
+research-output path, not in the live task layer.
 
 This reinforces the scope boundary: Convex is appropriate for shared task
 coordination, evidence drafts, comments, review status, and reviewer downloads.
 Large OSM history files, source snapshots, media, accepted diffs, and public
 map products should remain outside Convex unless a later pricing and
 governance review explicitly changes that boundary.
+
+## Features Used And Avoided
+
+Use Convex for:
+
+- schemas,
+- mutations,
+- queries and later reactive task queries,
+- Google OpenID Connect authentication,
+- scheduled or reviewer-triggered export functions if needed,
+- append-only task events,
+- evidence draft and review-decision state.
+
+Avoid Convex for the first spike:
+
+- public media/file storage,
+- large OSM source snapshots,
+- accepted master data,
+- full-text or vector search,
+- long-running geospatial processing,
+- direct writes to public map products,
+- HTTP actions that bypass `pow` for accepted data changes.
 
 ## Users And Roles
 
@@ -120,9 +158,9 @@ Roles are project roles, not merely authentication identities.
 - `service`: can run imports, task generation, scheduled checks, and exports
   with scoped credentials.
 
-Authentication should use a managed OpenID Connect-compatible provider, likely
-Google sign-in for the New Zealand pilot. Convex functions must enforce project
-roles server-side; the client should never decide permissions by itself.
+Authentication uses Google sign-in for the New Zealand pilot through Convex's
+OpenID Connect auth configuration. Convex functions must enforce project roles
+server-side; the client should never decide permissions by itself.
 
 ## Core Status Model
 
@@ -187,7 +225,8 @@ Fields:
 - `source_kind`: `static_map_import`, `osm_refresh`, `ra_nomination`,
   `manual_curator`, or `system_check`.
 - `source_manifest_id`: optional link to static data or input manifest.
-- `target_years`: array, e.g. `[2013, 2018, 2023]`.
+- `target_years`: country-specific array, e.g. `[2013, 2018, 2023]` for New
+  Zealand or `[1989, 1999, 2009, 2020]` for Vanuatu.
 - `status`: `draft`, `active`, `frozen`, `exported`, or `archived`.
 - `created_by`, `created_at`, `updated_at`.
 - `notes`.
@@ -196,6 +235,31 @@ Indexes:
 
 - `by_country_status`
 - `by_batch_id`
+
+### `country_configs`
+
+One row per country pilot. This should become the source of truth for
+country-specific task-map settings instead of hard-coding them in each
+frontend, sheet, and import script.
+
+Fields:
+
+- `country_code`: e.g. `NZ` or `VU`.
+- `country_name`.
+- `target_years`: ordered numeric array, e.g. `[2013, 2018, 2023]` for New
+  Zealand or `[1989, 1999, 2009, 2020]` for Vanuatu.
+- `target_year_reference_dates`: optional map from year to reference date when
+  the country needs a census-date anchor.
+- `lifecycle_date_min_year`: e.g. `1600` for Vanuatu.
+- `map_centre`, `map_zoom`, and optional bounds.
+- `source_type_options`: source vocabulary values enabled for that country.
+- `nomination_type_options`: country-specific candidate task types.
+- `status`: `draft`, `active`, or `archived`.
+
+First implementation rule:
+seed `NZ` and `VU` before Vanuatu frontend work proceeds. `tasks`,
+`task_batches`, manual candidate tasks, frontend target-year controls, and
+exports should read country target years from this table once it exists.
 
 ### `tasks`
 
@@ -289,15 +353,17 @@ Fields:
 - `source_date_or_capture_date`: optional partial date string.
 - `source_notes`.
 - `action`: map action value.
-- `target_year_statuses`: object keyed by `2013`, `2018`, `2023`.
-- `target_year_evidence`: object keyed by year.
+- `target_year_statuses`: object keyed by the task batch's target years.
+- `target_year_evidence`: object keyed by the task batch's target years.
 - `existence_status`.
 - `worship_use_status`.
 - `assessment_confidence`.
 - `match_confidence`.
 - `geocoding_confidence`.
 - `lifecycle_event`: optional.
-- `lifecycle_date`: optional partial date string.
+- `lifecycle_date`: optional partial date string. Country protocols may allow
+  early historical dates; the Vanuatu protocol accepts valid dates from 1600
+  onward.
 - `lifecycle_date_precision`: optional.
 - `lifecycle_note`: optional.
 - `related_ids_or_note`.
@@ -482,6 +548,20 @@ because the existing RA template and `pow validate` path already understand
 that shape. Later exports may emit change-event JSONL directly after the
 mapping is proven.
 
+Schema-version rule:
+`site_evidence_wide` is the first wire schema. A major schema mismatch should
+stop export validation. A minor version mismatch may warn if fields are
+backward-compatible. Reordering, renaming, or removing `WIDE_EVIDENCE_FIELDS`
+columns is a major change.
+
+OSM-as-evidence rule:
+An evidence draft whose only source is OSM may be exported for OSM identity-link
+or OSM-date-tag review, or as `uncertain` target-year evidence. Exporting
+`present` or `absent` target-year conclusions should normally require a
+non-OSM source, such as a denominational directory, official register, dated
+street imagery, field observation, archive, council/heritage record, or other
+source approved by a reviewer.
+
 ## Security And Privacy
 
 Minimum controls before real RA use:
@@ -489,6 +569,7 @@ Minimum controls before real RA use:
 - invite-only authentication,
 - server-side role checks in every mutation and action,
 - no public anonymous writes,
+- a documented backend kill switch,
 - no private contact details or restricted source material in normal evidence
   fields,
 - request size limits for evidence text,
@@ -503,6 +584,21 @@ If media upload becomes necessary, use the quarantine plan in
 `docs/portal-media-and-provider-evaluation-plan.md` and keep media private until
 licence, privacy, and review checks pass.
 
+Rate limiting:
+For the first invite-only pilot, rely on authentication, role checks, short
+text fields, and small trusted-user numbers rather than building a custom
+per-user limiter immediately. Revisit this before public signup, external
+community contribution, bulk upload, or any anonymous endpoint.
+
+Kill switch:
+
+1. Set `window.POW_CONVEX_CONFIG.enabled = false` in the deployed
+   `apps/regions/nz/js/convex-config.js`.
+2. Redeploy the static site. The map then returns to local fallback and
+   spreadsheet export behaviour.
+3. Record the incident and recovery decision in `JOURNAL.md`, and preserve any
+   Convex export or dashboard evidence needed for audit.
+
 ## Migration From Current Pilot
 
 Phase 0: Current demo
@@ -514,6 +610,8 @@ Phase 0: Current demo
 Phase 1: Convex task state
 
 - Import static verification tasks into Convex.
+- Import the curated 50-case New Zealand temporal workpack as the first
+  assigned web batch (`nz-temporal-ra-workpack-001`).
 - Replace browser-local copied/skipped state with Convex task events.
 - Keep the Sheet export path as a fallback.
 
@@ -522,12 +620,17 @@ Phase 2: Evidence drafts
 - Save map evidence drafts directly in Convex.
 - Keep generated TSV preview for reviewer/export debugging.
 - Submit evidence drafts to reviewer queue.
+- During this phase, decide explicitly which surface is authoritative for each
+  batch. Do not ask an RA to maintain the same evidence in both Convex and a
+  Sheet except during a named test.
 
 Phase 3: Review and export
 
 - Reviewers make decisions in the task workbench.
 - A person with export permission freezes the reviewed file set.
 - The exported file set is validated by `pow`.
+- Convex becomes the default RA working surface only after this export path has
+  produced a file set that `pow validate` accepts.
 
 Phase 4: Remove Sheet as default
 
@@ -549,14 +652,23 @@ The first implementation scaffold lives in `convex/`:
 - `reviews.ts`: reviewer queue and review-decision mutations.
 - `exports.ts`: reviewer export batch creation, freezing, and file-set retrieval.
 
-The seed bridge is `scripts/build_convex_task_seed.py`, which converts the
-current static NZ verification GeoJSON into the argument shape expected by
-`tasks:upsertTasksFromStaticMap`.
+Two seed bridges now feed `tasks:upsertTasksFromStaticMap`:
+
+- `scripts/build_convex_task_seed.py` converts the current static NZ
+  verification GeoJSON into a broad task batch.
+- `scripts/build_convex_workpack_seed.py` converts the curated 50-case
+  New Zealand temporal workpack into the assigned web batch
+  `nz-temporal-ra-workpack-001`.
 
 Setup details live in `docs/development/convex-task-layer-setup.md`.
 
-This scaffold is not yet wired to the public NZ map and has no master-write
-path.
+The static NZ verification map now has a guarded Convex client bridge for
+Google sign-in, task-state refresh, evidence draft save, submit-for-review, and
+backend skip actions. A `batch=` query parameter switches the page into assigned
+workpack mode, where tasks are loaded from Convex and spreadsheet copy/paste is
+disabled for the RA. The bridge is disabled by default until the hosted
+deployment URL and Google client id are configured. The scaffold still has no
+master-write path.
 
 ## Definition Of Done For The First Spike
 
@@ -588,6 +700,7 @@ The first Convex spike is complete when:
   plus manual freeze?
 - What is the rollback procedure if a reviewed Convex export is later found to
   contain sensitive or incorrect evidence?
+- Which three open questions block the next spike, and who owns each answer?
 
 ## Convex Reference Points
 

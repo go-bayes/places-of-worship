@@ -41,6 +41,17 @@ credentials.
 The repository sets `aiFiles.enabled` to `false` in `convex.json` so Convex does
 not create assistant-specific instruction files during setup.
 
+## Set The Bootstrap Token
+
+Before running either bootstrap mutation, set a deployment-only setup token.
+This prevents unauthorised users from creating the first project account on a
+hosted deployment.
+
+In the Convex dashboard, add an environment variable named
+`POW_CONVEX_SETUP_TOKEN` with a long random value. Do not commit the token or
+paste it into chat. The examples below use the placeholder
+`<setup-token-from-dashboard>`.
+
 ## Bootstrap Project Users
 
 There are two bootstrap paths.
@@ -51,6 +62,7 @@ before any project users exist:
 
 ```json
 users:bootstrapPendingInvites({
+  "setupToken": "<setup-token-from-dashboard>",
   "adminEmail": "jb@example.org",
   "adminInitials": "JB",
   "adminDisplayName": "JB",
@@ -82,6 +94,7 @@ run:
 
 ```json
 users:bootstrapFirstAdmin({
+  "setupToken": "<setup-token-from-dashboard>",
   "initials": "JB",
   "displayName": "JB"
 })
@@ -111,15 +124,17 @@ replace the admin user with a real claimed invite before RA work begins.
 ## Google/OIDC Auth
 
 The first hosted pilot should use Google sign-in through an OpenID
-Connect-compatible provider. `docs/development/convex-auth-google.config.example.ts`
-is the direct Google OpenID Connect configuration:
+Connect-compatible provider. `convex/auth.config.ts` is configured for direct
+Google OpenID Connect:
 
 - issuer/domain: `https://accounts.google.com`,
 - application id: Convex environment variable `GOOGLE_CLIENT_ID`.
 
-When the hosted deployment has a real Google client id, copy the example to
-`convex/auth.config.ts`, set `GOOGLE_CLIENT_ID` in the Convex deployment
-environment, and run `npm run convex:dev` or `npx convex deploy`.
+Set `GOOGLE_CLIENT_ID` in the Convex deployment environment, then run
+`npm run convex:dev` or `npx convex deploy`.
+
+`docs/development/convex-auth-google.config.example.ts` is kept only as a small
+reference copy of the same configuration.
 
 The Google client id is public configuration, but the deploy key and any OAuth
 client secret are not. Configure secrets in the Convex dashboard, GitHub
@@ -134,6 +149,37 @@ CONVEX_DEPLOY_KEY='...' npx convex deploy
 
 or export it in the shell and then run the Convex command. The key should never
 be written to source files.
+
+## Enable The Static Map Client
+
+The public map reads only public frontend configuration from
+`apps/regions/nz/js/convex-config.js`. During local development this file can
+be disabled:
+
+```js
+window.POW_CONVEX_CONFIG = {
+    enabled: false,
+    url: "",
+    googleClientId: "",
+    countryCode: "NZ",
+};
+```
+
+For the hosted NZ pilot, the committed file is enabled with the live Convex URL
+and the public Google client id:
+
+```js
+window.POW_CONVEX_CONFIG = {
+    enabled: true,
+    url: "https://pastel-goshawk-398.convex.cloud",
+    googleClientId: "365609603908-modldahk3205acfdf1pshhckufho13v0.apps.googleusercontent.com",
+    countryCode: "NZ",
+};
+```
+
+The Convex URL and Google client id are public configuration. Setup tokens,
+deploy keys, and OAuth secrets are private and must stay in the Convex
+dashboard, GitHub secrets, or a local ignored environment file.
 
 ## Seed NZ Tasks
 
@@ -157,6 +203,42 @@ tasks:upsertTasksFromStaticMap({
 The generated JSON shape already matches the mutation arguments. For the full
 3,618-task seed, use a scripted import rather than pasting through the dashboard
 if the dashboard payload becomes unwieldy.
+
+## Seed The 50-Case NZ Assignment
+
+For André's first real web assignment, seed the curated temporal workpack rather
+than the whole static map:
+
+```sh
+uv run scripts/build_convex_workpack_seed.py
+```
+
+This writes:
+
+```text
+exports/convex-task-seed/nz-temporal-ra-workpack-001.json
+```
+
+The output is ignored local data. It contains exactly the `batch` and `tasks`
+arguments for:
+
+```json
+tasks:upsertTasksFromStaticMap({
+  "batch": { "...": "paste payload.batch here" },
+  "tasks": [{ "...": "paste payload.tasks here" }]
+})
+```
+
+The first hosted assignment has been seeded as `nz-temporal-ra-workpack-001`.
+Send the RA the assignment link:
+
+```text
+https://www.placesmap.org/apps/regions/nz/verification.html?batch=nz-temporal-ra-workpack-001
+```
+
+The assignment page loads only that batch from Convex. It should not ask the RA
+to paste rows into a spreadsheet unless the backend is unavailable and JB has
+explicitly chosen the fallback path.
 
 ## Manual Candidate Tasks
 
@@ -206,4 +288,5 @@ turns this file set into `site_evidence_wide.csv` plus JSONL artefacts for
 
 If Convex is unavailable during the pilot, fall back to the current map plus
 shared Sheet workflow. The Sheet remains a compatible evidence export path until
-Convex exports have been validated by `pow`.
+Convex exports have been validated by `pow`, but the RA default should be
+backend save/submit once the hosted deployment is configured.

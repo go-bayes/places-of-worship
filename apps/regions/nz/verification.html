@@ -634,6 +634,56 @@
             font-size: 13px;
         }
 
+        .backend-panel {
+            padding: 12px 16px;
+            border-bottom: 1px solid #d8dee4;
+            font-size: 13px;
+        }
+
+        .backend-card {
+            display: grid;
+            gap: 8px;
+            border: 1px solid #cfe1ef;
+            border-radius: 5px;
+            background: #f2f8fc;
+            padding: 10px 12px;
+            line-height: 1.45;
+            color: #1f2d3d;
+        }
+
+        .backend-card strong {
+            color: #1f4e79;
+        }
+
+        .backend-card.disabled {
+            border-color: #d8dee4;
+            background: #f8fafc;
+            color: #5d6d7e;
+        }
+
+        .backend-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .backend-actions button {
+            min-height: 42px;
+            font-size: 14px;
+        }
+
+        .backend-badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 1px 6px;
+            border-radius: 3px;
+            background: #e8f1fb;
+            color: #1f4e79;
+            border: 1px solid #8db9dc;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
         .session-panel summary {
             cursor: pointer;
             font-size: 14px;
@@ -872,6 +922,7 @@
             </section>
 
             <section id="taskList" class="task-list" aria-label="Verification tasks"></section>
+            <section id="backendPanel" class="backend-panel"></section>
             <section id="sessionPanel" class="session-panel"></section>
             <section id="nominationPanel" class="nomination-panel"></section>
             <section id="detailPanel" class="detail-panel" tabindex="-1"></section>
@@ -883,6 +934,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
-    <script src="js/verification-map.js?v=20260507-date-tag-language"></script>
+    <script src="js/convex-config.js?v=20260513-convex-task-layer"></script>
+    <script src="js/convex-task-client.js?v=20260513-convex-task-layer"></script>
+    <script src="js/verification-map.js?v=20260513-convex-task-layer"></script>
 </body>
 </html>

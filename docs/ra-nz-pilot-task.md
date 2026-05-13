@@ -5,42 +5,64 @@ pilot.
 
 ## Start Here
 
-Your main task is to test the map-first evidence workflow. Start with the New
-Zealand verification map, inspect one case at a time, find source evidence, and
-record what the evidence supports in the working spreadsheet.
+Your main task is to test the map-first evidence workflow. If JB sends you an
+assigned workpack link, start there. It will show only the assigned cases, let
+you sign in with Google, and save your drafts or submissions to the project
+task queue.
+
+Current assigned workpack link:
+<https://www.placesmap.org/apps/regions/nz/verification.html?batch=nz-temporal-ra-workpack-001>
+
+When the page shows the shared task backend at the top, sign in with Google and
+use `Save draft` or `Submit for review`. That is the preferred path because it
+saves your work to the project task queue and helps other collaborators avoid
+duplicating the same task.
+
+If the shared backend is unavailable, or JB asks you to use the fallback, use
+the shared working spreadsheet link supplied by JB. In that mode the map helps
+you copy a draft row, but the spreadsheet is where the work is saved.
 
 In practical terms:
 
-1. Open the NZ verification task map.
-2. Open the shared working spreadsheet link supplied by JB. This
-   is where your work is saved.
-3. Choose a target year: 2013, 2018, or 2023.
-4. Sample one task from the demo map, using the map, filters, or priority list.
-5. Check the links and search for source evidence.
-6. Decide what kind of case it is: confirmed site, missing from the project
+1. Open the assigned workpack link from JB.
+2. Sign in with Google in the shared task backend panel.
+3. Work down the visible task list, starting with the first 15 cases or about
+   90 minutes.
+4. Choose a target year: 2013, 2018, or 2023, when inspecting the map aid.
+5. Select one task from the assigned list or map.
+6. Check the links and search for source evidence.
+7. Decide what kind of case it is: confirmed site, missing from the project
    map, duplicate, closure, changed use, shared use, or uncertain.
-7. Record the evidence in the working spreadsheet. If you are using demo mode,
-   use `Copy spreadsheet row` to create a draft row, then review it in the
-   sheet.
-8. If a place is missing from the project map, use the draft nomination panel
-   to capture the candidate details and record the evidence in the spreadsheet.
-   It may still have an OSM object; record that id where available.
-9. Mark uncertain cases `needs_review` and move on.
-10. Tell JB when the spreadsheet rows are ready, and include notes
-   on confusing cases.
+8. Fill in source title, URL or agreed file reference, status/confidence
+   dropdowns, any useful lifecycle date, and a short evidence note.
+9. Click `Save draft` if the row is not ready, or `Submit for review` when the
+   evidence is ready for JB or a reviewer to inspect.
+10. If JB explicitly asks you to use spreadsheet fallback, click `Copy
+   spreadsheet row`, paste under the unchanged header in the shared Sheet, and
+   review the pasted row.
+11. If a place is missing from the project map, record the closest available
+   action and explain the candidate in the evidence note. It may still have an
+   OSM object; record that id where available.
+12. Mark uncertain cases `needs_review` and move on.
+13. Tell JB when submitted backend tasks or fallback spreadsheet rows are ready,
+    and include notes on confusing cases.
 
 Do not submit pull requests, commit files, edit repository templates, or put
-private/restricted source material into GitHub. Nothing entered in the demo map
-is saved or submitted.
+private/restricted source material into GitHub. If the backend panel says the
+shared task backend is not configured, stop and tell JB before doing assigned
+work. Nothing entered in the map is saved or submitted until the backend is
+enabled or JB explicitly asks you to use the spreadsheet fallback.
 
 ## First Sampling Brief
 
+Use this only if JB asks you to sample the open task map rather than work from
+the assigned web workpack.
+
 Open <https://www.placesmap.org/apps/regions/nz/verification.html>, sample
-5 to 10 varied cases, and paste the generated TSV rows under the header in the
-shared Sheet. Aim for variety: some confirm-current cases, one or two missing
-sites, one or two duplicates, one closed or lifecycle case, and one or two
-deliberate skips for control. Do not worry about coverage; pick cases that are
-informative.
+5 to 10 varied cases, and save or submit each useful case. Aim for variety:
+some confirm-current cases, one or two missing sites, one or two duplicates,
+one closed or lifecycle case, and one or two deliberate skips for control. Do
+not worry about coverage; pick cases that are informative.
 
 This is the first real test of the page. Tell JB anything that
 confuses you: labels you did not trust, fields you were not sure how to fill,
@@ -48,9 +70,10 @@ a moment when you were not sure where to click next, or anything that made you
 slow down. A note in the session-log `Reason` field, or a message after the
 session, both work.
 
-When you paste a row into the Sheet, glance at the first two columns to make
-sure they line up with the headers `evidence_row_id` and `collection_batch`.
-If they do not, stop and contact JB before pasting more rows.
+If JB asks you to use the spreadsheet fallback, glance at the first two pasted
+columns to make sure they line up with the headers `evidence_row_id` and
+`collection_batch`. If they do not, stop and contact JB before pasting more
+rows.
 
 Use blanks for missing information. Do not type `NA`, `N/A`, or similar
 placeholders into open cells. Use dropdown values such as `unknown`,
@@ -61,24 +84,50 @@ Use date formats exactly: `YYYY`, `YYYY-MM`, or `YYYY-MM-DD`. For example,
 `2018`, `2018-09`, or `2018-09-01`. If a date is unknown, leave the date cell
 blank and explain the uncertainty in the evidence note.
 
+## Assigned Temporal Workpacks
+
+If JB sends you a named workpack, such as `NZ Temporal RA Workpack 001`, use
+that workpack as the assignment instead of sampling freely from the task map.
+For the current web workpack, work down the assigned list in order. Start with
+the first 15 cases, or about 90 minutes, before deciding whether to continue.
+
+For each assigned case:
+
+1. read the `main_question`;
+2. open the OSM object or map link as context;
+3. look for non-OSM evidence where possible;
+4. record what the source supports for 2013, 2018, and 2023;
+5. preserve useful opening, closure, first-seen, last-seen, relocation, or
+   changed-use dates;
+6. mark difficult cases `needs_review` and move on.
+
+The OSM information in the workpack is a prompt, not accepted evidence. The
+task is to check what other sources support.
+
 ## Where Your Work Is Saved
 
-The map demo does not save anything. It only helps you inspect a case and, in
-demo mode, copy a draft row.
+When the shared task backend is enabled and you are signed in, `Save draft`,
+`Submit for review`, and `Skip this task` are saved to the project backend.
+That backend is the preferred record for the RA pilot because it can show
+shared task status to JB, JW, reviewers, and other RAs.
 
-Your saved work lives in a project-controlled Google Sheet in the project
-workspace. JB will send you the sheet link directly. Do not look for the sheet
-in GitHub, and do not add the link to GitHub.
+When the backend is not enabled, the map does not save anything. It only helps
+you inspect a case. For the assigned web workpack, stop and tell JB if the
+shared backend is not available. Use the project-controlled Google Sheet only
+when JB explicitly asks you to use the fallback. Do not look for the sheet in
+GitHub, and do not add the link to GitHub.
 
-Each case you work on should become one row in that spreadsheet. For the NZ
-pilot, expect a project-owned sheet named `NZ PoW RA Pilot Working Sheet` with
+Each case you work on should become one saved backend draft/submission, or one
+row in the fallback spreadsheet. For the NZ pilot fallback, expect a
+project-owned sheet named `NZ PoW RA Pilot Working Sheet` with
 `site_evidence_wide` as the main evidence-entry tab.
 
 At the end of the work period, either:
 
-1. leave the completed rows in the shared spreadsheet and tell JB
-   they are ready, or
-2. if asked, export the active sheet/tab as CSV and send that file through the
+1. tell JB that submitted backend tasks are ready for review, or
+2. if using spreadsheet fallback, leave the completed rows in the shared
+   spreadsheet and tell JB they are ready, or
+3. if asked, export the active sheet/tab as CSV and send that file through the
    agreed project channel.
 
 In Google Sheets, CSV export is:
@@ -92,13 +141,15 @@ Do not upload the CSV to GitHub. JB will review the data separately.
 
 ## Avoiding Accidental Duplicate Work
 
-The map can mark a task as `tentatively closed` or `skipped`, but only in the
-same browser. This is a local reminder, not a shared saved status.
+When the shared backend is enabled, use its task status as the main guide. A
+task saved, submitted, skipped, or reopened there is visible to other signed-in
+project users.
 
-The shared Sheet is the record of work completed in this pilot. Before spending
-time on a task, check whether the Sheet already has a row for the same
-`source_record_id` (the map task id), `matched_current_site_id`,
-`candidate_site_id`, or `matched_osm_id`.
+When using spreadsheet fallback, the map can mark a task as `tentatively
+closed` or `skipped`, but only in the same browser. This is a local reminder,
+not a shared saved status. In that mode, before spending time on a task, check
+whether the Sheet already has a row for the same `source_record_id` (the map
+task id), `matched_current_site_id`, `candidate_site_id`, or `matched_osm_id`.
 
 It is OK for the Sheet to contain more than one row for the same place when the
 rows add different evidence. For example, one row might support 2013 status, a
@@ -113,7 +164,7 @@ We are not trying to finish New Zealand in this first pass. We are trying to
 learn how the save, evaluate, review, and merge-track workflow should work
 before we scale up.
 
-The best use of RA time is to sample real tasks from the demo map and tell us
+The best use of RA time is to sample real tasks from the task map and tell us
 where the workflow is clear or slow. We need examples that test the full
 workflow: straightforward confirmations, missing lifecycle dates, duplicates,
 missing current sites, places present in 2013 but absent by 2018, and shared or
@@ -136,13 +187,16 @@ A useful pilot row has:
 
 ## Main Rule
 
-Start from the map and use the working spreadsheet. Do not edit GitHub files or
+Start from the map and use the shared backend when it is available. Use the
+working spreadsheet only as the fallback path. Do not edit GitHub files or
 repository templates.
 
 ## Links
 
 - NZ verification task map (lands in demo mode by default):
   <https://www.placesmap.org/apps/regions/nz/verification.html>
+- NZ Temporal RA Workpack 001:
+  <https://www.placesmap.org/apps/regions/nz/verification.html?batch=nz-temporal-ra-workpack-001>
 - Read-only feedback view (no action builder):
   <https://www.placesmap.org/apps/regions/nz/verification.html?demo=0>
 - Detailed case guide:
@@ -151,7 +205,7 @@ repository templates.
 ## Sampling Tasks From The Demo Map
 
 Unless JB assigns a specific set of sites, sample tasks directly
-from the demo map. Prioritise variety over volume. A useful session might
+from the task map. Prioritise variety over volume. A useful session might
 include:
 
 - a few high-priority current map records,
@@ -179,14 +233,13 @@ Mark it `needs_review`, explain the uncertainty, and move on.
    denomination or tradition, lifecycle tags, automated checks, and links.
 7. Open source links in new tabs and search for evidence.
 8. Decide which action best fits the evidence.
-9. Use the dropdown fields to record status and confidence. Then record the
-   evidence in the working spreadsheet. If using demo mode, click
-   `Copy spreadsheet row`, click column A in the next empty row under the
-   unchanged spreadsheet header, paste, and review the pasted row. The map
-   will mark the task as tentatively closed in this browser; then choose
-   another task from the map or list.
-10. For a place missing from the map, use the draft nomination panel and record
-    the same source evidence in the spreadsheet.
+9. Use the dropdown fields to record status and confidence, then click
+   `Save draft` or `Submit for review` if the shared backend is enabled. If
+   using spreadsheet fallback, click `Copy spreadsheet row`, click column A in
+   the next empty row under the unchanged spreadsheet header, paste, and review
+   the pasted row.
+10. For a place missing from the map, use the closest available action and
+    explain the candidate in the evidence note.
 11. Mark unclear cases `needs_review`.
 12. Add a short note on any confusing user-interface or source problem.
 13. Move to the next case.
@@ -289,15 +342,17 @@ material into GitHub or the public repository.
 
 At the end of the assigned work period, send JB:
 
-1. the updated working spreadsheet or exported CSV,
+1. confirmation that backend tasks have been submitted, or the updated fallback
+   spreadsheet/exported CSV if JB asked you to use that path,
 2. a short list of confusing cases,
-3. a short list of map or spreadsheet fields that slowed you down,
-4. any cases that seem important but require reviewer judgement.
-5. the exported session JSON from the `Export session JSON` button at the
-   bottom of the `My session` panel. This file is a local session log, not a
-   map submission. It records copied and skipped cases, action choices, reason
-   notes, timestamps, and the generated TSV rows so JB can reconstruct what
-   happened if a paste goes wrong or a case is confusing.
+3. a short list of map or evidence fields that slowed you down,
+4. any cases that seem important but require reviewer judgement,
+5. if using spreadsheet fallback, the exported session JSON from the
+   `Export session JSON` button at the bottom of the `My session` panel. This
+   file is a local session log, not a map submission. It records copied and
+   skipped cases, action choices, reason notes, timestamps, and the generated
+   TSV rows so JB can reconstruct what happened if a paste goes wrong or a case
+   is confusing.
 
 After the first sampling session, answer these five questions:
 
@@ -307,7 +362,8 @@ After the first sampling session, answer these five questions:
    match how you actually worked?
 4. Did you skip anything for control sampling rather than because you were
    unsure? Include a count and how you communicated it.
-5. Did anything paste wrong into the Sheet? If yes, include row numbers.
+5. Did anything fail to save, submit, or paste? If yes, include the task name
+   or row number.
 
 Do not send a pull request. Do not commit files to the repository.
 

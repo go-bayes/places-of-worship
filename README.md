@@ -14,6 +14,7 @@ reference product.
 - [New Zealand regional map](https://www.placesmap.org/enhanced-places.html)
 - [New Zealand verification task map](https://www.placesmap.org/apps/regions/nz/verification.html)
 - [Roadmap](ROADMAP.md)
+- [System map](docs/system-map.md)
 - [Planning](PLANNING.md)
 - [Brainstorming](BRAINSTORMING.md)
 - [FAQ](FAQ.md)
@@ -23,8 +24,10 @@ reference product.
 ## Current Work
 
 New Zealand is the proof-of-concept country for temporal validation. The pilot
-uses the verification map and a shared working spreadsheet to collect
-source-backed evidence about:
+is moving from spreadsheet copy/paste to a Convex-backed task map that can save
+evidence drafts, provisional task status, and reviewer queues directly. The
+spreadsheet export remains a fallback while the backend is being configured.
+The evidence workflow collects source-backed information about:
 
 - places of worship present or absent in 2013, 2018, and 2023,
 - missing or duplicate mapped sites,
@@ -33,9 +36,13 @@ source-backed evidence about:
 - shared buildings and multi-purpose sites,
 - uncertainty that requires reviewer judgement.
 
+Vanuatu is the first active Pacific case after New Zealand. It starts with a
+source-first protocol rather than immediate map validation at scale; see
+`research/vanuatu-case-analysis.md`.
+
 The `pow` Rust CLI provides local validation, staging, proposal, and reviewer
-diff reports. The map does not yet save directly to a backend; authenticated
-save, review, and merge tracking are planned next.
+diff reports. Convex coordinates live RA and reviewer task state; accepted data
+still has to pass through `pow` before it can affect the master or public map.
 
 ## Scope
 
@@ -72,8 +79,8 @@ This work is supported by a Templeton Religion Trust subgrant
 
 This repository is not currently accepting pull requests while the data
 contracts, research-assistant workflow, and map products are stabilising.
-Research assistants should follow the agreed map-first pilot, spreadsheet, and
-validation workflow rather than submitting GitHub changes.
+Research assistants should follow the agreed map-first pilot and shared backend
+workflow rather than submitting GitHub changes.
 
 Public corrections to places of worship should generally be made through
 OpenStreetMap itself, following OpenStreetMap's own contribution rules and

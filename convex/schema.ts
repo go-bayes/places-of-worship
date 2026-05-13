@@ -77,6 +77,7 @@ export default defineSchema({
     nearby_site_refs: v.optional(v.array(nearbySiteRef)),
     automated_checks: v.optional(v.array(automatedCheck)),
     task_brief: v.string(),
+    source_context: v.optional(v.any()),
     created_at: v.number(),
     updated_at: v.number(),
     last_event_at: v.optional(v.number()),

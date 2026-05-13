@@ -2,6 +2,74 @@
 
 ## Unreleased
 
+### 2026-05-14
+
+- Enabled the hosted Convex-backed NZ assignment client for
+  `placesmap.org`, using the public Convex deployment URL and public Google
+  OAuth client id.
+- Deployed the Convex task backend and seeded
+  `nz-temporal-ra-workpack-001` with 50 open tasks for the first RA web
+  assignment.
+- Added pending Google-authenticated project invitations for the NZ pilot
+  admin/reviewer and RA accounts.
+
+### 2026-05-13
+
+- Added a configuration-gated Convex bridge to the NZ verification map:
+  Google sign-in panel, shared task-state refresh, `Save draft`, `Submit for
+  review`, and backend `Skip this task` actions.
+- Added the first 50-case Convex-backed web assignment path:
+  `?batch=nz-temporal-ra-workpack-001` loads only that assigned batch, disables
+  spreadsheet copy/paste for the assignment, and saves drafts/submissions to
+  the shared task backend.
+- Added `scripts/build_convex_workpack_seed.py` to turn the reproducible New
+  Zealand temporal workpack into a deterministic Convex seed payload.
+- Added a disabled-by-default public `convex-config.js` and browser task
+  client so the static map can be enabled after hosted Convex auth, invites,
+  and task seeding are ready.
+- Guarded Convex bootstrap mutations with a deployment setup token and updated
+  setup guidance so the first hosted admin/RA invites cannot be created
+  anonymously.
+- Added the real Convex Google OpenID Connect auth config, using the deployment
+  `GOOGLE_CLIENT_ID` environment variable rather than a committed client id.
+- Added a Convex capacity and plan-trigger model: start on Free, move to
+  Starter only on quota pressure, and reserve Professional for backups, logs,
+  support/compliance needs, or sustained high usage.
+- Tightened the Convex task-layer spec with country-config, schema-version,
+  OSM-as-evidence, rate-limit, kill-switch, and Sheet/Convex transition rules.
+- Fixed local fallback state so a failed clipboard write no longer marks a task
+  tentatively closed, and namespaced local session exports by country and RA
+  initials.
+- Updated RA-facing guidance to make backend save/submit the preferred
+  workflow and spreadsheet copy/paste the fallback path.
+- Added `research/vanuatu-case-analysis.md` as the first Vanuatu source-first
+  country protocol, with 1989/1999/2009/2020 target years and lifecycle dates
+  accepted from 1600 onward.
+- Recorded Guy as the research assistant for the first Vanuatu source-first
+  pass.
+- Updated planning, roadmap, FAQ, Convex task-layer, and RA template guidance
+  so target years are country-specific rather than treated as globally fixed
+  New Zealand fields.
+- Generalised the verification-map target-year controls behind a small country
+  config while preserving the New Zealand 2013/2018/2023 defaults.
+- Added a private André handoff draft for the existing New Zealand temporal RA
+  workpack, keeping the shared Sheet link out of public docs.
+
+### 2026-05-10
+
+- Added `docs/system-map.md` to organise the project as deep modules with clear
+  ownership, interfaces, and tactical task homes.
+- Added system-map links from the README, roadmap, planning, and agent
+  guidance.
+
+### 2026-05-09
+
+- Added a reproducible New Zealand temporal RA workpack builder that selects a
+  first 50-record pilot set from the generated OSM date-tag and temporal
+  places-to-check files.
+- Documented the workpack selection rule, generated outputs, SHA-256 check, and
+  RA use pattern in `docs/development/nz-temporal-ra-workpack.md`.
+
 ### 2026-05-08
 
 - Added `BRAINSTORMING.md` for tool and architecture ideas still being weighed,

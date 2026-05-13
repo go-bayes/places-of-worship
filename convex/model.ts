@@ -145,10 +145,21 @@ export const sourceType = v.union(
   v.literal("official_register"),
   v.literal("denominational_directory"),
   v.literal("charity_register"),
+  v.literal("charities_register"),
+  v.literal("incorporated_societies"),
   v.literal("historic_map"),
   v.literal("aerial_or_street_imagery"),
+  v.literal("street_imagery"),
+  v.literal("aerial_imagery"),
   v.literal("field_observation"),
   v.literal("osm"),
+  v.literal("osm_history"),
+  v.literal("osm_date_tags"),
+  v.literal("archived_website"),
+  v.literal("local_council"),
+  v.literal("heritage_list"),
+  v.literal("linz_building_outlines"),
+  v.literal("linz_property"),
   v.literal("news_or_web"),
   v.literal("other"),
 );
@@ -209,6 +220,7 @@ export const taskInput = v.object({
   nearby_site_refs: v.optional(v.array(nearbySiteRef)),
   automated_checks: v.optional(v.array(automatedCheck)),
   task_brief: v.string(),
+  source_context: v.optional(v.any()),
 });
 
 export const evidenceDraftInput = v.object({

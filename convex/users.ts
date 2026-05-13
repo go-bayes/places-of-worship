@@ -3,6 +3,20 @@ import { mutation, query } from "./_generated/server";
 import { projectRole } from "./model";
 import { normaliseEmail, requireUser } from "./lib/auth";
 
+declare const process: {
+  env: Record<string, string | undefined>;
+};
+
+function requireSetupToken(token: string) {
+  const expected = process.env.POW_CONVEX_SETUP_TOKEN;
+  if (expected === undefined || expected.length < 24) {
+    throw new Error("POW_CONVEX_SETUP_TOKEN must be set before bootstrap.");
+  }
+  if (token !== expected) {
+    throw new Error("Invalid Convex setup token.");
+  }
+}
+
 export const me = query({
   args: {},
   handler: async (ctx) => {
@@ -19,10 +33,12 @@ export const me = query({
 
 export const bootstrapFirstAdmin = mutation({
   args: {
+    setupToken: v.string(),
     initials: v.string(),
     displayName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    requireSetupToken(args.setupToken);
     const existing = await ctx.db.query("users").first();
     if (existing !== null) {
       throw new Error("A project user already exists.");
@@ -50,6 +66,7 @@ export const bootstrapFirstAdmin = mutation({
 
 export const bootstrapPendingInvites = mutation({
   args: {
+    setupToken: v.string(),
     adminEmail: v.string(),
     adminInitials: v.optional(v.string()),
     adminDisplayName: v.optional(v.string()),
@@ -64,6 +81,7 @@ export const bootstrapPendingInvites = mutation({
     ),
   },
   handler: async (ctx, args) => {
+    requireSetupToken(args.setupToken);
     const existing = await ctx.db.query("users").first();
     if (existing !== null) {
       throw new Error("Project users already exist; use inviteUser instead.");

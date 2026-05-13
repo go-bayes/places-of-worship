@@ -21,6 +21,102 @@ Consequences:
 Future entries should summarise context, decision, rationale, consequences, and
 open questions. The changelog should stay concise and release-oriented.
 
+## 2026-05-13: Start Vanuatu source-first and hand André the NZ workpack
+
+Decision:
+For immediate RA work, ask André to work from the private 50-record New Zealand
+temporal workpack rather than continuing open-ended demo-map sampling. Start
+Vanuatu as a source-first country case before building a Vanuatu task map. Guy
+is the assigned RA for the first Vanuatu pass.
+
+Rationale:
+The New Zealand temporal workpack already turns noisy OSM history into narrow
+evidence questions, so it is the fastest useful task for André. Vanuatu has a
+different historical and census structure. The current OSM extract is a useful
+starting inventory, but it is sparse and should not drive RA work before the
+source protocol is clear.
+
+Consequences:
+The Vanuatu protocol now uses 1989, 1999, 2009, and 2020 as the first
+structured target years, while allowing lifecycle dates from 1600 onward for
+mission, colonial, denominational, and historical locality evidence. The future
+interface should take target years and timeline bounds from country
+configuration. A time slider should help review and visualise reconstructed
+states and diffs; it should not become the primary data-entry mechanism.
+
+## 2026-05-13: Prioritise the shared task backend over spreadsheet copying
+
+Decision:
+Make the Convex-backed task map the preferred direction for RA evidence entry,
+with Google sign-in, shared task status, draft evidence saves, submitted review
+items, and backend skips. Keep the spreadsheet row export as a fallback and
+debugging path while hosted authentication, task seeding, and exports to `pow`
+are being proven.
+
+Rationale:
+The map-to-spreadsheet bridge helped us test the data shape quickly, but it
+creates too many manual handoffs for routine RA work. A shared task backend lets
+RAs see which tasks have already been saved, skipped, or submitted, reduces
+copy/paste errors, and gives reviewers a clearer queue. Convex is still a task
+coordination layer, not the master database: accepted changes must still pass
+through the governed `pow` validation, diff, and rebuild path.
+
+Consequences:
+The static NZ verification map now has a guarded Convex client bridge that stays
+disabled until the hosted deployment URL and Google client id are configured.
+Bootstrap mutations require a setup token before first users can be invited.
+Local browser state remains a degraded fallback only, now scoped by country and
+RA initials so it is less likely to mix sessions. The next operational step is
+to configure the hosted Convex deployment, seed the first NZ tasks, invite JB,
+JW, and André, and verify a save/submit/review/export loop before asking André
+to rely on the backend.
+
+## 2026-05-13: Make the 50-case web assignment the first RA backend task
+
+Decision:
+The next concrete build task is the 50-case Convex-backed New Zealand web
+assignment. André should receive a website link for
+`nz-temporal-ra-workpack-001`, sign in with Google, work through the assigned
+cases, and save drafts or submissions directly to the shared backend.
+
+Rationale:
+The spreadsheet workpack is reproducible and useful as a source file, but it is
+not the right primary working surface for a paid RA. A web assignment reduces
+copy/paste risk, gives JB and JW shared task status, and lets the review queue
+start taking shape before the whole New Zealand task map is backend-driven.
+
+Consequences:
+The assigned URL uses `?batch=nz-temporal-ra-workpack-001`; the map loads that
+batch from Convex after sign-in and disables spreadsheet copying for the
+assignment. The generated seed keeps deterministic task ids for all 50 cases so
+rerunning the import updates the same tasks. The remaining operational steps are
+to import the seed into the hosted Convex deployment, invite André, and smoke
+test one draft save and one submitted review item before sending the link.
+
+## 2026-05-13: Start Convex on Free and upgrade by trigger
+
+Decision:
+Start the Convex task-map pilot on the Free plan. Move to Starter only if the
+pilot approaches a hard Free quota. Move to Professional when the project needs
+daily managed backups, log streaming, exception reporting, email support,
+compliance reports, or sustained usage where Starter overage is no longer the
+right fit.
+
+Rationale:
+The New Zealand pilot is small relative to current Convex Free limits if Convex
+stores only task coordination, evidence drafts, review decisions, and export
+metadata. The project should not use Convex for raw OSM snapshots, media,
+accepted master records, or public map products. Those exclusions keep both
+cost and governance risk low.
+
+Consequences:
+`docs/convex-task-layer-spec.md` now includes a capacity model and plan triggers.
+The most important quota to watch is function calls, especially if we later use
+reactive subscriptions rather than explicit refreshes. The next design step is
+to move country-specific settings into a `country_configs` table so Vanuatu and
+later countries do not require code changes for target years, source options,
+timeline bounds, or map defaults.
+
 ## 2026-05-08: Save raw OSM snapshots as their own source package
 
 Decision:
@@ -59,6 +155,46 @@ path, and decision status in `BRAINSTORMING.md`. Once a tool is adopted, the
 actual decision should move into `PLANNING.md` and `JOURNAL.md`. Research data
 semantics remain defined by the schemas, `pow`, manifests, and accepted change
 events, not by developer workflow or display tools.
+
+## 2026-05-09: Give André a curated temporal workpack, not raw OSM differences
+
+Decision:
+Generate a first 50-record New Zealand temporal RA workpack from the OSM
+places-to-check files before asking André to review temporal change evidence.
+
+Rationale:
+Raw OSM year differences contain mapping lag, object replacement, node-to-way
+changes, tag corrections, and genuine historical signals mixed together. André
+should be asked narrow evidence questions, such as whether an OSM date-tag
+opening is supported by another source or whether an apparent disappearance is
+real worship-use loss rather than OSM object churn.
+
+Consequences:
+The workpack is selected reproducibly by
+`scripts/build_nz_temporal_ra_workpack.R` and documented in
+`docs/development/nz-temporal-ra-workpack.md`. The first workpack contains all
+35 possible OSM date-tag opening windows, plus 5 likely object-churn losses, 5
+ambiguous date/status cases, and 5 controls. This is a pilot for the workflow;
+it is not accepted historical data.
+
+## 2026-05-10: Organise project work by deep modules
+
+Decision:
+Add `docs/system-map.md` as the project module map and use module labels in the
+private tasklist.
+
+Rationale:
+The project now has several connected but distinct responsibilities: source
+storage, extraction, temporal leads, task coordination, evidence intake,
+review, reconstruction, research outputs, public maps, and governance. A module
+map makes those responsibilities easier to see and reduces the risk that a task
+or tool starts owning more than it should.
+
+Consequences:
+Each active task should have one primary module. The module does not describe
+who is responsible; it describes where the work sits in the system. The private
+tasklist should use those module names so tactical work stays connected to the
+overall design.
 
 ## 2026-05-07: Make current data locations explicit
 
@@ -109,6 +245,10 @@ pilot. The one-RA New Zealand pilot should start on Free/Starter if the hosted
 account and collaborator model fits. Professional should be considered only
 when daily backups, log streaming, exception reporting, support, or usage
 limits justify the cost.
+
+This was refined on 2026-05-13: start on Free, use Starter only for quota
+pressure, and reserve Professional for backups, logs, support/compliance needs,
+or sustained high usage.
 
 Rationale:
 The pricing page checked on 2026-05-07 lists Free/Starter for prototypes with
@@ -1388,11 +1528,10 @@ stable identity chain before any evidence is saved.
 Consequences:
 `users:bootstrapPendingInvites` can initialise a fresh deployment with a
 pending admin and one or more pending RA invites. The Google OpenID Connect
-auth config is kept as a development example until the hosted deployment has a
-real `GOOGLE_CLIENT_ID`; this avoids breaking local Convex checks with a
-missing environment variable. The remaining work is hosted deployment setup,
-Google client configuration, and frontend sign-in/wiring behind the Convex demo
-gate.
+auth config now lives in `convex/auth.config.ts` and reads the deployment
+`GOOGLE_CLIENT_ID` environment variable, so no client id or secret is committed.
+The remaining work is hosted deployment setup, Google client configuration, and
+frontend sign-in/wiring behind the Convex demo gate.
 
 ## 2026-05-09: Looking back at nine months of commits
 
@@ -1473,3 +1612,22 @@ reviewer decision loop that would actually close it. The commit history lines
 up with current priorities: finish the OSM date-tag parser, get the NZ
 places-to-check files into durable storage with proper manifests, and run a
 small RA pilot end-to-end before scaling up.
+
+## 2026-05-14: Seed the first hosted NZ web assignment
+
+Decision:
+Use the hosted Convex deployment for the first real NZ RA web assignment, with
+the public verification map loading a named 50-task batch from the backend.
+
+Rationale:
+The spreadsheet bridge helped us understand the evidence fields, but it asks
+the RA to copy rows by hand and gives us no shared task state. A small
+backend-backed batch lets Andre work from a single web link, save drafts, submit
+rows for review, and avoid re-checking tasks that have already been acted on.
+
+Consequences:
+The hosted task backend now has the `nz-temporal-ra-workpack-001` batch seeded
+with 50 open tasks. The public map is configured to use the hosted Convex
+deployment and Google sign-in. Human users still have to claim their pending
+invites on first sign-in, and accepted evidence still has to move through the
+review/export/`pow` path before it can affect the master map.

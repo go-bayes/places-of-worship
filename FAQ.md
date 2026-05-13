@@ -93,25 +93,28 @@ hashes, and manifests.
 
 ## How does the shared RA spreadsheet fit in?
 
-For the current pilot, the project uses a project-owned Google Sheet as the
-working evidence store. Trusted editors may add or revise evidence rows there.
-The Sheet is not the master database.
+The spreadsheet is now the fallback and export format, not the preferred RA
+working surface once the shared backend is enabled. The New Zealand task map is
+being wired to Convex so trusted assistants can save drafts, submit evidence
+for review, and skip tasks without copying rows by hand.
 
-Rows from the Sheet should later be exported or ingested, validated, staged,
-reviewed, and converted into accepted change events. Only accepted events affect
-rebuilt master outputs.
+If Convex is unavailable, the project can still use a project-owned Google
+Sheet as the temporary evidence store. Rows from the Sheet, or exports from
+Convex, should later be validated, staged, reviewed, and converted into
+accepted change events. Only accepted events affect rebuilt master outputs.
 
 ## How can RAs avoid duplicating task work?
 
-For the current demo, the map only remembers copied or skipped tasks in the
-same browser. A `tentatively closed` badge means the browser has copied a row
-for that task. It is not a shared review decision, and it is not visible to
-another browser or collaborator.
+When the shared backend is enabled, RAs should rely on backend task status:
+open, draft saved, skipped, needs review, reviewed, or reopened. That status is
+visible to signed-in project users and is meant to prevent duplicate work.
 
-The shared Sheet is the durable pilot record. Before spending time on a task,
-check whether the Sheet already has a row with the same `source_record_id`
-(the map task id), `matched_current_site_id`, `candidate_site_id`, or
-`matched_osm_id`.
+In spreadsheet fallback mode, the map only remembers copied or skipped tasks in
+the same browser. A `tentatively closed` badge means the browser has copied a
+row for that task. It is not a shared review decision, and it is not visible to
+another browser or collaborator. In that mode, check whether the Sheet already
+has a row with the same `source_record_id` (the map task id),
+`matched_current_site_id`, `candidate_site_id`, or `matched_osm_id`.
 
 Multiple rows for the same place can be correct when they capture different
 evidence: for example, one row for a 2013 directory, one row for 2018 Street
@@ -120,11 +123,8 @@ use finding. Avoid adding a second row that repeats the same source and same
 claim. When adding another row for the same place, make the new evidence or
 reason clear in the evidence note.
 
-The planned fix is a shared task store outside the master database. The map or
-portal should read and update task status there, marking tasks as open,
-assigned, provisionally closed, reviewed, or reopened. Accepted review decisions
-then become change events and rebuild the master; the task store itself is not
-the master.
+The shared backend is that task store. Accepted review decisions then become
+change events and rebuild the master; the task store itself is not the master.
 
 ## Will Convex be the master database?
 
@@ -163,21 +163,36 @@ record the interpretation in the date field only when it can be expressed in
 one of those formats, set the matching precision field where available, and
 preserve the original wording in the evidence note or raw-date field.
 
-## How do we record dates outside 2013, 2018, and 2023?
+## Are target years the same for every country?
 
-Use the target-year columns for the three census-wave questions. Use opening,
-closure, or later-change fields for other useful evidence, such as when worship
-began at a site, when a building was opened, when worship use ended, when a
-site was first or last seen in a source, or when a later shared-use or
-multi-denominational change occurred.
+No. Target years are country-specific research or census anchors. New Zealand
+currently uses 2013, 2018, and 2023 because those are the census-linked years
+for the pilot. Vanuatu should begin with 1989, 1999, 2009, and 2020 because
+those years align with the Vanuatu census reporting frame for religion.
+
+The target-year fields answer a narrow question: what does a source support
+about worship use at that site in that year? Other useful dates belong in
+lifecycle fields.
+
+## How do we record dates outside a country's target years?
+
+Use the target-year columns for the country-specific status questions. Use
+opening, closure, or later-change fields for other useful evidence, such as
+when worship began at a site, when a building was opened, when worship use
+ended, when a site was first or last seen in a source, or when a later
+shared-use or multi-denominational change occurred.
 
 For example, if a source says a site became multi-denominational in 2024, record
-the target years that the source supports, then use the opening/closure/change fields
-with `use_changed_date = 2024`, date precision `year`, and an evidence note
-explaining the claim. If one source gives several distinct opening, closure, or
-change dates, it
-is acceptable to create more than one evidence row when each row carries a
-different source-backed claim.
+the target years that the source supports, then use the opening/closure/change
+fields with `use_changed_date = 2024`, date precision `year`, and an evidence
+note explaining the claim. If one source gives several distinct opening,
+closure, or change dates, it is acceptable to create more than one evidence row
+when each row carries a different source-backed claim.
+
+Historical country protocols can allow much earlier dates. For Vanuatu, the
+interface should accept valid dates from 1600 onward so RAs can record mission,
+colonial, and denominational evidence without forcing it into modern census
+target years.
 
 ## Will the map generate tasks automatically?
 

@@ -11,6 +11,8 @@
 ## Where To Look
 
 - `ROADMAP.md`: high-level phases, non-goals, and long-horizon direction.
+- `docs/system-map.md`: compact module map. Use it to place work inside the
+  right part of the system before changing planning or task lists.
 - `PLANNING.md`: active design, priorities, next steps, and open questions.
 - `BRAINSTORMING.md`: tool and architecture ideas still being considered.
   Treat entries as options, not decisions, until they move into planning or the
@@ -27,9 +29,9 @@
 - `schemas/`: data contracts. Update schemas before changing dependent shapes.
 - `docs/ra-nz-pilot-task.md`: current RA-facing task instructions for the
   time-bounded New Zealand web/map-first pilot.
-- `docs/ra-map-triage-guide.md`: RA-facing map-to-spreadsheet triage
-  instructions for missing sites, duplicates, disappeared sites, priority
-  tasks, and target-year states.
+- `docs/ra-map-triage-guide.md`: RA-facing map triage instructions for missing
+  sites, duplicates, disappeared sites, priority tasks, target-year states, and
+  the spreadsheet fallback.
 - `docs/development/`: implementation-facing CLI, staging, and proposal
   mapping notes. Keep these out of the default RA task path unless explicitly
   requested.
@@ -78,8 +80,8 @@
 - Governed data modification: Rust (`pow validate`, `pow stage`, later diff,
   review, replay, and export).
 - Python: support/API tooling only; use `uv`.
-- Frontend: static HTML/CSS/JavaScript map products until a secure backend is
-  ready.
+- Frontend: static HTML/CSS/JavaScript map products, with configuration-gated
+  Convex save/submit paths for the RA task map.
 - Backend direction for the RA task map: Convex spike for shared live
   task/review state, exported into `pow`; no direct master writes from public
   or RA interfaces.

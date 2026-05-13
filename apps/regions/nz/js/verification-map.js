@@ -1,14 +1,67 @@
-const DATA_BASE = (() => {
-    const prefix = window.location.pathname.includes("/places-of-worship/") ? "/places-of-worship" : "";
-    return `${window.location.origin}${prefix}/apps/regions/nz/data/`;
-})();
-
 const SEARCH_PARAMS = new URLSearchParams(window.location.search);
 const DEMO_MODE = SEARCH_PARAMS.get("demo") !== "0";
 const INTAKE_ENABLED = DEMO_MODE;
-const TARGET_YEARS = ["2013", "2018", "2023"];
-const SESSION_LOG_KEY = "pow_ra_session_v1";
-const RA_INITIALS_KEY = "pow_ra_initials";
+const COUNTRY_CONFIGS = {
+    nz: {
+        countryCode: "NZ",
+        countryName: "New Zealand",
+        targetYears: ["2013", "2018", "2023"],
+        defaultTargetYear: "2023",
+        dataPath: "apps/regions/nz/data/",
+        mapCentre: [-41.235726, 172.5118422],
+        mapZoom: 6,
+        collectionBatch: "nz-map-workbench-demo",
+        sourceDatasetId: "nz_static_verification_map",
+        mapSource: "nz_verification_static_map_workbench",
+        nominationSource: "nz_verification_static_map_nomination",
+        temporalLossAction: {
+            value: "present_2013_absent_2018",
+            label: "Present in 2013, absent in 2018",
+            statuses: {
+                "2013": "present",
+                "2018": "absent",
+                "2023": "not_assessed",
+            },
+            note: "Evidence appears to support worship use in 2013 and absence by 2018; reviewer to confirm dates and status.",
+        },
+    },
+    vu: {
+        countryCode: "VU",
+        countryName: "Vanuatu",
+        targetYears: ["1989", "1999", "2009", "2020"],
+        defaultTargetYear: "2020",
+        dataPath: "",
+        mapCentre: [-16.2902, 167.7019],
+        mapZoom: 7,
+        collectionBatch: "vu-map-workbench-demo",
+        sourceDatasetId: "vu_static_verification_map",
+        mapSource: "vu_verification_static_map_workbench",
+        nominationSource: "vu_verification_static_map_nomination",
+        temporalLossAction: {
+            value: "target_year_loss_or_changed_use",
+            label: "Present in one target year, absent in a later target year",
+            statuses: {
+                "1989": "present",
+                "2020": "absent",
+            },
+            note: "Evidence appears to support worship use in one target year and absence or changed use in a later target year; reviewer to confirm dates and status.",
+        },
+    },
+};
+const COUNTRY_KEY = SEARCH_PARAMS.get("country") === "vu" ? "vu" : "nz";
+const COUNTRY_CONFIG = COUNTRY_CONFIGS[COUNTRY_KEY];
+const TARGET_YEARS = COUNTRY_CONFIG.targetYears;
+const DEFAULT_TARGET_YEAR = COUNTRY_CONFIG.defaultTargetYear || TARGET_YEARS[TARGET_YEARS.length - 1];
+const ASSIGNMENT_BATCH_ID = (SEARCH_PARAMS.get("batch") || "").trim();
+const ASSIGNMENT_MODE = ASSIGNMENT_BATCH_ID.length > 0;
+const ASSIGNMENT_SESSION_SEGMENT = ASSIGNMENT_BATCH_ID
+    ? `:${ASSIGNMENT_BATCH_ID.toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-|-$/g, "").slice(0, 64)}`
+    : "";
+const LEGACY_SESSION_LOG_KEY = "pow_ra_session_v1";
+const LEGACY_RA_INITIALS_KEY = "pow_ra_initials";
+const COUNTRY_SESSION_LOG_KEY = `pow_ra_session_v1:${COUNTRY_CONFIG.countryCode.toLowerCase()}`;
+const SESSION_LOG_KEY_PREFIX = `${COUNTRY_SESSION_LOG_KEY}${ASSIGNMENT_SESSION_SEGMENT}:`;
+const RA_INITIALS_KEY = `pow_ra_initials:${COUNTRY_CONFIG.countryCode.toLowerCase()}`;
 const SESSION_RECENT_LIMIT = 25;
 const WIDE_EVIDENCE_FIELDS = [
     "evidence_row_id", "collection_batch", "country_code", "area_hint",
@@ -41,11 +94,12 @@ const WIDE_EVIDENCE_FIELDS = [
     "use_changed_date", "use_changed_date_precision", "relocated_date",
     "relocated_date_precision", "date_evidence_raw", "date_evidence_summary",
     "existence_status", "worship_use_status", "public_access_status",
-    "target_year_2013_status", "target_year_2013_probability",
-    "target_year_2013_evidence", "target_year_2018_status",
-    "target_year_2018_probability", "target_year_2018_evidence",
-    "target_year_2023_status", "target_year_2023_probability",
-    "target_year_2023_evidence", "quality_flag", "review_status",
+    ...TARGET_YEARS.flatMap(year => [
+        `target_year_${year}_status`,
+        `target_year_${year}_probability`,
+        `target_year_${year}_evidence`,
+    ]),
+    "quality_flag", "review_status",
     "privacy_flag", "licence_flag", "extracted_by", "extracted_at",
     "reviewed_by", "reviewed_at", "review_note", "exclusion_reason",
 ];
@@ -73,6 +127,24 @@ const ASSESSMENT_CONFIDENCE_OPTIONS = [
     ["0.9", "High (0.90)"],
     ["0.7", "Medium (0.70)"],
     ["0.5", "Low (0.50)"],
+];
+const SOURCE_TYPE_OPTIONS = [
+    ["osm_history", "OSM history"],
+    ["osm_date_tags", "OSM date tags"],
+    ["street_imagery", "Street imagery / Street View"],
+    ["aerial_imagery", "Aerial imagery"],
+    ["field_observation", "Field observation"],
+    ["denominational_directory", "Denominational directory"],
+    ["charities_register", "Charities register"],
+    ["incorporated_societies", "Incorporated societies"],
+    ...(COUNTRY_CONFIG.countryCode === "NZ" ? [
+        ["linz_building_outlines", "LINZ building outlines"],
+        ["linz_property", "LINZ property/address"],
+    ] : []),
+    ["archived_website", "Archived website"],
+    ["local_council", "Local council"],
+    ["heritage_list", "Heritage list"],
+    ["other", "Other"],
 ];
 const DATE_PRECISION_OPTIONS = [
     ["day", "Day"],
@@ -117,7 +189,11 @@ const LIFECYCLE_FIELD_BY_EVENT = {
 };
 
 function dataUrl(path) {
-    return new URL(path, DATA_BASE).toString();
+    if (!COUNTRY_CONFIG.dataPath) {
+        throw new Error(`${COUNTRY_CONFIG.countryName} task data is not configured yet.`);
+    }
+    const prefix = window.location.pathname.includes("/places-of-worship/") ? "/places-of-worship/" : "/";
+    return new URL(`${prefix}${COUNTRY_CONFIG.dataPath}${path}`, window.location.origin).toString();
 }
 
 function demoUrl() {
@@ -137,6 +213,11 @@ function cap(value) {
     return String(value || "")
         .replaceAll("_", " ")
         .replace(/\b\w/g, letter => letter.toUpperCase());
+}
+
+function targetYearListText(years = TARGET_YEARS) {
+    if (years.length <= 1) return years[0] || "the target year";
+    return `${years.slice(0, -1).join(", ")} or ${years[years.length - 1]}`;
 }
 
 function slug(value, maxLength = 44) {
@@ -166,6 +247,8 @@ function tsvRowFromObject(row) {
 function isValidPartialDateText(value) {
     const text = String(value || "").trim();
     if (!text) return true;
+    const year = Number(text.slice(0, 4));
+    if (!Number.isInteger(year) || year < 1000 || year > 2100) return false;
     if (/^\d{4}$/.test(text)) return true;
     if (/^\d{4}-(0[1-9]|1[0-2])$/.test(text)) return true;
     const fullDate = text.match(/^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/);
@@ -192,6 +275,37 @@ function selectOptionsHtml(options, selectedValue) {
 
 function optionLabel(options, selectedValue) {
     return options.find(([value]) => value === selectedValue)?.[1] || selectedValue;
+}
+
+function statusOptionsHtml() {
+    return `
+        <option value="not_assessed">Not assessed</option>
+        <option value="present">Present</option>
+        <option value="absent">Absent</option>
+        <option value="uncertain">Uncertain</option>
+    `;
+}
+
+function targetYearStatusControlsHtml() {
+    return TARGET_YEARS.map(year => `
+        <label>
+            ${escapeHtml(year)} status
+            <select id="status${escapeHtml(year)}">
+                ${statusOptionsHtml()}
+            </select>
+        </label>
+    `).join("");
+}
+
+function nominationTypeOptionsHtml() {
+    return [
+        `<option value="current_place_missing_from_project_map">Current place missing from project map</option>`,
+        ...TARGET_YEARS.map(year => `<option value="lost_${escapeHtml(year)}_place_of_worship">Lost ${escapeHtml(year)} place of worship</option>`),
+        `<option value="denomination_switch_or_reuse">Denomination switch or reuse</option>`,
+        `<option value="shared_building_multiple_congregations">Shared building with multiple congregations</option>`,
+        `<option value="split_or_merged_site_records">Split or merged site records</option>`,
+        `<option value="charity_record_for_site_matching">Charity record for site matching</option>`,
+    ].join("");
 }
 
 function priorityColor(priority) {
@@ -332,20 +446,18 @@ function normaliseSiteType(value) {
 }
 
 function statusDefaultsForAction(action, targetYear, props) {
-    const statuses = {
-        "2013": "not_assessed",
-        "2018": "not_assessed",
-        "2023": "not_assessed",
-    };
+    const statuses = Object.fromEntries(TARGET_YEARS.map(year => [year, "not_assessed"]));
+    const latestYear = TARGET_YEARS[TARGET_YEARS.length - 1];
+    const lossAction = COUNTRY_CONFIG.temporalLossAction;
 
     if (action === "confirm_current_record" || action === "denomination_or_shared_use") {
         statuses[targetYear] = "present";
     } else if (action === "missing_current_site") {
-        statuses["2023"] = "present";
-    } else if (action === "present_2013_absent_2018") {
-        statuses["2013"] = "present";
-        statuses["2018"] = "absent";
-        statuses["2023"] = "not_assessed";
+        statuses[latestYear] = "present";
+    } else if (action === lossAction.value) {
+        Object.entries(lossAction.statuses || {}).forEach(([year, status]) => {
+            if (year in statuses) statuses[year] = status;
+        });
     } else if (action === "closed_or_changed_use") {
         statuses[targetYear] = "absent";
     } else if (action === "needs_review" || action === "possible_duplicate") {
@@ -363,7 +475,7 @@ function assessmentDefaultsForAction(action, statuses = {}) {
     const anyAbsent = statusValues.includes("absent");
     const isMissing = action === "missing_current_site";
     const isDuplicate = action === "possible_duplicate";
-    const isClosed = action === "closed_or_changed_use" || action === "present_2013_absent_2018";
+    const isClosed = action === "closed_or_changed_use" || action === COUNTRY_CONFIG.temporalLossAction.value;
     const needsReview = action === "needs_review";
 
     let worshipUseStatus = "uncertain";
@@ -388,7 +500,7 @@ function actionLabelForRa(action) {
     if (action === "confirm_current_record") return "Confirm current site";
     if (action === "missing_current_site") return "Missing from project map";
     if (action === "possible_duplicate") return "Possible duplicate";
-    if (action === "present_2013_absent_2018") return "Present in 2013, absent in 2018";
+    if (action === COUNTRY_CONFIG.temporalLossAction.value) return COUNTRY_CONFIG.temporalLossAction.label;
     if (action === "closed_or_changed_use") return "Closed or changed use";
     if (action === "denomination_or_shared_use") return "Denomination/shared use";
     return "Needs review";
@@ -398,7 +510,7 @@ function reviewNoteForAction(action) {
     if (action === "confirm_current_record") return "RA source check supports current worship-site record.";
     if (action === "missing_current_site") return "Possible current PoW missing from the project map; OSM may already have a candidate object. Reviewer to decide whether to create or link a site.";
     if (action === "possible_duplicate") return "Possible duplicate or merge candidate; reviewer to compare linked ids and site identity.";
-    if (action === "present_2013_absent_2018") return "Evidence appears to support worship use in 2013 and absence by 2018; reviewer to confirm dates and status.";
+    if (action === COUNTRY_CONFIG.temporalLossAction.value) return COUNTRY_CONFIG.temporalLossAction.note;
     if (action === "closed_or_changed_use") return "Evidence suggests worship use closed or changed; reviewer to distinguish building existence from worship function.";
     if (action === "denomination_or_shared_use") return "Evidence suggests denomination change, shared use, or multi-use building; reviewer to preserve concurrent uses if present.";
     return "Needs reviewer decision.";
@@ -432,7 +544,7 @@ function taskFocusForAction(action, priority) {
 function checklistItemForCheck(check) {
     const id = check?.check_id || "";
     if (id === "missing_osm_lifecycle_date") {
-        return "Look for opening, first-seen, closure, or changed-use evidence that helps assess 2013, 2018, or 2023 worship use.";
+        return `Look for opening, first-seen, closure, or changed-use evidence that helps assess ${targetYearListText()} worship use.`;
     }
     if (id === "missing_address") {
         return "Find a source-backed street address or locality, and note if the location remains approximate.";
@@ -452,8 +564,8 @@ function checklistItemForCheck(check) {
     if (id === "near_duplicate_name" || id === "same_coordinate_cluster") {
         return "Compare nearby or similarly named records and record related ids if this may be a duplicate, shared building, or separate congregation.";
     }
-    if (id === "coordinate_outside_nz_bounds") {
-        return "Check the coordinates and record a location problem if the point is outside New Zealand or clearly misplaced.";
+    if (id === "coordinate_outside_nz_bounds" || id === "coordinate_outside_country_bounds") {
+        return `Check the coordinates and record a location problem if the point is outside ${COUNTRY_CONFIG.countryName} or clearly misplaced.`;
     }
     return check?.message || "Review the automated flag and record source-backed evidence if it changes the site assessment.";
 }
@@ -546,6 +658,101 @@ function deriveTargetYearStatus(props, targetYear) {
     };
 }
 
+function osmObjectUrl(osmType, osmId) {
+    if (!osmType || !osmId) return "";
+    return `https://www.openstreetmap.org/${encodeURIComponent(osmType)}/${encodeURIComponent(osmId)}`;
+}
+
+function backendTaskAction(task, context) {
+    if (context.case_type === "control_confirmation") return "review_when_sampling";
+    if (task.task_type === "possible_duplicate") return "possible_duplicate";
+    if (task.task_type === "missing_from_project_map") return "missing_current_site";
+    return "needs_human_review";
+}
+
+function backendTargetYearFields(context) {
+    const statuses = context.target_year_statuses || {};
+    return Object.fromEntries(TARGET_YEARS.flatMap(year => {
+        const entry = statuses[year] || {};
+        return [
+            [`target_year_${year}_status`, entry.status || "not_assessed"],
+            [`target_year_${year}_basis`, entry.basis || ""],
+            [`target_year_${year}_evidence`, entry.evidence || ""],
+        ];
+    }));
+}
+
+function searchUrlForTask(name, locality) {
+    const query = [name, locality, COUNTRY_CONFIG.countryName, "place of worship"].filter(Boolean).join(" ");
+    return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+}
+
+function mapUrlForCoordinates(coordinates) {
+    if (!Array.isArray(coordinates) || coordinates.length < 2) return "";
+    const [lng, lat] = coordinates;
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${lat},${lng}`)}`;
+}
+
+function streetViewUrlForCoordinates(coordinates) {
+    if (!Array.isArray(coordinates) || coordinates.length < 2) return "";
+    const [lng, lat] = coordinates;
+    return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${encodeURIComponent(`${lat},${lng}`)}`;
+}
+
+function featureFromBackendTask(task) {
+    const context = task.source_context || {};
+    const coordinates = task.geometry?.coordinates || [];
+    const osmUrl = context.osm_object_url || osmObjectUrl(task.osm_object_type, task.matched_osm_id);
+    const osmHistoryUrl = task.osm_object_type && task.matched_osm_id ? `${osmUrl}/history` : "";
+    const originTag = context.origin_tag || "";
+    const originRaw = context.origin_raw || "";
+    const closureRaw = context.closure_raw || "";
+    const properties = {
+        task_id: task.task_id,
+        master_snapshot_id: ASSIGNMENT_BATCH_ID || task.batch_id || "",
+        master_site_id: task.matched_current_site_id || context.matched_current_project_id || "",
+        source_record_id: task.source_record_id || context.source_record_id || "",
+        batch_id: task.batch_id || "",
+        country_code: task.country_code || COUNTRY_CONFIG.countryCode,
+        name: task.name || context.latest_name || context.matched_current_name || "Unnamed place of worship",
+        address: task.address || "",
+        locality: task.locality || "",
+        religion: context.religion || "",
+        denomination: context.denomination || "",
+        verification_priority: task.priority || "medium",
+        automated_suggested_action: backendTaskAction(task, context),
+        automated_check_count: (task.automated_checks || []).length,
+        automated_checks: task.automated_checks || [],
+        task_brief: task.task_brief || context.main_question || "",
+        source_hints: context.source_hints || "",
+        selection_reason: context.selection_reason || "",
+        case_type: context.case_type || task.task_type || "",
+        osm_object_url: osmUrl,
+        osm_history_url: osmHistoryUrl,
+        osm_map_url: osmUrl,
+        google_maps_url: mapUrlForCoordinates(coordinates),
+        street_view_url: streetViewUrlForCoordinates(coordinates),
+        search_queries: {
+            name_locality: {
+                google_url: searchUrlForTask(task.name || context.latest_name || "", task.locality || ""),
+            },
+        },
+        osm_type: task.osm_object_type || "",
+        osm_id: task.matched_osm_id || "",
+        osm_start_date: originTag === "start_date" ? originRaw : "",
+        osm_old_start_date: originTag === "old_start_date" ? originRaw : "",
+        osm_end_date: closureRaw,
+        osm_lifecycle_date_notes: context.osm_date_tags_by_year || "",
+        source_context: context,
+        ...backendTargetYearFields(context),
+    };
+    return {
+        type: "Feature",
+        geometry: task.geometry || { type: "Point", coordinates: [] },
+        properties,
+    };
+}
+
 function actionLabel(action) {
     if (action === "needs_human_review") return "Needs human review";
     if (action === "review_when_sampling") return "Spot-check in sample";
@@ -562,17 +769,33 @@ class NzVerificationMap {
         this.markersByTaskId = new Map();
         this.selectedTask = null;
         this.visibleLimit = 80;
-        this.targetYear = "2023";
+        this.targetYear = DEFAULT_TARGET_YEAR;
         this.sessionEntries = this.readSessionLog();
+        this.backend = window.PowConvexTaskClient
+            ? new window.PowConvexTaskClient({
+                ...(window.POW_CONVEX_CONFIG || {}),
+                countryCode: COUNTRY_CONFIG.countryCode,
+            })
+            : null;
+        this.backendUser = null;
+        this.backendTasksById = new Map();
+        this.backendLastError = "";
         this.init();
     }
 
     readSessionLog() {
         try {
-            const raw = localStorage.getItem(SESSION_LOG_KEY);
+            const currentKey = this.sessionLogKey();
+            const raw = localStorage.getItem(currentKey)
+                || localStorage.getItem(COUNTRY_SESSION_LOG_KEY)
+                || (COUNTRY_CONFIG.countryCode === "NZ" ? localStorage.getItem(LEGACY_SESSION_LOG_KEY) : "");
             if (!raw) return [];
             const parsed = JSON.parse(raw);
-            return Array.isArray(parsed) ? parsed : [];
+            const entries = Array.isArray(parsed) ? parsed : [];
+            if (entries.length && !localStorage.getItem(currentKey)) {
+                localStorage.setItem(currentKey, JSON.stringify(entries));
+            }
+            return entries;
         } catch (error) {
             console.warn("Could not read session log:", error);
             return [];
@@ -581,7 +804,7 @@ class NzVerificationMap {
 
     writeSessionLog() {
         try {
-            localStorage.setItem(SESSION_LOG_KEY, JSON.stringify(this.sessionEntries));
+            localStorage.setItem(this.sessionLogKey(), JSON.stringify(this.sessionEntries));
         } catch (error) {
             console.warn("Could not save session log:", error);
         }
@@ -616,13 +839,26 @@ class NzVerificationMap {
 
     getRaInitials() {
         try {
-            return localStorage.getItem(RA_INITIALS_KEY) || "";
+            return localStorage.getItem(RA_INITIALS_KEY)
+                || (COUNTRY_CONFIG.countryCode === "NZ" ? localStorage.getItem(LEGACY_RA_INITIALS_KEY) : "")
+                || "";
         } catch (error) {
             return "";
         }
     }
 
+    sessionLogKey(initials = this.getRaInitials()) {
+        const suffix = String(initials || "anon")
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9_-]+/g, "-")
+            .replace(/^-|-$/g, "")
+            || "anon";
+        return `${SESSION_LOG_KEY_PREFIX}${suffix}`;
+    }
+
     setRaInitials(value) {
+        const previousKey = this.sessionLogKey();
         const trimmed = String(value || "").trim().slice(0, 8);
         try {
             if (trimmed) {
@@ -630,10 +866,22 @@ class NzVerificationMap {
             } else {
                 localStorage.removeItem(RA_INITIALS_KEY);
             }
+            const nextKey = this.sessionLogKey(trimmed);
+            if (previousKey !== nextKey && this.sessionEntries?.length) {
+                const existing = localStorage.getItem(nextKey);
+                if (existing) {
+                    const parsed = JSON.parse(existing);
+                    this.sessionEntries = Array.isArray(parsed) ? parsed : this.sessionEntries;
+                } else {
+                    localStorage.setItem(nextKey, JSON.stringify(this.sessionEntries));
+                }
+            }
         } catch (error) {
             console.warn("Could not save RA initials:", error);
         }
         this.renderRaInitialsBadge();
+        this.renderSessionPanel();
+        this.renderTaskList();
     }
 
     promptForRaInitials(force) {
@@ -670,11 +918,84 @@ class NzVerificationMap {
         });
     }
 
+    renderBackendPanel() {
+        const panel = document.getElementById("backendPanel");
+        if (!panel) return;
+        const assignmentLabel = ASSIGNMENT_MODE
+            ? `<span>Assigned batch: <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong></span>`
+            : "";
+        if (!this.backend?.configured) {
+            panel.innerHTML = `
+                <div class="backend-card disabled">
+                    <strong>Shared task backend</strong>
+                    ${assignmentLabel}
+                    <span>${ASSIGNMENT_MODE
+                        ? "This assignment needs the shared backend. Ask JB for the backend-enabled link before starting."
+                        : "Not configured on this deployment. The page is using the local demo and spreadsheet fallback."}</span>
+                </div>
+            `;
+            return;
+        }
+
+        if (!this.backendUser) {
+            panel.innerHTML = `
+                <div class="backend-card">
+                    <strong>Shared task backend</strong>
+                    ${assignmentLabel}
+                    <span>Sign in with Google to load assigned tasks and save evidence directly for review.</span>
+                    <div id="googleSignInButton"></div>
+                    ${this.backendLastError ? `<span class="copy-status">${escapeHtml(this.backendLastError)}</span>` : ""}
+                </div>
+            `;
+            this.backend.renderSignInButton(document.getElementById("googleSignInButton"), {
+                initials: this.getRaInitials(),
+                onSignedIn: async user => {
+                    this.backendUser = user;
+                    await this.refreshBackendTasks();
+                    this.renderBackendPanel();
+                    this.applyFilters();
+                    if (this.selectedTask) {
+                        this.renderDetail(this.selectedTask);
+                    }
+                },
+                onError: error => {
+                    this.backendLastError = error.message || "Could not sign in to the shared backend.";
+                    this.renderBackendPanel();
+                },
+            }).catch(error => {
+                this.backendLastError = error.message || "Could not initialise sign-in.";
+                this.renderBackendPanel();
+            });
+            return;
+        }
+
+        const label = this.backendUser.initials || this.backendUser.email || "signed in";
+        panel.innerHTML = `
+            <div class="backend-card">
+                <strong>Shared task backend</strong>
+                ${assignmentLabel}
+                <span>Signed in as ${escapeHtml(label)}. ${ASSIGNMENT_MODE ? `${this.backendTasksById.size} assigned task${this.backendTasksById.size === 1 ? "" : "s"} loaded.` : "Saves and submissions go to Convex for reviewer follow-up."}</span>
+                <div class="backend-actions">
+                    <button type="button" class="secondary" id="refreshBackendTasksButton">Refresh task state</button>
+                </div>
+            </div>
+        `;
+        document.getElementById("refreshBackendTasksButton")?.addEventListener("click", async () => {
+            await this.refreshBackendTasks();
+            this.applyFilters();
+            if (this.selectedTask) {
+                this.renderDetail(this.selectedTask);
+            }
+        });
+    }
+
     async init() {
         this.setupMap();
         this.setupPageMode();
         this.setupFilters();
+        this.renderBackendPanel();
         await this.loadTasks();
+        await this.refreshBackendTasks();
         this.applyFilters();
         this.renderSessionPanel();
         if (DEMO_MODE) {
@@ -772,7 +1093,8 @@ class NzVerificationMap {
         const link = document.createElement("a");
         link.href = url;
         const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-        link.download = `pow-ra-session-${stamp}.json`;
+        const initials = this.getRaInitials() || "anon";
+        link.download = `pow-${COUNTRY_CONFIG.countryCode.toLowerCase()}-ra-session-${slug(initials, 16)}-${stamp}.json`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -780,7 +1102,7 @@ class NzVerificationMap {
     }
 
     setupMap() {
-        this.map = L.map("map", { preferCanvas: true }).setView([-41.235726, 172.5118422], 6);
+        this.map = L.map("map", { preferCanvas: true }).setView(COUNTRY_CONFIG.mapCentre, COUNTRY_CONFIG.mapZoom);
         L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
             maxZoom: 19,
@@ -792,34 +1114,59 @@ class NzVerificationMap {
     }
 
     setupPageMode() {
+        document.title = `${COUNTRY_CONFIG.countryName} OSM Verification Tasks`;
+        const title = document.querySelector(".sidebar-header h1");
+        if (title) {
+            title.textContent = `${COUNTRY_CONFIG.countryName} OSM Verification`;
+        }
+
         const notice = document.getElementById("modeNotice");
         if (notice) {
             notice.classList.toggle("demo-warning", DEMO_MODE);
             notice.innerHTML = DEMO_MODE
-                ? "Demo mode: draft controls only. Nothing is uploaded or saved to the database. Do not enter private or sensitive data."
+                ? (ASSIGNMENT_MODE
+                    ? (this.backend?.configured
+                        ? `Assigned web workpack: <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Sign in to load tasks and save evidence. Do not enter private or sensitive data.`
+                        : `Assigned web workpack: <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. The shared backend is not configured here, so the assignment cannot be used on this deployment yet.`)
+                    : this.backend?.configured
+                    ? "Draft controls enabled. Sign in through the shared backend panel to save or submit evidence. Do not enter private or sensitive data."
+                    : "Draft controls enabled. The shared backend is not configured here, so nothing is uploaded or saved until you use the spreadsheet fallback. Do not enter private or sensitive data.")
                 : `Inspection only: form controls live in <a href="${escapeHtml(demoUrl())}">demo mode</a>. Nothing is uploaded either way.`;
             notice.setAttribute("role", DEMO_MODE ? "alert" : "note");
         }
 
         const quickstart = document.getElementById("quickstartBanner");
-        if (quickstart && DEMO_MODE && localStorage.getItem("pow_ra_quickstart_dismissed_v1") !== "1") {
+        const quickstartKey = ASSIGNMENT_MODE
+            ? `pow_ra_quickstart_dismissed_v1:${ASSIGNMENT_BATCH_ID}`
+            : "pow_ra_quickstart_dismissed_v1";
+        if (quickstart && DEMO_MODE && localStorage.getItem(quickstartKey) !== "1") {
             quickstart.innerHTML = `
                 <div class="quickstart" role="note">
-                    <strong>How this pilot works</strong>
-                    <ol>
-                        <li>Set <em>Target year</em> and <em>Priority</em> in the filters above.</li>
-                        <li>Click a task in the list or on the map.</li>
-                        <li>Open the source links in step 1 of the task panel.</li>
-                        <li>In step 2, choose what your evidence shows and confirm year statuses.</li>
-                        <li>In step 3, paste a short evidence note and the source URL or file reference.</li>
-                        <li>In step 4, click <em>Copy spreadsheet row</em> and paste into the working evidence sheet.</li>
-                    </ol>
+                    <strong>${ASSIGNMENT_MODE ? "How this assignment works" : "How this pilot works"}</strong>
+                    ${ASSIGNMENT_MODE ? `
+                        <ol>
+                            <li>Sign in with Google in the shared task backend panel.</li>
+                            <li>Work down the assigned task list. Start with the first 15 rows or about 90 minutes.</li>
+                            <li>Open the source links, especially the OSM object as context, then look for non-OSM evidence where possible.</li>
+                            <li>Record 2013, 2018, and 2023 status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
+                            <li>Use <em>Save draft</em> while working and <em>Submit for review</em> when the case is ready for JB to inspect.</li>
+                        </ol>
+                    ` : `
+                        <ol>
+                            <li>Set <em>Target year</em> and <em>Priority</em> in the filters above.</li>
+                            <li>Click a task in the list or on the map.</li>
+                            <li>Open the source links in step 1 of the task panel.</li>
+                            <li>In step 2, choose what your evidence shows and confirm year statuses.</li>
+                            <li>In step 3, paste a short evidence note and the source URL or file reference.</li>
+                            <li>In step 4, use <em>Save draft</em> or <em>Submit for review</em> when the shared backend is enabled. Use <em>Copy spreadsheet row</em> only as the fallback.</li>
+                        </ol>
+                    `}
                     <button type="button" class="quickstart-dismiss" id="quickstartDismiss">Hide this guide</button>
                 </div>
             `;
             document.getElementById("quickstartDismiss")?.addEventListener("click", () => {
                 quickstart.innerHTML = "";
-                localStorage.setItem("pow_ra_quickstart_dismissed_v1", "1");
+                localStorage.setItem(quickstartKey, "1");
             });
         } else if (quickstart) {
             quickstart.innerHTML = "";
@@ -827,7 +1174,7 @@ class NzVerificationMap {
 
         const nominationPanel = document.getElementById("nominationPanel");
         if (nominationPanel) {
-            nominationPanel.innerHTML = DEMO_MODE ? this.nominationFormHtml() : `
+            nominationPanel.innerHTML = ASSIGNMENT_MODE ? "" : DEMO_MODE ? this.nominationFormHtml() : `
                 <div class="disabled-panel">
                     Nominations are disabled for this feedback pilot. Use the map for inspection and send notes separately.
                     To inspect mock entry fields, <a href="${escapeHtml(demoUrl())}">open demo mode</a>.
@@ -847,9 +1194,14 @@ class NzVerificationMap {
 
         const targetYearSelect = document.getElementById("targetYearSelect");
         if (targetYearSelect) {
+            targetYearSelect.innerHTML = TARGET_YEARS.slice().reverse().map(year => `
+                <option value="${escapeHtml(year)}">${escapeHtml(year)}</option>
+            `).join("");
             targetYearSelect.value = this.targetYear;
             targetYearSelect.addEventListener("change", () => {
-                this.targetYear = TARGET_YEARS.includes(targetYearSelect.value) ? targetYearSelect.value : "2023";
+                this.targetYear = TARGET_YEARS.includes(targetYearSelect.value)
+                    ? targetYearSelect.value
+                    : DEFAULT_TARGET_YEAR;
                 this.applyFilters();
                 if (this.selectedTask) {
                     this.renderDetail(this.selectedTask);
@@ -863,6 +1215,24 @@ class NzVerificationMap {
     }
 
     async loadTasks() {
+        if (ASSIGNMENT_MODE) {
+            this.tasks = [];
+            const snapshotEl = document.getElementById("snapshotId");
+            if (snapshotEl) {
+                snapshotEl.textContent = this.backend?.configured
+                    ? `${ASSIGNMENT_BATCH_ID} | sign in to load assigned tasks`
+                    : `${ASSIGNMENT_BATCH_ID} | shared backend not configured`;
+            }
+            return;
+        }
+        if (!COUNTRY_CONFIG.dataPath) {
+            this.tasks = [];
+            const snapshotEl = document.getElementById("snapshotId");
+            if (snapshotEl) {
+                snapshotEl.textContent = `${COUNTRY_CONFIG.countryName} task data not configured`;
+            }
+            return;
+        }
         const response = await fetch(dataUrl("verification_tasks.geojson"));
         if (!response.ok) {
             throw new Error(`Failed to load verification tasks: ${response.status}`);
@@ -874,6 +1244,37 @@ class NzVerificationMap {
         if (snapshotEl) {
             const meta = geojson.metadata || {};
             snapshotEl.textContent = `${meta.master_snapshot_id || "unknown snapshot"} | ${meta.feature_count || this.tasks.length} tasks`;
+        }
+    }
+
+    async refreshBackendTasks() {
+        if (!this.backend?.configured || !this.backend.signedIn) return;
+        try {
+            const query = {
+                countryCode: COUNTRY_CONFIG.countryCode,
+                limit: 1000,
+            };
+            if (ASSIGNMENT_MODE) {
+                query.batchId = ASSIGNMENT_BATCH_ID;
+            }
+            const tasks = await this.backend.listTasks(query);
+            this.backendTasksById = new Map((tasks || []).map(task => [task.task_id, task]));
+            if (ASSIGNMENT_MODE) {
+                this.tasks = (tasks || []).map(featureFromBackendTask);
+                const snapshotEl = document.getElementById("snapshotId");
+                if (snapshotEl) {
+                    snapshotEl.textContent = `${ASSIGNMENT_BATCH_ID} | ${this.tasks.length} assigned task${this.tasks.length === 1 ? "" : "s"}`;
+                }
+                if (this.selectedTask && !this.backendTasksById.has(this.selectedTask.properties?.task_id)) {
+                    this.selectedTask = null;
+                    this.renderInitialDetail();
+                }
+            }
+            this.backendLastError = "";
+            this.renderBackendPanel();
+        } catch (error) {
+            this.backendLastError = error.message || "Could not refresh shared task state.";
+            this.renderBackendPanel();
         }
     }
 
@@ -890,9 +1291,12 @@ class NzVerificationMap {
                 props.name,
                 props.address,
                 props.master_site_id,
+                props.source_record_id,
                 props.osm_id,
                 props.religion,
                 props.denomination,
+                props.case_type,
+                props.task_brief,
             ].join(" ").toLowerCase();
 
             if (search && !searchText.includes(search)) return false;
@@ -912,7 +1316,9 @@ class NzVerificationMap {
         this.markersByTaskId.clear();
 
         this.filteredTasks.forEach(feature => {
-            const [lng, lat] = feature.geometry.coordinates;
+            const coordinates = feature.geometry?.coordinates || [];
+            if (coordinates.length < 2) return;
+            const [lng, lat] = coordinates;
             const props = feature.properties || {};
             const temporal = deriveTargetYearStatus(props, this.targetYear);
             const marker = L.marker([lat, lng], {
@@ -964,16 +1370,32 @@ class NzVerificationMap {
         if (!taskList) return;
 
         const visible = this.filteredTasks.slice(0, this.visibleLimit);
+        if (visible.length === 0) {
+            taskList.innerHTML = `
+                <div class="disabled-panel">
+                    ${ASSIGNMENT_MODE
+                        ? (this.backend?.configured && this.backendUser
+                            ? "No assigned tasks are currently visible. Refresh task state or clear filters."
+                            : "Sign in with Google to load this assigned workpack.")
+                        : "No tasks match the current filters."}
+                </div>
+            `;
+            return;
+        }
         taskList.innerHTML = visible.map(feature => {
             const props = feature.properties || {};
             const temporal = deriveTargetYearStatus(props, this.targetYear);
             const activeClass = this.selectedTask?.properties?.task_id === props.task_id ? " active" : "";
+            const backendTask = this.backendTasksById.get(props.task_id);
+            const backendBadge = backendTask
+                ? `<span class="backend-badge">${escapeHtml(backendTask.status.replaceAll("_", " "))}</span>`
+                : "";
             const outcome = this.sessionTaskOutcome(props.task_id);
-            const outcomeBadge = outcome
+            const outcomeBadge = backendBadge || (outcome
                 ? (outcome.type === "skipped"
                     ? `<span class="skip-badge">skipped</span>`
                     : `<span class="closed-badge">tentatively closed</span>`)
-                : "";
+                : "");
             return `
                 <button class="task-row${activeClass}" type="button" data-task-id="${escapeHtml(props.task_id)}">
                     <span class="task-row-title">
@@ -981,7 +1403,7 @@ class NzVerificationMap {
                         ${escapeHtml(props.name || "Unnamed site")}${outcomeBadge}
                     </span>
                     <span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))}</span>
-                    <span class="task-row-meta">${escapeHtml(cap(props.religion)) || "Unknown"} | ${escapeHtml(props.master_site_id)}</span>
+                    <span class="task-row-meta">${escapeHtml(cap(props.religion)) || "Unknown"} | ${escapeHtml(props.master_site_id || props.source_record_id || "")}</span>
                     <span class="task-row-meta">${escapeHtml(actionLabel(props.automated_suggested_action))} | ${props.automated_check_count} checks</span>
                 </button>
             `;
@@ -1025,9 +1447,10 @@ class NzVerificationMap {
     selectTask(feature, fromMarker, options = {}) {
         this.selectedTask = feature;
         const props = feature.properties || {};
-        const [lng, lat] = feature.geometry.coordinates;
+        const coordinates = feature.geometry?.coordinates || [];
+        const [lng, lat] = coordinates;
 
-        if (!fromMarker) {
+        if (!fromMarker && coordinates.length >= 2) {
             this.map.setView([lat, lng], Math.max(this.map.getZoom(), 16));
             const marker = this.markersByTaskId.get(props.task_id);
             if (marker) {
@@ -1053,6 +1476,23 @@ class NzVerificationMap {
     renderInitialDetail() {
         const panel = document.getElementById("detailPanel");
         if (!panel) return;
+        if (ASSIGNMENT_MODE) {
+            panel.innerHTML = `
+                <h2>Assigned web workpack</h2>
+                <div class="${this.backend?.configured ? "pilot-note" : "demo-warning"}" role="${this.backend?.configured ? "note" : "alert"}">
+                    ${this.backend?.configured
+                        ? `Sign in with Google, then work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong> from the task list. Use <em>Save draft</em> while working and <em>Submit for review</em> when a case is ready for JB.`
+                        : `This link points to <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>, but this deployment does not yet have the shared backend enabled.`}
+                </div>
+                <div class="detail-section">
+                    <h3>What to check</h3>
+                    <div class="disabled-panel">
+                        For each assigned case, answer the task question, seek non-OSM evidence where possible, record 2013, 2018, and 2023 status, preserve any useful opening or closure dates, and mark difficult cases as needing review.
+                    </div>
+                </div>
+            `;
+            return;
+        }
         panel.innerHTML = DEMO_MODE ? `
             <h2>Mock entry preview</h2>
             <div class="demo-warning" role="alert">
@@ -1093,6 +1533,30 @@ class NzVerificationMap {
         firstInput?.focus({ preventScroll: true });
     }
 
+    backendStatusHtml(props) {
+        if (!this.backend?.configured) return "";
+        const backendTask = this.backendTasksById.get(props.task_id);
+        if (!this.backendUser) {
+            return `
+                <div class="pilot-note">
+                    Sign in from the sidebar to save this task directly to the shared review backend.
+                </div>
+            `;
+        }
+        if (!backendTask) {
+            return `
+                <div class="demo-warning" role="alert">
+                    This task is not in Convex yet. Ask JB to seed the current task batch before saving evidence here.
+                </div>
+            `;
+        }
+        return `
+            <div class="pilot-note">
+                Shared backend status: <strong>${escapeHtml(backendTask.status.replaceAll("_", " "))}</strong>.
+            </div>
+        `;
+    }
+
     renderDetail(feature) {
         const props = feature.properties || {};
         const checks = props.automated_checks || [];
@@ -1102,6 +1566,7 @@ class NzVerificationMap {
 
         panel.innerHTML = `
             <h2>${escapeHtml(props.name || "Unnamed site")}</h2>
+            ${this.backendStatusHtml(props)}
             ${INTAKE_ENABLED ? this.workflowStepsHtml("inspect") : ""}
 
             <div class="detail-section">
@@ -1167,9 +1632,12 @@ class NzVerificationMap {
         const checks = props.automated_checks || [];
         const focus = taskFocusForAction(props.automated_suggested_action, props.verification_priority);
         const temporal = deriveTargetYearStatus(props, this.targetYear);
+        const context = props.source_context || {};
+        const briefText = props.task_brief || focus.text;
         const checklist = uniqueItems([
             "Confirm that the source evidence refers to this site, not only a similarly named organisation or nearby building.",
             `Assess worship-use status for ${this.targetYear}. The current map aid says ${statusLabel(temporal.status).toLowerCase()}; verify with sources.`,
+            context.andre_check || "",
             ...checks.map(checklistItemForCheck),
             "Record the closest supported action, target-year statuses, source title, URL or file reference, and a short evidence note.",
         ]);
@@ -1181,7 +1649,8 @@ class NzVerificationMap {
                     <span class="task-focus">${escapeHtml(focus.label)}</span>
                     <span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))}</span>
                 </div>
-                <p>${escapeHtml(focus.text)}</p>
+                <p>${escapeHtml(briefText)}</p>
+                ${props.source_hints ? `<p><strong>Source hints:</strong> ${escapeHtml(props.source_hints)}</p>` : ""}
                 <ol>
                     ${checklist.map(item => `<li>${escapeHtml(item)}</li>`).join("")}
                 </ol>
@@ -1197,7 +1666,7 @@ class NzVerificationMap {
             { id: "inspect", title: "1. Inspect", subtitle: "Open links" },
             { id: "decide", title: "2. Decide", subtitle: "Choose action" },
             { id: "evidence", title: "3. Evidence", subtitle: "Source + note" },
-            { id: "copy", title: "4. Copy row", subtitle: "Paste to sheet" },
+            { id: "copy", title: "4. Save", subtitle: this.backend?.configured ? "Backend review" : "Fallback copy" },
         ];
         return `
             <div class="workflow-steps" id="workflowSteps">
@@ -1265,13 +1734,26 @@ class NzVerificationMap {
         `;
     }
 
+    formModeNoticeHtml() {
+        if (this.backend?.configured && this.backendUser) {
+            return `
+                <div class="pilot-note">
+                    Shared backend enabled. Use <strong>Save draft</strong> or <strong>Submit for review</strong> to record this evidence without spreadsheet copy/paste.
+                </div>
+            `;
+        }
+        return `
+            <div class="demo-warning" role="alert">
+                Demo only. This generates local text to paste into the working sheet or send to JB; it does not save or submit data. Do not enter private or sensitive data.
+            </div>
+        `;
+    }
+
     reviewFormHtml() {
         return `
             <h3>2. Choose what your evidence shows</h3>
             <div class="review-form">
-                <div class="demo-warning" role="alert">
-                    Demo only. This generates local text to paste into the working sheet or send to JB; it does not save or submit data. Do not enter private or sensitive data.
-                </div>
+                ${this.formModeNoticeHtml()}
                 <label>
                     What did you find?
                     <select id="raActionSelect">
@@ -1279,56 +1761,17 @@ class NzVerificationMap {
                         <option value="confirm_current_record">Confirm current site</option>
                         <option value="missing_current_site">Missing from project map</option>
                         <option value="possible_duplicate">Possible duplicate</option>
-                        <option value="present_2013_absent_2018">Present in 2013, absent in 2018</option>
+                        <option value="${escapeHtml(COUNTRY_CONFIG.temporalLossAction.value)}">${escapeHtml(COUNTRY_CONFIG.temporalLossAction.label)}</option>
                         <option value="closed_or_changed_use">Closed or changed use</option>
                         <option value="denomination_or_shared_use">Denomination/shared use</option>
                     </select>
                 </label>
                 <div class="field-grid">
-                    <label>
-                        2013 status
-                        <select id="status2013">
-                            <option value="not_assessed">Not assessed</option>
-                            <option value="present">Present</option>
-                            <option value="absent">Absent</option>
-                            <option value="uncertain">Uncertain</option>
-                        </select>
-                    </label>
-                    <label>
-                        2018 status
-                        <select id="status2018">
-                            <option value="not_assessed">Not assessed</option>
-                            <option value="present">Present</option>
-                            <option value="absent">Absent</option>
-                            <option value="uncertain">Uncertain</option>
-                        </select>
-                    </label>
-                    <label>
-                        2023 status
-                        <select id="status2023">
-                            <option value="not_assessed">Not assessed</option>
-                            <option value="present">Present</option>
-                            <option value="absent">Absent</option>
-                            <option value="uncertain">Uncertain</option>
-                        </select>
-                    </label>
+                    ${targetYearStatusControlsHtml()}
                     <label>
                         Source type
                         <select id="sourceTypeSelect">
-                            <option value="osm_history">OSM history</option>
-                            <option value="osm_date_tags">OSM date tags</option>
-                            <option value="street_imagery">Street imagery / Street View</option>
-                            <option value="aerial_imagery">Aerial imagery</option>
-                            <option value="field_observation">Field observation</option>
-                            <option value="denominational_directory">Denominational directory</option>
-                            <option value="charities_register">Charities register</option>
-                            <option value="incorporated_societies">Incorporated societies</option>
-                            <option value="linz_building_outlines">LINZ building outlines</option>
-                            <option value="linz_property">LINZ property/address</option>
-                            <option value="archived_website">Archived website</option>
-                            <option value="local_council">Local council</option>
-                            <option value="heritage_list">Heritage list</option>
-                            <option value="other">Other</option>
+                            ${selectOptionsHtml(SOURCE_TYPE_OPTIONS, "osm_history")}
                         </select>
                     </label>
                     <label>
@@ -1416,17 +1859,33 @@ class NzVerificationMap {
                     Evidence note
                     <textarea id="decisionNote" rows="3" placeholder="One or two sentences explaining what the source says about this site at the target year."></textarea>
                 </label>
-                <h3>4. Copy the row to your spreadsheet</h3>
-                <div class="copy-help">
-                    <strong>What this does:</strong> Copies one tab-separated row to your clipboard. Switch to the working evidence spreadsheet, click column A in the next empty row under the unchanged header, and paste with <kbd>Cmd</kbd>+<kbd>V</kbd> (Mac) or <kbd>Ctrl</kbd>+<kbd>V</kbd> (Windows). Nothing is uploaded.
-                </div>
-                <div class="button-row">
-                    <button id="copyEvidenceRowButton" type="button">Copy spreadsheet row</button>
-                    <button id="copyDecisionButton" type="button">Copy review JSON</button>
-                </div>
+                <h3>4. Save for review</h3>
+                ${this.backend?.configured && this.backendUser ? `
+                    <div class="copy-help">
+                        <strong>Preferred:</strong> Save the evidence to the shared backend. Submitted cases move into JB's review queue.
+                    </div>
+                    <div class="button-row">
+                        <button id="saveDraftButton" type="button">Save draft</button>
+                        <button id="submitReviewButton" type="button">Submit for review</button>
+                    </div>
+                ` : ASSIGNMENT_MODE ? `
+                    <div class="demo-warning" role="alert">
+                        Sign in with Google from the shared backend panel before recording this assignment. Spreadsheet copy is disabled for the assigned web workpack.
+                    </div>
+                ` : `
+                    <div class="copy-help">
+                        <strong>Fallback:</strong> Copies one tab-separated row to your clipboard. Switch to the working evidence spreadsheet, click column A in the next empty row under the unchanged header, and paste with <kbd>Cmd</kbd>+<kbd>V</kbd> (Mac) or <kbd>Ctrl</kbd>+<kbd>V</kbd> (Windows). Nothing is uploaded.
+                    </div>
+                `}
+                ${ASSIGNMENT_MODE ? "" : `
+                    <div class="button-row">
+                        <button id="copyEvidenceRowButton" class="secondary" type="button">Copy spreadsheet row</button>
+                        <button id="copyDecisionButton" type="button">Copy review JSON</button>
+                    </div>
+                    <textarea id="evidenceRowOutput" class="json-output wide-output" rows="4" readonly></textarea>
+                    <textarea id="decisionJsonOutput" class="json-output" rows="5" readonly></textarea>
+                `}
                 <div id="copyStatus" class="copy-status" aria-live="polite"></div>
-                <textarea id="evidenceRowOutput" class="json-output wide-output" rows="4" readonly></textarea>
-                <textarea id="decisionJsonOutput" class="json-output" rows="5" readonly></textarea>
                 <details class="skip-form">
                     <summary>Nothing to record for this task — skip it</summary>
                     <label>
@@ -1474,8 +1933,8 @@ class NzVerificationMap {
                     sourceProvider.dispatchEvent(new Event("input", { bubbles: true }));
                 }
                 const sourceTypeSelect = document.getElementById("sourceTypeSelect");
-                if (sourceTypeSelect) {
-                    sourceTypeSelect.value = "osm_date_tags";
+                if (sourceTypeSelect && !String(sourceTypeSelect.value || "").startsWith("osm_")) {
+                    sourceTypeSelect.value = "osm_history";
                 }
                 this.updateWorkflowSteps();
             });
@@ -1534,6 +1993,8 @@ class NzVerificationMap {
 
         document.getElementById("copyEvidenceRowButton")?.addEventListener("click", () => this.copyEvidenceRow(props));
         document.getElementById("copyDecisionButton")?.addEventListener("click", () => this.copyDecision(props));
+        document.getElementById("saveDraftButton")?.addEventListener("click", () => this.saveEvidenceToBackend(props, { submit: false }));
+        document.getElementById("submitReviewButton")?.addEventListener("click", () => this.saveEvidenceToBackend(props, { submit: true }));
         document.getElementById("skipTaskButton")?.addEventListener("click", () => {
             const reason = (document.getElementById("skipReasonInput")?.value || "").trim();
             this.skipCurrentTask(props, reason);
@@ -1583,11 +2044,13 @@ class NzVerificationMap {
     }
 
     currentFormValues() {
+        const targetYearStatuses = Object.fromEntries(TARGET_YEARS.map(year => [
+            year,
+            document.getElementById(`status${year}`)?.value || "not_assessed",
+        ]));
         return {
             action: document.getElementById("raActionSelect")?.value || "needs_review",
-            status2013: document.getElementById("status2013")?.value || "not_assessed",
-            status2018: document.getElementById("status2018")?.value || "not_assessed",
-            status2023: document.getElementById("status2023")?.value || "not_assessed",
+            targetYearStatuses,
             sourceType: document.getElementById("sourceTypeSelect")?.value || "other",
             existenceStatus: document.getElementById("existenceStatusSelect")?.value || "uncertain",
             worshipUseStatus: document.getElementById("worshipUseStatusSelect")?.value || "uncertain",
@@ -1646,12 +2109,11 @@ class NzVerificationMap {
         const coordinates = this.selectedTask?.geometry?.coordinates || [];
         const [lng, lat] = coordinates;
         const sourceSlug = slug(values.sourceUrl || values.sourceTitle || values.note || "source", 32);
+        const statusSlug = TARGET_YEARS.map(year => values.targetYearStatuses[year] || "not_assessed").join("-");
         const evidenceSlug = slug([
             props.task_id || props.master_site_id || "candidate",
             values.action,
-            values.status2013,
-            values.status2018,
-            values.status2023,
+            statusSlug,
             sourceSlug,
         ].join("-"), 96);
         const sourceRecordId = props.task_id || props.master_site_id || props.osm_id || "";
@@ -1662,12 +2124,12 @@ class NzVerificationMap {
         const isShared = values.action === "denomination_or_shared_use";
 
         row.evidence_row_id = `map-${evidenceSlug || slug(`${values.action}-${todayIsoDate()}`)}`;
-        row.collection_batch = "nz-map-workbench-demo";
-        row.country_code = "NZ";
-        row.source_dataset_id = "nz_static_verification_map";
+        row.collection_batch = ASSIGNMENT_BATCH_ID || COUNTRY_CONFIG.collectionBatch;
+        row.country_code = COUNTRY_CONFIG.countryCode;
+        row.source_dataset_id = COUNTRY_CONFIG.sourceDatasetId;
         row.source_type = values.sourceType;
         row.provider = values.sourceProvider || "unspecified";
-        row.source_title = values.sourceTitle || "NZ map verification task";
+        row.source_title = values.sourceTitle || `${COUNTRY_CONFIG.countryName} map verification task`;
         row.source_url_or_file = values.sourceUrl;
         row.source_record_id = sourceRecordId;
         row.retrieval_date = todayIsoDate();
@@ -1675,7 +2137,7 @@ class NzVerificationMap {
         row.access_limits = "public_or_project_review";
         row.redistribution_limits = "needs_review";
         const raInitials = this.getRaInitials();
-        row.source_notes = `Generated locally from the static RA workbench${raInitials ? ` by ${raInitials}` : ""}. Action: ${actionLabelForRa(values.action)}.${values.sourceDate ? ` Source/capture date: ${values.sourceDate}.` : ""}`;
+        row.source_notes = `Generated from the ${ASSIGNMENT_MODE ? "assigned web workpack" : "static RA workbench"}${raInitials ? ` by ${raInitials}` : ""}. Action: ${actionLabelForRa(values.action)}.${values.sourceDate ? ` Source/capture date: ${values.sourceDate}.` : ""}`;
         row.name_raw = props.name || "";
         row.name_standardised = props.name || "";
         row.denomination_or_tradition_raw = props.denomination || "";
@@ -1738,15 +2200,12 @@ class NzVerificationMap {
         row.existence_status = values.existenceStatus;
         row.worship_use_status = values.worshipUseStatus;
         row.public_access_status = "unknown";
-        row.target_year_2013_status = values.status2013;
-        row.target_year_2013_probability = values.status2013 === "not_assessed" ? "" : values.assessmentConfidence;
-        row.target_year_2013_evidence = values.status2013 === "not_assessed" ? "" : targetEvidence;
-        row.target_year_2018_status = values.status2018;
-        row.target_year_2018_probability = values.status2018 === "not_assessed" ? "" : values.assessmentConfidence;
-        row.target_year_2018_evidence = values.status2018 === "not_assessed" ? "" : targetEvidence;
-        row.target_year_2023_status = values.status2023;
-        row.target_year_2023_probability = values.status2023 === "not_assessed" ? "" : values.assessmentConfidence;
-        row.target_year_2023_evidence = values.status2023 === "not_assessed" ? "" : targetEvidence;
+        TARGET_YEARS.forEach(year => {
+            const status = values.targetYearStatuses[year] || "not_assessed";
+            row[`target_year_${year}_status`] = status;
+            row[`target_year_${year}_probability`] = status === "not_assessed" ? "" : values.assessmentConfidence;
+            row[`target_year_${year}_evidence`] = status === "not_assessed" ? "" : targetEvidence;
+        });
         row.quality_flag = ["street_imagery", "aerial_imagery", "field_observation"].includes(values.sourceType)
             ? "visual_confirmation"
             : values.action === "confirm_current_record"
@@ -1763,6 +2222,105 @@ class NzVerificationMap {
         return row;
     }
 
+    buildEvidenceDraft(props, row) {
+        const values = this.currentFormValues();
+        const targetEvidence = values.note || deriveTargetYearStatus(props, this.targetYear).note;
+        const targetYearEvidence = Object.fromEntries(TARGET_YEARS.map(year => [
+            year,
+            (values.targetYearStatuses[year] || "not_assessed") === "not_assessed" ? "" : targetEvidence,
+        ]));
+        return {
+            source_type: values.sourceType,
+            provider: values.sourceProvider || undefined,
+            source_title: values.sourceTitle,
+            source_url_or_file: values.sourceUrl || undefined,
+            source_date_or_capture_date: values.sourceDate || undefined,
+            source_notes: row.source_notes || undefined,
+            action: values.action,
+            target_year_statuses: values.targetYearStatuses,
+            target_year_evidence: targetYearEvidence,
+            existence_status: values.existenceStatus,
+            worship_use_status: values.worshipUseStatus,
+            assessment_confidence: values.assessmentConfidence || undefined,
+            match_confidence: values.matchConfidence,
+            geocoding_confidence: values.geocodingConfidence,
+            lifecycle_event: values.lifecycleEvent || undefined,
+            lifecycle_date: values.lifecycleDate || undefined,
+            lifecycle_date_precision: values.lifecycleEvent ? values.lifecycleDatePrecision : undefined,
+            lifecycle_note: values.lifecycleNote || undefined,
+            related_ids_or_note: values.relatedIds || undefined,
+            evidence_note: values.note,
+            generated_wide_row: {
+                fields: WIDE_EVIDENCE_FIELDS,
+                row,
+                tsv: tsvRowFromObject(row),
+            },
+            privacy_flag: "clear",
+            licence_flag: "needs_review",
+            validation_summary: {
+                status: "client_checked",
+                checked_at: nowIso(),
+            },
+        };
+    }
+
+    async saveEvidenceToBackend(props, options = {}) {
+        const status = document.getElementById("copyStatus");
+        const values = this.currentFormValues();
+        const inputError = this.evidenceInputError(values);
+        if (inputError) {
+            if (status) status.textContent = `${inputError} Nothing was saved.`;
+            return;
+        }
+        if (!this.backend?.configured || !this.backend.signedIn) {
+            if (status) status.textContent = "Sign in to the shared backend before saving evidence.";
+            return;
+        }
+        if (!this.backendTasksById.has(props.task_id)) {
+            if (status) status.textContent = "This task is not seeded in Convex yet. Ask JB to seed the current batch.";
+            return;
+        }
+
+        const row = this.buildWideEvidenceRow(props);
+        const draft = this.buildEvidenceDraft(props, row);
+        try {
+            if (status) status.textContent = options.submit ? "Saving and submitting..." : "Saving draft...";
+            const saved = await this.backend.saveEvidenceDraft({
+                taskId: props.task_id,
+                draft,
+                clientContext: {
+                    source: "static_verification_map",
+                    country_code: COUNTRY_CONFIG.countryCode,
+                    batch_id: ASSIGNMENT_BATCH_ID || undefined,
+                    selected_target_year: this.targetYear,
+                    page_path: window.location.pathname,
+                },
+            });
+            if (options.submit) {
+                await this.backend.submitEvidenceDraft({
+                    evidenceDraftId: saved.evidence_draft_id,
+                    note: values.note || undefined,
+                });
+            }
+            await this.refreshBackendTasks();
+            if (ASSIGNMENT_MODE) {
+                const refreshed = this.tasks.find(feature => feature.properties?.task_id === props.task_id);
+                if (refreshed) this.selectedTask = refreshed;
+            }
+            this.applyFilters();
+            const stepsEl = document.getElementById("workflowSteps");
+            if (stepsEl) stepsEl.dataset.copied = "1";
+            this.updateWorkflowSteps();
+            if (status) {
+                status.textContent = options.submit
+                    ? "Saved to the shared backend and submitted for review. Pick another task from the map or list."
+                    : "Draft saved to the shared backend. Submit for review when the row is ready.";
+            }
+        } catch (error) {
+            if (status) status.textContent = `${error.message || "Backend save failed."} Nothing was saved.`;
+        }
+    }
+
     buildDecisionPayload(props) {
         const values = this.currentFormValues();
         return {
@@ -1773,11 +2331,7 @@ class NzVerificationMap {
             selected_target_year: this.targetYear,
             action: values.action,
             action_label: actionLabelForRa(values.action),
-            target_year_statuses: {
-                2013: values.status2013,
-                2018: values.status2018,
-                2023: values.status2023,
-            },
+            target_year_statuses: values.targetYearStatuses,
             lifecycle_event: values.lifecycleEvent,
             lifecycle_event_label: values.lifecycleEvent ? optionLabel(LIFECYCLE_EVENT_OPTIONS, values.lifecycleEvent) : "",
             lifecycle_date: values.lifecycleDate,
@@ -1795,7 +2349,7 @@ class NzVerificationMap {
             source_url_or_file: values.sourceUrl,
             related_ids_or_note: values.relatedIds,
             evidence_note: values.note,
-            source: "nz_verification_static_map_workbench",
+            source: COUNTRY_CONFIG.mapSource,
             saved_or_submitted: false,
         };
     }
@@ -1811,13 +2365,7 @@ class NzVerificationMap {
                     <label>
                         Type
                         <select id="nominationType">
-                            <option value="current_place_missing_from_project_map">Current place missing from project map</option>
-                            <option value="lost_2013_place_of_worship">Lost 2013 place of worship</option>
-                            <option value="lost_2018_place_of_worship">Lost 2018 place of worship</option>
-                            <option value="denomination_switch_or_reuse">Denomination switch or reuse</option>
-                            <option value="shared_building_multiple_congregations">Shared building with multiple congregations</option>
-                            <option value="split_or_merged_site_records">Split or merged site records</option>
-                            <option value="charity_record_for_site_matching">Charity record for site matching</option>
+                            ${nominationTypeOptionsHtml()}
                         </select>
                     </label>
                     <label>
@@ -1834,7 +2382,7 @@ class NzVerificationMap {
                     </label>
                     <label>
                         Target years
-                        <input id="nominationYears" type="text" value="current">
+                        <input id="nominationYears" type="text" value="${escapeHtml(targetYearListText())}">
                     </label>
                     <label>
                         Source URL
@@ -1886,54 +2434,69 @@ class NzVerificationMap {
             output.textContent = tsv;
         }
         const stepsEl = document.getElementById("workflowSteps");
-        if (stepsEl) stepsEl.dataset.copied = "1";
         try {
             await navigator.clipboard.writeText(tsv);
+            if (stepsEl) stepsEl.dataset.copied = "1";
             if (status) {
                 status.textContent =
                     "✓ Copied. This task is marked tentatively closed in this browser. Paste the row into the spreadsheet, then pick another task from the map or list.";
             }
+            this.appendSessionEntry({
+                type: "copied",
+                copied_at: nowIso(),
+                task_id: props.task_id || "",
+                master_site_id: props.master_site_id || "",
+                name: props.name || "Unnamed site",
+                ra_initials: this.getRaInitials(),
+                action: values.action,
+                action_label: actionLabelForRa(values.action),
+                target_year_statuses: values.targetYearStatuses,
+                lifecycle_event: values.lifecycleEvent,
+                lifecycle_event_label: values.lifecycleEvent ? optionLabel(LIFECYCLE_EVENT_OPTIONS, values.lifecycleEvent) : "",
+                lifecycle_date: values.lifecycleDate,
+                lifecycle_date_precision: values.lifecycleEvent ? values.lifecycleDatePrecision : "",
+                lifecycle_note: values.lifecycleNote,
+                existence_status: values.existenceStatus,
+                worship_use_status: values.worshipUseStatus,
+                assessment_confidence: values.assessmentConfidence,
+                match_confidence: values.matchConfidence,
+                geocoding_confidence: values.geocodingConfidence,
+                source_provider: values.sourceProvider,
+                source_title: values.sourceTitle,
+                source_date_or_capture_date: values.sourceDate,
+                source_url_or_file: values.sourceUrl,
+                tsv,
+            });
         } catch (error) {
             if (status) {
                 status.textContent =
-                    "Could not access the clipboard. Select all text in the box below, copy it manually, and paste into your spreadsheet. Nothing was uploaded.";
+                    "Could not access the clipboard. Select all text in the box below, copy it manually, and paste into your spreadsheet. This task has not been marked tentatively closed.";
             }
         }
-
-        this.appendSessionEntry({
-            type: "copied",
-            copied_at: nowIso(),
-            task_id: props.task_id || "",
-            master_site_id: props.master_site_id || "",
-            name: props.name || "Unnamed site",
-            ra_initials: this.getRaInitials(),
-            action: values.action,
-            action_label: actionLabelForRa(values.action),
-            target_year_statuses: {
-                2013: values.status2013,
-                2018: values.status2018,
-                2023: values.status2023,
-            },
-            lifecycle_event: values.lifecycleEvent,
-            lifecycle_event_label: values.lifecycleEvent ? optionLabel(LIFECYCLE_EVENT_OPTIONS, values.lifecycleEvent) : "",
-            lifecycle_date: values.lifecycleDate,
-            lifecycle_date_precision: values.lifecycleEvent ? values.lifecycleDatePrecision : "",
-            lifecycle_note: values.lifecycleNote,
-            existence_status: values.existenceStatus,
-            worship_use_status: values.worshipUseStatus,
-            assessment_confidence: values.assessmentConfidence,
-            match_confidence: values.matchConfidence,
-            geocoding_confidence: values.geocodingConfidence,
-            source_provider: values.sourceProvider,
-            source_title: values.sourceTitle,
-            source_date_or_capture_date: values.sourceDate,
-            source_url_or_file: values.sourceUrl,
-            tsv,
-        });
         this.updateWorkflowSteps();
     }
 
-    skipCurrentTask(props, reason) {
+    async skipCurrentTask(props, reason) {
+        const status = document.getElementById("copyStatus");
+        if (this.backend?.configured && this.backend.signedIn && this.backendTasksById.has(props.task_id)) {
+            try {
+                await this.backend.skipTask({
+                    taskId: props.task_id,
+                    reason: reason || undefined,
+                });
+                await this.refreshBackendTasks();
+                this.applyFilters();
+                if (status) {
+                    status.textContent = "Skipped in the shared backend. Pick another task from the map or list.";
+                }
+                return;
+            } catch (error) {
+                if (status) {
+                    status.textContent = `${error.message || "Could not skip in backend."} Falling back to local skip.`;
+                }
+            }
+        }
+
         this.appendSessionEntry({
             type: "skipped",
             skipped_at: nowIso(),
@@ -1943,7 +2506,6 @@ class NzVerificationMap {
             ra_initials: this.getRaInitials(),
             reason: String(reason || "").slice(0, 240),
         });
-        const status = document.getElementById("copyStatus");
         if (status) {
             status.textContent = "Skipped in this browser. Pick another task from the map or list.";
         }
@@ -1972,7 +2534,7 @@ class NzVerificationMap {
             evidence_note: document.getElementById("nominationNote")?.value || "",
             linked_master_site_id: this.selectedTask?.properties?.master_site_id || "",
             linked_task_id: this.selectedTask?.properties?.task_id || "",
-            source: "nz_verification_static_map_nomination",
+            source: COUNTRY_CONFIG.nominationSource,
         };
 
         const status = document.getElementById("nominationCopyStatus");
