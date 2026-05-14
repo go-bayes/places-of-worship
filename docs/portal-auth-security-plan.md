@@ -35,6 +35,12 @@ Current Convex pilot rule: RA accounts may save and inspect their own assigned
 evidence and task history. Reviewer, curator, admin, and service roles may
 inspect project-wide evidence needed for review, export, or maintenance.
 
+Current Convex size rule: evidence notes, source fields, generated rows,
+review notes, task notes, and client context are rejected before writing when
+they exceed the pilot's field-size limits. These limits reduce the damage from
+accidental paste errors and basic oversized-submission attacks; they do not
+replace rate limits, upload controls, or source review.
+
 ## Assets And Threats
 
 Assets:

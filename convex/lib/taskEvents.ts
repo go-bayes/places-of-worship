@@ -1,6 +1,7 @@
 import type { Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 import type { ProjectRole } from "./auth";
+import { assertClientContextLimit, assertTaskReasonLimit } from "./limits";
 
 export type TaskStatus =
   | "open"
@@ -49,6 +50,9 @@ export async function appendTaskEvent(
     clientContext?: unknown;
   },
 ): Promise<void> {
+  assertTaskReasonLimit("task event reason", args.reason);
+  assertClientContextLimit(args.clientContext);
+
   const now = Date.now();
   await ctx.db.insert("task_events", {
     event_id: `${args.taskId}:${args.eventType}:${now}:${args.actorUserId}`,

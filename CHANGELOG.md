@@ -7,6 +7,9 @@
 - Tightened Convex evidence/task-history access so RA accounts can inspect
   only their own or assigned evidence, while reviewer, curator, admin, and
   service roles retain project-wide inspection access.
+- Added server-side field-size limits to Convex evidence, review, and task
+  mutations so oversized notes, generated rows, and client context are rejected
+  before they reach the shared backend.
 - Added the New Zealand submitted-evidence reviewer portal to the README links
   and noted that current authorisation is limited to JB and JW.
 - Clarified that new Convex-facing task, review, nomination, export, and

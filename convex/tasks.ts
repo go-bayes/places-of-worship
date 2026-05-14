@@ -4,6 +4,14 @@ import type { Doc } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { taskBatchInput, taskInput, taskPriority, taskStatus, taskType } from "./model";
 import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser } from "./lib/auth";
+import {
+  MEDIUM_TEXT_MAX,
+  SHORT_TEXT_MAX,
+  TASK_BRIEF_MAX,
+  TASK_NAME_MAX,
+  TASK_REASON_MAX,
+  assertMaxString,
+} from "./lib/limits";
 import { appendTaskEvent } from "./lib/taskEvents";
 
 function manualTaskId(countryCode: string, name: string, now: number): string {
@@ -24,6 +32,44 @@ async function getTaskOrThrow(ctx: QueryCtx | MutationCtx, taskId: string): Prom
     throw new Error(`Task not found: ${taskId}`);
   }
   return task;
+}
+
+function assertTaskSeedTextLimits(taskRecord: {
+  task_id: string;
+  batch_id: string;
+  country_code: string;
+  matched_current_site_id?: string;
+  candidate_site_id?: string;
+  source_record_id?: string;
+  matched_osm_id?: string;
+  name: string;
+  address?: string;
+  locality?: string;
+  task_brief: string;
+  automated_checks?: Array<{
+    check_id: string;
+    severity?: string;
+    message: string;
+    suggested_action?: string;
+  }>;
+}): void {
+  assertMaxString("task id", taskRecord.task_id, MEDIUM_TEXT_MAX);
+  assertMaxString("batch id", taskRecord.batch_id, MEDIUM_TEXT_MAX);
+  assertMaxString("country code", taskRecord.country_code, SHORT_TEXT_MAX);
+  assertMaxString("matched current site id", taskRecord.matched_current_site_id, MEDIUM_TEXT_MAX);
+  assertMaxString("candidate site id", taskRecord.candidate_site_id, MEDIUM_TEXT_MAX);
+  assertMaxString("source record id", taskRecord.source_record_id, MEDIUM_TEXT_MAX);
+  assertMaxString("matched OSM id", taskRecord.matched_osm_id, MEDIUM_TEXT_MAX);
+  assertMaxString("task name", taskRecord.name, TASK_NAME_MAX);
+  assertMaxString("task address", taskRecord.address, MEDIUM_TEXT_MAX);
+  assertMaxString("task locality", taskRecord.locality, MEDIUM_TEXT_MAX);
+  assertMaxString("task brief", taskRecord.task_brief, TASK_BRIEF_MAX);
+  for (const check of taskRecord.automated_checks ?? []) {
+    assertMaxString("automated check id", check.check_id, MEDIUM_TEXT_MAX);
+    assertMaxString("automated check severity", check.severity, SHORT_TEXT_MAX);
+    assertMaxString("automated check message", check.message, TASK_BRIEF_MAX);
+    assertMaxString("automated check suggested action", check.suggested_action, MEDIUM_TEXT_MAX);
+  }
 }
 
 export const listTasks = query({
@@ -189,6 +235,10 @@ export const upsertTasksFromStaticMap = mutation({
     const user = await requireUser(ctx, ["admin", "service"]);
     const actorRole = chooseActorRole(user, ["service", "admin"]);
     const now = Date.now();
+    assertMaxString("batch id", args.batch.batch_id, MEDIUM_TEXT_MAX);
+    assertMaxString("batch country code", args.batch.country_code, SHORT_TEXT_MAX);
+    assertMaxString("batch source manifest id", args.batch.source_manifest_id, MEDIUM_TEXT_MAX);
+    assertMaxString("batch notes", args.batch.notes, TASK_BRIEF_MAX);
 
     const existingBatch = await ctx.db
       .query("task_batches")
@@ -217,6 +267,7 @@ export const upsertTasksFromStaticMap = mutation({
     let inserted = 0;
     let updated = 0;
     for (const taskRecord of args.tasks) {
+      assertTaskSeedTextLimits(taskRecord);
       const existing = await ctx.db
         .query("tasks")
         .withIndex("by_task_id", (q) => q.eq("task_id", taskRecord.task_id))
@@ -456,6 +507,12 @@ export const createManualCandidateTask = mutation({
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
+    assertMaxString("nomination country code", args.countryCode, SHORT_TEXT_MAX);
+    assertMaxString("nomination name", args.name, TASK_NAME_MAX);
+    assertMaxString("nomination address", args.address, MEDIUM_TEXT_MAX);
+    assertMaxString("nomination locality", args.locality, MEDIUM_TEXT_MAX);
+    assertMaxString("nomination task brief", args.taskBrief, TASK_BRIEF_MAX);
+    assertMaxString("nomination source note", args.sourceNote, TASK_REASON_MAX);
     const now = Date.now();
     const taskId = manualTaskId(args.countryCode, args.name, now);
     const candidateSiteId = `candidate:${taskId}`;

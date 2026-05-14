@@ -3,6 +3,11 @@ import { mutation, query } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { evidenceDraftInput } from "./model";
 import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser } from "./lib/auth";
+import {
+  assertClientContextLimit,
+  assertEvidenceDraftLimits,
+  assertTaskReasonLimit,
+} from "./lib/limits";
 import { appendTaskEvent } from "./lib/taskEvents";
 
 async function getTaskOrThrow(ctx: any, taskId: string): Promise<Doc<"tasks">> {
@@ -81,6 +86,8 @@ export const saveEvidenceDraft = mutation({
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
     assertOwnsOrCanReview(user._id, user.roles, task.assigned_to);
+    assertEvidenceDraftLimits(args.draft);
+    assertClientContextLimit(args.clientContext);
 
     const now = Date.now();
     const draftId = args.evidenceDraftId ?? `${args.taskId}:${user._id}:draft`;
@@ -151,6 +158,7 @@ export const submitEvidenceDraft = mutation({
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
+    assertTaskReasonLimit("submission note", args.note);
     const draft = await getDraftOrThrow(ctx, args.evidenceDraftId);
     if (draft.created_by !== user._id && !canReview(user.roles)) {
       throw new Error("Evidence draft belongs to another user.");
@@ -204,6 +212,7 @@ export const submitUnresolvedNote = mutation({
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
+    assertTaskReasonLimit("unresolved note", args.note);
     const draft = await getDraftOrThrow(ctx, args.evidenceDraftId);
     if (
       draft.created_by !== user._id

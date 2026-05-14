@@ -3,6 +3,14 @@ import { mutation, query } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { reviewDecisionInput, taskStatus } from "./model";
 import { chooseActorRole, requireUser } from "./lib/auth";
+import {
+  LONG_TEXT_MAX,
+  MEDIUM_TEXT_MAX,
+  TASK_REASON_MAX,
+  VALIDATION_SUMMARY_MAX,
+  assertMaxJson,
+  assertMaxString,
+} from "./lib/limits";
 import { appendTaskEvent } from "./lib/taskEvents";
 
 async function getTaskOrThrow(ctx: any, taskId: string): Promise<Doc<"tasks">> {
@@ -126,6 +134,10 @@ export const recordReviewDecision = mutation({
     if ((args.decision.decision_note ?? "").trim().length < 8) {
       throw new Error("Review decisions require a short decision note.");
     }
+    assertMaxString("review decision note", args.decision.decision_note, TASK_REASON_MAX);
+    assertMaxString("accepted action", args.decision.accepted_action, MEDIUM_TEXT_MAX);
+    assertMaxString("required follow-up", args.decision.required_follow_up, LONG_TEXT_MAX);
+    assertMaxJson("target-year affects", args.decision.target_year_affects, VALIDATION_SUMMARY_MAX);
 
     const now = Date.now();
     const reviewDecisionId = `${args.taskId}:review:${now}:${user._id}`;
