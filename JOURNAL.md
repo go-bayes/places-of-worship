@@ -5,22 +5,6 @@ and what remains open. `CHANGELOG.md` records what changed; this file records
 the reasoning that should remain visible when the project is reported, audited,
 or handed to collaborators.
 
-## 2026-05-01: Keep the changelog lean and use this journal for decisions
-
-Decision:
-Use `JOURNAL.md` for decision rationale and `CHANGELOG.md` for implementation
-changes.
-
-Rationale:
-Many project choices are methodological rather than only technical. Examples
-include what counts as site evidence, how to treat current versus historical
-place counts, and how to stage community or AI contributions before master
-ingestion.
-
-Consequences:
-Future entries should summarise context, decision, rationale, consequences, and
-open questions. The changelog should stay concise and release-oriented.
-
 ## 2026-05-14: Add unresolved notes to the RA-review workflow
 
 Decision:
@@ -42,6 +26,150 @@ in the review portal. Reviewers can accept, reject, defer, mark duplicate, or
 request more evidence. The master boundary is unchanged: unresolved notes and
 review decisions still require export and `pow` validation before they can
 affect public or research data.
+
+## 2026-05-14: Move to strict TypeScript incrementally
+
+Decision:
+Use strict TypeScript for Convex and for new Convex-facing workflow UI. Do not
+convert the large live static verification map merely for consistency while it
+is serving the active New Zealand pilot.
+
+Rationale:
+Convex already gives the project typed backend contracts, and new review,
+task, nomination, export, and country-configuration interfaces should use
+those contracts directly. The live JavaScript map is currently more valuable
+as a stable pilot surface than as a migration target.
+
+Consequences:
+The TypeScript boundary should grow through new modules and targeted redesigns.
+Legacy JavaScript can be migrated when a module is replaced by the Vite/React
+workbench or when a pilot need justifies touching it. Strict checking remains a
+gate for Convex and new TypeScript surfaces.
+
+## 2026-05-14: Start the review loop with a static Convex portal
+
+Decision:
+Build the first reviewer surface as a static, role-gated New Zealand page that
+reads submitted Convex evidence drafts and records review decisions. Defer
+export buttons and the React/Vite workbench until the first live review cycle
+has been exercised.
+
+Rationale:
+André's first submissions need a simple reviewer path now. The existing Convex
+backend already has review and export functions, so the fastest reliable step
+is to expose the review queue without adding a new build system. Keeping export
+controls out of the first portal also preserves the master-data boundary: a
+review decision can make evidence eligible for export, but it cannot update the
+public map or master data by itself.
+
+Consequences:
+The static portal can accept, reject, defer, mark duplicates, or request more
+evidence for submitted tasks. Accepted-for-export decisions require an evidence
+draft from the same task. Export bundles remain a maintainer operation until
+the first reviewed batch has been checked through the `pow` path.
+
+## 2026-05-14: Use Convex for live work and keep the governed master replayable
+
+Decision:
+Use Convex as the live operational layer for assignments, candidate
+nominations, evidence drafts, review decisions, and export batches. Do not make
+Convex the only authoritative store for accepted research data. Accepted
+decisions should round-trip through an explicit export bundle, `pow`
+validation, diff, and later master rebuild before they affect public maps or
+analysis products.
+
+Rationale:
+Convex gives the project a practical way to coordinate multiple research
+assistants and reviewers without spreadsheet handoffs. That convenience should
+not replace the scientific requirement to distinguish historical changes in
+worship function from corrections to our records. The durable research product
+is the accepted, typed change history plus the rebuilt master snapshots, not
+the transient live task database.
+
+Consequences:
+The next technical milestone is a thin round trip: take accepted Convex review
+decisions, export tasks, task events, evidence drafts, review decisions, and a
+`site_evidence_wide.csv`, materialise the bundle with hashes, and run it
+through `pow validate`, `pow stage`, `pow propose`, and `pow diff`. The
+Vanuatu surface should wait until this path has been kicked hard enough to show
+that proposed changes can leave the live backend and enter the governed data
+pipeline cleanly.
+
+The review step should also move into an authenticated UI. Reviewers should
+record accept, reject, request-more-evidence, revise, duplicate/link, and defer
+decisions through role-checked Convex functions, and each decision should update
+the RA-facing task state immediately. The current 50-case André assignment is a
+filtered batch over the shared task list, not a separate worksheet model; later
+New Zealand batches, Vanuatu tasks, and missing-place nominations should use
+the same task history and review loop.
+
+Workflow map:
+
+```mermaid
+flowchart TD
+  A["Generated or nominated task<br/>OSM lead, workpack row, or missing PoW"] --> B["Convex shared task list"]
+  B --> C["RA opens assigned task<br/>Google sign-in"]
+  C --> D{"RA action"}
+  D -->|save incomplete work| E["Save draft<br/>visible in My work"]
+  D -->|useful but unresolved| F["Submit unresolved note"]
+  D -->|ready for review| G["Submit for review"]
+  D -->|not useful now| H["Skip task<br/>reason recorded"]
+  E --> B
+  F --> I["Review queue<br/>unresolved notes"]
+  G --> J["Review queue<br/>submitted evidence"]
+  H --> B
+  I --> K["Reviewer portal"]
+  J --> K
+  K --> L{"Review decision"}
+  L -->|accepted for export| M["Frozen export bundle<br/>tasks, evidence, decisions, hashes"]
+  L -->|needs more evidence| N["Changes requested<br/>RA sees task again"]
+  L -->|rejected or duplicate| O["Reviewed task history<br/>kept for audit"]
+  L -->|deferred| P["Deferred task<br/>kept out of current export"]
+  N --> B
+  M --> Q["pow validate, stage, propose, diff"]
+  Q --> R["Accepted events and rebuilt outputs"]
+  R --> S["Public map and research products"]
+```
+
+## 2026-05-14: Use TypeScript pragmatically around Convex
+
+Decision:
+Be more permissive about TypeScript where the project is working directly with
+Convex. TypeScript is appropriate for Convex schemas, mutations, queries,
+review-workbench prototypes, export glue, and frontend integrations that need
+to speak the same typed interface as the live backend.
+
+Rationale:
+Convex exposes its application model through TypeScript. Using that surface
+reduces translation work during the prototype stage and lets the live task
+workflow, evidence drafts, review decisions, and export helpers evolve together
+while the data contracts are still being tested.
+
+Consequences:
+This does not change the scientific data boundary. Rust remains the governed
+validation, diff, replay, and rebuild layer for accepted changes, and R remains
+the principal analysis and reporting environment. TypeScript is a practical
+workflow language for Convex-backed coordination and prototyping, not a reason
+to move the master or research products into Convex.
+
+## 2026-05-14: Seed the first hosted NZ web assignment
+
+Decision:
+Use the hosted Convex deployment for the first real NZ RA web assignment, with
+the public verification map loading a named 50-task batch from the backend.
+
+Rationale:
+The spreadsheet bridge helped us understand the evidence fields, but it asks
+the RA to copy rows by hand and gives us no shared task state. A small
+backend-backed batch lets André work from a single web link, save drafts, submit
+rows for review, and avoid re-checking tasks that have already been acted on.
+
+Consequences:
+The hosted task backend now has the `nz-temporal-ra-workpack-001` batch seeded
+with 50 open tasks. The public map is configured to use the hosted Convex
+deployment and Google sign-in. Human users still have to claim their pending
+invites on first sign-in, and accepted evidence still has to move through the
+review/export/`pow` path before it can affect the master map.
 
 ## 2026-05-13: Start Vanuatu source-first and hand André the NZ workpack
 
@@ -115,84 +243,6 @@ rerunning the import updates the same tasks. The remaining operational steps are
 to import the seed into the hosted Convex deployment, invite André, and smoke
 test one draft save and one submitted review item before sending the link.
 
-## 2026-05-14: Start the review loop with a static Convex portal
-
-Decision:
-Build the first reviewer surface as a static, role-gated New Zealand page that
-reads submitted Convex evidence drafts and records review decisions. Defer
-export buttons and the React/Vite workbench until the first live review cycle
-has been exercised.
-
-Rationale:
-André's first submissions need a simple reviewer path now. The existing Convex
-backend already has review and export functions, so the fastest reliable step
-is to expose the review queue without adding a new build system. Keeping export
-controls out of the first portal also preserves the master-data boundary: a
-review decision can make evidence eligible for export, but it cannot update the
-public map or master data by itself.
-
-Consequences:
-The static portal can accept, reject, defer, mark duplicates, or request more
-evidence for submitted tasks. Accepted-for-export decisions require an evidence
-draft from the same task. Export bundles remain a maintainer operation until
-the first reviewed batch has been checked through the `pow` path.
-
-## 2026-05-14: Use Convex for live work and keep the governed master replayable
-
-Decision:
-Use Convex as the live operational layer for assignments, candidate
-nominations, evidence drafts, review decisions, and export batches. Do not make
-Convex the only authoritative store for accepted research data. Accepted
-decisions should round-trip through an explicit export bundle, `pow`
-validation, diff, and later master rebuild before they affect public maps or
-analysis products.
-
-Rationale:
-Convex gives the project a practical way to coordinate multiple research
-assistants and reviewers without spreadsheet handoffs. That convenience should
-not replace the scientific requirement to distinguish historical changes in
-worship function from corrections to our records. The durable research product
-is the accepted, typed change history plus the rebuilt master snapshots, not
-the transient live task database.
-
-Consequences:
-The next technical milestone is a thin round trip: take accepted Convex review
-decisions, export tasks, task events, evidence drafts, review decisions, and a
-`site_evidence_wide.csv`, materialise the bundle with hashes, and run it
-through `pow validate`, `pow stage`, `pow propose`, and `pow diff`. The
-Vanuatu surface should wait until this path has been kicked hard enough to show
-that proposed changes can leave the live backend and enter the governed data
-pipeline cleanly.
-
-The review step should also move into an authenticated UI. Reviewers should
-record accept, reject, request-more-evidence, revise, duplicate/link, and defer
-decisions through role-checked Convex functions, and each decision should update
-the RA-facing task state immediately. The current 50-case André assignment is a
-filtered batch over the shared task list, not a separate worksheet model; later
-New Zealand batches, Vanuatu tasks, and missing-place nominations should use
-the same task history and review loop.
-
-## 2026-05-14: Use TypeScript pragmatically around Convex
-
-Decision:
-Be more permissive about TypeScript where the project is working directly with
-Convex. TypeScript is appropriate for Convex schemas, mutations, queries,
-review-workbench prototypes, export glue, and frontend integrations that need
-to speak the same typed interface as the live backend.
-
-Rationale:
-Convex exposes its application model through TypeScript. Using that surface
-reduces translation work during the prototype stage and lets the live task
-workflow, evidence drafts, review decisions, and export helpers evolve together
-while the data contracts are still being tested.
-
-Consequences:
-This does not change the scientific data boundary. Rust remains the governed
-validation, diff, replay, and rebuild layer for accepted changes, and R remains
-the principal analysis and reporting environment. TypeScript is a practical
-workflow language for Convex-backed coordination and prototyping, not a reason
-to move the master or research products into Convex.
-
 ## 2026-05-13: Start Convex on Free and upgrade by trigger
 
 Decision:
@@ -216,6 +266,126 @@ reactive subscriptions rather than explicit refreshes. The next design step is
 to move country-specific settings into a `country_configs` table so Vanuatu and
 later countries do not require code changes for target years, source options,
 timeline bounds, or map defaults.
+
+## 2026-05-10: Organise project work by deep modules
+
+Decision:
+Add `docs/system-map.md` as the project module map and use module labels in the
+private tasklist.
+
+Rationale:
+The project now has several connected but distinct responsibilities: source
+storage, extraction, temporal leads, task coordination, evidence intake,
+review, reconstruction, research outputs, public maps, and governance. A module
+map makes those responsibilities easier to see and reduces the risk that a task
+or tool starts owning more than it should.
+
+Consequences:
+Each active task should have one primary module. The module does not describe
+who is responsible; it describes where the work sits in the system. The private
+tasklist should use those module names so tactical work stays connected to the
+overall design.
+
+## 2026-05-09: Give André a curated temporal workpack, not raw OSM differences
+
+Decision:
+Generate a first 50-record New Zealand temporal RA workpack from the OSM
+places-to-check files before asking André to review temporal change evidence.
+
+Rationale:
+Raw OSM year differences contain mapping lag, object replacement, node-to-way
+changes, tag corrections, and genuine historical signals mixed together. André
+should be asked narrow evidence questions, such as whether an OSM date-tag
+opening is supported by another source or whether an apparent disappearance is
+real worship-use loss rather than OSM object churn.
+
+Consequences:
+The workpack is selected reproducibly by
+`scripts/build_nz_temporal_ra_workpack.R` and documented in
+`docs/development/nz-temporal-ra-workpack.md`. The first workpack contains all
+35 possible OSM date-tag opening windows, plus 5 likely object-churn losses, 5
+ambiguous date/status cases, and 5 controls. This is a pilot for the workflow;
+it is not accepted historical data.
+
+## 2026-05-09: Looking back at nine months of commits
+
+We went through the git history—370 commits since August 2024—and noticed the
+project has moved through six fairly distinct phases. Writing this down helps
+explain why certain messy interim solutions (demo modes, spreadsheet bridges,
+files sitting in Google Drive) are still around, and why we built so much
+governance scaffolding before letting anyone actually save to a backend.
+
+**Phase 1: Just get the map working (August–December 2024)**
+The early commits are all about deployment: GitHub Pages, CORS fixes, wrestling
+with data loading. We swapped map providers when MapLibre throttled us,
+obsessed over mobile UI, and watched loading screens hang repeatedly. The first
+NZ dataset landed—3,370 places from OpenStreetMap—and we sketched out early
+schemas for sites and structures. Most commits were mobile UX tweaks; the
+interface kept getting simplified because phones were hard.
+
+**Phase 2: Realising the data was messy (January–March 2025)**
+We cleaned house: archived old files, moved frontends into an `apps/` directory,
+then started aggressive NZ cleanup. Dropped from 4,718 records to 3,618 by
+removing duplicates and false positives like masonic centres. The first manual
+review queue appeared—719 records that needed human eyes. We started central
+planning documents and admitted the global extractor was "too permissive for
+research-grade use."
+
+**Phase 3: Rebuilding the pipeline properly (April–June 2025)**
+Modernised Python tooling, started porting the global pipeline to R. Built the
+first area summary contract for NZ territorial authorities, with an honest
+caveat that place counts were repeated across census years because we did not
+have historical snapshots yet. Started designing RA workflows with spreadsheet
+templates that could handle fuzzy dates and bounded intervals.
+
+**Phase 4: Figuring out how to verify things (July–September 2025)**
+Planned temporal verification workflows. Launched the NZ verification map as
+read-only, with a demo action builder so RAs could generate spreadsheet rows
+without any backend save functionality. The Rust `pow` CLI took shape—
+validation, staging, diff reports. Wrote a critique of our own RA evidence
+pipeline, then tightened the schemas in response.
+
+**Phase 5: Adding shared task state (October 2025–January 2026)**
+Spiked Convex as a backend for shared task assignments and provisional closures,
+with a strict rule: Convex exports into `pow`, never writes to the master
+database. Refined RA workflows, added visual evidence support, documented the
+storage pipeline. Explicitly demoted Google Drive to "temporary holding, not
+the long-term system of record."
+
+**Phase 6: Temporal data and manifests (January–May 2026)**
+Extracted NZ OSM history annually from 2013 through 2025. Separated raw snapshot
+manifests from the places-to-check archives we generate from them. Defined the
+accepted diff contract: "validated diff artefacts are primary research data."
+Fixed bugs in `pow diff`, consolidated the public readme. We are still at Phase 1
+(~) in the official ROADMAP—governed local ingestion works, but reviewer
+decisions and deterministic replay remain `[ ]`.
+
+**What the commit history suggests:**
+
+1. **Maps come first, governance follows.** Every phase started with interface
+pressure, then we discovered what data infrastructure we needed to support it.
+
+2. **We document before we build.** The R pipeline, Rust CLI, and Convex spike
+all had planning documents arguing the case before the code landed.
+
+3. **NZ is our forcing function.** Global expansion keeps getting deferred while
+we try to get New Zealand right first. The cleanup queue, temporal
+reconstruction, and RA workflows are all being proven in NZ before any other
+country sees them.
+
+4. **Bridge solutions pile up.** Demo modes, local JSON previews, spreadsheet
+exports, Google Drive as holding pen—these interim fixes last longer than we
+expect because the "proper" backend stays `[ ]`.
+
+5. **Schemas precede implementation.** Change events, geometry history, area
+summaries, manifests—all specified in JSON before any code consumed them.
+
+**What this means for now:**
+We have invested heavily in governance infrastructure while deferring the
+reviewer decision loop that would actually close it. The commit history lines
+up with current priorities: finish the OSM date-tag parser, get the NZ
+places-to-check files into durable storage with proper manifests, and run a
+small RA pilot end-to-end before scaling up.
 
 ## 2026-05-08: Save raw OSM snapshots as their own source package
 
@@ -255,46 +425,6 @@ path, and decision status in `BRAINSTORMING.md`. Once a tool is adopted, the
 actual decision should move into `PLANNING.md` and `JOURNAL.md`. Research data
 semantics remain defined by the schemas, `pow`, manifests, and accepted change
 events, not by developer workflow or display tools.
-
-## 2026-05-09: Give André a curated temporal workpack, not raw OSM differences
-
-Decision:
-Generate a first 50-record New Zealand temporal RA workpack from the OSM
-places-to-check files before asking André to review temporal change evidence.
-
-Rationale:
-Raw OSM year differences contain mapping lag, object replacement, node-to-way
-changes, tag corrections, and genuine historical signals mixed together. André
-should be asked narrow evidence questions, such as whether an OSM date-tag
-opening is supported by another source or whether an apparent disappearance is
-real worship-use loss rather than OSM object churn.
-
-Consequences:
-The workpack is selected reproducibly by
-`scripts/build_nz_temporal_ra_workpack.R` and documented in
-`docs/development/nz-temporal-ra-workpack.md`. The first workpack contains all
-35 possible OSM date-tag opening windows, plus 5 likely object-churn losses, 5
-ambiguous date/status cases, and 5 controls. This is a pilot for the workflow;
-it is not accepted historical data.
-
-## 2026-05-10: Organise project work by deep modules
-
-Decision:
-Add `docs/system-map.md` as the project module map and use module labels in the
-private tasklist.
-
-Rationale:
-The project now has several connected but distinct responsibilities: source
-storage, extraction, temporal leads, task coordination, evidence intake,
-review, reconstruction, research outputs, public maps, and governance. A module
-map makes those responsibilities easier to see and reduces the risk that a task
-or tool starts owning more than it should.
-
-Consequences:
-Each active task should have one primary module. The module does not describe
-who is responsible; it describes where the work sits in the system. The private
-tasklist should use those module names so tactical work stays connected to the
-overall design.
 
 ## 2026-05-07: Make current data locations explicit
 
@@ -620,429 +750,6 @@ record. Google Drive and cloud storage are recovery layers for source files and
 generated lists of
 places to check. The canonical research record is still accepted events and
 accepted-diff manifests generated through `pow` review and replay.
-
-## 2026-05-01: Treat the grant as a reporting reference, not a tracked source
-
-Decision:
-Keep original grant materials in the ignored local `grant/` folder and use them
-as the document we report against.
-
-Rationale:
-The grant remains the reference point for objectives, reporting, and
-accountability. Keeping the original file outside Git lets the public
-repository describe project direction while avoiding dependence on a local
-administrative document.
-
-Consequences:
-Planning notes should remain mindful of grant aims and explain justified shifts
-in scope. Repo documentation should not depend on the grant file being present.
-
-## 2026-05-01: Keep the research pipeline R-first
-
-Decision:
-Use R as the primary research-facing pipeline language, with Python retained for
-API, tooling, and support scripts. Use `uv` for Python work.
-
-Rationale:
-The research pipeline needs to remain legible to investigators and research
-assistants. Python is useful for app support and static-task generation, but the
-main extraction, cleaning, and analytical products should remain reviewable in R
-unless there is a clear reason to move a component elsewhere.
-
-Consequences:
-Optimisation should target specific bottlenecks rather than trigger a wholesale
-rewrite. `extendr` remains a possible later path for hot R code.
-
-## 2026-05-01: Use area summaries as the portal contract
-
-Decision:
-Make `area_summary_ta.json` the first New Zealand example of a provenance-rich
-analytical product for the map and future portal.
-
-Rationale:
-Map layers should consume reproducible analytical products with explicit units,
-years, boundaries, denominators, sources, and quality flags. This better matches
-researcher download and citation needs than browser-derived legacy census
-tables.
-
-Consequences:
-The current NZ area summary combines current committed place counts with
-2013, 2018, and 2023 Census religion denominators. It must be labelled as a
-current inventory overlay, not a historical place-density estimate.
-
-## 2026-05-01: Do not back-project current places into historical density
-
-Decision:
-Do not interpret current `nz_places.json` counts as true 2013 or 2018 place
-density.
-
-Rationale:
-True historical density requires evidence that a place existed and was in
-worship use at the target year. Current OSM-derived inventories cannot safely
-answer that question alone.
-
-Consequences:
-Historical density should be reconstructed through evidence layers such as OSM
-history, OSM date tags, visual evidence, directories, denominational sources,
-charity or organisation records, building evidence, and reviewed target-year
-status.
-
-## 2026-05-01: Collect bounded historical evidence before exact dates
-
-Decision:
-RA templates should record exact dates when available and bounded dates when
-sources only show limits, such as "opened by 2013" or "closed after 2018".
-
-Rationale:
-Forcing vague source evidence into exact birth or death dates would create
-false precision.
-
-Consequences:
-The ingestion model needs first-class fields for `not_earlier_than` and
-`not_later_than` evidence, source wording, precision, and review status.
-
-## 2026-05-01: Contributions should stage evidence, not write to the master
-
-Decision:
-Human, RA, community, scripted, and AI-assisted contributions should go through
-staging, validation, review, adjudication, and master-change proposals.
-
-Rationale:
-The master database needs auditability, reproducibility, and protection from
-unchecked edits.
-
-Consequences:
-Google Sheets can be the first familiar RA adapter. A later API can accept
-structured contributions from humans and agents, but master updates should be
-accepted only through reviewed proposals.
-
-## 2026-05-01: Verification edits are staged, reversible, and auditable
-
-Decision:
-The NZ verification map is a staging surface. It prepares review or nomination
-JSON and does not directly edit the master database.
-
-Rationale:
-Reviewers need a fast way to inspect evidence and propose changes, while the
-master needs an audit trail.
-
-Consequences:
-Before submission, a reviewer can discard or regenerate staged JSON. After
-staging, undo should mean a `retracted` decision or a superseding decision linked
-by `supersedes_decision_id`. After master acceptance, undo should require a
-reviewed reversal proposal and an audit entry. Silent overwrites should be
-avoided.
-
-## 2026-05-01: Use the NZ verification map as a feedback pilot
-
-Decision:
-The current verification map should be treated as an internal or RA-facing
-feedback pilot, not a public correction interface.
-
-Rationale:
-The workflow is still being tested. It is useful for reviewers to identify
-records, evidence gaps, and ergonomic problems, but the backend staging and
-review contract is not complete.
-
-Consequences:
-For this pilot, staged JSON is sufficient. A future version can post to a
-staging API once validation and undo semantics are clearer.
-
-Implementation note:
-For RA feedback, the verification map should show individual points by default
-rather than clustered markers. Clustering is useful for public browsing, but it
-hides co-located or nearby records that reviewers need to notice.
-
-Follow-up decision:
-The public RA feedback page should be read-only until a secure staging sink
-exists. The earlier draft decision and nomination controls generated only local
-browser JSON, which was useful for a smoke test but too easy to confuse with a
-real submission path.
-
-Demo-mode exception:
-The RA may inspect draft decision and nomination controls through an explicit
-`?demo=1` URL. Demo mode must show clear warnings that nothing is saved or
-submitted, and it must keep the normal public verification URL read-only.
-
-## 2026-05-01: Missing sites and building complications require first-class staging
-
-Decision:
-Verification must support nominations that are not simply fixes to existing
-OSM-derived master rows.
-
-Rationale:
-Important evidence may concern current places missing from OSM, lost places
-present in 2013 or another target year, denomination switches, shared buildings,
-split/merged site records, and organisation evidence that does not map directly
-to a building.
-
-Consequences:
-Nominations need their own ids, evidence, target-year status, proposed action,
-and links to any relevant master, OSM, building, or organisation records.
-
-## 2026-05-01: Treat charity data as organisation evidence
-
-Decision:
-Charity records should be modelled as organisation observations before they are
-linked to site observations.
-
-Rationale:
-Annual returns, registration dates, deregistration dates, activities, and
-addresses can be valuable, but one charity may operate multiple sites and one
-building may host several communities.
-
-Consequences:
-Charity evidence should support site matching with explicit confidence and date
-bounds. It should not automatically become building-level evidence.
-
-## 2026-05-01: Defer fuzzy placement from address-poor historical sources
-
-Decision:
-Historical sources without street addresses can be retained as congregation or
-regional evidence, but should not yet enter site-level density products.
-
-Rationale:
-Sources such as theses and denominational histories may contain substantial
-evidence about congregations while only identifying parishes, towns, or regions.
-That evidence is valuable, but precise placement would require assumptions.
-
-Consequences:
-Preserve raw wording and regional cues. Later, fuzzy regional placement may
-support uncertain back-propagated maps or regional counts once confidence rules
-and uncertainty visualisation are defined.
-
-## Open Decision: OSM fixes versus project audit API
-
-Question:
-Should the review surface direct users to OSM to fix errors, or to a project
-API to audit evidence and stage proposed changes?
-
-Current recommendation:
-For the research workflow, direct reviewers to a project audit API or staged
-audit form. Keep OSM links as source context and optional external editing links,
-but do not make OSM editing the primary correction path.
-
-Rationale:
-The project needs to track evidence for historical status, non-OSM sites,
-lost sites, building complications, and organisation-level sources. OSM is an
-important source, but it cannot represent all research evidence and should not
-be treated as the master correction channel.
-
-Near-term pilot:
-Expose the NZ verification draft to the RA for feedback first. Avoid exposing
-the global map as an input surface until staging, moderation, and abuse controls
-exist. Keep any input as draft staged JSON or a test-only endpoint that is not
-linked to the master.
-
-## 2026-05-01: Treat data intake as a security boundary
-
-Decision:
-Any workflow that accepts incoming data must be designed as an untrusted-input
-surface from the beginning.
-
-Rationale:
-RA spreadsheets, public forms, direct API clients, file uploads, partner bulk
-submissions, and AI-agent contributions can introduce bad data, spam, malicious
-files, private information, licence violations, or attempts to alter published
-outputs. Security cannot be added only after the intake path exists.
-
-Consequences:
-The default architecture is read-only master exports plus staged submissions.
-Before any intake endpoint is exposed beyond the core team, define
-authentication or contributor identification, permission scopes, rate limits,
-upload type and size limits, malware scanning where feasible, privacy and
-licence checks, validation, quarantine for low-trust submissions, audit logs,
-abuse handling, and reviewed promotion into accepted data. No intake path should
-write directly to the master or to public map products.
-
-## 2026-05-01: Use managed authentication
-
-Decision:
-Use a managed authentication service. Do not build authentication ourselves.
-
-Rationale:
-Password storage, password reset, multi-factor authentication, login sessions,
-token refresh, and account recovery are security-sensitive systems. The project
-needs staged evidence, permission scopes, and audit records, but it should not
-carry the operational risk of custom authentication.
-
-Consequences:
-The future staging API should verify provider-issued identity tokens and then
-map authenticated identities to project permissions such as submit-only, review,
-adjudicate, and master-commit. Scripts and AI agents should use scoped machine
-credentials. The project should store provider subject ids, contributor records,
-permission grants, and audit events, not passwords or session secrets. Provider
-selection remains a later deployment decision.
-
-## 2026-05-01: Use Rust for governed data modification
-
-Decision:
-Use Rust as the preferred systems layer for data modification, validation,
-staging, event application, master rebuilding, and export generation. Keep R as
-the primary investigator-facing layer for analysis, summaries, plots, and
-reports.
-
-Rationale:
-The project needs strict contracts around data changes: immutable inputs,
-typed validation, reproducible diffs, auditable acceptance, and explainable
-master snapshots. Rust is well suited to this governed state-change layer.
-R remains better for collaborator-facing research work, data exploration, and
-statistical reporting, and it is already the canonical research pipeline.
-
-Consequences:
-Rust should not become a general rewrite of the research workflow. It should
-begin with explicit invariants and an event model: staged proposals, validation
-results, review decisions, accepted changes, and rebuild manifests. The first
-implementation should be a local CLI that validates and diffs a small NZ staged
-batch without writing to the master. Future API work can reuse the same typed
-contracts once authentication, permissions, and staging storage are ready.
-
-Open questions:
-The repository still needs a concrete event schema, storage choice for staged
-and accepted events, and a migration path from current static JSON outputs to
-event-rebuilt master snapshots. These should be specified before a Rust service
-or public write endpoint is built.
-
-## 2026-05-02: Use Google Cloud for the first portal staging baseline
-
-Status:
-Superseded in part by the 2026-05-03 Convex task-map decision below. Google
-Cloud remains the durable staging, geospatial storage, media quarantine, and
-provider-neutral export reference; Convex is now the preferred near-term spike
-for live shared task/review state.
-
-Decision:
-Use Google Cloud as the reference backend for durable authenticated staging,
-geospatial storage, private media quarantine, and provider-neutral archival
-exports in the New Zealand portal pilot.
-
-Rationale:
-The immediate problem is safe, auditable intake: managed authentication,
-permission scopes, staged submissions, geospatial validation, image quarantine,
-reviewer decisions, and dry-run master diffs. Google Cloud provides mature
-pieces for this path:
-Identity Platform for managed OAuth and multi-factor authentication support,
-Cloud Run for a Rust API, Cloud SQL/PostgreSQL with PostGIS for staging and
-review geometry, Cloud Storage for raw submissions and quarantined images, and a
-durable ecosystem that is likely to remain available over the long horizon.
-
-Consequences:
-The planning docs should treat Google Cloud as the baseline implementation, while
-keeping provider-neutral contracts for identity claims, SQL/GeoJSON exports,
-object storage references, audit records, and master-change manifests. GitHub
-may be used as an audit or export mirror, but not as the primary review backend.
-
-Open questions:
-SpacetimeDB remains a possible later spike if the portal needs Rust-first
-realtime state or reducer-style governed updates. Convex is now handled by the
-2026-05-03 task-map decision below.
-
-## 2026-05-02: Treat relocation as new site identity when place changes
-
-Decision:
-Use `site_id` for the mappable place of worship, not for a congregation or
-organisation that may move between places. If a worship community relocates to a
-materially different place, create a new `site_id` for the destination and link
-the records through a relocation event, successor relation, and organisation
-evidence where available. Geometry corrections, address renumbering, street
-renaming, and better building outlines should preserve `site_id` and append
-geometry-history states.
-
-Rationale:
-The project reports places located in space and time. Treating a moving
-congregation as one site would blur place-based density, area assignment, and
-historical map products. Treating every corrected coordinate as a new site would
-inflate counts and break longitudinal continuity. The stable rule is therefore
-place continuity first, organisation continuity second.
-
-Consequences:
-`schemas/change-event.schema.json` is the append-only event envelope for
-accepted or staged changes, with both effective dates and `recorded_at` for
-bitemporal replay. `schemas/geometry-history.schema.json` records time-bounded
-geometry states for a site or structure. `site_snapshot` rows should be treated
-as derived caches rebuilt from accepted change events, not as directly edited
-records.
-
-## 2026-05-02: Keep Python narrow and optional
-
-Decision:
-Keep Python as a lightweight support layer, not as the default research or
-governed-ingestion stack. The default `uv` environment should stay minimal.
-Install the FastAPI/GeoPandas API prototype only through an explicit `api` extra,
-keep Parquet acceleration in the existing `fast-parquet` extra, and keep
-archive-only dependencies in a `legacy` extra.
-
-Rationale:
-The active research pipeline is R-first, and the governed mutation layer is
-planned for Rust. Most current Python scripts under `scripts/` use only the
-standard library. Keeping FastAPI, Starlette, GeoPandas, Pandas, Polars,
-OSM conversion, and legacy parser packages in the default environment increases
-security surface and maintenance cost without supporting routine RA or research
-work.
-
-Consequences:
-Routine Python utility work should use `uv sync` and `uv run`. API prototype work
-should use `uv sync --extra api`; Parquet fast-path work should add
-`--extra fast-parquet`; archived legacy inspection should use `--extra legacy`.
-New canonical data-cleaning, event-replay, and master-rebuild work should go to
-R or Rust rather than expanding the default Python dependency set.
-
-## 2026-05-02: Keep edit and review maps API-backed, not CLI-backed
-
-Decision:
-The edit map should remain map-first and should not call the Rust CLI directly.
-The first `pow validate` CLI is the local and CI validation surface for exported
-RA spreadsheets, bulk evidence files, and agent-produced event proposals. A
-future authenticated map should submit proposals to a backend API that reuses the
-same Rust validation rules, writes only to staging, and returns clear submission
-states: staged, rejected by validation, or saved only locally in demo mode.
-
-Rationale:
-The working map needs to feel fast and spatial. Large explanatory panels would
-make the core task harder: selecting a site, building, or point and entering the
-smallest relevant correction or nomination. The safety boundary belongs at the
-API and staging layer, not inside a static HTML page. Keeping the CLI and API on
-the same validation contracts means RA spreadsheets, map submissions, bulk
-uploads, and AI-assisted proposals can converge on one governed path without
-allowing direct master writes.
-
-Consequences:
-The entry UI should use concise controls, disabled states, and confirmation
-messages that identify the true persistence state. The reviewer UI should show
-the same map and site context, plus validation warnings, nearby duplicate
-candidates, linked OSM objects, linked building geometry, existing master
-values, proposed values, and the evidence trail. Review decisions should emit
-accepted or rejected change events; public map layers should still be derived
-from reviewed exports and rebuilt snapshots rather than live unreviewed
-submissions.
-
-## 2026-05-02: Use SQLite-compatible staging first, evaluate Turso later
-
-Decision:
-Use a plain SQLite-compatible staging design for the next local `pow stage` and
-`pow diff` milestone. Treat Turso as a possible later spike, not the default
-database choice for the first staging implementation.
-
-Rationale:
-The immediate need is a small, auditable local staging store for RA batches:
-raw-input snapshots, parsed rows, validation diagnostics, staged proposals,
-review decisions, accepted change events, and diff reports. SQLite is sufficient
-for that milestone, is easy to inspect, and keeps the database contract simple.
-The linked Turso project is promising because it is written in Rust, is
-SQLite-compatible, and advertises features relevant to future collaboration
-such as change data capture, improved write concurrency, multi-language
-bindings, and WebAssembly support. However, its repository currently describes
-the software as beta and advises caution with production data. That makes it a
-candidate for evaluation after the schema, staging, and review contracts are
-stable, not the foundation for the first governed intake path.
-
-Consequences:
-Design the next staging tables in standard SQLite terms and avoid relying on
-provider-specific extensions. Keep exports explicit enough to migrate later to
-Turso, libSQL, Cloud SQL/PostgreSQL/PostGIS, or another backend. Turso should be
-evaluated only when we have concrete pressure for SQLite-compatible sync, change
-data capture, browser/WASM workflows, or agent-friendly local database
-inspection that plain SQLite cannot handle well.
 
 ## 2026-05-03: Treat functional changes as data
 
@@ -1620,7 +1327,7 @@ creating active users from mocked command-line identities.
 
 Rationale:
 The local smoke test used a mocked identity, which is fine for proving the
-backend loop but wrong for real RA work. Andre should claim a pending `ra`
+backend loop but wrong for real RA work. André should claim a pending `ra`
 invite using his own Google-authenticated identity, and JB should likewise
 claim the admin role with a real identity. That gives the task-event log a
 stable identity chain before any evidence is saved.
@@ -1633,101 +1340,441 @@ auth config now lives in `convex/auth.config.ts` and reads the deployment
 The remaining work is hosted deployment setup, Google client configuration, and
 frontend sign-in/wiring behind the Convex demo gate.
 
-## 2026-05-09: Looking back at nine months of commits
+## 2026-05-02: Use Google Cloud for the first portal staging baseline
 
-We went through the git history—370 commits since August 2024—and noticed the
-project has moved through six fairly distinct phases. Writing this down helps
-explain why certain messy interim solutions (demo modes, spreadsheet bridges,
-files sitting in Google Drive) are still around, and why we built so much
-governance scaffolding before letting anyone actually save to a backend.
-
-**Phase 1: Just get the map working (August–December 2024)**
-The early commits are all about deployment: GitHub Pages, CORS fixes, wrestling
-with data loading. We swapped map providers when MapLibre throttled us,
-obsessed over mobile UI, and watched loading screens hang repeatedly. The first
-NZ dataset landed—3,370 places from OpenStreetMap—and we sketched out early
-schemas for sites and structures. Most commits were mobile UX tweaks; the
-interface kept getting simplified because phones were hard.
-
-**Phase 2: Realising the data was messy (January–March 2025)**
-We cleaned house: archived old files, moved frontends into an `apps/` directory,
-then started aggressive NZ cleanup. Dropped from 4,718 records to 3,618 by
-removing duplicates and false positives like masonic centres. The first manual
-review queue appeared—719 records that needed human eyes. We started central
-planning documents and admitted the global extractor was "too permissive for
-research-grade use."
-
-**Phase 3: Rebuilding the pipeline properly (April–June 2025)**
-Modernised Python tooling, started porting the global pipeline to R. Built the
-first area summary contract for NZ territorial authorities, with an honest
-caveat that place counts were repeated across census years because we did not
-have historical snapshots yet. Started designing RA workflows with spreadsheet
-templates that could handle fuzzy dates and bounded intervals.
-
-**Phase 4: Figuring out how to verify things (July–September 2025)**
-Planned temporal verification workflows. Launched the NZ verification map as
-read-only, with a demo action builder so RAs could generate spreadsheet rows
-without any backend save functionality. The Rust `pow` CLI took shape—
-validation, staging, diff reports. Wrote a critique of our own RA evidence
-pipeline, then tightened the schemas in response.
-
-**Phase 5: Adding shared task state (October 2025–January 2026)**
-Spiked Convex as a backend for shared task assignments and provisional closures,
-with a strict rule: Convex exports into `pow`, never writes to the master
-database. Refined RA workflows, added visual evidence support, documented the
-storage pipeline. Explicitly demoted Google Drive to "temporary holding, not
-the long-term system of record."
-
-**Phase 6: Temporal data and manifests (January–May 2026)**
-Extracted NZ OSM history annually from 2013 through 2025. Separated raw snapshot
-manifests from the places-to-check archives we generate from them. Defined the
-accepted diff contract: "validated diff artefacts are primary research data."
-Fixed bugs in `pow diff`, consolidated the public readme. We are still at Phase 1
-(~) in the official ROADMAP—governed local ingestion works, but reviewer
-decisions and deterministic replay remain `[ ]`.
-
-**What the commit history suggests:**
-
-1. **Maps come first, governance follows.** Every phase started with interface
-pressure, then we discovered what data infrastructure we needed to support it.
-
-2. **We document before we build.** The R pipeline, Rust CLI, and Convex spike
-all had planning documents arguing the case before the code landed.
-
-3. **NZ is our forcing function.** Global expansion keeps getting deferred while
-we try to get New Zealand right first. The cleanup queue, temporal
-reconstruction, and RA workflows are all being proven in NZ before any other
-country sees them.
-
-4. **Bridge solutions pile up.** Demo modes, local JSON previews, spreadsheet
-exports, Google Drive as holding pen—these interim fixes last longer than we
-expect because the "proper" backend stays `[ ]`.
-
-5. **Schemas precede implementation.** Change events, geometry history, area
-summaries, manifests—all specified in JSON before any code consumed them.
-
-**What this means for now:**
-We have invested heavily in governance infrastructure while deferring the
-reviewer decision loop that would actually close it. The commit history lines
-up with current priorities: finish the OSM date-tag parser, get the NZ
-places-to-check files into durable storage with proper manifests, and run a
-small RA pilot end-to-end before scaling up.
-
-## 2026-05-14: Seed the first hosted NZ web assignment
+Status:
+Superseded in part by the 2026-05-03 Convex task-map decision below. Google
+Cloud remains the durable staging, geospatial storage, media quarantine, and
+provider-neutral export reference; Convex is now the preferred near-term spike
+for live shared task/review state.
 
 Decision:
-Use the hosted Convex deployment for the first real NZ RA web assignment, with
-the public verification map loading a named 50-task batch from the backend.
+Use Google Cloud as the reference backend for durable authenticated staging,
+geospatial storage, private media quarantine, and provider-neutral archival
+exports in the New Zealand portal pilot.
 
 Rationale:
-The spreadsheet bridge helped us understand the evidence fields, but it asks
-the RA to copy rows by hand and gives us no shared task state. A small
-backend-backed batch lets Andre work from a single web link, save drafts, submit
-rows for review, and avoid re-checking tasks that have already been acted on.
+The immediate problem is safe, auditable intake: managed authentication,
+permission scopes, staged submissions, geospatial validation, image quarantine,
+reviewer decisions, and dry-run master diffs. Google Cloud provides mature
+pieces for this path:
+Identity Platform for managed OAuth and multi-factor authentication support,
+Cloud Run for a Rust API, Cloud SQL/PostgreSQL with PostGIS for staging and
+review geometry, Cloud Storage for raw submissions and quarantined images, and a
+durable ecosystem that is likely to remain available over the long horizon.
 
 Consequences:
-The hosted task backend now has the `nz-temporal-ra-workpack-001` batch seeded
-with 50 open tasks. The public map is configured to use the hosted Convex
-deployment and Google sign-in. Human users still have to claim their pending
-invites on first sign-in, and accepted evidence still has to move through the
-review/export/`pow` path before it can affect the master map.
+The planning docs should treat Google Cloud as the baseline implementation, while
+keeping provider-neutral contracts for identity claims, SQL/GeoJSON exports,
+object storage references, audit records, and master-change manifests. GitHub
+may be used as an audit or export mirror, but not as the primary review backend.
+
+Open questions:
+SpacetimeDB remains a possible later spike if the portal needs Rust-first
+realtime state or reducer-style governed updates. Convex is now handled by the
+2026-05-03 task-map decision below.
+
+## 2026-05-02: Treat relocation as new site identity when place changes
+
+Decision:
+Use `site_id` for the mappable place of worship, not for a congregation or
+organisation that may move between places. If a worship community relocates to a
+materially different place, create a new `site_id` for the destination and link
+the records through a relocation event, successor relation, and organisation
+evidence where available. Geometry corrections, address renumbering, street
+renaming, and better building outlines should preserve `site_id` and append
+geometry-history states.
+
+Rationale:
+The project reports places located in space and time. Treating a moving
+congregation as one site would blur place-based density, area assignment, and
+historical map products. Treating every corrected coordinate as a new site would
+inflate counts and break longitudinal continuity. The stable rule is therefore
+place continuity first, organisation continuity second.
+
+Consequences:
+`schemas/change-event.schema.json` is the append-only event envelope for
+accepted or staged changes, with both effective dates and `recorded_at` for
+bitemporal replay. `schemas/geometry-history.schema.json` records time-bounded
+geometry states for a site or structure. `site_snapshot` rows should be treated
+as derived caches rebuilt from accepted change events, not as directly edited
+records.
+
+## 2026-05-02: Keep Python narrow and optional
+
+Decision:
+Keep Python as a lightweight support layer, not as the default research or
+governed-ingestion stack. The default `uv` environment should stay minimal.
+Install the FastAPI/GeoPandas API prototype only through an explicit `api` extra,
+keep Parquet acceleration in the existing `fast-parquet` extra, and keep
+archive-only dependencies in a `legacy` extra.
+
+Rationale:
+The active research pipeline is R-first, and the governed mutation layer is
+planned for Rust. Most current Python scripts under `scripts/` use only the
+standard library. Keeping FastAPI, Starlette, GeoPandas, Pandas, Polars,
+OSM conversion, and legacy parser packages in the default environment increases
+security surface and maintenance cost without supporting routine RA or research
+work.
+
+Consequences:
+Routine Python utility work should use `uv sync` and `uv run`. API prototype work
+should use `uv sync --extra api`; Parquet fast-path work should add
+`--extra fast-parquet`; archived legacy inspection should use `--extra legacy`.
+New canonical data-cleaning, event-replay, and master-rebuild work should go to
+R or Rust rather than expanding the default Python dependency set.
+
+## 2026-05-02: Keep edit and review maps API-backed, not CLI-backed
+
+Decision:
+The edit map should remain map-first and should not call the Rust CLI directly.
+The first `pow validate` CLI is the local and CI validation surface for exported
+RA spreadsheets, bulk evidence files, and agent-produced event proposals. A
+future authenticated map should submit proposals to a backend API that reuses the
+same Rust validation rules, writes only to staging, and returns clear submission
+states: staged, rejected by validation, or saved only locally in demo mode.
+
+Rationale:
+The working map needs to feel fast and spatial. Large explanatory panels would
+make the core task harder: selecting a site, building, or point and entering the
+smallest relevant correction or nomination. The safety boundary belongs at the
+API and staging layer, not inside a static HTML page. Keeping the CLI and API on
+the same validation contracts means RA spreadsheets, map submissions, bulk
+uploads, and AI-assisted proposals can converge on one governed path without
+allowing direct master writes.
+
+Consequences:
+The entry UI should use concise controls, disabled states, and confirmation
+messages that identify the true persistence state. The reviewer UI should show
+the same map and site context, plus validation warnings, nearby duplicate
+candidates, linked OSM objects, linked building geometry, existing master
+values, proposed values, and the evidence trail. Review decisions should emit
+accepted or rejected change events; public map layers should still be derived
+from reviewed exports and rebuilt snapshots rather than live unreviewed
+submissions.
+
+## 2026-05-02: Use SQLite-compatible staging first, evaluate Turso later
+
+Decision:
+Use a plain SQLite-compatible staging design for the next local `pow stage` and
+`pow diff` milestone. Treat Turso as a possible later spike, not the default
+database choice for the first staging implementation.
+
+Rationale:
+The immediate need is a small, auditable local staging store for RA batches:
+raw-input snapshots, parsed rows, validation diagnostics, staged proposals,
+review decisions, accepted change events, and diff reports. SQLite is sufficient
+for that milestone, is easy to inspect, and keeps the database contract simple.
+The linked Turso project is promising because it is written in Rust, is
+SQLite-compatible, and advertises features relevant to future collaboration
+such as change data capture, improved write concurrency, multi-language
+bindings, and WebAssembly support. However, its repository currently describes
+the software as beta and advises caution with production data. That makes it a
+candidate for evaluation after the schema, staging, and review contracts are
+stable, not the foundation for the first governed intake path.
+
+Consequences:
+Design the next staging tables in standard SQLite terms and avoid relying on
+provider-specific extensions. Keep exports explicit enough to migrate later to
+Turso, libSQL, Cloud SQL/PostgreSQL/PostGIS, or another backend. Turso should be
+evaluated only when we have concrete pressure for SQLite-compatible sync, change
+data capture, browser/WASM workflows, or agent-friendly local database
+inspection that plain SQLite cannot handle well.
+
+## 2026-05-01: Keep the changelog lean and use this journal for decisions
+
+Decision:
+Use `JOURNAL.md` for decision rationale and `CHANGELOG.md` for implementation
+changes.
+
+Rationale:
+Many project choices are methodological rather than only technical. Examples
+include what counts as site evidence, how to treat current versus historical
+place counts, and how to stage community or AI contributions before master
+ingestion.
+
+Consequences:
+Future entries should summarise context, decision, rationale, consequences, and
+open questions. The changelog should stay concise and release-oriented.
+
+## 2026-05-01: Treat the grant as a reporting reference, not a tracked source
+
+Decision:
+Keep original grant materials in the ignored local `grant/` folder and use them
+as the document we report against.
+
+Rationale:
+The grant remains the reference point for objectives, reporting, and
+accountability. Keeping the original file outside Git lets the public
+repository describe project direction while avoiding dependence on a local
+administrative document.
+
+Consequences:
+Planning notes should remain mindful of grant aims and explain justified shifts
+in scope. Repo documentation should not depend on the grant file being present.
+
+## 2026-05-01: Keep the research pipeline R-first
+
+Decision:
+Use R as the primary research-facing pipeline language, with Python retained for
+API, tooling, and support scripts. Use `uv` for Python work.
+
+Rationale:
+The research pipeline needs to remain legible to investigators and research
+assistants. Python is useful for app support and static-task generation, but the
+main extraction, cleaning, and analytical products should remain reviewable in R
+unless there is a clear reason to move a component elsewhere.
+
+Consequences:
+Optimisation should target specific bottlenecks rather than trigger a wholesale
+rewrite. `extendr` remains a possible later path for hot R code.
+
+## 2026-05-01: Use area summaries as the portal contract
+
+Decision:
+Make `area_summary_ta.json` the first New Zealand example of a provenance-rich
+analytical product for the map and future portal.
+
+Rationale:
+Map layers should consume reproducible analytical products with explicit units,
+years, boundaries, denominators, sources, and quality flags. This better matches
+researcher download and citation needs than browser-derived legacy census
+tables.
+
+Consequences:
+The current NZ area summary combines current committed place counts with
+2013, 2018, and 2023 Census religion denominators. It must be labelled as a
+current inventory overlay, not a historical place-density estimate.
+
+## 2026-05-01: Do not back-project current places into historical density
+
+Decision:
+Do not interpret current `nz_places.json` counts as true 2013 or 2018 place
+density.
+
+Rationale:
+True historical density requires evidence that a place existed and was in
+worship use at the target year. Current OSM-derived inventories cannot safely
+answer that question alone.
+
+Consequences:
+Historical density should be reconstructed through evidence layers such as OSM
+history, OSM date tags, visual evidence, directories, denominational sources,
+charity or organisation records, building evidence, and reviewed target-year
+status.
+
+## 2026-05-01: Collect bounded historical evidence before exact dates
+
+Decision:
+RA templates should record exact dates when available and bounded dates when
+sources only show limits, such as "opened by 2013" or "closed after 2018".
+
+Rationale:
+Forcing vague source evidence into exact birth or death dates would create
+false precision.
+
+Consequences:
+The ingestion model needs first-class fields for `not_earlier_than` and
+`not_later_than` evidence, source wording, precision, and review status.
+
+## 2026-05-01: Contributions should stage evidence, not write to the master
+
+Decision:
+Human, RA, community, scripted, and AI-assisted contributions should go through
+staging, validation, review, adjudication, and master-change proposals.
+
+Rationale:
+The master database needs auditability, reproducibility, and protection from
+unchecked edits.
+
+Consequences:
+Google Sheets can be the first familiar RA adapter. A later API can accept
+structured contributions from humans and agents, but master updates should be
+accepted only through reviewed proposals.
+
+## 2026-05-01: Verification edits are staged, reversible, and auditable
+
+Decision:
+The NZ verification map is a staging surface. It prepares review or nomination
+JSON and does not directly edit the master database.
+
+Rationale:
+Reviewers need a fast way to inspect evidence and propose changes, while the
+master needs an audit trail.
+
+Consequences:
+Before submission, a reviewer can discard or regenerate staged JSON. After
+staging, undo should mean a `retracted` decision or a superseding decision linked
+by `supersedes_decision_id`. After master acceptance, undo should require a
+reviewed reversal proposal and an audit entry. Silent overwrites should be
+avoided.
+
+## 2026-05-01: Use the NZ verification map as a feedback pilot
+
+Decision:
+The current verification map should be treated as an internal or RA-facing
+feedback pilot, not a public correction interface.
+
+Rationale:
+The workflow is still being tested. It is useful for reviewers to identify
+records, evidence gaps, and ergonomic problems, but the backend staging and
+review contract is not complete.
+
+Consequences:
+For this pilot, staged JSON is sufficient. A future version can post to a
+staging API once validation and undo semantics are clearer.
+
+Implementation note:
+For RA feedback, the verification map should show individual points by default
+rather than clustered markers. Clustering is useful for public browsing, but it
+hides co-located or nearby records that reviewers need to notice.
+
+Follow-up decision:
+The public RA feedback page should be read-only until a secure staging sink
+exists. The earlier draft decision and nomination controls generated only local
+browser JSON, which was useful for a smoke test but too easy to confuse with a
+real submission path.
+
+Demo-mode exception:
+The RA may inspect draft decision and nomination controls through an explicit
+`?demo=1` URL. Demo mode must show clear warnings that nothing is saved or
+submitted, and it must keep the normal public verification URL read-only.
+
+## 2026-05-01: Missing sites and building complications require first-class staging
+
+Decision:
+Verification must support nominations that are not simply fixes to existing
+OSM-derived master rows.
+
+Rationale:
+Important evidence may concern current places missing from OSM, lost places
+present in 2013 or another target year, denomination switches, shared buildings,
+split/merged site records, and organisation evidence that does not map directly
+to a building.
+
+Consequences:
+Nominations need their own ids, evidence, target-year status, proposed action,
+and links to any relevant master, OSM, building, or organisation records.
+
+## 2026-05-01: Treat charity data as organisation evidence
+
+Decision:
+Charity records should be modelled as organisation observations before they are
+linked to site observations.
+
+Rationale:
+Annual returns, registration dates, deregistration dates, activities, and
+addresses can be valuable, but one charity may operate multiple sites and one
+building may host several communities.
+
+Consequences:
+Charity evidence should support site matching with explicit confidence and date
+bounds. It should not automatically become building-level evidence.
+
+## 2026-05-01: Defer fuzzy placement from address-poor historical sources
+
+Decision:
+Historical sources without street addresses can be retained as congregation or
+regional evidence, but should not yet enter site-level density products.
+
+Rationale:
+Sources such as theses and denominational histories may contain substantial
+evidence about congregations while only identifying parishes, towns, or regions.
+That evidence is valuable, but precise placement would require assumptions.
+
+Consequences:
+Preserve raw wording and regional cues. Later, fuzzy regional placement may
+support uncertain back-propagated maps or regional counts once confidence rules
+and uncertainty visualisation are defined.
+
+## Open Decision: OSM fixes versus project audit API
+
+Question:
+Should the review surface direct users to OSM to fix errors, or to a project
+API to audit evidence and stage proposed changes?
+
+Current recommendation:
+For the research workflow, direct reviewers to a project audit API or staged
+audit form. Keep OSM links as source context and optional external editing links,
+but do not make OSM editing the primary correction path.
+
+Rationale:
+The project needs to track evidence for historical status, non-OSM sites,
+lost sites, building complications, and organisation-level sources. OSM is an
+important source, but it cannot represent all research evidence and should not
+be treated as the master correction channel.
+
+Near-term pilot:
+Expose the NZ verification draft to the RA for feedback first. Avoid exposing
+the global map as an input surface until staging, moderation, and abuse controls
+exist. Keep any input as draft staged JSON or a test-only endpoint that is not
+linked to the master.
+
+## 2026-05-01: Treat data intake as a security boundary
+
+Decision:
+Any workflow that accepts incoming data must be designed as an untrusted-input
+surface from the beginning.
+
+Rationale:
+RA spreadsheets, public forms, direct API clients, file uploads, partner bulk
+submissions, and AI-agent contributions can introduce bad data, spam, malicious
+files, private information, licence violations, or attempts to alter published
+outputs. Security cannot be added only after the intake path exists.
+
+Consequences:
+The default architecture is read-only master exports plus staged submissions.
+Before any intake endpoint is exposed beyond the core team, define
+authentication or contributor identification, permission scopes, rate limits,
+upload type and size limits, malware scanning where feasible, privacy and
+licence checks, validation, quarantine for low-trust submissions, audit logs,
+abuse handling, and reviewed promotion into accepted data. No intake path should
+write directly to the master or to public map products.
+
+## 2026-05-01: Use managed authentication
+
+Decision:
+Use a managed authentication service. Do not build authentication ourselves.
+
+Rationale:
+Password storage, password reset, multi-factor authentication, login sessions,
+token refresh, and account recovery are security-sensitive systems. The project
+needs staged evidence, permission scopes, and audit records, but it should not
+carry the operational risk of custom authentication.
+
+Consequences:
+The future staging API should verify provider-issued identity tokens and then
+map authenticated identities to project permissions such as submit-only, review,
+adjudicate, and master-commit. Scripts and AI agents should use scoped machine
+credentials. The project should store provider subject ids, contributor records,
+permission grants, and audit events, not passwords or session secrets. Provider
+selection remains a later deployment decision.
+
+## 2026-05-01: Use Rust for governed data modification
+
+Decision:
+Use Rust as the preferred systems layer for data modification, validation,
+staging, event application, master rebuilding, and export generation. Keep R as
+the primary investigator-facing layer for analysis, summaries, plots, and
+reports.
+
+Rationale:
+The project needs strict contracts around data changes: immutable inputs,
+typed validation, reproducible diffs, auditable acceptance, and explainable
+master snapshots. Rust is well suited to this governed state-change layer.
+R remains better for collaborator-facing research work, data exploration, and
+statistical reporting, and it is already the canonical research pipeline.
+
+Consequences:
+Rust should not become a general rewrite of the research workflow. It should
+begin with explicit invariants and an event model: staged proposals, validation
+results, review decisions, accepted changes, and rebuild manifests. The first
+implementation should be a local CLI that validates and diffs a small NZ staged
+batch without writing to the master. Future API work can reuse the same typed
+contracts once authentication, permissions, and staging storage are ready.
+
+Open questions:
+The repository still needs a concrete event schema, storage choice for staged
+and accepted events, and a migration path from current static JSON outputs to
+event-rebuilt master snapshots. These should be specified before a Rust service
+or public write endpoint is built.

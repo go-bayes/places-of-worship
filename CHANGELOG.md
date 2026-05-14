@@ -10,6 +10,13 @@
 - Added server-side field-size limits to Convex evidence, review, and task
   mutations so oversized notes, generated rows, and client context are rejected
   before they reach the shared backend.
+- Recorded the strict TypeScript transition rule: new Convex-facing workflow UI
+  should be strict TypeScript, while the live static verification map should
+  migrate only through targeted redesign or pilot-driven edits.
+- Refreshed RA-facing documentation so the assigned Convex-backed workpack is
+  the preferred saving path and spreadsheet copy/paste is fallback only.
+- Reordered the journal newest-first and refreshed the planning snapshot to
+  describe the live Convex assignment/review workflow as of 2026-05-14.
 - Added the New Zealand submitted-evidence reviewer portal to the README links
   and noted that current authorisation is limited to JB and JW.
 - Clarified that new Convex-facing task, review, nomination, export, and

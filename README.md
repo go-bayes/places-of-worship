@@ -24,9 +24,9 @@ reference product.
 ## Current Work
 
 New Zealand is the proof-of-concept country for temporal validation. The pilot
-is moving from spreadsheet copy/paste to a Convex-backed task map that can save
-evidence drafts, provisional task status, and reviewer queues directly. The
-spreadsheet export remains a fallback while the backend is being configured.
+now uses a Convex-backed task map that can save evidence drafts, provisional
+task status, and reviewer queues directly. Spreadsheet export remains a
+fallback and audit aid.
 The evidence workflow collects source-backed information about:
 
 - places of worship present or absent in 2013, 2018, and 2023,

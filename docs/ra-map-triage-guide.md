@@ -11,21 +11,16 @@ The short version is:
 2. Use the map to find and inspect the case.
 3. Use source links, searches, street maps, directories, or other approved
    sources to check the evidence.
-4. Record the evidence in the agreed spreadsheet. If the map demo action
-   builder is enabled, you may use it to generate a draft spreadsheet row for
-   pasting into the sheet.
-5. Tell JB when the spreadsheet rows are ready, and include
-   unresolved questions.
+4. In the assigned web workpack, sign in and use `Save draft`,
+   `Submit unresolved note`, or `Submit for review`.
+5. Use spreadsheet copy/paste only if JB explicitly asks you to use the
+   fallback.
 
-The current pilot is map-assisted, but not yet a secure submission portal. The
-map is a search and triage surface. In demo mode, it can generate a local
-spreadsheet-ready evidence row and a local review JSON preview for feedback.
-The spreadsheet remains the evidence-entry surface. For the NZ pilot, this is a
-project-controlled Google Sheet in the private Google Drive workspace. JB sends
-the link directly; it should not be committed to GitHub. JB handles validation,
-staging, and review unless he explicitly asks otherwise. Nothing entered in the
-demo map is saved or submitted.
-Your work is saved in the shared working spreadsheet, not in the map.
+The current pilot has a shared backend. In assignment mode, signed-in work is
+saved to the project task queue, where reviewers can inspect it. In demo or
+fallback mode, the map can still generate a local spreadsheet-ready evidence
+row and a local review JSON preview, but those local previews are not submitted
+unless JB asks you to use the spreadsheet fallback.
 
 The verification map also has target-year controls for 2013, 2018, and 2023.
 These colours are provisional. They use reviewed target-year fields when
@@ -46,12 +41,13 @@ acceptance decisions, editing the master database, or changing the public map.
 
 Current pilot:
 
-- The NZ verification map helps you find tasks and inspect current map records.
-- The demo controls can generate a local spreadsheet row and review JSON for
-  discussion, but they do not save or submit data.
-- The working spreadsheet records evidence.
-- JB handles command-line validation and staging outside the
-  default RA workflow.
+- The assigned NZ verification link shows a filtered task list.
+- Google sign-in connects the page to the shared Convex task backend.
+- `Save draft`, `Submit unresolved note`, and `Submit for review` are the
+  preferred saving path.
+- Spreadsheet rows remain a fallback and export/debug aid.
+- JB and reviewers handle validation, staging, and review outside the default
+  RA workflow.
 
 Target workflow:
 
@@ -63,7 +59,8 @@ Target workflow:
 - The authenticated portal writes the proposal to staging for review.
 - Reviewed changes rebuild the 2013, 2018, and 2023 map layers.
 
-Until that target workflow exists, use the spreadsheet.
+Until the full target workflow exists, use the assigned backend link and the
+spreadsheet fallback only when JB asks for it.
 
 ## Using The Demo Map Action Builder
 

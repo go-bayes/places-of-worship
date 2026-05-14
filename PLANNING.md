@@ -30,170 +30,59 @@ durable progress.
 
 ## Current state
 
-As of 30 April 2026:
+As of 14 May 2026:
 
-- The global static app lives in `apps/global/`.
-- The NZ regional app lives in `apps/regions/nz/`.
-- NZ territorial authority codes now align with official boundary codes.
-- The NZ places dataset has been reduced from 4,718 committed records to 3,618
-  after staged cleanup passes.
-- The NZ manual review queue currently contains 719 records in
-  `docs/nz-manual-review-queue.md`.
-- The NZ cleanup workflow is now documented and auditable:
-  - `scripts/clean_nz_places.py`
-  - `scripts/build_nz_review_queue.py`
-  - `docs/nz-data-cleanup-audit.md`
-- The legacy global extractor remains too permissive for research-grade use.
-- `scripts/extract_global_data.R` is the best starting point for a replacement
-  global pipeline, but it still needs explicit cleaning, deduplication, review
-  queues, and run manifests.
-- Some source extracts and intermediate files may currently only exist in
-  Google Drive. Treat Google Drive as temporary holding, not the long-term
-  system of record.
-- The original grant materials are stored locally in `grant/`, which is ignored
-  by Git. Use them as the reporting reference when planning deliverables,
-  country expansion, and justified shifts in scope.
-- A first New Zealand territorial-authority `area_summary` contract now exists
-  through `schemas/area-summary.schema.json`,
-  `scripts/build_nz_area_summary.R`, and
-  `apps/regions/nz/data/area_summary_ta.json`. This first product combines
-  current committed place counts with 2013, 2018, and 2023 Census religion
-  denominators, and flags that the place counts are current rather than
-  historical.
+- Static map products remain the public-facing map layer. The global app lives
+  in `apps/global/`; the New Zealand regional app lives in
+  `apps/regions/nz/`. Public map outputs consume reviewed exports and should
+  not be edited directly by RA, reviewer, public, script, or AI intake paths.
 - Current New Zealand map data lives in committed app files under
   `apps/regions/nz/data/`: `nz_places.json`, `verification_tasks.geojson`,
   `ta_aggregated_data.json`, `territorial_authorities.geojson`, and
-  `area_summary_ta.json`/`.csv`. The annual New Zealand OSM history run lives
-  under ignored temporary working files at `data/intermediate/nz_osm_temporal/`.
-  The raw OSM/ohsome snapshots and the generated places-to-check archive now
-  have separate Google Drive copies and tracked manifests. Do not use annual
-  OSM outputs for Convex tasks, RA assignments, density plots, or reporting
-  unless the relevant Drive archive and tracked manifest are cited.
-- A separate community and agent-assisted ingestion plan now lives in
-  `docs/community-ingestion-api-plan.md`. It treats Google Sheets as a first
-  research-assistant adapter and defines a future staging API for human,
-  scripted, community, and AI-agent contributions.
-- Any workflow that accepts incoming data must be designed with an explicit
-  security and trust boundary. Submissions are untrusted input until validated,
-  reviewed, permission-checked, and accepted through a staged audit path.
-- The NZ verification page now defaults to the demo action-builder surface for
-  the RA pilot. A `?demo=0` mode preserves the read-only view. Demo mode must
-  continue to state clearly that data is not saved or submitted and should not
-  contain private or sensitive information.
-- A separate master-data verification plan now lives in
-  `docs/master-verification-workflow-plan.md`. It defines read-only site data
-  files, automated checks, review queues, staged verification decisions,
-  agent-readable data dumps, and map verification layers for NZ and global
-  scale.
-- Initial RA-facing historical site evidence templates now live in
-  `docs/templates/ra-historical-site-evidence/`. They provide Google
-  Sheets-ready CSV tabs, including a wide human-entry sheet for source-backed
-  opening, closure, and change-date evidence; source metadata; site
-  observations; candidate matches; review notes; controlled vocabularies; and
-  privacy/licence instructions.
-- `docs/ra-map-triage-guide.md` now defines the interim RA map-to-spreadsheet
-  workflow for missing current sites, duplicate records, disappeared sites,
-  complicated worship functions, NZ verification priorities, and
-  2013/2018/2023 target-year states. This is the current bridge until the map
-  can accept authenticated staged proposals directly.
-- The NZ verification map now includes provisional 2013, 2018, and 2023
-  target-year controls. These controls use explicit target-year fields when
-  available and otherwise derive a provisional status from OSM `start_date`,
-  `old_start_date`, and `end_date`. This is an RA triage aid, not an accepted
-  historical reconstruction.
-- In demo mode, the NZ verification map now includes a local RA action builder
-  that turns the selected task, target-year statuses, source details, related
-  ids, one optional opening, closure, or later-change date, and evidence note into a
-  spreadsheet-ready wide evidence row plus review JSON. This is a usability
-  bridge only: it does not save, submit, authenticate, or write to staging.
-- Street-level imagery and direct field observations are first-class RA
-  evidence sources. Use `source_type = street_imagery` for dated imagery
-  providers such as Google Street View, Apple Look Around, Mapillary, KartaView,
-  Bing Streetside, or equivalent services, and use
-  `source_type = field_observation` for approved RA or project-team site visits.
-  Record provider, link or agreed reference, capture or visit date, and a
-  short site-level visual claim; do not store screenshots, photos, videos, or
-  private observations in Git.
-- Selected NZ verification tasks now display a concrete task brief before the
-  findings form. The brief turns priority, suggested action, target year, and
-  automated checks into an RA-facing checklist.
-- `docs/ra-nz-pilot-task.md` now defines the current time-bounded RA task:
-  start from the NZ verification map, build a small mixed pilot batch, use the
-  action builder and spreadsheet for evidence, and leave command-line
-  validation and staging to the project team unless explicitly asked. Until
-  authenticated save exists, the persistent working surface is a
-  project-controlled Google Sheet in the project team's private Google Drive
-  workspace. The sheet link should be supplied directly to the RA and should
-  not be committed to GitHub. CSV export comes from that spreadsheet only when
-  requested.
-- CLI and staging support docs that are not essential to RA map work now live
-  under `docs/development/` so the RA path stays focused on the UI and working
-  spreadsheet.
-- Frontend and task-workflow path: keep the current static map stable for the
-  active pilot, but make new Convex-facing workflow UI TypeScript-first with
-  strict types wherever practical. Use Convex's typed schemas, mutations,
-  queries, exports, and frontend integration points instead of adding new
-  vanilla JavaScript surfaces. Revisit Leptos once the action vocabulary,
-  staged event contract, and review ergonomics are stable enough to justify a
-  persistent portal.
-- TypeScript framework trigger: do not rewrite the live static New Zealand
-  verification map while André's pilot is active. For the first authenticated
-  review portal or shared task workbench, use a small React + Vite + Convex
-  React app so reviewer queues, review-decision forms, reusable evidence forms,
-  `Nominate missing PoW`, country-config controls, and live shared task state
-  have typed components and Convex hooks. Avoid Next.js, Remix, TanStack Start,
-  or a larger meta-framework until the project needs broader public-portal
-  routing, server-rendered pages, complex account/admin flows, or a wider
-  public application shell.
-- A separate portal data-entry planning hub now lives in
-  `docs/portal-data-entry-plan.md`. The current direction is to spike Convex as
-  the shared online task map and reviewer-workbench backend for the New Zealand
-  RA pilot. Google Cloud/PostGIS remains the durable staging and storage
-  reference if the project needs heavier geospatial storage, quarantined media,
-  or provider-neutral exports. No live task backend should write directly to
-  the master.
-- The Convex task-map backend contract now lives in
-  `docs/convex-task-layer-spec.md`. It defines Convex-owned task status,
-  evidence drafts, review decisions, task-event logs, reviewer exports, and the
-  boundary from live task coordination into the `pow` validation/rebuild path.
-- The initial Convex scaffold now lives in `convex/`, with maintainer setup in
-  `docs/development/convex-task-layer-setup.md` and a static NZ seed builder in
-  `scripts/build_convex_task_seed.py`. The NZ verification map now has a
-  configuration-gated Convex client for sign-in, shared task status, draft
-  evidence saves, review submission, and backend skips. Convex still has no
-  authority to mutate the master.
-- The first Convex export bridge now returns a curator file bundle, and
-  `scripts/materialise_convex_export.py` can write ignored local artefacts with
-  SHA-256 hashes. Use this to kick the tyres on one accepted New Zealand
-  decision before expanding Vanuatu UI work.
-- The first curated New Zealand temporal RA workpack is generated by
-  `scripts/build_nz_temporal_ra_workpack.R` and documented in
-  `docs/development/nz-temporal-ra-workpack.md`. It reduces the OSM temporal
-  outputs to 50 reproducible rows: 35 possible date-tag openings, 5 likely OSM
-  object-churn losses, 5 ambiguous date/status cases, and 5 controls.
-  `scripts/build_convex_workpack_seed.py` turns that same workpack into the
-  first 50-case Convex-backed web assignment, exposed through
-  `verification.html?batch=nz-temporal-ra-workpack-001` once the hosted backend
-  is configured and seeded.
-- Vanuatu is now the first active Pacific country case after New Zealand. Guy
-  is the assigned research assistant. The starting point is source
-  reconnaissance, documented in
-  `research/vanuatu-case-analysis.md`, not immediate map validation at scale.
-  The Vanuatu protocol uses target years 1989, 1999, 2009, and 2020, and
-  lifecycle dates from 1600 onward.
-- The project module map now lives in `docs/system-map.md`. It organises the
-  work into Source Library, Extraction And Cleaning, Temporal Leads, Task
-  Coordination, Evidence Intake, Review And Diff, Master Reconstruction,
-  Research Outputs, Public And Portal UI, and Governance.
-- Tool and architecture ideas we are still weighing now live in
-  `BRAINSTORMING.md`. Current candidates include Graphite for implementation
-  pull-request coordination and JSON diff/tree renderers for replaceable
-  reviewer displays. These tools must not define research data semantics.
-- `CRITIQUE.md` records a critical review of the revisions pipeline for
-  RA-submitted location and denomination evidence. The first schema response is
-  `schemas/change-event.schema.json` plus
-  `schemas/geometry-history.schema.json`, after deciding that `site_id` tracks
-  a mappable place rather than a congregation that relocates.
+  `area_summary_ta.json`/`.csv`. The area-summary product still combines
+  current committed place counts with 2013, 2018, and 2023 Census denominators;
+  it is not yet a historical reconstruction of place counts.
+- The New Zealand OSM temporal work is reproducible but provisional. Raw
+  OSM/ohsome snapshots and generated places-to-check archives have project
+  Google Drive copies and tracked manifests. Ignored local files under
+  `data/intermediate/` are cache, not durable storage. Do not use annual OSM
+  outputs for Convex tasks, RA assignments, density plots, or reporting unless
+  the relevant Drive archive and tracked manifest are cited.
+- The hosted Convex backend is the active shared task layer for the New Zealand
+  RA pilot. The first 50-case batch is `nz-temporal-ra-workpack-001`, generated
+  by `scripts/build_nz_temporal_ra_workpack.R` and seeded from
+  `scripts/build_convex_workpack_seed.py`. André should use the assigned web
+  link, sign in with Google, and use `Save draft`, `Submit unresolved note`, or
+  `Submit for review`. Spreadsheet copy/paste is fallback only.
+- A static reviewer portal now exists at `apps/regions/nz/review.html`. It lets
+  authorised reviewers inspect submitted evidence and record accept, reject,
+  defer, duplicate, or needs-more-evidence decisions. Review decisions do not
+  update the master or public map until exported and processed through `pow`.
+- Convex owns live coordination only: task status, assignments, provisional
+  candidate tasks, evidence drafts, task events, review decisions, and export
+  metadata. The governed data boundary remains `pow` validation, staging, diff,
+  replay, and rebuild. The first Convex export bridge and
+  `scripts/materialise_convex_export.py` are available for the next round-trip
+  test on one accepted New Zealand decision.
+- The immediate reusable UI gap is `Nominate missing PoW`: create a provisional
+  candidate task, require source evidence and nearby-site checks, and reuse the
+  same review/export path as seeded tasks. The wording should remain `Nominate
+  missing PoW`, not `Add to map`.
+- New Convex-facing workflow UI should be strict TypeScript. Keep the live
+  static JavaScript verification map stable while André is using it, and migrate
+  modules only through targeted redesigns, the Vite/React workbench, or a clear
+  pilot need.
+- Vanuatu is the first active Pacific country case after New Zealand. Guy is
+  the assigned RA. The starting point is source reconnaissance in
+  `research/vanuatu-case-analysis.md`, with target years 1989, 1999, 2009, and
+  2020 and lifecycle dates from 1600 onward. Vanuatu should wait for the first
+  New Zealand Convex-review-export-`pow` round trip before receiving a full task
+  map.
+- Current reference documents: `docs/system-map.md` for modules,
+  `docs/convex-task-layer-spec.md` for Convex scope,
+  `docs/portal-submission-review-plan.md` for review,
+  `docs/data-storage-pipeline.md` for storage, `FAQ.md` for recurring concepts,
+  and `LEXICON.md` for plain-language definitions.
 
 ## Near-term RA UI requirements
 
@@ -242,10 +131,9 @@ site:
 
 ### Working spreadsheet provisioning
 
-The pilot should use project-owned Google Sheets, not RA-owned copies, as the
-temporary evidence store. The simplest version is one project-controlled
-working sheet shared directly with the RA. The next iteration should automate
-sheet provisioning from a locked project-owned template:
+Google Sheets are now a fallback and interchange surface, not the preferred RA
+working surface. When a sheet is needed for a collaborator, export, or offline
+handoff, use project-owned Google Sheets rather than RA-owned copies:
 
 1. Create one workbook or tab per RA, batch, or assigned work period in the
    project Google Drive workspace.
@@ -256,18 +144,18 @@ sheet provisioning from a locked project-owned template:
    country, and target-year set.
 5. Keep the sheet link out of GitHub and revoke access when the work period
    ends.
-6. Later, let the authenticated map/portal request or assign a project-owned
-   working sheet automatically.
+6. Treat the sheet as a fallback/export artefact that can be reconciled with
+   Convex and `pow`, not as the source of truth for live task status.
 
 Avoid making RA-owned sheets the default system of record. RA-owned copies make
 offboarding, retrieval, permissions, and audit trails harder.
 
-The first provisioning helper is `scripts/build_ra_working_sheet.py`, which
+The provisioning helper is `scripts/build_ra_working_sheet.py`, which
 builds a gitignored `.xlsx` import workbook from
 `docs/templates/ra-historical-site-evidence/`, including frozen headers,
 filters, and main-tab controlled-field dropdowns. Import that workbook into
-Google Drive as a native Sheet, then share the project-owned Sheet directly
-with the RA. Keep the private Sheet URL out of repository docs.
+Google Drive as a native Sheet when a fallback or partner-facing sheet is
+needed. Keep private Sheet URLs out of repository docs.
 
 ### Shared provisional task state
 
@@ -532,9 +420,9 @@ The working model is:
 
 - Use `docs/community-ingestion-api-plan.md` as the supporting design note for
   contribution workflows.
-- Treat Google Sheets as the first contributor interface for research
-  assistants, but keep the durable contract in a staging API and validated data
-  model.
+- Treat Google Sheets as a fallback or partner-ingest adapter for research
+  assistants, while keeping the normal RA pilot path in Convex and the durable
+  contract in `pow` validation and accepted change events.
 - Make the ingestion path support:
   - human research assistants
   - community contributors
@@ -710,15 +598,16 @@ for reviewer triage but not for research estimates.
 
 Because this contract is still pre-release, do not preserve awkward schema
 shapes for backward compatibility. Update examples, tests, and templates
-together while portal intake, review decisions, accepted-event replay, and
-master rebuilds are still absent. The priority is a coherent event model that
-can represent worship-function change directly.
+together while accepted-event replay and master rebuilds are still being
+proven. The priority is a coherent event model that can represent
+worship-function change directly.
 
-Next priority after `pow diff` v1:
-wire the minimal save/evaluate/review loop for the New Zealand RA pilot. The
-near-term flow is shared spreadsheet or map-assisted row -> `pow stage` ->
-`pow propose --persist` -> `pow diff` reviewer report -> explicit reviewer
-decision. This still must not write directly to the master database.
+Current review/export priority:
+wire the minimal Convex review round trip for the New Zealand RA pilot. The
+near-term flow is Convex evidence draft -> reviewer decision -> frozen export
+bundle -> `pow validate` -> `pow stage` -> `pow propose --persist` -> `pow
+diff` reviewer report -> accepted-event replay. This still must not write
+directly to the master database.
 
 Infrastructure decision rules for that loop:
 
