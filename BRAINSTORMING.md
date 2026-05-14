@@ -7,6 +7,15 @@ Use it when an option looks promising but still needs a price check, security
 review, migration plan, or small prototype. Once we choose a direction, move the
 actual decision into `PLANNING.md`, `ROADMAP.md`, or `JOURNAL.md`.
 
+## Relationship to OSM
+
+- The most sustainable long-term path may be integration with OpenStreetMap
+  (OSM), rather than maintaining a fully separate public map forever.
+- We need to consider whether reviewed project outputs can be shaped so they
+  help update OSM where appropriate.
+- Open question: should the long-range plan work primarily through OSM, and if
+  so, what project data, review, and attribution rules would make that viable?
+
 ## Evaluation Principles
 
 - Prefer tools that store project data in open, documented formats.
