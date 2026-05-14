@@ -14,9 +14,9 @@ Current assigned workpack link:
 <https://www.placesmap.org/apps/regions/nz/verification.html?batch=nz-temporal-ra-workpack-001>
 
 When the page shows the shared task backend at the top, sign in with Google and
-use `Save draft` or `Submit for review`. That is the preferred path because it
-saves your work to the project task queue and helps other collaborators avoid
-duplicating the same task.
+use `Save draft`, `Submit unresolved note`, or `Submit for review`. That is
+the preferred path because it saves your work to the project task queue and
+helps other collaborators avoid duplicating the same task.
 
 If the shared backend is unavailable, or JB asks you to use the fallback, use
 the shared working spreadsheet link supplied by JB. In that mode the map helps
@@ -36,9 +36,10 @@ In practical terms:
 8. Fill in source title, URL or agreed file reference, status/confidence
    dropdowns, any useful lifecycle date, and a short evidence note.
 9. Click `Save draft` if the row is not ready. A draft can be incomplete, so
-   use it whenever you have started useful work. Click `Submit for review` only
-   when the source title, source link or file reference, and evidence note are
-   ready for JB or a reviewer to inspect.
+   use it whenever you have started useful work. Click `Submit unresolved note`
+   when you have checked something useful but cannot yet resolve the case.
+   Click `Submit for review` only when the source title, source link or file
+   reference, and evidence note are ready for JB or a reviewer to inspect.
 10. If JB explicitly asks you to use spreadsheet fallback, click `Copy
    spreadsheet row`, paste under the unchanged header in the shared Sheet, and
    review the pasted row.
@@ -50,7 +51,7 @@ In practical terms:
    tasks, do not try to nominate it through the map yet. Note its name, source,
    location, and any OSM id if available, then send that note to JB. A proper
    `Nominate missing PoW` button will be added later.
-13. Mark uncertain cases `needs_review` and move on.
+13. Submit unresolved notes for uncertain cases and move on.
 14. Tell JB when submitted backend tasks or fallback spreadsheet rows are ready,
     and include notes on confusing cases.
 
@@ -89,15 +90,16 @@ placeholders into open cells. Use dropdown values such as `unknown`,
 `uncertain`, `none`, or `not_assessed` only where the Sheet or map gives that
 option.
 
-The web form will let you save an incomplete draft, but it will not submit a
-case for review with `NA` or `N/A` as the source title. Add the actual source
-name, or save a draft until you have it.
+The web form will let you save an incomplete draft or submit an unresolved
+note, but it will not submit a completed case for review with `NA` or `N/A` as
+the source title. Add the actual source name, or save a draft until you have
+it.
 
-Use the `My work` panel to check what you have already saved, submitted,
-skipped, or had reviewed. Submitted work stays there so you do not repeat a
-case. If new evidence changes your answer, use `Revise submission`; the map
-will create a new evidence version rather than rewriting the earlier
-submission.
+Use the `My work` panel to check what you have already saved, submitted as an
+unresolved note, submitted for review, skipped, or had reviewed. Submitted work
+stays there so you do not repeat a case. If new evidence changes your answer,
+use `Revise submission`; the map will create a new evidence version rather
+than rewriting the earlier submission.
 
 Use date formats exactly: `YYYY`, `YYYY-MM`, or `YYYY-MM-DD`. For example,
 `2018`, `2018-09`, or `2018-09-01`. If a date is unknown, leave the date cell
@@ -139,7 +141,7 @@ For each assigned case:
 4. record what the source supports for 2013, 2018, and 2023;
 5. preserve useful opening, closure, first-seen, last-seen, relocation, or
    changed-use dates;
-6. mark difficult cases `needs_review` and move on.
+6. submit difficult cases as unresolved notes and move on.
 
 The OSM information in the workpack is a prompt, not accepted evidence. The
 task is to check what other sources support.
@@ -147,9 +149,9 @@ task is to check what other sources support.
 ## Where Your Work Is Saved
 
 When the shared task backend is enabled and you are signed in, `Save draft`,
-`Submit for review`, and `Skip this task` are saved to the project backend.
-That backend is the preferred record for the RA pilot because it can show
-shared task status to JB, JW, reviewers, and other RAs.
+`Submit unresolved note`, `Submit for review`, and `Skip this task` are saved
+to the project backend. That backend is the preferred record for the RA pilot
+because it can show shared task status to JB, JW, reviewers, and other RAs.
 
 When the backend is not enabled, the map does not save anything. It only helps
 you inspect a case. For the assigned web workpack, stop and tell JB if the
@@ -262,7 +264,7 @@ map. Prioritise variety over volume. A useful session might include:
 
 There is no fixed row target for the demo-map sampling phase. Do not spend a
 large amount of time on one difficult case unless it is unusually important.
-Mark it `needs_review`, explain the uncertainty, and move on.
+Submit an unresolved note, explain the uncertainty, and move on.
 
 ## Step-By-Step Workflow
 
@@ -280,16 +282,16 @@ Mark it `needs_review`, explain the uncertainty, and move on.
 7. Open source links in new tabs and search for evidence.
 8. Decide which action best fits the evidence.
 9. Use the dropdown fields to record status and confidence, then click
-   `Save draft` or `Submit for review` if the shared backend is enabled. If
-   using spreadsheet fallback, click `Copy spreadsheet row`, click column A in
-   the next empty row under the unchanged spreadsheet header, paste, and review
-   the pasted row.
+   `Save draft`, `Submit unresolved note`, or `Submit for review` if the
+   shared backend is enabled. If using spreadsheet fallback, click
+   `Copy spreadsheet row`, click column A in the next empty row under the
+   unchanged spreadsheet header, paste, and review the pasted row.
 10. For a missing place that belongs to the assigned task, use the closest
     available action and explain the candidate in the evidence note. For an
     unrelated missing place you happen to notice, write down its name, source,
     location, and any OSM id, then send that note to JB until the
     `Nominate missing PoW` flow is available.
-11. Mark unclear cases `needs_review`.
+11. Submit unclear cases as unresolved notes.
 12. Add a short note on any confusing user-interface or source problem.
 13. Move to the next case.
 
@@ -314,8 +316,10 @@ Use the closest action available in the map action builder:
   building, multiple congregations, or multi-purpose use.
 - `Needs review`: the evidence is relevant but does not settle the case.
 
-Use `needs_review` freely. The pilot is designed to find difficult cases, not
-to force final decisions.
+Use `Submit unresolved note` freely. The pilot is designed to find difficult
+cases, not to force final decisions. This is similar to a map-note workflow:
+record the lead, say what remains unclear, and let JB or a reviewer decide the
+next step.
 
 For now, `Missing current site` should be used only when the missing-place
 finding is part of the assigned task you are already checking. The live

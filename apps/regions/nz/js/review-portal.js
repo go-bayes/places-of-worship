@@ -73,6 +73,9 @@
         if (task.candidate_site_id) {
             pills.push(`<span class="pill amber">Nominate missing PoW</span>`);
         }
+        if (task.status === "unresolved_note" || draft?.draft_status === "unresolved_note") {
+            pills.push(`<span class="pill amber">unresolved note</span>`);
+        }
         return pills.join("");
     }
 
@@ -462,7 +465,10 @@
 
     function decisionForm(task, draft) {
         const defaultAction = draft?.action || "";
-        const canDecide = task.status === "needs_review" || task.status === "changes_requested" || task.status === "provisionally_closed";
+        const canDecide = task.status === "needs_review"
+            || task.status === "unresolved_note"
+            || task.status === "changes_requested"
+            || task.status === "provisionally_closed";
         return `
             <form id="reviewDecisionForm" class="decision-form">
                 <div>

@@ -21,6 +21,7 @@ export const taskStatus = v.union(
   v.literal("skipped"),
   v.literal("provisionally_closed"),
   v.literal("needs_review"),
+  v.literal("unresolved_note"),
   v.literal("changes_requested"),
   v.literal("reviewed"),
   v.literal("exported"),
@@ -70,6 +71,7 @@ export const taskEventType = v.union(
   v.literal("row_copied"),
   v.literal("skipped"),
   v.literal("submitted_for_review"),
+  v.literal("submitted_unresolved_note"),
   v.literal("provisionally_closed"),
   v.literal("review_started"),
   v.literal("review_decided"),
@@ -82,6 +84,7 @@ export const taskEventType = v.union(
 export const evidenceDraftStatus = v.union(
   v.literal("draft"),
   v.literal("submitted"),
+  v.literal("unresolved_note"),
   v.literal("superseded"),
   v.literal("withdrawn"),
   v.literal("accepted_for_export"),

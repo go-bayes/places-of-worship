@@ -54,6 +54,7 @@ async function latestDraftForReview(ctx: any, taskId: string): Promise<Doc<"evid
     .order("desc")
     .take(50);
   return drafts.find((draft: Doc<"evidence_drafts">) => draft.draft_status === "submitted")
+    ?? drafts.find((draft: Doc<"evidence_drafts">) => draft.draft_status === "unresolved_note")
     ?? drafts.find((draft: Doc<"evidence_drafts">) => draft.draft_status === "accepted_for_export")
     ?? drafts[0]
     ?? null;

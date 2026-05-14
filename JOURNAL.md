@@ -21,6 +21,28 @@ Consequences:
 Future entries should summarise context, decision, rationale, consequences, and
 open questions. The changelog should stay concise and release-oriented.
 
+## 2026-05-14: Add unresolved notes to the RA-review workflow
+
+Decision:
+Treat useful but incomplete RA submissions as first-class unresolved notes in
+the shared task system. An RA can now save a draft, submit an unresolved note,
+or submit a completed case for review.
+
+Rationale:
+Many real cases will not be settled by the first source check. Forcing those
+cases into a completed submission loses the distinction between "this evidence
+supports a decision" and "this is a lead that needs more work". OpenStreetMap's
+note workflow is a useful model: preserve incomplete observations, keep them
+visible to reviewers, and close them only when a decision is justified.
+
+Consequences:
+Convex now has an `unresolved_note` task and draft state. Unresolved notes leave
+the active RA list, remain visible in `My work`, and appear as a separate queue
+in the review portal. Reviewers can accept, reject, defer, mark duplicate, or
+request more evidence. The master boundary is unchanged: unresolved notes and
+review decisions still require export and `pow` validation before they can
+affect public or research data.
+
 ## 2026-05-13: Start Vanuatu source-first and hand André the NZ workpack
 
 Decision:

@@ -371,6 +371,7 @@
             <section class="panel boundary">
                 <h2>Review boundary</h2>
                 <p>Use <strong>accepted for export</strong> only when the evidence draft is ready for the governed export and <code>pow</code> validation path.</p>
+                <p>Use <strong>unresolved notes</strong> for useful but incomplete RA submissions. These are modelled on map-note workflows: keep the lead visible, then ask for more evidence, defer, reject, or accept after review.</p>
                 <p>Use <strong>needs more evidence</strong> when the RA should clarify a source, date, identity match, or lifecycle claim.</p>
             </section>
 
@@ -381,6 +382,7 @@
                         <label for="queueStatus">Task status</label>
                         <select id="queueStatus">
                             <option value="needs_review">needs review</option>
+                            <option value="unresolved_note">unresolved notes</option>
                             <option value="changes_requested">changes requested</option>
                             <option value="provisionally_closed">provisionally closed</option>
                             <option value="reviewed">reviewed</option>
@@ -401,8 +403,8 @@
         </section>
     </main>
 
-    <script src="js/convex-config.js?v=20260514-review-workflow"></script>
-    <script src="js/convex-task-client.js?v=20260514-review-workflow"></script>
-    <script src="js/review-portal.js?v=20260514-review-workflow"></script>
+    <script src="js/convex-config.js?v=20260514-unresolved-notes"></script>
+    <script src="js/convex-task-client.js?v=20260514-unresolved-notes"></script>
+    <script src="js/review-portal.js?v=20260514-unresolved-notes"></script>
 </body>
 </html>

@@ -176,6 +176,10 @@
             return await this.request("mutation", "evidence:submitEvidenceDraft", args);
         }
 
+        async submitUnresolvedNote(args) {
+            return await this.request("mutation", "evidence:submitUnresolvedNote", args);
+        }
+
         async skipTask(args) {
             return await this.request("mutation", "tasks:skipTask", args);
         }

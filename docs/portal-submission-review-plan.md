@@ -27,6 +27,12 @@ has been exercised. The static v1 records decisions only; export bundles stay
 in the maintainer workflow until the review decisions have been checked against
 `pow`.
 
+Incomplete but useful RA submissions should be recorded as unresolved notes
+rather than forced into a complete evidence claim. This follows the lesson of
+OpenStreetMap note workflows: keep a source-backed lead visible, preserve the
+conversation and history, and let a reviewer accept, reject, defer, or ask for
+more evidence once the uncertainty is clear.
+
 ```mermaid
 flowchart LR
   A["Assigned task or<br/>Nominate missing PoW"] --> B["Convex shared task list"]
@@ -55,6 +61,7 @@ then relies on the export bundle and `pow` for governed data changes.
 Static v1 scope:
 
 - list submitted New Zealand tasks that need review;
+- list unresolved notes as their own review queue;
 - show the task, latest evidence draft, generated wide row, target-year
   statuses, lifecycle notes, source details, and task history;
 - record accepted-for-export, rejected, needs-more-evidence, duplicate, or

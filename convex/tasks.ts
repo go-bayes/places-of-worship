@@ -107,6 +107,7 @@ export const listMyTasks = query({
       "in_progress",
       "draft_saved",
       "needs_review",
+      "unresolved_note",
       "changes_requested",
       "skipped",
       "reviewed",

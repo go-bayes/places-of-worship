@@ -33,6 +33,8 @@ eggs/
 .eggs/
 lib/
 lib64/
+!convex/lib/
+!convex/lib/*.ts
 parts/
 sdist/
 var/

@@ -4,6 +4,11 @@
 
 ### 2026-05-14
 
+- Added an OSM-notes-style `Submit unresolved note` path for RA work: useful
+  but incomplete evidence now becomes a first-class Convex task/draft state
+  instead of being forced into a completed submission.
+- Added unresolved-note handling to the reviewer portal queue and documented
+  the RA/reviewer workflow.
 - Tightened the static reviewer portal: decisions now require an explicit
   choice and short note, reviewed/exported cases can be inspected, and reviewers
   can mark system-test submissions as rejected/excluded without entering the

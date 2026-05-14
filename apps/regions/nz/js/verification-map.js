@@ -79,13 +79,21 @@ const MY_WORK_STATUSES = [
     "in_progress",
     "draft_saved",
     "needs_review",
+    "unresolved_note",
     "changes_requested",
     "skipped",
     "reviewed",
     "exported",
 ];
-const REVISION_ELIGIBLE_STATUSES = new Set(["needs_review", "changes_requested"]);
-const READ_ONLY_ASSIGNMENT_STATUSES = new Set(["needs_review", "changes_requested", "skipped", "reviewed", "exported"]);
+const REVISION_ELIGIBLE_STATUSES = new Set(["needs_review", "unresolved_note", "changes_requested"]);
+const READ_ONLY_ASSIGNMENT_STATUSES = new Set([
+    "needs_review",
+    "unresolved_note",
+    "changes_requested",
+    "skipped",
+    "reviewed",
+    "exported",
+]);
 const WIDE_EVIDENCE_FIELDS = [
     "evidence_row_id", "collection_batch", "country_code", "area_hint",
     "source_dataset_id", "source_type", "provider", "source_title",
@@ -1136,6 +1144,7 @@ class NzVerificationMap {
         const total = items.length;
         const revisionDrafts = items.filter(item => item.task?.status === "needs_review" && item.latestDraft?.draft_status === "draft").length;
         const submitted = items.filter(item => item.task?.status === "needs_review").length - revisionDrafts;
+        const unresolved = items.filter(item => item.task?.status === "unresolved_note").length;
         const drafts = items.filter(item => item.task?.status === "draft_saved").length + revisionDrafts;
         const needsMore = items.filter(item => item.task?.status === "changes_requested").length;
         const skipped = items.filter(item => item.task?.status === "skipped").length;
@@ -1143,7 +1152,7 @@ class NzVerificationMap {
         panel.innerHTML = `
             <details ${total > 0 ? "open" : ""}>
                 <summary>My work
-                    <span class="ra-initials">${escapeHtml(`${total} item${total === 1 ? "" : "s"}: ${drafts} draft, ${submitted} submitted, ${needsMore} needs more evidence, ${skipped} skipped, ${reviewed} reviewed`)}</span>
+                    <span class="ra-initials">${escapeHtml(`${total} item${total === 1 ? "" : "s"}: ${drafts} draft, ${submitted} submitted, ${unresolved} unresolved, ${needsMore} needs more evidence, ${skipped} skipped, ${reviewed} reviewed`)}</span>
                 </summary>
                 ${total === 0 ? `
                     <div class="session-empty">No saved, submitted, skipped, or reviewed tasks yet.</div>
@@ -1169,6 +1178,8 @@ class NzVerificationMap {
             ? "revision draft saved"
             : status === "needs_review"
             ? "submitted, waiting for review"
+            : status === "unresolved_note"
+                ? "unresolved note submitted"
             : status === "changes_requested"
                 ? "needs more evidence"
                 : status.replaceAll("_", " ");
@@ -1296,7 +1307,7 @@ class NzVerificationMap {
                             <li>How the list was made: <a href="https://github.com/go-bayes/places-of-worship/blob/main/scripts/build_nz_temporal_ra_workpack.R" target="_blank" rel="noopener">this R script</a> first selects every date-tag row whose <code>candidate_date_tag_windows</code> contains <code>candidate_gain</code>; then, after excluding used <code>osm_key</code>s, adds five OSM-present-then-absent rows with a nearby replacement object, five rows with parser warnings, uncertain target-year status, or <code>candidate_status_change</code>, and five present-present-present controls with no candidate window or parser warning. Treat OSM as the prompt to check, not as final evidence.</li>
                             <li>Open Street View or Google Maps to look around the site, and use the OSM object only as context. Record the imagery capture date if Street View is your evidence.</li>
                             <li>Record 2013, 2018, and 2023 status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
-                            <li>Use <em>Save draft</em> while working. Use <em>Submit for review</em> when the case is ready for JB.</li>
+                            <li>Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when the case remains unclear after useful checking, and <em>Submit for review</em> when the evidence is ready for JB.</li>
                         </ol>
                     ` : `
                         <ol>
@@ -1305,7 +1316,7 @@ class NzVerificationMap {
                             <li>Open the source links in step 1 of the task panel.</li>
                             <li>In step 2, choose what your evidence shows and confirm year statuses.</li>
                             <li>In step 3, paste a short evidence note and the source URL or file reference.</li>
-                            <li>In step 4, use <em>Save draft</em> or <em>Submit for review</em> when the shared backend is enabled. Use <em>Copy spreadsheet row</em> only as the fallback.</li>
+                            <li>In step 4, use <em>Save draft</em>, <em>Submit unresolved note</em>, or <em>Submit for review</em> when the shared backend is enabled. Use <em>Copy spreadsheet row</em> only as the fallback.</li>
                         </ol>
                     `}
                     <button type="button" class="quickstart-dismiss" id="quickstartDismiss">Hide this guide for this workpack</button>
@@ -1701,13 +1712,13 @@ class NzVerificationMap {
                 <h2>Assigned web workpack</h2>
                 <div class="${this.backend?.configured ? "pilot-note" : "demo-warning"}" role="${this.backend?.configured ? "note" : "alert"}">
                     ${this.backend?.configured
-                        ? `Sign in with Google at the top of this panel, then work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Use <em>Save draft</em> while working and <em>Submit for review</em> when a case is ready for JB.`
+                        ? `Sign in with Google at the top of this panel, then work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when useful evidence remains incomplete, and <em>Submit for review</em> when a case is ready for JB.`
                         : `This link points to <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>, but this deployment does not yet have the shared backend enabled.`}
                 </div>
                 <div class="detail-section">
                     <h3>What to check</h3>
                     <div class="disabled-panel">
-                        For each assigned case, answer the task question, seek non-OSM evidence where possible, record 2013, 2018, and 2023 status, preserve any useful opening or closure dates, and mark difficult cases as needing review.
+                        For each assigned case, answer the task question, seek non-OSM evidence where possible, record 2013, 2018, and 2023 status, preserve any useful opening or closure dates, and submit unresolved notes for cases that should stay visible but cannot yet be resolved.
                     </div>
                 </div>
             `;
@@ -2046,6 +2057,13 @@ class NzVerificationMap {
                     </div>
                 `;
             }
+            if (readOnly && status === "unresolved_note") {
+                return `
+                    <div class="pilot-note">
+                        This unresolved note is waiting for review. View it here, or use <strong>Revise submission</strong> if you find better evidence.
+                    </div>
+                `;
+            }
             if (readOnly && status === "changes_requested") {
                 return `
                     <div class="pilot-note">
@@ -2062,7 +2080,7 @@ class NzVerificationMap {
             }
             return `
                 <div class="pilot-note">
-                    Shared backend enabled. Use <strong>Save draft</strong> or <strong>Submit for review</strong> to record this evidence for review.
+                    Shared backend enabled. Use <strong>Save draft</strong>, <strong>Submit unresolved note</strong>, or <strong>Submit for review</strong> to record this work.
                     ${draft ? `<br><strong>Draft loaded:</strong> showing the latest saved draft for this task. Change the action above if you want to recompute defaults.` : ""}
                 </div>
             `;
@@ -2250,7 +2268,7 @@ class NzVerificationMap {
                             ? "This saved work is visible for reference. Revisions create a new evidence version; they do not rewrite the submitted record."
                             : revisionMode
                                 ? "Save a revision draft while working. Submit the revision when the corrected or extended evidence is ready for review."
-                                : "Save the evidence to the shared backend. Submitted cases move into JB's review queue."}
+                                : "Save drafts while working. Use Submit unresolved note when you have checked sources but cannot resolve the case. Use Submit for review when the evidence is ready for a decision."}
                     </div>
                     ${readOnly ? `
                         ${canRevise ? `
@@ -2265,6 +2283,7 @@ class NzVerificationMap {
                     ` : `
                         <div class="button-row">
                             <button id="saveDraftButton" type="button">${revisionMode ? "Save revision draft" : "Save draft"}</button>
+                            <button id="submitUnresolvedButton" class="secondary" type="button">${revisionMode ? "Submit revision as unresolved note" : "Submit unresolved note"}</button>
                             <button id="submitReviewButton" type="button">${revisionMode ? "Submit revision for review" : "Submit for review"}</button>
                         </div>
                     `}
@@ -2421,6 +2440,7 @@ class NzVerificationMap {
         document.getElementById("copyEvidenceRowButton")?.addEventListener("click", () => this.copyEvidenceRow(props));
         document.getElementById("copyDecisionButton")?.addEventListener("click", () => this.copyDecision(props));
         document.getElementById("saveDraftButton")?.addEventListener("click", () => this.saveEvidenceToBackend(props, { submit: false }));
+        document.getElementById("submitUnresolvedButton")?.addEventListener("click", () => this.saveEvidenceToBackend(props, { unresolved: true }));
         document.getElementById("submitReviewButton")?.addEventListener("click", () => this.saveEvidenceToBackend(props, { submit: true }));
         document.getElementById("reviseSubmissionButton")?.addEventListener("click", () => this.startSubmissionRevision(props));
         document.getElementById("skipTaskButton")?.addEventListener("click", () => {
@@ -2551,8 +2571,34 @@ class NzVerificationMap {
     }
 
     evidenceInputError(values, options = {}) {
-        const submit = options.submit !== false;
-        if (!submit) return "";
+        const unresolved = Boolean(options.unresolved);
+        const submit = !unresolved && options.submit !== false;
+        if (!submit && !unresolved) return "";
+        if (unresolved) {
+            if (values.sourceTitle.trim() && isPlaceholderText(values.sourceTitle)) {
+                return "Do not use NA or N/A as a source title. Add the actual source title, or leave it blank and explain what you checked.";
+            }
+            if (values.note.trim().length < 12) {
+                return "Add a short unresolved-note explanation: what you checked, what remains unclear, or why the case needs review.";
+            }
+            if (values.sourceDate.trim() && !isValidPartialDateText(values.sourceDate)) {
+                return "Use YYYY, YYYY-MM, or YYYY-MM-DD for source and capture dates. Preserve prose dates in the note.";
+            }
+            const hasLifecycleDetail = values.lifecycleEvent || values.lifecycleDate.trim() || values.lifecycleNote.trim();
+            if (hasLifecycleDetail && !values.lifecycleEvent) {
+                return "Choose an opening/closure/change event type, or leave the optional date fields blank.";
+            }
+            if (values.lifecycleEvent && !values.lifecycleDate.trim()) {
+                return "Add an opening/closure/change date, or leave the optional date fields blank.";
+            }
+            if (values.lifecycleDate.trim() && !isValidPartialDateText(values.lifecycleDate)) {
+                return "Use YYYY, YYYY-MM, or YYYY-MM-DD for opening/closure/change dates. Preserve prose dates in the note.";
+            }
+            if (values.sourceType === "field_observation" && !values.sourceDate.trim()) {
+                return "Add the field observation date.";
+            }
+            return "";
+        }
         if (!values.sourceTitle.trim()) return "Add a source title.";
         if (isPlaceholderText(values.sourceTitle)) {
             return "Do not use NA or N/A as a source title. Add the actual source title, or save a draft until you have it.";
@@ -2707,7 +2753,7 @@ class NzVerificationMap {
         return row;
     }
 
-    buildEvidenceDraft(props, row) {
+    buildEvidenceDraft(props, row, options = {}) {
         const values = this.currentFormValues();
         const targetEvidence = values.note || deriveTargetYearStatus(props, this.targetYear).note;
         const targetYearEvidence = Object.fromEntries(TARGET_YEARS.map(year => [
@@ -2715,6 +2761,16 @@ class NzVerificationMap {
             (values.targetYearStatuses[year] || "not_assessed") === "not_assessed" ? "" : targetEvidence,
         ]));
         const submitError = this.evidenceInputError(values, { submit: true });
+        const unresolved = Boolean(options.unresolved);
+        const unresolvedError = unresolved ? this.evidenceInputError(values, { unresolved: true }) : "";
+        const validationMessages = [];
+        if (unresolvedError) {
+            validationMessages.push(unresolvedError);
+        } else if (unresolved && submitError) {
+            validationMessages.push(`Full submission still needs: ${submitError}`);
+        } else if (submitError) {
+            validationMessages.push(submitError);
+        }
         return {
             source_type: values.sourceType,
             provider: values.sourceProvider || undefined,
@@ -2744,9 +2800,9 @@ class NzVerificationMap {
             privacy_flag: "clear",
             licence_flag: "needs_review",
             validation_summary: {
-                status: submitError ? "draft_needs_more_detail" : "client_checked",
+                status: unresolved ? "unresolved_note" : submitError ? "draft_needs_more_detail" : "client_checked",
                 checked_at: nowIso(),
-                messages: submitError ? [submitError] : [],
+                messages: validationMessages,
             },
         };
     }
@@ -2754,7 +2810,9 @@ class NzVerificationMap {
     async saveEvidenceToBackend(props, options = {}) {
         const status = document.getElementById("copyStatus");
         const values = this.currentFormValues();
-        const inputError = this.evidenceInputError(values, { submit: Boolean(options.submit) });
+        const unresolved = Boolean(options.unresolved);
+        const submit = Boolean(options.submit);
+        const inputError = this.evidenceInputError(values, unresolved ? { unresolved: true } : { submit });
         if (inputError) {
             if (status) status.textContent = `${inputError} Nothing was saved.`;
             return;
@@ -2769,10 +2827,16 @@ class NzVerificationMap {
         }
 
         const row = this.buildWideEvidenceRow(props);
-        const draft = this.buildEvidenceDraft(props, row);
+        const draft = this.buildEvidenceDraft(props, row, { unresolved });
         const revisionDraftId = this.revisionDraftIdsByTaskId.get(props.task_id);
         try {
-            if (status) status.textContent = options.submit ? "Saving and submitting..." : "Saving draft...";
+            if (status) {
+                status.textContent = unresolved
+                    ? "Saving unresolved note..."
+                    : submit
+                        ? "Saving and submitting..."
+                        : "Saving draft...";
+            }
             const saved = await this.backend.saveEvidenceDraft({
                 taskId: props.task_id,
                 evidenceDraftId: revisionDraftId || undefined,
@@ -2785,7 +2849,12 @@ class NzVerificationMap {
                     page_path: window.location.pathname,
                 },
             });
-            if (options.submit) {
+            if (unresolved) {
+                await this.backend.submitUnresolvedNote({
+                    evidenceDraftId: saved.evidence_draft_id,
+                    note: values.note || undefined,
+                });
+            } else if (submit) {
                 await this.backend.submitEvidenceDraft({
                     evidenceDraftId: saved.evidence_draft_id,
                     note: values.note || undefined,
@@ -2795,9 +2864,9 @@ class NzVerificationMap {
                 ...draft,
                 task_id: props.task_id,
                 evidence_draft_id: saved.evidence_draft_id,
-                draft_status: options.submit ? "submitted" : "draft",
+                draft_status: unresolved ? "unresolved_note" : submit ? "submitted" : "draft",
             });
-            if (options.submit && revisionDraftId) {
+            if ((unresolved || submit) && revisionDraftId) {
                 this.revisionDraftIdsByTaskId.delete(props.task_id);
             }
             await this.refreshBackendTasks();
@@ -2811,7 +2880,9 @@ class NzVerificationMap {
             this.updateWorkflowSteps();
             if (status) {
                 const submitError = this.evidenceInputError(values, { submit: true });
-                status.textContent = options.submit
+                status.textContent = unresolved
+                    ? `Saved as an unresolved note for review. Pick another task from the map or list.${this.filterActiveHint()}`
+                    : submit
                     ? `Saved to the shared backend and submitted for review. Pick another task from the map or list.${this.filterActiveHint()}`
                     : submitError
                         ? `Draft saved to the shared backend. It still needs more detail before submission: ${submitError}`

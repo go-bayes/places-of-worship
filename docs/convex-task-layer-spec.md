@@ -197,15 +197,17 @@ Task statuses:
 - `skipped`: RA skipped the task with an optional reason.
 - `provisionally_closed`: RA believes the task has been handled.
 - `needs_review`: ready for reviewer attention or flagged by validation.
+- `unresolved_note`: useful but incomplete evidence has been submitted for
+  reviewer triage, modelled on map-note workflows.
 - `changes_requested`: reviewer asks for more evidence or a correction.
 - `reviewed`: reviewer has made a decision.
 - `exported`: the reviewed decision was included in an export batch.
 - `reopened`: a reviewer returned the task to active work.
 
 In the RA assignment view, `open`, `in_progress`, `draft_saved`,
-`changes_requested`, and `reopened` are active work. `needs_review`, `skipped`,
-`reviewed`, and `exported` stay visible in `My work` so RAs can see what they
-have already handled without repeating it.
+`changes_requested`, and `reopened` are active work. `needs_review`,
+`unresolved_note`, `skipped`, `reviewed`, and `exported` stay visible in
+`My work` so RAs can see what they have already handled without repeating it.
 
 Review decision statuses:
 
@@ -380,8 +382,9 @@ Fields:
 - `event_id`: stable id.
 - `task_id`.
 - `event_type`: `opened`, `claimed`, `unclaimed`, `draft_saved`,
-  `row_copied`, `skipped`, `submitted_for_review`, `review_started`,
-  `review_decided`, `changes_requested`, `reopened`, `exported`, or `note_added`.
+  `row_copied`, `skipped`, `submitted_for_review`,
+  `submitted_unresolved_note`, `review_started`, `review_decided`,
+  `changes_requested`, `reopened`, `exported`, or `note_added`.
 - `actor_user_id`.
 - `actor_role`.
 - `occurred_at`.
@@ -409,8 +412,8 @@ Fields:
 
 - `evidence_draft_id`.
 - `task_id`.
-- `draft_status`: `draft`, `submitted`, `superseded`, `withdrawn`,
-  `accepted_for_export`, or `rejected`.
+- `draft_status`: `draft`, `submitted`, `unresolved_note`, `superseded`,
+  `withdrawn`, `accepted_for_export`, or `rejected`.
 - `created_by`, `created_at`, `updated_at`.
 - `source_type`.
 - `provider`.
@@ -427,10 +430,10 @@ Fields:
 - `match_confidence`.
 - `geocoding_confidence`.
 
-Submitted evidence is read-only for RAs. If an RA needs to correct or extend a
-submission, the UI starts a revision with a new `evidence_draft_id`. The earlier
-submitted draft remains part of the audit trail and is marked `superseded` only
-after the revision is submitted.
+Submitted evidence and unresolved notes are read-only for RAs. If an RA needs
+to correct or extend either, the UI starts a revision with a new
+`evidence_draft_id`. The earlier submitted draft remains part of the audit
+trail and is marked `superseded` only after the revision is submitted.
 - `lifecycle_event`: optional.
 - `lifecycle_date`: optional partial date string. Country protocols may allow
   early historical dates; the Vanuatu protocol accepts valid dates from 1600

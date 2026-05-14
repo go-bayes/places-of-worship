@@ -65,6 +65,7 @@ configuration before wider country rollout.
 | `listTaskEvidence` | query | `ra`, `reviewer`, `curator`, `admin` | List evidence drafts for a task. | None |
 | `saveEvidenceDraft` | mutation | `ra`, `reviewer`, `curator`, `admin` | Create or update a user's evidence draft and mark the task draft-saved. | `evidence_drafts`, `tasks`, `task_events` |
 | `submitEvidenceDraft` | mutation | draft owner, `reviewer`, `curator`, `admin` | Submit a draft for reviewer attention and mark the task needs-review. | `evidence_drafts`, `tasks`, `task_events` |
+| `submitUnresolvedNote` | mutation | draft owner, `reviewer`, `curator`, `admin` | Submit useful but incomplete evidence for reviewer triage and mark the task unresolved-note. | `evidence_drafts`, `tasks`, `task_events` |
 
 ## `reviews.ts`
 

@@ -101,7 +101,7 @@ export const saveEvidenceDraft = mutation({
       if (
         existing.created_by === user._id
         && !canReviewEvidence(user)
-        && ["submitted", "accepted_for_export", "rejected"].includes(existing.draft_status)
+        && ["submitted", "unresolved_note", "accepted_for_export", "rejected"].includes(existing.draft_status)
       ) {
         throw new Error("Submitted evidence cannot be edited directly. Start a revision instead.");
       }
@@ -163,7 +163,7 @@ export const submitEvidenceDraft = mutation({
       if (
         otherDraft._id !== draft._id
         && otherDraft.created_by === draft.created_by
-        && otherDraft.draft_status === "submitted"
+        && (otherDraft.draft_status === "submitted" || otherDraft.draft_status === "unresolved_note")
       ) {
         await ctx.db.patch(otherDraft._id, {
           draft_status: "superseded",
@@ -187,5 +187,63 @@ export const submitEvidenceDraft = mutation({
       reason: args.note,
     });
     return { task_id: draft.task_id, evidence_draft_id: args.evidenceDraftId, task_status: "needs_review" };
+  },
+});
+
+export const submitUnresolvedNote = mutation({
+  args: {
+    evidenceDraftId: v.string(),
+    note: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
+    const draft = await getDraftOrThrow(ctx, args.evidenceDraftId);
+    if (
+      draft.created_by !== user._id
+      && !user.roles.includes("reviewer")
+      && !user.roles.includes("curator")
+      && !user.roles.includes("admin")
+    ) {
+      throw new Error("Evidence draft belongs to another user.");
+    }
+    const task = await getTaskOrThrow(ctx, draft.task_id);
+    const now = Date.now();
+
+    await ctx.db.patch(draft._id, {
+      draft_status: "unresolved_note",
+      updated_at: now,
+    });
+    const otherDrafts = await ctx.db
+      .query("evidence_drafts")
+      .filter((q) => q.eq(q.field("task_id"), draft.task_id))
+      .take(100);
+    for (const otherDraft of otherDrafts) {
+      if (
+        otherDraft._id !== draft._id
+        && otherDraft.created_by === draft.created_by
+        && (otherDraft.draft_status === "submitted" || otherDraft.draft_status === "unresolved_note")
+      ) {
+        await ctx.db.patch(otherDraft._id, {
+          draft_status: "superseded",
+          updated_at: now,
+        });
+      }
+    }
+    await ctx.db.patch(task._id, {
+      status: "unresolved_note",
+      updated_at: now,
+      last_event_at: now,
+    });
+    await appendTaskEvent(ctx, {
+      taskId: draft.task_id,
+      eventType: "submitted_unresolved_note",
+      actorUserId: user._id,
+      actorRole: chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]),
+      previousStatus: task.status,
+      newStatus: "unresolved_note",
+      evidenceDraftId: args.evidenceDraftId,
+      reason: args.note,
+    });
+    return { task_id: draft.task_id, evidence_draft_id: args.evidenceDraftId, task_status: "unresolved_note" };
   },
 });
