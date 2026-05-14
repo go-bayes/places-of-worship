@@ -134,6 +134,15 @@ As of 30 April 2026:
   schemas, mutations, queries, exports, or frontend integration points. Revisit
   Leptos once the action vocabulary, staged event contract, and review
   ergonomics are stable enough to justify a persistent portal.
+- TypeScript framework trigger: do not rewrite the live static New Zealand
+  verification map while André's pilot is active. For the first authenticated
+  review portal or shared task workbench, use a small React + Vite + Convex
+  React app so reviewer queues, review-decision forms, reusable evidence forms,
+  `Nominate missing PoW`, country-config controls, and live shared task state
+  have typed components and Convex hooks. Avoid Next.js, Remix, TanStack Start,
+  or a larger meta-framework until the project needs broader public-portal
+  routing, server-rendered pages, complex account/admin flows, or a wider
+  public application shell.
 - A separate portal data-entry planning hub now lives in
   `docs/portal-data-entry-plan.md`. The current direction is to spike Convex as
   the shared online task map and reviewer-workbench backend for the New Zealand

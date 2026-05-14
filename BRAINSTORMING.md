@@ -118,19 +118,24 @@ Question:
 Can Convex serve the shared RA task map, provisional task closure, evidence
 drafts, reviewer comments, and exports?
 
+Status:
+Chosen for the New Zealand pilot's live task and review coordination layer.
+This entry remains here only for exit-path and boundary review.
+
 Useful roles:
 
 - Shared online task status across RAs and reviewers.
 - Authenticated evidence drafts and review actions.
 - Live task-map state without building a full custom backend immediately.
+- First authenticated review portal and reviewer export workflow.
 
 Limits:
 
 - Convex is not the master database.
 - It should not store raw OSM archives, accepted diffs, public map products, or
   quarantined media as the durable record.
-- Pricing, backups, identity, and export guarantees need review before the
-  hosted pilot becomes important infrastructure.
+- Professional features, backups, export guarantees, and service continuity
+  should be reviewed before the hosted pilot becomes critical infrastructure.
 
 Migration path:
 
@@ -141,8 +146,9 @@ Migration path:
 - Keep the static map and `pow` path able to continue if Convex is replaced.
 
 Provisional stance:
-Preferred near-term shared task layer for the New Zealand RA pilot, with strict
-boundaries.
+Adopted for the pilot's live task/review layer, with strict boundaries. The
+next test is the authenticated review portal plus one end-to-end reviewed
+export through `pow`.
 
 ### PostgreSQL/PostGIS
 
@@ -178,6 +184,11 @@ Question:
 Should the country-level maps or data-entry portal move toward a Rust-first web
 stack?
 
+Status:
+Deferred. The first authenticated review portal or shared task workbench should
+use React + Vite + Convex React because it matches the chosen live backend and
+keeps the prototype small.
+
 Useful roles:
 
 - Sharing validation types and logic with Rust services.
@@ -192,12 +203,14 @@ Limits:
 Migration path:
 
 - Keep current map outputs as static GeoJSON/JSON consumers.
-- Move one bounded surface at a time: task panel, evidence form, reviewer
-  summary, then richer spatial editing.
+- Build the first authenticated review surface as a bounded React + Vite
+  workbench that talks to Convex.
+- Revisit a Rust-first UI if shared Rust validation logic becomes more
+  important than Convex's TypeScript integration.
 
 Provisional stance:
-Revisit after the Convex task layer and `pow` export loop have been tested with
-real RA work.
+Do not use Leptos for the first review portal. Revisit after the Convex review
+workbench and `pow` export loop have been tested with real RA work.
 
 ## Open Questions
 

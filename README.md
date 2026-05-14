@@ -87,4 +87,7 @@ licence requirements.
 See [ROADMAP.md](ROADMAP.md) for planned phases, [PLANNING.md](PLANNING.md)
 for current implementation priorities, [FAQ.md](FAQ.md) for plain-language
 answers about site identity, task generation, and staged review, and
-[LEXICON.md](LEXICON.md) for preferred project terms.
+[LEXICON.md](LEXICON.md) for preferred project terms. Maintainer references
+include the [documentation health check](docs/documentation-health-check.md),
+the [Convex function inventory](docs/api/convex-functions.md), and the
+[UI style guide](docs/ui-style-guide.md).

@@ -25,6 +25,13 @@
 - `CHANGELOG.md`: durable progress. Update it for user-visible docs, schemas,
   scripts, data products, or deployment behaviour. Add dated entries under
   `## Unreleased`, using ISO dates such as `### 2026-05-03`.
+- `docs/documentation-health-check.md`: periodic staleness checklist for
+  keeping README, roadmap, planning, FAQ, RA docs, storage docs, and Convex
+  docs aligned.
+- `docs/api/convex-functions.md`: human-readable inventory of Convex queries
+  and mutations, their roles, and their workflow position.
+- `docs/ui-style-guide.md`: UI wording, status, colour, button, and form
+  conventions for the map-first task interfaces.
 - `CRITIQUE.md`: review notes that motivated the revision-event pipeline.
 - `schemas/`: data contracts. Update schemas before changing dependent shapes.
 - `docs/ra-nz-pilot-task.md`: current RA-facing task instructions for the

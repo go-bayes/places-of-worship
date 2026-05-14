@@ -1,4 +1,13 @@
-# RA CLI Tutorial
+# Archived CSV Validation Tutorial
+
+This is not the current research-assistant workflow. The current New Zealand
+pilot uses the Convex-backed web assignment described in
+`docs/ra-nz-pilot-task.md`.
+
+Use this document only when JB asks someone to validate an exported CSV, or when
+maintaining the local `pow` validation, staging, and proposal pipeline. The CLI
+path is a fallback and development support path, not the default RA assignment
+surface.
 
 ## Big Picture
 
@@ -8,11 +17,11 @@ larger: we want to understand when places of worship appeared, disappeared,
 moved, changed denomination or tradition, shared buildings, or shifted into
 other uses.
 
-For New Zealand, we are using the current map as a starting list. Your role is
-to help check the evidence behind these places and add carefully sourced
-historical information where it can be found. You are not approving records or
-changing the public map. You are helping prepare evidence that the project team
-can review.
+For New Zealand, the active RA workflow uses the web assignment and shared
+backend. This archived tutorial records the older spreadsheet-to-CSV validation
+path: exported evidence can be checked locally before project review. The
+person running these commands is not approving records or changing the public
+map. They are checking evidence files that the project team can review.
 
 The workflow is deliberately cautious:
 
@@ -43,9 +52,9 @@ or change the public map. It checks whether an exported CSV follows the project
 templates. If asked, it can also make a local staging copy and print draft
 events for review.
 
-## Pilot Rules
+## Archived Fallback Rules
 
-Follow these rules for the current RA pilot:
+Follow these rules when this fallback path is explicitly requested:
 
 1. Do not open pull requests.
 2. Do not commit changes.

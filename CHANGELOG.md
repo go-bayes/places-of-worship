@@ -14,6 +14,15 @@
   Convex-backed `Nominate missing PoW` flow.
 - Added `Nominate missing PoW`, not `Add to map`, as the required wording for
   provisional candidate intake so RA-facing UI keeps the master boundary clear.
+- Added documentation-governance guides: a staleness health check, a Convex
+  function inventory, and a UI style guide for task-map wording, status,
+  colour, button, and form conventions.
+- Relabelled the old RA CLI tutorial as an archived CSV validation fallback,
+  and recorded React + Vite + Convex React as the preferred stack for the first
+  authenticated review portal or shared task workbench.
+- Updated `BRAINSTORMING.md` so Convex is described as the chosen live pilot
+  coordination layer, while Leptos/Rust-first UI remains a deferred comparison
+  after the React + Vite review workbench.
 - Recorded the Convex/live-workbench decision and added the first
   Convex-to-`pow` export bridge: `exports:getExportBundle` now exposes a file
   bundle, and `scripts/materialise_convex_export.py` writes ignored export
