@@ -4,6 +4,17 @@
 
 ### 2026-05-14
 
+- Relaxed RA backend draft saving so `Save draft` can preserve incomplete work,
+  while `Submit for review` still requires source and evidence details.
+- Added a `No building present` RA action for demolition or no-visible-building
+  cases, keeping building absence distinct from worship-use closure.
+- Added a static Convex-backed New Zealand reviewer portal at
+  `apps/regions/nz/review.html` for role-gated review of submitted evidence
+  drafts.
+- Extended the browser Convex client with review queue, review decision,
+  evidence-list, and task-history methods.
+- Tightened Convex review decisions so accepted-for-export decisions require an
+  evidence draft from the same task.
 - Added clearer street-level imagery support to the RA verification map:
   marker popups now expose Street View, the source-link panel prioritises
   Street View and Google Maps, and the evidence form can explicitly fill a

@@ -469,7 +469,7 @@ function statusDefaultsForAction(action, targetYear, props) {
         Object.entries(lossAction.statuses || {}).forEach(([year, status]) => {
             if (year in statuses) statuses[year] = status;
         });
-    } else if (action === "closed_or_changed_use") {
+    } else if (action === "closed_or_changed_use" || action === "no_building_present") {
         statuses[targetYear] = "absent";
     } else if (action === "needs_review" || action === "possible_duplicate") {
         statuses[targetYear] = "uncertain";
@@ -486,11 +486,12 @@ function assessmentDefaultsForAction(action, statuses = {}) {
     const anyAbsent = statusValues.includes("absent");
     const isMissing = action === "missing_current_site";
     const isDuplicate = action === "possible_duplicate";
+    const isNoBuilding = action === "no_building_present";
     const isClosed = action === "closed_or_changed_use" || action === COUNTRY_CONFIG.temporalLossAction.value;
     const needsReview = action === "needs_review";
 
     let worshipUseStatus = "uncertain";
-    if (isClosed) {
+    if (isClosed || isNoBuilding) {
         worshipUseStatus = "not_worship";
     } else if (action === "missing_current_site") {
         worshipUseStatus = "probable_worship";
@@ -499,11 +500,11 @@ function assessmentDefaultsForAction(action, statuses = {}) {
     }
 
     return {
-        existenceStatus: anyPresent ? "present" : anyAbsent ? "absent" : "uncertain",
+        existenceStatus: isNoBuilding ? "absent" : anyPresent || isMissing ? "present" : "uncertain",
         worshipUseStatus,
-        assessmentConfidence: needsReview ? "0.5" : isDuplicate || isMissing || isClosed ? "0.7" : "0.9",
-        matchConfidence: isMissing ? "none" : isDuplicate ? "medium" : needsReview ? "low" : "high",
-        geocodingConfidence: isMissing || isDuplicate ? "medium" : needsReview ? "low" : "high",
+        assessmentConfidence: needsReview ? "0.5" : isDuplicate || isMissing || isClosed || isNoBuilding ? "0.7" : "0.9",
+        matchConfidence: isMissing ? "none" : isDuplicate || isNoBuilding ? "medium" : needsReview ? "low" : "high",
+        geocodingConfidence: isMissing || isDuplicate || isNoBuilding ? "medium" : needsReview ? "low" : "high",
     };
 }
 
@@ -513,6 +514,7 @@ function actionLabelForRa(action) {
     if (action === "possible_duplicate") return "Possible duplicate";
     if (action === COUNTRY_CONFIG.temporalLossAction.value) return COUNTRY_CONFIG.temporalLossAction.label;
     if (action === "closed_or_changed_use") return "Closed or changed use";
+    if (action === "no_building_present") return "No building present";
     if (action === "denomination_or_shared_use") return "Denomination/shared use";
     return "Needs review";
 }
@@ -523,6 +525,7 @@ function reviewNoteForAction(action) {
     if (action === "possible_duplicate") return "Possible duplicate or merge candidate; reviewer to compare linked ids and site identity.";
     if (action === COUNTRY_CONFIG.temporalLossAction.value) return COUNTRY_CONFIG.temporalLossAction.note;
     if (action === "closed_or_changed_use") return "Evidence suggests worship use closed or changed; reviewer to distinguish building existence from worship function.";
+    if (action === "no_building_present") return "Evidence suggests no building is present at the mapped location; reviewer to distinguish demolition, relocation, bad geometry, and worship-use closure.";
     if (action === "denomination_or_shared_use") return "Evidence suggests denomination change, shared use, or multi-use building; reviewer to preserve concurrent uses if present.";
     return "Needs reviewer decision.";
 }
@@ -1839,6 +1842,7 @@ class NzVerificationMap {
         const action = document.getElementById("raActionSelect")?.value || "";
         const closureActions = new Set([
             "closed_or_changed_use",
+            "no_building_present",
             "denomination_or_shared_use",
             COUNTRY_CONFIG.temporalLossAction.value,
         ]);
@@ -1935,6 +1939,7 @@ class NzVerificationMap {
                         <option value="possible_duplicate">Possible duplicate</option>
                         <option value="${escapeHtml(COUNTRY_CONFIG.temporalLossAction.value)}">${escapeHtml(COUNTRY_CONFIG.temporalLossAction.label)}</option>
                         <option value="closed_or_changed_use">Closed or changed use</option>
+                        <option value="no_building_present">No building present</option>
                         <option value="denomination_or_shared_use">Denomination/shared use</option>
                     </select>
                 </label>
@@ -2306,7 +2311,9 @@ class NzVerificationMap {
         };
     }
 
-    evidenceInputError(values) {
+    evidenceInputError(values, options = {}) {
+        const submit = options.submit !== false;
+        if (!submit) return "";
         if (!values.sourceTitle.trim()) return "Add a source title.";
         if (values.note.trim().length < 5) return "Add a short evidence note.";
         if (values.sourceDate.trim() && !isValidPartialDateText(values.sourceDate)) {
@@ -2465,6 +2472,7 @@ class NzVerificationMap {
             year,
             (values.targetYearStatuses[year] || "not_assessed") === "not_assessed" ? "" : targetEvidence,
         ]));
+        const submitError = this.evidenceInputError(values, { submit: true });
         return {
             source_type: values.sourceType,
             provider: values.sourceProvider || undefined,
@@ -2494,8 +2502,9 @@ class NzVerificationMap {
             privacy_flag: "clear",
             licence_flag: "needs_review",
             validation_summary: {
-                status: "client_checked",
+                status: submitError ? "draft_needs_more_detail" : "client_checked",
                 checked_at: nowIso(),
+                messages: submitError ? [submitError] : [],
             },
         };
     }
@@ -2503,7 +2512,7 @@ class NzVerificationMap {
     async saveEvidenceToBackend(props, options = {}) {
         const status = document.getElementById("copyStatus");
         const values = this.currentFormValues();
-        const inputError = this.evidenceInputError(values);
+        const inputError = this.evidenceInputError(values, { submit: Boolean(options.submit) });
         if (inputError) {
             if (status) status.textContent = `${inputError} Nothing was saved.`;
             return;
@@ -2554,9 +2563,12 @@ class NzVerificationMap {
             if (stepsEl) stepsEl.dataset.copied = "1";
             this.updateWorkflowSteps();
             if (status) {
+                const submitError = this.evidenceInputError(values, { submit: true });
                 status.textContent = options.submit
                     ? `Saved to the shared backend and submitted for review. Pick another task from the map or list.${this.filterActiveHint()}`
-                    : "Draft saved to the shared backend. Submit for review when the row is ready.";
+                    : submitError
+                        ? `Draft saved to the shared backend. It still needs more detail before submission: ${submitError}`
+                        : "Draft saved to the shared backend. Submit for review when the row is ready.";
             }
         } catch (error) {
             if (error.authExpired) {

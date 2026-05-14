@@ -35,8 +35,10 @@ In practical terms:
    map, duplicate, closure, changed use, shared use, or uncertain.
 8. Fill in source title, URL or agreed file reference, status/confidence
    dropdowns, any useful lifecycle date, and a short evidence note.
-9. Click `Save draft` if the row is not ready, or `Submit for review` when the
-   evidence is ready for JB or a reviewer to inspect.
+9. Click `Save draft` if the row is not ready. A draft can be incomplete, so
+   use it whenever you have started useful work. Click `Submit for review` only
+   when the source title, source link or file reference, and evidence note are
+   ready for JB or a reviewer to inspect.
 10. If JB explicitly asks you to use spreadsheet fallback, click `Copy
    spreadsheet row`, paste under the unchanged header in the shared Sheet, and
    review the pasted row.
@@ -293,6 +295,10 @@ Use the closest action available in the map action builder:
   non-use, closure, demolition, or changed use by 2018.
 - `Closed or changed use`: source suggests worship use ended or the building
   changed function.
+- `No building present`: source suggests the mapped building is gone or no
+  building is visible at that location. Use this for demolition or absence
+  cases, and explain whether the source is Street View, aerial imagery, a local
+  record, or another source.
 - `Denomination/shared use`: source suggests denomination change, shared
   building, multiple congregations, or multi-purpose use.
 - `Needs review`: the evidence is relevant but does not settle the case.

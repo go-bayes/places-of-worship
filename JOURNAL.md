@@ -93,6 +93,28 @@ rerunning the import updates the same tasks. The remaining operational steps are
 to import the seed into the hosted Convex deployment, invite André, and smoke
 test one draft save and one submitted review item before sending the link.
 
+## 2026-05-14: Start the review loop with a static Convex portal
+
+Decision:
+Build the first reviewer surface as a static, role-gated New Zealand page that
+reads submitted Convex evidence drafts and records review decisions. Defer
+export buttons and the React/Vite workbench until the first live review cycle
+has been exercised.
+
+Rationale:
+André's first submissions need a simple reviewer path now. The existing Convex
+backend already has review and export functions, so the fastest reliable step
+is to expose the review queue without adding a new build system. Keeping export
+controls out of the first portal also preserves the master-data boundary: a
+review decision can make evidence eligible for export, but it cannot update the
+public map or master data by itself.
+
+Consequences:
+The static portal can accept, reject, defer, mark duplicates, or request more
+evidence for submitted tasks. Accepted-for-export decisions require an evidence
+draft from the same task. Export bundles remain a maintainer operation until
+the first reviewed batch has been checked through the `pow` path.
+
 ## 2026-05-14: Use Convex for live work and keep the governed master replayable
 
 Decision:

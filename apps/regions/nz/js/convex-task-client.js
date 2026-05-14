@@ -98,7 +98,7 @@
             const endpoint = kind === "query" ? "query" : "mutation";
             const headers = {
                 "Content-Type": "application/json",
-                "Convex-Client": "placesmap-static-map",
+                "Convex-Client": "placesmap-static-workbench",
             };
             if (this.authToken) {
                 headers.Authorization = `Bearer ${this.authToken}`;
@@ -156,6 +156,14 @@
             return await this.request("query", "evidence:listTaskEvidence", args);
         }
 
+        async getTaskEvents(args) {
+            return await this.request("query", "tasks:getTaskEvents", args);
+        }
+
+        async listReviewQueue(args) {
+            return await this.request("query", "reviews:listReviewQueue", args);
+        }
+
         async saveEvidenceDraft(args) {
             return await this.request("mutation", "evidence:saveEvidenceDraft", args);
         }
@@ -166,6 +174,10 @@
 
         async skipTask(args) {
             return await this.request("mutation", "tasks:skipTask", args);
+        }
+
+        async recordReviewDecision(args) {
+            return await this.request("mutation", "reviews:recordReviewDecision", args);
         }
     }
 

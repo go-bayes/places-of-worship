@@ -96,6 +96,12 @@ export const recordReviewDecision = mutation({
     if (args.decision.evidence_draft_id !== undefined && draft === null) {
       throw new Error(`Evidence draft not found: ${args.decision.evidence_draft_id}`);
     }
+    if (draft !== null && draft.task_id !== args.taskId) {
+      throw new Error("Evidence draft belongs to a different task.");
+    }
+    if (args.decision.decision_status === "accepted_for_export" && draft === null) {
+      throw new Error("Accepted-for-export decisions require an evidence draft.");
+    }
 
     const now = Date.now();
     const reviewDecisionId = `${args.taskId}:review:${now}:${user._id}`;

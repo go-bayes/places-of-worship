@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Review submitted evidence | Places of Worship</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f6f7f9;
+            --panel: #ffffff;
+            --ink: #17202a;
+            --muted: #667085;
+            --line: #d7dde5;
+            --blue: #1f618d;
+            --blue-soft: #e8f1fb;
+            --green: #1e8449;
+            --green-soft: #dff3e6;
+            --amber: #a36200;
+            --amber-soft: #fff4dc;
+            --red: #b42318;
+            --red-soft: #fee4e2;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 15px;
+            line-height: 1.45;
+        }
+
+        a {
+            color: var(--blue);
+        }
+
+        button,
+        select,
+        textarea,
+        input {
+            font: inherit;
+        }
+
+        button {
+            min-height: 44px;
+            border: 0;
+            border-radius: 6px;
+            background: var(--blue);
+            color: #fff;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        button.secondary {
+            background: #e6ebf1;
+            color: var(--ink);
+        }
+
+        button.tertiary {
+            min-height: 36px;
+            background: transparent;
+            color: var(--blue);
+            padding: 6px 0;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+
+        header {
+            background: var(--panel);
+            border-bottom: 1px solid var(--line);
+            padding: 18px 24px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 0;
+        }
+
+        header p {
+            max-width: 960px;
+            margin: 6px 0 0;
+            color: var(--muted);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(320px, 390px) minmax(0, 1fr);
+            min-height: calc(100vh - 95px);
+        }
+
+        .sidebar,
+        .detail {
+            padding: 18px;
+        }
+
+        .sidebar {
+            border-right: 1px solid var(--line);
+            background: #fbfcfd;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .panel h2,
+        .panel h3 {
+            margin: 0 0 10px;
+            font-size: 16px;
+        }
+
+        .panel p {
+            margin: 8px 0;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .boundary {
+            border-color: #f1c36d;
+            background: var(--amber-soft);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            align-items: end;
+        }
+
+        label {
+            display: block;
+            color: #344054;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        select,
+        textarea,
+        input {
+            width: 100%;
+            border: 1px solid #b9c2cf;
+            border-radius: 6px;
+            padding: 9px 10px;
+            background: #fff;
+            color: var(--ink);
+        }
+
+        textarea {
+            min-height: 92px;
+            resize: vertical;
+        }
+
+        .queue {
+            display: grid;
+            gap: 8px;
+            max-height: calc(100vh - 360px);
+            overflow: auto;
+        }
+
+        .task-button {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #fff;
+            color: var(--ink);
+            padding: 10px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .task-button.active {
+            border-color: var(--blue);
+            box-shadow: inset 4px 0 0 var(--blue);
+        }
+
+        .task-button strong {
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 3px 8px;
+            background: #eef2f7;
+            color: #344054;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .pill.green {
+            background: var(--green-soft);
+            color: var(--green);
+        }
+
+        .pill.amber {
+            background: var(--amber-soft);
+            color: var(--amber);
+        }
+
+        .pill.red {
+            background: var(--red-soft);
+            color: var(--red);
+        }
+
+        .status {
+            border-radius: 6px;
+            padding: 9px 10px;
+            background: #eef2f7;
+            color: #344054;
+            margin-top: 10px;
+        }
+
+        .status.error {
+            background: var(--red-soft);
+            color: var(--red);
+        }
+
+        .status.ok {
+            background: var(--green-soft);
+            color: var(--green);
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .field-grid {
+            display: grid;
+            grid-template-columns: minmax(150px, 210px) minmax(0, 1fr);
+            border-top: 1px solid var(--line);
+        }
+
+        .field-grid div {
+            border-bottom: 1px solid var(--line);
+            padding: 7px 8px;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .field-grid div:nth-child(odd) {
+            color: #475467;
+            background: #f8fafc;
+            font-weight: 700;
+        }
+
+        details {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #fff;
+            padding: 10px 12px;
+            margin-top: 10px;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: 800;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            background: #0f172a;
+            color: #e5e7eb;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 12px;
+            max-height: 360px;
+            overflow: auto;
+        }
+
+        .decision-form {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .decision-form .wide {
+            grid-column: 1 / -1;
+        }
+
+        .empty {
+            color: var(--muted);
+            text-align: center;
+            padding: 28px 16px;
+        }
+
+        @media (max-width: 900px) {
+            .layout,
+            .detail-grid,
+            .decision-form {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .queue {
+                max-height: 420px;
+            }
+
+            .decision-form .wide {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Review submitted evidence</h1>
+        <p>Review New Zealand task submissions saved in Convex. Decisions recorded here do not update the public map or master data until an export bundle is validated through <code>pow</code>.</p>
+    </header>
+
+    <main class="layout">
+        <aside class="sidebar">
+            <section class="panel" id="authPanel">
+                <h2>Sign in</h2>
+                <p class="muted">Use the Google account invited as a reviewer, curator, or admin.</p>
+                <div id="signInButton"></div>
+                <div id="authStatus" class="status">Checking review access...</div>
+            </section>
+
+            <section class="panel boundary">
+                <h2>Review boundary</h2>
+                <p>Use <strong>accepted for export</strong> only when the evidence draft is ready for the governed export and <code>pow</code> validation path.</p>
+                <p>Use <strong>needs more evidence</strong> when the RA should clarify a source, date, identity match, or lifecycle claim.</p>
+            </section>
+
+            <section class="panel">
+                <h2>Queue</h2>
+                <div class="controls">
+                    <div>
+                        <label for="queueStatus">Task status</label>
+                        <select id="queueStatus">
+                            <option value="needs_review">needs review</option>
+                            <option value="changes_requested">changes requested</option>
+                            <option value="provisionally_closed">provisionally closed</option>
+                        </select>
+                    </div>
+                    <button id="refreshQueue" class="secondary" type="button">Refresh</button>
+                </div>
+                <div id="queueStatusText" class="status">Sign in to load the queue.</div>
+                <div class="queue" id="queueList"></div>
+            </section>
+        </aside>
+
+        <section class="detail" id="detailPanel">
+            <div class="panel empty">
+                Select a submitted task after signing in.
+            </div>
+        </section>
+    </main>
+
+    <script src="js/convex-config.js"></script>
+    <script src="js/convex-task-client.js"></script>
+    <script src="js/review-portal.js"></script>
+</body>
+</html>

@@ -15,10 +15,17 @@ change would result if accepted.
 
 ## Current V1 Direction
 
-The first review surface should be a small authenticated React + Vite + Convex
-React workbench. It should review evidence already saved in Convex by the New
-Zealand assignment page, then freeze accepted decisions into an export bundle
-for `pow`.
+The first review surface is a small authenticated static page at
+`apps/regions/nz/review.html`. It uses the same Google/Convex sign-in bridge as
+the assignment page and records review decisions against evidence drafts already
+saved in Convex. This is the fastest path to reviewing André's first submitted
+work without introducing a build step.
+
+React + Vite + Convex React remain the preferred direction for the fuller
+review workbench, but the migration should happen after the first review loop
+has been exercised. The static v1 records decisions only; export bundles stay
+in the maintainer workflow until the review decisions have been checked against
+`pow`.
 
 ```mermaid
 flowchart LR
@@ -44,6 +51,16 @@ Convex schema:
 The portal should not write to the master, publish public map changes, or
 create a second review database. It reads and writes Convex task/review state,
 then relies on the export bundle and `pow` for governed data changes.
+
+Static v1 scope:
+
+- list submitted New Zealand tasks that need review;
+- show the task, latest evidence draft, generated wide row, target-year
+  statuses, lifecycle notes, source details, and task history;
+- record accepted-for-export, rejected, needs-more-evidence, duplicate, or
+  deferred decisions;
+- refresh the queue after each decision;
+- omit export buttons.
 
 ## Review Queue
 

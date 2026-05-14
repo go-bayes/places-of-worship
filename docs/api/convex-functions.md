@@ -71,7 +71,7 @@ configuration before wider country rollout.
 | Function | Kind | Roles | Purpose | Writes |
 | --- | --- | --- | --- | --- |
 | `listReviewQueue` | query | `reviewer`, `curator`, `admin` | List submitted or review-relevant tasks with latest draft evidence. | None |
-| `recordReviewDecision` | mutation | `reviewer`, `curator`, `admin` | Record accept, reject, needs-more-evidence, duplicate, or defer decisions and update task state. | `review_decisions`, `tasks`, `evidence_drafts`, `task_events` |
+| `recordReviewDecision` | mutation | `reviewer`, `curator`, `admin` | Record accept, reject, needs-more-evidence, duplicate, or defer decisions and update task state. Accepted-for-export decisions require an evidence draft from the same task. | `review_decisions`, `tasks`, `evidence_drafts`, `task_events` |
 
 The review decision is not a master write. It becomes eligible for export only
 through the export batch workflow.
@@ -113,4 +113,3 @@ When adding or changing a public Convex function:
 4. Update `docs/development/convex-task-layer-setup.md` if setup or operator
    commands changed.
 5. Update `CHANGELOG.md` if collaborator-visible behaviour changed.
-
