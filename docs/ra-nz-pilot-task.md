@@ -89,6 +89,10 @@ placeholders into open cells. Use dropdown values such as `unknown`,
 `uncertain`, `none`, or `not_assessed` only where the Sheet or map gives that
 option.
 
+The web form will let you save an incomplete draft, but it will not submit a
+case for review with `NA` or `N/A` as the source title. Add the actual source
+name, or save a draft until you have it.
+
 Use date formats exactly: `YYYY`, `YYYY-MM`, or `YYYY-MM-DD`. For example,
 `2018`, `2018-09`, or `2018-09-01`. If a date is unknown, leave the date cell
 blank and explain the uncertainty in the evidence note.
@@ -298,7 +302,8 @@ Use the closest action available in the map action builder:
 - `No building present`: source suggests the mapped building is gone or no
   building is visible at that location. Use this for demolition or absence
   cases, and explain whether the source is Street View, aerial imagery, a local
-  record, or another source.
+  record, or another source. In the status fields, this exports as building
+  existence `absent` and worship use `not_worship`.
 - `Denomination/shared use`: source suggests denomination change, shared
   building, multiple congregations, or multi-purpose use.
 - `Needs review`: the evidence is relevant but does not settle the case.

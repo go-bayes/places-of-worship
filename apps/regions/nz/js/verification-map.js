@@ -124,6 +124,7 @@ const WORSHIP_USE_STATUS_OPTIONS = [
     ["probable_worship", "Probable worship"],
     ["organisation_only", "Organisation only"],
     ["building_only", "Building only"],
+    ["no_building_present", "No building present"],
     ["not_worship", "Not worship"],
     ["uncertain", "Uncertain"],
 ];
@@ -444,6 +445,10 @@ function lifecycleDateSummary(props) {
     ].filter(Boolean).join("; ");
 }
 
+function isPlaceholderText(value) {
+    return /^(?:na|n\/a|not applicable)$/i.test(String(value || "").trim());
+}
+
 function normaliseSiteType(value) {
     const text = String(value || "").toLowerCase();
     if (text.includes("chapel")) return "chapel";
@@ -491,7 +496,9 @@ function assessmentDefaultsForAction(action, statuses = {}) {
     const needsReview = action === "needs_review";
 
     let worshipUseStatus = "uncertain";
-    if (isClosed || isNoBuilding) {
+    if (isNoBuilding) {
+        worshipUseStatus = "no_building_present";
+    } else if (isClosed) {
         worshipUseStatus = "not_worship";
     } else if (action === "missing_current_site") {
         worshipUseStatus = "probable_worship";
@@ -2227,7 +2234,10 @@ class NzVerificationMap {
         });
         setValue("sourceTypeSelect", draft.source_type);
         setValue("existenceStatusSelect", draft.existence_status);
-        setValue("worshipUseStatusSelect", draft.worship_use_status);
+        setValue(
+            "worshipUseStatusSelect",
+            draft.action === "no_building_present" ? "no_building_present" : draft.worship_use_status,
+        );
         setValue("assessmentConfidenceSelect", draft.assessment_confidence);
         setValue("matchConfidenceSelect", draft.match_confidence);
         setValue("geocodingConfidenceSelect", draft.geocoding_confidence);
@@ -2289,12 +2299,16 @@ class NzVerificationMap {
             year,
             document.getElementById(`status${year}`)?.value || "not_assessed",
         ]));
+        const action = document.getElementById("raActionSelect")?.value || "needs_review";
+        const rawWorshipUseStatus = document.getElementById("worshipUseStatusSelect")?.value || "uncertain";
+        const noBuilding = action === "no_building_present" || rawWorshipUseStatus === "no_building_present";
         return {
-            action: document.getElementById("raActionSelect")?.value || "needs_review",
+            action,
             targetYearStatuses,
             sourceType: document.getElementById("sourceTypeSelect")?.value || "other",
-            existenceStatus: document.getElementById("existenceStatusSelect")?.value || "uncertain",
-            worshipUseStatus: document.getElementById("worshipUseStatusSelect")?.value || "uncertain",
+            existenceStatus: noBuilding ? "absent" : document.getElementById("existenceStatusSelect")?.value || "uncertain",
+            worshipUseStatus: noBuilding ? "not_worship" : rawWorshipUseStatus,
+            rawWorshipUseStatus,
             assessmentConfidence: document.getElementById("assessmentConfidenceSelect")?.value || "",
             matchConfidence: document.getElementById("matchConfidenceSelect")?.value || "medium",
             geocodingConfidence: document.getElementById("geocodingConfidenceSelect")?.value || "medium",
@@ -2315,6 +2329,9 @@ class NzVerificationMap {
         const submit = options.submit !== false;
         if (!submit) return "";
         if (!values.sourceTitle.trim()) return "Add a source title.";
+        if (isPlaceholderText(values.sourceTitle)) {
+            return "Do not use NA or N/A as a source title. Add the actual source title, or save a draft until you have it.";
+        }
         if (values.note.trim().length < 5) return "Add a short evidence note.";
         if (values.sourceDate.trim() && !isValidPartialDateText(values.sourceDate)) {
             return "Use YYYY, YYYY-MM, or YYYY-MM-DD for source and capture dates. If the date is unknown, leave it blank and explain in the note.";

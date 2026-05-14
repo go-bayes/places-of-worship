@@ -4,6 +4,11 @@
 
 ### 2026-05-14
 
+- Added a visible `No building present` option to the worship-use dropdown and
+  normalised it to `existence_status = absent` plus
+  `worship_use_status = not_worship` for exported evidence.
+- Blocked `NA`/`N/A` source titles on submit while still allowing incomplete
+  drafts to be saved.
 - Relaxed RA backend draft saving so `Save draft` can preserve incomplete work,
   while `Submit for review` still requires source and evidence details.
 - Added a `No building present` RA action for demolition or no-visible-building

@@ -16,7 +16,9 @@ The live reference today is `apps/regions/nz/verification.html` and
 - Use `Submit for review` when the RA wants JB or a reviewer to inspect the
   evidence.
 - Use `No building present` when imagery or another source indicates the mapped
-  building is gone or no building is visible at that location.
+  building is gone or no building is visible at that location. Store this as
+  `existence_status = absent` and `worship_use_status = not_worship` for
+  export.
 - Use `accepted for export`, not `accepted into the master`, until `pow`
   validation, diff, replay, and rebuild have happened.
 - Use `not assessed` when no one checked a target year.
