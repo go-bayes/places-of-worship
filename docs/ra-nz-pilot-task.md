@@ -25,7 +25,7 @@ you copy a draft row, but the spreadsheet is where the work is saved.
 In practical terms:
 
 1. Open the assigned workpack link from JB.
-2. Sign in with Google in the shared task backend panel.
+2. Sign in with Google at the top of the shared task backend panel.
 3. Work down the visible task list in order. Stop at a natural stopping point
    and tell JB where you stopped.
 4. Choose a target year: 2013, 2018, or 2023, when inspecting the map aid.
@@ -40,11 +40,16 @@ In practical terms:
 10. If JB explicitly asks you to use spreadsheet fallback, click `Copy
    spreadsheet row`, paste under the unchanged header in the shared Sheet, and
    review the pasted row.
-11. If a place is missing from the project map, record the closest available
-   action and explain the candidate in the evidence note. It may still have an
-   OSM object; record that id where available.
-12. Mark uncertain cases `needs_review` and move on.
-13. Tell JB when submitted backend tasks or fallback spreadsheet rows are ready,
+11. If the assigned task itself appears to involve a place missing from the
+   project map, choose the closest available action, save or submit the task
+   through the backend, and explain the candidate in the evidence note. It may
+   still have an OSM object; record that id where available.
+12. If you notice a different place of worship that is not one of the assigned
+   tasks, do not try to add it through the map yet. Note its name, source,
+   location, and any OSM id if available, then send that note to JB. A proper
+   missing-site nomination button will be added later.
+13. Mark uncertain cases `needs_review` and move on.
+14. Tell JB when submitted backend tasks or fallback spreadsheet rows are ready,
     and include notes on confusing cases.
 
 Do not submit pull requests, commit files, edit repository templates, or put
@@ -58,8 +63,10 @@ enabled or JB explicitly asks you to use the spreadsheet fallback.
 Use this only if JB asks you to sample the open task map rather than work from
 the assigned web workpack.
 
-Open <https://www.placesmap.org/apps/regions/nz/verification.html>, sample
-5 to 10 varied cases, and save or submit each useful case. Aim for variety:
+Open <https://www.placesmap.org/apps/regions/nz/verification.html?full=1>,
+sample 5 to 10 varied cases, and save or submit each useful case. The `?full=1`
+parameter overrides the default workpack and shows the full NZ task map. Aim
+for variety:
 some confirm-current cases, one or two missing sites, one or two duplicates,
 one closed or lifecycle case, and one or two deliberate skips for control. Do
 not worry about coverage; pick cases that are informative.
@@ -214,10 +221,12 @@ repository templates.
 
 ## Links
 
-- NZ verification task map (lands in demo mode by default):
+- NZ verification task map (lands on the assigned workpack by default):
   <https://www.placesmap.org/apps/regions/nz/verification.html>
-- NZ Temporal RA Workpack 001:
+- NZ Temporal RA Workpack 001 (explicit workpack link):
   <https://www.placesmap.org/apps/regions/nz/verification.html?batch=nz-temporal-ra-workpack-001>
+- Open NZ task map (full, for free sampling outside the workpack):
+  <https://www.placesmap.org/apps/regions/nz/verification.html?full=1>
 - Read-only feedback view (no action builder):
   <https://www.placesmap.org/apps/regions/nz/verification.html?demo=0>
 - Detailed case guide:
@@ -225,9 +234,11 @@ repository templates.
 
 ## Sampling Tasks From The Demo Map
 
-Unless JB assigns a specific set of sites, sample tasks directly
-from the task map. Prioritise variety over volume. A useful session might
-include:
+Unless JB assigns a specific set of sites, sample tasks directly from the full
+task map by opening
+<https://www.placesmap.org/apps/regions/nz/verification.html?full=1>. The bare
+URL without `?full=1` lands on the assigned workpack and hides the rest of the
+map. Prioritise variety over volume. A useful session might include:
 
 - a few high-priority current map records,
 - a few records with missing or ambiguous lifecycle dates,
@@ -243,7 +254,9 @@ Mark it `needs_review`, explain the uncertainty, and move on.
 
 ## Step-By-Step Workflow
 
-1. Open the NZ verification task map.
+1. Open the NZ verification task map. For free sampling outside the workpack,
+   use the `?full=1` URL in the Links section above; for assigned cases, use
+   the workpack link.
 2. Use the default action-builder view. If the page opens in read-only mode,
    ask JB before continuing.
 3. Choose the target year you are checking: 2013, 2018, or 2023.
@@ -259,8 +272,11 @@ Mark it `needs_review`, explain the uncertainty, and move on.
    using spreadsheet fallback, click `Copy spreadsheet row`, click column A in
    the next empty row under the unchanged spreadsheet header, paste, and review
    the pasted row.
-10. For a place missing from the map, use the closest available action and
-    explain the candidate in the evidence note.
+10. For a missing place that belongs to the assigned task, use the closest
+    available action and explain the candidate in the evidence note. For an
+    unrelated missing place you happen to notice, write down its name, source,
+    location, and any OSM id, then send that note to JB rather than adding it
+    through the map.
 11. Mark unclear cases `needs_review`.
 12. Add a short note on any confusing user-interface or source problem.
 13. Move to the next case.
@@ -283,6 +299,12 @@ Use the closest action available in the map action builder:
 
 Use `needs_review` freely. The pilot is designed to find difficult cases, not
 to force final decisions.
+
+For now, `Missing current site` should be used only when the missing-place
+finding is part of the assigned task you are already checking. The live
+backend can save evidence against assigned tasks. It does not yet let you
+create a new standalone task for an unrelated missing place. If you find one,
+record the details separately and send them to JB.
 
 ## Target-Year Status
 
@@ -379,8 +401,8 @@ After the first sampling session, answer these five questions:
 
 1. Where did you stop or hesitate?
 2. Were any field labels unclear or surprising?
-3. Did the workflow steps, `Inspect`, `Decide`, `Evidence`, and `Copy row`,
-   match how you actually worked?
+3. Did the workflow steps, `Inspect`, `Decide`, `Evidence`, and `Save`, match
+   how you actually worked?
 4. Did you skip anything for control sampling rather than because you were
    unsure? Include a count and how you communicated it.
 5. Did anything fail to save, submit, or paste? If yes, include the task name
