@@ -93,6 +93,62 @@ rerunning the import updates the same tasks. The remaining operational steps are
 to import the seed into the hosted Convex deployment, invite André, and smoke
 test one draft save and one submitted review item before sending the link.
 
+## 2026-05-14: Use Convex for live work and keep the governed master replayable
+
+Decision:
+Use Convex as the live operational layer for assignments, candidate
+nominations, evidence drafts, review decisions, and export batches. Do not make
+Convex the only authoritative store for accepted research data. Accepted
+decisions should round-trip through an explicit export bundle, `pow`
+validation, diff, and later master rebuild before they affect public maps or
+analysis products.
+
+Rationale:
+Convex gives the project a practical way to coordinate multiple research
+assistants and reviewers without spreadsheet handoffs. That convenience should
+not replace the scientific requirement to distinguish historical changes in
+worship function from corrections to our records. The durable research product
+is the accepted, typed change history plus the rebuilt master snapshots, not
+the transient live task database.
+
+Consequences:
+The next technical milestone is a thin round trip: take accepted Convex review
+decisions, export tasks, task events, evidence drafts, review decisions, and a
+`site_evidence_wide.csv`, materialise the bundle with hashes, and run it
+through `pow validate`, `pow stage`, `pow propose`, and `pow diff`. The
+Vanuatu surface should wait until this path has been kicked hard enough to show
+that proposed changes can leave the live backend and enter the governed data
+pipeline cleanly.
+
+The review step should also move into an authenticated UI. Reviewers should
+record accept, reject, request-more-evidence, revise, duplicate/link, and defer
+decisions through role-checked Convex functions, and each decision should update
+the RA-facing task state immediately. The current 50-case André assignment is a
+filtered batch over the shared task list, not a separate worksheet model; later
+New Zealand batches, Vanuatu tasks, and missing-place nominations should use
+the same task history and review loop.
+
+## 2026-05-14: Use TypeScript pragmatically around Convex
+
+Decision:
+Be more permissive about TypeScript where the project is working directly with
+Convex. TypeScript is appropriate for Convex schemas, mutations, queries,
+review-workbench prototypes, export glue, and frontend integrations that need
+to speak the same typed interface as the live backend.
+
+Rationale:
+Convex exposes its application model through TypeScript. Using that surface
+reduces translation work during the prototype stage and lets the live task
+workflow, evidence drafts, review decisions, and export helpers evolve together
+while the data contracts are still being tested.
+
+Consequences:
+This does not change the scientific data boundary. Rust remains the governed
+validation, diff, replay, and rebuild layer for accepted changes, and R remains
+the principal analysis and reporting environment. TypeScript is a practical
+workflow language for Convex-backed coordination and prototyping, not a reason
+to move the master or research products into Convex.
+
 ## 2026-05-13: Start Convex on Free and upgrade by trigger
 
 Decision:

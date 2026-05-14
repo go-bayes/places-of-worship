@@ -238,10 +238,22 @@ Evidence And Governance:
 - `[~]` First assigned web batch:
   `nz-temporal-ra-workpack-001` exposes 50 curated New Zealand temporal cases
   through the verification map once the hosted backend is seeded.
+- `[ ]` Authenticated review portal: role-gated queue where reviewers inspect
+  submitted evidence, record decisions, and push decision state back to the
+  RA-facing task history.
+- `[~]` Shared task-list model: treat prototype assignments as filtered batches
+  over one task store, so later New Zealand batches, Vanuatu tasks, and
+  missing-site nominations can merge without reconciling separate worksheets.
+- `[ ]` Reusable `Nominate missing PoW` flow: create provisional candidate
+  tasks in Convex, then reuse the same evidence, review, and export path for
+  New Zealand, Vanuatu, later country maps, and the larger public site.
 - `[~]` Implement the task/event/evidence/review/export contract in
   `docs/convex-task-layer-spec.md`.
 - `[ ]` Weekly or reviewer-triggered export from Convex task status into `pow`
   validation, diff, replay, and reviewed map-output workflows.
+- `[~]` First thin Convex-to-`pow` round-trip bridge: Convex export bundle,
+  local materialisation with hashes, and `site_evidence_wide.csv` handoff for
+  validation, stage, propose, and diff.
 - `[ ]` Rust API on Cloud Run or an equivalent backend where schema validation,
   heavy geospatial checks, or durable staging need a separate service.
 - `[ ]` Staged submissions in Cloud SQL/PostgreSQL/PostGIS or a compatible

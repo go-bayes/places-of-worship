@@ -34,7 +34,8 @@ RA opens task
   -> Convex records shared task status
   -> RA saves evidence draft
   -> RA marks task complete, skipped, or needs review
-  -> reviewer sees evidence and task history
+  -> authenticated reviewer sees evidence and task history
+  -> reviewer decision updates the shared task
   -> reviewer downloads reviewed decisions for pow
   -> pow validates, diffs, and feeds reviewed rebuilds
 ```
@@ -42,6 +43,11 @@ RA opens task
 Convex should solve coordination, shared task status, draft evidence capture,
 reviewer queues, and export readiness. It should not become the master
 database.
+
+The project can use Convex more heavily for the live workbench, including the
+Professional plan if reliability or operational support justifies it. That
+does not change the governed boundary: accepted research data must remain
+exportable, hashable, and replayable outside Convex.
 
 ## Boundaries
 
@@ -54,6 +60,7 @@ Convex owns:
 - skip and reopen reasons,
 - reviewer comments,
 - review decisions,
+- RA-visible decision summaries and next actions,
 - reviewer download records,
 - lightweight user profile and role metadata.
 
@@ -85,6 +92,8 @@ diff, replay, and project sign-off.
    session JSON clunkiness for one RA.
 9. Keep cost exposure narrow: task status and draft evidence belong in Convex;
    raw OSM snapshots, media, and accepted master data do not.
+10. Treat assignment batches as filtered views of one shared task list, not as
+    separate working databases.
 
 ## Pricing And Capacity Assumption
 
@@ -130,7 +139,8 @@ Use Convex for:
 - Google OpenID Connect authentication,
 - scheduled or reviewer-triggered export functions if needed,
 - append-only task events,
-- evidence draft and review-decision state.
+- evidence draft and review-decision state,
+- provisional candidate tasks for user-nominated places of worship.
 
 Avoid Convex for the first spike:
 
@@ -304,6 +314,39 @@ Indexes:
 - `by_matched_site`
 - `by_candidate_site`
 - `by_osm`
+
+### Reusable candidate intake
+
+The next build step is a reusable `Nominate missing PoW` flow on top of the
+existing task and evidence-draft model. It should work for the New Zealand
+assignment page first, then be reused for Vanuatu and later public-country
+maps.
+
+Use this wording consistently in the interface and documentation. Do not label
+the action `Add to map`: the user is proposing a candidate for review, not
+changing the master or the public map.
+
+The flow should:
+
+1. appear as a clear `Nominate missing PoW` control near the task list and map,
+2. let the user place the candidate by clicking the map, entering coordinates,
+   or entering an address/locality,
+3. ask for candidate type, name, source title, source URL or file reference,
+   evidence note, and target-year status where known,
+4. show nearby existing sites before submission so the user can flag a possible
+   match, duplicate, shared building, successor site, or unrelated candidate,
+5. call `tasks:createManualCandidateTask` to create a provisional
+   `candidate_site_id` and ordinary review task,
+6. reopen the standard evidence form for that new task, so save/submit,
+   validation, review, and export use the same path as seeded tasks, and
+7. keep all country-specific target years, date bounds, map defaults, and
+   nomination options in `country_configs` rather than hard-coding New Zealand
+   assumptions into the component.
+
+This flow creates reviewable task state only. It does not mint a durable master
+`site_id`, change the public map, or accept the candidate into the master. A
+reviewer must still reject it, link it to an existing site, request more
+evidence, or accept it for export to `pow`.
 
 ### `task_events`
 
@@ -509,6 +552,34 @@ Minimum reviewer behaviours:
 4. request changes or reopen task,
 5. include accepted decisions in a reviewer download for `pow`.
 
+## Authenticated Review Portal
+
+The reviewer surface should be an authenticated UI, not a spreadsheet editing
+step. It may start as a small route or panel attached to the task map, but every
+review action must run through Convex role checks.
+
+The review portal should let a reviewer:
+
+1. filter submitted tasks by country, batch, status, source type, and assigned
+   RA,
+2. inspect the task history, source links, evidence draft, target-year states,
+   lifecycle-date claims, nearby project/OSM candidates, and validation
+   warnings,
+3. record one decision: accept for export, reject, request more evidence,
+   request revision, mark duplicate/link to existing site, or defer,
+4. write a short rationale that is visible in the task history,
+5. update the RA-facing task or worksheet state immediately, so the RA can see
+   whether the task was accepted, rejected, reopened, or needs more evidence,
+6. freeze accepted decisions into an export batch only after the task state and
+   decision log agree.
+
+For the prototype, `nz-temporal-ra-workpack-001` is just a batch filter over
+the shared task list. Later NZ batches, Vanuatu tasks, missing-site
+nominations, and reviewer-created follow-up tasks should enter the same task
+store. This keeps assignment work, reviewer decisions, and future multi-RA
+coordination on one history rather than creating separate workbooks that must
+be reconciled by hand.
+
 The frontend should keep the current spreadsheet row preview during the
 transition, but it should become a secondary export/debug view once Convex is
 trusted.
@@ -620,6 +691,8 @@ Phase 2: Evidence drafts
 - Save map evidence drafts directly in Convex.
 - Keep generated TSV preview for reviewer/export debugging.
 - Submit evidence drafts to reviewer queue.
+- Add the reusable `Nominate missing PoW` flow: create a provisional candidate
+  task in Convex, then reuse the standard evidence form for save/submit.
 - During this phase, decide explicitly which surface is authoritative for each
   batch. Do not ask an RA to maintain the same evidence in both Convex and a
   Sheet except during a named test.
@@ -628,6 +701,10 @@ Phase 3: Review and export
 
 - Reviewers make decisions in the task workbench.
 - A person with export permission freezes the reviewed file set.
+- Convex returns a file bundle with tasks, task events, evidence drafts, review
+  decisions, and `site_evidence_wide.csv`.
+- A local materialiser writes the bundle to ignored export files, adds
+  SHA-256 hashes, and produces a manifest for `pow`.
 - The exported file set is validated by `pow`.
 - Convex becomes the default RA working surface only after this export path has
   produced a file set that `pow validate` accepts.
@@ -670,6 +747,14 @@ disabled for the RA. The bridge is disabled by default until the hosted
 deployment URL and Google client id are configured. The scaffold still has no
 master-write path.
 
+The first export bundle path is now available through
+`exports:getExportBundle`. It returns raw task/review documents plus a file
+block for `export_manifest.json`, JSONL artefacts, and
+`site_evidence_wide.csv`. The local materialiser
+`scripts/materialise_convex_export.py` writes those files and hash manifests so
+the curator can run the first Convex-to-`pow` round trip without treating
+Convex as the master.
+
 ## Definition Of Done For The First Spike
 
 The first Convex spike is complete when:
@@ -685,6 +770,16 @@ The first Convex spike is complete when:
 8. `pow validate` can run on the exported CSV,
 9. no Convex mutation can write to the master or public map data,
 10. docs explain how to recover if Convex is unavailable.
+
+The next small spike after the 50-case assignment is the reusable missing-site
+nomination flow. It should be implemented as a shared component because the
+same candidate intake pattern is needed for Vanuatu, later country task maps,
+and the larger public site.
+
+Before expanding the Vanuatu interface, run one accepted NZ review decision
+through the export bundle, materialiser, `pow validate`, `pow stage`,
+`pow propose --persist`, and `pow diff`. This confirms that Convex can be the
+live workbench while the master remains governed by exported events and replay.
 
 ## Open Questions
 

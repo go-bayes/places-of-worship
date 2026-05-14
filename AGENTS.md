@@ -70,6 +70,10 @@
   states, density changes, and appeared/disappeared map layers must be derived
   from accepted change events and accepted-diff manifests, not from unreviewed
   snapshot comparisons alone.
+- Use the wording `Nominate missing PoW`, not `Add to map`, for RA or public
+  candidate intake. A nomination is a provisional claim for review; adding to
+  the map happens only after validation, reviewer acceptance, export to `pow`,
+  and governed rebuild.
 - `site_id` tracks the mappable place. Moving congregations normally create a
   new `site_id` linked by relocation and organisation evidence.
 - New Zealand is the proof-of-concept country, not the universal template.
@@ -85,6 +89,10 @@
 - Backend direction for the RA task map: Convex spike for shared live
   task/review state, exported into `pow`; no direct master writes from public
   or RA interfaces.
+- TypeScript is acceptable, and often preferred, for Convex-backed prototypes,
+  live task/review workflow glue, schemas, exports, and frontend integrations
+  that speak directly to Convex. Do not force these paths through Rust merely
+  for stack purity.
 - Durable staging/storage reference: managed auth plus Rust API,
   PostgreSQL/PostGIS, and object storage when Convex is not sufficient for
   geospatial storage, media quarantine, or archival exports.

@@ -280,9 +280,26 @@ exports:freezeExportBatch({
 ```
 
 The export query returns JSON documents for tasks, task events, evidence drafts,
-and review decisions. The next implementation step is a file-export action that
-turns this file set into `site_evidence_wide.csv` plus JSONL artefacts for
-`pow`.
+review decisions, and a `files` block. The `files` block contains
+`site_evidence_wide.csv` plus JSONL artefacts for `pow` handoff.
+
+Save the query output to a local JSON file outside Git-tracked paths, then
+materialise the file set:
+
+```sh
+python3 scripts/materialise_convex_export.py path/to/convex-export-bundle.json
+```
+
+The materialiser writes an export directory under `exports/convex-roundtrip/`,
+adds local SHA-256 hashes, and writes `SHA256SUMS`. The first kick-the-tyres
+round trip is:
+
+```sh
+cargo run -p pow-cli -- validate exports/convex-roundtrip/<export_batch_id>/site_evidence_wide.csv
+cargo run -p pow-cli -- stage exports/convex-roundtrip/<export_batch_id>/site_evidence_wide.csv
+cargo run -p pow-cli -- propose <staged_batch_id> --persist
+cargo run -p pow-cli -- diff <derived_batch_id>
+```
 
 ## Recovery
 

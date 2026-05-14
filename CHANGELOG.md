@@ -8,6 +8,23 @@
   marker popups now expose Street View, the source-link panel prioritises
   Street View and Google Maps, and the evidence form can explicitly fill a
   Google Street View source URL for street-imagery checks.
+- Clarified the RA instructions and planning around missing places of worship:
+  assigned-task missing-site evidence should save through Convex, unrelated new
+  candidates should be sent to JB for now, and the next reusable build step is a
+  Convex-backed `Nominate missing PoW` flow.
+- Added `Nominate missing PoW`, not `Add to map`, as the required wording for
+  provisional candidate intake so RA-facing UI keeps the master boundary clear.
+- Recorded the Convex/live-workbench decision and added the first
+  Convex-to-`pow` export bridge: `exports:getExportBundle` now exposes a file
+  bundle, and `scripts/materialise_convex_export.py` writes ignored export
+  artefacts with SHA-256 hashes for the round-trip validation path.
+- Added the review-portal direction to the Convex planning docs: reviewer
+  decisions should happen in a role-gated UI, update the RA-facing task state,
+  and treat the current workpack as a filtered batch over one shared task list.
+- Recorded the stack decision to use TypeScript pragmatically for
+  Convex-backed prototypes, task/review workflow glue, and frontend
+  integrations while keeping Rust and R authoritative for governed data and
+  analysis.
 - Polished the RA assignment page with a collapsible quickstart guide,
   optional invited-account hint, lifecycle-date prompt for closure/change
   actions, clearer post-submit/skip filter guidance, and a pre-paint mobile

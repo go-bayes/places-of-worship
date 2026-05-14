@@ -36,6 +36,9 @@ identity.
 
 ## What happens when a user suggests a missing place of worship?
 
+The interface should call this `Nominate missing PoW`, not `Add to map`,
+because the user is making a provisional claim for review.
+
 The suggestion starts as a candidate, with a provisional `candidate_site_id`.
 Here, "missing" usually means missing from the project map or master list. OSM
 may already contain a candidate object, and that OSM id should be recorded as
@@ -43,6 +46,13 @@ source or matching evidence rather than treated as the project identity.
 
 The candidate should include source evidence, location evidence, target-year
 status where known, any relevant OSM object ids, and review notes.
+
+For the first New Zealand RA assignment, the live page can save evidence
+against assigned tasks but does not yet let an RA create an unrelated new
+candidate. If an assistant finds a missing place while checking an assigned
+task, they should record it in that task. If they notice a separate missing
+place, they should send the name, source, location, and any OSM id to JB until
+the reusable `Nominate missing PoW` flow is built.
 
 A reviewer can then reject it, link it to an existing site, request more
 evidence, or accept it as a new project site. Acceptance mints or assigns a
@@ -125,6 +135,20 @@ reason clear in the evidence note.
 
 The shared backend is that task store. Accepted review decisions then become
 change events and rebuild the master; the task store itself is not the master.
+
+## How will review decisions get back to RAs?
+
+The intended path is an authenticated review portal. A reviewer signs in,
+opens the submitted evidence, records a decision, and the same decision is
+written back to the shared task history. The RA should then see whether a task
+was accepted for export, rejected, reopened, marked as a duplicate, or returned
+for more evidence.
+
+The first New Zealand workpack is a filtered batch over that shared task list,
+not a separate data silo. This matters because later New Zealand batches,
+Vanuatu tasks, and missing-site nominations should merge into the same review
+queue rather than becoming separate worksheets that have to be reconciled by
+hand.
 
 ## Will Convex be the master database?
 

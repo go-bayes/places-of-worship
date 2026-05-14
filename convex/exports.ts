@@ -19,6 +19,104 @@ async function decisionsForTask(ctx: any, taskId: string): Promise<Doc<"review_d
     .collect();
 }
 
+function jsonl(rows: unknown[]): string {
+  return rows.map((row) => JSON.stringify(row)).join("\n") + (rows.length > 0 ? "\n" : "");
+}
+
+function csvCell(value: unknown): string {
+  const text = value === null || value === undefined ? "" : String(value);
+  if (!/[",\n\r]/.test(text)) {
+    return text;
+  }
+  return `"${text.replaceAll('"', '""')}"`;
+}
+
+function csvLine(values: unknown[]): string {
+  return values.map(csvCell).join(",");
+}
+
+function acceptedEvidenceDraftIds(reviewDecisions: Doc<"review_decisions">[]): Set<string> {
+  return new Set(
+    reviewDecisions
+      .map((decision) => decision.evidence_draft_id)
+      .filter((draftId): draftId is string => draftId !== undefined),
+  );
+}
+
+function siteEvidenceWideCsv(
+  evidenceDrafts: Doc<"evidence_drafts">[],
+  reviewDecisions: Doc<"review_decisions">[],
+): { csv: string; rowCount: number; fieldCount: number } {
+  const acceptedDraftIds = acceptedEvidenceDraftIds(reviewDecisions);
+  const rows: Record<string, unknown>[] = [];
+  let fields: string[] = [];
+
+  for (const draft of evidenceDrafts) {
+    if (!acceptedDraftIds.has(draft.evidence_draft_id)) {
+      continue;
+    }
+    const generated = draft.generated_wide_row as
+      | { fields?: unknown; row?: unknown }
+      | undefined;
+    if (!generated || !Array.isArray(generated.fields) || typeof generated.row !== "object" || generated.row === null) {
+      continue;
+    }
+    if (fields.length === 0) {
+      fields = generated.fields.map((field) => String(field));
+    }
+    rows.push(generated.row as Record<string, unknown>);
+  }
+
+  if (fields.length === 0) {
+    return { csv: "", rowCount: 0, fieldCount: 0 };
+  }
+
+  const lines = [csvLine(fields)];
+  for (const row of rows) {
+    lines.push(csvLine(fields.map((field) => row[field] ?? "")));
+  }
+  return {
+    csv: `${lines.join("\n")}\n`,
+    rowCount: rows.length,
+    fieldCount: fields.length,
+  };
+}
+
+function exportFiles(
+  manifest: Record<string, unknown>,
+  tasks: Doc<"tasks">[],
+  taskEvents: Doc<"task_events">[],
+  evidenceDrafts: Doc<"evidence_drafts">[],
+  reviewDecisions: Doc<"review_decisions">[],
+) {
+  const wide = siteEvidenceWideCsv(evidenceDrafts, reviewDecisions);
+  const fileManifest = {
+    ...manifest,
+    files: [
+      { filename: "export_manifest.json", content_type: "application/json" },
+      { filename: "tasks.jsonl", content_type: "application/x-ndjson", record_count: tasks.length },
+      { filename: "task_events.jsonl", content_type: "application/x-ndjson", record_count: taskEvents.length },
+      { filename: "evidence_drafts.jsonl", content_type: "application/x-ndjson", record_count: evidenceDrafts.length },
+      { filename: "review_decisions.jsonl", content_type: "application/x-ndjson", record_count: reviewDecisions.length },
+      {
+        filename: "site_evidence_wide.csv",
+        content_type: "text/csv",
+        record_count: wide.rowCount,
+        field_count: wide.fieldCount,
+      },
+    ],
+  };
+
+  return {
+    export_manifest_json: JSON.stringify(fileManifest, null, 2) + "\n",
+    tasks_jsonl: jsonl(tasks),
+    task_events_jsonl: jsonl(taskEvents),
+    evidence_drafts_jsonl: jsonl(evidenceDrafts),
+    review_decisions_jsonl: jsonl(reviewDecisions),
+    site_evidence_wide_csv: wide.csv,
+  };
+}
+
 export const listExportBatches = query({
   args: {
     countryCode: v.optional(v.string()),
@@ -187,22 +285,26 @@ export const getExportBundle = query({
       }
     }
 
+    const exportManifest = {
+      export_batch_id: batch.export_batch_id,
+      country_code: batch.country_code,
+      created_at: batch.created_at,
+      frozen_at: batch.frozen_at,
+      schema_version: batch.schema_version,
+      export_format: batch.export_format,
+      included_task_count: tasks.length,
+      included_evidence_count: evidenceDrafts.length,
+      included_review_decision_count: reviewDecisions.length,
+      pow_validation_status: batch.pow_validation_status,
+    };
+
     return {
-      export_manifest: {
-        export_batch_id: batch.export_batch_id,
-        country_code: batch.country_code,
-        created_at: batch.created_at,
-        frozen_at: batch.frozen_at,
-        schema_version: batch.schema_version,
-        export_format: batch.export_format,
-        included_task_count: tasks.length,
-        included_evidence_count: evidenceDrafts.length,
-        included_review_decision_count: reviewDecisions.length,
-      },
+      export_manifest: exportManifest,
       tasks,
       task_events: taskEvents,
       evidence_drafts: evidenceDrafts,
       review_decisions: reviewDecisions,
+      files: exportFiles(exportManifest, tasks, taskEvents, evidenceDrafts, reviewDecisions),
     };
   },
 });
