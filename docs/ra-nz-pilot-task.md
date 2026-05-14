@@ -45,9 +45,9 @@ In practical terms:
    through the backend, and explain the candidate in the evidence note. It may
    still have an OSM object; record that id where available.
 12. If you notice a different place of worship that is not one of the assigned
-   tasks, do not try to add it through the map yet. Note its name, source,
+   tasks, do not try to nominate it through the map yet. Note its name, source,
    location, and any OSM id if available, then send that note to JB. A proper
-   missing-site nomination button will be added later.
+   `Nominate missing PoW` button will be added later.
 13. Mark uncertain cases `needs_review` and move on.
 14. Tell JB when submitted backend tasks or fallback spreadsheet rows are ready,
     and include notes on confusing cases.
@@ -275,8 +275,8 @@ Mark it `needs_review`, explain the uncertainty, and move on.
 10. For a missing place that belongs to the assigned task, use the closest
     available action and explain the candidate in the evidence note. For an
     unrelated missing place you happen to notice, write down its name, source,
-    location, and any OSM id, then send that note to JB rather than adding it
-    through the map.
+    location, and any OSM id, then send that note to JB until the
+    `Nominate missing PoW` flow is available.
 11. Mark unclear cases `needs_review`.
 12. Add a short note on any confusing user-interface or source problem.
 13. Move to the next case.
