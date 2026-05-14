@@ -31,6 +31,10 @@ Minimum roles:
 Authentication answers who the user is. Authorisation answers what the user can
 do in the project. Keep these separate in the implementation and audit logs.
 
+Current Convex pilot rule: RA accounts may save and inspect their own assigned
+evidence and task history. Reviewer, curator, admin, and service roles may
+inspect project-wide evidence needed for review, export, or maintenance.
+
 ## Assets And Threats
 
 Assets:

@@ -3,7 +3,7 @@ import { mutation, query } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { taskBatchInput, taskInput, taskPriority, taskStatus, taskType } from "./model";
-import { assertOwnsOrCanReview, chooseActorRole, requireUser } from "./lib/auth";
+import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser } from "./lib/auth";
 import { appendTaskEvent } from "./lib/taskEvents";
 
 function manualTaskId(countryCode: string, name: string, now: number): string {
@@ -76,13 +76,20 @@ export const listTasks = query({
   },
 });
 
-async function latestDraftForTask(ctx: QueryCtx, taskId: string): Promise<Doc<"evidence_drafts"> | null> {
+async function latestDraftForTask(
+  ctx: QueryCtx,
+  taskId: string,
+  user: Doc<"users">,
+): Promise<Doc<"evidence_drafts"> | null> {
   const drafts = await ctx.db
     .query("evidence_drafts")
     .filter((q) => q.eq(q.field("task_id"), taskId))
     .order("desc")
-    .take(1);
-  return drafts[0] ?? null;
+    .take(20);
+  if (canReview(user.roles)) {
+    return drafts[0] ?? null;
+  }
+  return drafts.find((draft) => draft.created_by === user._id) ?? null;
 }
 
 async function latestReviewDecision(ctx: QueryCtx, taskId: string): Promise<Doc<"review_decisions"> | null> {
@@ -131,7 +138,7 @@ export const listMyTasks = query({
     for (const task of filtered) {
       rows.push({
         task,
-        latestDraft: await latestDraftForTask(ctx, task.task_id),
+        latestDraft: await latestDraftForTask(ctx, task.task_id, user),
         latestReview: await latestReviewDecision(ctx, task.task_id),
       });
     }
@@ -144,13 +151,9 @@ export const getTask = query({
     taskId: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireUser(ctx, ["ra", "reviewer", "curator", "admin", "service"]);
+    const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin", "service"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
-    const latestDraft = await ctx.db
-      .query("evidence_drafts")
-      .filter((q) => q.eq(q.field("task_id"), args.taskId))
-      .order("desc")
-      .first();
+    const latestDraft = await latestDraftForTask(ctx, args.taskId, user);
     return { task, latestDraft };
   },
 });
@@ -161,12 +164,19 @@ export const getTaskEvents = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    await requireUser(ctx, ["ra", "reviewer", "curator", "admin", "service"]);
-    return await ctx.db
+    const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin", "service"]);
+    const task = await getTaskOrThrow(ctx, args.taskId);
+    if (!canReview(user.roles)) {
+      assertOwnsOrCanReview(user._id, user.roles, task.assigned_to);
+    }
+    const events = await ctx.db
       .query("task_events")
       .withIndex("by_task_time", (q) => q.eq("task_id", args.taskId))
       .order("desc")
       .take(Math.min(Math.max(args.limit ?? 100, 1), 500));
+    return canReview(user.roles)
+      ? events
+      : events.filter((event) => event.actor_user_id === user._id);
   },
 });
 

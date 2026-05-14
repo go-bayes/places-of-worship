@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { evidenceDraftInput } from "./model";
-import { assertOwnsOrCanReview, chooseActorRole, requireUser } from "./lib/auth";
+import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser } from "./lib/auth";
 import { appendTaskEvent } from "./lib/taskEvents";
 
 async function getTaskOrThrow(ctx: any, taskId: string): Promise<Doc<"tasks">> {
@@ -36,7 +36,7 @@ export const getEvidenceDraft = query({
     const draft = await getDraftOrThrow(ctx, args.evidenceDraftId);
     if (
       draft.created_by !== user._id &&
-      !user.roles.some((role) => role === "reviewer" || role === "curator" || role === "admin")
+      !canReview(user.roles)
     ) {
       throw new Error("Evidence draft belongs to another user.");
     }
@@ -50,17 +50,24 @@ export const listTaskEvidence = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
-    return await ctx.db
+    const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
+    const task = await getTaskOrThrow(ctx, args.taskId);
+    if (!canReview(user.roles)) {
+      assertOwnsOrCanReview(user._id, user.roles, task.assigned_to);
+    }
+    const drafts = await ctx.db
       .query("evidence_drafts")
       .filter((q) => q.eq(q.field("task_id"), args.taskId))
       .order("desc")
       .take(Math.min(Math.max(args.limit ?? 50, 1), 200));
+    return canReview(user.roles)
+      ? drafts
+      : drafts.filter((draft) => draft.created_by === user._id);
   },
 });
 
 function canReviewEvidence(user: Doc<"users">): boolean {
-  return user.roles.includes("reviewer") || user.roles.includes("curator") || user.roles.includes("admin");
+  return canReview(user.roles);
 }
 
 export const saveEvidenceDraft = mutation({
@@ -145,7 +152,7 @@ export const submitEvidenceDraft = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const draft = await getDraftOrThrow(ctx, args.evidenceDraftId);
-    if (draft.created_by !== user._id && !user.roles.includes("reviewer") && !user.roles.includes("curator") && !user.roles.includes("admin")) {
+    if (draft.created_by !== user._id && !canReview(user.roles)) {
       throw new Error("Evidence draft belongs to another user.");
     }
     const task = await getTaskOrThrow(ctx, draft.task_id);
@@ -200,9 +207,7 @@ export const submitUnresolvedNote = mutation({
     const draft = await getDraftOrThrow(ctx, args.evidenceDraftId);
     if (
       draft.created_by !== user._id
-      && !user.roles.includes("reviewer")
-      && !user.roles.includes("curator")
-      && !user.roles.includes("admin")
+      && !canReview(user.roles)
     ) {
       throw new Error("Evidence draft belongs to another user.");
     }

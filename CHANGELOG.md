@@ -4,6 +4,14 @@
 
 ### 2026-05-14
 
+- Tightened Convex evidence/task-history access so RA accounts can inspect
+  only their own or assigned evidence, while reviewer, curator, admin, and
+  service roles retain project-wide inspection access.
+- Added the New Zealand submitted-evidence reviewer portal to the README links
+  and noted that current authorisation is limited to JB and JW.
+- Clarified that new Convex-facing task, review, nomination, export, and
+  country-configuration UI should prefer strict TypeScript over new vanilla
+  JavaScript.
 - Added an OSM-notes-style `Submit unresolved note` path for RA work: useful
   but incomplete evidence now becomes a first-class Convex task/draft state
   instead of being forced into a completed submission.

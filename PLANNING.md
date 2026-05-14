@@ -129,11 +129,13 @@ As of 30 April 2026:
 - CLI and staging support docs that are not essential to RA map work now live
   under `docs/development/` so the RA path stays focused on the UI and working
   spreadsheet.
-- Frontend and task-workflow path: prototype the RA workbench as controls on
-  the current static map and use TypeScript freely where Convex gives typed
-  schemas, mutations, queries, exports, or frontend integration points. Revisit
-  Leptos once the action vocabulary, staged event contract, and review
-  ergonomics are stable enough to justify a persistent portal.
+- Frontend and task-workflow path: keep the current static map stable for the
+  active pilot, but make new Convex-facing workflow UI TypeScript-first with
+  strict types wherever practical. Use Convex's typed schemas, mutations,
+  queries, exports, and frontend integration points instead of adding new
+  vanilla JavaScript surfaces. Revisit Leptos once the action vocabulary,
+  staged event contract, and review ergonomics are stable enough to justify a
+  persistent portal.
 - TypeScript framework trigger: do not rewrite the live static New Zealand
   verification map while André's pilot is active. For the first authenticated
   review portal or shared task workbench, use a small React + Vite + Convex
@@ -785,9 +787,9 @@ Pricing and account checks before action:
 - It is acceptable to use more of Convex, including a Professional plan, for
   live coordination and reliability. That does not move the scientific source
   of truth into Convex.
-- Be permissive about TypeScript in Convex-facing workflow code. Convex's
-  TypeScript surface is a practical advantage for prototyping task state,
-  review actions, exports, and map integration.
+- Prefer strict TypeScript for Convex-facing workflow code. Convex's TypeScript
+  surface is a practical advantage for prototyping task state, review actions,
+  exports, and map integration.
 - Keep the Rust/R master path authoritative. Convex exports should feed staged
   evidence and accepted-review records into `pow` validation, diff, replay, and
   reviewed map exports.

@@ -12,7 +12,8 @@ reference product.
 
 - **[RA assignment: New Zealand 50-case workpack](https://www.placesmap.org/apps/regions/nz/verification.html)**
 - **[RA task guide](docs/ra-nz-pilot-task.md)**
-- **[Reviewer portal: New Zealand submissions](https://www.placesmap.org/apps/regions/nz/review.html)**
+- **[Reviewer portal: New Zealand submitted evidence](https://www.placesmap.org/apps/regions/nz/review.html)**,
+  currently authorised for JB and JW only.
 - [Global map](https://go-bayes.github.io/places-of-worship/index.html)
 - [New Zealand regional map](https://www.placesmap.org/enhanced-places.html)
 - [Roadmap](ROADMAP.md)

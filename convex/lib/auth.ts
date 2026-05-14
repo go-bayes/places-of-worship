@@ -15,6 +15,16 @@ export function chooseActorRole(
   return allowedRoles.find((role) => user.roles.includes(role)) ?? user.roles[0] ?? "ra";
 }
 
+// checks whether a user may inspect review queues and other users' evidence.
+export function canReview(
+  userRoles: readonly ProjectRole[],
+): boolean {
+  return userRoles.includes("reviewer")
+    || userRoles.includes("curator")
+    || userRoles.includes("admin")
+    || userRoles.includes("service");
+}
+
 export async function requireUser(
   ctx: QueryCtx | MutationCtx,
   allowedRoles: readonly ProjectRole[],
@@ -48,7 +58,7 @@ export function assertOwnsOrCanReview(
   if (ownerId === undefined || ownerId === userId) {
     return;
   }
-  if (userRoles.includes("reviewer") || userRoles.includes("curator") || userRoles.includes("admin")) {
+  if (canReview(userRoles)) {
     return;
   }
   throw new Error("Task is assigned to another user.");

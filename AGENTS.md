@@ -91,15 +91,18 @@
 - Governed data modification: Rust (`pow validate`, `pow stage`, later diff,
   review, replay, and export).
 - Python: support/API tooling only; use `uv`.
-- Frontend: static HTML/CSS/JavaScript map products, with configuration-gated
-  Convex save/submit paths for the RA task map.
+- Frontend: the current static HTML/CSS/JavaScript map products remain the
+  live pilot surface, but new shared task, review, nomination, export, and
+  country-configuration UI should be TypeScript-first with strict types
+  wherever practical.
 - Backend direction for the RA task map: Convex spike for shared live
   task/review state, exported into `pow`; no direct master writes from public
   or RA interfaces.
-- TypeScript is acceptable, and often preferred, for Convex-backed prototypes,
-  live task/review workflow glue, schemas, exports, and frontend integrations
-  that speak directly to Convex. Do not force these paths through Rust merely
-  for stack purity.
+- Prefer strict TypeScript over new vanilla JavaScript for Convex-backed
+  prototypes, live task/review workflow glue, schemas, exports, and frontend
+  integrations that speak directly to Convex. Keep small vanilla JavaScript
+  patches only when they are narrowly scoped to the existing static pilot page
+  or avoid disrupting active RA work.
 - Durable staging/storage reference: managed auth plus Rust API,
   PostgreSQL/PostGIS, and object storage when Convex is not sufficient for
   geospatial storage, media quarantine, or archival exports.
