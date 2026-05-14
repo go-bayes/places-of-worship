@@ -4,6 +4,26 @@ This FAQ explains current operating rules for the New Zealand pilot and the
 planned staged data workflow. The authoritative contracts remain in schemas and
 planning documents; this page is a readable guide.
 
+## What is the project doing right now?
+
+The New Zealand pilot is using a Convex-backed web assignment rather than a
+spreadsheet-first workflow. André opens the assigned New Zealand workpack,
+signs in with Google, saves drafts, submits unresolved notes, or submits
+evidence for review. JB and JW use the reviewer portal to inspect submitted
+evidence and record review decisions.
+
+The live backend is still a coordination layer. It records task status,
+evidence drafts, review decisions, and export metadata. It does not update the
+master database or public map. Reviewed evidence must still be exported,
+validated by `pow`, staged, diffed, and replayed before it becomes research or
+public-map data.
+
+Vanuatu is the next country case, but it starts source-first. Guy should first
+collect and assess source leads for 1989, 1999, 2009, and 2020, while
+preserving older lifecycle evidence back to 1600. A full Vanuatu task map
+should wait until the New Zealand review-export-`pow` round trip has been
+tested.
+
 ## What is the unit of analysis?
 
 The primary unit is a mappable place of worship: a building, parcel, compound,
@@ -104,9 +124,9 @@ hashes, and manifests.
 ## How does the shared RA spreadsheet fit in?
 
 The spreadsheet is now the fallback and export format, not the preferred RA
-working surface once the shared backend is enabled. The New Zealand task map is
-being wired to Convex so trusted assistants can save drafts, submit evidence
-for review, and skip tasks without copying rows by hand.
+working surface. The New Zealand task map now uses Convex so trusted assistants
+can save drafts, submit unresolved notes, submit evidence for review, and skip
+tasks without copying rows by hand.
 
 If Convex is unavailable, the project can still use a project-owned Google
 Sheet as the temporary evidence store. Rows from the Sheet, or exports from
@@ -115,9 +135,10 @@ accepted change events. Only accepted events affect rebuilt master outputs.
 
 ## How can RAs avoid duplicating task work?
 
-When the shared backend is enabled, RAs should rely on backend task status:
-open, draft saved, skipped, needs review, reviewed, or reopened. That status is
-visible to signed-in project users and is meant to prevent duplicate work.
+In the current assigned workpack, RAs should rely on backend task status:
+open, in progress, draft saved, unresolved note, skipped, needs review, changes
+requested, reviewed, exported, or reopened. That status is visible to signed-in
+project users and is meant to prevent duplicate work.
 
 In spreadsheet fallback mode, the map only remembers copied or skipped tasks in
 the same browser. A `tentatively closed` badge means the browser has copied a
@@ -136,13 +157,26 @@ reason clear in the evidence note.
 The shared backend is that task store. Accepted review decisions then become
 change events and rebuild the master; the task store itself is not the master.
 
+## What is an unresolved note?
+
+An unresolved note is useful but incomplete evidence. It is for cases where an
+RA has found something worth preserving but cannot yet make a clean submission:
+for example, a source suggests a closure but the target year remains unclear,
+or a Street View check shows no visible building but the source does not prove
+when worship use ended.
+
+Submitting an unresolved note removes the task from the RA's active list and
+keeps the note visible in `My work` and in the reviewer queue. A reviewer can
+then accept it, reject it, defer it, mark it duplicate, or ask for more
+evidence. An unresolved note does not update the master or public map.
+
 ## How will review decisions get back to RAs?
 
-The intended path is an authenticated review portal. A reviewer signs in,
-opens the submitted evidence, records a decision, and the same decision is
-written back to the shared task history. The RA should then see whether a task
-was accepted for export, rejected, reopened, marked as a duplicate, or returned
-for more evidence.
+The current path is the authenticated reviewer portal. A reviewer signs in,
+opens submitted evidence or unresolved notes, records a decision, and the same
+decision is written back to the shared task history. The RA can then see
+whether a task was accepted for export, rejected, deferred, marked as a
+duplicate, or returned for more evidence.
 
 The first New Zealand workpack is a filtered batch over that shared task list,
 not a separate data silo. This matters because later New Zealand batches,
@@ -150,13 +184,25 @@ Vanuatu tasks, and missing-site nominations should merge into the same review
 queue rather than becoming separate worksheets that have to be reconciled by
 hand.
 
+## What does accepted for export mean?
+
+`accepted_for_export` means a reviewer accepts the submitted evidence for the
+next governed handoff. It does not mean the public map or master database has
+changed.
+
+Accepted-for-export decisions become eligible for a frozen export bundle. That
+bundle should contain the tasks, task events, evidence drafts, review
+decisions, wide evidence CSV, manifest, and hashes needed for `pow` validation
+and diffing. Only after the `pow` path accepts and replays the change can it
+affect rebuilt research outputs or public map products.
+
 ## Will Convex be the master database?
 
-No. Convex is a strong candidate for the shared live task map: assignments,
-task status, evidence drafts, reviewer comments, provisional closures, and
-weekly project-review queues. It should help multiple RAs and reviewers see
-the same task status without relying on browser-local storage or a manually
-checked spreadsheet.
+No. Convex is the current shared live task map for the pilot: assignments,
+task status, evidence drafts, reviewer comments, provisional closures, review
+decisions, and export metadata. It helps multiple RAs and reviewers see the
+same task status without relying on browser-local storage or a manually checked
+spreadsheet.
 
 The master database should still be rebuilt from accepted change events through
 the Rust validation and replay pipeline and the research-facing R outputs.
@@ -238,15 +284,17 @@ share the same review queue but preserve their provenance.
 
 ## What is the path from task to master?
 
-The intended path is:
+The current intended path is:
 
-1. raw source or user suggestion,
-2. staged evidence row or task,
-3. validation,
-4. reviewer decision,
-5. accepted change event,
-6. master rebuild,
-7. reviewer and research diffs.
+1. generated task, assigned workpack row, or `Nominate missing PoW` candidate,
+2. RA draft, unresolved note, skipped task, or submitted evidence in Convex,
+3. reviewer decision in the authenticated portal,
+4. frozen Convex export bundle with tasks, evidence, decisions, manifest, and
+   hashes,
+5. `pow validate`, `pow stage`, `pow propose`, and `pow diff`,
+6. accepted change events and replay into rebuilt master outputs,
+7. public map products, downloads, and research summaries derived from those
+   reviewed outputs.
 
 No intake path should mutate the master directly.
 
@@ -270,3 +318,27 @@ short site-level visual claim. Do not store screenshots, photos, videos,
 private conversations, or personal contact details in Git or public outputs
 unless a later approved media workflow covers consent, licensing, quarantine,
 and review.
+
+## Why use Convex and TypeScript if the governed stack is Rust?
+
+The project uses each tool where it currently helps most. Convex and TypeScript
+are useful for live coordination: Google sign-in, assignments, task status,
+draft evidence, reviewer queues, and fast interface changes. Rust remains the
+governed data spine: validation, staging, diffs, replay, master rebuilds, and
+reproducible exports.
+
+This keeps the pilot moving without giving the live task backend authority over
+the research data. If the live workbench later becomes stable infrastructure,
+parts of it could be rebuilt in a more Rust-centred stack. That is an
+aspiration for settled, load-bearing parts, not a reason to slow the current RA
+pilot.
+
+## Where are the function and script references?
+
+The public Convex function inventory is
+`docs/api/convex-functions.md`. It lists public queries and mutations, who may
+call them, what they write, and how they fit into the workflow.
+
+The workflow script catalogue is `docs/api/workflow-scripts.md`. It lists the
+scripts that generate OSM temporal leads, curated RA workpacks, Convex seed
+payloads, and export bundles for the `pow` handoff.

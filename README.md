@@ -91,5 +91,6 @@ for current implementation priorities, [FAQ.md](FAQ.md) for plain-language
 answers about site identity, task generation, and staged review, and
 [LEXICON.md](LEXICON.md) for preferred project terms. Maintainer references
 include the [documentation health check](docs/documentation-health-check.md),
-the [Convex function inventory](docs/api/convex-functions.md), and the
-[UI style guide](docs/ui-style-guide.md).
+the [Convex function inventory](docs/api/convex-functions.md), the
+[workflow script catalogue](docs/api/workflow-scripts.md), and the [UI style
+guide](docs/ui-style-guide.md).

@@ -30,6 +30,9 @@
   docs aligned.
 - `docs/api/convex-functions.md`: human-readable inventory of Convex queries
   and mutations, their roles, and their workflow position.
+- `docs/api/workflow-scripts.md`: human-readable catalogue of workflow-facing
+  scripts that generate task seeds, RA workpacks, review exports, and `pow`
+  handoff artefacts.
 - `docs/ui-style-guide.md`: UI wording, status, colour, button, and form
   conventions for the map-first task interfaces.
 - `CRITIQUE.md`: review notes that motivated the revision-event pipeline.

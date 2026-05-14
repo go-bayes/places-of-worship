@@ -76,6 +76,8 @@ When a Convex function, schema, or front-end task flow changes, check:
 - `docs/convex-task-layer-spec.md`,
 - `docs/development/convex-task-layer-setup.md`,
 - `docs/api/convex-functions.md`,
+- `docs/api/workflow-scripts.md` if task seeds, workpacks, export bundles, or
+  `pow` handoff scripts changed,
 - `ROADMAP.md` if the phase changed,
 - `PLANNING.md` if the next step changed,
 - `JOURNAL.md` if the decision matters later,
@@ -120,4 +122,3 @@ the summary and the others point to it.
 6. What phrase would confuse JB, JW, a funder, or a future maintainer?
 7. Which open question should now be a decision?
 8. Which decision should now be a FAQ entry?
-

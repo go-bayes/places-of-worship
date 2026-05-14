@@ -17,6 +17,12 @@
   the preferred saving path and spreadsheet copy/paste is fallback only.
 - Reordered the journal newest-first and refreshed the planning snapshot to
   describe the live Convex assignment/review workflow as of 2026-05-14.
+- Reviewed the public Convex function inventory against the current exported
+  queries and mutations, and added a workflow script catalogue for RA workpacks,
+  Convex seeding, review exports, and `pow` handoff scripts.
+- Updated the FAQ to reflect the current Convex-backed RA assignment, static
+  reviewer portal, unresolved-note path, accepted-for-export boundary,
+  TypeScript/Rust split, and workflow function/script references.
 - Added the New Zealand submitted-evidence reviewer portal to the README links
   and noted that current authorisation is limited to JB and JW.
 - Clarified that new Convex-facing task, review, nomination, export, and
