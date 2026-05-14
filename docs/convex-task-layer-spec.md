@@ -217,6 +217,9 @@ Review decision statuses:
 - `deferred`: useful evidence, but outside the current review round.
 
 No status in Convex means "accepted into the master".
+Every review decision should carry a short decision note so later exports can
+explain why the case was accepted, rejected, deferred, or returned for more
+evidence.
 
 ## Core Data Model
 

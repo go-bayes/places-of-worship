@@ -59,6 +59,10 @@ Static v1 scope:
   statuses, lifecycle notes, source details, and task history;
 - record accepted-for-export, rejected, needs-more-evidence, duplicate, or
   deferred decisions;
+- require an explicit decision and short decision note;
+- keep reviewed and exported tasks inspectable after a decision;
+- provide a reviewer shortcut for system-test submissions so they can be
+  rejected/excluded without entering an export round;
 - refresh the queue after each decision;
 - omit export buttons.
 

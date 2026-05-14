@@ -4,6 +4,10 @@
 
 ### 2026-05-14
 
+- Tightened the static reviewer portal: decisions now require an explicit
+  choice and short note, reviewed/exported cases can be inspected, and reviewers
+  can mark system-test submissions as rejected/excluded without entering the
+  export path.
 - Added an assignment-mode `My work` panel so RAs can see saved drafts,
   submitted cases, skipped tasks, and review outcomes without repeating work.
 - Added a deliberate `Revise submission` path: submitted evidence is read-only

@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
-import { reviewDecisionInput } from "./model";
+import { reviewDecisionInput, taskStatus } from "./model";
 import { chooseActorRole, requireUser } from "./lib/auth";
 import { appendTaskEvent } from "./lib/taskEvents";
 
@@ -59,10 +59,21 @@ async function latestDraftForReview(ctx: any, taskId: string): Promise<Doc<"evid
     ?? null;
 }
 
+async function latestReviewDecision(ctx: any, taskId: string): Promise<Doc<"review_decisions"> | null> {
+  const decisions = await ctx.db
+    .query("review_decisions")
+    .withIndex("by_task", (q: any) => q.eq("task_id", taskId))
+    .take(50);
+  return decisions.sort(
+    (left: Doc<"review_decisions">, right: Doc<"review_decisions">) =>
+      right.created_at - left.created_at,
+  )[0] ?? null;
+}
+
 export const listReviewQueue = query({
   args: {
     countryCode: v.optional(v.string()),
-    status: v.optional(v.union(v.literal("needs_review"), v.literal("provisionally_closed"), v.literal("changes_requested"))),
+    status: v.optional(taskStatus),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
@@ -86,7 +97,8 @@ export const listReviewQueue = query({
     const rows = [];
     for (const task of tasks) {
       const latestDraft = await latestDraftForReview(ctx, task.task_id);
-      rows.push({ task, latestDraft });
+      const latestReview = await latestReviewDecision(ctx, task.task_id);
+      rows.push({ task, latestDraft, latestReview });
     }
     return rows;
   },
@@ -109,6 +121,9 @@ export const recordReviewDecision = mutation({
     }
     if (args.decision.decision_status === "accepted_for_export" && draft === null) {
       throw new Error("Accepted-for-export decisions require an evidence draft.");
+    }
+    if ((args.decision.decision_note ?? "").trim().length < 8) {
+      throw new Error("Review decisions require a short decision note.");
     }
 
     const now = Date.now();

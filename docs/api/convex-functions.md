@@ -70,8 +70,8 @@ configuration before wider country rollout.
 
 | Function | Kind | Roles | Purpose | Writes |
 | --- | --- | --- | --- | --- |
-| `listReviewQueue` | query | `reviewer`, `curator`, `admin` | List submitted or review-relevant tasks with latest draft evidence. | None |
-| `recordReviewDecision` | mutation | `reviewer`, `curator`, `admin` | Record accept, reject, needs-more-evidence, duplicate, or defer decisions and update task state. Accepted-for-export decisions require an evidence draft from the same task. | `review_decisions`, `tasks`, `evidence_drafts`, `task_events` |
+| `listReviewQueue` | query | `reviewer`, `curator`, `admin` | List review-relevant tasks by status with latest draft evidence and latest review decision. | None |
+| `recordReviewDecision` | mutation | `reviewer`, `curator`, `admin` | Record accept, reject, needs-more-evidence, duplicate, or defer decisions and update task state. Decisions require a short note; accepted-for-export decisions require an evidence draft from the same task. | `review_decisions`, `tasks`, `evidence_drafts`, `task_events` |
 
 The review decision is not a master write. It becomes eligible for export only
 through the export batch workflow.

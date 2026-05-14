@@ -245,6 +245,26 @@
             color: var(--green);
         }
 
+        .review-warning {
+            border: 1px solid #f1c36d;
+            border-radius: 6px;
+            background: var(--amber-soft);
+            color: #5f4200;
+            padding: 9px 10px;
+            margin-top: 10px;
+        }
+
+        .review-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .review-actions button {
+            width: auto;
+        }
+
         .detail-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -363,6 +383,8 @@
                             <option value="needs_review">needs review</option>
                             <option value="changes_requested">changes requested</option>
                             <option value="provisionally_closed">provisionally closed</option>
+                            <option value="reviewed">reviewed</option>
+                            <option value="exported">exported</option>
                         </select>
                     </div>
                     <button id="refreshQueue" class="secondary" type="button">Refresh</button>
@@ -379,8 +401,8 @@
         </section>
     </main>
 
-    <script src="js/convex-config.js"></script>
-    <script src="js/convex-task-client.js"></script>
-    <script src="js/review-portal.js"></script>
+    <script src="js/convex-config.js?v=20260514-review-workflow"></script>
+    <script src="js/convex-task-client.js?v=20260514-review-workflow"></script>
+    <script src="js/review-portal.js?v=20260514-review-workflow"></script>
 </body>
 </html>

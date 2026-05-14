@@ -76,6 +76,32 @@
         return pills.join("");
     }
 
+    function decisionLabel(value) {
+        if (value === "accepted_for_export") return "accepted for export";
+        if (value === "needs_more_evidence") return "needs more evidence";
+        if (value === "duplicate_task") return "duplicate task";
+        return human(value || "");
+    }
+
+    function decisionHint(value) {
+        if (value === "accepted_for_export") {
+            return "This marks the evidence as ready for the export bundle. It still does not update the master or public map until pow validation and rebuild.";
+        }
+        if (value === "needs_more_evidence") {
+            return "This returns the case to the RA's My work panel as needing more evidence or correction.";
+        }
+        if (value === "rejected") {
+            return "Use this for system tests, unsupported claims, wrong-site evidence, or cases that should be excluded from export.";
+        }
+        if (value === "duplicate_task") {
+            return "Use this when the task duplicates another task. Add the related id or explanation in the decision note.";
+        }
+        if (value === "deferred") {
+            return "Use this when the evidence may be useful later but should not enter this export round.";
+        }
+        return "Choose a decision before recording review.";
+    }
+
     function renderFieldGrid(rows) {
         const visibleRows = rows.filter(([, value]) => value !== undefined && value !== null && value !== "");
         if (visibleRows.length === 0) {
@@ -141,6 +167,7 @@
                 target_year_status: status,
                 basis: "source_observation",
             }))
+            .filter((entry) => entry.target_year_status !== "not_assessed")
             .filter((entry) => Number.isFinite(entry.target_year));
     }
 
@@ -225,13 +252,14 @@
             return;
         }
         els.queueList.innerHTML = state.queue
-            .map(({ task, latestDraft }) => `
+            .map(({ task, latestDraft, latestReview }) => `
                 <button class="task-button ${state.selected?.task?.task_id === task.task_id ? "active" : ""}"
                     type="button"
                     data-task-id="${escapeHtml(task.task_id)}">
                     <strong>${escapeHtml(task.name)}</strong>
                     <span class="muted">${escapeHtml(taskSubtitle(task))}</span>
                     <span class="pill-row">${taskPills(task, latestDraft)}</span>
+                    ${latestReview?.decision_status ? `<span class="muted">Last decision: ${escapeHtml(decisionLabel(latestReview.decision_status))}</span>` : ""}
                 </button>
             `)
             .join("");
@@ -265,6 +293,10 @@
         return state.selected?.latestDraft || state.drafts[0] || null;
     }
 
+    function currentReview() {
+        return state.selected?.latestReview || null;
+    }
+
     function renderEmptyDetail(message) {
         els.detailPanel.innerHTML = `<div class="panel empty">${escapeHtml(message)}</div>`;
     }
@@ -278,6 +310,7 @@
 
         const { task } = row;
         const draft = currentDraft();
+        const review = currentReview();
         const coordinates = Array.isArray(task.geometry?.coordinates)
             ? `${task.geometry.coordinates[1]}, ${task.geometry.coordinates[0]}`
             : "";
@@ -289,6 +322,12 @@
                 <div class="pill-row">${taskPills(task, draft)}</div>
                 ${loading ? `<div class="status">Loading evidence and task history...</div>` : ""}
                 ${errorMessage ? `<div class="status error">${escapeHtml(errorMessage)}</div>` : ""}
+                ${review ? `
+                    <div class="status">
+                        Last review decision: <strong>${escapeHtml(decisionLabel(review.decision_status))}</strong>
+                        ${review.decision_note ? `<br>${escapeHtml(review.decision_note)}` : ""}
+                    </div>
+                ` : ""}
             </section>
 
             <div class="detail-grid">
@@ -381,17 +420,55 @@
         `;
         const form = document.getElementById("reviewDecisionForm");
         if (form) {
+            wireDecisionForm(form);
             form.addEventListener("submit", submitDecision);
         }
     }
 
+    function setDecisionFormValues(form, values) {
+        if (values.decisionStatus !== undefined) form.decisionStatus.value = values.decisionStatus;
+        if (values.identityDecision !== undefined) form.identityDecision.value = values.identityDecision;
+        if (values.acceptedAction !== undefined) form.acceptedAction.value = values.acceptedAction;
+        if (values.requiredFollowUp !== undefined) form.requiredFollowUp.value = values.requiredFollowUp;
+        if (values.decisionNote !== undefined) form.decisionNote.value = values.decisionNote;
+        updateDecisionHelp(form);
+    }
+
+    function updateDecisionHelp(form) {
+        const help = document.getElementById("decisionHelp");
+        if (!help) return;
+        help.textContent = decisionHint(form.decisionStatus.value);
+    }
+
+    function wireDecisionForm(form) {
+        form.decisionStatus?.addEventListener("change", () => updateDecisionHelp(form));
+        document.getElementById("markSystemTest")?.addEventListener("click", () => {
+            setDecisionFormValues(form, {
+                decisionStatus: "rejected",
+                identityDecision: "uncertain",
+                acceptedAction: "",
+                requiredFollowUp: "",
+                decisionNote: "JB system test; exclude from export.",
+            });
+        });
+        document.getElementById("requestMoreEvidence")?.addEventListener("click", () => {
+            setDecisionFormValues(form, {
+                decisionStatus: "needs_more_evidence",
+                requiredFollowUp: "Clarify the source, date, site identity, or target-year status.",
+            });
+            form.decisionNote.focus();
+        });
+    }
+
     function decisionForm(task, draft) {
         const defaultAction = draft?.action || "";
+        const canDecide = task.status === "needs_review" || task.status === "changes_requested" || task.status === "provisionally_closed";
         return `
             <form id="reviewDecisionForm" class="decision-form">
                 <div>
                     <label for="decisionStatus">Decision</label>
-                    <select id="decisionStatus" name="decisionStatus" required>
+                    <select id="decisionStatus" name="decisionStatus" required ${canDecide ? "" : "disabled"}>
+                        <option value="">choose decision...</option>
                         <option value="accepted_for_export">accepted for export</option>
                         <option value="needs_more_evidence">needs more evidence</option>
                         <option value="rejected">rejected</option>
@@ -401,7 +478,7 @@
                 </div>
                 <div>
                     <label for="identityDecision">Identity decision</label>
-                    <select id="identityDecision" name="identityDecision">
+                    <select id="identityDecision" name="identityDecision" ${canDecide ? "" : "disabled"}>
                         <option value="">not specified</option>
                         <option value="same_site">same site</option>
                         <option value="new_candidate">new candidate</option>
@@ -414,18 +491,25 @@
                 </div>
                 <div>
                     <label for="acceptedAction">Accepted action</label>
-                    <input id="acceptedAction" name="acceptedAction" value="${escapeHtml(defaultAction)}" placeholder="Usually copied from the draft action">
+                    <input id="acceptedAction" name="acceptedAction" value="${escapeHtml(defaultAction)}" placeholder="Usually copied from the draft action" ${canDecide ? "" : "disabled"}>
                 </div>
                 <div>
                     <label for="requiredFollowUp">Required follow-up</label>
-                    <input id="requiredFollowUp" name="requiredFollowUp" placeholder="Only needed for more evidence">
+                    <input id="requiredFollowUp" name="requiredFollowUp" placeholder="Only needed for more evidence" ${canDecide ? "" : "disabled"}>
                 </div>
                 <div class="wide">
                     <label for="decisionNote">Decision note</label>
-                    <textarea id="decisionNote" name="decisionNote" placeholder="Record why this decision is appropriate. Mention source gaps, identity uncertainty, or any changes needed."></textarea>
+                    <textarea id="decisionNote" name="decisionNote" placeholder="Record why this decision is appropriate. Mention source gaps, identity uncertainty, or any changes needed." ${canDecide ? "" : "disabled"}></textarea>
                 </div>
                 <div class="wide">
-                    <button type="submit" ${state.busy ? "disabled" : ""}>Record review decision</button>
+                    <div id="decisionHelp" class="review-warning">${escapeHtml(canDecide ? decisionHint("") : "This task is already reviewed or exported. Change the queue status to inspect other work, or reopen from the maintainer workflow if new evidence requires action.")}</div>
+                    ${canDecide ? `
+                        <div class="review-actions">
+                            <button type="button" class="secondary" id="markSystemTest">Exclude as system test</button>
+                            <button type="button" class="secondary" id="requestMoreEvidence">Needs more evidence</button>
+                        </div>
+                    ` : ""}
+                    <button type="submit" ${state.busy || !canDecide ? "disabled" : ""}>Record review decision</button>
                     <span id="decisionStatusText" class="muted">${draft ? `Draft: ${escapeHtml(draft.evidence_draft_id)}` : "Accepted-for-export requires an evidence draft."}</span>
                 </div>
                 <input type="hidden" name="taskId" value="${escapeHtml(task.task_id)}">
@@ -440,6 +524,16 @@
         const form = event.currentTarget;
         const statusText = document.getElementById("decisionStatusText");
         const decisionStatus = form.decisionStatus.value;
+        if (!decisionStatus) {
+            statusText.textContent = "Choose a review decision.";
+            statusText.className = "status error";
+            return;
+        }
+        if (form.decisionNote.value.trim().length < 8) {
+            statusText.textContent = "Add a short decision note.";
+            statusText.className = "status error";
+            return;
+        }
         if (decisionStatus === "accepted_for_export" && !draft) {
             statusText.textContent = "Accepted-for-export decisions require an evidence draft.";
             statusText.className = "status error";
