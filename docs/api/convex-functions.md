@@ -41,7 +41,7 @@ and export bundles. Accepted changes become research data only after export,
 | Function | Kind | Roles | Purpose | Writes |
 | --- | --- | --- | --- | --- |
 | `listTasks` | query | `ra`, `reviewer`, `curator`, `admin`, `service` | List tasks by country, batch, status, priority, and limit. | None |
-| `listMyTasks` | query | `ra`, `reviewer`, `curator`, `admin` | List tasks assigned to the current user. | None |
+| `listMyTasks` | query | `ra`, `reviewer`, `curator`, `admin` | List tasks assigned to the current user, with latest draft and review summary for RA history panels. | None |
 | `getTask` | query | `ra`, `reviewer`, `curator`, `admin`, `service` | Return one task and its latest evidence draft. | None |
 | `getTaskEvents` | query | `ra`, `reviewer`, `curator`, `admin`, `service` | Return append-only history for a task. | None |
 | `upsertTasksFromStaticMap` | mutation | `admin`, `service` | Import or refresh a task batch from static map or workpack seed data. | `task_batches`, `tasks`, `task_events` |

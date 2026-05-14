@@ -152,6 +152,10 @@
             return await this.request("query", "tasks:listTasks", args);
         }
 
+        async listMyTasks(args) {
+            return await this.request("query", "tasks:listMyTasks", args);
+        }
+
         async listTaskEvidence(args) {
             return await this.request("query", "evidence:listTaskEvidence", args);
         }

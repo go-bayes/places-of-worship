@@ -202,6 +202,11 @@ Task statuses:
 - `exported`: the reviewed decision was included in an export batch.
 - `reopened`: a reviewer returned the task to active work.
 
+In the RA assignment view, `open`, `in_progress`, `draft_saved`,
+`changes_requested`, and `reopened` are active work. `needs_review`, `skipped`,
+`reviewed`, and `exported` stay visible in `My work` so RAs can see what they
+have already handled without repeating it.
+
 Review decision statuses:
 
 - `accepted_for_export`: reviewer accepts the evidence for export to `pow`.
@@ -418,6 +423,11 @@ Fields:
 - `assessment_confidence`.
 - `match_confidence`.
 - `geocoding_confidence`.
+
+Submitted evidence is read-only for RAs. If an RA needs to correct or extend a
+submission, the UI starts a revision with a new `evidence_draft_id`. The earlier
+submitted draft remains part of the audit trail and is marked `superseded` only
+after the revision is submitted.
 - `lifecycle_event`: optional.
 - `lifecycle_date`: optional partial date string. Country protocols may allow
   early historical dates; the Vanuatu protocol accepts valid dates from 1600
@@ -499,7 +509,8 @@ external side effects such as exports or calls to validation services.
 - `listTasks(filters)`: task list for the map sidebar.
 - `getTask(taskId)`: task details, current status, and latest evidence summary.
 - `getTaskEvents(taskId)`: append-only task history for reviewer context.
-- `listMyTasks(statuses)`: RA or reviewer queue.
+- `listMyTasks(statuses)`: RA history and active-work summary, with latest
+  draft and review information.
 - `listReviewQueue(filters)`: reviewer work queue.
 - `getEvidenceDraft(draftId)`: one evidence draft.
 - `listExportBatches(filters)`: reviewer download history.
@@ -802,8 +813,8 @@ live workbench while the master remains governed by exported events and replay.
   emit draft change-event JSONL?
 - Should task assignment be explicit (`claimTask`) or implicit when an RA opens
   a task?
-- How should we model multiple evidence drafts for the same task: one active
-  draft per user, or many drafts with reviewer choice?
+- Should reviewers need a side-by-side view of superseded evidence drafts, or
+  is latest-submitted-plus-history enough for the pilot?
 - How much duplicate/nearby-site context should be precomputed into tasks
   versus queried from a separate spatial service?
 - Should reviewer export be weekly by schedule, manual only, or scheduled draft

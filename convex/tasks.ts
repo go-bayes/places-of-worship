@@ -76,15 +76,42 @@ export const listTasks = query({
   },
 });
 
+async function latestDraftForTask(ctx: QueryCtx, taskId: string): Promise<Doc<"evidence_drafts"> | null> {
+  const drafts = await ctx.db
+    .query("evidence_drafts")
+    .filter((q) => q.eq(q.field("task_id"), taskId))
+    .order("desc")
+    .take(1);
+  return drafts[0] ?? null;
+}
+
+async function latestReviewDecision(ctx: QueryCtx, taskId: string): Promise<Doc<"review_decisions"> | null> {
+  const decisions = await ctx.db
+    .query("review_decisions")
+    .withIndex("by_task", (q) => q.eq("task_id", taskId))
+    .take(50);
+  return decisions.sort((left, right) => right.created_at - left.created_at)[0] ?? null;
+}
+
 export const listMyTasks = query({
   args: {
     statuses: v.optional(v.array(taskStatus)),
+    countryCode: v.optional(v.string()),
+    batchId: v.optional(v.string()),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const limit = Math.min(Math.max(args.limit ?? 100, 1), 500);
-    const statuses = args.statuses ?? ["in_progress", "draft_saved", "needs_review"];
+    const statuses = args.statuses ?? [
+      "in_progress",
+      "draft_saved",
+      "needs_review",
+      "changes_requested",
+      "skipped",
+      "reviewed",
+      "exported",
+    ];
     const results: Doc<"tasks">[] = [];
     for (const status of statuses) {
       const tasks = await ctx.db
@@ -93,7 +120,21 @@ export const listMyTasks = query({
         .take(limit);
       results.push(...tasks);
     }
-    return results.slice(0, limit);
+    const filtered = results
+      .filter((task) => args.countryCode === undefined || task.country_code === args.countryCode)
+      .filter((task) => args.batchId === undefined || task.batch_id === args.batchId)
+      .sort((left, right) => (right.last_event_at ?? right.updated_at) - (left.last_event_at ?? left.updated_at))
+      .slice(0, limit);
+
+    const rows = [];
+    for (const task of filtered) {
+      rows.push({
+        task,
+        latestDraft: await latestDraftForTask(ctx, task.task_id),
+        latestReview: await latestReviewDecision(ctx, task.task_id),
+      });
+    }
+    return rows;
   },
 });
 

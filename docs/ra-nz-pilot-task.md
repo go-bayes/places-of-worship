@@ -93,6 +93,12 @@ The web form will let you save an incomplete draft, but it will not submit a
 case for review with `NA` or `N/A` as the source title. Add the actual source
 name, or save a draft until you have it.
 
+Use the `My work` panel to check what you have already saved, submitted,
+skipped, or had reviewed. Submitted work stays there so you do not repeat a
+case. If new evidence changes your answer, use `Revise submission`; the map
+will create a new evidence version rather than rewriting the earlier
+submission.
+
 Use date formats exactly: `YYYY`, `YYYY-MM`, or `YYYY-MM-DD`. For example,
 `2018`, `2018-09`, or `2018-09-01`. If a date is unknown, leave the date cell
 blank and explain the uncertainty in the evidence note.

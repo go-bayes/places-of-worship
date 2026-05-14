@@ -15,6 +15,9 @@ The live reference today is `apps/regions/nz/verification.html` and
 - Use `Save draft` when the RA is still gathering evidence.
 - Use `Submit for review` when the RA wants JB or a reviewer to inspect the
   evidence.
+- Use `Revise submission` only after a submitted case needs correction or new
+  evidence. Revisions must create a new evidence version instead of silently
+  rewriting the submitted one.
 - Use `No building present` when imagery or another source indicates the mapped
   building is gone or no building is visible at that location. Store this as
   `existence_status = absent` and `worship_use_status = not_worship` for

@@ -47,6 +47,18 @@ function draftStatusForDecision(
   return "submitted";
 }
 
+async function latestDraftForReview(ctx: any, taskId: string): Promise<Doc<"evidence_drafts"> | null> {
+  const drafts = await ctx.db
+    .query("evidence_drafts")
+    .filter((q: any) => q.eq(q.field("task_id"), taskId))
+    .order("desc")
+    .take(50);
+  return drafts.find((draft: Doc<"evidence_drafts">) => draft.draft_status === "submitted")
+    ?? drafts.find((draft: Doc<"evidence_drafts">) => draft.draft_status === "accepted_for_export")
+    ?? drafts[0]
+    ?? null;
+}
+
 export const listReviewQueue = query({
   args: {
     countryCode: v.optional(v.string()),
@@ -73,11 +85,7 @@ export const listReviewQueue = query({
 
     const rows = [];
     for (const task of tasks) {
-      const latestDraft = await ctx.db
-        .query("evidence_drafts")
-        .filter((q) => q.eq(q.field("task_id"), task.task_id))
-        .order("desc")
-        .first();
+      const latestDraft = await latestDraftForReview(ctx, task.task_id);
       rows.push({ task, latestDraft });
     }
     return rows;

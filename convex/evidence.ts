@@ -59,6 +59,10 @@ export const listTaskEvidence = query({
   },
 });
 
+function canReviewEvidence(user: Doc<"users">): boolean {
+  return user.roles.includes("reviewer") || user.roles.includes("curator") || user.roles.includes("admin");
+}
+
 export const saveEvidenceDraft = mutation({
   args: {
     taskId: v.string(),
@@ -91,8 +95,15 @@ export const saveEvidenceDraft = mutation({
         ...args.draft,
       });
     } else {
-      if (existing.created_by !== user._id && !user.roles.includes("reviewer") && !user.roles.includes("curator") && !user.roles.includes("admin")) {
+      if (existing.created_by !== user._id && !canReviewEvidence(user)) {
         throw new Error("Evidence draft belongs to another user.");
+      }
+      if (
+        existing.created_by === user._id
+        && !canReviewEvidence(user)
+        && ["submitted", "accepted_for_export", "rejected"].includes(existing.draft_status)
+      ) {
+        throw new Error("Submitted evidence cannot be edited directly. Start a revision instead.");
       }
       await ctx.db.patch(existing._id, {
         ...args.draft,
@@ -144,6 +155,22 @@ export const submitEvidenceDraft = mutation({
       draft_status: "submitted",
       updated_at: now,
     });
+    const otherDrafts = await ctx.db
+      .query("evidence_drafts")
+      .filter((q) => q.eq(q.field("task_id"), draft.task_id))
+      .take(100);
+    for (const otherDraft of otherDrafts) {
+      if (
+        otherDraft._id !== draft._id
+        && otherDraft.created_by === draft.created_by
+        && otherDraft.draft_status === "submitted"
+      ) {
+        await ctx.db.patch(otherDraft._id, {
+          draft_status: "superseded",
+          updated_at: now,
+        });
+      }
+    }
     await ctx.db.patch(task._id, {
       status: "needs_review",
       updated_at: now,

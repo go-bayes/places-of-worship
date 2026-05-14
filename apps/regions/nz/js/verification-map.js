@@ -74,6 +74,18 @@ const COUNTRY_SESSION_LOG_KEY = `pow_ra_session_v1:${COUNTRY_CONFIG.countryCode.
 const SESSION_LOG_KEY_PREFIX = `${COUNTRY_SESSION_LOG_KEY}${ASSIGNMENT_SESSION_SEGMENT}:`;
 const RA_INITIALS_KEY = `pow_ra_initials:${COUNTRY_CONFIG.countryCode.toLowerCase()}`;
 const SESSION_RECENT_LIMIT = 25;
+const ACTIVE_ASSIGNMENT_STATUSES = new Set(["open", "in_progress", "draft_saved", "changes_requested", "reopened"]);
+const MY_WORK_STATUSES = [
+    "in_progress",
+    "draft_saved",
+    "needs_review",
+    "changes_requested",
+    "skipped",
+    "reviewed",
+    "exported",
+];
+const REVISION_ELIGIBLE_STATUSES = new Set(["needs_review", "changes_requested"]);
+const READ_ONLY_ASSIGNMENT_STATUSES = new Set(["needs_review", "changes_requested", "skipped", "reviewed", "exported"]);
 const WIDE_EVIDENCE_FIELDS = [
     "evidence_row_id", "collection_batch", "country_code", "area_hint",
     "source_dataset_id", "source_type", "provider", "source_title",
@@ -801,6 +813,8 @@ class NzVerificationMap {
         this.backendUser = null;
         this.backendTasksById = new Map();
         this.latestDraftsByTaskId = new Map();
+        this.myWorkItems = [];
+        this.revisionDraftIdsByTaskId = new Map();
         this.backendLastError = "";
         this.init();
     }
@@ -1003,11 +1017,14 @@ class NzVerificationMap {
         }
 
         const label = this.backendUser.initials || this.backendUser.email || "signed in";
+        const assignmentStatusText = ASSIGNMENT_MODE
+            ? `${this.tasks.length} available task${this.tasks.length === 1 ? "" : "s"}; ${this.myWorkItems.length} item${this.myWorkItems.length === 1 ? "" : "s"} in My work.`
+            : "Saves and submissions go to Convex for reviewer follow-up.";
         panel.innerHTML = `
             <div class="backend-card signed-in">
                 <strong>${ASSIGNMENT_MODE ? "Signed in. Choose a task below." : "Shared task backend"}</strong>
                 ${assignmentLabel}
-                <span>Signed in as ${escapeHtml(label)}. ${ASSIGNMENT_MODE ? `${this.backendTasksById.size} assigned task${this.backendTasksById.size === 1 ? "" : "s"} loaded.` : "Saves and submissions go to Convex for reviewer follow-up."}</span>
+                <span>Signed in as ${escapeHtml(label)}. ${escapeHtml(assignmentStatusText)}</span>
                 <div class="backend-actions">
                     <button type="button" class="secondary" id="refreshBackendTasksButton">Refresh task list</button>
                     <button type="button" class="tertiary" id="signOutButton">Sign out</button>
@@ -1029,6 +1046,8 @@ class NzVerificationMap {
         this.backendUser = null;
         this.backendTasksById.clear();
         this.latestDraftsByTaskId.clear();
+        this.myWorkItems = [];
+        this.revisionDraftIdsByTaskId.clear();
         this.backendLastError = "Signed out here. On a shared computer, also sign out of Google in the browser.";
         if (ASSIGNMENT_MODE) {
             this.tasks = [];
@@ -1064,6 +1083,10 @@ class NzVerificationMap {
     renderSessionPanel() {
         const panel = document.getElementById("sessionPanel");
         if (!panel) return;
+        if (ASSIGNMENT_MODE) {
+            this.renderMyWorkPanel(panel);
+            return;
+        }
         if (!DEMO_MODE || ASSIGNMENT_MODE) {
             panel.innerHTML = "";
             return;
@@ -1102,6 +1125,70 @@ class NzVerificationMap {
         panel.querySelectorAll(".session-open").forEach(btn => {
             btn.addEventListener("click", () => this.selectTaskById(btn.dataset.taskId));
         });
+    }
+
+    renderMyWorkPanel(panel) {
+        if (!this.backend?.configured || !this.backendUser) {
+            panel.innerHTML = "";
+            return;
+        }
+        const items = this.myWorkItems || [];
+        const total = items.length;
+        const revisionDrafts = items.filter(item => item.task?.status === "needs_review" && item.latestDraft?.draft_status === "draft").length;
+        const submitted = items.filter(item => item.task?.status === "needs_review").length - revisionDrafts;
+        const drafts = items.filter(item => item.task?.status === "draft_saved").length + revisionDrafts;
+        const needsMore = items.filter(item => item.task?.status === "changes_requested").length;
+        const skipped = items.filter(item => item.task?.status === "skipped").length;
+        const reviewed = items.filter(item => item.task?.status === "reviewed" || item.task?.status === "exported").length;
+        panel.innerHTML = `
+            <details ${total > 0 ? "open" : ""}>
+                <summary>My work
+                    <span class="ra-initials">${escapeHtml(`${total} item${total === 1 ? "" : "s"}: ${drafts} draft, ${submitted} submitted, ${needsMore} needs more evidence, ${skipped} skipped, ${reviewed} reviewed`)}</span>
+                </summary>
+                ${total === 0 ? `
+                    <div class="session-empty">No saved, submitted, skipped, or reviewed tasks yet.</div>
+                ` : `
+                    <div class="session-entries" role="list">
+                        ${items.slice(0, SESSION_RECENT_LIMIT).map(item => this.myWorkEntryHtml(item)).join("")}
+                    </div>
+                    <div class="session-empty">Submitted and reviewed work stays here so you do not repeat it. Revise only when you have new evidence or need to correct a mistake.</div>
+                `}
+            </details>
+        `;
+        panel.querySelectorAll(".my-work-open").forEach(btn => {
+            btn.addEventListener("click", () => this.selectTaskById(btn.dataset.taskId, { focusDetail: true }));
+        });
+    }
+
+    myWorkEntryHtml(item) {
+        const task = item.task || {};
+        const draft = item.latestDraft || {};
+        const review = item.latestReview || {};
+        const status = task.status || "unknown";
+        const label = status === "needs_review" && draft.draft_status === "draft"
+            ? "revision draft saved"
+            : status === "needs_review"
+            ? "submitted, waiting for review"
+            : status === "changes_requested"
+                ? "needs more evidence"
+                : status.replaceAll("_", " ");
+        const reviewNote = review.decision_note
+            ? `<div class="entry-meta">Review note: ${escapeHtml(review.decision_note)}</div>`
+            : "";
+        const draftAction = draft.action
+            ? `<div class="entry-meta">Finding: ${escapeHtml(actionLabelForRa(draft.action))}${draft.source_title ? ` · ${escapeHtml(draft.source_title)}` : ""}</div>`
+            : "";
+        return `
+            <div class="session-entry" role="listitem">
+                <span class="entry-title">${escapeHtml(task.name || "Unnamed site")}</span>
+                <span class="entry-meta">${escapeHtml(label)} · ${escapeHtml(task.task_id || "")}</span>
+                ${draftAction}
+                ${reviewNote}
+                <div class="entry-actions">
+                    <button type="button" class="tertiary my-work-open" data-task-id="${escapeHtml(task.task_id || "")}">View</button>
+                </div>
+            </div>
+        `;
     }
 
     sessionEntryHtml(entry, displayIndex) {
@@ -1318,28 +1405,48 @@ class NzVerificationMap {
                 query.batchId = ASSIGNMENT_BATCH_ID;
             }
             const tasks = await this.backend.listTasks(query);
-            this.backendTasksById = new Map((tasks || []).map(task => [task.task_id, task]));
+            const allTasks = tasks || [];
+            this.backendTasksById = new Map(allTasks.map(task => [task.task_id, task]));
+            this.myWorkItems = ASSIGNMENT_MODE
+                ? await this.backend.listMyTasks({
+                    countryCode: COUNTRY_CONFIG.countryCode,
+                    batchId: ASSIGNMENT_BATCH_ID,
+                    statuses: MY_WORK_STATUSES,
+                    limit: 200,
+                })
+                : [];
             if (ASSIGNMENT_MODE) {
-                this.tasks = (tasks || []).map(featureFromBackendTask);
+                this.tasks = allTasks
+                    .filter(task => this.assignmentTaskIsAvailable(task))
+                    .map(featureFromBackendTask);
                 const snapshotEl = document.getElementById("snapshotId");
                 if (snapshotEl) {
-                    snapshotEl.textContent = `${ASSIGNMENT_BATCH_ID} | ${this.tasks.length} assigned task${this.tasks.length === 1 ? "" : "s"}`;
+                    const total = allTasks.length;
+                    snapshotEl.textContent = `${ASSIGNMENT_BATCH_ID} | ${this.tasks.length} available of ${total}`;
                 }
                 const selectedId = this.selectedTask?.properties?.task_id;
                 if (selectedId && !this.backendTasksById.has(selectedId)) {
                     this.selectedTask = null;
                     this.renderInitialDetail();
                 } else if (selectedId) {
-                    this.selectedTask = this.tasks.find(feature => feature.properties?.task_id === selectedId)
-                        || this.selectedTask;
+                    this.selectedTask = this.featureForTaskId(selectedId) || this.selectedTask;
                 }
             }
             this.backendLastError = "";
             this.renderBackendPanel();
+            this.renderSessionPanel();
         } catch (error) {
             this.backendLastError = error.message || "Could not refresh shared task state.";
             this.renderBackendPanel();
         }
+    }
+
+    assignmentTaskIsAvailable(task) {
+        const status = task?.status || "";
+        if (!ACTIVE_ASSIGNMENT_STATUSES.has(status)) return false;
+        const assignedTo = task.assigned_to || "";
+        if (!assignedTo) return true;
+        return assignedTo === this.backendUser?._id;
     }
 
     applyFilters() {
@@ -1506,8 +1613,15 @@ class NzVerificationMap {
         document.getElementById("lifecycleNeededCount").textContent = missingLifecycle.toLocaleString();
     }
 
+    featureForTaskId(taskId) {
+        const activeFeature = this.tasks.find(feature => feature.properties?.task_id === taskId);
+        if (activeFeature) return activeFeature;
+        const backendTask = this.backendTasksById.get(taskId);
+        return backendTask ? featureFromBackendTask(backendTask) : null;
+    }
+
     selectTaskById(taskId, options = {}) {
-        const task = this.tasks.find(feature => feature.properties?.task_id === taskId);
+        const task = this.featureForTaskId(taskId);
         if (task) {
             this.selectTask(task, false, options);
         }
@@ -1550,6 +1664,15 @@ class NzVerificationMap {
             const drafts = await this.backend.listTaskEvidence({ taskId, limit: 1 });
             const latestDraft = Array.isArray(drafts) && drafts.length ? drafts[0] : null;
             this.latestDraftsByTaskId.set(taskId, latestDraft);
+            const backendTask = this.backendTasksById.get(taskId);
+            if (
+                latestDraft?.draft_status === "draft"
+                && backendTask
+                && REVISION_ELIGIBLE_STATUSES.has(backendTask.status)
+                && latestDraft.evidence_draft_id
+            ) {
+                this.revisionDraftIdsByTaskId.set(taskId, latestDraft.evidence_draft_id);
+            }
             return latestDraft;
         } catch (error) {
             if (error.authExpired) {
@@ -1630,9 +1753,41 @@ class NzVerificationMap {
         firstInput?.focus({ preventScroll: true });
     }
 
+    backendTaskForProps(props) {
+        return props?.task_id ? this.backendTasksById.get(props.task_id) : null;
+    }
+
+    taskCanRevise(taskId) {
+        const backendTask = this.backendTasksById.get(taskId);
+        return Boolean(backendTask && REVISION_ELIGIBLE_STATUSES.has(backendTask.status));
+    }
+
+    taskIsRevisionMode(taskId) {
+        return this.revisionDraftIdsByTaskId.has(taskId);
+    }
+
+    taskIsReadOnly(taskId) {
+        const backendTask = this.backendTasksById.get(taskId);
+        if (!ASSIGNMENT_MODE || !backendTask) return false;
+        return READ_ONLY_ASSIGNMENT_STATUSES.has(backendTask.status) && !this.taskIsRevisionMode(taskId);
+    }
+
+    startSubmissionRevision(props) {
+        const taskId = props?.task_id || "";
+        if (!taskId || !this.taskCanRevise(taskId)) return;
+        if (!this.revisionDraftIdsByTaskId.has(taskId)) {
+            this.revisionDraftIdsByTaskId.set(taskId, `${taskId}:${this.backendUser?._id || "user"}:revision:${Date.now()}`);
+        }
+        this.renderDetail(this.featureForTaskId(taskId) || this.selectedTask);
+        const status = document.getElementById("copyStatus");
+        if (status) {
+            status.textContent = "Revision started. Save a revision draft while working, then submit the revision for review when ready.";
+        }
+    }
+
     backendStatusHtml(props) {
         if (!this.backend?.configured) return "";
-        const backendTask = this.backendTasksById.get(props.task_id);
+        const backendTask = this.backendTaskForProps(props);
         if (!this.backendUser) {
             return `
                 <div class="pilot-note">
@@ -1647,9 +1802,12 @@ class NzVerificationMap {
                 </div>
             `;
         }
+        const revisionText = this.taskIsRevisionMode(props.task_id)
+            ? " Revision mode is active; saving creates a new evidence version."
+            : "";
         return `
             <div class="pilot-note">
-                Shared backend status: <strong>${escapeHtml(backendTask.status.replaceAll("_", " "))}</strong>.
+                Shared backend status: <strong>${escapeHtml(backendTask.status.replaceAll("_", " "))}</strong>.${escapeHtml(revisionText)}
             </div>
         `;
     }
@@ -1869,7 +2027,39 @@ class NzVerificationMap {
 
     formModeNoticeHtml(props) {
         const draft = props?.task_id ? this.latestDraftForTask(props.task_id) : null;
+        const backendTask = this.backendTaskForProps(props);
+        const status = backendTask?.status || "";
+        const readOnly = props?.task_id ? this.taskIsReadOnly(props.task_id) : false;
+        const revisionMode = props?.task_id ? this.taskIsRevisionMode(props.task_id) : false;
         if (this.backend?.configured && this.backendUser) {
+            if (revisionMode) {
+                return `
+                    <div class="pilot-note">
+                        Revision mode is active. Saving now creates a new draft version; submitting sends the revised evidence back to review.
+                    </div>
+                `;
+            }
+            if (readOnly && status === "needs_review") {
+                return `
+                    <div class="pilot-note">
+                        This submission is waiting for review. View it here, or use <strong>Revise submission</strong> if you have new evidence or need to correct a mistake.
+                    </div>
+                `;
+            }
+            if (readOnly && status === "changes_requested") {
+                return `
+                    <div class="pilot-note">
+                        A reviewer asked for more evidence. Use <strong>Revise submission</strong> to respond with a new evidence version.
+                    </div>
+                `;
+            }
+            if (readOnly) {
+                return `
+                    <div class="pilot-note">
+                        This task is closed for now. You can view the saved evidence, but it should not be changed unless JB reopens it.
+                    </div>
+                `;
+            }
             return `
                 <div class="pilot-note">
                     Shared backend enabled. Use <strong>Save draft</strong> or <strong>Submit for review</strong> to record this evidence for review.
@@ -1912,8 +2102,12 @@ class NzVerificationMap {
                 </div>
             `;
         }
+        const backendTask = this.backendTaskForProps(props);
+        const readOnly = taskId ? this.taskIsReadOnly(taskId) : false;
+        const revisionMode = taskId ? this.taskIsRevisionMode(taskId) : false;
+        const canRevise = taskId ? this.taskCanRevise(taskId) : false;
         const skipControl = ASSIGNMENT_MODE
-            ? (assignmentTaskAvailable ? `
+            ? (assignmentTaskAvailable && !readOnly && !revisionMode ? `
                 <details class="skip-form">
                     <summary>Nothing to record for this task — skip it</summary>
                     <label>
@@ -2052,12 +2246,28 @@ class NzVerificationMap {
                 <h3>4. Save or submit</h3>
                 ${this.backend?.configured && this.backendUser ? `
                     <div class="copy-help">
-                        Save the evidence to the shared backend. Submitted cases move into JB's review queue.
+                        ${readOnly
+                            ? "This saved work is visible for reference. Revisions create a new evidence version; they do not rewrite the submitted record."
+                            : revisionMode
+                                ? "Save a revision draft while working. Submit the revision when the corrected or extended evidence is ready for review."
+                                : "Save the evidence to the shared backend. Submitted cases move into JB's review queue."}
                     </div>
-                    <div class="button-row">
-                        <button id="saveDraftButton" type="button">Save draft</button>
-                        <button id="submitReviewButton" type="button">Submit for review</button>
-                    </div>
+                    ${readOnly ? `
+                        ${canRevise ? `
+                            <div class="button-row">
+                                <button id="reviseSubmissionButton" type="button">Revise submission</button>
+                            </div>
+                        ` : `
+                            <div class="disabled-panel">
+                                Status: ${escapeHtml((backendTask?.status || "closed").replaceAll("_", " "))}. Ask JB to reopen this task if new evidence changes the answer.
+                            </div>
+                        `}
+                    ` : `
+                        <div class="button-row">
+                            <button id="saveDraftButton" type="button">${revisionMode ? "Save revision draft" : "Save draft"}</button>
+                            <button id="submitReviewButton" type="button">${revisionMode ? "Submit revision for review" : "Submit for review"}</button>
+                        </div>
+                    `}
                 ` : ASSIGNMENT_MODE ? `
                     <div class="demo-warning" role="alert">
                         Sign in with Google at the top of this panel before recording this assignment.
@@ -2212,12 +2422,27 @@ class NzVerificationMap {
         document.getElementById("copyDecisionButton")?.addEventListener("click", () => this.copyDecision(props));
         document.getElementById("saveDraftButton")?.addEventListener("click", () => this.saveEvidenceToBackend(props, { submit: false }));
         document.getElementById("submitReviewButton")?.addEventListener("click", () => this.saveEvidenceToBackend(props, { submit: true }));
+        document.getElementById("reviseSubmissionButton")?.addEventListener("click", () => this.startSubmissionRevision(props));
         document.getElementById("skipTaskButton")?.addEventListener("click", () => {
             const reason = (document.getElementById("skipReasonInput")?.value || "").trim();
             this.skipCurrentTask(props, reason);
         });
 
+        if (this.taskIsReadOnly(props.task_id)) {
+            this.setReviewFormReadOnly();
+        }
         this.updateWorkflowSteps();
+    }
+
+    setReviewFormReadOnly() {
+        document.querySelectorAll(".review-form select, .review-form input, .review-form textarea").forEach(element => {
+            element.disabled = true;
+        });
+        document.querySelectorAll(".review-form button").forEach(element => {
+            if (element.id !== "reviseSubmissionButton") {
+                element.disabled = true;
+            }
+        });
     }
 
     applyDraftToForm(draft) {
@@ -2545,10 +2770,12 @@ class NzVerificationMap {
 
         const row = this.buildWideEvidenceRow(props);
         const draft = this.buildEvidenceDraft(props, row);
+        const revisionDraftId = this.revisionDraftIdsByTaskId.get(props.task_id);
         try {
             if (status) status.textContent = options.submit ? "Saving and submitting..." : "Saving draft...";
             const saved = await this.backend.saveEvidenceDraft({
                 taskId: props.task_id,
+                evidenceDraftId: revisionDraftId || undefined,
                 draft,
                 clientContext: {
                     source: "static_verification_map",
@@ -2570,9 +2797,12 @@ class NzVerificationMap {
                 evidence_draft_id: saved.evidence_draft_id,
                 draft_status: options.submit ? "submitted" : "draft",
             });
+            if (options.submit && revisionDraftId) {
+                this.revisionDraftIdsByTaskId.delete(props.task_id);
+            }
             await this.refreshBackendTasks();
             if (ASSIGNMENT_MODE) {
-                const refreshed = this.tasks.find(feature => feature.properties?.task_id === props.task_id);
+                const refreshed = this.featureForTaskId(props.task_id);
                 if (refreshed) this.selectedTask = refreshed;
             }
             this.applyFilters();

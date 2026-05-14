@@ -4,6 +4,14 @@
 
 ### 2026-05-14
 
+- Added an assignment-mode `My work` panel so RAs can see saved drafts,
+  submitted cases, skipped tasks, and review outcomes without repeating work.
+- Added a deliberate `Revise submission` path: submitted evidence is read-only
+  by default, revisions create a new draft id, and older submitted drafts are
+  marked `superseded` after the revision is submitted.
+- Changed the assigned task list to show active work only, so submitted or
+  skipped tasks leave the main queue after refresh and remain visible in
+  `My work`.
 - Added a visible `No building present` option to the worship-use dropdown and
   normalised it to `existence_status = absent` plus
   `worship_use_status = not_worship` for exported evidence.
