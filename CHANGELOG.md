@@ -23,6 +23,9 @@
 - Updated `BRAINSTORMING.md` so Convex is described as the chosen live pilot
   coordination layer, while Leptos/Rust-first UI remains a deferred comparison
   after the React + Vite review workbench.
+- Updated the dataflow figures and review planning so assigned tasks and
+  `Nominate missing PoW` candidates both flow through Convex, an authenticated
+  review portal, a reviewed export bundle, and `pow` before public outputs.
 - Recorded the Convex/live-workbench decision and added the first
   Convex-to-`pow` export bridge: `exports:getExportBundle` now exposes a file
   bundle, and `scripts/materialise_convex_export.py` writes ignored export

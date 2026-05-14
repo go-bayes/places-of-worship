@@ -52,7 +52,13 @@ flowchart TD
   OSM2["Annual OSM history<br/>2013-2025 snapshots"] --> Temporal["scripts/build_nz_osm_temporal_candidates.R"]
   Temporal --> TempFiles["data/intermediate/nz_osm_temporal/<br/>temporary working files<br/>not committed and not durable"]
   TempFiles --> Promote["Next required action:<br/>copy to project-owned storage,<br/>hash files, commit a file record"]
-  Promote --> FutureTasks["Curated places to check<br/>for RA task map/list"]
+  Promote --> Workpacks["Curated places to check<br/>for assigned workpacks"]
+  Workpacks --> Convex["Convex shared task list<br/>assignments, status,<br/>evidence drafts"]
+  Nominate["Nominate missing PoW<br/>provisional candidate task<br/>not a map write"] --> Convex
+  Convex --> Review["Authenticated review portal<br/>accept, reject, defer,<br/>request more evidence"]
+  Review --> Bundle["Frozen reviewed export bundle<br/>manifest, CSV/JSONL,<br/>review decisions"]
+  Bundle --> Pow["pow validation, staging,<br/>proposal, diff, replay"]
+  Pow --> Outputs["Reviewed map and research outputs"]
 ```
 
 ### Current Data Inventory
@@ -91,7 +97,7 @@ flowchart TD
   G -->|yes| H["Promote before use<br/>project-owned storage,<br/>SHA-256 hashes,<br/>row/feature counts,<br/>tracked file record"]
   G -->|no| I["Leave as disposable<br/>temporary working files"]
   F -->|no| J{"Is it RA or collaborator evidence?"}
-  J -->|yes| K["Project Google Drive now<br/>Convex task map/list for shared status<br/>reviewer download to pow later"]
+  J -->|yes| K["Project Google Drive for files<br/>Convex shared task list for status<br/>review portal decisions<br/>export bundle to pow"]
   J -->|no| L["Decide owner and storage<br/>before relying on it"]
 ```
 
@@ -190,7 +196,7 @@ tables:
 ```mermaid
 flowchart TD
   A["New data or service need"] --> B{"Do several people need to see<br/>the same task status?"}
-  B -->|yes| C["Convex pilot<br/>shared online task map/list,<br/>draft rows, review notes,<br/>reviewer downloads to pow"]
+  B -->|yes| C["Convex pilot<br/>shared online task map/list,<br/>evidence drafts, nominated candidates,<br/>review portal decisions,<br/>export bundle to pow"]
   B -->|no| D{"Is this a file we may use again?"}
   D -->|small file people inspect or edit| E["Project Google Drive<br/>stable file IDs, original uploads,<br/>export native files before hashing"]
   D -->|large file or rebuild input| F["Google Cloud Storage<br/>private bucket, stable cloud path,<br/>checksums, file record, access roles"]
@@ -204,7 +210,8 @@ Provider actions should follow the smallest durable choice that protects the
 data:
 
 - Use Convex for live task coordination when more than one person needs shared
-  task status, assignment, provisional closure, or review comments.
+  task status, assignment, provisional closure, candidate nomination, evidence
+  drafts, review decisions, or reviewer export bundles.
 - Use project Google Drive for near-term working evidence when collaborators
   need familiar access and files are still being inspected or cleaned.
 - Use Google Cloud Storage when the data are immutable, large, needed for

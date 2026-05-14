@@ -40,6 +40,21 @@ RA opens task
   -> pow validates, diffs, and feeds reviewed rebuilds
 ```
 
+The target dataflow for the review-layer prototype is:
+
+```mermaid
+flowchart LR
+  A["Assigned workpack task"] --> T["Convex shared task list"]
+  N["Nominate missing PoW<br/>provisional candidate task"] --> T
+  T --> E["Evidence draft<br/>source, target-year states,<br/>lifecycle claims"]
+  E --> Q["Authenticated review portal<br/>review queue and task history"]
+  Q --> D["Review decision<br/>accept, reject, defer,<br/>request revision or more evidence"]
+  D --> T
+  D --> B["Frozen export bundle<br/>manifest, CSV/JSONL,<br/>review decisions"]
+  B --> P["pow validation, staging,<br/>proposal, diff, replay"]
+  P --> M["Accepted events and rebuilt outputs"]
+```
+
 Convex should solve coordination, shared task status, draft evidence capture,
 reviewer queues, and export readiness. It should not become the master
 database.

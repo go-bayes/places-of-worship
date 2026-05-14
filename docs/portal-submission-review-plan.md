@@ -13,6 +13,38 @@ boundary. The review tool should show what was submitted, what the master
 currently says, what evidence is available, which automated checks ran, and what
 change would result if accepted.
 
+## Current V1 Direction
+
+The first review surface should be a small authenticated React + Vite + Convex
+React workbench. It should review evidence already saved in Convex by the New
+Zealand assignment page, then freeze accepted decisions into an export bundle
+for `pow`.
+
+```mermaid
+flowchart LR
+  A["Assigned task or<br/>Nominate missing PoW"] --> B["Convex shared task list"]
+  B --> C["Evidence draft<br/>source, target years,<br/>lifecycle claims"]
+  C --> D["Authenticated review portal"]
+  D --> E["Review decision<br/>accept, reject, defer,<br/>needs more evidence,<br/>duplicate/link"]
+  E --> B
+  E --> F["Export bundle<br/>manifest, CSV/JSONL,<br/>review decisions"]
+  F --> G["pow validate, stage,<br/>propose, diff"]
+  G --> H["Accepted events and<br/>rebuilt public/research outputs"]
+```
+
+For v1, keep the decision vocabulary narrow and aligned with the current
+Convex schema:
+
+- `accepted_for_export`,
+- `rejected`,
+- `needs_more_evidence`,
+- `duplicate_task`,
+- `deferred`.
+
+The portal should not write to the master, publish public map changes, or
+create a second review database. It reads and writes Convex task/review state,
+then relies on the export bundle and `pow` for governed data changes.
+
 ## Review Queue
 
 The first queue should support:
@@ -28,13 +60,14 @@ The first queue should support:
 
 Default review decisions:
 
-- accept
+- accept for export
 - reject
-- request more information
+- request more evidence
+- mark duplicate or link to an existing site
 - defer
-- retract
-- supersede
-- route to adjudication
+
+Later versions may add retract, supersede, and adjudication routing once the
+first reviewed export round trip works.
 
 ## States
 
