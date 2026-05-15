@@ -5,8 +5,7 @@ change across space and time.
 
 The long-term aim is a reproducible research portal that can track opening,
 closure, persistence, relocation, shared use, and repurposing at the level of
-the place itself. The public map is an active prototype, not a finished
-reference product.
+the place itself. The public map is an active prototype (i.e. not yet fully polished).
 
 ## Links
 
@@ -23,10 +22,10 @@ reference product.
 
 ## Current Work
 
-New Zealand is the proof-of-concept country for temporal validation. The pilot
+New Zealand serves as a proof-of-concept for temporal validation. The pilot
 now uses a Convex-backed task map that can save evidence drafts, provisional
-task status, and reviewer queues directly. Spreadsheet export remains a
-fallback and audit aid.
+task status, and reviewer queues directly.
+
 The evidence workflow collects source-backed information about:
 
 - places of worship present or absent in 2013, 2018, and 2023,
