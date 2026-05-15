@@ -2214,6 +2214,24 @@ class NzVerificationMap {
                     Source date or imagery capture date
                     <input id="sourceDateInput" type="text" placeholder="e.g. 2018-09, 2023, or 2026-05-03 for a field visit">
                 </label>
+                <h3>Address or locality</h3>
+                <div class="copy-help">
+                    Use these fields when the task says the street address is missing or a source gives a better address than the map record. Leave them blank if your evidence is about worship use only.
+                </div>
+                <div class="field-grid">
+                    <label>
+                        Street address found
+                        <input id="addressRawInput" type="text" placeholder="${escapeHtml(props.address || "e.g. 12 Example Street")}">
+                    </label>
+                    <label>
+                        Locality found
+                        <input id="localityRawInput" type="text" placeholder="${escapeHtml(props.locality || "suburb, town, or city")}">
+                    </label>
+                </div>
+                <label>
+                    Address note
+                    <input id="addressNoteInput" type="text" placeholder="e.g. source gives street address; map point remains approximate">
+                </label>
                 <h3>Optional opening, closure, or later change</h3>
                 <div class="copy-help">
                     Use this when the source gives a dated opening, closure, first/last seen, relocation, demolition, or later worship-function change. For example, use <em>Use changed / shared use began</em> for evidence that a site became multi-denominational in 2024.
@@ -2400,6 +2418,9 @@ class NzVerificationMap {
             "sourceUrlInput",
             "sourceTitleInput",
             "sourceDateInput",
+            "addressRawInput",
+            "localityRawInput",
+            "addressNoteInput",
             "lifecycleEventSelect",
             "lifecycleDateInput",
             "lifecycleDatePrecisionSelect",
@@ -2489,6 +2510,9 @@ class NzVerificationMap {
         setValue("sourceProviderInput", draft.provider, false);
         setValue("sourceTitleInput", draft.source_title, false);
         setValue("sourceDateInput", draft.source_date_or_capture_date, false);
+        setValue("addressRawInput", draft.address_raw, false);
+        setValue("localityRawInput", draft.locality_raw, false);
+        setValue("addressNoteInput", draft.address_change_note, false);
         setValue("lifecycleEventSelect", draft.lifecycle_event);
         setValue("lifecycleDateInput", draft.lifecycle_date, false);
         setValue("lifecycleDatePrecisionSelect", draft.lifecycle_date_precision);
@@ -2560,6 +2584,9 @@ class NzVerificationMap {
             sourceProvider: document.getElementById("sourceProviderInput")?.value || "",
             sourceTitle: document.getElementById("sourceTitleInput")?.value || "",
             sourceDate: document.getElementById("sourceDateInput")?.value || "",
+            addressRaw: document.getElementById("addressRawInput")?.value || "",
+            localityRaw: document.getElementById("localityRawInput")?.value || "",
+            addressNote: document.getElementById("addressNoteInput")?.value || "",
             lifecycleEvent: document.getElementById("lifecycleEventSelect")?.value || "",
             lifecycleDate: document.getElementById("lifecycleDateInput")?.value || "",
             lifecycleDatePrecision: document.getElementById("lifecycleDatePrecisionSelect")?.value || "unknown",
@@ -2653,6 +2680,8 @@ class NzVerificationMap {
         const isMissing = values.action === "missing_current_site";
         const isDuplicate = values.action === "possible_duplicate";
         const isShared = values.action === "denomination_or_shared_use";
+        const addressRaw = values.addressRaw.trim() || props.address || "";
+        const localityRaw = values.localityRaw.trim() || props.locality || "";
 
         row.evidence_row_id = `map-${evidenceSlug || slug(`${values.action}-${todayIsoDate()}`)}`;
         row.collection_batch = ASSIGNMENT_BATCH_ID || COUNTRY_CONFIG.collectionBatch;
@@ -2673,10 +2702,17 @@ class NzVerificationMap {
         row.name_standardised = props.name || "";
         row.denomination_or_tradition_raw = props.denomination || "";
         row.site_type = isShared ? "multi_use" : normaliseSiteType(props.site_type || props.name || "");
-        row.address_raw = props.address || "";
-        row.modern_address_candidate = props.address || "";
-        row.address_standardised = props.address || "";
-        row.geocoding_basis = isMissing ? "manual_match" : "existing_osm_site";
+        row.address_raw = addressRaw;
+        row.modern_address_candidate = addressRaw;
+        row.address_standardised = addressRaw;
+        row.locality_raw = localityRaw;
+        row.address_change_note = values.addressNote
+            || (values.addressRaw.trim() || values.localityRaw.trim() ? "RA supplied source-backed address or locality." : "");
+        row.geocoding_basis = isMissing
+            ? "manual_match"
+            : values.addressRaw.trim() || values.localityRaw.trim()
+                ? "source_address"
+                : "existing_osm_site";
         row.geocoding_confidence = values.geocodingConfidence;
         row.latitude = lat ?? "";
         row.longitude = lng ?? "";
@@ -2777,6 +2813,9 @@ class NzVerificationMap {
             source_title: values.sourceTitle,
             source_url_or_file: values.sourceUrl || undefined,
             source_date_or_capture_date: values.sourceDate || undefined,
+            address_raw: values.addressRaw || undefined,
+            locality_raw: values.localityRaw || undefined,
+            address_change_note: values.addressNote || undefined,
             source_notes: row.source_notes || undefined,
             action: values.action,
             target_year_statuses: values.targetYearStatuses,
@@ -2923,6 +2962,9 @@ class NzVerificationMap {
             source_provider: values.sourceProvider,
             source_title: values.sourceTitle,
             source_date_or_capture_date: values.sourceDate,
+            address_raw: values.addressRaw,
+            locality_raw: values.localityRaw,
+            address_change_note: values.addressNote,
             source_url_or_file: values.sourceUrl,
             related_ids_or_note: values.relatedIds,
             evidence_note: values.note,

@@ -2,8 +2,23 @@
 
 ## Unreleased
 
+### 2026-05-15
+
+- Added explicit RA evidence fields for source-backed street address, locality,
+  and address notes so `street address missing` tasks have somewhere to record
+  the correction.
+- Added Google identity-token expiry tracking and pre-expiry refresh attempts
+  for the static Convex task client, reducing mid-session sign-in expiry during
+  RA verification and review work.
+- Switched the Convex Google OpenID Connect auth config to the public Google
+  client id already used by the frontend, so local anonymous Convex codegen no
+  longer depends on hosted deployment environment variables.
+
 ### 2026-05-14
 
+- Refreshed RA-facing docs to include `No building present` / building absence
+  as a first-class finding, distinct from worship-use closure, changed use,
+  unrelated missing-site nomination, and bad-geometry review.
 - Tightened Convex evidence/task-history access so RA accounts can inspect
   only their own or assigned evidence, while reviewer, curator, admin, and
   service roles retain project-wide inspection access.

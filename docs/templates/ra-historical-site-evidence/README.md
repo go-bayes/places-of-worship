@@ -67,6 +67,11 @@ sheet public unless source licences and privacy checks permit public release.
 - A place missing from the project map may already have an OSM candidate object.
   Record that OSM id and object type as source or matching evidence; do not
   treat it as the project site id.
+- Keep absent-building evidence distinct from worship-use closure. Use
+  `existence_status = absent` when the source suggests the mapped building is
+  gone, no building is visible at the mapped point, or the geometry may be
+  wrong. Use `worship_use_status = not_worship` when the source supports no
+  active worship use; use `uncertain` when it only raises a question.
 - Treat changed streets, renamed localities, demolished buildings, and shifted road alignments as matching problems. Record the historical address separately from any modern address candidate, explain the address change, and lower `geocoding_confidence` where the location is uncertain.
 - Do not collapse all lifecycle evidence into one birthday or death date. Use the specific date fields for organisation founding, site opening, building opening or dedication, first seen, last seen, closure, demolition, change of use, and relocation.
 - Use `use_changed_date` for later worship-function changes that do not fit a

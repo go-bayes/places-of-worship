@@ -358,6 +358,9 @@
                         ["Provider", draft.provider],
                         ["URL or file", draft.source_url_or_file],
                         ["Source date", draft.source_date_or_capture_date],
+                        ["Address found", draft.address_raw],
+                        ["Locality found", draft.locality_raw],
+                        ["Address note", draft.address_change_note],
                         ["Licence flag", draft.licence_flag],
                         ["Privacy flag", draft.privacy_flag],
                     ]) : `<p class="muted">No evidence draft is attached.</p>`}

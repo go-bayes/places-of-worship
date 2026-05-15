@@ -55,7 +55,8 @@ Target workflow:
 - You choose a time point: 2013, 2018, or 2023.
 - You click an existing point, building, or empty location.
 - You propose a change: missing site, duplicate, closure, changed use,
-  denomination change, shared building, or uncertain status.
+  no building present, denomination change, shared building, or uncertain
+  status.
 - The authenticated portal writes the proposal to staging for review.
 - Reviewed changes rebuild the 2013, 2018, and 2023 map layers.
 
@@ -67,14 +68,17 @@ spreadsheet fallback only when JB asks for it.
 Demo mode is useful for testing the workflow and reducing typing, but it is not
 an intake system.
 
+Use this section only if JB asks you to use demo or spreadsheet-fallback mode.
+
 1. Open the NZ verification map in demo mode.
 2. Select a target year: 2013, 2018, or 2023.
 3. Click a task from the map or priority list.
 4. In "What did you find?", choose the closest action.
 5. Check or adjust the 2013, 2018, and 2023 statuses.
 6. Check or adjust the controlled status and confidence dropdowns.
-7. Add a short source title, source URL or agreed file reference, related ids if
-   relevant, and a source-backed evidence note.
+7. Add a short source title, source URL or agreed file reference, any
+   source-backed street address or locality found for missing-address tasks,
+   related ids if relevant, and a source-backed evidence note.
 8. Click `Copy spreadsheet row` if you were asked to paste a draft row into the
    wide evidence sheet.
 9. Click `Copy review JSON` if JB asks for a compact feedback
@@ -208,35 +212,40 @@ evidence.
    denominational directory, council or heritage record, street imagery, or
    other approved source. Also search OSM or inspect nearby OSM candidates when
    relevant.
-3. Use the draft nomination panel in the map to capture the candidate details
-   if that helps, but remember that the panel does not save anything.
-4. In the wide evidence sheet, add one row for the source-place record.
-5. Set `candidate_site_id` to a temporary id, for example
+3. In the assigned workpack, use `Missing current site` only when the missing
+   place belongs to the task you are already checking. If you find an unrelated
+   missing place, record its name, source, location, and any OSM id, then send
+   that note to JB until the `Nominate missing PoW` flow is available.
+4. If JB asks you to use demo mode, the draft nomination panel can help you
+   inspect the fields for a candidate, but it does not save or submit anything.
+5. In the shared backend or fallback wide evidence sheet, add one record for
+   the source-place evidence.
+6. Set `candidate_site_id` to a temporary id, for example
    `candidate-missing-001`.
-6. Leave `matched_current_site_id` blank if there is no current mapped site.
-7. If there is an OSM object for the candidate, record `matched_osm_id` and
+7. Leave `matched_current_site_id` blank if there is no current mapped site.
+8. If there is an OSM object for the candidate, record `matched_osm_id` and
    `osm_object_type`. This does not make the OSM id the project site id.
-8. Set `match_method` to `unmatched`, or `manual_review` if there is a plausible
+9. Set `match_method` to `unmatched`, or `manual_review` if there is a plausible
    nearby project or OSM candidate that needs reviewer judgement.
-9. Set `match_confidence` to `none` unless there is a plausible nearby match
+10. Set `match_confidence` to `none` unless there is a plausible nearby match
    that needs review.
-10. Record `name_raw`, `name_standardised`, `denomination_or_tradition_raw`,
+11. Record `name_raw`, `name_standardised`, `denomination_or_tradition_raw`,
     `site_type`, `address_raw`, `locality_raw`, and source fields where known.
-11. If you can locate the place, record `latitude`, `longitude`,
+12. If you can locate the place, record `latitude`, `longitude`,
     `geocoding_basis`, and `geocoding_confidence`.
-12. If the source supports current worship use, set:
+13. If the source supports current worship use, set:
     - `target_year_2023_status`: `present`
     - `worship_use_status`: `confirmed_worship` or `probable_worship`
     - `existence_status`: `present`
-13. Fill 2013 and 2018 target-year fields only if the source supports them.
-14. Set `quality_flag` to `needs_review`.
-15. Set `review_status` to `needs_review`.
-16. In `review_note`, write: `Current PoW appears missing from project map; reviewer to
+14. Fill 2013 and 2018 target-year fields only if the source supports them.
+15. Set `quality_flag` to `needs_review`.
+16. Set `review_status` to `needs_review`.
+17. In `review_note`, write: `Current PoW appears missing from project map; reviewer to
 confirm whether this should become a new site.`
 
-Current limitation: the demo map can generate a candidate row, but it does not
-mint accepted site ids or write to staging. A reviewer must decide whether the
-candidate becomes a new site.
+Current limitation: the assigned backend can save evidence against existing
+tasks, but it does not yet create standalone missing-site tasks. A reviewer
+must decide whether a candidate becomes a new site.
 
 ## Case 2: Two Map Points Appear To Be One Site
 
@@ -287,20 +296,26 @@ Use this when evidence suggests a place was active as a place of worship in
      `not_assessed` or `uncertain`
 7. Use the matching `target_year_*_evidence` fields to explain the evidence for
    each target year.
-8. If you know the closure date, fill `site_closed_date` and
+8. Choose `No building present` when the source suggests the mapped building is
+   gone, no building is visible at the mapped point, or the geometry may point
+   to the wrong place. In that case, set `existence_status` to `absent`,
+   `worship_use_status` to `not_worship`, and explain whether the evidence is
+   demolition, street imagery, aerial imagery, a property record, or a geometry
+   problem.
+9. If you know the closure date, fill `site_closed_date` and
    `site_closed_date_precision`.
-9. If you only know that closure happened after 2013 and by 2018, fill:
+10. If you only know that closure happened after 2013 and by 2018, fill:
    - `closure_not_earlier_than_date`: `2013-09-01`
    - `closure_not_earlier_than_date_precision`: `day`
    - `closure_not_later_than_date`: `2018-09-01`
    - `closure_not_later_than_date_precision`: `day`
-10. If the building still exists but worship use ended, use `use_changed_date`
+11. If the building still exists but worship use ended, use `use_changed_date`
     or `closure_not_*` fields rather than treating the building as demolished.
-11. Set `worship_use_status` to the source-specific status. For an end-use
+12. Set `worship_use_status` to the source-specific status. For an end-use
     source, this will often be `not_worship` or `uncertain`.
-12. Set `quality_flag` to `needs_review`.
-13. Set `review_status` to `needs_review`.
-14. In `review_note`, write what needs reviewer judgement, for example:
+13. Set `quality_flag` to `needs_review`.
+14. Set `review_status` to `needs_review`.
+15. In `review_note`, write what needs reviewer judgement, for example:
     `Evidence supports worship in 2013 and non-worship by 2018; closure date is
 bounded but not exact.`
 
@@ -351,6 +366,7 @@ The NZ verification map uses automated priority labels.
    - duplicate or merge candidate,
    - not a place of worship,
    - closed or changed use,
+   - no building present, apparent demolition, or bad geometry,
    - historical only,
    - target-year status uncertain,
    - denomination changed,

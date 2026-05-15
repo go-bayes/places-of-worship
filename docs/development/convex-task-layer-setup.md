@@ -128,18 +128,24 @@ Connect-compatible provider. `convex/auth.config.ts` is configured for direct
 Google OpenID Connect:
 
 - issuer/domain: `https://accounts.google.com`,
-- application id: Convex environment variable `GOOGLE_CLIENT_ID`.
+- application id: the public Google client id already committed in
+  `convex/auth.config.ts` and the frontend Convex config.
 
-Set `GOOGLE_CLIENT_ID` in the Convex deployment environment, then run
-`npm run convex:dev` or `npx convex deploy`.
+The Google client id is intentionally public configuration. It is also useful
+to keep `GOOGLE_CLIENT_ID` in the hosted Convex deployment environment for
+operator visibility and older branches, but the current `auth.config.ts` does
+not read it at codegen time because local anonymous Convex deployments reject a
+missing deployment environment variable before hosted settings are available.
+
+Run `npm run convex:dev` or `npx convex deploy` after changing the provider
+configuration.
 
 `docs/development/convex-auth-google.config.example.ts` is kept only as a small
 reference copy of the same configuration.
 
-The Google client id is public configuration, but the deploy key and any OAuth
-client secret are not. Configure secrets in the Convex dashboard, GitHub
-secrets, or a local shell environment. Do not paste them into chat or commit
-them.
+The deploy key and any OAuth client secret are not public. Configure secrets in
+the Convex dashboard, GitHub secrets, or a local shell environment. Do not paste
+them into chat or commit them.
 
 If using a Convex deploy key, set it locally only for the command that needs it:
 

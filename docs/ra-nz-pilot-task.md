@@ -32,9 +32,11 @@ In practical terms:
 5. Select one task from the assigned list or map.
 6. Check the links and search for source evidence.
 7. Decide what kind of case it is: confirmed site, missing from the project
-   map, duplicate, closure, changed use, shared use, or uncertain.
+   map, duplicate, closed or changed use, no building present, shared use, or
+   uncertain.
 8. Fill in source title, URL or agreed file reference, status/confidence
-   dropdowns, any useful lifecycle date, and a short evidence note.
+   dropdowns, any source-backed street address or locality correction, any
+   useful lifecycle date, and a short evidence note.
 9. Click `Save draft` if the row is not ready. A draft can be incomplete, so
    use it whenever you have started useful work. Click `Submit unresolved note`
    when you have checked something useful but cannot yet resolve the case.
@@ -71,8 +73,9 @@ sample 5 to 10 varied cases, and save or submit each useful case. The `?full=1`
 parameter overrides the default workpack and shows the full NZ task map. Aim
 for variety:
 some confirm-current cases, one or two missing sites, one or two duplicates,
-one closed or lifecycle case, and one or two deliberate skips for control. Do
-not worry about coverage; pick cases that are informative.
+one closed, `No building present`, or lifecycle case, and one or two
+deliberate skips for control. Do not worry about coverage; pick cases that are
+informative.
 
 This is the first real test of the page. Tell JB anything that
 confuses you: labels you did not trust, fields you were not sure how to fill,
@@ -209,14 +212,14 @@ before we scale up.
 The best use of RA time is to sample real tasks from the task map and tell us
 where the workflow is clear or slow. We need examples that test the full
 workflow: straightforward confirmations, missing lifecycle dates, duplicates,
-missing current sites, places present in 2013 but absent by 2018, and shared or
-changed-use sites.
+missing current sites, places present in 2013 but absent by 2018, `No building
+present` or apparent demolition cases, and shared or changed-use sites.
 
 ## Goal
 
-Sample a small, high-value set of demo-map tasks that helps JB design the save,
-evaluate, review, and merge-track flow. Do not try to
-exhaustively check New Zealand yet.
+Work through a small, high-value set of assigned tasks that helps JB design the
+save, evaluate, review, and merge-track flow. Do not try to exhaustively check
+New Zealand yet.
 
 A useful pilot row has:
 
@@ -259,6 +262,7 @@ map. Prioritise variety over volume. A useful session might include:
 - an apparent duplicate if one is easy to find,
 - a current place of worship missing from the map if evidence appears quickly,
 - a possible site present in 2013 but absent by 2018,
+- a `No building present`, demolition, or bad-geometry case,
 - a denomination-change, shared-building, or multi-use case,
 - one or two low- or medium-priority controls.
 
@@ -304,9 +308,11 @@ Use the closest action available in the map action builder:
   not on the map.
 - `Possible duplicate`: two or more mapped records may represent one site.
 - `Present in 2013, absent in 2018`: source supports worship use in 2013 and
-  non-use, closure, demolition, or changed use by 2018.
-- `Closed or changed use`: source suggests worship use ended or the building
-  changed function.
+  non-use, closure, demolition, or changed use by 2018. If the clearest
+  finding is that no building is present at the mapped location, use `No
+  building present`.
+- `Closed or changed use`: source suggests the building remains but worship
+  use ended or the building changed function.
 - `No building present`: source suggests the mapped building is gone or no
   building is visible at that location. Use this for demolition or absence
   cases, and explain whether the source is Street View, aerial imagery, a local

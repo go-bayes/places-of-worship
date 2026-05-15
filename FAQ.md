@@ -121,6 +121,20 @@ create tasks and evidence rows. Accepted gain/loss data comes later,
 through reviewed change events with source references, target-year affects,
 hashes, and manifests.
 
+## What if a source shows no building at the mapped point?
+
+Treat this as a building-existence finding, not automatically as a worship-use
+closure. The current RA interface calls this `No building present`. Use it when
+street-level imagery, aerial imagery, a property record, or another source
+suggests the mapped building is gone, no building is visible at that point, or
+the geometry may be wrong.
+
+If the building is absent, the evidence can support `existence_status =
+absent` and `worship_use_status = not_worship`, with an evidence note saying
+whether the issue appears to be demolition, relocation, bad geometry, or
+something else. If the building remains but worship use has ended, record that
+as closed or changed use instead.
+
 ## How does the shared RA spreadsheet fit in?
 
 The spreadsheet is now the fallback and export format, not the preferred RA

@@ -4,7 +4,8 @@ export default {
   providers: [
     {
       domain: "https://accounts.google.com",
-      applicationID: process.env.GOOGLE_CLIENT_ID!,
+      applicationID:
+        "365609603908-modldahk3205acfdf1pshhckufho13v0.apps.googleusercontent.com",
     },
   ],
 } satisfies AuthConfig;

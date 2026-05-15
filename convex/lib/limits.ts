@@ -15,6 +15,9 @@ type EvidenceDraftLimitInput = {
   source_title?: string;
   source_url_or_file?: string;
   source_date_or_capture_date?: string;
+  address_raw?: string;
+  locality_raw?: string;
+  address_change_note?: string;
   source_notes?: string;
   action?: string;
   target_year_statuses?: unknown;
@@ -69,6 +72,9 @@ export function assertEvidenceDraftLimits(draft: EvidenceDraftLimitInput): void 
   assertMaxString("source title", draft.source_title, MEDIUM_TEXT_MAX);
   assertMaxString("source URL or file", draft.source_url_or_file, URL_OR_FILE_MAX);
   assertMaxString("source date or capture date", draft.source_date_or_capture_date, SHORT_TEXT_MAX);
+  assertMaxString("address", draft.address_raw, MEDIUM_TEXT_MAX);
+  assertMaxString("locality", draft.locality_raw, MEDIUM_TEXT_MAX);
+  assertMaxString("address change note", draft.address_change_note, LONG_TEXT_MAX);
   assertMaxString("source notes", draft.source_notes, LONG_TEXT_MAX);
   assertMaxString("action", draft.action, SHORT_TEXT_MAX);
   assertMaxString("existence status", draft.existence_status, SHORT_TEXT_MAX);

@@ -32,6 +32,7 @@ The evidence workflow collects source-backed information about:
 - places of worship present or absent in 2013, 2018, and 2023,
 - missing or duplicate mapped sites,
 - closures and changes of use,
+- apparent building absence, demolition, or bad geometry,
 - denomination or tradition changes,
 - shared buildings and multi-purpose sites,
 - uncertainty that requires reviewer judgement.
