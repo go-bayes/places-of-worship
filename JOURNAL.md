@@ -5,6 +5,48 @@ and what remains open. `CHANGELOG.md` records what changed; this file records
 the reasoning that should remain visible when the project is reported, audited,
 or handed to collaborators.
 
+## 2026-05-15: Make missing-address review explicit in the RA workflow
+
+Decision:
+Treat missing or corrected street-address evidence as a first-class RA input,
+not as an implicit note buried in free text.
+
+Rationale:
+Some assigned tasks ask the RA to resolve a missing street address, but the
+verification form did not previously give them a clear place to enter the
+address, locality, or uncertainty note. That made a legitimate task look
+unactionable and increased the chance that address evidence would be lost in a
+general source note.
+
+Consequences:
+The RA form, Convex evidence draft, reviewer portal, and spreadsheet fallback
+now carry source-backed address, locality, and address-note fields. Address
+corrections remain evidence for review. They do not directly update the master
+map until accepted evidence is exported and passed through the governed `pow`
+path.
+
+## 2026-05-15: Keep Google auth public config explicit and refresh early
+
+Decision:
+Use the public Google client id directly in the Convex auth configuration and
+refresh Google identity tokens before they expire during RA and reviewer work.
+
+Rationale:
+The Google client id is public configuration already present in the frontend.
+Keeping it only as a hosted Convex environment variable made local anonymous
+Convex code generation fail before hosted settings were available. The more
+important secret boundary is the deploy key, OAuth secrets, local admin keys,
+and session tokens. Separately, RA sessions should not fail mid-task merely
+because the browser-held identity token has reached its expiry window.
+
+Consequences:
+Local Convex code generation can validate the auth configuration without a
+hosted deployment environment. The hosted deployment may still keep
+`GOOGLE_CLIENT_ID` as an operator-facing record for older branches, but the
+current auth config does not depend on it. The static client now attempts a
+quiet pre-expiry refresh and asks the user to sign in again only when Google
+cannot refresh the token.
+
 ## 2026-05-14: Add unresolved notes to the RA-review workflow
 
 Decision:
@@ -1337,8 +1379,11 @@ Consequences:
 pending admin and one or more pending RA invites. The Google OpenID Connect
 auth config now lives in `convex/auth.config.ts` and reads the deployment
 `GOOGLE_CLIENT_ID` environment variable, so no client id or secret is committed.
-The remaining work is hosted deployment setup, Google client configuration, and
-frontend sign-in/wiring behind the Convex demo gate.
+This environment-variable detail was later superseded by the 2026-05-15 auth
+configuration decision: the Google client id is public configuration and is now
+committed directly, while secrets remain outside the repository. The remaining
+work is hosted deployment setup, Google client configuration, and frontend
+sign-in/wiring behind the Convex demo gate.
 
 ## 2026-05-02: Use Google Cloud for the first portal staging baseline
 
