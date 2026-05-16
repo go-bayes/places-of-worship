@@ -1,8 +1,6 @@
 # Places of Worship Lexicon
 
-This lexicon explains project terms in plain language. It is written for
-project reporting, research assistants, collaborators, and future agents who do
-not need to know backend design.
+This lexicon explains project terms in plain language. Audience is: potential contributors.
 
 The preferred style is concrete: name the thing a person can see or do. Use
 "shared online task map/list" rather than "task layer"; "reviewer download"
@@ -11,9 +9,8 @@ rather than "export bundle"; "cloud storage path" rather than "URI".
 ## One-Paragraph Project Description
 
 The project maps places of worship across space and time. We want to know where
-worship use occurred, whether it was present in target years such as 2013,
-2018, and 2023, and how places opened, closed, moved, changed denomination,
-shared buildings, or changed use. Public map layers and research tables should
+worship use occurred, whether it was present in target years (e.g. for New Zealand: 2013,
+2018, and 2023 -- the NZ census years), and how places opened, closed, moved, changed denomination, shared buildings, or changed use. Public map layers and research tables should
 come from reviewed evidence and approved changes, not directly from raw source
 files.
 
