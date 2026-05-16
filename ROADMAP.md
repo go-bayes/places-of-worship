@@ -1,29 +1,25 @@
 # Roadmap
 
-This roadmap gives directional guidance for the Places of Worship project. It
-groups work into design phases so we can keep near-term engineering choices
-aligned with the long-term research objective. It is not a release schedule, and
-the phases are not version numbers.
+This is our provisional roadmap. 
 
-The roadmap has two coupled tracks:
+The roadmap has two tracks:
 
 - Evidence and governance: how data are obtained, validated, staged, reviewed,
   accepted, replayed, and audited.
 - Research outputs and analysis: how reviewed or clearly provisional data are
-  surfaced for maps, downloads, visualisations, density estimates, temporal
-  comparisons, and reproducible investigator workflows.
-
+  made available for maps, downloads, visualisations, density estimates -- basically for science. 
+  
 ## How To Read This
 
-Status markers:
+Status:
 
 - `[x]` substantially in place
 - `[~]` in progress or partially proven
 - `[ ]` not started or not yet stable
 
-Use this file for the broad phase map. Use `docs/system-map.md` for the module
-map, `PLANNING.md` for active design and next steps, `JOURNAL.md` for decisions
-and rationale, and `CHANGELOG.md` for durable progress.
+Use this file for the broad phase map. 
+
+Use `docs/system-map.md` for the module map, `PLANNING.md` for active design and next steps, `JOURNAL.md` for decisions and rationale, and `CHANGELOG.md` for a record of progress.
 
 Each phase should advance both tracks where possible. A data-management phase is
 not complete merely because intake works; it must also make the consequences of
@@ -52,7 +48,7 @@ are stable enough to protect the master database and explain analytical changes.
 - Keep evidence governance and research outputs coupled. Every accepted or
   staged change should be capable of producing an investigator-facing summary of
   what it would change.
-- Surface research-facing outputs first through CLI reports, SQLite staging,
+- Make available research-facing outputs first through CLI reports, SQLite staging,
   JSON/CSV/GeoJSON exports, and R-readable summaries.
 - Prioritise `pow diff` before rich editors. The mission-critical diffs are
   whether a place of worship appeared or disappeared at a target date, whether
@@ -178,7 +174,6 @@ Research Outputs And Analysis:
 
 Non-goals:
 
-- Do not make the TUI the only review interface.
 - Do not replace the map where spatial building-level judgement is necessary.
 - Do not treat the workbench as a public portal.
 
@@ -206,7 +201,7 @@ Evidence And Governance:
 
 Research Outputs And Analysis:
 
-- `[ ]` Target-year site-state tables for 2013, 2018, and 2023.
+- `[ ]` Target-year site-state tables for 2013, 2018, and 2023 (NZ).
 - `[ ]` Area counts and density estimates with explicit denominators, boundary
   versions, uncertainty, and source coverage.
 - `[ ]` Appeared/disappeared map layers that represent worship-function change,
@@ -328,7 +323,7 @@ Evidence And Governance:
   taxonomies.
 - `[ ]` Community and partner contribution paths.
 - `[ ]` AI-assisted proposal generation and AI-assisted review under scoped
-  credentials and audit.
+  credentials and audit may be possible.
 - `[ ]` Provider migration options, including SQLite-compatible, PostGIS, and
   object-storage backends.
 - `[~]` Convex-to-`pow` export contract for task state, evidence drafts, and
