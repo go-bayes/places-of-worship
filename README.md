@@ -36,8 +36,7 @@ The evidence workflow collects source-backed information about:
 - shared buildings and multi-purpose sites,
 - uncertainty that requires reviewer judgement.
 
-Vanuatu is the first active Pacific case after New Zealand. It starts with a
-source-first protocol rather than immediate map validation at scale; see
+Vanuatu is the first active Pacific case after New Zealand. See
 `research/vanuatu-case-analysis.md`.
 
 The `pow` Rust CLI provides local validation, staging, proposal, and reviewer
