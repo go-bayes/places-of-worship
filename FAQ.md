@@ -7,7 +7,7 @@ planning documents; this page is a readable guide.
 ## What is the project doing right now?
 
 The New Zealand pilot is using a Convex-backed web assignment rather than a
-spreadsheet-first workflow. André opens the assigned New Zealand workpack,
+spreadsheet-first workflow. André (the NZ RA) opens the assigned New Zealand workpack,
 signs in with Google, saves drafts, submits unresolved notes, or submits
 evidence for review. JB and JW use the reviewer portal to inspect submitted
 evidence and record review decisions.
