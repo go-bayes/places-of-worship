@@ -94,7 +94,9 @@ yarn-error.log*
 
 # Private ops notes (local only)
 ops/private-ops-notes.md
+.private
 .private/
+.private-sync.env
 
 # Local assistant instruction files
 /AGENT.md
