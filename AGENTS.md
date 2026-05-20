@@ -2,10 +2,7 @@
 
 ## Scope
 
-- Applies to the `places-of-worship` repository.
 - Direct user requests take precedence over this file.
-- This is the canonical repo-local agent guidance. Do not create or rely on a
-  repo-root `CLAUDE.md`.
 - Use New Zealand English.
 
 ## Where To Look

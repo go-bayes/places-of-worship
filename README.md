@@ -1,16 +1,15 @@
 # Places of Worship
 
-An open research project for mapping places of worship and studying religious
-change across space and time.
+This is an open research project for mapping places of worship and studying religious
+and cultural variation across space and time.
 
-The long-term aim is a reproducible research portal that can track opening,
+Our long-term aim is a reproducible research portal that can track opening,
 closure, persistence, relocation, shared use, and repurposing at the level of
-the place itself. The public map is an active prototype (i.e. not yet fully polished).
+the place itself, linking such place to historical data relevant to testing theories about the social consequences of religion  The public map is an active prototype (i.e. not yet fully polished).
 
 ## Links
 
 - **[RA assignment: New Zealand 50-case workpack](https://www.placesmap.org/apps/regions/nz/verification.html)**
-- **[RA task guide](docs/ra-nz-pilot-task.md)**
 - **[Reviewer portal: New Zealand submitted evidence](https://www.placesmap.org/apps/regions/nz/review.html)**,
   currently authorised for JB and JW only.
 - [Global map](https://go-bayes.github.io/places-of-worship/index.html)
@@ -22,9 +21,7 @@ the place itself. The public map is an active prototype (i.e. not yet fully poli
 
 ## Current Work
 
-New Zealand serves as a proof-of-concept for temporal validation. The pilot
-now uses a Convex-backed task map that can save evidence drafts, provisional
-task status, and reviewer queues directly.
+New Zealand serves as a proof-of-concept for temporal validation. (We will soon extend our pilot to Vanuatu.*) The pilot now uses a Convex-backed task map that can save evidence drafts, provisional task status, and reviewer queues directly.
 
 The evidence workflow collects source-backed information about:
 
@@ -36,12 +33,7 @@ The evidence workflow collects source-backed information about:
 - shared buildings and multi-purpose sites,
 - uncertainty that requires reviewer judgement.
 
-Vanuatu is the first active Pacific case after New Zealand. See
-`research/vanuatu-case-analysis.md`.
-
-The `pow` Rust CLI provides local validation, staging, proposal, and reviewer
-diff reports. Convex coordinates live RA and reviewer task state; accepted data
-still has to pass through `pow` before it can affect the master or public map.
+*See `research/vanuatu-case-analysis.md`.
 
 ## Scope
 
@@ -93,3 +85,12 @@ include the [documentation health check](docs/documentation-health-check.md),
 the [Convex function inventory](docs/api/convex-functions.md), the
 [workflow script catalogue](docs/api/workflow-scripts.md), and the [UI style
 guide](docs/ui-style-guide.md).
+
+
+## Note
+
+The `pow` Rust CLI provides local validation, staging, proposal, and reviewer
+diff reports. Convex coordinates live RA and reviewer task state; accepted data
+still has to pass through `pow` before it can affect the master or public map.
+
+
