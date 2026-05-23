@@ -10,6 +10,8 @@
 - Added a spreadsheet-submission import path so exported RA
   `site_evidence_wide` CSV rows can become provisional Convex tasks with
   submitted evidence drafts in the review portal.
+- Added a Vanuatu OSM-derived starter seed builder for a balanced 50-case
+  source-first task batch under `vu-source-first-test-001`.
 - Documented the Vanuatu test workflow, spreadsheet import command, Convex
   import mutation, and the continuing boundary that imported rows do not update
   the master or public map before review and `pow` validation.

@@ -264,6 +264,32 @@ Until Guy's Google account is known, invite the primary investigators as
 reviewer/admin users and run test imports under their accounts. Do not commit
 real email addresses to repository docs.
 
+To build the initial 50-case Vanuatu OSM-derived starter batch:
+
+```sh
+uv run scripts/build_vu_osm_starter_seed.py
+```
+
+This writes:
+
+```text
+exports/convex-task-seed/vu-source-first-test-001.json
+```
+
+Use the Convex dashboard function runner or an authenticated hosted-deployment
+CLI to call:
+
+```json
+tasks:upsertTasksFromStaticMap({
+  "batch": { "...": "paste payload.batch here" },
+  "tasks": [{ "...": "paste payload.tasks here" }]
+})
+```
+
+The starter batch is balanced across named leads, missing-denomination leads,
+unnamed denomination leads, and sparse unnamed leads. Treat all rows as prompts
+for source-first checking rather than accepted evidence.
+
 ## Import Spreadsheet Submissions
 
 When an RA or partner spreadsheet should enter the review portal, export the
