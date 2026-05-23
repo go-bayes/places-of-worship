@@ -31,6 +31,9 @@ flowchart LR
   I --> J["Convex export bundle"]
   J --> K["materialise_convex_export.py"]
   K --> L["pow validate, stage, propose, diff"]
+  S["RA spreadsheet CSV"] --> T["build_convex_spreadsheet_submission_seed.py"]
+  T --> U["importSubmittedEvidenceDrafts"]
+  U --> I
 ```
 
 ## Task And Workpack Scripts
@@ -41,6 +44,7 @@ flowchart LR
 | `scripts/build_nz_temporal_ra_workpack.R` | `main()` | Reduce noisy temporal leads to a small reproducible RA workpack with one narrow evidence question per row. | `nz_osm_date_tag_places_to_check.csv` and temporal candidate files from `data/intermediate/nz_osm_temporal/`. | Ignored workpack CSV and summary JSON under `exports/nz_temporal_ra_workpack/`. | Before seeding or refreshing a small curated New Zealand RA assignment. |
 | `scripts/build_convex_workpack_seed.py` | `main()` | Convert the curated RA workpack CSV into a Convex task import payload. | Workpack CSV and summary JSON from `exports/nz_temporal_ra_workpack/`. | Ignored JSON payload under `exports/convex-task-seed/`, with deterministic task ids and source context. | Before importing or refreshing `nz-temporal-ra-workpack-001` in Convex. |
 | `scripts/build_convex_task_seed.py` | `main()` | Convert the static NZ verification GeoJSON into a broader Convex task import payload. | `apps/regions/nz/data/verification_tasks.geojson`. | JSON payload printed to stdout or written to `--output`. | For broader static-map task seeding, smoke tests, or future full-map imports. Do not use it to replace the curated workpack without a review plan. |
+| `scripts/build_convex_spreadsheet_submission_seed.py` | `main()` | Convert an exported RA `site_evidence_wide` CSV into provisional Convex tasks plus submitted evidence drafts. | A project-owned Google Sheet export or compatible CSV using the wide evidence columns. | Ignored JSON payload for `evidence:importSubmittedEvidenceDrafts`. | When an RA or partner spreadsheet should drop into the authenticated review portal rather than remain a separate worksheet. |
 | `scripts/build_ra_working_sheet.py` | `main()` | Build a fallback Google Sheets import workbook from the RA evidence templates. | CSV tabs in `docs/templates/ra-historical-site-evidence/`. | Ignored `.xlsx` workbook under `exports/ra-working-sheet/`. | Only when a project-owned spreadsheet fallback, partner handoff, or offline evidence sheet is needed. The normal pilot path is Convex. |
 
 ## Review Export Scripts

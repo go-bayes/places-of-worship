@@ -105,3 +105,15 @@ sheet public unless source licences and privacy checks permit public release.
 ## Handoff
 
 When a batch is ready, export the tabs as CSV files and place them in the agreed controlled data location. The ingestion step should validate required fields, controlled vocabularies, coordinates, dates, source licences, and match confidence before writing to the master database.
+
+For the current Convex review-layer test, export the `site_evidence_wide` tab
+as CSV and run:
+
+```sh
+uv run scripts/build_convex_spreadsheet_submission_seed.py --input path/to/site_evidence_wide.csv
+```
+
+The generated JSON payload is for `evidence:importSubmittedEvidenceDrafts`.
+It creates provisional tasks and submitted evidence drafts in Convex so
+reviewers can inspect spreadsheet rows in the same review portal as map-first
+submissions. It is still a staging/review step, not a master-data write.

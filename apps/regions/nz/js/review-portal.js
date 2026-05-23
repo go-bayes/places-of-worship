@@ -1,5 +1,9 @@
 (function () {
     const config = window.POW_CONVEX_CONFIG || {};
+    const searchParams = new URLSearchParams(window.location.search);
+    const countryFromQuery = searchParams.get("country") === "vu" ? "VU" : "";
+    const countryCode = countryFromQuery || config.countryCode || "NZ";
+    const countryName = countryCode === "VU" ? "Vanuatu" : "New Zealand";
     const client = new window.PowConvexTaskClient(config);
     const state = {
         user: null,
@@ -20,6 +24,18 @@
         refreshQueue: document.getElementById("refreshQueue"),
         signInButton: document.getElementById("signInButton"),
     };
+
+    function setupPageLabel() {
+        document.title = `${countryName} submitted evidence | Places of Worship`;
+        const heading = document.querySelector("header h1");
+        const intro = document.querySelector("header p");
+        if (heading) {
+            heading.textContent = `Review ${countryName} submitted evidence`;
+        }
+        if (intro) {
+            intro.innerHTML = `Review ${countryName} task submissions saved in Convex. Decisions recorded here do not update the public map or master data until an export bundle is validated through <code>pow</code>.`;
+        }
+    }
 
     function escapeHtml(value) {
         return String(value ?? "")
@@ -222,7 +238,7 @@
         setStatus(els.queueStatusText, "Loading review queue...");
         try {
             const rows = await client.listReviewQueue({
-                countryCode: config.countryCode || "NZ",
+                countryCode,
                 status: els.queueStatus.value,
                 limit: 100,
             });
@@ -586,6 +602,7 @@
     }
 
     function init() {
+        setupPageLabel();
         els.refreshQueue.addEventListener("click", loadQueue);
         els.queueStatus.addEventListener("change", () => {
             state.selected = null;

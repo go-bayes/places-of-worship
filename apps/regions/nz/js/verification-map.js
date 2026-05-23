@@ -1,6 +1,9 @@
 const SEARCH_PARAMS = new URLSearchParams(window.location.search);
 const DEMO_MODE = SEARCH_PARAMS.get("demo") !== "0";
 const INTAKE_ENABLED = DEMO_MODE;
+const PATH_COUNTRY_KEY = window.location.pathname.includes("/regions/vu/") ? "vu" : "";
+const CONFIG_COUNTRY_KEY = String(window.POW_CONVEX_CONFIG?.countryCode || "").toLowerCase();
+const REQUESTED_COUNTRY_KEY = SEARCH_PARAMS.get("country") === "vu" ? "vu" : "";
 const COUNTRY_CONFIGS = {
     nz: {
         countryCode: "NZ",
@@ -38,6 +41,7 @@ const COUNTRY_CONFIGS = {
         sourceDatasetId: "vu_static_verification_map",
         mapSource: "vu_verification_static_map_workbench",
         nominationSource: "vu_verification_static_map_nomination",
+        defaultAssignmentBatchId: "vu-source-first-test-001",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -49,7 +53,7 @@ const COUNTRY_CONFIGS = {
         },
     },
 };
-const COUNTRY_KEY = SEARCH_PARAMS.get("country") === "vu" ? "vu" : "nz";
+const COUNTRY_KEY = REQUESTED_COUNTRY_KEY || PATH_COUNTRY_KEY || (CONFIG_COUNTRY_KEY === "vu" ? "vu" : "nz");
 const COUNTRY_CONFIG = COUNTRY_CONFIGS[COUNTRY_KEY];
 const TARGET_YEARS = COUNTRY_CONFIG.targetYears;
 const DEFAULT_TARGET_YEAR = COUNTRY_CONFIG.defaultTargetYear || TARGET_YEARS[TARGET_YEARS.length - 1];
@@ -801,6 +805,31 @@ function actionLabel(action) {
     return cap(action);
 }
 
+function assignmentQuickstartHtml() {
+    if (COUNTRY_CONFIG.countryCode === "VU") {
+        return `
+            <ol>
+                <li>Sign in with Google at the top of this panel.</li>
+                <li>Use this as a Vanuatu source-first test, not as the final country task map.</li>
+                <li>Work from source-backed leads. OSM is sparse in Vanuatu, so treat any OSM record as context rather than the main evidence.</li>
+                <li>Record 1989, 1999, 2009, and 2020 status only where a source supports a target-year judgement.</li>
+                <li>Use lifecycle fields for older historical evidence, including mission, church, building, relocation, closure, or changed-use dates back to 1600.</li>
+                <li>Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when useful evidence remains unclear, and <em>Submit for review</em> when the evidence is ready for JB or JW.</li>
+            </ol>
+        `;
+    }
+    return `
+        <ol>
+            <li>Sign in with Google at the top of this panel.</li>
+            <li>Work down the assigned task list in order. Stop at a natural stopping point and tell JB where you stopped.</li>
+            <li>How the list was made: <a href="https://github.com/go-bayes/places-of-worship/blob/main/scripts/build_nz_temporal_ra_workpack.R" target="_blank" rel="noopener">this R script</a> first selects every date-tag row whose <code>candidate_date_tag_windows</code> contains <code>candidate_gain</code>; then, after excluding used <code>osm_key</code>s, adds five OSM-present-then-absent rows with a nearby replacement object, five rows with parser warnings, uncertain target-year status, or <code>candidate_status_change</code>, and five present-present-present controls with no candidate window or parser warning. Treat OSM as the prompt to check, not as final evidence.</li>
+            <li>Open Street View or Google Maps to look around the site, and use the OSM object only as context. Record the imagery capture date if Street View is your evidence.</li>
+            <li>Record 2013, 2018, and 2023 status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
+            <li>Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when the case remains unclear after useful checking, and <em>Submit for review</em> when the evidence is ready for JB.</li>
+        </ol>
+    `;
+}
+
 class NzVerificationMap {
     constructor() {
         this.map = null;
@@ -1269,11 +1298,11 @@ class NzVerificationMap {
 
     setupPageMode() {
         document.body.classList.toggle("assignment-mode", ASSIGNMENT_MODE);
-        document.title = `${COUNTRY_CONFIG.countryName} OSM Verification Tasks`;
+        document.title = `${COUNTRY_CONFIG.countryName} Verification Tasks`;
         const title = document.querySelector(".sidebar-header h1");
         if (title) {
             title.textContent = ASSIGNMENT_MODE
-                ? `${COUNTRY_CONFIG.countryName} verification · workpack 001`
+                ? `${COUNTRY_CONFIG.countryName} source-first test`
                 : `${COUNTRY_CONFIG.countryName} OSM Verification`;
         }
 
@@ -1301,14 +1330,7 @@ class NzVerificationMap {
                 <details class="quickstart" role="note" open>
                     <summary><strong>${ASSIGNMENT_MODE ? "How this assignment works" : "How this pilot works"}</strong></summary>
                     ${ASSIGNMENT_MODE ? `
-                        <ol>
-                            <li>Sign in with Google at the top of this panel.</li>
-                            <li>Work down the assigned task list in order. Stop at a natural stopping point and tell JB where you stopped.</li>
-                            <li>How the list was made: <a href="https://github.com/go-bayes/places-of-worship/blob/main/scripts/build_nz_temporal_ra_workpack.R" target="_blank" rel="noopener">this R script</a> first selects every date-tag row whose <code>candidate_date_tag_windows</code> contains <code>candidate_gain</code>; then, after excluding used <code>osm_key</code>s, adds five OSM-present-then-absent rows with a nearby replacement object, five rows with parser warnings, uncertain target-year status, or <code>candidate_status_change</code>, and five present-present-present controls with no candidate window or parser warning. Treat OSM as the prompt to check, not as final evidence.</li>
-                            <li>Open Street View or Google Maps to look around the site, and use the OSM object only as context. Record the imagery capture date if Street View is your evidence.</li>
-                            <li>Record 2013, 2018, and 2023 status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
-                            <li>Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when the case remains unclear after useful checking, and <em>Submit for review</em> when the evidence is ready for JB.</li>
-                        </ol>
+                        ${assignmentQuickstartHtml()}
                     ` : `
                         <ol>
                             <li>Set <em>Target year</em> and <em>Priority</em> in the filters above.</li>

@@ -75,9 +75,10 @@ As of 14 May 2026:
 - Vanuatu is the first active Pacific country case after New Zealand. Guy is
   the assigned RA. The starting point is source reconnaissance in
   `research/vanuatu-case-analysis.md`, with target years 1989, 1999, 2009, and
-  2020 and lifecycle dates from 1600 onward. Vanuatu should wait for the first
-  New Zealand Convex-review-export-`pow` round trip before receiving a full task
-  map.
+  2020 and lifecycle dates from 1600 onward. A temporary Vanuatu source-first
+  portal can use the shared Convex review layer for test tasks and imported
+  spreadsheet submissions, while a full Vanuatu task map waits for the first
+  New Zealand Convex-review-export-`pow` round trip.
 - Current reference documents: `docs/system-map.md` for modules,
   `docs/convex-task-layer-spec.md` for Convex scope,
   `docs/portal-submission-review-plan.md` for review,
@@ -1672,7 +1673,9 @@ OSM ids or user suggestions.
 6. Start Guy on the Vanuatu source-first protocol in
    `research/vanuatu-case-analysis.md`: build a source register, identify
    place-level evidence leads, preserve historical dates from 1600 onward, and
-   use 1989, 1999, 2009, and 2020 as the first structured target years.
+   use 1989, 1999, 2009, and 2020 as the first structured target years. Use the
+   temporary Vanuatu portal and spreadsheet-import path only as review-layer
+   tests.
 7. Generalise country target-year configuration before building a Vanuatu map
    intake surface. NZ should continue to show 2013, 2018, and 2023; Vanuatu
    should show 1989, 1999, 2009, and 2020.
@@ -1738,8 +1741,9 @@ OSM ids or user suggestions.
     2018, and 2023. Include OSM history extraction, OSM date-tag parsing,
     provisional target-year statuses, possible gain/loss windows, visual
     evidence review, and target-year probability rules.
-26. Draft the Google Sheets to staging API pilot described in
-    `docs/community-ingestion-api-plan.md`.
+26. Exercise the Google Sheets/CSV to Convex review-layer adapter with a small
+    Vanuatu source-first spreadsheet export, then use the results to refine the
+    fuller staging API pilot described in `docs/community-ingestion-api-plan.md`.
 27. Extend the initial CLI-first RA revisions pipeline from `CRITIQUE.md`,
     using `schemas/change-event.schema.json` and
     `schemas/geometry-history.schema.json` as the first event and geometry

@@ -321,7 +321,8 @@ Evidence And Governance:
   and 2020 target years while preserving lifecycle dates from 1600 onward.
 - `[ ]` Country adapters for boundaries, sources, licences, and denominational
   taxonomies.
-- `[ ]` Community and partner contribution paths.
+- `[~]` Community and partner contribution paths, starting with a spreadsheet
+  export adapter into the shared review portal.
 - `[ ]` AI-assisted proposal generation and AI-assisted review under scoped
   credentials and audit may be possible.
 - `[ ]` Provider migration options, including SQLite-compatible, PostGIS, and

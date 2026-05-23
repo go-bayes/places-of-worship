@@ -12,6 +12,9 @@ the place itself, linking such place to historical data relevant to testing theo
 - **[RA assignment: New Zealand 50-case workpack](https://www.placesmap.org/apps/regions/nz/verification.html)**
 - **[Reviewer portal: New Zealand submitted evidence](https://www.placesmap.org/apps/regions/nz/review.html)**,
   currently authorised for JB and JW only.
+- **[Vanuatu source-first test portal](https://www.placesmap.org/apps/regions/vu/verification.html)**
+- **[Reviewer portal: Vanuatu submitted evidence](https://www.placesmap.org/apps/regions/vu/review.html)**,
+  currently a test surface over the shared review layer.
 - [Global map](https://go-bayes.github.io/places-of-worship/index.html)
 - [New Zealand regional map](https://www.placesmap.org/enhanced-places.html)
 - [Roadmap](ROADMAP.md)
@@ -21,7 +24,11 @@ the place itself, linking such place to historical data relevant to testing theo
 
 ## Current Work
 
-New Zealand serves as a proof-of-concept for temporal validation. (We will soon extend our pilot to Vanuatu.*) The pilot now uses a Convex-backed task map that can save evidence drafts, provisional task status, and reviewer queues directly.
+New Zealand serves as a proof-of-concept for temporal validation. Vanuatu is
+now beginning as a source-first test, with spreadsheet submissions routed into
+the same Convex-backed review layer rather than treated as accepted data. The
+pilot task map can save evidence drafts, provisional task status, and reviewer
+queues directly.
 
 The evidence workflow collects source-backed information about:
 
@@ -33,7 +40,7 @@ The evidence workflow collects source-backed information about:
 - shared buildings and multi-purpose sites,
 - uncertainty that requires reviewer judgement.
 
-*See `research/vanuatu-case-analysis.md`.
+See `research/vanuatu-case-analysis.md`.
 
 ## Scope
 
@@ -92,5 +99,3 @@ guide](docs/ui-style-guide.md).
 The `pow` Rust CLI provides local validation, staging, proposal, and reviewer
 diff reports. Convex coordinates live RA and reviewer task state; accepted data
 still has to pass through `pow` before it can affect the master or public map.
-
-

@@ -49,6 +49,7 @@ export const taskType = v.union(
 export const taskBatchSourceKind = v.union(
   v.literal("static_map_import"),
   v.literal("osm_refresh"),
+  v.literal("spreadsheet_submission"),
   v.literal("ra_nomination"),
   v.literal("manual_curator"),
   v.literal("system_check"),

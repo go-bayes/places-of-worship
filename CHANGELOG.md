@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### 2026-05-23
+
+- Added temporary Vanuatu source-first portal entry points that use the shared
+  Convex assignment and reviewer surfaces with Vanuatu target years 1989, 1999,
+  2009, and 2020.
+- Added a spreadsheet-submission import path so exported RA
+  `site_evidence_wide` CSV rows can become provisional Convex tasks with
+  submitted evidence drafts in the review portal.
+- Documented the Vanuatu test workflow, spreadsheet import command, Convex
+  import mutation, and the continuing boundary that imported rows do not update
+  the master or public map before review and `pow` validation.
+
 ### 2026-05-15
 
 - Added explicit RA evidence fields for source-backed street address, locality,

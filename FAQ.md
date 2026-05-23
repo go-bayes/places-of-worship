@@ -20,9 +20,8 @@ public-map data.
 
 Vanuatu is the next country case, but it starts source-first. Guy should first
 collect and assess source leads for 1989, 1999, 2009, and 2020, while
-preserving older lifecycle evidence back to 1600. A full Vanuatu task map
-should wait until the New Zealand review-export-`pow` round trip has been
-tested.
+preserving older lifecycle evidence back to 1600. The temporary Vanuatu portal
+is a test surface over the shared Convex review layer, not a final country map.
 
 ## What is the unit of analysis?
 
@@ -146,6 +145,11 @@ If Convex is unavailable, the project can still use a project-owned Google
 Sheet as the temporary evidence store. Rows from the Sheet, or exports from
 Convex, should later be validated, staged, reviewed, and converted into
 accepted change events. Only accepted events affect rebuilt master outputs.
+
+The Vanuatu source-first test also supports the opposite direction: a
+project-owned `site_evidence_wide` spreadsheet can be exported as CSV and
+imported into Convex as submitted evidence drafts. Those rows then appear in
+the reviewer portal instead of remaining a separate worksheet.
 
 ## How can RAs avoid duplicating task work?
 

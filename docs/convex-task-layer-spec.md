@@ -46,6 +46,7 @@ The target dataflow for the review-layer prototype is:
 flowchart LR
   A["Assigned workpack task"] --> T["Convex shared task list"]
   N["Nominate missing PoW<br/>provisional candidate task"] --> T
+  S["Spreadsheet submission<br/>source-first evidence row"] --> T
   T --> E["Evidence draft<br/>source, target-year states,<br/>lifecycle claims"]
   E --> Q["Authenticated review portal<br/>review queue and task history"]
   Q --> D["Review decision<br/>accept, reject, defer,<br/>request revision or more evidence"]

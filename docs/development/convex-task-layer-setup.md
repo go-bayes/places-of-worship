@@ -246,6 +246,55 @@ The assignment page loads only that batch from Convex. It should not ask the RA
 to paste rows into a spreadsheet unless the backend is unavailable and JB has
 explicitly chosen the fallback path.
 
+## Vanuatu Source-First Test
+
+The temporary Vanuatu entry points are:
+
+```text
+https://www.placesmap.org/apps/regions/vu/verification.html
+https://www.placesmap.org/apps/regions/vu/review.html
+```
+
+They route into the shared static task and reviewer pages with `country=vu`.
+This is a test surface only. It uses the Vanuatu target years 1989, 1999,
+2009, and 2020, keeps lifecycle evidence open back to 1600, and should be used
+for source-first leads rather than a final Vanuatu map validation pass.
+
+Until Guy's Google account is known, invite the primary investigators as
+reviewer/admin users and run test imports under their accounts. Do not commit
+real email addresses to repository docs.
+
+## Import Spreadsheet Submissions
+
+When an RA or partner spreadsheet should enter the review portal, export the
+`site_evidence_wide` tab as CSV and build a Convex import payload:
+
+```sh
+uv run scripts/build_convex_spreadsheet_submission_seed.py \
+  --input path/to/site_evidence_wide.csv \
+  --batch-id vu-source-first-test-001 \
+  --country-code VU \
+  --target-years 1989,1999,2009,2020 \
+  --submitter-email "<invited-account@example.org>" \
+  --submitter-name "Guy or PI test import"
+```
+
+The script writes an ignored JSON payload under `exports/convex-task-seed/`.
+Use the Convex dashboard function runner to call:
+
+```json
+evidence:importSubmittedEvidenceDrafts({
+  "batch": { "...": "paste payload.batch here" },
+  "tasks": [{ "...": "paste payload.tasks here" }],
+  "drafts": [{ "...": "paste payload.drafts here" }]
+})
+```
+
+Imported rows become provisional tasks with submitted evidence drafts. They
+appear in the authenticated review portal, but they still do not update the
+master database or public map until reviewer acceptance, export, and `pow`
+validation.
+
 ## Manual Candidate Tasks
 
 For a place of worship that is not on the project map, or not on OSM, call:
