@@ -12,6 +12,8 @@
   submitted evidence drafts in the review portal.
 - Added a Vanuatu OSM-derived starter seed builder for a balanced 50-case
   source-first task batch under `vu-source-first-test-001`.
+- Seeded the hosted Convex deployment with the 50-case Vanuatu starter batch
+  and verified that the public Vanuatu task and review entry points are live.
 - Documented the Vanuatu test workflow, spreadsheet import command, Convex
   import mutation, and the continuing boundary that imported rows do not update
   the master or public map before review and `pow` validation.
