@@ -23,7 +23,7 @@ durable progress.
   rule.
 - Record scope decisions here when they affect inclusion, exclusion, or
   interpretation of data.
-- Keep unchosen tooling ideas in `BRAINSTORMING.md` until they have a clear
+- Keep unchosen ideas in `BRAINSTORMING.md` until they have a clear
   role, migration path, and adoption decision.
 - Use `docs/system-map.md` to place active work in a primary module before
   turning it into tasklist items.

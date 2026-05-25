@@ -1,20 +1,14 @@
 # Places of Worship
 
-This is an open research project for mapping places of worship and studying religious
-and cultural variation across space and time.
+This is a research project for mapping places of worship and studying religious and cultural variation across space and time.
 
-Our long-term aim is a reproducible research portal that can track opening,
-closure, persistence, relocation, shared use, and repurposing at the level of
-the place itself, linking such place to historical data relevant to testing theories about the social consequences of religion  The public map is an active prototype (i.e. not yet fully polished).
+Our long-term aim is to build a research portal for Places of Worship (PoWs) that can track opening, closure, persistence, relocation, shared use, and repurposing at the level of the place itself, linking such place information to other historical data relevant to testing theories about the social consequences of religion.  The public map is an active prototype (i.e. not yet fully polished). The lowest-level analytical unit is a mappable place of worship with
+worship-function state, thus not merely a building record and not necessarily a congregation as a social group.
+
+Building historical datasets fit for scientific inferences is remarkably difficult because the historical records are diffuse and incomplete. Somewhat inconveniently our ancestors were not carefully documenting everything we'd want to know. Indeed,  in most cases, they didn't document anything.  Having build a prototype global location map, we're focussing on New Zealand and Vanuatu, two very different island settings, to establish the feasibility of scientific work on religion that uses PoWs as the smallest units of analysis.  
 
 ## Links
 
-- **[RA assignment: New Zealand 50-case workpack](https://www.placesmap.org/apps/regions/nz/verification.html)**
-- **[Reviewer portal: New Zealand submitted evidence](https://www.placesmap.org/apps/regions/nz/review.html)**,
-  currently authorised for JB and JW only.
-- **[Vanuatu source-first test portal](https://www.placesmap.org/apps/regions/vu/verification.html)**
-- **[Reviewer portal: Vanuatu submitted evidence](https://www.placesmap.org/apps/regions/vu/review.html)**,
-  currently a test surface over the shared review layer.
 - [Global map](https://go-bayes.github.io/places-of-worship/index.html)
 - [New Zealand regional map](https://www.placesmap.org/enhanced-places.html)
 - [Roadmap](ROADMAP.md)
@@ -22,50 +16,32 @@ the place itself, linking such place to historical data relevant to testing theo
 - [FAQ](FAQ.md)
 - [Lexicon](LEXICON.md)
 
-## Current Work
 
-New Zealand serves as a proof-of-concept for temporal validation. Vanuatu is
-now beginning as a source-first test, with spreadsheet submissions routed into
-the same Convex-backed review layer rather than treated as accepted data. The
-pilot task map can save evidence drafts, provisional task status, and reviewer
-queues directly.
+## Ongoing Work
 
-The evidence workflow collects source-backed information about:
+- **[RA assignment: New Zealand 50-case workpack](https://www.placesmap.org/apps/regions/nz/verification.html)**
+- **[Reviewer portal: New Zealand submitted evidence](https://www.placesmap.org/apps/regions/nz/review.html)**,
+  currently authorised for JB and JW only.
+- **[Vanuatu source-first test portal](https://www.placesmap.org/apps/regions/vu/verification.html)**
+- **[Reviewer portal: Vanuatu submitted evidence](https://www.placesmap.org/apps/regions/vu/review.html)**,
+  currently a test surface over the shared review layer.
 
-- places of worship present or absent in 2013, 2018, and 2023,
-- missing or duplicate mapped sites,
-- closures and changes of use,
-- apparent building absence, demolition, or bad geometry,
-- denomination or tradition changes,
-- shared buildings and multi-purpose sites,
-- uncertainty that requires reviewer judgement.
 
-See `research/vanuatu-case-analysis.md`.
-
-## Scope
-
-The lowest-level analytical unit is a mappable place of worship with
-worship-function state, not merely a building record and not necessarily a
-congregation as a social group.
 
 ## Data
 
-The project uses OpenStreetMap data and thanks the OpenStreetMap community for
-the base global places-of-worship data. We also use public statistical and
-boundary data, including Statistics New Zealand data where documented in the
+The project uses OpenStreetMap data for the preliminary global map. We thanks the OpenStreetMap community for
+the base global places-of-worship data. 
+
+We also use public statistical and boundary data, including Statistics New Zealand data where documented in the
 relevant data products.
 
 OpenStreetMap-derived databases are distributed under the Open Database Licence
 (ODbL 1.0), consistent with OSM licence terms.
 
-Large, private, or generated data are not tracked directly in Git. See
-[docs/data-storage-pipeline.md](docs/data-storage-pipeline.md) for the storage
-policy: local ignored data is cache only, and reusable datasets need durable
-project-controlled storage plus tracked manifests.
-
 ## Project Team
 
-The project is led by Professor Joseph Bulbulia (Victoria University of
+The main project is includes Professor Joseph Bulbulia (Victoria University of
 Wellington, New Zealand) and Dr Joseph Watts (University of Canterbury, New
 Zealand). We thank Nick Young at the University of Auckland Centre for
 eResearch for the initial inspiration.

@@ -27,7 +27,7 @@ new evidence visible to investigators. A research-output phase is not complete
 merely because a map renders; it must rest on documented, reproducible, and
 auditable data products.
 
-## North Star
+## "North Star" as they say in Corporate Speak. 
 
 Build a global, research-grade database and map of places of worship located in
 space and time.
@@ -38,10 +38,9 @@ changes: worship use appearing or disappearing, denomination or tradition
 changes, multi-denominational use, multi-purpose use, shared buildings, split or
 merged worship uses, and uncertainty about dates or locations.
 
-The first stable surface for governed modification is the `pow` command-line
-interface and local staging store. Web-based data management should remain
-deferred until validation, staging, diff, review, replay, and export contracts
-are stable enough to protect the master database and explain analytical changes.
+The first stable place for governed modification is the `pow` command-line
+interface and local staging store. 
+
 
 ## Roadmap Principles
 
@@ -92,7 +91,7 @@ Non-goals:
 - Do not treat current OpenStreetMap-derived records as historical truth.
 - Do not make the current map a direct write surface for the master database.
 
-## Phase 1: Governed Local Ingestion
+## Phase 1: Governed Local Data Update (aka "Ingestion")
 
 Status: `[~]` in progress.
 
@@ -139,7 +138,7 @@ Research Outputs And Analysis:
 - `[ ]` Defer `before.geojson`, `after.geojson`, `area_summary_diff.csv`, and
   full map/export effects until `pow rebuild-master` can reconstruct state.
 
-Non-goals:
+To avoid:
 
 - Do not accept direct master writes.
 - Do not build rich terminal or web-based data management before the save,
@@ -154,8 +153,6 @@ Give reviewers a fast way to inspect staged batches, validation warnings,
 evidence, proposed changes, and dry-run effects.
 
 Evidence And Governance:
-
-- `[ ]` Decide whether to add `pow-tui` as a separate binary in this workspace.
 - `[ ]` Split shared validation, staging, and diff logic into `pow-core`.
 - `[ ]` Browse staged batches and records from SQLite.
 - `[ ]` Show existing master values, proposed values, evidence trail, validation

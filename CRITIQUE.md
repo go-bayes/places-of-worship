@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-02
 
-## Repo aim (one paragraph)
+## Repo aim 
 
 The Global Places of Worship Project tracks individual religious sites
 across countries and over time, anchored to annual snapshots at 1 September
@@ -48,7 +48,7 @@ task.
 
 These are sound; we should build on them rather than relitigating.
 
-## Eight critical gaps to fix before the pipeline accepts revisions
+## Eight gaps to fix before the pipeline accepts revisions
 
 ### 1. Geometry-over-time has no schema yet — blocks location revisions
 

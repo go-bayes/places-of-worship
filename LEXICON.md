@@ -1,18 +1,9 @@
 # Places of Worship Lexicon
 
-This lexicon explains project terms in plain language. Audience is: potential contributors.
+This lexicon explains project terms in plain language. The audience is potential contributors.
 
-The preferred style is concrete: name the thing a person can see or do. Use
-"shared online task map/list" rather than "task layer"; "reviewer download"
-rather than "export bundle"; "cloud storage path" rather than "URI".
-
-## One-Paragraph Project Description
-
-The project maps places of worship across space and time. We want to know where
-worship use occurred, whether it was present in target years (e.g. for New Zealand: 2013,
-2018, and 2023 -- the NZ census years), and how places opened, closed, moved, changed denomination, shared buildings, or changed use. Public map layers and research tables should
-come from reviewed evidence and approved changes, not directly from raw source
-files.
+The preferred style is to be concrete and to avoid jargon terms.  We try to name the thing a person can see or do. For example we use
+"shared online task map/list" rather than "task layer";  rather than "export bundle"; "cloud storage path" rather than "URI".
 
 ## Preferred Plain Language
 
@@ -29,7 +20,7 @@ files.
 
 Some code and spreadsheet column names still use older terms such as
 `lifecycle_event`, `curator`, `bundle`, or `intermediate_lead`. Treat those as
-technical labels, not reporting language. Public, RA-facing, and report-facing
+technical labels, we are aiming for clearer reporting language now. Public, RA-facing, and report-facing
 prose should use the preferred terms above unless a code value must be quoted.
 
 ## Core Research Terms
