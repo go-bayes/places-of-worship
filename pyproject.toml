@@ -16,7 +16,7 @@ api = [
   "uvicorn==0.35.0",
 ]
 fast-parquet = [
-  "pyarrow>=20,<21",
+  "pyarrow>=23.0.1,<24",
 ]
 legacy = [
   "osm2geojson",
