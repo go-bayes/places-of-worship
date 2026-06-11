@@ -42,6 +42,11 @@
 - `docs/development/`: implementation-facing CLI, staging, and proposal
   mapping notes. Keep these out of the default RA task path unless explicitly
   requested.
+- `docs/development/location-features-from-reliefmap.md`: porting guide for
+  the reliefmap location/UX features (blue dot, near-me, measuring pin,
+  nearest banner, directions hand-off, lazy Street View) into
+  `apps/global/index.html` — feature inventory, known gotchas, and adaptation
+  rules. Start here when asked to add location features to the map.
 - `docs/templates/ra-historical-site-evidence/`: RA evidence-entry templates.
 - `docs/master-verification-workflow-plan.md`: master verification and review.
 - `docs/portal-data-entry-plan.md`: authenticated portal planning hub.
