@@ -77,9 +77,14 @@
         <div class="dock-row">
           <input id="searchInput" type="text" placeholder="Search an address or place (prototype)">
           <button id="searchButton">Search</button>
+          <button id="dock-close" type="button" aria-label="Close search and filters">×</button>
         </div>
         <div class="dock-row dock-cities-row">
           <div class="dock-cities" id="cityChips"></div>
+        </div>
+        <div class="dock-filters" id="dock-filters" hidden>
+          <div class="filter-group" id="religion-filters" role="group" aria-label="Filter by religion"></div>
+          <div class="filter-group" id="denom-filters" role="group" aria-label="Filter Christian denominations" hidden></div>
         </div>
     </div>
   </div>
@@ -570,13 +575,16 @@
     // later moves; when the fix is off-screen the previous answer is kept
     // rather than recomputed against tiles far from the user. nearest
     // deliberately queries the detailed places source, never the thinned
-    // low-zoom overview tier. no layer filters exist on this map today; if
-    // religion filters arrive they must thread into this query too.
+    // low-zoom overview tier, and shares the panel's filter clauses so the
+    // answer respects what the map is showing.
     function updateNearestPlace() {
       const ref = referencePoint();
       if (!ref || !map.getSource(SOURCES.places)) return;
       if (!map.getBounds().contains({ lng: ref[0], lat: ref[1] })) return;
-      const features = map.querySourceFeatures(SOURCES.places, { sourceLayer: PLACES_LAYER });
+      const queryOptions = { sourceLayer: PLACES_LAYER };
+      const filterClauses = currentFilterClauses();
+      if (filterClauses) queryOptions.filter = filterClauses;
+      const features = map.querySourceFeatures(SOURCES.places, queryOptions);
       // tiles duplicate features at boundaries; dedupe on the osm identity
       const seen = new Set();
       let best = null;
@@ -1445,12 +1453,14 @@
       if (!map.isStyleLoaded()) return;
       if (!map.getLayer(LAYERS.places) && !map.getLayer(LAYERS.overview)) {
         addCustomLayers();
+        applyFilters();
         updateCounts();
       }
     }
 
     map.on("style.load", () => {
       addCustomLayers();
+      applyFilters();
       ensureNearestLine();
       updateCounts();
       setTimeout(ensureCustomLayers, 350);
@@ -1698,7 +1708,8 @@
       clearPin();
       if (activePlacePopup) activePlacePopup.remove();
       if (searchInput) searchInput.value = "";
-      if (dock && dock.style.display !== "none" && dockToggle) dockToggle.click();
+      setDockOpen(false);
+      clearFiltersIfAny();
       map.flyTo({ center: CONFIG.center, zoom: CONFIG.initialZoom, bearing: 0, pitch: 0, speed: 1.6 });
       showClickHint("Map reset");
     }
@@ -1838,30 +1849,40 @@
 
     function syncDockToggleLabel(isOpen) {
       if (!dockToggle) return;
-      const showLabel = "Search World";
-      const hideLabel = "Hide Search World";
-      dockToggle.textContent = isOpen ? hideLabel : showLabel;
+      dockToggle.textContent = isOpen ? "Close" : "Search & Filters";
     }
 
+    function dockIsOpen() {
+      return Boolean(dock) && dock.style.display !== "none";
+    }
+    // single open/close path shared by the toggle, the panel ×, escape, and
+    // reset. closing clears the filters: a filter left on behind a closed
+    // panel is invisible state that quietly hides places with no cue. the
+    // body class hides the nearest banner, which overlays the open panel on
+    // phones, and lets it return on close.
+    function setDockOpen(open) {
+      if (!dock) return;
+      dock.style.display = open ? "flex" : "none";
+      document.body.classList.toggle("dock-open", open);
+      if (!open) {
+        if (searchInput) searchInput.blur();
+        clearFiltersIfAny();
+      }
+      syncDockToggleLabel(open);
+      requestAnimationFrame(syncInfoPosition);
+    }
     if (dockToggle) {
       if (dock) {
         dock.style.display = "none";
         syncDockToggleLabel(false);
       }
-      dockToggle.addEventListener("click", () => {
-        if (!dock) return;
-        const hidden = dock.style.display === "none";
-        dock.style.display = hidden ? "flex" : "none";
-        // the nearest banner overlays the open panel on phones; hide it
-        // while the dock is up and let it return on close
-        document.body.classList.toggle("dock-open", hidden);
-        if (!hidden && searchInput) {
-          searchInput.blur();
-        }
-        syncDockToggleLabel(hidden);
-        requestAnimationFrame(syncInfoPosition);
-      });
+      dockToggle.addEventListener("click", () => setDockOpen(!dockIsOpen()));
     }
+    const dockClose = document.getElementById("dock-close");
+    if (dockClose) dockClose.addEventListener("click", () => setDockOpen(false));
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && dockIsOpen()) setDockOpen(false);
+    });
 
     window.addEventListener("resize", () => {
       requestAnimationFrame(() => {
@@ -2021,6 +2042,145 @@
       taoist: 0,
       unknown: 0
     };
+
+    // ---- search-panel filters ----------------------------------------------
+    // one clause builder feeds the layer filters, the counts key (which reads
+    // rendered features, so it follows the layer filter), and the nearest
+    // search. religion chips cover the palette; christian denominations group
+    // raw osm values through the taxonomy's alias table.
+    const KNOWN_RELIGIONS = countLabels.filter((c) => c.key !== "unknown").map((c) => c.key);
+    const CHRISTIAN_BUCKET_CODES = [
+      "christian.anglican", "christian.catholic", "christian.presbyterian",
+      "christian.methodist", "christian.baptist", "christian.pentecostal",
+      "christian.orthodox", "christian.latter_day_saints"
+    ];
+    const religionFilterState = {};
+    countLabels.forEach((c) => { religionFilterState[c.key] = true; });
+    const denomFilterState = { __other: true };
+    let christianBuckets = null; // [{ code, label, aliases }] from the taxonomy
+
+    async function loadDenominationBuckets() {
+      try {
+        const res = await fetch("../../schemas/denomination-taxonomy.json");
+        if (!res.ok) throw new Error(`taxonomy fetch ${res.status}`);
+        const tax = await res.json();
+        christianBuckets = CHRISTIAN_BUCKET_CODES.map((code) => {
+          const entry = (tax.denominations || []).find((d) => d.code === code);
+          if (!entry) return null;
+          const en = (entry.labels || []).find((l) => l.lang === "en");
+          return {
+            code,
+            label: en ? en.label.replace(/\s*\(.*\)$/, "") : code.split(".")[1],
+            aliases: (entry.osm_aliases || []).map((a) => a.toLowerCase())
+          };
+        }).filter(Boolean);
+        christianBuckets.forEach((b) => { denomFilterState[b.code] = true; });
+      } catch (error) {
+        // religion filters still work without the taxonomy
+        christianBuckets = null;
+      }
+      buildFilterUi();
+    }
+
+    function allFiltersOn() {
+      const religionsOn = countLabels.every((c) => religionFilterState[c.key]);
+      const denomsOn = !christianBuckets ||
+        (denomFilterState.__other && christianBuckets.every((b) => denomFilterState[b.code]));
+      return religionsOn && denomsOn;
+    }
+
+    function currentFilterClauses() {
+      if (allFiltersOn()) return null;
+      const rel = ["coalesce", ["get", "religion"], "unknown"];
+      const checked = KNOWN_RELIGIONS.filter((k) => religionFilterState[k]);
+      const otherChecked = Boolean(religionFilterState.unknown);
+      const religionClause = ["any",
+        checked.length ? ["match", rel, checked, true, false] : false,
+        otherChecked ? ["!", ["match", rel, KNOWN_RELIGIONS, true, false]] : false
+      ];
+      if (!christianBuckets || !religionFilterState.christian) return religionClause;
+      const bucketsOn = christianBuckets.filter((b) => denomFilterState[b.code]);
+      const allBuckets = denomFilterState.__other && bucketsOn.length === christianBuckets.length;
+      if (allBuckets) return religionClause;
+      const aliases = bucketsOn.flatMap((b) => b.aliases);
+      const denom = ["downcase", ["to-string", ["coalesce", ["get", "denomination"], ""]]];
+      const denomMatch = aliases.length
+        ? ["match", denom, aliases, true, Boolean(denomFilterState.__other)]
+        : Boolean(denomFilterState.__other);
+      // non-christian features pass untouched; christian ones face the buckets
+      return ["all", religionClause, ["any", ["!=", rel, "christian"], denomMatch]];
+    }
+
+    function applyFilters() {
+      const clauses = currentFilterClauses();
+      if (map.getLayer(LAYERS.places)) map.setFilter(LAYERS.places, clauses);
+      if (map.getLayer(LAYERS.overview)) map.setFilter(LAYERS.overview, clauses);
+      updateCounts();
+      if (referencePoint()) scheduleNearestUpdate();
+    }
+
+    function clearFiltersIfAny() {
+      if (allFiltersOn()) return;
+      countLabels.forEach((c) => { religionFilterState[c.key] = true; });
+      denomFilterState.__other = true;
+      if (christianBuckets) christianBuckets.forEach((b) => { denomFilterState[b.code] = true; });
+      buildFilterUi();
+      applyFilters();
+    }
+
+    function filterChip(group, key, label, colour, state, onChange) {
+      const chip = document.createElement("label");
+      chip.className = "filter-chip" + (state[key] ? "" : " unchecked");
+      const box = document.createElement("input");
+      box.type = "checkbox";
+      box.checked = Boolean(state[key]);
+      box.addEventListener("change", () => {
+        state[key] = box.checked;
+        chip.classList.toggle("unchecked", !box.checked);
+        onChange();
+      });
+      chip.appendChild(box);
+      if (colour) {
+        const dot = document.createElement("span");
+        dot.className = "dot";
+        dot.style.background = colour;
+        chip.appendChild(dot);
+      }
+      chip.appendChild(document.createTextNode(label));
+      group.appendChild(chip);
+    }
+
+    function buildFilterUi() {
+      const wrap = document.getElementById("dock-filters");
+      const religionGroup = document.getElementById("religion-filters");
+      const denomGroup = document.getElementById("denom-filters");
+      if (!wrap || !religionGroup || !denomGroup) return;
+      religionGroup.innerHTML = "";
+      denomGroup.innerHTML = "";
+      countLabels.forEach((c) => {
+        filterChip(religionGroup, c.key, c.label, c.color, religionFilterState, () => {
+          syncDenomVisibility();
+          applyFilters();
+        });
+      });
+      if (christianBuckets) {
+        christianBuckets.forEach((b) => {
+          filterChip(denomGroup, b.code, b.label, null, denomFilterState, applyFilters);
+        });
+        filterChip(denomGroup, "__other", "Other Christian", null, denomFilterState, applyFilters);
+      }
+      wrap.hidden = false;
+      syncDenomVisibility();
+    }
+
+    function syncDenomVisibility() {
+      const denomGroup = document.getElementById("denom-filters");
+      if (!denomGroup) return;
+      denomGroup.hidden = !(christianBuckets && religionFilterState.christian);
+    }
+
+    loadDenominationBuckets();
+
     const COUNTS_MIN_INTERVAL_MS = 160;
     let countsUserEnabled = false;
     let countsLastUpdate = 0;

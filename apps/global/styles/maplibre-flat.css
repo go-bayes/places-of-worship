@@ -906,3 +906,57 @@
 
 /* the nearest banner overlays the open search panel; yield while it is up */
 body.dock-open #nearest-place { display: none; }
+
+/* filter chips inside the search panel */
+.dock-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 2px 2px;
+}
+.filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #e2e8f0;
+  background: rgba(148,163,184,0.14);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 999px;
+  padding: 3px 9px;
+  cursor: pointer;
+  user-select: none;
+}
+.filter-chip input {
+  margin: 0;
+  width: 13px;
+  height: 13px;
+  accent-color: #3b82f6;
+}
+.filter-chip .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+}
+.filter-chip.unchecked { opacity: 0.45; }
+#denom-filters {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 6px;
+}
+#dock-close {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 6px;
+  flex: none;
+}
+#dock-close:hover { color: #fff; }
