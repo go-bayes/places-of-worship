@@ -5,6 +5,54 @@ and what remains open. `CHANGELOG.md` records what changed; this file records
 the reasoning that should remain visible when the project is reported, audited,
 or handed to collaborators.
 
+## 2026-06-12: Keep reserved hues for location features, separate by shape
+
+Decision:
+Port the reliefmap location features with their reserved hues intact: the
+user-location dot stays the idiomatic blue and the planning pin stays amber.
+Marker shape carries the distinction from the religion palette, which uses
+blue for Jewish sites and orange/yellow for Hindu and Buddhist sites.
+
+Rationale:
+The blue dot with a white ring and pulsing halo is a cross-application idiom
+users already know, and site markers are small flat circles, so morphology
+separates the two at normal zooms. Recolouring the religion palette would
+change the research-facing colour vocabulary on the public map for the sake
+of an interaction affordance; recolouring the dot would discard the idiom.
+Shape-based separation costs nothing now and leaves both palettes untouched.
+
+Consequences:
+The geolocate control ships with MapLibre's default dot styling, enlarged on
+phones. The planning pin, when ported, uses relief's amber. If low-zoom
+confusion between the dot and Jewish site markers appears in real use, the
+fallback is a palette adjustment, which remains available.
+
+## 2026-06-12: Adjudicate the revisions-pipeline decisions into a register
+
+Decision:
+Adjudicate the design decisions raised by `CRITIQUE.md` and the open items in
+`PLANNING.md` that intersect the revisions pipeline, and record the rulings in
+`DECISIONS.md` with rationale, what each ruling forecloses, and the cost to
+reverse it.
+
+Rationale:
+Several critique recommendations had already been implemented in the schemas
+and `pow-cli` without a record stating that they are commitments rather than
+provisional code. Other decisions remained genuinely open, and two PLANNING.md
+entries contradicted the built system. A register separates the rulings from
+the dated narrative in this journal and gives each one a named reversal cost,
+so future work can tell which choices are cheap to revisit and which would
+rewrite accepted data.
+
+Consequences:
+Sixteen rulings now stand, most ratifying the implemented design. Schema
+changes land with the register: `taxonomy_version` is now required for any
+denomination-bearing payload, and the denomination vocabulary becomes a
+versioned artefact at `schemas/denomination-taxonomy.json` with supersession
+links and review-flagged placements. The PLANNING.md open items on historical
+and demolished places and on Rust adoption timing close with pointers to the
+register.
+
 ## 2026-05-15: Make missing-address review explicit in the RA workflow
 
 Decision:

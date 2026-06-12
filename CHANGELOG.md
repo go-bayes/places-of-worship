@@ -2,6 +2,53 @@
 
 ## Unreleased
 
+### 2026-06-12
+
+- Fixed the global map's fullscreen mode hiding the HUD, dock, and buttons:
+  the fullscreen control now fullscreens `document.body` rather than the map
+  element alone.
+- Replaced `isStyleLoaded()` gates in the global map's click handlers and
+  counts panel with layer-presence guards, so taps and key updates are no
+  longer silently dropped during repaints (worst around basemap switches).
+- Added a blue-dot geolocate control to the global map for all devices
+  (high accuracy, follow mode, larger dot on phones) — the first feature of
+  the reliefmap location-features port described in
+  `docs/development/location-features-from-reliefmap.md`.
+- Added a labelled `Near Me` pill beside `Search World` that drives the
+  geolocate control's state machine, replacing the stock icon; on phones the
+  pill row sits above the corner basemap control with 44 px touch targets.
+- The global map now lands on the keyed Backdrop theme wherever a MapTiler
+  key exists and falls back to the free CARTO style once if the key is
+  blocked, rate-limited, or out of credit.
+- Shortened the global map's onboarding card to two bullets and moved its
+  copy to NZ English; the fix-on-OSM route now lives in the wordmark's
+  fix-map link and the card's `How to fix data` button.
+- Added a top-right wordmark pill with a GitHub repo link and an OSM
+  fix-map deep-link that opens the editor at the current view (desktop
+  only).
+- Added the measuring point and nearest banner from the reliefmap port:
+  distances answer from the blue dot (later the planning pin), the banner
+  reports the nearest place of worship as the crow flies with a walk
+  estimate, and tapping it opens Google Maps walking directions. The
+  nearest search queries the detailed places source only, never the
+  low-zoom overview tier.
+- Added `DECISIONS.md`, a register of sixteen adjudicated rulings for the
+  revisions pipeline, each with rationale, what it forecloses, and the cost
+  to reverse.
+- Added `schemas/denomination-taxonomy.schema.json` and the first versioned
+  vocabulary instance `schemas/denomination-taxonomy.json`
+  (`taxonomy_version` 2026-06-12.1), promoting the controlled vocabulary out
+  of `apps/regions/nz/js/denomination-mapper.js`. Contested placements follow
+  the Stats NZ standard classification and carry review flags.
+- Tightened `schemas/change-event.schema.json`: `taxonomy_version` is now
+  required for any denomination-bearing payload (previously only for
+  `denomination_*` event types), `client_event_id` must be non-empty, and the
+  descriptions state the bitemporal replay rule.
+- Updated `docs/examples/revisions/nz-relocation.jsonl` to pin the v1
+  taxonomy and use dotted denomination codes. Bare codes remaining in other
+  example files and `pow-cli` fixtures are migration debt before
+  taxonomy-membership validation is enforced.
+
 ### 2026-05-23
 
 - Added temporary Vanuatu source-first portal entry points that use the shared
