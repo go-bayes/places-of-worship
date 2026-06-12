@@ -751,3 +751,38 @@
     border-width: 3px;
   }
 }
+
+/* top-right wordmark: repo link plus an osm fix-map deep-link */
+#wordmark {
+  position: fixed;
+  right: var(--safe-right);
+  top: var(--safe-top);
+  z-index: 12;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15,23,42,0.55);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #cbd5e1;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  opacity: 0.85;
+}
+#wordmark a {
+  color: #e2e8f0;
+  text-decoration: none;
+  white-space: nowrap;
+}
+#wordmark a + a {
+  border-left: 1px solid rgba(255,255,255,0.18);
+  padding-left: 8px;
+}
+#wordmark a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+@media (max-width: 640px) {
+  #wordmark { display: none; }
+}

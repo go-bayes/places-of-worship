@@ -37,6 +37,10 @@
       <a role="menuitem" href="https://github.com/go-bayes/places-of-worship">GitHub Repo</a>
     </div>
   </div>
+  <div id="wordmark">
+    <a id="wordmark-repo" href="https://github.com/go-bayes/places-of-worship" target="_blank" rel="noopener" title="Project repository on GitHub">GitHub</a>
+    <a id="fixmap-link" href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener" title="Improve this map area on OpenStreetMap">fix map</a>
+  </div>
   <div id="theme-menu">
     <select id="basemapSelect" aria-label="Theme"></select>
   </div>
@@ -348,6 +352,17 @@
         geolocate.on("geolocate", syncNearMe);
         geolocate.on("error", syncNearMe);
       }
+    }
+
+    // the wordmark's fix-map link deep-links the osm editor to whatever the
+    // user is looking at; href is computed at click time so it tracks the view
+    const fixmapLink = document.getElementById("fixmap-link");
+    if (fixmapLink) {
+      fixmapLink.addEventListener("click", () => {
+        const centre = map.getCenter();
+        const zoom = Math.round(map.getZoom());
+        fixmapLink.href = `https://www.openstreetmap.org/edit#map=${zoom}/${centre.lat.toFixed(5)}/${centre.lng.toFixed(5)}`;
+      });
     }
 
     let pinnedLabel = null;
