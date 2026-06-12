@@ -526,22 +526,40 @@
     }
     #counts-toggle {
       z-index: 12;
-      padding: 10px 22px;
+      /* compact pull-down: three palette dots and a caret, panel on tap */
+      padding: 7px 14px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.08);
       background: rgba(15,23,42,0.72);
       color: #e2e8f0;
-      font-size: 18px;
+      font-size: 14px;
       cursor: pointer;
       display: inline-flex;
+      align-items: center;
+      gap: 6px;
       width: auto;
-      min-width: 200px;
+      min-width: 0;
       justify-content: center;
       box-shadow: 0 8px 16px rgba(0,0,0,0.28);
       letter-spacing: 0.01em;
       opacity: 0.85;
       white-space: nowrap;
     }
+    #counts-toggle .key-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex: none;
+    }
+    #counts-toggle .key-label {
+      font-weight: 600;
+      margin-left: 2px;
+    }
+    #counts-toggle .key-caret {
+      color: #94a3b8;
+      font-size: 12px;
+    }
+    #counts-toggle[disabled] { opacity: 0.45; cursor: default; }
     #counts {
       display: none;
       z-index: 11;
@@ -608,9 +626,8 @@
       line-height: 1.05;
       box-shadow: 0 5px 10px rgba(15,23,42,0.2);
     }
-    body:not(.show-attribution) .maplibregl-ctrl-attrib {
-      display: none;
-    }
+    /* the osm credit stays visible: the places data is odbl, and the
+       basemap credits ride in the same small pill */
     .maplibregl-ctrl-attrib a {
       color: #0f172a;
     }

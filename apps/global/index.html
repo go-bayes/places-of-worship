@@ -287,7 +287,9 @@
       minZoom: IS_MOBILE ? CONFIG.mobileMinZoom : CONFIG.desktopMinZoom
     });
 
-    map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
+    // full (non-collapsing) attribution: the osm credit stays readable
+    // without interaction, in the small corner idiom
+    map.addControl(new maplibregl.AttributionControl({ compact: false }), "bottom-right");
 
     // fall back to the free carto basemap when the keyed maptiler style or
     // tiles stop loading: 401/403 key blocked or credit exhausted, 429
@@ -1275,7 +1277,14 @@
 
     let overviewMobileHandlerAttached = false;
     function addOverviewLayer() {
-      map.addSource(SOURCES.overview, { type: "vector", tiles: [CONFIG.tiles.overview], minzoom: 0, maxzoom: 6 });
+      map.addSource(SOURCES.overview, {
+        type: "vector",
+        tiles: [CONFIG.tiles.overview],
+        minzoom: 0,
+        maxzoom: 6,
+        // the places data is odbl: credit is required, not courtesy
+        attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
+      });
       map.addLayer({
         id: LAYERS.overview,
         type: "circle",
@@ -1324,7 +1333,13 @@
 
     let placesHandlersAttached = false;
     function addPlacesLayer() {
-      map.addSource(SOURCES.places, { type: "vector", tiles: [CONFIG.tiles.places], minzoom: 6, maxzoom: 18 });
+      map.addSource(SOURCES.places, {
+        type: "vector",
+        tiles: [CONFIG.tiles.places],
+        minzoom: 6,
+        maxzoom: 18,
+        attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
+      });
       map.addLayer({
         id: LAYERS.places,
         type: "circle",
@@ -1783,7 +1798,6 @@
       if (infoMenu.hidden) return;
       infoMenu.hidden = true;
       infoToggle.setAttribute("aria-expanded", "false");
-      document.body.classList.remove("show-attribution");
     }
 
     function showOnboard() {
@@ -1821,7 +1835,6 @@
         const shouldOpen = infoMenu.hidden;
         infoMenu.hidden = !shouldOpen;
         infoToggle.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
-        document.body.classList.toggle("show-attribution", shouldOpen);
       });
       document.addEventListener("click", (event) => {
         if (infoMenu.hidden) return;
@@ -2442,10 +2455,18 @@
     let countsLastUpdate = 0;
     let countsScheduled = false;
 
+    // compact pull-down: three colour dots hint at the palette, the panel
+    // holds the full key. dots follow the top categories in view.
+    let countsTopThree = null;
     function syncCountsToggleLabel() {
       if (!countsToggle) return;
-      countsToggle.textContent = countsUserEnabled ? "Hide Denomination Key" : "Show Denomination Key";
+      const top = countsTopThree && countsTopThree.length ? countsTopThree : countLabels.slice(0, 3);
+      countsToggle.innerHTML =
+        top.map((c) => `<span class="key-dot" style="background:${c.color}"></span>`).join("") +
+        `<span class="key-label">Key</span>` +
+        `<span class="key-caret" aria-hidden="true">${countsUserEnabled ? "▴" : "▾"}</span>`;
       countsToggle.setAttribute("aria-expanded", countsUserEnabled ? "true" : "false");
+      countsToggle.setAttribute("aria-label", countsUserEnabled ? "Hide denomination key" : "Show denomination key");
     }
 
     if (countsToggle) {
@@ -2471,6 +2492,13 @@
         countsList.appendChild(item);
       });
       countsTotal.textContent = `Total: ${total.toLocaleString()}`;
+      // feed the toggle's hint dots with the categories that lead this view
+      const ranked = countLabels
+        .filter((c) => (counts[c.key] || 0) > 0)
+        .sort((a, b) => (counts[b.key] || 0) - (counts[a.key] || 0))
+        .slice(0, 3);
+      countsTopThree = ranked.length ? ranked : null;
+      syncCountsToggleLabel();
     }
 
     function updateCounts() {
@@ -2499,7 +2527,7 @@
           countsToggle.disabled = disableToggle;
           countsToggle.setAttribute("aria-disabled", disableToggle ? "true" : "false");
           if (!eligibleZoom && disableToggle) {
-            countsToggle.textContent = "Zoom in for key";
+            syncCountsToggleLabel();
             countsToggle.setAttribute("aria-expanded", "false");
           } else {
             syncCountsToggleLabel();
