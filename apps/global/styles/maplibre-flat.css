@@ -945,10 +945,23 @@ body.dock-open #nearest-place { display: none; }
   flex: none;
 }
 .filter-chip.unchecked { opacity: 0.45; }
+/* the denomination row nests under the christian chip */
 #denom-filters {
-  border-top: 1px solid rgba(255,255,255,0.08);
-  padding-top: 6px;
+  margin-left: 14px;
+  border-left: 2px solid rgba(255,255,255,0.14);
+  padding-left: 10px;
 }
+.dock-filters-row { min-height: 0; }
+#filters-toggle {
+  background: none;
+  border: none;
+  color: #cbd5e1;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+#filters-toggle:hover { color: #fff; }
 #dock-close {
   background: none;
   border: none;

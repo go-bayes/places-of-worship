@@ -82,6 +82,9 @@
         <div class="dock-row dock-cities-row">
           <div class="dock-cities" id="cityChips"></div>
         </div>
+        <div class="dock-row dock-filters-row">
+          <button id="filters-toggle" type="button" aria-expanded="false" aria-controls="dock-filters">Filters ▾</button>
+        </div>
         <div class="dock-filters" id="dock-filters" hidden>
           <div class="filter-group" id="religion-filters" role="group" aria-label="Filter by religion"></div>
           <div class="filter-group" id="denom-filters" role="group" aria-label="Filter Christian denominations" hidden></div>
@@ -1867,6 +1870,10 @@
       if (!open) {
         if (searchInput) searchInput.blur();
         clearFiltersIfAny();
+        // reopen spare: the disclosure starts collapsed each time
+        const filtersWrap = document.getElementById("dock-filters");
+        if (filtersWrap) filtersWrap.hidden = true;
+        syncFiltersToggleLabel();
       }
       syncDockToggleLabel(open);
       requestAnimationFrame(syncInfoPosition);
@@ -2047,7 +2054,10 @@
     // one clause builder feeds the layer filters, the counts key (which reads
     // rendered features, so it follows the layer filter), and the nearest
     // search. religion chips cover the palette; christian denominations group
-    // raw osm values through the taxonomy's alias table.
+    // raw osm values through the taxonomy's alias table. the christian chip
+    // is the tri-state master of its denomination row, so the subtype
+    // relation is structural: picking anglican alone shows christian as
+    // partially on, and there is no way to select anglican without christian.
     const KNOWN_RELIGIONS = countLabels.filter((c) => c.key !== "unknown").map((c) => c.key);
     const CHRISTIAN_BUCKET_CODES = [
       "christian.anglican", "christian.catholic", "christian.presbyterian",
@@ -2082,33 +2092,45 @@
       buildFilterUi();
     }
 
+    // christian participation derives from the denomination boxes
+    function christianTotals() {
+      if (!christianBuckets) return null;
+      const total = christianBuckets.length + 1; // + other christian
+      const on = christianBuckets.filter((b) => denomFilterState[b.code]).length +
+        (denomFilterState.__other ? 1 : 0);
+      return { on, total };
+    }
+
     function allFiltersOn() {
-      const religionsOn = countLabels.every((c) => religionFilterState[c.key]);
-      const denomsOn = !christianBuckets ||
-        (denomFilterState.__other && christianBuckets.every((b) => denomFilterState[b.code]));
-      return religionsOn && denomsOn;
+      const others = countLabels.every((c) => c.key === "christian" || religionFilterState[c.key]);
+      const totals = christianTotals();
+      const christianOn = totals ? totals.on === totals.total : Boolean(religionFilterState.christian);
+      return others && christianOn;
     }
 
     function currentFilterClauses() {
       if (allFiltersOn()) return null;
       const rel = ["coalesce", ["get", "religion"], "unknown"];
-      const checked = KNOWN_RELIGIONS.filter((k) => religionFilterState[k]);
+      const totals = christianTotals();
+      const christianFull = totals ? totals.on === totals.total : Boolean(religionFilterState.christian);
+      const christianNone = totals ? totals.on === 0 : !religionFilterState.christian;
+      const fullReligions = KNOWN_RELIGIONS.filter((k) =>
+        k === "christian" ? christianFull : religionFilterState[k]);
       const otherChecked = Boolean(religionFilterState.unknown);
-      const religionClause = ["any",
-        checked.length ? ["match", rel, checked, true, false] : false,
+      const parts = [
+        fullReligions.length ? ["match", rel, fullReligions, true, false] : false,
         otherChecked ? ["!", ["match", rel, KNOWN_RELIGIONS, true, false]] : false
       ];
-      if (!christianBuckets || !religionFilterState.christian) return religionClause;
-      const bucketsOn = christianBuckets.filter((b) => denomFilterState[b.code]);
-      const allBuckets = denomFilterState.__other && bucketsOn.length === christianBuckets.length;
-      if (allBuckets) return religionClause;
-      const aliases = bucketsOn.flatMap((b) => b.aliases);
-      const denom = ["downcase", ["to-string", ["coalesce", ["get", "denomination"], ""]]];
-      const denomMatch = aliases.length
-        ? ["match", denom, aliases, true, Boolean(denomFilterState.__other)]
-        : Boolean(denomFilterState.__other);
-      // non-christian features pass untouched; christian ones face the buckets
-      return ["all", religionClause, ["any", ["!=", rel, "christian"], denomMatch]];
+      if (totals && !christianFull && !christianNone) {
+        // partially-selected christianity: only the chosen buckets pass
+        const aliases = christianBuckets.filter((b) => denomFilterState[b.code]).flatMap((b) => b.aliases);
+        const denom = ["downcase", ["to-string", ["coalesce", ["get", "denomination"], ""]]];
+        const denomMatch = aliases.length
+          ? ["match", denom, aliases, true, Boolean(denomFilterState.__other)]
+          : Boolean(denomFilterState.__other);
+        parts.push(["all", ["==", rel, "christian"], denomMatch]);
+      }
+      return ["any", ...parts];
     }
 
     function applyFilters() {
@@ -2150,71 +2172,138 @@
       group.appendChild(chip);
     }
 
-    // one tri-state box per row does select-all and unselect-all: a click
-    // from checked clears the row, from unchecked or mixed it fills it, and
-    // the indeterminate dash shows a mixed row at a glance
-    function masterChip(group, keys, state, label) {
+    // the row-leading box selects or clears everything, denominations
+    // included; the indeterminate dash shows a mixed state at a glance
+    function religionMasterChip(group) {
       const chip = document.createElement("label");
       chip.className = "filter-chip filter-chip-all";
       const box = document.createElement("input");
       box.type = "checkbox";
-      const sync = () => {
-        const on = keys.filter((k) => state[k]).length;
-        box.checked = on === keys.length;
-        box.indeterminate = on > 0 && on < keys.length;
-        chip.classList.toggle("unchecked", on === 0);
-      };
-      sync();
+      const totals = christianTotals();
+      let on = countLabels.filter((c) => c.key !== "christian" && religionFilterState[c.key]).length;
+      let total = countLabels.length;
+      if (totals) {
+        on += totals.on > 0 ? (totals.on === totals.total ? 1 : 0.5) : 0;
+      } else if (religionFilterState.christian) {
+        on += 1;
+      }
+      box.checked = on === total;
+      box.indeterminate = on > 0 && on < total;
+      chip.classList.toggle("unchecked", on === 0);
       box.addEventListener("change", () => {
         const target = box.checked;
-        keys.forEach((k) => { state[k] = target; });
+        countLabels.forEach((c) => { religionFilterState[c.key] = target; });
+        if (christianBuckets) {
+          christianBuckets.forEach((b) => { denomFilterState[b.code] = target; });
+          denomFilterState.__other = target;
+        }
         buildFilterUi();
         applyFilters();
       });
       chip.appendChild(box);
-      chip.appendChild(document.createTextNode(label));
+      chip.appendChild(document.createTextNode("All"));
       group.appendChild(chip);
-      return sync;
+    }
+
+    // the christian chip doubles as the master of the denomination row
+    function christianMasterChip(group) {
+      const c = countLabels.find((x) => x.key === "christian");
+      const chip = document.createElement("label");
+      chip.className = "filter-chip";
+      const box = document.createElement("input");
+      box.type = "checkbox";
+      const totals = christianTotals();
+      box.checked = totals.on === totals.total;
+      box.indeterminate = totals.on > 0 && totals.on < totals.total;
+      chip.classList.toggle("unchecked", totals.on === 0);
+      box.addEventListener("change", () => {
+        const target = box.checked;
+        christianBuckets.forEach((b) => { denomFilterState[b.code] = target; });
+        denomFilterState.__other = target;
+        religionFilterState.christian = target;
+        buildFilterUi();
+        applyFilters();
+      });
+      chip.appendChild(box);
+      const dot = document.createElement("span");
+      dot.className = "dot";
+      dot.style.background = c.color;
+      chip.appendChild(dot);
+      chip.appendChild(document.createTextNode(c.label));
+      group.appendChild(chip);
+    }
+
+    function onDenomChange() {
+      // mirror any-on into the stored flag, then refresh so the christian
+      // chip and the all box show the new mix
+      religionFilterState.christian = christianTotals().on > 0;
+      buildFilterUi();
+      applyFilters();
     }
 
     function buildFilterUi() {
-      const wrap = document.getElementById("dock-filters");
       const religionGroup = document.getElementById("religion-filters");
       const denomGroup = document.getElementById("denom-filters");
-      if (!wrap || !religionGroup || !denomGroup) return;
+      if (!religionGroup || !denomGroup) return;
       religionGroup.innerHTML = "";
       denomGroup.innerHTML = "";
-      const religionKeys = countLabels.map((c) => c.key);
-      const syncReligionMaster = masterChip(religionGroup, religionKeys, religionFilterState, "All");
+      religionMasterChip(religionGroup);
       countLabels.forEach((c) => {
+        if (c.key === "christian" && christianBuckets) {
+          christianMasterChip(religionGroup);
+          return;
+        }
         filterChip(religionGroup, c.key, c.label, c.color, religionFilterState, () => {
-          syncReligionMaster();
-          syncDenomVisibility();
+          buildFilterUi();
           applyFilters();
         });
       });
       if (christianBuckets) {
-        const denomKeys = [...christianBuckets.map((b) => b.code), "__other"];
-        const syncDenomMaster = masterChip(denomGroup, denomKeys, denomFilterState, "All");
         christianBuckets.forEach((b) => {
-          filterChip(denomGroup, b.code, b.label, null, denomFilterState, () => {
-            syncDenomMaster();
-            applyFilters();
-          });
+          filterChip(denomGroup, b.code, b.label, null, denomFilterState, onDenomChange);
         });
-        filterChip(denomGroup, "__other", "Other Christian", null, denomFilterState, () => {
-          syncDenomMaster();
-          applyFilters();
-        });
+        filterChip(denomGroup, "__other", "Other Christian", null, denomFilterState, onDenomChange);
       }
-      wrap.hidden = false;
       syncDenomVisibility();
+      syncFiltersToggleLabel();
     }
 
     function syncDenomVisibility() {
       const denomGroup = document.getElementById("denom-filters");
       if (!denomGroup) return;
-      denomGroup.hidden = !(christianBuckets && religionFilterState.christian);
+      const totals = christianTotals();
+      denomGroup.hidden = !(totals && totals.on > 0);
+    }
+
+    // collapsed by default so the panel stays spare; the label carries a
+    // count whenever anything is filtered, so collapsed filters are never
+    // invisible state
+    const filtersToggle = document.getElementById("filters-toggle");
+    function filtersOffCount() {
+      let off = countLabels.filter((c) => c.key !== "christian" && !religionFilterState[c.key]).length;
+      if (christianBuckets) {
+        off += christianBuckets.filter((b) => !denomFilterState[b.code]).length +
+          (denomFilterState.__other ? 0 : 1);
+      } else if (!religionFilterState.christian) {
+        off += 1;
+      }
+      return off;
+    }
+    function syncFiltersToggleLabel() {
+      if (!filtersToggle) return;
+      const wrap = document.getElementById("dock-filters");
+      const open = wrap && !wrap.hidden;
+      const off = filtersOffCount();
+      filtersToggle.textContent = `Filters${off ? ` (${off} off)` : ""} ${open ? "▴" : "▾"}`;
+      filtersToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+    if (filtersToggle) {
+      filtersToggle.addEventListener("click", () => {
+        const wrap = document.getElementById("dock-filters");
+        if (!wrap) return;
+        wrap.hidden = !wrap.hidden;
+        syncFiltersToggleLabel();
+      });
     }
 
     loadDenominationBuckets();
