@@ -4,6 +4,13 @@
 
 ### 2026-06-13
 
+- Filters now persist when the search panel closes; an indicator chip
+  beside the toggle shows the off-count and clears everything in one tap,
+  and reopening the panel shows the active filters. Filter state travels
+  in the URL fragment beside the camera, so filtered views are shareable.
+- Typing a category into search (mosque, synagogue, church, a religion
+  name, or a Christian denomination) now applies the matching filter and
+  closes the panel; longer queries geocode as before.
 - Restructured the filters: the Christian chip is now the tri-state master
   of its nested denomination row (selecting Anglican alone shows Christian
   as partially on, so a denomination can never be selected without its

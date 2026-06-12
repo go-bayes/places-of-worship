@@ -5,6 +5,33 @@ and what remains open. `CHANGELOG.md` records what changed; this file records
 the reasoning that should remain visible when the project is reported, audited,
 or handed to collaborators.
 
+## 2026-06-13: Filters persist across panel close; an indicator carries them
+
+Decision:
+Closing the global map's search panel no longer clears the filters. When
+the panel closes with filters active, a chip beside the toggle shows the
+off-count and clears everything in one tap; reopening the panel expands
+the filter section so active filters are in view; reset still clears.
+Filter state also travels in the URL fragment beside the camera, and an
+exact category typed into search (mosque, anglican, a religion name)
+applies the matching filter rather than geocoding.
+
+Rationale:
+The clear-on-close rule, inherited from the reliefmap fork, prevented
+invisible state. On this map it collided with the workflow the filters
+exist for: filtering is the analytical act, and closing the panel is how
+the user looks at the result. Clearing on close meant no one could ever
+see a filtered map without the panel covering it. The hazard was never
+persistence; it was state without a cue. Moving the cue outside the
+panel (the chip, the auto-expanded section on reopen, the off-list in
+the URL) removes the hazard while keeping the workflow.
+
+Consequences:
+A filtered view survives looking at it, can be shared as a link that
+arrives with its chip showing, and is always one tap from cleared. The
+reliefmap rule is retired here, and the earlier journal entries
+describing clear-on-close are superseded on that point.
+
 ## 2026-06-13: Map filters group denominations through the taxonomy aliases
 
 Decision:
