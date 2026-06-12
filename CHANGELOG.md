@@ -4,6 +4,12 @@
 
 ### 2026-06-13
 
+- The theme selector now rides in the wordmark pill beside GitHub and fix
+  map; phones fix the theme to Backdrop (the wordmark hides there, and the
+  credit fallback still applies).
+- Mobile pills dropped to the refresh button's line and the dock followed;
+  attribution uses MapLibre's responsive default — full text on desktop,
+  a tap-to-expand disc on phones.
 - Removed the nearest-place banner and its background nearest search;
   distances live in the place popups, and the tap-held guide line and
   planning pin remain (tap the pin to remove it).
