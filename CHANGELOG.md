@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-13
+
+- Fixed Near Me on phones: the pill is now a strict toggle (a tap after
+  panning turns location off rather than re-zooming to the user), the
+  nearest search no longer stacks deferred tile queries while location
+  tracking keeps the camera busy, and a denied browser permission now
+  explains where to re-enable location.
+
 ### 2026-06-12
 
 - Fixed the global map's fullscreen mode hiding the HUD, dock, and buttons:

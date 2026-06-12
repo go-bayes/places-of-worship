@@ -5,6 +5,33 @@ and what remains open. `CHANGELOG.md` records what changed; this file records
 the reasoning that should remain visible when the project is reported, audited,
 or handed to collaborators.
 
+## 2026-06-13: The near-me pill is a strict toggle, diverging from reliefmap
+
+Decision:
+On the worship map, tapping the near-me pill while location is on turns it
+fully off, whatever internal state the geolocate control is in. Reliefmap
+keeps MapLibre's stock semantics, where a tap after panning recentres on
+the user instead of switching off.
+
+Rationale:
+Recentre-on-tap suits reliefmap, where the user wants the nearest toilet
+from where they stand. The worship map is a browsing map: users locate
+themselves, then pan to distant places. Under stock semantics every pan
+demoted the control to its background state, so the next tap zoomed back
+to the user rather than turning location off — on a phone the pill felt
+stuck. A strict toggle makes the pill predictable; users who want a
+recentre tap twice.
+
+Consequences:
+The toggle reaches into the control's private _watchState to lift the
+background state before triggering, with the same graceful degradation as
+the existing state read: if a MapLibre upgrade removes the field, the pill
+falls back to stock semantics rather than breaking. Two further fixes
+shipped alongside: the nearest search keeps a single pending once-idle
+listener (continuous gps fixes kept the map non-idle and the old code
+stacked heavy tile queries), and a denied browser permission now tells the
+user where to re-enable location.
+
 ## 2026-06-12: One compass, shown on demand; refresh replaces the corner slot
 
 Decision:
