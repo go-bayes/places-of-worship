@@ -5,6 +5,30 @@ and what remains open. `CHANGELOG.md` records what changed; this file records
 the reasoning that should remain visible when the project is reported, audited,
 or handed to collaborators.
 
+## 2026-06-13: The guide line waits for a tap
+
+Decision:
+Turning on Near Me no longer draws the dashed guide line to the nearest
+place of worship. The banner still reports the nearest distance; the
+line appears only when the user taps a place and releases on a second
+tap.
+
+Rationale:
+The ambient nearest-line came from the reliefmap fork, where the user's
+need is urgent and the nearest answer is almost always the destination.
+On a browsing map the same line presumes a destination the user has not
+chosen, and draws attention to one arbitrary place the moment location
+turns on. Joseph's framing settled it: people are generally not busting
+for church as they would be for a loo. The same reasoning earlier made
+the near-me pill a strict toggle; reliefmap's urgency assumptions do not
+transfer to this map.
+
+Consequences:
+Location on means a dot and a distance readout, nothing more. The line
+becomes an expression of interest in a specific place, consistent with
+focus-survives-popup-close planning behaviour. The porting inventory's
+feature 6 is amended here rather than in the inherited form.
+
 ## 2026-06-13: Filters persist across panel close; an indicator carries them
 
 Decision:

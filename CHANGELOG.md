@@ -4,6 +4,12 @@
 
 ### 2026-06-13
 
+- The guide line now draws only when the user taps a place (and releases on
+  a second tap); Near Me shows the dot and the nearest-distance banner
+  without drawing a line unbidden.
+- Moved the attribution to the true bottom corner on phones, where it no
+  longer crosses the Search and Near Me pills; the filters disclosure became
+  a full-width 44 px touch target and its chips now build at page start.
 - The OpenStreetMap credit is now always on screen: both place tile sources
   declare ODbL attribution and the attribution pill no longer hides behind
   the info menu.
