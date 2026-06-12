@@ -4,8 +4,13 @@
 
 ### 2026-06-13
 
-- Added a tri-state `All` box to each filter row: one click selects or
-  clears the whole row, and a dash shows a mixed row.
+- Restructured the filters: the Christian chip is now the tri-state master
+  of its nested denomination row (selecting Anglican alone shows Christian
+  as partially on, so a denomination can never be selected without its
+  religion), and the rows sit behind a collapsed `Filters` disclosure whose
+  label carries an off-count whenever anything is filtered.
+- Added a tri-state `All` box that selects or clears every filter at once,
+  with a dash showing a mixed state.
 - Added search-panel filters: chips for the nine palette religions plus,
   while Christian is selected, eight major denomination buckets and Other
   Christian, grouped from raw OSM values through the denomination
