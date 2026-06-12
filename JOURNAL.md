@@ -5,6 +5,29 @@ and what remains open. `CHANGELOG.md` records what changed; this file records
 the reasoning that should remain visible when the project is reported, audited,
 or handed to collaborators.
 
+## 2026-06-13: The nearest banner retires
+
+Decision:
+The nearest-place banner is gone, and with it the nearest-search
+machinery that fed it. Location now gives the blue dot; distances appear
+in popups when the user opens a place; the tap-held guide line and the
+planning pin stay.
+
+Rationale:
+The banner pinned itself to whichever place happened to be nearest and
+followed the user around — an answer to a question nobody asked on a
+browsing map, occupying the screen the rest of the day's work had been
+clearing. The reasoning completes a sequence: the strict near-me toggle,
+then the line-on-tap, now this. Each removed an urgency assumption
+inherited from the reliefmap fork.
+
+Consequences:
+The ported feature 4 is retired rather than amended, and the per-move
+tile queries it required are gone with it. The pin's removal route is
+tapping the pin. If a nearest readout is ever wanted again, the popup
+distance rows and the taxonomy-filtered search are the surviving
+foundations to build from.
+
 ## 2026-06-13: The guide line waits for a tap
 
 Decision:

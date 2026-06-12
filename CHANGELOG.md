@@ -4,6 +4,9 @@
 
 ### 2026-06-13
 
+- Removed the nearest-place banner and its background nearest search;
+  distances live in the place popups, and the tap-held guide line and
+  planning pin remain (tap the pin to remove it).
 - Replaced the circular GitHub info badge with a compact theme selector
   pill under the wordmark (top corner on phones); the badge's links live in
   the wordmark and the repo, and the onboarding card still shows each new
