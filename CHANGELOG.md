@@ -26,6 +26,9 @@
 - Added a top-right wordmark pill with a GitHub repo link and an OSM
   fix-map deep-link that opens the editor at the current view (desktop
   only).
+- Added the planning pin: right-click or touch-hold drops a draggable amber
+  pin that becomes the measuring point, with nearest-to-pin readouts,
+  pin-origin directions, and tap-or-× removal.
 - Added the measuring point and nearest banner from the reliefmap port:
   distances answer from the blue dot (later the planning pin), the banner
   reports the nearest place of worship as the crow flies with a walk
