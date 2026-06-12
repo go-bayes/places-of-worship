@@ -604,6 +604,15 @@
         top: calc(var(--safe-top) + 10px);
         max-width: min(88vw, 360px);
       }
+      /* the hint toast wraps inside the screen instead of running off it */
+      #click-hint {
+        font-size: 14px;
+        padding: 8px 14px;
+        max-width: 86vw;
+        white-space: normal;
+        text-align: center;
+        border-radius: 16px;
+      }
       .dock-cities-row { display: none; }
       /* attribution tucks below the lifted pill row */
       .maplibregl-ctrl-bottom-right { bottom: 0; }
