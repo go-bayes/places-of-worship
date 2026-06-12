@@ -55,6 +55,7 @@
     <button id="dock-toggle" type="button">Search World</button>
     <button id="near-me" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
   </div>
+  <div id="nearest-place" role="status" aria-live="polite"></div>
   <div id="counts-wrap">
     <div id="counts-bar">
       <button id="counts-toggle" type="button" aria-controls="counts" aria-expanded="false">Show Denomination Key</button>
@@ -361,6 +362,165 @@
         const centre = map.getCenter();
         const zoom = Math.round(map.getZoom());
         fixmapLink.href = `https://www.openstreetmap.org/edit#map=${zoom}/${centre.lat.toFixed(5)}/${centre.lng.toFixed(5)}`;
+      });
+    }
+
+    // ---- measuring point ---------------------------------------------------
+    // every distance answers from one reference: the planning pin when down
+    // (ported in a later step), otherwise the blue dot.
+    let userLocation = null;   // [lng, lat] from the last geolocate fix
+    let pinLocation = null;    // [lng, lat] of the planning pin, once ported
+    let nearestPlace = null;   // { coords, props, metres } or null
+    let nearestUpdateTimer = null;
+
+    function referencePoint() {
+      return pinLocation || userLocation;
+    }
+
+    // great-circle distance in metres; ample precision for a banner readout
+    function haversineMetres(a, b) {
+      const toRad = (deg) => (deg * Math.PI) / 180;
+      const earthRadius = 6371000;
+      const dLat = toRad(b[1] - a[1]);
+      const dLng = toRad(b[0] - a[0]);
+      const h = Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(a[1])) * Math.cos(toRad(b[1])) * Math.sin(dLng / 2) ** 2;
+      return 2 * earthRadius * Math.asin(Math.sqrt(h));
+    }
+
+    geolocate.on("geolocate", (event) => {
+      userLocation = [event.coords.longitude, event.coords.latitude];
+      scheduleNearestUpdate();
+    });
+
+    geolocate.on("error", () => {
+      showClickHint("Location unavailable");
+    });
+
+    geolocate.on("trackuserlocationend", () => {
+      // fires when dropping to the background state too; only clear once the
+      // watch is fully off (blue dot removed). _watchState is private, so an
+      // api change degrades to keeping the banner rather than crashing.
+      if (geolocate._watchState && geolocate._watchState !== "OFF") return;
+      userLocation = null;
+      if (pinLocation) {
+        // the pin remains the measuring point
+        updateNearestPlace();
+        return;
+      }
+      nearestPlace = null;
+      syncNearestBanner();
+    });
+
+    // a new measuring point invalidates the previous nearest answer; if the
+    // recompute is skipped (point off-screen) the banner still flips to the
+    // honest "not found yet" state instead of keeping a stale distance
+    function referenceChanged() {
+      nearestPlace = null;
+      updateNearestPlace();
+      syncNearestBanner();
+    }
+
+    // ---- nearest place of worship -------------------------------------------
+    // walking directions; when the planning pin is down it becomes the
+    // origin, otherwise google uses the device's current location
+    function directionsUrl(latFixed, lngFixed) {
+      const origin = pinLocation
+        ? `&origin=${pinLocation[1].toFixed(6)},${pinLocation[0].toFixed(6)}`
+        : "";
+      return `https://www.google.com/maps/dir/?api=1&destination=${latFixed},${lngFixed}&travelmode=walking${origin}`;
+    }
+
+    function formatDistance(metres) {
+      if (metres < 950) return `${Math.max(10, Math.round(metres / 10) * 10)} m`;
+      return `${(metres / 1000).toFixed(1)} km`;
+    }
+
+    // walk estimate: straight-line distance inflated by a typical
+    // street-network detour factor (1.3) at 4.8 km/h; omitted beyond a
+    // plausible walking trip. distances themselves stay as the crow flies,
+    // and the ui says so — hills and harbours ignore the haversine.
+    function walkSuffix(metres) {
+      const minutes = (metres * 1.3) / 80;
+      return minutes <= 90 ? ` · ~${Math.max(1, Math.round(minutes))} min walk` : "";
+    }
+
+    const nearestBanner = document.getElementById("nearest-place");
+
+    function syncNearestBanner() {
+      if (!nearestBanner) return;
+      if (!referencePoint()) {
+        nearestBanner.classList.remove("visible");
+        return;
+      }
+      const fromPin = Boolean(pinLocation);
+      // the places source carries tiles from zoom 6 up, so the helpful empty
+      // hint depends on which side of that boundary the user is on
+      const emptyHint = map.getZoom() < 6 ? "zoom in to load places" : "try zooming out";
+      const label = nearestPlace
+        ? `${fromPin ? "Nearest to pin" : "Nearest place of worship"}: ${formatDistance(nearestPlace.metres)}` +
+          `${walkSuffix(nearestPlace.metres)} <span class="nearest-cf">· crow flies</span>`
+        : `No places of worship found ${fromPin ? "near the pin" : "near you"} yet — ${emptyHint}`;
+      nearestBanner.innerHTML =
+        `<button type="button" class="nearest-go" title="Walking directions (Google Maps)">` +
+        `<span class="nearest-dot${fromPin ? " pin" : ""}"></span><span>${label}</span>` +
+        (nearestPlace ? `<span class="nearest-chevron" aria-hidden="true">↗</span>` : "") +
+        `</button>`;
+      nearestBanner.classList.add("visible");
+    }
+
+    // the places source only exposes features in loaded tiles (zoom 6 up),
+    // so the search runs after the geolocate fly-to settles and re-runs on
+    // later moves; when the fix is off-screen the previous answer is kept
+    // rather than recomputed against tiles far from the user. nearest
+    // deliberately queries the detailed places source, never the thinned
+    // low-zoom overview tier. no layer filters exist on this map today; if
+    // religion filters arrive they must thread into this query too.
+    function updateNearestPlace() {
+      const ref = referencePoint();
+      if (!ref || !map.getSource(SOURCES.places)) return;
+      if (!map.getBounds().contains({ lng: ref[0], lat: ref[1] })) return;
+      const features = map.querySourceFeatures(SOURCES.places, { sourceLayer: PLACES_LAYER });
+      // tiles duplicate features at boundaries; dedupe on the osm identity
+      const seen = new Set();
+      let best = null;
+      features.forEach((feature) => {
+        const coords = coordsFromFeature(feature, null);
+        if (!coords) return;
+        const props = feature.properties || {};
+        const key = props.osm_id
+          ? `${props.osm_type || "node"}/${props.osm_id}`
+          : (feature.id != null ? `id/${feature.id}` : coords.join(","));
+        if (seen.has(key)) return;
+        seen.add(key);
+        const metres = haversineMetres(ref, coords);
+        if (!best || metres < best.metres) best = { coords, props, metres };
+      });
+      nearestPlace = best;
+      syncNearestBanner();
+    }
+
+    // debounced so a burst of geolocate fixes or move events costs one query;
+    // defers to idle so the destination tiles have loaded before searching.
+    function scheduleNearestUpdate() {
+      if (nearestUpdateTimer) clearTimeout(nearestUpdateTimer);
+      nearestUpdateTimer = setTimeout(() => {
+        nearestUpdateTimer = null;
+        if (map.isMoving()) map.once("idle", updateNearestPlace);
+        else updateNearestPlace();
+      }, 600);
+    }
+
+    if (nearestBanner) {
+      // delegated: the banner is rebuilt on every sync, so listen once here
+      nearestBanner.addEventListener("click", (event) => {
+        if (!event.target.closest(".nearest-go") || !nearestPlace) return;
+        // hand over to google maps for a real route; origin = pin when down
+        window.open(
+          directionsUrl(nearestPlace.coords[1].toFixed(6), nearestPlace.coords[0].toFixed(6)),
+          "_blank",
+          "noopener"
+        );
       });
     }
 
@@ -1716,6 +1876,7 @@
     map.on("moveend", () => {
       updateCounts();
       ensureCustomLayers();
+      if (referencePoint()) scheduleNearestUpdate();
     });
     map.on("zoomstart", showTileStatus);
     map.on("zoomend", () => {
