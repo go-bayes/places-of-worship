@@ -242,82 +242,23 @@
       user-select: none;
       pointer-events: auto;
     }
-    #corner-info {
+    /* theme pill sits where the info badge was, under the wordmark; github
+       and fix-map live in the wordmark, so the badge earned no keep */
+    #theme-menu {
       position: fixed;
       right: var(--safe-right);
-      top: calc(var(--safe-top) + 42px);
+      top: calc(var(--safe-top) + 38px);
       z-index: 13;
-      display: flex;
-      align-items: flex-start;
-    }
-    #corner-info-toggle {
-      width: 55px;
-      height: 55px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15,23,42,0.55);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #cbd5e1;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(15, 23, 42, 0.6);
-      color: #e2e8f0;
-      font-size: 20px;
-      font-weight: 600;
-      display: grid;
-      place-items: center;
-      cursor: pointer;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+      padding: 4px 10px;
+      font-size: 12px;
       opacity: 0.85;
-      padding: 0;
-    }
-    #corner-info-toggle svg {
-      width: 30px;
-      height: 30px;
-      display: block;
-    }
-    #corner-info-toggle:hover {
-      opacity: 1;
-    }
-    #corner-info-menu {
-      position: absolute;
-      right: 0;
-      top: 60px;
-      display: grid;
-      gap: 4px;
-      padding: 6px;
-      min-width: 170px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(15, 23, 42, 0.6);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.35);
-      opacity: 0.85;
-    }
-    #corner-info-menu[hidden] {
-      display: none;
-    }
-    #corner-info-menu a {
-      display: block;
-      padding: 9px 12px;
-      border-radius: 12px;
-      color: #e2e8f0;
-      font-size: 15px;
-      text-decoration: none;
-      white-space: nowrap;
-      background: rgba(15, 23, 42, 0.45);
-    }
-    #corner-info-menu button {
-      display: block;
-      width: 100%;
-      text-align: left;
-      padding: 9px 12px;
-      border-radius: 12px;
-      color: #e2e8f0;
-      font-size: 15px;
-      background: rgba(15, 23, 42, 0.45);
-      border: none;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    #corner-info-menu a:hover,
-    #corner-info-menu button:hover,
-    #corner-info-menu a:focus-visible {
-      background: rgba(148, 163, 184, 0.28);
     }
     #corner-reset {
       position: fixed;
@@ -346,27 +287,16 @@
       height: 50px;
       display: block;
     }
-    /* theme picker lives in the corner menu rather than its own pill */
-    .menu-theme {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 6px 10px;
-      font-size: 13px;
-      color: #94a3b8;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      margin-top: 2px;
-    }
     #basemapSelect {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 8px;
+      background: transparent;
+      border: none;
       color: #e2e8f0;
       font-size: 13px;
       cursor: pointer;
-      padding: 3px 6px;
+      padding: 2px 0;
       max-width: 130px;
+      text-align: right;
+      text-align-last: right;
     }
     #basemapSelect:focus { outline: none; }
     #tile-status {
@@ -671,7 +601,8 @@
         /* sit above the pill row so the open panel hides no controls */
         bottom: calc(var(--safe-bottom) + 104px);
       }
-      #corner-info { right: var(--safe-right); top: var(--safe-top); }
+      /* the wordmark hides on phones, so the theme pill takes the corner */
+      #theme-menu { top: var(--safe-top); }
       #corner-refresh {
         left: var(--safe-left);
         bottom: var(--safe-bottom);
@@ -748,14 +679,6 @@
       #corner-reset svg {
         width: 44px;
         height: 44px;
-      }
-      #corner-info-toggle {
-        width: 50px;
-        height: 50px;
-      }
-      #corner-info-toggle svg {
-        width: 26px;
-        height: 26px;
       }
     }
 
