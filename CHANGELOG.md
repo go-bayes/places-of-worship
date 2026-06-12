@@ -33,6 +33,14 @@
   nearest place; tapping a place holds the line on it (surviving popup
   close), tapping it again releases, and the line survives basemap
   switches.
+- Place popups are now singletons (opening one closes the previous) and the
+  refresh sweep closes the open popup.
+- Street View is now lazy: the page-load prewarm (a billable Dynamic Maps
+  hit per visit) is gone, popups show a Show Street View button, and the
+  Google Maps API loads once on first request with callback-based
+  readiness. Expand, the drag hint, and Copy coords work without it.
+- Raised the open search dock above the mobile pill row so it no longer
+  hides the Search World and Near Me buttons.
 - Added From you / From pin distance rows to place popups with a crow-flies
   footnote and a walking Directions link (pin as origin when down), on both
   the desktop and mobile popups.
