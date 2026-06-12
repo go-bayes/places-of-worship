@@ -58,6 +58,7 @@
   </button>
   <div id="bottom-actions">
     <button id="dock-toggle" type="button">Search World</button>
+    <button id="filters-clear" type="button" hidden aria-label="Clear filters"></button>
     <button id="near-me" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
   </div>
   <div id="nearest-place" role="status" aria-live="polite"></div>
@@ -1852,7 +1853,8 @@
 
     function syncDockToggleLabel(isOpen) {
       if (!dockToggle) return;
-      dockToggle.textContent = isOpen ? "Close" : "Search & Filters";
+      // the long label overflows the phone pill row once the filter chip joins
+      dockToggle.textContent = isOpen ? "Close" : (IS_MOBILE ? "Search" : "Search & Filters");
     }
 
     function dockIsOpen() {
@@ -1863,18 +1865,23 @@
     // panel is invisible state that quietly hides places with no cue. the
     // body class hides the nearest banner, which overlays the open panel on
     // phones, and lets it return on close.
+    // filters survive close: filtering is the analytical act here, and
+    // closing the panel is how you look at the result. the indicator chip
+    // beside the toggle keeps closed-panel filters visible (and one tap
+    // clears them), so persistence carries no invisible state.
     function setDockOpen(open) {
       if (!dock) return;
       dock.style.display = open ? "flex" : "none";
       document.body.classList.toggle("dock-open", open);
+      const filtersWrap = document.getElementById("dock-filters");
       if (!open) {
         if (searchInput) searchInput.blur();
-        clearFiltersIfAny();
-        // reopen spare: the disclosure starts collapsed each time
-        const filtersWrap = document.getElementById("dock-filters");
         if (filtersWrap) filtersWrap.hidden = true;
-        syncFiltersToggleLabel();
+      } else if (filtersWrap && filtersOffCount() > 0) {
+        // reopen with active filters in view, spare otherwise
+        filtersWrap.hidden = false;
       }
+      syncFiltersToggleLabel();
       syncDockToggleLabel(open);
       requestAnimationFrame(syncInfoPosition);
     }
@@ -2296,6 +2303,20 @@
       const off = filtersOffCount();
       filtersToggle.textContent = `Filters${off ? ` (${off} off)` : ""} ${open ? "▴" : "▾"}`;
       filtersToggle.setAttribute("aria-expanded", open ? "true" : "false");
+      // the indicator chip carries closed-panel filter state
+      const clearChip = document.getElementById("filters-clear");
+      if (clearChip) {
+        const show = off > 0 && !dockIsOpen();
+        clearChip.hidden = !show;
+        if (show) clearChip.textContent = `${off} off ✕`;
+      }
+    }
+    const filtersClearChip = document.getElementById("filters-clear");
+    if (filtersClearChip) {
+      filtersClearChip.addEventListener("click", () => {
+        clearFiltersIfAny();
+        showClickHint("Filters cleared");
+      });
     }
     if (filtersToggle) {
       filtersToggle.addEventListener("click", () => {

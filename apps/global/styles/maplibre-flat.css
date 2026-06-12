@@ -980,3 +980,18 @@ body.dock-open #nearest-place { display: none; }
   border-color: rgba(59,130,246,0.35);
   font-weight: 600;
 }
+
+/* closed-panel filter indicator: count plus one-tap clear */
+#filters-clear {
+  padding: 12px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(59,130,246,0.5);
+  background: rgba(59,130,246,0.22);
+  color: #e2e8f0;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+}
+#filters-clear:hover { background: rgba(59,130,246,0.32); }
