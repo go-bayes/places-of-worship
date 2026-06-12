@@ -283,7 +283,7 @@
 
     if (!IS_MOBILE) {
       map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
-      map.addControl(new maplibregl.FullscreenControl(), "bottom-right");
+      map.addControl(new maplibregl.FullscreenControl({ container: document.body }), "bottom-right");
     }
 
     let pinnedLabel = null;
