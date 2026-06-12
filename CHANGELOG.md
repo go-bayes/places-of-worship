@@ -4,6 +4,12 @@
 
 ### 2026-06-13
 
+- Searching a specific address now drops the measuring pin there and zooms
+  in; area searches surface a once-per-session tip naming the gesture for
+  dropping a pin.
+- Marked the reliefmap porting guide as historical in `AGENTS.md` and in
+  the guide itself, so retired features (the nearest banner, the ambient
+  guide line) are not rebuilt from its inventory.
 - The hint toast (pin drop, location messages) now wraps centred within
   the phone screen instead of running past both edges.
 - Fixed the Filters toggle, which had never visually worked: its hidden

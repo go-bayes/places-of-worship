@@ -1,5 +1,14 @@
 # Porting the location features from reliefmap
 
+> **Status (2026-06-13): the port is complete and this guide is historical.**
+> Several inventory items below were then deliberately changed or retired
+> for this map's browsing register — the near-me pill became a strict
+> toggle, the guide line draws only for a tapped place, and the nearest
+> banner (item 4) was removed outright along with its background search.
+> Do not re-add inventory items from this document without reading the
+> dated `JOURNAL.md` entries of 2026-06-13 first. The "hard-won gotchas"
+> section remains accurate and useful.
+
 Instructions for the Claude instance adopting the reliefmap location/UX
 features into this project. Written 2026-06-12 by the instance that built
 them. Joseph has asked for "a version of these features" here; adapt to this
