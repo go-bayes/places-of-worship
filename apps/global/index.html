@@ -279,7 +279,9 @@
       pitch: 0,
       bearing: 0,
       projection: "mercator",
-      hash: true,
+      // named hash so the camera (#map=...) and filter state (#f=...) share
+      // the fragment; legacy bare-position links fall back to the default view
+      hash: "map",
       attributionControl: false,
       maxZoom: 18,
       minZoom: IS_MOBILE ? CONFIG.mobileMinZoom : CONFIG.desktopMinZoom
@@ -2096,7 +2098,12 @@
         // religion filters still work without the taxonomy
         christianBuckets = null;
       }
+      // a shared link's filters apply once the bucket vocabulary is known
+      const fromHash = readHashParam("f");
+      if (fromHash) applyTokensToFilterState(fromHash.split(","));
+      filtersBootstrapped = true;
       buildFilterUi();
+      if (fromHash) applyFilters();
     }
 
     // christian participation derives from the denomination boxes
@@ -2146,6 +2153,50 @@
       if (map.getLayer(LAYERS.overview)) map.setFilter(LAYERS.overview, clauses);
       updateCounts();
       if (referencePoint()) scheduleNearestUpdate();
+      // no hash writes until the boot parse has run, or an early style.load
+      // would erase a shared link's filter param before it is read
+      if (filtersBootstrapped) writeHashParam("f", filterStateToTokens().join(","));
+    }
+    let filtersBootstrapped = false;
+
+    // ---- filters in the url ------------------------------------------------
+    // the fragment carries the off-list (#f=muslim,catholic,other) beside the
+    // camera, so a filtered view is shareable and citable. helpers handle the
+    // fragment as raw segments because the camera value contains slashes that
+    // urlsearchparams would re-encode.
+    function readHashParam(key) {
+      const seg = location.hash.slice(1).split("&").find((s) => s.startsWith(key + "="));
+      return seg ? decodeURIComponent(seg.slice(key.length + 1)) : null;
+    }
+    function writeHashParam(key, value) {
+      const segs = location.hash.slice(1).split("&").filter((s) => s && !s.startsWith(key + "="));
+      if (value) segs.push(key + "=" + value);
+      const next = segs.length ? "#" + segs.join("&") : "#";
+      if (next !== location.hash) history.replaceState(null, "", next);
+    }
+    function filterStateToTokens() {
+      const off = countLabels.filter((c) => c.key !== "christian" && !religionFilterState[c.key]).map((c) => c.key);
+      if (christianBuckets) {
+        christianBuckets.forEach((b) => { if (!denomFilterState[b.code]) off.push(b.code.split(".")[1]); });
+        if (!denomFilterState.__other) off.push("other");
+      } else if (!religionFilterState.christian) {
+        off.push("christian");
+      }
+      return off;
+    }
+    function applyTokensToFilterState(tokens) {
+      const set = new Set(tokens.filter(Boolean));
+      countLabels.forEach((c) => { if (c.key !== "christian") religionFilterState[c.key] = !set.has(c.key); });
+      if (christianBuckets) {
+        const wholeChristianOff = set.has("christian");
+        christianBuckets.forEach((b) => {
+          denomFilterState[b.code] = !(wholeChristianOff || set.has(b.code.split(".")[1]));
+        });
+        denomFilterState.__other = !(wholeChristianOff || set.has("other"));
+        religionFilterState.christian = christianTotals().on > 0;
+      } else {
+        religionFilterState.christian = !set.has("christian");
+      }
     }
 
     function clearFiltersIfAny() {
