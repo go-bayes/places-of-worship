@@ -29,6 +29,10 @@
 - Added the planning pin: right-click or touch-hold drops a draggable amber
   pin that becomes the measuring point, with nearest-to-pin readouts,
   pin-origin directions, and tap-or-× removal.
+- Added the dashed guide line from the measuring point to the inspected or
+  nearest place; tapping a place holds the line on it (surviving popup
+  close), tapping it again releases, and the line survives basemap
+  switches.
 - Added the measuring point and nearest banner from the reliefmap port:
   distances answer from the blue dot (later the planning pin), the banner
   reports the nearest place of worship as the crow flies with a walk
