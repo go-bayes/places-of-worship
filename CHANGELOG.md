@@ -33,6 +33,10 @@
   nearest place; tapping a place holds the line on it (surviving popup
   close), tapping it again releases, and the line survives basemap
   switches.
+- The nearest banner now yields while the search dock is open on phones and
+  returns on close, instead of overlaying the panel.
+- The basemap theme selector moved from its bottom-right pill into the
+  octocat corner menu, clearing the bottom-right corner.
 - Place popups are now singletons (opening one closes the previous) and the
   refresh sweep closes the open popup.
 - Street View is now lazy: the page-load prewarm (a billable Dynamic Maps
