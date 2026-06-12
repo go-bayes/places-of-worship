@@ -854,3 +854,15 @@
 @media (max-width: 400px) {
   #nearest-place .nearest-cf { display: none; }
 }
+
+/* remove-pin control on the nearest banner */
+#nearest-place .nearest-clear {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0 0 2px;
+}
+#nearest-place .nearest-clear:hover { color: #e2e8f0; }

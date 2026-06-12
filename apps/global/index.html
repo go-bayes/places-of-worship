@@ -465,7 +465,8 @@
         `<button type="button" class="nearest-go" title="Walking directions (Google Maps)">` +
         `<span class="nearest-dot${fromPin ? " pin" : ""}"></span><span>${label}</span>` +
         (nearestPlace ? `<span class="nearest-chevron" aria-hidden="true">↗</span>` : "") +
-        `</button>`;
+        `</button>` +
+        (fromPin ? `<button type="button" class="nearest-clear" aria-label="Remove pin" title="Remove pin">×</button>` : "");
       nearestBanner.classList.add("visible");
     }
 
@@ -514,6 +515,10 @@
     if (nearestBanner) {
       // delegated: the banner is rebuilt on every sync, so listen once here
       nearestBanner.addEventListener("click", (event) => {
+        if (event.target.closest(".nearest-clear")) {
+          clearPin();
+          return;
+        }
         if (!event.target.closest(".nearest-go") || !nearestPlace) return;
         // hand over to google maps for a real route; origin = pin when down
         window.open(
@@ -523,6 +528,87 @@
         );
       });
     }
+
+    // ---- planning pin --------------------------------------------------------
+    // right-click (mouse) or press-and-hold (touch) drops a draggable amber
+    // pin; while present it replaces the blue dot as the measuring point, so
+    // the banner and directions answer "from the pin". the × on the banner
+    // or a tap on the pin removes it.
+    let pinMarker = null;
+    let pinDragging = false;
+
+    function setPin(lngLat) {
+      const coords = [lngLat.lng, lngLat.lat];
+      if (!pinMarker) {
+        pinMarker = new maplibregl.Marker({ color: "#f59e0b", draggable: true })
+          .setLngLat(coords)
+          .addTo(map);
+        pinMarker.on("dragstart", () => { pinDragging = true; });
+        pinMarker.on("dragend", () => {
+          const moved = pinMarker.getLngLat();
+          pinLocation = [moved.lng, moved.lat];
+          referenceChanged();
+          // let the post-drag click slip past before re-arming tap-to-remove
+          setTimeout(() => { pinDragging = false; }, 80);
+        });
+        // tap the pin itself to remove it: click on, click off
+        pinMarker.getElement().addEventListener("click", (event) => {
+          event.stopPropagation();
+          if (pinDragging) return;
+          clearPin();
+        });
+        showClickHint("Measuring from pin — tap it to remove", { durationMs: 2400 });
+      } else {
+        pinMarker.setLngLat(coords);
+      }
+      pinLocation = coords;
+      referenceChanged();
+    }
+
+    function clearPin() {
+      if (pinMarker) {
+        pinMarker.remove();
+        pinMarker = null;
+      }
+      pinLocation = null;
+      referenceChanged();
+    }
+
+    map.on("contextmenu", (e) => {
+      if (e.originalEvent && e.originalEvent.preventDefault) e.originalEvent.preventDefault();
+      setPin(e.lngLat);
+    });
+
+    // long-press for touch, cancelled by panning or a second finger
+    let pressTimer = null;
+    let pressPoint = null;
+    function cancelLongPress() {
+      if (pressTimer) clearTimeout(pressTimer);
+      pressTimer = null;
+      pressPoint = null;
+    }
+    map.on("touchstart", (e) => {
+      if (!e.lngLat || (e.points && e.points.length > 1)) {
+        cancelLongPress();
+        return;
+      }
+      pressPoint = e.point;
+      const lngLat = e.lngLat;
+      if (pressTimer) clearTimeout(pressTimer);
+      pressTimer = setTimeout(() => {
+        pressTimer = null;
+        setPin(lngLat);
+      }, 600);
+    });
+    map.on("touchmove", (e) => {
+      if (pressPoint && e.point &&
+          Math.hypot(e.point.x - pressPoint.x, e.point.y - pressPoint.y) > 12) {
+        cancelLongPress();
+      }
+    });
+    map.on("touchend", cancelLongPress);
+    map.on("touchcancel", cancelLongPress);
+    map.on("move", cancelLongPress);
 
     let pinnedLabel = null;
     let pinnedTimer = null;
