@@ -656,6 +656,8 @@
         transform: translateX(-50%);
         width: 86dvw;
         max-width: 86dvw;
+        /* sit above the pill row so the open panel hides no controls */
+        bottom: calc(var(--safe-bottom) + 104px);
       }
       #corner-info { right: var(--safe-right); top: var(--safe-top); }
       #corner-refresh {
