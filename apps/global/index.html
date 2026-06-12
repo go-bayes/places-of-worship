@@ -286,6 +286,17 @@
       map.addControl(new maplibregl.FullscreenControl({ container: document.body }), "bottom-right");
     }
 
+    // blue-dot location for all devices: permission-gated by the browser and
+    // computed client-side, so coordinates never leave the page. tracking
+    // keeps the dot following the user, the main mobile use case.
+    const geolocate = new maplibregl.GeolocateControl({
+      positionOptions: { enableHighAccuracy: true },
+      fitBoundsOptions: { maxZoom: 16 },
+      trackUserLocation: true,
+      showAccuracyCircle: true
+    });
+    map.addControl(geolocate, "bottom-right");
+
     let pinnedLabel = null;
     let pinnedTimer = null;
     function showPinnedLabel(name, coords) {
