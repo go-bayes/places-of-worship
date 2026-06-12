@@ -92,7 +92,9 @@ This port concerns interaction features only.
 - **Local dev needs HTTP Range support** — `python3 -m http.server` ignores
   Range (200 + full body) and PMTiles silently renders nothing; use
   `npx http-server`. Relief keeps a `.claude/launch.json` for the preview
-  harness; replicate it here (mind which port any origin-locked keys allow).
+  harness; replicate it here. Serve on port 8000: this project's MapTiler
+  and Google keys are origin-locked to `localhost:8000`, so any other port
+  loses the keyed basemaps and Street View.
 - **Preview testing: cache-bust BOTH the HTML and the stylesheet** —
   http-server 304s made fresh CSS look broken.
 - **Coordinate quantisation** — at the tileset's maxzoom, feature coords are
