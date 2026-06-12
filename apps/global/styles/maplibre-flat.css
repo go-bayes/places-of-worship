@@ -734,7 +734,8 @@
 .place-note {
   margin: 4px 0 2px;
   font-size: 11px;
-  color: #94a3b8;
+  /* legible against the dark popup, not a grey whisper */
+  color: #e2e8f0;
 }
 
 /* lazy street view: the popup shows a button until someone asks */
@@ -755,6 +756,12 @@
   flex-direction: column;
   gap: 6px;
   padding: 4px 2px 2px;
+}
+/* author display rules silently defeat the hidden attribute; restore its
+   authority or the filters toggle flips state with no visual effect */
+.dock-filters[hidden],
+.filter-group[hidden] {
+  display: none;
 }
 .filter-group {
   display: flex;

@@ -505,8 +505,8 @@
 
     // distance rows for popups: from the blue dot and the planning pin;
     // both rows show when both exist, which is the planning case that
-    // motivates the pin. straight lines ignore hills and harbours, so the
-    // footnote points at Directions for a real route.
+    // motivates the pin. each figure names itself as the crow flies, and
+    // the footnote points at Directions for a real route.
     function distanceRowsHtml(coords) {
       if (!coords) return "";
       const rows = [];
@@ -521,11 +521,11 @@
         .map(([k, v]) => `<div class="place-attr"><span class="place-attr-key">${k}</span><span class="place-attr-val">${v}</span></div>`)
         .join("");
       return `<div class="place-attrs">${items}</div>` +
-        `<div class="place-note">Distances are straight lines (as the crow flies) — Directions gives a real route.</div>`;
+        `<div class="place-note">Directions gives a real route.</div>`;
     }
 
     function distanceSummary(metres) {
-      return `${formatDistance(metres)}${walkSuffix(metres)}`;
+      return `${formatDistance(metres)} as the crow flies${walkSuffix(metres)}`;
     }
 
     // ---- planning pin --------------------------------------------------------
