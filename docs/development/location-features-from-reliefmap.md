@@ -13,8 +13,9 @@ is a fork of THIS project's `apps/global/index.html`, so the two maps share a
 skeleton: MapLibre GL 3.6.1, `styles/maplibre-flat.css`, the dock/search UI,
 popup machinery, and Street View integration. The canonical implementation of
 everything below is in relief's `docs/apps/global/index.html` and
-`docs/apps/global/styles/maplibre-flat.css`, commits `b479471..2845b33`
-(2026-06-11 to -12). Read those two files side by side with this project's
+`docs/apps/global/styles/maplibre-flat.css`, commits `b479471..94071ae`
+(2026-06-11 to -12; the addendum at the end covers the second-day round).
+Read those two files side by side with this project's
 `apps/global/index.html`; most code transplants with renames.
 
 The 2026-06-09 decoupling decision still stands for the DATA layer: worship is
@@ -140,3 +141,59 @@ commit), render/verify between steps, and record durable decisions in
 Joseph approves UI decisions quickly when shown screenshots; when a relief
 decision conflicts with a worship convention, ask rather than guess — this
 project pays the rent.
+
+## Addendum — second-day round (relief commits e86f590..94071ae)
+
+**Fix this first, port or no port: the fullscreen bug exists in THIS repo
+today.** `apps/global/index.html` adds `new maplibregl.FullscreenControl()`
+with no container option, and this map's UI (HUD, dock, buttons) are siblings
+of the map element. The Fullscreen API renders only the fullscreened
+element's subtree, so entering fullscreen hides every control except
+MapLibre's own. One-line fix, verified on relief:
+`new maplibregl.FullscreenControl({ container: document.body })`. Browsers
+refuse synthetic fullscreen gestures, so verify by hand.
+
+Additional features adopted on relief, in the same adapt-don't-copy spirit:
+
+13. **Ambient legend** — the counts/key toggle became the legend itself:
+    colour chips always visible in a compact strip, tap for the counts
+    panel. Principle: the map's colour vocabulary should not hide behind a
+    toggle. Caveat here: worship colours by religion, a much larger palette —
+    a full ambient legend may not fit 375 px. Consider top-N categories with
+    "more…", or keep the toggle but put real colour dots on it.
+14. **Dark stock controls** — `.maplibregl-ctrl-group` in the dark pill
+    idiom; icons are dark data-URI SVGs, lightened with
+    `filter: invert(0.9) hue-rotate(180deg)` (hue-rotate keeps the compass
+    needle red). Scope the filter to `-group` so the white attribution pill
+    is untouched.
+15. **Dock hygiene** — toggle labelled for what it holds ("Search &
+    filters" / "Close"), a quiet panel ×, Escape closes, and closing CLEARS
+    the filter checkboxes: a filter behind a closed panel is invisible state
+    that quietly hides data.
+16. **Reset button** (replaced the info menu): one tap sweeps pin, filters,
+    popups, search text, flies to the default view; keeps the tile cache and
+    the blue dot. Licence trap: if an info menu is the only route to map
+    credits, removing it must make the attribution pill always visible.
+17. **Wordmark with a fix-map link** — deep-links the OSM editor to the
+    current view, href computed at click time. A static pill that looks like
+    a button reads as broken; give it work or flatten it.
+
+Further gotchas earned on day two:
+
+- **Fourth `isStyleLoaded()` instance** (updateCounts): audit EVERY
+  `isStyleLoaded()` gate in this map's file before porting — for queries,
+  setData, and UI toggling it is always wrong (false during any pending
+  repaint, silently swallows the action). Guard on source/layer presence.
+- **Hidden preview windows lie**: `requestAnimationFrame` never fires
+  (shim with `setTimeout` to test rAF-deferred UI), MapLibre camera
+  animations don't tick (capture `flyTo` args instead of asserting the
+  camera moved), tiles never paint (rendered-feature counts come back 0),
+  and the window can wedge at `innerWidth: 0` (fix with an explicit
+  `preview_resize` then reload). Cache-bust BOTH the HTML and the CSS.
+- **When the dev network blocks the live site** (e.g. FortiGuard at VUW),
+  verify deploys with `gh api repos/<owner>/<repo>/pages/builds/latest`
+  instead of curl-ing the domain.
+- **New domains get quarantined**: FortiGuard-style filters block "Newly
+  Registered Domain" for ~4 days. Relevant if this project ever launches a
+  new public domain — plan the announcement after the quarantine, and the
+  block page's re-rate link is the fastest unblock.
