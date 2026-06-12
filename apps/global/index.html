@@ -1794,7 +1794,11 @@
       return {
         lon: parseFloat(result.lon),
         lat: parseFloat(result.lat),
-        name: result.display_name || ""
+        name: result.display_name || "",
+        // address-precise results get a measuring pin; areas only get a fly
+        precise: result.class === "building" ||
+          ["house", "building"].includes(result.type) ||
+          result.addresstype === "house"
       };
     }
 
@@ -1815,7 +1819,8 @@
       return {
         lon: center[0],
         lat: center[1],
-        name: feature.place_name || feature.text || ""
+        name: feature.place_name || feature.text || "",
+        precise: Array.isArray(feature.place_type) && feature.place_type.includes("address")
       };
     }
 
@@ -1832,10 +1837,12 @@
       const feature = payload && payload.features && payload.features[0];
       const coords = feature && feature.geometry && feature.geometry.coordinates;
       if (!coords) return null;
+      const props = feature.properties || {};
       return {
         lon: coords[0],
         lat: coords[1],
-        name: feature.properties?.name || feature.properties?.label || ""
+        name: props.name || props.label || "",
+        precise: Boolean(props.housenumber) || props.osm_key === "building" || props.type === "house"
       };
     }
 
@@ -1926,15 +1933,40 @@
         }
         const lon = parseFloat(result.lon);
         const lat = parseFloat(result.lat);
+        const zoom = result.precise ? 16 : 13;
         if (IS_MOBILE) {
-          map.jumpTo({ center: [lon, lat], zoom: 13 });
+          map.jumpTo({ center: [lon, lat], zoom });
         } else {
-          flyTo([lon, lat], 13);
+          flyTo([lon, lat], zoom);
         }
-        scheduleSearchHintClear([lon, lat]);
+        if (result.precise) {
+          // an address is a point: measure from it without asking. the hint
+          // also replaces the sticky searching message, which setPin alone
+          // leaves behind when it merely moves an existing pin.
+          setPin({ lng: lon, lat: lat });
+          showClickHint("Measuring pin dropped at the address — tap it to remove", { durationMs: 2600 });
+        } else if (!maybeShowPinTip()) {
+          scheduleSearchHintClear([lon, lat]);
+        }
       } catch (error) {
         showClickHint("Search Unavailable, Use Scroll");
       }
+    }
+
+    // one nudge per session: area searches often precede distance questions.
+    // shown in place of the searching hint and self-expiring, so it neither
+    // races the arrival hint-clear nor nags.
+    function maybeShowPinTip() {
+      if (pinLocation) return false;
+      try {
+        if (sessionStorage.getItem("pow-pin-tip")) return false;
+        sessionStorage.setItem("pow-pin-tip", "1");
+      } catch (error) {
+        // private mode: once per page load is fine
+      }
+      const gesture = IS_MOBILE ? "press and hold the map" : "right-click the map";
+      showClickHint(`Tip: ${gesture} to drop a measuring pin`, { durationMs: 3600 });
+      return true;
     }
 
     searchButton.addEventListener("click", runSearch);
