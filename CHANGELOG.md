@@ -4,6 +4,12 @@
 
 ### 2026-06-13
 
+- The OpenStreetMap credit is now always on screen: both place tile sources
+  declare ODbL attribution and the attribution pill no longer hides behind
+  the info menu.
+- The denomination key shrank to a compact pull-down: three colour dots for
+  the leading categories in view, a Key label, and a caret, with the full
+  key one tap away.
 - Filters now persist when the search panel closes; an indicator chip
   beside the toggle shows the off-count and clears everything in one tap,
   and reopening the panel shows the active filters. Filter state travels
