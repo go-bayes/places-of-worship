@@ -129,20 +129,6 @@
     let googleMapsReady = false;
     const IS_MOBILE = window.matchMedia && window.matchMedia("(max-width: 640px)").matches;
 
-    function prewarmStreetView() {
-      if (!GOOGLE_MAPS_KEY) return;
-      loadGoogleMaps()
-        .then(() => {
-          if (!window.google?.maps) return;
-          const sv = new google.maps.StreetViewService();
-          sv.getPanorama(
-            { location: { lat: CONFIG.center[1], lng: CONFIG.center[0] }, radius: 560, source: google.maps.StreetViewSource.OUTDOOR },
-            () => {}
-          );
-        })
-        .catch(() => {});
-    }
-
     const religionColors = [
       "match",
       ["get", "religion"],
@@ -768,24 +754,34 @@
       updateTerrainToggleAvailability();
     }
 
+    // with loading=async the maps api is NOT ready at script.onload;
+    // readiness must come from the callback= param. the promise is cached
+    // so rapid clicks cannot inject the script twice.
+    let googleMapsPromise = null;
     function loadGoogleMaps() {
-      if (googleMapsReady) return Promise.resolve();
-      if (!GOOGLE_MAPS_KEY) return Promise.reject(new Error("Missing Google Maps key"));
-      if (window.google && window.google.maps) {
-        googleMapsReady = true;
+      if (window.google && window.google.maps && window.google.maps.StreetViewService) {
         return Promise.resolve();
       }
-      return new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(GOOGLE_MAPS_KEY)}&loading=async`;
-        script.async = true;
-        script.onload = () => {
+      if (!GOOGLE_MAPS_KEY) return Promise.reject(new Error("Missing Google Maps key"));
+      if (googleMapsPromise) return googleMapsPromise;
+      googleMapsPromise = new Promise((resolve, reject) => {
+        const callbackName = "__powGoogleMapsReady";
+        window[callbackName] = () => {
           googleMapsReady = true;
+          delete window[callbackName];
           resolve();
         };
-        script.onerror = () => reject(new Error("Failed to load Google Maps"));
+        const script = document.createElement("script");
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(GOOGLE_MAPS_KEY)}&loading=async&callback=${callbackName}`;
+        script.async = true;
+        script.onerror = () => {
+          googleMapsPromise = null;
+          delete window[callbackName];
+          reject(new Error("Failed to load Google Maps"));
+        };
         document.head.appendChild(script);
       });
+      return googleMapsPromise;
     }
 
     const SOURCES = {
@@ -846,6 +842,7 @@
           `<div class="popup-actions" style="margin-top:6px;">${openStreetViewLink}${directionsLink}</div>`
         )
         .addTo(map);
+      trackPlacePopup(popup);
 
       if (featureId === undefined || featureId === null) return;
       const fillPopupName = () => {
@@ -865,6 +862,17 @@
       };
       setTimeout(fillPopupName, 180);
       map.once("idle", fillPopupName);
+    }
+
+    // only one place popup at a time: repeated opens were stacking
+    // translucent copies on the same spot, each needing its own close
+    let activePlacePopup = null;
+    function trackPlacePopup(popup) {
+      if (activePlacePopup && activePlacePopup !== popup) activePlacePopup.remove();
+      activePlacePopup = popup;
+      popup.on("close", () => {
+        if (activePlacePopup === popup) activePlacePopup = null;
+      });
     }
 
     function clampPopupToViewport(popup, padding = 12) {
@@ -948,6 +956,7 @@
           `</div>`
         )
         .addTo(map);
+      trackPlacePopup(popup);
       requestAnimationFrame(() => clampPopupToViewport(popup));
 
       const panoContainer = () => document.getElementById(panoId);
@@ -1004,20 +1013,96 @@
           document.body.style.userSelect = "";
         });
       }
+      // ui wiring that must work whether or not street view ever starts:
+      // expand, the drag hint, and copy-coords live outside the lazy path
+      const popupEl = popup.getElement();
+      const expandButton = popupEl.querySelector(`[data-mode="expand"][data-pano="${panoId}"]`);
+      let resizePano = null;
+      if (expandButton) {
+        expandButton.addEventListener("click", () => {
+          const target = panoContainer();
+          if (!target) return;
+          const expanded = target.classList.toggle("expanded");
+          expandButton.textContent = expanded ? "Collapse" : "Expand";
+          if (resizePano) resizePano();
+          requestAnimationFrame(() => clampPopupToViewport(popup));
+        });
+      }
+      if (popupBody) {
+        const DRAG_HINT_KEY = "pow-drag-hint-dismissed";
+        const hint = document.createElement("div");
+        hint.className = "popup-drag-toast";
+        hint.textContent = "Drag to move";
+        const shouldShowHint = () => {
+          try {
+            return !sessionStorage.getItem(DRAG_HINT_KEY);
+          } catch (error) {
+            return true;
+          }
+        };
+        if (shouldShowHint()) {
+          popupBody.appendChild(hint);
+          setTimeout(() => {
+            hint.classList.add("visible");
+          }, 120);
+          setTimeout(() => {
+            hint.classList.remove("visible");
+            hint.remove();
+            try {
+              sessionStorage.setItem(DRAG_HINT_KEY, "1");
+            } catch (error) {
+              // Ignore storage failures.
+            }
+          }, 2600);
+        }
+      }
+      const copyButton = popupEl.querySelector(`[data-copy]`);
+      if (copyButton) {
+        copyButton.addEventListener("click", async () => {
+          const value = copyButton.getAttribute("data-copy");
+          try {
+            await navigator.clipboard.writeText(value || "");
+            copyButton.textContent = "Copied";
+            setTimeout(() => {
+              copyButton.textContent = "Copy coords";
+            }, 1200);
+          } catch (error) {
+            copyButton.textContent = "Copy failed";
+            setTimeout(() => {
+              copyButton.textContent = "Copy coords";
+            }, 1200);
+          }
+        });
+      }
+
       if (!GOOGLE_MAPS_KEY) {
         const node = panoContainer();
         if (node) node.textContent = "Street View unavailable.";
         return;
       }
+      // lazy street view: the maps api bills per dynamic load, and most
+      // popup opens never look at it — load only on request
+      const placeholder = panoContainer();
+      if (placeholder) {
+        placeholder.innerHTML = `<button type="button" class="sv-show">Show Street View</button>`;
+        let svStarted = false;
+        placeholder.querySelector(".sv-show").addEventListener("click", () => {
+          if (svStarted) return;
+          svStarted = true;
+          void startStreetView();
+        });
+      }
+
+      async function startStreetView() {
       try {
+        const loadingNode = panoContainer();
+        if (loadingNode) loadingNode.textContent = "Loading Street View…";
         await loadGoogleMaps();
         const node = panoContainer();
         if (!node) return;
         const sv = new google.maps.StreetViewService();
         let panoInstance = null;
         let currentSource = "OUTDOOR";
-        const popupEl = popup.getElement();
-        const expandButton = popupEl.querySelector(`[data-mode="expand"][data-pano="${panoId}"]`);
         let panoLoading = false;
         let lastPanoRequest = 0;
         let resizeObserver = null;
@@ -1130,64 +1215,8 @@
           });
         }
 
-        if (expandButton) {
-          expandButton.addEventListener("click", () => {
-            const target = panoContainer();
-            if (!target) return;
-            const expanded = target.classList.toggle("expanded");
-            expandButton.textContent = expanded ? "Collapse" : "Expand";
-            resizePanorama();
-            requestAnimationFrame(() => clampPopupToViewport(popup));
-          });
-        }
-
-        if (popupBody) {
-          const DRAG_HINT_KEY = "pow-drag-hint-dismissed";
-          const hint = document.createElement("div");
-          hint.className = "popup-drag-toast";
-          hint.textContent = "Drag to move";
-          const shouldShowHint = () => {
-            try {
-              return !sessionStorage.getItem(DRAG_HINT_KEY);
-            } catch (error) {
-              return true;
-            }
-          };
-          if (shouldShowHint()) {
-            popupBody.appendChild(hint);
-            setTimeout(() => {
-              hint.classList.add("visible");
-            }, 120);
-            setTimeout(() => {
-              hint.classList.remove("visible");
-              hint.remove();
-              try {
-                sessionStorage.setItem(DRAG_HINT_KEY, "1");
-              } catch (error) {
-                // Ignore storage failures.
-              }
-            }, 2600);
-          }
-        }
-
-        const copyButton = popupEl.querySelector(`[data-copy]`);
-        if (copyButton) {
-          copyButton.addEventListener("click", async () => {
-            const value = copyButton.getAttribute("data-copy");
-            try {
-              await navigator.clipboard.writeText(value || "");
-              copyButton.textContent = "Copied";
-              setTimeout(() => {
-                copyButton.textContent = "Copy coords";
-              }, 1200);
-            } catch (error) {
-              copyButton.textContent = "Copy failed";
-              setTimeout(() => {
-                copyButton.textContent = "Copy coords";
-              }, 1200);
-            }
-          });
-        }
+        // the hoisted expand handler resizes the pano once it exists
+        resizePano = resizePanorama;
 
         loadPanorama("OUTDOOR");
         attachResizeHandle(panoContainer());
@@ -1201,6 +1230,7 @@
       } catch (error) {
         const node = panoContainer();
         if (node) node.textContent = "Street View failed to load.";
+      }
       }
     }
 
@@ -1415,7 +1445,6 @@
       map.once("idle", ensureCustomLayers);
       map.once("idle", nudgeMap);
       map.once("idle", refreshMapLayers);
-      map.once("idle", prewarmStreetView);
     });
 
     map.on("error", (e) => {
@@ -1636,13 +1665,13 @@
     map.on("load", syncCompassVisibility);
     syncCompassVisibility();
 
-    // one tap back to a clean slate: pin, guide line, search text, dock,
-    // default view — without dumping the tile cache the way a reload would.
-    // the blue dot survives; location is the user's own toggle. open popups
-    // join the sweep when the popup singleton lands with the next port step.
+    // one tap back to a clean slate: pin, guide line, popup, search text,
+    // dock, default view — without dumping the tile cache the way a reload
+    // would. the blue dot survives; location is the user's own toggle.
     const cornerRefresh = document.getElementById("corner-refresh");
     function resetSite() {
       clearPin();
+      if (activePlacePopup) activePlacePopup.remove();
       if (searchInput) searchInput.value = "";
       if (dock && dock.style.display !== "none" && dockToggle) dockToggle.click();
       map.flyTo({ center: CONFIG.center, zoom: CONFIG.initialZoom, bearing: 0, pitch: 0, speed: 1.6 });

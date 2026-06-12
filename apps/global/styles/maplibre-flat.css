@@ -901,3 +901,15 @@
   font-size: 11px;
   color: #94a3b8;
 }
+
+/* lazy street view: the popup shows a button until someone asks */
+.streetview .sv-show {
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.08);
+  color: #e2e8f0;
+  font-size: 13px;
+  cursor: pointer;
+}
+.streetview .sv-show:hover { background: rgba(255,255,255,0.16); }
