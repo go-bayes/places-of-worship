@@ -634,7 +634,8 @@
     .maplibregl-ctrl-attrib a:hover {
       color: #1e293b;
     }
-    .maplibregl-ctrl-bottom-right { bottom: 56px; }
+    /* the corner is clear since the theme pill moved into the menu */
+    .maplibregl-ctrl-bottom-right { bottom: 0; }
     #corner-refresh {
       position: fixed;
       left: var(--safe-left);
@@ -685,7 +686,8 @@
         max-width: min(88vw, 360px);
       }
       .dock-cities-row { display: none; }
-      .maplibregl-ctrl-bottom-right { bottom: 80px; }
+      /* attribution tucks below the lifted pill row */
+      .maplibregl-ctrl-bottom-right { bottom: 0; }
       #counts {
         display: none;
         width: min(86vw, 480px);
@@ -973,12 +975,23 @@ body.dock-open #nearest-place { display: none; }
   background: none;
   border: none;
   color: #cbd5e1;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  padding: 2px 4px;
+  /* a real touch target: full row width, thumb-sized height */
+  width: 100%;
+  text-align: left;
+  padding: 8px 6px;
+  min-height: 36px;
 }
 #filters-toggle:hover { color: #fff; }
+@media (max-width: 640px) {
+  #filters-toggle {
+    font-size: 15px;
+    padding: 11px 6px;
+    min-height: 44px;
+  }
+}
 #dock-close {
   background: none;
   border: none;

@@ -2448,6 +2448,10 @@
       });
     }
 
+    // religion chips render immediately; the denomination row joins when
+    // the taxonomy fetch lands, so a quick first tap never finds an empty
+    // panel on a slow connection
+    buildFilterUi();
     loadDenominationBuckets();
 
     const COUNTS_MIN_INTERVAL_MS = 160;
