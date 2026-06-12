@@ -33,6 +33,9 @@
   nearest place; tapping a place holds the line on it (surviving popup
   close), tapping it again releases, and the line survives basemap
   switches.
+- Added From you / From pin distance rows to place popups with a crow-flies
+  footnote and a walking Directions link (pin as origin when down), on both
+  the desktop and mobile popups.
 - Tidied the global map's corner controls: the set-north badge now appears
   only when the map is rotated (phone and desktop), the dead second compass
   button is gone, the octocat info menu sits top-right under the wordmark,
