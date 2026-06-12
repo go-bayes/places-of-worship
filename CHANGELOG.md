@@ -4,6 +4,8 @@
 
 ### 2026-06-13
 
+- The hint toast (pin drop, location messages) now wraps centred within
+  the phone screen instead of running past both edges.
 - Fixed the Filters toggle, which had never visually worked: its hidden
   attribute was silently overridden by the rows' display rule, so the
   state flipped while the screen never changed. Popup distances now say
