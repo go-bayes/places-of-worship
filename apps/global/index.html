@@ -1990,9 +1990,66 @@
       return await geocodeMaptiler(query);
     }
 
+    // typing a category into the search box ("mosque", "anglican") expresses
+    // a filter, not an address; the geocoder would serve it poorly. exact
+    // single-term matches apply the filter instead; anything longer geocodes.
+    function searchFilterTarget(query) {
+      const q = query.toLowerCase().trim();
+      const venueTerms = {
+        mosque: "muslim", mosques: "muslim", masjid: "muslim",
+        church: "christian", churches: "christian",
+        cathedral: "christian", chapel: "christian",
+        synagogue: "jewish", synagogues: "jewish",
+        gurdwara: "sikh", gurdwaras: "sikh"
+      };
+      const religionTerms = { ...venueTerms };
+      countLabels.forEach((c) => {
+        religionTerms[c.key] = c.key;
+        religionTerms[c.label.toLowerCase()] = c.key;
+      });
+      if (religionTerms[q]) {
+        const entry = countLabels.find((c) => c.key === religionTerms[q]);
+        return { kind: "religion", key: entry.key, label: entry.label };
+      }
+      if (christianBuckets) {
+        const bucket = christianBuckets.find((b) =>
+          b.label.toLowerCase() === q || b.code.split(".")[1] === q || b.aliases.includes(q));
+        if (bucket) return { kind: "bucket", code: bucket.code, label: bucket.label };
+      }
+      return null;
+    }
+
+    function applySearchFilter(target) {
+      countLabels.forEach((c) => { religionFilterState[c.key] = false; });
+      if (christianBuckets) {
+        christianBuckets.forEach((b) => { denomFilterState[b.code] = false; });
+        denomFilterState.__other = false;
+      }
+      if (target.kind === "religion") {
+        religionFilterState[target.key] = true;
+        if (target.key === "christian" && christianBuckets) {
+          christianBuckets.forEach((b) => { denomFilterState[b.code] = true; });
+          denomFilterState.__other = true;
+        }
+      } else {
+        denomFilterState[target.code] = true;
+        religionFilterState.christian = true;
+      }
+      buildFilterUi();
+      applyFilters();
+    }
+
     async function runSearch() {
       const query = searchInput.value.trim();
       if (!query) return;
+      const filterTarget = searchFilterTarget(query);
+      if (filterTarget) {
+        applySearchFilter(filterTarget);
+        searchInput.value = "";
+        setDockOpen(false);
+        showClickHint(`Showing ${filterTarget.label} places only — tap ✕ to clear`, { durationMs: 3200 });
+        return;
+      }
       showClickHint("SEARCHING", { sticky: true });
       const presetMatch = findCityPresetMatch(query);
       if (presetMatch) {
