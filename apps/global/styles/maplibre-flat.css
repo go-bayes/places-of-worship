@@ -880,3 +880,24 @@
   padding: 0 0 0 2px;
 }
 #nearest-place .nearest-clear:hover { color: #e2e8f0; }
+
+/* popup distance rows (from you / from pin) and crow-flies footnote */
+.place-attrs {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 14px;
+  margin: 4px 0 2px;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+.place-attr { display: contents; }
+.place-attr-key {
+  color: #94a3b8;
+  font-weight: 600;
+}
+.place-attr-val { color: #e2e8f0; }
+.place-note {
+  margin: 4px 0 2px;
+  font-size: 11px;
+  color: #94a3b8;
+}

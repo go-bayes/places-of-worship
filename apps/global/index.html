@@ -516,6 +516,31 @@
       return minutes <= 90 ? ` · ~${Math.max(1, Math.round(minutes))} min walk` : "";
     }
 
+    // distance rows for popups: from the blue dot and the planning pin;
+    // both rows show when both exist, which is the planning case that
+    // motivates the pin. straight lines ignore hills and harbours, so the
+    // footnote points at Directions for a real route.
+    function distanceRowsHtml(coords) {
+      if (!coords) return "";
+      const rows = [];
+      if (userLocation) {
+        rows.push(["From you", distanceSummary(haversineMetres(userLocation, coords))]);
+      }
+      if (pinLocation) {
+        rows.push(["From pin", distanceSummary(haversineMetres(pinLocation, coords))]);
+      }
+      if (!rows.length) return "";
+      const items = rows
+        .map(([k, v]) => `<div class="place-attr"><span class="place-attr-key">${k}</span><span class="place-attr-val">${v}</span></div>`)
+        .join("");
+      return `<div class="place-attrs">${items}</div>` +
+        `<div class="place-note">Distances are straight lines (as the crow flies) — Directions gives a real route.</div>`;
+    }
+
+    function distanceSummary(metres) {
+      return `${formatDistance(metres)}${walkSuffix(metres)}`;
+    }
+
     const nearestBanner = document.getElementById("nearest-place");
 
     function syncNearestBanner() {
@@ -812,11 +837,13 @@
       const latFixed = coords[1].toFixed(6);
       const lngFixed = coords[0].toFixed(6);
       const openStreetViewLink = `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Streetview</a>`;
+      const directionsLink = `<a href="${directionsUrl(latFixed, lngFixed)}" target="_blank" rel="noopener">Directions</a>`;
       const popup = new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
         .setLngLat(coords)
         .setHTML(
           `<div class="popup-header"><span class="popup-title">${name || "Unnamed"}</span></div>` +
-          `<div class="popup-actions" style="margin-top:6px;">${openStreetViewLink}</div>`
+          distanceRowsHtml(coords) +
+          `<div class="popup-actions" style="margin-top:6px;">${openStreetViewLink}${directionsLink}</div>`
         )
         .addTo(map);
 
@@ -910,9 +937,11 @@
           `<div class="popup-header" data-drag-handle="true">` +
           `<span class="popup-title">${name}</span>` +
           `</div>` +
+          distanceRowsHtml(coords) +
           `<div class="streetview" id="${panoId}">Loading Street View…</div>` +
           `<div class="popup-actions">` +
           `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Streetview</a>` +
+          `<a href="${directionsUrl(latFixed, lngFixed)}" target="_blank" rel="noopener">Directions</a>` +
           `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +
           `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
           `<button type="button" class="streetview-expand" data-mode="expand" data-pano="${panoId}">Expand</button>` +
