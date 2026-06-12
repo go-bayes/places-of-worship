@@ -244,11 +244,11 @@
     }
     #corner-info {
       position: fixed;
-      left: var(--safe-left);
-      bottom: var(--safe-bottom);
+      right: var(--safe-right);
+      top: calc(var(--safe-top) + 42px);
       z-index: 13;
       display: flex;
-      align-items: flex-end;
+      align-items: flex-start;
     }
     #corner-info-toggle {
       width: 55px;
@@ -276,8 +276,8 @@
     }
     #corner-info-menu {
       position: absolute;
-      left: 0;
-      bottom: 32px;
+      right: 0;
+      top: 60px;
       display: grid;
       gap: 4px;
       padding: 6px;
@@ -335,10 +335,12 @@
       text-decoration: none;
       opacity: 0.85;
       cursor: pointer;
-      display: inline-flex;
+      /* compass on demand: hidden until the map is rotated off north */
+      display: none;
       align-items: center;
       justify-content: center;
     }
+    #corner-reset.rotated { display: inline-flex; }
     #corner-reset svg {
       width: 50px;
       height: 50px;
@@ -622,25 +624,30 @@
       color: #1e293b;
     }
     .maplibregl-ctrl-bottom-right { bottom: 56px; }
-    .compass-btn {
+    #corner-refresh {
       position: fixed;
-      right: 12px;
-      top: 12px;
-      z-index: 12;
-      width: 54px;
-      height: 54px;
-      border-radius: 50%;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(15,23,42,0.7);
+      left: var(--safe-left);
+      bottom: var(--safe-bottom);
+      z-index: 13;
+      width: 55px;
+      height: 55px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(15, 23, 42, 0.6);
       color: #e2e8f0;
-      font-size: 17px;
+      display: grid;
+      place-items: center;
       cursor: pointer;
-      display: none;
-      align-items: center;
-      justify-content: center;
       box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+      opacity: 0.85;
+      padding: 0;
     }
-    .compass-btn.hidden { display: none !important; }
+    #corner-refresh svg {
+      width: 26px;
+      height: 26px;
+      display: block;
+    }
+    #corner-refresh:hover { opacity: 1; }
     @media (max-width: 640px) {
       #hud { max-width: 94vw; }
       #dock {
@@ -650,7 +657,14 @@
         width: 86dvw;
         max-width: 86dvw;
       }
-      #corner-info { left: var(--safe-left); bottom: var(--safe-bottom); }
+      #corner-info { right: var(--safe-right); top: var(--safe-top); }
+      #corner-refresh {
+        left: var(--safe-left);
+        bottom: var(--safe-bottom);
+        width: 44px;
+        height: 44px;
+      }
+      #corner-refresh svg { width: 22px; height: 22px; }
       #onboard {
         left: 50%;
         transform: translateX(-50%);
@@ -693,8 +707,9 @@
       .dock-chip { font-size: clamp(9px, 2.1vw, 11px); padding: 3px 6px; }
       #bottom-actions {
         left: 50%;
-        /* lifted above the corner basemap pill; keeps 44 px touch-height pills */
-        bottom: calc(var(--safe-bottom) + 34px);
+        /* lifted above the corner basemap and refresh pills; keeps 44 px
+           touch-height pills */
+        bottom: calc(var(--safe-bottom) + 48px);
         transform: translateX(-50%);
       }
       #dock-toggle {
@@ -718,7 +733,6 @@
       }
       .maplibregl-ctrl { transform: scale(0.85); transform-origin: bottom right; }
       #corner-reset {
-        display: inline-flex;
         width: 54px;
         height: 54px;
       }
@@ -848,7 +862,7 @@
     font-size: 13px;
     padding: 8px 14px;
     /* clears the lifted pill row */
-    bottom: calc(var(--safe-bottom) + 95px);
+    bottom: calc(var(--safe-bottom) + 108px);
   }
 }
 @media (max-width: 400px) {
