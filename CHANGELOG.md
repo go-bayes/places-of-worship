@@ -4,6 +4,10 @@
 
 ### 2026-06-13
 
+- Fixed the Filters toggle, which had never visually worked: its hidden
+  attribute was silently overridden by the rows' display rule, so the
+  state flipped while the screen never changed. Popup distances now say
+  `as the crow flies` inline and the footnote renders white.
 - The theme selector now rides in the wordmark pill beside GitHub and fix
   map; phones fix the theme to Backdrop (the wordmark hides there, and the
   credit fallback still applies).
