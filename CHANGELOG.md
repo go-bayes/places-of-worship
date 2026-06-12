@@ -4,6 +4,10 @@
 
 ### 2026-06-13
 
+- Replaced the circular GitHub info badge with a compact theme selector
+  pill under the wordmark (top corner on phones); the badge's links live in
+  the wordmark and the repo, and the onboarding card still shows each new
+  session.
 - The guide line now draws only when the user taps a place (and releases on
   a second tap); Near Me shows the dot and the nearest-distance banner
   without drawing a line unbidden.
