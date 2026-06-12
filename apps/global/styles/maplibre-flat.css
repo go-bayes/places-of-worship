@@ -960,3 +960,10 @@ body.dock-open #nearest-place { display: none; }
   flex: none;
 }
 #dock-close:hover { color: #fff; }
+
+/* the select-all / unselect-all box leads each filter row */
+.filter-chip-all {
+  background: rgba(59,130,246,0.16);
+  border-color: rgba(59,130,246,0.35);
+  font-weight: 600;
+}

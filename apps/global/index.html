@@ -2150,6 +2150,33 @@
       group.appendChild(chip);
     }
 
+    // one tri-state box per row does select-all and unselect-all: a click
+    // from checked clears the row, from unchecked or mixed it fills it, and
+    // the indeterminate dash shows a mixed row at a glance
+    function masterChip(group, keys, state, label) {
+      const chip = document.createElement("label");
+      chip.className = "filter-chip filter-chip-all";
+      const box = document.createElement("input");
+      box.type = "checkbox";
+      const sync = () => {
+        const on = keys.filter((k) => state[k]).length;
+        box.checked = on === keys.length;
+        box.indeterminate = on > 0 && on < keys.length;
+        chip.classList.toggle("unchecked", on === 0);
+      };
+      sync();
+      box.addEventListener("change", () => {
+        const target = box.checked;
+        keys.forEach((k) => { state[k] = target; });
+        buildFilterUi();
+        applyFilters();
+      });
+      chip.appendChild(box);
+      chip.appendChild(document.createTextNode(label));
+      group.appendChild(chip);
+      return sync;
+    }
+
     function buildFilterUi() {
       const wrap = document.getElementById("dock-filters");
       const religionGroup = document.getElementById("religion-filters");
@@ -2157,17 +2184,28 @@
       if (!wrap || !religionGroup || !denomGroup) return;
       religionGroup.innerHTML = "";
       denomGroup.innerHTML = "";
+      const religionKeys = countLabels.map((c) => c.key);
+      const syncReligionMaster = masterChip(religionGroup, religionKeys, religionFilterState, "All");
       countLabels.forEach((c) => {
         filterChip(religionGroup, c.key, c.label, c.color, religionFilterState, () => {
+          syncReligionMaster();
           syncDenomVisibility();
           applyFilters();
         });
       });
       if (christianBuckets) {
+        const denomKeys = [...christianBuckets.map((b) => b.code), "__other"];
+        const syncDenomMaster = masterChip(denomGroup, denomKeys, denomFilterState, "All");
         christianBuckets.forEach((b) => {
-          filterChip(denomGroup, b.code, b.label, null, denomFilterState, applyFilters);
+          filterChip(denomGroup, b.code, b.label, null, denomFilterState, () => {
+            syncDenomMaster();
+            applyFilters();
+          });
         });
-        filterChip(denomGroup, "__other", "Other Christian", null, denomFilterState, applyFilters);
+        filterChip(denomGroup, "__other", "Other Christian", null, denomFilterState, () => {
+          syncDenomMaster();
+          applyFilters();
+        });
       }
       wrap.hidden = false;
       syncDenomVisibility();
