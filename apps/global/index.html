@@ -34,14 +34,14 @@
       <a role="menuitem" href="../regions/nz/">Enhanced Data (NZ)</a>
       <a role="menuitem" href="https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map" target="_blank" rel="noopener">Fix Errors in OSM</a>
       <a role="menuitem" href="https://github.com/go-bayes/places-of-worship">GitHub Repo</a>
+      <label class="menu-theme">Theme
+        <select id="basemapSelect" aria-label="Theme"></select>
+      </label>
     </div>
   </div>
   <div id="wordmark">
     <a id="wordmark-repo" href="https://github.com/go-bayes/places-of-worship" target="_blank" rel="noopener" title="Project repository on GitHub">GitHub</a>
     <a id="fixmap-link" href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener" title="Improve this map area on OpenStreetMap">fix map</a>
-  </div>
-  <div id="theme-menu">
-    <select id="basemapSelect" aria-label="Theme"></select>
   </div>
   <button id="corner-reset" type="button" aria-label="Set North">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -1827,6 +1827,9 @@
         if (!dock) return;
         const hidden = dock.style.display === "none";
         dock.style.display = hidden ? "flex" : "none";
+        // the nearest banner overlays the open panel on phones; hide it
+        // while the dock is up and let it return on close
+        document.body.classList.toggle("dock-open", hidden);
         if (!hidden && searchInput) {
           searchInput.blur();
         }

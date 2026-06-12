@@ -346,33 +346,27 @@
       height: 50px;
       display: block;
     }
-    #theme-menu {
-      position: fixed;
-      right: var(--safe-right);
-      top: auto;
-      bottom: var(--safe-bottom);
-      z-index: 13;
+    /* theme picker lives in the corner menu rather than its own pill */
+    .menu-theme {
       display: flex;
       align-items: center;
-      gap: 6px;
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(255,255,255,0.06);
-      color: #e2e8f0;
-      border-radius: 999px;
-      padding: 4px 10px;
-      font-size: 14px;
-      text-decoration: none;
-      opacity: 0.85;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 6px 10px;
+      font-size: 13px;
+      color: #94a3b8;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      margin-top: 2px;
     }
     #basemapSelect {
-      background: transparent;
-      border: none;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
       color: #e2e8f0;
-      font-size: 16px;
+      font-size: 13px;
       cursor: pointer;
-      padding: 2px 0;
-      text-align: right;
-      text-align-last: right;
+      padding: 3px 6px;
+      max-width: 130px;
     }
     #basemapSelect:focus { outline: none; }
     #tile-status {
@@ -690,14 +684,8 @@
       #counts ul { gap: 6px; }
       #counts li { font-size: 22px; }
       #counts .dot { width: 12px; height: 12px; }
-      #theme-menu {
-        display: flex;
-        padding: 2px 5px;
-        font-size: 10px;
-        bottom: var(--safe-bottom);
-      }
       #basemapSelect {
-        font-size: 11px;
+        font-size: 12px;
         max-width: 110px;
         text-overflow: ellipsis;
       }
@@ -915,3 +903,6 @@
   cursor: pointer;
 }
 .streetview .sv-show:hover { background: rgba(255,255,255,0.16); }
+
+/* the nearest banner overlays the open search panel; yield while it is up */
+body.dock-open #nearest-place { display: none; }
