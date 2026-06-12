@@ -5,6 +5,31 @@ and what remains open. `CHANGELOG.md` records what changed; this file records
 the reasoning that should remain visible when the project is reported, audited,
 or handed to collaborators.
 
+## 2026-06-13: Map filters group denominations through the taxonomy aliases
+
+Decision:
+The global map's search panel filters by the nine palette religions and,
+within Christianity, by eight major denomination buckets plus Other
+Christian. The buckets group raw OSM denomination strings through the
+alias table in `schemas/denomination-taxonomy.json`, fetched by the page
+at load; the map does not maintain a second vocabulary.
+
+Rationale:
+The served vector tiles carry raw OSM `denomination` values in both the
+places and overview tiers, so denomination filtering needs no pipeline
+change. Raw values are inconsistent (catholic, roman_catholic, marist),
+and the taxonomy already adjudicates those groupings with review flags;
+reusing its aliases keeps the filter, the research vocabulary, and the
+future mapper generation aligned. If the taxonomy fetch fails the
+religion filters still work, so the panel degrades rather than breaks.
+
+Consequences:
+One clause builder feeds the layer filters, the counts key, and the
+nearest search, so what the map shows, counts, and measures stays
+consistent. Closing the panel clears the filters (the reliefmap rule:
+filters behind a closed panel are invisible state). Taxonomy updates
+change filter behaviour without touching the map code.
+
 ## 2026-06-13: The near-me pill is a strict toggle, diverging from reliefmap
 
 Decision:

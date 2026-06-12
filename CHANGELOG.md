@@ -4,6 +4,14 @@
 
 ### 2026-06-13
 
+- Added search-panel filters: chips for the nine palette religions plus,
+  while Christian is selected, eight major denomination buckets and Other
+  Christian, grouped from raw OSM values through the denomination
+  taxonomy's aliases. Filters drive the map layers, the counts key, and
+  the nearest search together.
+- The search dock follows the reliefmap contract: the toggle reads
+  `Search & Filters` / `Close`, the panel has a ×, Escape closes, and
+  closing or resetting clears all filters.
 - Fixed Near Me on phones: the pill is now a strict toggle (a tap after
   panning turns location off rather than re-zooming to the user), the
   nearest search no longer stacks deferred tile queries while location
