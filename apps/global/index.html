@@ -446,9 +446,11 @@
       ensureNearestLine();
     }
 
-    // dashed guide line from the measuring point to the place being
-    // inspected, or failing that the nearest one; re-added after every
-    // basemap switch because setStyle drops custom sources and layers
+    // dashed guide line from the measuring point to a place the user has
+    // tapped — never drawn unbidden to the nearest place: this is a
+    // browsing map, and nobody is busting for church the way they are for
+    // a loo. re-added after every basemap switch because setStyle drops
+    // custom sources and layers.
     function ensureNearestLine() {
       // places-source presence proxies "style initialised"; isStyleLoaded()
       // is false during any pending repaint and would skip updates silently
@@ -474,7 +476,7 @@
         }, map.getLayer(LAYERS.places) ? LAYERS.places : undefined);
       }
       const ref = referencePoint();
-      const target = focusedPlace || (nearestPlace ? nearestPlace.coords : null);
+      const target = focusedPlace;
       const features = (ref && target)
         ? [{
             type: "Feature",
