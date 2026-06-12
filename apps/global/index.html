@@ -333,6 +333,13 @@
         nearMe.style.display = "none";
       } else {
         nearMe.addEventListener("click", () => {
+          // strict toggle: when watching in any state, a tap turns location
+          // fully off. stock trigger() would recentre from the background
+          // state instead, which on phones reads as the pill being stuck —
+          // it keeps zooming to the user and never switches off.
+          if (locateWatching() && geolocate._watchState === "BACKGROUND") {
+            geolocate._watchState = "ACTIVE_LOCK";
+          }
           geolocate.trigger();
           // off/lock transitions settle synchronously but the first fix
           // arrives async; a short delay covers both
@@ -388,8 +395,14 @@
       scheduleNearestUpdate();
     });
 
-    geolocate.on("error", () => {
-      showClickHint("Location unavailable");
+    geolocate.on("error", (err) => {
+      // code 1 means the browser blocked the request: without a pointer to
+      // settings the pill just looks dead
+      if (err && err.code === 1) {
+        showClickHint("Location is blocked for this site — allow it in your browser settings", { durationMs: 3500 });
+      } else {
+        showClickHint("Location unavailable", { durationMs: 2400 });
+      }
     });
 
     geolocate.on("trackuserlocationend", () => {
@@ -586,12 +599,24 @@
 
     // debounced so a burst of geolocate fixes or move events costs one query;
     // defers to idle so the destination tiles have loaded before searching.
+    // a single pending idle listener: while location tracking the camera
+    // refits on every fix and the map can stay non-idle for a long time, so
+    // stacking once-idle callbacks would fire a burst of heavy tile queries
+    let nearestIdlePending = false;
     function scheduleNearestUpdate() {
       if (nearestUpdateTimer) clearTimeout(nearestUpdateTimer);
       nearestUpdateTimer = setTimeout(() => {
         nearestUpdateTimer = null;
-        if (map.isMoving()) map.once("idle", updateNearestPlace);
-        else updateNearestPlace();
+        if (map.isMoving()) {
+          if (nearestIdlePending) return;
+          nearestIdlePending = true;
+          map.once("idle", () => {
+            nearestIdlePending = false;
+            updateNearestPlace();
+          });
+        } else {
+          updateNearestPlace();
+        }
       }, 600);
     }
 
