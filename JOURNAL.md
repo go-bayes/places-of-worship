@@ -5,6 +5,31 @@ and what remains open. `CHANGELOG.md` records what changed; this file records
 the reasoning that should remain visible when the project is reported, audited,
 or handed to collaborators.
 
+## 2026-06-12: One compass, shown on demand; refresh replaces the corner slot
+
+Decision:
+The global map keeps one custom bearing affordance, the set-north badge,
+and shows it only when the map is rotated off north, on phone and desktop
+alike. The dead second compass button leaves the markup. The octocat info
+menu moves to the top-right under the wordmark, and a refresh button takes
+the freed bottom-left slot on both form factors.
+
+Rationale:
+The map carried three north affordances on desktop (a dead one among them)
+and none of the corner furniture existed for phones, where accidental
+two-finger rotation is the case that needs a reset. A compass that appears
+exactly when bearing is non-zero advertises the problem it solves.
+Refresh-to-clean-slate proved its worth on the reliefmap fork, and phones
+need it most: pins, search text, and an open dock accumulate fast on a
+small screen. The arrangement mirrors reliefmap.info so the two maps stay
+recognisably siblings.
+
+Consequences:
+Bottom-left is the reset affordance, top-right holds identity and
+project links, top-left is transient state (compass when rotated). The
+refresh sweep will include open popups once the popup singleton from the
+porting inventory lands.
+
 ## 2026-06-12: Keep reserved hues for location features, separate by shape
 
 Decision:

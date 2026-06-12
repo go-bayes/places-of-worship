@@ -33,6 +33,14 @@
   nearest place; tapping a place holds the line on it (surviving popup
   close), tapping it again releases, and the line survives basemap
   switches.
+- Tidied the global map's corner controls: the set-north badge now appears
+  only when the map is rotated (phone and desktop), the dead second compass
+  button is gone, the octocat info menu sits top-right under the wordmark,
+  and a refresh button (bottom-left, both form factors) clears pin, search,
+  and dock and flies home.
+- Bumped starlette (1.0.1), pyarrow (23.0.1), and idna (3.17) past open
+  dependabot advisories; fastapi 0.136.1 resolves cleanly against the new
+  pins.
 - Added the measuring point and nearest banner from the reliefmap port:
   distances answer from the blue dot (later the planning pin), the banner
   reports the nearest place of worship as the crow flies with a walk
