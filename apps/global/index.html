@@ -51,7 +51,10 @@
     </svg>
   </button>
   <button id="compassBtn" class="compass-btn" title="Reset bearing">N</button>
-  <button id="dock-toggle" type="button">Search World</button>
+  <div id="bottom-actions">
+    <button id="dock-toggle" type="button">Search World</button>
+    <button id="near-me" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
+  </div>
   <div id="counts-wrap">
     <div id="counts-bar">
       <button id="counts-toggle" type="button" aria-controls="counts" aria-expanded="false">Show Denomination Key</button>
@@ -296,6 +299,38 @@
       showAccuracyCircle: true
     });
     map.addControl(geolocate, "bottom-right");
+
+    // labelled primary control for locating; the stock geolocate icon is
+    // hidden in css. trigger() follows the control's state machine:
+    // off → locate, following → off (dot removed), background → recentre.
+    const nearMe = document.getElementById("near-me");
+    function locateWatching() {
+      // _watchState is private maplibre api: if an upgrade removes it, the
+      // pill degrades to never showing active rather than crashing
+      return Boolean(geolocate._watchState && geolocate._watchState !== "OFF");
+    }
+    function syncNearMe() {
+      if (!nearMe) return;
+      const watching = locateWatching();
+      nearMe.setAttribute("aria-pressed", watching ? "true" : "false");
+      nearMe.classList.toggle("active", watching);
+    }
+    if (nearMe) {
+      if (!(navigator && "geolocation" in navigator)) {
+        nearMe.style.display = "none";
+      } else {
+        nearMe.addEventListener("click", () => {
+          geolocate.trigger();
+          // off/lock transitions settle synchronously but the first fix
+          // arrives async; a short delay covers both
+          setTimeout(syncNearMe, 60);
+        });
+        geolocate.on("trackuserlocationstart", syncNearMe);
+        geolocate.on("trackuserlocationend", syncNearMe);
+        geolocate.on("geolocate", syncNearMe);
+        geolocate.on("error", syncNearMe);
+      }
+    }
 
     let pinnedLabel = null;
     let pinnedTimer = null;

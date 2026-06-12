@@ -465,13 +465,18 @@
       border-color: rgba(15, 23, 42, 0.35);
       font-weight: 600;
     }
-    #dock-toggle {
+    #bottom-actions {
       position: fixed;
       left: 50%;
       bottom: var(--safe-bottom);
-      top: auto;
       transform: translateX(-50%);
       z-index: 13;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    #dock-toggle,
+    #near-me {
       padding: 12px 22px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.08);
@@ -481,7 +486,28 @@
       cursor: pointer;
       box-shadow: 0 6px 14px rgba(0,0,0,0.25);
       opacity: 0.85;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
     }
+    #near-me .nm-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      border: 2px solid #94a3b8;
+      background: transparent;
+      box-sizing: border-box;
+      flex: none;
+    }
+    #near-me.active .nm-dot {
+      border-color: #3b82f6;
+      background: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.35);
+    }
+    /* the labelled near-me pill replaces the stock geolocate icon */
+    .maplibregl-ctrl-group:has(.maplibregl-ctrl-geolocate) { display: none; }
+    .maplibregl-ctrl button.maplibregl-ctrl-geolocate { display: none; }
     #counts-wrap {
       position: fixed;
       left: 0;
@@ -665,12 +691,14 @@
       .dock-row button { padding: 5px 9px; font-size: clamp(11px, 3vw, 12px); }
       .dock-cities { gap: 6px; }
       .dock-chip { font-size: clamp(9px, 2.1vw, 11px); padding: 3px 6px; }
+      #bottom-actions {
+        left: 50%;
+        /* lifted above the corner basemap pill; keeps 44 px touch-height pills */
+        bottom: calc(var(--safe-bottom) + 34px);
+        transform: translateX(-50%);
+      }
       #dock-toggle {
         display: inline-flex;
-        left: 50%;
-        bottom: var(--safe-bottom);
-        top: auto;
-        transform: translateX(-50%);
       }
       #counts-wrap {
         left: 0;
