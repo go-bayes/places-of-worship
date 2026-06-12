@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://go-bayes.github.io/places-of-worship/schemas/change-event.schema.json",
   "title": "Place of Worship — Change Event",
-  "description": "Append-only event envelope for accepted or staged changes to places of worship. Events are bitemporal: effective dates describe the world, recorded_at describes when the project logged the event.",
+  "description": "Append-only event envelope for accepted or staged changes to places of worship. Events are bitemporal: effective dates describe the world, recorded_at describes when the project logged the event. Replay rule (DECISIONS.md D3): the snapshot for date S as publishable at audit time T replays accepted events with effective time <= S and recorded_at <= T; bounded effective times order by their latest admissible date (not_later_than <= S replays into S; bounds straddling S contribute uncertainty, not state); current products use T = now, and published artefacts pin T in their run manifests.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -26,6 +26,7 @@
     "event_id": { "$ref": "#/$defs/Uuid" },
     "client_event_id": {
       "type": "string",
+      "minLength": 1,
       "description": "Stable submitter-side idempotency key. Replays must not apply the same client_event_id twice for the same source batch."
     },
     "event_type": {
@@ -72,7 +73,8 @@
     "effective": { "$ref": "#/$defs/EffectiveTime" },
     "recorded_at": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "UTC system time when the project logged the event. Never backdated: corrections to world history change effective, not recorded_at."
     },
     "source_refs": {
       "type": "array",
@@ -82,7 +84,7 @@
     "review": { "$ref": "#/$defs/ReviewRef" },
     "taxonomy_version": {
       "type": ["string", "null"],
-      "description": "Authoritative taxonomy version for the whole event. Required for denomination events. Do not duplicate inside payloads."
+      "description": "Authoritative taxonomy version for the whole event, resolving against schemas/denomination-taxonomy.json. Required for denomination_* events and for any payload carrying denomination codes. Do not duplicate inside payloads."
     },
     "supersedes_event_ids": {
       "type": "array",
@@ -187,6 +189,22 @@
     },
     {
       "if": { "required": ["event_type"], "properties": { "event_type": { "pattern": "^denomination_" } } },
+      "then": { "required": ["taxonomy_version"], "properties": { "taxonomy_version": { "type": "string", "minLength": 1 } } }
+    },
+    {
+      "if": {
+        "required": ["payload"],
+        "properties": {
+          "payload": {
+            "anyOf": [
+              { "required": ["denomination_set"] },
+              { "required": ["previous_denomination_set"] },
+              { "required": ["denomination_code"] },
+              { "required": ["previous_denomination_code"] }
+            ]
+          }
+        }
+      },
       "then": { "required": ["taxonomy_version"], "properties": { "taxonomy_version": { "type": "string", "minLength": 1 } } }
     }
   ],

@@ -5,7 +5,8 @@ This file is the active planning source for the repository.
 Use it for current priorities, design detail, sequencing, and open questions.
 Use `ROADMAP.md` for high-level phases, `docs/system-map.md` for the module map,
 `BRAINSTORMING.md` for tool and architecture ideas that are still being
-considered, `JOURNAL.md` for decisions and rationale, and `CHANGELOG.md` for
+considered, `JOURNAL.md` for decisions and rationale, `DECISIONS.md` for the
+adjudicated standing rulings on the revisions pipeline, and `CHANGELOG.md` for
 durable progress.
 
 ## Planning rules
@@ -1500,20 +1501,12 @@ OSM ids or user suggestions.
 
 ## Open decisions
 
-### Open: historical and demolished places
+### Closed: historical and demolished places
 
-- Context: time-slice work will need a rule for sites that no longer exist or
-  no longer have an identifiable address.
-- Options:
-  - keep exact historical coordinates where known
-  - keep approximate coordinates with an uncertainty flag
-  - exclude sites below a location-confidence threshold
-- Risks:
-  - false precision
-  - inconsistent historical coverage
-  - confusion between present and past landscapes
-- Next step:
-  - define a location-confidence field and a publication rule.
+- Adjudicated 2026-06-12: see `DECISIONS.md` D13. Keep approximate geometries
+  as records with explicit `geometry_role` and `location_confidence`; site-mode
+  map points require confidence in {exact, building, parcel_or_compound};
+  coarser placements feed area-level products only.
 
 ### Open: boundary comparability over time beyond the NZ pilot
 
@@ -1628,25 +1621,12 @@ OSM ids or user suggestions.
 - Next step:
   - choose one human-readable format and enforce review comments in the file.
 
-### Open: Rust adoption timing
+### Closed: Rust adoption timing
 
-- Context: Rust may be useful for ingestion and API performance, but it is not
-  required to complete the data cleanup rebuild.
-- Preferred acceleration path:
-  - keep pipeline orchestration and data policy in R
-  - use `extendr` for targeted Rust acceleration of R bottlenecks when profiling
-    shows a clear need
-  - prefer this over a wholesale rewrite when the goal is to speed up a small
-    number of hot loops such as deduplication or candidate matching
-- Options:
-  - keep the research pipeline in R and the API/support tooling in Python for now
-  - build a Rust ingestion spike after pipeline rules stabilise
-  - move directly to a hybrid Rust stack now
-- Risks:
-  - architecture churn before data policy is settled
-  - slower cleanup progress
-- Next step:
-  - defer major Rust work until the deterministic pipeline design is stable.
+- Adjudicated 2026-06-12: see `DECISIONS.md` D16. Rust owns the governed
+  boundary (`pow`), which already exists in `crates/pow-cli`; R remains the
+  investigator-facing layer; `extendr` acceleration only after profiling; no
+  wholesale rewrite and no Rust API as a prerequisite for data work.
 
 ## Next concrete steps
 

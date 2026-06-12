@@ -33,6 +33,9 @@
 - `docs/ui-style-guide.md`: UI wording, status, colour, button, and form
   conventions for the map-first task interfaces.
 - `CRITIQUE.md`: review notes that motivated the revision-event pipeline.
+- `DECISIONS.md`: adjudicated standing rulings for the revisions pipeline,
+  with rationale, what each forecloses, and the cost to reverse. Check it
+  before reopening an identity, taxonomy, event-contract, or staging choice.
 - `schemas/`: data contracts. Update schemas before changing dependent shapes.
 - `docs/ra-nz-pilot-task.md`: current RA-facing task instructions for the
   time-bounded New Zealand web/map-first pilot.

@@ -1,0 +1,432 @@
+{
+  "schema_version": "denomination-taxonomy.v1",
+  "taxonomy_version": "2026-06-12.1",
+  "valid_from": "2026-06-12",
+  "supersedes_taxonomy_version": null,
+  "classification_basis": [
+    {
+      "name": "Stats NZ standard classification of religious affiliation",
+      "url": "https://aria.stats.govt.nz/aria/",
+      "note": "Placement of contested entries (Latter-day Saints, Jehovah's Witnesses, Christian Science, Iglesia ni Cristo, Ratana, Ringatu) follows this classification pending project review; each carries a review flag in its notes."
+    },
+    {
+      "name": "OpenStreetMap religion and denomination keys",
+      "url": "https://wiki.openstreetmap.org/wiki/Key:denomination",
+      "note": "Religion codes follow OSM religion=* values; osm_aliases hold raw strings observed in NZ extracts and in apps/regions/nz/js/denomination-mapper.js."
+    }
+  ],
+  "religions": [
+    {
+      "code": "christian",
+      "labels": [{ "lang": "en", "label": "Christian", "type": "official" }],
+      "osm_aliases": ["christian", "christianity", "protestant", "christian (other)"],
+      "status": "active",
+      "notes": "protestant maps here at religion level because it names a family, not a denomination."
+    },
+    {
+      "code": "muslim",
+      "labels": [{ "lang": "en", "label": "Islam", "type": "official" }],
+      "osm_aliases": ["muslim", "islam"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "buddhist",
+      "labels": [{ "lang": "en", "label": "Buddhism", "type": "official" }],
+      "osm_aliases": ["buddhist", "buddhism"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "jewish",
+      "labels": [{ "lang": "en", "label": "Judaism", "type": "official" }],
+      "osm_aliases": ["jewish", "judaism"],
+      "status": "active",
+      "notes": "No denomination-level entries yet; add orthodox/progressive codes when NZ source rows require them."
+    },
+    {
+      "code": "hindu",
+      "labels": [{ "lang": "en", "label": "Hinduism", "type": "official" }],
+      "osm_aliases": ["hindu", "hinduism"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "sikh",
+      "labels": [{ "lang": "en", "label": "Sikhism", "type": "official" }],
+      "osm_aliases": ["sikh", "sikhism"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "bahai",
+      "labels": [{ "lang": "en", "label": "Bahá'í Faith", "type": "official" }],
+      "osm_aliases": ["bahai", "baha'i faith", "baháʼí faith"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "maori",
+      "labels": [{ "lang": "en", "label": "Māori religions, beliefs, and philosophies", "type": "official" }],
+      "osm_aliases": [],
+      "status": "active",
+      "notes": "Category name follows the Stats NZ standard classification. REVIEW: Rātana and Ringatū placement under this category rather than christian is a project-level call; see denomination notes."
+    }
+  ],
+  "denominations": [
+    {
+      "code": "christian.anglican",
+      "religion_code": "christian",
+      "labels": [
+        { "lang": "en", "label": "Anglican", "type": "official" },
+        { "lang": "mi", "label": "Mihinare", "type": "local" }
+      ],
+      "osm_aliases": ["anglican", "anglo_catholic"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "christian.catholic",
+      "religion_code": "christian",
+      "labels": [
+        { "lang": "en", "label": "Catholic", "type": "official" },
+        { "lang": "mi", "label": "Katorika", "type": "local" }
+      ],
+      "osm_aliases": ["catholic", "roman_catholic", "marist"],
+      "status": "active",
+      "notes": "marist maps here because Marist sites are Catholic religious-order facilities."
+    },
+    {
+      "code": "christian.presbyterian",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Presbyterian", "type": "official" }],
+      "osm_aliases": ["presbyterian"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "christian.methodist",
+      "religion_code": "christian",
+      "labels": [
+        { "lang": "en", "label": "Methodist", "type": "official" },
+        { "lang": "mi", "label": "Weteriana", "type": "local" }
+      ],
+      "osm_aliases": ["methodist", "wesleyan"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "christian.wesleyan_methodist",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Wesleyan Methodist", "type": "historic" }],
+      "osm_aliases": [],
+      "status": "merged",
+      "succession": [
+        {
+          "relation_type": "merged_into",
+          "to_codes": ["christian.methodist"],
+          "effective_year": 1913,
+          "note": "Methodist Union in New Zealand. Demonstrates the supersession mechanism for historical evidence rows."
+        }
+      ],
+      "notes": null
+    },
+    {
+      "code": "christian.primitive_methodist",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Primitive Methodist", "type": "historic" }],
+      "osm_aliases": [],
+      "status": "merged",
+      "succession": [
+        {
+          "relation_type": "merged_into",
+          "to_codes": ["christian.methodist"],
+          "effective_year": 1913,
+          "note": "Methodist Union in New Zealand."
+        }
+      ],
+      "notes": null
+    },
+    {
+      "code": "christian.baptist",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Baptist", "type": "official" }],
+      "osm_aliases": ["baptist", "southern_baptist", "reformed_baptist", "independent_baptist"],
+      "status": "active",
+      "notes": "v1 lumps Baptist sub-traditions; split_into is available when analysis needs the distinction."
+    },
+    {
+      "code": "christian.pentecostal",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Pentecostal and charismatic", "type": "official" }],
+      "osm_aliases": ["pentecostal", "assemblies_of_god", "apostolic", "charismatic", "neocharismatic_evangelical", "c3", "vineyard"],
+      "status": "active",
+      "notes": "C3 and Vineyard are charismatic church networks; mapped here in v1."
+    },
+    {
+      "code": "christian.evangelical",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Evangelical", "type": "official" }],
+      "osm_aliases": ["evangelical"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "christian.lutheran",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Lutheran", "type": "official" }],
+      "osm_aliases": ["lutheran"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "christian.reformed",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Reformed", "type": "official" }],
+      "osm_aliases": ["reformed"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "christian.orthodox",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Orthodox (Eastern and Oriental)", "type": "official" }],
+      "osm_aliases": ["orthodox", "greek_orthodox", "russian_orthodox", "serbian_orthodox", "romanian_orthodox", "coptic_orthodox", "indian_orthodox"],
+      "status": "active",
+      "notes": "v1 lumps Eastern and Oriental Orthodox churches; split_into is available when analysis needs the distinction. The bare alias orthodox resolves here only when religion context is Christian; Orthodox Judaism requires a jewish.* code."
+    },
+    {
+      "code": "christian.salvation_army",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Salvation Army", "type": "official" }],
+      "osm_aliases": ["salvation_army", "salvation army"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "christian.brethren",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Brethren", "type": "official" }],
+      "osm_aliases": ["brethren", "exclusive_brethren", "plymouth_brethren"],
+      "status": "active",
+      "notes": "REVIEW: Exclusive Brethren and Open/Plymouth Brethren are socially distinct in NZ; v1 lumps them, split_into is available."
+    },
+    {
+      "code": "christian.congregational",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Congregational", "type": "official" }],
+      "osm_aliases": ["congregational"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "christian.church_of_christ",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Church of Christ", "type": "official" }],
+      "osm_aliases": ["church_of_christ"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "christian.seventh_day_adventist",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Seventh-day Adventist", "type": "official" }],
+      "osm_aliases": ["seventh_day_adventist"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "christian.nazarene",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Church of the Nazarene", "type": "official" }],
+      "osm_aliases": ["nazarene"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "christian.quaker",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Quaker (Religious Society of Friends)", "type": "official" }],
+      "osm_aliases": ["quaker"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "christian.uniting",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Uniting and Union parishes", "type": "official" }],
+      "osm_aliases": ["united church", "uniting"],
+      "status": "active",
+      "notes": "Covers NZ co-operating ventures and union parishes."
+    },
+    {
+      "code": "christian.nondenominational",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Non-denominational", "type": "official" }],
+      "osm_aliases": ["nondenominational", "interdenominational", "evangelical_non-denominational"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "christian.latter_day_saints",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Latter-day Saints", "type": "official" }],
+      "osm_aliases": ["mormon", "latter-day_saints", "latter-day saints", "latter_day_saints"],
+      "status": "active",
+      "notes": "REVIEW: placement under christian follows the Stats NZ classification; the legacy mapper placed lowercase variants under Other Religions and title-case variants under Christian."
+    },
+    {
+      "code": "christian.jehovahs_witnesses",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Jehovah's Witnesses", "type": "official" }],
+      "osm_aliases": ["jehovahs_witness", "jehovah's witnesses"],
+      "status": "active",
+      "notes": "REVIEW: placement under christian follows the Stats NZ classification; the legacy mapper split variants across two categories."
+    },
+    {
+      "code": "christian.christian_science",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Christian Science", "type": "official" }],
+      "osm_aliases": ["christian_science", "christ_scientist"],
+      "status": "active",
+      "notes": "REVIEW: placement follows the Stats NZ classification."
+    },
+    {
+      "code": "christian.iglesia_ni_cristo",
+      "religion_code": "christian",
+      "labels": [{ "lang": "en", "label": "Iglesia ni Cristo", "type": "official" }],
+      "osm_aliases": ["iglesia_ni_cristo"],
+      "status": "active",
+      "notes": "REVIEW: self-identifies as Christian (independent, nontrinitarian); the legacy mapper placed it under Other Religions."
+    },
+    {
+      "code": "muslim.sunni",
+      "religion_code": "muslim",
+      "labels": [{ "lang": "en", "label": "Sunni", "type": "official" }],
+      "osm_aliases": ["sunni"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "muslim.shia",
+      "religion_code": "muslim",
+      "labels": [{ "lang": "en", "label": "Shia", "type": "official" }],
+      "osm_aliases": ["shia"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "muslim.ahmadiyya",
+      "religion_code": "muslim",
+      "labels": [{ "lang": "en", "label": "Ahmadiyya", "type": "official" }],
+      "osm_aliases": ["ahmadiyya"],
+      "status": "active",
+      "notes": "Placement under Islam follows self-identification and Stats NZ practice."
+    },
+    {
+      "code": "buddhist.theravada",
+      "religion_code": "buddhist",
+      "labels": [{ "lang": "en", "label": "Theravada", "type": "official" }],
+      "osm_aliases": ["theravada"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "buddhist.mahayana",
+      "religion_code": "buddhist",
+      "labels": [{ "lang": "en", "label": "Mahayana", "type": "official" }],
+      "osm_aliases": ["mahayana"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "buddhist.vajrayana",
+      "religion_code": "buddhist",
+      "labels": [{ "lang": "en", "label": "Vajrayana (Tibetan)", "type": "official" }],
+      "osm_aliases": ["tibetan", "gelug"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "buddhist.zen",
+      "religion_code": "buddhist",
+      "labels": [{ "lang": "en", "label": "Zen", "type": "official" }],
+      "osm_aliases": ["rinzai"],
+      "status": "active",
+      "notes": "Rinzai is a Zen school; coded at the Zen level in v1."
+    },
+    {
+      "code": "buddhist.soka_gakkai",
+      "religion_code": "buddhist",
+      "labels": [{ "lang": "en", "label": "Soka Gakkai", "type": "official" }],
+      "osm_aliases": ["soka_gakkai"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "hindu.vaishnava",
+      "religion_code": "hindu",
+      "labels": [{ "lang": "en", "label": "Vaishnavism", "type": "official" }],
+      "osm_aliases": ["vaishnavism"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "hindu.swaminarayan",
+      "religion_code": "hindu",
+      "labels": [{ "lang": "en", "label": "Swaminarayan", "type": "official" }],
+      "osm_aliases": ["swaminarayan"],
+      "status": "active",
+      "notes": null
+    },
+    {
+      "code": "maori.ratana",
+      "religion_code": "maori",
+      "labels": [{ "lang": "mi", "label": "Rātana", "type": "official" }],
+      "osm_aliases": ["ratana"],
+      "status": "active",
+      "notes": "REVIEW: the Rātana movement carries Christian elements; placement under maori follows the Stats NZ classification and needs a project ruling."
+    },
+    {
+      "code": "maori.ringatu",
+      "religion_code": "maori",
+      "labels": [{ "lang": "mi", "label": "Ringatū", "type": "official" }],
+      "osm_aliases": ["ringatu"],
+      "status": "active",
+      "notes": "REVIEW: as for Rātana."
+    }
+  ],
+  "unresolved_aliases": [
+    {
+      "alias": "masonic",
+      "seen_in": "denomination-mapper.js (Other Religions)",
+      "note": "Masonic halls are not places of worship in the project sense; likely an exclusion-rule case for the cleaning pipeline, not a taxonomy entry."
+    },
+    {
+      "alias": "unitarian",
+      "seen_in": "denomination-mapper.js (Christian)",
+      "note": "Contested placement (Unitarian Universalism vs Christian heritage); route to review."
+    },
+    {
+      "alias": "liberal_catholic",
+      "seen_in": "denomination-mapper.js (Christian)",
+      "note": "The Liberal Catholic Church is a distinct small denomination, not Roman Catholic; create a code if NZ rows require one."
+    },
+    {
+      "alias": "alliance",
+      "seen_in": "denomination-mapper.js (Christian)",
+      "note": "Ambiguous; possibly Christian and Missionary Alliance. Verify against the source rows that carry it."
+    },
+    {
+      "alias": "vibrant",
+      "seen_in": "denomination-mapper.js (Christian)",
+      "note": "Probably a single congregation's brand name; verify before coding."
+    },
+    {
+      "alias": "south_indian_(_not_buddhist_)",
+      "seen_in": "denomination-mapper.js (Other Religions)",
+      "note": "Malformed source tag; route to review with the original OSM object."
+    }
+  ],
+  "notes": "Code shape: dotted religion.denomination codes prevent cross-religion collisions (orthodox names both Eastern Orthodox Christianity and Orthodox Judaism in OSM tagging). Codes are ASCII by pattern; labels carry macrons. Alias matching is case-insensitive on the raw string. The raw value unknown is not a denomination: rows with no resolvable alias render as Unknown in display products. Display colours stay in app and visual-layer configuration, not in the taxonomy. apps/regions/nz/js/denomination-mapper.js should be generated from this file (DECISIONS.md D2 follow-up). Te reo Māori labels appear only where well attested (Mihinare, Katorika, Weteriana); extend under review."
+}

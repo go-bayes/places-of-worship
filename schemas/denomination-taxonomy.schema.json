@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://go-bayes.github.io/places-of-worship/schemas/denomination-taxonomy.schema.json",
+  "title": "Place of Worship — Denomination Taxonomy",
+  "description": "Versioned controlled vocabulary for religion and denomination codes used in change events, evidence rows, and exports. Events pin the taxonomy_version they were validated against (DECISIONS.md D2, D14); taxonomy updates publish a new version and never rewrite accepted events. Denomination codes are dotted and hierarchical: the segment before the first dot is the religion code (e.g. christian.anglican).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "taxonomy_version", "valid_from", "religions", "denominations"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^denomination-taxonomy\\.v[0-9]+$"
+    },
+    "taxonomy_version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Version string cited by change events. Recommended convention: YYYY-MM-DD.N."
+    },
+    "valid_from": { "type": "string", "format": "date" },
+    "supersedes_taxonomy_version": {
+      "type": ["string", "null"],
+      "description": "The taxonomy_version this version replaces, if any."
+    },
+    "classification_basis": {
+      "type": "array",
+      "description": "External classifications the placements follow, so contested placements trace to a named source rather than an editor's judgement.",
+      "items": { "$ref": "#/$defs/ClassificationBasis" }
+    },
+    "religions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/Religion" }
+    },
+    "denominations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/Denomination" }
+    },
+    "unresolved_aliases": {
+      "type": "array",
+      "description": "Raw source strings whose placement needs review. Parking them here keeps the mapping honest: no alias is forced into a code the evidence does not support.",
+      "items": { "$ref": "#/$defs/UnresolvedAlias" }
+    },
+    "notes": { "type": ["string", "null"] }
+  },
+  "$defs": {
+    "ReligionCode": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Religion-level code. Follows OSM religion=* values where one exists."
+    },
+    "DenominationCode": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9._-]*$",
+      "description": "Dotted code: <religion_code>.<denomination>. Must satisfy the denomination_code pattern in change-event.schema.json."
+    },
+    "Label": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lang", "label"],
+      "properties": {
+        "lang": { "type": "string", "description": "BCP-47 language tag (e.g. en, mi)." },
+        "label": { "type": "string", "minLength": 1 },
+        "type": {
+          "type": ["string", "null"],
+          "enum": ["official", "local", "alt", "historic", null]
+        }
+      }
+    },
+    "Status": {
+      "type": "string",
+      "enum": ["active", "deprecated", "merged", "split", "renamed"]
+    },
+    "Succession": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["relation_type", "to_codes"],
+      "properties": {
+        "relation_type": {
+          "type": "string",
+          "enum": ["merged_into", "split_into", "renamed_to"]
+        },
+        "to_codes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/DenominationCode" }
+        },
+        "effective_date": { "type": ["string", "null"], "format": "date" },
+        "effective_year": { "type": ["integer", "null"], "minimum": 1, "maximum": 9999 },
+        "note": { "type": ["string", "null"] }
+      }
+    },
+    "Religion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "labels", "status"],
+      "properties": {
+        "code": { "$ref": "#/$defs/ReligionCode" },
+        "labels": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Label" }
+        },
+        "osm_aliases": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string" },
+          "description": "Raw religion or denomination strings (matched case-insensitively) that map to this religion when no denomination-level alias matches."
+        },
+        "status": { "$ref": "#/$defs/Status" },
+        "notes": { "type": ["string", "null"] }
+      }
+    },
+    "Denomination": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "religion_code", "labels", "status"],
+      "properties": {
+        "code": { "$ref": "#/$defs/DenominationCode" },
+        "religion_code": {
+          "$ref": "#/$defs/ReligionCode",
+          "description": "Must equal the segment of code before the first dot."
+        },
+        "labels": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Label" }
+        },
+        "osm_aliases": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string" },
+          "description": "Raw denomination strings (matched case-insensitively) that map to this code."
+        },
+        "status": { "$ref": "#/$defs/Status" },
+        "succession": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Succession" },
+          "description": "Required when status is merged, split, or renamed; keeps historical series comparable across taxonomy versions."
+        },
+        "notes": { "type": ["string", "null"] }
+      }
+    },
+    "ClassificationBasis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "url": { "type": ["string", "null"], "format": "uri" },
+        "note": { "type": ["string", "null"] }
+      }
+    },
+    "UnresolvedAlias": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["alias", "note"],
+      "properties": {
+        "alias": { "type": "string", "minLength": 1 },
+        "seen_in": { "type": ["string", "null"], "description": "Where the string was observed (e.g. nz osm extract)." },
+        "note": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

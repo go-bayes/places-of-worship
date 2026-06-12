@@ -8,6 +8,11 @@ JSON Schemas that define the core data structures used across the project.
   including worship-function state changes needed for `pow diff`.
 - data-manifest.schema.json: checksummed data artefact manifest for local cache,
   durable storage, global partitions, and supersession tracking.
+- denomination-taxonomy.schema.json: contract for the versioned religion and
+  denomination vocabulary.
+- denomination-taxonomy.json: the versioned vocabulary instance itself (not a
+  schema). Change events pin its `taxonomy_version`; update it by publishing a
+  new version with supersession links, never by editing codes in place.
 - geometry-history.schema.json: time-bounded site or structure geometry state.
 - indicator.schema.json: reusable indicator definitions.
 - indicator-observation.schema.json: indicator values attached to spatial and
