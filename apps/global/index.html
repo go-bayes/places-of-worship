@@ -23,12 +23,10 @@
       <button type="button" id="onboard-dismiss">Got it</button>
     </div>
   </div>
-  <div id="theme-menu">
-    <select id="basemapSelect" aria-label="Theme"></select>
-  </div>
   <div id="wordmark">
     <a id="wordmark-repo" href="https://github.com/go-bayes/places-of-worship" target="_blank" rel="noopener" title="Project repository on GitHub">GitHub</a>
     <a id="fixmap-link" href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener" title="Improve this map area on OpenStreetMap">fix map</a>
+    <select id="basemapSelect" aria-label="Theme"></select>
   </div>
   <button id="corner-reset" type="button" aria-label="Set North">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -273,9 +271,9 @@
       minZoom: IS_MOBILE ? CONFIG.mobileMinZoom : CONFIG.desktopMinZoom
     });
 
-    // full (non-collapsing) attribution: the osm credit stays readable
-    // without interaction, in the small corner idiom
-    map.addControl(new maplibregl.AttributionControl({ compact: false }), "bottom-right");
+    // responsive attribution: full text on wide maps, the standard
+    // tap-to-expand disc on phones, where the corner shares the pill line
+    map.addControl(new maplibregl.AttributionControl(), "bottom-right");
 
     // fall back to the free carto basemap when the keyed maptiler style or
     // tiles stop loading: 401/403 key blocked or credit exhausted, 429
@@ -1419,7 +1417,7 @@
         const target = e.originalEvent && e.originalEvent.target;
         if (target instanceof Element) {
           const isUiClick = target.closest(
-            "button, a, input, select, textarea, label, #dock, #counts-wrap, #theme-menu, #corner-refresh, .maplibregl-ctrl"
+            "button, a, input, select, textarea, label, #dock, #counts-wrap, #wordmark, #corner-refresh, .maplibregl-ctrl"
           );
           if (isUiClick) return;
         }

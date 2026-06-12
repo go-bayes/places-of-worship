@@ -242,24 +242,6 @@
       user-select: none;
       pointer-events: auto;
     }
-    /* theme pill sits where the info badge was, under the wordmark; github
-       and fix-map live in the wordmark, so the badge earned no keep */
-    #theme-menu {
-      position: fixed;
-      right: var(--safe-right);
-      top: calc(var(--safe-top) + 38px);
-      z-index: 13;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(15,23,42,0.55);
-      border: 1px solid rgba(255,255,255,0.06);
-      color: #cbd5e1;
-      border-radius: 999px;
-      padding: 4px 10px;
-      font-size: 12px;
-      opacity: 0.85;
-    }
     #corner-reset {
       position: fixed;
       left: var(--safe-left);
@@ -287,16 +269,18 @@
       height: 50px;
       display: block;
     }
+    /* the theme select rides in the wordmark pill, behind its own divider;
+       the wordmark hides on phones, which fixes the theme to backdrop there
+       (the credit fallback still guards it) */
     #basemapSelect {
       background: transparent;
       border: none;
+      border-left: 1px solid rgba(255,255,255,0.18);
+      padding-left: 8px;
       color: #e2e8f0;
-      font-size: 13px;
+      font-size: 12px;
       cursor: pointer;
-      padding: 2px 0;
-      max-width: 130px;
-      text-align: right;
-      text-align-last: right;
+      max-width: 120px;
     }
     #basemapSelect:focus { outline: none; }
     #tile-status {
@@ -599,10 +583,8 @@
         width: 86dvw;
         max-width: 86dvw;
         /* sit above the pill row so the open panel hides no controls */
-        bottom: calc(var(--safe-bottom) + 104px);
+        bottom: calc(var(--safe-bottom) + 64px);
       }
-      /* the wordmark hides on phones, so the theme pill takes the corner */
-      #theme-menu { top: var(--safe-top); }
       #corner-refresh {
         left: var(--safe-left);
         bottom: var(--safe-bottom);
@@ -634,11 +616,6 @@
       #counts ul { gap: 6px; }
       #counts li { font-size: 22px; }
       #counts .dot { width: 12px; height: 12px; }
-      #basemapSelect {
-        font-size: 12px;
-        max-width: 110px;
-        text-overflow: ellipsis;
-      }
       #cityChips { display: none; }
       .dock-row { gap: 4px; }
       .dock-row input { padding: 12px 12px; font-size: 19px; }
@@ -647,9 +624,9 @@
       .dock-chip { font-size: clamp(9px, 2.1vw, 11px); padding: 3px 6px; }
       #bottom-actions {
         left: 50%;
-        /* lifted above the corner basemap and refresh pills; keeps 44 px
-           touch-height pills */
-        bottom: calc(var(--safe-bottom) + 48px);
+        /* on the refresh button's line: the corner furniture this row once
+           cleared is gone, and the short mobile label clears the refresh */
+        bottom: var(--safe-bottom);
         transform: translateX(-50%);
       }
       #dock-toggle {
@@ -865,3 +842,14 @@
   box-shadow: 0 6px 14px rgba(0,0,0,0.25);
 }
 #filters-clear:hover { background: rgba(59,130,246,0.32); }
+
+/* the collapsed credit disc stays thumb-tappable despite the tiny text */
+.maplibregl-ctrl-attrib.maplibregl-compact:not(.maplibregl-compact-show) {
+  min-width: 24px;
+  min-height: 24px;
+  border-radius: 12px;
+}
+.maplibregl-ctrl-attrib-button {
+  width: 24px;
+  height: 24px;
+}
