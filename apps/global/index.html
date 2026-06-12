@@ -221,7 +221,9 @@
   ]
 : [];
     const basemapOptions = [cartoStyle, ...maptilerStyles];
-    const defaultBasemapId = isPlacesmapHost && hasMaptilerKey ? BACKDROP_BASEMAP_ID : cartoStyle.id;
+    // land on the keyed backdrop theme wherever a key exists; the error
+    // handler below falls back to the free carto style if credit runs out
+    const defaultBasemapId = hasMaptilerKey ? BACKDROP_BASEMAP_ID : cartoStyle.id;
     let activeBasemapId = defaultBasemapId;
 
     const initialBasemap = basemapOptions.find((s) => s.id === defaultBasemapId) || cartoStyle;
@@ -283,6 +285,25 @@
     });
 
     map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
+
+    // fall back to the free carto basemap when the keyed maptiler style or
+    // tiles stop loading: 401/403 key blocked or credit exhausted, 429
+    // rate-limited. one-shot so a flaky tile cannot flip the style repeatedly.
+    let maptilerFallbackDone = false;
+    map.on("error", (e) => {
+      if (maptilerFallbackDone || activeBasemapId === cartoStyle.id) return;
+      const err = e && e.error;
+      const status = err && err.status;
+      const url = (err && err.url) || "";
+      if (![401, 402, 403, 429].includes(status)) return;
+      if (typeof url === "string" && url && !url.includes("api.maptiler.com")) return;
+      maptilerFallbackDone = true;
+      activeBasemapId = cartoStyle.id;
+      if (basemapSelect) basemapSelect.value = cartoStyle.id;
+      setTerrainStateFromBasemap(cartoStyle.id);
+      map.setStyle(cartoStyle.style, { diff: false });
+      map.once("style.load", () => refreshMapLayers());
+    });
 
     if (!IS_MOBILE) {
       map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
