@@ -999,7 +999,9 @@
 
     if (IS_MOBILE) {
       map.on("click", (e) => {
-        if (mobileFeatureClickHandled || !map.isStyleLoaded()) return;
+        // gate on layer presence, not isStyleLoaded(): the latter is false during
+        // any pending repaint and silently swallows taps (see CRITIQUE/porting doc)
+        if (mobileFeatureClickHandled || !map.getLayer(LAYERS.places) || !map.getLayer(LAYERS.overview)) return;
         const tapPadding = 12;
         const bbox = [
           [e.point.x - tapPadding, e.point.y - tapPadding],
@@ -1019,7 +1021,8 @@
 
     if (!IS_MOBILE) {
       map.on("click", (e) => {
-        if (!map.isStyleLoaded()) return;
+        // layer-presence guard; isStyleLoaded() would drop clicks during repaints
+        if (!map.getLayer(LAYERS.places) || !map.getLayer(LAYERS.overview)) return;
         const target = e.originalEvent && e.originalEvent.target;
         if (target instanceof Element) {
           const isUiClick = target.closest(
@@ -1541,7 +1544,8 @@
     }
 
     function updateCounts() {
-      if (!map.isStyleLoaded()) return;
+      // no isStyleLoaded() gate: it skips UI sync during repaints; the
+      // rendered-feature query below already guards on layer presence
       if (countsScheduled) return;
       const now = performance.now();
       const elapsed = now - countsLastUpdate;
