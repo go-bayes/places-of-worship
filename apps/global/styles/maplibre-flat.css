@@ -733,86 +733,6 @@
   #wordmark { display: none; }
 }
 
-/* nearest-place banner: distance readout above the action row */
-#nearest-place {
-  position: fixed;
-  left: 50%;
-  bottom: calc(var(--safe-bottom) + 58px);
-  transform: translateX(-50%);
-  z-index: 13;
-  display: none;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(15,23,42,0.72);
-  color: #e2e8f0;
-  font-size: 15px;
-  cursor: pointer;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
-  opacity: 0.92;
-  white-space: nowrap;
-}
-#nearest-place.visible { display: inline-flex; }
-#nearest-place .nearest-go {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: none;
-  border: none;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-  padding: 0;
-}
-#nearest-place .nearest-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.35);
-  flex: none;
-}
-/* amber when measuring from the planning pin rather than the blue dot */
-#nearest-place .nearest-dot.pin {
-  background: #f59e0b;
-  box-shadow: 0 0 0 3px rgba(245,158,11,0.35);
-}
-#nearest-place .nearest-chevron {
-  color: #94a3b8;
-  font-size: 16px;
-  line-height: 1;
-}
-/* straight-line caveat, tucked small beside the banner distance */
-#nearest-place .nearest-cf {
-  color: #94a3b8;
-  font-size: 12px;
-}
-@media (max-width: 640px) {
-  #nearest-place {
-    font-size: 13px;
-    padding: 8px 14px;
-    /* clears the lifted pill row */
-    bottom: calc(var(--safe-bottom) + 108px);
-  }
-}
-@media (max-width: 400px) {
-  #nearest-place .nearest-cf { display: none; }
-}
-
-/* remove-pin control on the nearest banner */
-#nearest-place .nearest-clear {
-  background: none;
-  border: none;
-  color: #94a3b8;
-  font-size: 17px;
-  line-height: 1;
-  cursor: pointer;
-  padding: 0 0 0 2px;
-}
-#nearest-place .nearest-clear:hover { color: #e2e8f0; }
-
 /* popup distance rows (from you / from pin) and crow-flies footnote */
 .place-attrs {
   display: grid;
@@ -845,9 +765,6 @@
   cursor: pointer;
 }
 .streetview .sv-show:hover { background: rgba(255,255,255,0.16); }
-
-/* the nearest banner overlays the open search panel; yield while it is up */
-body.dock-open #nearest-place { display: none; }
 
 /* filter chips inside the search panel */
 .dock-filters {

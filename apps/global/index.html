@@ -48,7 +48,6 @@
     <button id="filters-clear" type="button" hidden aria-label="Clear filters"></button>
     <button id="near-me" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
   </div>
-  <div id="nearest-place" role="status" aria-live="polite"></div>
   <div id="counts-wrap">
     <div id="counts-bar">
       <button id="counts-toggle" type="button" aria-controls="counts" aria-expanded="false">Show Denomination Key</button>
@@ -368,8 +367,6 @@
     // (ported in a later step), otherwise the blue dot.
     let userLocation = null;   // [lng, lat] from the last geolocate fix
     let pinLocation = null;    // [lng, lat] of the planning pin, once ported
-    let nearestPlace = null;   // { coords, props, metres } or null
-    let nearestUpdateTimer = null;
     let focusedPlace = null;   // coords the guide line is held on
     let focusedKey = null;     // its osm identity, for the click-again toggle
     const NEAREST_LINE_SOURCE = "nearest-line";
@@ -379,7 +376,7 @@
       return pinLocation || userLocation;
     }
 
-    // great-circle distance in metres; ample precision for a banner readout
+    // great-circle distance in metres; ample precision for a popup readout
     function haversineMetres(a, b) {
       const toRad = (deg) => (deg * Math.PI) / 180;
       const earthRadius = 6371000;
@@ -392,7 +389,8 @@
 
     geolocate.on("geolocate", (event) => {
       userLocation = [event.coords.longitude, event.coords.latitude];
-      scheduleNearestUpdate();
+      // a held guide line tracks the moving dot
+      ensureNearestLine();
     });
 
     geolocate.on("error", (err) => {
@@ -408,28 +406,18 @@
     geolocate.on("trackuserlocationend", () => {
       // fires when dropping to the background state too; only clear once the
       // watch is fully off (blue dot removed). _watchState is private, so an
-      // api change degrades to keeping the banner rather than crashing.
+      // api change degrades to keeping the line rather than crashing.
       if (geolocate._watchState && geolocate._watchState !== "OFF") return;
       userLocation = null;
-      if (pinLocation) {
-        // the pin remains the measuring point
-        updateNearestPlace();
-        return;
-      }
-      nearestPlace = null;
-      syncNearestBanner();
+      // the pin, if down, remains the measuring point; otherwise the line
+      // loses its start and clears
       ensureNearestLine();
     });
 
-    // a new measuring point invalidates the previous nearest answer; if the
-    // recompute is skipped (point off-screen) the banner still flips to the
-    // honest "not found yet" state instead of keeping a stale distance
+    // a new measuring point releases any held guide line
     function referenceChanged() {
       focusedPlace = null;
       focusedKey = null;
-      nearestPlace = null;
-      updateNearestPlace();
-      syncNearestBanner();
       ensureNearestLine();
     }
 
@@ -540,106 +528,6 @@
 
     function distanceSummary(metres) {
       return `${formatDistance(metres)}${walkSuffix(metres)}`;
-    }
-
-    const nearestBanner = document.getElementById("nearest-place");
-
-    function syncNearestBanner() {
-      if (!nearestBanner) return;
-      if (!referencePoint()) {
-        nearestBanner.classList.remove("visible");
-        return;
-      }
-      const fromPin = Boolean(pinLocation);
-      // the places source carries tiles from zoom 6 up, so the helpful empty
-      // hint depends on which side of that boundary the user is on
-      const emptyHint = map.getZoom() < 6 ? "zoom in to load places" : "try zooming out";
-      const label = nearestPlace
-        ? `${fromPin ? "Nearest to pin" : "Nearest place of worship"}: ${formatDistance(nearestPlace.metres)}` +
-          `${walkSuffix(nearestPlace.metres)} <span class="nearest-cf">· crow flies</span>`
-        : `No places of worship found ${fromPin ? "near the pin" : "near you"} yet — ${emptyHint}`;
-      nearestBanner.innerHTML =
-        `<button type="button" class="nearest-go" title="Walking directions (Google Maps)">` +
-        `<span class="nearest-dot${fromPin ? " pin" : ""}"></span><span>${label}</span>` +
-        (nearestPlace ? `<span class="nearest-chevron" aria-hidden="true">↗</span>` : "") +
-        `</button>` +
-        (fromPin ? `<button type="button" class="nearest-clear" aria-label="Remove pin" title="Remove pin">×</button>` : "");
-      nearestBanner.classList.add("visible");
-    }
-
-    // the places source only exposes features in loaded tiles (zoom 6 up),
-    // so the search runs after the geolocate fly-to settles and re-runs on
-    // later moves; when the fix is off-screen the previous answer is kept
-    // rather than recomputed against tiles far from the user. nearest
-    // deliberately queries the detailed places source, never the thinned
-    // low-zoom overview tier, and shares the panel's filter clauses so the
-    // answer respects what the map is showing.
-    function updateNearestPlace() {
-      const ref = referencePoint();
-      if (!ref || !map.getSource(SOURCES.places)) return;
-      if (!map.getBounds().contains({ lng: ref[0], lat: ref[1] })) return;
-      const queryOptions = { sourceLayer: PLACES_LAYER };
-      const filterClauses = currentFilterClauses();
-      if (filterClauses) queryOptions.filter = filterClauses;
-      const features = map.querySourceFeatures(SOURCES.places, queryOptions);
-      // tiles duplicate features at boundaries; dedupe on the osm identity
-      const seen = new Set();
-      let best = null;
-      features.forEach((feature) => {
-        const coords = coordsFromFeature(feature, null);
-        if (!coords) return;
-        const props = feature.properties || {};
-        const key = props.osm_id
-          ? `${props.osm_type || "node"}/${props.osm_id}`
-          : (feature.id != null ? `id/${feature.id}` : coords.join(","));
-        if (seen.has(key)) return;
-        seen.add(key);
-        const metres = haversineMetres(ref, coords);
-        if (!best || metres < best.metres) best = { coords, props, metres };
-      });
-      nearestPlace = best;
-      syncNearestBanner();
-      ensureNearestLine();
-    }
-
-    // debounced so a burst of geolocate fixes or move events costs one query;
-    // defers to idle so the destination tiles have loaded before searching.
-    // a single pending idle listener: while location tracking the camera
-    // refits on every fix and the map can stay non-idle for a long time, so
-    // stacking once-idle callbacks would fire a burst of heavy tile queries
-    let nearestIdlePending = false;
-    function scheduleNearestUpdate() {
-      if (nearestUpdateTimer) clearTimeout(nearestUpdateTimer);
-      nearestUpdateTimer = setTimeout(() => {
-        nearestUpdateTimer = null;
-        if (map.isMoving()) {
-          if (nearestIdlePending) return;
-          nearestIdlePending = true;
-          map.once("idle", () => {
-            nearestIdlePending = false;
-            updateNearestPlace();
-          });
-        } else {
-          updateNearestPlace();
-        }
-      }, 600);
-    }
-
-    if (nearestBanner) {
-      // delegated: the banner is rebuilt on every sync, so listen once here
-      nearestBanner.addEventListener("click", (event) => {
-        if (event.target.closest(".nearest-clear")) {
-          clearPin();
-          return;
-        }
-        if (!event.target.closest(".nearest-go") || !nearestPlace) return;
-        // hand over to google maps for a real route; origin = pin when down
-        window.open(
-          directionsUrl(nearestPlace.coords[1].toFixed(6), nearestPlace.coords[0].toFixed(6)),
-          "_blank",
-          "noopener"
-        );
-      });
     }
 
     // ---- planning pin --------------------------------------------------------
@@ -1839,18 +1727,13 @@
       return Boolean(dock) && dock.style.display !== "none";
     }
     // single open/close path shared by the toggle, the panel ×, escape, and
-    // reset. closing clears the filters: a filter left on behind a closed
-    // panel is invisible state that quietly hides places with no cue. the
-    // body class hides the nearest banner, which overlays the open panel on
-    // phones, and lets it return on close.
-    // filters survive close: filtering is the analytical act here, and
-    // closing the panel is how you look at the result. the indicator chip
-    // beside the toggle keeps closed-panel filters visible (and one tap
-    // clears them), so persistence carries no invisible state.
+    // reset. filters survive close: filtering is the analytical act here,
+    // and closing the panel is how you look at the result. the indicator
+    // chip beside the toggle keeps closed-panel filters visible (and one
+    // tap clears them), so persistence carries no invisible state.
     function setDockOpen(open) {
       if (!dock) return;
       dock.style.display = open ? "flex" : "none";
-      document.body.classList.toggle("dock-open", open);
       const filtersWrap = document.getElementById("dock-filters");
       if (!open) {
         if (searchInput) searchInput.blur();
@@ -2185,7 +2068,6 @@
       if (map.getLayer(LAYERS.places)) map.setFilter(LAYERS.places, clauses);
       if (map.getLayer(LAYERS.overview)) map.setFilter(LAYERS.overview, clauses);
       updateCounts();
-      if (referencePoint()) scheduleNearestUpdate();
       // no hash writes until the boot parse has run, or an early style.load
       // would erase a shared link's filter param before it is read
       if (filtersBootstrapped) writeHashParam("f", filterStateToTokens().join(","));
@@ -2563,7 +2445,6 @@
     map.on("moveend", () => {
       updateCounts();
       ensureCustomLayers();
-      if (referencePoint()) scheduleNearestUpdate();
     });
     map.on("zoomstart", showTileStatus);
     map.on("zoomend", () => {
