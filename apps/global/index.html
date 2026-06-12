@@ -372,6 +372,10 @@
     let pinLocation = null;    // [lng, lat] of the planning pin, once ported
     let nearestPlace = null;   // { coords, props, metres } or null
     let nearestUpdateTimer = null;
+    let focusedPlace = null;   // coords the guide line is held on
+    let focusedKey = null;     // its osm identity, for the click-again toggle
+    const NEAREST_LINE_SOURCE = "nearest-line";
+    const NEAREST_LINE_LAYER = "nearest-line";
 
     function referencePoint() {
       return pinLocation || userLocation;
@@ -410,15 +414,77 @@
       }
       nearestPlace = null;
       syncNearestBanner();
+      ensureNearestLine();
     });
 
     // a new measuring point invalidates the previous nearest answer; if the
     // recompute is skipped (point off-screen) the banner still flips to the
     // honest "not found yet" state instead of keeping a stale distance
     function referenceChanged() {
+      focusedPlace = null;
+      focusedKey = null;
       nearestPlace = null;
       updateNearestPlace();
       syncNearestBanner();
+      ensureNearestLine();
+    }
+
+    // dashed guide line from the measuring point to the place being
+    // inspected, or failing that the nearest one; re-added after every
+    // basemap switch because setStyle drops custom sources and layers
+    function ensureNearestLine() {
+      // places-source presence proxies "style initialised"; isStyleLoaded()
+      // is false during any pending repaint and would skip updates silently
+      if (!map.getSource(SOURCES.places)) return;
+      if (!map.getSource(NEAREST_LINE_SOURCE)) {
+        map.addSource(NEAREST_LINE_SOURCE, {
+          type: "geojson",
+          data: { type: "FeatureCollection", features: [] }
+        });
+      }
+      if (!map.getLayer(NEAREST_LINE_LAYER)) {
+        // insert beneath the place points so dots stay tappable
+        map.addLayer({
+          id: NEAREST_LINE_LAYER,
+          type: "line",
+          source: NEAREST_LINE_SOURCE,
+          paint: {
+            "line-color": "#3b82f6",
+            "line-width": 3,
+            "line-dasharray": [1.5, 1.5],
+            "line-opacity": 0.85
+          }
+        }, map.getLayer(LAYERS.places) ? LAYERS.places : undefined);
+      }
+      const ref = referencePoint();
+      const target = focusedPlace || (nearestPlace ? nearestPlace.coords : null);
+      const features = (ref && target)
+        ? [{
+            type: "Feature",
+            geometry: { type: "LineString", coordinates: [ref, target] },
+            properties: {}
+          }]
+        : [];
+      map.getSource(NEAREST_LINE_SOURCE).setData({ type: "FeatureCollection", features });
+    }
+
+    // holding focus keys on osm identity so the line survives popup close
+    // (useful for planning); clicking the same place again, or changing the
+    // measuring point, releases the line back to the nearest place
+    function placeKey(props, coords) {
+      return props && props.osm_id ? `${props.osm_type || "node"}/${props.osm_id}` : coords.join(",");
+    }
+    function focusPlace(props, coords) {
+      if (!referencePoint() || !coords) return;
+      const key = placeKey(props, coords);
+      if (focusedKey === key) {
+        focusedPlace = null;
+        focusedKey = null;
+      } else {
+        focusedPlace = coords;
+        focusedKey = key;
+      }
+      ensureNearestLine();
     }
 
     // ---- nearest place of worship -------------------------------------------
@@ -499,6 +565,7 @@
       });
       nearestPlace = best;
       syncNearestBanner();
+      ensureNearestLine();
     }
 
     // debounced so a burst of geolocate fixes or move events costs one query;
@@ -803,6 +870,9 @@
       const name = props["name:en"] || props.name_en || props.name || "Loading place…";
       const coords = coordsFromFeature(feature, fallbackLngLat);
       if (!coords) return;
+      // hold or release the guide line on this place (no-op without a
+      // measuring point); survives popup close by design
+      focusPlace(props, coords);
       const panoId = `pano-${Date.now()}`;
       const latFixed = coords[1].toFixed(6);
       const lngFixed = coords[0].toFixed(6);
@@ -1143,6 +1213,7 @@
           const coords = coordsFromFeature(feature, e.lngLat);
           if (!coords) return;
           markMobileFeatureClickHandled();
+          focusPlace(props, coords);
           showMobileStreetViewPopup(name, coords, feature.id);
         });
       }
@@ -1291,6 +1362,7 @@
 
     map.on("style.load", () => {
       addCustomLayers();
+      ensureNearestLine();
       updateCounts();
       setTimeout(ensureCustomLayers, 350);
       setTimeout(nudgeMap, 400);
@@ -1339,6 +1411,7 @@
         const coords = coordsFromFeature(feature, e.lngLat);
         if (!coords) return;
         markMobileFeatureClickHandled();
+        focusPlace(props, coords);
         showMobileStreetViewPopup(name, coords, feature.id);
       });
     }
