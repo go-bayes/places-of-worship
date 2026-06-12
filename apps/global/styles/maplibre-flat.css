@@ -271,14 +271,20 @@
     }
     /* the theme select rides in the wordmark pill, behind its own divider;
        the wordmark hides on phones, which fixes the theme to backdrop there
-       (the credit fallback still guards it) */
+       (the credit fallback still guards it). native select chrome is
+       stripped so it reads as pill text with a quiet caret, not a widget. */
     #basemapSelect {
-      background: transparent;
+      appearance: none;
+      -webkit-appearance: none;
+      background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='6'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right center;
       border: none;
       border-left: 1px solid rgba(255,255,255,0.18);
+      border-radius: 0;
       padding-left: 8px;
+      padding-right: 13px;
       color: #e2e8f0;
       font-size: 12px;
+      line-height: 1;
       cursor: pointer;
       max-width: 120px;
     }
