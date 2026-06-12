@@ -4,6 +4,8 @@
 
 ### 2026-06-13
 
+- Added a tri-state `All` box to each filter row: one click selects or
+  clears the whole row, and a dash shows a mixed row.
 - Added search-panel filters: chips for the nine palette religions plus,
   while Christian is selected, eight major denomination buckets and Other
   Christian, grouped from raw OSM values through the denomination
