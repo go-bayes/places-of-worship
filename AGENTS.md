@@ -45,6 +45,11 @@
 - `docs/development/`: implementation-facing CLI, staging, and proposal
   mapping notes. Keep these out of the default RA task path unless explicitly
   requested.
+- `docs/development/theme-primitives-to-research-maps.md`: ACTIVE porting
+  brief for unifying the NZ research maps with the global map's design
+  language (PLANNING.md step 31). Start here when asked to align the maps'
+  look; it carries the primitives inventory, the live-pilot constraints,
+  and the verification gotchas from the 2026-06-12/13 sessions.
 - `docs/development/location-features-from-reliefmap.md`: HISTORICAL porting
   guide for the reliefmap location/UX features. The port completed on
   2026-06-13 and several features then deliberately diverged or were
