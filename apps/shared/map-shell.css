@@ -133,14 +133,17 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
   color: #f8fafc;
   background: rgba(15, 23, 42, 0.6);
 }
-.popup-actions {
+/* the idiom's content classes are scoped to maplibre popups so pages
+   with their own popup-actions (e.g. the leaflet verification surface)
+   are untouched by this sheet */
+.maplibregl-popup-content .popup-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 8px;
 }
-.popup-actions a,
-.popup-actions button {
+.maplibregl-popup-content .popup-actions a,
+.maplibregl-popup-content .popup-actions button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -154,7 +157,7 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
   text-decoration: none;
   cursor: pointer;
 }
-.place-attrs {
+.maplibregl-popup-content .place-attrs {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 2px 14px;
@@ -162,13 +165,13 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
   font-size: 13px;
   color: #cbd5e1;
 }
-.place-attr { display: contents; }
-.place-attr-key {
+.maplibregl-popup-content .place-attr { display: contents; }
+.maplibregl-popup-content .place-attr-key {
   color: #94a3b8;
   font-weight: 600;
 }
-.place-attr-val { color: #e2e8f0; }
-.place-note {
+.maplibregl-popup-content .place-attr-val { color: #e2e8f0; }
+.maplibregl-popup-content .place-note {
   margin: 4px 0 2px;
   font-size: 11px;
   color: #e2e8f0;

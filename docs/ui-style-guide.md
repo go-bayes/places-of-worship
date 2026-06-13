@@ -57,8 +57,13 @@ Do not reuse these colours for unrelated meanings.
 | Warning or demo-only message | `.demo-warning` | amber warning |
 | Disabled or unavailable state | `.disabled-panel`, `.backend-card.disabled` | light grey |
 
-If these colours change, update both the CSS and this table. Future work should
-move repeated colours into CSS custom properties.
+If these colours change, update both the CSS and this table. On
+`verification.html` these meanings now live as CSS custom properties in the
+page's `:root` block (`--action`, `--present*`, `--absent*`, `--uncertain*`,
+`--warning*`, `--not-assessed*`, `--priority-*`, `--danger`), with values
+unchanged — change a meaning by changing its variable, then update this table.
+The page also links `apps/shared/map-shell.css` for the shared type stack and
+tokens; its colours stay page-owned.
 
 ## Status Components
 

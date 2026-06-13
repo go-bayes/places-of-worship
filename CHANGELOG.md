@@ -4,6 +4,13 @@
 
 ### 2026-06-13
 
+- The verification surface keeps its light RA workspace and CARTO
+  basemap but now shares the project's type stack via
+  `apps/shared/map-shell.css`, and the style guide's colour meanings
+  moved into CSS custom properties with values unchanged (the guide's
+  named future work). Computed styles verified: only the font stack
+  changed. The shared sheet's popup idiom is now scoped to MapLibre
+  popups so it cannot leak into Leaflet surfaces like this one.
 - The rebuilt NZ research map is now the live page: `next.html` became
   `apps/regions/nz/index.html`, and the Leaflet page retired with its
   app scripts (`enhanced-places-app.js`, `denomination-mapper.js`;
