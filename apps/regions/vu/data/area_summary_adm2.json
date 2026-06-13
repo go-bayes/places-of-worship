@@ -1,10 +1,10 @@
 {
   "schema_version": "0.1.0",
-  "generated_at": "2026-06-13T03:09:00Z",
+  "generated_at": "2026-06-13T05:19:31Z",
   "generated_by": "scripts/build_vu_area_scaffold.R",
   "country_code": "VU",
-  "data_status": "boundaries_only",
-  "data_status_note": "Vanuatu province and area-council boundaries are in place; per-area religious-affiliation counts await a structured source. The 2020 VNSO census reports religion nationally (Presbyterian 27.2%, SDA 14.8%, Catholic 12.1%, Anglican 12.0%, others 20.3%) but the provincial tables are PDF-only. Drop counts into these rows to light up the choropleth.",
+  "data_status": "place_density_only",
+  "data_status_note": "Place-of-worship density (OSM places per sq km) is computed and live. Per-area religious-affiliation counts await a structured source: the 2020 VNSO census reports religion nationally (Presbyterian 27.2%, SDA 14.8%, Catholic 12.1%, Anglican 12.0%, others 20.3%) but the provincial tables are PDF-only. Drop counts into these rows to light up the religion metrics.",
   "boundary_set": {
     "boundary_set_id": "vu-adm2-geoboundaries",
     "country_code": "VU",
@@ -18,14 +18,28 @@
       "name": "geoBoundaries gbOpen VUT ADM2",
       "provider": "geoBoundaries (William & Mary geoLab)",
       "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/VUT/ADM2/geoBoundaries-VUT-ADM2_simplified.geojson",
-      "retrieval_date": "2026-06-13T03:09:00Z",
+      "retrieval_date": "2026-06-13T05:19:31Z",
       "licence": {
         "name": "CC-BY-3.0-IGO",
         "url": "https://creativecommons.org/licenses/by/3.0/igo/",
         "attribution": "geoBoundaries (William & Mary geoLab)"
       },
       "citation": "Runfola et al. (2020) geoBoundaries: A global database of political administrative boundaries.",
-      "notes": "Simplified release 9469f09 re-tagged to the project area schema."
+      "notes": "Simplified release 9469f09 re-tagged to the project area schema; land area computed geodesically from this geometry."
+    },
+    {
+      "source_dataset_id": "osm-vu-place-of-worship",
+      "name": "OpenStreetMap places of worship in Vanuatu",
+      "provider": "OpenStreetMap contributors",
+      "url": "https://overpass-api.de/api/interpreter",
+      "retrieval_date": "2026-06-13T05:19:31Z",
+      "licence": {
+        "name": "ODbL-1.0",
+        "url": "https://opendatacommons.org/licenses/odbl/1-0/",
+        "attribution": "OpenStreetMap contributors"
+      },
+      "citation": "OpenStreetMap contributors, amenity=place_of_worship, Vanuatu.",
+      "notes": "amenity=place_of_worship as recorded in OSM; in Vanuatu this includes some nakamals (kava meeting houses) alongside churches. Node/way/relation centroids used for point-in-polygon assignment."
     }
   ],
   "indicators": [],
@@ -45,16 +59,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 160.5,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -70,16 +85,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 160.5,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -95,16 +111,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 10,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 1.2312,
+      "land_area_sq_km": 8.12,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -120,16 +137,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 10,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 1.2312,
+      "land_area_sq_km": 8.12,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -145,16 +163,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 6,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0166,
+      "land_area_sq_km": 361.17,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -170,16 +189,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 6,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0166,
+      "land_area_sq_km": 361.17,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -195,16 +215,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 372.03,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -220,16 +241,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 372.03,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -245,16 +267,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 67.59,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -270,16 +293,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 67.59,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -295,16 +319,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.007,
+      "land_area_sq_km": 143.13,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -320,16 +345,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.007,
+      "land_area_sq_km": 143.13,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -345,16 +371,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 2,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0455,
+      "land_area_sq_km": 43.95,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -370,16 +397,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 2,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0455,
+      "land_area_sq_km": 43.95,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -395,16 +423,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 135.35,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -420,16 +449,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 135.35,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -445,16 +475,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 9,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0148,
+      "land_area_sq_km": 608.77,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -470,16 +501,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 9,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0148,
+      "land_area_sq_km": 608.77,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -495,16 +527,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 5,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.6643,
+      "land_area_sq_km": 7.53,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -520,16 +553,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 5,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.6643,
+      "land_area_sq_km": 7.53,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -545,16 +579,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 3,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0278,
+      "land_area_sq_km": 108.04,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -570,16 +605,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 3,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0278,
+      "land_area_sq_km": 108.04,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -595,16 +631,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 4,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0547,
+      "land_area_sq_km": 73.19,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -620,16 +657,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 4,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0547,
+      "land_area_sq_km": 73.19,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -645,16 +683,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0031,
+      "land_area_sq_km": 322.62,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -670,16 +709,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0031,
+      "land_area_sq_km": 322.62,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -695,16 +735,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 10.49,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -720,16 +761,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 10.49,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -745,16 +787,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 310.61,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -770,16 +813,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 310.61,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -795,16 +839,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 0.9,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -820,16 +865,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 0.9,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -845,16 +891,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 6,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.24,
+      "land_area_sq_km": 25,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -870,16 +917,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 6,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.24,
+      "land_area_sq_km": 25,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -895,16 +943,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 36.18,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -920,16 +969,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 36.18,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -945,16 +995,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 3,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0124,
+      "land_area_sq_km": 241.83,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -970,16 +1021,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 3,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0124,
+      "land_area_sq_km": 241.83,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -995,16 +1047,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 5,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0726,
+      "land_area_sq_km": 68.87,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1020,16 +1073,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 5,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0726,
+      "land_area_sq_km": 68.87,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1045,16 +1099,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 18.56,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1070,16 +1125,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 18.56,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1095,16 +1151,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 76.58,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1120,16 +1177,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 76.58,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1145,16 +1203,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 9.72,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1170,16 +1229,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 9.72,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1195,16 +1255,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 35.02,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1220,16 +1281,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 35.02,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1245,16 +1307,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 13,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.407,
+      "land_area_sq_km": 31.94,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1270,16 +1333,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 13,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.407,
+      "land_area_sq_km": 31.94,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1295,16 +1359,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 3,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0299,
+      "land_area_sq_km": 100.38,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1320,16 +1385,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 3,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0299,
+      "land_area_sq_km": 100.38,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1345,16 +1411,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 2,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0103,
+      "land_area_sq_km": 193.88,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1370,16 +1437,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 2,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0103,
+      "land_area_sq_km": 193.88,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1395,16 +1463,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 6,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0346,
+      "land_area_sq_km": 173.2,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1420,16 +1489,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 6,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0346,
+      "land_area_sq_km": 173.2,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1445,16 +1515,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 5,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0589,
+      "land_area_sq_km": 84.91,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1470,16 +1541,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 5,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0589,
+      "land_area_sq_km": 84.91,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1495,16 +1567,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 6,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.011,
+      "land_area_sq_km": 545.42,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1520,16 +1593,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 6,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.011,
+      "land_area_sq_km": 545.42,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1545,16 +1619,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 4,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0297,
+      "land_area_sq_km": 134.59,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1570,16 +1645,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 4,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0297,
+      "land_area_sq_km": 134.59,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1595,16 +1671,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 90.79,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1620,16 +1697,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 90.79,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1645,16 +1723,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 1028.07,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1670,16 +1749,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 1028.07,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1695,16 +1775,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0101,
+      "land_area_sq_km": 98.94,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1720,16 +1801,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0101,
+      "land_area_sq_km": 98.94,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1745,16 +1827,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 4,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.1396,
+      "land_area_sq_km": 28.66,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1770,16 +1853,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 4,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.1396,
+      "land_area_sq_km": 28.66,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1795,16 +1879,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0029,
+      "land_area_sq_km": 341.87,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1820,16 +1905,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0029,
+      "land_area_sq_km": 341.87,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1845,16 +1931,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 459.43,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1870,16 +1957,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 459.43,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1895,16 +1983,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 20,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.3204,
+      "land_area_sq_km": 62.42,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1920,16 +2009,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 20,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.3204,
+      "land_area_sq_km": 62.42,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1945,16 +2035,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 5,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.8451,
+      "land_area_sq_km": 5.92,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1970,16 +2061,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 5,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.8451,
+      "land_area_sq_km": 5.92,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -1995,16 +2087,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 36,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 1.5227,
+      "land_area_sq_km": 23.64,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2020,16 +2113,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 36,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 1.5227,
+      "land_area_sq_km": 23.64,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2045,16 +2139,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0074,
+      "land_area_sq_km": 134.87,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2070,16 +2165,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0074,
+      "land_area_sq_km": 134.87,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2095,16 +2191,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 2,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0096,
+      "land_area_sq_km": 209.2,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2120,16 +2217,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 2,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0096,
+      "land_area_sq_km": 209.2,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2145,16 +2243,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 277.83,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2170,16 +2269,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 277.83,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2195,16 +2295,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 7,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0272,
+      "land_area_sq_km": 257.82,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2220,16 +2321,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 7,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0272,
+      "land_area_sq_km": 257.82,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2245,16 +2347,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 105.43,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2270,16 +2373,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 105.43,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2295,16 +2399,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 349.37,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2320,16 +2425,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 349.37,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2345,16 +2451,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0058,
+      "land_area_sq_km": 171.47,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2370,16 +2477,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0058,
+      "land_area_sq_km": 171.47,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2395,16 +2503,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0043,
+      "land_area_sq_km": 232.65,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2420,16 +2529,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0043,
+      "land_area_sq_km": 232.65,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2445,16 +2555,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 189.41,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2470,16 +2581,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 189.41,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2495,16 +2607,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 2,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0047,
+      "land_area_sq_km": 424.36,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2520,16 +2633,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 2,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0047,
+      "land_area_sq_km": 424.36,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2545,16 +2659,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0394,
+      "land_area_sq_km": 25.37,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2570,16 +2685,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0394,
+      "land_area_sq_km": 25.37,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2595,16 +2711,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 3,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0045,
+      "land_area_sq_km": 670.65,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2620,16 +2737,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 3,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0045,
+      "land_area_sq_km": 670.65,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2645,16 +2763,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 136.62,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2670,16 +2789,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 136.62,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2695,16 +2815,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.053,
+      "land_area_sq_km": 18.88,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2720,16 +2841,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.053,
+      "land_area_sq_km": 18.88,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2745,16 +2867,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 41.66,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2770,16 +2893,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 41.66,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2795,16 +2919,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0029,
+      "land_area_sq_km": 340.84,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2820,16 +2945,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 1,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0029,
+      "land_area_sq_km": 340.84,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2845,16 +2971,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 3,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0282,
+      "land_area_sq_km": 106.44,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2870,16 +2997,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 3,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0282,
+      "land_area_sq_km": 106.44,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2895,16 +3023,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 3,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0501,
+      "land_area_sq_km": 59.87,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2920,16 +3049,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 3,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0501,
+      "land_area_sq_km": 59.87,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2945,16 +3075,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 176.27,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2970,16 +3101,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 0,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0,
+      "land_area_sq_km": 176.27,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -2995,16 +3127,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 13,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.1032,
+      "land_area_sq_km": 126.01,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -3020,16 +3153,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 13,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.1032,
+      "land_area_sq_km": 126.01,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -3045,16 +3179,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 2,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0072,
+      "land_area_sq_km": 276.31,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -3070,16 +3205,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 2,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0072,
+      "land_area_sq_km": 276.31,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -3095,16 +3231,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 3,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0626,
+      "land_area_sq_km": 47.89,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -3120,16 +3257,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 3,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0626,
+      "land_area_sq_km": 47.89,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -3145,16 +3283,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 2,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0023,
+      "land_area_sq_km": 888.32,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -3170,16 +3309,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 2,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0023,
+      "land_area_sq_km": 888.32,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -3195,16 +3335,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 4,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0408,
+      "land_area_sq_km": 98.02,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -3220,16 +3361,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 4,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.0408,
+      "land_area_sq_km": 98.02,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -3245,16 +3387,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 3,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.024,
+      "land_area_sq_km": 125.08,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     },
     {
       "country_code": "VU",
@@ -3270,16 +3413,17 @@
       "religious_affiliation_percent": null,
       "no_religion_count": null,
       "no_religion_percent": null,
-      "place_count": null,
+      "place_count": 3,
       "places_per_10000_residents": null,
-      "place_density_per_sq_km": null,
-      "land_area_sq_km": null,
-      "site_snapshot_date": null,
-      "place_count_basis": null,
+      "place_density_per_sq_km": 0.024,
+      "land_area_sq_km": 125.08,
+      "site_snapshot_date": "2026-06-13T05:19:31Z",
+      "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "source_dataset_ids": [
-        "vu-adm2-geoboundaries"
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
       ],
-      "quality_flag": "boundaries_only_awaiting_census_religion"
+      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
     }
   ]
 }

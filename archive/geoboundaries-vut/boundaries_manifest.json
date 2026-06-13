@@ -1,9 +1,10 @@
 {
   "source": "geoBoundaries gbOpen, VUT",
   "geoboundaries_commit": "9469f09",
-  "retrieval_date": "2026-06-13T03:09:00Z",
+  "retrieval_date": "2026-06-13T05:19:31Z",
   "census_years": [2009, 2020],
-  "data_status": "boundaries_only",
+  "data_status": "place_density_only",
+  "osm_place_of_worship_count": 214,
   "levels": {
     "adm1": {
       "level": "province",

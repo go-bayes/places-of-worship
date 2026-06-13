@@ -1,0 +1,2734 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-06-13T05:18:00Z",
+    "timestamp_areas_base": "2026-06-13T01:21:01Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 539913456,
+  "lat": -17.7184943,
+  "lon": 168.3100314,
+  "tags": {
+    "amenity": "place_of_worship",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 539913462,
+  "lat": -17.6913275,
+  "lon": 168.2706435,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "mormon",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 1208562439,
+  "lat": -17.7753547,
+  "lon": 168.3086493,
+  "tags": {
+    "amenity": "place_of_worship",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 1211001512,
+  "lat": -17.7336050,
+  "lon": 168.3154462,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Port du Ciel",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 2246093970,
+  "lat": -15.0410816,
+  "lon": 167.0742001,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "catholic",
+    "name": "Église Sainte-Anne",
+    "name:fr": "Église Sainte-Anne",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 2249759474,
+  "lat": -19.4375799,
+  "lon": 169.2268890,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "seventh_day_adventist",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 2996033916,
+  "lat": -15.0661885,
+  "lon": 167.0272974,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "anglican",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 3270339793,
+  "lat": -16.2622872,
+  "lon": 167.9851688,
+  "tags": {
+    "amenity": "place_of_worship"
+  }
+},
+{
+  "type": "node",
+  "id": 3274139639,
+  "lat": -19.5570074,
+  "lon": 169.4736305,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Nakamal Koupre"
+  }
+},
+{
+  "type": "node",
+  "id": 3274139640,
+  "lat": -19.5525152,
+  "lon": 169.4764005,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Nakamal Manuapen"
+  }
+},
+{
+  "type": "node",
+  "id": 3274139641,
+  "lat": -19.5589414,
+  "lon": 169.4734239,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Nakamal Resban"
+  }
+},
+{
+  "type": "node",
+  "id": 3400791587,
+  "lat": -16.5921097,
+  "lon": 168.1689065,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "presbyterian",
+    "name": "Molika Presbyterian Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 3415221094,
+  "lat": -15.0952889,
+  "lon": 168.0808123,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "Church_of_Christ",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 3415228365,
+  "lat": -15.1053754,
+  "lon": 168.0806974,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "anglican",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 3415256702,
+  "lat": -15.1239291,
+  "lon": 168.0905864,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "anglican",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 3415407301,
+  "lat": -17.4655509,
+  "lon": 168.3747168,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 3415407318,
+  "lat": -17.4690933,
+  "lon": 168.3730461,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Presbyterian Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 3415407319,
+  "lat": -17.4691445,
+  "lon": 168.3729013,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Presbyterian Church (under construction)",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 3415407320,
+  "lat": -17.4678729,
+  "lon": 168.3728771,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "seventh_day_adventist",
+    "name": "SDA Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 3415407323,
+  "lat": -17.4652943,
+  "lon": 168.3751671,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Survival Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 3415411577,
+  "lat": -18.7478254,
+  "lon": 169.2097045,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "presbyterian",
+    "name": "Presbyterian Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 3415413561,
+  "lat": -18.7476803,
+  "lon": 169.2114590,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "adventist",
+    "name": "Seventh Day Adventist",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 4270972889,
+  "lat": -15.9399274,
+  "lon": 167.3277783,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "lavalsal church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 4336508930,
+  "lat": -17.7228958,
+  "lon": 168.3195473,
+  "tags": {
+    "amenity": "place_of_worship",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 4336537375,
+  "lat": -17.7224626,
+  "lon": 168.3184484,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Church of God",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 4336537376,
+  "lat": -17.7216876,
+  "lon": 168.3186477,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "NTM",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 4336537377,
+  "lat": -17.7218014,
+  "lon": 168.3188153,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "NTM"
+  }
+},
+{
+  "type": "node",
+  "id": 4874870727,
+  "lat": -17.7154137,
+  "lon": 168.3119206,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Pakaroa Presbyterian Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 5349063832,
+  "lat": -17.7266867,
+  "lon": 168.3124651,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "pentecostal",
+    "name": "United Pentecostal Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 5349085321,
+  "lat": -17.7315501,
+  "lon": 168.3214917,
+  "tags": {
+    "addr:street": "Freshwater 1 street",
+    "amenity": "place_of_worship",
+    "name": "Epauto SDA church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 5349085333,
+  "lat": -17.7354025,
+  "lon": 168.3139474,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Pauls Religious Shop"
+  }
+},
+{
+  "type": "node",
+  "id": 5349175323,
+  "lat": -17.7229505,
+  "lon": 168.3195391,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Malasitapu",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 5349181723,
+  "lat": -17.7109321,
+  "lon": 168.3120673,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "SDA church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 5349181724,
+  "lat": -17.7209106,
+  "lon": 168.3174352,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "SDA Reform Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 5349196221,
+  "lat": -17.7508106,
+  "lon": 168.3145702,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Portoroki Seventh Day Adventist Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 5350689622,
+  "lat": -17.7430980,
+  "lon": 168.3200796,
+  "tags": {
+    "amenity": "place_of_worship"
+  }
+},
+{
+  "type": "node",
+  "id": 5350689721,
+  "lat": -17.7409892,
+  "lon": 168.3213269,
+  "tags": {
+    "amenity": "place_of_worship"
+  }
+},
+{
+  "type": "node",
+  "id": 5371386023,
+  "lat": -17.7180851,
+  "lon": 168.3138890,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "New Covenant Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 5470888321,
+  "lat": -17.7844328,
+  "lon": 168.3631174,
+  "tags": {
+    "amenity": "place_of_worship"
+  }
+},
+{
+  "type": "node",
+  "id": 5470888421,
+  "lat": -17.7812258,
+  "lon": 168.3607921,
+  "tags": {
+    "amenity": "place_of_worship"
+  }
+},
+{
+  "type": "node",
+  "id": 5923778920,
+  "lat": -13.9030347,
+  "lon": 167.4520289,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Anglican Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6075309312,
+  "lat": -16.5251702,
+  "lon": 167.8252931,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Presbyterian Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6117356871,
+  "lat": -17.7249179,
+  "lon": 168.3120132,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Sarabulu Church of Christ",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6127292188,
+  "lat": -15.5167150,
+  "lon": 167.2264093,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Pentecost church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6130105572,
+  "lat": -15.5076304,
+  "lon": 167.2330659,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "anglican",
+    "name": "Banban transfiguration parish",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6130106885,
+  "lat": -15.5172187,
+  "lon": 167.2364212,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Banan Apostolic Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6130106886,
+  "lat": -15.5154733,
+  "lon": 167.2363426,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Banban Bible Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6172047488,
+  "lat": -17.5703881,
+  "lon": 168.2576414,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Tanoliu SDA church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6215259147,
+  "lat": -16.3559900,
+  "lon": 168.2535379,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Netty Freda Memorial Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6243819586,
+  "lat": -16.3381868,
+  "lon": 168.2940941,
+  "tags": {
+    "amenity": "place_of_worship",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6300469595,
+  "lat": -15.5102871,
+  "lon": 167.1712908,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "anglican",
+    "name": "Sarakata Anglican church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6300605571,
+  "lat": -15.5116584,
+  "lon": 167.1753874,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "jehovahs_witness",
+    "name": "Jehovah witness",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6302682297,
+  "lat": -15.1776588,
+  "lon": 167.0888468,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Melanesian brotherhood"
+  }
+},
+{
+  "type": "node",
+  "id": 6305272874,
+  "lat": -15.4200757,
+  "lon": 167.1552314,
+  "tags": {
+    "amenity": "place_of_worship",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6305272875,
+  "lat": -15.4602542,
+  "lon": 167.1765335,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Assembly of god",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6309240476,
+  "lat": -15.5088818,
+  "lon": 167.1696017,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "seventh_day_adventist",
+    "name": "Sarakata SDS",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6309261999,
+  "lat": -15.5119449,
+  "lon": 167.1749938,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Sarakata apostolic church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6311706887,
+  "lat": -15.4889415,
+  "lon": 167.2345767,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Biria SDA church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6313728983,
+  "lat": -15.5222011,
+  "lon": 167.2389805,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "apostolic",
+    "name": "Apostolic life",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6313729503,
+  "lat": -15.5202569,
+  "lon": 167.2549673,
+  "tags": {
+    "amenity": "place_of_worship",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6316021546,
+  "lat": -15.1451191,
+  "lon": 167.0321115,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Sara Apostolic Church"
+  }
+},
+{
+  "type": "node",
+  "id": 6316024067,
+  "lat": -15.1449918,
+  "lon": 167.1413364,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "seventh_day_adventist",
+    "name": "Lathi SDA",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6317720269,
+  "lat": -15.5361027,
+  "lon": 167.0937083,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "apostolic",
+    "name": "Mavunlevu Apostolic",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6317725223,
+  "lat": -15.5789711,
+  "lon": 166.9973846,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "adventist",
+    "name": "Fanomai adventist church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6332215312,
+  "lat": -15.7369152,
+  "lon": 168.1339180,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "catholic",
+    "name": "Catholic Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6334554104,
+  "lat": -15.5120147,
+  "lon": 167.1791761,
+  "tags": {
+    "amenity": "place_of_worship",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6336819678,
+  "lat": -15.5071765,
+  "lon": 167.2318783,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Banban whitewood christian fellowship",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6347056389,
+  "lat": -15.3729272,
+  "lon": 167.7351845,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Nanako church of christ",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6347056390,
+  "lat": -15.3698436,
+  "lon": 167.7402992,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Navitora Church of Christ",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6347058363,
+  "lat": -15.4026068,
+  "lon": 167.7406467,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "apostolic",
+    "name": "Nataluhangele apostolic church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6347058373,
+  "lat": -15.3819202,
+  "lon": 167.7388024,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "mormon",
+    "name": "Jisas Kraes",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6347062113,
+  "lat": -15.4155245,
+  "lon": 167.6873486,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "apostolic",
+    "name": "Vilakalaka apostolic church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6347062114,
+  "lat": -15.4212394,
+  "lon": 167.7041910,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "seventh_day_adventist",
+    "name": "Vinambulu Seventh Day adventist church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6347062356,
+  "lat": -15.4178863,
+  "lon": 167.6990119,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "apostolic",
+    "name": "Halalulu apostolic church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6347062773,
+  "lat": -15.3807775,
+  "lon": 167.7404428,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Navuti church of christ",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6347062983,
+  "lat": -15.3854831,
+  "lon": 167.7216586,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Mataidan Church of Christ",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6347063280,
+  "lat": -15.3970168,
+  "lon": 167.7211358,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "apostolic",
+    "name": "Tavala apostolic church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6347063281,
+  "lat": -15.3976109,
+  "lon": 167.7042208,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Masalato apostolic zion",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6347063282,
+  "lat": -15.4067228,
+  "lon": 167.6956179,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "apostolic",
+    "name": "Walaha apostolic church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6347063912,
+  "lat": -15.3910396,
+  "lon": 167.7136479,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Amata church of Christ",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6598255534,
+  "lat": -19.2563982,
+  "lon": 169.5948054,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "presbyterian",
+    "name": "Ipake",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6601873146,
+  "lat": -19.2660769,
+  "lon": 169.5993805,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "nazarene_church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6601888501,
+  "lat": -19.2658339,
+  "lon": 169.5999813,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "Glorious_Of_Vanuatu",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6601899704,
+  "lat": -19.2654389,
+  "lon": 169.5997452,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "Apostolic_Life_Ministry",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6601902240,
+  "lat": -19.2625271,
+  "lon": 169.5997399,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "John_Frum_movement"
+  }
+},
+{
+  "type": "node",
+  "id": 6601903799,
+  "lat": -19.2596111,
+  "lon": 169.5997902,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "seventh_day_adventist",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6601908847,
+  "lat": -19.2569321,
+  "lon": 169.5971723,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "Living_Water_Ministry",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6601911583,
+  "lat": -19.2570283,
+  "lon": 169.5993556,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "Potters_House_Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6601918285,
+  "lat": -19.2550938,
+  "lon": 169.5961853,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6625345527,
+  "lat": -17.5536213,
+  "lon": 168.4577172,
+  "tags": {
+    "amenity": "place_of_worship",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6677784488,
+  "lat": -17.6782604,
+  "lon": 168.5351763,
+  "tags": {
+    "amenity": "place_of_worship"
+  }
+},
+{
+  "type": "node",
+  "id": 6683340086,
+  "lat": -17.5403877,
+  "lon": 168.3827324,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Emua SDA church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6763543388,
+  "lat": -17.7246759,
+  "lon": 168.3283543,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Beverly Hills SDA church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6782143842,
+  "lat": -17.5297434,
+  "lon": 168.4026711,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "presbyterian",
+    "name": "Presbyterian Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6784005086,
+  "lat": -17.7039137,
+  "lon": 168.3041126,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Mormons",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6784005286,
+  "lat": -17.7176891,
+  "lon": 168.3007262,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Britano - Seventh-day Adventist Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6784389288,
+  "lat": -17.6882903,
+  "lon": 168.2685432,
+  "tags": {
+    "amenity": "place_of_worship",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6784446486,
+  "lat": -17.6911868,
+  "lon": 168.2707457,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Mormons",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6784446685,
+  "lat": -17.6900879,
+  "lon": 168.2696517,
+  "tags": {
+    "amenity": "place_of_worship",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6876649785,
+  "lat": -15.3983966,
+  "lon": 167.1100310,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6876650285,
+  "lat": -15.3976031,
+  "lon": 167.1179343,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Mormons",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6876650286,
+  "lat": -15.3966704,
+  "lon": 167.1218450,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6952953186,
+  "lat": -16.6031824,
+  "lon": 168.2084563,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6952954885,
+  "lat": -16.6390433,
+  "lon": 168.2290869,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Old Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 6952955785,
+  "lat": -16.6392437,
+  "lon": 168.2291007,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "New Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 8328547162,
+  "lat": -17.7020499,
+  "lon": 168.3101177,
+  "tags": {
+    "amenity": "place_of_worship",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 11817228242,
+  "lat": -17.7401736,
+  "lon": 168.3158766,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "presbyterian",
+    "name": "Paton Memorial Church (PMC)",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 12452797939,
+  "lat": -17.7447048,
+  "lon": 168.3792563,
+  "tags": {
+    "amenity": "place_of_worship",
+    "name": "Etas Zone 12 Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "node",
+  "id": 13517444057,
+  "lat": -17.7162959,
+  "lon": 168.3174271,
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "non-denominational",
+    "description": "Christian fellowship meeting location",
+    "name": "Church of the Lost Sheep",
+    "note": "Meetings occur all day everyday in prayer; no fixed street address. website = https://churchofthelostsheep.org",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 197101897,
+  "center": {
+    "lat": -17.4285570,
+    "lon": 168.3281445
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "religion": "christian",
+    "source": "bing"
+  }
+},
+{
+  "type": "way",
+  "id": 197101933,
+  "center": {
+    "lat": -17.4861665,
+    "lon": 168.3930502
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "religion": "christian",
+    "source": "GPS survey"
+  }
+},
+{
+  "type": "way",
+  "id": 197509885,
+  "center": {
+    "lat": -17.4765430,
+    "lon": 168.4792977
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "name": "Norl Kaltiara Memorial Church",
+    "religion": "christian",
+    "source": "bing"
+  }
+},
+{
+  "type": "way",
+  "id": 199406951,
+  "center": {
+    "lat": -17.4932154,
+    "lon": 168.4882163
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 199407627,
+  "center": {
+    "lat": -17.4956054,
+    "lon": 168.4826663
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 199410478,
+  "center": {
+    "lat": -17.4818052,
+    "lon": 168.4735480
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 207633477,
+  "center": {
+    "lat": -15.5911992,
+    "lon": 166.9887404
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 297867394,
+  "center": {
+    "lat": -15.2297783,
+    "lon": 167.1574869
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "religion": "christian",
+    "source": "survey"
+  }
+},
+{
+  "type": "way",
+  "id": 301866842,
+  "center": {
+    "lat": -15.2131705,
+    "lon": 167.1098723
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 301868909,
+  "center": {
+    "lat": -15.2751847,
+    "lon": 167.1502097
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "name": "Manioc Presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 303939066,
+  "center": {
+    "lat": -15.3017559,
+    "lon": 166.6656137
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 303939068,
+  "center": {
+    "lat": -15.3648116,
+    "lon": 166.6569743
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 307563602,
+  "center": {
+    "lat": -17.7740772,
+    "lon": 168.2973556
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "protestant",
+    "name": "Jack Kalotiti Kalotrip AOG Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 319762684,
+  "center": {
+    "lat": -17.7346446,
+    "lon": 168.3151582
+  },
+  "tags": {
+    "addr:city": "Port-Vila",
+    "amenity": "place_of_worship",
+    "building": "cathedral",
+    "denomination": "roman_catholic",
+    "name": "Cathédrale du Sacré-Cœur",
+    "name:es": "Catedral del Sagrado Corazón",
+    "name:fr": "Cathédrale du Sacré-Cœur",
+    "religion": "christian",
+    "source": "Bing",
+    "wikidata": "Q2942912",
+    "wikipedia": "fr:Cathédrale du Sacré-Cœur de Port-Vila"
+  }
+},
+{
+  "type": "way",
+  "id": 327348828,
+  "center": {
+    "lat": -17.4893200,
+    "lon": 168.4966320
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "construction",
+    "construction": "church",
+    "denomination": "presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 327517137,
+  "center": {
+    "lat": -17.4974374,
+    "lon": 168.4183133
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "methodist",
+    "name": "NTM Inner Life Ministry",
+    "religion": "christian",
+    "source": "GPS survey"
+  }
+},
+{
+  "type": "way",
+  "id": 327517146,
+  "center": {
+    "lat": -17.5002176,
+    "lon": 168.4165070
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "religion": "christian",
+    "source": "GPS survey"
+  }
+},
+{
+  "type": "way",
+  "id": 327518611,
+  "center": {
+    "lat": -17.4977210,
+    "lon": 168.4018880
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "religion": "christian",
+    "source": "GPS survey"
+  }
+},
+{
+  "type": "way",
+  "id": 327954092,
+  "center": {
+    "lat": -16.4330386,
+    "lon": 168.2323063
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "name": "Tavie Presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 327954094,
+  "center": {
+    "lat": -16.4502100,
+    "lon": 168.2301466
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "seventh_day_adventist",
+    "name": "Liro Nessa SDA",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 327954095,
+  "center": {
+    "lat": -16.4491315,
+    "lon": 168.2301064
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "name": "Liro Nessa Presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 327954107,
+  "center": {
+    "lat": -16.4510032,
+    "lon": 168.2267783
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "name": "Vaum Presbyterian Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 327956253,
+  "center": {
+    "lat": -16.4613386,
+    "lon": 168.2199161
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "name": "Nou Presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 327956255,
+  "center": {
+    "lat": -16.4666966,
+    "lon": 168.2191335
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "name": "Tahi Presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 327956260,
+  "center": {
+    "lat": -16.4779515,
+    "lon": 168.2172850
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "methodist",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 327956262,
+  "center": {
+    "lat": -16.4879665,
+    "lon": 168.2146389
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "name": "Kelai Presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 327956263,
+  "center": {
+    "lat": -16.4892925,
+    "lon": 168.2139403
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "methodist",
+    "name": "Kelai NTM",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 327959887,
+  "center": {
+    "lat": -16.4911673,
+    "lon": 168.2173024
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "name": "Vaoleli Presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 327959888,
+  "center": {
+    "lat": -16.4924186,
+    "lon": 168.2131543
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "name": "Tahal Nessa Presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 327959890,
+  "center": {
+    "lat": -16.4898509,
+    "lon": 168.2263478
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "seventh_day_adventist",
+    "name": "Vauleli SDA",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 327959895,
+  "center": {
+    "lat": -16.5000052,
+    "lon": 168.2142214
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 327959899,
+  "center": {
+    "lat": -16.5051231,
+    "lon": 168.2160659
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "name": "Vutekai Presybyterian",
+    "note": "New church under construction - January 2015.",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 327959903,
+  "center": {
+    "lat": -16.5047601,
+    "lon": 168.2238651
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "name": "Wailep Presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 327959905,
+  "center": {
+    "lat": -16.5082820,
+    "lon": 168.2284758
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "name": "Hingal Presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 327959906,
+  "center": {
+    "lat": -16.5055770,
+    "lon": 168.2306458
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "seventh_day_adventist",
+    "name": "Hingal SDA",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 329234221,
+  "center": {
+    "lat": -16.8690635,
+    "lon": 168.5600473
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 329234222,
+  "center": {
+    "lat": -16.8686912,
+    "lon": 168.5594672
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "pentecostal",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 329234224,
+  "center": {
+    "lat": -16.8895445,
+    "lon": 168.5525084
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "construction",
+    "construction": "church",
+    "denomination": "presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 329234225,
+  "center": {
+    "lat": -16.8744866,
+    "lon": 168.5659721
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332739514,
+  "center": {
+    "lat": -17.4516465,
+    "lon": 168.3659953
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332741258,
+  "center": {
+    "lat": -17.4416994,
+    "lon": 168.3584379
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332741260,
+  "center": {
+    "lat": -17.4604500,
+    "lon": 168.3708166
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332749995,
+  "center": {
+    "lat": -18.8548469,
+    "lon": 169.2821907
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "seventh_day_adventist",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332750003,
+  "center": {
+    "lat": -18.8588426,
+    "lon": 169.2851384
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "protestant",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332750345,
+  "center": {
+    "lat": -18.8518902,
+    "lon": 169.2759990
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332762202,
+  "center": {
+    "lat": -17.7419161,
+    "lon": 168.3575578
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332763423,
+  "center": {
+    "lat": -17.5425920,
+    "lon": 168.3658754
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "name": "A.o.g church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332763985,
+  "center": {
+    "lat": -17.5234901,
+    "lon": 168.3231055
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332801862,
+  "center": {
+    "lat": -19.5142064,
+    "lon": 169.2877791
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332802701,
+  "center": {
+    "lat": -19.5355545,
+    "lon": 169.2882406
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332803863,
+  "center": {
+    "lat": -17.7747545,
+    "lon": 168.3168667
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332804151,
+  "center": {
+    "lat": -16.5860074,
+    "lon": 168.1377601
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "name": "Assembly of God (AOG) Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332827404,
+  "center": {
+    "lat": -17.7220819,
+    "lon": 168.3185944
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "christian",
+    "source": "Bing, 2013-7"
+  }
+},
+{
+  "type": "way",
+  "id": 332832247,
+  "center": {
+    "lat": -17.5360417,
+    "lon": 168.3909843
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "religion": "christian",
+    "source": "Bing, 2013-7"
+  }
+},
+{
+  "type": "way",
+  "id": 332853572,
+  "center": {
+    "lat": -18.8568152,
+    "lon": 169.2854866
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332869006,
+  "center": {
+    "lat": -17.7164190,
+    "lon": 168.3169117
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "apostolic",
+    "name": "Apostolic Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332879461,
+  "center": {
+    "lat": -17.7767009,
+    "lon": 168.2885735
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "presbyterian",
+    "name": "Navele session",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332894941,
+  "center": {
+    "lat": -17.6934504,
+    "lon": 168.2849771
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "name": "Wasisi Mission Presbyterian Church",
+    "religion": "christian",
+    "source": "bing;mapbox"
+  }
+},
+{
+  "type": "way",
+  "id": 332908898,
+  "center": {
+    "lat": -17.7535052,
+    "lon": 168.3161004
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "name": "Eglise du Coeur Immaculé de Marie de Paray",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332914920,
+  "center": {
+    "lat": -19.6030820,
+    "lon": 169.4627674
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "catholic",
+    "height": "4",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332916275,
+  "center": {
+    "lat": -17.7178772,
+    "lon": 168.3178042
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes"
+  }
+},
+{
+  "type": "way",
+  "id": 332917957,
+  "center": {
+    "lat": -17.7892570,
+    "lon": 168.3727861
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "seventh_day_adventist",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332918048,
+  "center": {
+    "lat": -17.7886315,
+    "lon": 168.3735259
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "seventh_day_adventist",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332930201,
+  "center": {
+    "lat": -17.7524598,
+    "lon": 168.3177460
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "name": "We care ministry assemblies of God",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332942909,
+  "center": {
+    "lat": -15.0953681,
+    "lon": 168.0808945
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "Church_of_Christ",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332948314,
+  "center": {
+    "lat": -17.7748232,
+    "lon": 168.2913423
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "pentecostal",
+    "name": "Pentecostal Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332949001,
+  "center": {
+    "lat": -17.7744409,
+    "lon": 168.2858624
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "emergency": "destination",
+    "name": "Niel Thomas Ministry",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332949005,
+  "center": {
+    "lat": -17.7756701,
+    "lon": 168.2873521
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "pentecostal",
+    "name": "House of Refuge",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332958225,
+  "center": {
+    "lat": -17.7170951,
+    "lon": 168.3217861
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332958499,
+  "center": {
+    "lat": -17.7166760,
+    "lon": 168.3212027
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "name": "Church"
+  }
+},
+{
+  "type": "way",
+  "id": 332967563,
+  "center": {
+    "lat": -16.1083620,
+    "lon": 168.1808737
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "name:en": "SDA, Fonteng",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332968564,
+  "center": {
+    "lat": -15.3804162,
+    "lon": 168.1310804
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332976746,
+  "center": {
+    "lat": -16.5874957,
+    "lon": 168.1344143
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 332990626,
+  "center": {
+    "lat": -16.1014869,
+    "lon": 168.1620004
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "catholic",
+    "name": "Olal Catholic Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 333002330,
+  "center": {
+    "lat": -17.7454981,
+    "lon": 168.3189213
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "presbyterian",
+    "name": "Seaside Paama Presbyterian Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 333935809,
+  "center": {
+    "lat": -15.6402138,
+    "lon": 167.0973834
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "pentecostal",
+    "name": "Christian Mission Centre Church",
+    "religion": "christian",
+    "source": "survey"
+  }
+},
+{
+  "type": "way",
+  "id": 334418658,
+  "center": {
+    "lat": -16.0180984,
+    "lon": 167.3993074
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "latter-day_saints",
+    "name": "Pinalum LDS",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 334419090,
+  "center": {
+    "lat": -16.0162156,
+    "lon": 167.3998414
+  },
+  "tags": {
+    "addr:city": "Pinalum",
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "presbyterian",
+    "name": "Pinalum Presbyterian",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 334419752,
+  "center": {
+    "lat": -16.0041732,
+    "lon": 167.3823255
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "presbyterian",
+    "name": "Amelvet Presbytery",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 334420331,
+  "center": {
+    "lat": -16.4715868,
+    "lon": 168.2250962
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "seventh_day_adventist",
+    "name": "Tevali SDA Mission",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 334420371,
+  "center": {
+    "lat": -15.9011276,
+    "lon": 167.3058859
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "catholic",
+    "name": "St. Paul Catholic Church of Vao",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 334420570,
+  "center": {
+    "lat": -15.9909028,
+    "lon": 167.3746544
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "catholic",
+    "name": "Wala Rano Catholic Mission",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 334424206,
+  "center": {
+    "lat": -16.4726439,
+    "lon": 168.2285738
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "presbyterian",
+    "name": "Tevali Presbyterian Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 334428658,
+  "center": {
+    "lat": -16.4703025,
+    "lon": 168.2240759
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "denomination": "AOG",
+    "name": "AOG Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 334433171,
+  "center": {
+    "lat": -15.9319543,
+    "lon": 167.1762899
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "name": "Matanvat Seventh Day Adventist Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 334899810,
+  "center": {
+    "lat": -16.4830846,
+    "lon": 167.4466384
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "presbyterian",
+    "name": "Boyd Memorial Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 335507339,
+  "center": {
+    "lat": -16.4459912,
+    "lon": 167.4273407
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "presbyterian",
+    "name": "Stallen Memorial Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 335683570,
+  "center": {
+    "lat": -15.2841470,
+    "lon": 167.9898640
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "anglican",
+    "name": "Saint Mark Chapel",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 335842465,
+  "center": {
+    "lat": -16.3478772,
+    "lon": 167.3768438
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "catholic",
+    "evacuation_center": "yes",
+    "name": "Catholic Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 335998183,
+  "center": {
+    "lat": -15.6635186,
+    "lon": 167.0869865
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "assemblies_of_god",
+    "height": "2",
+    "name": "A.O.G Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 336038153,
+  "center": {
+    "lat": -15.6439590,
+    "lon": 167.0925347
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "presbyterian",
+    "name": "Reverend J. D. Landels Memorial Presbyterian Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 336157258,
+  "center": {
+    "lat": -15.2797059,
+    "lon": 167.9819778
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "anglican",
+    "name": "Saint Luke Anglican Church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 336157762,
+  "center": {
+    "lat": -15.3250775,
+    "lon": 167.8905261
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "restoration",
+    "name": "Duviara Church of Christ",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 336161097,
+  "center": {
+    "lat": -15.1421812,
+    "lon": 167.1025784
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 336590687,
+  "center": {
+    "lat": -15.2910568,
+    "lon": 167.8936914
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "catholic",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 402536380,
+  "center": {
+    "lat": -15.3179124,
+    "lon": 167.8928747
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "restoration",
+    "name": "Ambanga Church of Christ",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 426061695,
+  "center": {
+    "lat": -16.3410442,
+    "lon": 168.0559831
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "name": "SDA church",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 427552332,
+  "center": {
+    "lat": -16.9111960,
+    "lon": 168.5296904
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "name": "bastpeterian"
+  }
+},
+{
+  "type": "way",
+  "id": 435752215,
+  "center": {
+    "lat": -17.7077208,
+    "lon": 168.3134528
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "name": "Foursquare Gospel Church"
+  }
+},
+{
+  "type": "way",
+  "id": 723058125,
+  "center": {
+    "lat": -17.7504713,
+    "lon": 168.3145905
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "seventh_day_adventist",
+    "name": "No. 1 SDA Church Building",
+    "name:fr": "Bâtiment 1 de l'Église Adventiste du Septième Jour",
+    "religion": "christian",
+    "service_times": "Fr sunset-Sa sunset"
+  }
+},
+{
+  "type": "way",
+  "id": 820668254,
+  "center": {
+    "lat": -17.5697678,
+    "lon": 168.2595726
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "jehovahs_witness",
+    "name": "Haos Kingdom o Jehova's Witnes",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 1010217152,
+  "center": {
+    "lat": -15.3897332,
+    "lon": 167.9251482
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "churches_of_christ",
+    "name": "Lonako Churches of Christ",
+    "religion": "christian",
+    "service_times": "09:00-11:00"
+  }
+},
+{
+  "type": "way",
+  "id": 1047364604,
+  "center": {
+    "lat": -19.3723901,
+    "lon": 169.2978119
+  },
+  "tags": {
+    "addr:city": "Lenakel",
+    "amenity": "place_of_worship",
+    "building": "church",
+    "denomination": "protestant",
+    "name": "Nazareth",
+    "religion": "christian"
+  }
+},
+{
+  "type": "way",
+  "id": 1253665631,
+  "center": {
+    "lat": -19.2523606,
+    "lon": 169.6057694
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes"
+  }
+},
+{
+  "type": "way",
+  "id": 1356605019,
+  "center": {
+    "lat": -19.5129359,
+    "lon": 169.2883445
+  },
+  "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "denomination": "jehovahs_witness",
+    "name": "Haos Kingdom Witnes Blong Jehova",
+    "religion": "christian",
+    "service_times": "Wednesday 18:00, Sunday 10:00"
+  }
+}
+
+  ]
+}

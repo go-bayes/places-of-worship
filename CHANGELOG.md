@@ -4,6 +4,13 @@
 
 ### 2026-06-13
 
+- The Vanuatu map now shows a real metric while census religion stays
+  pending: place-of-worship density (OSM places per km²). The build
+  fetches `amenity=place_of_worship` from Overpass (214 points; includes
+  some nakamals as OSM tags them), computes geodesic land area and
+  point-in-polygon counts per province and area council, and the map
+  opens on that choropleth. Area popups show the count, area and density;
+  the religion metrics report "no data yet" until counts arrive.
 - Fixed wordmark links being unclickable on the country maps: the
   centred census control is a full-width layer above the top-right
   wordmark, and it was swallowing the clicks. The shared

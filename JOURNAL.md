@@ -5,6 +5,37 @@ and what remains open. `CHANGELOG.md` records what changed; this file records
 the reasoning that should remain visible when the project is reported, audited,
 or handed to collaborators.
 
+## 2026-06-13: Vanuatu gets a live metric before its census data
+
+Decision:
+The Vanuatu map no longer ships purely boundaries-only. It now computes
+and shows place-of-worship density — OpenStreetMap `place_of_worship`
+points per square kilometre — per province and area council, while the
+census religion metrics stay pending. The build fetches the points from
+Overpass (214, ODbL), computes geodesic land area and point-in-polygon
+counts with `sf`, and writes them into the existing area-summary rows;
+the map opens on the density choropleth.
+
+Rationale:
+Density needs only points and land area, both of which are reachable
+today, so it is a real test of the whole pipeline — fetch, area
+assignment, choropleth, popup, legend — without waiting on the PDF-only
+VNSO religion tables. It also makes the Vanuatu map useful now rather
+than a placeholder. The computed national land area (~12,140 km²) lands
+within half a percent of Vanuatu's official ~12,189 km², a cheap check
+that the geodesic area is sound.
+
+Consequences:
+The earlier "areas first / boundaries-only" framing now has one live
+metric layered on top. The map module needed two small accommodations:
+a per-metric "no data yet" legend (so switching to a religion metric
+reads clearly rather than blanking), and a default metric of density
+for Vanuatu. The OSM count reflects OSM tagging, which in Vanuatu folds
+some nakamals (kava meeting houses) into `place_of_worship`; the metric
+is labelled "places of worship" honestly rather than "churches". Place
+counts are a current snapshot repeated across census years, so the year
+slider is present but the density does not move with it.
+
 ## 2026-06-13: A second country, areas first
 
 Decision:

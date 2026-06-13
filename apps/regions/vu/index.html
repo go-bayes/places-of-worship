@@ -108,9 +108,9 @@
     <h3>Vanuatu research map</h3>
     <p>Places of worship across Vanuatu, with census geographies ready for religious-affiliation data.</p>
     <ul>
-      <li>Open <strong>Census</strong> (top centre) to switch province and area-council boundaries.</li>
-      <li>Census religion data is pending; the areas are ready to receive it.</li>
-      <li>Tap any dot for a place of worship.</li>
+      <li>Areas are shaded by place-of-worship density (OSM places per km²).</li>
+      <li>Open <strong>Census</strong> (top centre) for the metric and geography; religion data is pending.</li>
+      <li>Tap any dot for a place, or an area for its density.</li>
     </ul>
     <div class="onboard-actions">
       <a href="../../global/">Global map</a>
@@ -2624,7 +2624,7 @@
         summary: "data/area_summary_adm1.json",
         codeProp: "area_code",
         nameProp: "area_name",
-        credit: "Boundaries © geoBoundaries (ODbL) · religion data pending"
+        credit: "Boundaries © geoBoundaries (ODbL)"
       },
       adm2: {
         label: "Area council",
@@ -2632,7 +2632,7 @@
         summary: "data/area_summary_adm2.json",
         codeProp: "area_code",
         nameProp: "area_name",
-        credit: "Boundaries © geoBoundaries (CC BY 3.0 IGO) · religion data pending"
+        credit: "Boundaries © geoBoundaries (CC BY 3.0 IGO)"
       }
     };
     const CENSUS_METRICS = {
@@ -2670,7 +2670,9 @@
     const censusState = {
       enabled: false,
       level: "adm1",
-      metric: "religious_affiliation_percent",
+      // open on the metric that has data today: place-of-worship density.
+      // the religion metrics await a structured census source
+      metric: "place_density_per_sq_km",
       year: 2020,
       // per-level stores: { geojson, rows, byAreaYear, years, domains, hasFlags, loading }
       levels: {}
@@ -2993,9 +2995,19 @@
         return row && Number.isFinite(row.population_total);
       });
       if (!areaHasData) {
+        // religion is pending, but place-of-worship density is computed
+        const row = store.byAreaYear.get(`${code}|${censusState.year}`);
+        const placeInfo = row && Number.isFinite(row.place_count)
+          ? `<div class="place-attrs">` +
+              `<div class="place-attr"><span class="place-attr-key">Places of worship</span><span class="place-attr-val">${row.place_count}</span></div>` +
+              `<div class="place-attr"><span class="place-attr-key">Land area</span><span class="place-attr-val">${row.land_area_sq_km.toFixed(0)} km²</span></div>` +
+              `<div class="place-attr"><span class="place-attr-key">Density</span><span class="place-attr-val">${row.place_density_per_sq_km.toFixed(3)} / km²</span></div>` +
+            `</div>`
+          : "";
         const html =
           `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
-          `<div class="place-note">Census religious-affiliation data is pending for this area.</div>` +
+          placeInfo +
+          `<div class="place-note">Place density from OpenStreetMap. Census religious-affiliation data is pending for this area.</div>` +
           `<div class="place-note">${levelDef.credit} · places © OpenStreetMap (ODbL)</div>`;
         trackPlacePopup(new maplibregl.Popup({ maxWidth: "320px" }).setLngLat(lngLat).setHTML(html).addTo(map));
         return;
@@ -3053,9 +3065,8 @@
         censusLegend.hidden = true;
         return;
       }
-      // boundaries-only state: areas are mapped but no metric has values yet
-      // (Vanuatu awaits census religion data). show the areas and say so,
-      // rather than hiding the panel as if census were off.
+      // boundaries-only state: areas are mapped but no metric has values yet.
+      // show the areas and say so, rather than hiding the panel.
       const hasAnyData = Object.keys(store.domains || {}).length > 0;
       if (!domain && !hasAnyData) {
         const years = (store.years || []).join(" · ");
@@ -3067,8 +3078,14 @@
           (years ? `<div class="census-legend-note">Census years: ${years}</div>` : "");
         return;
       }
+      // this metric has no values, but others do (Vanuatu's religion metrics
+      // are pending while place density is live): say so for this metric
       if (!domain) {
-        censusLegend.hidden = true;
+        const def = CENSUS_METRICS[censusState.metric];
+        censusLegend.hidden = false;
+        scale.innerHTML =
+          `<div class="census-legend-title">${censusLevelDef().label}: ${def.label}</div>` +
+          `<div class="census-legend-note">No data for this metric yet — religious-affiliation counts are pending.</div>`;
         return;
       }
       const def = CENSUS_METRICS[censusState.metric];

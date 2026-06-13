@@ -1,0 +1,15 @@
+{
+  "source_dataset_id": "osm-vu-place-of-worship",
+  "name": "OpenStreetMap places of worship in Vanuatu",
+  "provider": "OpenStreetMap contributors",
+  "endpoint": "https://overpass-api.de/api/interpreter",
+  "query": "[out:json][timeout:90];area[\"ISO3166-1\"=\"VU\"]->.a;(node[\"amenity\"=\"place_of_worship\"](area.a);way[\"amenity\"=\"place_of_worship\"](area.a);relation[\"amenity\"=\"place_of_worship\"](area.a););out tags center;",
+  "retrieval_date": "2026-06-13T05:19:31Z",
+  "feature_count": 214,
+  "licence": {
+    "name": "ODbL-1.0",
+    "url": "https://opendatacommons.org/licenses/odbl/1-0/",
+    "attribution": "OpenStreetMap contributors"
+  },
+  "notes": "amenity=place_of_worship as recorded in OSM; in Vanuatu this includes some nakamals (kava meeting houses) alongside churches. Node/way/relation centroids used for point-in-polygon assignment."
+}

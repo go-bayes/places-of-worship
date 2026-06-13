@@ -1,7 +1,7 @@
-"area_code","area_name"
-"VU-SAM","Sanma"
-"VU-TOB","Torba"
-"VU-PAM","Penama"
-"VU-MAP","Malampa"
-"VU-SEE","Shefa"
-"VU-TAE","Tafea"
+"area_code","area_name","land_area_sq_km","place_count","place_density_per_sq_km"
+"VU-SAM","Sanma",4243.59,34,0.008
+"VU-TOB","Torba",857.68,1,0.0012
+"VU-PAM","Penama",1200.75,25,0.0208
+"VU-MAP","Malampa",2799.69,37,0.0132
+"VU-SEE","Shefa",1499.76,87,0.058
+"VU-TAE","Tafea",1640.08,25,0.0152
