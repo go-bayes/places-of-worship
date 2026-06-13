@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Data maps</title>
+  <link href="../shared/map-shell.css" rel="stylesheet">
+  <style>
+    /* a small hub linking the per-country data maps; styled from the shared
+       tokens so it reads as part of the same project */
+    body {
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 32px 16px;
+    }
+    main { width: min(560px, 92vw); }
+    h1 { margin: 0 0 4px; font-size: 24px; font-weight: 600; letter-spacing: -0.01em; }
+    .lede { margin: 0 0 20px; color: #94a3b8; font-size: 14px; line-height: 1.5; }
+    .map-list { display: grid; gap: 10px; }
+    a.map-card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 14px 16px;
+      transition: background 120ms ease, border-color 120ms ease;
+    }
+    a.map-card:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(148, 163, 184, 0.5); }
+    .map-card-title { font-weight: 600; font-size: 16px; }
+    .map-card-note { color: #94a3b8; font-size: 13px; margin-top: 2px; }
+    .back { display: inline-block; margin-top: 18px; color: #cbd5f5; font-size: 13px; text-decoration: none; }
+    .back:hover { color: #fff; text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Data maps</h1>
+    <p class="lede">Places of worship with census religious-affiliation overlays, by country.</p>
+    <nav class="map-list">
+      <a class="map-card" href="nz/">
+        <div class="map-card-title">New Zealand</div>
+        <div class="map-card-note">Territorial-authority and statistical-area-2 census overlays, 2013–2023.</div>
+      </a>
+      <a class="map-card" href="vu/">
+        <div class="map-card-title">Vanuatu</div>
+        <div class="map-card-note">Province and area-council boundaries; census religion data pending.</div>
+      </a>
+    </nav>
+    <a class="back" href="../global/">← Global map</a>
+  </main>
+</body>
+</html>

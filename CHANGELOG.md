@@ -4,6 +4,11 @@
 
 ### 2026-06-13
 
+- Added a Data maps hub (`apps/regions/index.html`) listing the country
+  research maps, and a desktop "Data maps" link in the global map's
+  wordmark (first entry, the reciprocal of the country maps' "Global
+  map" link). The README now links the New Zealand and Vanuatu maps
+  directly.
 - Brought the Vanuatu map to the same control layout as NZ: Census
   front-and-centre as a panel disclosure (geography selector and the
   boundaries-pending legend), Key top-left, no play button, two-pill
