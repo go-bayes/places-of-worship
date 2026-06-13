@@ -7,15 +7,15 @@
   computed-style diff (47 elements × 63 properties, 1280 and 375).
 - **NZ main map restyled in place** (`977d1d5`) as the interim state.
 - **Scope change**: Joseph authorised a rebuild of the NZ main map.
-  **Stage one SHIPPED** (`1d564ef`): `apps/regions/nz/next.html` forks
-  the global shell and adds TA census choropleths from the governed
-  `area_summary_ta.json`. The Leaflet `index.html` stays live until
-  parity + screenshot approval. See JOURNAL 2026-06-13 entries.
-- **Open decisions**: (1) swap `next.html` → `index.html`; (2) the
-  verification surface's register — dark chrome would collide with the
-  RA light-workspace convention, so per this brief's rule the question
-  goes to Joseph rather than being guessed; (3) SA2 resolution waits on
-  a governed SA2 summary product.
+  **Stage one SHIPPED** (`1d564ef`) and **SWAPPED to live**
+  (2026-06-13, Joseph's approval): the global-shell fork with TA census
+  choropleths from the governed `area_summary_ta.json` is now
+  `apps/regions/nz/index.html`; the Leaflet page and its app scripts
+  retired to git history. See JOURNAL 2026-06-13 entries.
+- **Open decisions**: (1) the verification surface's register — dark
+  chrome would collide with the RA light-workspace convention, so per
+  this brief's rule the question goes to Joseph rather than being
+  guessed; (2) SA2 resolution waits on a governed SA2 summary product.
 
 Instructions for the Claude instance unifying the NZ research maps with the
 global map's design language. Written 2026-06-13 by the instance that built

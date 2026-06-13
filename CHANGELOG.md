@@ -4,6 +4,12 @@
 
 ### 2026-06-13
 
+- The rebuilt NZ research map is now the live page: `next.html` became
+  `apps/regions/nz/index.html`, and the Leaflet page retired with its
+  app scripts (`enhanced-places-app.js`, `denomination-mapper.js`;
+  both live in git history). Inbound links pointed at the directory,
+  so no link changed. Data files all remain, including `sa2.geojson`
+  for the future SA2 overlay.
 - Began the NZ research map rebuild on the global MapLibre shell:
   `apps/regions/nz/next.html` (alongside the live page) adds
   territorial-authority census choropleths (five metrics, censuses
