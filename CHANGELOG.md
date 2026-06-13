@@ -4,6 +4,12 @@
 
 ### 2026-06-13
 
+- The NZ research map now wears the shared design language: slate
+  masthead and controls bar, dark legend and loading panels, pill corner
+  links, and the shared type stack, via `apps/shared/map-shell.css`.
+  Semantic colours (category dots, data-quality sizes, cluster tints,
+  choropleth scales) are unchanged; popups stay light pending the
+  rebuild decision.
 - Extracted the global map's theme primitives (tokens, the dark pill,
   corner placement, toast, popup skin, attribution treatment) into a
   shared stylesheet, `apps/shared/map-shell.css`, that the global map now

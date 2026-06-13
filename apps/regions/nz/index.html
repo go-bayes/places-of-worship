@@ -13,6 +13,9 @@
     <!-- Marker Clustering CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+
+    <!-- Shared theme primitives (tokens, dark pill, panel idiom) -->
+    <link rel="stylesheet" href="../../shared/map-shell.css">
     
     <!-- Plotly.js for histograms -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -20,33 +23,43 @@
     <!-- Google Maps API for Street View - removed due to API key restrictions -->
     
     <style>
+        /* tokens, base, and the pill idiom come from ../../shared/map-shell.css;
+           this page is a light document with dark chrome, so body text reverts
+           to ink while the dark panels set their own light text */
         body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            color: #0f172a;
         }
-        
+
+        /* leaflet pins its own font stack; inherit the shared one instead */
+        .leaflet-container {
+            font-family: inherit;
+        }
+
         .header {
-            background: linear-gradient(135deg, #2c3e50, #3498db);
-            color: white;
+            background: linear-gradient(160deg, #0f172a, #1e293b);
+            color: #e2e8f0;
             padding: 20px;
             text-align: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        
+
         .header h1 {
             margin: 0 0 10px 0;
             font-size: 2.5em;
+            font-weight: 600;
+            letter-spacing: -0.02em;
         }
-        
+
         .header p {
             margin: 0;
             font-size: 1.1em;
-            opacity: 0.9;
+            color: #cbd5f5;
         }
-        
+
         .controls {
-            background: white;
+            background: #0f172a;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            color: #cbd5e1;
             padding: 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             display: grid;
@@ -54,16 +67,16 @@
             gap: 15px;
             align-items: center;
         }
-        
+
         .control-group {
             display: flex;
             flex-direction: column;
             gap: 5px;
         }
-        
+
         .control-group label {
-            font-weight: bold;
-            color: #2c3e50;
+            font-weight: 600;
+            color: #cbd5f5;
             font-size: 0.9em;
         }
         
@@ -79,7 +92,7 @@
             border-radius: 4px;
             font-size: 14px;
         }
-        
+
         button {
             background: #3498db;
             color: white;
@@ -87,9 +100,35 @@
             transition: background-color 0.3s;
             white-space: nowrap;
         }
-        
+
         button:hover {
             background: #2980b9;
+        }
+
+        /* dark-translucent field idiom inside the dark bars only; popup
+           content keeps the light element styles above */
+        .controls select,
+        .census-controls select {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #e2e8f0;
+            border-radius: 8px;
+        }
+        .controls select:focus,
+        .census-controls select:focus {
+            outline: 1px solid rgba(148,163,184,0.6);
+        }
+        .controls button,
+        .census-controls button {
+            background: rgba(226,232,240,0.16);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #e2e8f0;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .controls button:hover,
+        .census-controls button:hover {
+            background: rgba(226,232,240,0.28);
         }
         
         .toggle-switch {
@@ -112,7 +151,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: #ccc;
+            background-color: rgba(148,163,184,0.4);
             transition: .4s;
             border-radius: 34px;
         }
@@ -130,7 +169,7 @@
         }
         
         input:checked + .toggle-slider {
-            background-color: #3498db;
+            background-color: #3b82f6;
         }
         
         input:checked + .toggle-slider:before {
@@ -140,10 +179,11 @@
         .census-controls {
             display: none;
             grid-column: span 2;
-            background: #f8f9fa;
+            background: rgba(255,255,255,0.04);
+            color: #cbd5e1;
             padding: 15px;
-            border-radius: 6px;
-            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.08);
         }
         
         .census-controls.active {
@@ -159,26 +199,28 @@
         }
         
         .info-panel {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(15, 23, 42, 0.85);
+            color: #cbd5e1;
+            border: 1px solid rgba(255,255,255,0.08);
             padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            border-radius: 16px;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.24);
             margin: 10px;
             max-width: 300px;
         }
-        
+
         .info-panel h3 {
             margin: 0 0 10px 0;
-            color: #2c3e50;
+            color: #e2e8f0;
         }
-        
+
         .info-item {
             margin: 8px 0;
-            color: #555;
+            color: #cbd5e1;
         }
-        
+
         .info-item strong {
-            color: #2c3e50;
+            color: #e2e8f0;
         }
         
         .place-popup, .census-popup {
@@ -237,30 +279,28 @@
         
         /* Region interaction styling like age_map */
         .leaflet-tooltip {
-            background-color: rgba(0, 0, 0, 0.8) !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 5px !important;
+            background-color: rgba(15, 23, 42, 0.88) !important;
+            color: #e2e8f0 !important;
+            border: 1px solid rgba(255,255,255,0.12) !important;
+            border-radius: 999px !important;
             padding: 8px 12px !important;
-            font-family: Arial, Helvetica, sans-serif !important;
+            font-family: inherit !important;
             font-size: 14px !important;
             font-weight: normal !important;
         }
         
-        .leaflet-tooltip-top:before {
-            border-top-color: rgba(0, 0, 0, 0.8) !important;
-        }
-        
-        .leaflet-tooltip-bottom:before {
-            border-bottom-color: rgba(0, 0, 0, 0.8) !important;
-        }
-        
-        .leaflet-tooltip-left:before {
-            border-left-color: rgba(0, 0, 0, 0.8) !important;
-        }
-        
+        /* the popup idiom hides the tip; tooltips follow */
+        .leaflet-tooltip-top:before,
+        .leaflet-tooltip-bottom:before,
+        .leaflet-tooltip-left:before,
         .leaflet-tooltip-right:before {
-            border-right-color: rgba(0, 0, 0, 0.8) !important;
+            display: none !important;
+        }
+
+        /* popup card rounded to the shared idiom; content stays light
+           (census tables and histograms are designed on white) */
+        .leaflet-popup-content-wrapper {
+            border-radius: 16px;
         }
         
         /* Street View panorama styling */
@@ -283,32 +323,34 @@
         }
         
         .legend {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(15, 23, 42, 0.8);
+            color: #cbd5e1;
+            border: 1px solid rgba(255,255,255,0.08);
             padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            border-radius: 16px;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.24);
             position: absolute;
             bottom: 20px;
             right: 20px;
             max-width: 250px;
             z-index: 1000;
         }
-        
+
         .legend h4 {
             margin: 0 0 10px 0;
-            color: #2c3e50;
+            color: #e2e8f0;
         }
-        
+
         .legend-section {
             margin-bottom: 15px;
         }
-        
+
         .legend-section h5 {
             margin: 0 0 8px 0;
-            color: #2c3e50;
+            color: #e2e8f0;
             font-size: 0.9em;
         }
-        
+
         .legend-item {
             display: flex;
             align-items: center;
@@ -333,28 +375,34 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(15, 23, 42, 0.88);
+            color: #e2e8f0;
+            border: 1px solid rgba(255,255,255,0.08);
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            border-radius: 16px;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
             z-index: 2000;
             text-align: center;
         }
-        
+
+        /* credits stay light and legible, mirroring the shared
+           attribution treatment */
         .attribution {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.82);
+            border-top: 1px solid rgba(15,23,42,0.12);
             padding: 10px;
             font-size: 0.8em;
-            color: #666;
+            color: #0f172a;
             text-align: center;
         }
-        
+
         .attribution a {
-            color: #3498db;
+            color: #0f172a;
             text-decoration: none;
         }
-        
+
         .attribution a:hover {
+            color: #1e293b;
             text-decoration: underline;
         }
         
@@ -473,18 +521,18 @@
             font-size: 0.9em;
             color: #6c757d;
         }
+        /* corner links wear the shared pill; only their seats are ours */
         .back-link {
             position: fixed;
             top: 16px;
             right: 16px;
             z-index: 1000;
-            background: rgba(15, 23, 42, 0.9);
-            color: #f8fafc;
-            border-radius: 999px;
             padding: 8px 12px;
             font-size: 12px;
             text-decoration: none;
-            border: 1px solid rgba(255,255,255,0.12);
+        }
+        .back-link:hover {
+            opacity: 1;
         }
         .verification-link {
             top: 52px;
@@ -492,8 +540,8 @@
     </style>
 </head>
 <body>
-    <a class="back-link" href="../../global/">Global Map</a>
-    <a class="back-link verification-link" href="verification.html">Verification</a>
+    <a class="back-link shell-pill" href="../../global/">Global Map</a>
+    <a class="back-link verification-link shell-pill" href="verification.html">Verification</a>
     <div class="header">
         <h1>Enhanced Places of Worship Map</h1>
         <p>Interactive visualization of <span id="totalPlaces">0</span> places of worship with demographic overlays</p>
@@ -676,7 +724,7 @@
                 <span style="font-size: 1.2em;">🏔️</span>
                 Remote Uninhabited Areas
             </div>
-            <div class="legend-description" style="font-size: 0.85em; color: #666; margin-top: 8px; font-style: italic;">
+            <div class="legend-description" style="font-size: 0.85em; color: #94a3b8; margin-top: 8px; font-style: italic;">
                 * These areas have no permanent residents and therefore no religious affiliation data
             </div>
         </div>

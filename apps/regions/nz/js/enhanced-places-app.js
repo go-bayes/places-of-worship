@@ -2923,7 +2923,7 @@ class EnhancedPlacesOfWorshipApp {
         
         // Add data source attribution
         content += `
-            <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.8em; color: #666;">
+            <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.15); font-size: 0.8em; color: #94a3b8;">
                 <strong>Data Sources:</strong><br>
                 Stats NZ via Figure.NZ (CC BY 4.0)<br>
                 OpenStreetMap contributors (ODbL)<br>
@@ -3110,7 +3110,7 @@ class EnhancedPlacesOfWorshipApp {
             
             legendHtml += `
                 <div class="legend-item" style="margin: 4px 0;">
-                    <div class="legend-dot" style="background-color: ${color}; width: 16px; height: 16px; border: 1px solid #333;"></div>
+                    <div class="legend-dot" style="background-color: ${color}; width: 16px; height: 16px; border: 1px solid rgba(255,255,255,0.25);"></div>
                     <span style="font-size: 0.85em;">${range}</span>
                 </div>
             `;
