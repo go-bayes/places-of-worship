@@ -56,6 +56,23 @@
     }
     .census-legend-range { display: flex; justify-content: space-between; margin-top: 3px; color: #e2e8f0; }
     .census-legend-note { margin-top: 4px; color: #94a3b8; }
+    /* time slider: steps the choropleth through the census years, with an
+       optional autoplay so the historical change reads as motion */
+    #census-time { margin-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 8px; }
+    .census-time-row { display: flex; align-items: center; gap: 8px; }
+    .census-play {
+      flex: none; width: 26px; height: 26px; border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08); color: #e2e8f0;
+      font-size: 11px; line-height: 1; cursor: pointer; display: grid; place-items: center;
+    }
+    .census-play:hover { background: rgba(255, 255, 255, 0.16); }
+    .census-slider { flex: 1; min-width: 0; accent-color: #3b82f6; cursor: pointer; }
+    .census-ticks { display: flex; margin-top: 2px; color: #94a3b8; font-size: 11px; }
+    .census-ticks span { flex: 1; text-align: center; }
+    .census-ticks span:first-child { text-align: left; }
+    .census-ticks span:last-child { text-align: right; }
+    .census-ticks span.census-tick-active { color: #e2e8f0; font-weight: 600; }
     .census-table {
       border-collapse: collapse;
       margin: 4px 0 6px;
@@ -124,7 +141,10 @@
       <ul id="countsList"></ul>
       <div class="count-total" id="countsTotal">Total: 0</div>
     </div>
-    <div id="census-legend" hidden></div>
+    <div id="census-legend" hidden>
+      <div id="census-legend-scale"></div>
+      <div id="census-time" hidden></div>
+    </div>
   </div>
     <div id="dock">
       <div class="dock-panel">
@@ -2983,6 +3003,7 @@
 
     function updateCensusLegend() {
       if (!censusLegend) return;
+      const scale = document.getElementById("census-legend-scale");
       const store = censusActive();
       const domain = store && store.domains[censusState.metric];
       if (!censusState.enabled || !domain) {
@@ -3000,12 +3021,117 @@
       const loLabel = (isClamped ? "≤ " : "") + def.format(domain[0]);
       const hiLabel = (isClamped ? "≥ " : "") + def.format(domain[1]);
       censusLegend.hidden = false;
-      censusLegend.innerHTML =
+      // only the scale child is rewritten; the time slider below it persists
+      scale.innerHTML =
         `<div class="census-legend-title">${censusLevelDef().label}: ${def.label} (${censusState.year})</div>` +
         `<div class="census-legend-bar" style="background:${rampGradient(stops)}"></div>` +
         `<div class="census-legend-range"><span>${loLabel}</span><span>${hiLabel}</span></div>` +
         `<div class="census-legend-note">${def.note}</div>` +
         washNote;
+      markActiveTick();
+    }
+
+    // ── census time slider ─────────────────────────────────────────────
+    // one control drives censusState.year: dropdown, slider, and autoplay
+    // all route through setCensusYear so they stay in lockstep
+    let censusPlayTimer = null;
+
+    function setCensusYear(year) {
+      if (!Number.isFinite(year)) return;
+      const changed = year !== censusState.year;
+      censusState.year = year;
+      if (censusYearSelect) censusYearSelect.value = String(year);
+      syncCensusTimeValue();
+      if (changed) applyCensusPaint();
+    }
+
+    function stopCensusPlay() {
+      if (censusPlayTimer) {
+        clearInterval(censusPlayTimer);
+        censusPlayTimer = null;
+      }
+      const btn = document.getElementById("census-play");
+      if (btn) {
+        btn.textContent = "▶";
+        btn.setAttribute("aria-label", "Play through census years");
+      }
+    }
+
+    // rebuild the slider structure for the active level's year set
+    function syncCensusTimeSlider() {
+      const timeEl = document.getElementById("census-time");
+      const store = censusActive();
+      if (!timeEl || !store) return;
+      stopCensusPlay();
+      const years = store.years;
+      // a slider needs at least two stops to mean anything
+      if (years.length < 2) {
+        timeEl.hidden = true;
+        timeEl.innerHTML = "";
+        return;
+      }
+      const idx = Math.max(0, years.indexOf(censusState.year));
+      timeEl.hidden = false;
+      timeEl.innerHTML =
+        `<div class="census-time-row">` +
+          `<button id="census-play" type="button" class="census-play" aria-label="Play through census years">▶</button>` +
+          `<input id="census-slider" class="census-slider" type="range" min="0" max="${years.length - 1}" step="1" value="${idx}" aria-label="Census year">` +
+        `</div>` +
+        `<div class="census-ticks">${years.map((y) => `<span data-year="${y}">${y}</span>`).join("")}</div>`;
+      attachCensusTimeListeners();
+      markActiveTick();
+    }
+
+    // keep the slider thumb on the active year without rebuilding the markup
+    function syncCensusTimeValue() {
+      const store = censusActive();
+      const slider = document.getElementById("census-slider");
+      if (!store || !slider) return;
+      const idx = store.years.indexOf(censusState.year);
+      if (idx >= 0 && String(idx) !== slider.value) slider.value = String(idx);
+      markActiveTick();
+    }
+
+    function markActiveTick() {
+      const ticks = document.querySelectorAll("#census-time .census-ticks span");
+      ticks.forEach((span) => {
+        span.classList.toggle("census-tick-active", Number(span.dataset.year) === censusState.year);
+      });
+    }
+
+    function attachCensusTimeListeners() {
+      const slider = document.getElementById("census-slider");
+      const play = document.getElementById("census-play");
+      if (slider) {
+        slider.addEventListener("input", () => {
+          const store = censusActive();
+          if (!store) return;
+          stopCensusPlay(); // a manual drag cancels autoplay
+          setCensusYear(store.years[Number(slider.value)]);
+        });
+      }
+      if (play) {
+        play.addEventListener("click", () => {
+          if (censusPlayTimer) {
+            stopCensusPlay();
+            return;
+          }
+          const years = censusActive().years;
+          play.textContent = "⏸";
+          play.setAttribute("aria-label", "Pause");
+          // restart from the first census if parked on the last
+          if (censusState.year === years[years.length - 1]) setCensusYear(years[0]);
+          censusPlayTimer = setInterval(() => {
+            const yrs = censusActive().years;
+            const i = yrs.indexOf(censusState.year);
+            if (i >= yrs.length - 1) {
+              stopCensusPlay();
+              return;
+            }
+            setCensusYear(yrs[i + 1]);
+          }, 1200);
+        });
+      }
     }
 
     async function setCensusEnabled(on) {
@@ -3020,9 +3146,11 @@
           return;
         }
         syncCensusYearSelect();
+        syncCensusTimeSlider();
         addCensusLayers();
         applyCensusPaint();
       } else {
+        stopCensusPlay();
         removeCensusLayers();
         updateCensusLegend();
       }
@@ -3042,6 +3170,7 @@
         return;
       }
       syncCensusYearSelect();
+      syncCensusTimeSlider();
       addCensusLayers();
       applyCensusPaint();
     }
@@ -3086,8 +3215,8 @@
     }
     if (censusYearSelect) {
       censusYearSelect.addEventListener("change", () => {
-        censusState.year = Number(censusYearSelect.value);
-        applyCensusPaint();
+        stopCensusPlay(); // a manual year pick cancels autoplay
+        setCensusYear(Number(censusYearSelect.value));
       });
     }
 

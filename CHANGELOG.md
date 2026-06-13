@@ -4,6 +4,11 @@
 
 ### 2026-06-13
 
+- The census overlay gained a time slider in the legend panel: it steps
+  the choropleth through the census years (2013, 2018, 2023) with a play
+  button that auto-advances, so the religious-affiliation change reads as
+  motion across the map. The slider, the year dropdown, and autoplay all
+  drive one shared year state and stay in lockstep.
 - The NZ map's census overlay now offers two geographies: territorial
   authority and statistical area 2. The SA2 level reads a new governed
   product (`area_summary_sa2.json`, 2,311 areas by censuses 2013–2023)
