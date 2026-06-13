@@ -312,9 +312,14 @@
   ]
 : [];
     const basemapOptions = [cartoStyle, ...maptilerStyles];
-    // land on the keyed backdrop theme wherever a key exists; the error
-    // handler below falls back to the free carto style if credit runs out
-    const defaultBasemapId = hasMaptilerKey ? BACKDROP_BASEMAP_ID : cartoStyle.id;
+    // default to maptiler's low-saturation dataviz theme: it is built to sit
+    // under data overlays, so the census choropleth reads clearly above it.
+    // fall back to dataviz-absent backdrop, then the free carto style; the
+    // error handler below also drops to carto if maptiler credit runs out
+    const DEFAULT_BASEMAP_ID = "dataviz";
+    const defaultBasemapId = hasMaptilerKey
+      ? (basemapOptions.some((s) => s.id === DEFAULT_BASEMAP_ID) ? DEFAULT_BASEMAP_ID : BACKDROP_BASEMAP_ID)
+      : cartoStyle.id;
     let activeBasemapId = defaultBasemapId;
 
     const initialBasemap = basemapOptions.find((s) => s.id === defaultBasemapId) || cartoStyle;
@@ -2145,7 +2150,9 @@
 
     async function loadDenominationBuckets() {
       try {
-        const res = await fetch("../../schemas/denomination-taxonomy.json");
+        // this page sits one level deeper than the global map
+        // (apps/regions/nz/ vs apps/global/), so the taxonomy is three up
+        const res = await fetch("../../../schemas/denomination-taxonomy.json");
         if (!res.ok) throw new Error(`taxonomy fetch ${res.status}`);
         const tax = await res.json();
         christianBuckets = CHRISTIAN_BUCKET_CODES.map((code) => {

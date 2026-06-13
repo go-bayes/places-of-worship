@@ -4,6 +4,14 @@
 
 ### 2026-06-13
 
+- The NZ map now defaults to MapTiler's low-saturation Dataviz basemap,
+  which is built to sit under data overlays so the census choropleth
+  reads clearly above it; without a MapTiler key it falls back to
+  Backdrop, then the free CARTO style.
+- Fixed the denomination taxonomy path on the NZ map: the page sits one
+  level deeper than the global map, so its `../../schemas/` fetch 404ed
+  and the Christian-denomination sub-filters never populated. Corrected
+  to `../../../schemas/`.
 - The census overlay gained a time slider in the legend panel: it steps
   the choropleth through the census years (2013, 2018, 2023) with a play
   button that auto-advances, so the religious-affiliation change reads as
