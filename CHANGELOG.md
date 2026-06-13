@@ -4,6 +4,11 @@
 
 ### 2026-06-13
 
+- Extracted the global map's theme primitives (tokens, the dark pill,
+  corner placement, toast, popup skin, attribution treatment) into a
+  shared stylesheet, `apps/shared/map-shell.css`, that the global map now
+  consumes. Computed styles verified unchanged at 1280 px and 375 px;
+  the research maps adopt the same sheet next.
 - Searching a specific address now drops the measuring pin there and zooms
   in; area searches surface a once-per-session tip naming the gesture for
   dropping a pin.

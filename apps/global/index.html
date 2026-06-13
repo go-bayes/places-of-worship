@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Places of Worship | MapLibre Flat Prototype</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../shared/map-shell.css" rel="stylesheet">
   <link href="styles/maplibre-flat.css" rel="stylesheet">
 </head>
 <body>
   <div id="map"></div>
   <div id="tile-status">Loading tiles…</div>
-  <div id="click-hint" role="status" aria-live="polite"></div>
+  <div id="click-hint" class="shell-toast" role="status" aria-live="polite"></div>
   <div id="onboard" role="dialog" aria-label="What am I looking at?">
     <h3>What am I looking at?</h3>
     <p>Global places of worship, mapped from OpenStreetMap.</p>
@@ -23,32 +24,32 @@
       <button type="button" id="onboard-dismiss">Got it</button>
     </div>
   </div>
-  <div id="wordmark">
+  <div id="wordmark" class="shell-pill shell-top-right shell-divided">
     <a id="wordmark-repo" href="https://github.com/go-bayes/places-of-worship" target="_blank" rel="noopener" title="Project repository on GitHub">GitHub</a>
     <a id="fixmap-link" href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener" title="Improve this map area on OpenStreetMap">fix map</a>
-    <select id="basemapSelect" aria-label="Theme"></select>
+    <select id="basemapSelect" class="shell-pill-select" aria-label="Theme"></select>
   </div>
-  <button id="corner-reset" type="button" aria-label="Set North">
+  <button id="corner-reset" class="shell-pill shell-top-left" type="button" aria-label="Set North">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path d="M12 3L17 12L7 12L12 3Z" fill="#ef4444"/>
       <path d="M7 12L17 12L12 21L7 12Z" fill="currentColor" opacity="0.45"/>
       <text x="12" y="15" text-anchor="middle" font-size="8.5" font-weight="800" fill="#f8fafc" font-family="system-ui, sans-serif">N</text>
     </svg>
   </button>
-  <button id="corner-refresh" type="button" aria-label="Reset map" title="Reset map">
+  <button id="corner-refresh" class="shell-pill shell-bottom-left" type="button" aria-label="Reset map" title="Reset map">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M21 12a9 9 0 1 1-2.64-6.36"/>
       <polyline points="21 3 21 9 15 9"/>
     </svg>
   </button>
-  <div id="bottom-actions">
-    <button id="dock-toggle" type="button">Search World</button>
-    <button id="filters-clear" type="button" hidden aria-label="Clear filters"></button>
-    <button id="near-me" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
+  <div id="bottom-actions" class="shell-bottom-centre">
+    <button id="dock-toggle" class="shell-pill" type="button">Search World</button>
+    <button id="filters-clear" class="shell-pill" type="button" hidden aria-label="Clear filters"></button>
+    <button id="near-me" class="shell-pill" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
   </div>
-  <div id="counts-wrap">
+  <div id="counts-wrap" class="shell-top-centre">
     <div id="counts-bar">
-      <button id="counts-toggle" type="button" aria-controls="counts" aria-expanded="false">Show Denomination Key</button>
+      <button id="counts-toggle" class="shell-pill" type="button" aria-controls="counts" aria-expanded="false">Show Denomination Key</button>
     </div>
     <div id="counts">
       <h3>Visible Places</h3>

@@ -1,16 +1,6 @@
-    :root {
-      --bg: #f8fafc;
-      --panel: rgba(13, 16, 23, 0.82);
-      --text: #e8edf2;
-      --accent: #cbd5f5;
-      --muted: #94a3b8;
-      --safe-top: max(12px, env(safe-area-inset-top, 0px));
-      --safe-right: max(12px, env(safe-area-inset-right, 0px));
-      --safe-bottom: max(10px, env(safe-area-inset-bottom, 0px));
-      --safe-left: max(12px, env(safe-area-inset-left, 0px));
-    }
-    * { box-sizing: border-box; }
-    body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: "Work Sans", -apple-system, "Segoe UI", sans-serif; }
+    /* tokens, base styles, and the pill/toast/popup/corner primitives
+       live in ../../shared/map-shell.css (linked before this sheet);
+       this file keeps the global app's own layout and machinery */
     #map { position: fixed; inset: 0; }
     #hud {
       position: fixed; top: 12px; left: 12px; right: 12px; max-width: 520px;
@@ -129,30 +119,12 @@
       width: min(960px, 92vw);
       height: min(630px, 72vh);
     }
+    /* popup skin comes from the shared sheet; the drag affordance is ours */
     .maplibregl-popup-content {
-      max-width: min(1080px, 92vw);
-      background: rgba(15, 23, 42, 0.72);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 16px;
-      box-shadow: 0 18px 32px rgba(0,0,0,0.22);
-      color: #e2e8f0;
-      overflow: hidden;
       cursor: grab;
-    }
-    .maplibregl-popup-tip {
-      display: none;
     }
     .maplibregl-popup-content.dragging {
       cursor: grabbing;
-    }
-    .maplibregl-popup-close-button {
-      width: 28px;
-      height: 28px;
-      font-size: 20px;
-      line-height: 26px;
-      border-radius: 999px;
-      color: #f8fafc;
-      background: rgba(15, 23, 42, 0.6);
     }
     .popup-actions .streetview-expand {
       background: rgba(15, 23, 42, 0.85);
@@ -180,12 +152,6 @@
     .popup-drag-toast.visible {
       opacity: 0.9;
     }
-    .popup-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 8px;
-    }
     .popup-header {
       display: flex;
       align-items: center;
@@ -205,21 +171,6 @@
       font-size: 11px;
       color: #cbd5f5;
       letter-spacing: 0.02em;
-    }
-    .popup-actions a,
-    .popup-actions button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 9px;
-      padding: 8px 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(15, 23, 42, 0.45);
-      color: #e2e8f0;
-      font-size: 17px;
-      text-decoration: none;
-      cursor: pointer;
     }
     .sv-resize-handle {
       position: absolute;
@@ -243,20 +194,13 @@
       pointer-events: auto;
     }
     #corner-reset {
-      position: fixed;
-      left: var(--safe-left);
-      top: var(--safe-top);
-      z-index: 13;
-      transform: none;
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(255,255,255,0.06);
-      color: #e2e8f0;
-      border-radius: 999px;
+      --pill-bg: rgba(15, 23, 42, 0.6);
+      --pill-border: rgba(255, 255, 255, 0.06);
+      --pill-shadow: none;
       width: 69px;
       height: 69px;
       padding: 0;
       text-decoration: none;
-      opacity: 0.85;
       cursor: pointer;
       /* compass on demand: hidden until the map is rotated off north */
       display: none;
@@ -271,24 +215,9 @@
     }
     /* the theme select rides in the wordmark pill, behind its own divider;
        the wordmark hides on phones, which fixes the theme to backdrop there
-       (the credit fallback still guards it). native select chrome is
-       stripped so it reads as pill text with a quiet caret, not a widget. */
-    #basemapSelect {
-      appearance: none;
-      -webkit-appearance: none;
-      background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='6'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right center;
-      border: none;
-      border-left: 1px solid rgba(255,255,255,0.18);
-      border-radius: 0;
-      padding-left: 8px;
-      padding-right: 13px;
-      color: #e2e8f0;
-      font-size: 12px;
-      line-height: 1;
-      cursor: pointer;
-      max-width: 120px;
-    }
-    #basemapSelect:focus { outline: none; }
+       (the credit fallback still guards it). select chrome comes from
+       .shell-pill-select in the shared sheet. */
+    #basemapSelect { max-width: 120px; }
     #tile-status {
       position: fixed;
       left: 50%;
@@ -306,24 +235,6 @@
       z-index: 11;
     }
     #tile-status.visible { opacity: 0.5; }
-    #click-hint {
-      position: fixed;
-      left: 50%;
-      top: 48%;
-      transform: translate(-50%, -50%);
-      background: rgba(15, 23, 42, 0.72);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: #e2e8f0;
-      border-radius: 999px;
-      padding: 10px 18px;
-      font-size: 28px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 180ms ease;
-      z-index: 12;
-      white-space: nowrap;
-    }
-    #click-hint.visible { opacity: 0.8; }
     #onboard {
       position: fixed;
       left: var(--safe-left);
@@ -382,11 +293,6 @@
       font-weight: 600;
     }
     #bottom-actions {
-      position: fixed;
-      left: 50%;
-      bottom: var(--safe-bottom);
-      transform: translateX(-50%);
-      z-index: 13;
       display: flex;
       gap: 8px;
       align-items: center;
@@ -394,14 +300,8 @@
     #dock-toggle,
     #near-me {
       padding: 12px 22px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(15,23,42,0.72);
-      color: #e2e8f0;
       font-size: 18px;
       cursor: pointer;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.25);
-      opacity: 0.85;
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -425,14 +325,6 @@
     .maplibregl-ctrl-group:has(.maplibregl-ctrl-geolocate) { display: none; }
     .maplibregl-ctrl button.maplibregl-ctrl-geolocate { display: none; }
     #counts-wrap {
-      position: fixed;
-      left: 0;
-      right: 0;
-      top: var(--safe-top);
-      z-index: 13;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
       gap: 4px;
       pointer-events: none;
     }
@@ -445,13 +337,10 @@
       gap: 8px;
     }
     #counts-toggle {
+      --pill-shadow: 0 8px 16px rgba(0, 0, 0, 0.28);
       z-index: 12;
       /* compact pull-down: three palette dots and a caret, panel on tap */
       padding: 7px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(15,23,42,0.72);
-      color: #e2e8f0;
       font-size: 14px;
       cursor: pointer;
       display: inline-flex;
@@ -460,9 +349,7 @@
       width: auto;
       min-width: 0;
       justify-content: center;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.28);
       letter-spacing: 0.01em;
-      opacity: 0.85;
       white-space: nowrap;
     }
     #counts-toggle .key-dot {
@@ -535,43 +422,13 @@
       font-weight: 600;
       color: #f1f5f9;
     }
-    .maplibregl-ctrl-attrib,
-    .maplibregl-ctrl-attrib.maplibregl-compact {
-      background: rgba(255,255,255,0.82);
-      color: #0f172a;
-      border: 1px solid rgba(15,23,42,0.2);
-      border-radius: 6px;
-      padding: 0 3px;
-      font-size: 7px;
-      line-height: 1.05;
-      box-shadow: 0 5px 10px rgba(15,23,42,0.2);
-    }
-    /* the osm credit stays visible: the places data is odbl, and the
-       basemap credits ride in the same small pill */
-    .maplibregl-ctrl-attrib a {
-      color: #0f172a;
-    }
-    .maplibregl-ctrl-attrib a:hover {
-      color: #1e293b;
-    }
-    /* the corner is clear since the theme pill moved into the menu */
-    .maplibregl-ctrl-bottom-right { bottom: 0; }
     #corner-refresh {
-      position: fixed;
-      left: var(--safe-left);
-      bottom: var(--safe-bottom);
-      z-index: 13;
+      --pill-bg: rgba(15, 23, 42, 0.6);
       width: 55px;
       height: 55px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(15, 23, 42, 0.6);
-      color: #e2e8f0;
       display: grid;
       place-items: center;
       cursor: pointer;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.25);
-      opacity: 0.85;
       padding: 0;
     }
     #corner-refresh svg {
@@ -592,8 +449,6 @@
         bottom: calc(var(--safe-bottom) + 64px);
       }
       #corner-refresh {
-        left: var(--safe-left);
-        bottom: var(--safe-bottom);
         width: 44px;
         height: 44px;
       }
@@ -604,18 +459,7 @@
         top: calc(var(--safe-top) + 10px);
         max-width: min(88vw, 360px);
       }
-      /* the hint toast wraps inside the screen instead of running off it */
-      #click-hint {
-        font-size: 14px;
-        padding: 8px 14px;
-        max-width: 86vw;
-        white-space: normal;
-        text-align: center;
-        border-radius: 16px;
-      }
       .dock-cities-row { display: none; }
-      /* attribution tucks below the lifted pill row */
-      .maplibregl-ctrl-bottom-right { bottom: 0; }
       #counts {
         display: none;
         width: min(86vw, 480px);
@@ -637,30 +481,9 @@
       .dock-row button { padding: 5px 9px; font-size: clamp(11px, 3vw, 12px); }
       .dock-cities { gap: 6px; }
       .dock-chip { font-size: clamp(9px, 2.1vw, 11px); padding: 3px 6px; }
-      #bottom-actions {
-        left: 50%;
-        /* on the refresh button's line: the corner furniture this row once
-           cleared is gone, and the short mobile label clears the refresh */
-        bottom: var(--safe-bottom);
-        transform: translateX(-50%);
-      }
-      #dock-toggle {
-        display: inline-flex;
-      }
-      #counts-wrap {
-        left: 0;
-        right: 0;
-        top: var(--safe-top);
-      }
       #counts-toggle {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
         gap: 9px;
-        font-size: 14px;
         padding: 6px 20px;
-        white-space: nowrap;
-        width: auto;
         min-width: max-content;
       }
       .maplibregl-ctrl { transform: scale(0.85); transform-origin: bottom right; }
@@ -690,32 +513,24 @@
   }
 }
 
-/* top-right wordmark: repo link plus an osm fix-map deep-link */
+/* top-right wordmark: repo link plus an osm fix-map deep-link; the pill,
+   corner seat, and entry dividers come from the shared sheet */
 #wordmark {
-  position: fixed;
-  right: var(--safe-right);
-  top: var(--safe-top);
-  z-index: 12;
+  --pill-bg: rgba(15, 23, 42, 0.55);
+  --pill-border: rgba(255, 255, 255, 0.06);
+  --pill-shadow: none;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(15,23,42,0.55);
-  border: 1px solid rgba(255,255,255,0.06);
   color: #cbd5e1;
-  border-radius: 999px;
   padding: 5px 12px;
   font-size: 12px;
   letter-spacing: 0.02em;
-  opacity: 0.85;
 }
 #wordmark a {
   color: #e2e8f0;
   text-decoration: none;
   white-space: nowrap;
-}
-#wordmark a + a {
-  border-left: 1px solid rgba(255,255,255,0.18);
-  padding-left: 8px;
 }
 #wordmark a:hover {
   color: #fff;
@@ -723,28 +538,6 @@
 }
 @media (max-width: 640px) {
   #wordmark { display: none; }
-}
-
-/* popup distance rows (from you / from pin) and crow-flies footnote */
-.place-attrs {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 2px 14px;
-  margin: 4px 0 2px;
-  font-size: 13px;
-  color: #cbd5e1;
-}
-.place-attr { display: contents; }
-.place-attr-key {
-  color: #94a3b8;
-  font-weight: 600;
-}
-.place-attr-val { color: #e2e8f0; }
-.place-note {
-  margin: 4px 0 2px;
-  font-size: 11px;
-  /* legible against the dark popup, not a grey whisper */
-  color: #e2e8f0;
 }
 
 /* lazy street view: the popup shows a button until someone asks */
@@ -765,12 +558,6 @@
   flex-direction: column;
   gap: 6px;
   padding: 4px 2px 2px;
-}
-/* author display rules silently defeat the hidden attribute; restore its
-   authority or the filters toggle flips state with no visual effect */
-.dock-filters[hidden],
-.filter-group[hidden] {
-  display: none;
 }
 .filter-group {
   display: flex;
@@ -828,6 +615,8 @@
   #filters-toggle {
     font-size: 15px;
     padding: 11px 6px;
+    /* the id rule above outranks the class-based .shell-touch floor,
+       so the thumb floor is restated here */
     min-height: 44px;
   }
 }
@@ -852,26 +641,14 @@
 
 /* closed-panel filter indicator: count plus one-tap clear */
 #filters-clear {
+  --pill-bg: rgba(59, 130, 246, 0.22);
+  --pill-border: rgba(59, 130, 246, 0.5);
+  --pill-opacity: 1;
   padding: 12px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(59,130,246,0.5);
-  background: rgba(59,130,246,0.22);
-  color: #e2e8f0;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
 }
 #filters-clear:hover { background: rgba(59,130,246,0.32); }
 
-/* the collapsed credit disc stays thumb-tappable despite the tiny text */
-.maplibregl-ctrl-attrib.maplibregl-compact:not(.maplibregl-compact-show) {
-  min-width: 24px;
-  min-height: 24px;
-  border-radius: 12px;
-}
-.maplibregl-ctrl-attrib-button {
-  width: 24px;
-  height: 24px;
-}

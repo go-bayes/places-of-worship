@@ -5,6 +5,37 @@ and what remains open. `CHANGELOG.md` records what changed; this file records
 the reasoning that should remain visible when the project is reported, audited,
 or handed to collaborators.
 
+## 2026-06-13: One stylesheet owns the design language
+
+Decision:
+The global map's theme primitives now live in `apps/shared/map-shell.css`:
+the colour and safe-area tokens, the dark pill (with per-control
+custom-property knobs for background, border, shadow, and opacity), the
+corner placement classes, the toast, the popup skin, the attribution
+treatment, and a universal `[hidden] { display: none !important }`. The
+global map consumes the sheet; `maplibre-flat.css` keeps only that app's
+layout and machinery. The research maps adopt the shared sheet surface by
+surface, in place of copying styles.
+
+Rationale:
+The look of the NZ research maps and the global map drifted apart because
+styles were copied between apps and then edited independently. Extraction
+makes the design language a single artefact: a change to the pill recipe
+reaches every control that wears it, and an app that needs a variant
+declares a knob instead of forking the recipe. The extraction was proven
+a no-op before any adoption — computed styles for 47 chrome elements
+across 63 properties are identical before and after, at both 1280 px and
+375 px.
+
+Consequences:
+New map surfaces link `map-shell.css` first and add app styles after it.
+The proof yielded two lessons: a cached stylesheet in the preview can make a
+fresh edit look unapplied (fetch with `cache: "reload"` before judging a
+diff), and class-based utilities lose to id-specific rules — the filters
+toggle keeps its 44 px touch floor in the app sheet for that reason.
+Semantic status colours on research surfaces stay app-side by design; the
+shared sheet styles containers, never meaning.
+
 ## 2026-06-13: The nearest banner retires
 
 Decision:
