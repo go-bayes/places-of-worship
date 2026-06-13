@@ -9,7 +9,7 @@ Building historical datasets fit for scientific inferences is remarkably difficu
 
 ## Links
 
-- [Global map](https://go-bayes.github.io/places-of-worship/index.html)
+- [Global map](https://www.placesmap.org/)
 - [New Zealand regional map](https://www.placesmap.org/apps/regions/nz/)
 - [Vanuatu regional map](https://www.placesmap.org/apps/regions/vu/)
 - [Roadmap](ROADMAP.md)
