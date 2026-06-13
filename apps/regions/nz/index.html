@@ -87,6 +87,36 @@
     .census-table th:first-child, .census-table td:first-child { text-align: left; }
     .census-table th { color: #94a3b8; font-weight: 600; }
     .census-year-selected td { background: rgba(59, 130, 246, 0.18); }
+    /* census toggle pill: peer of Near Me in the bottom row. its swatch is a
+       rounded square (an area layer) to read distinctly from Near Me's round
+       location dot, and fills with the choropleth accent when active */
+    #census-toggle {
+      padding: 12px 22px;
+      font-size: 18px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    #census-toggle .census-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      border: 2px solid #94a3b8;
+      background: transparent;
+      box-sizing: border-box;
+      flex: none;
+    }
+    #census-toggle.active .census-dot {
+      border-color: #3b82f6;
+      background: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+    }
+    @media (max-width: 640px) {
+      /* three pills must share 375px: trim the bottom-row padding */
+      #dock-toggle, #census-toggle, #near-me { padding: 11px 14px; font-size: 16px; }
+    }
   </style>
 </head>
 <body>
@@ -97,9 +127,9 @@
     <h3>NZ research map</h3>
     <p>Places of worship across Aotearoa New Zealand, with census religious-affiliation overlays.</p>
     <ul>
-      <li>Colours show broad religion categories.</li>
-      <li>Open Search &amp; Filters for the census overlay (2013–2023).</li>
-      <li>Tap any dot for details and Street View.</li>
+      <li>The census overlay is on: areas are shaded by religious affiliation.</li>
+      <li>Use the time slider in the key to step through 2013–2023.</li>
+      <li>Tap any dot for a place; tap an area for its census detail.</li>
     </ul>
     <div class="onboard-actions">
       <a href="../../global/">Global map</a>
@@ -129,6 +159,7 @@
   <div id="bottom-actions" class="shell-bottom-centre">
     <button id="dock-toggle" class="shell-pill" type="button">Search &amp; Filters</button>
     <button id="filters-clear" class="shell-pill" type="button" hidden aria-label="Clear filters"></button>
+    <button id="census-toggle" class="shell-pill active" type="button" aria-pressed="true" aria-label="Toggle the census overlay"><span class="census-dot"></span><span>Census</span></button>
     <button id="near-me" class="shell-pill" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
   </div>
   <div id="counts-wrap" class="shell-top-centre">
@@ -167,7 +198,6 @@
           <button id="census-disclosure" type="button" aria-expanded="false" aria-controls="dock-census">Census ▾</button>
         </div>
         <div class="dock-census" id="dock-census" hidden>
-          <label class="filter-chip"><input type="checkbox" id="censusEnabled"><span>Census overlay</span></label>
           <div class="dock-row">
             <select id="censusLevel" aria-label="Census geography"></select>
             <select id="censusYear" aria-label="Census year">
@@ -1493,6 +1523,10 @@
       map.once("idle", ensureCustomLayers);
       map.once("idle", nudgeMap);
       map.once("idle", refreshMapLayers);
+      // census is on by default so the map opens already oriented in NZ; this
+      // idle fires after the point layers exist, so the choropleth inserts
+      // beneath them rather than over the dots
+      map.once("idle", () => { void setCensusEnabled(true); });
     });
 
     map.on("error", (e) => {
@@ -2671,12 +2705,20 @@
     };
 
     const censusEnabledInput = document.getElementById("censusEnabled");
+    const censusToggle = document.getElementById("census-toggle");
     const censusLevelSelect = document.getElementById("censusLevel");
     const censusMetricSelect = document.getElementById("censusMetric");
     const censusYearSelect = document.getElementById("censusYear");
     const censusDisclosure = document.getElementById("census-disclosure");
     const censusSection = document.getElementById("dock-census");
     const censusLegend = document.getElementById("census-legend");
+
+    // the bottom-row Census pill mirrors the overlay's on/off state
+    function syncCensusToggle() {
+      if (!censusToggle) return;
+      censusToggle.classList.toggle("active", censusState.enabled);
+      censusToggle.setAttribute("aria-pressed", censusState.enabled ? "true" : "false");
+    }
 
     function censusActive() {
       return censusState.levels[censusState.level] || null;
@@ -3149,6 +3191,7 @@
         if (!data) {
           censusState.enabled = false;
           if (censusEnabledInput) censusEnabledInput.checked = false;
+          syncCensusToggle();
           updateCensusLegend();
           return;
         }
@@ -3161,6 +3204,7 @@
         removeCensusLayers();
         updateCensusLegend();
       }
+      syncCensusToggle();
     }
 
     // switching geography swaps the source and rejoins; each level's data
@@ -3193,6 +3237,11 @@
     if (censusEnabledInput) {
       censusEnabledInput.addEventListener("change", () => {
         void setCensusEnabled(censusEnabledInput.checked);
+      });
+    }
+    if (censusToggle) {
+      censusToggle.addEventListener("click", () => {
+        void setCensusEnabled(!censusState.enabled);
       });
     }
     if (censusLevelSelect) {

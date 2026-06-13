@@ -4,6 +4,12 @@
 
 ### 2026-06-13
 
+- The census overlay is now a first-class control on the NZ map: it is
+  on by default (so the map opens already oriented over the country), and
+  a third bottom-row pill — Search & Filters · Census · Near Me — toggles
+  it. The redundant in-dock checkbox is gone; the Census pill carries a
+  rounded-square swatch (an area layer) to read distinctly from Near Me's
+  round location dot. Three pills fit 375px.
 - The NZ map now defaults to MapTiler's low-saturation Dataviz basemap,
   which is built to sit under data overlays so the census choropleth
   reads clearly above it; without a MapTiler key it falls back to
