@@ -4,6 +4,14 @@
 
 ### 2026-06-13
 
+- Reworked the NZ map's top controls so census is the centrepiece: the
+  Census button moved front-and-centre at the top (a disclosure that
+  opens and closes its data panel — metric, geography, colour key and
+  the time slider all in one place), and the denomination Key moved to
+  the top-left. The census options left the Search bar entirely. The
+  bottom row returns to Search & Filters · Near Me. The slider's play
+  button is gone — dragging the slider is enough. On phones the Key
+  collapses to its colour dots so it never crowds the Census control.
 - Added a parallel Vanuatu research map at `apps/regions/vu/`, forked
   from the NZ map on the same shell. It carries the country's province
   (ADM1, 6) and area-council (ADM2, 65) geographies from geoBoundaries,

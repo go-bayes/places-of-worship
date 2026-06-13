@@ -8,46 +8,36 @@
   <link href="../../shared/map-shell.css" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
   <style>
-    /* census overlay chrome: dock disclosure, legend panel, popup table.
-       everything else comes from the shared sheet and the global app
-       sheet this page forks. */
-    #census-disclosure {
-      background: none;
-      border: none;
-      color: #cbd5e1;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      text-align: left;
-      padding: 8px 6px;
-      min-height: 36px;
-    }
-    #census-disclosure:hover { color: #fff; }
-    @media (max-width: 640px) {
-      #census-disclosure {
-        font-size: 15px;
-        padding: 11px 6px;
-        min-height: 44px;
-      }
-    }
-    .dock-census {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding: 4px 2px 2px;
-    }
-    .dock-census .filter-chip { align-self: flex-start; }
-    #census-legend {
+    /* census overlay chrome: centre data panel, colour key, time slider, and
+       popup table. everything else comes from the shared sheet and the
+       global app sheet this page forks. */
+    /* the census data panel drops from the centre Census button; it holds
+       the options, the colour key, and the time slider */
+    #census-panel {
+      margin-top: 4px;
       background: rgba(15, 23, 42, 0.62);
       border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 16px;
       padding: 10px 14px;
       color: #cbd5e1;
-      width: min(280px, 76vw);
+      width: min(300px, 82vw);
       font-size: 12px;
       box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24);
     }
+    #census-panel[hidden] { display: none; }
+    #census-options { display: flex; gap: 6px; margin-bottom: 8px; }
+    #census-options select {
+      flex: 1;
+      min-width: 0;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 6px 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    #census-options select:focus { outline: 1px solid rgba(148, 163, 184, 0.6); }
     .census-legend-title { font-weight: 600; color: #e2e8f0; margin-bottom: 6px; }
     .census-legend-bar {
       height: 10px;
@@ -56,17 +46,9 @@
     }
     .census-legend-range { display: flex; justify-content: space-between; margin-top: 3px; color: #e2e8f0; }
     .census-legend-note { margin-top: 4px; color: #94a3b8; }
-    /* time slider: steps the choropleth through the census years, with an
-       optional autoplay so the historical change reads as motion */
+    /* time slider: steps the choropleth through the census years */
     #census-time { margin-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 8px; }
     .census-time-row { display: flex; align-items: center; gap: 8px; }
-    .census-play {
-      flex: none; width: 26px; height: 26px; border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      background: rgba(255, 255, 255, 0.08); color: #e2e8f0;
-      font-size: 11px; line-height: 1; cursor: pointer; display: grid; place-items: center;
-    }
-    .census-play:hover { background: rgba(255, 255, 255, 0.16); }
     .census-slider { flex: 1; min-width: 0; accent-color: #3b82f6; cursor: pointer; }
     .census-ticks { display: flex; margin-top: 2px; color: #94a3b8; font-size: 11px; }
     .census-ticks span { flex: 1; text-align: center; }
@@ -87,35 +69,34 @@
     .census-table th:first-child, .census-table td:first-child { text-align: left; }
     .census-table th { color: #94a3b8; font-weight: 600; }
     .census-year-selected td { background: rgba(59, 130, 246, 0.18); }
-    /* census toggle pill: peer of Near Me in the bottom row. its swatch is a
-       rounded square (an area layer) to read distinctly from Near Me's round
-       location dot, and fills with the choropleth accent when active */
+    /* the denomination key sits in the top-left corner */
+    #key-wrap {
+      position: fixed;
+      left: var(--safe-left);
+      top: var(--safe-top);
+      z-index: 13;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      pointer-events: none;
+    }
+    #key-wrap > * { pointer-events: auto; }
+    /* the census data control sits front and centre; its caret mirrors the
+       Key button's disclosure idiom */
     #census-toggle {
-      padding: 12px 22px;
-      font-size: 18px;
-      cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       white-space: nowrap;
+      cursor: pointer;
     }
-    #census-toggle .census-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 3px;
-      border: 2px solid #94a3b8;
-      background: transparent;
-      box-sizing: border-box;
-      flex: none;
-    }
-    #census-toggle.active .census-dot {
-      border-color: #3b82f6;
-      background: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
-    }
+    .census-caret { color: #94a3b8; font-size: 12px; }
     @media (max-width: 640px) {
-      /* three pills must share 375px: trim the bottom-row padding */
-      #dock-toggle, #census-toggle, #near-me { padding: 11px 14px; font-size: 16px; }
+      /* the top row is tight on phones: the key shrinks to its colour dots
+         beside the centre Census control so the two never collide */
+      #counts-toggle .key-label { display: none; }
+      #census-panel { width: min(300px, 76vw); }
     }
   </style>
 </head>
@@ -128,7 +109,7 @@
     <p>Places of worship across Aotearoa New Zealand, with census religious-affiliation overlays.</p>
     <ul>
       <li>The census overlay is on: areas are shaded by religious affiliation.</li>
-      <li>Use the time slider in the key to step through 2013–2023.</li>
+      <li>Open <strong>Census</strong> (top centre) for the metric, geography and 2013–2023 slider.</li>
       <li>Tap any dot for a place; tap an area for its census detail.</li>
     </ul>
     <div class="onboard-actions">
@@ -159,10 +140,10 @@
   <div id="bottom-actions" class="shell-bottom-centre">
     <button id="dock-toggle" class="shell-pill" type="button">Search &amp; Filters</button>
     <button id="filters-clear" class="shell-pill" type="button" hidden aria-label="Clear filters"></button>
-    <button id="census-toggle" class="shell-pill active" type="button" aria-pressed="true" aria-label="Toggle the census overlay"><span class="census-dot"></span><span>Census</span></button>
     <button id="near-me" class="shell-pill" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
   </div>
-  <div id="counts-wrap" class="shell-top-centre">
+  <!-- top-left: the denomination key for the place dots -->
+  <div id="key-wrap">
     <div id="counts-bar">
       <button id="counts-toggle" class="shell-pill" type="button" aria-controls="counts" aria-expanded="false">Show Denomination Key</button>
     </div>
@@ -172,9 +153,21 @@
       <ul id="countsList"></ul>
       <div class="count-total" id="countsTotal">Total: 0</div>
     </div>
-    <div id="census-legend" hidden>
-      <div id="census-legend-scale"></div>
-      <div id="census-time" hidden></div>
+  </div>
+  <!-- top-centre: the census data control, holding its options, colour key and time slider -->
+  <div id="census-wrap" class="shell-top-centre">
+    <button id="census-toggle" class="shell-pill" type="button" aria-controls="census-panel" aria-expanded="true">
+      <span>Census</span><span class="census-caret" aria-hidden="true">▴</span>
+    </button>
+    <div id="census-panel">
+      <div id="census-options">
+        <select id="censusMetric" aria-label="Census metric"></select>
+        <select id="censusLevel" aria-label="Census geography"></select>
+      </div>
+      <div id="census-legend">
+        <div id="census-legend-scale"></div>
+        <div id="census-time" hidden></div>
+      </div>
     </div>
   </div>
     <div id="dock">
@@ -193,22 +186,6 @@
         <div class="dock-filters" id="dock-filters" hidden>
           <div class="filter-group" id="religion-filters" role="group" aria-label="Filter by religion"></div>
           <div class="filter-group" id="denom-filters" role="group" aria-label="Filter Christian denominations" hidden></div>
-        </div>
-        <div class="dock-row dock-filters-row">
-          <button id="census-disclosure" type="button" aria-expanded="false" aria-controls="dock-census">Census ▾</button>
-        </div>
-        <div class="dock-census" id="dock-census" hidden>
-          <div class="dock-row">
-            <select id="censusLevel" aria-label="Census geography"></select>
-            <select id="censusYear" aria-label="Census year">
-              <option value="2023" selected>2023</option>
-              <option value="2018">2018</option>
-              <option value="2013">2013</option>
-            </select>
-          </div>
-          <div class="dock-row">
-            <select id="censusMetric" aria-label="Census metric"></select>
-          </div>
         </div>
     </div>
   </div>
@@ -1568,7 +1545,7 @@
         const target = e.originalEvent && e.originalEvent.target;
         if (target instanceof Element) {
           const isUiClick = target.closest(
-            "button, a, input, select, textarea, label, #dock, #counts-wrap, #wordmark, #corner-refresh, .maplibregl-ctrl"
+            "button, a, input, select, textarea, label, #dock, #key-wrap, #census-wrap, #wordmark, #corner-refresh, .maplibregl-ctrl"
           );
           if (isUiClick) return;
         }
@@ -2704,20 +2681,23 @@
       levels: {}
     };
 
-    const censusEnabledInput = document.getElementById("censusEnabled");
     const censusToggle = document.getElementById("census-toggle");
+    const censusPanel = document.getElementById("census-panel");
     const censusLevelSelect = document.getElementById("censusLevel");
     const censusMetricSelect = document.getElementById("censusMetric");
     const censusYearSelect = document.getElementById("censusYear");
-    const censusDisclosure = document.getElementById("census-disclosure");
-    const censusSection = document.getElementById("dock-census");
     const censusLegend = document.getElementById("census-legend");
 
-    // the bottom-row Census pill mirrors the overlay's on/off state
-    function syncCensusToggle() {
-      if (!censusToggle) return;
-      censusToggle.classList.toggle("active", censusState.enabled);
-      censusToggle.setAttribute("aria-pressed", censusState.enabled ? "true" : "false");
+    // census is on by default; the centre Census button opens and closes its
+    // data panel (options, colour key, slider) rather than toggling the layer
+    let censusPanelOpen = true;
+    function syncCensusPanel() {
+      if (censusPanel) censusPanel.hidden = !censusPanelOpen;
+      if (censusToggle) {
+        censusToggle.setAttribute("aria-expanded", censusPanelOpen ? "true" : "false");
+        const caret = censusToggle.querySelector(".census-caret");
+        if (caret) caret.textContent = censusPanelOpen ? "▴" : "▾";
+      }
     }
 
     function censusActive() {
@@ -3085,10 +3065,8 @@
     }
 
     // ── census time slider ─────────────────────────────────────────────
-    // one control drives censusState.year: dropdown, slider, and autoplay
-    // all route through setCensusYear so they stay in lockstep
-    let censusPlayTimer = null;
-
+    // the slider drives censusState.year through setCensusYear, the single
+    // entry point that keeps the slider thumb and the paint in step
     function setCensusYear(year) {
       if (!Number.isFinite(year)) return;
       const changed = year !== censusState.year;
@@ -3098,24 +3076,11 @@
       if (changed) applyCensusPaint();
     }
 
-    function stopCensusPlay() {
-      if (censusPlayTimer) {
-        clearInterval(censusPlayTimer);
-        censusPlayTimer = null;
-      }
-      const btn = document.getElementById("census-play");
-      if (btn) {
-        btn.textContent = "▶";
-        btn.setAttribute("aria-label", "Play through census years");
-      }
-    }
-
     // rebuild the slider structure for the active level's year set
     function syncCensusTimeSlider() {
       const timeEl = document.getElementById("census-time");
       const store = censusActive();
       if (!timeEl || !store) return;
-      stopCensusPlay();
       const years = store.years;
       // a slider needs at least two stops to mean anything
       if (years.length < 2) {
@@ -3127,7 +3092,6 @@
       timeEl.hidden = false;
       timeEl.innerHTML =
         `<div class="census-time-row">` +
-          `<button id="census-play" type="button" class="census-play" aria-label="Play through census years">▶</button>` +
           `<input id="census-slider" class="census-slider" type="range" min="0" max="${years.length - 1}" step="1" value="${idx}" aria-label="Census year">` +
         `</div>` +
         `<div class="census-ticks">${years.map((y) => `<span data-year="${y}">${y}</span>`).join("")}</div>`;
@@ -3154,48 +3118,21 @@
 
     function attachCensusTimeListeners() {
       const slider = document.getElementById("census-slider");
-      const play = document.getElementById("census-play");
       if (slider) {
         slider.addEventListener("input", () => {
           const store = censusActive();
           if (!store) return;
-          stopCensusPlay(); // a manual drag cancels autoplay
           setCensusYear(store.years[Number(slider.value)]);
-        });
-      }
-      if (play) {
-        play.addEventListener("click", () => {
-          if (censusPlayTimer) {
-            stopCensusPlay();
-            return;
-          }
-          const years = censusActive().years;
-          play.textContent = "⏸";
-          play.setAttribute("aria-label", "Pause");
-          // restart from the first census if parked on the last
-          if (censusState.year === years[years.length - 1]) setCensusYear(years[0]);
-          censusPlayTimer = setInterval(() => {
-            const yrs = censusActive().years;
-            const i = yrs.indexOf(censusState.year);
-            if (i >= yrs.length - 1) {
-              stopCensusPlay();
-              return;
-            }
-            setCensusYear(yrs[i + 1]);
-          }, 1200);
         });
       }
     }
 
     async function setCensusEnabled(on) {
       censusState.enabled = on;
-      if (censusEnabledInput) censusEnabledInput.checked = on;
       if (on) {
         const data = await loadCensusData(censusState.level);
         if (!data) {
           censusState.enabled = false;
-          if (censusEnabledInput) censusEnabledInput.checked = false;
-          syncCensusToggle();
           updateCensusLegend();
           return;
         }
@@ -3204,11 +3141,9 @@
         addCensusLayers();
         applyCensusPaint();
       } else {
-        stopCensusPlay();
         removeCensusLayers();
         updateCensusLegend();
       }
-      syncCensusToggle();
     }
 
     // switching geography swaps the source and rejoins; each level's data
@@ -3230,22 +3165,11 @@
       applyCensusPaint();
     }
 
-    if (censusDisclosure && censusSection) {
-      censusDisclosure.addEventListener("click", () => {
-        const open = censusSection.hidden;
-        censusSection.hidden = !open;
-        censusDisclosure.setAttribute("aria-expanded", open ? "true" : "false");
-        censusDisclosure.textContent = open ? "Census ▴" : "Census ▾";
-      });
-    }
-    if (censusEnabledInput) {
-      censusEnabledInput.addEventListener("change", () => {
-        void setCensusEnabled(censusEnabledInput.checked);
-      });
-    }
     if (censusToggle) {
+      syncCensusPanel();
       censusToggle.addEventListener("click", () => {
-        void setCensusEnabled(!censusState.enabled);
+        censusPanelOpen = !censusPanelOpen;
+        syncCensusPanel();
       });
     }
     if (censusLevelSelect) {
@@ -3271,12 +3195,6 @@
       censusMetricSelect.addEventListener("change", () => {
         censusState.metric = censusMetricSelect.value;
         applyCensusPaint();
-      });
-    }
-    if (censusYearSelect) {
-      censusYearSelect.addEventListener("change", () => {
-        stopCensusPlay(); // a manual year pick cancels autoplay
-        setCensusYear(Number(censusYearSelect.value));
       });
     }
 
