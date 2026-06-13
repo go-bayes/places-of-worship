@@ -1,5 +1,22 @@
 # Porting the global map's theme primitives to the research maps
 
+## Status (2026-06-13)
+
+- **Extraction DONE** (`ad815f4`): `apps/shared/map-shell.css` holds the
+  primitives; the global map consumes it. Proven a visual no-op by
+  computed-style diff (47 elements × 63 properties, 1280 and 375).
+- **NZ main map restyled in place** (`977d1d5`) as the interim state.
+- **Scope change**: Joseph authorised a rebuild of the NZ main map.
+  **Stage one SHIPPED** (`1d564ef`): `apps/regions/nz/next.html` forks
+  the global shell and adds TA census choropleths from the governed
+  `area_summary_ta.json`. The Leaflet `index.html` stays live until
+  parity + screenshot approval. See JOURNAL 2026-06-13 entries.
+- **Open decisions**: (1) swap `next.html` → `index.html`; (2) the
+  verification surface's register — dark chrome would collide with the
+  RA light-workspace convention, so per this brief's rule the question
+  goes to Joseph rather than being guessed; (3) SA2 resolution waits on
+  a governed SA2 summary product.
+
 Instructions for the Claude instance unifying the NZ research maps with the
 global map's design language. Written 2026-06-13 by the instance that built
 that language (with Joseph, over ~50 commits — see `git log --since
