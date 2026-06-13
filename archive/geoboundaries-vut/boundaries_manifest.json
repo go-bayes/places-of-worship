@@ -1,0 +1,31 @@
+{
+  "source": "geoBoundaries gbOpen, VUT",
+  "geoboundaries_commit": "9469f09",
+  "retrieval_date": "2026-06-13T03:09:00Z",
+  "census_years": [2009, 2020],
+  "data_status": "boundaries_only",
+  "levels": {
+    "adm1": {
+      "level": "province",
+      "boundary_set_id": "vu-adm1-geoboundaries",
+      "source_url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/VUT/ADM1/geoBoundaries-VUT-ADM1_simplified.geojson",
+      "licence": {
+        "name": "ODbL-1.0",
+        "url": "https://opendatacommons.org/licenses/odbl/1-0/",
+        "attribution": "geoBoundaries (William & Mary geoLab)"
+      },
+      "area_count": 6
+    },
+    "adm2": {
+      "level": "area_council",
+      "boundary_set_id": "vu-adm2-geoboundaries",
+      "source_url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/VUT/ADM2/geoBoundaries-VUT-ADM2_simplified.geojson",
+      "licence": {
+        "name": "CC-BY-3.0-IGO",
+        "url": "https://creativecommons.org/licenses/by/3.0/igo/",
+        "attribution": "geoBoundaries (William & Mary geoLab)"
+      },
+      "area_count": 65
+    }
+  }
+}
