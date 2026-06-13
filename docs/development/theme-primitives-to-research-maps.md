@@ -12,10 +12,18 @@
   choropleths from the governed `area_summary_ta.json` is now
   `apps/regions/nz/index.html`; the Leaflet page and its app scripts
   retired to git history. See JOURNAL 2026-06-13 entries.
-- **Open decisions**: (1) the verification surface's register — dark
-  chrome would collide with the RA light-workspace convention, so per
-  this brief's rule the question goes to Joseph rather than being
-  guessed; (2) SA2 resolution waits on a governed SA2 summary product.
+- **Verification RESOLVED** (`0ff72c1`, Joseph's call): stays a light
+  RA workspace on its CARTO basemap; shared type stack linked; the
+  style guide's colour meanings became CSS custom properties with
+  values unchanged. Proven by computed-style diff (only the font stack
+  moved).
+- **SA2 RESOLVED** (`bad9401`, `7c0d9f3`): a governed
+  `area_summary_sa2.json` (provenance-recorded Stats NZ extract,
+  2013–2023 on 2023 boundaries) feeds a geography select on the census
+  module, with rr3 wash-outs and percentile-clamped scales. The legacy
+  demo data files are removed.
+- This brief's porting work is COMPLETE; it remains as the record of
+  the primitives inventory and the verification gotchas.
 
 Instructions for the Claude instance unifying the NZ research maps with the
 global map's design language. Written 2026-06-13 by the instance that built
