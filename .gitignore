@@ -231,3 +231,6 @@ test_datasets/
 *.v1
 *.v2
 *.version_*
+
+# the global gitignore excludes *.csv; source extracts in archive are project records
+!archive/statsnz-2023-census-totals-sa2/*.csv

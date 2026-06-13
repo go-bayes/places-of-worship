@@ -1,0 +1,18 @@
+{
+  "source_dataset_id": "statsnz-2023-census-totals-by-topic-sa2",
+  "name": "2023 Census totals by topic for individuals by SA2 (part 1, clipped to coastline)",
+  "provider": "Stats NZ Tatauranga Aotearoa",
+  "service_url": "https://services2.arcgis.com/vKb0s8tBIA3bdocZ/arcgis/rest/services/2023_Census_totals_by_topic_for_individuals_by_SA2/FeatureServer/0/query",
+  "item_url": "https://www.arcgis.com/home/item.html?id=29a82d5a0ea24a3880219bcb3df126dc",
+  "retrieval_date": "2026-06-13T01:18:45Z",
+  "licence": {
+    "name": "CC BY 4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "attribution": "Stats NZ"
+  },
+  "row_count": 90129,
+  "area_count": 2311,
+  "years": [2013, 2018, 2023],
+  "confidentiality": "Counts are subject to Stats NZ confidentiality rules: random rounding to base 3, with -999 marking suppressed cells.",
+  "notes": "Religious affiliation counts for the census usually resident population, censuses 2013, 2018, and 2023, on 2023 SA2 boundaries (Stats NZ concordance). Field ids VAR_1_377-415; labels taken from field aliases."
+}
