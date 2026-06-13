@@ -5,6 +5,41 @@ and what remains open. `CHANGELOG.md` records what changed; this file records
 the reasoning that should remain visible when the project is reported, audited,
 or handed to collaborators.
 
+## 2026-06-13: A second country, areas first
+
+Decision:
+Vanuatu joins New Zealand as a research map at `apps/regions/vu/`, a
+fork of the NZ page on the same shell. Its census geographies are the
+country's six provinces (geoBoundaries ADM1) and sixty-five area
+councils (ADM2), with census years 2009 and 2020. Per-area religious
+affiliation is not yet loaded: the 2020 VNSO census reports religion
+nationally but its provincial tables are PDF-only, and the Pacific Data
+Hub's structured dataflows stop at population, not religion. Rather than
+scrape a PDF speculatively or hand-enter unverifiable numbers, the map
+ships as a boundaries-only scaffold — the areas, the years, and the
+schema are in place; the values are null and clearly marked pending.
+
+Rationale:
+The instruction was to set up the areas if the data could not be reached
+over the internet, and that is exactly the honest state: open,
+provenance-clean boundaries are reachable; structured provincial
+religion is not. The area-summary skeleton uses the same schema as the
+NZ products, so when counts arrive they drop into existing rows and the
+choropleth lights up with no code change. The boundaries-only legend and
+the pending area popups say what is true now instead of implying data
+that is absent.
+
+Consequences:
+The fork inherits the NZ census module, so the two pages can drift; that
+is the accepted cost of a parallel page, and the shared design language
+keeps the chrome aligned. Building against all-null data exposed a real
+bug the NZ data had masked: JavaScript's `null - null` is 0, so the
+change metric had been manufacturing a zero-change domain from missing
+values. Guarding the operands fixed it on both maps — a suppressed or
+pending denominator now reads as no data, not no change. The places
+layer needs nothing Vanuatu-specific: it streams from the global tiles,
+so Vanuatu's churches appear the moment the page loads.
+
 ## 2026-06-13: SA2 census data arrives through the front door
 
 Decision:

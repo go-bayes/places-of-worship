@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Places of Worship | NZ Research Map</title>
+  <title>Places of Worship | Vanuatu Research Map</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
   <link href="../../shared/map-shell.css" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
@@ -124,22 +124,22 @@
   <div id="tile-status">Loading tiles…</div>
   <div id="click-hint" class="shell-toast" role="status" aria-live="polite"></div>
   <div id="onboard" role="dialog" aria-label="About this map">
-    <h3>NZ research map</h3>
-    <p>Places of worship across Aotearoa New Zealand, with census religious-affiliation overlays.</p>
+    <h3>Vanuatu research map</h3>
+    <p>Places of worship across Vanuatu, with census geographies ready for religious-affiliation data.</p>
     <ul>
-      <li>The census overlay is on: areas are shaded by religious affiliation.</li>
-      <li>Use the time slider in the key to step through 2013–2023.</li>
-      <li>Tap any dot for a place; tap an area for its census detail.</li>
+      <li>Province and area-council boundaries are in place.</li>
+      <li>Census religion data is pending; the areas are ready to receive it.</li>
+      <li>Tap any dot for a place of worship.</li>
     </ul>
     <div class="onboard-actions">
       <a href="../../global/">Global map</a>
-      <a href="https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map" target="_blank" rel="noopener">How to fix data</a>
+      <a href="../nz/">NZ map</a>
       <button type="button" id="onboard-dismiss">Got it</button>
     </div>
   </div>
   <div id="wordmark" class="shell-pill shell-top-right shell-divided">
     <a id="wordmark-global" href="../../global/" title="Open the global map">Global map</a>
-    <a id="verification-link" href="verification.html" title="Open the RA verification map">Verification</a>
+    <a id="nz-link" href="../nz/" title="Open the New Zealand research map">NZ map</a>
     <a id="fixmap-link" href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener" title="Improve this map area on OpenStreetMap">fix map</a>
     <select id="basemapSelect" class="shell-pill-select" aria-label="Theme"></select>
   </div>
@@ -201,9 +201,8 @@
           <div class="dock-row">
             <select id="censusLevel" aria-label="Census geography"></select>
             <select id="censusYear" aria-label="Census year">
-              <option value="2023" selected>2023</option>
-              <option value="2018">2018</option>
-              <option value="2013">2013</option>
+              <option value="2020" selected>2020</option>
+              <option value="2009">2009</option>
             </select>
           </div>
           <div class="dock-row">
@@ -223,8 +222,9 @@
     const showStatus = () => {};
 
     const CONFIG = {
-      center: [174.7762, -41.2865],
-      initialZoom: 4.5,
+      // vanuatu archipelago: centred between Efate and Espiritu Santo
+      center: [167.9, -16.3],
+      initialZoom: 6,
       streetViewMinZoom: 14,
       streetViewFailDelayMs: 1200,
       mobileMinZoom: 3.0,
@@ -1611,20 +1611,16 @@
     const onboard = document.getElementById("onboard");
     const onboardDismiss = document.getElementById("onboard-dismiss");
     const onboardToggle = document.getElementById("onboard-toggle");
-    const ONBOARD_STORAGE_KEY = "pow-nz-onboard-dismissed";
+    const ONBOARD_STORAGE_KEY = "pow-vu-onboard-dismissed";
     const cityPresets = [
-      { label: "Auckland", coords: [174.7633, -36.8485], zoom: 10 },
-      { label: "Wellington", coords: [174.7762, -41.2865], zoom: 10 },
-      { label: "Christchurch", shortLabel: "Chch", coords: [172.6362, -43.5321], zoom: 10 },
-      { label: "Hamilton", coords: [175.2793, -37.787], zoom: 11 },
-      { label: "Tauranga", coords: [176.1651, -37.6878], zoom: 11 },
-      { label: "Dunedin", coords: [170.5028, -45.8788], zoom: 11 },
-      { label: "Napier", aliases: ["Hastings"], coords: [176.912, -39.4928], zoom: 10 },
-      { label: "Nelson", coords: [173.284, -41.2706], zoom: 11 },
-      { label: "Rotorua", coords: [176.2497, -38.1368], zoom: 11 },
-      { label: "New Plymouth", shortLabel: "NP", coords: [174.0752, -39.0556], zoom: 11 },
-      { label: "Queenstown", shortLabel: "Qtown", coords: [168.6626, -45.0312], zoom: 11 },
-      { label: "Invercargill", shortLabel: "Inverc.", coords: [168.3538, -46.4132], zoom: 11 }
+      { label: "Port Vila", shortLabel: "Pt Vila", coords: [168.3219, -17.7404], zoom: 11 },
+      { label: "Luganville", coords: [167.1667, -15.5167], zoom: 11 },
+      { label: "Isangel", aliases: ["Tanna"], coords: [169.2756, -19.539], zoom: 11 },
+      { label: "Lakatoro", coords: [167.4203, -16.0992], zoom: 11 },
+      { label: "Saratamata", aliases: ["Ambae"], coords: [167.9667, -15.3], zoom: 11 },
+      { label: "Sola", aliases: ["Banks"], coords: [167.5494, -13.8761], zoom: 10 },
+      { label: "Norsup", coords: [167.3919, -16.0667], zoom: 11 },
+      { label: "Longana", coords: [167.95, -15.3], zoom: 11 }
     ];
 
     function flyTo(coords, zoom) {
@@ -1936,8 +1932,8 @@
 
     async function geocodeNominatim(query) {
       const emailParam = NOMINATIM_EMAIL ? `&email=${encodeURIComponent(NOMINATIM_EMAIL)}` : "";
-      // nz-first: this is the nz research surface
-      const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&addressdetails=0&countrycodes=nz&q=${encodeURIComponent(query)}${emailParam}`;
+      // vu-first: this is the vanuatu research surface
+      const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&addressdetails=0&countrycodes=vu&q=${encodeURIComponent(query)}${emailParam}`;
       let response;
       try {
         response = await fetchWithTimeout(url, { headers: { "Accept": "application/json" } });
@@ -1961,7 +1957,7 @@
 
     async function geocodeMaptiler(query) {
       if (!hasMaptilerKey || !window.USE_MAPTILER_GEOCODE) return null;
-      const url = `https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${encodeURIComponent(MAPTILER_API_KEY)}&limit=1&country=nz`;
+      const url = `https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${encodeURIComponent(MAPTILER_API_KEY)}&limit=1&country=vu`;
       let response;
       try {
         response = await fetchWithTimeout(url, { headers: { "Accept": "application/json" } });
@@ -1983,7 +1979,7 @@
 
     async function geocodePhoton(query) {
       // bias results toward nz; photon has no hard country filter
-      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=1&lat=-41.3&lon=174.8`;
+      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=1&lat=-16.3&lon=167.9`;
       let response;
       try {
         response = await fetchWithTimeout(url, { headers: { "Accept": "application/json" } });
@@ -2631,7 +2627,7 @@
       tileTimer = setTimeout(() => tileStatus.classList.remove("visible"), 2200);
     }
 
-    // ── census overlay: territorial-authority choropleths ──────────────
+    // ── census overlay: province and area-council choropleths ──────────
     // consumes the governed area summary product (data/area_summary_ta.json,
     // 67 TAs x 3 census years) joined to the 2025 TA boundaries on
     // area_code <-> TA2025_V1. sa2 resolution waits for a governed sa2
@@ -2646,21 +2642,21 @@
     // each level is a governed area-summary product plus its boundary file;
     // join key and display name are properties of that boundary set
     const CENSUS_LEVELS = {
-      ta: {
-        label: "Territorial authority",
-        boundaries: "data/territorial_authorities.geojson",
-        summary: "data/area_summary_ta.json",
-        codeProp: "TA2025_V1",
-        nameProp: "TA2025_NAME",
-        credit: "Stats NZ via Figure.NZ (CC BY 4.0) · 2025 boundaries"
+      adm1: {
+        label: "Province",
+        boundaries: "data/adm1_2020.geojson",
+        summary: "data/area_summary_adm1.json",
+        codeProp: "area_code",
+        nameProp: "area_name",
+        credit: "Boundaries © geoBoundaries (ODbL) · religion data pending"
       },
-      sa2: {
-        label: "Statistical area 2",
-        boundaries: "data/sa2_2023.geojson",
-        summary: "data/area_summary_sa2.json",
-        codeProp: "SA22023_V1_00",
-        nameProp: "SA22023_V1_00_NAME",
-        credit: "Stats NZ (CC BY 4.0) · 2023 boundaries · rr3-rounded counts"
+      adm2: {
+        label: "Area council",
+        boundaries: "data/adm2_2020.geojson",
+        summary: "data/area_summary_adm2.json",
+        codeProp: "area_code",
+        nameProp: "area_name",
+        credit: "Boundaries © geoBoundaries (CC BY 3.0 IGO) · religion data pending"
       }
     };
     const CENSUS_METRICS = {
@@ -2697,9 +2693,9 @@
     };
     const censusState = {
       enabled: false,
-      level: "ta",
+      level: "adm1",
       metric: "religious_affiliation_percent",
-      year: 2023,
+      year: 2020,
       // per-level stores: { geojson, rows, byAreaYear, years, domains, hasFlags, loading }
       levels: {}
     };
@@ -2824,7 +2820,7 @@
         const a = now.religious_affiliation_percent;
         const b = prev.religious_affiliation_percent;
         // guard the operands: JS coerces null to 0, so null - null is 0, not
-        // NaN — a suppressed denominator must not read as zero change
+        // NaN — without this a fully-pending level fakes an all-zero domain
         if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
         return a - b;
       }
@@ -2915,7 +2911,7 @@
         map.addSource(CENSUS.source, {
           type: "geojson",
           data: store.geojson,
-          attribution: '© <a href="https://www.stats.govt.nz/" target="_blank" rel="noopener">Stats NZ</a> (CC BY 4.0)'
+          attribution: 'Boundaries © <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a>'
         });
       }
       const codeProp = censusLevelDef().codeProp;
@@ -3011,8 +3007,23 @@
       const levelDef = censusLevelDef();
       const code = feature.properties[levelDef.codeProp];
       const name = feature.properties[levelDef.nameProp];
+      // boundaries-only scaffold: no row for this area carries a denominator,
+      // so show the area and its pending status rather than a table of dashes
+      const areaHasData = store.years.some((year) => {
+        const row = store.byAreaYear.get(`${code}|${year}`);
+        return row && Number.isFinite(row.population_total);
+      });
+      if (!areaHasData) {
+        const html =
+          `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
+          `<div class="place-note">Census religious-affiliation data is pending for this area.</div>` +
+          `<div class="place-note">${levelDef.credit} · places © OpenStreetMap (ODbL)</div>`;
+        trackPlacePopup(new maplibregl.Popup({ maxWidth: "320px" }).setLngLat(lngLat).setHTML(html).addTo(map));
+        return;
+      }
       const fmtPercent = (v) => (Number.isFinite(v) ? `${v.toFixed(1)}%` : "–");
       const fmtRate = (v) => (Number.isFinite(v) ? v.toFixed(1) : "–");
+      const fmtCount = (v) => (Number.isFinite(v) ? v : "–");
       let anyFlagged = false;
       const rowsHtml = store.years.map((year) => {
         const row = store.byAreaYear.get(`${code}|${year}`);
@@ -3024,12 +3035,12 @@
           <td>${year}${flagged ? "*" : ""}</td>
           <td>${fmtPercent(row.religious_affiliation_percent)}</td>
           <td>${fmtPercent(row.no_religion_percent)}</td>
-          <td>${row.place_count}</td>
+          <td>${fmtCount(row.place_count)}</td>
           <td>${fmtRate(row.places_per_10000_residents)}</td>
         </tr>`;
       }).join("");
       const flagNote = anyFlagged
-        ? `<div class="place-note">* small or suppressed denominator under Stats NZ rr3 rounding; treat percentages as indicative.</div>`
+        ? `<div class="place-note">* small or suppressed denominator under census confidentiality rounding; treat percentages as indicative.</div>`
         : "";
       const html =
         `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
@@ -3059,7 +3070,25 @@
       const scale = document.getElementById("census-legend-scale");
       const store = censusActive();
       const domain = store && store.domains[censusState.metric];
-      if (!censusState.enabled || !domain) {
+      if (!censusState.enabled || !store || !store.geojson) {
+        censusLegend.hidden = true;
+        return;
+      }
+      // boundaries-only state: areas are mapped but no metric has values yet
+      // (Vanuatu awaits census religion data). show the areas and say so,
+      // rather than hiding the panel as if census were off.
+      const hasAnyData = Object.keys(store.domains || {}).length > 0;
+      if (!domain && !hasAnyData) {
+        const years = (store.years || []).join(" · ");
+        censusLegend.hidden = false;
+        scale.innerHTML =
+          `<div class="census-legend-title">${censusLevelDef().label} boundaries</div>` +
+          `<div class="census-legend-note">Census religious-affiliation data is pending. ` +
+          `The areas are ready to receive it.</div>` +
+          (years ? `<div class="census-legend-note">Census years: ${years}</div>` : "");
+        return;
+      }
+      if (!domain) {
         censusLegend.hidden = true;
         return;
       }
@@ -3117,8 +3146,10 @@
       if (!timeEl || !store) return;
       stopCensusPlay();
       const years = store.years;
-      // a slider needs at least two stops to mean anything
-      if (years.length < 2) {
+      // a slider needs at least two stops, and at least one metric with data
+      // to animate; the boundaries-only scaffold has neither use for it
+      const hasAnyData = Object.keys(store.domains || {}).length > 0;
+      if (years.length < 2 || !hasAnyData) {
         timeEl.hidden = true;
         timeEl.innerHTML = "";
         return;

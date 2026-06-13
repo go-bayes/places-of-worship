@@ -4,6 +4,19 @@
 
 ### 2026-06-13
 
+- Added a parallel Vanuatu research map at `apps/regions/vu/`, forked
+  from the NZ map on the same shell. It carries the country's province
+  (ADM1, 6) and area-council (ADM2, 65) geographies from geoBoundaries,
+  census years 2009 and 2020, and the full place layer from the global
+  tiles. Per-area religious-affiliation data is not yet available as a
+  structured source (the 2020 VNSO provincial tables are PDF-only), so
+  the areas render as a boundaries-only scaffold: the legend states the
+  data is pending and the area summaries are ready to receive counts
+  with no schema change. Wordmarks cross-link NZ and Vanuatu.
+- Fixed a latent bug in the change metric: JavaScript coerces `null` to
+  0, so `null - null` returned 0 rather than no-data. A suppressed or
+  pending denominator now counts as no change, not zero change
+  (surfaced by Vanuatu's all-pending data; also corrected on the NZ map).
 - The census overlay is now a first-class control on the NZ map: it is
   on by default (so the map opens already oriented over the country), and
   a third bottom-row pill — Search & Filters · Census · Near Me — toggles
@@ -20,7 +33,7 @@
   to `../../../schemas/`.
 - The census overlay gained a time slider in the legend panel: it steps
   the choropleth through the census years (2013, 2018, 2023) with a play
-  button that auto-advances, so the religious-affiliation change reads as
+  button that auto-advances, so the religious-affiliation change shows as
   motion across the map. The slider, the year dropdown, and autoplay all
   drive one shared year state and stay in lockstep.
 - The NZ map's census overlay now offers two geographies: territorial
