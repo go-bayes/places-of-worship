@@ -52,7 +52,11 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
    the stock map controls. */
 .shell-top-left { position: fixed; left: var(--safe-left); top: var(--safe-top); z-index: 13; }
 .shell-top-right { position: fixed; right: var(--safe-right); top: var(--safe-top); z-index: 12; }
-.shell-top-centre { position: fixed; left: 0; right: 0; top: var(--safe-top); z-index: 13; display: flex; flex-direction: column; align-items: center; }
+/* full-width so its content centres, but the empty flanks must let clicks
+   through to whatever sits beneath (e.g. the top-right wordmark); only the
+   actual controls inside catch pointer events */
+.shell-top-centre { position: fixed; left: 0; right: 0; top: var(--safe-top); z-index: 13; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+.shell-top-centre > * { pointer-events: auto; }
 .shell-bottom-left { position: fixed; left: var(--safe-left); bottom: var(--safe-bottom); z-index: 13; }
 .shell-bottom-centre { position: fixed; left: 50%; bottom: var(--safe-bottom); transform: translateX(-50%); z-index: 13; }
 

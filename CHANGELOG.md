@@ -4,6 +4,14 @@
 
 ### 2026-06-13
 
+- Fixed wordmark links being unclickable on the country maps: the
+  centred census control is a full-width layer above the top-right
+  wordmark, and it was swallowing the clicks. The shared
+  `.shell-top-centre` now passes pointer events through its empty flanks,
+  so only the actual controls catch clicks (cured on NZ and Vanuatu).
+- Removed Vanuatu's cross-link to the NZ map (wordmark and onboarding);
+  country maps link only to the global map, which is the route between
+  countries for now.
 - Added a Data maps hub (`apps/regions/index.html`) listing the country
   research maps, and a desktop "Data maps" link in the global map's
   wordmark (first entry, the reciprocal of the country maps' "Global
