@@ -4,6 +4,10 @@
 
 ### 2026-06-13
 
+- Brought the Vanuatu map to the same control layout as NZ: Census
+  front-and-centre as a panel disclosure (geography selector and the
+  boundaries-pending legend), Key top-left, no play button, two-pill
+  bottom row.
 - Reworked the NZ map's top controls so census is the centrepiece: the
   Census button moved front-and-centre at the top (a disclosure that
   opens and closes its data panel — metric, geography, colour key and
