@@ -5,6 +5,42 @@ and what remains open. `CHANGELOG.md` records what changed; this file records
 the reasoning that should remain visible when the project is reported, audited,
 or handed to collaborators.
 
+## 2026-06-13: SA2 census data arrives through the front door
+
+Decision:
+The SA2 overlay consumes a new governed product, `area_summary_sa2.json`
+(2,311 statistical areas by three census years), built by
+`scripts/build_nz_area_summary_sa2.R` from a provenance-recorded Stats
+NZ extract: religious affiliation from the 2023 Census totals-by-topic
+SA2 feature service (CC BY 4.0, retrieved 2026-06-13), with 2013 and
+2018 counts re-aggregated by Stats NZ onto 2023 SA2 boundaries. The
+legacy `religion.json`, `demographics.json`, the 2018 `sa2.geojson`,
+and the static demographic stubs are removed rather than audited: the
+storage policy classed them as unverifiable demo material, and the new
+extract supersedes everything they offered.
+
+Rationale:
+The provenance gate held. The repo's own records say the legacy files
+"should not be treated as current authoritative Census ingestion", and
+a governed product cannot stand on an unverifiable source. Re-fetching
+from the official feature service yielded more than provenance: the
+extract includes the 2023 census, Stats NZ's own boundary concordance
+for earlier years, official land areas, and explicit suppression
+sentinels. National totals from the new SA2 product agree with the
+territorial-authority product to within 0.006 percent in every census
+year.
+
+Consequences:
+Small-area honesty is now structural. Rows with suppressed or sub-100
+denominators carry quality flags; the map washes those areas out,
+marks flagged years in popups, and clamps colour scales to the 2nd–98th
+percentile so a handful of extreme small-area values cannot compress
+the national palette. The geography select offers territorial authority
+and SA2 from one census module; each level loads once and caches for
+the session. The 2006 SA2 religion counts in the retired legacy file
+were not carried over — if they are ever needed, fetch them through the
+same documented route.
+
 ## 2026-06-13: The NZ research map rebuilds on the global shell
 
 Decision:

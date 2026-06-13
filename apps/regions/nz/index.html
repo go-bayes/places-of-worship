@@ -147,14 +147,17 @@
           <button id="census-disclosure" type="button" aria-expanded="false" aria-controls="dock-census">Census ▾</button>
         </div>
         <div class="dock-census" id="dock-census" hidden>
-          <label class="filter-chip"><input type="checkbox" id="censusEnabled"><span>Territorial-authority overlay</span></label>
+          <label class="filter-chip"><input type="checkbox" id="censusEnabled"><span>Census overlay</span></label>
           <div class="dock-row">
-            <select id="censusMetric" aria-label="Census metric"></select>
+            <select id="censusLevel" aria-label="Census geography"></select>
             <select id="censusYear" aria-label="Census year">
               <option value="2023" selected>2023</option>
               <option value="2018">2018</option>
               <option value="2013">2013</option>
             </select>
+          </div>
+          <div class="dock-row">
+            <select id="censusMetric" aria-label="Census metric"></select>
           </div>
         </div>
     </div>
@@ -2574,10 +2577,30 @@
     // summary product; the legacy sa2/religion/demographics files are not
     // read here.
     const CENSUS = {
-      source: "nz-ta",
-      fill: "nz-ta-fill",
-      line: "nz-ta-line",
-      hover: "nz-ta-hover"
+      source: "nz-census",
+      fill: "nz-census-fill",
+      line: "nz-census-line",
+      hover: "nz-census-hover"
+    };
+    // each level is a governed area-summary product plus its boundary file;
+    // join key and display name are properties of that boundary set
+    const CENSUS_LEVELS = {
+      ta: {
+        label: "Territorial authority",
+        boundaries: "data/territorial_authorities.geojson",
+        summary: "data/area_summary_ta.json",
+        codeProp: "TA2025_V1",
+        nameProp: "TA2025_NAME",
+        credit: "Stats NZ via Figure.NZ (CC BY 4.0) · 2025 boundaries"
+      },
+      sa2: {
+        label: "Statistical area 2",
+        boundaries: "data/sa2_2023.geojson",
+        summary: "data/area_summary_sa2.json",
+        codeProp: "SA22023_V1_00",
+        nameProp: "SA22023_V1_00_NAME",
+        credit: "Stats NZ (CC BY 4.0) · 2023 boundaries · rr3-rounded counts"
+      }
     };
     const CENSUS_METRICS = {
       religious_affiliation_percent: {
@@ -2613,22 +2636,37 @@
     };
     const censusState = {
       enabled: false,
+      level: "ta",
       metric: "religious_affiliation_percent",
       year: 2023,
-      loading: false,
-      geojson: null,
-      rows: null,
-      byAreaYear: new Map(),
-      years: [],
-      domains: {}
+      // per-level stores: { geojson, rows, byAreaYear, years, domains, hasFlags, loading }
+      levels: {}
     };
 
     const censusEnabledInput = document.getElementById("censusEnabled");
+    const censusLevelSelect = document.getElementById("censusLevel");
     const censusMetricSelect = document.getElementById("censusMetric");
     const censusYearSelect = document.getElementById("censusYear");
     const censusDisclosure = document.getElementById("census-disclosure");
     const censusSection = document.getElementById("dock-census");
     const censusLegend = document.getElementById("census-legend");
+
+    function censusActive() {
+      return censusState.levels[censusState.level] || null;
+    }
+    function censusLevelDef() {
+      return CENSUS_LEVELS[censusState.level];
+    }
+    // rr3 makes percentages on small denominators volatile, and suppressed
+    // cells carry no value at all; both wash out instead of implying precision
+    function rowFlagged(row) {
+      return typeof row?.quality_flag === "string" &&
+        (row.quality_flag.includes("suppressed_denominator") ||
+          row.quality_flag.includes("rr3_small_denominator"));
+    }
+    function metricUsesDenominator(metric) {
+      return metric !== "place_density_per_sq_km";
+    }
 
     // three-stop ramps: sequential blues for levels, orange-to-blue
     // diverging for change. interpolation in srgb is fine at this scale.
@@ -2647,95 +2685,143 @@
 
     // change is computed against the previous census; the first year has none
     function censusValue(code, year, metric) {
+      const store = censusActive();
+      if (!store) return null;
+      return storeValue(store, code, year, metric);
+    }
+
+    function censusWashed(code, year, metric) {
+      if (!metricUsesDenominator(metric)) return false;
+      const store = censusActive();
+      if (!store) return false;
       if (metric === "religious_change") {
-        const idx = censusState.years.indexOf(year);
-        if (idx <= 0) return null;
-        const now = censusState.byAreaYear.get(`${code}|${year}`);
-        const prev = censusState.byAreaYear.get(`${code}|${censusState.years[idx - 1]}`);
-        if (!now || !prev) return null;
-        return now.religious_affiliation_percent - prev.religious_affiliation_percent;
+        const idx = store.years.indexOf(year);
+        if (idx <= 0) return true;
+        return rowFlagged(store.byAreaYear.get(`${code}|${year}`)) ||
+          rowFlagged(store.byAreaYear.get(`${code}|${store.years[idx - 1]}`));
       }
-      const row = censusState.byAreaYear.get(`${code}|${year}`);
+      return rowFlagged(store.byAreaYear.get(`${code}|${year}`));
+    }
+
+    // domains span all years so colours stay comparable across the year
+    // selector, exclude washed rows, and clamp to the 2nd-98th percentile so
+    // a handful of extreme small-area values cannot compress the national
+    // palette; the diverging domain is symmetric about zero
+    function quantileOf(sorted, p) {
+      if (!sorted.length) return NaN;
+      const pos = (sorted.length - 1) * p;
+      const lo = Math.floor(pos);
+      const hi = Math.ceil(pos);
+      return sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
+    }
+
+    function computeCensusDomains(store) {
+      const domains = {};
+      const clamped = {};
+      for (const metric of Object.keys(CENSUS_METRICS)) {
+        const values = [];
+        for (const row of store.rows) {
+          if (metricUsesDenominator(metric) && rowFlagged(row)) continue;
+          const v = storeValue(store, row.area_code, row.year, metric);
+          if (v !== null) values.push(v);
+        }
+        if (!values.length) continue;
+        values.sort((a, b) => a - b);
+        if (CENSUS_METRICS[metric].kind === "div") {
+          const magnitudes = values.map(Math.abs).sort((a, b) => a - b);
+          const m = quantileOf(magnitudes, 0.98);
+          domains[metric] = [-m, m];
+          clamped[metric] = magnitudes[magnitudes.length - 1] > m;
+        } else {
+          const lo = quantileOf(values, 0.02);
+          const hi = quantileOf(values, 0.98);
+          domains[metric] = [lo, hi];
+          clamped[metric] = values[0] < lo || values[values.length - 1] > hi;
+        }
+      }
+      store.domains = domains;
+      store.clamped = clamped;
+    }
+
+    // value lookup against an explicit store, usable before the store is
+    // installed as the active level
+    function storeValue(store, code, year, metric) {
+      if (metric === "religious_change") {
+        const idx = store.years.indexOf(year);
+        if (idx <= 0) return null;
+        const now = store.byAreaYear.get(`${code}|${year}`);
+        const prev = store.byAreaYear.get(`${code}|${store.years[idx - 1]}`);
+        if (!now || !prev) return null;
+        const delta = now.religious_affiliation_percent - prev.religious_affiliation_percent;
+        return Number.isFinite(delta) ? delta : null;
+      }
+      const row = store.byAreaYear.get(`${code}|${year}`);
       const v = row ? row[metric] : null;
       return Number.isFinite(v) ? v : null;
     }
 
-    // domains span all years so colours stay comparable across the
-    // year selector; the diverging domain is symmetric about zero
-    function computeCensusDomains() {
-      const domains = {};
-      for (const metric of Object.keys(CENSUS_METRICS)) {
-        let min = Infinity;
-        let max = -Infinity;
-        for (const row of censusState.rows) {
-          const v = censusValue(row.area_code, row.year, metric);
-          if (v === null) continue;
-          if (v < min) min = v;
-          if (v > max) max = v;
-        }
-        if (!Number.isFinite(min)) continue;
-        if (CENSUS_METRICS[metric].kind === "div") {
-          const m = Math.max(Math.abs(min), Math.abs(max));
-          domains[metric] = [-m, m];
-        } else {
-          domains[metric] = [min, max];
-        }
+    function syncCensusYearSelect() {
+      const store = censusActive();
+      if (!censusYearSelect || !store) return;
+      const previous = String(censusState.year);
+      censusYearSelect.innerHTML = "";
+      [...store.years].sort((a, b) => b - a).forEach((y) => {
+        const option = document.createElement("option");
+        option.value = String(y);
+        option.textContent = String(y);
+        censusYearSelect.appendChild(option);
+      });
+      censusYearSelect.value = previous;
+      if (censusYearSelect.value !== previous) {
+        censusYearSelect.selectedIndex = 0;
+        censusState.year = Number(censusYearSelect.value);
       }
-      censusState.domains = domains;
     }
 
-    async function loadCensusData() {
-      if (censusState.geojson || censusState.loading) return censusState.geojson;
-      censusState.loading = true;
+    async function loadCensusData(level) {
+      const existing = censusState.levels[level];
+      if (existing && (existing.geojson || existing.loading)) return existing.geojson;
+      const def = CENSUS_LEVELS[level];
+      const store = { geojson: null, rows: [], byAreaYear: new Map(), years: [], domains: {}, hasFlags: false, loading: true };
+      censusState.levels[level] = store;
       showClickHint("Loading census boundaries…");
       try {
         const [boundariesRes, summaryRes] = await Promise.all([
-          fetch("data/territorial_authorities.geojson"),
-          fetch("data/area_summary_ta.json")
+          fetch(def.boundaries),
+          fetch(def.summary)
         ]);
         if (!boundariesRes.ok || !summaryRes.ok) throw new Error("census fetch failed");
         const summary = await summaryRes.json();
-        censusState.geojson = await boundariesRes.json();
-        censusState.rows = summary.rows || [];
-        censusState.byAreaYear = new Map(censusState.rows.map((r) => [`${r.area_code}|${r.year}`, r]));
-        censusState.years = [...new Set(censusState.rows.map((r) => r.year))].sort((a, b) => a - b);
-        computeCensusDomains();
-        if (censusYearSelect) {
-          const previous = String(censusState.year);
-          censusYearSelect.innerHTML = "";
-          [...censusState.years].sort((a, b) => b - a).forEach((y) => {
-            const option = document.createElement("option");
-            option.value = String(y);
-            option.textContent = String(y);
-            censusYearSelect.appendChild(option);
-          });
-          censusYearSelect.value = previous;
-          if (censusYearSelect.value !== previous) {
-            censusYearSelect.selectedIndex = 0;
-            censusState.year = Number(censusYearSelect.value);
-          }
-        }
+        store.geojson = await boundariesRes.json();
+        store.rows = summary.rows || [];
+        store.byAreaYear = new Map(store.rows.map((r) => [`${r.area_code}|${r.year}`, r]));
+        store.years = [...new Set(store.rows.map((r) => r.year))].sort((a, b) => a - b);
+        store.hasFlags = store.rows.some(rowFlagged);
+        computeCensusDomains(store);
       } catch (err) {
-        censusState.geojson = null;
+        store.geojson = null;
         showClickHint("Census data failed to load");
       } finally {
-        censusState.loading = false;
+        store.loading = false;
       }
-      return censusState.geojson;
+      return store.geojson;
     }
 
     function censusFillExpression() {
       const { metric, year } = censusState;
-      const [min, max] = censusState.domains[metric] || [0, 1];
+      const store = censusActive();
+      const def = censusLevelDef();
+      const [min, max] = store.domains[metric] || [0, 1];
       const stops = CENSUS_METRICS[metric].kind === "div" ? DIV_STOPS : SEQ_STOPS;
-      const expr = ["match", ["get", "TA2025_V1"]];
-      for (const feature of censusState.geojson.features) {
-        const code = feature.properties.TA2025_V1;
+      const expr = ["match", ["get", def.codeProp]];
+      for (const feature of store.geojson.features) {
+        const code = feature.properties[def.codeProp];
         const v = censusValue(code, year, metric);
-        // areas without a value (e.g. change at the first census) wash out
-        expr.push(code, v === null
+        // no value (change at the first census, suppressed cells) or a
+        // flagged denominator washes out instead of implying precision
+        expr.push(code, v === null || censusWashed(code, year, metric)
           ? "rgba(148, 163, 184, 0.25)"
-          : rampColour(stops, max === min ? 0.5 : (v - min) / (max - min)));
+          : rampColour(stops, max === min ? 0.5 : Math.min(1, Math.max(0, (v - min) / (max - min)))));
       }
       expr.push("rgba(0, 0, 0, 0)");
       return expr;
@@ -2749,15 +2835,17 @@
 
     let censusHandlersAttached = false;
     function addCensusLayers() {
-      if (!censusState.enabled || !censusState.geojson) return;
+      const store = censusActive();
+      if (!censusState.enabled || !store || !store.geojson) return;
       if (map.getLayer(CENSUS.fill)) return;
       if (!map.getSource(CENSUS.source)) {
         map.addSource(CENSUS.source, {
           type: "geojson",
-          data: censusState.geojson,
+          data: store.geojson,
           attribution: '© <a href="https://www.stats.govt.nz/" target="_blank" rel="noopener">Stats NZ</a> (CC BY 4.0)'
         });
       }
+      const codeProp = censusLevelDef().codeProp;
       const beforeId = censusBeforeId();
       map.addLayer({
         id: CENSUS.fill,
@@ -2775,10 +2863,17 @@
         id: CENSUS.hover,
         type: "line",
         source: CENSUS.source,
-        filter: ["==", ["get", "TA2025_V1"], ""],
+        filter: ["==", ["get", codeProp], ""],
         paint: { "line-color": "#0f172a", "line-width": 2.2 }
       }, beforeId);
       attachCensusHandlers();
+    }
+
+    function removeCensusLayers() {
+      [CENSUS.hover, CENSUS.line, CENSUS.fill].forEach((id) => {
+        if (map.getLayer(id)) map.removeLayer(id);
+      });
+      if (map.getSource(CENSUS.source)) map.removeSource(CENSUS.source);
     }
 
     function placeUnderCursor(point) {
@@ -2800,27 +2895,32 @@
         if (!censusState.enabled) return;
         const feature = e.features && e.features[0];
         if (!feature) return;
+        const codeProp = censusLevelDef().codeProp;
         // places win the cursor: clear area affordances under a point
         if (placeUnderCursor(e.point)) {
-          map.setFilter(CENSUS.hover, ["==", ["get", "TA2025_V1"], ""]);
+          map.setFilter(CENSUS.hover, ["==", ["get", codeProp], ""]);
           censusHoverPopup.remove();
           return;
         }
-        const code = feature.properties.TA2025_V1;
-        map.setFilter(CENSUS.hover, ["==", ["get", "TA2025_V1"], code]);
+        const code = feature.properties[codeProp];
+        map.setFilter(CENSUS.hover, ["==", ["get", codeProp], code]);
         const def = CENSUS_METRICS[censusState.metric];
         const v = censusValue(code, censusState.year, censusState.metric);
+        const washed = censusWashed(code, censusState.year, censusState.metric);
+        const valueText = v === null
+          ? "no data"
+          : def.format(v) + (washed ? " · small denominator" : "");
         censusHoverPopup
           .setLngLat(e.lngLat)
           .setHTML(
-            `<div style="font-weight:600;">${feature.properties.TA2025_NAME}</div>` +
-            `<div>${def.label} (${censusState.year}): ${v === null ? "no data" : def.format(v)}</div>`
+            `<div style="font-weight:600;">${feature.properties[censusLevelDef().nameProp]}</div>` +
+            `<div>${def.label} (${censusState.year}): ${valueText}</div>`
           )
           .addTo(map);
       });
       map.on("mouseleave", CENSUS.fill, () => {
         if (map.getLayer(CENSUS.hover)) {
-          map.setFilter(CENSUS.hover, ["==", ["get", "TA2025_V1"], ""]);
+          map.setFilter(CENSUS.hover, ["==", ["get", censusLevelDef().codeProp], ""]);
         }
         censusHoverPopup.remove();
       });
@@ -2834,28 +2934,39 @@
     }
 
     function openCensusPopup(feature, lngLat) {
-      const code = feature.properties.TA2025_V1;
-      const name = feature.properties.TA2025_NAME;
-      const rowsHtml = censusState.years.map((year) => {
-        const row = censusState.byAreaYear.get(`${code}|${year}`);
+      const store = censusActive();
+      const levelDef = censusLevelDef();
+      const code = feature.properties[levelDef.codeProp];
+      const name = feature.properties[levelDef.nameProp];
+      const fmtPercent = (v) => (Number.isFinite(v) ? `${v.toFixed(1)}%` : "–");
+      const fmtRate = (v) => (Number.isFinite(v) ? v.toFixed(1) : "–");
+      let anyFlagged = false;
+      const rowsHtml = store.years.map((year) => {
+        const row = store.byAreaYear.get(`${code}|${year}`);
         if (!row) return "";
+        const flagged = rowFlagged(row);
+        if (flagged) anyFlagged = true;
         const selected = year === censusState.year ? ' class="census-year-selected"' : "";
         return `<tr${selected}>
-          <td>${year}</td>
-          <td>${row.religious_affiliation_percent.toFixed(1)}%</td>
-          <td>${row.no_religion_percent.toFixed(1)}%</td>
+          <td>${year}${flagged ? "*" : ""}</td>
+          <td>${fmtPercent(row.religious_affiliation_percent)}</td>
+          <td>${fmtPercent(row.no_religion_percent)}</td>
           <td>${row.place_count}</td>
-          <td>${row.places_per_10000_residents.toFixed(1)}</td>
+          <td>${fmtRate(row.places_per_10000_residents)}</td>
         </tr>`;
       }).join("");
+      const flagNote = anyFlagged
+        ? `<div class="place-note">* small or suppressed denominator under Stats NZ rr3 rounding; treat percentages as indicative.</div>`
+        : "";
       const html =
         `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
         `<table class="census-table">` +
         `<thead><tr><th>Census</th><th>Religious</th><th>No religion</th><th>Places</th><th>Per 10k</th></tr></thead>` +
         `<tbody>${rowsHtml}</tbody></table>` +
+        flagNote +
         `<div class="place-note">Percentages use the stated religion-response denominator. ` +
         `Place counts are the current snapshot repeated across census years.</div>` +
-        `<div class="place-note">Stats NZ via Figure.NZ (CC BY 4.0) · 2025 boundaries · places © OpenStreetMap (ODbL)</div>`;
+        `<div class="place-note">${levelDef.credit} · places © OpenStreetMap (ODbL)</div>`;
       const popup = new maplibregl.Popup({ maxWidth: "380px" })
         .setLngLat(lngLat)
         .setHTML(html)
@@ -2872,41 +2983,67 @@
 
     function updateCensusLegend() {
       if (!censusLegend) return;
-      const domain = censusState.domains[censusState.metric];
+      const store = censusActive();
+      const domain = store && store.domains[censusState.metric];
       if (!censusState.enabled || !domain) {
         censusLegend.hidden = true;
         return;
       }
       const def = CENSUS_METRICS[censusState.metric];
       const stops = def.kind === "div" ? DIV_STOPS : SEQ_STOPS;
+      const washNote = store.hasFlags && metricUsesDenominator(censusState.metric)
+        ? `<div class="census-legend-note">pale areas: small or suppressed denominators</div>`
+        : "";
+      // the ramp clamps at the 2nd-98th percentile; mark the ends when
+      // values continue beyond them
+      const isClamped = store.clamped && store.clamped[censusState.metric];
+      const loLabel = (isClamped ? "≤ " : "") + def.format(domain[0]);
+      const hiLabel = (isClamped ? "≥ " : "") + def.format(domain[1]);
       censusLegend.hidden = false;
       censusLegend.innerHTML =
-        `<div class="census-legend-title">${def.label} (${censusState.year})</div>` +
+        `<div class="census-legend-title">${censusLevelDef().label}: ${def.label} (${censusState.year})</div>` +
         `<div class="census-legend-bar" style="background:${rampGradient(stops)}"></div>` +
-        `<div class="census-legend-range"><span>${def.format(domain[0])}</span><span>${def.format(domain[1])}</span></div>` +
-        `<div class="census-legend-note">${def.note}</div>`;
+        `<div class="census-legend-range"><span>${loLabel}</span><span>${hiLabel}</span></div>` +
+        `<div class="census-legend-note">${def.note}</div>` +
+        washNote;
     }
 
     async function setCensusEnabled(on) {
       censusState.enabled = on;
       if (censusEnabledInput) censusEnabledInput.checked = on;
       if (on) {
-        const data = await loadCensusData();
+        const data = await loadCensusData(censusState.level);
         if (!data) {
           censusState.enabled = false;
           if (censusEnabledInput) censusEnabledInput.checked = false;
           updateCensusLegend();
           return;
         }
+        syncCensusYearSelect();
         addCensusLayers();
         applyCensusPaint();
       } else {
-        [CENSUS.hover, CENSUS.line, CENSUS.fill].forEach((id) => {
-          if (map.getLayer(id)) map.removeLayer(id);
-        });
-        if (map.getSource(CENSUS.source)) map.removeSource(CENSUS.source);
+        removeCensusLayers();
         updateCensusLegend();
       }
+    }
+
+    // switching geography swaps the source and rejoins; each level's data
+    // loads once and is cached for the session
+    async function setCensusLevel(level) {
+      if (!CENSUS_LEVELS[level] || level === censusState.level) return;
+      censusState.level = level;
+      if (censusLevelSelect) censusLevelSelect.value = level;
+      if (!censusState.enabled) return;
+      removeCensusLayers();
+      const data = await loadCensusData(level);
+      if (!data) {
+        updateCensusLegend();
+        return;
+      }
+      syncCensusYearSelect();
+      addCensusLayers();
+      applyCensusPaint();
     }
 
     if (censusDisclosure && censusSection) {
@@ -2920,6 +3057,18 @@
     if (censusEnabledInput) {
       censusEnabledInput.addEventListener("change", () => {
         void setCensusEnabled(censusEnabledInput.checked);
+      });
+    }
+    if (censusLevelSelect) {
+      for (const [id, def] of Object.entries(CENSUS_LEVELS)) {
+        const option = document.createElement("option");
+        option.value = id;
+        option.textContent = def.label;
+        censusLevelSelect.appendChild(option);
+      }
+      censusLevelSelect.value = censusState.level;
+      censusLevelSelect.addEventListener("change", () => {
+        void setCensusLevel(censusLevelSelect.value);
       });
     }
     if (censusMetricSelect) {

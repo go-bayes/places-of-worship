@@ -4,6 +4,20 @@
 
 ### 2026-06-13
 
+- The NZ map's census overlay now offers two geographies: territorial
+  authority and statistical area 2. The SA2 level reads a new governed
+  product (`area_summary_sa2.json`, 2,311 areas by censuses 2013–2023)
+  built from a provenance-recorded Stats NZ extract (the 2023 Census
+  totals-by-topic SA2 feature service, CC BY 4.0; earlier censuses sit
+  on 2023 boundaries via Stats NZ's own concordance). Areas with small
+  or suppressed denominators wash out on denominator metrics, popups
+  mark flagged years, and colour scales clamp to the 2nd–98th
+  percentile so extreme small-area values cannot compress the national
+  palette.
+- Removed the unverifiable legacy demo data (`religion.json`,
+  `demographics.json`, the 2018 `sa2.geojson`, and the static
+  demographic stubs), completing the storage policy's audit-or-remove
+  action; the new SA2 extract supersedes them with full provenance.
 - The verification surface keeps its light RA workspace and CARTO
   basemap but now shares the project's type stack via
   `apps/shared/map-shell.css`, and the style guide's colour meanings
