@@ -57,6 +57,12 @@
   removed) — see the dated `JOURNAL.md` entries. Do not rebuild inventory
   items from this guide without checking the journal first; its gotchas
   section remains useful.
+- `docs/development/regional-map-consistency.md`: AGREED-BUT-UNSCHEDULED
+  plan to stop forking per-country maps. Read it before adding a country
+  or making another cross-country UI change by hand: it proposes one
+  shared runtime module plus thin per-country `REGION_CONFIG` pages, with
+  a staged verify-before-swap migration. The country maps currently drift
+  because each is a full fork of the shell.
 - `docs/templates/ra-historical-site-evidence/`: RA evidence-entry templates.
 - `docs/master-verification-workflow-plan.md`: master verification and review.
 - `docs/portal-data-entry-plan.md`: authenticated portal planning hub.
