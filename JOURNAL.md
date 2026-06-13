@@ -5,6 +5,43 @@ and what remains open. `CHANGELOG.md` records what changed; this file records
 the reasoning that should remain visible when the project is reported, audited,
 or handed to collaborators.
 
+## 2026-06-13: The NZ research map rebuilds on the global shell
+
+Decision:
+The NZ research map is being rebuilt as a fork of the global MapLibre
+shell rather than restyled further in place. The rebuild lives at
+`apps/regions/nz/next.html` beside the live Leaflet page and replaces
+`index.html` only at feature parity, after screenshot approval. The
+census overlay consumes the governed area summary product
+(`area_summary_ta.json`, 67 territorial authorities by three census
+years) joined to the 2025 boundaries; SA2 resolution waits for a
+governed SA2 summary product rather than reading the legacy
+`religion.json` and `demographics.json` extracts. The verification
+surface is untouched throughout.
+
+Rationale:
+Joseph authorised an overhaul wherever rebuilding enhances function.
+The Leaflet page and the global map solved the same problems twice:
+two search implementations, two popup systems, two filter systems, two
+styling passes that drifted apart. The global shell already serves the
+same vector tiles, wears the shared theme by construction, and carries
+search, religion and denomination filters, Street View, and location
+features the research map lacked. Porting the census machinery onto
+that shell is less work than porting the shell's features onto
+Leaflet, and the result is one codebase to maintain.
+
+Consequences:
+Stage one ships territorial-authority choropleths (five metrics, three
+census years, a diverging change scale with a symmetric domain), dark
+census popups with the full year table and quality footnotes, a legend
+that rides under the key pill, NZ city chips, and NZ-biased geocoding.
+Colour domains span all census years, so a year switch changes the map,
+not the scale. The data-quality dashboard and the stub demographic
+popups (age, income, ethnicity) did not port: the static files behind
+them are placeholders, and a governed data product should precede any
+reappearance. Remaining before the swap: SA2 resolution, screenshot
+approval, and link updates on the retiring page.
+
 ## 2026-06-13: One stylesheet owns the design language
 
 Decision:

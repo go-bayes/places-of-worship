@@ -4,6 +4,14 @@
 
 ### 2026-06-13
 
+- Began the NZ research map rebuild on the global MapLibre shell:
+  `apps/regions/nz/next.html` (alongside the live page) adds
+  territorial-authority census choropleths (five metrics, censuses
+  2013–2023, a diverging change scale), dark census popups with the
+  full year table, a choropleth legend under the key pill, NZ city
+  chips, and NZ-biased search. The overlay consumes the governed
+  `area_summary_ta.json`; the Leaflet page remains the live
+  `index.html` until parity.
 - The NZ research map now wears the shared design language: slate
   masthead and controls bar, dark legend and loading panels, pill corner
   links, and the shared type stack, via `apps/shared/map-shell.css`.
