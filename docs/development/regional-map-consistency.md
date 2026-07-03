@@ -1,8 +1,14 @@
 # Keeping the regional maps consistent across countries
 
-Status: **agreed direction, not yet scheduled** (2026-06-13). This is a plan,
-not a record of work done. Pick it up when the cost of hand-porting the next
-country, or the next UI change, is worth paying down.
+Status: **completed 2026-07-04**. The migration below was executed as
+planned: `apps/regions/_shared/region-map.js` + `region-map.css` now carry
+all map and census logic, and the NZ and VU pages are thin
+`REGION_CONFIG` loaders. Parity was verified before each swap (42-element
+computed-style sweep identical on NZ; hash-identical sweep on VU;
+interaction checks on panel, metric, level, slider, legend; zero console
+errors). Fork differences and their resolutions are recorded in
+`apps/regions/_shared/DRIFT-REPORT.md`. For adding countries, see
+`docs/development/adding-a-region.md`. The historical plan follows.
 
 ## The problem
 

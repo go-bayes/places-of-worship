@@ -57,12 +57,15 @@
   removed) — see the dated `JOURNAL.md` entries. Do not rebuild inventory
   items from this guide without checking the journal first; its gotchas
   section remains useful.
-- `docs/development/regional-map-consistency.md`: AGREED-BUT-UNSCHEDULED
-  plan to stop forking per-country maps. Read it before adding a country
-  or making another cross-country UI change by hand: it proposes one
-  shared runtime module plus thin per-country `REGION_CONFIG` pages, with
-  a staged verify-before-swap migration. The country maps currently drift
-  because each is a full fork of the shell.
+- `docs/development/adding-a-region.md`: how to add a country research
+  map now that the country pages share one runtime
+  (`apps/regions/_shared/region-map.js`) with thin per-country
+  `REGION_CONFIG` loaders. UI changes happen once in `_shared/`; never
+  add country-conditional logic to the module.
+- `docs/development/regional-map-consistency.md`: COMPLETED 2026-07-04
+  migration plan that unified the forked NZ/VU maps onto the shared
+  runtime, with the parity-verification record and the link to
+  `apps/regions/_shared/DRIFT-REPORT.md`.
 - `docs/templates/ra-historical-site-evidence/`: RA evidence-entry templates.
 - `docs/master-verification-workflow-plan.md`: master verification and review.
 - `docs/portal-data-entry-plan.md`: authenticated portal planning hub.

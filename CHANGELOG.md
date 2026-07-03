@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+### 2026-07-04
+
+- Unified the country research maps onto one shared runtime:
+  `apps/regions/_shared/region-map.js` and `region-map.css` now carry all
+  map and census logic, and `apps/regions/nz/index.html` (87 lines) and
+  `apps/regions/vu/index.html` (84 lines) are thin `REGION_CONFIG`
+  loaders, executing the plan in
+  `docs/development/regional-map-consistency.md`. The module is the
+  union of both forks' behaviour, keyed on config and data rather than
+  country identity (boundaries-pending legend and popups, rr3 wash-out,
+  percentile clamps, the null-change guard). Parity was verified before
+  each swap: a 42-element computed-style sweep identical on NZ, a
+  hash-identical sweep on VU, interaction checks across the census
+  panel, metric and geography switches, slider, legend, and popups, with
+  zero console errors. Fork drift and resolutions are recorded in
+  `apps/regions/_shared/DRIFT-REPORT.md`; adding a country is now a
+  config plus governed data products per
+  `docs/development/adding-a-region.md`.
+
 ### 2026-06-13
 
 - The Vanuatu map now shows a real metric while census religion stays
