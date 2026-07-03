@@ -4,6 +4,25 @@
 
 ### 2026-07-04
 
+- Began the strict-TypeScript Research Workbench (`apps/workbench/`), the
+  RA ingestion app for location and attributes of historic and present
+  places of faith. React + Vite with strict types per the standing stack
+  decision; country behaviour is declarative config (NZ 2013/2018/2023;
+  Vanuatu 1989/1999/2009/2020 with a first-class kastom-site sensitivity
+  prompt and lifecycle evidence accepted from 1600). The evidence form
+  extends the pilot's wide row with bounded lifecycle dates, geocoding
+  basis, per-source provenance, and place attributes, following the UI
+  style guide's wording, colour meanings, and controlled-vocabulary
+  rules. All data access goes through a provider interface; only a
+  localStorage demo provider exists, so the shared Convex backend, the
+  live RA surfaces, and the master data are untouched. Verified in
+  browser at desktop and phone widths: save draft, submit for review
+  with validation, read-only submitted state, unresolved-note path, and
+  country switching, with a clean console.
+- Added `research/countries/TEMPLATE.md`, the one-page build-card
+  template that every surveyed country will follow (tier, verified
+  sources over time, boundaries, first visualisation, build recipe,
+  risks, deep-history potential).
 - Unified the country research maps onto one shared runtime:
   `apps/regions/_shared/region-map.js` and `region-map.css` now carry all
   map and census logic, and `apps/regions/nz/index.html` (87 lines) and

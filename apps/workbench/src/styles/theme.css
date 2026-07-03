@@ -1,0 +1,187 @@
+/* workbench theme — light working surface under a slate masthead.
+   tokens follow apps/shared/map-shell.css (type stack, slate identity)
+   and docs/ui-style-guide.md (colour meanings; do not reuse a colour
+   for an unrelated meaning). the workbench is a dense tool, not a
+   landing page: no hero copy, no decorative cards. */
+
+:root {
+  /* identity (shared with the map shell) */
+  --shell-slate: #0f172a;
+  --shell-slate-soft: rgba(15, 23, 42, 0.72);
+  --shell-text: #e2e8f0;
+  --shell-muted: #94a3b8;
+
+  /* working surface */
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --text: #0f172a;
+  --text-muted: #475569;
+
+  /* colour meanings — values from docs/ui-style-guide.md; change a
+     meaning by changing its variable, then update the guide's table */
+  --action: #1f618d;
+  --action-soft: #e8f1fb;
+  --present: #1e8449;
+  --present-deep: #145a32;
+  --present-soft: #d7f1df;
+  --absent: #374151;
+  --absent-soft: #e5e7eb;
+  --uncertain: #d68910;
+  --uncertain-soft: #fff3cd;
+  --uncertain-softer: #fff7e6;
+  --not-assessed: #1f4e79;
+  --not-assessed-soft: #e8f1fb;
+  --warning: #d68910;
+  --danger: #b03a2e;
+  --disabled-soft: #f1f5f9;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { margin: 0; height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Work Sans", -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+/* restore the hidden attribute's authority over display rules */
+[hidden] { display: none !important; }
+
+/* masthead: slate identity bar shared with the map shell */
+.masthead {
+  background: var(--shell-slate);
+  color: var(--shell-text);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+}
+.masthead .wordmark { font-weight: 600; letter-spacing: 0.01em; }
+.masthead .wordmark a { color: inherit; text-decoration: none; }
+.masthead .context { color: var(--shell-muted); font-size: 13px; }
+.masthead .spacer { flex: 1; }
+.masthead select {
+  background: transparent;
+  color: var(--shell-text);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 13px;
+  width: auto;
+  flex: 0 0 auto;
+}
+
+/* layout: sidebar (tasks, state) + main working panel */
+.frame {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  height: calc(100% - 48px);
+}
+.sidebar {
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 12px;
+  background: var(--surface);
+}
+.main {
+  overflow-y: auto;
+  padding: 16px 20px;
+}
+@media (max-width: 800px) {
+  .frame { grid-template-columns: 1fr; height: auto; }
+  .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+}
+
+/* status pills — short machine states only */
+.status-pill {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.status-present { background: var(--present-soft); color: var(--present-deep); }
+.status-absent { background: var(--absent-soft); color: var(--absent); }
+.status-uncertain { background: var(--uncertain-soft); color: var(--uncertain); }
+.status-not-assessed { background: var(--not-assessed-soft); color: var(--not-assessed); }
+
+/* buttons: primary / secondary / tertiary / danger hierarchy */
+button {
+  font: inherit;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  padding: 10px 14px;
+  min-height: 44px;
+  cursor: pointer;
+  background: var(--action);
+  color: #fff;
+}
+button.secondary {
+  background: var(--action-soft);
+  color: var(--action);
+  border-color: var(--action);
+}
+button.tertiary {
+  background: transparent;
+  color: var(--action);
+  border-color: var(--border);
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+button.danger { background: var(--danger); }
+button:disabled { background: var(--disabled-soft); color: var(--text-muted); cursor: not-allowed; border-color: var(--border); }
+
+/* forms: dropdowns for controlled vocabulary, text only for
+   source-specific detail */
+label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin: 10px 0 4px; }
+input, select, textarea {
+  font: inherit;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: var(--surface);
+  color: var(--text);
+}
+textarea { min-height: 72px; resize: vertical; }
+fieldset {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin: 14px 0;
+  padding: 4px 12px 12px;
+}
+legend { font-size: 13px; font-weight: 600; color: var(--text-muted); padding: 0 4px; }
+
+.field-note { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+.demo-warning {
+  background: var(--uncertain-softer);
+  border: 1px solid var(--uncertain);
+  color: var(--uncertain);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+/* task list */
+.task-item {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+.task-item:hover { border-color: var(--action); }
+.task-item.selected { border-color: var(--action); background: var(--action-soft); }
+.task-item .task-name { font-weight: 600; }
+.task-item .task-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+h1 { font-size: 20px; margin: 0 0 4px; }
+h2 { font-size: 16px; margin: 18px 0 6px; }
+a { color: var(--action); }
