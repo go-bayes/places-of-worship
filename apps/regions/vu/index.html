@@ -45,9 +45,9 @@
         }
       },
       defaultLevel: "adm1",
-      // open on the metric that has data today: place-of-worship density.
-      // the religion metrics await a structured census source
-      defaultMetric: "place_density_per_sq_km",
+      // census religion is live (2009/2020 provinces; 2020 area councils),
+      // so the map opens on affiliation like the nz map
+      defaultMetric: "religious_affiliation_percent",
       defaultYear: 2020,
       cityPresets: [
         { label: "Port Vila", shortLabel: "Pt Vila", coords: [168.3219, -17.7404], zoom: 11 },
@@ -62,11 +62,11 @@
       geocode: { country: "vu", biasLngLat: [167.9, -16.3] },
       onboarding: {
         title: "Vanuatu research map",
-        intro: "Places of worship across Vanuatu, with census geographies ready for religious-affiliation data.",
+        intro: "Places of worship across Vanuatu, with census religious-affiliation overlays.",
         bullets: [
-          "Areas are shaded by place-of-worship density (OSM places per km²).",
-          "Open <strong>Census</strong> (top centre) for the metric and geography; religion data is pending.",
-          "Tap any dot for a place, or an area for its density."
+          "The census overlay is on: areas are shaded by religious affiliation (2009 and 2020).",
+          "Open <strong>Census</strong> (top centre) for the metric, geography and year slider.",
+          "Tap any dot for a place; tap an area for its census detail."
         ],
         links: [
           { label: "Global map", href: "../../global/" }
@@ -75,8 +75,8 @@
       wordmarkLinks: [
         { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
       ],
-      censusSourceAttribution: 'Boundaries © <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a>',
-      censusFlagNote: "* small or suppressed denominator under census confidentiality rounding; treat percentages as indicative."
+      censusSourceAttribution: 'Census religion © <a href="https://vbos.gov.vu/" target="_blank" rel="noopener">Vanuatu Bureau of Statistics</a> &amp; <a href="https://sdd.spc.int/" target="_blank" rel="noopener">SPC</a> · Boundaries © <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a>',
+      censusFlagNote: "* published census cells carry small (±1–2) internal inconsistencies consistent with confidentiality perturbation; treat close percentages as equal."
     };
   </script>
   <script src="../_shared/region-map.js"></script>

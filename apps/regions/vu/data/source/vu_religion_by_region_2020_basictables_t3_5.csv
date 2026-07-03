@@ -1,0 +1,1126 @@
+geography,geo_level,province,census_year,religion_label_source,religion_label_normalised,count
+VANUATU,nation,,2020,Total,total,293963
+VANUATU,nation,,2020,Presbyterian,presbyterian,80060
+VANUATU,nation,,2020,Seventh Day Adventist (SDA),seventh_day_adventist,43541
+VANUATU,nation,,2020,Catholic,catholic,35602
+VANUATU,nation,,2020,Anglican,anglican,35339
+VANUATU,nation,,2020,Churches of Christ,church_of_christ,14588
+VANUATU,nation,,2020,Assemblies of God (AOG),assemblies_of_god,14450
+VANUATU,nation,,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,9515
+VANUATU,nation,,2020,Customary beliefs,customary_beliefs,9080
+VANUATU,nation,,2020,Apostolic,apostolic,6894
+VANUATU,nation,,2020,Latter Day Saints (Mormon),latter_day_saints,5174
+VANUATU,nation,,2020,Other churches,other,35270
+VANUATU,nation,,2020,No Religion/Faith,no_religion,4023
+VANUATU,nation,,2020,Refuse to answer,refuse_to_answer,394
+VANUATU,nation,,2020,Not Stated,not_stated,34
+URBAN,urban_rural_total,,2020,Total,total,65867
+URBAN,urban_rural_total,,2020,Presbyterian,presbyterian,17054
+URBAN,urban_rural_total,,2020,Seventh Day Adventist (SDA),seventh_day_adventist,12920
+URBAN,urban_rural_total,,2020,Catholic,catholic,8467
+URBAN,urban_rural_total,,2020,Anglican,anglican,6276
+URBAN,urban_rural_total,,2020,Churches of Christ,church_of_christ,3262
+URBAN,urban_rural_total,,2020,Assemblies of God (AOG),assemblies_of_god,3319
+URBAN,urban_rural_total,,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,2530
+URBAN,urban_rural_total,,2020,Customary beliefs,customary_beliefs,45
+URBAN,urban_rural_total,,2020,Apostolic,apostolic,1443
+URBAN,urban_rural_total,,2020,Latter Day Saints (Mormon),latter_day_saints,1301
+URBAN,urban_rural_total,,2020,Other churches,other,8353
+URBAN,urban_rural_total,,2020,No Religion/Faith,no_religion,737
+URBAN,urban_rural_total,,2020,Refuse to answer,refuse_to_answer,141
+URBAN,urban_rural_total,,2020,Not Stated,not_stated,19
+Port Vila,urban_municipality,,2020,Total,total,48461
+Port Vila,urban_municipality,,2020,Presbyterian,presbyterian,14244
+Port Vila,urban_municipality,,2020,Seventh Day Adventist (SDA),seventh_day_adventist,8928
+Port Vila,urban_municipality,,2020,Catholic,catholic,5980
+Port Vila,urban_municipality,,2020,Anglican,anglican,3813
+Port Vila,urban_municipality,,2020,Churches of Christ,church_of_christ,2092
+Port Vila,urban_municipality,,2020,Assemblies of God (AOG),assemblies_of_god,2616
+Port Vila,urban_municipality,,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,2040
+Port Vila,urban_municipality,,2020,Customary beliefs,customary_beliefs,33
+Port Vila,urban_municipality,,2020,Apostolic,apostolic,1073
+Port Vila,urban_municipality,,2020,Latter Day Saints (Mormon),latter_day_saints,1017
+Port Vila,urban_municipality,,2020,Other churches,other,5876
+Port Vila,urban_municipality,,2020,No Religion/Faith,no_religion,608
+Port Vila,urban_municipality,,2020,Refuse to answer,refuse_to_answer,122
+Port Vila,urban_municipality,,2020,Not Stated,not_stated,18
+Luganville,urban_municipality,,2020,Total,total,17407
+Luganville,urban_municipality,,2020,Presbyterian,presbyterian,2810
+Luganville,urban_municipality,,2020,Seventh Day Adventist (SDA),seventh_day_adventist,3993
+Luganville,urban_municipality,,2020,Catholic,catholic,2486
+Luganville,urban_municipality,,2020,Anglican,anglican,2463
+Luganville,urban_municipality,,2020,Churches of Christ,church_of_christ,1171
+Luganville,urban_municipality,,2020,Assemblies of God (AOG),assemblies_of_god,702
+Luganville,urban_municipality,,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,490
+Luganville,urban_municipality,,2020,Customary beliefs,customary_beliefs,12
+Luganville,urban_municipality,,2020,Apostolic,apostolic,370
+Luganville,urban_municipality,,2020,Latter Day Saints (Mormon),latter_day_saints,284
+Luganville,urban_municipality,,2020,Other churches,other,2476
+Luganville,urban_municipality,,2020,No Religion/Faith,no_religion,128
+Luganville,urban_municipality,,2020,Refuse to answer,refuse_to_answer,20
+Luganville,urban_municipality,,2020,Not Stated,not_stated,1
+RURAL,urban_rural_total,,2020,Total,total,228095
+RURAL,urban_rural_total,,2020,Presbyterian,presbyterian,63006
+RURAL,urban_rural_total,,2020,Seventh Day Adventist (SDA),seventh_day_adventist,30621
+RURAL,urban_rural_total,,2020,Catholic,catholic,27135
+RURAL,urban_rural_total,,2020,Anglican,anglican,29063
+RURAL,urban_rural_total,,2020,Churches of Christ,church_of_christ,11326
+RURAL,urban_rural_total,,2020,Assemblies of God (AOG),assemblies_of_god,11131
+RURAL,urban_rural_total,,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,6985
+RURAL,urban_rural_total,,2020,Customary beliefs,customary_beliefs,9035
+RURAL,urban_rural_total,,2020,Apostolic,apostolic,5451
+RURAL,urban_rural_total,,2020,Latter Day Saints (Mormon),latter_day_saints,3873
+RURAL,urban_rural_total,,2020,Other churches,other,26917
+RURAL,urban_rural_total,,2020,No Religion/Faith,no_religion,3286
+RURAL,urban_rural_total,,2020,Refuse to answer,refuse_to_answer,253
+RURAL,urban_rural_total,,2020,Not Stated,not_stated,14
+TORBA,province,Torba,2020,Total,total,11215
+TORBA,province,Torba,2020,Presbyterian,presbyterian,51
+TORBA,province,Torba,2020,Seventh Day Adventist (SDA),seventh_day_adventist,653
+TORBA,province,Torba,2020,Catholic,catholic,53
+TORBA,province,Torba,2020,Anglican,anglican,8665
+TORBA,province,Torba,2020,Churches of Christ,church_of_christ,166
+TORBA,province,Torba,2020,Assemblies of God (AOG),assemblies_of_god,466
+TORBA,province,Torba,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,359
+TORBA,province,Torba,2020,Customary beliefs,customary_beliefs,7
+TORBA,province,Torba,2020,Apostolic,apostolic,39
+TORBA,province,Torba,2020,Latter Day Saints (Mormon),latter_day_saints,99
+TORBA,province,Torba,2020,Other churches,other,649
+TORBA,province,Torba,2020,No Religion/Faith,no_religion,4
+TORBA,province,Torba,2020,Refuse to answer,refuse_to_answer,3
+TORBA,province,Torba,2020,Not Stated,not_stated,0
+Torres,area_council,Torba,2020,Total,total,1185
+Torres,area_council,Torba,2020,Presbyterian,presbyterian,8
+Torres,area_council,Torba,2020,Seventh Day Adventist (SDA),seventh_day_adventist,29
+Torres,area_council,Torba,2020,Catholic,catholic,2
+Torres,area_council,Torba,2020,Anglican,anglican,1128
+Torres,area_council,Torba,2020,Churches of Christ,church_of_christ,6
+Torres,area_council,Torba,2020,Assemblies of God (AOG),assemblies_of_god,2
+Torres,area_council,Torba,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,0
+Torres,area_council,Torba,2020,Customary beliefs,customary_beliefs,0
+Torres,area_council,Torba,2020,Apostolic,apostolic,0
+Torres,area_council,Torba,2020,Latter Day Saints (Mormon),latter_day_saints,0
+Torres,area_council,Torba,2020,Other churches,other,7
+Torres,area_council,Torba,2020,No Religion/Faith,no_religion,3
+Torres,area_council,Torba,2020,Refuse to answer,refuse_to_answer,0
+Torres,area_council,Torba,2020,Not Stated,not_stated,0
+Ureparapara,area_council,Torba,2020,Total,total,466
+Ureparapara,area_council,Torba,2020,Presbyterian,presbyterian,1
+Ureparapara,area_council,Torba,2020,Seventh Day Adventist (SDA),seventh_day_adventist,14
+Ureparapara,area_council,Torba,2020,Catholic,catholic,1
+Ureparapara,area_council,Torba,2020,Anglican,anglican,437
+Ureparapara,area_council,Torba,2020,Churches of Christ,church_of_christ,0
+Ureparapara,area_council,Torba,2020,Assemblies of God (AOG),assemblies_of_god,3
+Ureparapara,area_council,Torba,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,7
+Ureparapara,area_council,Torba,2020,Customary beliefs,customary_beliefs,0
+Ureparapara,area_council,Torba,2020,Apostolic,apostolic,2
+Ureparapara,area_council,Torba,2020,Latter Day Saints (Mormon),latter_day_saints,0
+Ureparapara,area_council,Torba,2020,Other churches,other,1
+Ureparapara,area_council,Torba,2020,No Religion/Faith,no_religion,0
+Ureparapara,area_council,Torba,2020,Refuse to answer,refuse_to_answer,0
+Ureparapara,area_council,Torba,2020,Not Stated,not_stated,0
+Motalava,area_council,Torba,2020,Total,total,1689
+Motalava,area_council,Torba,2020,Presbyterian,presbyterian,2
+Motalava,area_council,Torba,2020,Seventh Day Adventist (SDA),seventh_day_adventist,182
+Motalava,area_council,Torba,2020,Catholic,catholic,2
+Motalava,area_council,Torba,2020,Anglican,anglican,927
+Motalava,area_council,Torba,2020,Churches of Christ,church_of_christ,7
+Motalava,area_council,Torba,2020,Assemblies of God (AOG),assemblies_of_god,148
+Motalava,area_council,Torba,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,1
+Motalava,area_council,Torba,2020,Customary beliefs,customary_beliefs,1
+Motalava,area_council,Torba,2020,Apostolic,apostolic,0
+Motalava,area_council,Torba,2020,Latter Day Saints (Mormon),latter_day_saints,2
+Motalava,area_council,Torba,2020,Other churches,other,413
+Motalava,area_council,Torba,2020,No Religion/Faith,no_religion,1
+Motalava,area_council,Torba,2020,Refuse to answer,refuse_to_answer,3
+Motalava,area_council,Torba,2020,Not Stated,not_stated,0
+Vanua Lava,area_council,Torba,2020,Total,total,3231
+Vanua Lava,area_council,Torba,2020,Presbyterian,presbyterian,26
+Vanua Lava,area_council,Torba,2020,Seventh Day Adventist (SDA),seventh_day_adventist,188
+Vanua Lava,area_council,Torba,2020,Catholic,catholic,39
+Vanua Lava,area_council,Torba,2020,Anglican,anglican,2668
+Vanua Lava,area_council,Torba,2020,Churches of Christ,church_of_christ,12
+Vanua Lava,area_council,Torba,2020,Assemblies of God (AOG),assemblies_of_god,140
+Vanua Lava,area_council,Torba,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,90
+Vanua Lava,area_council,Torba,2020,Customary beliefs,customary_beliefs,6
+Vanua Lava,area_council,Torba,2020,Apostolic,apostolic,10
+Vanua Lava,area_council,Torba,2020,Latter Day Saints (Mormon),latter_day_saints,1
+Vanua Lava,area_council,Torba,2020,Other churches,other,52
+Vanua Lava,area_council,Torba,2020,No Religion/Faith,no_religion,0
+Vanua Lava,area_council,Torba,2020,Refuse to answer,refuse_to_answer,0
+Vanua Lava,area_council,Torba,2020,Not Stated,not_stated,0
+Mota,area_council,Torba,2020,Total,total,597
+Mota,area_council,Torba,2020,Presbyterian,presbyterian,1
+Mota,area_council,Torba,2020,Seventh Day Adventist (SDA),seventh_day_adventist,3
+Mota,area_council,Torba,2020,Catholic,catholic,0
+Mota,area_council,Torba,2020,Anglican,anglican,573
+Mota,area_council,Torba,2020,Churches of Christ,church_of_christ,0
+Mota,area_council,Torba,2020,Assemblies of God (AOG),assemblies_of_god,18
+Mota,area_council,Torba,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,0
+Mota,area_council,Torba,2020,Customary beliefs,customary_beliefs,0
+Mota,area_council,Torba,2020,Apostolic,apostolic,1
+Mota,area_council,Torba,2020,Latter Day Saints (Mormon),latter_day_saints,0
+Mota,area_council,Torba,2020,Other churches,other,0
+Mota,area_council,Torba,2020,No Religion/Faith,no_religion,0
+Mota,area_council,Torba,2020,Refuse to answer,refuse_to_answer,0
+Mota,area_council,Torba,2020,Not Stated,not_stated,0
+Gaua,area_council,Torba,2020,Total,total,3400
+Gaua,area_council,Torba,2020,Presbyterian,presbyterian,14
+Gaua,area_council,Torba,2020,Seventh Day Adventist (SDA),seventh_day_adventist,238
+Gaua,area_council,Torba,2020,Catholic,catholic,9
+Gaua,area_council,Torba,2020,Anglican,anglican,2407
+Gaua,area_council,Torba,2020,Churches of Christ,church_of_christ,121
+Gaua,area_council,Torba,2020,Assemblies of God (AOG),assemblies_of_god,126
+Gaua,area_council,Torba,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,225
+Gaua,area_council,Torba,2020,Customary beliefs,customary_beliefs,0
+Gaua,area_council,Torba,2020,Apostolic,apostolic,16
+Gaua,area_council,Torba,2020,Latter Day Saints (Mormon),latter_day_saints,71
+Gaua,area_council,Torba,2020,Other churches,other,174
+Gaua,area_council,Torba,2020,No Religion/Faith,no_religion,0
+Gaua,area_council,Torba,2020,Refuse to answer,refuse_to_answer,0
+Gaua,area_council,Torba,2020,Not Stated,not_stated,0
+Merelava,area_council,Torba,2020,Total,total,647
+Merelava,area_council,Torba,2020,Presbyterian,presbyterian,0
+Merelava,area_council,Torba,2020,Seventh Day Adventist (SDA),seventh_day_adventist,0
+Merelava,area_council,Torba,2020,Catholic,catholic,0
+Merelava,area_council,Torba,2020,Anglican,anglican,525
+Merelava,area_council,Torba,2020,Churches of Christ,church_of_christ,20
+Merelava,area_council,Torba,2020,Assemblies of God (AOG),assemblies_of_god,29
+Merelava,area_council,Torba,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,36
+Merelava,area_council,Torba,2020,Customary beliefs,customary_beliefs,0
+Merelava,area_council,Torba,2020,Apostolic,apostolic,10
+Merelava,area_council,Torba,2020,Latter Day Saints (Mormon),latter_day_saints,25
+Merelava,area_council,Torba,2020,Other churches,other,2
+Merelava,area_council,Torba,2020,No Religion/Faith,no_religion,0
+Merelava,area_council,Torba,2020,Refuse to answer,refuse_to_answer,0
+Merelava,area_council,Torba,2020,Not Stated,not_stated,0
+SANMA,province,Sanma,2020,Total,total,42245
+SANMA,province,Sanma,2020,Presbyterian,presbyterian,12645
+SANMA,province,Sanma,2020,Seventh Day Adventist (SDA),seventh_day_adventist,5451
+SANMA,province,Sanma,2020,Catholic,catholic,4987
+SANMA,province,Sanma,2020,Anglican,anglican,3434
+SANMA,province,Sanma,2020,Churches of Christ,church_of_christ,2956
+SANMA,province,Sanma,2020,Assemblies of God (AOG),assemblies_of_god,1395
+SANMA,province,Sanma,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,1296
+SANMA,province,Sanma,2020,Customary beliefs,customary_beliefs,298
+SANMA,province,Sanma,2020,Apostolic,apostolic,2022
+SANMA,province,Sanma,2020,Latter Day Saints (Mormon),latter_day_saints,574
+SANMA,province,Sanma,2020,Other churches,other,6794
+SANMA,province,Sanma,2020,No Religion/Faith,no_religion,347
+SANMA,province,Sanma,2020,Refuse to answer,refuse_to_answer,44
+SANMA,province,Sanma,2020,Not Stated,not_stated,3
+North West Santo,area_council,Sanma,2020,Total,total,1589
+North West Santo,area_council,Sanma,2020,Presbyterian,presbyterian,1175
+North West Santo,area_council,Sanma,2020,Seventh Day Adventist (SDA),seventh_day_adventist,149
+North West Santo,area_council,Sanma,2020,Catholic,catholic,8
+North West Santo,area_council,Sanma,2020,Anglican,anglican,11
+North West Santo,area_council,Sanma,2020,Churches of Christ,church_of_christ,3
+North West Santo,area_council,Sanma,2020,Assemblies of God (AOG),assemblies_of_god,56
+North West Santo,area_council,Sanma,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,11
+North West Santo,area_council,Sanma,2020,Customary beliefs,customary_beliefs,0
+North West Santo,area_council,Sanma,2020,Apostolic,apostolic,1
+North West Santo,area_council,Sanma,2020,Latter Day Saints (Mormon),latter_day_saints,0
+North West Santo,area_council,Sanma,2020,Other churches,other,167
+North West Santo,area_council,Sanma,2020,No Religion/Faith,no_religion,5
+North West Santo,area_council,Sanma,2020,Refuse to answer,refuse_to_answer,1
+North West Santo,area_council,Sanma,2020,Not Stated,not_stated,0
+North Santo,area_council,Sanma,2020,Total,total,5194
+North Santo,area_council,Sanma,2020,Presbyterian,presbyterian,1179
+North Santo,area_council,Sanma,2020,Seventh Day Adventist (SDA),seventh_day_adventist,964
+North Santo,area_council,Sanma,2020,Catholic,catholic,1077
+North Santo,area_council,Sanma,2020,Anglican,anglican,934
+North Santo,area_council,Sanma,2020,Churches of Christ,church_of_christ,23
+North Santo,area_council,Sanma,2020,Assemblies of God (AOG),assemblies_of_god,200
+North Santo,area_council,Sanma,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,51
+North Santo,area_council,Sanma,2020,Customary beliefs,customary_beliefs,4
+North Santo,area_council,Sanma,2020,Apostolic,apostolic,94
+North Santo,area_council,Sanma,2020,Latter Day Saints (Mormon),latter_day_saints,1
+North Santo,area_council,Sanma,2020,Other churches,other,623
+North Santo,area_council,Sanma,2020,No Religion/Faith,no_religion,41
+North Santo,area_council,Sanma,2020,Refuse to answer,refuse_to_answer,3
+North Santo,area_council,Sanma,2020,Not Stated,not_stated,1
+West Santo,area_council,Sanma,2020,Total,total,3089
+West Santo,area_council,Sanma,2020,Presbyterian,presbyterian,1423
+West Santo,area_council,Sanma,2020,Seventh Day Adventist (SDA),seventh_day_adventist,69
+West Santo,area_council,Sanma,2020,Catholic,catholic,7
+West Santo,area_council,Sanma,2020,Anglican,anglican,129
+West Santo,area_council,Sanma,2020,Churches of Christ,church_of_christ,12
+West Santo,area_council,Sanma,2020,Assemblies of God (AOG),assemblies_of_god,3
+West Santo,area_council,Sanma,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,369
+West Santo,area_council,Sanma,2020,Customary beliefs,customary_beliefs,37
+West Santo,area_council,Sanma,2020,Apostolic,apostolic,39
+West Santo,area_council,Sanma,2020,Latter Day Saints (Mormon),latter_day_saints,0
+West Santo,area_council,Sanma,2020,Other churches,other,963
+West Santo,area_council,Sanma,2020,No Religion/Faith,no_religion,29
+West Santo,area_council,Sanma,2020,Refuse to answer,refuse_to_answer,8
+West Santo,area_council,Sanma,2020,Not Stated,not_stated,0
+South Santo,area_council,Sanma,2020,Total,total,8702
+South Santo,area_council,Sanma,2020,Presbyterian,presbyterian,3477
+South Santo,area_council,Sanma,2020,Seventh Day Adventist (SDA),seventh_day_adventist,742
+South Santo,area_council,Sanma,2020,Catholic,catholic,659
+South Santo,area_council,Sanma,2020,Anglican,anglican,54
+South Santo,area_council,Sanma,2020,Churches of Christ,church_of_christ,79
+South Santo,area_council,Sanma,2020,Assemblies of God (AOG),assemblies_of_god,78
+South Santo,area_council,Sanma,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,288
+South Santo,area_council,Sanma,2020,Customary beliefs,customary_beliefs,182
+South Santo,area_council,Sanma,2020,Apostolic,apostolic,598
+South Santo,area_council,Sanma,2020,Latter Day Saints (Mormon),latter_day_saints,51
+South Santo,area_council,Sanma,2020,Other churches,other,2399
+South Santo,area_council,Sanma,2020,No Religion/Faith,no_religion,90
+South Santo,area_council,Sanma,2020,Refuse to answer,refuse_to_answer,6
+South Santo,area_council,Sanma,2020,Not Stated,not_stated,1
+East Santo,area_council,Sanma,2020,Total,total,5788
+East Santo,area_council,Sanma,2020,Presbyterian,presbyterian,1917
+East Santo,area_council,Sanma,2020,Seventh Day Adventist (SDA),seventh_day_adventist,259
+East Santo,area_council,Sanma,2020,Catholic,catholic,1795
+East Santo,area_council,Sanma,2020,Anglican,anglican,423
+East Santo,area_council,Sanma,2020,Churches of Christ,church_of_christ,542
+East Santo,area_council,Sanma,2020,Assemblies of God (AOG),assemblies_of_god,125
+East Santo,area_council,Sanma,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,275
+East Santo,area_council,Sanma,2020,Customary beliefs,customary_beliefs,0
+East Santo,area_council,Sanma,2020,Apostolic,apostolic,90
+East Santo,area_council,Sanma,2020,Latter Day Saints (Mormon),latter_day_saints,2
+East Santo,area_council,Sanma,2020,Other churches,other,355
+East Santo,area_council,Sanma,2020,No Religion/Faith,no_religion,3
+East Santo,area_council,Sanma,2020,Refuse to answer,refuse_to_answer,0
+East Santo,area_council,Sanma,2020,Not Stated,not_stated,0
+South East Santo,area_council,Sanma,2020,Total,total,7479
+South East Santo,area_council,Sanma,2020,Presbyterian,presbyterian,1022
+South East Santo,area_council,Sanma,2020,Seventh Day Adventist (SDA),seventh_day_adventist,1268
+South East Santo,area_council,Sanma,2020,Catholic,catholic,586
+South East Santo,area_council,Sanma,2020,Anglican,anglican,1252
+South East Santo,area_council,Sanma,2020,Churches of Christ,church_of_christ,1323
+South East Santo,area_council,Sanma,2020,Assemblies of God (AOG),assemblies_of_god,201
+South East Santo,area_council,Sanma,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,116
+South East Santo,area_council,Sanma,2020,Customary beliefs,customary_beliefs,11
+South East Santo,area_council,Sanma,2020,Apostolic,apostolic,405
+South East Santo,area_council,Sanma,2020,Latter Day Saints (Mormon),latter_day_saints,292
+South East Santo,area_council,Sanma,2020,Other churches,other,965
+South East Santo,area_council,Sanma,2020,No Religion/Faith,no_religion,25
+South East Santo,area_council,Sanma,2020,Refuse to answer,refuse_to_answer,12
+South East Santo,area_council,Sanma,2020,Not Stated,not_stated,1
+Canal - Fanafo,area_council,Sanma,2020,Total,total,5731
+Canal - Fanafo,area_council,Sanma,2020,Presbyterian,presbyterian,1056
+Canal - Fanafo,area_council,Sanma,2020,Seventh Day Adventist (SDA),seventh_day_adventist,820
+Canal - Fanafo,area_council,Sanma,2020,Catholic,catholic,751
+Canal - Fanafo,area_council,Sanma,2020,Anglican,anglican,546
+Canal - Fanafo,area_council,Sanma,2020,Churches of Christ,church_of_christ,472
+Canal - Fanafo,area_council,Sanma,2020,Assemblies of God (AOG),assemblies_of_god,113
+Canal - Fanafo,area_council,Sanma,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,184
+Canal - Fanafo,area_council,Sanma,2020,Customary beliefs,customary_beliefs,62
+Canal - Fanafo,area_council,Sanma,2020,Apostolic,apostolic,503
+Canal - Fanafo,area_council,Sanma,2020,Latter Day Saints (Mormon),latter_day_saints,228
+Canal - Fanafo,area_council,Sanma,2020,Other churches,other,831
+Canal - Fanafo,area_council,Sanma,2020,No Religion/Faith,no_religion,153
+Canal - Fanafo,area_council,Sanma,2020,Refuse to answer,refuse_to_answer,11
+Canal - Fanafo,area_council,Sanma,2020,Not Stated,not_stated,0
+West Malo,area_council,Sanma,2020,Total,total,2657
+West Malo,area_council,Sanma,2020,Presbyterian,presbyterian,1201
+West Malo,area_council,Sanma,2020,Seventh Day Adventist (SDA),seventh_day_adventist,324
+West Malo,area_council,Sanma,2020,Catholic,catholic,10
+West Malo,area_council,Sanma,2020,Anglican,anglican,71
+West Malo,area_council,Sanma,2020,Churches of Christ,church_of_christ,108
+West Malo,area_council,Sanma,2020,Assemblies of God (AOG),assemblies_of_god,592
+West Malo,area_council,Sanma,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,1
+West Malo,area_council,Sanma,2020,Customary beliefs,customary_beliefs,0
+West Malo,area_council,Sanma,2020,Apostolic,apostolic,17
+West Malo,area_council,Sanma,2020,Latter Day Saints (Mormon),latter_day_saints,0
+West Malo,area_council,Sanma,2020,Other churches,other,332
+West Malo,area_council,Sanma,2020,No Religion/Faith,no_religion,0
+West Malo,area_council,Sanma,2020,Refuse to answer,refuse_to_answer,1
+West Malo,area_council,Sanma,2020,Not Stated,not_stated,0
+East Malo,area_council,Sanma,2020,Total,total,2017
+East Malo,area_council,Sanma,2020,Presbyterian,presbyterian,195
+East Malo,area_council,Sanma,2020,Seventh Day Adventist (SDA),seventh_day_adventist,856
+East Malo,area_council,Sanma,2020,Catholic,catholic,94
+East Malo,area_council,Sanma,2020,Anglican,anglican,14
+East Malo,area_council,Sanma,2020,Churches of Christ,church_of_christ,393
+East Malo,area_council,Sanma,2020,Assemblies of God (AOG),assemblies_of_god,27
+East Malo,area_council,Sanma,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,0
+East Malo,area_council,Sanma,2020,Customary beliefs,customary_beliefs,1
+East Malo,area_council,Sanma,2020,Apostolic,apostolic,276
+East Malo,area_council,Sanma,2020,Latter Day Saints (Mormon),latter_day_saints,0
+East Malo,area_council,Sanma,2020,Other churches,other,159
+East Malo,area_council,Sanma,2020,No Religion/Faith,no_religion,0
+East Malo,area_council,Sanma,2020,Refuse to answer,refuse_to_answer,1
+East Malo,area_council,Sanma,2020,Not Stated,not_stated,0
+PENAMA,province,Penama,2020,Total,total,34123
+PENAMA,province,Penama,2020,Presbyterian,presbyterian,199
+PENAMA,province,Penama,2020,Seventh Day Adventist (SDA),seventh_day_adventist,2028
+PENAMA,province,Penama,2020,Catholic,catholic,7394
+PENAMA,province,Penama,2020,Anglican,anglican,15312
+PENAMA,province,Penama,2020,Churches of Christ,church_of_christ,5506
+PENAMA,province,Penama,2020,Assemblies of God (AOG),assemblies_of_god,298
+PENAMA,province,Penama,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,419
+PENAMA,province,Penama,2020,Customary beliefs,customary_beliefs,827
+PENAMA,province,Penama,2020,Apostolic,apostolic,1038
+PENAMA,province,Penama,2020,Latter Day Saints (Mormon),latter_day_saints,110
+PENAMA,province,Penama,2020,Other churches,other,938
+PENAMA,province,Penama,2020,No Religion/Faith,no_religion,39
+PENAMA,province,Penama,2020,Refuse to answer,refuse_to_answer,12
+PENAMA,province,Penama,2020,Not Stated,not_stated,2
+West Ambae,area_council,Penama,2020,Total,total,3197
+West Ambae,area_council,Penama,2020,Presbyterian,presbyterian,5
+West Ambae,area_council,Penama,2020,Seventh Day Adventist (SDA),seventh_day_adventist,344
+West Ambae,area_council,Penama,2020,Catholic,catholic,36
+West Ambae,area_council,Penama,2020,Anglican,anglican,518
+West Ambae,area_council,Penama,2020,Churches of Christ,church_of_christ,864
+West Ambae,area_council,Penama,2020,Assemblies of God (AOG),assemblies_of_god,207
+West Ambae,area_council,Penama,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,15
+West Ambae,area_council,Penama,2020,Customary beliefs,customary_beliefs,0
+West Ambae,area_council,Penama,2020,Apostolic,apostolic,992
+West Ambae,area_council,Penama,2020,Latter Day Saints (Mormon),latter_day_saints,47
+West Ambae,area_council,Penama,2020,Other churches,other,166
+West Ambae,area_council,Penama,2020,No Religion/Faith,no_religion,0
+West Ambae,area_council,Penama,2020,Refuse to answer,refuse_to_answer,2
+West Ambae,area_council,Penama,2020,Not Stated,not_stated,0
+North Ambae,area_council,Penama,2020,Total,total,2917
+North Ambae,area_council,Penama,2020,Presbyterian,presbyterian,35
+North Ambae,area_council,Penama,2020,Seventh Day Adventist (SDA),seventh_day_adventist,479
+North Ambae,area_council,Penama,2020,Catholic,catholic,575
+North Ambae,area_council,Penama,2020,Anglican,anglican,1269
+North Ambae,area_council,Penama,2020,Churches of Christ,church_of_christ,377
+North Ambae,area_council,Penama,2020,Assemblies of God (AOG),assemblies_of_god,18
+North Ambae,area_council,Penama,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,80
+North Ambae,area_council,Penama,2020,Customary beliefs,customary_beliefs,0
+North Ambae,area_council,Penama,2020,Apostolic,apostolic,2
+North Ambae,area_council,Penama,2020,Latter Day Saints (Mormon),latter_day_saints,3
+North Ambae,area_council,Penama,2020,Other churches,other,77
+North Ambae,area_council,Penama,2020,No Religion/Faith,no_religion,0
+North Ambae,area_council,Penama,2020,Refuse to answer,refuse_to_answer,1
+North Ambae,area_council,Penama,2020,Not Stated,not_stated,0
+East Ambae,area_council,Penama,2020,Total,total,1880
+East Ambae,area_council,Penama,2020,Presbyterian,presbyterian,17
+East Ambae,area_council,Penama,2020,Seventh Day Adventist (SDA),seventh_day_adventist,110
+East Ambae,area_council,Penama,2020,Catholic,catholic,21
+East Ambae,area_council,Penama,2020,Anglican,anglican,1336
+East Ambae,area_council,Penama,2020,Churches of Christ,church_of_christ,354
+East Ambae,area_council,Penama,2020,Assemblies of God (AOG),assemblies_of_god,5
+East Ambae,area_council,Penama,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,13
+East Ambae,area_council,Penama,2020,Customary beliefs,customary_beliefs,0
+East Ambae,area_council,Penama,2020,Apostolic,apostolic,2
+East Ambae,area_council,Penama,2020,Latter Day Saints (Mormon),latter_day_saints,5
+East Ambae,area_council,Penama,2020,Other churches,other,17
+East Ambae,area_council,Penama,2020,No Religion/Faith,no_religion,0
+East Ambae,area_council,Penama,2020,Refuse to answer,refuse_to_answer,0
+East Ambae,area_council,Penama,2020,Not Stated,not_stated,0
+South Ambae,area_council,Penama,2020,Total,total,1211
+South Ambae,area_council,Penama,2020,Presbyterian,presbyterian,6
+South Ambae,area_council,Penama,2020,Seventh Day Adventist (SDA),seventh_day_adventist,368
+South Ambae,area_council,Penama,2020,Catholic,catholic,2
+South Ambae,area_council,Penama,2020,Anglican,anglican,623
+South Ambae,area_council,Penama,2020,Churches of Christ,church_of_christ,115
+South Ambae,area_council,Penama,2020,Assemblies of God (AOG),assemblies_of_god,13
+South Ambae,area_council,Penama,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,0
+South Ambae,area_council,Penama,2020,Customary beliefs,customary_beliefs,0
+South Ambae,area_council,Penama,2020,Apostolic,apostolic,19
+South Ambae,area_council,Penama,2020,Latter Day Saints (Mormon),latter_day_saints,50
+South Ambae,area_council,Penama,2020,Other churches,other,15
+South Ambae,area_council,Penama,2020,No Religion/Faith,no_religion,0
+South Ambae,area_council,Penama,2020,Refuse to answer,refuse_to_answer,0
+South Ambae,area_council,Penama,2020,Not Stated,not_stated,0
+North Maewo,area_council,Penama,2020,Total,total,2725
+North Maewo,area_council,Penama,2020,Presbyterian,presbyterian,8
+North Maewo,area_council,Penama,2020,Seventh Day Adventist (SDA),seventh_day_adventist,7
+North Maewo,area_council,Penama,2020,Catholic,catholic,7
+North Maewo,area_council,Penama,2020,Anglican,anglican,2375
+North Maewo,area_council,Penama,2020,Churches of Christ,church_of_christ,323
+North Maewo,area_council,Penama,2020,Assemblies of God (AOG),assemblies_of_god,2
+North Maewo,area_council,Penama,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,1
+North Maewo,area_council,Penama,2020,Customary beliefs,customary_beliefs,1
+North Maewo,area_council,Penama,2020,Apostolic,apostolic,0
+North Maewo,area_council,Penama,2020,Latter Day Saints (Mormon),latter_day_saints,0
+North Maewo,area_council,Penama,2020,Other churches,other,1
+North Maewo,area_council,Penama,2020,No Religion/Faith,no_religion,0
+North Maewo,area_council,Penama,2020,Refuse to answer,refuse_to_answer,0
+North Maewo,area_council,Penama,2020,Not Stated,not_stated,0
+South Maewo,area_council,Penama,2020,Total,total,1868
+South Maewo,area_council,Penama,2020,Presbyterian,presbyterian,5
+South Maewo,area_council,Penama,2020,Seventh Day Adventist (SDA),seventh_day_adventist,341
+South Maewo,area_council,Penama,2020,Catholic,catholic,12
+South Maewo,area_council,Penama,2020,Anglican,anglican,1012
+South Maewo,area_council,Penama,2020,Churches of Christ,church_of_christ,492
+South Maewo,area_council,Penama,2020,Assemblies of God (AOG),assemblies_of_god,1
+South Maewo,area_council,Penama,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,3
+South Maewo,area_council,Penama,2020,Customary beliefs,customary_beliefs,0
+South Maewo,area_council,Penama,2020,Apostolic,apostolic,1
+South Maewo,area_council,Penama,2020,Latter Day Saints (Mormon),latter_day_saints,0
+South Maewo,area_council,Penama,2020,Other churches,other,0
+South Maewo,area_council,Penama,2020,No Religion/Faith,no_religion,0
+South Maewo,area_council,Penama,2020,Refuse to answer,refuse_to_answer,0
+South Maewo,area_council,Penama,2020,Not Stated,not_stated,1
+North Pentecost,area_council,Penama,2020,Total,total,6451
+North Pentecost,area_council,Penama,2020,Presbyterian,presbyterian,22
+North Pentecost,area_council,Penama,2020,Seventh Day Adventist (SDA),seventh_day_adventist,94
+North Pentecost,area_council,Penama,2020,Catholic,catholic,354
+North Pentecost,area_council,Penama,2020,Anglican,anglican,5446
+North Pentecost,area_council,Penama,2020,Churches of Christ,church_of_christ,13
+North Pentecost,area_council,Penama,2020,Assemblies of God (AOG),assemblies_of_god,16
+North Pentecost,area_council,Penama,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,72
+North Pentecost,area_council,Penama,2020,Customary beliefs,customary_beliefs,21
+North Pentecost,area_council,Penama,2020,Apostolic,apostolic,3
+North Pentecost,area_council,Penama,2020,Latter Day Saints (Mormon),latter_day_saints,2
+North Pentecost,area_council,Penama,2020,Other churches,other,404
+North Pentecost,area_council,Penama,2020,No Religion/Faith,no_religion,3
+North Pentecost,area_council,Penama,2020,Refuse to answer,refuse_to_answer,1
+North Pentecost,area_council,Penama,2020,Not Stated,not_stated,0
+Central Pentecost 1,area_council,Penama,2020,Total,total,3405
+Central Pentecost 1,area_council,Penama,2020,Presbyterian,presbyterian,16
+Central Pentecost 1,area_council,Penama,2020,Seventh Day Adventist (SDA),seventh_day_adventist,179
+Central Pentecost 1,area_council,Penama,2020,Catholic,catholic,662
+Central Pentecost 1,area_council,Penama,2020,Anglican,anglican,1162
+Central Pentecost 1,area_council,Penama,2020,Churches of Christ,church_of_christ,1081
+Central Pentecost 1,area_council,Penama,2020,Assemblies of God (AOG),assemblies_of_god,1
+Central Pentecost 1,area_council,Penama,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,148
+Central Pentecost 1,area_council,Penama,2020,Customary beliefs,customary_beliefs,0
+Central Pentecost 1,area_council,Penama,2020,Apostolic,apostolic,13
+Central Pentecost 1,area_council,Penama,2020,Latter Day Saints (Mormon),latter_day_saints,0
+Central Pentecost 1,area_council,Penama,2020,Other churches,other,136
+Central Pentecost 1,area_council,Penama,2020,No Religion/Faith,no_religion,6
+Central Pentecost 1,area_council,Penama,2020,Refuse to answer,refuse_to_answer,0
+Central Pentecost 1,area_council,Penama,2020,Not Stated,not_stated,1
+Central Pentecost 2,area_council,Penama,2020,Total,total,4837
+Central Pentecost 2,area_council,Penama,2020,Presbyterian,presbyterian,28
+Central Pentecost 2,area_council,Penama,2020,Seventh Day Adventist (SDA),seventh_day_adventist,14
+Central Pentecost 2,area_council,Penama,2020,Catholic,catholic,3537
+Central Pentecost 2,area_council,Penama,2020,Anglican,anglican,1147
+Central Pentecost 2,area_council,Penama,2020,Churches of Christ,church_of_christ,59
+Central Pentecost 2,area_council,Penama,2020,Assemblies of God (AOG),assemblies_of_god,3
+Central Pentecost 2,area_council,Penama,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,2
+Central Pentecost 2,area_council,Penama,2020,Customary beliefs,customary_beliefs,15
+Central Pentecost 2,area_council,Penama,2020,Apostolic,apostolic,2
+Central Pentecost 2,area_council,Penama,2020,Latter Day Saints (Mormon),latter_day_saints,0
+Central Pentecost 2,area_council,Penama,2020,Other churches,other,29
+Central Pentecost 2,area_council,Penama,2020,No Religion/Faith,no_religion,0
+Central Pentecost 2,area_council,Penama,2020,Refuse to answer,refuse_to_answer,1
+Central Pentecost 2,area_council,Penama,2020,Not Stated,not_stated,0
+South Pentecost,area_council,Penama,2020,Total,total,5632
+South Pentecost,area_council,Penama,2020,Presbyterian,presbyterian,57
+South Pentecost,area_council,Penama,2020,Seventh Day Adventist (SDA),seventh_day_adventist,92
+South Pentecost,area_council,Penama,2020,Catholic,catholic,2188
+South Pentecost,area_council,Penama,2020,Anglican,anglican,423
+South Pentecost,area_council,Penama,2020,Churches of Christ,church_of_christ,1828
+South Pentecost,area_council,Penama,2020,Assemblies of God (AOG),assemblies_of_god,32
+South Pentecost,area_council,Penama,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,83
+South Pentecost,area_council,Penama,2020,Customary beliefs,customary_beliefs,790
+South Pentecost,area_council,Penama,2020,Apostolic,apostolic,4
+South Pentecost,area_council,Penama,2020,Latter Day Saints (Mormon),latter_day_saints,3
+South Pentecost,area_council,Penama,2020,Other churches,other,94
+South Pentecost,area_council,Penama,2020,No Religion/Faith,no_religion,30
+South Pentecost,area_council,Penama,2020,Refuse to answer,refuse_to_answer,7
+South Pentecost,area_council,Penama,2020,Not Stated,not_stated,0
+MALAMPA,province,Malampa,2020,Total,total,41506
+MALAMPA,province,Malampa,2020,Presbyterian,presbyterian,18220
+MALAMPA,province,Malampa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,7113
+MALAMPA,province,Malampa,2020,Catholic,catholic,7910
+MALAMPA,province,Malampa,2020,Anglican,anglican,172
+MALAMPA,province,Malampa,2020,Churches of Christ,church_of_christ,308
+MALAMPA,province,Malampa,2020,Assemblies of God (AOG),assemblies_of_god,1464
+MALAMPA,province,Malampa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,1597
+MALAMPA,province,Malampa,2020,Customary beliefs,customary_beliefs,8
+MALAMPA,province,Malampa,2020,Apostolic,apostolic,448
+MALAMPA,province,Malampa,2020,Latter Day Saints (Mormon),latter_day_saints,699
+MALAMPA,province,Malampa,2020,Other churches,other,3547
+MALAMPA,province,Malampa,2020,No Religion/Faith,no_religion,11
+MALAMPA,province,Malampa,2020,Refuse to answer,refuse_to_answer,8
+MALAMPA,province,Malampa,2020,Not Stated,not_stated,2
+North West Malekula,area_council,Malampa,2020,Total,total,5325
+North West Malekula,area_council,Malampa,2020,Presbyterian,presbyterian,945
+North West Malekula,area_council,Malampa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,1787
+North West Malekula,area_council,Malampa,2020,Catholic,catholic,981
+North West Malekula,area_council,Malampa,2020,Anglican,anglican,16
+North West Malekula,area_council,Malampa,2020,Churches of Christ,church_of_christ,61
+North West Malekula,area_council,Malampa,2020,Assemblies of God (AOG),assemblies_of_god,594
+North West Malekula,area_council,Malampa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,38
+North West Malekula,area_council,Malampa,2020,Customary beliefs,customary_beliefs,1
+North West Malekula,area_council,Malampa,2020,Apostolic,apostolic,136
+North West Malekula,area_council,Malampa,2020,Latter Day Saints (Mormon),latter_day_saints,116
+North West Malekula,area_council,Malampa,2020,Other churches,other,646
+North West Malekula,area_council,Malampa,2020,No Religion/Faith,no_religion,5
+North West Malekula,area_council,Malampa,2020,Refuse to answer,refuse_to_answer,0
+North West Malekula,area_council,Malampa,2020,Not Stated,not_stated,0
+North East Malekula,area_council,Malampa,2020,Total,total,6748
+North East Malekula,area_council,Malampa,2020,Presbyterian,presbyterian,1278
+North East Malekula,area_council,Malampa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,1276
+North East Malekula,area_council,Malampa,2020,Catholic,catholic,3120
+North East Malekula,area_council,Malampa,2020,Anglican,anglican,18
+North East Malekula,area_council,Malampa,2020,Churches of Christ,church_of_christ,108
+North East Malekula,area_council,Malampa,2020,Assemblies of God (AOG),assemblies_of_god,230
+North East Malekula,area_council,Malampa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,120
+North East Malekula,area_council,Malampa,2020,Customary beliefs,customary_beliefs,0
+North East Malekula,area_council,Malampa,2020,Apostolic,apostolic,10
+North East Malekula,area_council,Malampa,2020,Latter Day Saints (Mormon),latter_day_saints,169
+North East Malekula,area_council,Malampa,2020,Other churches,other,420
+North East Malekula,area_council,Malampa,2020,No Religion/Faith,no_religion,0
+North East Malekula,area_council,Malampa,2020,Refuse to answer,refuse_to_answer,0
+North East Malekula,area_council,Malampa,2020,Not Stated,not_stated,0
+Central Malekula,area_council,Malampa,2020,Total,total,6335
+Central Malekula,area_council,Malampa,2020,Presbyterian,presbyterian,3146
+Central Malekula,area_council,Malampa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,898
+Central Malekula,area_council,Malampa,2020,Catholic,catholic,634
+Central Malekula,area_council,Malampa,2020,Anglican,anglican,47
+Central Malekula,area_council,Malampa,2020,Churches of Christ,church_of_christ,73
+Central Malekula,area_council,Malampa,2020,Assemblies of God (AOG),assemblies_of_god,266
+Central Malekula,area_council,Malampa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,300
+Central Malekula,area_council,Malampa,2020,Customary beliefs,customary_beliefs,0
+Central Malekula,area_council,Malampa,2020,Apostolic,apostolic,67
+Central Malekula,area_council,Malampa,2020,Latter Day Saints (Mormon),latter_day_saints,296
+Central Malekula,area_council,Malampa,2020,Other churches,other,602
+Central Malekula,area_council,Malampa,2020,No Religion/Faith,no_religion,2
+Central Malekula,area_council,Malampa,2020,Refuse to answer,refuse_to_answer,5
+Central Malekula,area_council,Malampa,2020,Not Stated,not_stated,0
+South West Malekula,area_council,Malampa,2020,Total,total,3635
+South West Malekula,area_council,Malampa,2020,Presbyterian,presbyterian,2165
+South West Malekula,area_council,Malampa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,216
+South West Malekula,area_council,Malampa,2020,Catholic,catholic,228
+South West Malekula,area_council,Malampa,2020,Anglican,anglican,10
+South West Malekula,area_council,Malampa,2020,Churches of Christ,church_of_christ,35
+South West Malekula,area_council,Malampa,2020,Assemblies of God (AOG),assemblies_of_god,9
+South West Malekula,area_council,Malampa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,41
+South West Malekula,area_council,Malampa,2020,Customary beliefs,customary_beliefs,6
+South West Malekula,area_council,Malampa,2020,Apostolic,apostolic,4
+South West Malekula,area_council,Malampa,2020,Latter Day Saints (Mormon),latter_day_saints,0
+South West Malekula,area_council,Malampa,2020,Other churches,other,920
+South West Malekula,area_council,Malampa,2020,No Religion/Faith,no_religion,1
+South West Malekula,area_council,Malampa,2020,Refuse to answer,refuse_to_answer,0
+South West Malekula,area_council,Malampa,2020,Not Stated,not_stated,0
+South East Malekula,area_council,Malampa,2020,Total,total,5226
+South East Malekula,area_council,Malampa,2020,Presbyterian,presbyterian,3459
+South East Malekula,area_council,Malampa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,611
+South East Malekula,area_council,Malampa,2020,Catholic,catholic,25
+South East Malekula,area_council,Malampa,2020,Anglican,anglican,17
+South East Malekula,area_council,Malampa,2020,Churches of Christ,church_of_christ,20
+South East Malekula,area_council,Malampa,2020,Assemblies of God (AOG),assemblies_of_god,49
+South East Malekula,area_council,Malampa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,408
+South East Malekula,area_council,Malampa,2020,Customary beliefs,customary_beliefs,0
+South East Malekula,area_council,Malampa,2020,Apostolic,apostolic,12
+South East Malekula,area_council,Malampa,2020,Latter Day Saints (Mormon),latter_day_saints,101
+South East Malekula,area_council,Malampa,2020,Other churches,other,519
+South East Malekula,area_council,Malampa,2020,No Religion/Faith,no_religion,1
+South East Malekula,area_council,Malampa,2020,Refuse to answer,refuse_to_answer,2
+South East Malekula,area_council,Malampa,2020,Not Stated,not_stated,0
+South Malekula,area_council,Malampa,2020,Total,total,4472
+South Malekula,area_council,Malampa,2020,Presbyterian,presbyterian,2606
+South Malekula,area_council,Malampa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,211
+South Malekula,area_council,Malampa,2020,Catholic,catholic,1268
+South Malekula,area_council,Malampa,2020,Anglican,anglican,30
+South Malekula,area_council,Malampa,2020,Churches of Christ,church_of_christ,2
+South Malekula,area_council,Malampa,2020,Assemblies of God (AOG),assemblies_of_god,154
+South Malekula,area_council,Malampa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,56
+South Malekula,area_council,Malampa,2020,Customary beliefs,customary_beliefs,1
+South Malekula,area_council,Malampa,2020,Apostolic,apostolic,28
+South Malekula,area_council,Malampa,2020,Latter Day Saints (Mormon),latter_day_saints,14
+South Malekula,area_council,Malampa,2020,Other churches,other,99
+South Malekula,area_council,Malampa,2020,No Religion/Faith,no_religion,0
+South Malekula,area_council,Malampa,2020,Refuse to answer,refuse_to_answer,0
+South Malekula,area_council,Malampa,2020,Not Stated,not_stated,2
+North Ambrym,area_council,Malampa,2020,Total,total,3590
+North Ambrym,area_council,Malampa,2020,Presbyterian,presbyterian,1243
+North Ambrym,area_council,Malampa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,903
+North Ambrym,area_council,Malampa,2020,Catholic,catholic,808
+North Ambrym,area_council,Malampa,2020,Anglican,anglican,16
+North Ambrym,area_council,Malampa,2020,Churches of Christ,church_of_christ,2
+North Ambrym,area_council,Malampa,2020,Assemblies of God (AOG),assemblies_of_god,82
+North Ambrym,area_council,Malampa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,308
+North Ambrym,area_council,Malampa,2020,Customary beliefs,customary_beliefs,0
+North Ambrym,area_council,Malampa,2020,Apostolic,apostolic,108
+North Ambrym,area_council,Malampa,2020,Latter Day Saints (Mormon),latter_day_saints,0
+North Ambrym,area_council,Malampa,2020,Other churches,other,119
+North Ambrym,area_council,Malampa,2020,No Religion/Faith,no_religion,2
+North Ambrym,area_council,Malampa,2020,Refuse to answer,refuse_to_answer,0
+North Ambrym,area_council,Malampa,2020,Not Stated,not_stated,0
+West Ambrym,area_council,Malampa,2020,Total,total,2722
+West Ambrym,area_council,Malampa,2020,Presbyterian,presbyterian,916
+West Ambrym,area_council,Malampa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,660
+West Ambrym,area_council,Malampa,2020,Catholic,catholic,738
+West Ambrym,area_council,Malampa,2020,Anglican,anglican,7
+West Ambrym,area_council,Malampa,2020,Churches of Christ,church_of_christ,5
+West Ambrym,area_council,Malampa,2020,Assemblies of God (AOG),assemblies_of_god,16
+West Ambrym,area_council,Malampa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,175
+West Ambrym,area_council,Malampa,2020,Customary beliefs,customary_beliefs,0
+West Ambrym,area_council,Malampa,2020,Apostolic,apostolic,56
+West Ambrym,area_council,Malampa,2020,Latter Day Saints (Mormon),latter_day_saints,2
+West Ambrym,area_council,Malampa,2020,Other churches,other,147
+West Ambrym,area_council,Malampa,2020,No Religion/Faith,no_religion,0
+West Ambrym,area_council,Malampa,2020,Refuse to answer,refuse_to_answer,0
+West Ambrym,area_council,Malampa,2020,Not Stated,not_stated,0
+South East Ambrym,area_council,Malampa,2020,Total,total,1930
+South East Ambrym,area_council,Malampa,2020,Presbyterian,presbyterian,1610
+South East Ambrym,area_council,Malampa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,134
+South East Ambrym,area_council,Malampa,2020,Catholic,catholic,103
+South East Ambrym,area_council,Malampa,2020,Anglican,anglican,2
+South East Ambrym,area_council,Malampa,2020,Churches of Christ,church_of_christ,0
+South East Ambrym,area_council,Malampa,2020,Assemblies of God (AOG),assemblies_of_god,3
+South East Ambrym,area_council,Malampa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,8
+South East Ambrym,area_council,Malampa,2020,Customary beliefs,customary_beliefs,0
+South East Ambrym,area_council,Malampa,2020,Apostolic,apostolic,1
+South East Ambrym,area_council,Malampa,2020,Latter Day Saints (Mormon),latter_day_saints,0
+South East Ambrym,area_council,Malampa,2020,Other churches,other,69
+South East Ambrym,area_council,Malampa,2020,No Religion/Faith,no_religion,0
+South East Ambrym,area_council,Malampa,2020,Refuse to answer,refuse_to_answer,0
+South East Ambrym,area_council,Malampa,2020,Not Stated,not_stated,0
+Paama,area_council,Malampa,2020,Total,total,1522
+Paama,area_council,Malampa,2020,Presbyterian,presbyterian,852
+Paama,area_council,Malampa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,417
+Paama,area_council,Malampa,2020,Catholic,catholic,5
+Paama,area_council,Malampa,2020,Anglican,anglican,10
+Paama,area_council,Malampa,2020,Churches of Christ,church_of_christ,2
+Paama,area_council,Malampa,2020,Assemblies of God (AOG),assemblies_of_god,60
+Paama,area_council,Malampa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,144
+Paama,area_council,Malampa,2020,Customary beliefs,customary_beliefs,0
+Paama,area_council,Malampa,2020,Apostolic,apostolic,26
+Paama,area_council,Malampa,2020,Latter Day Saints (Mormon),latter_day_saints,1
+Paama,area_council,Malampa,2020,Other churches,other,6
+Paama,area_council,Malampa,2020,No Religion/Faith,no_religion,0
+Paama,area_council,Malampa,2020,Refuse to answer,refuse_to_answer,0
+Paama,area_council,Malampa,2020,Not Stated,not_stated,0
+SHEFA,province,Shefa,2020,Total,total,54108
+SHEFA,province,Shefa,2020,Presbyterian,presbyterian,22002
+SHEFA,province,Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,9093
+SHEFA,province,Shefa,2020,Catholic,catholic,2788
+SHEFA,province,Shefa,2020,Anglican,anglican,1390
+SHEFA,province,Shefa,2020,Churches of Christ,church_of_christ,1160
+SHEFA,province,Shefa,2020,Assemblies of God (AOG),assemblies_of_god,4131
+SHEFA,province,Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,2165
+SHEFA,province,Shefa,2020,Customary beliefs,customary_beliefs,138
+SHEFA,province,Shefa,2020,Apostolic,apostolic,959
+SHEFA,province,Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,935
+SHEFA,province,Shefa,2020,Other churches,other,8884
+SHEFA,province,Shefa,2020,No Religion/Faith,no_religion,320
+SHEFA,province,Shefa,2020,Refuse to answer,refuse_to_answer,136
+SHEFA,province,Shefa,2020,Not Stated,not_stated,6
+Vermali,area_council,Shefa,2020,Total,total,2279
+Vermali,area_council,Shefa,2020,Presbyterian,presbyterian,1623
+Vermali,area_council,Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,226
+Vermali,area_council,Shefa,2020,Catholic,catholic,6
+Vermali,area_council,Shefa,2020,Anglican,anglican,8
+Vermali,area_council,Shefa,2020,Churches of Christ,church_of_christ,8
+Vermali,area_council,Shefa,2020,Assemblies of God (AOG),assemblies_of_god,303
+Vermali,area_council,Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,1
+Vermali,area_council,Shefa,2020,Customary beliefs,customary_beliefs,1
+Vermali,area_council,Shefa,2020,Apostolic,apostolic,9
+Vermali,area_council,Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,0
+Vermali,area_council,Shefa,2020,Other churches,other,92
+Vermali,area_council,Shefa,2020,No Religion/Faith,no_religion,0
+Vermali,area_council,Shefa,2020,Refuse to answer,refuse_to_answer,1
+Vermali,area_council,Shefa,2020,Not Stated,not_stated,0
+Vermaul,area_council,Shefa,2020,Total,total,1766
+Vermaul,area_council,Shefa,2020,Presbyterian,presbyterian,970
+Vermaul,area_council,Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,256
+Vermaul,area_council,Shefa,2020,Catholic,catholic,54
+Vermaul,area_council,Shefa,2020,Anglican,anglican,3
+Vermaul,area_council,Shefa,2020,Churches of Christ,church_of_christ,4
+Vermaul,area_council,Shefa,2020,Assemblies of God (AOG),assemblies_of_god,275
+Vermaul,area_council,Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,35
+Vermaul,area_council,Shefa,2020,Customary beliefs,customary_beliefs,0
+Vermaul,area_council,Shefa,2020,Apostolic,apostolic,6
+Vermaul,area_council,Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,3
+Vermaul,area_council,Shefa,2020,Other churches,other,158
+Vermaul,area_council,Shefa,2020,No Religion/Faith,no_religion,0
+Vermaul,area_council,Shefa,2020,Refuse to answer,refuse_to_answer,2
+Vermaul,area_council,Shefa,2020,Not Stated,not_stated,0
+Varisu,area_council,Shefa,2020,Total,total,2007
+Varisu,area_council,Shefa,2020,Presbyterian,presbyterian,1224
+Varisu,area_council,Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,579
+Varisu,area_council,Shefa,2020,Catholic,catholic,8
+Varisu,area_council,Shefa,2020,Anglican,anglican,9
+Varisu,area_council,Shefa,2020,Churches of Christ,church_of_christ,0
+Varisu,area_council,Shefa,2020,Assemblies of God (AOG),assemblies_of_god,2
+Varisu,area_council,Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,0
+Varisu,area_council,Shefa,2020,Customary beliefs,customary_beliefs,0
+Varisu,area_council,Shefa,2020,Apostolic,apostolic,63
+Varisu,area_council,Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,0
+Varisu,area_council,Shefa,2020,Other churches,other,122
+Varisu,area_council,Shefa,2020,No Religion/Faith,no_religion,0
+Varisu,area_council,Shefa,2020,Refuse to answer,refuse_to_answer,0
+Varisu,area_council,Shefa,2020,Not Stated,not_stated,0
+South Epi,area_council,Shefa,2020,Total,total,1751
+South Epi,area_council,Shefa,2020,Presbyterian,presbyterian,190
+South Epi,area_council,Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,776
+South Epi,area_council,Shefa,2020,Catholic,catholic,1
+South Epi,area_council,Shefa,2020,Anglican,anglican,0
+South Epi,area_council,Shefa,2020,Churches of Christ,church_of_christ,1
+South Epi,area_council,Shefa,2020,Assemblies of God (AOG),assemblies_of_god,0
+South Epi,area_council,Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,0
+South Epi,area_council,Shefa,2020,Customary beliefs,customary_beliefs,0
+South Epi,area_council,Shefa,2020,Apostolic,apostolic,0
+South Epi,area_council,Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,0
+South Epi,area_council,Shefa,2020,Other churches,other,783
+South Epi,area_council,Shefa,2020,No Religion/Faith,no_religion,0
+South Epi,area_council,Shefa,2020,Refuse to answer,refuse_to_answer,0
+South Epi,area_council,Shefa,2020,Not Stated,not_stated,0
+North Tongoa,area_council,Shefa,2020,Total,total,1587
+North Tongoa,area_council,Shefa,2020,Presbyterian,presbyterian,892
+North Tongoa,area_council,Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,192
+North Tongoa,area_council,Shefa,2020,Catholic,catholic,50
+North Tongoa,area_council,Shefa,2020,Anglican,anglican,4
+North Tongoa,area_council,Shefa,2020,Churches of Christ,church_of_christ,0
+North Tongoa,area_council,Shefa,2020,Assemblies of God (AOG),assemblies_of_god,20
+North Tongoa,area_council,Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,17
+North Tongoa,area_council,Shefa,2020,Customary beliefs,customary_beliefs,0
+North Tongoa,area_council,Shefa,2020,Apostolic,apostolic,4
+North Tongoa,area_council,Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,1
+North Tongoa,area_council,Shefa,2020,Other churches,other,409
+North Tongoa,area_council,Shefa,2020,No Religion/Faith,no_religion,0
+North Tongoa,area_council,Shefa,2020,Refuse to answer,refuse_to_answer,0
+North Tongoa,area_council,Shefa,2020,Not Stated,not_stated,0
+Tongariki,area_council,Shefa,2020,Total,total,1022
+Tongariki,area_council,Shefa,2020,Presbyterian,presbyterian,499
+Tongariki,area_council,Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,163
+Tongariki,area_council,Shefa,2020,Catholic,catholic,3
+Tongariki,area_council,Shefa,2020,Anglican,anglican,0
+Tongariki,area_council,Shefa,2020,Churches of Christ,church_of_christ,0
+Tongariki,area_council,Shefa,2020,Assemblies of God (AOG),assemblies_of_god,0
+Tongariki,area_council,Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,1
+Tongariki,area_council,Shefa,2020,Customary beliefs,customary_beliefs,0
+Tongariki,area_council,Shefa,2020,Apostolic,apostolic,1
+Tongariki,area_council,Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,1
+Tongariki,area_council,Shefa,2020,Other churches,other,354
+Tongariki,area_council,Shefa,2020,No Religion/Faith,no_religion,0
+Tongariki,area_council,Shefa,2020,Refuse to answer,refuse_to_answer,0
+Tongariki,area_council,Shefa,2020,Not Stated,not_stated,0
+Makimae,area_council,Shefa,2020,Total,total,1091
+Makimae,area_council,Shefa,2020,Presbyterian,presbyterian,588
+Makimae,area_council,Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,132
+Makimae,area_council,Shefa,2020,Catholic,catholic,8
+Makimae,area_council,Shefa,2020,Anglican,anglican,0
+Makimae,area_council,Shefa,2020,Churches of Christ,church_of_christ,2
+Makimae,area_council,Shefa,2020,Assemblies of God (AOG),assemblies_of_god,112
+Makimae,area_council,Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,1
+Makimae,area_council,Shefa,2020,Customary beliefs,customary_beliefs,0
+Makimae,area_council,Shefa,2020,Apostolic,apostolic,0
+Makimae,area_council,Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,0
+Makimae,area_council,Shefa,2020,Other churches,other,248
+Makimae,area_council,Shefa,2020,No Religion/Faith,no_religion,0
+Makimae,area_council,Shefa,2020,Refuse to answer,refuse_to_answer,0
+Makimae,area_council,Shefa,2020,Not Stated,not_stated,0
+Nguna,area_council,Shefa,2020,Total,total,1790
+Nguna,area_council,Shefa,2020,Presbyterian,presbyterian,1188
+Nguna,area_council,Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,190
+Nguna,area_council,Shefa,2020,Catholic,catholic,12
+Nguna,area_council,Shefa,2020,Anglican,anglican,8
+Nguna,area_council,Shefa,2020,Churches of Christ,church_of_christ,11
+Nguna,area_council,Shefa,2020,Assemblies of God (AOG),assemblies_of_god,17
+Nguna,area_council,Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,137
+Nguna,area_council,Shefa,2020,Customary beliefs,customary_beliefs,1
+Nguna,area_council,Shefa,2020,Apostolic,apostolic,59
+Nguna,area_council,Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,9
+Nguna,area_council,Shefa,2020,Other churches,other,157
+Nguna,area_council,Shefa,2020,No Religion/Faith,no_religion,1
+Nguna,area_council,Shefa,2020,Refuse to answer,refuse_to_answer,0
+Nguna,area_council,Shefa,2020,Not Stated,not_stated,0
+Emau,area_council,Shefa,2020,Total,total,737
+Emau,area_council,Shefa,2020,Presbyterian,presbyterian,545
+Emau,area_council,Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,20
+Emau,area_council,Shefa,2020,Catholic,catholic,1
+Emau,area_council,Shefa,2020,Anglican,anglican,2
+Emau,area_council,Shefa,2020,Churches of Christ,church_of_christ,4
+Emau,area_council,Shefa,2020,Assemblies of God (AOG),assemblies_of_god,0
+Emau,area_council,Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,0
+Emau,area_council,Shefa,2020,Customary beliefs,customary_beliefs,0
+Emau,area_council,Shefa,2020,Apostolic,apostolic,0
+Emau,area_council,Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,4
+Emau,area_council,Shefa,2020,Other churches,other,161
+Emau,area_council,Shefa,2020,No Religion/Faith,no_religion,0
+Emau,area_council,Shefa,2020,Refuse to answer,refuse_to_answer,0
+Emau,area_council,Shefa,2020,Not Stated,not_stated,0
+Malorua,area_council,Shefa,2020,Total,total,3594
+Malorua,area_council,Shefa,2020,Presbyterian,presbyterian,1712
+Malorua,area_council,Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,478
+Malorua,area_council,Shefa,2020,Catholic,catholic,81
+Malorua,area_council,Shefa,2020,Anglican,anglican,83
+Malorua,area_council,Shefa,2020,Churches of Christ,church_of_christ,47
+Malorua,area_council,Shefa,2020,Assemblies of God (AOG),assemblies_of_god,216
+Malorua,area_council,Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,174
+Malorua,area_council,Shefa,2020,Customary beliefs,customary_beliefs,26
+Malorua,area_council,Shefa,2020,Apostolic,apostolic,88
+Malorua,area_council,Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,53
+Malorua,area_council,Shefa,2020,Other churches,other,537
+Malorua,area_council,Shefa,2020,No Religion/Faith,no_religion,88
+Malorua,area_council,Shefa,2020,Refuse to answer,refuse_to_answer,11
+Malorua,area_council,Shefa,2020,Not Stated,not_stated,0
+North Efate,area_council,Shefa,2020,Total,total,3333
+North Efate,area_council,Shefa,2020,Presbyterian,presbyterian,1551
+North Efate,area_council,Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,373
+North Efate,area_council,Shefa,2020,Catholic,catholic,24
+North Efate,area_council,Shefa,2020,Anglican,anglican,30
+North Efate,area_council,Shefa,2020,Churches of Christ,church_of_christ,20
+North Efate,area_council,Shefa,2020,Assemblies of God (AOG),assemblies_of_god,302
+North Efate,area_council,Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,301
+North Efate,area_council,Shefa,2020,Customary beliefs,customary_beliefs,0
+North Efate,area_council,Shefa,2020,Apostolic,apostolic,12
+North Efate,area_council,Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,32
+North Efate,area_council,Shefa,2020,Other churches,other,619
+North Efate,area_council,Shefa,2020,No Religion/Faith,no_religion,6
+North Efate,area_council,Shefa,2020,Refuse to answer,refuse_to_answer,58
+North Efate,area_council,Shefa,2020,Not Stated,not_stated,4
+Mele,area_council,Shefa,2020,Total,total,6439
+Mele,area_council,Shefa,2020,Presbyterian,presbyterian,3001
+Mele,area_council,Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,628
+Mele,area_council,Shefa,2020,Catholic,catholic,310
+Mele,area_council,Shefa,2020,Anglican,anglican,151
+Mele,area_council,Shefa,2020,Churches of Christ,church_of_christ,148
+Mele,area_council,Shefa,2020,Assemblies of God (AOG),assemblies_of_god,479
+Mele,area_council,Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,427
+Mele,area_council,Shefa,2020,Customary beliefs,customary_beliefs,27
+Mele,area_council,Shefa,2020,Apostolic,apostolic,56
+Mele,area_council,Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,148
+Mele,area_council,Shefa,2020,Other churches,other,1010
+Mele,area_council,Shefa,2020,No Religion/Faith,no_religion,42
+Mele,area_council,Shefa,2020,Refuse to answer,refuse_to_answer,11
+Mele,area_council,Shefa,2020,Not Stated,not_stated,0
+Ifira,area_council,Shefa,2020,Total,total,1274
+Ifira,area_council,Shefa,2020,Presbyterian,presbyterian,635
+Ifira,area_council,Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,64
+Ifira,area_council,Shefa,2020,Catholic,catholic,12
+Ifira,area_council,Shefa,2020,Anglican,anglican,2
+Ifira,area_council,Shefa,2020,Churches of Christ,church_of_christ,5
+Ifira,area_council,Shefa,2020,Assemblies of God (AOG),assemblies_of_god,268
+Ifira,area_council,Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,35
+Ifira,area_council,Shefa,2020,Customary beliefs,customary_beliefs,0
+Ifira,area_council,Shefa,2020,Apostolic,apostolic,7
+Ifira,area_council,Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,0
+Ifira,area_council,Shefa,2020,Other churches,other,220
+Ifira,area_council,Shefa,2020,No Religion/Faith,no_religion,25
+Ifira,area_council,Shefa,2020,Refuse to answer,refuse_to_answer,1
+Ifira,area_council,Shefa,2020,Not Stated,not_stated,0
+Pango,area_council,Shefa,2020,Total,total,2279
+Pango,area_council,Shefa,2020,Presbyterian,presbyterian,622
+Pango,area_council,Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,337
+Pango,area_council,Shefa,2020,Catholic,catholic,101
+Pango,area_council,Shefa,2020,Anglican,anglican,57
+Pango,area_council,Shefa,2020,Churches of Christ,church_of_christ,56
+Pango,area_council,Shefa,2020,Assemblies of God (AOG),assemblies_of_god,232
+Pango,area_council,Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,146
+Pango,area_council,Shefa,2020,Customary beliefs,customary_beliefs,1
+Pango,area_council,Shefa,2020,Apostolic,apostolic,29
+Pango,area_council,Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,64
+Pango,area_council,Shefa,2020,Other churches,other,626
+Pango,area_council,Shefa,2020,No Religion/Faith,no_religion,0
+Pango,area_council,Shefa,2020,Refuse to answer,refuse_to_answer,9
+Pango,area_council,Shefa,2020,Not Stated,not_stated,0
+Erakor,area_council,Shefa,2020,Total,total,11570
+Erakor,area_council,Shefa,2020,Presbyterian,presbyterian,3525
+Erakor,area_council,Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,2202
+Erakor,area_council,Shefa,2020,Catholic,catholic,1267
+Erakor,area_council,Shefa,2020,Anglican,anglican,457
+Erakor,area_council,Shefa,2020,Churches of Christ,church_of_christ,459
+Erakor,area_council,Shefa,2020,Assemblies of God (AOG),assemblies_of_god,723
+Erakor,area_council,Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,431
+Erakor,area_council,Shefa,2020,Customary beliefs,customary_beliefs,42
+Erakor,area_council,Shefa,2020,Apostolic,apostolic,387
+Erakor,area_council,Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,362
+Erakor,area_council,Shefa,2020,Other churches,other,1603
+Erakor,area_council,Shefa,2020,No Religion/Faith,no_religion,87
+Erakor,area_council,Shefa,2020,Refuse to answer,refuse_to_answer,25
+Erakor,area_council,Shefa,2020,Not Stated,not_stated,0
+Eratap,area_council,Shefa,2020,Total,total,7629
+Eratap,area_council,Shefa,2020,Presbyterian,presbyterian,2103
+Eratap,area_council,Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,1468
+Eratap,area_council,Shefa,2020,Catholic,catholic,740
+Eratap,area_council,Shefa,2020,Anglican,anglican,503
+Eratap,area_council,Shefa,2020,Churches of Christ,church_of_christ,240
+Eratap,area_council,Shefa,2020,Assemblies of God (AOG),assemblies_of_god,808
+Eratap,area_council,Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,234
+Eratap,area_council,Shefa,2020,Customary beliefs,customary_beliefs,39
+Eratap,area_council,Shefa,2020,Apostolic,apostolic,217
+Eratap,area_council,Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,204
+Eratap,area_council,Shefa,2020,Other churches,other,1024
+Eratap,area_council,Shefa,2020,No Religion/Faith,no_religion,40
+Eratap,area_council,Shefa,2020,Refuse to answer,refuse_to_answer,9
+Eratap,area_council,Shefa,2020,Not Stated,not_stated,1
+Eton,area_council,Shefa,2020,Total,total,3960
+Eton,area_council,Shefa,2020,Presbyterian,presbyterian,1135
+Eton,area_council,Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,1010
+Eton,area_council,Shefa,2020,Catholic,catholic,110
+Eton,area_council,Shefa,2020,Anglican,anglican,72
+Eton,area_council,Shefa,2020,Churches of Christ,church_of_christ,155
+Eton,area_council,Shefa,2020,Assemblies of God (AOG),assemblies_of_god,375
+Eton,area_council,Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,225
+Eton,area_council,Shefa,2020,Customary beliefs,customary_beliefs,1
+Eton,area_council,Shefa,2020,Apostolic,apostolic,22
+Eton,area_council,Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,54
+Eton,area_council,Shefa,2020,Other churches,other,761
+Eton,area_council,Shefa,2020,No Religion/Faith,no_religion,31
+Eton,area_council,Shefa,2020,Refuse to answer,refuse_to_answer,9
+Eton,area_council,Shefa,2020,Not Stated,not_stated,1
+TAFEA,province,Tafea,2020,Total,total,44899
+TAFEA,province,Tafea,2020,Presbyterian,presbyterian,9889
+TAFEA,province,Tafea,2020,Seventh Day Adventist (SDA),seventh_day_adventist,6282
+TAFEA,province,Tafea,2020,Catholic,catholic,4003
+TAFEA,province,Tafea,2020,Anglican,anglican,90
+TAFEA,province,Tafea,2020,Churches of Christ,church_of_christ,1230
+TAFEA,province,Tafea,2020,Assemblies of God (AOG),assemblies_of_god,3377
+TAFEA,province,Tafea,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,1149
+TAFEA,province,Tafea,2020,Customary beliefs,customary_beliefs,7757
+TAFEA,province,Tafea,2020,Apostolic,apostolic,944
+TAFEA,province,Tafea,2020,Latter Day Saints (Mormon),latter_day_saints,1457
+TAFEA,province,Tafea,2020,Other churches,other,6105
+TAFEA,province,Tafea,2020,No Religion/Faith,no_religion,2566
+TAFEA,province,Tafea,2020,Refuse to answer,refuse_to_answer,50
+TAFEA,province,Tafea,2020,Not Stated,not_stated,1
+North Erromango,area_council,Tafea,2020,Total,total,1713
+North Erromango,area_council,Tafea,2020,Presbyterian,presbyterian,553
+North Erromango,area_council,Tafea,2020,Seventh Day Adventist (SDA),seventh_day_adventist,763
+North Erromango,area_council,Tafea,2020,Catholic,catholic,15
+North Erromango,area_council,Tafea,2020,Anglican,anglican,12
+North Erromango,area_council,Tafea,2020,Churches of Christ,church_of_christ,2
+North Erromango,area_council,Tafea,2020,Assemblies of God (AOG),assemblies_of_god,48
+North Erromango,area_council,Tafea,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,69
+North Erromango,area_council,Tafea,2020,Customary beliefs,customary_beliefs,1
+North Erromango,area_council,Tafea,2020,Apostolic,apostolic,106
+North Erromango,area_council,Tafea,2020,Latter Day Saints (Mormon),latter_day_saints,0
+North Erromango,area_council,Tafea,2020,Other churches,other,143
+North Erromango,area_council,Tafea,2020,No Religion/Faith,no_religion,0
+North Erromango,area_council,Tafea,2020,Refuse to answer,refuse_to_answer,1
+North Erromango,area_council,Tafea,2020,Not Stated,not_stated,0
+South Erromango,area_council,Tafea,2020,Total,total,658
+South Erromango,area_council,Tafea,2020,Presbyterian,presbyterian,172
+South Erromango,area_council,Tafea,2020,Seventh Day Adventist (SDA),seventh_day_adventist,350
+South Erromango,area_council,Tafea,2020,Catholic,catholic,1
+South Erromango,area_council,Tafea,2020,Anglican,anglican,0
+South Erromango,area_council,Tafea,2020,Churches of Christ,church_of_christ,0
+South Erromango,area_council,Tafea,2020,Assemblies of God (AOG),assemblies_of_god,52
+South Erromango,area_council,Tafea,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,4
+South Erromango,area_council,Tafea,2020,Customary beliefs,customary_beliefs,0
+South Erromango,area_council,Tafea,2020,Apostolic,apostolic,41
+South Erromango,area_council,Tafea,2020,Latter Day Saints (Mormon),latter_day_saints,0
+South Erromango,area_council,Tafea,2020,Other churches,other,36
+South Erromango,area_council,Tafea,2020,No Religion/Faith,no_religion,1
+South Erromango,area_council,Tafea,2020,Refuse to answer,refuse_to_answer,1
+South Erromango,area_council,Tafea,2020,Not Stated,not_stated,0
+Aniwa,area_council,Tafea,2020,Total,total,465
+Aniwa,area_council,Tafea,2020,Presbyterian,presbyterian,78
+Aniwa,area_council,Tafea,2020,Seventh Day Adventist (SDA),seventh_day_adventist,19
+Aniwa,area_council,Tafea,2020,Catholic,catholic,1
+Aniwa,area_council,Tafea,2020,Anglican,anglican,0
+Aniwa,area_council,Tafea,2020,Churches of Christ,church_of_christ,0
+Aniwa,area_council,Tafea,2020,Assemblies of God (AOG),assemblies_of_god,2
+Aniwa,area_council,Tafea,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,0
+Aniwa,area_council,Tafea,2020,Customary beliefs,customary_beliefs,75
+Aniwa,area_council,Tafea,2020,Apostolic,apostolic,27
+Aniwa,area_council,Tafea,2020,Latter Day Saints (Mormon),latter_day_saints,0
+Aniwa,area_council,Tafea,2020,Other churches,other,263
+Aniwa,area_council,Tafea,2020,No Religion/Faith,no_religion,0
+Aniwa,area_council,Tafea,2020,Refuse to answer,refuse_to_answer,0
+Aniwa,area_council,Tafea,2020,Not Stated,not_stated,0
+North Tanna,area_council,Tafea,2020,Total,total,4701
+North Tanna,area_council,Tafea,2020,Presbyterian,presbyterian,1023
+North Tanna,area_council,Tafea,2020,Seventh Day Adventist (SDA),seventh_day_adventist,490
+North Tanna,area_council,Tafea,2020,Catholic,catholic,174
+North Tanna,area_council,Tafea,2020,Anglican,anglican,1
+North Tanna,area_council,Tafea,2020,Churches of Christ,church_of_christ,178
+North Tanna,area_council,Tafea,2020,Assemblies of God (AOG),assemblies_of_god,281
+North Tanna,area_council,Tafea,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,61
+North Tanna,area_council,Tafea,2020,Customary beliefs,customary_beliefs,896
+North Tanna,area_council,Tafea,2020,Apostolic,apostolic,2
+North Tanna,area_council,Tafea,2020,Latter Day Saints (Mormon),latter_day_saints,297
+North Tanna,area_council,Tafea,2020,Other churches,other,983
+North Tanna,area_council,Tafea,2020,No Religion/Faith,no_religion,311
+North Tanna,area_council,Tafea,2020,Refuse to answer,refuse_to_answer,4
+North Tanna,area_council,Tafea,2020,Not Stated,not_stated,0
+West Tanna,area_council,Tafea,2020,Total,total,12790
+West Tanna,area_council,Tafea,2020,Presbyterian,presbyterian,2696
+West Tanna,area_council,Tafea,2020,Seventh Day Adventist (SDA),seventh_day_adventist,1335
+West Tanna,area_council,Tafea,2020,Catholic,catholic,831
+West Tanna,area_council,Tafea,2020,Anglican,anglican,15
+West Tanna,area_council,Tafea,2020,Churches of Christ,church_of_christ,530
+West Tanna,area_council,Tafea,2020,Assemblies of God (AOG),assemblies_of_god,1958
+West Tanna,area_council,Tafea,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,333
+West Tanna,area_council,Tafea,2020,Customary beliefs,customary_beliefs,2142
+West Tanna,area_council,Tafea,2020,Apostolic,apostolic,173
+West Tanna,area_council,Tafea,2020,Latter Day Saints (Mormon),latter_day_saints,192
+West Tanna,area_council,Tafea,2020,Other churches,other,1920
+West Tanna,area_council,Tafea,2020,No Religion/Faith,no_religion,657
+West Tanna,area_council,Tafea,2020,Refuse to answer,refuse_to_answer,5
+West Tanna,area_council,Tafea,2020,Not Stated,not_stated,1
+Middle Bush Tanna,area_council,Tafea,2020,Total,total,6882
+Middle Bush Tanna,area_council,Tafea,2020,Presbyterian,presbyterian,1279
+Middle Bush Tanna,area_council,Tafea,2020,Seventh Day Adventist (SDA),seventh_day_adventist,800
+Middle Bush Tanna,area_council,Tafea,2020,Catholic,catholic,697
+Middle Bush Tanna,area_council,Tafea,2020,Anglican,anglican,21
+Middle Bush Tanna,area_council,Tafea,2020,Churches of Christ,church_of_christ,107
+Middle Bush Tanna,area_council,Tafea,2020,Assemblies of God (AOG),assemblies_of_god,363
+Middle Bush Tanna,area_council,Tafea,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,36
+Middle Bush Tanna,area_council,Tafea,2020,Customary beliefs,customary_beliefs,1742
+Middle Bush Tanna,area_council,Tafea,2020,Apostolic,apostolic,99
+Middle Bush Tanna,area_council,Tafea,2020,Latter Day Saints (Mormon),latter_day_saints,447
+Middle Bush Tanna,area_council,Tafea,2020,Other churches,other,1018
+Middle Bush Tanna,area_council,Tafea,2020,No Religion/Faith,no_religion,263
+Middle Bush Tanna,area_council,Tafea,2020,Refuse to answer,refuse_to_answer,10
+Middle Bush Tanna,area_council,Tafea,2020,Not Stated,not_stated,0
+South West Tanna,area_council,Tafea,2020,Total,total,6487
+South West Tanna,area_council,Tafea,2020,Presbyterian,presbyterian,562
+South West Tanna,area_council,Tafea,2020,Seventh Day Adventist (SDA),seventh_day_adventist,957
+South West Tanna,area_council,Tafea,2020,Catholic,catholic,621
+South West Tanna,area_council,Tafea,2020,Anglican,anglican,5
+South West Tanna,area_council,Tafea,2020,Churches of Christ,church_of_christ,49
+South West Tanna,area_council,Tafea,2020,Assemblies of God (AOG),assemblies_of_god,220
+South West Tanna,area_council,Tafea,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,107
+South West Tanna,area_council,Tafea,2020,Customary beliefs,customary_beliefs,1967
+South West Tanna,area_council,Tafea,2020,Apostolic,apostolic,322
+South West Tanna,area_council,Tafea,2020,Latter Day Saints (Mormon),latter_day_saints,132
+South West Tanna,area_council,Tafea,2020,Other churches,other,483
+South West Tanna,area_council,Tafea,2020,No Religion/Faith,no_religion,1051
+South West Tanna,area_council,Tafea,2020,Refuse to answer,refuse_to_answer,10
+South West Tanna,area_council,Tafea,2020,Not Stated,not_stated,0
+Whitesands,area_council,Tafea,2020,Total,total,7561
+Whitesands,area_council,Tafea,2020,Presbyterian,presbyterian,2332
+Whitesands,area_council,Tafea,2020,Seventh Day Adventist (SDA),seventh_day_adventist,701
+Whitesands,area_council,Tafea,2020,Catholic,catholic,706
+Whitesands,area_council,Tafea,2020,Anglican,anglican,23
+Whitesands,area_council,Tafea,2020,Churches of Christ,church_of_christ,360
+Whitesands,area_council,Tafea,2020,Assemblies of God (AOG),assemblies_of_god,366
+Whitesands,area_council,Tafea,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,220
+Whitesands,area_council,Tafea,2020,Customary beliefs,customary_beliefs,877
+Whitesands,area_council,Tafea,2020,Apostolic,apostolic,153
+Whitesands,area_council,Tafea,2020,Latter Day Saints (Mormon),latter_day_saints,382
+Whitesands,area_council,Tafea,2020,Other churches,other,1174
+Whitesands,area_council,Tafea,2020,No Religion/Faith,no_religion,253
+Whitesands,area_council,Tafea,2020,Refuse to answer,refuse_to_answer,14
+Whitesands,area_council,Tafea,2020,Not Stated,not_stated,0
+South Tanna,area_council,Tafea,2020,Total,total,1601
+South Tanna,area_council,Tafea,2020,Presbyterian,presbyterian,179
+South Tanna,area_council,Tafea,2020,Seventh Day Adventist (SDA),seventh_day_adventist,330
+South Tanna,area_council,Tafea,2020,Catholic,catholic,727
+South Tanna,area_council,Tafea,2020,Anglican,anglican,2
+South Tanna,area_council,Tafea,2020,Churches of Christ,church_of_christ,1
+South Tanna,area_council,Tafea,2020,Assemblies of God (AOG),assemblies_of_god,0
+South Tanna,area_council,Tafea,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,246
+South Tanna,area_council,Tafea,2020,Customary beliefs,customary_beliefs,57
+South Tanna,area_council,Tafea,2020,Apostolic,apostolic,13
+South Tanna,area_council,Tafea,2020,Latter Day Saints (Mormon),latter_day_saints,4
+South Tanna,area_council,Tafea,2020,Other churches,other,12
+South Tanna,area_council,Tafea,2020,No Religion/Faith,no_religion,29
+South Tanna,area_council,Tafea,2020,Refuse to answer,refuse_to_answer,0
+South Tanna,area_council,Tafea,2020,Not Stated,not_stated,0
+Futuna,area_council,Tafea,2020,Total,total,557
+Futuna,area_council,Tafea,2020,Presbyterian,presbyterian,374
+Futuna,area_council,Tafea,2020,Seventh Day Adventist (SDA),seventh_day_adventist,35
+Futuna,area_council,Tafea,2020,Catholic,catholic,3
+Futuna,area_council,Tafea,2020,Anglican,anglican,9
+Futuna,area_council,Tafea,2020,Churches of Christ,church_of_christ,1
+Futuna,area_council,Tafea,2020,Assemblies of God (AOG),assemblies_of_god,56
+Futuna,area_council,Tafea,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,72
+Futuna,area_council,Tafea,2020,Customary beliefs,customary_beliefs,0
+Futuna,area_council,Tafea,2020,Apostolic,apostolic,3
+Futuna,area_council,Tafea,2020,Latter Day Saints (Mormon),latter_day_saints,0
+Futuna,area_council,Tafea,2020,Other churches,other,0
+Futuna,area_council,Tafea,2020,No Religion/Faith,no_religion,0
+Futuna,area_council,Tafea,2020,Refuse to answer,refuse_to_answer,4
+Futuna,area_council,Tafea,2020,Not Stated,not_stated,0
+Aneityum,area_council,Tafea,2020,Total,total,1484
+Aneityum,area_council,Tafea,2020,Presbyterian,presbyterian,641
+Aneityum,area_council,Tafea,2020,Seventh Day Adventist (SDA),seventh_day_adventist,502
+Aneityum,area_council,Tafea,2020,Catholic,catholic,226
+Aneityum,area_council,Tafea,2020,Anglican,anglican,2
+Aneityum,area_council,Tafea,2020,Churches of Christ,church_of_christ,1
+Aneityum,area_council,Tafea,2020,Assemblies of God (AOG),assemblies_of_god,32
+Aneityum,area_council,Tafea,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,0
+Aneityum,area_council,Tafea,2020,Customary beliefs,customary_beliefs,0
+Aneityum,area_council,Tafea,2020,Apostolic,apostolic,3
+Aneityum,area_council,Tafea,2020,Latter Day Saints (Mormon),latter_day_saints,2
+Aneityum,area_council,Tafea,2020,Other churches,other,73
+Aneityum,area_council,Tafea,2020,No Religion/Faith,no_religion,0
+Aneityum,area_council,Tafea,2020,Refuse to answer,refuse_to_answer,1
+Aneityum,area_council,Tafea,2020,Not Stated,not_stated,0

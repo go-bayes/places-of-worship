@@ -1,0 +1,91 @@
+province,census_year,religion_label_source,religion_label_normalised,count,derivation
+Torba,2020,Total,total,11215,province (rural) as published
+Torba,2020,Presbyterian,presbyterian,51,province (rural) as published
+Torba,2020,Seventh Day Adventist (SDA),seventh_day_adventist,653,province (rural) as published
+Torba,2020,Catholic,catholic,53,province (rural) as published
+Torba,2020,Anglican,anglican,8665,province (rural) as published
+Torba,2020,Churches of Christ,church_of_christ,166,province (rural) as published
+Torba,2020,Assemblies of God (AOG),assemblies_of_god,466,province (rural) as published
+Torba,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,359,province (rural) as published
+Torba,2020,Customary beliefs,customary_beliefs,7,province (rural) as published
+Torba,2020,Apostolic,apostolic,39,province (rural) as published
+Torba,2020,Latter Day Saints (Mormon),latter_day_saints,99,province (rural) as published
+Torba,2020,Other churches,other,649,province (rural) as published
+Torba,2020,No Religion/Faith,no_religion,4,province (rural) as published
+Torba,2020,Refuse to answer,refuse_to_answer,3,province (rural) as published
+Torba,2020,Not Stated,not_stated,0,province (rural) as published
+Sanma,2020,Total,total,59652,province (rural) + Luganville
+Sanma,2020,Presbyterian,presbyterian,15455,province (rural) + Luganville
+Sanma,2020,Seventh Day Adventist (SDA),seventh_day_adventist,9444,province (rural) + Luganville
+Sanma,2020,Catholic,catholic,7473,province (rural) + Luganville
+Sanma,2020,Anglican,anglican,5897,province (rural) + Luganville
+Sanma,2020,Churches of Christ,church_of_christ,4127,province (rural) + Luganville
+Sanma,2020,Assemblies of God (AOG),assemblies_of_god,2097,province (rural) + Luganville
+Sanma,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,1786,province (rural) + Luganville
+Sanma,2020,Customary beliefs,customary_beliefs,310,province (rural) + Luganville
+Sanma,2020,Apostolic,apostolic,2392,province (rural) + Luganville
+Sanma,2020,Latter Day Saints (Mormon),latter_day_saints,858,province (rural) + Luganville
+Sanma,2020,Other churches,other,9270,province (rural) + Luganville
+Sanma,2020,No Religion/Faith,no_religion,475,province (rural) + Luganville
+Sanma,2020,Refuse to answer,refuse_to_answer,64,province (rural) + Luganville
+Sanma,2020,Not Stated,not_stated,4,province (rural) + Luganville
+Penama,2020,Total,total,34123,province (rural) as published
+Penama,2020,Presbyterian,presbyterian,199,province (rural) as published
+Penama,2020,Seventh Day Adventist (SDA),seventh_day_adventist,2028,province (rural) as published
+Penama,2020,Catholic,catholic,7394,province (rural) as published
+Penama,2020,Anglican,anglican,15312,province (rural) as published
+Penama,2020,Churches of Christ,church_of_christ,5506,province (rural) as published
+Penama,2020,Assemblies of God (AOG),assemblies_of_god,298,province (rural) as published
+Penama,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,419,province (rural) as published
+Penama,2020,Customary beliefs,customary_beliefs,827,province (rural) as published
+Penama,2020,Apostolic,apostolic,1038,province (rural) as published
+Penama,2020,Latter Day Saints (Mormon),latter_day_saints,110,province (rural) as published
+Penama,2020,Other churches,other,938,province (rural) as published
+Penama,2020,No Religion/Faith,no_religion,39,province (rural) as published
+Penama,2020,Refuse to answer,refuse_to_answer,12,province (rural) as published
+Penama,2020,Not Stated,not_stated,2,province (rural) as published
+Malampa,2020,Total,total,41506,province (rural) as published
+Malampa,2020,Presbyterian,presbyterian,18220,province (rural) as published
+Malampa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,7113,province (rural) as published
+Malampa,2020,Catholic,catholic,7910,province (rural) as published
+Malampa,2020,Anglican,anglican,172,province (rural) as published
+Malampa,2020,Churches of Christ,church_of_christ,308,province (rural) as published
+Malampa,2020,Assemblies of God (AOG),assemblies_of_god,1464,province (rural) as published
+Malampa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,1597,province (rural) as published
+Malampa,2020,Customary beliefs,customary_beliefs,8,province (rural) as published
+Malampa,2020,Apostolic,apostolic,448,province (rural) as published
+Malampa,2020,Latter Day Saints (Mormon),latter_day_saints,699,province (rural) as published
+Malampa,2020,Other churches,other,3547,province (rural) as published
+Malampa,2020,No Religion/Faith,no_religion,11,province (rural) as published
+Malampa,2020,Refuse to answer,refuse_to_answer,8,province (rural) as published
+Malampa,2020,Not Stated,not_stated,2,province (rural) as published
+Shefa,2020,Total,total,102569,province (rural) + Port Vila
+Shefa,2020,Presbyterian,presbyterian,36246,province (rural) + Port Vila
+Shefa,2020,Seventh Day Adventist (SDA),seventh_day_adventist,18021,province (rural) + Port Vila
+Shefa,2020,Catholic,catholic,8768,province (rural) + Port Vila
+Shefa,2020,Anglican,anglican,5203,province (rural) + Port Vila
+Shefa,2020,Churches of Christ,church_of_christ,3252,province (rural) + Port Vila
+Shefa,2020,Assemblies of God (AOG),assemblies_of_god,6747,province (rural) + Port Vila
+Shefa,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,4205,province (rural) + Port Vila
+Shefa,2020,Customary beliefs,customary_beliefs,171,province (rural) + Port Vila
+Shefa,2020,Apostolic,apostolic,2032,province (rural) + Port Vila
+Shefa,2020,Latter Day Saints (Mormon),latter_day_saints,1952,province (rural) + Port Vila
+Shefa,2020,Other churches,other,14760,province (rural) + Port Vila
+Shefa,2020,No Religion/Faith,no_religion,928,province (rural) + Port Vila
+Shefa,2020,Refuse to answer,refuse_to_answer,258,province (rural) + Port Vila
+Shefa,2020,Not Stated,not_stated,24,province (rural) + Port Vila
+Tafea,2020,Total,total,44899,province (rural) as published
+Tafea,2020,Presbyterian,presbyterian,9889,province (rural) as published
+Tafea,2020,Seventh Day Adventist (SDA),seventh_day_adventist,6282,province (rural) as published
+Tafea,2020,Catholic,catholic,4003,province (rural) as published
+Tafea,2020,Anglican,anglican,90,province (rural) as published
+Tafea,2020,Churches of Christ,church_of_christ,1230,province (rural) as published
+Tafea,2020,Assemblies of God (AOG),assemblies_of_god,3377,province (rural) as published
+Tafea,2020,Neil Thomas Ministry / Inner Life Ministry,neil_thomas_ministry,1149,province (rural) as published
+Tafea,2020,Customary beliefs,customary_beliefs,7757,province (rural) as published
+Tafea,2020,Apostolic,apostolic,944,province (rural) as published
+Tafea,2020,Latter Day Saints (Mormon),latter_day_saints,1457,province (rural) as published
+Tafea,2020,Other churches,other,6105,province (rural) as published
+Tafea,2020,No Religion/Faith,no_religion,2566,province (rural) as published
+Tafea,2020,Refuse to answer,refuse_to_answer,50,province (rural) as published
+Tafea,2020,Not Stated,not_stated,1,province (rural) as published

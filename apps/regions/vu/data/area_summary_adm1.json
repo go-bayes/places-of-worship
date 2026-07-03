@@ -1,10 +1,10 @@
 {
   "schema_version": "0.1.0",
-  "generated_at": "2026-06-13T05:19:31Z",
-  "generated_by": "scripts/build_vu_area_scaffold.R",
+  "generated_at": "2026-07-03T12:29:03Z",
+  "generated_by": "scripts/build_vu_area_summary.R",
   "country_code": "VU",
-  "data_status": "place_density_only",
-  "data_status_note": "Place-of-worship density (OSM places per sq km) is computed and live. Per-area religious-affiliation counts await a structured source: the 2020 VNSO census reports religion nationally (Presbyterian 27.2%, SDA 14.8%, Catholic 12.1%, Anglican 12.0%, others 20.3%) but the provincial tables are PDF-only. Drop counts into these rows to light up the religion metrics.",
+  "data_status": "census_religion_live",
+  "data_status_note": "Census religious affiliation is live for provinces in 2009 and 2020 (Basic Tables Volume 1, Table 3.5). The 2020 provincial values include the urban municipalities by derivation so they match the 2009 basis. National religion series back to 1989 sits in apps/regions/vu/data/source/.",
   "boundary_set": {
     "boundary_set_id": "vu-adm1-geoboundaries",
     "country_code": "VU",
@@ -40,9 +40,121 @@
       },
       "citation": "OpenStreetMap contributors, amenity=place_of_worship, Vanuatu.",
       "notes": "amenity=place_of_worship as recorded in OSM; in Vanuatu this includes some nakamals (kava meeting houses) alongside churches. Node/way/relation centroids used for point-in-polygon assignment."
+    },
+    {
+      "source_dataset_id": "vbos-2020-census-basic-tables-t3-5",
+      "name": "2020 National Population and Housing Census, Basic Tables Volume 1, Table 3.5: population in private households by religion and region",
+      "provider": "Vanuatu Bureau of Statistics (VBoS) / Pacific Community (SPC)",
+      "url": "https://www.spc.int/digitallibrary/get/2dwwa",
+      "retrieval_date": "2026-07-03",
+      "local_path": "apps/regions/vu/data/source/vu_religion_by_region_2020_basictables_t3_5.csv",
+      "licence": {
+        "name": "no explicit licence; SPC/VBoS research-use acknowledgement",
+        "url": "https://www.spc.int/digitallibrary/get/2dwwa",
+        "attribution": "Vanuatu Bureau of Statistics and the Pacific Community (SPC)"
+      },
+      "citation": "Vanuatu Bureau of Statistics (2022). 2020 National Population and Housing Census, Basic Tables Volume 1.",
+      "notes": "Extracted with scripts/extract_vu_census_religion.py; the published table is internally inconsistent by plus or minus 1-2 across rows (pattern consistent with cell perturbation), verified against the PDF text layer and identical in the VBoS Version 2 file. Counts reproduced for research with acknowledgement; formal redistribution terms unconfirmed."
+    },
+    {
+      "source_dataset_id": "vnso-2009-census-basic-tables-t3-5",
+      "name": "2009 National Population and Housing Census, Basic Tables Volume 1, Table 3.5: population by religion and region",
+      "provider": "Vanuatu National Statistics Office (VNSO)",
+      "url": "https://www.spc.int/digitallibrary/get/aazaf",
+      "retrieval_date": "2026-07-04",
+      "local_path": "apps/regions/vu/data/source/vu_religion_by_province_2009_basictables_t3_5.csv",
+      "licence": {
+        "name": "no explicit licence; SPC/VNSO research-use acknowledgement",
+        "url": "https://www.spc.int/digitallibrary/get/aazaf",
+        "attribution": "Vanuatu National Statistics Office and the Pacific Community (SPC)"
+      },
+      "citation": "Vanuatu National Statistics Office (2011). 2009 National Population and Housing Census, Basic Tables Volume 1.",
+      "notes": "All 75 geography rows sum exactly to their stated totals. 2009 provinces include the urban municipalities (Port Vila in Shefa, Luganville in Sanma)."
+    },
+    {
+      "source_dataset_id": "vu-2020-province-incl-urban-derived",
+      "name": "2020 provinces including urban municipalities (derived)",
+      "provider": "Places of Worship project derivation",
+      "url": null,
+      "retrieval_date": "2026-07-04",
+      "local_path": "apps/regions/vu/data/source/vu_religion_by_province_2020_incl_urban_DERIVED.csv",
+      "licence": {
+        "name": "derived from VBoS/SPC census tables",
+        "url": null,
+        "attribution": "Vanuatu Bureau of Statistics and the Pacific Community (SPC); derivation by the Places of Worship project"
+      },
+      "citation": "Derived: Shefa + Port Vila and Sanma + Luganville added so 2020 provinces match the 2009 provincial basis.",
+      "notes": "In the published 2020 table, province rows cover the rural population only. This derivation restores 2009-comparable provinces; shares reproduce the published Analytical Report Table 31 within 0.05 percentage points on 77 of 78 cells."
     }
   ],
-  "indicators": [],
+  "indicators": [
+    {
+      "indicator_id": "population_total",
+      "label": "Religion-response denominator",
+      "description": "People in private households with a stated religious-affiliation response in the area and census year (census total minus refusals and not-stated).",
+      "unit": "count",
+      "denominator_indicator_id": null,
+      "method": "Total from Basic Tables Volume 1 Table 3.5 minus refuse-to-answer and not-stated.",
+      "temporal_coverage": "2009, 2020",
+      "spatial_coverage": "Vanuatu provinces (2020 includes urban municipalities by derivation)",
+      "quality_notes": "The published 2020 table is internally inconsistent by plus or minus 1-2 (consistent with cell perturbation); treat small differences as noise."
+    },
+    {
+      "indicator_id": "religious_affiliation_percent",
+      "label": "Religious affiliation %",
+      "description": "Share of the stated-response denominator affiliated with any religion, including customary beliefs.",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "Stated denominator minus no-religion, over stated denominator.",
+      "temporal_coverage": "2009, 2020",
+      "spatial_coverage": "Vanuatu provinces",
+      "quality_notes": "Customary beliefs count as religious affiliation. Category boundaries changed between 2009 and 2020 (Latter Day Saints separated from Other; Not Stated added)."
+    },
+    {
+      "indicator_id": "no_religion_percent",
+      "label": "No religion %",
+      "description": "Share of the stated-response denominator reporting no religion or faith.",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "No-religion count over stated denominator.",
+      "temporal_coverage": "2009, 2020",
+      "spatial_coverage": "Vanuatu provinces",
+      "quality_notes": "2020 label is No Religion/Faith; 2009 label is No religion."
+    },
+    {
+      "indicator_id": "place_count",
+      "label": "Places of worship",
+      "description": "OpenStreetMap amenity=place_of_worship points assigned to the area.",
+      "unit": "count",
+      "denominator_indicator_id": null,
+      "method": "Point-in-polygon assignment of the current OSM snapshot.",
+      "temporal_coverage": "current snapshot, repeated across census years",
+      "spatial_coverage": "Vanuatu",
+      "quality_notes": "Includes some nakamals as tagged in OSM; not a census-year measure."
+    },
+    {
+      "indicator_id": "places_per_10000_residents",
+      "label": "Places per 10,000 residents",
+      "description": "Current place count per 10,000 stated-response residents in the census year.",
+      "unit": "rate",
+      "denominator_indicator_id": "population_total",
+      "method": "Place count over stated denominator, times 10,000.",
+      "temporal_coverage": "2009, 2020",
+      "spatial_coverage": "Vanuatu",
+      "quality_notes": "Numerator is the current OSM snapshot, not a census-year place count."
+    },
+    {
+      "indicator_id": "place_density_per_sq_km",
+      "label": "Places per km²",
+      "description": "Current place count per square kilometre of geodesic land area.",
+      "unit": "rate",
+      "denominator_indicator_id": null,
+      "method": "Place count over geodesic land area from the boundary geometry.",
+      "temporal_coverage": "current snapshot",
+      "spatial_coverage": "Vanuatu",
+      "quality_notes": "Repeated across census years."
+    }
+  ],
   "visual_layers": [],
   "rows": [
     {
@@ -53,23 +165,20 @@
       "area_code": "VU-SAM",
       "area_name": "Sanma",
       "year": 2009,
-      "population_total": null,
-      "population_total_basis": "stated religious-affiliation response (pending)",
-      "religious_affiliation_count": null,
-      "religious_affiliation_percent": null,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "population_total": 45744,
+      "population_total_basis": "total people with a stated religious-affiliation response (census total in private households minus refusals and not-stated)",
+      "religious_affiliation_count": 45259,
+      "religious_affiliation_percent": 98.94,
+      "no_religion_count": 485,
+      "no_religion_percent": 1.06,
       "place_count": 34,
-      "places_per_10000_residents": null,
+      "places_per_10000_residents": 7.43,
       "place_density_per_sq_km": 0.008,
       "land_area_sq_km": 4243.59,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship"
-      ],
-      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
+      "quality_flag": "current_place_counts_repeated_across_census_years",
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vnso-2009-census-basic-tables-t3-5"]
     },
     {
       "country_code": "VU",
@@ -79,23 +188,20 @@
       "area_code": "VU-SAM",
       "area_name": "Sanma",
       "year": 2020,
-      "population_total": null,
-      "population_total_basis": "stated religious-affiliation response (pending)",
-      "religious_affiliation_count": null,
-      "religious_affiliation_percent": null,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "population_total": 59584,
+      "population_total_basis": "total people with a stated religious-affiliation response (census total in private households minus refusals and not-stated)",
+      "religious_affiliation_count": 59109,
+      "religious_affiliation_percent": 99.2,
+      "no_religion_count": 475,
+      "no_religion_percent": 0.8,
       "place_count": 34,
-      "places_per_10000_residents": null,
+      "places_per_10000_residents": 5.71,
       "place_density_per_sq_km": 0.008,
       "land_area_sq_km": 4243.59,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship"
-      ],
-      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
+      "quality_flag": "current_place_counts_repeated_across_census_years;province_2020_includes_urban_derived",
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5", "vu-2020-province-incl-urban-derived"]
     },
     {
       "country_code": "VU",
@@ -105,23 +211,20 @@
       "area_code": "VU-TOB",
       "area_name": "Torba",
       "year": 2009,
-      "population_total": null,
-      "population_total_basis": "stated religious-affiliation response (pending)",
-      "religious_affiliation_count": null,
-      "religious_affiliation_percent": null,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "population_total": 9353,
+      "population_total_basis": "total people with a stated religious-affiliation response (census total in private households minus refusals and not-stated)",
+      "religious_affiliation_count": 9352,
+      "religious_affiliation_percent": 99.99,
+      "no_religion_count": 1,
+      "no_religion_percent": 0.01,
       "place_count": 1,
-      "places_per_10000_residents": null,
+      "places_per_10000_residents": 1.07,
       "place_density_per_sq_km": 0.0012,
       "land_area_sq_km": 857.68,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship"
-      ],
-      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
+      "quality_flag": "current_place_counts_repeated_across_census_years",
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vnso-2009-census-basic-tables-t3-5"]
     },
     {
       "country_code": "VU",
@@ -131,23 +234,20 @@
       "area_code": "VU-TOB",
       "area_name": "Torba",
       "year": 2020,
-      "population_total": null,
-      "population_total_basis": "stated religious-affiliation response (pending)",
-      "religious_affiliation_count": null,
-      "religious_affiliation_percent": null,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "population_total": 11212,
+      "population_total_basis": "total people with a stated religious-affiliation response (census total in private households minus refusals and not-stated)",
+      "religious_affiliation_count": 11208,
+      "religious_affiliation_percent": 99.96,
+      "no_religion_count": 4,
+      "no_religion_percent": 0.04,
       "place_count": 1,
-      "places_per_10000_residents": null,
+      "places_per_10000_residents": 0.89,
       "place_density_per_sq_km": 0.0012,
       "land_area_sq_km": 857.68,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship"
-      ],
-      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
+      "quality_flag": "current_place_counts_repeated_across_census_years;province_2020_includes_urban_derived",
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5", "vu-2020-province-incl-urban-derived"]
     },
     {
       "country_code": "VU",
@@ -157,23 +257,20 @@
       "area_code": "VU-PAM",
       "area_name": "Penama",
       "year": 2009,
-      "population_total": null,
-      "population_total_basis": "stated religious-affiliation response (pending)",
-      "religious_affiliation_count": null,
-      "religious_affiliation_percent": null,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "population_total": 30797,
+      "population_total_basis": "total people with a stated religious-affiliation response (census total in private households minus refusals and not-stated)",
+      "religious_affiliation_count": 30630,
+      "religious_affiliation_percent": 99.46,
+      "no_religion_count": 167,
+      "no_religion_percent": 0.54,
       "place_count": 25,
-      "places_per_10000_residents": null,
+      "places_per_10000_residents": 8.12,
       "place_density_per_sq_km": 0.0208,
       "land_area_sq_km": 1200.75,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship"
-      ],
-      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
+      "quality_flag": "current_place_counts_repeated_across_census_years",
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vnso-2009-census-basic-tables-t3-5"]
     },
     {
       "country_code": "VU",
@@ -183,23 +280,20 @@
       "area_code": "VU-PAM",
       "area_name": "Penama",
       "year": 2020,
-      "population_total": null,
-      "population_total_basis": "stated religious-affiliation response (pending)",
-      "religious_affiliation_count": null,
-      "religious_affiliation_percent": null,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "population_total": 34109,
+      "population_total_basis": "total people with a stated religious-affiliation response (census total in private households minus refusals and not-stated)",
+      "religious_affiliation_count": 34070,
+      "religious_affiliation_percent": 99.89,
+      "no_religion_count": 39,
+      "no_religion_percent": 0.11,
       "place_count": 25,
-      "places_per_10000_residents": null,
+      "places_per_10000_residents": 7.33,
       "place_density_per_sq_km": 0.0208,
       "land_area_sq_km": 1200.75,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship"
-      ],
-      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
+      "quality_flag": "current_place_counts_repeated_across_census_years;province_2020_includes_urban_derived",
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5", "vu-2020-province-incl-urban-derived"]
     },
     {
       "country_code": "VU",
@@ -209,23 +303,20 @@
       "area_code": "VU-MAP",
       "area_name": "Malampa",
       "year": 2009,
-      "population_total": null,
-      "population_total_basis": "stated religious-affiliation response (pending)",
-      "religious_affiliation_count": null,
-      "religious_affiliation_percent": null,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "population_total": 36722,
+      "population_total_basis": "total people with a stated religious-affiliation response (census total in private households minus refusals and not-stated)",
+      "religious_affiliation_count": 36685,
+      "religious_affiliation_percent": 99.9,
+      "no_religion_count": 37,
+      "no_religion_percent": 0.1,
       "place_count": 37,
-      "places_per_10000_residents": null,
+      "places_per_10000_residents": 10.08,
       "place_density_per_sq_km": 0.0132,
       "land_area_sq_km": 2799.69,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship"
-      ],
-      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
+      "quality_flag": "current_place_counts_repeated_across_census_years",
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vnso-2009-census-basic-tables-t3-5"]
     },
     {
       "country_code": "VU",
@@ -235,23 +326,20 @@
       "area_code": "VU-MAP",
       "area_name": "Malampa",
       "year": 2020,
-      "population_total": null,
-      "population_total_basis": "stated religious-affiliation response (pending)",
-      "religious_affiliation_count": null,
-      "religious_affiliation_percent": null,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "population_total": 41496,
+      "population_total_basis": "total people with a stated religious-affiliation response (census total in private households minus refusals and not-stated)",
+      "religious_affiliation_count": 41485,
+      "religious_affiliation_percent": 99.97,
+      "no_religion_count": 11,
+      "no_religion_percent": 0.03,
       "place_count": 37,
-      "places_per_10000_residents": null,
+      "places_per_10000_residents": 8.92,
       "place_density_per_sq_km": 0.0132,
       "land_area_sq_km": 2799.69,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship"
-      ],
-      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
+      "quality_flag": "current_place_counts_repeated_across_census_years;province_2020_includes_urban_derived",
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5", "vu-2020-province-incl-urban-derived"]
     },
     {
       "country_code": "VU",
@@ -261,23 +349,20 @@
       "area_code": "VU-SEE",
       "area_name": "Shefa",
       "year": 2009,
-      "population_total": null,
-      "population_total_basis": "stated religious-affiliation response (pending)",
-      "religious_affiliation_count": null,
-      "religious_affiliation_percent": null,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "population_total": 78495,
+      "population_total_basis": "total people with a stated religious-affiliation response (census total in private households minus refusals and not-stated)",
+      "religious_affiliation_count": 77569,
+      "religious_affiliation_percent": 98.82,
+      "no_religion_count": 926,
+      "no_religion_percent": 1.18,
       "place_count": 87,
-      "places_per_10000_residents": null,
+      "places_per_10000_residents": 11.08,
       "place_density_per_sq_km": 0.058,
       "land_area_sq_km": 1499.76,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship"
-      ],
-      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
+      "quality_flag": "current_place_counts_repeated_across_census_years",
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vnso-2009-census-basic-tables-t3-5"]
     },
     {
       "country_code": "VU",
@@ -287,23 +372,20 @@
       "area_code": "VU-SEE",
       "area_name": "Shefa",
       "year": 2020,
-      "population_total": null,
-      "population_total_basis": "stated religious-affiliation response (pending)",
-      "religious_affiliation_count": null,
-      "religious_affiliation_percent": null,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "population_total": 102287,
+      "population_total_basis": "total people with a stated religious-affiliation response (census total in private households minus refusals and not-stated)",
+      "religious_affiliation_count": 101359,
+      "religious_affiliation_percent": 99.09,
+      "no_religion_count": 928,
+      "no_religion_percent": 0.91,
       "place_count": 87,
-      "places_per_10000_residents": null,
+      "places_per_10000_residents": 8.51,
       "place_density_per_sq_km": 0.058,
       "land_area_sq_km": 1499.76,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship"
-      ],
-      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
+      "quality_flag": "current_place_counts_repeated_across_census_years;province_2020_includes_urban_derived",
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5", "vu-2020-province-incl-urban-derived"]
     },
     {
       "country_code": "VU",
@@ -313,23 +395,20 @@
       "area_code": "VU-TAE",
       "area_name": "Tafea",
       "year": 2009,
-      "population_total": null,
-      "population_total_basis": "stated religious-affiliation response (pending)",
-      "religious_affiliation_count": null,
-      "religious_affiliation_percent": null,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "population_total": 32428,
+      "population_total_basis": "total people with a stated religious-affiliation response (census total in private households minus refusals and not-stated)",
+      "religious_affiliation_count": 31490,
+      "religious_affiliation_percent": 97.11,
+      "no_religion_count": 938,
+      "no_religion_percent": 2.89,
       "place_count": 25,
-      "places_per_10000_residents": null,
+      "places_per_10000_residents": 7.71,
       "place_density_per_sq_km": 0.0152,
       "land_area_sq_km": 1640.08,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship"
-      ],
-      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
+      "quality_flag": "current_place_counts_repeated_across_census_years",
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vnso-2009-census-basic-tables-t3-5"]
     },
     {
       "country_code": "VU",
@@ -339,23 +418,20 @@
       "area_code": "VU-TAE",
       "area_name": "Tafea",
       "year": 2020,
-      "population_total": null,
-      "population_total_basis": "stated religious-affiliation response (pending)",
-      "religious_affiliation_count": null,
-      "religious_affiliation_percent": null,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "population_total": 44848,
+      "population_total_basis": "total people with a stated religious-affiliation response (census total in private households minus refusals and not-stated)",
+      "religious_affiliation_count": 42282,
+      "religious_affiliation_percent": 94.28,
+      "no_religion_count": 2566,
+      "no_religion_percent": 5.72,
       "place_count": 25,
-      "places_per_10000_residents": null,
+      "places_per_10000_residents": 5.57,
       "place_density_per_sq_km": 0.0152,
       "land_area_sq_km": 1640.08,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship"
-      ],
-      "quality_flag": "place_density_only;current_place_counts_repeated_across_census_years;religion_pending"
+      "quality_flag": "current_place_counts_repeated_across_census_years;province_2020_includes_urban_derived",
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5", "vu-2020-province-incl-urban-derived"]
     }
   ]
 }

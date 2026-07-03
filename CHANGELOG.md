@@ -4,6 +4,23 @@
 
 ### 2026-07-04
 
+- The Vanuatu map now carries real census religion data: provinces for
+  2009 and 2020 and area councils plus urban municipalities for 2020,
+  extracted from the census Basic Tables Volume 1 PDFs (Table 3.5) with
+  full provenance, cross-checked against the published Analytical Report
+  percentages (within 0.1pp), and built into the governed
+  `area_summary_adm1/adm2` products by `scripts/build_vu_area_summary.R`
+  with a tracked manifest. The 2020 provincial values include the urban
+  municipalities by derivation so they match the 2009 basis; 2009 stays
+  pending at area-council level because that census published islands,
+  and the Torres council is absent from the geoBoundaries ADM2 layer
+  (both documented in the product). The map now opens on religious
+  affiliation like NZ, attributes VBoS and SPC, and notes the source's
+  own ±1–2 cell perturbation. A national religion series back to 1989
+  sits alongside the source extracts; province-level 1989/1999 tables
+  exist in print only. The Basic Tables volumes carry no explicit
+  licence (the Analytical Report authorises acknowledged research use) —
+  flagged for maintainer review.
 - Began the strict-TypeScript Research Workbench (`apps/workbench/`), the
   RA ingestion app for location and attributes of historic and present
   places of faith. React + Vite with strict types per the standing stack
