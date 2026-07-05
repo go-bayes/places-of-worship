@@ -24,5 +24,6 @@ Rules for the executing agent:
 | `country-survey.md` | #3 global survey + build cards | none (template exists) |
 | `free-contribution-portal.md` | #10 open RA intake design/build | deep-history-schema (types) |
 | `fix-map-two-options.md` | #9 OSM + workbench routes on the maps | none |
+| `us-data-map.md` | first country extension (US counties, RCMS waves) | none |
 | `manifest-and-docs.md` | #1 + #4 + #8 inventory and doc architecture | best done last |
 | `guy-vu-spreadsheets.md` | #11 historical VU census ingestion | blocked on data arrival |
