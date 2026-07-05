@@ -12,6 +12,11 @@ Rules for the executing agent:
   of the playbook file rather than expanding the work.
 - Never touch `apps/regions/*/verification.html`, `review.html`, or the
   production Convex deployment.
+- **Attribution is never optional** (JB standing rule, 2026-07-04):
+  every data product carries its source attribution and licence in the
+  manifest AND on the visible surface (map attribution line, page
+  credit). A build that ships data without attribution fails acceptance
+  regardless of everything else.
 - Every playbook ends the same way: update `CHANGELOG.md` (dated entry
   under Unreleased), reconcile any doc the change makes stale
   (`AGENTS.md` Where To Look, README links), commit to `main` with an

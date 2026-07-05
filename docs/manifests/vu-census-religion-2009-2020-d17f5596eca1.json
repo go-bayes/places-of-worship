@@ -11,7 +11,9 @@
  "dataset_role": "source_extract",
  "scope": {
   "level": "country",
-  "country_codes": ["VU"],
+  "country_codes": [
+   "VU"
+  ],
   "snapshot_date": null,
   "snapshot_anchor": null,
   "pipeline_stage": "source_extraction"
@@ -43,7 +45,7 @@
    "https://www.spc.int/digitallibrary/get/aazaf"
   ],
   "retrieved_at": "2026-07-03T23:59:00Z",
-  "licence": "no explicit licence on Basic Tables volumes; 2020 Analytical Report authorises research/educational reproduction with acknowledgement of SPC and VBoS. Flagged for maintainer licence review before any redistribution beyond attributed map products.",
+  "licence": "no explicit licence on Basic Tables volumes; 2020 Analytical Report authorises research/educational reproduction with acknowledgement of SPC and VBoS. JB reviewed and signed off the attributed-use position 2026-07-04: publication as attributed map products (VBoS & SPC credited on the map and in this manifest) is approved; any redistribution beyond that returns for review.",
   "citation": "Vanuatu Bureau of Statistics (2022). 2020 National Population and Housing Census, Basic Tables Volume 1; Vanuatu National Statistics Office (2011). 2009 National Population and Housing Census, Basic Tables Volume 1."
  },
  "input_manifests": [],
