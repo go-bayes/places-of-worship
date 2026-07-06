@@ -1,193 +1,151 @@
 # Country data map: United States (US)
 
-One page per country, one consistent structure. This card is the single
-place a reader uses to learn whether a country data map is feasible,
-what it shows, and what building it requires. Update the card when
-sources are verified or the build advances; record status honestly.
+The United States map now shows a county-level institutional religion
+series from 1850 to 2020. The map does not show census
+self-identification: the United States census asks no religion question.
+The construct changes across source eras, and the page labels that
+change directly.
 
 ## Status
 
-- **Tier**: A (buildable now)
-- **Build state**: map live (county level, 1952, 1971, 1980, 1990,
-  2000, 2010, 2020)
+- **Tier**: A (live, with source caveats)
+- **Build state**: map live at county level, with NHGIS period-boundary
+  layers for 1850, 1860, 1870, 1890, and 1930, plus the existing 2020
+  county layer for 1952 to 2020
 - **Last verified**: 2026-07-06
 
 ## Religious data over time
 
 | Source | Construct | Smallest public unit | Years | Format | Access | Licence |
 | --- | --- | --- | --- | --- | --- | --- |
-| Churches and Church Membership / U.S. Religion Census (RCMS), Association of Religion Data Archives (ARDA) | congregations and adherents or members reported by religious bodies (institutional presence) | county | 1952, 1971, 1980, 1990, 2000, 2010, 2020 | Excel/SPSS/Stata/ASCII, county file per wave | open, no account or registration; files hosted on OSF behind an ARDA click-through citation notice | no formal EULA; cite ARDA and the original collectors; "as is"; no redistribution restriction on derived or aggregated products found |
-| Churches and Church Membership / U.S. Religion Census (RCMS), ARDA | same-study state totals used for validation | state | 1952, 1971, 1980, 1990, 2000, 2010, 2020 | Excel/SPSS/Stata/ASCII, state file per wave | open, same access pattern | same ARDA click-through terms |
-| Census of Religious Bodies (federal), ARDA | church-reported membership by denomination | county | 1906, 1916, 1926, 1936 | data archive files and codebooks | open, same access pattern | same ARDA click-through terms; not built because the county files fail the inclusion rule |
-| Statistics of Churches in the United States, ARDA | church statistics by denomination | county | 1890 | data archive files and codebooks | open, same access pattern | same ARDA click-through terms; not built because the county file fails the inclusion rule |
+| IPUMS NHGIS, nineteenth-century census church statistics | churches or church edifices, seating accommodation, and church property value by denomination | county | 1850, 1860, 1870, 1890 | API extract, CSV plus codebooks | registered IPUMS API key; raw extract cached under `data/raw/us_nhgis/` | raw redistribution requires permission; JB authorised attributed derived rates/counts for the research map, pending IPUMS/NHGIS confirmation |
+| IPUMS NHGIS, Census of Religious Bodies | members reported by religious bodies, with adjacent decennial population references supplied by NHGIS | county | 1906, 1916, 1926, 1936 | API extract, CSV plus codebooks | registered IPUMS API key; raw extract cached under `data/raw/us_nhgis/` | same NHGIS terms and JB licence position |
+| Churches and Church Membership / U.S. Religion Census (RCMS), Association of Religion Data Archives (ARDA) | congregations and adherents or members reported by religious bodies | county | 1952, 1971, 1980, 1990, 2000, 2010, 2020 | Excel/SPSS/Stata/ASCII, county file per wave | open, no account or registration; files hosted on OSF behind an ARDA click-through citation notice | no formal EULA found; cite ARDA and the original collectors; no redistribution restriction on derived or aggregated products found |
+| RCMS/ARDA state files and NHGIS state/nation extracts | state or national totals used for validation | state; nation where exposed | 1850 to 2020 | source-specific validation files | same access pattern as the corresponding source | same source terms |
 
-The United States census asks no religion question. The RCMS/ARDA series
-measures **congregations and adherents reported by religious bodies**:
-institutional presence claimed by participating denominations and faith
-groups. The US construct differs from the NZ/VU "religious affiliation"
-construct, which comes from a stated-response census item. Every US map
-label says "adherents" or "congregations".
+The live map uses one per-100 metric slot because the shared country-map
+runtime has fixed metric keys. The label and onboarding text name the
+construct shift: 1850-1890 shows church seating per 100 population,
+1906-1936 shows members per 100 population, and 1952-2020 shows
+adherents or members per 100 population. The NHGIS derived extracts also
+carry churches or edifices per 10,000 residents, but that optional metric
+is not exposed as a separate map control without changing the shared
+runtime.
 
-### Verification record (2026-07-06)
+### NHGIS verification record (2026-07-06)
 
-The playbook's source claims were verified by direct ARDA page lookup and
-`curl` before downloads:
+The NHGIS metadata API identified these county datasets and tables:
 
-- ARDA lists the county files as separate datasets: `CMS52CNT`,
-  `CMS71CNT`, `CMS80CNT`, `CMS90CNT`, `RCMSCY`, `RCMSCY10`, and
-  `RCMSCY20`. Each Downloads tab exposes OSF links that return HTTP 200
-  without login.
-- ARDA lists matching state validation files: `CMS52ST`, `CMS71ST`,
-  `CMS80ST`, `CMS90ST`, `RCMSST`, `RCMSST10`, and `RCMSST20`.
-- The relevant county codebooks expose joinable county identifiers and
-  same-study county population fields: `STCODE`/`CCODE` and `TOTPOP` in
-  1952; `FIPS` and `TOTPOP` in 1971, 1980, and 1990; `FIP` and
-  `POP200` in 2000; `FIPS` and `POP2010` in 2010; `FIPS` and
-  `POP2020` in 2020.
-- ARDA's Downloads page shows an in-page click-through notice with
-  JavaScript-toggled text. The notice is not a login form. It asks users
-  to cite ARDA and original collectors, use the data responsibly, accept
-  the files "as is", and note Indiana governing law. No restriction on
-  derived or aggregated products was found.
-- Census Bureau cartographic boundary file
-  (`cb_2020_us_county_5m.zip`, 1:5,000,000, 2020 vintage) downloads
-  directly from `www2.census.gov`, HTTP 200, public domain.
+| Wave | Dataset | NHGIS ID | Tables used |
+| --- | --- | --- | --- |
+| 1850 | `1850_cPAX` | `ds10` | `NT1`, `NT47`, `NT48`, `NT49`, `NT50`, `NT51`, `NT52` |
+| 1860 | `1860_cPAX` | `ds14` | `NT1`, `NT26`, `NT28`, `NT30`, `NT32`, `NT33`, `NT34` |
+| 1870 | `1870_cPAX` | `ds17` | `NT1`, `NT41`, `NT42`, `NT43`, `NT44`, `NT45`, `NT46` |
+| 1890 | `1890_cRelig` | `ds28` | `NT1`, `NT3`, `NT4`, `NT5`, `NT7`, `NT8`, `NT9`, `NT11`, `NT12` |
+| 1906 | `1906_cRelig` | `ds33` | `NT1`, `NT2`, `NT3` |
+| 1916 | `1916_cRelig` | `ds41` | `NT1`, `NT2`, `NT3` |
+| 1926 | `1926_cRelig` | `ds51` | `NT1`, `NT2`, `NT3` |
+| 1936 | `1936_cRelig` | `ds74` | `NT1`, `NT2`, `NT3` |
 
-All new raw workbooks and codebooks sit in the git-ignored cache
-`data/raw/us_rcms/`; `data/raw/us_rcms/sources.csv` records OSF URL,
-canonical ARDA URL, retrieval date, publisher, licence terms, SHA-256
-hash, and content notes.
+The NHGIS extract API returned county extract `1` and validation extract
+`2`. Raw ZIPs remain ignored in `data/raw/us_nhgis/`; `sources.csv`
+records dataset codes, table codes, shapefile codes, retrieval date,
+downloaded ZIP hashes, the IPUMS NHGIS citation, and JB's licence
+position. Raw NHGIS ZIPs are not committed.
 
 ## Boundaries
 
-- U.S. Census Bureau cartographic boundary file, counties,
-  1:5,000,000, 2020 vintage (published 2021-01-24, public domain).
-  The build filters to the 50 states plus District of Columbia (3,143 of
-  3,234 features; territories dropped, matching RCMS coverage).
-- Join key: 5-digit county Federal Information Processing Series (FIPS)
-  code (`GEOID`). The 2020 vintage boundary file predates Connecticut's
-  2022 planning-region switch; the county layout remains suitable for
-  this build.
-- The build joins every wave to the 2020 county layer through
-  `apps/regions/us/data/source/fips_crosswalk_to_2020.csv`. The
-  crosswalk is year-scoped because several historical codes either
-  disappeared or changed meaning before the 2020 boundary set.
-- Historical county rows that crosswalk onto one 2020 successor are
-  flagged `boundary_change_crosswalked`. Every pre-2010 row is also
-  flagged `wave_coverage_differs`.
-- Source rows left unmatchable after the crosswalk: 0 in every live
-  wave.
-- 2020 boundary counties without a mapped source row: 72 in 1952; 6 in
-  1971; 6 in 1980; 6 in 1990; 5 in 2000; 1 in 2010; 0 in 2020. The
-  manifest lists the FIPS values. The main recurring gaps are later
-  Alaska county-equivalents and Broomfield, Colorado; 1952 also lacks
-  Alaska and Hawaii and many Virginia independent cities.
+- The existing `county` level remains the 2020 U.S. Census Bureau county
+  layer used for 1952 to 2020.
+- NHGIS period county boundary levels were added for `county_1850`,
+  `county_1860`, `county_1870`, `county_1890`, and `county_1930`.
+  These use the NHGIS 2008 TIGER/Line+ basis and are simplified with a
+  1.5 km tolerance. File sizes range from 1.46 MB to 2.63 MB.
+- The nineteenth-century rows are not crosswalked onto 2020 counties.
+  Each wave joins by NHGIS `GISJOIN` to its period boundary. The
+  1906-1936 waves use one 1930 boundary level so users can compare the
+  Census of Religious Bodies sequence on a single period geography.
+- Every NHGIS row carries `wave_coverage_differs`. Rows from 1906, 1916,
+  1926, and 1936 also carry `period_boundary_vintage_differs`.
 
 ## Places-of-worship layer
 
-- No US-specific OpenStreetMap extraction has been built yet. The page
-  shows the existing global OSM places-overview layer, but the
-  `area_summary_county` product carries no `place_count` field.
-- A future US OSM extraction pass (`amenity=place_of_worship`
-  point-in-polygon assignment to counties) would populate
-  places-per-population and place-density metrics.
+No US-specific OpenStreetMap extraction has been built yet. The page
+shows the existing global OSM places-overview layer, but the governed
+US area-summary products do not treat OSM place counts as the historical
+county metric.
 
 ## Current visualisation
 
-Adherents per 100 population by county, ARDA Churches and Church
-Membership / U.S. Religion Census waves 1952 to 2020, on 2020 county
-boundaries. The change metric uses adjacent available waves.
+The default view remains 2020 counties and the 2020 U.S. Religion Census
+rate. Users can switch geography to the NHGIS period levels to view the
+deep-history series. The map metric is labelled "Seating, members,
+or adherents per 100 population" because the source construct changes
+across eras.
 
 ## Build recipe
 
-1. Download county workbooks and codebooks for `CMS52CNT`, `CMS71CNT`,
-   `CMS80CNT`, `CMS90CNT`, `RCMSCY`, `RCMSCY10`, and `RCMSCY20`; download
-   state validation workbooks and codebooks for `CMS52ST`, `CMS71ST`,
-   `CMS80ST`, `CMS90ST`, `RCMSST`, `RCMSST10`, and `RCMSST20`.
-2. Keep raw downloads in `data/raw/us_rcms/` and record provenance plus
-   SHA-256 hashes in `data/raw/us_rcms/sources.csv`.
-3. Boundaries: `scripts/build_us_county_boundaries.R` reads the Census
-   shapefile, filters to 50 states plus District of Columbia, simplifies,
-   and writes `apps/regions/us/data/counties_2020.geojson`.
-4. Extraction and governed product:
-   `scripts/build_us_area_summary.R` reads all seven county workbooks,
-   applies `fips_crosswalk_to_2020.csv`, writes per-wave extracts under
-   `apps/regions/us/data/source/`, and writes
-   `apps/regions/us/data/area_summary_county.{json,csv}`.
-5. Manifest: `docs/manifests/us-rcms-county-1952-2020.json` records
-   product hashes, source attribution, per-wave join coverage,
-   state-file validation, skipped federal waves, and all unmapped 2020
-   boundary FIPS values.
-6. Region page: `apps/regions/us/index.html` sets US-specific labels,
-   notes that historical coverage differs by wave, and hides no-religion
-   and place-density metrics until those constructs exist for the US
-   map.
+1. Use the IPUMS API key in `data/raw/us_nhgis/.ipums.env` only as the
+   Authorization header. Do not print, copy, commit, or archive the key.
+2. Submit `data/raw/us_nhgis/nhgis_deep_past_extract_request.json` to
+   the NHGIS extract API for county tables plus period county
+   shapefiles. Submit
+   `data/raw/us_nhgis/nhgis_deep_past_validation_extract_request.json`
+   for state and nation validation tables.
+3. Keep raw ZIPs and unpacked source files in `data/raw/us_nhgis/`.
+   Record provenance and ZIP hashes in `data/raw/us_nhgis/sources.csv`.
+4. Run `Rscript scripts/build_us_nhgis_deep_past.R` to write derived
+   extracts, simplified boundaries, area-summary JSON/CSV files, and
+   `docs/manifests/us-nhgis-county-1850-1936.json`.
+5. The existing RCMS build remains
+   `Rscript scripts/build_us_area_summary.R`.
 
 ## Validation
 
-County sums were compared with the matching ARDA state file for each
-wave before any county-to-2020 crosswalk:
+NHGIS county sums were compared with NHGIS state totals for every wave.
+The nineteenth-century waves were also compared with NHGIS national
+totals, because those datasets expose the nation geography through the
+API. The API does not expose nation geography for the 1906-1936
+religious-body datasets.
 
-| Wave | Source county rows | Complete source rows | Mapped 2020 counties | Join coverage | State-file validation |
-| --- | ---: | ---: | ---: | ---: | --- |
-| 1952 | 3,075 | 3,075 | 3,071 | 3,071/3,143 | exact across 49 matched states; congregations 182,856, adherents/members 74,125,462, population 150,635,574 |
-| 1971 | 3,141 | 3,092 | 3,137 | 3,137/3,143 | mismatch across 50 matched states; county sums are lower by 5,530 congregations, 1,833,392 adherents, and 98,351 population; the state file omits District of Columbia |
-| 1980 | 3,141 | 3,099 | 3,137 | 3,137/3,143 | congregations and adherents match across 50 matched states; county population is lower by 13,997; the state file omits District of Columbia |
-| 1990 | 3,141 | 3,104 | 3,137 | 3,137/3,143 | congregations and adherents match across 50 matched states; county population is lower by 10; the state file omits District of Columbia |
-| 2000 | 3,142 | 3,140 | 3,138 | 3,138/3,143 | exact across 51 matched states; congregations 268,254, adherents 141,371,963, population 281,421,839 |
-| 2010 | 3,149 | 3,143 | 3,142 | 3,142/3,143 | exact across 51 matched states; congregations 344,894, adherents 150,596,792, population 308,745,538 |
-| 2020 | 3,143 | 3,143 | 3,143 | 3,143/3,143 | population matches exactly across 51 matched states; county sums are lower by 644 congregations and 214,571 adherents than the state file |
+| Wave | Source rows | Mapped rows | Join coverage | Validation result |
+| --- | ---: | ---: | ---: | --- |
+| 1850 | 1,634 | 1,626 | 1,626/1,632 | state and nation mismatch: county sums differ by 1 church, 1,000 seats, and $2,998 property value; population matches |
+| 1860 | 2,102 | 2,097 | 2,097/2,126 | state and nation mismatch: county sums differ by 41,134 population, 105 seats, and $1,447 property value; churches match |
+| 1870 | 2,316 | 2,310 | 2,310/2,334 | state and nation mismatch: county sums are lower by 10 organisations, 9 edifices, 5,875 sittings, and $67,502 property value; population matches |
+| 1890 | 2,798 | 2,784 | 2,784/2,799 | state and nation mismatch: county sums differ by 13,072 population and are lower by 168 organisations, 152 edifices, 30,850 seats, $89,187 property value, and 10,450 members |
+| 1906 | 2,952 | 2,902 | 2,902/3,110 | state mismatch: county sums are lower by 57,835 population and 488,667 members |
+| 1916 | 3,036 | 3,005 | 3,005/3,110 | state mismatch: county sums are lower by 190,946 population and 54,424 members |
+| 1926 | 3,100 | 3,100 | 3,100/3,110 | state mismatch: members are lower by 56,742; population matches |
+| 1936 | 3,098 | 3,098 | 3,098/3,110 | matched states exact; state file coverage differs from the 1930 boundary set |
 
-The 2020 state-file mismatch is a source discrepancy between ARDA's
-county and state workbooks: population matches exactly, while
-congregations and adherents do not. The build uses the county file for
-county rows and records the state-file comparison in the manifest.
+`docs/manifests/us-nhgis-county-1850-1936.json` records the full warning
+set, missing boundary/source `GISJOIN` values, validation files, product
+hashes, and the raw-archive status.
 
 ## Coverage caveats
 
-- The 1952 county file covers the continental United States plus
-  District of Columbia. Alaska and Hawaii are absent. The file includes
-  only a limited Black-denomination estimate; 1952 supports only limited
-  comparison with later Black-denomination coverage.
-- The 1971 study includes 53 denominations and ARDA states that these
-  represented an estimated 81 percent of church membership in the United
-  States. The wave does not systematically cover historically Black
-  denominations.
-- The 1980 study includes 111 participating bodies. Four Black
-  denominations participated; several other large Black churches and
-  smaller Black denominations did not.
-- The 1990 study includes 133 participating bodies. Three predominantly
-  Black denominations participated; other Black denominations remained
-  undercovered.
-- The 2000 study includes 149 groups. ARDA states that all historically
-  African-American denominations were absent from this wave.
-- The 2010 and 2020 waves are broader U.S. Religion Census products with
-  stronger efforts to include underrepresented groups. Participation and
-  definitions still differ across waves; wave-to-wave change is an
-  indicative institutional measure.
-- Reported adherents can exceed resident population because adherents may
-  be counted in a congregation's county rather than a home county, and
-  because membership/adherent definitions differ by body.
+- NHGIS source coverage, denominator years, and religious-body
+  definitions differ across waves. Treat adjacent-wave changes as
+  descriptive institutional changes. They do not measure stable
+  affiliation change.
+- The 1906 denominator is the 1910 county population supplied by NHGIS.
+  The 1916, 1926, and 1936 denominators are the 1920, 1930, and 1940
+  county populations supplied by NHGIS.
+- The 1952 file covers the continental United States plus District of
+  Columbia. Alaska and Hawaii are absent. The file includes only a
+  limited Black-denomination estimate.
+- The 1971 study includes 53 denominations and does not systematically
+  cover historically Black denominations.
+- The 1980 and 1990 studies include partial Black-denomination coverage.
+  The 2000 wave excludes historically African-American denominations.
+- The 2010 and 2020 U.S. Religion Census waves are broader products, but
+  participation and definitions still differ across religious bodies.
 
-## Deep-history potential
+## Remaining work
 
-ARDA has federal Census of Religious Bodies county files for 1906, 1916,
-1926, and 1936 (`1906CENSCT`, `1916CENSCT`, `1926CENSCT`,
-`1936CENSCT`). The files are available and county-level, and the later
-codebooks expose state/county identifiers such as `FIPST` and `FIPCNT`.
-The 1906-1936 federal county files fail the Phase 2 inclusion rule
-because the county codebooks do not expose a same-study county
-population field. The 1906 file also has an apparent total Protestant
-field. That field is Protestant-only.
-
-ARDA also has an 1890 county file (`1890CENSCT`) and state file
-(`1890CENSST`). The 1890 county file exists, but it lacks a same-study
-county population field and has weaker join identifiers than the later
-FIPS-coded files. The 1890 county file remains a deep-history lead for a
-later boundary-specific build.
-
-The remaining historical work is period-boundary reconstruction. A
-period-boundary product would place each wave on its own county
-geography, then model comparability across periods. The present build
-deliberately avoids that step and maps only rows that can be joined or
-crosswalked to 2020 counties.
+The raw NHGIS ZIPs still need private archival upload to
+`gs://places-of-worship-private-sync/raw_sources/us_nhgis/`. JB also
+needs to ask IPUMS/NHGIS whether attributed derived county rates on a
+research map are within their licence or require permission. Record the
+answer in the manifest when it arrives.

@@ -1,0 +1,2614 @@
+{
+  "schema_version": "us-nhgis-county-manifest.v1",
+  "manifest_id": "manifest:us-nhgis-county:us:1850-1936:9d050b2b794f",
+  "dataset_id": "us-nhgis-county:us:1850-1936:public",
+  "dataset_version_id": "us-nhgis-county:us:1850-1936:public:9d050b2b794f",
+  "manifest_sha256": null,
+  "dataset_family": "us-nhgis-county",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "US"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-06T11:50:49Z",
+  "created_by": "scripts/build_us_nhgis_deep_past.R",
+  "pipeline": {
+    "script": "scripts/build_us_nhgis_deep_past.R",
+    "git_commit": null,
+    "command": "Rscript scripts/build_us_nhgis_deep_past.R",
+    "parameters": {
+      "waves": ["1850", "1860", "1870", "1890", "1906", "1916", "1926", "1936"],
+      "boundary_sets": ["county_1850", "county_1860", "county_1870", "county_1890", "county_1930"],
+      "shapefile_basis": "2008 TIGER/Line+"
+    },
+    "software_versions": {
+      "r": "4.6.1",
+      "sf": "1.1.1"
+    }
+  },
+  "source": {
+    "provider": "IPUMS NHGIS, University of Minnesota",
+    "source_dataset_ids": ["nhgis-ds10-1850-county", "nhgis-ds14-1860-county", "nhgis-ds17-1870-county", "nhgis-ds28-1890-county", "nhgis-ds33-1906-county", "nhgis-ds41-1916-county", "nhgis-ds51-1926-county", "nhgis-ds74-1936-county", "nhgis-shapefile-us-county-1850-tl2008", "nhgis-shapefile-us-county-1860-tl2008", "nhgis-shapefile-us-county-1870-tl2008", "nhgis-shapefile-us-county-1890-tl2008", "nhgis-shapefile-us-county-1930-tl2008"],
+    "source_urls": ["https://api.ipums.org/metadata/nhgis/datasets/1850_cPAX?version=2", "https://api.ipums.org/metadata/nhgis/datasets/1860_cPAX?version=2", "https://api.ipums.org/metadata/nhgis/datasets/1870_cPAX?version=2", "https://api.ipums.org/metadata/nhgis/datasets/1890_cRelig?version=2", "https://api.ipums.org/metadata/nhgis/datasets/1906_cRelig?version=2", "https://api.ipums.org/metadata/nhgis/datasets/1916_cRelig?version=2", "https://api.ipums.org/metadata/nhgis/datasets/1926_cRelig?version=2", "https://api.ipums.org/metadata/nhgis/datasets/1936_cRelig?version=2", "https://api.ipums.org/metadata/nhgis/shapefiles?version=2"],
+    "retrieved_at": "2026-07-06T00:00:00Z",
+    "citation": "Jonathan Schroeder, David Van Riper, Steven Manson, Grace Cooper, Zachary Krause, Tracy Kugler, Tsu Zhu, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 21.0 [dataset]. Minneapolis, MN: IPUMS. 2026. http://doi.org/10.18128/D050.V21.0",
+    "short_citation": "IPUMS NHGIS, University of Minnesota, www.nhgis.org.",
+    "licence_position": "publish the derived rates with citation and a pointer to the original NHGIS data, now; he judges the risk acceptable for a research website and takes responsibility for it.",
+    "licence_position_verbatim_from_playbook": "publish the derived rates with citation and a pointer to the original NHGIS data, now; he judges the risk acceptable for a research website and takes responsibility for it.",
+    "licence_todo": "JB will write to IPUMS/NHGIS asking whether attributed derived county rates on a research map are within their licence or need permission; record their answer here when it arrives.",
+    "raw_redistribution": "Raw NHGIS extract ZIPs are not committed or redistributed. They remain in data/raw/us_nhgis/ and await upload to the private raw archive."
+  },
+  "durable_files": {
+    "1": {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1850.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 1568554,
+      "sha256": "9d050b2b794f493665c7da15668dd1e7c38201bda6500c5abd4c7851fcb1c36c",
+      "row_count": 1626,
+      "content": "US NHGIS area summary for county_1850.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "2": {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1850.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 576737,
+      "sha256": "288a55649c86cfe0ad807eebdff15089dc4383b8d0d7acd7779f0846e4d12b87",
+      "row_count": 1626,
+      "content": "Flattened US NHGIS area summary for county_1850.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "3": {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1860.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 1994112,
+      "sha256": "a09ae6986d6309ed23f25f1c0b1704a90b2de9713ba4f45a656d0be499adc26f",
+      "row_count": 2097,
+      "content": "US NHGIS area summary for county_1860.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "4": {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1860.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 710648,
+      "sha256": "43e28d3b315e200c1ce0ce3daccb3014a2a41ff5cc4c0a058029c2b8f0b6ce24",
+      "row_count": 2097,
+      "content": "Flattened US NHGIS area summary for county_1860.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "5": {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1870.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 2221494,
+      "sha256": "3e5473bc5fb1baba35d8fad050278d1b93246bb4c638eba2ed765ba232b7f8f8",
+      "row_count": 2310,
+      "content": "US NHGIS area summary for county_1870.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "6": {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1870.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 809821,
+      "sha256": "a2a53103cb827acde5f094dcf63cb7326bb0139f6df9cb013ffc847ed33c174b",
+      "row_count": 2310,
+      "content": "Flattened US NHGIS area summary for county_1870.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "7": {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1890.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 2674078,
+      "sha256": "c0311c30cc7c40bc9ddee946fedc7423cb4dd26a8af9ae6c78af0a0d1d45309e",
+      "row_count": 2784,
+      "content": "US NHGIS area summary for county_1890.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "8": {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1890.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 975075,
+      "sha256": "e99bfae855f3147add580f5580e800b3f796bbecd1bbefd77e8196785c96efe0",
+      "row_count": 2784,
+      "content": "Flattened US NHGIS area summary for county_1890.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "9": {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1930.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 11945933,
+      "sha256": "0531e4851f0a4345ca541575131c2346cc8c5050522563ee07c495de29303954",
+      "row_count": 12105,
+      "content": "US NHGIS area summary for county_1930.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "10": {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1930.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 4427543,
+      "sha256": "4b53958521923a152f8ddf4e68fcbf1b2d37742f9dc1c707c24498092537945e",
+      "row_count": 12105,
+      "content": "Flattened US NHGIS area summary for county_1930.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "1850": {
+      "uri": "repo:apps/regions/us/data/counties_1850.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 1456083,
+      "sha256": "9a779edc08974105f190fa06f214cf0df94876e3a705271213fb3838e3eeb87b",
+      "row_count": 1632,
+      "content": "Simplified NHGIS 1850 county boundary GeoJSON.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "1860": {
+      "uri": "repo:apps/regions/us/data/counties_1860.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 1742574,
+      "sha256": "ae964e3d44a3eb51dc2be8fdaa8371a80be8c713a71ac100ae61d5a34cba1dfb",
+      "row_count": 2126,
+      "content": "Simplified NHGIS 1860 county boundary GeoJSON.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "1870": {
+      "uri": "repo:apps/regions/us/data/counties_1870.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 1872161,
+      "sha256": "cd6d960a55cfef31e6dfa4261067b2e66c80e74295fda9f46da316c252429046",
+      "row_count": 2334,
+      "content": "Simplified NHGIS 1870 county boundary GeoJSON.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "1890": {
+      "uri": "repo:apps/regions/us/data/counties_1890.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 2391190,
+      "sha256": "0e96bae1a309590a926195ba843d22a50184800d6c204c37a24d48fa102f4259",
+      "row_count": 2799,
+      "content": "Simplified NHGIS 1890 county boundary GeoJSON.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "1930": {
+      "uri": "repo:apps/regions/us/data/counties_1930.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 2630180,
+      "sha256": "8c23442b89ef071af2c740608ac4d8b8b2e2d524ea791484358372d8fb97f7eb",
+      "row_count": 3110,
+      "content": "Simplified NHGIS 1930 county boundary GeoJSON.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "1850.1": {
+      "uri": "repo:apps/regions/us/data/source/us_nhgis_county_1850_extract.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 350809,
+      "sha256": "e4f8857d6ac90409afd32503c465c393f7849e40cff6d3814b65efa9deab08fa",
+      "row_count": 1626,
+      "content": "Derived NHGIS county extract with rates/counts only.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "1860.1": {
+      "uri": "repo:apps/regions/us/data/source/us_nhgis_county_1860_extract.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 429962,
+      "sha256": "cbe9351c455b99676815232abe95b3551e76967d415c8d42db9541f9669b1837",
+      "row_count": 2097,
+      "content": "Derived NHGIS county extract with rates/counts only.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "1870.1": {
+      "uri": "repo:apps/regions/us/data/source/us_nhgis_county_1870_extract.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 498642,
+      "sha256": "5f9bf63f4dac8f2f533e071080930aa499a8a786936ffdd94a33110d866bab85",
+      "row_count": 2310,
+      "content": "Derived NHGIS county extract with rates/counts only.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "1890.1": {
+      "uri": "repo:apps/regions/us/data/source/us_nhgis_county_1890_extract.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 594889,
+      "sha256": "2c56572e135437560c5eff168a9dcf291a210bb72d757b207cbfbeab8445b475",
+      "row_count": 2784,
+      "content": "Derived NHGIS county extract with rates/counts only.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "1906": {
+      "uri": "repo:apps/regions/us/data/source/us_nhgis_county_1906_extract.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 518705,
+      "sha256": "1ae3bdda61719e3f1757dbf43b0f51a1166e3cb60f807dafdfa2be4f20440d8e",
+      "row_count": 2902,
+      "content": "Derived NHGIS county extract with rates/counts only.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "1916": {
+      "uri": "repo:apps/regions/us/data/source/us_nhgis_county_1916_extract.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 537719,
+      "sha256": "9a504ad0688c89af805e5af4743867612af724c5383b6cf5cd48ae1059f70f79",
+      "row_count": 3005,
+      "content": "Derived NHGIS county extract with rates/counts only.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "1926": {
+      "uri": "repo:apps/regions/us/data/source/us_nhgis_county_1926_extract.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 555124,
+      "sha256": "e0bbca91c765c99e6f617496c027c9d07edaa094da3569767c0fa232fc3883b7",
+      "row_count": 3100,
+      "content": "Derived NHGIS county extract with rates/counts only.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    "1936": {
+      "uri": "repo:apps/regions/us/data/source/us_nhgis_county_1936_extract.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 554759,
+      "sha256": "67fd405acb5bd3eaa340e3624e4cc55a3437fd8793308cc909d59d87933ae69e",
+      "row_count": 3098,
+      "content": "Derived NHGIS county extract with rates/counts only.",
+      "privacy": "public",
+      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+    }
+  },
+  "raw_files": [
+    {
+      "local_path": "data/raw/us_nhgis/nhgis0001_csv_PREVIEW.zip",
+      "bytes": 23139,
+      "sha256": "df3f8717ba4cca3e301cfc8ada20e61e46a20c6832005bd147a41cab9e268bd0",
+      "content": "NHGIS codebook preview ZIP for county extract 1.",
+      "privacy": "private_cache",
+      "archive_status": "pending_private_gcs_upload",
+      "archive_target": "gs://places-of-worship-private-sync/raw_sources/us_nhgis/"
+    },
+    {
+      "local_path": "data/raw/us_nhgis/nhgis0001_csv.zip",
+      "bytes": 1366401,
+      "sha256": "cf2bbfb3477b34cef44ca908c65aa62fefd052a6af8d160d0ca132e10e07eb4a",
+      "content": "NHGIS county table-data ZIP for extract 1.",
+      "privacy": "private_cache",
+      "archive_status": "pending_private_gcs_upload",
+      "archive_target": "gs://places-of-worship-private-sync/raw_sources/us_nhgis/"
+    },
+    {
+      "local_path": "data/raw/us_nhgis/nhgis0001_shape.zip",
+      "bytes": 632156872,
+      "sha256": "b78844a058af3cabda578669adae7ea3ebad2da86b6cba120b7eeac7ffd84ed0",
+      "content": "NHGIS period-boundary shape ZIP for extract 1.",
+      "privacy": "private_cache",
+      "archive_status": "pending_private_gcs_upload",
+      "archive_target": "gs://places-of-worship-private-sync/raw_sources/us_nhgis/"
+    },
+    {
+      "local_path": "data/raw/us_nhgis/nhgis0002_csv_PREVIEW.zip",
+      "bytes": 34214,
+      "sha256": "ef79cc7924de1eb7c1011e054f59ad0f1386be762506e7031c5fdd43d610b723",
+      "content": "NHGIS codebook preview ZIP for validation extract 2.",
+      "privacy": "private_cache",
+      "archive_status": "pending_private_gcs_upload",
+      "archive_target": "gs://places-of-worship-private-sync/raw_sources/us_nhgis/"
+    },
+    {
+      "local_path": "data/raw/us_nhgis/nhgis0002_csv.zip",
+      "bytes": 98771,
+      "sha256": "429ef3c364f1951df5e0e5f38d1f7f89994a0d8f599166e2275bea6e9aacaee4",
+      "content": "NHGIS state/nation validation table-data ZIP for extract 2.",
+      "privacy": "private_cache",
+      "archive_status": "pending_private_gcs_upload",
+      "archive_target": "gs://places-of-worship-private-sync/raw_sources/us_nhgis/"
+    }
+  ],
+  "stats": {
+    "total_area_rows": 20922,
+    "rows_by_level": {
+      "county_1850": 1626,
+      "county_1860": 2097,
+      "county_1870": 2310,
+      "county_1890": 2784,
+      "county_1930": 12105
+    },
+    "rows_by_year": {
+      "1850": 1626,
+      "1860": 2097,
+      "1870": 2310,
+      "1890": 2784,
+      "1906": 2902,
+      "1916": 3005,
+      "1926": 3100,
+      "1936": 3098
+    },
+    "boundary_features": {
+      "county_1850": 1632,
+      "county_1860": 2126,
+      "county_1870": 2334,
+      "county_1890": 2799,
+      "county_1930": 3110
+    },
+    "boundary_geojson_bytes": {
+      "county_1850": 1456083,
+      "county_1860": 1742574,
+      "county_1870": 1872161,
+      "county_1890": 2391190,
+      "county_1930": 2630180
+    },
+    "boundary_simplification_tolerance_metres": {
+      "county_1850": 1500,
+      "county_1860": 1500,
+      "county_1870": 1500,
+      "county_1890": 1500,
+      "county_1930": 1500
+    }
+  },
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_us_nhgis_deep_past.R"
+    ],
+    "warnings": [
+      "1850 state validation result: mismatch_against_state_file",
+      "1850 nation validation result: mismatch_against_nation_file",
+      "1850 has 8 source rows without the selected period boundary",
+      "1850 has 6 period-boundary counties without a source row",
+      "1860 state validation result: mismatch_against_state_file",
+      "1860 nation validation result: mismatch_against_nation_file",
+      "1860 has 5 source rows without the selected period boundary",
+      "1860 has 29 period-boundary counties without a source row",
+      "1870 state validation result: mismatch_against_state_file",
+      "1870 nation validation result: mismatch_against_nation_file",
+      "1870 has 6 source rows without the selected period boundary",
+      "1870 has 24 period-boundary counties without a source row",
+      "1890 state validation result: mismatch_against_state_file",
+      "1890 nation validation result: mismatch_against_nation_file",
+      "1890 has 14 source rows without the selected period boundary",
+      "1890 has 15 period-boundary counties without a source row",
+      "1906 state validation result: mismatch_against_state_file",
+      "1906 has 50 source rows without the selected period boundary",
+      "1906 has 208 period-boundary counties without a source row",
+      "1916 state validation result: mismatch_against_state_file",
+      "1916 has 31 source rows without the selected period boundary",
+      "1916 has 105 period-boundary counties without a source row",
+      "1926 state validation result: mismatch_against_state_file",
+      "1926 has 10 period-boundary counties without a source row",
+      "1936 state validation result: matched_states_exact_with_state_file_coverage_difference",
+      "1936 has 12 period-boundary counties without a source row"
+    ],
+    "notes": "County sums are validated against NHGIS state totals for every wave. Nineteenth-century waves also validate against NHGIS nation totals where the API exposes the nation geography. The 1906-1936 religious-body datasets expose state and county geographies, not nation geography.",
+    "waves": {
+      "1850": {
+        "year": 1850,
+        "dataset_code": "1850_cPAX",
+        "nhgis_id": "ds10",
+        "table_codes": [
+          {
+            "source_code": "NT1",
+            "nhgis_code": "ADQ",
+            "description": "Total Population"
+          },
+          {
+            "source_code": "NT47",
+            "nhgis_code": "AET",
+            "description": "Churches by Denomination"
+          },
+          {
+            "source_code": "NT48",
+            "nhgis_code": "AEU",
+            "description": "Aggregate Accommodations of Churches by Denomination"
+          },
+          {
+            "source_code": "NT49",
+            "nhgis_code": "AEV",
+            "description": "Value of Church Property by Denomination"
+          },
+          {
+            "source_code": "NT50",
+            "nhgis_code": "AEX",
+            "description": "Total Number of Churches"
+          },
+          {
+            "source_code": "NT51",
+            "nhgis_code": "AEY",
+            "description": "Total Aggregate Accommodations of Churches"
+          },
+          {
+            "source_code": "NT52",
+            "nhgis_code": "AEZ",
+            "description": "Total Value of Church Property"
+          }
+        ],
+        "boundary_vintage": 1850,
+        "boundary_set_id": "us-county-1850-tl2008",
+        "source_rows": 1634,
+        "source_rows_joined_to_boundary": 1626,
+        "boundary_feature_count": 1632,
+        "join_coverage": "1626/1632",
+        "source_unmatched_count": 8,
+        "source_unmatched_gisjoins": ["G0600115", "G1300458", "G2750165", "G4803495", "G4804270", "G4804790", "G5500015", "G5500175"],
+        "boundary_without_source_count": 6,
+        "boundary_without_source_gisjoins": ["G1901590", "G1901755", "G3550553", "G4801410", "G4850000", "G4950655"],
+        "complete_metric_rows": 1596,
+        "all_rows_flagged_wave_coverage_differs": true,
+        "validation": {
+          "state_validation_source": "nhgis0002_ds10_1850_state.csv",
+          "state_result": "mismatch_against_state_file",
+          "matched_state_count": 36,
+          "county_state_count": 36,
+          "validation_state_count": 36,
+          "missing_in_state_file": [],
+          "extra_in_state_file": [],
+          "county_sums_matched_states": {
+            "population": 23191876,
+            "churches_or_edifices": 38082,
+            "seating": 14217948,
+            "property_value": 86920501
+          },
+          "state_sums_matched_states": {
+            "population": 23191876,
+            "churches_or_edifices": 38136,
+            "seating": 14255277,
+            "property_value": 87331503
+          },
+          "differences_matched_states": {
+            "population": 0,
+            "churches_or_edifices": 1,
+            "seating": 1000,
+            "property_value": 2998
+          },
+          "mismatch_state_count": 3,
+          "mismatch_states": [
+            {
+              "state_code": "360",
+              "population_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": -1
+            },
+            {
+              "state_code": "420",
+              "population_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": -1
+            },
+            {
+              "state_code": "550",
+              "population_diff": 0,
+              "churches_or_edifices_diff": 1,
+              "seating_diff": 1000,
+              "property_value_diff": 3000
+            }
+          ],
+          "nation_validation": {
+            "result": "mismatch_against_nation_file",
+            "county_sums": {
+              "population": 23191876,
+              "churches_or_edifices": 38082,
+              "seating": 14217948,
+              "property_value": 86920501
+            },
+            "nation_sums": {
+              "population": 23191876,
+              "churches_or_edifices": 38183,
+              "seating": 14270140,
+              "property_value": 87446368
+            },
+            "differences": {
+              "population": 0,
+              "churches_or_edifices": -101,
+              "seating": -52192,
+              "property_value": -525867
+            }
+          }
+        }
+      },
+      "1860": {
+        "year": 1860,
+        "dataset_code": "1860_cPAX",
+        "nhgis_id": "ds14",
+        "table_codes": [
+          {
+            "source_code": "NT1",
+            "nhgis_code": "AG3",
+            "description": "Total Population"
+          },
+          {
+            "source_code": "NT26",
+            "nhgis_code": "AHL",
+            "description": "Churches by Denomination"
+          },
+          {
+            "source_code": "NT28",
+            "nhgis_code": "AHN",
+            "description": "Aggregate Accommodations of Churches by Denomination"
+          },
+          {
+            "source_code": "NT30",
+            "nhgis_code": "AHQ",
+            "description": "Value of Church Property by Denomination"
+          },
+          {
+            "source_code": "NT32",
+            "nhgis_code": "AHS",
+            "description": "Total Churches"
+          },
+          {
+            "source_code": "NT33",
+            "nhgis_code": "AHT",
+            "description": "Total Aggregate Accommodations of Churches"
+          },
+          {
+            "source_code": "NT34",
+            "nhgis_code": "AHU",
+            "description": "Total Value of Church Property"
+          }
+        ],
+        "boundary_vintage": 1860,
+        "boundary_set_id": "us-county-1860-tl2008",
+        "source_rows": 2102,
+        "source_rows_joined_to_boundary": 2097,
+        "boundary_feature_count": 2126,
+        "join_coverage": "2097/2126",
+        "source_unmatched_count": 5,
+        "source_unmatched_gisjoins": ["G1200875", "G3150585", "G4803275", "G4950655", "G4950695"],
+        "boundary_without_source_count": 29,
+        "boundary_without_source_gisjoins": ["G0950000", "G1100010", "G1780000", "G2050797", "G2600390", "G2600790", "G2601130", "G2601190", "G2601290", "G2601350", "G2601370", "G2601430", "G2601650", "G2701335", "G2701545", "G3150265", "G3150325", "G3150505", "G3150555", "G3150565", "G3150575", "G3150685", "G3150735", "G3150755", "G4800090", "G4803270", "G4804573", "G4804850", "G4804870"],
+        "complete_metric_rows": 1835,
+        "all_rows_flagged_wave_coverage_differs": true,
+        "validation": {
+          "state_validation_source": "nhgis0002_ds14_1860_state.csv",
+          "state_result": "mismatch_against_state_file",
+          "matched_state_count": 38,
+          "county_state_count": 38,
+          "validation_state_count": 42,
+          "missing_in_state_file": [],
+          "extra_in_state_file": ["085", "095", "110", "325"],
+          "county_sums_matched_states": {
+            "population": 31363404,
+            "churches_or_edifices": 53952,
+            "seating": 19077346,
+            "property_value": 170447572
+          },
+          "state_sums_matched_states": {
+            "population": 31322270,
+            "churches_or_edifices": 53952,
+            "seating": 19077241,
+            "property_value": 170446125
+          },
+          "differences_matched_states": {
+            "population": 41134,
+            "churches_or_edifices": 0,
+            "seating": 105,
+            "property_value": 1447
+          },
+          "mismatch_state_count": 6,
+          "mismatch_states": [
+            {
+              "state_code": "205",
+              "population_diff": 34277,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": 0
+            },
+            {
+              "state_code": "250",
+              "population_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": -1
+            },
+            {
+              "state_code": "360",
+              "population_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": -1
+            },
+            {
+              "state_code": "420",
+              "population_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": -1
+            },
+            {
+              "state_code": "495",
+              "population_diff": 6857,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": 0
+            },
+            {
+              "state_code": "510",
+              "population_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 105,
+              "property_value_diff": 1450
+            }
+          ],
+          "nation_validation": {
+            "result": "mismatch_against_nation_file",
+            "county_sums": {
+              "population": 31363404,
+              "churches_or_edifices": 53952,
+              "seating": 19077346,
+              "property_value": 170447572
+            },
+            "nation_sums": {
+              "population": 31443320,
+              "churches_or_edifices": 54009,
+              "seating": 19128752,
+              "property_value": 171398432
+            },
+            "differences": {
+              "population": -79916,
+              "churches_or_edifices": -57,
+              "seating": -51406,
+              "property_value": -950860
+            }
+          }
+        }
+      },
+      "1870": {
+        "year": 1870,
+        "dataset_code": "1870_cPAX",
+        "nhgis_id": "ds17",
+        "table_codes": [
+          {
+            "source_code": "NT1",
+            "nhgis_code": "AJ3",
+            "description": "Total Population"
+          },
+          {
+            "source_code": "NT41",
+            "nhgis_code": "AK5",
+            "description": "Religious Organizations by Denomination"
+          },
+          {
+            "source_code": "NT42",
+            "nhgis_code": "AK6",
+            "description": "Religious Sittings by Denomination"
+          },
+          {
+            "source_code": "NT43",
+            "nhgis_code": "AK7",
+            "description": "Total Religious Organizations of All Denominations"
+          },
+          {
+            "source_code": "NT44",
+            "nhgis_code": "AK8",
+            "description": "Total Religious Edifices of All Denominations"
+          },
+          {
+            "source_code": "NT45",
+            "nhgis_code": "AK9",
+            "description": "Total Religious Sittings of All Denominations"
+          },
+          {
+            "source_code": "NT46",
+            "nhgis_code": "ALA",
+            "description": "Value of Property of all Denominations"
+          }
+        ],
+        "boundary_vintage": 1870,
+        "boundary_set_id": "us-county-1870-tl2008",
+        "source_rows": 2316,
+        "source_rows_joined_to_boundary": 2310,
+        "boundary_feature_count": 2334,
+        "join_coverage": "2310/2334",
+        "source_unmatched_count": 6,
+        "source_unmatched_gisjoins": ["G2700810", "G3100755", "G3101155", "G3101675", "G3101731", "G3200255"],
+        "boundary_without_source_count": 24,
+        "boundary_without_source_gisjoins": ["G0950695", "G1780000", "G2000075", "G2000255", "G2000330", "G2000630", "G2000650", "G2000770", "G2000830", "G2000975", "G2001365", "G2001470", "G2001510", "G2001550", "G2001630", "G2001650", "G2001850", "G2001955", "G2600390", "G2701170", "G3100750", "G3100890", "G4804575", "G4950637"],
+        "complete_metric_rows": 2127,
+        "all_rows_flagged_wave_coverage_differs": true,
+        "validation": {
+          "state_validation_source": "nhgis0002_ds17_1870_state.csv",
+          "state_result": "mismatch_against_state_file",
+          "matched_state_count": 47,
+          "county_state_count": 47,
+          "validation_state_count": 47,
+          "missing_in_state_file": [],
+          "extra_in_state_file": [],
+          "county_sums_matched_states": {
+            "population": 38558371,
+            "religious_organisations": 72437,
+            "churches_or_edifices": 63061,
+            "seating": 21655687,
+            "property_value": 354370082
+          },
+          "state_sums_matched_states": {
+            "population": 38558371,
+            "religious_organisations": 72459,
+            "churches_or_edifices": 63082,
+            "seating": 21665062,
+            "property_value": 354483584
+          },
+          "differences_matched_states": {
+            "population": 0,
+            "religious_organisations": -10,
+            "churches_or_edifices": -9,
+            "seating": -5875,
+            "property_value": -67502
+          },
+          "mismatch_state_count": 13,
+          "mismatch_states": [
+            {
+              "state_code": "090",
+              "population_diff": 0,
+              "religious_organisations_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": -1
+            },
+            {
+              "state_code": "170",
+              "population_diff": 0,
+              "religious_organisations_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": -1
+            },
+            {
+              "state_code": "180",
+              "population_diff": 0,
+              "religious_organisations_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": -1
+            },
+            {
+              "state_code": "200",
+              "population_diff": 0,
+              "religious_organisations_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": -50,
+              "property_value_diff": 0
+            },
+            {
+              "state_code": "210",
+              "population_diff": 0,
+              "religious_organisations_diff": -2,
+              "churches_or_edifices_diff": -2,
+              "seating_diff": -1600,
+              "property_value_diff": -23001
+            },
+            {
+              "state_code": "230",
+              "population_diff": 0,
+              "religious_organisations_diff": -2,
+              "churches_or_edifices_diff": -2,
+              "seating_diff": -700,
+              "property_value_diff": -4000
+            },
+            {
+              "state_code": "250",
+              "population_diff": 0,
+              "religious_organisations_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": 1
+            },
+            {
+              "state_code": "320",
+              "population_diff": 450,
+              "religious_organisations_diff": 3,
+              "churches_or_edifices_diff": 2,
+              "seating_diff": 150,
+              "property_value_diff": 4000
+            },
+            {
+              "state_code": "360",
+              "population_diff": 0,
+              "religious_organisations_diff": -2,
+              "churches_or_edifices_diff": -2,
+              "seating_diff": -2000,
+              "property_value_diff": -18001
+            },
+            {
+              "state_code": "390",
+              "population_diff": 0,
+              "religious_organisations_diff": -2,
+              "churches_or_edifices_diff": -2,
+              "seating_diff": -1200,
+              "property_value_diff": -8999
+            },
+            {
+              "state_code": "420",
+              "population_diff": 0,
+              "religious_organisations_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": 1
+            },
+            {
+              "state_code": "470",
+              "population_diff": 0,
+              "religious_organisations_diff": -2,
+              "churches_or_edifices_diff": -1,
+              "seating_diff": -325,
+              "property_value_diff": -13500
+            },
+            {
+              "state_code": "495",
+              "population_diff": -450,
+              "religious_organisations_diff": -3,
+              "churches_or_edifices_diff": -2,
+              "seating_diff": -150,
+              "property_value_diff": -4000
+            }
+          ],
+          "nation_validation": {
+            "result": "mismatch_against_nation_file",
+            "county_sums": {
+              "population": 38558371,
+              "religious_organisations": 72437,
+              "churches_or_edifices": 63061,
+              "seating": 21655687,
+              "property_value": 354370082
+            },
+            "nation_sums": {
+              "population": 38558372,
+              "religious_organisations": 72459,
+              "churches_or_edifices": 63082,
+              "seating": 21665062,
+              "property_value": 354483584
+            },
+            "differences": {
+              "population": -1,
+              "religious_organisations": -22,
+              "churches_or_edifices": -21,
+              "seating": -9375,
+              "property_value": -113502
+            }
+          }
+        }
+      },
+      "1890": {
+        "year": 1890,
+        "dataset_code": "1890_cRelig",
+        "nhgis_id": "ds28",
+        "table_codes": [
+          {
+            "source_code": "NT1",
+            "nhgis_code": "AV4",
+            "description": "Total Population"
+          },
+          {
+            "source_code": "NT3",
+            "nhgis_code": "AWA",
+            "description": "Number of Church Edifices by Type of Church Organization"
+          },
+          {
+            "source_code": "NT4",
+            "nhgis_code": "AWB",
+            "description": "Approximate Seating Capacity of Churches by Type of Church Organization"
+          },
+          {
+            "source_code": "NT5",
+            "nhgis_code": "AWC",
+            "description": "Value of Church Property by Type of Church Organization"
+          },
+          {
+            "source_code": "NT7",
+            "nhgis_code": "AWE",
+            "description": "Total Number of Church Organizations"
+          },
+          {
+            "source_code": "NT8",
+            "nhgis_code": "AWF",
+            "description": "Total Number of Church Edifices"
+          },
+          {
+            "source_code": "NT9",
+            "nhgis_code": "AWG",
+            "description": "Approximate Seating Capacity of All Churches"
+          },
+          {
+            "source_code": "NT11",
+            "nhgis_code": "AV6",
+            "description": "Value of All Church Property"
+          },
+          {
+            "source_code": "NT12",
+            "nhgis_code": "AV7",
+            "description": "Total Number of Church Communicants or Members"
+          }
+        ],
+        "boundary_vintage": 1890,
+        "boundary_set_id": "us-county-1890-tl2008",
+        "source_rows": 2798,
+        "source_rows_joined_to_boundary": 2784,
+        "boundary_feature_count": 2799,
+        "join_coverage": "2784/2799",
+        "source_unmatched_count": 14,
+        "source_unmatched_gisjoins": ["G2009011", "G2009013", "G2009015", "G2009017", "G2009019", "G2009025", "G2009035", "G2009055", "G2009991", "G4059015", "G4059035", "G4059055", "G4059075", "G4059095"],
+        "boundary_without_source_count": 15,
+        "boundary_without_source_gisjoins": ["G1780000", "G3800015", "G3800973", "G4050425", "G4600835", "G4601079", "G4601113", "G4601230", "G4601265", "G4601277", "G4800170", "G4800450", "G4800790", "G4802190", "G5600470"],
+        "complete_metric_rows": 2660,
+        "all_rows_flagged_wave_coverage_differs": true,
+        "validation": {
+          "state_validation_source": "nhgis0002_ds28_1890_state.csv",
+          "state_result": "mismatch_against_state_file",
+          "matched_state_count": 50,
+          "county_state_count": 50,
+          "validation_state_count": 51,
+          "missing_in_state_file": [],
+          "extra_in_state_file": "178",
+          "county_sums_matched_states": {
+            "population": 62667374,
+            "church_organisations": 164177,
+            "churches_or_edifices": 141906,
+            "seating": 43449630,
+            "property_value": 679155042,
+            "members": 20558229
+          },
+          "state_sums_matched_states": {
+            "population": 62654302,
+            "church_organisations": 164371,
+            "churches_or_edifices": 142092,
+            "seating": 43485280,
+            "property_value": 679447879,
+            "members": 20583531
+          },
+          "differences_matched_states": {
+            "population": 13072,
+            "church_organisations": -168,
+            "churches_or_edifices": -152,
+            "seating": -30850,
+            "property_value": -89187,
+            "members": -10450
+          },
+          "mismatch_state_count": 21,
+          "mismatch_states": [
+            {
+              "state_code": "010",
+              "population_diff": 0,
+              "church_organisations_diff": -14,
+              "churches_or_edifices_diff": -10,
+              "seating_diff": -3000,
+              "property_value_diff": -4000,
+              "members_diff": -720
+            },
+            {
+              "state_code": "130",
+              "population_diff": 0,
+              "church_organisations_diff": -1,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": 0,
+              "members_diff": -175
+            },
+            {
+              "state_code": "170",
+              "population_diff": 0,
+              "church_organisations_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": 1,
+              "members_diff": 0
+            },
+            {
+              "state_code": "180",
+              "population_diff": 0,
+              "church_organisations_diff": -1,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": -1,
+              "members_diff": -14
+            },
+            {
+              "state_code": "200",
+              "population_diff": 6663,
+              "church_organisations_diff": 15,
+              "churches_or_edifices_diff": 5,
+              "seating_diff": 880,
+              "property_value_diff": 3825,
+              "members_diff": 481
+            },
+            {
+              "state_code": "210",
+              "population_diff": 0,
+              "church_organisations_diff": -7,
+              "churches_or_edifices_diff": -5,
+              "seating_diff": -1700,
+              "property_value_diff": -5450,
+              "members_diff": -396
+            },
+            {
+              "state_code": "240",
+              "population_diff": 0,
+              "church_organisations_diff": -1,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": 0,
+              "members_diff": -75
+            },
+            {
+              "state_code": "250",
+              "population_diff": 0,
+              "church_organisations_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": -1,
+              "members_diff": 0
+            },
+            {
+              "state_code": "260",
+              "population_diff": 0,
+              "church_organisations_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": -1,
+              "members_diff": 0
+            },
+            {
+              "state_code": "280",
+              "population_diff": 0,
+              "church_organisations_diff": -1,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": 0,
+              "members_diff": -123
+            },
+            {
+              "state_code": "290",
+              "population_diff": 0,
+              "church_organisations_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": 1,
+              "members_diff": 0
+            },
+            {
+              "state_code": "360",
+              "population_diff": 0,
+              "church_organisations_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": -1,
+              "members_diff": 0
+            },
+            {
+              "state_code": "370",
+              "population_diff": 0,
+              "church_organisations_diff": -1,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": 0,
+              "members_diff": -108
+            },
+            {
+              "state_code": "390",
+              "population_diff": 0,
+              "church_organisations_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": -2,
+              "members_diff": 0
+            },
+            {
+              "state_code": "405",
+              "population_diff": 6409,
+              "church_organisations_diff": -16,
+              "churches_or_edifices_diff": -5,
+              "seating_diff": -880,
+              "property_value_diff": -3825,
+              "members_diff": -515
+            },
+            {
+              "state_code": "420",
+              "population_diff": 0,
+              "church_organisations_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": 1,
+              "members_diff": 0
+            },
+            {
+              "state_code": "450",
+              "population_diff": 0,
+              "church_organisations_diff": -1,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": 0,
+              "members_diff": -203
+            },
+            {
+              "state_code": "470",
+              "population_diff": 0,
+              "church_organisations_diff": -17,
+              "churches_or_edifices_diff": -15,
+              "seating_diff": -3750,
+              "property_value_diff": -8251,
+              "members_diff": -1634
+            },
+            {
+              "state_code": "480",
+              "population_diff": 0,
+              "church_organisations_diff": -122,
+              "churches_or_edifices_diff": -122,
+              "seating_diff": -22400,
+              "property_value_diff": -71481,
+              "members_diff": -6831
+            },
+            {
+              "state_code": "510",
+              "population_diff": 0,
+              "church_organisations_diff": -1,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": -1,
+              "members_diff": -137
+            },
+            {
+              "state_code": "550",
+              "population_diff": 0,
+              "church_organisations_diff": 0,
+              "churches_or_edifices_diff": 0,
+              "seating_diff": 0,
+              "property_value_diff": -1,
+              "members_diff": 0
+            }
+          ],
+          "nation_validation": {
+            "result": "mismatch_against_nation_file",
+            "county_sums": {
+              "population": 62667374,
+              "church_organisations": 164177,
+              "churches_or_edifices": 141906,
+              "seating": 43449630,
+              "property_value": 679155042,
+              "members": 20558229
+            },
+            "nation_sums": {
+              "population": 62622248,
+              "church_organisations": 165177,
+              "churches_or_edifices": 142521,
+              "seating": 43564864,
+              "property_value": 679630144,
+              "members": 20612806
+            },
+            "differences": {
+              "population": 45126,
+              "church_organisations": -1000,
+              "churches_or_edifices": -615,
+              "seating": -115234,
+              "property_value": -475102,
+              "members": -54577
+            }
+          }
+        }
+      },
+      "1906": {
+        "year": 1906,
+        "dataset_code": "1906_cRelig",
+        "nhgis_id": "ds33",
+        "table_codes": [
+          {
+            "source_code": "NT1",
+            "nhgis_code": "AZ8",
+            "description": "Population in Census Years"
+          },
+          {
+            "source_code": "NT2",
+            "nhgis_code": "AZ9",
+            "description": "Number of Members by Churches"
+          },
+          {
+            "source_code": "NT3",
+            "nhgis_code": "A0A",
+            "description": "Members of All Denominations, 1906"
+          }
+        ],
+        "boundary_vintage": 1930,
+        "boundary_set_id": "us-county-1930-tl2008",
+        "source_rows": 2952,
+        "source_rows_joined_to_boundary": 2902,
+        "boundary_feature_count": 3110,
+        "join_coverage": "2902/3110",
+        "source_unmatched_count": 50,
+        "source_unmatched_gisjoins": ["G0450015", "G0450035", "G0450055", "G0450075", "G0450095", "G0450135", "G0450155", "G0450175", "G0450195", "G0450215", "G0450235", "G0450255", "G0450275", "G3009035", "G3550035", "G3550055", "G3550075", "G3550095", "G3550115", "G3550135", "G3550155", "G3550175", "G3550195", "G3550215", "G3550235", "G3550255", "G3550275", "G3550295", "G3550315", "G3550335", "G3550355", "G3550375", "G3550395", "G3550435", "G3550455", "G3550475", "G3550495", "G3550515", "G3550535", "G3550555", "G4600095", "G4600835", "G4600955", "G4601113", "G4601175", "G4609075", "G4700875", "G5100035", "G5106855", "G5300055"],
+        "boundary_without_source_count": 208,
+        "boundary_without_source_gisjoins": ["G0250015", "G0250035", "G0250075", "G0250115", "G0400010", "G0400030", "G0400050", "G0400070", "G0400090", "G0400110", "G0400130", "G0400150", "G0400170", "G0400190", "G0400210", "G0400230", "G0400250", "G0400270", "G0800030", "G0800250", "G0800810", "G1100010", "G1200050", "G1200110", "G1200150", "G1200210", "G1200290", "G1200350", "G1200410", "G1200430", "G1200450", "G1200490", "G1200510", "G1200550", "G1200610", "G1200850", "G1200910", "G1200930", "G1201030", "G1201150", "G1201170", "G1201250", "G1300030", "G1300050", "G1300130", "G1300230", "G1300250", "G1300430", "G1300750", "G1301090", "G1301710", "G1301730", "G1301830", "G1302250", "G1302530", "G1302830", "G1303090", "G1550015", "G1550035", "G1550075", "G1550095", "G1600030", "G1600090", "G1600190", "G1600210", "G1600230", "G1600250", "G1600290", "G1600330", "G1600350", "G1600410", "G1600450", "G1600470", "G1600510", "G1600530", "G1600610", "G1600650", "G1600670", "G1600750", "G1600770", "G1600810", "G1600850", "G1600875", "G2101470", "G2200030", "G2200110", "G2200390", "G2200530", "G2700770", "G2800390", "G2800530", "G2801310", "G2801470", "G3000030", "G3000050", "G3000110", "G3000190", "G3000250", "G3000330", "G3000350", "G3000370", "G3000410", "G3000450", "G3000470", "G3000510", "G3000550", "G3000610", "G3000650", "G3000690", "G3000710", "G3000730", "G3000750", "G3000790", "G3000830", "G3000850", "G3000910", "G3000950", "G3001010", "G3001030", "G3001070", "G3001090", "G3001130", "G3100050", "G3100690", "G3200210", "G3200270", "G3500010", "G3500030", "G3500050", "G3500070", "G3500090", "G3500110", "G3500130", "G3500150", "G3500170", "G3500190", "G3500210", "G3500230", "G3500250", "G3500270", "G3500290", "G3500310", "G3500330", "G3500350", "G3500370", "G3500390", "G3500410", "G3500430", "G3500450", "G3500470", "G3500490", "G3500510", "G3500530", "G3500550", "G3500570", "G3500590", "G3500610", "G3600050", "G3700110", "G3700930", "G3800130", "G3800230", "G3800330", "G3800370", "G3800750", "G3800850", "G3800870", "G4000330", "G4100170", "G4100310", "G4500050", "G4500330", "G4500530", "G4500650", "G4600550", "G4600710", "G4600750", "G4601210", "G4601370", "G4800470", "G4801090", "G4802290", "G4802470", "G4802490", "G4802610", "G4802730", "G4803850", "G4804890", "G4900090", "G4900130", "G5100130", "G5106500", "G5106600", "G5106700", "G5106900", "G5107805", "G5108000", "G5300270", "G5300510", "G5600050", "G5600150", "G5600170", "G5600230", "G5600270", "G5600310", "G5600350", "G5600390", "G5600430"],
+        "complete_metric_rows": 2898,
+        "all_rows_flagged_wave_coverage_differs": true,
+        "validation": {
+          "state_validation_source": "nhgis0002_ds33_1906_state.csv",
+          "state_result": "mismatch_against_state_file",
+          "matched_state_count": 48,
+          "county_state_count": 48,
+          "validation_state_count": 49,
+          "missing_in_state_file": [],
+          "extra_in_state_file": "110",
+          "county_sums_matched_states": {
+            "population": 91583362,
+            "members": 32311019
+          },
+          "state_sums_matched_states": {
+            "population": 91641197,
+            "members": 32799686
+          },
+          "differences_matched_states": {
+            "population": -57835,
+            "members": -488667
+          },
+          "mismatch_state_count": 42,
+          "mismatch_states": [
+            {
+              "state_code": "010",
+              "population_diff": 0,
+              "members_diff": -7872
+            },
+            {
+              "state_code": "050",
+              "population_diff": 0,
+              "members_diff": -1947
+            },
+            {
+              "state_code": "060",
+              "population_diff": 0,
+              "members_diff": -61
+            },
+            {
+              "state_code": "080",
+              "population_diff": 0,
+              "members_diff": -472
+            },
+            {
+              "state_code": "090",
+              "population_diff": 0,
+              "members_diff": -84
+            },
+            {
+              "state_code": "100",
+              "population_diff": 0,
+              "members_diff": -537
+            },
+            {
+              "state_code": "120",
+              "population_diff": 0,
+              "members_diff": -2609
+            },
+            {
+              "state_code": "130",
+              "population_diff": 0,
+              "members_diff": -7685
+            },
+            {
+              "state_code": "160",
+              "population_diff": 0,
+              "members_diff": -138
+            },
+            {
+              "state_code": "170",
+              "population_diff": 0,
+              "members_diff": -2399
+            },
+            {
+              "state_code": "180",
+              "population_diff": 0,
+              "members_diff": -2411
+            },
+            {
+              "state_code": "190",
+              "population_diff": 0,
+              "members_diff": -715
+            },
+            {
+              "state_code": "200",
+              "population_diff": 0,
+              "members_diff": -1342
+            },
+            {
+              "state_code": "210",
+              "population_diff": 0,
+              "members_diff": -35179
+            },
+            {
+              "state_code": "220",
+              "population_diff": 0,
+              "members_diff": -3096
+            },
+            {
+              "state_code": "230",
+              "population_diff": 0,
+              "members_diff": -116
+            },
+            {
+              "state_code": "240",
+              "population_diff": 0,
+              "members_diff": -748
+            },
+            {
+              "state_code": "250",
+              "population_diff": 0,
+              "members_diff": -1697
+            },
+            {
+              "state_code": "260",
+              "population_diff": 0,
+              "members_diff": -138586
+            },
+            {
+              "state_code": "270",
+              "population_diff": 0,
+              "members_diff": -3246
+            },
+            {
+              "state_code": "280",
+              "population_diff": -6599,
+              "members_diff": -6759
+            },
+            {
+              "state_code": "290",
+              "population_diff": 0,
+              "members_diff": -2594
+            },
+            {
+              "state_code": "310",
+              "population_diff": -3538,
+              "members_diff": -256
+            },
+            {
+              "state_code": "340",
+              "population_diff": 0,
+              "members_diff": -581
+            },
+            {
+              "state_code": "355",
+              "population_diff": 0,
+              "members_diff": -609
+            },
+            {
+              "state_code": "360",
+              "population_diff": 0,
+              "members_diff": -99296
+            },
+            {
+              "state_code": "370",
+              "population_diff": 0,
+              "members_diff": -2934
+            },
+            {
+              "state_code": "380",
+              "population_diff": -22919,
+              "members_diff": -539
+            },
+            {
+              "state_code": "390",
+              "population_diff": 0,
+              "members_diff": -122841
+            },
+            {
+              "state_code": "400",
+              "population_diff": 0,
+              "members_diff": -5679
+            },
+            {
+              "state_code": "410",
+              "population_diff": 0,
+              "members_diff": -302
+            },
+            {
+              "state_code": "420",
+              "population_diff": 0,
+              "members_diff": -1991
+            },
+            {
+              "state_code": "440",
+              "population_diff": 0,
+              "members_diff": -152
+            },
+            {
+              "state_code": "450",
+              "population_diff": -22615,
+              "members_diff": -4764
+            },
+            {
+              "state_code": "460",
+              "population_diff": -2164,
+              "members_diff": -1470
+            },
+            {
+              "state_code": "470",
+              "population_diff": 0,
+              "members_diff": -4496
+            },
+            {
+              "state_code": "480",
+              "population_diff": 0,
+              "members_diff": -17196
+            },
+            {
+              "state_code": "510",
+              "population_diff": 0,
+              "members_diff": -2419
+            },
+            {
+              "state_code": "530",
+              "population_diff": 0,
+              "members_diff": -259
+            },
+            {
+              "state_code": "540",
+              "population_diff": 0,
+              "members_diff": -1662
+            },
+            {
+              "state_code": "550",
+              "population_diff": 0,
+              "members_diff": -718
+            },
+            {
+              "state_code": "560",
+              "population_diff": 0,
+              "members_diff": -210
+            }
+          ],
+          "nation_validation": null
+        }
+      },
+      "1916": {
+        "year": 1916,
+        "dataset_code": "1916_cRelig",
+        "nhgis_id": "ds41",
+        "table_codes": [
+          {
+            "source_code": "NT1",
+            "nhgis_code": "A7F",
+            "description": "Population in Census Years"
+          },
+          {
+            "source_code": "NT2",
+            "nhgis_code": "A7G",
+            "description": "Number of Members by Churches"
+          },
+          {
+            "source_code": "NT3",
+            "nhgis_code": "A7H",
+            "description": "Members of All Denominations, 1916"
+          }
+        ],
+        "boundary_vintage": 1930,
+        "boundary_set_id": "us-county-1930-tl2008",
+        "source_rows": 3036,
+        "source_rows_joined_to_boundary": 3005,
+        "boundary_feature_count": 3110,
+        "join_coverage": "3005/3110",
+        "source_unmatched_count": 31,
+        "source_unmatched_gisjoins": ["G3550035", "G3550055", "G3550075", "G3550095", "G3550115", "G3550135", "G3550155", "G3550175", "G3550195", "G3550215", "G3550235", "G3550255", "G3550275", "G3550295", "G3550315", "G3550335", "G3550355", "G3550375", "G3550395", "G3550435", "G3550455", "G3550475", "G3550495", "G3550515", "G3550535", "G3550555", "G4601113", "G4601175", "G4700875", "G5100035", "G5300055"],
+        "boundary_without_source_count": 105,
+        "boundary_without_source_gisjoins": ["G0250015", "G0250035", "G0250075", "G0250115", "G1100010", "G1200150", "G1200210", "G1200290", "G1200350", "G1200410", "G1200430", "G1200450", "G1200490", "G1200510", "G1200550", "G1200610", "G1200850", "G1200930", "G1201150", "G1201250", "G1300030", "G1300250", "G1300750", "G1301710", "G1301730", "G1301830", "G1302250", "G1302530", "G1302830", "G1550015", "G1550035", "G1550075", "G1550095", "G1600230", "G1600250", "G1600290", "G1600330", "G1600530", "G1600750", "G1600850", "G1600875", "G2700770", "G2800530", "G3000110", "G3000190", "G3000330", "G3000350", "G3000370", "G3000450", "G3000470", "G3000510", "G3000550", "G3000690", "G3000730", "G3000750", "G3000850", "G3001030", "G3001070", "G3001130", "G3200270", "G3500010", "G3500030", "G3500050", "G3500070", "G3500090", "G3500110", "G3500130", "G3500150", "G3500170", "G3500190", "G3500210", "G3500230", "G3500250", "G3500270", "G3500290", "G3500310", "G3500330", "G3500350", "G3500370", "G3500390", "G3500410", "G3500430", "G3500450", "G3500470", "G3500490", "G3500510", "G3500530", "G3500550", "G3500570", "G3500590", "G3500610", "G4500050", "G4500650", "G4802290", "G4802610", "G4900090", "G5100130", "G5106500", "G5106600", "G5106900", "G5107805", "G5108000", "G5300270", "G5600350", "G5600390"],
+        "complete_metric_rows": 3004,
+        "all_rows_flagged_wave_coverage_differs": true,
+        "validation": {
+          "state_validation_source": "nhgis0002_ds41_1916_state.csv",
+          "state_result": "mismatch_against_state_file",
+          "matched_state_count": 48,
+          "county_state_count": 48,
+          "validation_state_count": 49,
+          "missing_in_state_file": [],
+          "extra_in_state_file": "110",
+          "county_sums_matched_states": {
+            "population": 105082105,
+            "members": 41708017
+          },
+          "state_sums_matched_states": {
+            "population": 105273051,
+            "members": 41762441
+          },
+          "differences_matched_states": {
+            "population": -190946,
+            "members": -54424
+          },
+          "mismatch_state_count": 43,
+          "mismatch_states": [
+            {
+              "state_code": "010",
+              "population_diff": 0,
+              "members_diff": -1134
+            },
+            {
+              "state_code": "050",
+              "population_diff": 0,
+              "members_diff": -2283
+            },
+            {
+              "state_code": "060",
+              "population_diff": 0,
+              "members_diff": -598
+            },
+            {
+              "state_code": "100",
+              "population_diff": 0,
+              "members_diff": -38
+            },
+            {
+              "state_code": "120",
+              "population_diff": -4574,
+              "members_diff": -450
+            },
+            {
+              "state_code": "130",
+              "population_diff": -26500,
+              "members_diff": -1951
+            },
+            {
+              "state_code": "160",
+              "population_diff": -24021,
+              "members_diff": -186
+            },
+            {
+              "state_code": "170",
+              "population_diff": 0,
+              "members_diff": -1003
+            },
+            {
+              "state_code": "180",
+              "population_diff": 0,
+              "members_diff": -376
+            },
+            {
+              "state_code": "190",
+              "population_diff": 0,
+              "members_diff": -1687
+            },
+            {
+              "state_code": "200",
+              "population_diff": 0,
+              "members_diff": -961
+            },
+            {
+              "state_code": "210",
+              "population_diff": 0,
+              "members_diff": -987
+            },
+            {
+              "state_code": "220",
+              "population_diff": 0,
+              "members_diff": -5324
+            },
+            {
+              "state_code": "250",
+              "population_diff": 0,
+              "members_diff": -20
+            },
+            {
+              "state_code": "260",
+              "population_diff": 0,
+              "members_diff": -44
+            },
+            {
+              "state_code": "270",
+              "population_diff": 0,
+              "members_diff": -801
+            },
+            {
+              "state_code": "280",
+              "population_diff": -19192,
+              "members_diff": -6266
+            },
+            {
+              "state_code": "290",
+              "population_diff": 0,
+              "members_diff": -1629
+            },
+            {
+              "state_code": "300",
+              "population_diff": -47735,
+              "members_diff": -677
+            },
+            {
+              "state_code": "310",
+              "population_diff": 0,
+              "members_diff": -377
+            },
+            {
+              "state_code": "320",
+              "population_diff": -2803,
+              "members_diff": 0
+            },
+            {
+              "state_code": "330",
+              "population_diff": 0,
+              "members_diff": -56
+            },
+            {
+              "state_code": "340",
+              "population_diff": 0,
+              "members_diff": -158
+            },
+            {
+              "state_code": "355",
+              "population_diff": -11079,
+              "members_diff": -1566
+            },
+            {
+              "state_code": "360",
+              "population_diff": -1,
+              "members_diff": -228
+            },
+            {
+              "state_code": "370",
+              "population_diff": 0,
+              "members_diff": -4815
+            },
+            {
+              "state_code": "380",
+              "population_diff": 0,
+              "members_diff": -522
+            },
+            {
+              "state_code": "390",
+              "population_diff": 0,
+              "members_diff": -305
+            },
+            {
+              "state_code": "400",
+              "population_diff": 0,
+              "members_diff": -994
+            },
+            {
+              "state_code": "410",
+              "population_diff": 0,
+              "members_diff": -556
+            },
+            {
+              "state_code": "420",
+              "population_diff": -1,
+              "members_diff": -1759
+            },
+            {
+              "state_code": "440",
+              "population_diff": 0,
+              "members_diff": -45
+            },
+            {
+              "state_code": "450",
+              "population_diff": -32542,
+              "members_diff": -7488
+            },
+            {
+              "state_code": "460",
+              "population_diff": 0,
+              "members_diff": -1848
+            },
+            {
+              "state_code": "470",
+              "population_diff": 0,
+              "members_diff": -3640
+            },
+            {
+              "state_code": "480",
+              "population_diff": -962,
+              "members_diff": -1779
+            },
+            {
+              "state_code": "490",
+              "population_diff": -400,
+              "members_diff": 0
+            },
+            {
+              "state_code": "500",
+              "population_diff": 0,
+              "members_diff": -28
+            },
+            {
+              "state_code": "510",
+              "population_diff": -21136,
+              "members_diff": -1178
+            },
+            {
+              "state_code": "530",
+              "population_diff": 0,
+              "members_diff": -24
+            },
+            {
+              "state_code": "540",
+              "population_diff": 0,
+              "members_diff": -293
+            },
+            {
+              "state_code": "550",
+              "population_diff": 0,
+              "members_diff": -205
+            },
+            {
+              "state_code": "560",
+              "population_diff": 0,
+              "members_diff": -145
+            }
+          ],
+          "nation_validation": null
+        }
+      },
+      "1926": {
+        "year": 1926,
+        "dataset_code": "1926_cRelig",
+        "nhgis_id": "ds51",
+        "table_codes": [
+          {
+            "source_code": "NT1",
+            "nhgis_code": "BCU",
+            "description": "Population in Census Years"
+          },
+          {
+            "source_code": "NT2",
+            "nhgis_code": "BCV",
+            "description": "Number of Members by Churches"
+          },
+          {
+            "source_code": "NT3",
+            "nhgis_code": "BCW",
+            "description": "Members of All Denominations, 1926"
+          }
+        ],
+        "boundary_vintage": 1930,
+        "boundary_set_id": "us-county-1930-tl2008",
+        "source_rows": 3100,
+        "source_rows_joined_to_boundary": 3100,
+        "boundary_feature_count": 3110,
+        "join_coverage": "3100/3110",
+        "source_unmatched_count": 0,
+        "source_unmatched_gisjoins": [],
+        "boundary_without_source_count": 10,
+        "boundary_without_source_gisjoins": ["G0250015", "G0250035", "G0250075", "G0250115", "G1100010", "G1550015", "G1550035", "G1550075", "G1550095", "G1600875"],
+        "complete_metric_rows": 3100,
+        "all_rows_flagged_wave_coverage_differs": true,
+        "validation": {
+          "state_validation_source": "nhgis0002_ds51_1926_state.csv",
+          "state_result": "mismatch_against_state_file",
+          "matched_state_count": 48,
+          "county_state_count": 48,
+          "validation_state_count": 49,
+          "missing_in_state_file": [],
+          "extra_in_state_file": "110",
+          "county_sums_matched_states": {
+            "population": 122288177,
+            "members": 54215850
+          },
+          "state_sums_matched_states": {
+            "population": 122288177,
+            "members": 54272592
+          },
+          "differences_matched_states": {
+            "population": 0,
+            "members": -56742
+          },
+          "mismatch_state_count": 43,
+          "mismatch_states": [
+            {
+              "state_code": "010",
+              "population_diff": 0,
+              "members_diff": -8016
+            },
+            {
+              "state_code": "040",
+              "population_diff": 0,
+              "members_diff": -135
+            },
+            {
+              "state_code": "050",
+              "population_diff": 0,
+              "members_diff": -1421
+            },
+            {
+              "state_code": "060",
+              "population_diff": 0,
+              "members_diff": -408
+            },
+            {
+              "state_code": "080",
+              "population_diff": 0,
+              "members_diff": -396
+            },
+            {
+              "state_code": "090",
+              "population_diff": 0,
+              "members_diff": -179
+            },
+            {
+              "state_code": "100",
+              "population_diff": 0,
+              "members_diff": -15
+            },
+            {
+              "state_code": "120",
+              "population_diff": 0,
+              "members_diff": -7086
+            },
+            {
+              "state_code": "130",
+              "population_diff": 0,
+              "members_diff": -9316
+            },
+            {
+              "state_code": "160",
+              "population_diff": 0,
+              "members_diff": -35
+            },
+            {
+              "state_code": "170",
+              "population_diff": 0,
+              "members_diff": -805
+            },
+            {
+              "state_code": "180",
+              "population_diff": 0,
+              "members_diff": -812
+            },
+            {
+              "state_code": "190",
+              "population_diff": 0,
+              "members_diff": -552
+            },
+            {
+              "state_code": "200",
+              "population_diff": 0,
+              "members_diff": -423
+            },
+            {
+              "state_code": "210",
+              "population_diff": 0,
+              "members_diff": -2376
+            },
+            {
+              "state_code": "220",
+              "population_diff": 0,
+              "members_diff": -1892
+            },
+            {
+              "state_code": "230",
+              "population_diff": 0,
+              "members_diff": -46
+            },
+            {
+              "state_code": "240",
+              "population_diff": 0,
+              "members_diff": -48
+            },
+            {
+              "state_code": "260",
+              "population_diff": 0,
+              "members_diff": -522
+            },
+            {
+              "state_code": "270",
+              "population_diff": 0,
+              "members_diff": -484
+            },
+            {
+              "state_code": "280",
+              "population_diff": 0,
+              "members_diff": -2325
+            },
+            {
+              "state_code": "290",
+              "population_diff": 0,
+              "members_diff": -596
+            },
+            {
+              "state_code": "300",
+              "population_diff": 0,
+              "members_diff": -337
+            },
+            {
+              "state_code": "310",
+              "population_diff": 0,
+              "members_diff": -398
+            },
+            {
+              "state_code": "340",
+              "population_diff": 0,
+              "members_diff": -18
+            },
+            {
+              "state_code": "350",
+              "population_diff": 0,
+              "members_diff": -12
+            },
+            {
+              "state_code": "360",
+              "population_diff": 0,
+              "members_diff": -116
+            },
+            {
+              "state_code": "370",
+              "population_diff": 0,
+              "members_diff": -3130
+            },
+            {
+              "state_code": "380",
+              "population_diff": 0,
+              "members_diff": -307
+            },
+            {
+              "state_code": "390",
+              "population_diff": 0,
+              "members_diff": -333
+            },
+            {
+              "state_code": "400",
+              "population_diff": 0,
+              "members_diff": -347
+            },
+            {
+              "state_code": "410",
+              "population_diff": 0,
+              "members_diff": -972
+            },
+            {
+              "state_code": "420",
+              "population_diff": 0,
+              "members_diff": -418
+            },
+            {
+              "state_code": "450",
+              "population_diff": 0,
+              "members_diff": -2509
+            },
+            {
+              "state_code": "460",
+              "population_diff": 0,
+              "members_diff": -396
+            },
+            {
+              "state_code": "470",
+              "population_diff": 0,
+              "members_diff": -3659
+            },
+            {
+              "state_code": "480",
+              "population_diff": 0,
+              "members_diff": -3099
+            },
+            {
+              "state_code": "490",
+              "population_diff": 0,
+              "members_diff": -19
+            },
+            {
+              "state_code": "510",
+              "population_diff": 0,
+              "members_diff": -1189
+            },
+            {
+              "state_code": "530",
+              "population_diff": 0,
+              "members_diff": -690
+            },
+            {
+              "state_code": "540",
+              "population_diff": 0,
+              "members_diff": -148
+            },
+            {
+              "state_code": "550",
+              "population_diff": 0,
+              "members_diff": -535
+            },
+            {
+              "state_code": "560",
+              "population_diff": 0,
+              "members_diff": -222
+            }
+          ],
+          "nation_validation": null
+        }
+      },
+      "1936": {
+        "year": 1936,
+        "dataset_code": "1936_cRelig",
+        "nhgis_id": "ds74",
+        "table_codes": [
+          {
+            "source_code": "NT1",
+            "nhgis_code": "BTU",
+            "description": "Population in Census Years"
+          },
+          {
+            "source_code": "NT2",
+            "nhgis_code": "BTV",
+            "description": "Number of Members by Churches"
+          },
+          {
+            "source_code": "NT3",
+            "nhgis_code": "BTW",
+            "description": "Members of All Denominations, 1936"
+          }
+        ],
+        "boundary_vintage": 1930,
+        "boundary_set_id": "us-county-1930-tl2008",
+        "source_rows": 3098,
+        "source_rows_joined_to_boundary": 3098,
+        "boundary_feature_count": 3110,
+        "join_coverage": "3098/3110",
+        "source_unmatched_count": 0,
+        "source_unmatched_gisjoins": [],
+        "boundary_without_source_count": 12,
+        "boundary_without_source_gisjoins": ["G0250015", "G0250035", "G0250075", "G0250115", "G1100010", "G1300395", "G1302015", "G1550015", "G1550035", "G1550075", "G1550095", "G1600875"],
+        "complete_metric_rows": 3098,
+        "all_rows_flagged_wave_coverage_differs": true,
+        "validation": {
+          "state_validation_source": "nhgis0002_ds74_1936_state.csv",
+          "state_result": "matched_states_exact_with_state_file_coverage_difference",
+          "matched_state_count": 48,
+          "county_state_count": 48,
+          "validation_state_count": 49,
+          "missing_in_state_file": [],
+          "extra_in_state_file": "110",
+          "county_sums_matched_states": {
+            "population": 131006184,
+            "members": 55331856
+          },
+          "state_sums_matched_states": {
+            "population": 131006184,
+            "members": 55331856
+          },
+          "differences_matched_states": {
+            "population": 0,
+            "members": 0
+          },
+          "mismatch_state_count": 0,
+          "mismatch_states": [],
+          "nation_validation": null
+        }
+      }
+    }
+  },
+  "privacy": "public",
+  "licence_status": "accepted_by_jb_pending_ipums_confirmation",
+  "downstream_status": "public",
+  "source_datasets": [
+    {
+      "source_dataset_id": "nhgis-ds10-1850-county",
+      "name": "1850 Census: Population, Agriculture & Other Data [US, States & Counties]",
+      "provider": "IPUMS NHGIS, University of Minnesota",
+      "url": "https://api.ipums.org/metadata/nhgis/datasets/1850_cPAX?version=2",
+      "documentation_url": "https://www.nhgis.org/documentation/tabular-data",
+      "retrieval_date": "2026-07-06",
+      "role": "map_source",
+      "dataset_code": "1850_cPAX",
+      "nhgis_id": "ds10",
+      "geographic_level": "county",
+      "table_records": [
+        {
+          "source_code": "NT1",
+          "nhgis_code": "ADQ",
+          "description": "Total Population",
+          "role": "population",
+          "variable_codes": "ADQ001"
+        },
+        {
+          "source_code": "NT47",
+          "nhgis_code": "AET",
+          "description": "Churches by Denomination",
+          "role": "denomination_detail",
+          "variable_codes": "AET001-AET023"
+        },
+        {
+          "source_code": "NT48",
+          "nhgis_code": "AEU",
+          "description": "Aggregate Accommodations of Churches by Denomination",
+          "role": "denomination_detail",
+          "variable_codes": "AEU001-AEU023"
+        },
+        {
+          "source_code": "NT49",
+          "nhgis_code": "AEV",
+          "description": "Value of Church Property by Denomination",
+          "role": "denomination_detail",
+          "variable_codes": "AEV001-AEV023"
+        },
+        {
+          "source_code": "NT50",
+          "nhgis_code": "AEX",
+          "description": "Total Number of Churches",
+          "role": "map_count",
+          "variable_codes": "AEX001"
+        },
+        {
+          "source_code": "NT51",
+          "nhgis_code": "AEY",
+          "description": "Total Aggregate Accommodations of Churches",
+          "role": "map_rate",
+          "variable_codes": "AEY001"
+        },
+        {
+          "source_code": "NT52",
+          "nhgis_code": "AEZ",
+          "description": "Total Value of Church Property",
+          "role": "validation",
+          "variable_codes": "AEZ001"
+        }
+      ],
+      "citation": "Jonathan Schroeder, David Van Riper, Steven Manson, Grace Cooper, Zachary Krause, Tracy Kugler, Tsu Zhu, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 21.0 [dataset]. Minneapolis, MN: IPUMS. 2026. http://doi.org/10.18128/D050.V21.0",
+      "short_citation": "IPUMS NHGIS, University of Minnesota, www.nhgis.org.",
+      "licence_position": "publish the derived rates with citation and a pointer to the original NHGIS data, now; he judges the risk acceptable for a research website and takes responsibility for it.",
+      "source_terms_summary": "NHGIS codebooks state that redistribution requires permission except for subsets published to meet journal requirements; derived rates are published here under JB's 2026-07-06 licence decision pending IPUMS/NHGIS confirmation."
+    },
+    {
+      "source_dataset_id": "nhgis-ds14-1860-county",
+      "name": "1860 Census: Population, Agriculture & Other Data [US, States & Counties]",
+      "provider": "IPUMS NHGIS, University of Minnesota",
+      "url": "https://api.ipums.org/metadata/nhgis/datasets/1860_cPAX?version=2",
+      "documentation_url": "https://www.nhgis.org/documentation/tabular-data",
+      "retrieval_date": "2026-07-06",
+      "role": "map_source",
+      "dataset_code": "1860_cPAX",
+      "nhgis_id": "ds14",
+      "geographic_level": "county",
+      "table_records": [
+        {
+          "source_code": "NT1",
+          "nhgis_code": "AG3",
+          "description": "Total Population",
+          "role": "population",
+          "variable_codes": "AG3001"
+        },
+        {
+          "source_code": "NT26",
+          "nhgis_code": "AHL",
+          "description": "Churches by Denomination",
+          "role": "denomination_detail",
+          "variable_codes": "AHL001-AHL022"
+        },
+        {
+          "source_code": "NT28",
+          "nhgis_code": "AHN",
+          "description": "Aggregate Accommodations of Churches by Denomination",
+          "role": "denomination_detail",
+          "variable_codes": "AHN001-AHN022"
+        },
+        {
+          "source_code": "NT30",
+          "nhgis_code": "AHQ",
+          "description": "Value of Church Property by Denomination",
+          "role": "denomination_detail",
+          "variable_codes": "AHQ001-AHQ022"
+        },
+        {
+          "source_code": "NT32",
+          "nhgis_code": "AHS",
+          "description": "Total Churches",
+          "role": "map_count",
+          "variable_codes": "AHS001"
+        },
+        {
+          "source_code": "NT33",
+          "nhgis_code": "AHT",
+          "description": "Total Aggregate Accommodations of Churches",
+          "role": "map_rate",
+          "variable_codes": "AHT001"
+        },
+        {
+          "source_code": "NT34",
+          "nhgis_code": "AHU",
+          "description": "Total Value of Church Property",
+          "role": "validation",
+          "variable_codes": "AHU001"
+        }
+      ],
+      "citation": "Jonathan Schroeder, David Van Riper, Steven Manson, Grace Cooper, Zachary Krause, Tracy Kugler, Tsu Zhu, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 21.0 [dataset]. Minneapolis, MN: IPUMS. 2026. http://doi.org/10.18128/D050.V21.0",
+      "short_citation": "IPUMS NHGIS, University of Minnesota, www.nhgis.org.",
+      "licence_position": "publish the derived rates with citation and a pointer to the original NHGIS data, now; he judges the risk acceptable for a research website and takes responsibility for it.",
+      "source_terms_summary": "NHGIS codebooks state that redistribution requires permission except for subsets published to meet journal requirements; derived rates are published here under JB's 2026-07-06 licence decision pending IPUMS/NHGIS confirmation."
+    },
+    {
+      "source_dataset_id": "nhgis-ds17-1870-county",
+      "name": "1870 Census: Population, Agriculture & Other Data [US, States & Counties]",
+      "provider": "IPUMS NHGIS, University of Minnesota",
+      "url": "https://api.ipums.org/metadata/nhgis/datasets/1870_cPAX?version=2",
+      "documentation_url": "https://www.nhgis.org/documentation/tabular-data",
+      "retrieval_date": "2026-07-06",
+      "role": "map_source",
+      "dataset_code": "1870_cPAX",
+      "nhgis_id": "ds17",
+      "geographic_level": "county",
+      "table_records": [
+        {
+          "source_code": "NT1",
+          "nhgis_code": "AJ3",
+          "description": "Total Population",
+          "role": "population",
+          "variable_codes": "AJ3001"
+        },
+        {
+          "source_code": "NT41",
+          "nhgis_code": "AK5",
+          "description": "Religious Organizations by Denomination",
+          "role": "denomination_detail",
+          "variable_codes": "AK5001-AK5019"
+        },
+        {
+          "source_code": "NT42",
+          "nhgis_code": "AK6",
+          "description": "Religious Sittings by Denomination",
+          "role": "denomination_detail",
+          "variable_codes": "AK6001-AK6019"
+        },
+        {
+          "source_code": "NT43",
+          "nhgis_code": "AK7",
+          "description": "Total Religious Organizations of All Denominations",
+          "role": "validation",
+          "variable_codes": "AK7001"
+        },
+        {
+          "source_code": "NT44",
+          "nhgis_code": "AK8",
+          "description": "Total Religious Edifices of All Denominations",
+          "role": "map_count",
+          "variable_codes": "AK8001"
+        },
+        {
+          "source_code": "NT45",
+          "nhgis_code": "AK9",
+          "description": "Total Religious Sittings of All Denominations",
+          "role": "map_rate",
+          "variable_codes": "AK9001"
+        },
+        {
+          "source_code": "NT46",
+          "nhgis_code": "ALA",
+          "description": "Value of Property of all Denominations",
+          "role": "validation",
+          "variable_codes": "ALA001"
+        }
+      ],
+      "citation": "Jonathan Schroeder, David Van Riper, Steven Manson, Grace Cooper, Zachary Krause, Tracy Kugler, Tsu Zhu, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 21.0 [dataset]. Minneapolis, MN: IPUMS. 2026. http://doi.org/10.18128/D050.V21.0",
+      "short_citation": "IPUMS NHGIS, University of Minnesota, www.nhgis.org.",
+      "licence_position": "publish the derived rates with citation and a pointer to the original NHGIS data, now; he judges the risk acceptable for a research website and takes responsibility for it.",
+      "source_terms_summary": "NHGIS codebooks state that redistribution requires permission except for subsets published to meet journal requirements; derived rates are published here under JB's 2026-07-06 licence decision pending IPUMS/NHGIS confirmation."
+    },
+    {
+      "source_dataset_id": "nhgis-ds28-1890-county",
+      "name": "1890 Census: Religious Bodies Data [US, States & Counties]",
+      "provider": "IPUMS NHGIS, University of Minnesota",
+      "url": "https://api.ipums.org/metadata/nhgis/datasets/1890_cRelig?version=2",
+      "documentation_url": "https://www.nhgis.org/documentation/tabular-data",
+      "retrieval_date": "2026-07-06",
+      "role": "map_source",
+      "dataset_code": "1890_cRelig",
+      "nhgis_id": "ds28",
+      "geographic_level": "county",
+      "table_records": [
+        {
+          "source_code": "NT1",
+          "nhgis_code": "AV4",
+          "description": "Total Population",
+          "role": "population",
+          "variable_codes": "AV4001"
+        },
+        {
+          "source_code": "NT3",
+          "nhgis_code": "AWA",
+          "description": "Number of Church Edifices by Type of Church Organization",
+          "role": "denomination_detail",
+          "variable_codes": "AWA001-AWA060"
+        },
+        {
+          "source_code": "NT4",
+          "nhgis_code": "AWB",
+          "description": "Approximate Seating Capacity of Churches by Type of Church Organization",
+          "role": "denomination_detail",
+          "variable_codes": "AWB001-AWB060"
+        },
+        {
+          "source_code": "NT5",
+          "nhgis_code": "AWC",
+          "description": "Value of Church Property by Type of Church Organization",
+          "role": "denomination_detail",
+          "variable_codes": "AWC001-AWC060"
+        },
+        {
+          "source_code": "NT7",
+          "nhgis_code": "AWE",
+          "description": "Total Number of Church Organizations",
+          "role": "validation",
+          "variable_codes": "AWE001"
+        },
+        {
+          "source_code": "NT8",
+          "nhgis_code": "AWF",
+          "description": "Total Number of Church Edifices",
+          "role": "map_count",
+          "variable_codes": "AWF001"
+        },
+        {
+          "source_code": "NT9",
+          "nhgis_code": "AWG",
+          "description": "Approximate Seating Capacity of All Churches",
+          "role": "map_rate",
+          "variable_codes": "AWG001"
+        },
+        {
+          "source_code": "NT11",
+          "nhgis_code": "AV6",
+          "description": "Value of All Church Property",
+          "role": "validation",
+          "variable_codes": "AV6001"
+        },
+        {
+          "source_code": "NT12",
+          "nhgis_code": "AV7",
+          "description": "Total Number of Church Communicants or Members",
+          "role": "not_mapped",
+          "variable_codes": "AV7001"
+        }
+      ],
+      "citation": "Jonathan Schroeder, David Van Riper, Steven Manson, Grace Cooper, Zachary Krause, Tracy Kugler, Tsu Zhu, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 21.0 [dataset]. Minneapolis, MN: IPUMS. 2026. http://doi.org/10.18128/D050.V21.0",
+      "short_citation": "IPUMS NHGIS, University of Minnesota, www.nhgis.org.",
+      "licence_position": "publish the derived rates with citation and a pointer to the original NHGIS data, now; he judges the risk acceptable for a research website and takes responsibility for it.",
+      "source_terms_summary": "NHGIS codebooks state that redistribution requires permission except for subsets published to meet journal requirements; derived rates are published here under JB's 2026-07-06 licence decision pending IPUMS/NHGIS confirmation."
+    },
+    {
+      "source_dataset_id": "nhgis-ds33-1906-county",
+      "name": "1906 Census of Religious Bodies: Religious Bodies Data [States & Counties]",
+      "provider": "IPUMS NHGIS, University of Minnesota",
+      "url": "https://api.ipums.org/metadata/nhgis/datasets/1906_cRelig?version=2",
+      "documentation_url": "https://www.nhgis.org/documentation/tabular-data",
+      "retrieval_date": "2026-07-06",
+      "role": "map_source",
+      "dataset_code": "1906_cRelig",
+      "nhgis_id": "ds33",
+      "geographic_level": "county",
+      "table_records": [
+        {
+          "source_code": "NT1",
+          "nhgis_code": "AZ8",
+          "description": "Population in Census Years",
+          "role": "population",
+          "variable_codes": "AZ8001-AZ8002"
+        },
+        {
+          "source_code": "NT2",
+          "nhgis_code": "AZ9",
+          "description": "Number of Members by Churches",
+          "role": "denomination_detail",
+          "variable_codes": "AZ9001-AZ9092"
+        },
+        {
+          "source_code": "NT3",
+          "nhgis_code": "A0A",
+          "description": "Members of All Denominations, 1906",
+          "role": "map_rate",
+          "variable_codes": "A0A001"
+        }
+      ],
+      "citation": "Jonathan Schroeder, David Van Riper, Steven Manson, Grace Cooper, Zachary Krause, Tracy Kugler, Tsu Zhu, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 21.0 [dataset]. Minneapolis, MN: IPUMS. 2026. http://doi.org/10.18128/D050.V21.0",
+      "short_citation": "IPUMS NHGIS, University of Minnesota, www.nhgis.org.",
+      "licence_position": "publish the derived rates with citation and a pointer to the original NHGIS data, now; he judges the risk acceptable for a research website and takes responsibility for it.",
+      "source_terms_summary": "NHGIS codebooks state that redistribution requires permission except for subsets published to meet journal requirements; derived rates are published here under JB's 2026-07-06 licence decision pending IPUMS/NHGIS confirmation."
+    },
+    {
+      "source_dataset_id": "nhgis-ds41-1916-county",
+      "name": "1916 Census of Religious Bodies: Religious Bodies Data [States & Counties]",
+      "provider": "IPUMS NHGIS, University of Minnesota",
+      "url": "https://api.ipums.org/metadata/nhgis/datasets/1916_cRelig?version=2",
+      "documentation_url": "https://www.nhgis.org/documentation/tabular-data",
+      "retrieval_date": "2026-07-06",
+      "role": "map_source",
+      "dataset_code": "1916_cRelig",
+      "nhgis_id": "ds41",
+      "geographic_level": "county",
+      "table_records": [
+        {
+          "source_code": "NT1",
+          "nhgis_code": "A7F",
+          "description": "Population in Census Years",
+          "role": "population",
+          "variable_codes": "A7F001-A7F002"
+        },
+        {
+          "source_code": "NT2",
+          "nhgis_code": "A7G",
+          "description": "Number of Members by Churches",
+          "role": "denomination_detail",
+          "variable_codes": "A7G001-A7G109"
+        },
+        {
+          "source_code": "NT3",
+          "nhgis_code": "A7H",
+          "description": "Members of All Denominations, 1916",
+          "role": "map_rate",
+          "variable_codes": "A7H001"
+        }
+      ],
+      "citation": "Jonathan Schroeder, David Van Riper, Steven Manson, Grace Cooper, Zachary Krause, Tracy Kugler, Tsu Zhu, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 21.0 [dataset]. Minneapolis, MN: IPUMS. 2026. http://doi.org/10.18128/D050.V21.0",
+      "short_citation": "IPUMS NHGIS, University of Minnesota, www.nhgis.org.",
+      "licence_position": "publish the derived rates with citation and a pointer to the original NHGIS data, now; he judges the risk acceptable for a research website and takes responsibility for it.",
+      "source_terms_summary": "NHGIS codebooks state that redistribution requires permission except for subsets published to meet journal requirements; derived rates are published here under JB's 2026-07-06 licence decision pending IPUMS/NHGIS confirmation."
+    },
+    {
+      "source_dataset_id": "nhgis-ds51-1926-county",
+      "name": "1926 Census of Religious Bodies: Religious Bodies Data [States & Counties]",
+      "provider": "IPUMS NHGIS, University of Minnesota",
+      "url": "https://api.ipums.org/metadata/nhgis/datasets/1926_cRelig?version=2",
+      "documentation_url": "https://www.nhgis.org/documentation/tabular-data",
+      "retrieval_date": "2026-07-06",
+      "role": "map_source",
+      "dataset_code": "1926_cRelig",
+      "nhgis_id": "ds51",
+      "geographic_level": "county",
+      "table_records": [
+        {
+          "source_code": "NT1",
+          "nhgis_code": "BCU",
+          "description": "Population in Census Years",
+          "role": "population",
+          "variable_codes": "BCU001-BCU002"
+        },
+        {
+          "source_code": "NT2",
+          "nhgis_code": "BCV",
+          "description": "Number of Members by Churches",
+          "role": "denomination_detail",
+          "variable_codes": "BCV001-BCV082"
+        },
+        {
+          "source_code": "NT3",
+          "nhgis_code": "BCW",
+          "description": "Members of All Denominations, 1926",
+          "role": "map_rate",
+          "variable_codes": "BCW001"
+        }
+      ],
+      "citation": "Jonathan Schroeder, David Van Riper, Steven Manson, Grace Cooper, Zachary Krause, Tracy Kugler, Tsu Zhu, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 21.0 [dataset]. Minneapolis, MN: IPUMS. 2026. http://doi.org/10.18128/D050.V21.0",
+      "short_citation": "IPUMS NHGIS, University of Minnesota, www.nhgis.org.",
+      "licence_position": "publish the derived rates with citation and a pointer to the original NHGIS data, now; he judges the risk acceptable for a research website and takes responsibility for it.",
+      "source_terms_summary": "NHGIS codebooks state that redistribution requires permission except for subsets published to meet journal requirements; derived rates are published here under JB's 2026-07-06 licence decision pending IPUMS/NHGIS confirmation."
+    },
+    {
+      "source_dataset_id": "nhgis-ds74-1936-county",
+      "name": "1936 Census of Religious Bodies: Religious Bodies Data [States & Counties]",
+      "provider": "IPUMS NHGIS, University of Minnesota",
+      "url": "https://api.ipums.org/metadata/nhgis/datasets/1936_cRelig?version=2",
+      "documentation_url": "https://www.nhgis.org/documentation/tabular-data",
+      "retrieval_date": "2026-07-06",
+      "role": "map_source",
+      "dataset_code": "1936_cRelig",
+      "nhgis_id": "ds74",
+      "geographic_level": "county",
+      "table_records": [
+        {
+          "source_code": "NT1",
+          "nhgis_code": "BTU",
+          "description": "Population in Census Years",
+          "role": "population",
+          "variable_codes": "BTU001-BTU002"
+        },
+        {
+          "source_code": "NT2",
+          "nhgis_code": "BTV",
+          "description": "Number of Members by Churches",
+          "role": "denomination_detail",
+          "variable_codes": "BTV001-BTV074"
+        },
+        {
+          "source_code": "NT3",
+          "nhgis_code": "BTW",
+          "description": "Members of All Denominations, 1936",
+          "role": "map_rate",
+          "variable_codes": "BTW001"
+        }
+      ],
+      "citation": "Jonathan Schroeder, David Van Riper, Steven Manson, Grace Cooper, Zachary Krause, Tracy Kugler, Tsu Zhu, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 21.0 [dataset]. Minneapolis, MN: IPUMS. 2026. http://doi.org/10.18128/D050.V21.0",
+      "short_citation": "IPUMS NHGIS, University of Minnesota, www.nhgis.org.",
+      "licence_position": "publish the derived rates with citation and a pointer to the original NHGIS data, now; he judges the risk acceptable for a research website and takes responsibility for it.",
+      "source_terms_summary": "NHGIS codebooks state that redistribution requires permission except for subsets published to meet journal requirements; derived rates are published here under JB's 2026-07-06 licence decision pending IPUMS/NHGIS confirmation."
+    },
+    {
+      "source_dataset_id": "nhgis-shapefile-us-county-1850-tl2008",
+      "name": "NHGIS county boundary shapefile, 1850 vintage, 2008 TIGER/Line+ basis",
+      "provider": "IPUMS NHGIS, University of Minnesota",
+      "url": "https://api.ipums.org/metadata/nhgis/shapefiles?version=2",
+      "retrieval_date": "2026-07-06",
+      "role": "boundary",
+      "shapefile_code": "us_county_1850_tl2008",
+      "citation": "Jonathan Schroeder, David Van Riper, Steven Manson, Grace Cooper, Zachary Krause, Tracy Kugler, Tsu Zhu, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 21.0 [dataset]. Minneapolis, MN: IPUMS. 2026. http://doi.org/10.18128/D050.V21.0",
+      "short_citation": "IPUMS NHGIS, University of Minnesota, www.nhgis.org.",
+      "licence_position": "publish the derived rates with citation and a pointer to the original NHGIS data, now; he judges the risk acceptable for a research website and takes responsibility for it.",
+      "notes": "Selected as a period county boundary; the build does not crosswalk these rows onto 2020 counties."
+    },
+    {
+      "source_dataset_id": "nhgis-shapefile-us-county-1860-tl2008",
+      "name": "NHGIS county boundary shapefile, 1860 vintage, 2008 TIGER/Line+ basis",
+      "provider": "IPUMS NHGIS, University of Minnesota",
+      "url": "https://api.ipums.org/metadata/nhgis/shapefiles?version=2",
+      "retrieval_date": "2026-07-06",
+      "role": "boundary",
+      "shapefile_code": "us_county_1860_tl2008",
+      "citation": "Jonathan Schroeder, David Van Riper, Steven Manson, Grace Cooper, Zachary Krause, Tracy Kugler, Tsu Zhu, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 21.0 [dataset]. Minneapolis, MN: IPUMS. 2026. http://doi.org/10.18128/D050.V21.0",
+      "short_citation": "IPUMS NHGIS, University of Minnesota, www.nhgis.org.",
+      "licence_position": "publish the derived rates with citation and a pointer to the original NHGIS data, now; he judges the risk acceptable for a research website and takes responsibility for it.",
+      "notes": "Selected as a period county boundary; the build does not crosswalk these rows onto 2020 counties."
+    },
+    {
+      "source_dataset_id": "nhgis-shapefile-us-county-1870-tl2008",
+      "name": "NHGIS county boundary shapefile, 1870 vintage, 2008 TIGER/Line+ basis",
+      "provider": "IPUMS NHGIS, University of Minnesota",
+      "url": "https://api.ipums.org/metadata/nhgis/shapefiles?version=2",
+      "retrieval_date": "2026-07-06",
+      "role": "boundary",
+      "shapefile_code": "us_county_1870_tl2008",
+      "citation": "Jonathan Schroeder, David Van Riper, Steven Manson, Grace Cooper, Zachary Krause, Tracy Kugler, Tsu Zhu, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 21.0 [dataset]. Minneapolis, MN: IPUMS. 2026. http://doi.org/10.18128/D050.V21.0",
+      "short_citation": "IPUMS NHGIS, University of Minnesota, www.nhgis.org.",
+      "licence_position": "publish the derived rates with citation and a pointer to the original NHGIS data, now; he judges the risk acceptable for a research website and takes responsibility for it.",
+      "notes": "Selected as a period county boundary; the build does not crosswalk these rows onto 2020 counties."
+    },
+    {
+      "source_dataset_id": "nhgis-shapefile-us-county-1890-tl2008",
+      "name": "NHGIS county boundary shapefile, 1890 vintage, 2008 TIGER/Line+ basis",
+      "provider": "IPUMS NHGIS, University of Minnesota",
+      "url": "https://api.ipums.org/metadata/nhgis/shapefiles?version=2",
+      "retrieval_date": "2026-07-06",
+      "role": "boundary",
+      "shapefile_code": "us_county_1890_tl2008",
+      "citation": "Jonathan Schroeder, David Van Riper, Steven Manson, Grace Cooper, Zachary Krause, Tracy Kugler, Tsu Zhu, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 21.0 [dataset]. Minneapolis, MN: IPUMS. 2026. http://doi.org/10.18128/D050.V21.0",
+      "short_citation": "IPUMS NHGIS, University of Minnesota, www.nhgis.org.",
+      "licence_position": "publish the derived rates with citation and a pointer to the original NHGIS data, now; he judges the risk acceptable for a research website and takes responsibility for it.",
+      "notes": "Selected as a period county boundary; the build does not crosswalk these rows onto 2020 counties."
+    },
+    {
+      "source_dataset_id": "nhgis-shapefile-us-county-1930-tl2008",
+      "name": "NHGIS county boundary shapefile, 1930 vintage, 2008 TIGER/Line+ basis",
+      "provider": "IPUMS NHGIS, University of Minnesota",
+      "url": "https://api.ipums.org/metadata/nhgis/shapefiles?version=2",
+      "retrieval_date": "2026-07-06",
+      "role": "boundary",
+      "shapefile_code": "us_county_1930_tl2008",
+      "citation": "Jonathan Schroeder, David Van Riper, Steven Manson, Grace Cooper, Zachary Krause, Tracy Kugler, Tsu Zhu, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 21.0 [dataset]. Minneapolis, MN: IPUMS. 2026. http://doi.org/10.18128/D050.V21.0",
+      "short_citation": "IPUMS NHGIS, University of Minnesota, www.nhgis.org.",
+      "licence_position": "publish the derived rates with citation and a pointer to the original NHGIS data, now; he judges the risk acceptable for a research website and takes responsibility for it.",
+      "notes": "Selected as a period county boundary; the build does not crosswalk these rows onto 2020 counties."
+    }
+  ],
+  "notes": "The build uses matching period county boundaries for 1850, 1860, 1870, and 1890, and a single 1930 period boundary for 1906, 1916, 1926, and 1936. No nineteenth-century rows are crosswalked onto 2020 counties. Every new row carries wave_coverage_differs."
+}

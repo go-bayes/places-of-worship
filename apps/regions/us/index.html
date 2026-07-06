@@ -35,6 +35,46 @@
           codeProp: "GEOID",
           nameProp: "NAME",
           credit: "U.S. Census Bureau cartographic boundaries (public domain) · 2020 vintage"
+        },
+        county_1930: {
+          label: "County (1930)",
+          boundaries: "data/counties_1930.geojson",
+          summary: "data/area_summary_county_1930.json",
+          codeProp: "GISJOIN",
+          nameProp: "AREA_NAME",
+          credit: "IPUMS NHGIS historical county boundaries · 1930 vintage · 2008 TIGER/Line+ basis"
+        },
+        county_1890: {
+          label: "County (1890)",
+          boundaries: "data/counties_1890.geojson",
+          summary: "data/area_summary_county_1890.json",
+          codeProp: "GISJOIN",
+          nameProp: "AREA_NAME",
+          credit: "IPUMS NHGIS historical county boundaries · 1890 vintage · 2008 TIGER/Line+ basis"
+        },
+        county_1870: {
+          label: "County (1870)",
+          boundaries: "data/counties_1870.geojson",
+          summary: "data/area_summary_county_1870.json",
+          codeProp: "GISJOIN",
+          nameProp: "AREA_NAME",
+          credit: "IPUMS NHGIS historical county boundaries · 1870 vintage · 2008 TIGER/Line+ basis"
+        },
+        county_1860: {
+          label: "County (1860)",
+          boundaries: "data/counties_1860.geojson",
+          summary: "data/area_summary_county_1860.json",
+          codeProp: "GISJOIN",
+          nameProp: "AREA_NAME",
+          credit: "IPUMS NHGIS historical county boundaries · 1860 vintage · 2008 TIGER/Line+ basis"
+        },
+        county_1850: {
+          label: "County (1850)",
+          boundaries: "data/counties_1850.geojson",
+          summary: "data/area_summary_county_1850.json",
+          codeProp: "GISJOIN",
+          nameProp: "AREA_NAME",
+          credit: "IPUMS NHGIS historical county boundaries · 1850 vintage · 2008 TIGER/Line+ basis"
         }
       },
       defaultLevel: "county",
@@ -50,19 +90,19 @@
       // showing them permanently pending.
       metricLabels: {
         religious_affiliation_percent: {
-          label: "Adherents per 100 population",
-          note: "reported congregations and adherents; participating bodies and definitions differ by wave, including limited 1952/1971 Black-denomination coverage"
+          label: "Seating, members, or adherents per 100 population",
+          note: "church seating in 1850-1890, members in 1906-1936, and reported congregational adherents or members in 1952-2020"
         },
         religious_change: {
-          label: "Change in adherents per 100 population",
-          note: "wave-to-wave percentage-point change in reported adherence"
+          label: "Change in the per-100 measure",
+          note: "wave-to-wave percentage-point change within the selected boundary level"
         }
       },
       metricsAvailable: ["religious_affiliation_percent", "religious_change"],
       // ~350k US places of worship in OSM bury the county choropleth at
       // national zoom; fade the overview dot tier (dots ramp back in from z6)
       overviewDotOpacity: 0.12,
-      popupDenominatorNote: "Rates use county resident population as the denominator; values can exceed 100 where adherents are counted at their congregation's county rather than their home county.",
+      popupDenominatorNote: "Rates use the source-supplied county population denominator. The construct shifts from church seating to members to adherents across the historical series.",
       cityPresets: [
         { label: "New York City", shortLabel: "NYC", coords: [-73.9857, 40.7484], zoom: 10 },
         { label: "Los Angeles", shortLabel: "LA", coords: [-118.2437, 34.0522], zoom: 10 },
@@ -78,9 +118,10 @@
       geocode: { country: "us", biasLngLat: [-98.6, 39.8] },
       onboarding: {
         title: "US research map",
-        intro: "Places of worship across the United States, with county overlays from ARDA's Churches and Church Membership / U.S. Religion Census series, 1952 to 2020.",
+        intro: "Places of worship across the United States, with county overlays from NHGIS church statistics, the Census of Religious Bodies, and ARDA's Churches and Church Membership / U.S. Religion Census series, 1850 to 2020.",
         bullets: [
           "The census overlay is on: counties are shaded by adherents per 100 population, as reported by religious bodies to the U.S. Religion Census.",
+          "The historical construct shifts across the series: 1850-1890 shows church seating, 1906-1936 shows members, and 1952-2020 shows adherents reported by religious bodies.",
           "This is not a census affiliation question: the United States census asks no religion question. The data are institutional counts submitted by participating denominations and faith groups.",
           "Participating bodies and definitions differ by wave; the 1952 file has only a limited Black-denomination estimate, and the 1971 file does not systematically cover historically Black denominations.",
           "Open <strong>Census</strong> (top centre) for the metric and year slider.",
@@ -93,8 +134,8 @@
       wordmarkLinks: [
         { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
       ],
-      censusSourceAttribution: 'Congregations &amp; adherents © <a href="https://www.usreligioncensus.org/" target="_blank" rel="noopener">U.S. Religion Census</a> / <a href="https://www.thearda.com/" target="_blank" rel="noopener">Association of Religion Data Archives (ARDA)</a> · Boundaries © <a href="https://www.census.gov/" target="_blank" rel="noopener">U.S. Census Bureau</a> (public domain)',
-      censusFlagNote: "* historical wave coverage differs from later U.S. Religion Census waves, or the county boundary was crosswalked to the 2020 county layer (see the manifest validation block)."
+      censusSourceAttribution: 'Congregations &amp; adherents © <a href="https://www.usreligioncensus.org/" target="_blank" rel="noopener">U.S. Religion Census</a> / <a href="https://www.thearda.com/" target="_blank" rel="noopener">Association of Religion Data Archives (ARDA)</a> · Historical tables © <a href="https://www.nhgis.org/" target="_blank" rel="noopener">IPUMS NHGIS</a> · Boundaries © <a href="https://www.census.gov/" target="_blank" rel="noopener">U.S. Census Bureau</a> (public domain) / <a href="https://www.nhgis.org/" target="_blank" rel="noopener">IPUMS NHGIS</a>',
+      censusFlagNote: "* historical wave coverage differs across source series, period-boundary vintage differs from the source wave, or a 1952-2020 county boundary was crosswalked to the 2020 county layer (see the manifests)."
     };
   </script>
   <script src="../_shared/region-map.js?v=20260706b"></script>

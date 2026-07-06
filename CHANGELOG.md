@@ -4,6 +4,19 @@
 
 ### 2026-07-06
 
+- Extended the United States research map back to 1850 with IPUMS NHGIS
+  county tables. Added derived NHGIS area summaries for 1850, 1860,
+  1870, 1890, and the 1906/1916/1926/1936 Census of Religious Bodies,
+  plus five period county boundary levels (`county_1850`,
+  `county_1860`, `county_1870`, `county_1890`, `county_1930`) simplified
+  to 1.46-2.63 MB each. The US page now attributes historical tables to
+  IPUMS NHGIS, names the construct shift from church seating to members
+  to adherents, and keeps the nineteenth-century data on period
+  boundaries rather than crosswalking them onto 2020 counties. New
+  manifest: `docs/manifests/us-nhgis-county-1850-1936.json`; raw NHGIS
+  ZIPs remain ignored under `data/raw/us_nhgis/` and await private
+  archive upload.
+
 - Fixed the country maps 404ing on the live site: GitHub Pages runs
   Jekyll by default and Jekyll silently excludes underscore-prefixed
   directories, so `apps/regions/_shared/region-map.js` — the shared

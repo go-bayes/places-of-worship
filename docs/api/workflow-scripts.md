@@ -6,7 +6,7 @@ helper function in `scripts/`. The aim is to make the data path readable:
 source extraction, task generation, Convex seeding, review export, and handoff
 to `pow`.
 
-Last reviewed: 2026-05-14.
+Last reviewed: 2026-07-06.
 
 ## Boundary Rule
 
@@ -66,6 +66,7 @@ from the live RA/review loop.
 | `scripts/clean_nz_places.py` | `main()` | Apply New Zealand-specific cleaning rules to current place records. | Affects current map data and review queues; preserve audit notes when rules change. |
 | `scripts/build_nz_review_queue.py` | `main()` | Build the New Zealand manual review queue from cleaned records. | Useful for non-temporal cleanup and broad quality review. |
 | `scripts/build_nz_area_summary.R` | `make_indicators()` / `make_visual_layers()` | Build territorial-authority area summaries and map visual layers. | Current place counts are not yet historical target-year counts. |
+| `scripts/build_us_nhgis_deep_past.R` | script entry point | Build United States NHGIS county deep-history products for 1850 to 1936. | Reads ignored NHGIS extracts under `data/raw/us_nhgis/`; writes derived public map products and `docs/manifests/us-nhgis-county-1850-1936.json`. |
 | `scripts/extract_global_data.R` | `main()` | Extract global OSM place-of-worship records into country partitions. | R-first replacement for the older permissive global extractor. |
 | `scripts/clean_global_places.R` | `main()` | Clean global country partitions with deterministic filtering rules. | Source for global cleaning reference behaviour. |
 | `scripts/deduplicate_global_places.R` | `main()` | Deduplicate cleaned global country partitions. | Use after cleaning and before review-queue generation. |
