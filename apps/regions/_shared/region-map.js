@@ -3027,10 +3027,36 @@ function openCensusPopup(feature, lngLat) {
   trackPlacePopup(popup);
 }
 
+// today's OSM snapshot is honest only near the present: when the census
+// year sits more than PLACE_SNAPSHOT_HORIZON years back, the dot layers
+// fade hard and the legend says why — historical place layers must come
+// from accepted events (docs/development/temporal-place-layer.md), not
+// from pretending the present is the past
+const PLACE_SNAPSHOT_HORIZON = 15;
+function placeSnapshotStale() {
+  return censusState.enabled &&
+    (new Date().getFullYear() - censusState.year) > PLACE_SNAPSHOT_HORIZON;
+}
+function syncPlaceDotEra() {
+  const stale = placeSnapshotStale();
+  const overviewBase = RC.overviewDotOpacity ?? 0.75;
+  const ov = stale ? overviewBase * 0.15 : overviewBase;
+  if (map.getLayer(LAYERS.overview)) {
+    map.setPaintProperty(LAYERS.overview, "circle-opacity",
+      ["interpolate", ["linear"], ["zoom"], 0, ov, 5, ov, 6, 0.0]);
+  }
+  if (map.getLayer(LAYERS.places)) {
+    map.setPaintProperty(LAYERS.places, "circle-opacity", stale
+      ? ["interpolate", ["linear"], ["zoom"], 6, 0.05, 9, 0.2, 12, 0.18, 18, 0.18]
+      : ["interpolate", ["linear"], ["zoom"], 6, 0.2, 9, 0.85, 12, 0.75, 18, 0.7]);
+  }
+}
+
 function applyCensusPaint() {
   if (map.getLayer(CENSUS.fill)) {
     map.setPaintProperty(CENSUS.fill, "fill-color", censusFillExpression());
   }
+  syncPlaceDotEra();
   updateCensusLegend();
 }
 
@@ -3071,6 +3097,9 @@ function updateCensusLegend() {
   const washNote = store.hasFlags && metricUsesDenominator(censusState.metric)
     ? `<div class="census-legend-note">pale areas: small or suppressed denominators</div>`
     : "";
+  const dotEraNote = placeSnapshotStale()
+    ? `<div class="census-legend-note">place dots show today's OpenStreetMap places, not ${censusState.year} places — historical place layers are being assembled from evidence</div>`
+    : "";
   // the ramp clamps at the 2nd-98th percentile; mark the ends when
   // values continue beyond them
   const isClamped = store.clamped && store.clamped[censusState.metric];
@@ -3083,7 +3112,8 @@ function updateCensusLegend() {
     `<div class="census-legend-bar" style="background:${rampGradient(stops)}"></div>` +
     `<div class="census-legend-range"><span>${loLabel}</span><span>${hiLabel}</span></div>` +
     `<div class="census-legend-note">${def.note}</div>` +
-    washNote;
+    washNote +
+    dotEraNote;
   markActiveTick();
 }
 
@@ -3115,6 +3145,8 @@ function syncCensusTimeSlider() {
     return;
   }
   const idx = Math.max(0, years.indexOf(censusState.year));
+  const panel = document.getElementById("census-panel");
+  if (panel) panel.classList.toggle("census-long", years.length >= 6);
   timeEl.hidden = false;
   timeEl.innerHTML =
     `<div class="census-time-row">` +
@@ -3166,6 +3198,7 @@ async function setCensusEnabled(on) {
     applyCensusPaint();
   } else {
     removeCensusLayers();
+    syncPlaceDotEra();
     updateCensusLegend();
   }
 }
