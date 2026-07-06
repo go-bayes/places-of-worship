@@ -30,5 +30,6 @@ Rules for the executing agent:
 | `free-contribution-portal.md` | #10 open RA intake design/build | deep-history-schema (types) |
 | `fix-map-two-options.md` | #9 OSM + workbench routes on the maps | none |
 | `us-data-map.md` | first country extension (US counties, RCMS waves) | none |
+| `us-deep-past.md` | US 1850-1936 from NHGIS (licence check blocking) | us-data-map |
 | `manifest-and-docs.md` | #1 + #4 + #8 inventory and doc architecture | best done last |
 | `guy-vu-spreadsheets.md` | #11 historical VU census ingestion | blocked on data arrival |
