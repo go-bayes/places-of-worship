@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "generated_at": "2026-07-03T12:29:03Z",
+  "generated_at": "2026-07-06T05:25:30Z",
   "generated_by": "scripts/build_vu_area_summary.R",
   "country_code": "VU",
   "data_status": "census_religion_live",

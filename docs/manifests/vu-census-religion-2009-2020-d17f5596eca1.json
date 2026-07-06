@@ -2,7 +2,7 @@
  "$schema": "../../schemas/data-manifest.schema.json",
  "schema_version": "data-manifest.v1",
  "manifest_id": "manifest:vu-census-religion:vu:2009-2020:extracted-tables:d17f5596eca1",
- "dataset_id": "vu-census-religion:vu:2009-2020:extracted-tables",
+ "dataset_id": "vu-census-religion:vu:1999-2020:extracted-tables",
  "dataset_version_id": "vu-census-religion:vu:2009-2020:extracted-tables:d17f5596eca1",
  "manifest_sha256": null,
  "supersedes_manifest_id": null,
@@ -36,6 +36,7 @@
  "source": {
   "provider": "Vanuatu Bureau of Statistics (VBoS) / Vanuatu National Statistics Office (VNSO), via SPC Digital Library",
   "source_dataset_ids": [
+   "vnso-1999-census-main-report-t2-10",
    "vbos-2020-census-basic-tables-t3-5",
    "vnso-2009-census-basic-tables-t3-5",
    "vu-2020-province-incl-urban-derived"
@@ -50,6 +51,15 @@
  },
  "input_manifests": [],
  "durable_files": [
+  {
+   "uri": "repo:apps/regions/vu/data/source/vu_religion_by_province_1999_mainreport_t2_10.csv",
+   "storage_provider": "git_repository",
+   "format": "csv",
+   "bytes": 5869,
+   "sha256": "c3faf210c42b2a8e8cf77d975496c3bd48140a8f67f99f0db8243a33b4da8085",
+   "row_count": 98,
+   "notes": "1999 Main Report Table 2.10 religion by province (+ national), transcribed from the print-volume scan received from Guy Lavender Forsyth 2026-07-06 (scan sha256 9cde4182\u2026, git-ignored at data/raw/vu_census_guy/). Every row sums exactly to its total; provinces sum to the national row; national matches 2020 AR Table 30 (its refuse-to-answer 2,374 = do-not-want-to-say 320 + not-stated 2,054). Island rows in the scan await transcription."
+  },
   {
    "uri": "repo:apps/regions/vu/data/source/vu_religion_by_region_2020_basictables_t3_5.csv",
    "storage_provider": "git_repository",
@@ -108,13 +118,13 @@
  "derived_outputs": [
   {
    "uri": "repo:apps/regions/vu/data/area_summary_adm1.json",
-   "sha256": "c08cab2ed7cbe7ff46e15ce2fd9b60dbdc641c814bce4bb58cc658bf74731c91",
+   "sha256": "396d89b4a5300ee75c60a4db7b0a5ee6e8d16258dc07e580bc9e55cba49862c7",
    "built_by": "scripts/build_vu_area_summary.R",
-   "notes": "Provinces 2009+2020; 2020 includes urban municipalities by derivation. Stated-response denominator (total minus refusals and not-stated), matching the NZ product basis."
+   "notes": "Provinces 1999, 2009, 2020; 2020 includes urban municipalities by derivation (1999/2009 published on that basis). Stated-response denominator (total minus refusals and not-stated), matching the NZ product basis."
   },
   {
    "uri": "repo:apps/regions/vu/data/area_summary_adm2.json",
-   "sha256": "49ae21dd5032b08ea8ac1fdac6d6e2599979fc482b4cfa4155c9d3edfdf0d825",
+   "sha256": "edddbf0196c205cc8168f4859dee3bb2db6a86ebeaef45a459b861a4078c38da",
    "built_by": "scripts/build_vu_area_summary.R",
    "notes": "Area councils + urban municipalities 2020 (65 of 65 boundary units matched). 2009 stays pending at this level (published by island). Torres area council is absent from geoBoundaries ADM2, so its 2020 counts are unmapped at this level."
   }
@@ -125,7 +135,9 @@
    "2020: +/-1-2 internal inconsistencies documented as source perturbation, verified against PDF text layer and identical in VBoS Version 2",
    "derived 2020 province shares reproduce published T31 within 0.1pp on all no-religion cells",
    "adm1 2020 population sum 293,536 vs national stated denominator 293,535 (+/-1 perturbation)",
-   "adm2 2020: 65/65 boundary units joined by name"
+   "adm2 2020: 65/65 boundary units joined by name",
+   "1999: all 7 geography rows sum exactly to stated totals; provinces sum to national per category; national row matches T30",
+   "rebuild is idempotent on its own output (r partial-matching bug fixed with exact [[ ]] access)"
   ]
  }
 }

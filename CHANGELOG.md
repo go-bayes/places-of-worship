@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+### 2026-07-06
+
+- The Vanuatu map's census time series now reaches back to 1999. Guy
+  Lavender Forsyth supplied a scan of the print-only 1999 Census Main
+  Report (previously locatable only at the National Library of
+  Australia and SPC Noumea); its Table 2.10 religion-by-island counts
+  were transcribed at province level, validated exactly (every province
+  row sums to its total, provinces sum to the national row, and the
+  national row matches the 2020 Analytical Report's Table 30, whose
+  1999 refuse-to-answer figure equals this table's do-not-want-to-say
+  plus not-stated), and built into `area_summary_adm1.json`. The
+  province slider now walks 1999–2009–2020 and the change metric spans
+  both intercensal periods. Island-level 1999 rows remain in the scan
+  for the planned area-council harmonisation. Also fixed a latent R
+  partial-matching bug in `scripts/build_vu_area_summary.R` (`$` on a
+  missing `population_total` silently matched `population_total_basis`)
+  by switching to exact `[[ ]]` access and writing explicit nulls — the
+  rebuild is now idempotent on its own output.
+
 ### 2026-07-04
 
 - The Vanuatu map now carries real census religion data: provinces for

@@ -72,6 +72,21 @@ fill_rows <- function(rows, agg, year, extra_flag, source_ids_added) {
 
 census_source_datasets <- list(
   list(
+    source_dataset_id = "vnso-1999-census-main-report-t2-10",
+    name = "1999 Vanuatu National Population and Housing Census, Main Report, Table 2.10: population by religion and island of residence",
+    provider = "Vanuatu National Statistics Office (VNSO); print volume digitised by Guy Lavender Forsyth",
+    url = NA,
+    retrieval_date = "2026-07-06",
+    local_path = "apps/regions/vu/data/source/vu_religion_by_province_1999_mainreport_t2_10.csv",
+    licence = list(
+      name = "no explicit licence; government census publication, attributed research use",
+      url = NA,
+      attribution = "Vanuatu National Statistics Office"
+    ),
+    citation = "Vanuatu National Statistics Office (2000). The 1999 Vanuatu National Population and Housing Census, Main Report. Port Vila.",
+    notes = "Print-only volume (previously located only at NLA Canberra/SPC Noumea); scan received from Guy Lavender Forsyth 2026-07-06 and transcribed at province level. Every province row sums exactly to its total and provinces sum to the national row, which matches the national series in Table 30 of the 2020 Analytical Report (its 1999 refuse-to-answer 2,374 equals this table's do-not-want-to-say 320 plus not-stated 2,054). Provinces include urban municipalities (Efate row carries Port Vila; Santo carries Luganville). Island-level rows exist in the scan and await transcription for the area-council harmonisation work."
+  ),
+  list(
     source_dataset_id = "vbos-2020-census-basic-tables-t3-5",
     name = "2020 National Population and Housing Census, Basic Tables Volume 1, Table 3.5: population in private households by religion and region",
     provider = "Vanuatu Bureau of Statistics (VBoS) / Pacific Community (SPC)",
@@ -123,31 +138,48 @@ build_level <- function(summary_path, level) {
   # scaffold rows -> data frame with the source-id list column preserved
   rows <- do.call(rbind, lapply(d$rows, function(r) {
     df <- data.frame(
-      country_code = r$country_code, boundary_set_id = r$boundary_set_id,
-      boundary_level = r$boundary_level, area_unit_id = r$area_unit_id,
-      area_code = r$area_code, area_name = r$area_name, year = r$year,
-      population_total = ifelse(is.null(r$population_total), NA, r$population_total),
-      population_total_basis = r$population_total_basis,
-      religious_affiliation_count = ifelse(is.null(r$religious_affiliation_count), NA, r$religious_affiliation_count),
-      religious_affiliation_percent = ifelse(is.null(r$religious_affiliation_percent), NA, r$religious_affiliation_percent),
-      no_religion_count = ifelse(is.null(r$no_religion_count), NA, r$no_religion_count),
-      no_religion_percent = ifelse(is.null(r$no_religion_percent), NA, r$no_religion_percent),
-      place_count = r$place_count,
-      places_per_10000_residents = ifelse(is.null(r$places_per_10000_residents), NA, r$places_per_10000_residents),
-      place_density_per_sq_km = r$place_density_per_sq_km,
-      land_area_sq_km = r$land_area_sq_km,
-      site_snapshot_date = r$site_snapshot_date,
-      place_count_basis = r$place_count_basis,
-      quality_flag = r$quality_flag,
+      country_code = r[["country_code"]], boundary_set_id = r[["boundary_set_id"]],
+      boundary_level = r[["boundary_level"]], area_unit_id = r[["area_unit_id"]],
+      area_code = r[["area_code"]], area_name = r[["area_name"]], year = r[["year"]],
+      population_total = ifelse(is.null(r[["population_total"]]), NA, r[["population_total"]]),
+      population_total_basis = r[["population_total_basis"]],
+      religious_affiliation_count = ifelse(is.null(r[["religious_affiliation_count"]]), NA, r[["religious_affiliation_count"]]),
+      religious_affiliation_percent = ifelse(is.null(r[["religious_affiliation_percent"]]), NA, r[["religious_affiliation_percent"]]),
+      no_religion_count = ifelse(is.null(r[["no_religion_count"]]), NA, r[["no_religion_count"]]),
+      no_religion_percent = ifelse(is.null(r[["no_religion_percent"]]), NA, r[["no_religion_percent"]]),
+      place_count = r[["place_count"]],
+      places_per_10000_residents = ifelse(is.null(r[["places_per_10000_residents"]]), NA, r[["places_per_10000_residents"]]),
+      place_density_per_sq_km = r[["place_density_per_sq_km"]],
+      land_area_sq_km = r[["land_area_sq_km"]],
+      site_snapshot_date = r[["site_snapshot_date"]],
+      place_count_basis = r[["place_count_basis"]],
+      quality_flag = r[["quality_flag"]],
       stringsAsFactors = FALSE
     )
-    df$source_dataset_ids <- I(list(r$source_dataset_ids))
+    df$source_dataset_ids <- I(list(r[["source_dataset_ids"]]))
     df
   }))
 
   if (level == "adm1") {
+    # provinces gain 1999 (main report table 2.10, digitised by guy lavender
+    # forsyth): clone the 2009 rows as the 1999 scaffold, then fill all years
+    if (!any(rows$year == 1999)) {
+      seed <- rows[rows$year == 2009, ]
+      seed$year <- 1999
+      seed$population_total <- NA
+      seed$population_total_basis <- "stated religious-affiliation response (pending)"
+      seed$religious_affiliation_count <- NA
+      seed$religious_affiliation_percent <- NA
+      seed$no_religion_count <- NA
+      seed$no_religion_percent <- NA
+      seed$places_per_10000_residents <- NA
+      rows <- rbind(rows, seed)
+      rows <- rows[order(rows$area_code, rows$year), ]
+    }
+    agg1999 <- aggregate_census(file.path(src_dir, "vu_religion_by_province_1999_mainreport_t2_10.csv"), "province")
     agg2009 <- aggregate_census(file.path(src_dir, "vu_religion_by_province_2009_basictables_t3_5.csv"), "province")
     agg2020 <- aggregate_census(file.path(src_dir, "vu_religion_by_province_2020_incl_urban_DERIVED.csv"), geo_col = "province")
+    rows <- fill_rows(rows, agg1999, 1999, "", "vnso-1999-census-main-report-t2-10")
     rows <- fill_rows(rows, agg2009, 2009, "", "vnso-2009-census-basic-tables-t3-5")
     rows <- fill_rows(rows, agg2020, 2020, "province_2020_includes_urban_derived",
                       c("vbos-2020-census-basic-tables-t3-5", "vu-2020-province-incl-urban-derived"))
@@ -167,14 +199,14 @@ build_level <- function(summary_path, level) {
 
   d$rows <- lapply(seq_len(nrow(rows)), function(i) {
     r <- as.list(rows[i, setdiff(names(rows), "source_dataset_ids")])
-    r$source_dataset_ids <- rows$source_dataset_ids[[i]]
+    r[["source_dataset_ids"]] <- rows$source_dataset_ids[[i]]
     for (k in names(r)) if (length(r[[k]]) == 1 && is.na(r[[k]])) r[[k]] <- NULL
     r
   })
 
   existing_ids <- vapply(d$source_datasets, function(s) s$source_dataset_id, "")
   for (s in census_source_datasets) {
-    if (level == "adm2" && s$source_dataset_id %in% c("vnso-2009-census-basic-tables-t3-5", "vu-2020-province-incl-urban-derived")) next
+    if (level == "adm2" && s$source_dataset_id %in% c("vnso-1999-census-main-report-t2-10", "vnso-2009-census-basic-tables-t3-5", "vu-2020-province-incl-urban-derived")) next
     if (!(s$source_dataset_id %in% existing_ids)) d$source_datasets <- c(d$source_datasets, list(s))
   }
 
@@ -183,21 +215,21 @@ build_level <- function(summary_path, level) {
          description = "People in private households with a stated religious-affiliation response in the area and census year (census total minus refusals and not-stated).",
          unit = "count", denominator_indicator_id = NULL,
          method = "Total from Basic Tables Volume 1 Table 3.5 minus refuse-to-answer and not-stated.",
-         temporal_coverage = if (level == "adm1") "2009, 2020" else "2020",
+         temporal_coverage = if (level == "adm1") "1999, 2009, 2020" else "2020",
          spatial_coverage = if (level == "adm1") "Vanuatu provinces (2020 includes urban municipalities by derivation)" else "Vanuatu area councils and urban municipalities, geoBoundaries ADM2",
          quality_notes = "The published 2020 table is internally inconsistent by plus or minus 1-2 (consistent with cell perturbation); treat small differences as noise."),
     list(indicator_id = "religious_affiliation_percent", label = "Religious affiliation %",
          description = "Share of the stated-response denominator affiliated with any religion, including customary beliefs.",
          unit = "percent", denominator_indicator_id = "population_total",
          method = "Stated denominator minus no-religion, over stated denominator.",
-         temporal_coverage = if (level == "adm1") "2009, 2020" else "2020",
+         temporal_coverage = if (level == "adm1") "1999, 2009, 2020" else "2020",
          spatial_coverage = if (level == "adm1") "Vanuatu provinces" else "Vanuatu area councils and urban municipalities",
          quality_notes = "Customary beliefs count as religious affiliation. Category boundaries changed between 2009 and 2020 (Latter Day Saints separated from Other; Not Stated added)."),
     list(indicator_id = "no_religion_percent", label = "No religion %",
          description = "Share of the stated-response denominator reporting no religion or faith.",
          unit = "percent", denominator_indicator_id = "population_total",
          method = "No-religion count over stated denominator.",
-         temporal_coverage = if (level == "adm1") "2009, 2020" else "2020",
+         temporal_coverage = if (level == "adm1") "1999, 2009, 2020" else "2020",
          spatial_coverage = if (level == "adm1") "Vanuatu provinces" else "Vanuatu area councils and urban municipalities",
          quality_notes = "2020 label is No Religion/Faith; 2009 label is No religion."),
     list(indicator_id = "place_count", label = "Places of worship",
@@ -211,7 +243,7 @@ build_level <- function(summary_path, level) {
          description = "Current place count per 10,000 stated-response residents in the census year.",
          unit = "rate", denominator_indicator_id = "population_total",
          method = "Place count over stated denominator, times 10,000.",
-         temporal_coverage = if (level == "adm1") "2009, 2020" else "2020",
+         temporal_coverage = if (level == "adm1") "1999, 2009, 2020" else "2020",
          spatial_coverage = "Vanuatu",
          quality_notes = "Numerator is the current OSM snapshot, not a census-year place count."),
     list(indicator_id = "place_density_per_sq_km", label = "Places per km²",
@@ -225,7 +257,7 @@ build_level <- function(summary_path, level) {
 
   d$data_status <- "census_religion_live"
   d$data_status_note <- if (level == "adm1") {
-    "Census religious affiliation is live for provinces in 2009 and 2020 (Basic Tables Volume 1, Table 3.5). The 2020 provincial values include the urban municipalities by derivation so they match the 2009 basis. National religion series back to 1989 sits in apps/regions/vu/data/source/."
+    "Census religious affiliation is live for provinces in 1999, 2009 and 2020 (1999 Main Report Table 2.10, digitised by Guy Lavender Forsyth; Basic Tables Volume 1 Table 3.5 for 2009 and 2020). The 2020 provincial values include the urban municipalities by derivation so all years share one basis. National religion series back to 1989 sits in apps/regions/vu/data/source/."
   } else {
     "Census religious affiliation is live for area councils and urban municipalities in 2020. 2009 sub-provincial religion was published by island, not area council, so 2009 stays pending at this level. The Torres area council is absent from the geoBoundaries ADM2 layer, so its 2020 counts are not mapped at this level."
   }
