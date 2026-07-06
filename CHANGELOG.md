@@ -4,6 +4,21 @@
 
 ### 2026-07-07
 
+- Added the United Kingdom as the fifth country data map: local-authority
+  census religion for England and Wales across 2001/2011/2021 (Nomis,
+  993 of 993 rows valued, OGL), Northern Ireland districts for 2021
+  (NISRA; 2001/2011 flagged pending), and Scotland council areas as an
+  honest boundaries-pending level (the census table-builder extraction
+  is queued). Opus browser verification passed all ten checks including
+  the blocking attribution rule.
+- Every country map's wordmark now links the Data maps hub, and a
+  config-keyed "RA portal" entry joins "fix map" where a Google-auth RA
+  surface exists (NZ and Vanuatu verification portals) — the public fix
+  route stays OpenStreetMap. While the census overlay is on, the place
+  dots now stay quiet at national zooms and return by city zoom, so
+  choropleths stay readable in dot-dense countries; the historical-year
+  fade is unchanged. Shared assets bumped to `?v=20260707c`.
+
 - Added the Ireland research map at `apps/regions/ie/`. The first build
   uses CSO PxStat table `F5051` for county-and-city religious
   affiliation in 2011, 2016, and 2022, with a stated-response denominator

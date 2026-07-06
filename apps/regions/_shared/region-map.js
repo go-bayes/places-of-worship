@@ -60,6 +60,7 @@ document.title = RC.title;
   <div id="wordmark" class="shell-pill shell-top-right shell-divided">
     ${wordmarkLinks}
     <a id="fixmap-link" href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener" title="Improve this map area on OpenStreetMap">fix map</a>
+    ${RC.raPortalHref ? `<a id="raportal-link" href="${RC.raPortalHref}" title="RA portal — sign in with your invited Google account">RA portal</a>` : ""}
     <select id="basemapSelect" class="shell-pill-select" aria-label="Theme"></select>
   </div>
   <button id="corner-reset" class="shell-pill shell-top-left" type="button" aria-label="Set North">
@@ -3046,9 +3047,12 @@ function syncPlaceDotEra() {
       ["interpolate", ["linear"], ["zoom"], 0, ov, 5, ov, 6, 0.0]);
   }
   if (map.getLayer(LAYERS.places)) {
+    const censusFirst = censusState.enabled && !stale;
     map.setPaintProperty(LAYERS.places, "circle-opacity", stale
       ? ["interpolate", ["linear"], ["zoom"], 6, 0.05, 9, 0.2, 12, 0.18, 18, 0.18]
-      : ["interpolate", ["linear"], ["zoom"], 6, 0.2, 9, 0.85, 12, 0.75, 18, 0.7]);
+      : censusFirst
+        ? ["interpolate", ["linear"], ["zoom"], 6, 0.08, 8, 0.45, 9, 0.85, 12, 0.75, 18, 0.7]
+        : ["interpolate", ["linear"], ["zoom"], 6, 0.2, 9, 0.85, 12, 0.75, 18, 0.7]);
   }
 }
 

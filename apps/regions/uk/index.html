@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | United Kingdom Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260707c" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // the whole country-specific surface; every behaviour lives in the
+    // shared module (../_shared/region-map.js) and keys on this config
+    // and the data products, never on country identity
+    window.REGION_CONFIG = {
+      countryCode: "UK",
+      title: "Places of Worship | United Kingdom Research Map",
+      // united kingdom extent, centred so the three jurisdictional levels
+      // are reachable without changing the shared map runtime
+      center: [-3.4, 54.7],
+      initialZoom: 5,
+      // each level is a governed area-summary product plus its boundary
+      // file; paths resolve from this page's directory
+      censusLevels: {
+        ew_ltla: {
+          label: "England and Wales local authority",
+          boundaries: "data/ew_ltla_2021.geojson",
+          summary: "data/area_summary_ew_ltla.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries © Office for National Statistics (OGL v3.0) · May 2021"
+        },
+        sco_ca: {
+          label: "Scotland council area",
+          boundaries: "data/sco_council_area_2019.geojson",
+          summary: "data/area_summary_sco_ca.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries © National Records of Scotland (OGL v3.0) · 2019"
+        },
+        ni_lgd: {
+          label: "Northern Ireland LGD",
+          boundaries: "data/ni_lgd_2012.geojson",
+          summary: "data/area_summary_ni_lgd.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries © OSNI/OpenDataNI (OGL v3.0) · 2012"
+        }
+      },
+      defaultLevel: "ew_ltla",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      // no governed united kingdom places-of-worship snapshot is included
+      // yet, so the place-rate metrics are hidden until that layer exists
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      popupDenominatorNote: "Percentages use the stated current-religion response denominator: all usual residents minus not answered or religion not stated.",
+      cityPresets: [
+        { label: "London", coords: [-0.1276, 51.5072], zoom: 10 },
+        { label: "Birmingham", coords: [-1.8904, 52.4862], zoom: 10 },
+        { label: "Manchester", coords: [-2.2426, 53.4808], zoom: 10 },
+        { label: "Cardiff", coords: [-3.1791, 51.4816], zoom: 10 },
+        { label: "Edinburgh", coords: [-3.1883, 55.9533], zoom: 10 },
+        { label: "Glasgow", coords: [-4.2518, 55.8642], zoom: 10 },
+        { label: "Belfast", coords: [-5.9301, 54.5973], zoom: 10 },
+        { label: "Leeds", coords: [-1.5491, 53.8008], zoom: 10 },
+        { label: "Liverpool", coords: [-2.9916, 53.4084], zoom: 10 },
+        { label: "Newcastle", coords: [-1.6178, 54.9783], zoom: 10 }
+      ],
+      geocode: { country: "gb", biasLngLat: [-3.4, 54.7] },
+      onboarding: {
+        title: "United Kingdom research map",
+        intro: "Census religious-affiliation overlays for the United Kingdom, split by the census geography used in each jurisdiction.",
+        bullets: [
+          "England and Wales local authorities are live for 2001, 2011 and 2021.",
+          "Northern Ireland Local Government Districts are live for 2021; 2001 and 2011 rows are pending extraction.",
+          "Scotland council areas are boundary-ready for 2001, 2011 and 2022, with census table extraction pending.",
+          "Open <strong>Census</strong> (top centre) for the metric, geography and year controls.",
+          "Tap an area for its census detail."
+        ],
+        links: [
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion © <a href="https://www.nomisweb.co.uk/" target="_blank" rel="noopener">ONS/Nomis</a>, <a href="https://www.scotlandscensus.gov.uk/" target="_blank" rel="noopener">Scotland\'s Census</a> &amp; <a href="https://www.nisra.gov.uk/" target="_blank" rel="noopener">NISRA</a> (OGL v3.0) · Boundaries © <a href="https://geoportal.statistics.gov.uk/" target="_blank" rel="noopener">ONS Open Geography Portal</a>, <a href="https://www.scotlandscensus.gov.uk/" target="_blank" rel="noopener">National Records of Scotland</a> &amp; <a href="https://www.opendatani.gov.uk/" target="_blank" rel="noopener">OSNI/OpenDataNI</a>',
+      censusFlagNote: "* England and Wales 2001/2011 rows use a documented LAD11-to-LAD21 concordance; small published-row national-total residuals are recorded in the manifest. Scotland rows and Northern Ireland 2001/2011 rows are placeholders until their census table extraction is pinned."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260707c"></script>
+</body>
+</html>
