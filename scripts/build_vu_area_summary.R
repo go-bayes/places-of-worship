@@ -10,7 +10,10 @@
 library(jsonlite)
 
 vu_dir <- "apps/regions/vu/data"
-src_dir <- file.path(vu_dir, "source")
+# source extracts live in the private research tier (attributed-use
+# licence class; see docs/data-access-and-research-tiers.md). fetch for
+# rebuilds: gcloud storage cp -r gs://pow-research-data/research_datasets/vu_census_extracts/* data/raw/vu_census_extracts/
+src_dir <- "data/raw/vu_census_extracts"
 stamp <- format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
 
 # affiliation = stated denominator minus no-religion; refusals and

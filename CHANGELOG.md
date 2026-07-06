@@ -4,6 +4,18 @@
 
 ### 2026-07-07
 
+- Adopted the data-access and research tiers (JB-ratified): the maps
+  show derived rates per source rulings, everyone gets
+  reproduce-it-yourself instructions, and assembled census data serves
+  team analysis only. Stood up the private tier: the pow-research
+  GitHub repository and the pow-research-data bucket (individual
+  Google-identity access, JB-granted; raw archives mirrored). The
+  Vanuatu source-extract CSVs (attributed-use licence class) moved from
+  the public repo to that tier; the public repo keeps the derived area
+  summaries the map consumes, and the build script documents the
+  private-tier fetch for rebuilds. Earlier revisions remain in git
+  history by decision rather than history rewrite.
+
 - Places of worship now ride the timeline: on historical years the maps
   show amber-ringed dots for places whose OpenStreetMap date tags say
   they existed in the selected year (born on or before it, not yet
