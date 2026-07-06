@@ -1,6 +1,7 @@
 # Playbook: United States county data map
 
-Status: READY (not started)
+Status: DONE (2010+2020 county map live; earlier waves not built this
+sitting). Commits: see CHANGELOG 2026-07-06.
 Task: first country extension beyond NZ/VU. Effort: one verification
 sitting + one build sitting. Chosen 2026-07-04 (JB) over Denmark/Norway
 (state-church membership only) and Germany (two waves, heavier
@@ -94,3 +95,39 @@ use with citation; the build must record the exact statement.
 Suited to a single capable session (Sonnet): the sources are flat
 files; the only design work (metric labels) is specified above. Est.
 comparable to the VU build, minus the PDF extraction.
+
+## Notes from the 2026-07-06 build
+
+- The model-memory source claims in "The data" section above were
+  accurate in outline and verified by direct web lookup and `curl`
+  before downloading anything: ARDA's county-file Downloads tab links
+  to OSF-hosted files (no account/registration), and Census Bureau
+  boundaries are public domain. See `research/countries/us-united-states.md`
+  for the full verification record with exact URLs.
+- The 2010 and 2020 RCMS Excel files have different column layouts (2010
+  has FIPS/name/state at the end of the sheet with different column
+  names than 2020's start-of-sheet layout) — not documented anywhere in
+  ARDA's metadata; discovered by inspecting both files directly.
+- Ten 2010 county FIPS codes needed a documented crosswalk to the 2020
+  boundary set (Alaska census-area history, one Montana dissolution, two
+  Virginia city mergers, one South Dakota rename); several of these
+  changes predate 2010, meaning the RCMS 2010 file itself carries a few
+  legacy FIPS codes rather than true 2010-vintage ones.
+- Browser tooling gotcha for future sessions: the `Claude_Preview`
+  in-browser eval/console tools in this environment exhibited a
+  reproducible stale-script problem — repeated navigations to the same
+  path (even with cache-busting query strings, even across stopped and
+  restarted preview servers) sometimes kept executing an old, cached
+  copy of a shared JS module, while `curl` against the same URL always
+  returned the current file. `Function.prototype.toString()` on a
+  module-level function was the most reliable signal of staleness;
+  behavioural output (calling the function and reading its return
+  value) was not sufficient by itself, since it sometimes reflected the
+  stale closure too. When shared-module JS changes do not appear to take
+  effect in the preview browser despite correct source and a confirmed
+  fresh `curl` response, do not trust the browser tool's evaluation —
+  verify the logic in an isolated Node `vm` sandbox instead (extract the
+  relevant function block, run it in `vm.createContext` with a mocked
+  `RC`/`document`, and check the wrapped return value). That method gave
+  an unambiguous, reproducible confirmation here after the browser tool
+  did not.

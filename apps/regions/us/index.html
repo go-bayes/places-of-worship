@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | US Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // the whole country-specific surface; every behaviour lives in the
+    // shared module (../_shared/region-map.js) and keys on this config
+    // and the data products, never on country identity
+    window.REGION_CONFIG = {
+      countryCode: "US",
+      title: "Places of Worship | US Research Map",
+      // continental US centre; alaska/hawaii/territories included in the
+      // data but off-canvas at this default view
+      center: [-98.6, 39.8],
+      initialZoom: 4,
+      // each level is a governed area-summary product plus its boundary
+      // file; paths resolve from this page's directory
+      censusLevels: {
+        county: {
+          label: "County",
+          boundaries: "data/counties_2020.geojson",
+          summary: "data/area_summary_county.json",
+          codeProp: "GEOID",
+          nameProp: "NAME",
+          credit: "U.S. Census Bureau cartographic boundaries (public domain) · 2020 vintage"
+        }
+      },
+      defaultLevel: "county",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2020,
+      // construct honesty (binding, docs/playbooks/us-data-map.md): the US
+      // religion census measures congregations and adherents reported by
+      // religious bodies, not a census self-identification question, and
+      // there is no US OSM place-of-worship layer built yet. metricLabels
+      // overrides the shared module's default census-question wording;
+      // metricsAvailable hides the no-religion and place-density metrics
+      // that do not apply to this construct or data state, rather than
+      // showing them permanently pending.
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Adherents per 100 population",
+          note: "congregations and adherents reported by religious bodies to the U.S. Religion Census, not a census self-identification question"
+        },
+        religious_change: {
+          label: "Change in adherents per 100 population",
+          note: "percentage-point change in reported adherence, 2010 to 2020"
+        }
+      },
+      metricsAvailable: ["religious_affiliation_percent", "religious_change"],
+      cityPresets: [
+        { label: "New York City", shortLabel: "NYC", coords: [-73.9857, 40.7484], zoom: 10 },
+        { label: "Los Angeles", shortLabel: "LA", coords: [-118.2437, 34.0522], zoom: 10 },
+        { label: "Chicago", coords: [-87.6298, 41.8781], zoom: 10 },
+        { label: "Houston", coords: [-95.3698, 29.7604], zoom: 10 },
+        { label: "Atlanta", coords: [-84.3880, 33.7490], zoom: 10 },
+        { label: "Seattle", coords: [-122.3321, 47.6062], zoom: 10 },
+        { label: "Denver", coords: [-104.9903, 39.7392], zoom: 10 },
+        { label: "Miami", coords: [-80.1918, 25.7617], zoom: 10 },
+        { label: "Washington", shortLabel: "DC", coords: [-77.0369, 38.9072], zoom: 10 },
+        { label: "Boston", coords: [-71.0589, 42.3601], zoom: 10 }
+      ],
+      geocode: { country: "us", biasLngLat: [-98.6, 39.8] },
+      onboarding: {
+        title: "US research map",
+        intro: "Places of worship across the United States, with U.S. Religion Census congregation and adherence overlays for 2010 and 2020.",
+        bullets: [
+          "The census overlay is on: counties are shaded by adherents per 100 population, as reported by religious bodies to the U.S. Religion Census.",
+          "This is not a census affiliation question: the United States census asks no religion question. The data are institutional counts submitted by participating denominations and faith groups.",
+          "Open <strong>Census</strong> (top centre) for the metric and year slider.",
+          "Tap any dot for a place; tap a county for its adherence detail."
+        ],
+        links: [
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Congregations &amp; adherents © <a href="https://www.usreligioncensus.org/" target="_blank" rel="noopener">U.S. Religion Census</a> / <a href="https://www.thearda.com/" target="_blank" rel="noopener">Association of Religion Data Archives (ARDA)</a> · Boundaries © <a href="https://www.census.gov/" target="_blank" rel="noopener">U.S. Census Bureau</a> (public domain)',
+      censusFlagNote: "* county boundary changed between 2010 and 2020; adjacent totals are combined onto the 2020 county (see the manifest crosswalk)."
+    };
+  </script>
+  <script src="../_shared/region-map.js"></script>
+</body>
+</html>

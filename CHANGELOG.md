@@ -4,6 +4,32 @@
 
 ### 2026-07-06
 
+- Added the United States as the third country data map:
+  `apps/regions/us/index.html`, a county-level choropleth of adherents
+  per 100 population from the U.S. Religion Census (RCMS 2010 and
+  2020), with sources verified by direct web/curl lookup before any
+  data was downloaded (ARDA/OSF county-file downloads require no
+  account or registration; Census Bureau boundaries are public domain).
+  Built `apps/regions/us/data/area_summary_county.json` (3,143 counties
+  x 2 years) and `counties_2020.geojson` (2.56 MB, simplified from the
+  Census Bureau's 2020 cartographic boundary file, 50 states + DC).
+  Join coverage is 3,143/3,143 for both waves; a documented crosswalk
+  (`apps/regions/us/data/source/fips_crosswalk_2010_to_2020.csv`)
+  handles ten 2010 county FIPS codes affected by Alaska census-area
+  splits/renames, a Montana park-county dissolution, two Virginia
+  independent-city mergers, and one South Dakota rename. County sums
+  reproduce ARDA's own published national and Alabama state totals to
+  within 0.06%. Construct honesty is binding here: the US series counts
+  congregations and adherents reported by religious bodies, not a
+  census self-identification question, so labels say "adherents", never
+  "affiliation", and the no-religion metric is omitted as inapplicable.
+  This required a minimal, backward-compatible extension to the shared
+  region-map runtime (`apps/regions/_shared/region-map.js`):
+  `RC.metricLabels` (per-metric label/note override) and
+  `RC.metricsAvailable` (metric allow-list), both optional and
+  documented in `docs/development/adding-a-region.md`; NZ and VU were
+  re-verified byte-identical in behaviour after the change (all five
+  metrics, both time sliders, zero console errors).
 - The Vanuatu map's census time series now reaches back to 1999. Guy
   Lavender Forsyth supplied a scan of the print-only 1999 Census Main
   Report (previously locatable only at the National Library of
