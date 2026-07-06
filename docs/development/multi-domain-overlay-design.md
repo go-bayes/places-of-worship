@@ -35,6 +35,26 @@ domain added.
 6. **Popups aggregate by domain**, one table per domain, collapsed by
    default except the active domain.
 
+## Non-census sources (JB, 2026-07-07)
+
+Overlay domains will include survey data measured at the individual
+level — named example: the Global Flourishing Study (Gallup/Harvard/
+Baylor; ~200k respondents, 20+ countries, flourishing and religion
+measures; baseline openly accessible via COS/OSF under terms). Design
+implications the census machinery does not cover:
+
+- **Microdata never enters the public tier** regardless of openness of
+  access — it goes through the research tiers like restricted census
+  data; only derived area or country estimates can surface on maps,
+  each with a per-source ruling.
+- **Survey estimates carry uncertainty**: overlays need an uncertainty
+  presentation (intervals in popups at minimum; washed styling for
+  wide-interval areas, like the rr3 treatment) — a new construct class
+  beside census affiliation and institutional adherence.
+- **Aggregation level is an analytic choice** (country, region, or
+  model-based small-area estimates), made in the research tier and
+  documented in the manifest, not improvised at the map layer.
+
 ## To decide during design
 
 - Config shape and area_summary versioning for multi-domain products.
