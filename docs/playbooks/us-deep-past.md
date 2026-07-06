@@ -18,16 +18,30 @@ and **period county boundary shapefiles** (1850–1940). ICPSR study 2896
 
 Together with the live 1952–2020 series, this reaches **1850–2020**.
 
-## Blocking step 1 — licence
+## Licence position (JB decision, 2026-07-06 — unblocked)
 
-NHGIS terms: free with registration; **redistribution requires
-permission except publication subsets**. Publishing derived county
-rates on the map with citation is likely a permitted publication use,
-but VERIFY the current IPUMS NHGIS terms text, record it in the
-manifest, and if ambiguous draft a permission request for JB to send
-before anything deploys. If NHGIS terms fail, evaluate ICPSR 2896's
-terms for the same tables. Attribution on the map and manifest either
-way (binding rule).
+JB ruled: **publish the derived rates with citation and a pointer to
+the original NHGIS data, now**; he judges the risk acceptable for a
+research website and takes responsibility for it. Requirements that
+follow:
+
+- map attribution names IPUMS NHGIS with a link; the manifest records
+  the full citation (IPUMS NHGIS, University of Minnesota,
+  www.nhgis.org) and the original table identifiers per wave;
+- only DERIVED rates and counts appear in the repo/products — do not
+  commit or redistribute the raw NHGIS extract files (raw stays in
+  `data/raw/` git-ignored + the private GCS archive);
+- **TODO (JB, open)**: write to IPUMS/NHGIS asking whether attributed
+  derived county rates on a research map are within their licence or
+  need permission; adjust or remove the layer if they object. Record
+  their answer in the manifest when it arrives.
+
+Prerequisite for fetching: NHGIS data comes through a registered
+extract system (web UI or the IPUMS API with a key from
+account.ipums.org). An agent cannot register; JB supplies either an
+API key (preferred — the build can then be fully scripted and
+reproducible) or a manually downloaded extract dropped into
+`data/raw/us_nhgis/`.
 
 ## Decisions already made (do not reopen)
 

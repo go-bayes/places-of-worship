@@ -35,7 +35,7 @@ staleness check ("does MANIFEST.md still describe what exists?").
 Mostly exists; finish and document the pattern in
 `docs/development/adding-a-region.md` (extend, don't fork a new doc):
 
-- `research/countries/<iso2>-<name>.md` — build card (TEMPLATE.md
+- `research/countries/<iso2>/README.md` — build card (TEMPLATE.md
   governs headings; survey playbook fills them).
 - `research/country-survey.md` — global matrix (from survey playbook).
 - `apps/regions/<cc>/` — page + data products;

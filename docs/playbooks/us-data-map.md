@@ -78,7 +78,7 @@ use with citation; the build must record the exact statement.
    further or add the state level as default), popups show the wave
    table, slider walks the waves, pending behaviour correct for any
    metric omitted. Changelog, commit, push.
-7. **Card**: write `research/countries/us-united-states.md` from
+7. **Card**: write `research/countries/us/README.md` from
    TEMPLATE.md documenting all of the above including the 1906–1936
    deep-past route and the PRRI/Pew survey alternatives (different
    constructs, noted not built).
@@ -148,7 +148,7 @@ Decisions already made (do not reopen):
   accurate in outline and verified by direct web lookup and `curl`
   before downloading anything: ARDA's county-file Downloads tab links
   to OSF-hosted files (no account/registration), and Census Bureau
-  boundaries are public domain. See `research/countries/us-united-states.md`
+  boundaries are public domain. See `research/countries/us/README.md`
   for the full verification record with exact URLs.
 - The 2010 and 2020 RCMS Excel files have different column layouts (2010
   has FIPS/name/state at the end of the sheet with different column

@@ -8,9 +8,10 @@ region, one synthesis sitting. Needs web access.
 
 Screen every country for PUBLIC data on religion/churches over time
 usable for subnational mapping; produce one build card per feasible
-country in `research/countries/<iso2>-<name>.md` following
-`research/countries/TEMPLATE.md` exactly; produce a global matrix at
-`research/country-survey.md`. Consistent method and look across all
+country at `research/countries/<iso2>/README.md` — one directory per
+country, extra notes alongside the card (JB convention, 2026-07-06) —
+following `research/countries/TEMPLATE.md` exactly; produce a global
+matrix at `research/country-survey.md`. Consistent method and look across all
 cards is the point — do not vary the template.
 
 ## Method (per region agent)
