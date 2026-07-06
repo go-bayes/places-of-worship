@@ -2955,6 +2955,11 @@ function openCensusPopup(feature, lngLat) {
   const hasNoReligion = "no_religion_percent" in CENSUS_METRICS;
   const affiliationLabel = CENSUS_METRICS.religious_affiliation_percent?.label || "Religious";
   const noReligionLabel = CENSUS_METRICS.no_religion_percent?.label || "No religion";
+  // the place columns come from the area summary's OSM-derived counts; a
+  // country that hides the place metrics (no extraction pass yet) drops
+  // the columns and the OSM credit instead of showing dashes
+  const hasPlaces = "places_per_10000_residents" in CENSUS_METRICS ||
+    "place_density_per_sq_km" in CENSUS_METRICS;
   let anyFlagged = false;
   const rowsHtml = store.years.map((year) => {
     const row = store.byAreaYear.get(`${code}|${year}`);
@@ -2966,8 +2971,7 @@ function openCensusPopup(feature, lngLat) {
       <td>${year}${flagged ? "*" : ""}</td>
       <td>${fmtPercent(row.religious_affiliation_percent)}</td>
       ${hasNoReligion ? `<td>${fmtPercent(row.no_religion_percent)}</td>` : ""}
-      <td>${fmtCount(row.place_count)}</td>
-      <td>${fmtRate(row.places_per_10000_residents)}</td>
+      ${hasPlaces ? `<td>${fmtCount(row.place_count)}</td><td>${fmtRate(row.places_per_10000_residents)}</td>` : ""}
     </tr>`;
   }).join("");
   const flagNote = anyFlagged
@@ -2976,12 +2980,12 @@ function openCensusPopup(feature, lngLat) {
   const html =
     `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
     `<table class="census-table">` +
-    `<thead><tr><th>Census</th><th>${affiliationLabel}</th>${hasNoReligion ? `<th>${noReligionLabel}</th>` : ""}<th>Places</th><th>Per 10k</th></tr></thead>` +
+    `<thead><tr><th>Census</th><th>${affiliationLabel}</th>${hasNoReligion ? `<th>${noReligionLabel}</th>` : ""}${hasPlaces ? "<th>Places</th><th>Per 10k</th>" : ""}</tr></thead>` +
     `<tbody>${rowsHtml}</tbody></table>` +
     flagNote +
-    `<div class="place-note">Percentages use the stated religion-response denominator. ` +
-    `Place counts are the current snapshot repeated across census years.</div>` +
-    `<div class="place-note">${levelDef.credit} · places © OpenStreetMap (ODbL)</div>`;
+    `<div class="place-note">${RC.popupDenominatorNote || "Percentages use the stated religion-response denominator."}` +
+    `${hasPlaces ? " Place counts are the current snapshot repeated across census years." : ""}</div>` +
+    `<div class="place-note">${levelDef.credit}${hasPlaces ? " · places © OpenStreetMap (ODbL)" : ""}</div>`;
   const popup = new maplibregl.Popup({ maxWidth: "380px" })
     .setLngLat(lngLat)
     .setHTML(html)

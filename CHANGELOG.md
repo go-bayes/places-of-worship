@@ -4,6 +4,14 @@
 
 ### 2026-07-06
 
+- Tightened the US map's construct honesty in the shared popup: the
+  hardcoded "stated religion-response denominator" footnote is now the
+  config field `popupDenominatorNote` (default unchanged for NZ/VU; the
+  US states its resident-population denominator and why rates can
+  exceed 100), and when a country hides the place metrics the popup
+  drops the Places/Per-10k columns and the OSM places credit instead of
+  showing dash columns. Verified the defaults reproduce the previous
+  popup strings exactly.
 - Added the United States as the third country data map:
   `apps/regions/us/index.html`, a county-level choropleth of adherents
   per 100 population from the U.S. Religion Census (RCMS 2010 and

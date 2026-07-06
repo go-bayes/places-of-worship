@@ -45,6 +45,12 @@ clamp colour domains wherever they appear in the data.
      `metricsAvailable` (optional; allow-list of metric ids) — see
      "Metric labels and availability" below. Omit both and a country
      gets the NZ/VU defaults unchanged.
+   - `popupDenominatorNote` (optional): the popup footnote explaining
+     the percentage denominator. Defaults to the census stated-response
+     wording; a country whose construct uses a different denominator
+     (the US uses resident population) must say so here. When the place
+     metrics are hidden via `metricsAvailable`, the popup also drops the
+     Places/Per-10k columns and the OSM places credit automatically.
 3. **Link it.** Add the country to the Data maps hub
    (`apps/regions/index.html`) and, when appropriate, the README.
 4. **Verify.** Serve the repo root and check: page loads with no
