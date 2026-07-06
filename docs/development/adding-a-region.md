@@ -45,6 +45,12 @@ clamp colour domains wherever they appear in the data.
      `metricsAvailable` (optional; allow-list of metric ids) — see
      "Metric labels and availability" below. Omit both and a country
      gets the NZ/VU defaults unchanged.
+   - `timeline` (optional): `[{year, level}, ...]` for countries whose
+     eras live on different boundary levels (the US spans 1850-2020
+     across six county vintages). The year slider then covers every
+     era and switches geography level automatically as the year
+     crosses an era boundary; without it the slider spans the active
+     level's years.
    - `overviewDotOpacity` (optional, default 0.75): opacity of the
      low-zoom place-dot overview tier. A country whose OSM dot density
      would bury the census choropleth at national zoom (the US) sets a

@@ -7,7 +7,7 @@
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
   <link href="../../shared/map-shell.css" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
-  <link href="../_shared/region-map.css?v=20260706b" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260707a" rel="stylesheet">
 </head>
 <body>
   <div id="region-root"></div>
@@ -99,6 +99,25 @@
         }
       },
       metricsAvailable: ["religious_affiliation_percent", "religious_change"],
+      // one slider across all eras: dragging the year switches the
+      // geography level (boundary vintage) automatically
+      timeline: [
+        { year: 1850, level: "county_1850" },
+        { year: 1860, level: "county_1860" },
+        { year: 1870, level: "county_1870" },
+        { year: 1890, level: "county_1890" },
+        { year: 1906, level: "county_1930" },
+        { year: 1916, level: "county_1930" },
+        { year: 1926, level: "county_1930" },
+        { year: 1936, level: "county_1930" },
+        { year: 1952, level: "county" },
+        { year: 1971, level: "county" },
+        { year: 1980, level: "county" },
+        { year: 1990, level: "county" },
+        { year: 2000, level: "county" },
+        { year: 2010, level: "county" },
+        { year: 2020, level: "county" }
+      ],
       // ~350k US places of worship in OSM bury the county choropleth at
       // national zoom; fade the overview dot tier (dots ramp back in from z6)
       overviewDotOpacity: 0.12,
@@ -138,6 +157,6 @@
       censusFlagNote: "* historical wave coverage differs across source series, period-boundary vintage differs from the source wave, or a 1952-2020 county boundary was crosswalked to the 2020 county layer (see the manifests)."
     };
   </script>
-  <script src="../_shared/region-map.js?v=20260706b"></script>
+  <script src="../_shared/region-map.js?v=20260707a"></script>
 </body>
 </html>

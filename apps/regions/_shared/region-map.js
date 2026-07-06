@@ -2637,6 +2637,35 @@ function censusActive() {
 function censusLevelDef() {
   return CENSUS_LEVELS[censusState.level];
 }
+// unified timeline: a country whose eras live on different boundary
+// levels (the us runs 1850-2020 across six county vintages) declares
+// RC.timeline = [{year, level}, ...]. the slider then spans every era
+// and switches geography level automatically as the year crosses an
+// era boundary. without the config the slider spans the active level's
+// years, as before.
+const CENSUS_TIMELINE = Array.isArray(RC.timeline)
+  ? RC.timeline.slice().sort((a, b) => a.year - b.year)
+  : null;
+function censusSliderYears() {
+  if (CENSUS_TIMELINE) return CENSUS_TIMELINE.map((t) => t.year);
+  const store = censusActive();
+  return store ? store.years : [];
+}
+// dragging across an era boundary triggers an async level load; the
+// token keeps a stale load from clobbering the latest requested year
+let censusYearRequestToken = 0;
+function requestCensusYear(year) {
+  if (!Number.isFinite(year)) return;
+  const token = ++censusYearRequestToken;
+  const entry = CENSUS_TIMELINE && CENSUS_TIMELINE.find((t) => t.year === year);
+  if (entry && entry.level !== censusState.level) {
+    void setCensusLevel(entry.level).then(() => {
+      if (token === censusYearRequestToken) setCensusYear(year);
+    });
+    return;
+  }
+  setCensusYear(year);
+}
 // rr3 makes percentages on small denominators volatile, and suppressed
 // cells carry no value at all; both wash out instead of implying precision
 function rowFlagged(row) {
@@ -3070,12 +3099,13 @@ function setCensusYear(year) {
   if (changed) applyCensusPaint();
 }
 
-// rebuild the slider structure for the active level's year set
+// rebuild the slider structure for the timeline (or the active level's
+// year set when no timeline is configured)
 function syncCensusTimeSlider() {
   const timeEl = document.getElementById("census-time");
   const store = censusActive();
   if (!timeEl || !store) return;
-  const years = store.years;
+  const years = censusSliderYears();
   // a slider needs at least two stops, and at least one metric with data
   // to animate; the boundaries-only scaffold has neither use for it
   const hasAnyData = Object.keys(store.domains || {}).length > 0;
@@ -3100,7 +3130,7 @@ function syncCensusTimeValue() {
   const store = censusActive();
   const slider = document.getElementById("census-slider");
   if (!store || !slider) return;
-  const idx = store.years.indexOf(censusState.year);
+  const idx = censusSliderYears().indexOf(censusState.year);
   if (idx >= 0 && String(idx) !== slider.value) slider.value = String(idx);
   markActiveTick();
 }
@@ -3116,9 +3146,7 @@ function attachCensusTimeListeners() {
   const slider = document.getElementById("census-slider");
   if (slider) {
     slider.addEventListener("input", () => {
-      const store = censusActive();
-      if (!store) return;
-      setCensusYear(store.years[Number(slider.value)]);
+      requestCensusYear(censusSliderYears()[Number(slider.value)]);
     });
   }
 }
