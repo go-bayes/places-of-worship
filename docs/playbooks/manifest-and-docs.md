@@ -43,6 +43,25 @@ Mostly exists; finish and document the pattern in
 - State the lifecycle: card (survey) → data products + manifest →
   region page → hub/README links → MANIFEST.md row.
 
+## Part 2b — audience re-organisation (JB, 2026-07-07)
+
+`docs/people/{ra,jw,guy}/README.md` exist as entry points with the
+public/private rule in `docs/people/README.md` (private = `.private/`
+via private-sync, never git). Finish the job here:
+
+- MOVE the RA-facing documents into `docs/people/ra/`
+  (`ra-nz-pilot-task.md`, `ra-map-triage-guide.md`) and fix every
+  inbound link (README, AGENTS.md, FAQ, templates, verification-page
+  copy if any). Keep redirects-by-stub only if an external link is
+  known to exist.
+- Sweep the tracked tree for privacy-rule violations: personal emails,
+  phone numbers, per-person assignment tracking, credentials. Move
+  content to `.private/` and scrub git history ONLY if JB approves a
+  history rewrite (otherwise note the exposure and rotate the secret).
+- Audit `docs/` top level: each file gets an audience tag line at the
+  top (RA / JW / collaborator / maintainer / agent) or moves under its
+  audience directory; MANIFEST.md records the audience per doc.
+
 ## Part 3 — governance wrap (#8)
 
 - `JOURNAL.md`: one entry covering the 2026-07-04 overnight session:

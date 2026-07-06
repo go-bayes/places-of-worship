@@ -136,6 +136,13 @@
 
 ## Working Rules
 
+- The repository is public and audience-addressed: `docs/people/` maps
+  who reads what (RAs, JW, Guy) and states the public/private rule.
+  Personal contact details, credentials, API keys, per-person
+  assignment tracking, and unpublished collaborator material never
+  enter git — they belong in `.private/` (git-ignored, synced across
+  JB's machines via `.private-sync.env` to the private GCS bucket).
+  Named credit in manifests/changelog is public by design.
 - Keep large, restricted, raw, or private data out of Git unless the repo
   already tracks that class of artefact and the licence permits it.
 - Treat ignored local data as cache only. Before using generated data for RA
