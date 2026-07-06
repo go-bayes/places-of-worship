@@ -1,4 +1,16 @@
-import type { EvidenceDraft, WorkTask } from "./types";
+import type {
+  AgentDraftInput,
+  DedupCandidate,
+  DedupCandidateQuery,
+  EvidenceDraft,
+  FreeContributionHandle,
+  FreeContributionInput,
+  HumanConfirmationInput,
+  HumanRejectionInput,
+  SourceRecordHandle,
+  SourceRecordInput,
+  WorkTask,
+} from "./types";
 
 // the workbench never talks to a backend directly: every screen goes
 // through this interface. DemoProvider keeps work in localStorage;
@@ -17,4 +29,11 @@ export interface WorkbenchProvider {
   submitUnresolvedNote(draftId: string, note: string): Promise<void>;
   skipTask(taskId: string, reason?: string): Promise<void>;
   listMyWork(countryCode: string): Promise<EvidenceDraft[]>;
+  createFreeContribution(input: FreeContributionInput): Promise<FreeContributionHandle>;
+  listDedupCandidates(input: DedupCandidateQuery): Promise<DedupCandidate[]>;
+  createSourceRecord(input: SourceRecordInput): Promise<SourceRecordHandle>;
+  listClaimsForSource(sourceRecordId: string): Promise<EvidenceDraft[]>;
+  saveAgentDraft(input: AgentDraftInput): Promise<EvidenceDraft>;
+  confirmAgentDraft(input: HumanConfirmationInput): Promise<EvidenceDraft>;
+  rejectAgentDraft(input: HumanRejectionInput): Promise<void>;
 }

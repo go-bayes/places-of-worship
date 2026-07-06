@@ -4,7 +4,9 @@ import type { WorkbenchProvider } from "../data/provider";
 import type {
   Confidence,
   EvidenceDraft,
+  EvidenceDraftState,
   ExistenceStatus,
+  FieldProvenanceState,
   GeocodingBasis,
   LifecycleClaim,
   LifecycleEventType,
@@ -15,18 +17,16 @@ import type {
   WorshipUseStatus,
 } from "../data/types";
 
-// evidence intake for one task. controlled vocabulary lives in dropdowns
-// (style-guide rule); free text is for source-specific detail only.
-// "No building present" is a visible worship-use option that normalises
-// to existence_status=absent + worship_use_status=not_worship on save.
+// Evidence intake for one task or provisional free contribution.
+// Controlled vocabulary lives in dropdowns (style-guide rule); free
+// text is for source-specific detail only.
 
 const PARTIAL_DATE = /^\d{4}(-\d{2})?(-\d{2})?$/;
-
 const NO_BUILDING = "no_building_present";
 
 type WorshipUseChoice = WorshipUseStatus | typeof NO_BUILDING | "";
 
-const sourceTypes: { value: SourceType; label: string }[] = [
+export const sourceTypes: { value: SourceType; label: string }[] = [
   { value: "osm_history", label: "OSM history" },
   { value: "osm_date_tags", label: "OSM date tags" },
   { value: "census_or_statistics", label: "Census or official statistics" },
@@ -46,7 +46,6 @@ const sourceTypes: { value: SourceType; label: string }[] = [
   { value: "street_imagery", label: "Street-level imagery" },
   { value: "aerial_imagery", label: "Aerial or satellite imagery" },
   { value: "field_observation", label: "Field observation" },
-  { value: "osm_date_tags", label: "OSM date tags" },
   { value: "academic_work", label: "Academic work or thesis" },
   { value: "oral_history", label: "Oral history" },
   { value: "other", label: "Other" },
@@ -68,11 +67,20 @@ const geocodingBases: { value: GeocodingBasis; label: string }[] = [
   { value: "historical_address_matched", label: "Historical address matched to modern map" },
   { value: "described_locality", label: "Locality described by the source" },
   { value: "map_georeference", label: "Georeferenced from a historical map" },
-  { value: "regional_only", label: "Region only — no precise placement" },
+  { value: "regional_only", label: "Region only, no precise placement" },
   { value: "unknown", label: "Unknown" },
 ];
 
-function emptyDraft(task: WorkTask): EvidenceDraft {
+const readOnlyStates = new Set<EvidenceDraftState>([
+  "submitted",
+  "accepted_for_export",
+  "rejected",
+  "rejected_by_human",
+  "unresolved_note",
+  "superseded",
+]);
+
+export function emptyDraft(task: WorkTask, patch: Partial<EvidenceDraft> = {}): EvidenceDraft {
   return {
     draftId: `${task.taskId}-${Date.now().toString(36)}`,
     taskId: task.taskId,
@@ -82,17 +90,61 @@ function emptyDraft(task: WorkTask): EvidenceDraft {
     sources: [],
     updatedAt: new Date().toISOString(),
     state: "draft",
+    ...patch,
   };
+}
+
+function draftWorshipChoice(draft: EvidenceDraft): WorshipUseChoice {
+  if (draft.existenceStatus === "absent" && draft.worshipUseStatus === "not_worship") {
+    return NO_BUILDING;
+  }
+  return draft.worshipUseStatus ?? "";
+}
+
+function stateLabel(state: EvidenceDraftState): string {
+  if (state === "submitted") return "submitted for review";
+  if (state === "accepted_for_export") return "accepted for export";
+  if (state === "agent_draft") return "agent draft";
+  if (state === "human_confirmed") return "human confirmed";
+  if (state === "rejected_by_human") return "rejected by human";
+  if (state === "unresolved_note") return "unresolved note";
+  return state.replace(/_/g, " ");
+}
+
+export function draftStateClass(state: EvidenceDraftState): string {
+  if (state === "submitted" || state === "accepted_for_export" || state === "human_confirmed") {
+    return "status-present";
+  }
+  if (state === "rejected" || state === "rejected_by_human" || state === "superseded") {
+    return "status-absent";
+  }
+  if (state === "draft" || state === "agent_draft" || state === "unresolved_note") {
+    return "status-uncertain";
+  }
+  return "status-not-assessed";
+}
+
+export function FieldProvenanceBadge(props: { state: FieldProvenanceState | undefined }) {
+  if (!props.state) return null;
+  const label =
+    props.state === "agent_suggested"
+      ? "agent suggested"
+      : props.state === "human_edited"
+        ? "human edited"
+        : "human added";
+  return <span className={`status-pill provenance-${props.state}`}>{label}</span>;
 }
 
 function ConfidenceSelect(props: {
   value: Confidence | undefined;
   onChange: (value: Confidence | undefined) => void;
+  disabled?: boolean;
 }) {
   return (
     <select
+      disabled={props.disabled}
       value={props.value ?? ""}
-      onChange={(e) => props.onChange((e.target.value || undefined) as Confidence | undefined)}
+      onChange={(event) => props.onChange((event.target.value || undefined) as Confidence | undefined)}
     >
       <option value="">not set</option>
       <option value="high">high</option>
@@ -110,82 +162,139 @@ export function EvidenceForm(props: {
 }) {
   const { task, country, provider } = props;
   const [draft, setDraft] = useState<EvidenceDraft>(() => emptyDraft(task));
-  const [worshipChoice, setWorshipChoice] = useState<WorshipUseChoice>("");
-  const [sensitivityAcknowledged, setSensitivityAcknowledged] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [problems, setProblems] = useState<string[]>([]);
 
   useEffect(() => {
     let cancelled = false;
     void provider.getDraft(task.taskId).then((existing) => {
-      if (cancelled || !existing) return;
-      setDraft(existing);
-      if (existing.existenceStatus === "absent" && existing.worshipUseStatus === "not_worship") {
-        setWorshipChoice(NO_BUILDING);
-      } else {
-        setWorshipChoice(existing.worshipUseStatus ?? "");
-      }
-      if (existing.attributes?.culturallySensitive !== undefined) {
-        setSensitivityAcknowledged(true);
-      }
+      if (cancelled) return;
+      setDraft(existing ?? emptyDraft(task));
     });
     return () => {
       cancelled = true;
     };
-  }, [provider, task.taskId]);
+  }, [provider, task]);
 
-  const readOnly = draft.state === "submitted";
+  return (
+    <DraftEvidenceEditor
+      task={task}
+      country={country}
+      provider={provider}
+      draft={draft}
+      onDraftChange={setDraft}
+      onChanged={props.onChanged}
+      allowSkip
+      showTaskHeader
+    />
+  );
+}
+
+export function DraftEvidenceEditor(props: {
+  task: WorkTask;
+  country: CountryConfig;
+  provider: WorkbenchProvider;
+  draft: EvidenceDraft;
+  onDraftChange: (draft: EvidenceDraft) => void;
+  onChanged: () => Promise<void>;
+  allowSkip?: boolean;
+  lockSources?: boolean;
+  showTaskHeader?: boolean;
+}) {
+  const { task, country, provider } = props;
+  const [worshipChoice, setWorshipChoice] = useState<WorshipUseChoice>(() =>
+    draftWorshipChoice(props.draft),
+  );
+  const [sensitivityAcknowledged, setSensitivityAcknowledged] = useState(
+    props.draft.attributes?.culturallySensitive !== undefined,
+  );
+  const [message, setMessage] = useState<string | null>(null);
+  const [problems, setProblems] = useState<string[]>([]);
+
+  useEffect(() => {
+    setWorshipChoice(draftWorshipChoice(props.draft));
+    setSensitivityAcknowledged(props.draft.attributes?.culturallySensitive !== undefined);
+  }, [props.draft.draftId, props.draft.attributes?.culturallySensitive, props.draft.worshipUseStatus, props.draft.existenceStatus]);
+
+  const readOnly = readOnlyStates.has(props.draft.state);
 
   function update(patch: Partial<EvidenceDraft>): void {
-    setDraft((d) => ({ ...d, ...patch }));
+    props.onDraftChange({ ...props.draft, ...patch });
   }
 
   function normalisedForSave(): EvidenceDraft {
     if (worshipChoice === NO_BUILDING) {
-      return { ...draft, existenceStatus: "absent", worshipUseStatus: "not_worship" };
+      return { ...props.draft, existenceStatus: "absent", worshipUseStatus: "not_worship" };
     }
     const worshipUseStatus = (worshipChoice || undefined) as WorshipUseStatus | undefined;
-    return worshipUseStatus === undefined
-      ? { ...draft, worshipUseStatus: undefined } as EvidenceDraft
-      : { ...draft, worshipUseStatus };
+    if (worshipUseStatus === undefined) return { ...props.draft, worshipUseStatus: undefined };
+    return { ...props.draft, worshipUseStatus };
   }
 
   function validateForSubmit(candidate: EvidenceDraft): string[] {
     const found: string[] = [];
+    if (candidate.state === "agent_draft") {
+      found.push("Agent draft claims need human confirmation before submission.");
+    }
+    if (candidate.state === "rejected_by_human") {
+      found.push("Rejected agent drafts cannot be submitted.");
+    }
     if (candidate.sources.length === 0) found.push("At least one source is required to submit.");
-    for (const s of candidate.sources) {
-      if (!s.title.trim() || /^n\/?a$/i.test(s.title.trim()))
+    for (const source of candidate.sources) {
+      if (!source.title.trim() || /^n\/?a$/i.test(source.title.trim())) {
         found.push("Every source needs a real title (not NA).");
-      if (!s.url?.trim() && !s.archiveRef)
+      }
+      if (!source.url?.trim() && !source.archiveRef) {
         found.push("Every source needs either a URL or an archive reference.");
-      if (s.archiveRef && (!s.archiveRef.repositoryName.trim() || !s.archiveRef.collection.trim()))
+      }
+      if (source.archiveRef && (!source.archiveRef.repositoryName.trim() || !source.archiveRef.collection.trim())) {
         found.push("Archive references need a repository and collection.");
-      if (s.archiveRef && !s.archiveRef.consultedDate.trim())
+      }
+      if (source.archiveRef && !source.archiveRef.consultedDate.trim()) {
         found.push("Archive references need a consulted date.");
+      }
       for (const [label, value] of [
-        ["source date", s.sourceDate],
-        ["consulted date", s.consultedDate],
-        ["archive consulted date", s.archiveRef?.consultedDate],
+        ["source date", source.sourceDate],
+        ["consulted date", source.consultedDate],
+        ["archive consulted date", source.archiveRef?.consultedDate],
       ] as const) {
-        if (value && !PARTIAL_DATE.test(value))
+        if (value && !PARTIAL_DATE.test(value)) {
           found.push(`Source ${label} must be YYYY, YYYY-MM, or YYYY-MM-DD.`);
+        }
       }
     }
     for (const claim of candidate.lifecycle) {
       for (const value of [claim.date.value, claim.date.notEarlierThan, claim.date.notLaterThan]) {
-        if (value && !PARTIAL_DATE.test(value))
+        if (value && !PARTIAL_DATE.test(value)) {
           found.push("Lifecycle dates must be YYYY, YYYY-MM, or YYYY-MM-DD.");
+        }
       }
     }
-    if (candidate.attributes?.denominationCode && !candidate.attributes.taxonomyVersion)
+    if (candidate.attributes?.denominationCode && !candidate.attributes.taxonomyVersion) {
       found.push("A denomination code needs its taxonomy version.");
-    if (country.culturalSensitivityPrompt && !sensitivityAcknowledged)
+    }
+    if (candidate.location) {
+      const hasLat = candidate.location.lat !== undefined;
+      const hasLng = candidate.location.lng !== undefined;
+      if (hasLat !== hasLng) found.push("Coordinates need both latitude and longitude.");
+      if (hasLat && candidate.location.geocodingBasis === "unknown") {
+        found.push("Coordinates need a geocoding basis.");
+      }
+      if (
+        candidate.location.geocodingBasis === "regional_only" &&
+        !candidate.location.containingArea?.areaName.trim()
+      ) {
+        found.push("Regional-only claims need a containing area.");
+      }
+    }
+    if (country.culturalSensitivityPrompt && !sensitivityAcknowledged) {
       found.push("Complete the cultural-sensitivity prompt before submitting.");
+    }
     return found;
   }
 
   async function handleSave(): Promise<void> {
-    await provider.saveDraft(normalisedForSave());
+    const candidate = normalisedForSave();
+    await provider.saveDraft(candidate);
+    props.onDraftChange(candidate);
     setMessage("Draft saved.");
     setProblems([]);
     await props.onChanged();
@@ -198,12 +307,16 @@ export function EvidenceForm(props: {
       setProblems(found);
       return;
     }
-    await provider.saveDraft(candidate);
-    await provider.submitForReview(candidate.draftId);
-    setDraft((d) => ({ ...d, state: "submitted" }));
-    setMessage("Submitted for review.");
-    setProblems([]);
-    await props.onChanged();
+    try {
+      await provider.saveDraft(candidate);
+      await provider.submitForReview(candidate.draftId);
+      props.onDraftChange({ ...candidate, state: "submitted", updatedAt: new Date().toISOString() });
+      setMessage("Submitted for review.");
+      setProblems([]);
+      await props.onChanged();
+    } catch (error) {
+      setProblems([error instanceof Error ? error.message : "Submission failed."]);
+    }
   }
 
   async function handleSkip(): Promise<void> {
@@ -214,57 +327,79 @@ export function EvidenceForm(props: {
 
   return (
     <div>
-      <h1>{task.siteName ?? task.taskId}</h1>
-      <p className="field-note">
-        {task.taskKind.replace(/_/g, " ")} · batch {task.batchId}
-        {task.siteId ? ` · site ${task.siteId}` : " · source-first (no site yet)"}
-      </p>
-      <p>{task.instructions}</p>
+      {props.showTaskHeader && (
+        <>
+          <h1>{task.siteName ?? task.taskId}</h1>
+          <p className="field-note">
+            {task.taskKind.replace(/_/g, " ")} · batch {task.batchId}
+            {task.siteId ? ` · site ${task.siteId}` : " · source-first (no site yet)"}
+          </p>
+          <p>{task.instructions}</p>
+        </>
+      )}
+
+      <div className="state-line">
+        <span className={`status-pill ${draftStateClass(props.draft.state)}`}>
+          {stateLabel(props.draft.state)}
+        </span>
+        {props.draft.lane === "agent_assisted_ra" && (
+          <span className="status-pill status-not-assessed">agent-assisted</span>
+        )}
+      </div>
 
       {readOnly && (
         <div className="demo-warning">
-          This evidence is submitted and read-only. Revising it will create a
-          new draft version; the submitted one is kept and marked superseded.
+          This evidence is not editable in its current state. Revisions create
+          a new evidence version rather than rewriting this one.
+        </div>
+      )}
+
+      {props.draft.state === "agent_draft" && (
+        <div className="demo-warning">
+          Agent draft claims cannot be submitted until a human confirms the
+          extracted claim.
         </div>
       )}
 
       {country.culturalSensitivityPrompt && (
         <fieldset>
           <legend>Cultural sensitivity</legend>
-          <label htmlFor="sensitive">Is this a customary or kastom site, or otherwise culturally sensitive?</label>
+          <label htmlFor={`${props.draft.draftId}-sensitive`}>
+            Is this a customary or kastom site, or otherwise culturally sensitive?
+          </label>
           <select
-            id="sensitive"
+            id={`${props.draft.draftId}-sensitive`}
             disabled={readOnly}
             value={
               sensitivityAcknowledged
-                ? draft.attributes?.culturallySensitive
+                ? props.draft.attributes?.culturallySensitive
                   ? "yes"
                   : "no"
                 : ""
             }
-            onChange={(e) => {
-              const v = e.target.value;
-              if (!v) return;
+            onChange={(event) => {
+              const value = event.target.value;
+              if (!value) return;
               setSensitivityAcknowledged(true);
               update({
-                attributes: { ...draft.attributes, culturallySensitive: v === "yes" },
+                attributes: { ...props.draft.attributes, culturallySensitive: value === "yes" },
               });
             }}
           >
             <option value="">choose before entering location detail</option>
             <option value="no">No</option>
-            <option value="yes">Yes — handle location and detail as sensitive</option>
+            <option value="yes">Yes, handle location and detail as sensitive</option>
           </select>
-          {draft.attributes?.culturallySensitive && (
+          {props.draft.attributes?.culturallySensitive && (
             <>
-              <label htmlFor="sensitivity-notes">Sensitivity notes</label>
+              <label htmlFor={`${props.draft.draftId}-sensitivity-notes`}>Sensitivity notes</label>
               <textarea
-                id="sensitivity-notes"
+                id={`${props.draft.draftId}-sensitivity-notes`}
                 disabled={readOnly}
-                value={draft.attributes?.sensitivityBasis ?? ""}
-                onChange={(e) =>
+                value={props.draft.attributes?.sensitivityBasis ?? ""}
+                onChange={(event) =>
                   update({
-                    attributes: { ...draft.attributes, sensitivityBasis: e.target.value },
+                    attributes: { ...props.draft.attributes, sensitivityBasis: event.target.value },
                   })
                 }
               />
@@ -273,146 +408,175 @@ export function EvidenceForm(props: {
         </fieldset>
       )}
 
-      <fieldset>
-        <legend>Assessment</legend>
-        <label htmlFor="worship-use">Worship use</label>
-        <select
-          id="worship-use"
-          disabled={readOnly}
-          value={worshipChoice}
-          onChange={(e) => setWorshipChoice(e.target.value as WorshipUseChoice)}
-        >
-          <option value="">not set</option>
-          <option value="confirmed_worship">Confirmed worship use</option>
-          <option value="probable_worship">Probable worship use</option>
-          <option value="organisation_only">Organisation only</option>
-          <option value="building_only">Building only</option>
-          <option value="not_worship">Not in worship use</option>
-          <option value={NO_BUILDING}>No building present</option>
-          <option value="uncertain">Uncertain</option>
-        </select>
-        <div className="field-note">
-          No building present records building absence, distinct from
-          worship-use closure.
-        </div>
-
-        {worshipChoice !== NO_BUILDING && (
-          <>
-            <label htmlFor="existence">Building existence</label>
-            <select
-              id="existence"
-              disabled={readOnly}
-              value={draft.existenceStatus ?? ""}
-              onChange={(e) =>
-                update({
-                  existenceStatus: (e.target.value || undefined) as ExistenceStatus | undefined,
-                })
-              }
-            >
-              <option value="">not set</option>
-              <option value="present">Present</option>
-              <option value="absent">Absent</option>
-              <option value="uncertain">Uncertain</option>
-            </select>
-          </>
-        )}
-
-        <label>Target-year status ({country.countryName})</label>
-        {country.targetYears.map((year) => (
-          <div key={year} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-            <span style={{ width: 48 }}>{year}</span>
-            <select
-              disabled={readOnly}
-              value={draft.targetYearStatuses[String(year)] ?? "not_assessed"}
-              onChange={(e) =>
-                update({
-                  targetYearStatuses: {
-                    ...draft.targetYearStatuses,
-                    [String(year)]: e.target.value as TargetYearStatus,
-                  },
-                })
-              }
-            >
-              <option value="not_assessed">not assessed</option>
-              <option value="present">present</option>
-              <option value="absent">absent</option>
-              <option value="uncertain">uncertain</option>
-            </select>
-          </div>
-        ))}
-
-        <label>Assessment confidence</label>
-        <ConfidenceSelect
-          value={draft.assessmentConfidence}
-          onChange={(assessmentConfidence) =>
-            setDraft((d) => {
-              const next = { ...d };
-              if (assessmentConfidence === undefined) delete next.assessmentConfidence;
-              else next.assessmentConfidence = assessmentConfidence;
-              return next;
-            })
-          }
-        />
-        <label>Site-match confidence</label>
-        <ConfidenceSelect
-          value={draft.siteMatchConfidence}
-          onChange={(siteMatchConfidence) =>
-            setDraft((d) => {
-              const next = { ...d };
-              if (siteMatchConfidence === undefined) delete next.siteMatchConfidence;
-              else next.siteMatchConfidence = siteMatchConfidence;
-              return next;
-            })
-          }
-        />
-      </fieldset>
-
-      <LocationFields draft={draft} readOnly={readOnly} update={update} />
-      <AttributeFields draft={draft} readOnly={readOnly} update={update} country={country} />
+      <AssessmentFields
+        draft={props.draft}
+        country={country}
+        readOnly={readOnly}
+        worshipChoice={worshipChoice}
+        setWorshipChoice={setWorshipChoice}
+        update={update}
+      />
+      <LocationFields draft={props.draft} readOnly={readOnly} update={update} />
+      <AttributeFields draft={props.draft} readOnly={readOnly} update={update} />
       <LifecycleFields
-        draft={draft}
+        draft={props.draft}
         readOnly={readOnly}
         update={update}
         floorYear={country.lifecycleFloorYear}
       />
-      <SourceFields draft={draft} readOnly={readOnly} update={update} country={country} />
+      <SourceFields
+        draft={props.draft}
+        readOnly={readOnly || Boolean(props.lockSources)}
+        update={update}
+        country={country}
+      />
 
       <fieldset>
         <legend>Notes</legend>
-        <label htmlFor="evidence-notes">Evidence notes</label>
+        <label htmlFor={`${props.draft.draftId}-evidence-notes`}>Evidence notes</label>
         <textarea
-          id="evidence-notes"
+          id={`${props.draft.draftId}-evidence-notes`}
           disabled={readOnly}
-          value={draft.evidenceNotes ?? ""}
-          onChange={(e) => update({ evidenceNotes: e.target.value })}
+          value={props.draft.evidenceNotes ?? ""}
+          onChange={(event) => update({ evidenceNotes: event.target.value })}
         />
       </fieldset>
 
       {problems.length > 0 && (
         <div className="demo-warning">
           <strong>Before submitting:</strong>
-          <ul style={{ margin: "4px 0 0 16px" }}>
-            {problems.map((p) => (
-              <li key={p}>{p}</li>
+          <ul className="compact-list">
+            {problems.map((problem) => (
+              <li key={problem}>{problem}</li>
             ))}
           </ul>
         </div>
       )}
       {message && <p className="field-note">{message}</p>}
 
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "14px 0" }}>
+      <div className="action-row">
         <button disabled={readOnly} onClick={() => void handleSave()}>
           Save draft
         </button>
-        <button disabled={readOnly} onClick={() => void handleSubmit()}>
+        <button disabled={readOnly || props.draft.state === "agent_draft"} onClick={() => void handleSubmit()}>
           Submit for review
         </button>
-        <button className="secondary" disabled={readOnly} onClick={() => void handleSkip()}>
-          Skip this task
-        </button>
+        {props.allowSkip && (
+          <button className="secondary" disabled={readOnly} onClick={() => void handleSkip()}>
+            Skip this task
+          </button>
+        )}
       </div>
-      <UnresolvedNote draft={draft} provider={provider} onChanged={props.onChanged} />
+      <UnresolvedNote
+        draft={props.draft}
+        provider={provider}
+        readOnly={readOnly}
+        onDraftChange={props.onDraftChange}
+        onChanged={props.onChanged}
+      />
     </div>
+  );
+}
+
+function AssessmentFields(props: {
+  draft: EvidenceDraft;
+  country: CountryConfig;
+  readOnly: boolean;
+  worshipChoice: WorshipUseChoice;
+  setWorshipChoice: (choice: WorshipUseChoice) => void;
+  update: (patch: Partial<EvidenceDraft>) => void;
+}) {
+  return (
+    <fieldset>
+      <legend>Assessment</legend>
+      <label htmlFor={`${props.draft.draftId}-worship-use`}>Worship use</label>
+      <select
+        id={`${props.draft.draftId}-worship-use`}
+        disabled={props.readOnly}
+        value={props.worshipChoice}
+        onChange={(event) => props.setWorshipChoice(event.target.value as WorshipUseChoice)}
+      >
+        <option value="">not set</option>
+        <option value="confirmed_worship">Confirmed worship use</option>
+        <option value="probable_worship">Probable worship use</option>
+        <option value="organisation_only">Organisation only</option>
+        <option value="building_only">Building only</option>
+        <option value="not_worship">Not in worship use</option>
+        <option value={NO_BUILDING}>No building present</option>
+        <option value="uncertain">Uncertain</option>
+      </select>
+      <div className="field-note">
+        No building present records building absence, distinct from worship-use closure.
+      </div>
+
+      {props.worshipChoice !== NO_BUILDING && (
+        <>
+          <label htmlFor={`${props.draft.draftId}-existence`}>Building existence</label>
+          <select
+            id={`${props.draft.draftId}-existence`}
+            disabled={props.readOnly}
+            value={props.draft.existenceStatus ?? ""}
+            onChange={(event) =>
+              props.update({
+                existenceStatus: (event.target.value || undefined) as ExistenceStatus | undefined,
+              })
+            }
+          >
+            <option value="">not set</option>
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+            <option value="uncertain">Uncertain</option>
+          </select>
+        </>
+      )}
+
+      <label>Target-year status ({props.country.countryName})</label>
+      {props.country.targetYears.map((year) => (
+        <div key={year} className="target-year-row">
+          <span>{year}</span>
+          <select
+            disabled={props.readOnly}
+            value={props.draft.targetYearStatuses[String(year)] ?? "not_assessed"}
+            onChange={(event) =>
+              props.update({
+                targetYearStatuses: {
+                  ...props.draft.targetYearStatuses,
+                  [String(year)]: event.target.value as TargetYearStatus,
+                },
+              })
+            }
+          >
+            <option value="not_assessed">not assessed</option>
+            <option value="present">present</option>
+            <option value="absent">absent</option>
+            <option value="uncertain">uncertain</option>
+          </select>
+        </div>
+      ))}
+
+      <label>Assessment confidence</label>
+      <ConfidenceSelect
+        disabled={props.readOnly}
+        value={props.draft.assessmentConfidence}
+        onChange={(assessmentConfidence) => {
+          const next = { ...props.draft };
+          if (assessmentConfidence === undefined) delete next.assessmentConfidence;
+          else next.assessmentConfidence = assessmentConfidence;
+          props.update(next);
+        }}
+      />
+      <label>Site-match confidence</label>
+      <ConfidenceSelect
+        disabled={props.readOnly}
+        value={props.draft.siteMatchConfidence}
+        onChange={(siteMatchConfidence) => {
+          const next = { ...props.draft };
+          if (siteMatchConfidence === undefined) delete next.siteMatchConfidence;
+          else next.siteMatchConfidence = siteMatchConfidence;
+          props.update(next);
+        }}
+      />
+    </fieldset>
   );
 }
 
@@ -431,77 +595,132 @@ function LocationFields(props: {
   return (
     <fieldset>
       <legend>Location evidence</legend>
-      <label htmlFor="street-address">Source-backed street address</label>
+      <label htmlFor={`${props.draft.draftId}-street-address`}>Source-backed street address</label>
       <input
-        id="street-address"
+        id={`${props.draft.draftId}-street-address`}
         disabled={props.readOnly}
         value={location.streetAddress ?? ""}
-        onChange={(e) => patch({ streetAddress: e.target.value })}
+        onChange={(event) => patch({ streetAddress: event.target.value })}
       />
-      <label htmlFor="locality">Locality</label>
+      <label htmlFor={`${props.draft.draftId}-locality`}>Locality</label>
       <input
-        id="locality"
+        id={`${props.draft.draftId}-locality`}
         disabled={props.readOnly}
         value={location.locality ?? ""}
-        onChange={(e) => patch({ locality: e.target.value })}
+        onChange={(event) => patch({ locality: event.target.value })}
       />
-      <label htmlFor="address-notes">Address notes</label>
+      <label htmlFor={`${props.draft.draftId}-address-notes`}>Address notes</label>
       <input
-        id="address-notes"
+        id={`${props.draft.draftId}-address-notes`}
         disabled={props.readOnly}
         value={location.addressNotes ?? ""}
-        onChange={(e) => patch({ addressNotes: e.target.value })}
-        placeholder="renamed street, demolished block, changed numbering…"
+        onChange={(event) => patch({ addressNotes: event.target.value })}
+        placeholder="renamed street, demolished block, changed numbering"
       />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+      <div className="form-grid two">
         <div>
-          <label htmlFor="lat">Latitude</label>
+          <label htmlFor={`${props.draft.draftId}-lat`}>Latitude</label>
           <input
-            id="lat"
+            id={`${props.draft.draftId}-lat`}
             disabled={props.readOnly}
             inputMode="decimal"
             value={location.lat ?? ""}
-            onChange={(e) => {
+            onChange={(event) => {
               const next = { ...location };
-              if (e.target.value === "" || Number.isNaN(Number(e.target.value))) delete next.lat;
-              else next.lat = Number(e.target.value);
+              if (event.target.value === "" || Number.isNaN(Number(event.target.value))) delete next.lat;
+              else next.lat = Number(event.target.value);
               props.update({ location: next });
             }}
           />
         </div>
         <div>
-          <label htmlFor="lng">Longitude</label>
+          <label htmlFor={`${props.draft.draftId}-lng`}>Longitude</label>
           <input
-            id="lng"
+            id={`${props.draft.draftId}-lng`}
             disabled={props.readOnly}
             inputMode="decimal"
             value={location.lng ?? ""}
-            onChange={(e) => {
+            onChange={(event) => {
               const next = { ...location };
-              if (e.target.value === "" || Number.isNaN(Number(e.target.value))) delete next.lng;
-              else next.lng = Number(e.target.value);
+              if (event.target.value === "" || Number.isNaN(Number(event.target.value))) delete next.lng;
+              else next.lng = Number(event.target.value);
               props.update({ location: next });
             }}
           />
         </div>
       </div>
-      <label htmlFor="geocoding-basis">Geocoding basis</label>
+      <label htmlFor={`${props.draft.draftId}-geocoding-basis`}>Geocoding basis</label>
       <select
-        id="geocoding-basis"
+        id={`${props.draft.draftId}-geocoding-basis`}
         disabled={props.readOnly}
         value={location.geocodingBasis}
-        onChange={(e) => patch({ geocodingBasis: e.target.value as GeocodingBasis })}
+        onChange={(event) => patch({ geocodingBasis: event.target.value as GeocodingBasis })}
       >
-        {geocodingBases.map((g) => (
-          <option key={g.value} value={g.value}>
-            {g.label}
+        {geocodingBases.map((basis) => (
+          <option key={basis.value} value={basis.value}>
+            {basis.label}
           </option>
         ))}
       </select>
+
+      <div className="form-grid three">
+        <div>
+          <label htmlFor={`${props.draft.draftId}-area-name`}>Containing area</label>
+          <input
+            id={`${props.draft.draftId}-area-name`}
+            disabled={props.readOnly}
+            value={location.containingArea?.areaName ?? ""}
+            onChange={(event) =>
+              patch({
+                containingArea: {
+                  ...location.containingArea,
+                  areaName: event.target.value,
+                },
+              })
+            }
+          />
+        </div>
+        <div>
+          <label htmlFor={`${props.draft.draftId}-area-type`}>Area type</label>
+          <input
+            id={`${props.draft.draftId}-area-type`}
+            disabled={props.readOnly}
+            value={location.containingArea?.areaType ?? ""}
+            onChange={(event) =>
+              patch({
+                containingArea: {
+                  ...location.containingArea,
+                  areaName: location.containingArea?.areaName ?? "",
+                  areaType: event.target.value || undefined,
+                },
+              })
+            }
+          />
+        </div>
+        <div>
+          <label htmlFor={`${props.draft.draftId}-area-country`}>Area country</label>
+          <input
+            id={`${props.draft.draftId}-area-country`}
+            disabled={props.readOnly}
+            value={location.containingArea?.countryCode ?? props.draft.countryCode}
+            onChange={(event) =>
+              patch({
+                containingArea: {
+                  ...location.containingArea,
+                  areaName: location.containingArea?.areaName ?? "",
+                  countryCode: event.target.value || undefined,
+                },
+              })
+            }
+          />
+        </div>
+      </div>
+
       <label>Location confidence</label>
       <ConfidenceSelect
+        disabled={props.readOnly}
         value={location.locationConfidence}
-        onChange={(c) => patch({ locationConfidence: c ?? "low" })}
+        onChange={(confidence) => patch({ locationConfidence: confidence ?? "low" })}
       />
     </fieldset>
   );
@@ -511,7 +730,6 @@ function AttributeFields(props: {
   draft: EvidenceDraft;
   readOnly: boolean;
   update: (patch: Partial<EvidenceDraft>) => void;
-  country: CountryConfig;
 }) {
   const attributes = props.draft.attributes ?? {};
   function patch(next: Partial<typeof attributes>): void {
@@ -520,56 +738,56 @@ function AttributeFields(props: {
   return (
     <fieldset>
       <legend>Place attributes (as the source states them)</legend>
-      <label htmlFor="site-name">Name in the source</label>
+      <label htmlFor={`${props.draft.draftId}-site-name`}>Name in the source</label>
       <input
-        id="site-name"
+        id={`${props.draft.draftId}-site-name`}
         disabled={props.readOnly}
         value={attributes.name ?? ""}
-        onChange={(e) => patch({ name: e.target.value })}
+        onChange={(event) => patch({ name: event.target.value })}
       />
-      <label htmlFor="religion">Religion</label>
+      <label htmlFor={`${props.draft.draftId}-religion`}>Religion</label>
       <input
-        id="religion"
+        id={`${props.draft.draftId}-religion`}
         disabled={props.readOnly}
         value={attributes.religion ?? ""}
-        onChange={(e) => patch({ religion: e.target.value })}
+        onChange={(event) => patch({ religion: event.target.value })}
       />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+      <div className="form-grid two">
         <div>
-          <label htmlFor="denomination-code">Denomination code</label>
+          <label htmlFor={`${props.draft.draftId}-denomination-code`}>Denomination code</label>
           <input
-            id="denomination-code"
+            id={`${props.draft.draftId}-denomination-code`}
             disabled={props.readOnly}
             value={attributes.denominationCode ?? ""}
-            onChange={(e) => patch({ denominationCode: e.target.value })}
+            onChange={(event) => patch({ denominationCode: event.target.value })}
             placeholder="dotted code from the taxonomy"
           />
         </div>
         <div>
-          <label htmlFor="taxonomy-version">Taxonomy version</label>
+          <label htmlFor={`${props.draft.draftId}-taxonomy-version`}>Taxonomy version</label>
           <input
-            id="taxonomy-version"
+            id={`${props.draft.draftId}-taxonomy-version`}
             disabled={props.readOnly}
             value={attributes.taxonomyVersion ?? ""}
-            onChange={(e) => patch({ taxonomyVersion: e.target.value })}
+            onChange={(event) => patch({ taxonomyVersion: event.target.value })}
             placeholder="e.g. 2026-06-12.1"
           />
         </div>
       </div>
-      <label htmlFor="material">Building material</label>
+      <label htmlFor={`${props.draft.draftId}-material`}>Building material</label>
       <input
-        id="material"
+        id={`${props.draft.draftId}-material`}
         disabled={props.readOnly}
         value={attributes.buildingMaterial ?? ""}
-        onChange={(e) => patch({ buildingMaterial: e.target.value })}
-        placeholder="timber, coral lime, concrete…"
+        onChange={(event) => patch({ buildingMaterial: event.target.value })}
+        placeholder="timber, coral lime, concrete"
       />
-      <label htmlFor="architecture-notes">Architecture and fabric notes</label>
+      <label htmlFor={`${props.draft.draftId}-architecture-notes`}>Architecture and fabric notes</label>
       <textarea
-        id="architecture-notes"
+        id={`${props.draft.draftId}-architecture-notes`}
         disabled={props.readOnly}
         value={attributes.architectureNotes ?? ""}
-        onChange={(e) => patch({ architectureNotes: e.target.value })}
+        onChange={(event) => patch({ architectureNotes: event.target.value })}
       />
     </fieldset>
   );
@@ -590,37 +808,31 @@ function LifecycleFields(props: {
     <fieldset>
       <legend>Lifecycle claims (accepted from {props.floorYear})</legend>
       {props.draft.lifecycle.map((claim, index) => (
-        <div
-          key={index}
-          style={{
-            border: "1px solid var(--border)",
-            borderRadius: 8,
-            padding: 8,
-            marginBottom: 8,
-          }}
-        >
+        <div key={`${claim.eventKind}-${index}`} className="subsection">
           <label>Event</label>
           <select
             disabled={props.readOnly}
             value={claim.eventKind}
-            onChange={(e) => setClaim(index, { ...claim, eventKind: e.target.value as LifecycleEventType })}
+            onChange={(event) =>
+              setClaim(index, { ...claim, eventKind: event.target.value as LifecycleEventType })
+            }
           >
-            {lifecycleTypes.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
+            {lifecycleTypes.map((type) => (
+              <option key={type.value} value={type.value}>
+                {type.label}
               </option>
             ))}
           </select>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+          <div className="form-grid three">
             <div>
               <label>Date</label>
               <input
                 disabled={props.readOnly}
                 value={claim.date.value ?? ""}
                 placeholder="YYYY[-MM[-DD]]"
-                onChange={(e) => {
+                onChange={(event) => {
                   const date = { ...claim.date };
-                  if (e.target.value) date.value = e.target.value;
+                  if (event.target.value) date.value = event.target.value;
                   else delete date.value;
                   setClaim(index, { ...claim, date });
                 }}
@@ -632,9 +844,9 @@ function LifecycleFields(props: {
                 disabled={props.readOnly}
                 value={claim.date.notEarlierThan ?? ""}
                 placeholder="YYYY"
-                onChange={(e) => {
+                onChange={(event) => {
                   const date = { ...claim.date };
-                  if (e.target.value) date.notEarlierThan = e.target.value;
+                  if (event.target.value) date.notEarlierThan = event.target.value;
                   else delete date.notEarlierThan;
                   setClaim(index, { ...claim, date });
                 }}
@@ -646,9 +858,9 @@ function LifecycleFields(props: {
                 disabled={props.readOnly}
                 value={claim.date.notLaterThan ?? ""}
                 placeholder="YYYY"
-                onChange={(e) => {
+                onChange={(event) => {
                   const date = { ...claim.date };
-                  if (e.target.value) date.notLaterThan = e.target.value;
+                  if (event.target.value) date.notLaterThan = event.target.value;
                   else delete date.notLaterThan;
                   setClaim(index, { ...claim, date });
                 }}
@@ -657,16 +869,14 @@ function LifecycleFields(props: {
           </div>
           <label>Confidence</label>
           <ConfidenceSelect
+            disabled={props.readOnly}
             value={claim.confidence}
-            onChange={(c) => setClaim(index, { ...claim, confidence: c ?? "low" })}
+            onChange={(confidence) => setClaim(index, { ...claim, confidence: confidence ?? "low" })}
           />
           {!props.readOnly && (
             <button
               className="tertiary"
-              style={{ marginTop: 6 }}
-              onClick={() =>
-                props.update({ lifecycle: props.draft.lifecycle.filter((_, i) => i !== index) })
-              }
+              onClick={() => props.update({ lifecycle: props.draft.lifecycle.filter((_, i) => i !== index) })}
             >
               Remove claim
             </button>
@@ -706,36 +916,28 @@ function SourceFields(props: {
   return (
     <fieldset>
       <legend>Sources</legend>
-      <div className="field-note" style={{ marginBottom: 6 }}>
+      <div className="field-note">
         Suggested for {props.country.countryName}:{" "}
-        {props.country.suggestedSources.map((s, i) => (
-          <span key={s.url}>
-            {i > 0 && " · "}
-            <a href={s.url} target="_blank" rel="noreferrer">
-              {s.label}
+        {props.country.suggestedSources.map((source, index) => (
+          <span key={source.url}>
+            {index > 0 && " · "}
+            <a href={source.url} target="_blank" rel="noreferrer">
+              {source.label}
             </a>
           </span>
         ))}
       </div>
       {props.draft.sources.map((source, index) => (
-        <div
-          key={index}
-          style={{
-            border: "1px solid var(--border)",
-            borderRadius: 8,
-            padding: 8,
-            marginBottom: 8,
-          }}
-        >
+        <div key={source.sourceRecordId ?? index} className="subsection">
           <label>Source type</label>
           <select
             disabled={props.readOnly}
             value={source.sourceType}
-            onChange={(e) => setSource(index, { ...source, sourceType: e.target.value as SourceType })}
+            onChange={(event) => setSource(index, { ...source, sourceType: event.target.value as SourceType })}
           >
-            {sourceTypes.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
+            {sourceTypes.map((type) => (
+              <option key={type.value} value={type.value}>
+                {type.label}
               </option>
             ))}
           </select>
@@ -743,28 +945,28 @@ function SourceFields(props: {
           <input
             disabled={props.readOnly}
             value={source.title}
-            onChange={(e) => setSource(index, { ...source, title: e.target.value })}
+            onChange={(event) => setSource(index, { ...source, title: event.target.value })}
           />
           <label>URL</label>
           <input
             disabled={props.readOnly}
             value={source.url ?? ""}
-            onChange={(e) => {
+            onChange={(event) => {
               const next = { ...source };
-              if (e.target.value) next.url = e.target.value;
+              if (event.target.value) next.url = event.target.value;
               else delete next.url;
               setSource(index, next);
             }}
           />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+          <div className="form-grid two">
             <div>
               <label>Archive repository</label>
               <input
                 disabled={props.readOnly}
                 value={source.archiveRef?.repositoryName ?? ""}
-                onChange={(e) => {
+                onChange={(event) => {
                   const archiveRef = {
-                    repositoryName: e.target.value,
+                    repositoryName: event.target.value,
                     collection: source.archiveRef?.collection ?? "",
                     consultedDate: source.archiveRef?.consultedDate ?? "",
                     itemRef: source.archiveRef?.itemRef,
@@ -779,10 +981,10 @@ function SourceFields(props: {
               <input
                 disabled={props.readOnly}
                 value={source.archiveRef?.collection ?? ""}
-                onChange={(e) => {
+                onChange={(event) => {
                   const archiveRef = {
                     repositoryName: source.archiveRef?.repositoryName ?? "",
-                    collection: e.target.value,
+                    collection: event.target.value,
                     consultedDate: source.archiveRef?.consultedDate ?? "",
                     itemRef: source.archiveRef?.itemRef,
                     location: source.archiveRef?.location,
@@ -792,18 +994,18 @@ function SourceFields(props: {
               />
             </div>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+          <div className="form-grid three">
             <div>
               <label>Archive item</label>
               <input
                 disabled={props.readOnly}
                 value={source.archiveRef?.itemRef ?? ""}
-                onChange={(e) => {
+                onChange={(event) => {
                   const archiveRef = {
                     repositoryName: source.archiveRef?.repositoryName ?? "",
                     collection: source.archiveRef?.collection ?? "",
                     consultedDate: source.archiveRef?.consultedDate ?? "",
-                    itemRef: e.target.value || undefined,
+                    itemRef: event.target.value || undefined,
                     location: source.archiveRef?.location,
                   };
                   setSource(index, { ...source, archiveRef });
@@ -816,11 +1018,11 @@ function SourceFields(props: {
                 disabled={props.readOnly}
                 value={source.archiveRef?.consultedDate ?? ""}
                 placeholder="YYYY[-MM[-DD]]"
-                onChange={(e) => {
+                onChange={(event) => {
                   const archiveRef = {
                     repositoryName: source.archiveRef?.repositoryName ?? "",
                     collection: source.archiveRef?.collection ?? "",
-                    consultedDate: e.target.value,
+                    consultedDate: event.target.value,
                     itemRef: source.archiveRef?.itemRef,
                     location: source.archiveRef?.location,
                   };
@@ -833,29 +1035,29 @@ function SourceFields(props: {
               <input
                 disabled={props.readOnly}
                 value={source.archiveRef?.location ?? ""}
-                onChange={(e) => {
+                onChange={(event) => {
                   const archiveRef = {
                     repositoryName: source.archiveRef?.repositoryName ?? "",
                     collection: source.archiveRef?.collection ?? "",
                     consultedDate: source.archiveRef?.consultedDate ?? "",
                     itemRef: source.archiveRef?.itemRef,
-                    location: e.target.value || undefined,
+                    location: event.target.value || undefined,
                   };
                   setSource(index, { ...source, archiveRef });
                 }}
               />
             </div>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+          <div className="form-grid two">
             <div>
               <label>Source date</label>
               <input
                 disabled={props.readOnly}
                 value={source.sourceDate ?? ""}
                 placeholder="YYYY[-MM[-DD]]"
-                onChange={(e) => {
+                onChange={(event) => {
                   const next = { ...source };
-                  if (e.target.value) next.sourceDate = e.target.value;
+                  if (event.target.value) next.sourceDate = event.target.value;
                   else delete next.sourceDate;
                   setSource(index, next);
                 }}
@@ -867,9 +1069,9 @@ function SourceFields(props: {
                 disabled={props.readOnly}
                 value={source.consultedDate ?? ""}
                 placeholder="when you accessed it"
-                onChange={(e) => {
+                onChange={(event) => {
                   const next = { ...source };
-                  if (e.target.value) next.consultedDate = e.target.value;
+                  if (event.target.value) next.consultedDate = event.target.value;
                   else delete next.consultedDate;
                   setSource(index, next);
                 }}
@@ -880,15 +1082,12 @@ function SourceFields(props: {
           <input
             disabled={props.readOnly}
             value={source.notes ?? ""}
-            onChange={(e) => setSource(index, { ...source, notes: e.target.value })}
+            onChange={(event) => setSource(index, { ...source, notes: event.target.value })}
           />
           {!props.readOnly && (
             <button
               className="tertiary"
-              style={{ marginTop: 6 }}
-              onClick={() =>
-                props.update({ sources: props.draft.sources.filter((_, i) => i !== index) })
-              }
+              onClick={() => props.update({ sources: props.draft.sources.filter((_, i) => i !== index) })}
             >
               Remove source
             </button>
@@ -914,10 +1113,18 @@ function SourceFields(props: {
 function UnresolvedNote(props: {
   draft: EvidenceDraft;
   provider: WorkbenchProvider;
+  readOnly: boolean;
+  onDraftChange: (draft: EvidenceDraft) => void;
   onChanged: () => Promise<void>;
 }) {
   const [note, setNote] = useState(props.draft.unresolvedNote ?? "");
   const [sent, setSent] = useState(false);
+
+  useEffect(() => {
+    setNote(props.draft.unresolvedNote ?? "");
+    setSent(false);
+  }, [props.draft.draftId, props.draft.unresolvedNote]);
+
   return (
     <fieldset>
       <legend>Unresolved note</legend>
@@ -925,15 +1132,20 @@ function UnresolvedNote(props: {
         Useful but incomplete evidence: park it here for a reviewer instead of
         forcing a submission.
       </div>
-      <textarea value={note} onChange={(e) => setNote(e.target.value)} />
+      <textarea disabled={props.readOnly} value={note} onChange={(event) => setNote(event.target.value)} />
       <button
         className="secondary"
-        style={{ marginTop: 8 }}
-        disabled={!note.trim() || sent}
+        disabled={props.readOnly || !note.trim() || sent}
         onClick={() =>
           void (async () => {
             await props.provider.saveDraft(props.draft);
             await props.provider.submitUnresolvedNote(props.draft.draftId, note.trim());
+            props.onDraftChange({
+              ...props.draft,
+              state: "unresolved_note",
+              unresolvedNote: note.trim(),
+              updatedAt: new Date().toISOString(),
+            });
             setSent(true);
             await props.onChanged();
           })()

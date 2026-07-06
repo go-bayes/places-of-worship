@@ -86,7 +86,12 @@ export interface SourceReference {
   notes?: string;
 }
 
-export type SourceRecord = SourceReference;
+export interface SourceRecord extends SourceReference {
+  sourceRecordId?: string;
+  countryCode?: string;
+  providerKind?: "demo";
+  createdAt?: string;
+}
 
 /** a dated lifecycle claim backed by at least one source */
 export interface LifecycleClaim {
@@ -164,6 +169,144 @@ export interface WorkTask {
   lng?: number;
 }
 
+export type ContributionMode = "place_first" | "source_first";
+
+export type EvidenceDraftState =
+  | "draft"
+  | "agent_draft"
+  | "human_confirmed"
+  | "submitted"
+  | "accepted_for_export"
+  | "rejected"
+  | "rejected_by_human"
+  | "unresolved_note"
+  | "superseded";
+
+export type ContributionLane = "fixed" | "agent_assisted_ra" | "agent_autonomous";
+
+export type ClaimOrigin =
+  | "assigned_task"
+  | "free_place_first"
+  | "source_first"
+  | "agent_assisted"
+  | "agent_autonomous";
+
+export type FieldProvenanceState = "agent_suggested" | "human_edited" | "human_added";
+
+export interface ClaimProvenance {
+  lane: ContributionLane;
+  origin: ClaimOrigin;
+  agentGenerated?: boolean;
+  agentRunId?: string;
+  sourceRecordId?: string;
+  sourceLocator?: string;
+  extractionConfidence?: Confidence;
+  fieldProvenance?: Record<string, FieldProvenanceState>;
+  confirmedBy?: string;
+  confirmedAt?: string;
+  rejectedBy?: string;
+  rejectedAt?: string;
+  rejectionReason?: string;
+}
+
+export interface AgentExtractionRun {
+  agentRunId: string;
+  agentName: string;
+  modelProvider: string;
+  modelName: string;
+  modelVersion?: string;
+  promptOrPipelineVersion: string;
+  sourceRecordId: string;
+  sourceLocator?: string;
+  runStartedAt: string;
+  runCompletedAt?: string;
+  extractionConfidence: Confidence;
+  confidencePolicy: string;
+  expectedCount?: number;
+  extractedCount: number;
+  confirmedCount: number;
+  rejectedCount: number;
+  status: "running" | "completed" | "failed";
+  providerKind?: "demo";
+}
+
+export interface DedupCandidate {
+  siteId?: string;
+  candidateSiteId?: string;
+  taskId?: string;
+  name: string;
+  locality?: string;
+  distanceMetres?: number;
+  sourceIds: string[];
+  confidence: Confidence;
+  reason: string;
+}
+
+export interface DedupCandidateQuery {
+  countryCode: string;
+  name?: string;
+  locality?: string;
+  lat?: number;
+  lng?: number;
+  addressText?: string;
+  osmId?: string;
+  sourceRecordId?: string;
+  archiveRef?: ArchiveRef;
+}
+
+export interface FreeContributionInput {
+  countryCode: string;
+  mode: ContributionMode;
+  mapContext?: { lat?: number; lng?: number; zoom?: number };
+  sourceRecordId?: string;
+  candidateSiteId?: string;
+  name?: string;
+  locality?: string;
+  religion?: string;
+  denominationCode?: string;
+  sourceTitle?: string;
+  sourceNotes?: string;
+  sensitivity?: { culturallySensitive: boolean; basis?: string };
+  containingArea?: LocationEvidence["containingArea"];
+  selectedDedupCandidate?: DedupCandidate;
+  continueAsNewReason?: string;
+}
+
+export interface FreeContributionHandle {
+  task: WorkTask;
+  draft: EvidenceDraft;
+  candidateSiteId: string;
+}
+
+export interface SourceRecordInput extends SourceReference {
+  countryCode: string;
+}
+
+export interface SourceRecordHandle {
+  sourceRecordId: string;
+  sourceRecord: SourceRecord;
+}
+
+export interface AgentDraftInput {
+  countryCode: string;
+  sourceRecordId: string;
+  agentRun: AgentExtractionRun;
+  draft: Omit<EvidenceDraft, "draftId" | "taskId" | "countryCode" | "updatedAt" | "state"> &
+    Partial<Pick<EvidenceDraft, "draftId" | "taskId">>;
+}
+
+export interface HumanConfirmationInput {
+  draftId: string;
+  confirmedBy: string;
+  fieldProvenance?: Record<string, FieldProvenanceState>;
+}
+
+export interface HumanRejectionInput {
+  draftId: string;
+  rejectedBy: string;
+  reason: string;
+}
+
 /** the evidence an RA drafts against a task; superset of the pilot's
     site_evidence_wide row, extended with deep-history fields */
 export interface EvidenceDraft {
@@ -180,8 +323,27 @@ export interface EvidenceDraft {
   lifecycle: LifecycleClaim[];
   sources: SourceRecord[];
   evidenceNotes?: string;
+  candidateSiteId?: string;
+  sourceRecordId?: string;
+  sourceFirstId?: string;
+  contributionMode?: ContributionMode;
+  lane?: ContributionLane;
+  origin?: ClaimOrigin;
+  providerKind?: "demo";
+  claimProvenance?: ClaimProvenance;
+  dedupCandidates?: DedupCandidate[];
+  selectedDedupCandidate?: DedupCandidate;
+  continueAsNewReason?: string;
   /** useful-but-incomplete evidence: parked for review, not submitted */
   unresolvedNote?: string;
   updatedAt: string;
-  state: "draft" | "submitted" | "superseded";
+  state: EvidenceDraftState;
 }
+
+export type FreeEvidenceDraft = EvidenceDraft & {
+  candidateSiteId: string;
+  contributionMode: ContributionMode;
+  lane: ContributionLane;
+  origin: ClaimOrigin;
+  claimProvenance: ClaimProvenance;
+};

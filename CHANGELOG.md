@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### 2026-07-07
+
+- Implemented the demo-mode `Nominate missing PoW` workbench path. The
+  provider interface now includes free contributions, deduplication
+  candidates, source records, source-linked claims, and agent draft
+  confirmation or rejection through `DemoProvider` and localStorage only.
+  The workbench sidebar now opens place-first and source-first flows,
+  supports archive references without URLs, keeps regional-only claims
+  valid without coordinates, and seeds a demo archive extraction run for
+  human-confirmed agent-assisted review. The shared Convex backend and
+  public map products remain untouched.
+
 ### 2026-07-06
 
 - Extended the United States research map back to 1850 with IPUMS NHGIS

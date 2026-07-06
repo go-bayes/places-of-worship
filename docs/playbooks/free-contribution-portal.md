@@ -1,6 +1,6 @@
 # Playbook: free-contribution portal (RAs add, not only review)
 
-Status: READY after `deep-history-schema.md` lands (types alignment)
+Status: BUILD SITTING IMPLEMENTED; awaiting maintainer browser verification and commit.
 Task: #10. Effort: one design sitting + one build sitting.
 
 ## Goal

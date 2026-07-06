@@ -3,12 +3,13 @@ import { countries, defaultCountryCode, getCountry } from "./config";
 import { DemoProvider } from "./data/demoProvider";
 import type { EvidenceDraft, WorkTask } from "./data/types";
 import { EvidenceForm } from "./screens/EvidenceForm";
+import { FreeContributionPortal } from "./screens/FreeContributionPortal";
 import { MyWork } from "./screens/MyWork";
 import { TaskList } from "./screens/TaskList";
 
 const provider = new DemoProvider();
 
-type View = "tasks" | "my_work";
+type View = "tasks" | "my_work" | "nominate";
 
 export function App() {
   const [countryCode, setCountryCode] = useState(defaultCountryCode);
@@ -60,6 +61,16 @@ export function App() {
             Demo mode: work saves to this browser only. The shared backend is
             not connected on this surface yet.
           </div>
+          <button
+            className={view === "nominate" ? undefined : "secondary"}
+            style={{ width: "100%", marginBottom: 10 }}
+            onClick={() => {
+              setView("nominate");
+              setSelectedTaskId(null);
+            }}
+          >
+            Nominate missing PoW
+          </button>
           <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
             <button
               className={view === "tasks" ? undefined : "secondary"}
@@ -81,11 +92,13 @@ export function App() {
               onSelect={setSelectedTaskId}
             />
           ) : (
-            <MyWork drafts={myWork} />
+            <MyWork drafts={myWork} onNominate={() => setView("nominate")} />
           )}
         </aside>
         <main className="main">
-          {selectedTask ? (
+          {view === "nominate" ? (
+            <FreeContributionPortal country={country} provider={provider} onChanged={refresh} />
+          ) : selectedTask ? (
             <EvidenceForm
               key={selectedTask.taskId}
               task={selectedTask}
