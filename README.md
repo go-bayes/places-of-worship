@@ -19,6 +19,12 @@ Building historical datasets fit for scientific inferences is remarkably difficu
 - [Lexicon](LEXICON.md)
 
 
+## Who reads what
+
+Instructions are audience-addressed under [docs/people/](docs/people/):
+[research assistants](docs/people/ra/), [JW](docs/people/jw/), and
+[Guy](docs/people/guy/). The public/private rule lives there too.
+
 ## Ongoing Work
 
 - **[RA assignment: New Zealand 50-case workpack](https://www.placesmap.org/apps/regions/nz/verification.html)**
