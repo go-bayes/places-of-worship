@@ -4,6 +4,19 @@
 
 ### 2026-07-06
 
+- Fixed stale-module hazard on the country maps: the shared
+  `region-map.js`/`region-map.css` URLs now carry a version query
+  (`?v=20260706a`) in every country page, so browsers holding a cached
+  copy of the old module cannot run it against new pages or data —
+  the likely cause of the maps appearing blocked or stale after
+  deploys. Bump the version token whenever the shared module changes.
+  Also restored byte-identical NZ/VU popup headers (the short
+  "Religious"/"No religion" words) — the dynamic header now applies only
+  when a country overrides `metricLabels`. Full pre-deploy pass on all
+  surfaces: hub, NZ (2013–2023, popups original), VU (1999–2020, Tafea
+  popup all three censuses), US (adherents labels, two metrics,
+  resident-population denominator note, no dash columns), global map
+  serving; zero console errors.
 - Tightened the US map's construct honesty in the shared popup: the
   hardcoded "stated religion-response denominator" footnote is now the
   config field `popupDenominatorNote` (default unchanged for NZ/VU; the

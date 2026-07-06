@@ -2953,8 +2953,10 @@ function openCensusPopup(feature, lngLat) {
   // construct, where absence of reported adherence is not "no religion")
   // drops the column entirely rather than showing dashes
   const hasNoReligion = "no_religion_percent" in CENSUS_METRICS;
-  const affiliationLabel = CENSUS_METRICS.religious_affiliation_percent?.label || "Religious";
-  const noReligionLabel = CENSUS_METRICS.no_religion_percent?.label || "No religion";
+  // popup headers keep the original short words unless a country
+  // explicitly overrides the metric labels (byte-identical NZ/VU popups)
+  const affiliationLabel = RC.metricLabels?.religious_affiliation_percent?.label || "Religious";
+  const noReligionLabel = RC.metricLabels?.no_religion_percent?.label || "No religion";
   // the place columns come from the area summary's OSM-derived counts; a
   // country that hides the place metrics (no extraction pass yet) drops
   // the columns and the OSM credit instead of showing dashes
