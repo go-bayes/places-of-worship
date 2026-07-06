@@ -113,6 +113,87 @@
    "sha256": "bc7f2e0470f33743ad114ce76fa787fb543279f9ea3674ec511a58c2cd70edb8",
    "row_count": null,
    "notes": "Full provenance for the source PDFs: URLs, retrieval dates, publishers, licence statements, SHA-256 hashes. The PDFs sit git-ignored at data/raw/vu_census/ (56 MB); durable archival location is a maintainer decision."
+  },
+  {
+   "uri": "gs://places-of-worship-private-sync/raw_sources/vu_census/vu_2020_census_basic_tables_vol1.pdf",
+   "storage_provider": "google_cloud_storage",
+   "format": "pdf",
+   "bytes": 10039520,
+   "sha256": "3a37789d93ae63045c634c92cb2e8f17a64bae7abe130e27c117747173697e37",
+   "row_count": null,
+   "notes": "archival master; sha256 verified by round-trip re-download 2026-07-06"
+  },
+  {
+   "uri": "gs://places-of-worship-private-sync/raw_sources/vu_census/vu_2020_census_basic_tables_vol1_v2_vbos.pdf",
+   "storage_provider": "google_cloud_storage",
+   "format": "pdf",
+   "bytes": 14955957,
+   "sha256": "eb902b2ff843986953b5dcf97f0eea2f5696eb8ca49cb289abda080b2932d20b",
+   "row_count": null,
+   "notes": "archival master; sha256 verified by round-trip re-download 2026-07-06"
+  },
+  {
+   "uri": "gs://places-of-worship-private-sync/raw_sources/vu_census/vu_2020_census_analytical_report_vol2.pdf",
+   "storage_provider": "google_cloud_storage",
+   "format": "pdf",
+   "bytes": 10628723,
+   "sha256": "67ea2862d87394115400dcfd4d41765f79267bd266c57430c2ee03dded1952f9",
+   "row_count": null,
+   "notes": "archival master; sha256 verified by round-trip re-download 2026-07-06"
+  },
+  {
+   "uri": "gs://places-of-worship-private-sync/raw_sources/vu_census/vu_2009_census_basic_tables_vol1.pdf",
+   "storage_provider": "google_cloud_storage",
+   "format": "pdf",
+   "bytes": 1981552,
+   "sha256": "9f3536b74c3781243772f5a395a455cee0d11ea48661f339863f14869f27be86",
+   "row_count": null,
+   "notes": "archival master; sha256 verified by round-trip re-download 2026-07-06"
+  },
+  {
+   "uri": "gs://places-of-worship-private-sync/raw_sources/vu_census/vu_2009_census_analytical_report_vol2.pdf",
+   "storage_provider": "google_cloud_storage",
+   "format": "pdf",
+   "bytes": 6846086,
+   "sha256": "ec80d576b629abfbd766d41070c3922e2fd73d92eed7386b85bc9d78e393e76a",
+   "row_count": null,
+   "notes": "archival master; sha256 verified by round-trip re-download 2026-07-06"
+  },
+  {
+   "uri": "gs://places-of-worship-private-sync/raw_sources/vu_census/vu_1999_census_demographic_analysis_report.pdf",
+   "storage_provider": "google_cloud_storage",
+   "format": "pdf",
+   "bytes": 1040336,
+   "sha256": "f76822c9d4cac11a48862e46334bfcd0fc49b317564436693d5117f5ed385b2a",
+   "row_count": null,
+   "notes": "archival master; sha256 verified by round-trip re-download 2026-07-06"
+  },
+  {
+   "uri": "gs://places-of-worship-private-sync/raw_sources/vu_census/vu_1989_census_demographic_migration_analysis.pdf",
+   "storage_provider": "google_cloud_storage",
+   "format": "pdf",
+   "bytes": 9315724,
+   "sha256": "3a90a12d12949fb4c1d5cdd7b4ff41341e06b4ab595515cd4a9fdb56a78d69c2",
+   "row_count": null,
+   "notes": "archival master; sha256 verified by round-trip re-download 2026-07-06"
+  },
+  {
+   "uri": "gs://places-of-worship-private-sync/raw_sources/vu_census/unsd_vanuatu_census_note.pdf",
+   "storage_provider": "google_cloud_storage",
+   "format": "pdf",
+   "bytes": 4140934,
+   "sha256": "329ac55cf4df57cde6c3238a9dba317dcf0c1e83b503520608d16c71e7f67ced",
+   "row_count": null,
+   "notes": "archival master; sha256 verified by round-trip re-download 2026-07-06"
+  },
+  {
+   "uri": "gs://places-of-worship-private-sync/raw_sources/vu_census_guy/vu_1999_census_main_report_tables_scan.pdf",
+   "storage_provider": "google_cloud_storage",
+   "format": "pdf",
+   "bytes": 6649877,
+   "sha256": "9cde4182403caf313bfb11669dbb83f0bee81b4bdc0345ccd87fbb016579844f",
+   "row_count": null,
+   "notes": "archival master of the print-only 1999 Main Report scan (digitised by Guy Lavender Forsyth); previously existed only as a local file. sha256 verified by round-trip re-download 2026-07-06"
   }
  ],
  "derived_outputs": [
@@ -137,7 +218,8 @@
    "adm1 2020 population sum 293,536 vs national stated denominator 293,535 (+/-1 perturbation)",
    "adm2 2020: 65/65 boundary units joined by name",
    "1999: all 7 geography rows sum exactly to stated totals; provinces sum to national per category; national row matches T30",
-   "rebuild is idempotent on its own output (r partial-matching bug fixed with exact [[ ]] access)"
+   "rebuild is idempotent on its own output (r partial-matching bug fixed with exact [[ ]] access)",
+   "2026-07-06: all raw source masters archived to gs://places-of-worship-private-sync/raw_sources/ and verified by sha256 round-trip (9 files)"
   ]
  }
 }
