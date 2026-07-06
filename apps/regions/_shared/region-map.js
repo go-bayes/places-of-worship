@@ -2547,7 +2547,14 @@ const CENSUS = {
 // each level is a governed area-summary product plus its boundary file;
 // join key and display name are properties of that boundary set
 const CENSUS_LEVELS = RC.censusLevels;
-const CENSUS_METRICS = {
+// base metric definitions are shared across every country; a country whose
+// construct differs (for example, adherents reported by religious bodies
+// rather than a census self-identification question) overrides label/note
+// text per metric via RC.metricLabels, and can hide metrics that make no
+// sense for its construct via RC.metricsAvailable — the metric key, kind,
+// and value formatting never change, so existing countries are unaffected
+// when neither config field is present
+const CENSUS_METRICS_BASE = {
   religious_affiliation_percent: {
     label: "Religious affiliation %",
     kind: "seq",
@@ -2579,6 +2586,18 @@ const CENSUS_METRICS = {
     note: "percentage-point change since the previous census"
   }
 };
+function buildCensusMetrics() {
+  const allow = Array.isArray(RC.metricsAvailable) ? RC.metricsAvailable : null;
+  const overrides = RC.metricLabels || {};
+  const out = {};
+  for (const [id, def] of Object.entries(CENSUS_METRICS_BASE)) {
+    if (allow && !allow.includes(id)) continue;
+    const override = overrides[id];
+    out[id] = override ? { ...def, ...override } : def;
+  }
+  return out;
+}
+const CENSUS_METRICS = buildCensusMetrics();
 const censusState = {
   enabled: false,
   // the level, metric and year the overlay opens on (config): a country
@@ -2620,7 +2639,8 @@ function censusLevelDef() {
 function rowFlagged(row) {
   return typeof row?.quality_flag === "string" &&
     (row.quality_flag.includes("suppressed_denominator") ||
-      row.quality_flag.includes("rr3_small_denominator"));
+      row.quality_flag.includes("rr3_small_denominator") ||
+      row.quality_flag.includes("boundary_change_crosswalked"));
 }
 function metricUsesDenominator(metric) {
   return metric !== "place_density_per_sq_km";
@@ -2928,6 +2948,13 @@ function openCensusPopup(feature, lngLat) {
   const fmtPercent = (v) => (Number.isFinite(v) ? `${v.toFixed(1)}%` : "–");
   const fmtRate = (v) => (Number.isFinite(v) ? v.toFixed(1) : "–");
   const fmtCount = (v) => (Number.isFinite(v) ? v : "–");
+  // no-religion is a NZ/VU-style census-question construct; a country whose
+  // metricsAvailable omits it (for example, the US adherents/congregations
+  // construct, where absence of reported adherence is not "no religion")
+  // drops the column entirely rather than showing dashes
+  const hasNoReligion = "no_religion_percent" in CENSUS_METRICS;
+  const affiliationLabel = CENSUS_METRICS.religious_affiliation_percent?.label || "Religious";
+  const noReligionLabel = CENSUS_METRICS.no_religion_percent?.label || "No religion";
   let anyFlagged = false;
   const rowsHtml = store.years.map((year) => {
     const row = store.byAreaYear.get(`${code}|${year}`);
@@ -2938,7 +2965,7 @@ function openCensusPopup(feature, lngLat) {
     return `<tr${selected}>
       <td>${year}${flagged ? "*" : ""}</td>
       <td>${fmtPercent(row.religious_affiliation_percent)}</td>
-      <td>${fmtPercent(row.no_religion_percent)}</td>
+      ${hasNoReligion ? `<td>${fmtPercent(row.no_religion_percent)}</td>` : ""}
       <td>${fmtCount(row.place_count)}</td>
       <td>${fmtRate(row.places_per_10000_residents)}</td>
     </tr>`;
@@ -2949,7 +2976,7 @@ function openCensusPopup(feature, lngLat) {
   const html =
     `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
     `<table class="census-table">` +
-    `<thead><tr><th>Census</th><th>Religious</th><th>No religion</th><th>Places</th><th>Per 10k</th></tr></thead>` +
+    `<thead><tr><th>Census</th><th>${affiliationLabel}</th>${hasNoReligion ? `<th>${noReligionLabel}</th>` : ""}<th>Places</th><th>Per 10k</th></tr></thead>` +
     `<tbody>${rowsHtml}</tbody></table>` +
     flagNote +
     `<div class="place-note">Percentages use the stated religion-response denominator. ` +
