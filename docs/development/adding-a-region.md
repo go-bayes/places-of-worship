@@ -104,6 +104,17 @@ and footnote treatment NZ's `rr3_small_denominator` gets (for example,
 `county_boundary_change_crosswalked`) — add the substring to the
 existing `||` chain rather than branching on country identity.
 
+## Deploy parity
+
+A local static server serves every file; GitHub Pages does not
+necessarily. The `.nojekyll` file at the repo root is load-bearing: it
+stops Pages' default Jekyll pass, which would silently exclude
+underscore-prefixed paths such as `apps/regions/_shared/` (this broke
+every country map on the live site once, 2026-07-06, while local
+testing stayed green). After changing deployment-affecting structure,
+verify the LIVE asset URLs with curl, not only a local server, and
+treat browser-cached modules as capable of masking a live 404.
+
 ## Rules
 
 - Do not add country-conditional logic to the shared module. If a new

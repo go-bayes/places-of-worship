@@ -4,6 +4,16 @@
 
 ### 2026-07-06
 
+- Fixed the country maps 404ing on the live site: GitHub Pages runs
+  Jekyll by default and Jekyll silently excludes underscore-prefixed
+  directories, so `apps/regions/_shared/region-map.js` — the shared
+  runtime every country page loads since the 2026-07-04 unification —
+  was never served to fresh visitors (cached copies masked the failure
+  for returning ones, including during earlier verification). Added
+  `.nojekyll` so Pages serves the repository as-is; the site uses no
+  Jekyll features and deploys build faster without Jekyll processing
+  the large data files.
+
 - Made the US datamap legible at national zoom and long series readable
   on phones: a new `overviewDotOpacity` config fades the low-zoom OSM
   place-dot tier where its density would bury the census choropleth
