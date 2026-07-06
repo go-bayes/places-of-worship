@@ -1,6 +1,6 @@
 # Free Contribution Portal Design
 
-Status: design sitting, 2026-07-07.
+Status: RATIFIED by JB, 2026-07-07 — build sitting authorised.
 
 Planning source: `docs/playbooks/free-contribution-portal.md`.
 
@@ -405,9 +405,13 @@ Submission validation should enforce these rules before review:
 Validation warnings should stay attached to the task and evidence draft. Review
 can accept a warning only by recording a reason.
 
-## Open Ratification Points
+## Ratification
 
-JB should ratify four design choices before the build sitting.
+JB ratified all four design choices as proposed, 2026-07-07: the
+candidate id format, the human_confirmed submission gate for
+agent-assisted claims, the full bulk-lane control set as a precondition
+for Convex ingestion, and sampled batch review with row-level
+exceptions. The build sitting may proceed on this design.
 
 | Choice | Proposed decision |
 | --- | --- |
