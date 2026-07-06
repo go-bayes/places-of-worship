@@ -3038,8 +3038,80 @@ function placeSnapshotStale() {
   return censusState.enabled &&
     (new Date().getFullYear() - censusState.year) > PLACE_SNAPSHOT_HORIZON;
 }
+const DATED = { source: "pow-dated", layer: "pow-dated-points" };
+let datedHandlersAttached = false;
+function addDatedPlacesLayer() {
+  if (!RC.datedPlaces || map.getSource(DATED.source)) return;
+  map.addSource(DATED.source, { type: "geojson", data: RC.datedPlaces });
+  map.addLayer({
+    id: DATED.layer,
+    type: "circle",
+    source: DATED.source,
+    layout: { visibility: "none" },
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 3.2, 9, 5.2, 16, 7.0],
+      "circle-color": religionColors,
+      "circle-opacity": 0.9,
+      "circle-stroke-width": 2,
+      "circle-stroke-color": "#d68910"
+    }
+  });
+  if (!datedHandlersAttached) {
+    datedHandlersAttached = true;
+    map.on("click", DATED.layer, (e) => {
+      const f = e.features && e.features[0];
+      if (!f) return;
+      const pr = f.properties || {};
+      const name = pr.name || "Unnamed place";
+      const span = `${pr.start_year || "?"}–${pr.end_year || "present"}`;
+      const [lng, lat] = f.geometry.coordinates;
+      const popup = new maplibregl.Popup({ maxWidth: "320px" })
+        .setLngLat(f.geometry.coordinates)
+        .setHTML(
+          `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
+          `<div class="place-attrs">` +
+          (pr.religion ? `<div class="place-attr"><span class="place-attr-key">Religion</span><span class="place-attr-val">${pr.religion}</span></div>` : "") +
+          (pr.denomination ? `<div class="place-attr"><span class="place-attr-key">Denomination</span><span class="place-attr-val">${pr.denomination}</span></div>` : "") +
+          `<div class="place-attr"><span class="place-attr-key">Dated</span><span class="place-attr-val">${span}</span></div>` +
+          `</div>` +
+          `<div class="place-note">Dates from OpenStreetMap tags — provisional until reviewed evidence replaces them.</div>` +
+          `<div class="popup-actions">` +
+          `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat.toFixed(6)},${lng.toFixed(6)}" target="_blank" rel="noopener">Streetview</a>` +
+          `<a href="https://www.openstreetmap.org/${pr.osm_type}/${pr.osm_id}" target="_blank" rel="noopener">Open OSM</a>` +
+          `</div>`
+        )
+        .addTo(map);
+      trackPlacePopup(popup);
+    });
+    map.on("mouseenter", DATED.layer, () => { map.getCanvas().style.cursor = "pointer"; });
+    map.on("mouseleave", DATED.layer, () => { map.getCanvas().style.cursor = ""; });
+  }
+}
+function syncDatedPlaces(stale) {
+  if (!RC.datedPlaces) return;
+  addDatedPlacesLayer();
+  if (!map.getLayer(DATED.layer)) return;
+  if (stale) {
+    // open-ended places carry end_year as an explicit null (the key is
+    // present), so ["has","end_year"] is true for them; test the value for
+    // null as well, or every still-open place would be filtered out.
+    map.setFilter(DATED.layer, ["all",
+      ["has", "start_year"],
+      ["<=", ["get", "start_year"], censusState.year],
+      ["any",
+        ["!", ["has", "end_year"]],
+        ["==", ["get", "end_year"], null],
+        [">=", ["get", "end_year"], censusState.year]]
+    ]);
+    map.setLayoutProperty(DATED.layer, "visibility", "visible");
+  } else {
+    map.setLayoutProperty(DATED.layer, "visibility", "none");
+  }
+}
+
 function syncPlaceDotEra() {
   const stale = placeSnapshotStale();
+  try { syncDatedPlaces(stale); } catch (e) { /* dated layer is optional */ }
   const overviewBase = RC.overviewDotOpacity ?? 0.75;
   const ov = stale ? overviewBase * 0.15 : overviewBase;
   if (map.getLayer(LAYERS.overview)) {
@@ -3102,7 +3174,7 @@ function updateCensusLegend() {
     ? `<div class="census-legend-note">pale areas: small or suppressed denominators</div>`
     : "";
   const dotEraNote = placeSnapshotStale()
-    ? `<div class="census-legend-note">place dots show today's OpenStreetMap places, not ${censusState.year} places — historical place layers are being assembled from evidence</div>`
+    ? `<div class="census-legend-note">place dots show today's OpenStreetMap places, not ${censusState.year} places${RC.datedPlaces ? ` — amber-ringed dots carry OpenStreetMap date tags saying they existed in ${censusState.year}` : " — historical place layers are being assembled from evidence"}</div>`
     : "";
   // the ramp clamps at the 2nd-98th percentile; mark the ends when
   // values continue beyond them

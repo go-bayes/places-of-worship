@@ -4,6 +4,22 @@
 
 ### 2026-07-07
 
+- Places of worship now ride the timeline: on historical years the maps
+  show amber-ringed dots for places whose OpenStreetMap date tags say
+  they existed in the selected year (born on or before it, not yet
+  closed), filtered live by the slider, each popup carrying its dated
+  span, a provisional-until-reviewed note, and Street View and OSM
+  links. Undated places keep the faint fade; recent years are
+  unchanged. Extracts: 1,313 dated NZ places (earliest 1835), 2,225 US
+  (plus a few OSM typos the provisional tier tolerates), 51 Irish
+  (earliest 1180); Vanuatu has none - the deep-history portal is the
+  route there. Review caught a MapLibre semantics bug before ship
+  (["has"] treats explicit null as present, which would have emptied
+  the layer); the corrected filter reproduces expected counts exactly.
+  This is tier two of docs/development/temporal-place-layer.md; tier
+  one arrives with pow-replayed site states. Shared assets
+  ?v=20260707e.
+
 - Added the United Kingdom as the fifth country data map: local-authority
   census religion for England and Wales across 2001/2011/2021 (Nomis,
   993 of 993 rows valued, OGL), Northern Ireland districts for 2021
