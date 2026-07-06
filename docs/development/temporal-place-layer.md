@@ -23,6 +23,27 @@ conditionals; the census choropleth (which IS year-true) stays fully
 saturated. Recent years keep normal dots because a current snapshot is a
 reasonable stand-in within roughly one census cycle.
 
+## Place-dot visibility modes (JB directive 2026-07-07, to implement)
+
+A `Points` control joins the census panel with three modes:
+
+- **Period** (default whenever the selected year is historical): only
+  dated dots alive at the year render (the current amber-ring layer);
+  the undated snapshot tier is hidden entirely rather than faded.
+- **All**: today's full OSM snapshot plus the dated layer — the current
+  behaviour.
+- **Off**: no place dots at all; the choropleth alone.
+
+Within Period mode, a **"show later foundations"** checkbox additionally
+renders dated dots with start_year AFTER the selected year in a distinct
+prospective style (e.g. hollow grey ring): with perfect information one
+would see where future PoWs were to be built — useful for studying
+antecedents of religious expansion. Copy must say what it is ("founded
+after {year}"). Implementation: extend syncDatedPlaces with a mode
+state + second filter branch; config-free (all countries get it);
+version-bump on ship; Opus verifies including the mode persistence
+across year changes and level switches.
+
 ## Destination: year-aware place states, three evidence tiers
 
 A dot for year Y should reflect what is KNOWN about that site at Y:
