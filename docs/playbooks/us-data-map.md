@@ -1,7 +1,8 @@
 # Playbook: United States county data map
 
-Status: DONE (2010+2020 county map live; earlier waves not built this
-sitting). Commits: see CHANGELOG 2026-07-06.
+Status: PHASE 1 DONE (2010+2020 county map live); PHASE 2 (historical
+backfill, below) authorised by JB 2026-07-06 — deepest available waves.
+Commits: see CHANGELOG 2026-07-06.
 Task: first country extension beyond NZ/VU. Effort: one verification
 sitting + one build sitting. Chosen 2026-07-04 (JB) over Denmark/Norway
 (state-church membership only) and Germany (two waves, heavier
@@ -95,6 +96,51 @@ use with citation; the build must record the exact statement.
 Suited to a single capable session (Sonnet): the sources are flat
 files; the only design work (metric labels) is specified above. Est.
 comparable to the VU build, minus the PDF extraction.
+
+## Phase 2 — historical backfill (deepest available)
+
+Goal: extend `area_summary_county.json` beyond 2010/2020 with every
+earlier wave that offers county-level data and a defensible county
+population denominator: the Churches and Church Membership studies
+(2000, 1990, 1980, 1971, 1952) and the federal Census of Religious
+Bodies (1936, 1926, 1916, 1906) at ARDA. Verify each wave's actual
+existence, granularity, and file format before building — the wave
+list above is from model memory.
+
+Decisions already made (do not reopen):
+
+1. **Inclusion rule**: a wave enters the map only if the source file
+   itself carries (a) county identifiers joinable to 2020 FIPS for the
+   bulk of counties and (b) total adherents/members AND a county
+   population figure from the same study. No external population
+   splicing in this phase; a wave failing (b) is documented on the
+   country card as present-but-not-mapped.
+2. **Construct drift is labelled, not hidden.** Participating bodies
+   and definitions differ per wave (1906–1936 count "members" as each
+   body defined them; 1952/1971 exclude most Black denominations —
+   a known, documented gap; RCMS waves broadened coverage). Every
+   pre-2010 row carries a `wave_coverage_differs` quality-flag
+   substring plus a per-wave note in the indicator quality_notes and
+   the country card. The metric label stays "Adherents per 100
+   population"; the legend note must say coverage varies by wave.
+   Do NOT add `wave_coverage_differs` to the module's `rowFlagged()`
+   wash-out list — flags here inform, they do not suppress a century of
+   data; the crosswalk flag behaviour stays as is.
+3. **Boundaries**: everything joins onto the 2020 county layer by
+   FIPS, extending the existing crosswalk file for historical county
+   changes (created/abolished/renamed counties, Virginia independent
+   cities). Counties in a historical wave with no defensible 2020
+   match are left unmapped and counted in the manifest (the Torres
+   rule). No period-boundary reconstruction in this phase — record it
+   on the card as future work.
+4. **Rates can exceed 100 and vary wildly in old waves** — keep the
+   percentile-clamped domain; do not special-case.
+5. **Slider ticks**: up to ~11 years must remain legible at 375px; if
+   ticks crowd, thin the labels (CSS in region-map.css, version bump
+   `?v=`) rather than dropping waves.
+6. **Per-wave validation**: county sums vs any published state or
+   national totals for that wave (record which check was possible);
+   join coverage counted per wave in the manifest.
 
 ## Notes from the 2026-07-06 build
 

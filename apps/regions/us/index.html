@@ -7,7 +7,7 @@
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
   <link href="../../shared/map-shell.css" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
-  <link href="../_shared/region-map.css?v=20260706a" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260706b" rel="stylesheet">
 </head>
 <body>
   <div id="region-root"></div>
@@ -51,14 +51,17 @@
       metricLabels: {
         religious_affiliation_percent: {
           label: "Adherents per 100 population",
-          note: "congregations and adherents reported by religious bodies to the U.S. Religion Census, not a census self-identification question"
+          note: "reported congregations and adherents; participating bodies and definitions differ by wave, including limited 1952/1971 Black-denomination coverage"
         },
         religious_change: {
           label: "Change in adherents per 100 population",
-          note: "percentage-point change in reported adherence, 2010 to 2020"
+          note: "wave-to-wave percentage-point change in reported adherence"
         }
       },
       metricsAvailable: ["religious_affiliation_percent", "religious_change"],
+      // ~350k US places of worship in OSM bury the county choropleth at
+      // national zoom; fade the overview dot tier (dots ramp back in from z6)
+      overviewDotOpacity: 0.12,
       popupDenominatorNote: "Rates use county resident population as the denominator; values can exceed 100 where adherents are counted at their congregation's county rather than their home county.",
       cityPresets: [
         { label: "New York City", shortLabel: "NYC", coords: [-73.9857, 40.7484], zoom: 10 },
@@ -75,10 +78,11 @@
       geocode: { country: "us", biasLngLat: [-98.6, 39.8] },
       onboarding: {
         title: "US research map",
-        intro: "Places of worship across the United States, with U.S. Religion Census congregation and adherence overlays for 2010 and 2020.",
+        intro: "Places of worship across the United States, with county overlays from ARDA's Churches and Church Membership / U.S. Religion Census series, 1952 to 2020.",
         bullets: [
           "The census overlay is on: counties are shaded by adherents per 100 population, as reported by religious bodies to the U.S. Religion Census.",
           "This is not a census affiliation question: the United States census asks no religion question. The data are institutional counts submitted by participating denominations and faith groups.",
+          "Participating bodies and definitions differ by wave; the 1952 file has only a limited Black-denomination estimate, and the 1971 file does not systematically cover historically Black denominations.",
           "Open <strong>Census</strong> (top centre) for the metric and year slider.",
           "Tap any dot for a place; tap a county for its adherence detail."
         ],
@@ -90,9 +94,9 @@
         { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Congregations &amp; adherents © <a href="https://www.usreligioncensus.org/" target="_blank" rel="noopener">U.S. Religion Census</a> / <a href="https://www.thearda.com/" target="_blank" rel="noopener">Association of Religion Data Archives (ARDA)</a> · Boundaries © <a href="https://www.census.gov/" target="_blank" rel="noopener">U.S. Census Bureau</a> (public domain)',
-      censusFlagNote: "* county boundary changed between 2010 and 2020; adjacent totals are combined onto the 2020 county (see the manifest crosswalk)."
+      censusFlagNote: "* historical wave coverage differs from later U.S. Religion Census waves, or the county boundary was crosswalked to the 2020 county layer (see the manifest validation block)."
     };
   </script>
-  <script src="../_shared/region-map.js?v=20260706a"></script>
+  <script src="../_shared/region-map.js?v=20260706b"></script>
 </body>
 </html>

@@ -45,6 +45,10 @@ clamp colour domains wherever they appear in the data.
      `metricsAvailable` (optional; allow-list of metric ids) — see
      "Metric labels and availability" below. Omit both and a country
      gets the NZ/VU defaults unchanged.
+   - `overviewDotOpacity` (optional, default 0.75): opacity of the
+     low-zoom place-dot overview tier. A country whose OSM dot density
+     would bury the census choropleth at national zoom (the US) sets a
+     low value; the detailed places tier still ramps in from zoom 6.
    - `popupDenominatorNote` (optional): the popup footnote explaining
      the percentage denominator. Defaults to the census stated-response
      wording; a country whose construct uses a different denominator

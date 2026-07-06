@@ -4,6 +4,35 @@
 
 ### 2026-07-06
 
+- Made the US datamap legible at national zoom and long series readable
+  on phones: a new `overviewDotOpacity` config fades the low-zoom OSM
+  place-dot tier where its density would bury the census choropleth
+  (US: 0.12; NZ/VU unchanged at the 0.75 default, dots ramp back in
+  from zoom 6), and with six or more year ticks the slider thins the
+  middle labels so 1952-2020 does not render as one run-together
+  string. Shared asset version bumped to `?v=20260706b`. Raw source
+  masters for both countries now have verified archival copies at
+  `gs://places-of-worship-private-sync/raw_sources/` (VU census PDFs,
+  Guy's 1999 scan, and all ARDA files; every file sha256-verified by
+  round-trip re-download).
+
+- Extended the United States county map from two waves to the full
+  qualifying ARDA county series: Churches and Church Membership 1952,
+  1971, 1980, 1990, and U.S. Religion Census 2000, 2010, 2020. The
+  rebuilt `area_summary_county.json` now carries 21,905 rows across
+  seven waves, with per-wave extracts, a year-scoped
+  `fips_crosswalk_to_2020.csv`, and a new
+  `docs/manifests/us-rcms-county-1952-2020.json` manifest. Validation
+  compares county sums with matching ARDA state files: 1952, 2000, and
+  2010 match exactly; 1980 and 1990 match on congregations/adherents but
+  differ slightly on population; 1971 differs materially from its state
+  file; 2020 county sums are below the state file by 644 congregations
+  and 214,571 adherents while population matches. Federal Census of
+  Religious Bodies county files for 1906, 1916, 1926, and 1936 were
+  verified but skipped because their county files lack same-study county
+  population fields. The US page now warns that wave coverage differs,
+  including the 1952/1971 Black-denomination coverage gap, and the
+  change metric is explicitly wave-to-wave.
 - Fixed stale-module hazard on the country maps: the shared
   `region-map.js`/`region-map.css` URLs now carry a version query
   (`?v=20260706a`) in every country page, so browsers holding a cached
@@ -35,7 +64,7 @@
   x 2 years) and `counties_2020.geojson` (2.56 MB, simplified from the
   Census Bureau's 2020 cartographic boundary file, 50 states + DC).
   Join coverage is 3,143/3,143 for both waves; a documented crosswalk
-  (`apps/regions/us/data/source/fips_crosswalk_2010_to_2020.csv`)
+  (`apps/regions/us/data/source/fips_crosswalk_to_2020.csv`)
   handles ten 2010 county FIPS codes affected by Alaska census-area
   splits/renames, a Montana park-county dissolution, two Virginia
   independent-city mergers, and one South Dakota rename. County sums

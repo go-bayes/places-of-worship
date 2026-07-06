@@ -1,193 +1,193 @@
 # Country data map: United States (US)
 
 One page per country, one consistent structure. This card is the single
-place a reader checks to learn whether a country data map is feasible,
-what it would show, and what building it requires. Update the card when
+place a reader uses to learn whether a country data map is feasible,
+what it shows, and what building it requires. Update the card when
 sources are verified or the build advances; record status honestly.
 
 ## Status
 
 - **Tier**: A (buildable now)
-- **Build state**: map live (county level, 2010 + 2020)
+- **Build state**: map live (county level, 1952, 1971, 1980, 1990,
+  2000, 2010, 2020)
 - **Last verified**: 2026-07-06
 
 ## Religious data over time
 
 | Source | Construct | Smallest public unit | Years | Format | Access | Licence |
 | --- | --- | --- | --- | --- | --- | --- |
-| U.S. Religion Census (RCMS), Association of Religion Data Archives (ARDA) | congregations and adherents reported by religious bodies (institutional presence) | county | 1952, 1971, 1980, 1990, 2000, 2010, 2020 | Excel/SPSS/Stata/ASCII, county file per wave | open, no account/registration (files hosted on OSF, linked from an ARDA click-through citation notice) | no formal EULA; cite ARDA and the original collectors; "as is", no redistribution restriction on derived/aggregated products found |
-| Census of Religious Bodies (federal) | church-reported membership | county | 1906, 1916, 1926, 1936 | scanned tables at ARDA | open, same access pattern as RCMS | not verified this sitting; noted for a future deep-past pass |
+| Churches and Church Membership / U.S. Religion Census (RCMS), Association of Religion Data Archives (ARDA) | congregations and adherents or members reported by religious bodies (institutional presence) | county | 1952, 1971, 1980, 1990, 2000, 2010, 2020 | Excel/SPSS/Stata/ASCII, county file per wave | open, no account or registration; files hosted on OSF behind an ARDA click-through citation notice | no formal EULA; cite ARDA and the original collectors; "as is"; no redistribution restriction on derived or aggregated products found |
+| Churches and Church Membership / U.S. Religion Census (RCMS), ARDA | same-study state totals used for validation | state | 1952, 1971, 1980, 1990, 2000, 2010, 2020 | Excel/SPSS/Stata/ASCII, state file per wave | open, same access pattern | same ARDA click-through terms |
+| Census of Religious Bodies (federal), ARDA | church-reported membership by denomination | county | 1906, 1916, 1926, 1936 | data archive files and codebooks | open, same access pattern | same ARDA click-through terms; not built because the county files fail the inclusion rule |
+| Statistics of Churches in the United States, ARDA | church statistics by denomination | county | 1890 | data archive files and codebooks | open, same access pattern | same ARDA click-through terms; not built because the county file fails the inclusion rule |
 
 The United States census asks no religion question. The RCMS/ARDA series
-measures **congregations and adherents reported by religious bodies** —
+measures **congregations and adherents reported by religious bodies**:
 institutional presence claimed by participating denominations and faith
-groups — not a census self-identification question, and not comparable
-to the NZ/VU "religious affiliation" construct built from a stated-
-response census item. Every US metric label on the map says "adherents"
-or "congregations", never "affiliation".
+groups. The US construct differs from the NZ/VU "religious affiliation"
+construct, which comes from a stated-response census item. Every US map
+label says "adherents" or "congregations".
 
-### Step 1 verification record (2026-07-06)
+### Verification record (2026-07-06)
 
-The playbook's source claims were model memory and were verified by
-direct web lookup and `curl` before any build step:
+The playbook's source claims were verified by direct ARDA page lookup and
+`curl` before downloads:
 
-- **usreligioncensus.org** hosts summary/detail Excel workbooks for 2020
-  directly (`2020_USRC_Summaries.xlsx`, `2020_USRC_Group_Detail.xlsx`,
-  `https://www.usreligioncensus.org/sites/default/files/2023-06/...`),
-  HTTP 200, no auth. These are nation/state/county/metro summary tables,
-  not the full per-denomination county file used here.
-- **thearda.com/data-archive** lists the county file for each wave as a
-  separate dataset: `RCMSCY` (2000), `RCMSCY10` (2010), `RCMSCY20`
-  (2020), each with its own `fid`. Curling the page's Downloads tab
-  (`?fid=RCMSCY10&tab=3`) shows the real download links point to
-  **OSF** (`https://osf.io/download/<id>`), not thearda.com itself.
-  Every OSF link returns HTTP 200 directly via `curl`, with SHA-256
-  hashes matching OSF's own `x-waterbutler-metadata` header exactly —
-  confirming no account, login, or registration wall of any kind.
-- ARDA's "Downloads" page shows an in-page **click-through notice**
-  (JavaScript-toggled `<div>`, not a login form) before revealing the
-  links: (1) cite ARDA and the original collectors; (2) make responsible
-  use of the data; (3) data offered "as is", no warranty; (4) agreement
-  governed by Indiana law. No restriction on redistribution of derived
-  or aggregated products was found in this notice or in ARDA's FAQ page.
-- Census Bureau cartographic boundary file for counties
+- ARDA lists the county files as separate datasets: `CMS52CNT`,
+  `CMS71CNT`, `CMS80CNT`, `CMS90CNT`, `RCMSCY`, `RCMSCY10`, and
+  `RCMSCY20`. Each Downloads tab exposes OSF links that return HTTP 200
+  without login.
+- ARDA lists matching state validation files: `CMS52ST`, `CMS71ST`,
+  `CMS80ST`, `CMS90ST`, `RCMSST`, `RCMSST10`, and `RCMSST20`.
+- The relevant county codebooks expose joinable county identifiers and
+  same-study county population fields: `STCODE`/`CCODE` and `TOTPOP` in
+  1952; `FIPS` and `TOTPOP` in 1971, 1980, and 1990; `FIP` and
+  `POP200` in 2000; `FIPS` and `POP2010` in 2010; `FIPS` and
+  `POP2020` in 2020.
+- ARDA's Downloads page shows an in-page click-through notice with
+  JavaScript-toggled text. The notice is not a login form. It asks users
+  to cite ARDA and original collectors, use the data responsibly, accept
+  the files "as is", and note Indiana governing law. No restriction on
+  derived or aggregated products was found.
+- Census Bureau cartographic boundary file
   (`cb_2020_us_county_5m.zip`, 1:5,000,000, 2020 vintage) downloads
-  directly from `www2.census.gov`, HTTP 200, public domain (U.S.
-  government work).
+  directly from `www2.census.gov`, HTTP 200, public domain.
 
-No registration wall, licence prohibition, or synthetic-data situation
-was found. The build proceeded on real downloaded data.
+All new raw workbooks and codebooks sit in the git-ignored cache
+`data/raw/us_rcms/`; `data/raw/us_rcms/sources.csv` records OSF URL,
+canonical ARDA URL, retrieval date, publisher, licence terms, SHA-256
+hash, and content notes.
 
 ## Boundaries
 
-- U.S. Census Bureau cartographic boundary file, counties, 1:5,000,000,
-  2020 vintage (published 2021-01-24, public domain). Filtered to the 50
-  states + DC (3,143 of 3,234 features; territories dropped, matching
-  RCMS coverage). Simplified to 1000m tolerance in NAD83 Conus Albers
-  (EPSG:5070), 2.56 MB, well under the ~10 MB budget.
-- Join key: 5-digit county FIPS (`GEOID`). The 2020 vintage boundary
-  file predates Connecticut's 2022 planning-region switch, so its county
-  layout matches both the 2010 and 2020 RCMS waves without a CT-specific
-  crosswalk.
-- Ten of 3,149 2010 RCMS county rows carry FIPS codes that predate or
-  postdate simple 1:1 successors to the 2020 boundary set: Alaska
-  census-area splits/renames (Prince of Wales-Outer Ketchikan,
-  Skagway-Yakutat/Hoonah-Angoon, Valdez-Cordova, Wrangell-Petersburg,
-  Wade Hampton), the 1997 dissolution of Montana's Yellowstone National
-  Park county-equivalent, two Virginia independent-city mergers (Bedford,
-  Clifton Forge), and the 2015 Shannon County to Oglala Lakota County
-  rename in South Dakota. All ten are mapped and documented in
-  `apps/regions/us/data/source/fips_crosswalk_2010_to_2020.csv`, sourced
-  from the Census Bureau's county-change documentation and corroborating
-  Wikipedia detail. Where a 2010 area later split into two 2020 counties
-  (Valdez-Cordova to Chugach + Copper River), the combined total is
-  attributed to the larger successor and the smaller successor is left
-  an honest pending row for 2010, flagged
-  `county_created_by_post_2010_split_no_2010_data`.
-- Join coverage: 3,143/3,143 for 2020 (no crosswalk needed); 3,143/3,143
-  for 2010 (after the crosswalk).
+- U.S. Census Bureau cartographic boundary file, counties,
+  1:5,000,000, 2020 vintage (published 2021-01-24, public domain).
+  The build filters to the 50 states plus District of Columbia (3,143 of
+  3,234 features; territories dropped, matching RCMS coverage).
+- Join key: 5-digit county Federal Information Processing Series (FIPS)
+  code (`GEOID`). The 2020 vintage boundary file predates Connecticut's
+  2022 planning-region switch; the county layout remains suitable for
+  this build.
+- The build joins every wave to the 2020 county layer through
+  `apps/regions/us/data/source/fips_crosswalk_to_2020.csv`. The
+  crosswalk is year-scoped because several historical codes either
+  disappeared or changed meaning before the 2020 boundary set.
+- Historical county rows that crosswalk onto one 2020 successor are
+  flagged `boundary_change_crosswalked`. Every pre-2010 row is also
+  flagged `wave_coverage_differs`.
+- Source rows left unmatchable after the crosswalk: 0 in every live
+  wave.
+- 2020 boundary counties without a mapped source row: 72 in 1952; 6 in
+  1971; 6 in 1980; 6 in 1990; 5 in 2000; 1 in 2010; 0 in 2020. The
+  manifest lists the FIPS values. The main recurring gaps are later
+  Alaska county-equivalents and Broomfield, Colorado; 1952 also lacks
+  Alaska and Hawaii and many Virginia independent cities.
 
 ## Places-of-worship layer
 
 - No US-specific OpenStreetMap extraction has been built yet. The page
-  shows the existing global OSM places-overview layer (shared across all
-  region pages) but the `area_summary_county` product carries no
-  `place_count` field, so the places-per-population and place-density
-  metrics are omitted from the metric list rather than shown as
-  permanently pending — see `metricsAvailable` in
-  `apps/regions/us/index.html`.
-- A future OSM extraction pass for the US (`amenity=place_of_worship`
-  point-in-polygon assignment to counties) would populate this and
-  should re-enable those two metrics.
+  shows the existing global OSM places-overview layer, but the
+  `area_summary_county` product carries no `place_count` field.
+- A future US OSM extraction pass (`amenity=place_of_worship`
+  point-in-polygon assignment to counties) would populate
+  places-per-population and place-density metrics.
 
-## First visualisation
+## Current visualisation
 
-Adherents per 100 population by county, U.S. Religion Census 2010 and
-2020, on 2020 county boundaries. This is the playbook's staged first
-release; earlier RCMS waves (1952–2000) are feasible in a follow-up
-sitting since they use the same ARDA/OSF access pattern.
+Adherents per 100 population by county, ARDA Churches and Church
+Membership / U.S. Religion Census waves 1952 to 2020, on 2020 county
+boundaries. The change metric uses adjacent available waves.
 
 ## Build recipe
 
-1. Download: `data/raw/us_rcms/RCMSCY{10,20}_county.xlsx` from the OSF
-   links behind ARDA's Downloads tab, plus
-   `cb_2020_us_county_5m.zip` from the Census Bureau; provenance and
-   SHA-256 in `data/raw/us_rcms/sources.csv` (git-ignored raw cache).
-2. Boundaries: `scripts/build_us_county_boundaries.R` reads the
-   shapefile, filters to 50 states + DC, simplifies, and writes
-   `apps/regions/us/data/counties_2020.geojson`.
-3. Extraction and governed product: `scripts/build_us_area_summary.R`
-   reads both RCMS Excel files (note: the 2010 and 2020 files have
-   different column layouts — 2010 carries its FIPS/name/state columns
-   at the end under different names, `TOTCNG`/`TOTADH`/`POP2010`, versus
-   2020's `TOTCNG_2020`/`TOTADH_2020`/`POP2020` at the start), applies
-   the FIPS crosswalk, and writes
-   `apps/regions/us/data/area_summary_county.{json,csv}` following the
-   `area_summary_ta.json` row contract, with tracked source extracts at
-   `apps/regions/us/data/source/*.csv`. Manifest-equivalent provenance
-   lives inside `area_summary_county.json`'s `source_datasets` block
-   (per-source URL, licence text, retrieval date, access/redistribution
-   notes), following the shape of
-   `docs/manifests/vu-census-religion-2009-2020-d17f5596eca1.json`.
-4. Region page: `apps/regions/us/index.html`, `REGION_CONFIG` with
-   `metricLabels` (adherents wording) and `metricsAvailable` (hides
-   no-religion and place-density metrics that do not apply to this
-   construct or data state) — the minimal shared-module extension
-   documented in `docs/development/adding-a-region.md`.
-5. Verification: county sums cross-checked against ARDA's own published
-   state/national summary statistics (see Validation below); join
-   coverage counts; NZ and VU pages re-verified byte-identical in
-   behaviour after the shared-module change.
+1. Download county workbooks and codebooks for `CMS52CNT`, `CMS71CNT`,
+   `CMS80CNT`, `CMS90CNT`, `RCMSCY`, `RCMSCY10`, and `RCMSCY20`; download
+   state validation workbooks and codebooks for `CMS52ST`, `CMS71ST`,
+   `CMS80ST`, `CMS90ST`, `RCMSST`, `RCMSST10`, and `RCMSST20`.
+2. Keep raw downloads in `data/raw/us_rcms/` and record provenance plus
+   SHA-256 hashes in `data/raw/us_rcms/sources.csv`.
+3. Boundaries: `scripts/build_us_county_boundaries.R` reads the Census
+   shapefile, filters to 50 states plus District of Columbia, simplifies,
+   and writes `apps/regions/us/data/counties_2020.geojson`.
+4. Extraction and governed product:
+   `scripts/build_us_area_summary.R` reads all seven county workbooks,
+   applies `fips_crosswalk_to_2020.csv`, writes per-wave extracts under
+   `apps/regions/us/data/source/`, and writes
+   `apps/regions/us/data/area_summary_county.{json,csv}`.
+5. Manifest: `docs/manifests/us-rcms-county-1952-2020.json` records
+   product hashes, source attribution, per-wave join coverage,
+   state-file validation, skipped federal waves, and all unmapped 2020
+   boundary FIPS values.
+6. Region page: `apps/regions/us/index.html` sets US-specific labels,
+   notes that historical coverage differs by wave, and hides no-religion
+   and place-density metrics until those constructs exist for the US
+   map.
 
 ## Validation
 
-- National totals (2010, from the raw county file's own column sums):
-  344,894 congregations (exact match to ARDA's published national
-  summary), 308,745,538 population (exact match), 150,596,792 adherents
-  (0.06% below ARDA's published 150,686,156 — a genuine small
-  discrepancy between ARDA's summary statistic and its own downloadable
-  county file, present before any crosswalk or pipeline step; not an
-  artefact of this build).
-- Alabama 2020 state total: this pipeline's county sum gives 3,194,369
-  adherents on a population of 5,024,279 (63.6%); ARDA's independently
-  published 2020 national-overview chapter states 3,195,509 adherents on
-  5,024,279 population (63.6%). Population matches exactly; adherents
-  differ by 0.036%, consistent with the same small residual pattern seen
-  nationally.
-- 31 (2010, ARDA's own count) / 30 (2020, this build) counties nationally
-  have reported adherents exceeding population — expected and documented
-  by ARDA (census undercount, membership overcount, or county of
-  residence differing from county of congregational membership,
-  especially in Virginia's independent cities).
-- Join coverage: 3,143/3,143 (2020), 3,143/3,143 (2010, post-crosswalk).
+County sums were compared with the matching ARDA state file for each
+wave before any county-to-2020 crosswalk:
 
-## Risks and open questions
+| Wave | Source county rows | Complete source rows | Mapped 2020 counties | Join coverage | State-file validation |
+| --- | ---: | ---: | ---: | ---: | --- |
+| 1952 | 3,075 | 3,075 | 3,071 | 3,071/3,143 | exact across 49 matched states; congregations 182,856, adherents/members 74,125,462, population 150,635,574 |
+| 1971 | 3,141 | 3,092 | 3,137 | 3,137/3,143 | mismatch across 50 matched states; county sums are lower by 5,530 congregations, 1,833,392 adherents, and 98,351 population; the state file omits District of Columbia |
+| 1980 | 3,141 | 3,099 | 3,137 | 3,137/3,143 | congregations and adherents match across 50 matched states; county population is lower by 13,997; the state file omits District of Columbia |
+| 1990 | 3,141 | 3,104 | 3,137 | 3,137/3,143 | congregations and adherents match across 50 matched states; county population is lower by 10; the state file omits District of Columbia |
+| 2000 | 3,142 | 3,140 | 3,138 | 3,138/3,143 | exact across 51 matched states; congregations 268,254, adherents 141,371,963, population 281,421,839 |
+| 2010 | 3,149 | 3,143 | 3,142 | 3,142/3,143 | exact across 51 matched states; congregations 344,894, adherents 150,596,792, population 308,745,538 |
+| 2020 | 3,143 | 3,143 | 3,143 | 3,143/3,143 | population matches exactly across 51 matched states; county sums are lower by 644 congregations and 214,571 adherents than the state file |
 
-- Denomination participation differs somewhat between the 2010 and 2020
-  waves (372 groups in 2020 vs 236 in 2010), so the adherents-per-100
-  change metric should be read as indicative of direction, not a precise
-  rate.
-- No US OSM place-of-worship extraction yet; the places-per-population
-  and place-density metrics are unavailable until that pass is done.
-- The construct (institutional adherence claimed by participating
-  religious bodies) is not comparable to survey-based religious
-  identification measures. PRRI and Pew both run large US religion
-  surveys with a self-identification construct closer to NZ/VU census
-  affiliation, but at coarser geography (state or region, not county)
-  and as periodic survey releases rather than a stable public file
-  series; noted here as an alternative construct, not built.
-- The ten crosswalked 2010 counties are an approximation where a 2010
-  area's total is attributed to one 2020 successor rather than split
-  proportionally; documented per-row in the crosswalk file and flagged
-  `county_boundary_change_crosswalked` in the data.
+The 2020 state-file mismatch is a source discrepancy between ARDA's
+county and state workbooks: population matches exactly, while
+congregations and adherents do not. The build uses the county file for
+county rows and records the state-file comparison in the manifest.
+
+## Coverage caveats
+
+- The 1952 county file covers the continental United States plus
+  District of Columbia. Alaska and Hawaii are absent. The file includes
+  only a limited Black-denomination estimate; 1952 supports only limited
+  comparison with later Black-denomination coverage.
+- The 1971 study includes 53 denominations and ARDA states that these
+  represented an estimated 81 percent of church membership in the United
+  States. The wave does not systematically cover historically Black
+  denominations.
+- The 1980 study includes 111 participating bodies. Four Black
+  denominations participated; several other large Black churches and
+  smaller Black denominations did not.
+- The 1990 study includes 133 participating bodies. Three predominantly
+  Black denominations participated; other Black denominations remained
+  undercovered.
+- The 2000 study includes 149 groups. ARDA states that all historically
+  African-American denominations were absent from this wave.
+- The 2010 and 2020 waves are broader U.S. Religion Census products with
+  stronger efforts to include underrepresented groups. Participation and
+  definitions still differ across waves; wave-to-wave change is an
+  indicative institutional measure.
+- Reported adherents can exceed resident population because adherents may
+  be counted in a congregation's county rather than a home county, and
+  because membership/adherent definitions differ by body.
 
 ## Deep-history potential
 
-The Census of Religious Bodies (1906, 1916, 1926, 1936) has county
-tables at ARDA under the same access pattern confirmed working here
-(`1906CENSCT`, `1916CENSCT`, `1926CENSCT`, `1936CENSCT` in ARDA's
-dataset picker) — not verified for exact OSF links or format this
-sitting; a natural next step once the modern waves are stable. The
-Churches and Church Membership studies for 1952, 1971, 1980, 1990, and
-2000 sit at the same archive and would extend the county series back
-before 2010 in a follow-up build.
+ARDA has federal Census of Religious Bodies county files for 1906, 1916,
+1926, and 1936 (`1906CENSCT`, `1916CENSCT`, `1926CENSCT`,
+`1936CENSCT`). The files are available and county-level, and the later
+codebooks expose state/county identifiers such as `FIPST` and `FIPCNT`.
+The 1906-1936 federal county files fail the Phase 2 inclusion rule
+because the county codebooks do not expose a same-study county
+population field. The 1906 file also has an apparent total Protestant
+field. That field is Protestant-only.
+
+ARDA also has an 1890 county file (`1890CENSCT`) and state file
+(`1890CENSST`). The 1890 county file exists, but it lacks a same-study
+county population field and has weaker join identifiers than the later
+FIPS-coded files. The 1890 county file remains a deep-history lead for a
+later boundary-specific build.
+
+The remaining historical work is period-boundary reconstruction. A
+period-boundary product would place each wave on its own county
+geography, then model comparability across periods. The present build
+deliberately avoids that step and maps only rows that can be joined or
+crosswalked to 2020 counties.

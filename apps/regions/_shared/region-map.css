@@ -94,3 +94,8 @@
   #counts-toggle .key-label { display: none; }
   #census-panel { width: min(300px, 76vw); }
 }
+
+/* long census series: with six or more year ticks the labels sit flush
+   on phones, so thin the middle ones; first and last always visible */
+.census-ticks:has(span:nth-child(6)) span:nth-child(even) { visibility: hidden; }
+.census-ticks:has(span:nth-child(6)) span:last-child { visibility: visible; }

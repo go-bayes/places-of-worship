@@ -1230,12 +1230,15 @@ function addOverviewLayer() {
       "circle-color": religionColors,
       "circle-stroke-width": 0.6,
       "circle-stroke-color": "rgba(10, 11, 14, 0.6)",
+      // a country whose OSM dot density would bury the census choropleth
+      // at national zoom can fade the overview tier via config; the
+      // detailed places tier still ramps in on zoom as everywhere else
       "circle-opacity": [
         "interpolate",
         ["linear"],
         ["zoom"],
-        0, 0.75,
-        5, 0.75,
+        0, RC.overviewDotOpacity ?? 0.75,
+        5, RC.overviewDotOpacity ?? 0.75,
         6, 0.0
       ]
     }
