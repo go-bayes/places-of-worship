@@ -55,6 +55,10 @@
         "organisation_use_ended",
         "site_name_corrected",
         "site_name_changed",
+        "site_attributes_corrected",
+        "site_attributes_changed",
+        "site_attributes_observed",
+        "site_lifecycle_claimed",
         "duplicate_merged",
         "duplicate_split",
         "structure_created",
@@ -105,6 +109,8 @@
         { "$ref": "#/$defs/OrganisationLinkPayload" },
         { "$ref": "#/$defs/StatusPayload" },
         { "$ref": "#/$defs/NamePayload" },
+        { "$ref": "#/$defs/AttributeUpdatePayload" },
+        { "$ref": "#/$defs/LifecycleClaimPayload" },
         { "$ref": "#/$defs/DuplicatePayload" },
         { "$ref": "#/$defs/ProposalPayload" }
       ]
@@ -148,6 +154,14 @@
       "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "name_update" } } } } }
     },
     {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["site_attributes_corrected", "site_attributes_changed", "site_attributes_observed"] } } },
+      "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "attribute_update" } } } } }
+    },
+    {
+      "if": { "required": ["event_type"], "properties": { "event_type": { "const": "site_lifecycle_claimed" } } },
+      "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "lifecycle_claim" } } } } }
+    },
+    {
       "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["duplicate_merged", "duplicate_split"] } } },
       "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "duplicate_resolution" } } } } }
     },
@@ -156,15 +170,15 @@
       "then": { "properties": { "payload": { "required": ["payload_type"], "properties": { "payload_type": { "const": "proposal_state" } } } } }
     },
     {
-      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["site_location_corrected", "structure_geometry_corrected", "site_status_corrected", "denomination_corrected", "site_name_corrected", "duplicate_merged", "duplicate_split"] } } },
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["site_location_corrected", "structure_geometry_corrected", "site_status_corrected", "denomination_corrected", "site_name_corrected", "site_attributes_corrected", "duplicate_merged", "duplicate_split"] } } },
       "then": { "properties": { "event_intent": { "const": "correction" } } }
     },
     {
-      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["site_status_changed", "denomination_changed", "denomination_added", "denomination_removed", "purpose_added", "purpose_removed", "site_name_changed"] } } },
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["site_status_changed", "denomination_changed", "denomination_added", "denomination_removed", "purpose_added", "purpose_removed", "site_name_changed", "site_attributes_changed"] } } },
       "then": { "properties": { "event_intent": { "const": "observed_change" } } }
     },
     {
-      "if": { "required": ["event_type"], "properties": { "event_type": { "const": "worship_function_observed" } } },
+      "if": { "required": ["event_type"], "properties": { "event_type": { "enum": ["worship_function_observed", "site_attributes_observed", "site_lifecycle_claimed"] } } },
       "then": { "properties": { "event_intent": { "const": "evidence_observation" } } }
     },
     {
@@ -216,6 +230,85 @@
     "DatasetId": {
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "PartialDate": {
+      "type": "string",
+      "pattern": "^[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?$",
+      "description": "Gregorian date with year, month, or day precision. Country-specific lifecycle floors are validation context, not schema constants."
+    },
+    "BoundedDate": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Source-backed date where the source may state an exact value, a lower bound, an upper bound, or no date. Unknown date components remain absent rather than placeholders.",
+      "properties": {
+        "value": { "$ref": "#/$defs/PartialDate" },
+        "not_earlier_than": { "$ref": "#/$defs/PartialDate" },
+        "not_later_than": { "$ref": "#/$defs/PartialDate" }
+      }
+    },
+    "ArchiveRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository_name", "collection", "consulted_date"],
+      "properties": {
+        "repository_name": { "type": "string", "minLength": 1 },
+        "collection": { "type": "string", "minLength": 1 },
+        "item_ref": { "type": ["string", "null"] },
+        "consulted_date": { "$ref": "#/$defs/PartialDate" },
+        "location": { "type": ["string", "null"] }
+      }
+    },
+    "SourceType": {
+      "type": "string",
+      "enum": [
+        "osm_history",
+        "osm_date_tags",
+        "street_imagery",
+        "aerial_imagery",
+        "field_observation",
+        "charities_register",
+        "incorporated_societies",
+        "linz_building_outlines",
+        "linz_property",
+        "denominational_directory",
+        "archived_website",
+        "local_council",
+        "heritage_list",
+        "census_or_statistics",
+        "church_record",
+        "denominational_yearbook",
+        "newspaper_archive",
+        "charity_or_society_register",
+        "map_or_survey",
+        "academic_work",
+        "oral_history",
+        "other"
+      ]
+    },
+    "SourceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title"],
+      "anyOf": [
+        { "required": ["url"] },
+        { "required": ["archive_ref"] }
+      ],
+      "properties": {
+        "source_type": { "$ref": "#/$defs/SourceType" },
+        "title": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "format": "uri", "minLength": 1 },
+        "archive_ref": { "$ref": "#/$defs/ArchiveRef" },
+        "provider": { "type": ["string", "null"] },
+        "source_date": { "$ref": "#/$defs/PartialDate" },
+        "consulted_date": { "$ref": "#/$defs/PartialDate" },
+        "licence": { "type": ["string", "null"] },
+        "access_limits": { "type": ["string", "null"] },
+        "notes": { "type": ["string", "null"] }
+      }
+    },
+    "Confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low"]
     },
     "EventTarget": {
       "type": "object",
@@ -317,6 +410,12 @@
           "type": "string",
           "enum": ["staged", "accepted", "rejected", "superseded", "retracted", "adjudication_required"]
         },
+        "display_clearance": {
+          "type": ["string", "null"],
+          "description": "Reviewer decision about whether culturally sensitive site-level detail may reach public map products. Sensitive payloads require cleared_for_public_display before public export.",
+          "enum": ["not_assessed", "cleared_for_public_display", "restricted_from_public_display", null]
+        },
+        "display_clearance_basis": { "type": ["string", "null"] },
         "confidence": {
           "type": ["number", "null"],
           "minimum": 0,
@@ -329,6 +428,12 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["payload_type", "site_id", "country_code", "geometry", "status"],
+      "allOf": [
+        {
+          "if": { "required": ["culturally_sensitive"], "properties": { "culturally_sensitive": { "const": true } } },
+          "then": { "required": ["sensitivity_basis"], "properties": { "sensitivity_basis": { "type": "string", "minLength": 1 } } }
+        }
+      ],
       "properties": {
         "payload_type": { "type": "string", "const": "site_created" },
         "site_id": { "$ref": "#/$defs/Uuid" },
@@ -338,7 +443,12 @@
         },
         "geometry": { "$ref": "site.schema.json#/$defs/Geometry" },
         "status": { "$ref": "site.schema.json#/$defs/Status" },
-        "name": { "type": ["string", "null"] }
+        "name": { "type": ["string", "null"] },
+        "culturally_sensitive": { "type": "boolean", "default": false },
+        "sensitivity_basis": {
+          "type": ["string", "null"],
+          "description": "Free-text basis for a culturally sensitive site-level claim, such as kastom, urupā, or another restricted-display concern."
+        }
       }
     },
     "StructureCreatedPayload": {
@@ -361,6 +471,12 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["payload_type", "geometry", "geometry_role", "geometry_basis"],
+      "allOf": [
+        {
+          "if": { "required": ["culturally_sensitive"], "properties": { "culturally_sensitive": { "const": true } } },
+          "then": { "required": ["sensitivity_basis"], "properties": { "sensitivity_basis": { "type": "string", "minLength": 1 } } }
+        }
+      ],
       "properties": {
         "payload_type": { "type": "string", "const": "geometry_update" },
         "geometry_history_id": { "$ref": "#/$defs/Uuid" },
@@ -374,13 +490,21 @@
           "type": "string",
           "enum": ["osm_object", "building_outline", "geocoded_address", "street_imagery", "aerial_imagery", "historical_map", "directory_address", "reviewer_point", "inferred_locality", "corrected_coordinate", "other"]
         },
-        "distance_from_previous_m": { "type": ["number", "null"], "minimum": 0 }
+        "distance_from_previous_m": { "type": ["number", "null"], "minimum": 0 },
+        "culturally_sensitive": { "type": "boolean", "default": false },
+        "sensitivity_basis": { "type": ["string", "null"] }
       }
     },
     "RelocationPayload": {
       "type": "object",
       "additionalProperties": false,
       "required": ["payload_type", "from_site_id", "to_site_id", "relation_type"],
+      "allOf": [
+        {
+          "if": { "required": ["culturally_sensitive"], "properties": { "culturally_sensitive": { "const": true } } },
+          "then": { "required": ["sensitivity_basis"], "properties": { "sensitivity_basis": { "type": "string", "minLength": 1 } } }
+        }
+      ],
       "properties": {
         "payload_type": { "type": "string", "const": "site_relocation" },
         "from_site_id": { "$ref": "#/$defs/Uuid" },
@@ -393,19 +517,29 @@
         "previous_geometry_history_id": { "$ref": "#/$defs/Uuid" },
         "new_geometry_history_id": { "$ref": "#/$defs/Uuid" },
         "distance_m": { "type": ["number", "null"], "minimum": 0 },
-        "identity_note": { "type": ["string", "null"] }
+        "identity_note": { "type": ["string", "null"] },
+        "culturally_sensitive": { "type": "boolean", "default": false },
+        "sensitivity_basis": { "type": ["string", "null"] }
       }
     },
     "DenominationPayload": {
       "type": "object",
       "additionalProperties": false,
       "required": ["payload_type", "denomination_code"],
+      "allOf": [
+        {
+          "if": { "required": ["culturally_sensitive"], "properties": { "culturally_sensitive": { "const": true } } },
+          "then": { "required": ["sensitivity_basis"], "properties": { "sensitivity_basis": { "type": "string", "minLength": 1 } } }
+        }
+      ],
       "properties": {
         "payload_type": { "type": "string", "const": "denomination_update" },
         "denomination_code": { "type": "string", "pattern": "^[a-z][a-z0-9._-]*$" },
         "denomination_raw": { "type": ["string", "null"] },
         "religion_code": { "type": ["string", "null"] },
-        "previous_denomination_code": { "type": ["string", "null"], "pattern": "^[a-z][a-z0-9._-]*$" }
+        "previous_denomination_code": { "type": ["string", "null"], "pattern": "^[a-z][a-z0-9._-]*$" },
+        "culturally_sensitive": { "type": "boolean", "default": false },
+        "sensitivity_basis": { "type": ["string", "null"] }
       }
     },
     "WorshipUseStatus": {
@@ -519,10 +653,88 @@
         "note": { "type": ["string", "null"] }
       }
     },
+    "GeocodingBasis": {
+      "type": "string",
+      "enum": [
+        "exact_address",
+        "historical_address_matched",
+        "described_locality",
+        "map_georeference",
+        "regional_only",
+        "unknown"
+      ]
+    },
+    "ContainingArea": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["area_name"],
+      "properties": {
+        "area_id": { "type": ["string", "null"] },
+        "area_name": { "type": "string", "minLength": 1 },
+        "area_type": {
+          "type": ["string", "null"],
+          "enum": ["country", "adm1", "adm2", "locality", "island", "customary_area", "other", null]
+        },
+        "country_code": { "type": ["string", "null"], "pattern": "^[A-Z]{2}$" }
+      }
+    },
+    "LocationClaim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["geocoding_basis"],
+      "anyOf": [
+        { "required": ["geometry"] },
+        { "required": ["containing_area"] },
+        { "required": ["historical_address"] },
+        { "required": ["described_locality"] }
+      ],
+      "properties": {
+        "geometry": { "$ref": "site.schema.json#/$defs/Geometry" },
+        "historical_address": { "type": ["string", "null"] },
+        "modern_address_candidate": { "type": ["string", "null"] },
+        "described_locality": { "type": ["string", "null"] },
+        "containing_area": { "$ref": "#/$defs/ContainingArea" },
+        "geocoding_basis": { "$ref": "#/$defs/GeocodingBasis" },
+        "geocoding_confidence": { "$ref": "#/$defs/Confidence" },
+        "location_note": { "type": ["string", "null"] }
+      }
+    },
+    "NameHistoryEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "from": { "$ref": "#/$defs/BoundedDate" },
+        "to": { "$ref": "#/$defs/BoundedDate" },
+        "name_type": {
+          "type": ["string", "null"],
+          "enum": ["official", "local", "alt", "historic", null]
+        },
+        "name_lang": { "type": ["string", "null"], "description": "BCP-47 language tag, if known." },
+        "name_script": { "type": ["string", "null"], "description": "ISO 15924 script code, if known." },
+        "source_references": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/SourceReference" }
+        },
+        "note": { "type": ["string", "null"] }
+      }
+    },
+    "LifecycleEventKind": {
+      "type": "string",
+      "enum": ["founding", "opening", "first_seen", "last_seen", "closure", "demolition", "change_of_use", "rebuild"]
+    },
     "WorshipFunctionPayload": {
       "type": "object",
       "additionalProperties": false,
       "required": ["payload_type"],
+      "allOf": [
+        {
+          "if": { "required": ["culturally_sensitive"], "properties": { "culturally_sensitive": { "const": true } } },
+          "then": { "required": ["sensitivity_basis"], "properties": { "sensitivity_basis": { "type": "string", "minLength": 1 } } }
+        }
+      ],
       "anyOf": [
         { "required": ["worship_use_status"] },
         { "required": ["denomination_set"] },
@@ -590,13 +802,21 @@
           "items": { "$ref": "#/$defs/Uuid" }
         },
         "merged_to_site_id": { "$ref": "#/$defs/Uuid" },
-        "function_note": { "type": ["string", "null"] }
+        "function_note": { "type": ["string", "null"] },
+        "culturally_sensitive": { "type": "boolean", "default": false },
+        "sensitivity_basis": { "type": ["string", "null"] }
       }
     },
     "OrganisationLinkPayload": {
       "type": "object",
       "additionalProperties": false,
       "required": ["payload_type", "site_id", "org_id", "role"],
+      "allOf": [
+        {
+          "if": { "required": ["culturally_sensitive"], "properties": { "culturally_sensitive": { "const": true } } },
+          "then": { "required": ["sensitivity_basis"], "properties": { "sensitivity_basis": { "type": "string", "minLength": 1 } } }
+        }
+      ],
       "properties": {
         "payload_type": { "type": "string", "const": "organisation_link_update" },
         "site_id": { "$ref": "#/$defs/Uuid" },
@@ -620,13 +840,21 @@
           "type": "array",
           "items": { "$ref": "#/$defs/TargetYearAffect" }
         },
-        "link_note": { "type": ["string", "null"] }
+        "link_note": { "type": ["string", "null"] },
+        "culturally_sensitive": { "type": "boolean", "default": false },
+        "sensitivity_basis": { "type": ["string", "null"] }
       }
     },
     "StatusPayload": {
       "type": "object",
       "additionalProperties": false,
       "required": ["payload_type", "new_status"],
+      "allOf": [
+        {
+          "if": { "required": ["culturally_sensitive"], "properties": { "culturally_sensitive": { "const": true } } },
+          "then": { "required": ["sensitivity_basis"], "properties": { "sensitivity_basis": { "type": "string", "minLength": 1 } } }
+        }
+      ],
       "properties": {
         "payload_type": { "type": "string", "const": "status_update" },
         "previous_status": {
@@ -636,13 +864,21 @@
           ]
         },
         "new_status": { "$ref": "site.schema.json#/$defs/Status" },
-        "status_note": { "type": ["string", "null"] }
+        "status_note": { "type": ["string", "null"] },
+        "culturally_sensitive": { "type": "boolean", "default": false },
+        "sensitivity_basis": { "type": ["string", "null"] }
       }
     },
     "NamePayload": {
       "type": "object",
       "additionalProperties": false,
       "required": ["payload_type", "new_name"],
+      "allOf": [
+        {
+          "if": { "required": ["culturally_sensitive"], "properties": { "culturally_sensitive": { "const": true } } },
+          "then": { "required": ["sensitivity_basis"], "properties": { "sensitivity_basis": { "type": "string", "minLength": 1 } } }
+        }
+      ],
       "properties": {
         "payload_type": { "type": "string", "const": "name_update" },
         "new_name": { "type": "string" },
@@ -652,7 +888,84 @@
           "enum": ["official", "local", "alt", "historic", null]
         },
         "name_lang": { "type": ["string", "null"], "description": "BCP-47 language tag, if known." },
-        "name_script": { "type": ["string", "null"], "description": "ISO 15924 script code, if known." }
+        "name_script": { "type": ["string", "null"], "description": "ISO 15924 script code, if known." },
+        "name_date": { "$ref": "#/$defs/BoundedDate" },
+        "source_references": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/SourceReference" }
+        },
+        "culturally_sensitive": { "type": "boolean", "default": false },
+        "sensitivity_basis": { "type": ["string", "null"] }
+      }
+    },
+    "AttributeUpdatePayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_type", "source_references"],
+      "allOf": [
+        {
+          "if": { "required": ["culturally_sensitive"], "properties": { "culturally_sensitive": { "const": true } } },
+          "then": { "required": ["sensitivity_basis"], "properties": { "sensitivity_basis": { "type": "string", "minLength": 1 } } }
+        }
+      ],
+      "anyOf": [
+        { "required": ["building_material"] },
+        { "required": ["capacity"] },
+        { "required": ["architecture_notes"] },
+        { "required": ["name_history_entries"] }
+      ],
+      "properties": {
+        "payload_type": { "type": "string", "const": "attribute_update" },
+        "building_material": { "type": ["string", "null"] },
+        "previous_building_material": { "type": ["string", "null"] },
+        "capacity": { "type": ["integer", "null"], "minimum": 0 },
+        "previous_capacity": { "type": ["integer", "null"], "minimum": 0 },
+        "architecture_notes": { "type": ["string", "null"] },
+        "previous_architecture_notes": { "type": ["string", "null"] },
+        "name_history_entries": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/NameHistoryEntry" }
+        },
+        "source_references": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/SourceReference" }
+        },
+        "attribute_note": { "type": ["string", "null"] },
+        "culturally_sensitive": { "type": "boolean", "default": false },
+        "sensitivity_basis": { "type": ["string", "null"] }
+      }
+    },
+    "LifecycleClaimPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_type", "event_kind", "date", "confidence", "source_references"],
+      "allOf": [
+        {
+          "if": { "required": ["culturally_sensitive"], "properties": { "culturally_sensitive": { "const": true } } },
+          "then": { "required": ["sensitivity_basis"], "properties": { "sensitivity_basis": { "type": "string", "minLength": 1 } } }
+        }
+      ],
+      "properties": {
+        "payload_type": { "type": "string", "const": "lifecycle_claim" },
+        "event_kind": { "$ref": "#/$defs/LifecycleEventKind" },
+        "date": { "$ref": "#/$defs/BoundedDate" },
+        "confidence": { "$ref": "#/$defs/Confidence" },
+        "source_references": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/SourceReference" }
+        },
+        "location_claim": { "$ref": "#/$defs/LocationClaim" },
+        "target_year_affects": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TargetYearAffect" }
+        },
+        "claim_note": { "type": ["string", "null"] },
+        "culturally_sensitive": { "type": "boolean", "default": false },
+        "sensitivity_basis": { "type": ["string", "null"] }
       }
     },
     "DuplicatePayload": {

@@ -27,12 +27,21 @@ const NO_BUILDING = "no_building_present";
 type WorshipUseChoice = WorshipUseStatus | typeof NO_BUILDING | "";
 
 const sourceTypes: { value: SourceType; label: string }[] = [
+  { value: "osm_history", label: "OSM history" },
+  { value: "osm_date_tags", label: "OSM date tags" },
   { value: "census_or_statistics", label: "Census or official statistics" },
   { value: "church_record", label: "Church or mission record" },
+  { value: "denominational_directory", label: "Denominational directory" },
   { value: "denominational_yearbook", label: "Denominational yearbook" },
   { value: "newspaper_archive", label: "Newspaper archive" },
-  { value: "heritage_register", label: "Heritage register" },
+  { value: "heritage_list", label: "Heritage list" },
   { value: "charity_or_society_register", label: "Charity or society register" },
+  { value: "charities_register", label: "Charities register" },
+  { value: "incorporated_societies", label: "Incorporated societies" },
+  { value: "linz_building_outlines", label: "LINZ building outlines" },
+  { value: "linz_property", label: "LINZ property or address" },
+  { value: "archived_website", label: "Archived website" },
+  { value: "local_council", label: "Local council" },
   { value: "map_or_survey", label: "Map or survey" },
   { value: "street_imagery", label: "Street-level imagery" },
   { value: "aerial_imagery", label: "Aerial or satellite imagery" },
@@ -51,10 +60,7 @@ const lifecycleTypes: { value: LifecycleEventType; label: string }[] = [
   { value: "closure", label: "Closure" },
   { value: "demolition", label: "Demolition" },
   { value: "change_of_use", label: "Change of use" },
-  { value: "relocation", label: "Relocation" },
   { value: "rebuild", label: "Rebuild" },
-  { value: "renaming", label: "Renaming" },
-  { value: "denomination_change", label: "Denomination change" },
 ];
 
 const geocodingBases: { value: GeocodingBasis; label: string }[] = [
@@ -150,9 +156,16 @@ export function EvidenceForm(props: {
     for (const s of candidate.sources) {
       if (!s.title.trim() || /^n\/?a$/i.test(s.title.trim()))
         found.push("Every source needs a real title (not NA).");
+      if (!s.url?.trim() && !s.archiveRef)
+        found.push("Every source needs either a URL or an archive reference.");
+      if (s.archiveRef && (!s.archiveRef.repositoryName.trim() || !s.archiveRef.collection.trim()))
+        found.push("Archive references need a repository and collection.");
+      if (s.archiveRef && !s.archiveRef.consultedDate.trim())
+        found.push("Archive references need a consulted date.");
       for (const [label, value] of [
         ["source date", s.sourceDate],
-        ["capture date", s.captureDate],
+        ["consulted date", s.consultedDate],
+        ["archive consulted date", s.archiveRef?.consultedDate],
       ] as const) {
         if (value && !PARTIAL_DATE.test(value))
           found.push(`Source ${label} must be YYYY, YYYY-MM, or YYYY-MM-DD.`);
@@ -248,10 +261,10 @@ export function EvidenceForm(props: {
               <textarea
                 id="sensitivity-notes"
                 disabled={readOnly}
-                value={draft.attributes?.sensitivityNotes ?? ""}
+                value={draft.attributes?.sensitivityBasis ?? ""}
                 onChange={(e) =>
                   update({
-                    attributes: { ...draft.attributes, sensitivityNotes: e.target.value },
+                    attributes: { ...draft.attributes, sensitivityBasis: e.target.value },
                   })
                 }
               />
@@ -270,8 +283,10 @@ export function EvidenceForm(props: {
           onChange={(e) => setWorshipChoice(e.target.value as WorshipUseChoice)}
         >
           <option value="">not set</option>
-          <option value="worship">In worship use</option>
-          <option value="shared_use">Shared or multi-purpose use</option>
+          <option value="confirmed_worship">Confirmed worship use</option>
+          <option value="probable_worship">Probable worship use</option>
+          <option value="organisation_only">Organisation only</option>
+          <option value="building_only">Building only</option>
           <option value="not_worship">Not in worship use</option>
           <option value={NO_BUILDING}>No building present</option>
           <option value="uncertain">Uncertain</option>
@@ -587,8 +602,8 @@ function LifecycleFields(props: {
           <label>Event</label>
           <select
             disabled={props.readOnly}
-            value={claim.eventType}
-            onChange={(e) => setClaim(index, { ...claim, eventType: e.target.value as LifecycleEventType })}
+            value={claim.eventKind}
+            onChange={(e) => setClaim(index, { ...claim, eventKind: e.target.value as LifecycleEventType })}
           >
             {lifecycleTypes.map((t) => (
               <option key={t.value} value={t.value}>
@@ -665,7 +680,7 @@ function LifecycleFields(props: {
             props.update({
               lifecycle: [
                 ...props.draft.lifecycle,
-                { eventType: "opening", date: {}, confidence: "low" },
+                { eventKind: "opening", date: {}, confidence: "low" },
               ],
             })
           }
@@ -734,8 +749,103 @@ function SourceFields(props: {
           <input
             disabled={props.readOnly}
             value={source.url ?? ""}
-            onChange={(e) => setSource(index, { ...source, url: e.target.value })}
+            onChange={(e) => {
+              const next = { ...source };
+              if (e.target.value) next.url = e.target.value;
+              else delete next.url;
+              setSource(index, next);
+            }}
           />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            <div>
+              <label>Archive repository</label>
+              <input
+                disabled={props.readOnly}
+                value={source.archiveRef?.repositoryName ?? ""}
+                onChange={(e) => {
+                  const archiveRef = {
+                    repositoryName: e.target.value,
+                    collection: source.archiveRef?.collection ?? "",
+                    consultedDate: source.archiveRef?.consultedDate ?? "",
+                    itemRef: source.archiveRef?.itemRef,
+                    location: source.archiveRef?.location,
+                  };
+                  setSource(index, { ...source, archiveRef });
+                }}
+              />
+            </div>
+            <div>
+              <label>Archive collection</label>
+              <input
+                disabled={props.readOnly}
+                value={source.archiveRef?.collection ?? ""}
+                onChange={(e) => {
+                  const archiveRef = {
+                    repositoryName: source.archiveRef?.repositoryName ?? "",
+                    collection: e.target.value,
+                    consultedDate: source.archiveRef?.consultedDate ?? "",
+                    itemRef: source.archiveRef?.itemRef,
+                    location: source.archiveRef?.location,
+                  };
+                  setSource(index, { ...source, archiveRef });
+                }}
+              />
+            </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+            <div>
+              <label>Archive item</label>
+              <input
+                disabled={props.readOnly}
+                value={source.archiveRef?.itemRef ?? ""}
+                onChange={(e) => {
+                  const archiveRef = {
+                    repositoryName: source.archiveRef?.repositoryName ?? "",
+                    collection: source.archiveRef?.collection ?? "",
+                    consultedDate: source.archiveRef?.consultedDate ?? "",
+                    itemRef: e.target.value || undefined,
+                    location: source.archiveRef?.location,
+                  };
+                  setSource(index, { ...source, archiveRef });
+                }}
+              />
+            </div>
+            <div>
+              <label>Archive consulted date</label>
+              <input
+                disabled={props.readOnly}
+                value={source.archiveRef?.consultedDate ?? ""}
+                placeholder="YYYY[-MM[-DD]]"
+                onChange={(e) => {
+                  const archiveRef = {
+                    repositoryName: source.archiveRef?.repositoryName ?? "",
+                    collection: source.archiveRef?.collection ?? "",
+                    consultedDate: e.target.value,
+                    itemRef: source.archiveRef?.itemRef,
+                    location: source.archiveRef?.location,
+                  };
+                  setSource(index, { ...source, archiveRef });
+                }}
+              />
+            </div>
+            <div>
+              <label>Archive location</label>
+              <input
+                disabled={props.readOnly}
+                value={source.archiveRef?.location ?? ""}
+                onChange={(e) => {
+                  const archiveRef = {
+                    repositoryName: source.archiveRef?.repositoryName ?? "",
+                    collection: source.archiveRef?.collection ?? "",
+                    consultedDate: source.archiveRef?.consultedDate ?? "",
+                    itemRef: source.archiveRef?.itemRef,
+                    location: e.target.value || undefined,
+                  };
+                  setSource(index, { ...source, archiveRef });
+                }}
+              />
+            </div>
+          </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
             <div>
               <label>Source date</label>
@@ -752,15 +862,15 @@ function SourceFields(props: {
               />
             </div>
             <div>
-              <label>Capture date</label>
+              <label>Consulted date</label>
               <input
                 disabled={props.readOnly}
-                value={source.captureDate ?? ""}
+                value={source.consultedDate ?? ""}
                 placeholder="when you accessed it"
                 onChange={(e) => {
                   const next = { ...source };
-                  if (e.target.value) next.captureDate = e.target.value;
-                  else delete next.captureDate;
+                  if (e.target.value) next.consultedDate = e.target.value;
+                  else delete next.consultedDate;
                   setSource(index, next);
                 }}
               />

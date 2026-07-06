@@ -6,7 +6,7 @@ use std::process::ExitCode;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context, Result, bail};
-use chrono::{DateTime, NaiveDate, Utc};
+use chrono::{DateTime, Days, NaiveDate, Utc};
 use clap::{Parser, Subcommand, ValueEnum};
 use jsonschema::{Registry, Validator};
 use rusqlite::{Connection, params};
@@ -56,6 +56,10 @@ struct ValidateArgs {
     /// Report format.
     #[arg(long, value_enum, default_value_t = ReportFormat::Text)]
     report: ReportFormat,
+
+    /// Apply gates required before public map or download export.
+    #[arg(long)]
+    for_public_export: bool,
 }
 
 #[derive(Parser, Debug)]
@@ -146,6 +150,12 @@ impl InputFormat {
 enum ReportFormat {
     Text,
     Json,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ValidationMode {
+    Staging,
+    PublicExport,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -314,7 +324,18 @@ fn run(cli: Cli) -> Result<bool> {
 
 fn validate(args: ValidateArgs) -> Result<ValidationSummary> {
     let format = detect_format(&args.input, args.format)?;
-    validate_input(&args.input, format, &args.schema_dir, &args.template_dir)
+    let mode = if args.for_public_export {
+        ValidationMode::PublicExport
+    } else {
+        ValidationMode::Staging
+    };
+    validate_input(
+        &args.input,
+        format,
+        &args.schema_dir,
+        &args.template_dir,
+        mode,
+    )
 }
 
 fn validate_input(
@@ -322,11 +343,12 @@ fn validate_input(
     format: InputFormat,
     schema_dir: &Path,
     template_dir: &Path,
+    mode: ValidationMode,
 ) -> Result<ValidationSummary> {
     let summary = match format {
         InputFormat::Csv => validate_csv(input, template_dir)?,
-        InputFormat::Json => validate_json_file(input, schema_dir)?,
-        InputFormat::Jsonl => validate_jsonl_file(input, schema_dir)?,
+        InputFormat::Json => validate_json_file(input, schema_dir, mode)?,
+        InputFormat::Jsonl => validate_jsonl_file(input, schema_dir, mode)?,
         InputFormat::Auto => unreachable!("auto should have been resolved"),
     };
     Ok(summary)
@@ -334,7 +356,13 @@ fn validate_input(
 
 fn stage(args: StageArgs) -> Result<StageOutcome> {
     let format = detect_format(&args.input, args.format)?;
-    let validation = validate_input(&args.input, format, &args.schema_dir, &args.template_dir)?;
+    let validation = validate_input(
+        &args.input,
+        format,
+        &args.schema_dir,
+        &args.template_dir,
+        ValidationMode::Staging,
+    )?;
     if !validation.errors.is_empty() {
         return Ok(StageOutcome::Rejected(validation));
     }
@@ -2167,7 +2195,11 @@ fn write_diagnostics(
     Ok(())
 }
 
-fn validate_json_file(input: &Path, schema_dir: &Path) -> Result<ValidationSummary> {
+fn validate_json_file(
+    input: &Path,
+    schema_dir: &Path,
+    mode: ValidationMode,
+) -> Result<ValidationSummary> {
     let mut summary = ValidationSummary::new(input, "json");
     let validators = SchemaValidators::load(schema_dir)?;
     let file = File::open(input).with_context(|| format!("failed to open {}", input.display()))?;
@@ -2177,16 +2209,20 @@ fn validate_json_file(input: &Path, schema_dir: &Path) -> Result<ValidationSumma
     match value {
         Value::Array(values) => {
             for (index, value) in values.iter().enumerate() {
-                validate_json_record(value, index + 1, &validators, &mut summary);
+                validate_json_record_with_mode(value, index + 1, &validators, &mut summary, mode);
             }
         }
-        value => validate_json_record(&value, 1, &validators, &mut summary),
+        value => validate_json_record_with_mode(&value, 1, &validators, &mut summary, mode),
     }
 
     Ok(summary)
 }
 
-fn validate_jsonl_file(input: &Path, schema_dir: &Path) -> Result<ValidationSummary> {
+fn validate_jsonl_file(
+    input: &Path,
+    schema_dir: &Path,
+    mode: ValidationMode,
+) -> Result<ValidationSummary> {
     let mut summary = ValidationSummary::new(input, "jsonl");
     let validators = SchemaValidators::load(schema_dir)?;
     let file = File::open(input).with_context(|| format!("failed to open {}", input.display()))?;
@@ -2198,7 +2234,9 @@ fn validate_jsonl_file(input: &Path, schema_dir: &Path) -> Result<ValidationSumm
             continue;
         }
         match serde_json::from_str::<Value>(&line) {
-            Ok(value) => validate_json_record(&value, line_number, &validators, &mut summary),
+            Ok(value) => {
+                validate_json_record_with_mode(&value, line_number, &validators, &mut summary, mode)
+            }
             Err(error) => summary.error(
                 Some(line_number),
                 None,
@@ -2216,6 +2254,16 @@ fn validate_json_record(
     record: usize,
     validators: &SchemaValidators,
     summary: &mut ValidationSummary,
+) {
+    validate_json_record_with_mode(value, record, validators, summary, ValidationMode::Staging);
+}
+
+fn validate_json_record_with_mode(
+    value: &Value,
+    record: usize,
+    validators: &SchemaValidators,
+    summary: &mut ValidationSummary,
+    mode: ValidationMode,
 ) {
     summary.records_checked += 1;
 
@@ -2254,7 +2302,11 @@ fn validate_json_record(
 
     validate_json_temporal_rules(value, record, summary);
     validate_json_geometry_rules(value, record, summary);
+    validate_change_event_source_reference_rules(value, record, summary);
     validate_change_event_replay_rules(value, record, summary);
+    if mode == ValidationMode::PublicExport {
+        validate_change_event_public_export_rules(value, record, summary);
+    }
 }
 
 struct SchemaValidators {
@@ -2315,11 +2367,7 @@ fn validate_change_event_replay_rules(
     record: usize,
     summary: &mut ValidationSummary,
 ) {
-    if !value
-        .get("schema_version")
-        .and_then(Value::as_str)
-        .is_some_and(|schema_version| schema_version.starts_with("change-event."))
-    {
+    if !is_change_event(value) {
         return;
     }
 
@@ -2335,6 +2383,55 @@ fn validate_change_event_replay_rules(
             "accepted change events must include payload_hash for deterministic replay",
         );
     }
+}
+
+fn validate_change_event_source_reference_rules(
+    value: &Value,
+    record: usize,
+    summary: &mut ValidationSummary,
+) {
+    if !is_change_event(value) {
+        return;
+    }
+    if let Some(payload) = value.get("payload") {
+        validate_source_references_in_value(payload, record, "/payload", summary);
+    }
+}
+
+fn validate_change_event_public_export_rules(
+    value: &Value,
+    record: usize,
+    summary: &mut ValidationSummary,
+) {
+    if !is_change_event(value) {
+        return;
+    }
+    if value
+        .pointer("/payload/culturally_sensitive")
+        .and_then(Value::as_bool)
+        != Some(true)
+    {
+        return;
+    }
+    if value
+        .pointer("/review/display_clearance")
+        .and_then(Value::as_str)
+        != Some("cleared_for_public_display")
+    {
+        summary.error(
+            Some(record),
+            Some("display_clearance"),
+            Some("/review/display_clearance"),
+            "culturally sensitive site-level payloads require review.display_clearance=cleared_for_public_display before public export",
+        );
+    }
+}
+
+fn is_change_event(value: &Value) -> bool {
+    value
+        .get("schema_version")
+        .and_then(Value::as_str)
+        .is_some_and(|schema_version| schema_version.starts_with("change-event."))
 }
 
 fn validate_json_temporal_rules(value: &Value, record: usize, summary: &mut ValidationSummary) {
@@ -2377,6 +2474,274 @@ fn validate_json_temporal_rules(value: &Value, record: usize, summary: &mut Vali
             "not_later_than",
             summary,
         );
+    }
+
+    validate_nested_bounded_dates(value, record, "", summary);
+}
+
+fn validate_source_references_in_value(
+    value: &Value,
+    record: usize,
+    pointer: &str,
+    summary: &mut ValidationSummary,
+) {
+    match value {
+        Value::Object(object) => {
+            if let Some(source_references) = object.get("source_references") {
+                let source_pointer = join_json_pointer(pointer, "source_references");
+                match source_references.as_array() {
+                    Some(values) => {
+                        for (index, source_reference) in values.iter().enumerate() {
+                            validate_source_reference(
+                                source_reference,
+                                record,
+                                &format!("{source_pointer}/{index}"),
+                                summary,
+                            );
+                        }
+                    }
+                    None => summary.error(
+                        Some(record),
+                        Some("source_references"),
+                        Some(&source_pointer),
+                        "source_references must be an array",
+                    ),
+                }
+            }
+            for (key, child) in object {
+                validate_source_references_in_value(
+                    child,
+                    record,
+                    &join_json_pointer(pointer, key),
+                    summary,
+                );
+            }
+        }
+        Value::Array(values) => {
+            for (index, child) in values.iter().enumerate() {
+                validate_source_references_in_value(
+                    child,
+                    record,
+                    &format!("{pointer}/{index}"),
+                    summary,
+                );
+            }
+        }
+        _ => {}
+    }
+}
+
+fn validate_source_reference(
+    value: &Value,
+    record: usize,
+    pointer: &str,
+    summary: &mut ValidationSummary,
+) {
+    let Some(object) = value.as_object() else {
+        summary.error(
+            Some(record),
+            Some("source_references"),
+            Some(pointer),
+            "source reference must be an object",
+        );
+        return;
+    };
+
+    let has_title = object
+        .get("title")
+        .and_then(Value::as_str)
+        .is_some_and(|title| !title.trim().is_empty());
+    if !has_title {
+        summary.error(
+            Some(record),
+            Some("title"),
+            Some(&format!("{pointer}/title")),
+            "source reference requires a non-empty title",
+        );
+    }
+
+    let has_url = object
+        .get("url")
+        .and_then(Value::as_str)
+        .is_some_and(|url| !url.trim().is_empty());
+    let has_archive_ref = object.get("archive_ref").is_some_and(Value::is_object);
+    if !has_url && !has_archive_ref {
+        summary.error(
+            Some(record),
+            Some("source_references"),
+            Some(pointer),
+            "source reference requires either url or archive_ref",
+        );
+    }
+
+    for field in ["source_date", "consulted_date"] {
+        if let Some(date) = object.get(field).and_then(Value::as_str)
+            && !is_valid_partial_date(date)
+        {
+            summary.error(
+                Some(record),
+                Some(field),
+                Some(&format!("{pointer}/{field}")),
+                format!("{field} must be YYYY, YYYY-MM, or YYYY-MM-DD"),
+            );
+        }
+    }
+
+    if let Some(archive_ref) = object.get("archive_ref").and_then(Value::as_object)
+        && let Some(date) = archive_ref.get("consulted_date").and_then(Value::as_str)
+        && !is_valid_partial_date(date)
+    {
+        summary.error(
+            Some(record),
+            Some("consulted_date"),
+            Some(&format!("{pointer}/archive_ref/consulted_date")),
+            "archive_ref.consulted_date must be YYYY, YYYY-MM, or YYYY-MM-DD",
+        );
+    }
+}
+
+fn validate_nested_bounded_dates(
+    value: &Value,
+    record: usize,
+    pointer: &str,
+    summary: &mut ValidationSummary,
+) {
+    match value {
+        Value::Object(object) => {
+            if object.contains_key("value")
+                || object.contains_key("not_earlier_than")
+                || object.contains_key("not_later_than")
+            {
+                validate_bounded_date_object(object, record, pointer, summary);
+            }
+            for (key, child) in object {
+                validate_nested_bounded_dates(
+                    child,
+                    record,
+                    &join_json_pointer(pointer, key),
+                    summary,
+                );
+            }
+        }
+        Value::Array(values) => {
+            for (index, child) in values.iter().enumerate() {
+                validate_nested_bounded_dates(
+                    child,
+                    record,
+                    &format!("{pointer}/{index}"),
+                    summary,
+                );
+            }
+        }
+        _ => {}
+    }
+}
+
+fn validate_bounded_date_object(
+    object: &serde_json::Map<String, Value>,
+    record: usize,
+    pointer: &str,
+    summary: &mut ValidationSummary,
+) {
+    let lower = bounded_date_field(object, "not_earlier_than", record, pointer, summary);
+    let value = bounded_date_field(object, "value", record, pointer, summary);
+    let upper = bounded_date_field(object, "not_later_than", record, pointer, summary);
+
+    if let (Some(lower), Some(upper)) = (lower, upper)
+        && lower.earliest > upper.latest
+    {
+        summary.error(
+            Some(record),
+            Some("not_earlier_than"),
+            Some(&join_json_pointer(pointer, "not_earlier_than")),
+            "not_earlier_than must be on or before not_later_than",
+        );
+    }
+    if let (Some(value), Some(lower)) = (value, lower)
+        && value.latest < lower.earliest
+    {
+        summary.error(
+            Some(record),
+            Some("value"),
+            Some(&join_json_pointer(pointer, "value")),
+            "value must not fall before not_earlier_than",
+        );
+    }
+    if let (Some(value), Some(upper)) = (value, upper)
+        && value.earliest > upper.latest
+    {
+        summary.error(
+            Some(record),
+            Some("value"),
+            Some(&join_json_pointer(pointer, "value")),
+            "value must not fall after not_later_than",
+        );
+    }
+}
+
+#[derive(Clone, Copy)]
+struct PartialDateBounds {
+    earliest: NaiveDate,
+    latest: NaiveDate,
+}
+
+fn bounded_date_field(
+    object: &serde_json::Map<String, Value>,
+    field: &str,
+    record: usize,
+    pointer: &str,
+    summary: &mut ValidationSummary,
+) -> Option<PartialDateBounds> {
+    let date = object.get(field).and_then(Value::as_str)?;
+    match parse_partial_date_bounds(date) {
+        Some(bounds) => Some(bounds),
+        None => {
+            summary.error(
+                Some(record),
+                Some(field),
+                Some(&join_json_pointer(pointer, field)),
+                format!("{field} must be YYYY, YYYY-MM, or YYYY-MM-DD"),
+            );
+            None
+        }
+    }
+}
+
+fn parse_partial_date_bounds(value: &str) -> Option<PartialDateBounds> {
+    if value.len() == 4 && value.chars().all(|ch| ch.is_ascii_digit()) {
+        let year = value.parse::<i32>().ok()?;
+        return Some(PartialDateBounds {
+            earliest: NaiveDate::from_ymd_opt(year, 1, 1)?,
+            latest: NaiveDate::from_ymd_opt(year, 12, 31)?,
+        });
+    }
+    if value.len() == 7 {
+        let (year, month) = value.split_once('-')?;
+        if year.len() != 4 || !year.chars().all(|ch| ch.is_ascii_digit()) {
+            return None;
+        }
+        let year = year.parse::<i32>().ok()?;
+        let month = month.parse::<u32>().ok()?;
+        let earliest = NaiveDate::from_ymd_opt(year, month, 1)?;
+        let first_next_month = if month == 12 {
+            NaiveDate::from_ymd_opt(year + 1, 1, 1)?
+        } else {
+            NaiveDate::from_ymd_opt(year, month + 1, 1)?
+        };
+        let latest = first_next_month.checked_sub_days(Days::new(1))?;
+        return Some(PartialDateBounds { earliest, latest });
+    }
+    parse_full_date(value).map(|date| PartialDateBounds {
+        earliest: date,
+        latest: date,
+    })
+}
+
+fn join_json_pointer(parent: &str, child: &str) -> String {
+    if parent.is_empty() {
+        format!("/{child}")
+    } else {
+        format!("{parent}/{child}")
     }
 }
 
@@ -3117,6 +3482,22 @@ mod tests {
         SchemaValidators::load(&schema_dir).expect("schemas load")
     }
 
+    fn repo_root_path() -> PathBuf {
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("../..")
+    }
+
+    fn validate_jsonl_fixture(relative_path: &str, mode: ValidationMode) -> ValidationSummary {
+        let repo_root = repo_root_path();
+        validate_input(
+            &repo_root.join(relative_path),
+            InputFormat::Jsonl,
+            &repo_root.join("schemas"),
+            &repo_root.join("docs/templates/ra-historical-site-evidence"),
+            mode,
+        )
+        .expect("validate fixture")
+    }
+
     #[test]
     fn valid_change_event_passes_schema_and_extra_checks() {
         let validators = validators();
@@ -3334,6 +3715,79 @@ mod tests {
 
         validate_json_record(&event, 1, &validators, &mut summary);
         assert!(!summary.errors.is_empty());
+    }
+
+    #[test]
+    fn deep_history_attribute_and_lifecycle_fixtures_pass_validation() {
+        for fixture in [
+            "docs/examples/revisions/deep-history-attribute-update.jsonl",
+            "docs/examples/revisions/deep-history-lifecycle-claim.jsonl",
+        ] {
+            let summary = validate_jsonl_fixture(fixture, ValidationMode::Staging);
+            assert!(
+                summary.errors.is_empty(),
+                "{fixture}: {:#?}",
+                summary.errors
+            );
+        }
+    }
+
+    #[test]
+    fn source_reference_without_url_or_archive_ref_is_rejected() {
+        let summary = validate_jsonl_fixture(
+            "docs/examples/revisions/deep-history-invalid-source-reference.jsonl",
+            ValidationMode::Staging,
+        );
+        assert!(
+            summary
+                .errors
+                .iter()
+                .any(|error| error.message.contains("requires either url or archive_ref")),
+            "{:#?}",
+            summary.errors
+        );
+    }
+
+    #[test]
+    fn inverted_bounded_date_fixture_is_rejected() {
+        let summary = validate_jsonl_fixture(
+            "docs/examples/revisions/deep-history-invalid-bounded-date.jsonl",
+            ValidationMode::Staging,
+        );
+        assert!(
+            summary
+                .errors
+                .iter()
+                .any(|error| error.message.contains("not_earlier_than")),
+            "{:#?}",
+            summary.errors
+        );
+    }
+
+    #[test]
+    fn sensitive_site_created_stages_but_is_blocked_from_public_export() {
+        let fixture = "docs/examples/revisions/deep-history-sensitive-site-created.jsonl";
+        let staging = validate_jsonl_fixture(fixture, ValidationMode::Staging);
+        assert!(staging.errors.is_empty(), "{:#?}", staging.errors);
+
+        let public_export = validate_jsonl_fixture(fixture, ValidationMode::PublicExport);
+        assert!(
+            public_export
+                .errors
+                .iter()
+                .any(|error| error.field.as_deref() == Some("display_clearance")),
+            "{:#?}",
+            public_export.errors
+        );
+    }
+
+    #[test]
+    fn sensitive_site_created_with_display_clearance_passes_public_export() {
+        let summary = validate_jsonl_fixture(
+            "docs/examples/revisions/deep-history-sensitive-site-cleared.jsonl",
+            ValidationMode::PublicExport,
+        );
+        assert!(summary.errors.is_empty(), "{:#?}", summary.errors);
     }
 
     #[test]

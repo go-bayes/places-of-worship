@@ -467,6 +467,60 @@ contract.
 **Status.** Ratified; the stale PLANNING.md open item closes with a
 pointer here.
 
+## D17. Offline sources are first-class source references
+
+**Ruling.** A deep-history source reference requires a source title and at
+least one locator: either `url` or `archive_ref`. An `archive_ref` names the
+repository, collection, consulted date, and, where available, the item
+reference and physical or catalogue location. URL-less archive sources are
+valid evidence. Media files that document a source remain outside the event
+payload and follow the media quarantine policy before any public release.
+
+**Rationale.** Mission registers, denominational directories, local archive
+files, field notes, and reading-room sources often have no stable public URL.
+Forcing those sources into a web-only shape would either reject useful
+evidence or encourage invented locators. Requiring a title plus a concrete
+archive reference preserves provenance without overstating access.
+
+**Forecloses.** URL-only provenance rules for accepted deep-history evidence;
+placeholder URLs for offline records; treating a photographed document as the
+source itself rather than media evidence attached to a source reference.
+
+**Cost to reverse.** Low before ingestion volume grows, high after archive
+sources accumulate. Reversing the rule would require re-reviewing every
+URL-less source reference and would probably discard evidence the project was
+designed to preserve.
+
+**Status.** New — implemented in `schemas/change-event.schema.json` through
+`SourceReference` and `ArchiveRef`, with `pow` validation over
+`source_references`.
+
+## D18. Sensitive site-level claims require public-display clearance
+
+**Ruling.** Site-level change-event payloads may carry
+`culturally_sensitive = true` and a required `sensitivity_basis`. Sensitive
+payloads may enter staging and review. They may not enter public map products
+or public downloads unless review metadata sets
+`display_clearance = cleared_for_public_display`; `pow validate
+--for-public-export` enforces that gate.
+
+**Rationale.** Some places, including kastom sites and urupā, can be valid
+research records while still needing restricted display. The data contract
+therefore separates the claim from its public-release decision. Reviewers can
+retain the evidence, restrict public output, or clear display with an auditable
+basis.
+
+**Forecloses.** UI-only sensitivity handling; silent public export of sensitive
+site-level records; deleting sensitive evidence merely because public display
+has not been cleared.
+
+**Cost to reverse.** Low in schema mechanics but high in governance. Removing
+the gate would make public release depend on downstream convention rather than
+the governed boundary.
+
+**Status.** New — implemented in the change-event payloads and in the `pow`
+public-export validation mode.
+
 ## Artefacts changed with this register
 
 - `schemas/change-event.schema.json` — `taxonomy_version` now required for

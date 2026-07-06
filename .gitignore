@@ -115,6 +115,9 @@ research/darbyshire_thesis_anglian_churches.pdf
 
 # Data directories (git-ignored for size and privacy)
 data/
+# the workbench data layer is source code, not data: un-ignore it all
+!apps/workbench/src/data/
+!apps/workbench/src/data/**
 datasets/
 cache/
 raw_data/

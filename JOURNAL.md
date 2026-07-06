@@ -5,6 +5,35 @@ and what remains open. `CHANGELOG.md` records what changed; this file records
 the reasoning that should remain visible when the project is reported, audited,
 or handed to collaborators.
 
+## 2026-07-07: Deep-history evidence gets a governed contract
+
+Decision:
+Deep-history evidence now enters the change-event contract through
+source-backed `attribute_update` and `lifecycle_claim` payloads. Dates from
+historical sources may be exact or bounded (`value`, `not_earlier_than`,
+`not_later_than`) at year, month, or day precision. Source references require
+a title plus either a URL or an archive reference; reading-room and other
+offline sources validate without inventing URLs. Site-level payloads also carry
+`culturally_sensitive` and `sensitivity_basis`, and public-export validation
+refuses sensitive payloads until a reviewer clears display.
+
+Rationale:
+The RA templates already ask investigators to preserve partial dates,
+historical addresses, source titles, and archive context. The governed event
+schema needed to carry that evidence directly, otherwise the staging boundary
+would force old records into modern web-source shapes. Keeping relocation and
+denomination changes in their existing payloads preserves the current identity
+and taxonomy rulings while adding the narrower source-claim surface needed for
+deep histories.
+
+Consequences:
+`pow validate` now tests bounded-date ordering and the URL-or-archive source
+rule on JSON and JSONL inputs. A separate public-export mode rejects sensitive
+site-level payloads unless review metadata explicitly clears display, while
+normal staging still accepts the records for review. The Workbench draft types
+now mirror the contract names and enums, including archive references,
+`eventKind`, `consultedDate`, and `sensitivityBasis`.
+
 ## 2026-06-13: Vanuatu gets a live metric before its census data
 
 Decision:
