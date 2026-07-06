@@ -10,9 +10,10 @@ Building historical datasets fit for scientific inferences is remarkably difficu
 ## Links
 
 - [Global map](https://www.placesmap.org/)
+- [Ireland regional map](https://www.placesmap.org/apps/regions/ie/)
 - [New Zealand regional map](https://www.placesmap.org/apps/regions/nz/)
-- [Vanuatu regional map](https://www.placesmap.org/apps/regions/vu/)
 - [United States regional map](https://www.placesmap.org/apps/regions/us/)
+- [Vanuatu regional map](https://www.placesmap.org/apps/regions/vu/)
 - [Roadmap](ROADMAP.md)
 - [Country survey](research/country-survey.md)
 - [System map](docs/system-map.md)

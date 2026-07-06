@@ -4,6 +4,28 @@
 
 ### 2026-07-07
 
+- Added the Ireland research map at `apps/regions/ie/`. The first build
+  uses CSO PxStat table `F5051` for county-and-city religious
+  affiliation in 2011, 2016, and 2022, with a stated-response denominator
+  (`All religions - Not stated`) and no place-density metrics until a
+  governed Ireland place layer exists. The new
+  `scripts/build_ie_area_summary.R` pipeline reads ignored raw sources
+  under `data/raw/ie_census/`, derives
+  `area_summary_county_city.json`/`.csv`, and writes the manifest
+  `docs/manifests/ie-census-religion-2011-2022.json`. The boundary layer
+  is a 30-feature, 2.56 MB GeoJSON derived from Tailte Éireann 2019
+  administrative areas; Cork City Council and Cork County Council are
+  dissolved because `F5051` publishes Cork City and Cork County as one
+  reporting unit. Validation is exact: 30/30 county-and-city joins for
+  every wave, and county-and-city sums match the CSO State row for
+  `All religions`, `Not stated`, the stated-response denominator,
+  religious affiliation, and no religion in all three waves. CSO and
+  Tailte Éireann are attributed on the page and in the manifest under
+  CC BY 4.0. Census 1926 Volume 3 Table 09 is downloaded but deferred:
+  the PDF is image-only. The 1861-1926 extension needs OCR, table QA,
+  and historical county/county-borough boundary handling before
+  publication.
+
 - Implemented the demo-mode `Nominate missing PoW` workbench path. The
   provider interface now includes free contributions, deduplication
   candidates, source records, source-linked claims, and agent draft

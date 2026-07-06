@@ -54,6 +54,10 @@ row_count_file <- function(path) {
     geo <- fromJSON(path, simplifyVector = FALSE)
     return(length(geo[["features"]]))
   }
+  if (grepl("\\.json$", path)) {
+    json <- fromJSON(path, simplifyVector = FALSE)
+    if (!is.null(json[["rows"]])) return(length(json[["rows"]]))
+  }
   NA_integer_
 }
 
@@ -371,7 +375,7 @@ visual_layers <- list(
     label = "Religious affiliation %",
     description = "County-and-city choropleth of religious-affiliation percentage.",
     layer_type = "choropleth",
-    indicator_ids = c("religious_affiliation_percent"),
+    indicator_ids = I(c("religious_affiliation_percent")),
     geometry_unit_type = "area_unit",
     legend = list(unit = "percent", denominator = "stated religion response"),
     colour_scale = "sequential",
@@ -386,7 +390,7 @@ visual_layers <- list(
     label = "No religion %",
     description = "County-and-city choropleth of no-religion percentage.",
     layer_type = "choropleth",
-    indicator_ids = c("no_religion_percent"),
+    indicator_ids = I(c("no_religion_percent")),
     geometry_unit_type = "area_unit",
     legend = list(unit = "percent", denominator = "stated religion response"),
     colour_scale = "sequential",
@@ -422,7 +426,7 @@ summary <- list(
   rows = rows
 )
 
-write(toJSON(summary, auto_unbox = TRUE, pretty = TRUE, null = "null"), summary_json_out)
+write(toJSON(summary, auto_unbox = TRUE, pretty = TRUE, null = "null", na = "null"), summary_json_out)
 write.csv(flatten_rows(rows), summary_csv_out, row.names = FALSE, na = "")
 
 boundary_export <- boundary_dissolved[c(
@@ -480,7 +484,7 @@ manifest <- list(
   dataset_role = "public_product",
   scope = list(
     level = "country",
-    country_codes = c("IE"),
+    country_codes = I(c("IE")),
     snapshot_date = NULL,
     snapshot_anchor = NULL,
     pipeline_stage = "public"
@@ -593,7 +597,7 @@ manifest <- list(
   )
 )
 
-write(toJSON(manifest, auto_unbox = TRUE, pretty = TRUE, null = "null"), manifest_out)
+write(toJSON(manifest, auto_unbox = TRUE, pretty = TRUE, null = "null", na = "null"), manifest_out)
 
 cat(sprintf("built %d area-summary rows across %d waves\n", length(rows), length(years)))
 cat(sprintf("derived boundary: %d features, %s bytes, %sm simplification\n",

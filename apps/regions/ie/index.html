@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Ireland Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260707b" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // the whole country-specific surface; every behaviour lives in the
+    // shared module (../_shared/region-map.js) and keys on this config
+    // and the data products, never on country identity
+    window.REGION_CONFIG = {
+      countryCode: "IE",
+      title: "Places of Worship | Ireland Research Map",
+      // republic of ireland extent, centred west of dublin so the island
+      // fits comfortably behind the census panel
+      center: [-8.1, 53.35],
+      initialZoom: 6,
+      // each level is a governed area-summary product plus its boundary
+      // file; paths resolve from this page's directory
+      censusLevels: {
+        county_city: {
+          label: "County and city",
+          boundaries: "data/county_city_2019.geojson",
+          summary: "data/area_summary_county_city.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries © Tailte Éireann (CC BY 4.0) · 2019 administrative areas, Cork dissolved to match CSO F5051"
+        }
+      },
+      defaultLevel: "county_city",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2022,
+      // no governed ireland places-of-worship snapshot is included yet,
+      // so the place-rate metrics are hidden until that layer exists
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      popupDenominatorNote: "Percentages use people usually resident and present in the State with a stated religion response: CSO F5051 All religions minus Not stated.",
+      cityPresets: [
+        { label: "Dublin", coords: [-6.2603, 53.3498], zoom: 11 },
+        { label: "Cork", coords: [-8.4756, 51.8985], zoom: 11 },
+        { label: "Galway", coords: [-9.0568, 53.2707], zoom: 11 },
+        { label: "Limerick", coords: [-8.6267, 52.6638], zoom: 11 },
+        { label: "Waterford", coords: [-7.1101, 52.2593], zoom: 11 }
+      ],
+      geocode: { country: "ie", biasLngLat: [-8.1, 53.35] },
+      onboarding: {
+        title: "Ireland research map",
+        intro: "County-and-city census religious-affiliation overlays for Ireland, 2011 to 2022.",
+        bullets: [
+          "The census overlay is on: areas are shaded by religious affiliation among people with a stated religion response.",
+          "Open <strong>Census</strong> (top centre) for the metric and year slider.",
+          "Tap an area for its census detail."
+        ],
+        links: [
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion © <a href="https://www.cso.ie/" target="_blank" rel="noopener">Central Statistics Office Ireland</a> (CC BY 4.0) · Boundaries © <a href="https://www.tailte.ie/" target="_blank" rel="noopener">Tailte Éireann</a> (CC BY 4.0)',
+      censusFlagNote: "* Cork City and Cork County are dissolved from two Tailte administrative-area features because CSO F5051 publishes them as one reporting unit."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260707b"></script>
+</body>
+</html>

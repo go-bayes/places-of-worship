@@ -1,0 +1,222 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:ie-census-religion:ie:2011-2022:pxstat-f5051",
+  "dataset_id": "ie-census-religion:ie:2011-2022:pxstat-f5051",
+  "dataset_version_id": "ie-census-religion:ie:2011-2022:pxstat-f5051:658aaa77e869",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "ie-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": ["IE"],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-06T22:18:25Z",
+  "created_by": "scripts/build_ie_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_ie_area_summary.R",
+    "git_commit": null,
+    "command": "Rscript scripts/build_ie_area_summary.R",
+    "parameters": {
+      "waves": ["2011", "2016", "2022"],
+      "boundary_set": "ie-county-city-2019-derived",
+      "boundary_simplification_tolerance_m": 100,
+      "denominator": "All religions minus Not stated"
+    },
+    "software_versions": {
+      "r": "4.6.1",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0"
+    }
+  },
+  "source": {
+    "provider": "Central Statistics Office (CSO), Ireland; Tailte Éireann",
+    "source_dataset_ids": ["cso-pxstat-f5051-county-city-2011-2022", "tailte-administrative-areas-2019"],
+    "source_urls": ["https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/F5051/CSV/1.0/en", "https://www.arcgis.com/home/item.html?id=d81188d16e804bde81548e982e80c53e", "https://www.cso.ie/en/aboutus/whoweare/copyrightpolicy/"],
+    "retrieved_at": "2026-07-07T00:00:00Z",
+    "licence": "CSO statistics are Government of Ireland copyright and licensed under Creative Commons Attribution 4.0; reproduction is authorised subject to acknowledgement of the source. Tailte Éireann open data are licensed under Creative Commons Attribution 4.0.",
+    "citation": "Central Statistics Office (Ireland), PxStat table F5051; Tailte Éireann, Administrative Areas - National Statutory Boundaries - 2019.",
+    "raw_redistribution": "Raw CSO CSV, Tailte GeoJSON, and CSO historical PDFs are not committed. They remain in data/raw/ie_census/ and await any project-controlled raw archive upload."
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/ie_census/cso_pxstat_f5051_religion_county_city_2011_2016_2022.csv",
+      "format": "csv",
+      "bytes": 1281647,
+      "sha256": "23aecd561599e96cb56712554ffba56ecc31b0c64fae5dcfb9a3ca7c39872432",
+      "row_count": 6975,
+      "notes": "Raw PxStat F5051 CSV API export; includes State row, 30 county-and-city rows, both sexes, male, and female rows for 2011, 2016, and 2022."
+    },
+    {
+      "uri": "data/raw/ie_census/tailte_administrative_areas_2019.geojson",
+      "format": "geojson",
+      "bytes": 67149811,
+      "sha256": "39720f8ced4795ed433dbbbae1ab3afcf5b8f9b88f8497ed206f511188f11bbb",
+      "row_count": 31,
+      "notes": "Raw Tailte 2019 administrative areas; 31 source features. Cork City Council and Cork County Council dissolve to match the CSO F5051 reporting unit."
+    },
+    {
+      "uri": "data/raw/ie_census/cso_census_1926_volume3_table09_counties_1861_1926.pdf",
+      "format": "pdf",
+      "bytes": 431979,
+      "sha256": "32e7a73116d32de54c4fadc42c5b4c768d22e11c1dbf279069e9ee541bac6ea6",
+      "row_count": null,
+      "notes": "Downloaded but not extracted in this release. Census 1926 Volume 3 Table 09 is a 5-page image-only PDF; pdftotext returns only form feeds, so OCR and table QA are required before the 1861-1926 extension."
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/ie/data/area_summary_county_city.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 98882,
+      "sha256": "658aaa77e8690454b673f9a36331e7c5219037cdfcb09d7ea02ef669cd619d31",
+      "row_count": 90,
+      "content": "Ireland county-and-city area summary with CSO F5051 stated-response religion metrics.",
+      "privacy": "public",
+      "licence_status": "open_cc_by_4_0_with_attribution"
+    },
+    {
+      "uri": "repo:apps/regions/ie/data/area_summary_county_city.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 37673,
+      "sha256": "25c6fc211addc8861b934100b95de2f9ddbd065496e5059d9d4bbe63e841abf4",
+      "row_count": 90,
+      "content": "Flattened Ireland county-and-city area summary with CSO F5051 stated-response religion metrics.",
+      "privacy": "public",
+      "licence_status": "open_cc_by_4_0_with_attribution"
+    },
+    {
+      "uri": "repo:apps/regions/ie/data/county_city_2019.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 2558090,
+      "sha256": "f2c8ab2854a3dc671c8372eb22d2b53df11b94ff11318d54b15c1e313f15bfc7",
+      "row_count": 30,
+      "content": "Simplified Ireland county-and-city boundary GeoJSON derived from Tailte 2019 administrative areas.",
+      "privacy": "public",
+      "licence_status": "open_cc_by_4_0_with_attribution"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/ie/data/area_summary_county_city.json",
+      "sha256": "658aaa77e8690454b673f9a36331e7c5219037cdfcb09d7ea02ef669cd619d31",
+      "built_by": "scripts/build_ie_area_summary.R",
+      "notes": "30 county-and-city reporting units x 3 census years; stated-response denominator equals All religions minus Not stated."
+    },
+    {
+      "uri": "repo:apps/regions/ie/data/county_city_2019.geojson",
+      "sha256": "f2c8ab2854a3dc671c8372eb22d2b53df11b94ff11318d54b15c1e313f15bfc7",
+      "built_by": "scripts/build_ie_area_summary.R",
+      "notes": "30 derived features; Cork City and Cork County dissolved; simplified at 100 m tolerance."
+    }
+  ],
+  "validation": {
+    "checks": ["F5051 source URL returned CSV and the downloaded file has 6,975 data rows.", "Tailte administrative-area source returned 31 raw features; derived boundary has 30 features after Cork dissolve.", "For each of 2011, 2016, and 2022, area sums match the CSO State row exactly for All religions, Not stated, stated-response denominator, religious affiliation, and No religion.", "Join coverage is 30/30 county-and-city reporting units for every built wave.", "Census 1926 Volume 3 Table 09 PDF is downloaded and verified as image-only; OCR extraction is deferred."],
+    "join_coverage": [
+      {
+        "year": 2011,
+        "matched_area_count": 30,
+        "expected_area_count": 30,
+        "missing_area_names": []
+      },
+      {
+        "year": 2016,
+        "matched_area_count": 30,
+        "expected_area_count": 30,
+        "missing_area_names": []
+      },
+      {
+        "year": 2022,
+        "matched_area_count": 30,
+        "expected_area_count": 30,
+        "missing_area_names": []
+      }
+    ],
+    "state_validation": [
+      {
+        "year": 2011,
+        "area_count": 30,
+        "all_religions_area_sum": 4525281,
+        "all_religions_state": 4525281,
+        "all_religions_difference": 0,
+        "stated_response_area_sum": 4456613,
+        "stated_response_state": 4456613,
+        "stated_response_difference": 0,
+        "religious_affiliation_area_sum": 4199783,
+        "religious_affiliation_state": 4199783,
+        "religious_affiliation_difference": 0,
+        "no_religion_area_sum": 256830,
+        "no_religion_state": 256830,
+        "no_religion_difference": 0,
+        "not_stated_area_sum": 68668,
+        "not_stated_state": 68668,
+        "not_stated_difference": 0
+      },
+      {
+        "year": 2016,
+        "area_count": 30,
+        "all_religions_area_sum": 4689921,
+        "all_religions_state": 4689921,
+        "all_religions_difference": 0,
+        "stated_response_area_sum": 4570572,
+        "stated_response_state": 4570572,
+        "stated_response_difference": 0,
+        "religious_affiliation_area_sum": 4118631,
+        "religious_affiliation_state": 4118631,
+        "religious_affiliation_difference": 0,
+        "no_religion_area_sum": 451941,
+        "no_religion_state": 451941,
+        "no_religion_difference": 0,
+        "not_stated_area_sum": 119349,
+        "not_stated_state": 119349,
+        "not_stated_difference": 0
+      },
+      {
+        "year": 2022,
+        "area_count": 30,
+        "all_religions_area_sum": 5084879,
+        "all_religions_state": 5084879,
+        "all_religions_difference": 0,
+        "stated_response_area_sum": 4745317,
+        "stated_response_state": 4745317,
+        "stated_response_difference": 0,
+        "religious_affiliation_area_sum": 4009107,
+        "religious_affiliation_state": 4009107,
+        "religious_affiliation_difference": 0,
+        "no_religion_area_sum": 736210,
+        "no_religion_state": 736210,
+        "no_religion_difference": 0,
+        "not_stated_area_sum": 339562,
+        "not_stated_state": 339562,
+        "not_stated_difference": 0
+      }
+    ],
+    "boundary_validation": {
+      "source_feature_count": 31,
+      "derived_feature_count": 30,
+      "expected_feature_count": 30,
+      "cork_source_features_dissolved": ["CORK CITY COUNCIL", "CORK COUNTY COUNCIL"],
+      "unmapped_boundary_features": [],
+      "unmapped_census_areas": [],
+      "simplified_boundary_bytes": 2558090,
+      "simplification_tolerance_m": 100
+    }
+  },
+  "deferred_sources": [
+    {
+      "source_dataset_id": "cso-census-1926-volume3-table09-counties-1861-1926",
+      "url": "https://www.cso.ie/en/media/csoie/census/census1926results/volume3/C_12_1926_V3_T9.pdf",
+      "local_path": "data/raw/ie_census/cso_census_1926_volume3_table09_counties_1861_1926.pdf",
+      "notes": "Next build route for the deep past. The source title is 'Counties 1861-1926. Number of persons of each religion in each county and county borough in Saorstát Éireann at each census year from 1861'. Extraction requires OCR and a historical county/county-borough concordance before publication."
+    }
+  ]
+}
