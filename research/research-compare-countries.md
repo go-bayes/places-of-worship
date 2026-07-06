@@ -1,5 +1,7 @@
 # Global Country Survey: Religious Data Feasibility
 
+> Superseded for country ranking by [country-survey.md](country-survey.md); retained as the earlier grant-aligned screening brief.
+
 This note is a working brief for deciding which countries can support the
 places-of-worship portal beyond New Zealand. It should be updated as sources are
 verified. Do not treat the current country list as a final ranking.

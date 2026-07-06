@@ -14,6 +14,7 @@ Building historical datasets fit for scientific inferences is remarkably difficu
 - [Vanuatu regional map](https://www.placesmap.org/apps/regions/vu/)
 - [United States regional map](https://www.placesmap.org/apps/regions/us/)
 - [Roadmap](ROADMAP.md)
+- [Country survey](research/country-survey.md)
 - [System map](docs/system-map.md)
 - [FAQ](FAQ.md)
 - [Lexicon](LEXICON.md)
