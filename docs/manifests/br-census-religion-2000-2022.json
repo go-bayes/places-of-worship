@@ -1,0 +1,1411 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:br-census-religion:br:2000-2022:4b72458a326d",
+  "dataset_id": "br-census-religion:br:2000-2022:ibge-sidra",
+  "dataset_version_id": "br-census-religion:br:2000-2022:ibge-sidra:4b72458a326d",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "br-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "BR"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-06T23:29:03Z",
+  "created_by": "scripts/build_br_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_br_area_summary.R",
+    "git_commit": null,
+    "command": "Rscript scripts/build_br_area_summary.R",
+    "parameters": {
+      "waves": ["2000", "2010", "2022"],
+      "municipality_boundary_set": "br-municipality-2022-ibge",
+      "uf_boundary_set": "br-uf-2022-ibge",
+      "municipality_boundary_simplification_tolerance_m": 2000,
+      "uf_boundary_simplification_tolerance_m": 5000,
+      "denominator": "Total minus Sem declaração",
+      "omitted_metrics": ["religious_change", "places_per_10000_residents", "place_density_per_sq_km"]
+    },
+    "software_versions": {
+      "r": "4.6.1",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0"
+    }
+  },
+  "source": {
+    "provider": "Instituto Brasileiro de Geografia e Estatística (IBGE), SIDRA and malhas APIs",
+    "source_dataset_ids": ["ibge-sidra-137-religion-2000-2010", "ibge-sidra-9537-religion-age10plus-2022", "ibge-malhas-municipality-2022", "ibge-malhas-uf-2022", "ibge-localidades-municipios-ufs"],
+    "source_urls": ["https://servicodados.ibge.gov.br/api/v3/agregados/137/metadados", "https://servicodados.ibge.gov.br/api/v3/agregados/9537/metadados", "https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?formato=application/vnd.geo+json&qualidade=minima&intrarregiao=municipio&periodo=2022", "https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?formato=application/vnd.geo+json&qualidade=minima&intrarregiao=UF&periodo=2022", "https://servicodados.ibge.gov.br/api/v1/localidades/municipios?view=nivelado", "https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=id"],
+    "retrieved_at": "2026-07-07T00:00:00Z",
+    "licence": "IBGE public API data; no explicit machine-readable redistribution licence was found in the SIDRA, malhas, or localities API responses during this build. Derived public products attribute Instituto Brasileiro de Geografia e Estatística (IBGE) and link to the source API URLs.",
+    "citation": "Instituto Brasileiro de Geografia e Estatística (IBGE), Censo Demográfico, SIDRA tables 137 and 9537; IBGE malhas API, 2022 municipality and UF geometries.",
+    "raw_redistribution": "Raw SIDRA JSON, raw malhas, localities JSON, and long source extracts are not committed. They remain in data/raw/br_census/ and await any project-controlled raw archive upload."
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/br_census/sidra_137_metadata.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/metadados",
+      "format": "json",
+      "bytes": 6898,
+      "sha256": "7e49c8832fba1c4746108bc7e531270ba11c5c1ab00d3410783f10fb461a6869",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133",
+      "periods": "1991|2000|2010",
+      "territorial_level": "N1,N2,N3,N6",
+      "notes": "Metadata for aggregate 137."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_metadata.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/metadados",
+      "format": "json",
+      "bytes": 2453,
+      "sha256": "88fb524c5eb3cbea96f492eed6bb9a426dfdd07c11356e33ec274cb280caa187",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133|2|58",
+      "periods": "2022",
+      "territorial_level": "N1,N2,N3,N6",
+      "notes": "Metadata for aggregate 9537."
+    },
+    {
+      "uri": "data/raw/br_census/ibge_malhas_municipality_2022_minima.geojson",
+      "url": "https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?formato=application/vnd.geo+json&qualidade=minima&intrarregiao=municipio&periodo=2022",
+      "format": "geojson",
+      "bytes": 3605638,
+      "sha256": "5efffedf8772dc8654322affafac4e3e8b001839e7c2af5cab4eb1094dcd6240",
+      "aggregate_id": null,
+      "variable_id": null,
+      "classification_ids": null,
+      "periods": "2022",
+      "territorial_level": "N6",
+      "notes": "Raw 2022 municipality malha, minimum quality."
+    },
+    {
+      "uri": "data/raw/br_census/ibge_malhas_uf_2022_minima.geojson",
+      "url": "https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?formato=application/vnd.geo+json&qualidade=minima&intrarregiao=UF&periodo=2022",
+      "format": "geojson",
+      "bytes": 98502,
+      "sha256": "07c671aa87aa1ab296c446de6294df9827112782537b996c0a160284907e7c0f",
+      "aggregate_id": null,
+      "variable_id": null,
+      "classification_ids": null,
+      "periods": "2022",
+      "territorial_level": "N3",
+      "notes": "Raw 2022 UF malha, minimum quality."
+    },
+    {
+      "uri": "data/raw/br_census/ibge_localidades_municipios_nivelado.json",
+      "url": "https://servicodados.ibge.gov.br/api/v1/localidades/municipios?view=nivelado",
+      "format": "json",
+      "bytes": 2372050,
+      "sha256": "77bf68d9f5b1237522bcd28c39b8857725ebb25e913a5b13aa4a740ce67041b4",
+      "aggregate_id": null,
+      "variable_id": null,
+      "classification_ids": null,
+      "periods": null,
+      "territorial_level": "N6",
+      "notes": "Municipality names and UF membership."
+    },
+    {
+      "uri": "data/raw/br_census/ibge_localidades_ufs.json",
+      "url": "https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=id",
+      "format": "json",
+      "bytes": 2446,
+      "sha256": "7ca1368dea3af83cba1af84ae8a7e88f1173c97586831d086cc8b3c1ba9c6596",
+      "aggregate_id": null,
+      "variable_id": null,
+      "classification_ids": null,
+      "periods": null,
+      "territorial_level": "N3",
+      "notes": "UF names."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_religion_extract_municipality.csv",
+      "url": "data/raw/br_census/sidra_religion_extract_municipality.csv",
+      "format": "csv",
+      "bytes": 8804307,
+      "sha256": "490b4fe4fb573c04bd4b8319ee568fa7c9281a9efc7ec554a6d3a208a43fe323",
+      "aggregate_id": "137|9537",
+      "variable_id": "93|140",
+      "classification_ids": "133|2|58",
+      "periods": "2000|2010|2022",
+      "territorial_level": "N6",
+      "notes": "Long source extract with Portuguese category labels and normalised labels alongside."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_religion_extract_uf.csv",
+      "url": "data/raw/br_census/sidra_religion_extract_uf.csv",
+      "format": "csv",
+      "bytes": 44102,
+      "sha256": "9ea6a5437f6c53b20d72d1f43b718ddea12ff6404958664eaa5ab36fa23f2a4c",
+      "aggregate_id": "137|9537",
+      "variable_id": "93|140",
+      "classification_ids": "133|2|58",
+      "periods": "2000|2010|2022",
+      "territorial_level": "N3",
+      "notes": "Long UF source extract with Portuguese category labels and normalised labels alongside."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_religion_extract_brazil.csv",
+      "url": "data/raw/br_census/sidra_religion_extract_brazil.csv",
+      "format": "csv",
+      "bytes": 1519,
+      "sha256": "09fd4349beb05ccd2cf768649f6b3975d6ada8a9f11bd4d534f5a3b565325063",
+      "aggregate_id": "137|9537",
+      "variable_id": "93|140",
+      "classification_ids": "133|2|58",
+      "periods": "2000|2010|2022",
+      "territorial_level": "N1",
+      "notes": "Long national source extract with Portuguese category labels and normalised labels alongside."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_11.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B11%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 21925,
+      "sha256": "ed4ab5c882d85cf97aa04177eda1e2780fd4d39cf046572199b7cc4250804e7a",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_11.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B11%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 20208,
+      "sha256": "f0f125fe4fd2061bb1a5f24049a7702fb07d615625dec9f557172a14775181ea",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_12.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B12%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 9315,
+      "sha256": "baa70922bee0ffb1fec5f21e4f99ec9e42c7b3dcd9c924b7ae5911744b9bfc3f",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_12.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B12%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 8831,
+      "sha256": "91e8949b6da956a38e016a6a7dd9791efd59faaee611b3de5dbd090ae4ef55cb",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_13.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B13%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 25305,
+      "sha256": "7e9be10795f966baff1f9930969c7a7c2e1120e8cc8d1bd52b5a9323dc5fe28a",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_13.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B13%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 23223,
+      "sha256": "a7df3b04672af720ba43d46f3569a9f37b1ecb462effec867089614f386786f0",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_14.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B14%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 6376,
+      "sha256": "d6a66198ed753837fdb0e1f464d9defa6ce24aca5777f7b28366f3590ec3b22d",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_14.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B14%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 6177,
+      "sha256": "bf28fdc1f6eff8a93c24d5e598d21fd9a6ea75f4124b3df6bfdfd5c6d6fd5145",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_15.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B15%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 58750,
+      "sha256": "7e28705deb019ac2fed31fb9e9f3db44dddfa851fce987b8970160d113e7b280",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_15.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B15%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 53795,
+      "sha256": "0a9c7bd40aa5c124878f20d2e92fefbb6c26332855234582d00280daba4916db",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_16.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B16%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 6823,
+      "sha256": "9359378162c50e25bc79695110a0d225a762932fb24e38184e9f3a69328734e6",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_16.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B16%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 6572,
+      "sha256": "1df05ff11146f145adc18419f8d4af670cc0b59ba0f61384b0e6fbbaee475f93",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_17.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B17%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 57286,
+      "sha256": "2043eeab0f13c1404a811b71ad2adfa6ad748345d3ad3e69c3a4bdd71eb0ab85",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_17.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B17%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 52432,
+      "sha256": "a85c981bc3238363e2e43eb2471e7d8bf3ee4ebce2a6dedbee5f17121ddfc0f5",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_21.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B21%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 90134,
+      "sha256": "8061ce4b00c499790aecb048293a23f3c19fe8538b03d94617ff67b32b05eb16",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_21.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B21%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 81914,
+      "sha256": "e2395754b2da71e35ddf568bdd284c03dbaa9d65b43f097b47b99e073c7a51d4",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_22.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B22%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 92921,
+      "sha256": "2ba8f30021bd1908b15e8039ab9c5381c402fd98d9e357fa995f17d26b10ac90",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_22.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B22%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 84767,
+      "sha256": "612e597b5e947f944fc5d67e4504559fe4ea6cd12b8a6e8e77e4e98ac2face0e",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_23.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B23%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 73622,
+      "sha256": "ee3bcd0b22c7cef85af5e0c80550041be52bb4a34fd1edba317abf82e2156b0e",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_23.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B23%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 66743,
+      "sha256": "e5adf16492a1eb5f79b603a85fa9d423a08a8772c0051656126c3f63831858ff",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_24.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B24%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 67996,
+      "sha256": "92df95e11c4488dfe0ed9a3328b93d7e25ab34cd64cc67feded65ea37b43c415",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_24.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B24%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 61899,
+      "sha256": "df22b7f6346814a8f72b0c9e40d17cd6ce9e1d3907339dfb62a1c2f5e9992ae6",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_25.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B25%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 89973,
+      "sha256": "00e598bd4aef77e4c19d9122a44cbca90d2a62aa7c0d92eda4665618dc8c10fb",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_25.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B25%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 81835,
+      "sha256": "97a791d69c266a379ecfc716015f9f23214f7f1fa1e8dd2fd6e4600eaa4ada3b",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_26.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B26%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 74853,
+      "sha256": "2e153d05531338a419be04dca4416e6a52ff151afb21200988dc0d586bd1e159",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_26.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B26%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 67850,
+      "sha256": "9458a5279f1704abe359c2a8c39084ac92e446ac659c5cc0a44f6419bbc8210f",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_27.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B27%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 41998,
+      "sha256": "ba7ea411e1041ba0a25f09cc90a0d9a76fe38c541b331cf08ab12fb541e090df",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_27.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B27%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 38285,
+      "sha256": "72b242c3a58a9c69e5719892952ffb25ed8577eb8395e1427f639c4c9bb5007b",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_28.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B28%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 31008,
+      "sha256": "a76b9a9e19e423e654e2dcf26c4e25d67eff9cb53fd1b422948e6dda32a9cbcf",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_28.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B28%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 28420,
+      "sha256": "b974e6908b512c9a3ede5bae294ded74dd881ab8e6e4816a49d7d95c512d14e9",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_29.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B29%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 168694,
+      "sha256": "b7fe99dbae6ac2901a6a9f3087044297d64d222781491db0e450eccd71675cc2",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_29.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B29%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 152396,
+      "sha256": "a09f78aab3750a695b7f4de1662d7a0e19e20f29fffe9d591ed8c48c91630edb",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_31.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B31%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 346038,
+      "sha256": "9e5133acc5d6dad5b1db56e7bfce37d550f06fd0621579432d5537c253f9ddd8",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_31.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B31%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 313770,
+      "sha256": "e09941332f00dc4542aeab83e55912eedb3fe3841d8d0df08603111e1f384014",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_32.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B32%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 32197,
+      "sha256": "032ef434a3137290314c9885ba3d240afbbe10d40383d0fb3f7e9c2b523295d1",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_32.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B32%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 29492,
+      "sha256": "183c9e13da225b516aef934136c6674132a659ad88757583d8f513b5f4611e8d",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_33.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B33%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 38108,
+      "sha256": "c0d08e1efa255078008e66e4d92fffcd9b7e4adcb7b45ac044d7d4db6d55dbcc",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_33.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B33%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 34722,
+      "sha256": "b5763f5a4b9689c1d99f3ec881f1f7e9a9d03707eaee97f3a13d5515f948adb6",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_35.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B35%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 260303,
+      "sha256": "5cff87a0d4554e0f151721a0fd239381872327bad4c3692d680e524dcf8d8a4f",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_35.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B35%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 235488,
+      "sha256": "cdb186619d2495b6f01c961744c45717916c262cf886be1648f4756d53574be4",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_41.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B41%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 162230,
+      "sha256": "7edc9212eeba9f325fbf141063bae15d5f6e5210890636bee22c6771f91c31b5",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_41.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B41%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 147234,
+      "sha256": "4b62e629a2a2d2f52c0ae4d4f257f695e6e4626c89d4e21830cf5fb4471475ab",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_42.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B42%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 117766,
+      "sha256": "c5b5e1ac7734df35ef3fb4050bfc5e4a87ff83fa43100e05a867e867d998fc50",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_42.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B42%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 107948,
+      "sha256": "96cb5817eed0f8d4e8993c08a85d62b8701872cb06abee7c063772667cbac931",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_43.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B43%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 200699,
+      "sha256": "966a680fe1eba945b7783655995f14e85e1559c99c2d4dccd60b0cb3883ef4c5",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_43.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B43%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 182764,
+      "sha256": "a5ae4e2f8b18f8e7666ff4e83bbb3abcc1a3783885b0f29d5d0259c723d6047b",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_50.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B50%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 31817,
+      "sha256": "643c93ac2789d956861c71c6bb990f249950d6e640688aa5db11cb7b6dbcc08f",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_50.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B50%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 29507,
+      "sha256": "559684c63e9e4ff18bba6551fe69144e9a98ddc013bf9395bf2df66c1ae5df3d",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_51.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B51%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 58123,
+      "sha256": "d33115298c475d50f1696e4ac07b1e4e5523a9d32e5688cefedfc612597f20a2",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_51.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B51%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 52946,
+      "sha256": "cb4f3f086d3d9d456be20a85a6cedeffc91927fa1932ad80d4c81177d12ff269",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_52.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B52%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 100277,
+      "sha256": "46a9632a8ccf1b43e3780b64d218cb055c04350540e887fdcc962c1583252e7c",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_52.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B52%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 91117,
+      "sha256": "f5762eb297b8df64ee2360c72a923de584a7f2626ef433cf4b1339a30968ed24",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_municipios_uf_53.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N6%5BN3%5B53%5D%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 789,
+      "sha256": "417c20f41adbf94427faea7227a94b366c8a628b9a0b97dee8c192b6aab09fc9",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_municipios_uf_53.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N6%5BN3%5B53%5D%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 1122,
+      "sha256": "08fab3aed1950fdad86062d48e0e94878eb92073551ee802b0937e7c7b0d2926",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "municipality",
+      "notes": "Raw SIDRA response for municipality level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_ufs.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N3%5Ball%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 11714,
+      "sha256": "b26bd44010a3e32cc00d2293f447eece536e00cdfa0fc95a4436b8500aced83b",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "uf",
+      "notes": "Raw SIDRA response for uf level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_ufs.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N3%5Ball%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 10845,
+      "sha256": "0a2e195c58860b65921a328310439f177f20c3bcfef3f8e8498da53e0867b476",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "uf",
+      "notes": "Raw SIDRA response for uf level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_137_2000_2010_brazil.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/periodos/2000|2010/variaveis/93?localidades=N1%5Ball%5D&classificacao=133%5B0%2C2836%2C2837%5D",
+      "format": "json",
+      "bytes": 747,
+      "sha256": "bdbc9db17d45eb0206ccf16d304e9f245347b9dec22c63333e8105e25eea32a1",
+      "aggregate_id": "137",
+      "variable_id": "93",
+      "classification_ids": "133[0,2836,2837]",
+      "periods": "2000|2010",
+      "territorial_level": "country",
+      "notes": "Raw SIDRA response for country level."
+    },
+    {
+      "uri": "data/raw/br_census/sidra_9537_2022_brazil.json",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/periodos/2022/variaveis/140?localidades=N1%5Ball%5D&classificacao=133%5B95278%2C2836%2C2837%5D%7C2%5B6794%5D%7C58%5B95253%5D",
+      "format": "json",
+      "bytes": 1074,
+      "sha256": "2c7efcf15ca7ea7d0f91f8ed1ed9b80ba1608e605a7e6821d630d735f2caf449",
+      "aggregate_id": "9537",
+      "variable_id": "140",
+      "classification_ids": "133[95278,2836,2837]|2[6794]|58[95253]",
+      "periods": "2022",
+      "territorial_level": "country",
+      "notes": "Raw SIDRA response for country level."
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/br/data/area_summary_municipality.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 17086418,
+      "sha256": "4b72458a326dddb53c5799dfa3f882dbc5b559aa7a3faa848c15d550af44ee23",
+      "row_count": 16710,
+      "content": "Brazil municipality area summary with IBGE SIDRA stated-response religion metrics.",
+      "privacy": "public",
+      "licence_status": "ibge_public_api_terms_not_explicit"
+    },
+    {
+      "uri": "repo:apps/regions/br/data/area_summary_municipality.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 6783566,
+      "sha256": "b49cd09220737ec660593d90263fc0d906a9b32360a9dfe47b15719c5737b784",
+      "row_count": 16710,
+      "content": "Flattened Brazil municipality area summary with IBGE SIDRA stated-response religion metrics.",
+      "privacy": "public",
+      "licence_status": "ibge_public_api_terms_not_explicit"
+    },
+    {
+      "uri": "repo:apps/regions/br/data/br_municipality_2022.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 2676699,
+      "sha256": "9577b55e2d36798b0793210799c48823e6c925188b48e6e6ad55f7a554bc11c8",
+      "row_count": 5570,
+      "content": "Simplified Brazil 2022 municipality boundary GeoJSON derived from IBGE malhas.",
+      "privacy": "public",
+      "licence_status": "ibge_public_api_terms_not_explicit"
+    },
+    {
+      "uri": "repo:apps/regions/br/data/area_summary_uf.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 84433,
+      "sha256": "c8e4dd1d81fbdb441a852efbbe78b5a292e08aa2fbd06bead0d0d930609a4e28",
+      "row_count": 81,
+      "content": "Brazil UF area summary with IBGE SIDRA stated-response religion metrics.",
+      "privacy": "public",
+      "licence_status": "ibge_public_api_terms_not_explicit"
+    },
+    {
+      "uri": "repo:apps/regions/br/data/area_summary_uf.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 26484,
+      "sha256": "d47f432a12742f2760ce1d9d5dc790ead732f565c17ae1a39bef0b8867b18291",
+      "row_count": 81,
+      "content": "Flattened Brazil UF area summary with IBGE SIDRA stated-response religion metrics.",
+      "privacy": "public",
+      "licence_status": "ibge_public_api_terms_not_explicit"
+    },
+    {
+      "uri": "repo:apps/regions/br/data/br_uf_2022.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 61147,
+      "sha256": "0fb5345441f772f164887672b506f26fa260924fbe5cc72f7c40ea4506abb96c",
+      "row_count": 27,
+      "content": "Simplified Brazil 2022 UF boundary GeoJSON derived from IBGE malhas.",
+      "privacy": "public",
+      "licence_status": "ibge_public_api_terms_not_explicit"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/br/data/area_summary_municipality.json",
+      "sha256": "4b72458a326dddb53c5799dfa3f882dbc5b559aa7a3faa848c15d550af44ee23",
+      "built_by": "scripts/build_br_area_summary.R",
+      "notes": "5570 municipalities x 3 census years; denominator equals Total minus Sem declaração."
+    },
+    {
+      "uri": "repo:apps/regions/br/data/area_summary_uf.json",
+      "sha256": "c8e4dd1d81fbdb441a852efbbe78b5a292e08aa2fbd06bead0d0d930609a4e28",
+      "built_by": "scripts/build_br_area_summary.R",
+      "notes": "27 federative units x 3 census years; denominator equals Total minus Sem declaração."
+    },
+    {
+      "uri": "repo:apps/regions/br/data/br_municipality_2022.geojson",
+      "sha256": "9577b55e2d36798b0793210799c48823e6c925188b48e6e6ad55f7a554bc11c8",
+      "built_by": "scripts/build_br_area_summary.R",
+      "notes": "IBGE 2022 municipality malha simplified at 2,000 m tolerance."
+    },
+    {
+      "uri": "repo:apps/regions/br/data/br_uf_2022.geojson",
+      "sha256": "0fb5345441f772f164887672b506f26fa260924fbe5cc72f7c40ea4506abb96c",
+      "built_by": "scripts/build_br_area_summary.R",
+      "notes": "IBGE 2022 UF malha simplified at 5,000 m tolerance."
+    }
+  ],
+  "validation": {
+    "checks": ["SIDRA aggregate 137 metadata resolved with periods 1991, 2000 and 2010; this build uses 2000 and 2010, variable 93, classification 133.", "SIDRA aggregate 9537 metadata resolved with period 2022; this build uses variable 140, religion classification 133, Sexo=Total (2:6794), and Grupo de idade=Total (58:95253).", "Municipality boundary layer has 5570 IBGE 2022 features and writes to 2676699 bytes after 2,000 m simplification.", "UF boundary layer has 27 IBGE 2022 features and writes to 61147 bytes after 5,000 m simplification.", "SIDRA '-' count cells are preserved in value_raw and interpreted as zero for derived count totals.", "Municipality source sums were compared with SIDRA UF rows for Total, Sem religião, and Sem declaração.", "UF source sums were compared with SIDRA Brazil rows for Total, Sem religião, and Sem declaração."],
+    "join_coverage": {
+      "municipality": [
+        {
+          "year": 2000,
+          "matched_area_count": 5507,
+          "expected_area_count": 5570,
+          "source_area_count": 5507,
+          "missing_area_codes": [
+            "1504752",
+            "2200954",
+            "2206720",
+            "2207793",
+            "2406155",
+            "2703759",
+            "2903276",
+            "2919553",
+            "3202256",
+            "3302858",
+            "4212650",
+            "4220000",
+            "4300034",
+            "4300471",
+            "4301073",
+            "4302220",
+            "4302238",
+            "4302584",
+            "4304614",
+            "4304622",
+            "4304655",
+            "4305835",
+            "4305934",
+            "4306130",
+            "4308433",
+            "4310652",
+            "4310876",
+            "4311239",
+            "4312179",
+            "4313466",
+            "4314134",
+            "4314175",
+            "4314464",
+            "4314548",
+            "4315313",
+            "4315958",
+            "4316733",
+            "4316972",
+            "4318614",
+            "4319364",
+            "4321469",
+            "4323770",
+            "5003900",
+            "5006275",
+            "5101852",
+            "5103254",
+            "5103361",
+            "5103437",
+            "5104526",
+            "5104542",
+            "5106174",
+            "5106190",
+            "5106315",
+            "5107578",
+            "5107743",
+            "5107768",
+            "5107792",
+            "5107883",
+            "5108352",
+            "5204854",
+            "5208152",
+            "5210158",
+            "5212253"
+          ],
+          "extra_source_area_codes": []
+        },
+        {
+          "year": 2010,
+          "matched_area_count": 5565,
+          "expected_area_count": 5570,
+          "source_area_count": 5565,
+          "missing_area_codes": [
+            "1504752",
+            "4212650",
+            "4220000",
+            "4314548",
+            "5006275"
+          ],
+          "extra_source_area_codes": []
+        },
+        {
+          "year": 2022,
+          "matched_area_count": 5570,
+          "expected_area_count": 5570,
+          "source_area_count": 5570,
+          "missing_area_codes": [],
+          "extra_source_area_codes": []
+        }
+      ],
+      "uf": [
+        {
+          "year": 2000,
+          "matched_area_count": 27,
+          "expected_area_count": 27,
+          "source_area_count": 27,
+          "missing_area_codes": [],
+          "extra_source_area_codes": []
+        },
+        {
+          "year": 2010,
+          "matched_area_count": 27,
+          "expected_area_count": 27,
+          "source_area_count": 27,
+          "missing_area_codes": [],
+          "extra_source_area_codes": []
+        },
+        {
+          "year": 2022,
+          "matched_area_count": 27,
+          "expected_area_count": 27,
+          "source_area_count": 27,
+          "missing_area_codes": [],
+          "extra_source_area_codes": []
+        }
+      ]
+    },
+    "state_validation": [
+      {
+        "year": 2000,
+        "lower_level": "municipality",
+        "upper_level": "uf",
+        "categories": [
+          {
+            "category": "no_religion",
+            "lower_sum": 12492395,
+            "upper_sum": 12492406,
+            "difference": -11
+          },
+          {
+            "category": "not_declared",
+            "lower_sum": 383970,
+            "upper_sum": 383954,
+            "difference": 16
+          },
+          {
+            "category": "total",
+            "lower_sum": 169872854,
+            "upper_sum": 169872859,
+            "difference": -5
+          }
+        ]
+      },
+      {
+        "year": 2010,
+        "lower_level": "municipality",
+        "upper_level": "uf",
+        "categories": [
+          {
+            "category": "no_religion",
+            "lower_sum": 15335521,
+            "upper_sum": 15335510,
+            "difference": 11
+          },
+          {
+            "category": "not_declared",
+            "lower_sum": 45841,
+            "upper_sum": 45836,
+            "difference": 5
+          },
+          {
+            "category": "total",
+            "lower_sum": 190755799,
+            "upper_sum": 190755799,
+            "difference": 0
+          }
+        ]
+      },
+      {
+        "year": 2022,
+        "lower_level": "municipality",
+        "upper_level": "uf",
+        "categories": [
+          {
+            "category": "no_religion",
+            "lower_sum": 16385362,
+            "upper_sum": 16385344,
+            "difference": 18
+          },
+          {
+            "category": "not_declared",
+            "lower_sum": 199483,
+            "upper_sum": 199473,
+            "difference": 10
+          },
+          {
+            "category": "total",
+            "lower_sum": 176600152,
+            "upper_sum": 176600151,
+            "difference": 1
+          }
+        ]
+      }
+    ],
+    "national_validation": [
+      {
+        "year": 2000,
+        "lower_level": "uf",
+        "upper_level": "country",
+        "categories": [
+          {
+            "category": "no_religion",
+            "lower_sum": 12492406,
+            "upper_sum": 12492403,
+            "difference": 3
+          },
+          {
+            "category": "not_declared",
+            "lower_sum": 383954,
+            "upper_sum": 383953,
+            "difference": 1
+          },
+          {
+            "category": "total",
+            "lower_sum": 169872859,
+            "upper_sum": 169872856,
+            "difference": 3
+          }
+        ]
+      },
+      {
+        "year": 2010,
+        "lower_level": "uf",
+        "upper_level": "country",
+        "categories": [
+          {
+            "category": "no_religion",
+            "lower_sum": 15335510,
+            "upper_sum": 15335510,
+            "difference": 0
+          },
+          {
+            "category": "not_declared",
+            "lower_sum": 45836,
+            "upper_sum": 45839,
+            "difference": -3
+          },
+          {
+            "category": "total",
+            "lower_sum": 190755799,
+            "upper_sum": 190755799,
+            "difference": 0
+          }
+        ]
+      },
+      {
+        "year": 2022,
+        "lower_level": "uf",
+        "upper_level": "country",
+        "categories": [
+          {
+            "category": "no_religion",
+            "lower_sum": 16385344,
+            "upper_sum": 16385342,
+            "difference": 2
+          },
+          {
+            "category": "not_declared",
+            "lower_sum": 199473,
+            "upper_sum": 199472,
+            "difference": 1
+          },
+          {
+            "category": "total",
+            "lower_sum": 176600151,
+            "upper_sum": 176600150,
+            "difference": 1
+          }
+        ]
+      }
+    ],
+    "boundary_validation": {
+      "municipality_source_feature_count": 5570,
+      "municipality_output_feature_count": 5570,
+      "municipality_output_bytes": 2676699,
+      "municipality_simplification_tolerance_m": 2000,
+      "uf_source_feature_count": 27,
+      "uf_output_feature_count": 27,
+      "uf_output_bytes": 61147,
+      "uf_simplification_tolerance_m": 5000,
+      "unmapped_boundary_features": [],
+      "unmapped_locality_rows": [
+        "5101837"
+      ]
+    }
+  },
+  "construct_notes": [
+    "2000 and 2010 use SIDRA aggregate 137, variable 93: População residente.",
+    "2022 uses SIDRA aggregate 9537, variable 140: Pessoas de 10 anos ou mais de idade.",
+    "The 2022 age-universe break is flagged in every 2022 area-summary row as age_universe_10_plus.",
+    "The municipality layer is anchored on 2022 municipality boundaries. Pre-2022 municipality rows are not concorded across splits and mergers, and the page omits the religious_change metric."
+  ],
+  "privacy": "public",
+  "licence_status": "ibge_public_api_terms_not_explicit",
+  "downstream_status": "public",
+  "source_datasets": [
+    {
+      "source_dataset_id": "ibge-sidra-137-religion-2000-2010",
+      "name": "SIDRA aggregate 137: População residente, por religião",
+      "provider": "Instituto Brasileiro de Geografia e Estatística (IBGE), SIDRA",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/137/metadados",
+      "retrieval_date": "2026-07-07",
+      "local_path": "data/raw/br_census/sidra_137_metadata.json",
+      "licence": {
+        "name": "IBGE public API terms not explicit in API response",
+        "url": null,
+        "attribution": "Instituto Brasileiro de Geografia e Estatística (IBGE)"
+      },
+      "citation": "IBGE, Censo Demográfico, SIDRA table 137, variable 93, classification 133.",
+      "access_limits": null,
+      "redistribution_limits": "No explicit machine-readable redistribution licence found in the API response; attribute IBGE and link to the source.",
+      "notes": "Used for 2000 and 2010 resident population by religion. Extracted categories: Total (0), Sem religião (2836), and Sem declaração (2837)."
+    },
+    {
+      "source_dataset_id": "ibge-sidra-9537-religion-age10plus-2022",
+      "name": "SIDRA aggregate 9537: Pessoas de 10 anos ou mais de idade, por religião, segundo o sexo e os grupos de idade",
+      "provider": "Instituto Brasileiro de Geografia e Estatística (IBGE), SIDRA",
+      "url": "https://servicodados.ibge.gov.br/api/v3/agregados/9537/metadados",
+      "retrieval_date": "2026-07-07",
+      "local_path": "data/raw/br_census/sidra_9537_metadata.json",
+      "licence": {
+        "name": "IBGE public API terms not explicit in API response",
+        "url": null,
+        "attribution": "Instituto Brasileiro de Geografia e Estatística (IBGE)"
+      },
+      "citation": "IBGE, Censo Demográfico 2022, SIDRA table 9537, variable 140, classifications 133, 2, and 58.",
+      "access_limits": null,
+      "redistribution_limits": "No explicit machine-readable redistribution licence found in the API response; attribute IBGE and link to the source.",
+      "notes": "Used for 2022 people aged 10 years or older by religion, with Sexo=Total (6794) and Grupo de idade=Total (95253). Extracted religion categories: Total (95278), Sem religião (2836), and Sem declaração (2837)."
+    },
+    {
+      "source_dataset_id": "ibge-malhas-municipality-2022",
+      "name": "IBGE malhas, Brazil municipalities, 2022, minimum quality",
+      "provider": "Instituto Brasileiro de Geografia e Estatística (IBGE)",
+      "url": "https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?formato=application/vnd.geo+json&qualidade=minima&intrarregiao=municipio&periodo=2022",
+      "retrieval_date": "2026-07-07",
+      "local_path": "data/raw/br_census/ibge_malhas_municipality_2022_minima.geojson",
+      "licence": {
+        "name": "IBGE public API terms not explicit in API response",
+        "url": null,
+        "attribution": "Instituto Brasileiro de Geografia e Estatística (IBGE)"
+      },
+      "citation": "IBGE malhas API, Brazil municipality geometries, periodo=2022, qualidade=minima.",
+      "access_limits": null,
+      "redistribution_limits": "No explicit machine-readable redistribution licence found in the API response; attribute IBGE and link to the source.",
+      "notes": "Simplified to 2,000 m tolerance in EPSG:5880 before export to GeoJSON."
+    },
+    {
+      "source_dataset_id": "ibge-malhas-uf-2022",
+      "name": "IBGE malhas, Brazil federative units, 2022, minimum quality",
+      "provider": "Instituto Brasileiro de Geografia e Estatística (IBGE)",
+      "url": "https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?formato=application/vnd.geo+json&qualidade=minima&intrarregiao=UF&periodo=2022",
+      "retrieval_date": "2026-07-07",
+      "local_path": "data/raw/br_census/ibge_malhas_uf_2022_minima.geojson",
+      "licence": {
+        "name": "IBGE public API terms not explicit in API response",
+        "url": null,
+        "attribution": "Instituto Brasileiro de Geografia e Estatística (IBGE)"
+      },
+      "citation": "IBGE malhas API, Brazil UF geometries, periodo=2022, qualidade=minima.",
+      "access_limits": null,
+      "redistribution_limits": "No explicit machine-readable redistribution licence found in the API response; attribute IBGE and link to the source.",
+      "notes": "Simplified to 5,000 m tolerance in EPSG:5880 before export to GeoJSON."
+    },
+    {
+      "source_dataset_id": "ibge-localidades-municipios-ufs",
+      "name": "IBGE localities API, municipalities and federative units",
+      "provider": "Instituto Brasileiro de Geografia e Estatística (IBGE)",
+      "url": "https://servicodados.ibge.gov.br/api/v1/localidades/municipios?view=nivelado",
+      "retrieval_date": "2026-07-07",
+      "local_path": "data/raw/br_census/ibge_localidades_municipios_nivelado.json",
+      "licence": {
+        "name": "IBGE public API terms not explicit in API response",
+        "url": null,
+        "attribution": "Instituto Brasileiro de Geografia e Estatística (IBGE)"
+      },
+      "citation": "IBGE localities API, municipalities with nested UF fields; IBGE localities API, states.",
+      "access_limits": null,
+      "redistribution_limits": "No explicit machine-readable redistribution licence found in the API response; attribute IBGE and link to the source.",
+      "notes": "Used to add municipality and UF names to the malha features and area-summary rows."
+    }
+  ],
+  "notes": "Portuguese SIDRA category labels are preserved in the ignored long source extracts with normalised labels alongside. The committed products contain only derived area summaries and simplified boundaries."
+}

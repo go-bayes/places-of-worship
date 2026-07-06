@@ -3,23 +3,25 @@
 ## Status
 
 - **Tier**: A (buildable now)
-- **Build state**: survey verified
-- **Last verified**: 2026-07-07; verified SIDRA table 137, SIDRA table 9537, and geoBoundaries BRA ADM2:
+- **Build state**: map live; municipality and UF census-religion overlays built for 2000, 2010, and 2022.
+- **Last verified**: 2026-07-07; verified SIDRA table 137, SIDRA table 9537, IBGE 2022 malhas, and the generated manifest:
   <https://servicodados.ibge.gov.br/api/v3/agregados/137/metadados>,
   <https://servicodados.ibge.gov.br/api/v3/agregados/9537/metadados>,
-  <https://www.geoboundaries.org/api/current/gbOpen/BRA/ADM2/>.
+  <https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?formato=application/vnd.geo+json&qualidade=minima&intrarregiao=municipio&periodo=2022>,
+  `docs/manifests/br-census-religion-2000-2022.json`.
 
 ## Religious data over time
 
 | Source | Construct | Smallest public unit | Years | Format | Access | Licence |
 | --- | --- | --- | --- | --- | --- | --- |
-| IBGE SIDRA table 137 metadata, <https://servicodados.ibge.gov.br/api/v3/agregados/137/metadados> | census affiliation | municipality | 1991, 2000, 2010 | API | open | IBGE terms |
-| IBGE SIDRA table 9537 metadata, <https://servicodados.ibge.gov.br/api/v3/agregados/9537/metadados> | census affiliation for people aged 10+ | municipality | 2022 | API | open | IBGE terms |
+| IBGE SIDRA aggregate 137, variable 93, classification 133 (`Religião`), <https://servicodados.ibge.gov.br/api/v3/agregados/137/metadados> | census affiliation: resident population by religion | municipality | 1991, 2000, 2010; map uses 2000 and 2010 | API | open | IBGE public API terms not explicit in API response |
+| IBGE SIDRA aggregate 9537, variable 140, classifications 133 (`Religião`), 2 (`Sexo` = Total, 6794), and 58 (`Grupo de idade` = Total, 95253), <https://servicodados.ibge.gov.br/api/v3/agregados/9537/metadados> | census affiliation for people aged 10 years or older | municipality | 2022 | API | open | IBGE public API terms not explicit in API response |
 
 ## Boundaries
 
-- Official boundary files: IBGE municipal malhas; geoBoundaries ADM2 at <https://www.geoboundaries.org/api/current/gbOpen/BRA/ADM2/> is an open fallback.
-- Anchor the first series on 2022 municipalities and use IBGE municipality codes with concordances for municipality splits and mergers.
+- Official boundary files: IBGE 2022 municipal malhas and UF malhas from the malhas API; geoBoundaries ADM2 at <https://www.geoboundaries.org/api/current/gbOpen/BRA/ADM2/> remains an open fallback.
+- The live map anchors municipality rows on 2022 municipalities. A published municipality split/merge concordance is still required before making long-run municipality trend claims.
+- The generated municipality GeoJSON is 2.68 MB after 2 km simplification. The UF GeoJSON is 61 KB after 5 km simplification.
 
 ## Places-of-worship layer
 
@@ -28,20 +30,23 @@
 
 ## First visualisation
 
-Religious-affiliation percent by municipality, 1991-2022, on 2022 municipal boundaries.
+Religious-affiliation percent and `Sem religião` percent by municipality and UF, 2000-2022, on 2022 boundaries.
 
 ## Build recipe
 
-1. Extract: pull SIDRA table 137 by `N6` municipality and religion classification, then pull table 9537 for 2022; batch requests to stay below SIDRA row limits and record URLs.
-2. Governed product: `area_summary` per `schemas/area_summary.schema.json`, with a tracked manifest per `docs/data-storage-pipeline.md`.
-3. Boundaries: use IBGE 2022 municipal malhas or geoBoundaries BRA ADM2, simplified for the web map and joined by IBGE municipality code.
-4. Region page: `REGION_CONFIG` per `docs/development/adding-a-region.md`.
-5. Verification: reconcile national totals, municipality join coverage, licence and attribution strings.
+1. Built: `scripts/build_br_area_summary.R` pulls and caches SIDRA responses by UF under `data/raw/br_census/`, with `sources.csv` recording URLs, hashes, aggregate IDs, variable IDs, classifications, periods, and licence notes.
+2. Built: `apps/regions/br/data/area_summary_municipality.{json,csv}` and `apps/regions/br/data/area_summary_uf.{json,csv}`.
+3. Built: `apps/regions/br/data/br_municipality_2022.geojson` and `apps/regions/br/data/br_uf_2022.geojson` from IBGE malhas.
+4. Built: `apps/regions/br/index.html` with IBGE/SIDRA and IBGE malhas attribution on the page. The page hides place-density and change metrics until those constructs have governed inputs.
+5. Manifest: `docs/manifests/br-census-religion-2000-2022.json` records raw sources, derived files, checksums, join coverage, and validation.
 
 ## Risks and open questions
 
-- The 2022 table changes age universe to people aged 10+; label the series rather than silently merging constructs.
-- Municipality boundary changes require a published concordance before long-run trend claims.
+- The 2022 table changes the age universe to people aged 10 years or older. Every 2022 row is flagged `age_universe_10_plus`, and the page names the break in the popup denominator note.
+- Municipality boundary changes require a published concordance before long-run trend claims. The page therefore omits the calculated change layer.
+- Municipality join coverage is 5,507/5,570 for 2000, 5,565/5,570 for 2010, and 5,570/5,570 for 2022. UF coverage is 27/27 in all three waves.
+- The IBGE localities API includes Boa Esperança do Norte (`5101837`), which is absent from the 2022 malha used here; it is recorded as an unmapped locality row in the manifest.
+- Formal machine-readable IBGE redistribution terms were not found in the API responses during this build. The map and manifest attribute IBGE and link to the source APIs.
 
 ## Deep-history potential
 

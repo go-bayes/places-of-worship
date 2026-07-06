@@ -4,6 +4,15 @@
 
 ### 2026-07-07
 
+- Added Brazil as the sixth country data map: municipality-level census
+  religion for 2000, 2010, and 2022 from IBGE SIDRA (16,710 rows across
+  5,570 municipalities, join coverage 5,507/5,565/5,570 per wave,
+  validation residuals of at most 18 people against IBGE state and
+  national totals), with a 27-state UF level alongside. The 2022 census
+  universe break (ages 10 and over, versus resident population earlier)
+  is flagged in every popup and the onboarding. Opus verification
+  passed all checks with 40-53ms repaints at full municipality detail.
+
 - Adopted the data-access and research tiers (JB-ratified): the maps
   show derived rates per source rulings, everyone gets
   reproduce-it-yourself instructions, and assembled census data serves

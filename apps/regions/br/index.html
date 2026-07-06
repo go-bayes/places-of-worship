@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Brazil Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260707e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // the whole country-specific surface; every behaviour lives in the
+    // shared module (../_shared/region-map.js) and keys on this config
+    // and the data products, never on country identity
+    window.REGION_CONFIG = {
+      countryCode: "BR",
+      title: "Places of Worship | Brazil Research Map",
+      // brazil extent, centred inland so the amazon and southern states
+      // remain in the first viewport
+      center: [-53.2, -14.2],
+      initialZoom: 4,
+      // each level is a governed area-summary product plus its boundary
+      // file; paths resolve from this page's directory
+      censusLevels: {
+        municipality: {
+          label: "Municipality",
+          boundaries: "data/br_municipality_2022.geojson",
+          summary: "data/area_summary_municipality.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries © IBGE malhas API · 2022 municipality malha · simplified at 2 km"
+        },
+        uf: {
+          label: "UF",
+          boundaries: "data/br_uf_2022.geojson",
+          summary: "data/area_summary_uf.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries © IBGE malhas API · 2022 UF malha · simplified at 5 km"
+        }
+      },
+      defaultLevel: "municipality",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2022,
+      // no governed brazil places-of-worship snapshot or municipality
+      // concordance is included yet; place-rate and change metrics stay
+      // hidden rather than implying a harmonised longitudinal product
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share not in Sem religião after excluding Sem declaração"
+        },
+        no_religion_percent: {
+          label: "Sem religião %",
+          note: "share in the source Sem religião category"
+        }
+      },
+      popupDenominatorNote: "Percentages use the SIDRA religion-response denominator: Total minus Sem declaração. The 2022 wave covers people aged 10 years or older; 2000 and 2010 cover resident population.",
+      cityPresets: [
+        { label: "São Paulo", shortLabel: "SP", coords: [-46.6333, -23.5505], zoom: 10 },
+        { label: "Rio de Janeiro", shortLabel: "Rio", coords: [-43.1729, -22.9068], zoom: 10 },
+        { label: "Brasília", shortLabel: "BSB", coords: [-47.8825, -15.7942], zoom: 10 },
+        { label: "Salvador", coords: [-38.5014, -12.9777], zoom: 10 },
+        { label: "Fortaleza", coords: [-38.5267, -3.7319], zoom: 10 },
+        { label: "Belo Horizonte", shortLabel: "BH", coords: [-43.9378, -19.9208], zoom: 10 },
+        { label: "Manaus", coords: [-60.0217, -3.1190], zoom: 10 },
+        { label: "Curitiba", coords: [-49.2733, -25.4284], zoom: 10 },
+        { label: "Recife", coords: [-34.8770, -8.0476], zoom: 10 },
+        { label: "Porto Alegre", coords: [-51.2177, -30.0346], zoom: 10 }
+      ],
+      geocode: { country: "br", biasLngLat: [-53.2, -14.2] },
+      onboarding: {
+        title: "Brazil research map",
+        intro: "Census religion overlays for Brazil from IBGE/SIDRA, 2000, 2010 and 2022.",
+        bullets: [
+          "Municipalities and UFs are shaded by religious affiliation or the source Sem religião category.",
+          "The 2022 wave changes the age universe: it covers people aged 10 years or older, while 2000 and 2010 cover resident population.",
+          "Municipality rows use 2022 boundaries without a split/merge concordance. This release therefore does not calculate a change layer.",
+          "Open <strong>Census</strong> (top centre) for the metric, geography and year controls.",
+          "Tap an area for its census detail."
+        ],
+        links: [
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion © <a href="https://sidra.ibge.gov.br/" target="_blank" rel="noopener">IBGE/SIDRA</a> · Boundaries © <a href="https://servicodados.ibge.gov.br/api/docs/malhas?versao=3" target="_blank" rel="noopener">IBGE malhas API</a> · API reuse terms not machine-readable in source responses',
+      censusFlagNote: "* 2022 rows cover people aged 10 years or older; pre-2022 municipality rows use 2022 boundaries without a split/merge concordance."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260707e"></script>
+</body>
+</html>
