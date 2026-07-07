@@ -1,4 +1,5 @@
 import type { WorkTask } from "../data/types";
+import { taskKindLabel } from "./EvidenceForm";
 
 const statusClass: Record<string, string> = {
   open: "status-not-assessed",
@@ -18,7 +19,12 @@ export function TaskList(props: {
   onSelect: (taskId: string) => void;
 }) {
   if (props.tasks.length === 0) {
-    return <p className="field-note">No active tasks in this batch.</p>;
+    return (
+      <p className="field-note">
+        No active tasks right now. New assignments appear here; you can still
+        nominate a missing place of worship above.
+      </p>
+    );
   }
   return (
     <div>
@@ -30,7 +36,8 @@ export function TaskList(props: {
         >
           <div className="task-name">{task.siteName ?? task.taskId}</div>
           <div className="task-meta">
-            {task.taskKind.replace(/_/g, " ")} · batch {task.batchId}
+            {taskKindLabel(task.taskKind)}
+            <span className="batch-tag">batch {task.batchId}</span>
           </div>
           <span className={`status-pill ${statusClass[task.status] ?? "status-not-assessed"}`}>
             {task.status.replace(/_/g, " ")}

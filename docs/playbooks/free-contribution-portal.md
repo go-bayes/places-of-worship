@@ -1,6 +1,6 @@
 # Playbook: free-contribution portal (RAs add, not only review)
 
-Status: BUILD SITTING IMPLEMENTED; awaiting maintainer browser verification and commit.
+Status: BUILD VERIFIED IN BROWSER (agent verification, 2026-07-07); all acceptance checks pass. Publication and Convex binding remain JB-gated.
 Task: #10. Effort: one design sitting + one build sitting.
 
 ## Goal
@@ -74,3 +74,53 @@ Write `docs/portal-free-contribution-design.md` covering:
 - Nothing in the flow writes outside localStorage in demo mode.
 - Wording audit: no "Add to map" anywhere; statuses match the style
   guide list.
+
+## Verification notes (agent browser verification, 2026-07-07)
+
+All acceptance checks passed against the build at commit 7d24426, on a
+live Vite preview (port 5176, portal-workbench worktree):
+
+- Place-first (NZ): nomination created with candidate id
+  `candidate:nz:<ulid>`, saved as draft, listed in My work.
+- Dedup: candidates render under "Is it one of these?"; a
+  high-confidence name match disables `Continue as new nomination`
+  until a reason is entered; low-confidence matches require no reason.
+- Source-first offline: a source with no URL validates via archive
+  reference (repository, collection, consulted date); a claim with no
+  coordinates and `regional_only` basis plus a containing area submits
+  cleanly. This was the key check.
+- VU kastom prompt: the sensitivity question is the first and only
+  screen of place-first entry; location fields are not rendered until
+  it is answered, and `validateForSubmit` independently blocks
+  submission. Hardening applied after verification: the gate's
+  onChange previously accepted a synthetic change event carrying the
+  empty placeholder value (not reachable by real interaction); it now
+  ignores the placeholder (`FreeContributionPortal.tsx`). Re-verified
+  both ways in the browser.
+- Submitted records are read-only (all inputs disabled, revision
+  notice shown); statuses observed match the style-guide list; no
+  "Add to map" wording in the DOM or `src`.
+- Boundary: only localhost Vite asset requests in the network log; the
+  sole persistence call in `src` is localStorage in `demoProvider.ts`;
+  no fetch/XHR/WebSocket usage anywhere in the app; console clean.
+
+Known limits parked for later sittings: the My work sidebar list is
+display-only (no click-through to a detail route), and the
+agent-assisted extraction workspace exists behind the provider surface
+with seeded demo drafts but has not yet had a dedicated verification
+pass of its confirm/reject/submit gating in the browser.
+
+Publication, Convex binding, and invites are prepared as deliberate
+JB steps in `docs/development/workbench-publication-plan.md`.
+
+Friendliness pass (2026-07-07, JB request): My work items now open
+their record (drafts editable, submitted read-only, agent drafts with
+a confirm-as-own-work path), task cards use plain-language kind labels
+with an outline batch tag, the nominate flows carry step cues,
+validation messages read as guidance with date-format help text, and
+empty states explain themselves. Reviewed by a multi-angle code review;
+fixes applied and browser-verified. Deferred cleanups for a later
+sitting: derive the App open-record state instead of resetting it in
+each handler; move the task-kind label map nearer the data types; lift
+the nominate step arrays into country config when a third country
+needs a different flow.

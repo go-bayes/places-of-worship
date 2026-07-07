@@ -43,4 +43,6 @@ The repo deploys static files from `main`. To publish the workbench,
 build locally and commit `dist/` (or add a CI build) — a decision for
 JB, recorded here so the demo surface cannot drift onto placesmap.org
 by accident. Connecting `ConvexProvider` to the hosted deployment is a
-separate deliberate step with its own review.
+separate deliberate step with its own review. The prepared step-by-step
+plan for both, with the JB decision checklist, is
+[docs/development/workbench-publication-plan.md](../../docs/development/workbench-publication-plan.md).
