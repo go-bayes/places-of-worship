@@ -7,7 +7,7 @@
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
   <link href="../../shared/map-shell.css" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
-  <link href="../_shared/region-map.css?v=20260707h" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260707i" rel="stylesheet">
 </head>
 <body>
   <div id="region-root"></div>
@@ -35,11 +35,16 @@
       defaultLevel: "sa2",
       defaultMetric: "religious_affiliation_percent",
       defaultYear: 2021,
+      timeline: [
+        { year: 2016, level: "sa2" },
+        { year: 2021, level: "sa2" }
+      ],
       metricsAvailable: [
         "religious_affiliation_percent",
         "no_religion_percent"
       ],
       popupDenominatorNote: "Percentages use people counted at place of usual residence with a stated religious-affiliation response: ABS G14 Total Persons minus Religious affiliation not stated, which comprises Not stated and Inadequately described. No religion % uses the ABS top-level Secular Beliefs and Other Spiritual Beliefs and No Religious Affiliation total.",
+      censusFlagNote: "* 2016 rows are converted to 2021 SA2 boundaries with the official ABS population-weighted correspondence; treat small areas as approximate.",
       cityPresets: [
         { label: "Sydney", coords: [151.2093, -33.8688], zoom: 10 },
         { label: "Melbourne", coords: [144.9631, -37.8136], zoom: 10 },
@@ -57,7 +62,7 @@
         bullets: [
           "The census overlay is on: areas are shaded by religious affiliation among people with a stated religious-affiliation response.",
           "No religion % uses the ABS top-level Secular Beliefs and Other Spiritual Beliefs and No Religious Affiliation total.",
-          "Only the 2021 wave is rendered. The 2011 and 2016 waves are deferred until the official ABS SA2 correspondences are available and unambiguous.",
+          "The 2021 and 2016 waves are rendered; 2016 rides the official ABS correspondence onto 2021 boundaries. The 2011 wave stays deferred until an official 2011 correspondence exists.",
           "Open <strong>Census</strong> (top centre) for the metric selector.",
           "Tap an area for its census detail."
         ],
@@ -70,10 +75,8 @@
         { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
       ],
       censusSourceAttribution: 'Census religion and ASGS boundaries &copy; <a href="https://www.abs.gov.au/" target="_blank" rel="noopener">Australian Bureau of Statistics</a> &middot; ABS data used with permission from the Australian Bureau of Statistics &middot; DataPacks licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> &middot; <a href="https://www.abs.gov.au/website-privacy-copyright-and-disclaimer" target="_blank" rel="noopener">ABS website copyright terms</a>'
-      // no per-row caveats in the 2021-only product; the wave-deferral
-      // note lives in the onboarding copy, which always renders
     };
   </script>
-  <script src="../_shared/region-map.js?v=20260707h"></script>
+  <script src="../_shared/region-map.js?v=20260707i"></script>
 </body>
 </html>

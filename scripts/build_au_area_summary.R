@@ -1,8 +1,8 @@
 # build the australia SA2 area-summary product from ABS Census GCP G14.
-# inputs: data/raw/au_census ABS DataPack and ASGS boundary zip files.
+# inputs: data/raw/au_census ABS DataPack, ASGS correspondence, and boundary files.
 # outputs: apps/regions/au/data/area_summary_sa2.{json,csv},
 # apps/regions/au/data/sa2_2021.geojson, and
-# docs/manifests/au-census-religion-2021.json.
+# docs/manifests/au-census-religion-2016-2021.json.
 # run from the repo root: Rscript scripts/build_au_area_summary.R
 
 suppressMessages({
@@ -28,30 +28,50 @@ dir.create(manifest_dir, showWarnings = FALSE, recursive = TRUE)
 stamp <- format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
 retrieval_date <- "2026-07-07"
 
-census_dataset_id <- "abs-2021-gcp-g14-sa2-aus"
-state_validation_dataset_id <- "abs-2021-gcp-g14-ste-aus"
-national_validation_dataset_id <- "abs-2021-gcp-g14-aus-aus"
+census_2021_dataset_id <- "abs-2021-gcp-g14-sa2-aus"
+state_validation_2021_dataset_id <- "abs-2021-gcp-g14-ste-aus"
+national_validation_2021_dataset_id <- "abs-2021-gcp-g14-aus-aus"
+census_2016_dataset_id <- "abs-2016-gcp-g14-sa2-aus"
+state_validation_2016_dataset_id <- "abs-2016-gcp-g14-ste-aus"
+national_validation_2016_dataset_id <- "abs-2016-gcp-g14-au-aus"
+correspondence_dataset_id <- "abs-cg-sa2-2016-sa2-2021"
 boundary_dataset_id <- "abs-asgs-ed3-sa2-2021-gda2020"
 boundary_set_id <- "au-sa2-2021-asgs-ed3"
 
-census_sa2_zip <- "2021_GCP_SA2_for_AUS_short-header.zip"
-census_ste_zip <- "2021_GCP_STE_for_AUS_short-header.zip"
-census_aus_zip <- "2021_GCP_AUS_for_AUS_short-header.zip"
+census_2021_sa2_zip <- "2021_GCP_SA2_for_AUS_short-header.zip"
+census_2021_ste_zip <- "2021_GCP_STE_for_AUS_short-header.zip"
+census_2021_aus_zip <- "2021_GCP_AUS_for_AUS_short-header.zip"
+census_2016_sa2_zip <- "2016_GCP_SA2_for_AUS_short-header.zip"
+census_2016_ste_zip <- "2016_GCP_STE_for_AUS_short-header.zip"
+census_2016_aus_zip <- "2016_GCP_AU_for_AUS_short-header.zip"
+correspondence_csv <- "CG_SA2_2016_SA2_2021.csv"
 boundary_zip <- "SA2_2021_AUST_SHP_GDA2020.zip"
 sources_csv_rel <- file.path(raw_dir_rel, "sources.csv")
 sources_csv <- file.path(repo_root, sources_csv_rel)
 
-census_sa2_url <- paste0(
+census_2021_sa2_url <- paste0(
   "https://www.abs.gov.au/census/find-census-data/datapacks/download/",
-  census_sa2_zip
+  census_2021_sa2_zip
 )
-census_ste_url <- paste0(
+census_2021_ste_url <- paste0(
   "https://www.abs.gov.au/census/find-census-data/datapacks/download/",
-  census_ste_zip
+  census_2021_ste_zip
 )
-census_aus_url <- paste0(
+census_2021_aus_url <- paste0(
   "https://www.abs.gov.au/census/find-census-data/datapacks/download/",
-  census_aus_zip
+  census_2021_aus_zip
+)
+census_2016_sa2_url <- paste0(
+  "https://www.abs.gov.au/census/find-census-data/datapacks/download/",
+  census_2016_sa2_zip
+)
+census_2016_ste_url <- paste0(
+  "https://www.abs.gov.au/census/find-census-data/datapacks/download/",
+  census_2016_ste_zip
+)
+census_2016_aus_url <- paste0(
+  "https://www.abs.gov.au/census/find-census-data/datapacks/download/",
+  census_2016_aus_zip
 )
 boundary_url <- paste0(
   "https://www.abs.gov.au/statistics/standards/",
@@ -65,18 +85,23 @@ correspondence_url <- paste0(
   "australian-statistical-geography-standard-asgs/",
   "edition-3-july-2021-june-2026/access-and-downloads/correspondences"
 )
+correspondence_csv_url <- paste0(correspondence_url, "/", correspondence_csv)
 abs_copyright_url <- "https://www.abs.gov.au/website-privacy-copyright-and-disclaimer"
 cc_by_url <- "https://creativecommons.org/licenses/by/4.0/"
 
-sa2_zip_path <- file.path(raw_dir, census_sa2_zip)
-ste_zip_path <- file.path(raw_dir, census_ste_zip)
-aus_zip_path <- file.path(raw_dir, census_aus_zip)
+census_2021_sa2_zip_path <- file.path(raw_dir, census_2021_sa2_zip)
+census_2021_ste_zip_path <- file.path(raw_dir, census_2021_ste_zip)
+census_2021_aus_zip_path <- file.path(raw_dir, census_2021_aus_zip)
+census_2016_sa2_zip_path <- file.path(raw_dir, census_2016_sa2_zip)
+census_2016_ste_zip_path <- file.path(raw_dir, census_2016_ste_zip)
+census_2016_aus_zip_path <- file.path(raw_dir, census_2016_aus_zip)
+correspondence_csv_path <- file.path(raw_dir, correspondence_csv)
 boundary_zip_path <- file.path(raw_dir, boundary_zip)
 
 boundary_out_rel <- file.path(au_dir_rel, "sa2_2021.geojson")
 summary_json_out_rel <- file.path(au_dir_rel, "area_summary_sa2.json")
 summary_csv_out_rel <- file.path(au_dir_rel, "area_summary_sa2.csv")
-manifest_out_rel <- file.path(manifest_dir_rel, "au-census-religion-2021.json")
+manifest_out_rel <- file.path(manifest_dir_rel, "au-census-religion-2016-2021.json")
 
 boundary_out <- file.path(repo_root, boundary_out_rel)
 summary_json_out <- file.path(repo_root, summary_json_out_rel)
@@ -97,6 +122,12 @@ population_total_basis <- paste(
   "religious-affiliation response (ABS G14 Total Persons minus",
   "Religious affiliation not stated, which comprises Not stated and",
   "Inadequately described)"
+)
+population_total_basis_2016 <- paste(
+  "people counted at place of usual residence in the 2016 ABS Census",
+  "with a stated religious-affiliation response, converted to 2021 SA2",
+  "boundaries with the official ABS population-weighted SA2 2016 to 2021",
+  "correspondence"
 )
 
 # independent small random adjustment across about 2.5k sa2s and 9 ste units makes residuals of this order expected; observed 100 state / 198 national.
@@ -137,12 +168,12 @@ read_zip_csv <- function(zip_path, inner_path) {
   if (!inner_path %in% listing[["Name"]]) {
     stop("zip member not found: ", inner_path, call. = FALSE)
   }
-  read.csv(
+  suppressWarnings(read.csv(
     unz(zip_path, inner_path),
     stringsAsFactors = FALSE,
     check.names = FALSE,
     colClasses = "character"
-  )
+  ))
 }
 
 # coerce an ABS count column while keeping missing values explicit.
@@ -184,10 +215,21 @@ count_components <- function(data, code_col, name_col = NULL) {
 }
 
 # build one public area-summary row from joined census and boundary data.
-build_area_row <- function(row) {
-  population_total <- as.integer(round(row[["stated"]]))
-  no_religion_count <- as.integer(round(row[["no_religion"]]))
-  religious_affiliation_count <- as.integer(round(row[["religious_affiliation"]]))
+# round the total and no-religion once, clamp, and derive affiliation:
+# three independent roundings broke additivity on fractional crosswalked
+# inputs, and abs perturbation can push tiny stated-minus-group
+# differences negative on small areas — the derived form guarantees
+# affiliation + no_religion == population_total with both non-negative
+build_area_row <- function(row, year, basis, source_dataset_ids, quality_flag) {
+  if (!is.finite(row[["stated"]]) || !is.finite(row[["no_religion"]])) {
+    stop("non-finite census input for area ", row[["area_code"]], " in ", year, call. = FALSE)
+  }
+  # perturbation can push a near-zero area's stated total itself below
+  # zero (industrial sa2s): floor at zero so the whole chain stays
+  # non-negative and the percents fall to their no-population na path
+  population_total <- max(0L, as.integer(round(row[["stated"]])))
+  no_religion_count <- min(as.integer(round(row[["no_religion"]])), population_total)
+  religious_affiliation_count <- population_total - no_religion_count
 
   list(
     country_code = "AU",
@@ -196,9 +238,9 @@ build_area_row <- function(row) {
     area_unit_id = paste0(boundary_set_id, ":", row[["area_code"]]),
     area_code = row[["area_code"]],
     area_name = row[["area_name"]],
-    year = 2021L,
+    year = year,
     population_total = population_total,
-    population_total_basis = population_total_basis,
+    population_total_basis = basis,
     religious_affiliation_count = religious_affiliation_count,
     religious_affiliation_percent = if (population_total > 0) {
       round(100 * religious_affiliation_count / population_total, 2)
@@ -217,8 +259,8 @@ build_area_row <- function(row) {
     land_area_sq_km = round(as.numeric(row[["land_area_sq_km"]]), 2),
     site_snapshot_date = NULL,
     place_count_basis = NULL,
-    source_dataset_ids = c(census_dataset_id, boundary_dataset_id),
-    quality_flag = ""
+    source_dataset_ids = source_dataset_ids,
+    quality_flag = quality_flag
   )
 }
 
@@ -327,6 +369,107 @@ validation_note_line <- function(year, level, validation_records) {
   )
 }
 
+# read the ABS SA2 2016 to 2021 correspondence and keep real SA2 targets.
+read_sa2_correspondence <- function(path) {
+  correspondence <- read.csv(
+    path,
+    stringsAsFactors = FALSE,
+    check.names = FALSE,
+    colClasses = "character",
+    fileEncoding = "UTF-8-BOM"
+  )
+  required <- c(
+    "SA2_MAINCODE_2016",
+    "SA2_NAME_2016",
+    "SA2_CODE_2021",
+    "SA2_NAME_2021",
+    "RATIO_FROM_TO",
+    "INDIV_TO_REGION_QLTY_INDICATOR",
+    "OVERALL_QUALITY_INDICATOR",
+    "BMOS_NULL_FLAG"
+  )
+  missing <- setdiff(required, names(correspondence))
+  if (length(missing) > 0) {
+    stop("missing required ABS correspondence columns: ", paste(missing, collapse = ", "), call. = FALSE)
+  }
+
+  correspondence[["ratio_from_to"]] <- suppressWarnings(as.numeric(correspondence[["RATIO_FROM_TO"]]))
+  real_target <- nzchar(correspondence[["SA2_MAINCODE_2016"]]) &
+    nzchar(correspondence[["SA2_CODE_2021"]]) &
+    correspondence[["SA2_CODE_2021"]] != "ZZZZZZZZZ"
+  real <- correspondence[real_target, ]
+  if (any(!is.finite(real[["ratio_from_to"]]))) {
+    stop("real SA2 correspondence rows contain missing RATIO_FROM_TO values", call. = FALSE)
+  }
+  if (any(real[["ratio_from_to"]] < 0 | real[["ratio_from_to"]] > 1)) {
+    stop("real SA2 correspondence ratios are outside [0, 1]", call. = FALSE)
+  }
+
+  list(
+    all_rows = correspondence,
+    real_rows = real,
+    dropped_null_target_rows = sum(!real_target)
+  )
+}
+
+# apply the population-weighted correspondence to one set of 2016 counts.
+crosswalk_2016_counts <- function(counts, correspondence) {
+  metrics <- c("total", "not_stated", "stated", "no_religion", "religious_affiliation")
+  if (any(!counts[["code"]] %in% correspondence[["SA2_MAINCODE_2016"]])) {
+    missing <- counts[["code"]][!counts[["code"]] %in% correspondence[["SA2_MAINCODE_2016"]]]
+    stop("2016 SA2 rows missing from correspondence: ", paste(head(missing, 10), collapse = ", "), call. = FALSE)
+  }
+
+  joined <- merge(
+    correspondence,
+    counts,
+    by.x = "SA2_MAINCODE_2016",
+    by.y = "code",
+    all.x = FALSE,
+    all.y = FALSE
+  )
+  for (metric in metrics) {
+    joined[[metric]] <- joined[[metric]] * joined[["ratio_from_to"]]
+  }
+
+  crossed <- stats::aggregate(
+    joined[metrics],
+    by = list(area_code = joined[["SA2_CODE_2021"]]),
+    FUN = sum
+  )
+  crossed[["code"]] <- crossed[["area_code"]]
+  crossed
+}
+
+# compare rounded crosswalked national totals with pre-crosswalk totals.
+compare_crosswalk_conservation <- function(pre_counts, post_counts) {
+  metrics <- c("total", "not_stated", "stated", "no_religion", "religious_affiliation")
+  lapply(metrics, function(metric) {
+    pre_total <- as.integer(round(sum(pre_counts[[metric]])))
+    post_total <- as.integer(sum(round(post_counts[[metric]])))
+    list(
+      metric = metric,
+      pre_crosswalk_total = pre_total,
+      post_crosswalk_total = post_total,
+      difference = post_total - pre_total
+    )
+  })
+}
+
+# return the largest absolute conservation difference in a check list.
+max_conservation_difference <- function(conservation_records) {
+  max(abs(vapply(conservation_records, function(item) item[["difference"]], integer(1))))
+}
+
+# summarise one conservation result in one manifest-note line.
+conservation_note_line <- function(year, conservation_records) {
+  paste0(
+    year,
+    " post-crosswalk national conservation: rounded component max_abs_difference=",
+    max_conservation_difference(conservation_records)
+  )
+}
+
 # write the ignored raw-source ledger required for the launch.
 write_sources_ledger <- function() {
   datapack_licence <- paste(
@@ -339,14 +482,38 @@ write_sources_ledger <- function() {
     "ABS data used with permission from the Australian Bureau of Statistics;",
     "follow ABS website copyright terms."
   )
+  correspondence_licence <- paste(
+    "ABS correspondence files are licensed under Creative Commons Attribution 4.0;",
+    "attribute the Australian Bureau of Statistics;",
+    "follow ABS website copyright terms."
+  )
+  source_files <- c(
+    census_2021_sa2_zip,
+    census_2021_ste_zip,
+    census_2021_aus_zip,
+    census_2016_sa2_zip,
+    census_2016_ste_zip,
+    census_2016_aus_zip,
+    boundary_zip,
+    correspondence_csv
+  )
   source_rows <- data.frame(
-    filename = c(census_sa2_zip, census_ste_zip, census_aus_zip, boundary_zip),
-    url = c(census_sa2_url, census_ste_url, census_aus_url, boundary_url),
+    filename = source_files,
+    url = c(
+      census_2021_sa2_url,
+      census_2021_ste_url,
+      census_2021_aus_url,
+      census_2016_sa2_url,
+      census_2016_ste_url,
+      census_2016_aus_url,
+      boundary_url,
+      correspondence_csv_url
+    ),
     retrieval_date = retrieval_date,
     publisher = "Australian Bureau of Statistics",
-    licence_text = c(rep(datapack_licence, 3), boundary_licence),
+    licence_text = c(rep(datapack_licence, 6), boundary_licence, correspondence_licence),
     sha256 = vapply(
-      file.path(raw_dir, c(census_sa2_zip, census_ste_zip, census_aus_zip, boundary_zip)),
+      file.path(raw_dir, source_files),
       sha256_file,
       character(1)
     ),
@@ -521,24 +688,41 @@ validate_boundary_ring_points <- function(path) {
   )
 }
 
-require_file(sa2_zip_path)
-require_file(ste_zip_path)
-require_file(aus_zip_path)
+require_file(census_2021_sa2_zip_path)
+require_file(census_2021_ste_zip_path)
+require_file(census_2021_aus_zip_path)
+require_file(census_2016_sa2_zip_path)
+require_file(census_2016_ste_zip_path)
+require_file(census_2016_aus_zip_path)
+require_file(correspondence_csv_path)
 require_file(boundary_zip_path)
 source_ledger <- write_sources_ledger()
 
-sa2_g14 <- read_zip_csv(
-  sa2_zip_path,
+sa2_2021_g14 <- read_zip_csv(
+  census_2021_sa2_zip_path,
   "2021 Census GCP Statistical Area 2 for AUS/2021Census_G14_AUST_SA2.csv"
 )
-ste_g14 <- read_zip_csv(
-  ste_zip_path,
+ste_2021_g14 <- read_zip_csv(
+  census_2021_ste_zip_path,
   "2021 Census GCP States and Territories for AUS/2021Census_G14_AUST_STE.csv"
 )
-aus_g14 <- read_zip_csv(
-  aus_zip_path,
+aus_2021_g14 <- read_zip_csv(
+  census_2021_aus_zip_path,
   "2021 Census GCP Australia for AUS/2021Census_G14_AUS_AUS.csv"
 )
+sa2_2016_g14 <- read_zip_csv(
+  census_2016_sa2_zip_path,
+  "2016 Census GCP Statistical Area 2 for AUST/2016Census_G14_AUS_SA2.csv"
+)
+ste_2016_g14 <- read_zip_csv(
+  census_2016_ste_zip_path,
+  "2016 Census GCP States and Territories for AUST/2016Census_G14_AUS_STE.csv"
+)
+aus_2016_g14 <- read_zip_csv(
+  census_2016_aus_zip_path,
+  "2016 Census GCP Australia for AUST/2016Census_G14_AUS.csv"
+)
+sa2_2016_to_2021 <- read_sa2_correspondence(correspondence_csv_path)
 
 boundary_tmp <- tempfile("au_sa2_boundary_")
 dir.create(boundary_tmp)
@@ -547,9 +731,17 @@ boundary_shp <- list.files(boundary_tmp, pattern = "[.]shp$", full.names = TRUE)
 if (length(boundary_shp) != 1) stop("expected one shapefile in boundary zip", call. = FALSE)
 boundary <- st_read(boundary_shp, quiet = TRUE)
 
-sa2_counts <- count_components(sa2_g14, "SA2_CODE_2021")
-state_counts <- count_components(ste_g14, "STE_CODE_2021", "STE_NAME_2021")
-national_counts <- count_components(aus_g14, "AUS_CODE_2021")
+sa2_2021_counts <- count_components(sa2_2021_g14, "SA2_CODE_2021")
+state_2021_counts <- count_components(ste_2021_g14, "STE_CODE_2021", "STE_NAME_2021")
+national_2021_counts <- count_components(aus_2021_g14, "AUS_CODE_2021")
+sa2_2016_counts <- count_components(sa2_2016_g14, "SA2_MAINCODE_2016")
+state_2016_counts <- count_components(ste_2016_g14, "STE_CODE_2016")
+national_2016_counts <- count_components(aus_2016_g14, "AUS_CODE_2016")
+sa2_2016_counts[["state_code"]] <- substr(sa2_2016_counts[["code"]], 1, 1)
+crosswalked_2016_counts <- crosswalk_2016_counts(
+  sa2_2016_counts,
+  sa2_2016_to_2021[["real_rows"]]
+)
 
 boundary_lookup <- data.frame(
   area_code = boundary[["SA2_CODE21"]],
@@ -560,38 +752,89 @@ boundary_lookup <- data.frame(
   stringsAsFactors = FALSE
 )
 state_name_lookup <- unique(boundary_lookup[c("state_code", "state_name")])
-state_counts[["name"]] <- state_name_lookup[["state_name"]][match(
-  state_counts[["code"]],
+state_2021_counts[["name"]] <- state_name_lookup[["state_name"]][match(
+  state_2021_counts[["code"]],
   state_name_lookup[["state_code"]]
 )]
-national_counts[["name"]] <- "Australia"
+state_2016_counts[["name"]] <- state_name_lookup[["state_name"]][match(
+  state_2016_counts[["code"]],
+  state_name_lookup[["state_code"]]
+)]
+national_2021_counts[["name"]] <- "Australia"
+national_2016_counts[["name"]] <- "Australia"
 
-match_index <- match(boundary_lookup[["area_code"]], sa2_counts[["code"]])
+match_index <- match(boundary_lookup[["area_code"]], sa2_2021_counts[["code"]])
 missing_census_codes <- boundary_lookup[["area_code"]][is.na(match_index)]
-missing_boundary_codes <- sa2_counts[["code"]][is.na(match(sa2_counts[["code"]], boundary_lookup[["area_code"]]))]
+missing_boundary_codes <- sa2_2021_counts[["code"]][is.na(match(sa2_2021_counts[["code"]], boundary_lookup[["area_code"]]))]
 if (length(missing_boundary_codes) > 0 ||
     length(setdiff(missing_census_codes, "ZZZZZZZZZ")) > 0) {
   stop("SA2 census/boundary join is incomplete", call. = FALSE)
 }
 matched_boundary_rows <- !is.na(match_index)
-join_matched_count <- length(intersect(sa2_counts[["code"]], boundary_lookup[["area_code"]]))
+join_matched_count <- length(intersect(sa2_2021_counts[["code"]], boundary_lookup[["area_code"]]))
 
-joined <- cbind(
+joined_2021 <- cbind(
   boundary_lookup[matched_boundary_rows, ],
-  sa2_counts[match_index[matched_boundary_rows], setdiff(names(sa2_counts), c("code", "name"))]
+  sa2_2021_counts[match_index[matched_boundary_rows], setdiff(names(sa2_2021_counts), c("code", "name"))]
 )
-joined[["code"]] <- joined[["area_code"]]
+joined_2021[["code"]] <- joined_2021[["area_code"]]
 
-rows <- lapply(seq_len(nrow(joined)), function(index) build_area_row(as.list(joined[index, ])))
+crosswalk_match_index <- match(boundary_lookup[["area_code"]], crosswalked_2016_counts[["area_code"]])
+missing_crosswalk_target_codes <- boundary_lookup[["area_code"]][is.na(crosswalk_match_index)]
+missing_crosswalk_target_codes <- setdiff(missing_crosswalk_target_codes, "ZZZZZZZZZ")
+if (length(missing_crosswalk_target_codes) > 0) {
+  stop(
+    "2016 crosswalk does not cover 2021 SA2 targets: ",
+    paste(head(missing_crosswalk_target_codes, 10), collapse = ", "),
+    call. = FALSE
+  )
+}
+joined_2016 <- cbind(
+  boundary_lookup[matched_boundary_rows, ],
+  crosswalked_2016_counts[
+    crosswalk_match_index[matched_boundary_rows],
+    setdiff(names(crosswalked_2016_counts), c("code", "area_code"))
+  ]
+)
+joined_2016[["code"]] <- joined_2016[["area_code"]]
+
+rows_2016 <- lapply(seq_len(nrow(joined_2016)), function(index) {
+  build_area_row(
+    as.list(joined_2016[index, ]),
+    2016L,
+    population_total_basis_2016,
+    c(census_2016_dataset_id, boundary_dataset_id, correspondence_dataset_id),
+    "boundary_change_crosswalked"
+  )
+})
+rows_2021 <- lapply(seq_len(nrow(joined_2021)), function(index) {
+  build_area_row(
+    as.list(joined_2021[index, ]),
+    2021L,
+    population_total_basis,
+    c(census_2021_dataset_id, boundary_dataset_id),
+    ""
+  )
+})
+rows <- c(rows_2016, rows_2021)
+
+# count rows where the no-religion clamp fired, for the manifest: abs
+# perturbation (2021) or crosswalk rounding (2016) pushed the rounded
+# group total past the rounded stated total on these small areas
+count_clamped <- function(joined) {
+  sum(as.integer(round(joined[["no_religion"]])) > as.integer(round(joined[["stated"]])))
+}
+clamped_2016 <- count_clamped(joined_2016)
+clamped_2021 <- count_clamped(joined_2021)
 
 source_datasets <- list(
   list(
-    source_dataset_id = census_dataset_id,
+    source_dataset_id = census_2021_dataset_id,
     name = "2021 Census General Community Profile DataPack G14, SA2, Australia",
     provider = "Australian Bureau of Statistics",
-    url = census_sa2_url,
+    url = census_2021_sa2_url,
     retrieval_date = retrieval_date,
-    local_path = file.path(raw_dir_rel, census_sa2_zip),
+    local_path = file.path(raw_dir_rel, census_2021_sa2_zip),
     licence = list(
       name = "Creative Commons Attribution 4.0, subject to ABS website copyright terms",
       url = abs_copyright_url,
@@ -607,12 +850,12 @@ source_datasets <- list(
     )
   ),
   list(
-    source_dataset_id = state_validation_dataset_id,
+    source_dataset_id = state_validation_2021_dataset_id,
     name = "2021 Census General Community Profile DataPack G14, states and territories, Australia",
     provider = "Australian Bureau of Statistics",
-    url = census_ste_url,
+    url = census_2021_ste_url,
     retrieval_date = retrieval_date,
-    local_path = file.path(raw_dir_rel, census_ste_zip),
+    local_path = file.path(raw_dir_rel, census_2021_ste_zip),
     licence = list(
       name = "Creative Commons Attribution 4.0, subject to ABS website copyright terms",
       url = abs_copyright_url,
@@ -624,12 +867,12 @@ source_datasets <- list(
     notes = "Used to validate each state and territory G14 total against sums of SA2 rows."
   ),
   list(
-    source_dataset_id = national_validation_dataset_id,
+    source_dataset_id = national_validation_2021_dataset_id,
     name = "2021 Census General Community Profile DataPack G14, Australia",
     provider = "Australian Bureau of Statistics",
-    url = census_aus_url,
+    url = census_2021_aus_url,
     retrieval_date = retrieval_date,
-    local_path = file.path(raw_dir_rel, census_aus_zip),
+    local_path = file.path(raw_dir_rel, census_2021_aus_zip),
     licence = list(
       name = "Creative Commons Attribution 4.0, subject to ABS website copyright terms",
       url = abs_copyright_url,
@@ -639,6 +882,82 @@ source_datasets <- list(
     access_limits = NULL,
     redistribution_limits = "Validation source only; raw zip remains in the ignored local cache.",
     notes = "Used to validate the national G14 total against sums of SA2 rows."
+  ),
+  list(
+    source_dataset_id = census_2016_dataset_id,
+    name = "2016 Census General Community Profile DataPack G14, SA2, Australia",
+    provider = "Australian Bureau of Statistics",
+    url = census_2016_sa2_url,
+    retrieval_date = retrieval_date,
+    local_path = file.path(raw_dir_rel, census_2016_sa2_zip),
+    licence = list(
+      name = "Creative Commons Attribution 4.0, subject to ABS website copyright terms",
+      url = abs_copyright_url,
+      attribution = "Australian Bureau of Statistics; ABS data used with permission from the Australian Bureau of Statistics"
+    ),
+    citation = "Australian Bureau of Statistics. 2016 Census General Community Profile DataPack, table G14, Statistical Area 2 for Australia.",
+    access_limits = NULL,
+    redistribution_limits = "Attribute the Australian Bureau of Statistics and retain ABS website copyright context.",
+    notes = paste(
+      "The 2016 metadata identifies G14 as Religious Affiliation by Sex.",
+      "Public metrics retain only headline stated-response aggregates.",
+      "No-religion count uses SB_OSB_NRA_Tot_P, the ABS top-level",
+      "Secular Beliefs and Other Spiritual Beliefs and No Religious Affiliation total."
+    )
+  ),
+  list(
+    source_dataset_id = state_validation_2016_dataset_id,
+    name = "2016 Census General Community Profile DataPack G14, states and territories, Australia",
+    provider = "Australian Bureau of Statistics",
+    url = census_2016_ste_url,
+    retrieval_date = retrieval_date,
+    local_path = file.path(raw_dir_rel, census_2016_ste_zip),
+    licence = list(
+      name = "Creative Commons Attribution 4.0, subject to ABS website copyright terms",
+      url = abs_copyright_url,
+      attribution = "Australian Bureau of Statistics"
+    ),
+    citation = "Australian Bureau of Statistics. 2016 Census General Community Profile DataPack, table G14, states and territories for Australia.",
+    access_limits = NULL,
+    redistribution_limits = "Validation source only; raw zip remains in the ignored local cache.",
+    notes = "Used to validate each 2016 state and territory G14 total against sums of 2016 SA2 rows before crosswalking."
+  ),
+  list(
+    source_dataset_id = national_validation_2016_dataset_id,
+    name = "2016 Census General Community Profile DataPack G14, Australia",
+    provider = "Australian Bureau of Statistics",
+    url = census_2016_aus_url,
+    retrieval_date = retrieval_date,
+    local_path = file.path(raw_dir_rel, census_2016_aus_zip),
+    licence = list(
+      name = "Creative Commons Attribution 4.0, subject to ABS website copyright terms",
+      url = abs_copyright_url,
+      attribution = "Australian Bureau of Statistics"
+    ),
+    citation = "Australian Bureau of Statistics. 2016 Census General Community Profile DataPack, table G14, Australia.",
+    access_limits = NULL,
+    redistribution_limits = "Validation source only; raw zip remains in the ignored local cache.",
+    notes = "Used to validate the 2016 national G14 total against sums of 2016 SA2 rows before crosswalking."
+  ),
+  list(
+    source_dataset_id = correspondence_dataset_id,
+    name = "ASGS Edition 3 correspondence from 2016 SA2 to 2021 SA2",
+    provider = "Australian Bureau of Statistics",
+    url = correspondence_csv_url,
+    retrieval_date = retrieval_date,
+    local_path = file.path(raw_dir_rel, correspondence_csv),
+    licence = list(
+      name = "Creative Commons Attribution 4.0, subject to ABS website copyright terms",
+      url = cc_by_url,
+      attribution = "Australian Bureau of Statistics, Australian Statistical Geography Standard (ASGS) Edition 3"
+    ),
+    citation = "Australian Bureau of Statistics. CG_SA2_2016_SA2_2021.csv, ASGS Edition 3 correspondences.",
+    access_limits = NULL,
+    redistribution_limits = "Attribute the Australian Bureau of Statistics and ASGS correspondence source.",
+    notes = paste(
+      "Population-weighted correspondence used to convert 2016 SA2 counts",
+      "onto 2021 SA2 boundaries through RATIO_FROM_TO."
+    )
   ),
   list(
     source_dataset_id = boundary_dataset_id,
@@ -667,9 +986,9 @@ indicators <- list(
     unit = "count",
     denominator_indicator_id = NULL,
     method = "ABS G14 Total Persons minus Religious affiliation not stated.",
-    temporal_coverage = "2021",
+    temporal_coverage = "2016 and 2021",
     spatial_coverage = "Australia ASGS Edition 3 Statistical Area Level 2.",
-    quality_notes = "The religious-affiliation question is voluntary. The denominator excludes the ABS not-stated field, which comprises Not stated and Inadequately described."
+    quality_notes = "The religious-affiliation question is voluntary. The denominator excludes the ABS not-stated field, which comprises Not stated and Inadequately described. The 2016 rows are converted to 2021 SA2 boundaries with the official ABS population-weighted correspondence."
   ),
   list(
     indicator_id = "religious_affiliation_percent",
@@ -678,9 +997,9 @@ indicators <- list(
     unit = "percent",
     denominator_indicator_id = "population_total",
     method = "100 * (Total Persons - Religious affiliation not stated - SB_OSB_NRA_Tot_P) / (Total Persons - Religious affiliation not stated).",
-    temporal_coverage = "2021",
+    temporal_coverage = "2016 and 2021",
     spatial_coverage = "Australia ASGS Edition 3 Statistical Area Level 2.",
-    quality_notes = "The public product uses a headline affiliation/no-religion split, not the detailed ABS G14 religion categories."
+    quality_notes = "The public product uses a headline affiliation/no-religion split, not the detailed ABS G14 religion categories. The 2016 rows carry boundary_change_crosswalked because they use the official ABS correspondence to 2021 SA2 boundaries."
   ),
   list(
     indicator_id = "no_religion_percent",
@@ -689,9 +1008,9 @@ indicators <- list(
     unit = "percent",
     denominator_indicator_id = "population_total",
     method = "100 * SB_OSB_NRA_Tot_P / (Total Persons - Religious affiliation not stated).",
-    temporal_coverage = "2021",
+    temporal_coverage = "2016 and 2021",
     spatial_coverage = "Australia ASGS Edition 3 Statistical Area Level 2.",
-    quality_notes = "SB_OSB_NRA_Tot_P includes the ABS top-level Secular Beliefs and Other Spiritual Beliefs and No Religious Affiliation total, not only No Religion, so described."
+    quality_notes = "SB_OSB_NRA_Tot_P includes the ABS top-level Secular Beliefs and Other Spiritual Beliefs and No Religious Affiliation total, not only No Religion, so described. The 2016 rows carry boundary_change_crosswalked because they use the official ABS correspondence to 2021 SA2 boundaries."
   )
 )
 
@@ -744,7 +1063,7 @@ summary <- list(
     source_dataset_id = NULL,
     snapshot_date = NULL,
     basis = "no Australia place-of-worship snapshot is included in this country data-map release",
-    notes = "The Australia page exposes 2021 census affiliation and no-religion metrics only; place-density metrics are hidden until a governed Australia place layer is built."
+    notes = "The Australia page exposes 2016 and 2021 census affiliation and no-religion metrics; place-density metrics are hidden until a governed Australia place layer is built."
   ),
   source_datasets = source_datasets,
   indicators = indicators,
@@ -774,44 +1093,79 @@ boundary_export <- st_transform(st_make_valid(boundary_export), 3577)
 boundary_simplification <- write_simplified_boundary(boundary_export, boundary_out)
 boundary_ring_stats <- validate_boundary_ring_points(boundary_out)
 
-sa2_for_validation <- data.frame(
-  code = joined[["area_code"]],
-  state_code = joined[["state_code"]],
-  total = joined[["total"]],
-  not_stated = joined[["not_stated"]],
-  stated = joined[["stated"]],
-  no_religion = joined[["no_religion"]],
-  religious_affiliation = joined[["religious_affiliation"]],
+sa2_2021_for_validation <- data.frame(
+  code = joined_2021[["area_code"]],
+  state_code = joined_2021[["state_code"]],
+  total = joined_2021[["total"]],
+  not_stated = joined_2021[["not_stated"]],
+  stated = joined_2021[["stated"]],
+  no_religion = joined_2021[["no_religion"]],
+  religious_affiliation = joined_2021[["religious_affiliation"]],
   stringsAsFactors = FALSE
 )
-state_derived <- aggregate_components(sa2_for_validation, "state_code")
-national_derived <- data.frame(
+state_2021_derived <- aggregate_components(sa2_2021_for_validation, "state_code")
+national_2021_derived <- data.frame(
   code = "AUS",
-  total = sum(sa2_for_validation[["total"]]),
-  not_stated = sum(sa2_for_validation[["not_stated"]]),
-  stated = sum(sa2_for_validation[["stated"]]),
-  no_religion = sum(sa2_for_validation[["no_religion"]]),
-  religious_affiliation = sum(sa2_for_validation[["religious_affiliation"]]),
+  total = sum(sa2_2021_for_validation[["total"]]),
+  not_stated = sum(sa2_2021_for_validation[["not_stated"]]),
+  stated = sum(sa2_2021_for_validation[["stated"]]),
+  no_religion = sum(sa2_2021_for_validation[["no_religion"]]),
+  religious_affiliation = sum(sa2_2021_for_validation[["religious_affiliation"]]),
+  stringsAsFactors = FALSE
+)
+state_2016_derived <- aggregate_components(sa2_2016_counts, "state_code")
+national_2016_derived <- data.frame(
+  code = national_2016_counts[["code"]][[1]],
+  total = sum(sa2_2016_counts[["total"]]),
+  not_stated = sum(sa2_2016_counts[["not_stated"]]),
+  stated = sum(sa2_2016_counts[["stated"]]),
+  no_religion = sum(sa2_2016_counts[["no_religion"]]),
+  religious_affiliation = sum(sa2_2016_counts[["religious_affiliation"]]),
   stringsAsFactors = FALSE
 )
 
-state_validation <- compare_level(state_counts, state_derived, "STE")
-national_validation <- compare_level(national_counts, national_derived, "AUST")
-state_max_difference <- max_validation_difference(state_validation)
-national_max_difference <- max_validation_difference(national_validation)
-if (state_max_difference > perturbation_residual_bound ||
-    national_max_difference > perturbation_residual_bound) {
+state_2021_validation <- compare_level(state_2021_counts, state_2021_derived, "STE")
+national_2021_validation <- compare_level(national_2021_counts, national_2021_derived, "AUST")
+state_2016_validation <- compare_level(state_2016_counts, state_2016_derived, "STE")
+national_2016_validation <- compare_level(national_2016_counts, national_2016_derived, "AUST")
+state_2021_max_difference <- max_validation_difference(state_2021_validation)
+national_2021_max_difference <- max_validation_difference(national_2021_validation)
+state_2016_max_difference <- max_validation_difference(state_2016_validation)
+national_2016_max_difference <- max_validation_difference(national_2016_validation)
+crosswalk_conservation <- compare_crosswalk_conservation(sa2_2016_counts, crosswalked_2016_counts)
+crosswalk_conservation_max_difference <- max_conservation_difference(crosswalk_conservation)
+if (state_2021_max_difference > perturbation_residual_bound ||
+    national_2021_max_difference > perturbation_residual_bound ||
+    state_2016_max_difference > perturbation_residual_bound ||
+    national_2016_max_difference > perturbation_residual_bound) {
   stop(
     sprintf(
-      "ABS perturbation residual exceeds %d: state max=%d, national max=%d",
+      "ABS perturbation residual exceeds %d: 2021 state max=%d, 2021 national max=%d, 2016 state max=%d, 2016 national max=%d",
       perturbation_residual_bound,
-      state_max_difference,
-      national_max_difference
+      state_2021_max_difference,
+      national_2021_max_difference,
+      state_2016_max_difference,
+      national_2016_max_difference
     ),
     call. = FALSE
   )
 }
-validation_status <- if (state_max_difference == 0 && national_max_difference == 0) {
+if (crosswalk_conservation_max_difference > 50L) {
+  stop(
+    sprintf(
+      "2016 post-crosswalk conservation residual exceeds 50 persons: max=%d",
+      crosswalk_conservation_max_difference
+    ),
+    call. = FALSE
+  )
+}
+validation_status <- if (
+  state_2021_max_difference == 0 &&
+    national_2021_max_difference == 0 &&
+    state_2016_max_difference == 0 &&
+    national_2016_max_difference == 0 &&
+    crosswalk_conservation_max_difference == 0
+) {
   "passed"
 } else {
   "passed_with_warnings"
@@ -827,24 +1181,68 @@ if (boundary_feature_count != nrow(boundary)) {
   stop("simplified boundary feature count differs from source boundary count", call. = FALSE)
 }
 
+crosswalk_source_match_count <- sum(
+  sa2_2016_counts[["code"]] %in% sa2_2016_to_2021[["real_rows"]][["SA2_MAINCODE_2016"]]
+)
+crosswalk_target_match_count <- length(intersect(
+  crosswalked_2016_counts[["area_code"]],
+  sa2_2021_counts[["code"]]
+))
+crosswalk_conservation_detail <- paste(
+  vapply(crosswalk_conservation, function(item) {
+    paste0(item[["metric"]], "=", item[["difference"]])
+  }, character(1)),
+  collapse = "; "
+)
+
 validation_lines <- c(
   paste0(
-    "wave 2021 row output: ", length(rows),
-    " SA2 rows; join coverage: ", join_matched_count, "/", nrow(sa2_counts),
+    "count derivation: no_religion is rounded once and clamped to the rounded",
+    " stated total, and affiliation is derived as the difference, so",
+    " affiliation + no_religion = population_total with both non-negative;",
+    " the clamp fired on ", clamped_2016, " rows in 2016 (crosswalk rounding)",
+    " and ", clamped_2021, " rows in 2021 (ABS small random adjustment on",
+    " tiny areas)"
+  ),
+  paste0(
+    "wave 2016 row output: ", length(rows_2016),
+    " SA2 rows on 2021 boundaries; correspondence join coverage: source=",
+    crosswalk_source_match_count,
+    "/",
+    nrow(sa2_2016_counts),
+    " 2016 SA2 G14 rows; target=",
+    crosswalk_target_match_count,
+    "/",
+    nrow(sa2_2021_counts),
+    " 2021 SA2 targets; real correspondence rows=",
+    nrow(sa2_2016_to_2021[["real_rows"]]),
+    "; dropped null or Outside Australia correspondence rows=",
+    sa2_2016_to_2021[["dropped_null_target_rows"]]
+  ),
+  paste0(
+    "wave 2021 row output: ", length(rows_2021),
+    " SA2 rows; join coverage: ", join_matched_count, "/", nrow(sa2_2021_counts),
     " SA2 G14 rows matched ASGS Edition 3 SA2 boundaries on SA2_CODE_2021 to SA2_CODE21;",
     " boundary-only ASGS features without a G14 row: ",
     paste(missing_census_codes, collapse = ", ")
   ),
-  validation_note_line(2021, "state and territory", state_validation),
-  validation_note_line(2021, "national", national_validation),
+  validation_note_line(2016, "pre-crosswalk state and territory", state_2016_validation),
+  validation_note_line(2016, "pre-crosswalk national", national_2016_validation),
+  paste0(
+    conservation_note_line(2016, crosswalk_conservation),
+    "; component_differences=",
+    crosswalk_conservation_detail
+  ),
+  validation_note_line(2021, "state and territory", state_2021_validation),
+  validation_note_line(2021, "national", national_2021_validation),
   paste(
     "reconciliation differences at these magnitudes are expected under the",
     "ABS small random adjustment (perturbation) applied to all census cells;",
-    "SA2, STE, and AUS tables are perturbed independently; their sums",
+    "SA2, STE, and national tables are perturbed independently; their sums",
     "can therefore differ by small amounts and exact zero is unattainable;",
     "acceptance bound is",
     perturbation_residual_bound,
-    "persons for both state and national max_abs_difference."
+    "persons for pre-crosswalk state and national max_abs_difference."
   ),
   paste0(
     "boundary validation: ", boundary_validation_status,
@@ -877,10 +1275,16 @@ validation_lines <- c(
     boundary_simplification[["guard_adjusted_features"]]
   ),
   paste(
-    "deferred waves: 2011 and 2016 were not shipped.",
-    "The official ABS SA2 2016 to 2021 correspondence is available at the ASGS Edition 3 correspondence page,",
-    "but the official ABS SA2 2011 to 2021 correspondence was not available through the current ABS correspondence page or tested direct ABS paths.",
-    "The launch rule forbids constructing a project correspondence."
+    "crosswalk method: 2016 SA2 counts are multiplied by the official ABS",
+    "population-weighted RATIO_FROM_TO values, summed by 2021 SA2, and",
+    "rounded to integers at public-output time; every 2016 row carries",
+    "quality_flag boundary_change_crosswalked."
+  ),
+  paste(
+    "deferred waves: 2011 was not shipped because an official ABS SA2",
+    "2011 to 2021 correspondence was not available through the current",
+    "ABS correspondence page or tested direct ABS paths. The project",
+    "must not construct its own correspondence."
   ),
   paste(
     "denominator decision: population_total_basis is",
@@ -890,7 +1294,7 @@ validation_lines <- c(
   paste(
     "raw-source ledger:",
     sources_csv_rel,
-    "records filename, URL, retrieval date, publisher, licence text, and sha256 for the downloaded ABS zips."
+    "records filename, URL, retrieval date, publisher, licence text, and sha256 for the downloaded ABS zips and correspondence CSV."
   )
 )
 
@@ -900,11 +1304,11 @@ git_commit <- current_git_commit()
 manifest <- list(
   "$schema" = "../../schemas/data-manifest.schema.json",
   schema_version = "data-manifest.v1",
-  manifest_id = "manifest:au-census-religion:au:2021:gcp-g14-sa2",
-  dataset_id = "au-census-religion:au:2021:gcp-g14-sa2",
-  dataset_version_id = paste0("au-census-religion:au:2021:gcp-g14-sa2:", summary_hash),
+  manifest_id = "manifest:au-census-religion:au:2016-2021:gcp-g14-sa2",
+  dataset_id = "au-census-religion:au:2016-2021:gcp-g14-sa2",
+  dataset_version_id = paste0("au-census-religion:au:2016-2021:gcp-g14-sa2:", summary_hash),
   manifest_sha256 = NULL,
-  supersedes_manifest_id = NULL,
+  supersedes_manifest_id = "manifest:au-census-religion:au:2021:gcp-g14-sa2",
   superseded_by_manifest_id = NULL,
   dataset_family = "au-census-religion",
   dataset_role = "public_product",
@@ -922,8 +1326,9 @@ manifest <- list(
     git_commit = git_commit,
     command = "Rscript scripts/build_au_area_summary.R",
     parameters = list(
-      waves_built = "2021",
-      waves_deferred = "2011, 2016",
+      waves_built = "2016, 2021",
+      waves_deferred = "2011",
+      crosswalk_method = "2016 SA2 counts are multiplied by official ABS RATIO_FROM_TO values from CG_SA2_2016_SA2_2021.csv, summed by 2021 SA2, and rounded after summing.",
       boundary_set = boundary_set_id,
       boundary_simplification_rule = list(
         type = "area_scaled_per_feature",
@@ -952,15 +1357,23 @@ manifest <- list(
   source = list(
     provider = "Australian Bureau of Statistics",
     source_dataset_ids = I(c(
-      census_dataset_id,
-      state_validation_dataset_id,
-      national_validation_dataset_id,
+      census_2021_dataset_id,
+      state_validation_2021_dataset_id,
+      national_validation_2021_dataset_id,
+      census_2016_dataset_id,
+      state_validation_2016_dataset_id,
+      national_validation_2016_dataset_id,
+      correspondence_dataset_id,
       boundary_dataset_id
     )),
     source_urls = I(c(
-      census_sa2_url,
-      census_ste_url,
-      census_aus_url,
+      census_2021_sa2_url,
+      census_2021_ste_url,
+      census_2021_aus_url,
+      census_2016_sa2_url,
+      census_2016_ste_url,
+      census_2016_aus_url,
+      correspondence_csv_url,
       boundary_url,
       correspondence_url,
       abs_copyright_url
@@ -969,23 +1382,24 @@ manifest <- list(
     licence = paste(
       "Australian Bureau of Statistics DataPacks are licensed under Creative Commons Attribution 4.0.",
       "ABS data used with permission from the Australian Bureau of Statistics.",
+      "The ASGS Edition 3 SA2 2016 to 2021 correspondence is licensed under Creative Commons Attribution 4.0.",
       "ASGS Edition 3 SA2 boundaries are credited to the Australian Bureau of Statistics under ABS website copyright terms."
     ),
-    citation = "Australian Bureau of Statistics. 2021 Census General Community Profile DataPacks table G14 and Australian Statistical Geography Standard (ASGS) Edition 3 SA2 2021 digital boundary file."
+    citation = "Australian Bureau of Statistics. 2016 and 2021 Census General Community Profile DataPacks table G14, CG_SA2_2016_SA2_2021 correspondence, and Australian Statistical Geography Standard (ASGS) Edition 3 SA2 2021 digital boundary file."
   ),
   input_manifests = list(),
   durable_files = list(
     manifest_file_record(
       summary_json_out_rel,
       summary_json_out,
-      "Australia SA2 area summary with ABS 2021 G14 stated-response religion metrics.",
+      "Australia SA2 area summary with ABS 2016 and 2021 G14 stated-response religion metrics.",
       row_count = row_count_file(summary_json_out),
       feature_count = NULL
     ),
     manifest_file_record(
       summary_csv_out_rel,
       summary_csv_out,
-      "Flattened Australia SA2 area summary with ABS 2021 G14 stated-response religion metrics.",
+      "Flattened Australia SA2 area summary with ABS 2016 and 2021 G14 stated-response religion metrics.",
       row_count = row_count_file(summary_csv_out),
       feature_count = NULL
     ),
@@ -1009,15 +1423,29 @@ manifest <- list(
     )
   ),
   stats = list(
-    waves_built = 1L,
-    rows_2021 = length(rows),
+    waves_built = 2L,
+    rows_total = length(rows),
+    rows_2016 = length(rows_2016),
+    rows_2021 = length(rows_2021),
+    correspondence_real_rows_2016_to_2021 = nrow(sa2_2016_to_2021[["real_rows"]]),
+    correspondence_dropped_null_target_rows_2016_to_2021 = sa2_2016_to_2021[["dropped_null_target_rows"]],
+    correspondence_source_matched_rows_2016 = crosswalk_source_match_count,
+    correspondence_source_expected_rows_2016 = nrow(sa2_2016_counts),
+    correspondence_target_matched_rows_2021 = crosswalk_target_match_count,
+    correspondence_target_expected_rows_2021 = nrow(sa2_2021_counts),
+    state_validation_units_2016 = length(state_2016_validation),
+    state_validation_max_abs_difference_2016 = state_2016_max_difference,
+    national_validation_units_2016 = length(national_2016_validation),
+    national_validation_max_abs_difference_2016 = national_2016_max_difference,
+    crosswalk_conservation_max_abs_difference_2016 = crosswalk_conservation_max_difference,
+    crosswalk_conservation_component_differences_2016 = crosswalk_conservation,
     join_matched_rows_2021 = join_matched_count,
-    join_expected_rows_2021 = nrow(sa2_counts),
+    join_expected_rows_2021 = nrow(sa2_2021_counts),
     boundary_only_features_without_g14_2021 = length(missing_census_codes),
-    state_validation_units_2021 = length(state_validation),
-    state_validation_max_abs_difference_2021 = state_max_difference,
-    national_validation_units_2021 = length(national_validation),
-    national_validation_max_abs_difference_2021 = national_max_difference,
+    state_validation_units_2021 = length(state_2021_validation),
+    state_validation_max_abs_difference_2021 = state_2021_max_difference,
+    national_validation_units_2021 = length(national_2021_validation),
+    national_validation_max_abs_difference_2021 = national_2021_max_difference,
     boundary_expected_feature_count = 2473L,
     boundary_source_feature_count = nrow(boundary),
     boundary_derived_feature_count = boundary_feature_count,
@@ -1068,10 +1496,28 @@ manifest <- list(
 
 write(toJSON(manifest, auto_unbox = TRUE, pretty = TRUE, null = "null", na = "null"), manifest_out)
 
-cat(sprintf("built %d AU SA2 area-summary rows for 2021\n", length(rows)))
-cat(sprintf("2021 join coverage: %d/%d G14 SA2 rows\n", join_matched_count, nrow(sa2_counts)))
-cat(sprintf("2021 state validation max absolute difference: %d\n", state_max_difference))
-cat(sprintf("2021 national validation max absolute difference: %d\n", national_max_difference))
+cat(sprintf("built %d AU SA2 area-summary rows across 2016 and 2021\n", length(rows)))
+cat(sprintf("2016 row output: %d SA2 rows on 2021 boundaries\n", length(rows_2016)))
+cat(sprintf(
+  "2016 correspondence coverage: source %d/%d, target %d/%d, real rows %d, dropped null/outside rows %d\n",
+  crosswalk_source_match_count,
+  nrow(sa2_2016_counts),
+  crosswalk_target_match_count,
+  nrow(sa2_2021_counts),
+  nrow(sa2_2016_to_2021[["real_rows"]]),
+  sa2_2016_to_2021[["dropped_null_target_rows"]]
+))
+cat(sprintf("2016 pre-crosswalk state validation max absolute difference: %d\n", state_2016_max_difference))
+cat(sprintf("2016 pre-crosswalk national validation max absolute difference: %d\n", national_2016_max_difference))
+cat(sprintf(
+  "2016 post-crosswalk conservation max absolute difference: %d (%s)\n",
+  crosswalk_conservation_max_difference,
+  crosswalk_conservation_detail
+))
+cat(sprintf("2021 row output: %d SA2 rows\n", length(rows_2021)))
+cat(sprintf("2021 join coverage: %d/%d G14 SA2 rows\n", join_matched_count, nrow(sa2_2021_counts)))
+cat(sprintf("2021 state validation max absolute difference: %d\n", state_2021_max_difference))
+cat(sprintf("2021 national validation max absolute difference: %d\n", national_2021_max_difference))
 cat(sprintf("boundary validation: %d/%d features, %s bytes, factor %.6f at iteration %d\n",
             boundary_feature_count, nrow(boundary), file_bytes(boundary_out),
             boundary_simplification[["factor"]], boundary_simplification[["iteration"]]))

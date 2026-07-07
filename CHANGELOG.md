@@ -4,6 +4,19 @@
 
 ### 2026-07-07
 
+- Backfilled the Australia 2016 census wave through the official ABS
+  population-weighted SA2 correspondence onto 2021 boundaries
+  (4,944 rows across two waves; conservation residual at most 8
+  persons; every 2016 row flagged and asterisked as crosswalked). The
+  2011 wave stays deferred: no official 2011-to-2021 correspondence
+  exists and the project builds no crosswalks of its own. Review
+  caught an additivity defect before ship — independent rounding of
+  three fractional components broke affiliation + no religion =
+  population on 85 crosswalked rows and produced negative counts on
+  tiny perturbed areas (one already live in 2021) — fixed by rounding
+  once, clamping, and deriving, with clamp counts recorded in the
+  manifest.
+
 - Redesigned how whole-wave caveats render in the shared runtime: a
   wash flag carried by every row of a displayed year no longer washes
   the map pale (which erased a wave's information entirely — caught
