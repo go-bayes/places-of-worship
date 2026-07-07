@@ -2,7 +2,17 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
-import { taskBatchInput, taskInput, taskPriority, taskStatus, taskStatusValues, taskType } from "./model";
+import {
+  projectRole,
+  reviewDecisionStatus,
+  taskBatchInput,
+  taskEventType,
+  taskInput,
+  taskPriority,
+  taskStatus,
+  taskStatusValues,
+  taskType,
+} from "./model";
 import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser } from "./lib/auth";
 import {
   MEDIUM_TEXT_MAX,
@@ -277,6 +287,74 @@ export const getTaskEvents = query({
     return canReview(user.roles)
       ? events
       : events.filter((event) => event.actor_user_id === user._id);
+  },
+});
+
+export const getTaskHistory = query({
+  args: {
+    taskId: v.string(),
+    limit: v.optional(v.number()),
+  },
+  returns: v.object({
+    events: v.array(v.object({
+      event_type: taskEventType,
+      occurred_at: v.number(),
+      previous_status: v.optional(taskStatus),
+      new_status: v.optional(taskStatus),
+      evidence_draft_id: v.optional(v.string()),
+      actor_role: projectRole,
+      actor_user_id: v.optional(v.id("users")),
+      reason: v.optional(v.string()),
+      is_self: v.boolean(),
+    })),
+    draft_count: v.number(),
+    latest_review: v.union(v.null(), v.object({
+      decision_status: reviewDecisionStatus,
+      created_at: v.number(),
+    })),
+  }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin", "service"]);
+    await getTaskOrThrow(ctx, args.taskId);
+
+    const privileged = canReview(user.roles);
+    const limit = Math.min(Math.max(args.limit ?? 100, 1), 200);
+    const events = await ctx.db
+      .query("task_events")
+      .withIndex("by_task_time", (q) => q.eq("task_id", args.taskId))
+      .order("desc")
+      .take(limit);
+    const drafts = await ctx.db
+      .query("evidence_drafts")
+      .withIndex("by_task_status", (q) => q.eq("task_id", args.taskId))
+      .collect();
+    const latestReview = await latestReviewDecision(ctx, args.taskId);
+
+    return {
+      // expose workflow state to all roles while limiting attribution and notes
+      events: events.map((event) => {
+        const isSelf = event.actor_user_id === user._id;
+        const canSeePrivateFields = privileged || isSelf;
+        return {
+          event_type: event.event_type,
+          occurred_at: event.occurred_at,
+          ...(event.previous_status !== undefined ? { previous_status: event.previous_status } : {}),
+          ...(event.new_status !== undefined ? { new_status: event.new_status } : {}),
+          ...(event.evidence_draft_id !== undefined ? { evidence_draft_id: event.evidence_draft_id } : {}),
+          actor_role: event.actor_role,
+          ...(canSeePrivateFields ? { actor_user_id: event.actor_user_id } : {}),
+          ...(canSeePrivateFields && event.reason !== undefined ? { reason: event.reason } : {}),
+          is_self: isSelf,
+        };
+      }),
+      draft_count: drafts.length,
+      latest_review: latestReview === null
+        ? null
+        : {
+            decision_status: latestReview.decision_status,
+            created_at: latestReview.created_at,
+          },
+    };
   },
 });
 
