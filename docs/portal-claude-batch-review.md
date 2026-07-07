@@ -106,7 +106,7 @@ unchecked, never silently passed. Each `sources_checked` entry:
 | --- | --- |
 | `source_title`, `url_or_file` | Which source, in the draft's own terms. |
 | `check` | What was assessed: `existence`, `date_support`, `location_plausibility`. |
-| `method` | `http_fetch` (the runner fetched the URL and a model read the retrieved content), `model_assessment` (no fetch possible; the model reasoned from the citation alone), or `not_checked`. |
+| `method` | `http_fetch` (the runner fetched the URL and a model read the retrieved content) or `not_checked`. A third value, `model_assessment`, is reserved in the schema; no current code path emits it. |
 | `outcome` | `supported`, `not_supported`, `unclear`, `unreachable`, or `requires_human_access` (offline/archive sources). |
 | `note` | One or two sentences of specifics — what the fetched page said, or why the check could not run. |
 
@@ -114,6 +114,17 @@ The synthesis prompt receives only these recorded check results plus
 the draft fields; the recommendation must cite them, and `reasoning`
 that asserts a verification with no matching `sources_checked` entry
 is a prompt-contract violation to fix, not a display problem.
+
+Two boundary rules govern what the checks may touch. First,
+privacy-flagged evidence (`privacy_flag` of `needs_review` or
+`restricted`) never leaves the deployment: the runner performs no fetch
+and no model call for it, and the artifact records that the check was
+withheld. Second, fetched page content is contributor-controlled text:
+the runner walks redirects manually and refuses private and local hosts
+at every hop, and the check prompt treats page text as data to judge,
+never as instructions — but a hostile page can still bias the cheap
+model's outcome notes, which is one more reason the artifact is
+advisory and the human decision is the gate.
 
 ## Model Routing (JB Cost/Capability Policy)
 
@@ -176,7 +187,14 @@ artifact per task:
 - If the reviewer ignores the panel and decides anyway, the recorded
   agreement is derived from whether the decision matched the
   recommendation, so the provenance never claims the human followed
-  advice they contradicted.
+  advice they contradicted. The derivation errs the other way by
+  design: a coincidental match records `followed` even when the panel
+  went unread, so agreement counts overstate engagement, never
+  disagreement — read them accordingly. (`not_considered` exists in the
+  schema for clients that can attest non-display; the portal cannot.)
+- A per-task version history query (`listAgentReviewsForTask`) is
+  prepared and reviewer-gated; the portal currently renders only the
+  latest artifact, and wiring the history view is a later touch.
 
 ## Controls And Limits
 
@@ -186,9 +204,10 @@ artifact per task:
 | Per-run cap | `maxItems`, default 10, hard ceiling 50. |
 | Idempotency | One artifact per (evidence draft, prompt version); reruns require `forceRerun`. |
 | Text limits | `reasoning` ≤ LONG_TEXT_MAX; `sources_checked` JSON ≤ VALIDATION_SUMMARY_MAX; over-limit model output is truncated with a recorded note. |
-| Fetch budget | One GET per source URL, 10 s timeout, first 20 kB of text only; no retries. |
+| Fetch budget | One GET per source URL with at most 3 manually-walked redirects, each hop checked against the private-host block; 10 s timeout; first 20,000 characters of stripped text; no retries. |
+| Batch deadline | The runner stops starting new items 8 minutes in and closes the manifest with a deadline note, so the Convex action time cap never leaves a batch stuck `running`. |
 | API key | `ANTHROPIC_API_KEY` lives in the Convex deployment environment, server-side only (the action proxy pattern from `ra-ai-interaction-options.md`). Never in the browser, never committed. |
-| Pause | Absent key or absent service user fails the run loudly before any artifact is written. |
+| Pause | An absent key fails the run loudly before any artifact is written. The service user is created on demand and cannot block a run. |
 
 ## Activation Checklist (JB — prepared, not performed)
 
@@ -197,8 +216,9 @@ Dev deployment first; production only after the dev run is inspected.
 1. `npx convex dev` (login) in the repo, then `npx convex deploy` of
    the schema and functions to the **dev** deployment.
 2. Set the key on dev: `npx convex env set ANTHROPIC_API_KEY <key>`.
-3. Seed the service user once:
-   `npx convex run claudeReviews:ensureServiceUser '{}'`.
+3. Optional: pre-seed the service user with
+   `npx convex run claudeReviews:ensureServiceUser '{}'` (idempotent;
+   the runner also creates it on demand).
 4. Dry run: `npx convex run claudeReviews:runBatch '{"maxItems": 3}'`,
    then inspect the artifacts in the dashboard and the portal.
 5. Production binding (separate decision): repeat 1–3 against prod

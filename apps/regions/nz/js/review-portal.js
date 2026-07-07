@@ -628,7 +628,8 @@
         }
 
         state.busy = true;
-        form.querySelector("button").disabled = true;
+        const submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton) submitButton.disabled = true;
         statusText.textContent = "Recording review decision...";
         statusText.className = "muted";
         try {
@@ -646,8 +647,7 @@
             statusText.className = "status error";
         } finally {
             state.busy = false;
-            const button = form.querySelector("button");
-            if (button) button.disabled = false;
+            if (submitButton) submitButton.disabled = false;
         }
     }
 

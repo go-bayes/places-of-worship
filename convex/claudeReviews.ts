@@ -39,12 +39,18 @@ const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const FETCH_TIMEOUT_MS = 10_000;
 const MODEL_TIMEOUT_MS = 60_000;
 const FETCH_TEXT_MAX = 20_000;
-// conservative caps: a worst-case item costs one page fetch plus two
-// model calls, and the whole batch must fit inside one action's time
-// budget. Idempotency makes clearing a bigger queue with repeated runs
-// cheap, so small batches lose nothing.
+const FETCH_MAX_REDIRECTS = 3;
+// a worst-case item costs one page fetch plus two model calls
+// (~2.5 min); the batch deadline below closes the manifest cleanly
+// before Convex's 10-minute action cap can kill the run, and
+// idempotent re-runs continue the remaining queue.
 const DEFAULT_MAX_ITEMS = 10;
 const HARD_MAX_ITEMS = 50;
+const BATCH_DEADLINE_MS = 8 * 60 * 1000;
+// clamps keep three check records well under VALIDATION_SUMMARY_MAX
+// even for maximum-length titles and urls
+const CHECK_TITLE_MAX = 300;
+const CHECK_URL_MAX = 500;
 const ERROR_NOTES_MAX = 20;
 
 type SourceCheckName = "existence" | "date_support" | "location_plausibility";
@@ -109,7 +115,9 @@ export const pendingForBatch = internalQuery({
     v.object({ task: v.any(), draft: v.any(), alreadyReviewed: v.boolean() }),
   ),
   handler: async (ctx, args) => {
-    const limit = Math.min(Math.max(args.limit ?? 500, 1), 500);
+    // modest scan ceiling: each task costs three indexed sub-queries,
+    // and Convex bounds reads per transaction
+    const limit = Math.min(Math.max(args.limit ?? 200, 1), 200);
     let tasks: Doc<"tasks">[];
     if (args.countryCode !== undefined) {
       const countryCode = args.countryCode;
@@ -126,13 +134,17 @@ export const pendingForBatch = internalQuery({
 
     const rows = [];
     for (const task of tasks) {
+      // newest-first so a heavily revised task cannot push its latest
+      // draft past the take() window
       const submitted = await ctx.db
         .query("evidence_drafts")
         .withIndex("by_task_status", (q) => q.eq("task_id", task.task_id).eq("draft_status", "submitted"))
+        .order("desc")
         .take(25);
       const unresolved = await ctx.db
         .query("evidence_drafts")
         .withIndex("by_task_status", (q) => q.eq("task_id", task.task_id).eq("draft_status", "unresolved_note"))
+        .order("desc")
         .take(25);
       const draft = latestReviewableDraft([...submitted, ...unresolved]);
       if (draft === null) {
@@ -141,7 +153,7 @@ export const pendingForBatch = internalQuery({
       const priorForDraft = await ctx.db
         .query("agent_reviews")
         .withIndex("by_draft", (q) => q.eq("evidence_draft_id", draft.evidence_draft_id))
-        .collect();
+        .take(100);
       const alreadyReviewed = priorForDraft.some(
         (artifact) => artifact.prompt_version === args.promptVersion,
       );
@@ -331,12 +343,61 @@ function culturalSensitivityFor(
 // source fetching and model calls
 
 async function fetchWithTimeout(url: string, init?: RequestInit, timeoutMs = FETCH_TIMEOUT_MS): Promise<Response> {
-  return await Promise.race([
-    fetch(url, { redirect: "follow", ...init }),
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("Fetch timed out.")), timeoutMs),
-    ),
-  ]);
+  // abort the losing fetch and clear the timer: a hung request must not
+  // keep consuming the action after the race resolves
+  const controller = typeof AbortController === "undefined" ? undefined : new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      fetch(url, { redirect: "manual", ...init, signal: controller?.signal }),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          controller?.abort();
+          reject(new Error("Fetch timed out."));
+        }, timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+
+// contributor-controlled URLs are fetched server-side, so private and
+// local hosts are refused at every redirect hop (SSRF guard). Hostname
+// checks cannot see DNS answers, so a hostile domain pointing at a
+// private IP remains a residual risk — bounded, because the output is
+// an advisory artifact a human reads.
+function isBlockedHost(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (host === "localhost" || host.endsWith(".local") || host.endsWith(".internal")) return true;
+  if (/^(127\.|10\.|0\.|169\.254\.|192\.168\.)/.test(host)) return true;
+  if (/^172\.(1[6-9]|2\d|3[01])\./.test(host)) return true;
+  if (host === "::1" || /^(fc|fd|fe8)/.test(host)) return true;
+  return false;
+}
+
+// fetch with the redirect chain walked manually so every hop is
+// checked against the private-host block, capped at FETCH_MAX_REDIRECTS
+async function fetchPublicUrl(rawUrl: string): Promise<Response> {
+  let current = rawUrl;
+  for (let hop = 0; hop <= FETCH_MAX_REDIRECTS; hop += 1) {
+    const parsed = new URL(current);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      throw new Error("Only HTTP(S) sources are fetched.");
+    }
+    if (isBlockedHost(parsed.hostname)) {
+      throw new Error("Source URL resolves to a private or local host; not fetched.");
+    }
+    const response = await fetchWithTimeout(current);
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get("location");
+      if (location === null) return response;
+      current = new URL(location, current).toString();
+      continue;
+    }
+    return response;
+  }
+  throw new Error("Too many redirects while fetching the source URL.");
 }
 
 // crude tag strip: enough for a model to read page text; not a parser
@@ -352,6 +413,10 @@ function stripHtml(text: string): string {
 function clampNote(note: unknown): string | undefined {
   if (typeof note !== "string" || note.trim() === "") return undefined;
   return note.trim().slice(0, 500);
+}
+
+function clampField(value: string | undefined, max: number): string | undefined {
+  return value === undefined ? undefined : value.slice(0, max);
 }
 
 // one structured-output call to the Anthropic API; the forced tool
@@ -376,6 +441,9 @@ async function callClaude(args: {
     body: JSON.stringify({
       model: args.model,
       max_tokens: args.maxTokens,
+      // structured mechanical calls: adaptive thinking would spend
+      // inside max_tokens and can truncate the forced tool output
+      thinking: { type: "disabled" },
       system: args.system,
       messages: [{ role: "user", content: args.user }],
       tools: [
@@ -443,10 +511,15 @@ async function checkSources(
   task: Doc<"tasks">,
   draft: Doc<"evidence_drafts">,
 ): Promise<SourceCheckResult[]> {
-  const title = draft.source_title;
-  const urlOrFile = draft.source_url_or_file;
+  // fetch uses the full url; the stored check records carry clamped
+  // copies so three records stay well under the artifact's JSON limit
+  const rawUrl = draft.source_url_or_file;
+  const title = clampField(draft.source_title, CHECK_TITLE_MAX);
+  const urlOrFile = clampField(rawUrl, CHECK_URL_MAX);
 
-  if (!urlOrFile || !/^https?:\/\//i.test(urlOrFile)) {
+  // privacy-flagged evidence never leaves the deployment: no fetch, no
+  // model call — the artifact records that the check was withheld
+  if (draft.privacy_flag !== "clear") {
     return [
       {
         source_title: title,
@@ -454,7 +527,20 @@ async function checkSources(
         check: "existence",
         method: "not_checked",
         outcome: "requires_human_access",
-        note: urlOrFile
+        note: `Evidence carries privacy flag ${draft.privacy_flag}; its content is not sent to external services. Verify sources manually.`,
+      },
+    ];
+  }
+
+  if (!rawUrl || !/^https?:\/\//i.test(rawUrl)) {
+    return [
+      {
+        source_title: title,
+        url_or_file: urlOrFile,
+        check: "existence",
+        method: "not_checked",
+        outcome: "requires_human_access",
+        note: rawUrl
           ? "Source locator is not a fetchable URL; verify from the file or archive reference."
           : "No source URL or file recorded; verify offline.",
       },
@@ -464,7 +550,7 @@ async function checkSources(
   let pageText: string | null = null;
   let fetchNote = "";
   try {
-    const response = await fetchWithTimeout(urlOrFile);
+    const response = await fetchPublicUrl(rawUrl);
     if (!response.ok) {
       fetchNote = `HTTP ${response.status} when fetching the source URL.`;
     } else {
@@ -662,13 +748,15 @@ export const runBatch = internalAction({
         countryCode: args.countryCode,
         promptVersion: PROMPT_VERSION,
       });
+    // queue-wide at scan time, not per-run: "how many of the current
+    // queue already carry an artifact at this prompt version"
     const skippedExisting = args.forceRerun === true ? 0 : rows.filter((row) => row.alreadyReviewed).length;
     const pending = (args.forceRerun === true ? rows : rows.filter((row) => !row.alreadyReviewed)).slice(
       0,
       maxItems,
     );
 
-    const batchId = `agent-review-batch:${Date.now()}`;
+    const batchId = `agent-review-batch:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
     await ctx.runMutation(internal.claudeReviews.openBatch, {
       batchId,
       trigger: args.trigger ?? "jb_cli",
@@ -679,9 +767,20 @@ export const runBatch = internalAction({
     let reviewed = 0;
     let deferredCultural = 0;
     let failed = 0;
+    let attempted = 0;
     const errorNotes: string[] = [];
+    const runStartedAt = Date.now();
 
     for (const { task, draft } of pending) {
+      // close the manifest cleanly before the action time cap can kill
+      // the run; idempotent re-runs continue the remaining queue
+      if (Date.now() - runStartedAt > BATCH_DEADLINE_MS) {
+        errorNotes.push(
+          `deadline: stopped after ${attempted} of ${pending.length} items; re-run to continue the queue.`,
+        );
+        break;
+      }
+      attempted += 1;
       try {
         const sensitivity = culturalSensitivityFor(task, draft);
         const checks = await checkSources(apiKey, task, draft);
