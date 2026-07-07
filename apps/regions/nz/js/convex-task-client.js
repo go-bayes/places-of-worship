@@ -317,6 +317,12 @@
             return await this.request("mutation", "tasks:createIssueTask", args);
         }
 
+        async createManualCandidateTask(args) {
+            // nominates a missing place of worship as an in-progress task in
+            // the country's manual batch, assigned to the nominating ra
+            return await this.request("mutation", "tasks:createManualCandidateTask", args);
+        }
+
         async recordReviewDecision(args) {
             return await this.request("mutation", "reviews:recordReviewDecision", args);
         }

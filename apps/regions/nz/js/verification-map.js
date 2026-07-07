@@ -387,6 +387,10 @@ const SKIP_REASON_CHIPS = [
     { reason: "Looks like a duplicate", issueHint: true },
     { reason: "Data error on the map", issueHint: true },
 ];
+// pin-drop nominations: placements must be building-accurate, so the
+// confirm step gates on zoom, and nearby existing tasks are offered first
+const PIN_MIN_PLACEMENT_ZOOM = 15;
+const PIN_PROXIMITY_METRES = 150;
 const DATE_PRECISION_OPTIONS = [
     ["day", "Day"],
     ["month", "Month"],
@@ -1077,6 +1081,14 @@ class NzVerificationMap {
         this.backendLastError = "";
         // which task's issue form should render expanded (survives re-renders)
         this.issueFormOpenTaskId = null;
+        // pin-drop nomination state: mode flag, live marker, confirmed
+        // position, and locally created manual tasks (the assignment-batch
+        // refresh cannot see the manual batch, so we re-merge these)
+        this.pinMode = false;
+        this.pinMarker = null;
+        this.pinConfirmed = null;
+        this.pinNearbyCount = 0;
+        this.manualTasksById = new Map();
         this.init();
     }
 
@@ -1684,12 +1696,17 @@ class NzVerificationMap {
 
         const nominationPanel = document.getElementById("nominationPanel");
         if (nominationPanel) {
-            nominationPanel.innerHTML = ASSIGNMENT_MODE ? "" : DEMO_MODE ? this.nominationFormHtml() : `
+            // refit: assignment mode (previously an empty panel) hosts the
+            // pin-drop missing-place flow; demo keeps its local json form
+            nominationPanel.innerHTML = ASSIGNMENT_MODE ? this.pinNominationHtml() : DEMO_MODE ? this.nominationFormHtml() : `
                 <div class="disabled-panel">
                     Nominations are disabled for this feedback pilot. Use the map for inspection and send notes separately.
                     To inspect mock entry fields, <a href="${escapeHtml(demoUrl())}">open demo mode</a>.
                 </div>
             `;
+            if (ASSIGNMENT_MODE) {
+                this.bindPinNomination();
+            }
         }
 
         this.renderInitialDetail();
@@ -1769,6 +1786,14 @@ class NzVerificationMap {
             const tasks = await this.backend.listTasks(query);
             const allTasks = tasks || [];
             this.backendTasksById = new Map(allTasks.map(task => [task.task_id, task]));
+            // pin-drop tasks live in the manual batch, which the
+            // assignment-scoped query cannot return; re-merge the local
+            // copies so the ra stays landed in a freshly created task
+            for (const [taskId, manualTask] of this.manualTasksById) {
+                if (!this.backendTasksById.has(taskId)) {
+                    this.backendTasksById.set(taskId, manualTask);
+                }
+            }
             this.myWorkItems = ASSIGNMENT_MODE
                 ? await this.backend.listMyTasks({
                     countryCode: COUNTRY_CONFIG.countryCode,
@@ -3616,6 +3641,330 @@ class NzVerificationMap {
             source: COUNTRY_CONFIG.mapSource,
             saved_or_submitted: false,
         };
+    }
+
+    // pin-drop nomination: the assignment-mode refit of the nomination
+    // panel. drop a draggable pin, confirm at building-accurate zoom, offer
+    // any existing task within 150 m first, then create the candidate task
+    // through tasks:createManualCandidateTask and land in its detail panel
+    pinNominationHtml() {
+        return `
+            <details id="nominationDetails">
+                <summary>Add missing place of worship</summary>
+                <div class="nomination-form">
+                    <div class="copy-help">
+                        Know a place of worship that is not on the map? Drop a pin on the building, confirm the location, then describe how you know it. Local knowledge counts as evidence.
+                    </div>
+                    <button id="pinModeButton" type="button" class="secondary">Add missing place — drop a pin</button>
+                    <div id="pinConfirmCard" class="pin-card" hidden>
+                        <div class="pin-coords">Pin: <span id="pinLat"></span>, <span id="pinLng"></span></div>
+                        <div id="pinZoomGate" class="pin-zoom-gate">
+                            Zoom in further to place the pin precisely — the recorded location must be building-accurate.
+                        </div>
+                        <div class="button-row">
+                            <button id="pinConfirmButton" type="button" disabled>Confirm location</button>
+                            <button id="pinCancelButton" type="button" class="secondary">Cancel</button>
+                        </div>
+                    </div>
+                    <div id="pinProximityCard" class="pin-card" hidden></div>
+                    <div id="pinFormCard" class="pin-card" hidden>
+                        <label>
+                            Name (optional)
+                            <input id="pinNameInput" type="text" placeholder="Unknown place of worship">
+                        </label>
+                        <label>
+                            Address (optional)
+                            <input id="pinAddressInput" type="text">
+                        </label>
+                        <label>
+                            Locality (optional)
+                            <input id="pinLocalityInput" type="text">
+                        </label>
+                        <label>
+                            Observed or source date (optional)
+                            <input id="pinObservedDateInput" type="text" placeholder="e.g. 2026-07 or 'seen last month'">
+                        </label>
+                        <label>
+                            How do you know this place? (source note)
+                            <textarea id="pinSourceNoteInput" rows="3" placeholder="e.g. I attend services here; no URL exists."></textarea>
+                        </label>
+                        <div class="button-row">
+                            <button id="pinSubmitButton" type="button">Create candidate task</button>
+                            <button id="pinFormCancelButton" type="button" class="secondary">Cancel</button>
+                        </div>
+                    </div>
+                    <div id="pinStatus" class="copy-status" aria-live="polite"></div>
+                </div>
+            </details>
+        `;
+    }
+
+    bindPinNomination() {
+        document.getElementById("pinModeButton")?.addEventListener("click", () => this.enterPinMode());
+        document.getElementById("pinConfirmButton")?.addEventListener("click", () => this.confirmPinLocation());
+        document.getElementById("pinCancelButton")?.addEventListener("click", () => this.exitPinMode());
+        document.getElementById("pinFormCancelButton")?.addEventListener("click", () => this.exitPinMode());
+        document.getElementById("pinSubmitButton")?.addEventListener("click", () => this.submitPinNomination());
+    }
+
+    enterPinMode() {
+        if (this.pinMode || !this.map) return;
+        this.pinMode = true;
+        this.pinConfirmed = null;
+        this.pinNearbyCount = 0;
+        this.map.getContainer().classList.add("pin-placement");
+        document.getElementById("pinModeButton")?.setAttribute("disabled", "true");
+        const status = document.getElementById("pinStatus");
+        if (status) status.textContent = "Click the building on the map to drop the pin. Press Escape to cancel.";
+        this._pinClickHandler = (event) => this.placePin(event.latlng);
+        this.map.once("click", this._pinClickHandler);
+        this._pinKeyHandler = (event) => {
+            if (event.key === "Escape") this.exitPinMode();
+        };
+        document.addEventListener("keydown", this._pinKeyHandler);
+    }
+
+    placePin(latlng) {
+        if (!this.pinMode || this.pinMarker) return;
+        this.pinMarker = L.marker(latlng, {
+            draggable: true,
+            zIndexOffset: 1000,
+            icon: L.divIcon({
+                className: "",
+                html: `<div class="pin-drop-marker"></div>`,
+                iconSize: [18, 18],
+                iconAnchor: [9, 9],
+            }),
+        }).addTo(this.map);
+        this.pinMarker.on("drag", () => this.updatePinConfirmCard());
+        this._pinZoomHandler = () => this.updatePinConfirmCard();
+        this.map.on("zoomend", this._pinZoomHandler);
+        const card = document.getElementById("pinConfirmCard");
+        if (card) card.hidden = false;
+        const status = document.getElementById("pinStatus");
+        if (status) status.textContent = "Drag the pin onto the building, zoom in, then confirm the location.";
+        this.updatePinConfirmCard();
+    }
+
+    updatePinConfirmCard() {
+        if (!this.pinMarker) return;
+        const position = this.pinMarker.getLatLng();
+        const latEl = document.getElementById("pinLat");
+        const lngEl = document.getElementById("pinLng");
+        if (latEl) latEl.textContent = position.lat.toFixed(5);
+        if (lngEl) lngEl.textContent = position.lng.toFixed(5);
+        const zoomOk = this.map.getZoom() >= PIN_MIN_PLACEMENT_ZOOM;
+        const confirmButton = document.getElementById("pinConfirmButton");
+        if (confirmButton) confirmButton.disabled = !zoomOk;
+        const gate = document.getElementById("pinZoomGate");
+        if (gate) gate.hidden = zoomOk;
+    }
+
+    confirmPinLocation() {
+        if (!this.pinMarker || this.map.getZoom() < PIN_MIN_PLACEMENT_ZOOM) return;
+        const position = this.pinMarker.getLatLng();
+        this.pinConfirmed = {
+            latitude: position.lat,
+            longitude: position.lng,
+            zoom: this.map.getZoom(),
+        };
+        // the confirmed position is what gets recorded; freeze the pin
+        this.pinMarker.dragging.disable();
+        if (this._pinZoomHandler) {
+            this.map.off("zoomend", this._pinZoomHandler);
+            this._pinZoomHandler = null;
+        }
+        const confirmCard = document.getElementById("pinConfirmCard");
+        if (confirmCard) confirmCard.hidden = true;
+        const nearby = this.nearbyTaskRows(position);
+        this.pinNearbyCount = nearby.length;
+        if (nearby.length) {
+            this.showPinProximity(nearby);
+        } else {
+            this.showPinForm();
+        }
+    }
+
+    // existing task markers within the proximity radius, nearest first
+    nearbyTaskRows(position) {
+        const pin = L.latLng(position.lat, position.lng);
+        return this.tasks
+            .map(feature => {
+                const coords = feature.geometry?.coordinates || [];
+                if (coords.length < 2) return null;
+                const distance = pin.distanceTo(L.latLng(coords[1], coords[0]));
+                if (distance > PIN_PROXIMITY_METRES) return null;
+                const props = feature.properties || {};
+                const backendStatus = this.backendTasksById.get(props.task_id)?.status || "not started";
+                return {
+                    taskId: props.task_id,
+                    name: props.name || "Unnamed site",
+                    distance: Math.round(distance),
+                    status: backendStatus.replaceAll("_", " "),
+                };
+            })
+            .filter(Boolean)
+            .sort((a, b) => a.distance - b.distance);
+    }
+
+    showPinProximity(rows) {
+        const card = document.getElementById("pinProximityCard");
+        if (!card) return;
+        card.hidden = false;
+        card.innerHTML = `
+            <div class="copy-help">
+                Existing tasks near your pin — is one of these the same place?
+            </div>
+            ${rows.map(row => `
+                <div class="pin-nearby-row">
+                    <span>${escapeHtml(row.name)} — ${row.distance} m, ${escapeHtml(row.status)}</span>
+                    <button type="button" class="tertiary pin-nearby-open" data-task-id="${escapeHtml(row.taskId)}">This is it — open that task instead</button>
+                </div>
+            `).join("")}
+            <button id="pinProximityContinue" type="button" class="secondary">None of these — continue</button>
+        `;
+        card.querySelectorAll(".pin-nearby-open").forEach(button => {
+            button.addEventListener("click", () => {
+                const taskId = button.dataset.taskId;
+                this.exitPinMode();
+                this.selectTaskById(taskId, { focusDetail: true });
+            });
+        });
+        document.getElementById("pinProximityContinue")?.addEventListener("click", () => {
+            card.hidden = true;
+            this.showPinForm();
+        });
+        const status = document.getElementById("pinStatus");
+        if (status) status.textContent = "";
+    }
+
+    showPinForm() {
+        const card = document.getElementById("pinFormCard");
+        if (card) card.hidden = false;
+        const status = document.getElementById("pinStatus");
+        if (status) status.textContent = "";
+        document.getElementById("pinNameInput")?.focus({ preventScroll: true });
+    }
+
+    async submitPinNomination() {
+        const status = document.getElementById("pinStatus");
+        if (!this.pinConfirmed) {
+            if (status) status.textContent = "Confirm the pin location first.";
+            return;
+        }
+        if (!this.backend?.configured || !this.backend.signedIn) {
+            if (status) status.textContent = "Sign in to the shared backend before nominating a place.";
+            return;
+        }
+        const name = (document.getElementById("pinNameInput")?.value || "").trim() || "Unknown place of worship";
+        const address = (document.getElementById("pinAddressInput")?.value || "").trim();
+        const locality = (document.getElementById("pinLocalityInput")?.value || "").trim();
+        const observedDate = (document.getElementById("pinObservedDateInput")?.value || "").trim();
+        const noteText = (document.getElementById("pinSourceNoteInput")?.value || "").trim();
+        // the mutation has no separate observation-date field, so the date
+        // travels at the head of the source note
+        const sourceNote = [observedDate ? `Observed/source date: ${observedDate}.` : "", noteText]
+            .filter(Boolean)
+            .join(" ") || undefined;
+        const submitButton = document.getElementById("pinSubmitButton");
+        if (submitButton) submitButton.disabled = true;
+        if (status) status.textContent = "Creating the candidate task...";
+        try {
+            const result = await this.backend.createManualCandidateTask({
+                countryCode: COUNTRY_CONFIG.countryCode,
+                name,
+                address: address || undefined,
+                locality: locality || undefined,
+                latitude: this.pinConfirmed.latitude,
+                longitude: this.pinConfirmed.longitude,
+                targetYears: COUNTRY_CONFIG.targetYears.map(Number),
+                sourceNote,
+                clientContext: {
+                    source: "portal_pin_drop",
+                    country_code: COUNTRY_CONFIG.countryCode,
+                    page_path: window.location.pathname,
+                    placement_zoom: this.pinConfirmed.zoom,
+                    proximity_checked: true,
+                    nearby_count: this.pinNearbyCount,
+                },
+            });
+            // synthesise the backend-task shape locally so the detail panel
+            // can land on the new task before any batch-scoped refresh
+            const manualTask = {
+                task_id: result.task_id,
+                batch_id: `manual-${COUNTRY_CONFIG.countryCode.toLowerCase()}`,
+                country_code: COUNTRY_CONFIG.countryCode,
+                task_type: "missing_from_project_map",
+                priority: "high",
+                status: "in_progress",
+                target_years: COUNTRY_CONFIG.targetYears.map(Number),
+                candidate_site_id: result.candidate_site_id,
+                name,
+                address,
+                locality,
+                geometry: {
+                    type: "Point",
+                    coordinates: [this.pinConfirmed.longitude, this.pinConfirmed.latitude],
+                },
+                automated_checks: [{
+                    check_id: "user_nomination",
+                    severity: "info",
+                    message: sourceNote || "Candidate was nominated from the task map.",
+                    suggested_action: "review_identity",
+                }],
+                task_brief: "Review this user-nominated place of worship candidate. Check whether it is already on the project map or in OSM before accepting it for export.",
+            };
+            this.manualTasksById.set(result.task_id, manualTask);
+            this.backendTasksById.set(result.task_id, manualTask);
+            // a fresh task has no drafts; recording that skips the async
+            // draft fetch whose re-render would wipe the success message
+            this.latestDraftsByTaskId.set(result.task_id, null);
+            await this.refreshBackendTasks();
+            this.applyFilters();
+            this.exitPinMode();
+            this.selectTaskById(result.task_id, { focusDetail: true });
+            const copyStatus = document.getElementById("copyStatus");
+            if (copyStatus) copyStatus.textContent = "Candidate task created. Record your evidence, then submit for review.";
+        } catch (error) {
+            if (error.authExpired) {
+                this.backendUser = null;
+                this.backendLastError = error.message;
+                this.renderBackendPanel();
+            }
+            // stay in the form with the error visible; nothing is cleared
+            if (submitButton) submitButton.disabled = false;
+            if (status) status.textContent = `${error.message || "Could not create the candidate task."} Nothing was created — try again.`;
+        }
+    }
+
+    exitPinMode() {
+        this.pinMode = false;
+        this.pinConfirmed = null;
+        this.pinNearbyCount = 0;
+        if (this._pinClickHandler) {
+            this.map.off("click", this._pinClickHandler);
+            this._pinClickHandler = null;
+        }
+        if (this._pinZoomHandler) {
+            this.map.off("zoomend", this._pinZoomHandler);
+            this._pinZoomHandler = null;
+        }
+        if (this._pinKeyHandler) {
+            document.removeEventListener("keydown", this._pinKeyHandler);
+            this._pinKeyHandler = null;
+        }
+        if (this.pinMarker) {
+            this.map.removeLayer(this.pinMarker);
+            this.pinMarker = null;
+        }
+        this.map?.getContainer().classList.remove("pin-placement");
+        ["pinConfirmCard", "pinProximityCard", "pinFormCard"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.hidden = true;
+        });
+        document.getElementById("pinModeButton")?.removeAttribute("disabled");
+        const status = document.getElementById("pinStatus");
+        if (status) status.textContent = "";
     }
 
     nominationFormHtml() {

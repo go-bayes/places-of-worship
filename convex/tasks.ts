@@ -865,6 +865,7 @@ export const createManualCandidateTask = mutation({
     targetYears: v.optional(v.array(v.number())),
     taskBrief: v.optional(v.string()),
     sourceNote: v.optional(v.string()),
+    clientContext: v.optional(v.any()),
   },
   returns: v.object({
     task_id: v.string(),
@@ -879,6 +880,7 @@ export const createManualCandidateTask = mutation({
     assertMaxString("nomination locality", args.locality, MEDIUM_TEXT_MAX);
     assertMaxString("nomination task brief", args.taskBrief, TASK_BRIEF_MAX);
     assertMaxString("nomination source note", args.sourceNote, TASK_REASON_MAX);
+    assertClientContextLimit(args.clientContext);
     const now = Date.now();
     const taskId = manualTaskId(args.countryCode, args.name, now);
     const candidateSiteId = `candidate:${taskId}`;
@@ -927,6 +929,8 @@ export const createManualCandidateTask = mutation({
       actorRole: chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]),
       newStatus: "in_progress",
       reason: args.sourceNote,
+      // pin-drop placement provenance (zoom, proximity result) rides here
+      clientContext: args.clientContext,
     });
     return { task_id: taskId, candidate_site_id: candidateSiteId, status: "in_progress" as const };
   },

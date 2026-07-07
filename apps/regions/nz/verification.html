@@ -560,6 +560,54 @@
             margin-top: 10px;
         }
 
+        /* pin-drop nomination: placement cursor, live marker, confirm card */
+        .leaflet-container.pin-placement {
+            cursor: crosshair;
+        }
+
+        .pin-drop-marker {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #c0392b;
+            border: 2px solid #ffffff;
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.45);
+        }
+
+        .pin-card {
+            border: 1px dashed #b6c2cf;
+            border-radius: 5px;
+            background: #f8fafc;
+            padding: 10px 12px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .pin-coords {
+            font-size: 13px;
+            font-weight: 700;
+            color: #34495e;
+        }
+
+        .pin-zoom-gate {
+            font-size: 12px;
+            color: #a15c07;
+        }
+
+        .pin-nearby-row {
+            display: grid;
+            gap: 4px;
+            font-size: 13px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 6px;
+        }
+
+        .pin-card textarea {
+            width: 100%;
+            box-sizing: border-box;
+            font: inherit;
+        }
+
         .copy-status {
             min-height: 22px;
             font-size: 14px;
@@ -1202,7 +1250,7 @@
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
     <script src="js/convex-config.js?v=20260707-changes-requested"></script>
-    <script src="js/convex-task-client.js?v=20260708c"></script>
-    <script src="js/verification-map.js?v=20260708c"></script>
+    <script src="js/convex-task-client.js?v=20260708d"></script>
+    <script src="js/verification-map.js?v=20260708d"></script>
 </body>
 </html>
