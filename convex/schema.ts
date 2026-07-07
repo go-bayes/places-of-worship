@@ -149,11 +149,19 @@ export default defineSchema({
     privacy_flag: privacyFlag,
     licence_flag: licenceFlag,
     validation_summary: v.optional(v.any()),
+    // batch-import idempotency (docs/portal-batch-import-and-corrections.md):
+    // a row is a duplicate when its (source, locator) key OR its content
+    // hash matches an earlier import
+    source_claim_key: v.optional(v.string()),
+    claim_hash: v.optional(v.string()),
+    import_batch_id: v.optional(v.string()),
   })
     .index("by_evidence_draft_id", ["evidence_draft_id"])
     .index("by_task_status", ["task_id", "draft_status"])
     .index("by_creator_time", ["created_by", "updated_at"])
-    .index("by_source_url", ["source_url_or_file"]),
+    .index("by_source_url", ["source_url_or_file"])
+    .index("by_source_claim_key", ["source_claim_key"])
+    .index("by_claim_hash", ["claim_hash"]),
 
   review_decisions: defineTable({
     review_decision_id: v.string(),

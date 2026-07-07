@@ -1,5 +1,8 @@
 import type {
   AgentDraftInput,
+  BatchImportInput,
+  BatchImportReport,
+  CorrectionInput,
   DedupCandidate,
   DedupCandidateQuery,
   EvidenceDraft,
@@ -39,4 +42,10 @@ export interface WorkbenchProvider {
   saveAgentDraft(input: AgentDraftInput): Promise<EvidenceDraft>;
   confirmAgentDraft(input: HumanConfirmationInput): Promise<EvidenceDraft>;
   rejectAgentDraft(input: HumanRejectionInput): Promise<void>;
+  /** curator lane: one file, one source record, many source-first
+      claims arriving as drafts; per-row repairable report */
+  importNominationBatch(input: BatchImportInput): Promise<BatchImportReport>;
+  /** a map-dot correction: evidence against an existing site through
+      the standard queue; never an in-place edit */
+  createCorrection(input: CorrectionInput): Promise<FreeContributionHandle>;
 }

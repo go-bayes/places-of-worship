@@ -57,12 +57,12 @@ curator actually consulted — and an optional `source_url` column adds a
 second, row-level source reference on the claim recording the
 directory's own citation for that entry.
 
-Required columns (header names exact; extras preserved as notes):
-
 File-level fields, supplied once at upload: `source_type` (from the
 existing source-type vocabulary), source title, URL or archive
 reference, licence, and consulted date — together the file's source
 record.
+
+Row columns (header names exact; unknown columns preserved as notes):
 
 | Column | Rule |
 | --- | --- |

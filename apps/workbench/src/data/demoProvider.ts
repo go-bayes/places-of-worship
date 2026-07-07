@@ -2,7 +2,11 @@ import type { WorkbenchProvider } from "./provider";
 import type {
   AgentDraftInput,
   AgentExtractionRun,
+  BatchImportInput,
+  BatchImportReport,
+  BatchImportRowReport,
   Confidence,
+  CorrectionInput,
   DedupCandidate,
   DedupCandidateQuery,
   EvidenceDraft,
@@ -16,6 +20,14 @@ import type {
   SourceRecordInput,
   WorkTask,
 } from "./types";
+import {
+  buildImportClaim,
+  claimHash,
+  isParkedSensitive,
+  parseImportFile,
+  sourceClaimKey,
+  validateImportRow,
+} from "./batchImport";
 import { demoTasks } from "./demoTasks";
 
 const DRAFTS_KEY = "pow_workbench_demo_drafts_v1";
@@ -507,6 +519,217 @@ export class DemoProvider implements WorkbenchProvider {
     };
     saveMap(DRAFTS_KEY, drafts);
     this.setTaskStatus(draft.taskId, "skipped");
+  }
+
+  async importNominationBatch(input: BatchImportInput): Promise<BatchImportReport> {
+    this.ensureDemoAgentSeed();
+    const countryCode = input.countryCode.toUpperCase();
+    const parsed = parseImportFile(input.csvText, countryCode);
+    const batchId = `import:${countryCode.toLowerCase()}:${demoUlid()}`;
+    if (parsed.fileProblems.length > 0) {
+      return {
+        batchId,
+        totalRows: parsed.rows.length,
+        imported: 0,
+        rejected: 0,
+        parkedSensitive: 0,
+        skippedExisting: 0,
+        fileProblems: parsed.fileProblems,
+        rows: [],
+      };
+    }
+
+    // one file, one source record — and a re-upload of the same file
+    // reuses it, so the locator half of the idempotency key holds
+    // across repair rounds
+    validateSourceInput(input.source);
+    const sources = loadMap<SourceRecord>(SOURCES_KEY);
+    const existingSource = Object.values(sources).find(
+      (record) =>
+        record.countryCode === countryCode &&
+        normaliseText(record.title) === normaliseText(input.source.title) &&
+        (record.url ?? "") === (input.source.url ?? "") &&
+        (record.archiveRef?.repositoryName ?? "") === (input.source.archiveRef?.repositoryName ?? ""),
+    );
+    const fileSource: SourceRecord = existingSource ?? {
+      ...input.source,
+      countryCode,
+      sourceRecordId: `source:${countryCode.toLowerCase()}:${demoUlid()}`,
+      providerKind: "demo",
+      createdAt: new Date().toISOString(),
+    };
+    if (!existingSource) {
+      sources[fileSource.sourceRecordId!] = fileSource;
+      saveMap(SOURCES_KEY, sources);
+    }
+
+    // idempotency scope: prior batch-import drafts under this source
+    // record — a row is a duplicate when locator OR content hash matches
+    const drafts = loadMap<EvidenceDraft>(DRAFTS_KEY);
+    const priorImports = Object.values(drafts).filter(
+      (draft) =>
+        draft.claimProvenance?.origin === "batch_import" &&
+        draft.sourceRecordId === fileSource.sourceRecordId,
+    );
+    const priorKeys = new Set(priorImports.map((draft) => draft.claimProvenance?.sourceClaimKey).filter(Boolean));
+    const priorHashes = new Set(priorImports.map((draft) => draft.claimProvenance?.claimHash).filter(Boolean));
+
+    const tasks = loadMap<WorkTask>(FREE_TASKS_KEY);
+    const rowReports: BatchImportRowReport[] = [];
+    let imported = 0;
+    let rejected = 0;
+    let parkedSensitive = 0;
+    let skippedExisting = 0;
+
+    for (const row of parsed.rows) {
+      const name = row.values["name"] || undefined;
+      const locator = row.values["source_locator"] || undefined;
+      const problems = validateImportRow(row, countryCode);
+      if (problems.length > 0) {
+        rejected += 1;
+        rowReports.push({ rowNumber: row.rowNumber, name, sourceLocator: locator, status: "rejected", problems });
+        continue;
+      }
+      if (isParkedSensitive(row, countryCode)) {
+        parkedSensitive += 1;
+        rowReports.push({
+          rowNumber: row.rowNumber,
+          name,
+          sourceLocator: locator,
+          status: "parked_sensitive",
+          problems: ["Answer the kastom prompt (culturally_sensitive: yes or no) or nominate this place individually."],
+        });
+        continue;
+      }
+      const key = sourceClaimKey(fileSource.sourceRecordId!, locator!);
+      const hash = claimHash(row);
+      if (priorKeys.has(key) || priorHashes.has(hash)) {
+        skippedExisting += 1;
+        rowReports.push({
+          rowNumber: row.rowNumber,
+          name,
+          sourceLocator: locator,
+          status: "skipped_existing",
+          problems: ["Already imported in an earlier upload of this source; not duplicated."],
+        });
+        continue;
+      }
+
+      const built = buildImportClaim(row, countryCode, fileSource, batchId);
+      const taskId = freeTaskId(countryCode, "batch-claim");
+      const draftId = `${taskId}:draft`;
+      const task: WorkTask = {
+        taskId,
+        countryCode,
+        batchId,
+        siteName: built.siteName,
+        taskKind: "source_extraction",
+        instructions: `Imported from ${sourceTitle(fileSource)}, entry ${locator}. Review the evidence, then submit for review.`,
+        targetYears: countryCode === "VU" ? [1989, 1999, 2009, 2020] : [2013, 2018, 2023],
+        status: "draft_saved",
+        lat: built.lat,
+        lng: built.lng,
+      };
+      const draft: EvidenceDraft = {
+        ...built.draft,
+        draftId,
+        taskId,
+        candidateSiteId: candidateSiteId(countryCode),
+        sourceFirstId: taskId,
+        updatedAt: new Date().toISOString(),
+      };
+      // dedup screening is assistance: candidates ride on the claim for
+      // the reviewer, and never block creation
+      draft.dedupCandidates = await this.listDedupCandidates({
+        countryCode,
+        name: built.siteName,
+        locality: row.values["locality"] || row.values["containing_area"] || undefined,
+        lat: built.lat,
+        lng: built.lng,
+      });
+      tasks[taskId] = task;
+      drafts[draftId] = draft;
+      priorKeys.add(key);
+      priorHashes.add(hash);
+      imported += 1;
+      rowReports.push({
+        rowNumber: row.rowNumber,
+        name,
+        sourceLocator: locator,
+        status: "imported",
+        problems: [],
+        draftId,
+        taskId,
+      });
+    }
+
+    saveMap(FREE_TASKS_KEY, tasks);
+    saveMap(DRAFTS_KEY, drafts);
+    for (const report of rowReports) {
+      if (report.taskId) this.setTaskStatus(report.taskId, "draft_saved");
+    }
+
+    return {
+      batchId,
+      sourceRecordId: fileSource.sourceRecordId,
+      totalRows: parsed.rows.length,
+      imported,
+      rejected,
+      parkedSensitive,
+      skippedExisting,
+      fileProblems: [],
+      rows: rowReports,
+    };
+  }
+
+  async createCorrection(input: CorrectionInput): Promise<FreeContributionHandle> {
+    this.ensureDemoAgentSeed();
+    const countryCode = input.countryCode.toUpperCase();
+    const now = new Date().toISOString();
+    const taskId = freeTaskId(countryCode, "correction");
+    const mapNote =
+      input.mapContext?.lat !== undefined && input.mapContext?.lng !== undefined
+        ? ` Map context: ${input.mapContext.lat}, ${input.mapContext.lng} (display only — location evidence must come from your sources).`
+        : "";
+    const task: WorkTask = {
+      taskId,
+      countryCode,
+      batchId: "map-correction",
+      siteId: input.siteId,
+      siteName: input.siteName ?? input.siteId,
+      taskKind: "verify_site",
+      instructions: `Record source-backed evidence to correct or verify this existing site.${mapNote}`,
+      targetYears: countryCode === "VU" ? [1989, 1999, 2009, 2020] : [2013, 2018, 2023],
+      status: "draft_saved",
+      // display context only; the evidence draft's location stays empty
+      // until the contributor's source supports one
+      lat: input.mapContext?.lat,
+      lng: input.mapContext?.lng,
+    };
+    const draft: EvidenceDraft = {
+      draftId: `${taskId}:draft`,
+      taskId,
+      countryCode,
+      targetYearStatuses: {},
+      attributes: { name: input.siteName },
+      lifecycle: [],
+      sources: [],
+      updatedAt: now,
+      state: "draft",
+      contributionMode: "place_first",
+      lane: "fixed",
+      origin: "map_correction",
+      providerKind: "demo",
+      claimProvenance: { lane: "fixed", origin: "map_correction" },
+    };
+    const tasks = loadMap<WorkTask>(FREE_TASKS_KEY);
+    const drafts = loadMap<EvidenceDraft>(DRAFTS_KEY);
+    tasks[taskId] = task;
+    drafts[draft.draftId] = draft;
+    saveMap(FREE_TASKS_KEY, tasks);
+    saveMap(DRAFTS_KEY, drafts);
+    this.setTaskStatus(taskId, "draft_saved");
+    return { task, draft, candidateSiteId: input.siteId };
   }
 
   private setTaskStatus(taskId: string, status: WorkTask["status"]): void {

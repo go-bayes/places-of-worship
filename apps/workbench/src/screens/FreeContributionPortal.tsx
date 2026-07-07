@@ -42,6 +42,16 @@ const emptyIdentity: IdentityFields = {
   sourceNotes: "",
 };
 
+// identity fields seeded from the map-route context, when there is one
+function identityWithContext(context?: { lat?: number; lng?: number; name?: string }): IdentityFields {
+  return {
+    ...emptyIdentity,
+    name: context?.name ?? "",
+    lat: context?.lat !== undefined ? String(context.lat) : "",
+    lng: context?.lng !== undefined ? String(context.lng) : "",
+  };
+}
+
 // one dense line telling the RA which stage they are on and what remains
 function StepCue(props: { steps: string[]; current: number }) {
   const label = props.steps[props.current] ?? "";
@@ -98,8 +108,11 @@ export function FreeContributionPortal(props: {
   country: CountryConfig;
   provider: WorkbenchProvider;
   onChanged: () => Promise<void>;
+  /** map-route context: prefills the place-first identity fields and
+      skips the mode chooser, since the contributor arrived from a dot */
+  initialMapContext?: { lat?: number; lng?: number; name?: string };
 }) {
-  const [mode, setMode] = useState<PortalMode>("chooser");
+  const [mode, setMode] = useState<PortalMode>(props.initialMapContext ? "place_first" : "chooser");
 
   return (
     <div>
@@ -121,8 +134,17 @@ export function FreeContributionPortal(props: {
           Change mode
         </button>
       )}
-      {mode === "place_first" && <PlaceFirstFlow {...props} />}
-      {mode === "source_first" && <SourceFirstFlow {...props} />}
+      {mode === "place_first" && (
+        <PlaceFirstFlow
+          country={props.country}
+          provider={props.provider}
+          onChanged={props.onChanged}
+          initialMapContext={props.initialMapContext}
+        />
+      )}
+      {mode === "source_first" && (
+        <SourceFirstFlow country={props.country} provider={props.provider} onChanged={props.onChanged} />
+      )}
     </div>
   );
 }
@@ -131,8 +153,11 @@ function PlaceFirstFlow(props: {
   country: CountryConfig;
   provider: WorkbenchProvider;
   onChanged: () => Promise<void>;
+  initialMapContext?: { lat?: number; lng?: number; name?: string };
 }) {
-  const [identity, setIdentity] = useState<IdentityFields>(emptyIdentity);
+  const [identity, setIdentity] = useState<IdentityFields>(() =>
+    identityWithContext(props.initialMapContext),
+  );
   const [sensitivityAnswered, setSensitivityAnswered] = useState(!props.country.culturalSensitivityPrompt);
   const [culturallySensitive, setCulturallySensitive] = useState(false);
   const [sensitivityBasis, setSensitivityBasis] = useState("");
@@ -143,8 +168,10 @@ function PlaceFirstFlow(props: {
   const [draft, setDraft] = useState<EvidenceDraft | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
+  // the reset must be idempotent under StrictMode's doubled effects, so
+  // it resets TO the map-route prefill rather than skipping a first run
   useEffect(() => {
-    setIdentity(emptyIdentity);
+    setIdentity(identityWithContext(props.initialMapContext));
     setSensitivityAnswered(!props.country.culturalSensitivityPrompt);
     setCulturallySensitive(false);
     setSensitivityBasis("");

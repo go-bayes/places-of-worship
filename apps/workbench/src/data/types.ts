@@ -188,6 +188,8 @@ export type ClaimOrigin =
   | "assigned_task"
   | "free_place_first"
   | "source_first"
+  | "batch_import"
+  | "map_correction"
   | "agent_assisted"
   | "agent_autonomous";
 
@@ -200,6 +202,11 @@ export interface ClaimProvenance {
   agentRunId?: string;
   sourceRecordId?: string;
   sourceLocator?: string;
+  /** batch-import idempotency: (source record, locator) key plus a
+      content hash — a row is a duplicate only when locator or hash says so */
+  sourceClaimKey?: string;
+  claimHash?: string;
+  importBatchId?: string;
   extractionConfidence?: Confidence;
   fieldProvenance?: Record<string, FieldProvenanceState>;
   confirmedBy?: string;
@@ -305,6 +312,53 @@ export interface HumanRejectionInput {
   draftId: string;
   rejectedBy: string;
   reason: string;
+}
+
+/** curator batch import: one file, one file-level source record, many
+    source-first claims (docs/portal-batch-import-and-corrections.md) */
+export interface BatchImportInput {
+  countryCode: string;
+  source: SourceRecordInput;
+  csvText: string;
+}
+
+export type BatchImportRowStatus =
+  | "imported"
+  | "rejected"
+  | "parked_sensitive"
+  | "skipped_existing";
+
+export interface BatchImportRowReport {
+  rowNumber: number;
+  name?: string;
+  sourceLocator?: string;
+  status: BatchImportRowStatus;
+  /** the specific rules a rejected row broke, in submit-path wording */
+  problems: string[];
+  draftId?: string;
+  taskId?: string;
+}
+
+export interface BatchImportReport {
+  batchId: string;
+  sourceRecordId?: string;
+  totalRows: number;
+  imported: number;
+  rejected: number;
+  parkedSensitive: number;
+  skippedExisting: number;
+  /** file-level failures (headers, size, parse); when set, no rows ran */
+  fileProblems: string[];
+  rows: BatchImportRowReport[];
+}
+
+/** a map-dot correction: evidence against an existing site, never an
+    edit — identity is pre-resolved via the site id */
+export interface CorrectionInput {
+  countryCode: string;
+  siteId: string;
+  siteName?: string;
+  mapContext?: { lat?: number; lng?: number; zoom?: number };
 }
 
 /** the evidence an RA drafts against a task; superset of the pilot's

@@ -26,6 +26,23 @@
   non-blocking findings from the PR #17 review, including field
   provenance on the generic agent-draft confirm path.
 
+- Built the ratified batch-import and correction designs. Curators can
+  import a CSV of nominations in the workbench: one file-level source
+  record, per-row validation in the submit path's own wording plus the
+  two owned stricter rules, a repairable per-row report
+  (imported/rejected/parked/skipped), locator-plus-hash idempotent
+  re-uploads, VU rows parked without an explicit kastom answer, and
+  every imported row arriving as an unsubmitted draft in the standard
+  queue. The workbench also accepts the map route: `?site=` opens a
+  correction bound to that existing site (map coordinates shown as
+  display-only context, never copied into evidence), and coordinates
+  without a site prefill a place-first nomination; parameters are
+  consumed once and stripped so refresh cannot duplicate work. Browser-
+  verified end to end in demo mode; an inert Convex mirror
+  (`batchImport:importNominationBatch`, curator/admin-gated, drafts
+  only) waits on the JB-gated binding. Map-side links stay dormant per
+  the publication plan.
+
 - Ratified design notes for the portal's next arc
   (docs/portal-batch-import-and-corrections.md, reviewed by the same
   second instance): curator-lane batch import of site nominations with

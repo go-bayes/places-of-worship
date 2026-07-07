@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { countries, defaultCountryCode, getCountry } from "./config";
 import { DemoProvider } from "./data/demoProvider";
 import type { EvidenceDraft, WorkTask } from "./data/types";
+import { BatchImport } from "./screens/BatchImport";
 import { DraftEvidenceEditor, EvidenceForm } from "./screens/EvidenceForm";
 import { FreeContributionPortal } from "./screens/FreeContributionPortal";
 import { MyWork } from "./screens/MyWork";
@@ -9,7 +10,37 @@ import { TaskList } from "./screens/TaskList";
 
 const provider = new DemoProvider();
 
-type View = "tasks" | "my_work" | "nominate";
+type View = "tasks" | "my_work" | "nominate" | "import";
+
+// map-route entry (docs/portal-batch-import-and-corrections.md): the
+// workbench accepts country/site/name/lat/lng/zoom parameters. with
+// `site`, the flow is a correction bound to that existing site;
+// without it, plain workbench. invalid parameters degrade silently.
+interface MapRouteParams {
+  countryCode?: string;
+  siteId?: string;
+  siteName?: string;
+  lat?: number;
+  lng?: number;
+}
+
+function readMapRouteParams(): MapRouteParams | null {
+  const params = new URLSearchParams(window.location.search);
+  if ([...params.keys()].length === 0) return null;
+  const number = (key: string) => {
+    const raw = params.get(key);
+    if (raw === null || raw.trim() === "" || Number.isNaN(Number(raw))) return undefined;
+    return Number(raw);
+  };
+  const countryRaw = params.get("country")?.toUpperCase();
+  return {
+    countryCode: countryRaw && countries[countryRaw] ? countryRaw : undefined,
+    siteId: params.get("site")?.trim() || undefined,
+    siteName: params.get("name")?.trim() || undefined,
+    lat: number("lat"),
+    lng: number("lng"),
+  };
+}
 
 // an open My-work record: the draft plus the task record it belongs to,
 // so the editor has its site name, batch, and target years
@@ -48,6 +79,41 @@ export function App() {
     setOpenRecord(null);
     void refresh();
   }, [refresh]);
+
+  const [mapContext, setMapContext] = useState<{ lat?: number; lng?: number; name?: string } | null>(null);
+
+  // consume map-route parameters exactly once, then strip them from the
+  // URL so a refresh cannot mint a duplicate correction task
+  const routeHandled = useRef(false);
+  useEffect(() => {
+    if (routeHandled.current) return;
+    routeHandled.current = true;
+    const route = readMapRouteParams();
+    if (!route) return;
+    window.history.replaceState(null, "", window.location.pathname);
+    const routeCountry = route.countryCode ?? defaultCountryCode;
+    if (route.countryCode) setCountryCode(route.countryCode);
+    if (route.siteId) {
+      void (async () => {
+        const handle = await provider.createCorrection({
+          countryCode: routeCountry,
+          siteId: route.siteId!,
+          siteName: route.siteName,
+          mapContext: { lat: route.lat, lng: route.lng },
+        });
+        await refresh();
+        setView("tasks");
+        setSelectedTaskId(handle.task.taskId);
+      })();
+    } else if (route.lat !== undefined || route.lng !== undefined || route.siteName) {
+      // a nomination started from the map opens the nominate flow; the
+      // map context prefills the place-first identity fields
+      setMapContext({ lat: route.lat, lng: route.lng, name: route.siteName });
+      setView("nominate");
+    }
+    // refresh is stable per country; run-once semantics are the point
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // open a My-work item in its editor: resolve its task record, then show
   // the record view. a draft opens editable; a submitted record opens
@@ -129,6 +195,17 @@ export function App() {
               My work
             </button>
           </div>
+          <button
+            className={view === "import" ? undefined : "secondary"}
+            style={{ width: "100%", marginBottom: 10 }}
+            onClick={() => {
+              setView("import");
+              setSelectedTaskId(null);
+              setOpenRecord(null);
+            }}
+          >
+            Import batch (curator)
+          </button>
           {view === "tasks" ? (
             <TaskList
               tasks={activeTasks}
@@ -181,7 +258,14 @@ export function App() {
               />
             </div>
           ) : view === "nominate" ? (
-            <FreeContributionPortal country={country} provider={provider} onChanged={refresh} />
+            <FreeContributionPortal
+              country={country}
+              provider={provider}
+              onChanged={refresh}
+              initialMapContext={mapContext ?? undefined}
+            />
+          ) : view === "import" ? (
+            <BatchImport country={country} provider={provider} onChanged={refresh} />
           ) : selectedTask ? (
             <EvidenceForm
               key={selectedTask.taskId}
