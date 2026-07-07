@@ -1887,6 +1887,27 @@ class NzVerificationMap {
         });
     }
 
+    // post-submit confirmation pane, mirroring the review portal's
+    // "decision recorded" return-to-list. the submitted task rightly leaves
+    // the available list in assignment mode, so the prompt points at the
+    // next task rather than the one just finished.
+    renderSubmissionRecordedDetail(props, { unresolved = false } = {}) {
+        const panel = document.getElementById("detailPanel");
+        if (!panel) return;
+        panel.innerHTML = `
+            <h2>${unresolved ? "Unresolved note submitted" : "Submitted for review"}</h2>
+            <div class="copy-status" role="status">
+                ${escapeHtml(props.name || "Unnamed site")} ${props.task_id ? `(${escapeHtml(props.task_id)})` : ""} —
+                ${unresolved
+                    ? "saved as an unresolved note for review."
+                    : "saved to the shared backend and submitted for review."}
+            </div>
+            <div class="pilot-note" role="note">
+                Pick another task from the map or list.${this.filterActiveHint()}
+            </div>
+        `;
+    }
+
     focusNominationPanel() {
         const panel = document.getElementById("nominationPanel");
         const details = document.getElementById("nominationDetails");
@@ -3076,6 +3097,18 @@ class NzVerificationMap {
                 this.revisionDraftIdsByTaskId.delete(props.task_id);
             }
             await this.refreshBackendTasks();
+            if (unresolved || submit) {
+                // a recorded submission closes the task for this ra: mirror
+                // the review portal's return-to-list by clearing the
+                // selection, re-rendering the queue, and replacing the detail
+                // pane with a confirmation. drafts stay open below so the ra
+                // can keep editing.
+                this.selectedTask = null;
+                this.applyFilters();
+                this.renderSubmissionRecordedDetail(props, { unresolved });
+                this.focusDetailPanel();
+                return;
+            }
             if (ASSIGNMENT_MODE) {
                 const refreshed = this.featureForTaskId(props.task_id);
                 if (refreshed) this.selectedTask = refreshed;
@@ -3086,13 +3119,9 @@ class NzVerificationMap {
             this.updateWorkflowSteps();
             if (status) {
                 const submitError = this.evidenceInputError(values, { submit: true });
-                status.textContent = unresolved
-                    ? `Saved as an unresolved note for review. Pick another task from the map or list.${this.filterActiveHint()}`
-                    : submit
-                    ? `Saved to the shared backend and submitted for review. Pick another task from the map or list.${this.filterActiveHint()}`
-                    : submitError
-                        ? `Draft saved to the shared backend. It still needs more detail before submission: ${submitError}`
-                        : "Draft saved to the shared backend. Submit for review when the row is ready.";
+                status.textContent = submitError
+                    ? `Draft saved to the shared backend. It still needs more detail before submission: ${submitError}`
+                    : "Draft saved to the shared backend. Submit for review when the row is ready.";
             }
         } catch (error) {
             if (error.authExpired) {
