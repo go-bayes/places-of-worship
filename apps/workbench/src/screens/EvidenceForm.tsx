@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { CountryConfig } from "../config";
+import { markHumanEdits } from "../data/provenance";
 import type { WorkbenchProvider } from "../data/provider";
 import type {
   Confidence,
@@ -231,7 +232,9 @@ export function DraftEvidenceEditor(props: {
   const readOnly = readOnlyStates.has(props.draft.state);
 
   function update(patch: Partial<EvidenceDraft>): void {
-    props.onDraftChange({ ...props.draft, ...patch });
+    // keep field provenance current on every path that edits an
+    // agent-assisted draft; markHumanEdits is a no-op for other lanes
+    props.onDraftChange(markHumanEdits(props.draft, { ...props.draft, ...patch }));
   }
 
   function normalisedForSave(): EvidenceDraft {

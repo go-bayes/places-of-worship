@@ -104,7 +104,8 @@ live Vite preview (port 5176, portal-workbench worktree):
   sole persistence call in `src` is localStorage in `demoProvider.ts`;
   no fetch/XHR/WebSocket usage anywhere in the app; console clean.
 
-Known limits parked for later sittings: the My work sidebar list is
+Known limits parked for later sittings (the My work limit is addressed
+by the friendliness pass below): the My work sidebar list is
 display-only (no click-through to a detail route), and the
 agent-assisted extraction workspace exists behind the provider surface
 with seeded demo drafts but has not yet had a dedicated verification

@@ -94,30 +94,6 @@ function mergeDraft(list: EvidenceDraft[], draft: EvidenceDraft): EvidenceDraft[
   return [draft, ...list];
 }
 
-function markHumanEdits(previous: EvidenceDraft, next: EvidenceDraft): EvidenceDraft {
-  if (previous.lane !== "agent_assisted_ra") return next;
-  const fieldProvenance = { ...next.claimProvenance?.fieldProvenance };
-  for (const [field, before, after] of [
-    ["attributes.name", previous.attributes?.name, next.attributes?.name],
-    ["attributes.religion", previous.attributes?.religion, next.attributes?.religion],
-    ["location.locality", previous.location?.locality, next.location?.locality],
-    ["location.containingArea", previous.location?.containingArea?.areaName, next.location?.containingArea?.areaName],
-    ["evidenceNotes", previous.evidenceNotes, next.evidenceNotes],
-  ] as const) {
-    if (before === after) continue;
-    fieldProvenance[field] = before ? "human_edited" : "human_added";
-  }
-  return {
-    ...next,
-    claimProvenance: {
-      lane: next.claimProvenance?.lane ?? "agent_assisted_ra",
-      origin: next.claimProvenance?.origin ?? "agent_assisted",
-      ...next.claimProvenance,
-      fieldProvenance,
-    },
-  };
-}
-
 export function FreeContributionPortal(props: {
   country: CountryConfig;
   provider: WorkbenchProvider;
@@ -763,7 +739,19 @@ function ClaimList(props: {
         </p>
       ) : (
         props.claims.map((draft) => (
-          <div key={draft.draftId} className="task-item" onClick={() => props.onSelect(draft)}>
+          <div
+            key={draft.draftId}
+            className="task-item"
+            role="button"
+            tabIndex={0}
+            onClick={() => props.onSelect(draft)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                props.onSelect(draft);
+              }
+            }}
+          >
             <div className="task-name">{draft.attributes?.name ?? draft.taskId}</div>
             <div className="task-meta">
               {draft.location?.locality ??
@@ -934,9 +922,10 @@ function AgentExtractionWorkspace(props: {
                 provider={props.provider}
                 draft={activeDraft}
                 onDraftChange={(next) => {
-                  const marked = markHumanEdits(activeDraft, next);
-                  setDrafts((current) => mergeDraft(current, marked));
-                  setActiveDraftId(marked.draftId);
+                  // the editor's update() already maintains field provenance
+                  // via the shared markHumanEdits (data/provenance.ts)
+                  setDrafts((current) => mergeDraft(current, next));
+                  setActiveDraftId(next.draftId);
                 }}
                 onChanged={async () => {
                   await refresh();
