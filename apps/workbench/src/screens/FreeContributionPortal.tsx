@@ -15,6 +15,7 @@ import {
   FieldProvenanceBadge,
   draftStateClass,
   sourceTypes,
+  stateLabel,
 } from "./EvidenceForm";
 
 type PortalMode = "chooser" | "place_first" | "source_first";
@@ -41,14 +42,16 @@ const emptyIdentity: IdentityFields = {
   sourceNotes: "",
 };
 
-function draftLabel(draft: EvidenceDraft): string {
-  if (draft.state === "submitted") return "submitted for review";
-  if (draft.state === "agent_draft") return "agent draft";
-  if (draft.state === "human_confirmed") return "human confirmed";
-  if (draft.state === "rejected_by_human") return "rejected by human";
-  if (draft.state === "unresolved_note") return "unresolved note";
-  if (draft.state === "accepted_for_export") return "accepted for export";
-  return draft.state.replace(/_/g, " ");
+// one dense line telling the RA which stage they are on and what remains
+function StepCue(props: { steps: string[]; current: number }) {
+  const label = props.steps[props.current] ?? "";
+  return (
+    <p className="step-cue">
+      Step {props.current + 1} of {props.steps.length} —{" "}
+      <span className="step-current">{label}</span>
+      {props.current + 1 < props.steps.length ? ` · next: ${props.steps[props.current + 1]}` : ""}
+    </p>
+  );
 }
 
 function sourceSummary(source: SourceRecord | undefined): string {
@@ -178,6 +181,12 @@ function PlaceFirstFlow(props: {
 
   const highConfidenceCandidate = candidates?.some((candidate) => candidate.confidence === "high") ?? false;
 
+  // stages the RA moves through; the sensitivity stage only exists where the
+  // country protocol asks for it (Vanuatu)
+  const steps = props.country.culturalSensitivityPrompt
+    ? ["Choose mode", "Cultural sensitivity", "Identity", "Evidence"]
+    : ["Choose mode", "Identity", "Evidence"];
+
   async function checkCandidates(): Promise<void> {
     const found = await props.provider.listDedupCandidates({
       countryCode: props.country.countryCode,
@@ -226,7 +235,9 @@ function PlaceFirstFlow(props: {
     return (
       <div>
         <h2>Place-first nomination</h2>
+        <StepCue steps={steps} current={steps.length - 1} />
         <p className="field-note">
+          Record what your sources state, then save a draft or submit for review.
           Candidate id: <code>{handle.candidateSiteId}</code>
         </p>
         <DraftEvidenceEditor
@@ -245,33 +256,45 @@ function PlaceFirstFlow(props: {
 
   if (!sensitivityAnswered) {
     return (
-      <fieldset>
-        <legend>Cultural sensitivity</legend>
-        <label htmlFor="place-first-sensitive">
-          Is this a customary or kastom site, or otherwise culturally sensitive?
-        </label>
-        <select
-          id="place-first-sensitive"
-          value=""
-          onChange={(event) => {
-            // the empty placeholder is not an answer; the gate stays closed
-            if (event.target.value === "") return;
-            setCulturallySensitive(event.target.value === "yes");
-            setSensitivityAnswered(true);
-          }}
-        >
-          <option value="">choose before entering location detail</option>
-          <option value="no">No</option>
-          <option value="yes">Yes, handle location and detail as sensitive</option>
-        </select>
-      </fieldset>
+      <div>
+        <StepCue steps={steps} current={1} />
+        <fieldset>
+          <legend>Cultural sensitivity</legend>
+          <label htmlFor="place-first-sensitive">
+            Is this a customary or kastom site, or otherwise culturally sensitive?
+          </label>
+          <select
+            id="place-first-sensitive"
+            value=""
+            onChange={(event) => {
+              // the empty placeholder is not an answer; the gate stays closed
+              if (event.target.value === "") return;
+              setCulturallySensitive(event.target.value === "yes");
+              setSensitivityAnswered(true);
+            }}
+          >
+            <option value="">choose before entering location detail</option>
+            <option value="no">No</option>
+            <option value="yes">Yes, handle location and detail as sensitive</option>
+          </select>
+          <div className="field-note">
+            Answer this first. It sets how location detail is handled through
+            review, so the identity fields stay locked until you choose.
+          </div>
+        </fieldset>
+      </div>
     );
   }
 
   return (
     <div>
+      <StepCue steps={steps} current={steps.length - 2} />
       <fieldset>
         <legend>Minimal identity</legend>
+        <div className="field-note">
+          Enough to find and de-duplicate the place. You will add full evidence
+          in the next step.
+        </div>
         {props.country.culturalSensitivityPrompt && culturallySensitive && (
           <>
             <label htmlFor="place-first-sensitivity-basis">Sensitivity notes</label>
@@ -280,6 +303,10 @@ function PlaceFirstFlow(props: {
               value={sensitivityBasis}
               onChange={(event) => setSensitivityBasis(event.target.value)}
             />
+            <div className="field-note">
+              Note why this site is sensitive, so reviewers apply the right
+              display limits.
+            </div>
           </>
         )}
         <label htmlFor="place-first-name">Name in the source</label>
@@ -288,6 +315,10 @@ function PlaceFirstFlow(props: {
           value={identity.name}
           onChange={(event) => setIdentity({ ...identity, name: event.target.value })}
         />
+        <div className="field-note">
+          Record the name as the source gives it, even if it differs from the
+          modern name.
+        </div>
         <label htmlFor="place-first-locality">Locality or described place</label>
         <input
           id="place-first-locality"
@@ -338,6 +369,9 @@ function PlaceFirstFlow(props: {
           value={identity.sourceTitle}
           onChange={(event) => setIdentity({ ...identity, sourceTitle: event.target.value })}
         />
+        <div className="field-note">
+          A short title reviewers can use to find the document.
+        </div>
         <label htmlFor="place-first-source-notes">Source notes</label>
         <textarea
           id="place-first-source-notes"
@@ -345,6 +379,10 @@ function PlaceFirstFlow(props: {
           onChange={(event) => setIdentity({ ...identity, sourceNotes: event.target.value })}
         />
         <button onClick={() => void checkCandidates()}>Check for existing places</button>
+        <div className="field-note">
+          We compare your entry against known places so you do not create a
+          duplicate.
+        </div>
       </fieldset>
 
       {candidates && (
@@ -376,9 +414,28 @@ function DedupPanel(props: {
   onReasonChange: (reason: string) => void;
   onContinue: () => void;
 }) {
+  if (props.candidates.length === 0) {
+    return (
+      <fieldset>
+        <legend>Is it one of these?</legend>
+        <p className="field-note">
+          No existing places matched. Continue below to nominate this as a new
+          place of worship.
+        </p>
+        <button className="secondary" onClick={props.onContinue}>
+          Continue as new nomination
+        </button>
+        {props.message && <p className="field-note">{props.message}</p>}
+      </fieldset>
+    );
+  }
   return (
     <fieldset>
       <legend>Is it one of these?</legend>
+      <div className="field-note">
+        Use a match to add evidence to a place already on the map, or continue
+        as a new nomination if none is the same place.
+      </div>
       {props.candidates.map((candidate) => (
         <div key={`${candidate.siteId ?? candidate.candidateSiteId ?? candidate.taskId}`} className="dedup-item">
           <div>
@@ -404,6 +461,10 @@ function DedupPanel(props: {
             value={props.continueReason}
             onChange={(event) => props.onReasonChange(event.target.value)}
           />
+          <div className="field-note">
+            A close match was found. Say why this is a different place, so a
+            reviewer can tell them apart.
+          </div>
         </>
       )}
       {props.message && <p className="field-note">{props.message}</p>}
@@ -451,7 +512,7 @@ function SourceFirstFlow(props: {
       const created = await props.provider.createSourceRecord(source);
       setSourceRecord(created.sourceRecord);
       await refreshClaims(created.sourceRecord);
-      setMessage("Source record saved.");
+      setMessage("Source record saved. Next, create a claim from it below.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Source record could not be saved.");
     }
@@ -463,6 +524,9 @@ function SourceFirstFlow(props: {
       countryCode: props.country.countryCode,
       mode: "source_first",
       sourceRecordId: sourceRecord.sourceRecordId,
+      // name the claim after its source so My work shows something real
+      // until the RA names the place itself
+      name: sourceRecord.title ? `Claim from: ${sourceRecord.title}` : undefined,
       containingArea: { areaName: props.country.countryName, areaType: "country", countryCode: props.country.countryCode },
     });
     setActiveTask(created.task);
@@ -474,12 +538,21 @@ function SourceFirstFlow(props: {
     setSource({ ...source, ...patch });
   }
 
+  // stages the RA moves through in source-first: mode, the source record,
+  // then the claims extracted from it
+  const sourceSteps = ["Choose mode", "Source record", "Claims"];
+
   return (
     <div>
       <h2>Source-first</h2>
+      <StepCue steps={sourceSteps} current={sourceRecord ? 2 : 1} />
       {!sourceRecord ? (
         <fieldset>
           <legend>Source record</legend>
+          <div className="field-note">
+            Describe the document first. You will extract one claim at a time
+            from it in the next step.
+          </div>
           <label htmlFor="source-first-type">Source type</label>
           <select
             id="source-first-type"
@@ -498,6 +571,9 @@ function SourceFirstFlow(props: {
             value={source.title}
             onChange={(event) => updateSource({ title: event.target.value })}
           />
+          <div className="field-note">
+            A short title reviewers can use to find the document (avoid "NA").
+          </div>
           <label htmlFor="source-first-url">URL</label>
           <input
             id="source-first-url"
@@ -579,6 +655,7 @@ function SourceFirstFlow(props: {
                   })
                 }
               />
+              <div className="field-note">Use YYYY, YYYY-MM, or YYYY-MM-DD.</div>
             </div>
             <div>
               <label htmlFor="source-first-location">Archive location</label>
@@ -674,9 +751,16 @@ function ClaimList(props: {
   return (
     <fieldset>
       <legend>Claim list</legend>
+      <div className="field-note">
+        Each claim is one place the source describes. Add one per place, then
+        open it to record full evidence.
+      </div>
       <button onClick={props.onCreateClaim}>Create claim from this source</button>
       {props.claims.length === 0 ? (
-        <p className="field-note">No claims saved for this source yet.</p>
+        <p className="field-note">
+          No claims yet. Create your first claim from this source to start
+          recording evidence.
+        </p>
       ) : (
         props.claims.map((draft) => (
           <div key={draft.draftId} className="task-item" onClick={() => props.onSelect(draft)}>
@@ -686,7 +770,7 @@ function ClaimList(props: {
                 draft.location?.containingArea?.areaName ??
                 "regional placement not entered"}
             </div>
-            <span className={`status-pill ${draftStateClass(draft.state)}`}>{draftLabel(draft)}</span>
+            <span className={`status-pill ${draftStateClass(draft.state)}`}>{stateLabel(draft.state)}</span>
           </div>
         ))
       )}
@@ -762,7 +846,7 @@ function AgentExtractionWorkspace(props: {
     const submitted = { ...draft, state: "submitted" as const, updatedAt: new Date().toISOString() };
     setDrafts((current) => mergeDraft(current, submitted));
     setActiveDraftId(submitted.draftId);
-    setMessage("Submitted for review.");
+    setMessage("Submitted for review. A reviewer will look at this; you can track it under My work.");
     await props.onChanged();
   }
 
@@ -770,7 +854,10 @@ function AgentExtractionWorkspace(props: {
     <fieldset>
       <legend>Agent-assisted extraction</legend>
       {agentDrafts.length === 0 ? (
-        <p className="field-note">No agent-assisted demo claims for this country.</p>
+        <p className="field-note">
+          No agent-assisted claims for this country yet. When an agent extracts
+          claims from a source, they appear here for you to confirm or reject.
+        </p>
       ) : (
         <>
           <SourcePanel source={agentDrafts[0]?.sources[0]} />
@@ -793,7 +880,7 @@ function AgentExtractionWorkspace(props: {
                     <td>{draft.location?.locality ?? draft.location?.containingArea?.areaName ?? "not placed"}</td>
                     <td>{firstLifecycleDate(draft)}</td>
                     <td>
-                      <span className={`status-pill ${draftStateClass(draft.state)}`}>{draftLabel(draft)}</span>
+                      <span className={`status-pill ${draftStateClass(draft.state)}`}>{stateLabel(draft.state)}</span>
                     </td>
                     <td>
                       <FieldProvenanceBadge state={draft.claimProvenance?.fieldProvenance?.["attributes.name"]} />{" "}

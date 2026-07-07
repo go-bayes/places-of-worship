@@ -112,3 +112,15 @@ pass of its confirm/reject/submit gating in the browser.
 
 Publication, Convex binding, and invites are prepared as deliberate
 JB steps in `docs/development/workbench-publication-plan.md`.
+
+Friendliness pass (2026-07-07, JB request): My work items now open
+their record (drafts editable, submitted read-only, agent drafts with
+a confirm-as-own-work path), task cards use plain-language kind labels
+with an outline batch tag, the nominate flows carry step cues,
+validation messages read as guidance with date-format help text, and
+empty states explain themselves. Reviewed by a multi-angle code review;
+fixes applied and browser-verified. Deferred cleanups for a later
+sitting: derive the App open-record state instead of resetting it in
+each handler; move the task-kind label map nearer the data types; lift
+the nominate step arrays into country config when a third country
+needs a different flow.

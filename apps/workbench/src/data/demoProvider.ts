@@ -128,6 +128,15 @@ export class DemoProvider implements WorkbenchProvider {
       .map((task) => ({ ...task, status: overrides[task.taskId] ?? task.status }));
   }
 
+  async getTask(taskId: string): Promise<WorkTask | null> {
+    this.ensureDemoAgentSeed();
+    const overrides = loadMap<WorkTask["status"]>(TASKS_KEY);
+    const freeTasks = loadMap<WorkTask>(FREE_TASKS_KEY);
+    const found = freeTasks[taskId] ?? demoTasks.find((task) => task.taskId === taskId);
+    if (!found) return null;
+    return { ...found, status: overrides[taskId] ?? found.status };
+  }
+
   async getDraft(taskId: string): Promise<EvidenceDraft | null> {
     this.ensureDemoAgentSeed();
     const drafts = loadMap<EvidenceDraft>(DRAFTS_KEY);
@@ -206,7 +215,7 @@ export class DemoProvider implements WorkbenchProvider {
       countryCode: input.countryCode,
       batchId: "demo-free-contribution",
       siteId: chosenCandidate?.siteId,
-      siteName: input.name ?? chosenCandidate?.name ?? "Nominate missing PoW",
+      siteName: input.name ?? chosenCandidate?.name ?? "Unnamed nomination",
       taskKind: input.mode === "place_first" ? "deep_history" : "source_extraction",
       instructions:
         input.mode === "place_first"

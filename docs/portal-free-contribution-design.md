@@ -276,6 +276,7 @@ Convex or localStorage from screens.
 export interface WorkbenchProvider {
   readonly kind: "demo" | "convex";
   listTasks(countryCode: string): Promise<WorkTask[]>;
+  getTask(taskId: string): Promise<WorkTask | null>;
   getDraft(taskId: string): Promise<EvidenceDraft | null>;
   saveDraft(draft: EvidenceDraft): Promise<void>;
   submitForReview(draftId: string): Promise<void>;

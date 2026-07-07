@@ -26,6 +26,18 @@ const NO_BUILDING = "no_building_present";
 
 type WorshipUseChoice = WorshipUseStatus | typeof NO_BUILDING | "";
 
+// plain-language names for task kinds, so cards read calmly rather than
+// exposing raw enum values
+const taskKindLabels: Record<WorkTask["taskKind"], string> = {
+  verify_site: "Verify a site",
+  source_extraction: "Extract from a source",
+  deep_history: "Trace a site's history",
+};
+
+export function taskKindLabel(kind: WorkTask["taskKind"]): string {
+  return taskKindLabels[kind] ?? kind.replace(/_/g, " ");
+}
+
 export const sourceTypes: { value: SourceType; label: string }[] = [
   { value: "osm_history", label: "OSM history" },
   { value: "osm_date_tags", label: "OSM date tags" },
@@ -71,7 +83,9 @@ const geocodingBases: { value: GeocodingBasis; label: string }[] = [
   { value: "unknown", label: "Unknown" },
 ];
 
-const readOnlyStates = new Set<EvidenceDraftState>([
+// single source of truth for which states open read-only; MyWork's
+// open-hint derives from this same set so hint and editor cannot drift
+export const readOnlyStates = new Set<EvidenceDraftState>([
   "submitted",
   "accepted_for_export",
   "rejected",
@@ -101,7 +115,7 @@ function draftWorshipChoice(draft: EvidenceDraft): WorshipUseChoice {
   return draft.worshipUseStatus ?? "";
 }
 
-function stateLabel(state: EvidenceDraftState): string {
+export function stateLabel(state: EvidenceDraftState): string {
   if (state === "submitted") return "submitted for review";
   if (state === "accepted_for_export") return "accepted for export";
   if (state === "agent_draft") return "agent draft";
@@ -237,19 +251,21 @@ export function DraftEvidenceEditor(props: {
     if (candidate.state === "rejected_by_human") {
       found.push("Rejected agent drafts cannot be submitted.");
     }
-    if (candidate.sources.length === 0) found.push("At least one source is required to submit.");
+    if (candidate.sources.length === 0) {
+      found.push("Add at least one source so a reviewer can check the evidence.");
+    }
     for (const source of candidate.sources) {
       if (!source.title.trim() || /^n\/?a$/i.test(source.title.trim())) {
-        found.push("Every source needs a real title (not NA).");
+        found.push("Give each source a real title reviewers can find it by (not NA).");
       }
       if (!source.url?.trim() && !source.archiveRef) {
-        found.push("Every source needs either a URL or an archive reference.");
+        found.push("Add a URL or an archive reference so each source can be located.");
       }
       if (source.archiveRef && (!source.archiveRef.repositoryName.trim() || !source.archiveRef.collection.trim())) {
-        found.push("Archive references need a repository and collection.");
+        found.push("Name the repository and collection for each archive reference.");
       }
       if (source.archiveRef && !source.archiveRef.consultedDate.trim()) {
-        found.push("Archive references need a consulted date.");
+        found.push("Add the date you consulted the archive, so the citation is complete.");
       }
       for (const [label, value] of [
         ["source date", source.sourceDate],
@@ -257,36 +273,36 @@ export function DraftEvidenceEditor(props: {
         ["archive consulted date", source.archiveRef?.consultedDate],
       ] as const) {
         if (value && !PARTIAL_DATE.test(value)) {
-          found.push(`Source ${label} must be YYYY, YYYY-MM, or YYYY-MM-DD.`);
+          found.push(`Write the source ${label} as YYYY, YYYY-MM, or YYYY-MM-DD.`);
         }
       }
     }
     for (const claim of candidate.lifecycle) {
       for (const value of [claim.date.value, claim.date.notEarlierThan, claim.date.notLaterThan]) {
         if (value && !PARTIAL_DATE.test(value)) {
-          found.push("Lifecycle dates must be YYYY, YYYY-MM, or YYYY-MM-DD.");
+          found.push("Write lifecycle dates as YYYY, YYYY-MM, or YYYY-MM-DD.");
         }
       }
     }
     if (candidate.attributes?.denominationCode && !candidate.attributes.taxonomyVersion) {
-      found.push("A denomination code needs its taxonomy version.");
+      found.push("Add the taxonomy version that goes with the denomination code.");
     }
     if (candidate.location) {
       const hasLat = candidate.location.lat !== undefined;
       const hasLng = candidate.location.lng !== undefined;
-      if (hasLat !== hasLng) found.push("Coordinates need both latitude and longitude.");
+      if (hasLat !== hasLng) found.push("Enter both latitude and longitude, or leave both blank.");
       if (hasLat && candidate.location.geocodingBasis === "unknown") {
-        found.push("Coordinates need a geocoding basis.");
+        found.push("Choose a geocoding basis so reviewers know how you placed the point.");
       }
       if (
         candidate.location.geocodingBasis === "regional_only" &&
         !candidate.location.containingArea?.areaName.trim()
       ) {
-        found.push("Regional-only claims need a containing area.");
+        found.push("For a region-only claim, name the containing area.");
       }
     }
     if (country.culturalSensitivityPrompt && !sensitivityAcknowledged) {
-      found.push("Complete the cultural-sensitivity prompt before submitting.");
+      found.push("Answer the cultural-sensitivity prompt before submitting.");
     }
     return found;
   }
@@ -295,7 +311,7 @@ export function DraftEvidenceEditor(props: {
     const candidate = normalisedForSave();
     await provider.saveDraft(candidate);
     props.onDraftChange(candidate);
-    setMessage("Draft saved.");
+    setMessage("Draft saved. You can keep editing and submit when it is ready.");
     setProblems([]);
     await props.onChanged();
   }
@@ -311,7 +327,7 @@ export function DraftEvidenceEditor(props: {
       await provider.saveDraft(candidate);
       await provider.submitForReview(candidate.draftId);
       props.onDraftChange({ ...candidate, state: "submitted", updatedAt: new Date().toISOString() });
-      setMessage("Submitted for review.");
+      setMessage("Submitted for review. A reviewer will look at this; you can track it under My work.");
       setProblems([]);
       await props.onChanged();
     } catch (error) {
@@ -325,14 +341,30 @@ export function DraftEvidenceEditor(props: {
     await props.onChanged();
   }
 
+  // an agent draft opened outside the extraction workspace still needs a
+  // path to human ownership; this mirrors the workspace's confirm action
+  async function handleConfirmAgentDraft(): Promise<void> {
+    const candidate = normalisedForSave();
+    await provider.saveDraft(candidate);
+    const confirmed = await provider.confirmAgentDraft({
+      draftId: candidate.draftId,
+      confirmedBy: "demo human",
+      fieldProvenance: candidate.claimProvenance?.fieldProvenance,
+    });
+    props.onDraftChange(confirmed);
+    setMessage("Claim confirmed as your own work. You can now submit it for review.");
+    await props.onChanged();
+  }
+
   return (
     <div>
       {props.showTaskHeader && (
         <>
           <h1>{task.siteName ?? task.taskId}</h1>
-          <p className="field-note">
-            {task.taskKind.replace(/_/g, " ")} · batch {task.batchId}
-            {task.siteId ? ` · site ${task.siteId}` : " · source-first (no site yet)"}
+          <p className="task-meta">
+            {taskKindLabel(task.taskKind)}
+            {task.siteId ? ` · linked to site ${task.siteId}` : " · source-first (no site yet)"}
+            <span className="batch-tag">batch {task.batchId}</span>
           </p>
           <p>{task.instructions}</p>
         </>
@@ -357,7 +389,8 @@ export function DraftEvidenceEditor(props: {
       {props.draft.state === "agent_draft" && (
         <div className="demo-warning">
           Agent draft claims cannot be submitted until a human confirms the
-          extracted claim.
+          extracted claim. Review the fields, then confirm the claim as your
+          own work below.
         </div>
       )}
 
@@ -444,7 +477,7 @@ export function DraftEvidenceEditor(props: {
 
       {problems.length > 0 && (
         <div className="demo-warning">
-          <strong>Before submitting:</strong>
+          <strong>A few things to finish before submitting:</strong>
           <ul className="compact-list">
             {problems.map((problem) => (
               <li key={problem}>{problem}</li>
@@ -455,6 +488,11 @@ export function DraftEvidenceEditor(props: {
       {message && <p className="field-note">{message}</p>}
 
       <div className="action-row">
+        {props.draft.state === "agent_draft" && !readOnly && (
+          <button onClick={() => void handleConfirmAgentDraft()}>
+            Confirm as my own work
+          </button>
+        )}
         <button disabled={readOnly} onClick={() => void handleSave()}>
           Save draft
         </button>
@@ -867,6 +905,11 @@ function LifecycleFields(props: {
               />
             </div>
           </div>
+          <div className="field-note">
+            Use a single date, or a not-earlier-than / not-later-than range when
+            the source only brackets the event. Format: YYYY, YYYY-MM, or
+            YYYY-MM-DD.
+          </div>
           <label>Confidence</label>
           <ConfidenceSelect
             disabled={props.readOnly}
@@ -1077,6 +1120,10 @@ function SourceFields(props: {
                 }}
               />
             </div>
+          </div>
+          <div className="field-note">
+            Dates use YYYY, YYYY-MM, or YYYY-MM-DD. Leave a date blank if the
+            source does not give it.
           </div>
           <label>Notes</label>
           <input

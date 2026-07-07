@@ -21,6 +21,9 @@ import type {
 export interface WorkbenchProvider {
   readonly kind: "demo" | "convex";
   listTasks(countryCode: string): Promise<WorkTask[]>;
+  /** resolve the task a draft belongs to, from assigned or free-contribution
+      task records; used to open a My-work item in its editor context */
+  getTask(taskId: string): Promise<WorkTask | null>;
   getDraft(taskId: string): Promise<EvidenceDraft | null>;
   saveDraft(draft: EvidenceDraft): Promise<void>;
   /** submit for review; the draft becomes read-only until revised */
