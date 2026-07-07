@@ -10,6 +10,7 @@
 
 import type * as batchImport from "../batchImport.js";
 import type * as claudeReviews from "../claudeReviews.js";
+import type * as devSeed from "../devSeed.js";
 import type * as evidence from "../evidence.js";
 import type * as exports from "../exports.js";
 import type * as lib_auth from "../lib/auth.js";
@@ -29,6 +30,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   batchImport: typeof batchImport;
   claudeReviews: typeof claudeReviews;
+  devSeed: typeof devSeed;
   evidence: typeof evidence;
   exports: typeof exports;
   "lib/auth": typeof lib_auth;
