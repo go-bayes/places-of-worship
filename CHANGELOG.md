@@ -4,6 +4,29 @@
 
 ### 2026-07-07
 
+- Added Mexico as the seventh country data map: municipality-level
+  census religion for 2010 and 2020 from INEGI ITER (4,938 rows across
+  2,469 municipalities on 2020 Marco Geoestadistico boundaries; 2020
+  joins 2,469/2,469, 2010 joins 2,456 with the thirteen
+  post-2010-creation municipalities documented; national totals
+  reconcile exactly against the derived extract, and each source was
+  verified separately against its own raw archive — both ITER waves
+  exact to zero differences, boundary codes exact against the official
+  municipal catalogue). The denominator is the sum of four retained
+  constructs — Catholic, Protestant/evangelical/biblical, other
+  religion, and no religion — with the crosswalk caveat stated on the
+  page. The 2000 ITER archive is downloaded, checksummed, and
+  documented but not rendered: its three religion fields (Catholic 5+,
+  non-Catholic religion 5+, non-Catholic including no religion 5+)
+  cannot yield the four constructs, and mapping the two derivable
+  headline metrics on an ages-5-and-over universe awaits a
+  construct-honesty ruling. Build by codex (GPT-5.5) per the standard
+  brief; review caught a serialisation defect before ship (R row names
+  turned the rows array into a JSON object, which would have crashed
+  the census join). Opus browser verification passed all eleven
+  checks. Raw sources archived to the research bucket with sha256
+  round-trip verification.
+
 - Developed the multi-domain overlay brief into a proposed design
   (docs/development/multi-domain-overlay-design.md, awaiting JB
   ratification): an overlays config block with a permanent legacy shim

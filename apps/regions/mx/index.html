@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Mexico Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260707f" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // the country page stays declarative; shared behaviour lives in
+    // ../_shared/region-map.js and keys on this config plus the data files
+    window.REGION_CONFIG = {
+      countryCode: "MX",
+      title: "Places of Worship | Mexico Research Map",
+      center: [-102.5, 23.6],
+      initialZoom: 4,
+      censusLevels: {
+        municipality: {
+          label: "Municipality",
+          boundaries: "data/mx_municipality_2020.geojson",
+          summary: "data/area_summary_municipality.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries &copy; INEGI Marco Geoestadistico, Censo de Poblacion y Vivienda 2020"
+        }
+      },
+      defaultLevel: "municipality",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2020,
+      // no governed mexico places-of-worship snapshot or municipality
+      // concordance is included yet; place-rate and change metrics stay
+      // hidden rather than implying a harmonised longitudinal product
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Four-construct religious affiliation %",
+          note: "Catholic + Protestant/evangelical/biblical + other religion"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the source no-religion/no-affiliation category"
+        }
+      },
+      popupDenominatorNote: "Percentages use the sum of four retained INEGI ITER constructs: PCATOLICA, PRO_CRIEVA, POTRAS_REL and PSIN_RELIG in 2020; pcatolica, pncatolica, potras_rel and psin_relig in 2010. Category labels changed across waves, and no full denomination crosswalk is attempted.",
+      cityPresets: [
+        { label: "Mexico City", shortLabel: "CDMX", coords: [-99.1332, 19.4326], zoom: 10 },
+        { label: "Guadalajara", shortLabel: "GDL", coords: [-103.3496, 20.6597], zoom: 10 },
+        { label: "Monterrey", shortLabel: "MTY", coords: [-100.3161, 25.6866], zoom: 10 },
+        { label: "Puebla", coords: [-98.2063, 19.0414], zoom: 10 },
+        { label: "Tijuana", coords: [-117.0382, 32.5149], zoom: 10 },
+        { label: "Merida", coords: [-89.5926, 20.9674], zoom: 10 },
+        { label: "Leon", coords: [-101.6841, 21.1222], zoom: 10 },
+        { label: "Oaxaca", coords: [-96.7216, 17.0732], zoom: 10 },
+        { label: "Cancun", coords: [-86.8515, 21.1619], zoom: 10 },
+        { label: "Hermosillo", coords: [-110.9559, 29.0729], zoom: 10 }
+      ],
+      geocode: { country: "mx", biasLngLat: [-102.5, 23.6] },
+      onboarding: {
+        title: "Mexico research map",
+        intro: "Census religion overlays for Mexico from INEGI ITER, 2010 and 2020.",
+        bullets: [
+          "Municipalities are shaded by four-construct religious affiliation or the source no-religion category.",
+          "The denominator includes only PCATOLICA, PRO_CRIEVA, POTRAS_REL and PSIN_RELIG constructs, with the 2010 source field pncatolica mapped to the Protestant/evangelical/biblical construct.",
+          "Category labels changed across waves. This release does not attempt a full denomination crosswalk and does not calculate a change layer.",
+          "The 2000 ITER archive is documented but not rendered because it does not expose the four constructs separately.",
+          "Open <strong>Census</strong> (top centre) for the metric, geography and year controls."
+        ],
+        links: [
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://www.inegi.org.mx/programas/ccpv/2020/" target="_blank" rel="noopener">INEGI Censos de Poblacion y Vivienda ITER</a> &middot; Licence: <a href="https://www.inegi.org.mx/inegi/terminos.html" target="_blank" rel="noopener">INEGI terms</a> &middot; Boundaries &copy; <a href="https://www.inegi.org.mx/app/biblioteca/ficha.html?upc=889463807469" target="_blank" rel="noopener">INEGI Marco Geoestadistico CPV 2020</a>',
+      censusFlagNote: "* 2010 rows use 2020 municipality boundaries without a split/merge concordance. 2020 rows use official ITER municipality totals because locality-cell suppression prevents exact reconstruction from locality rows. The 2000 ITER archive is documented but not rendered."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260707f"></script>
+</body>
+</html>
