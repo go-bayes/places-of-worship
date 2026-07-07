@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Canada Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260707i" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    window.REGION_CONFIG = {
+      countryCode: "CA",
+      title: "Places of Worship | Canada Research Map",
+      center: [-96.8, 56.1],
+      initialZoom: 3,
+      censusLevels: {
+        cd_2021: {
+          label: "Census division (2021)",
+          boundaries: "data/cd_2021.geojson",
+          summary: "data/area_summary_cd_2021.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Statistics Canada 2021 CD cartographic boundary file · Statistics Canada Open Licence"
+        },
+        cd_2011: {
+          label: "Census division (2011)",
+          boundaries: "data/cd_2011.geojson",
+          summary: "data/area_summary_cd_2011.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Statistics Canada 2011 CD cartographic boundary file · Statistics Canada Open Licence"
+        },
+        cd_2001: {
+          label: "Census division (2001)",
+          boundaries: "data/cd_2001.geojson",
+          summary: "data/area_summary_cd_2001.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Statistics Canada 2001 CD cartographic boundary file · Statistics Canada Open Licence"
+        }
+      },
+      defaultLevel: "cd_2021",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the published religion universe reporting a religious affiliation"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share of the published religion universe reporting no religious affiliation or no religion and secular perspectives"
+        },
+        religious_change: {
+          label: "Religious affiliation change",
+          note: "wave-to-wave percentage-point change within whichever vintage geography is selected by the timeline"
+        }
+      },
+      metricsAvailable: ["religious_affiliation_percent", "no_religion_percent"],
+      timeline: [
+        { year: 2001, level: "cd_2001" },
+        { year: 2011, level: "cd_2011" },
+        { year: 2021, level: "cd_2021" }
+      ],
+      popupDenominatorNote: "Percentages use the published religion universe for that wave: 2021 Census Profile 25% sample religion responses, 2011 voluntary National Household Survey religion responses, and 2001 Census 20% sample religion by total age responses.",
+      cityPresets: [
+        { label: "Toronto", coords: [-79.3832, 43.6532], zoom: 10 },
+        { label: "Montreal", coords: [-73.5673, 45.5017], zoom: 10 },
+        { label: "Vancouver", coords: [-123.1207, 49.2827], zoom: 10 },
+        { label: "Calgary", coords: [-114.0719, 51.0447], zoom: 10 },
+        { label: "Ottawa", coords: [-75.6972, 45.4215], zoom: 10 },
+        { label: "Edmonton", coords: [-113.4938, 53.5461], zoom: 10 },
+        { label: "Winnipeg", coords: [-97.1384, 49.8951], zoom: 10 },
+        { label: "Quebec City", shortLabel: "Quebec", coords: [-71.2080, 46.8139], zoom: 10 },
+        { label: "Halifax", coords: [-63.5752, 44.6488], zoom: 10 },
+        { label: "St. John's", coords: [-52.7126, 47.5615], zoom: 10 }
+      ],
+      geocode: { country: "ca", biasLngLat: [-96.8, 56.1] },
+      onboarding: {
+        title: "Canada research map",
+        intro: "Places of worship across Canada, with Statistics Canada religion overlays for 2001, 2011 and 2021.",
+        bullets: [
+          "The census overlay is on: areas are shaded by religious affiliation in the published religion universe for the selected wave.",
+          "The timeline switches boundary vintage: 2021, 2011 and 2001 each use census divisions from their own StatCan boundary vintage.",
+          "The 2021 religion data are Census Profile 25% sample data; the public layer uses census divisions because the CSD boundary file could not fit the 4 MB layer budget.",
+          "The 2011 religion data are from the voluntary National Household Survey and have different non-response properties from census long-form waves; the public layer uses census divisions because CSD rows failed source-total reconciliation.",
+          "No cross-vintage correspondence is applied. Treat year-to-year changes as source-era views without harmonised small-area change.",
+          "Open <strong>Census</strong> (top centre) for the metric and year slider."
+        ],
+        links: [
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Religion and boundaries adapted from <a href="https://www.statcan.gc.ca/" target="_blank" rel="noopener">Statistics Canada</a> under the <a href="https://www.statcan.gc.ca/en/reference/licence" target="_blank" rel="noopener">Statistics Canada Open Licence</a>: 2021 Census Profile and 2021 CD boundaries; 2011 National Household Survey Profile and 2011 CD boundaries; 2001 Census tabulation 95F0450XCB2001006 and 2001 CD boundaries. This does not constitute an endorsement by Statistics Canada.',
+      censusFlagNote: "* 2011 rows are flagged voluntary_survey_nhs because the 2011 religion data come from the voluntary National Household Survey, with different non-response properties from census long-form waves. The 2021 and 2011 layers use census divisions after CSD fallback decisions. The 2021 religion data are 25% sample data. Boundaries switch by year."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260707i"></script>
+</body>
+</html>

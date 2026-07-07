@@ -4,6 +4,23 @@
 
 ### 2026-07-07
 
+- Added Canada as the ninth country data map: census-division religion
+  for 2001, 2011, and 2021 from Statistics Canada (288/293/293 rows,
+  all joins complete), each wave on its own boundary vintage via the
+  timeline's level switching — no cross-vintage correspondence is
+  applied, and the page says so. The 2011 wave is the voluntary
+  National Household Survey, carried as its own flagged construct with
+  a year caveat in the legend and the NHS named in every popup's
+  denominator note; the change metric is not exposed because
+  year-over-year comparison cannot span level-switching stores. Every
+  wave was validated independently from its raw archive (all rows
+  exact, including a reverse-engineered read of the 2001 E00 boundary
+  format), reconciliation covers all thirteen provinces and
+  territories, and residuals are consistent with StatCan random
+  rounding. Build by codex; review found and fixed a
+  validation-coverage gap and an inert metric before ship. Raw sources
+  archived with hash verification.
+
 - Backfilled the Australia 2016 census wave through the official ABS
   population-weighted SA2 correspondence onto 2021 boundaries
   (4,944 rows across two waves; conservation residual at most 8
