@@ -109,3 +109,6 @@ display-only (no click-through to a detail route), and the
 agent-assisted extraction workspace exists behind the provider surface
 with seeded demo drafts but has not yet had a dedicated verification
 pass of its confirm/reject/submit gating in the browser.
+
+Publication, Convex binding, and invites are prepared as deliberate
+JB steps in `docs/development/workbench-publication-plan.md`.
