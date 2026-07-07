@@ -29,9 +29,9 @@ declare const process: {
 const PROMPT_VERSION = "claude-batch-review-v1";
 const AGENT_NAME = "claude-batch-reviewer";
 const MODEL_PROVIDER = "anthropic";
-// model routing per the documented cost/capability policy: cheap model
-// reads fetched sources; a stronger model synthesises the recommendation
-const SOURCE_CHECK_MODEL = "claude-haiku-4-5-20251001";
+// model routing per the documented cost/capability policy. JB rule
+// 2026-07-07: never Haiku, in any role — Sonnet is the floor.
+const SOURCE_CHECK_MODEL = "claude-sonnet-5";
 const SYNTHESIS_MODEL = "claude-sonnet-5";
 const SERVICE_USER_EMAIL = "claude-batch-reviewer@service.local";
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";

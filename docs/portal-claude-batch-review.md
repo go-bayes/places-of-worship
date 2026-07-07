@@ -132,7 +132,7 @@ Two model calls per item, costed deliberately:
 
 | Step | Model | Why |
 | --- | --- | --- |
-| Source-check interpretation | `claude-haiku-4-5-20251001` | High-volume, mechanical: "does this fetched page mention this site and support this date?" is a cheap reading task; errors here surface in the recorded outcome and are visible to the reviewer. |
+| Source-check interpretation | `claude-sonnet-5` | Mechanical reading, but Sonnet is the floor: JB rule 2026-07-07 bans Haiku in every role after repeated quality burns; check errors would flow into the recorded outcomes reviewers rely on. |
 | Recommendation synthesis | `claude-sonnet-5` | Weighing partial evidence, dedup risk, and validation state needs judgement, but the task is bounded (one claim, a handful of checks) and the output is advisory with a human decision behind it — frontier-tier synthesis is not warranted. |
 
 Both model ids are recorded per artifact, so a later routing change is
