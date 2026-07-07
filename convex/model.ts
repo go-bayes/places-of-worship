@@ -135,6 +135,14 @@ export const reviewDecisionStatus = v.union(
   v.literal("deferred"),
 );
 
+// distinguishes real-world gain/loss of a place of worship from correction
+// of the map record; drives the annual census change accounting
+export const changeClass = v.union(
+  v.literal("genuine_change"),
+  v.literal("map_correction"),
+  v.literal("uncertain"),
+);
+
 export const identityDecision = v.union(
   v.literal("same_site"),
   v.literal("new_candidate"),
@@ -254,6 +262,7 @@ export const evidenceDraftInput = v.object({
   address_change_note: v.optional(v.string()),
   source_notes: v.optional(v.string()),
   action: v.optional(v.string()),
+  change_class: v.optional(changeClass),
   target_year_statuses: v.optional(targetYearStatusSet),
   target_year_evidence: v.optional(targetYearEvidenceSet),
   existence_status: v.optional(v.string()),

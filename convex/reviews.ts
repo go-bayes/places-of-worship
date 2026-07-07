@@ -11,6 +11,7 @@ import {
   assertMaxJson,
   assertMaxString,
 } from "./lib/limits";
+import { canonicalJson, sha256 } from "./lib/sha256";
 import { appendTaskEvent } from "./lib/taskEvents";
 
 async function getTaskOrThrow(ctx: any, taskId: string): Promise<Doc<"tasks">> {
@@ -271,8 +272,7 @@ export const recordReviewDecision = mutation({
     const now = Date.now();
     const reviewDecisionId = `${args.taskId}:review:${now}:${user._id}`;
     const newTaskStatus = taskStatusForDecision(args.decision.decision_status);
-
-    await ctx.db.insert("review_decisions", {
+    const reviewDecisionRecord = {
       review_decision_id: reviewDecisionId,
       task_id: args.taskId,
       evidence_draft_id: args.decision.evidence_draft_id,
@@ -287,6 +287,33 @@ export const recordReviewDecision = mutation({
       agent_review_agreement: args.decision.agent_review_agreement,
       created_at: now,
       updated_at: now,
+    };
+    // hash covers review_decision_id, task_id, evidence_draft_id,
+    // reviewer_user_id, decision_status, decision_note, accepted_action,
+    // identity_decision, target_year_affects, required_follow_up,
+    // agent_review_id, agent_review_agreement, created_at, and updated_at;
+    // recomputing the hash from the stored row must reproduce it
+    const hashInput = {
+      review_decision_id: reviewDecisionRecord.review_decision_id,
+      task_id: reviewDecisionRecord.task_id,
+      evidence_draft_id: reviewDecisionRecord.evidence_draft_id,
+      reviewer_user_id: String(reviewDecisionRecord.reviewer_user_id),
+      decision_status: reviewDecisionRecord.decision_status,
+      decision_note: reviewDecisionRecord.decision_note,
+      accepted_action: reviewDecisionRecord.accepted_action,
+      identity_decision: reviewDecisionRecord.identity_decision,
+      target_year_affects: reviewDecisionRecord.target_year_affects,
+      required_follow_up: reviewDecisionRecord.required_follow_up,
+      agent_review_id: reviewDecisionRecord.agent_review_id,
+      agent_review_agreement: reviewDecisionRecord.agent_review_agreement,
+      created_at: reviewDecisionRecord.created_at,
+      updated_at: reviewDecisionRecord.updated_at,
+    };
+    const decisionHash = sha256(canonicalJson(hashInput));
+
+    await ctx.db.insert("review_decisions", {
+      ...reviewDecisionRecord,
+      decision_hash: decisionHash,
     });
 
     await ctx.db.patch(task._id, {

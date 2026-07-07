@@ -15,6 +15,7 @@ import type * as evidence from "../evidence.js";
 import type * as exports from "../exports.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_limits from "../lib/limits.js";
+import type * as lib_sha256 from "../lib/sha256.js";
 import type * as lib_taskEvents from "../lib/taskEvents.js";
 import type * as lib_validators from "../lib/validators.js";
 import type * as model from "../model.js";
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   exports: typeof exports;
   "lib/auth": typeof lib_auth;
   "lib/limits": typeof lib_limits;
+  "lib/sha256": typeof lib_sha256;
   "lib/taskEvents": typeof lib_taskEvents;
   "lib/validators": typeof lib_validators;
   model: typeof model;

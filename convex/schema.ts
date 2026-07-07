@@ -6,6 +6,7 @@ import {
   agentReviewRecommendation,
   agentSourceCheck,
   automatedCheck,
+  changeClass,
   evidenceDraftStatus,
   exportBatchStatus,
   exportFormat,
@@ -132,6 +133,7 @@ export default defineSchema({
     address_change_note: v.optional(v.string()),
     source_notes: v.optional(v.string()),
     action: v.optional(v.string()),
+    change_class: v.optional(changeClass),
     target_year_statuses: v.optional(targetYearStatusSet),
     target_year_evidence: v.optional(targetYearEvidenceSet),
     existence_status: v.optional(v.string()),
@@ -178,6 +180,7 @@ export default defineSchema({
     agent_review_agreement: v.optional(agentReviewAgreement),
     created_at: v.number(),
     updated_at: v.number(),
+    decision_hash: v.optional(v.string()),
   })
     .index("by_review_decision_id", ["review_decision_id"])
     .index("by_task", ["task_id"])
