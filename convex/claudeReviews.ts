@@ -248,6 +248,14 @@ export const recordArtifact = internalMutation({
       basis: v.optional(v.string()),
     }),
     serviceUserId: v.id("users"),
+    // session-run reviews (Claude Code or codex sittings implementing the
+    // same contract) record their true executor; defaults are the API
+    // runner's models. prompt_version names the CONTRACT, not the
+    // executor, so idempotency spans lanes.
+    agentName: v.optional(v.string()),
+    modelProvider: v.optional(v.string()),
+    modelName: v.optional(v.string()),
+    sourceCheckModel: v.optional(v.string()),
   },
   returns: v.string(),
   handler: async (ctx, args) => {
@@ -271,10 +279,10 @@ export const recordArtifact = internalMutation({
       reasoning: args.reasoning,
       sources_checked: args.sourcesChecked,
       cultural_sensitivity: args.culturalSensitivity,
-      agent_name: AGENT_NAME,
-      model_provider: MODEL_PROVIDER,
-      model_name: SYNTHESIS_MODEL,
-      source_check_model: SOURCE_CHECK_MODEL,
+      agent_name: args.agentName ?? AGENT_NAME,
+      model_provider: args.modelProvider ?? MODEL_PROVIDER,
+      model_name: args.modelName ?? SYNTHESIS_MODEL,
+      source_check_model: args.sourceCheckModel ?? SOURCE_CHECK_MODEL,
       prompt_version: PROMPT_VERSION,
       actor_user_id: args.serviceUserId,
       ai_generated: true,
