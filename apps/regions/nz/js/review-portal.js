@@ -1,9 +1,22 @@
 (function () {
     const config = window.POW_CONVEX_CONFIG || {};
     const searchParams = new URLSearchParams(window.location.search);
-    const countryFromQuery = searchParams.get("country") === "vu" ? "VU" : "";
-    const countryCode = countryFromQuery || config.countryCode || "NZ";
-    const countryName = countryCode === "VU" ? "Vanuatu" : "New Zealand";
+    const countryLabels = {
+        nz: { code: "NZ", label: "New Zealand" },
+        vu: { code: "VU", label: "Vanuatu" },
+        au: { code: "AU", label: "Australia" },
+        br: { code: "BR", label: "Brazil" },
+        ca: { code: "CA", label: "Canada" },
+        ie: { code: "IE", label: "Ireland" },
+        mx: { code: "MX", label: "Mexico" },
+        uk: { code: "UK", label: "United Kingdom" },
+        us: { code: "US", label: "United States" },
+    };
+    const countryFromQuery = countryLabels[String(searchParams.get("country") || "").toLowerCase()];
+    const countryFromConfig = countryLabels[String(config.countryCode || "").toLowerCase()];
+    const country = countryFromQuery || countryFromConfig || countryLabels.nz;
+    const countryCode = country.code;
+    const countryName = country.label;
     const client = new window.PowConvexTaskClient(config);
     const state = {
         user: null,

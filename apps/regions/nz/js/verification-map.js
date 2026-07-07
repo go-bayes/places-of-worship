@@ -1,9 +1,9 @@
 const SEARCH_PARAMS = new URLSearchParams(window.location.search);
 const DEMO_MODE = SEARCH_PARAMS.get("demo") !== "0";
 const INTAKE_ENABLED = DEMO_MODE;
-const PATH_COUNTRY_KEY = window.location.pathname.includes("/regions/vu/") ? "vu" : "";
-const CONFIG_COUNTRY_KEY = String(window.POW_CONVEX_CONFIG?.countryCode || "").toLowerCase();
-const REQUESTED_COUNTRY_KEY = SEARCH_PARAMS.get("country") === "vu" ? "vu" : "";
+const PATH_COUNTRY_PARAM = window.location.pathname.match(/\/regions\/([a-z]{2})\//)?.[1] || "";
+const CONFIG_COUNTRY_PARAM = String(window.POW_CONVEX_CONFIG?.countryCode || "").toLowerCase();
+const REQUESTED_COUNTRY_PARAM = String(SEARCH_PARAMS.get("country") || "").toLowerCase();
 const COUNTRY_CONFIGS = {
     nz: {
         countryCode: "NZ",
@@ -18,6 +18,7 @@ const COUNTRY_CONFIGS = {
         mapSource: "nz_verification_static_map_workbench",
         nominationSource: "nz_verification_static_map_nomination",
         defaultAssignmentBatchId: "nz-temporal-ra-workpack-001",
+        assignmentHeading: "New Zealand source-first test",
         temporalLossAction: {
             value: "present_2013_absent_2018",
             label: "Present in 2013, absent in 2018",
@@ -42,6 +43,7 @@ const COUNTRY_CONFIGS = {
         mapSource: "vu_verification_static_map_workbench",
         nominationSource: "vu_verification_static_map_nomination",
         defaultAssignmentBatchId: "vu-source-first-test-001",
+        assignmentHeading: "Vanuatu source-first test",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -52,8 +54,186 @@ const COUNTRY_CONFIGS = {
             note: "Evidence appears to support worship use in one target year and absence or changed use in a later target year; reviewer to confirm dates and status.",
         },
     },
+    // target years are the census waves each country's data map ships;
+    // backend-only queues until task batches are seeded.
+    au: {
+        countryCode: "AU",
+        countryName: "Australia",
+        targetYears: ["2016", "2021"],
+        defaultTargetYear: "2021",
+        dataPath: "",
+        mapCentre: [-25.5, 134.5],
+        mapZoom: 3.2,
+        collectionBatch: "au-map-workbench-demo",
+        sourceDatasetId: "au_static_verification_map",
+        mapSource: "au_verification_static_map_workbench",
+        nominationSource: "au_verification_static_map_nomination",
+        defaultAssignmentBatchId: "au-source-first-test-001",
+        assignmentHeading: "Australia verification tasks",
+        temporalLossAction: {
+            value: "target_year_loss_or_changed_use",
+            label: "Present in one target year, absent in a later target year",
+            statuses: {
+                "2016": "present",
+                "2021": "absent",
+            },
+            note: "Evidence appears to support worship use in one target year and absence or changed use in a later target year; reviewer to confirm dates and status.",
+        },
+    },
+    br: {
+        countryCode: "BR",
+        countryName: "Brazil",
+        targetYears: ["2000", "2010", "2022"],
+        defaultTargetYear: "2022",
+        dataPath: "",
+        mapCentre: [-14.2, -53.2],
+        mapZoom: 4,
+        collectionBatch: "br-map-workbench-demo",
+        sourceDatasetId: "br_static_verification_map",
+        mapSource: "br_verification_static_map_workbench",
+        nominationSource: "br_verification_static_map_nomination",
+        defaultAssignmentBatchId: "br-source-first-test-001",
+        assignmentHeading: "Brazil verification tasks",
+        temporalLossAction: {
+            value: "target_year_loss_or_changed_use",
+            label: "Present in one target year, absent in a later target year",
+            statuses: {
+                "2000": "present",
+                "2022": "absent",
+            },
+            note: "Evidence appears to support worship use in one target year and absence or changed use in a later target year; reviewer to confirm dates and status.",
+        },
+    },
+    ca: {
+        countryCode: "CA",
+        countryName: "Canada",
+        targetYears: ["2001", "2011", "2021"],
+        defaultTargetYear: "2021",
+        dataPath: "",
+        mapCentre: [56.1, -96.8],
+        mapZoom: 3,
+        collectionBatch: "ca-map-workbench-demo",
+        sourceDatasetId: "ca_static_verification_map",
+        mapSource: "ca_verification_static_map_workbench",
+        nominationSource: "ca_verification_static_map_nomination",
+        defaultAssignmentBatchId: "ca-source-first-test-001",
+        assignmentHeading: "Canada verification tasks",
+        temporalLossAction: {
+            value: "target_year_loss_or_changed_use",
+            label: "Present in one target year, absent in a later target year",
+            statuses: {
+                "2001": "present",
+                "2021": "absent",
+            },
+            note: "Evidence appears to support worship use in one target year and absence or changed use in a later target year; reviewer to confirm dates and status.",
+        },
+    },
+    ie: {
+        countryCode: "IE",
+        countryName: "Ireland",
+        targetYears: ["2011", "2016", "2022"],
+        defaultTargetYear: "2022",
+        dataPath: "",
+        mapCentre: [53.35, -8.1],
+        mapZoom: 6,
+        collectionBatch: "ie-map-workbench-demo",
+        sourceDatasetId: "ie_static_verification_map",
+        mapSource: "ie_verification_static_map_workbench",
+        nominationSource: "ie_verification_static_map_nomination",
+        defaultAssignmentBatchId: "ie-source-first-test-001",
+        assignmentHeading: "Ireland verification tasks",
+        temporalLossAction: {
+            value: "target_year_loss_or_changed_use",
+            label: "Present in one target year, absent in a later target year",
+            statuses: {
+                "2011": "present",
+                "2022": "absent",
+            },
+            note: "Evidence appears to support worship use in one target year and absence or changed use in a later target year; reviewer to confirm dates and status.",
+        },
+    },
+    mx: {
+        countryCode: "MX",
+        countryName: "Mexico",
+        targetYears: ["2000", "2010", "2020"],
+        defaultTargetYear: "2020",
+        dataPath: "",
+        mapCentre: [23.6, -102.5],
+        mapZoom: 4,
+        collectionBatch: "mx-map-workbench-demo",
+        sourceDatasetId: "mx_static_verification_map",
+        mapSource: "mx_verification_static_map_workbench",
+        nominationSource: "mx_verification_static_map_nomination",
+        defaultAssignmentBatchId: "mx-source-first-test-001",
+        assignmentHeading: "Mexico verification tasks",
+        temporalLossAction: {
+            value: "target_year_loss_or_changed_use",
+            label: "Present in one target year, absent in a later target year",
+            statuses: {
+                "2000": "present",
+                "2020": "absent",
+            },
+            note: "Evidence appears to support worship use in one target year and absence or changed use in a later target year; reviewer to confirm dates and status.",
+        },
+    },
+    uk: {
+        countryCode: "UK",
+        countryName: "United Kingdom",
+        targetYears: ["2001", "2011", "2021"],
+        defaultTargetYear: "2021",
+        dataPath: "",
+        mapCentre: [54.7, -3.4],
+        mapZoom: 5,
+        collectionBatch: "uk-map-workbench-demo",
+        sourceDatasetId: "uk_static_verification_map",
+        mapSource: "uk_verification_static_map_workbench",
+        nominationSource: "uk_verification_static_map_nomination",
+        defaultAssignmentBatchId: "uk-source-first-test-001",
+        assignmentHeading: "United Kingdom verification tasks",
+        temporalLossAction: {
+            value: "target_year_loss_or_changed_use",
+            label: "Present in one target year, absent in a later target year",
+            statuses: {
+                "2001": "present",
+                "2021": "absent",
+            },
+            note: "Evidence appears to support worship use in one target year and absence or changed use in a later target year; reviewer to confirm dates and status.",
+        },
+    },
+    us: {
+        countryCode: "US",
+        countryName: "United States",
+        targetYears: ["2000", "2010", "2020"],
+        defaultTargetYear: "2020",
+        dataPath: "",
+        mapCentre: [39.8, -98.6],
+        mapZoom: 4,
+        collectionBatch: "us-map-workbench-demo",
+        sourceDatasetId: "us_static_verification_map",
+        mapSource: "us_verification_static_map_workbench",
+        nominationSource: "us_verification_static_map_nomination",
+        defaultAssignmentBatchId: "us-source-first-test-001",
+        assignmentHeading: "United States verification tasks",
+        temporalLossAction: {
+            value: "target_year_loss_or_changed_use",
+            label: "Present in one target year, absent in a later target year",
+            statuses: {
+                "2000": "present",
+                "2020": "absent",
+            },
+            note: "Evidence appears to support worship use in one target year and absence or changed use in a later target year; reviewer to confirm dates and status.",
+        },
+    },
 };
-const COUNTRY_KEY = REQUESTED_COUNTRY_KEY || PATH_COUNTRY_KEY || (CONFIG_COUNTRY_KEY === "vu" ? "vu" : "nz");
+function countryConfigKey(value) {
+    const key = String(value || "").toLowerCase();
+    return Object.prototype.hasOwnProperty.call(COUNTRY_CONFIGS, key) ? key : "";
+}
+
+const PATH_COUNTRY_KEY = countryConfigKey(PATH_COUNTRY_PARAM);
+const CONFIG_COUNTRY_KEY = countryConfigKey(CONFIG_COUNTRY_PARAM);
+const REQUESTED_COUNTRY_KEY = countryConfigKey(REQUESTED_COUNTRY_PARAM);
+const COUNTRY_KEY = REQUESTED_COUNTRY_KEY || PATH_COUNTRY_KEY || CONFIG_COUNTRY_KEY || "nz";
 const COUNTRY_CONFIG = COUNTRY_CONFIGS[COUNTRY_KEY];
 const TARGET_YEARS = COUNTRY_CONFIG.targetYears;
 const DEFAULT_TARGET_YEAR = COUNTRY_CONFIG.defaultTargetYear || TARGET_YEARS[TARGET_YEARS.length - 1];
@@ -262,6 +442,12 @@ function cap(value) {
 function targetYearListText(years = TARGET_YEARS) {
     if (years.length <= 1) return years[0] || "the target year";
     return `${years.slice(0, -1).join(", ")} or ${years[years.length - 1]}`;
+}
+
+function targetYearAndListText(years = TARGET_YEARS) {
+    if (years.length <= 1) return years[0] || "the target year";
+    if (years.length === 2) return `${years[0]} and ${years[1]}`;
+    return `${years.slice(0, -1).join(", ")}, and ${years[years.length - 1]}`;
 }
 
 function slug(value, maxLength = 44) {
@@ -823,6 +1009,17 @@ function assignmentQuickstartHtml() {
                 <li>Record 1989, 1999, 2009, and 2020 status only where a source supports a target-year judgement.</li>
                 <li>Use lifecycle fields for older historical evidence, including mission, church, building, relocation, closure, or changed-use dates back to 1600.</li>
                 <li>Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when useful evidence remains unclear, and <em>Submit for review</em> when the evidence is ready for JB or JW.</li>
+            </ol>
+        `;
+    }
+    if (COUNTRY_CONFIG.countryCode !== "NZ") {
+        return `
+            <ol>
+                <li>Sign in with Google at the top of this panel.</li>
+                <li>Work down the assigned ${COUNTRY_CONFIG.countryName} task list in order. Stop at a natural stopping point and tell JB where you stopped.</li>
+                <li>Open Street View or Google Maps to look around the site, and use the OSM object only as context. Record the imagery capture date if Street View is your evidence.</li>
+                <li>Record ${targetYearAndListText()} status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
+                <li>Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when the case remains unclear after useful checking, and <em>Submit for review</em> when the evidence is ready for JB.</li>
             </ol>
         `;
     }
@@ -1400,7 +1597,9 @@ class NzVerificationMap {
         L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
             maxZoom: 19,
-            minZoom: 5,
+            // keep the zoom-out floor at 5 for compact countries, but let
+            // continental configs (au/br/ca/mx/us open below 5) take effect
+            minZoom: Math.min(5, Math.floor(COUNTRY_CONFIG.mapZoom)),
         }).addTo(this.map);
 
         this.markerLayer = L.layerGroup();
@@ -1413,7 +1612,7 @@ class NzVerificationMap {
         const title = document.querySelector(".sidebar-header h1");
         if (title) {
             title.textContent = ASSIGNMENT_MODE
-                ? `${COUNTRY_CONFIG.countryName} source-first test`
+                ? (COUNTRY_CONFIG.assignmentHeading || `${COUNTRY_CONFIG.countryName} source-first test`)
                 : `${COUNTRY_CONFIG.countryName} OSM Verification`;
         }
 
@@ -1488,11 +1687,10 @@ class NzVerificationMap {
             targetYearSelect.innerHTML = TARGET_YEARS.slice().reverse().map(year => `
                 <option value="${escapeHtml(year)}">${escapeHtml(year)}</option>
             `).join("");
-            targetYearSelect.value = this.targetYear;
+            targetYearSelect.value = String(this.targetYear);
             targetYearSelect.addEventListener("change", () => {
-                this.targetYear = TARGET_YEARS.includes(targetYearSelect.value)
-                    ? targetYearSelect.value
-                    : DEFAULT_TARGET_YEAR;
+                const selectedYear = TARGET_YEARS.find(year => String(year) === targetYearSelect.value);
+                this.targetYear = selectedYear === undefined ? DEFAULT_TARGET_YEAR : selectedYear;
                 this.applyFilters();
                 if (this.selectedTask) {
                     this.renderDetail(this.selectedTask);
@@ -1887,20 +2085,22 @@ class NzVerificationMap {
         });
     }
 
-    // post-submit confirmation pane, mirroring the review portal's
-    // "decision recorded" return-to-list. the submitted task rightly leaves
-    // the available list in assignment mode, so the prompt points at the
-    // next task rather than the one just finished.
-    renderSubmissionRecordedDetail(props, { unresolved = false } = {}) {
+    // post-submit (or post-skip) confirmation pane, mirroring the review
+    // portal's "decision recorded" return-to-list. the finished task rightly
+    // leaves the available list in assignment mode, so the prompt points at
+    // the next task rather than the one just closed.
+    renderSubmissionRecordedDetail(props, { unresolved = false, skipped = false } = {}) {
         const panel = document.getElementById("detailPanel");
         if (!panel) return;
         panel.innerHTML = `
-            <h2>${unresolved ? "Unresolved note submitted" : "Submitted for review"}</h2>
+            <h2>${skipped ? "Task skipped" : unresolved ? "Unresolved note submitted" : "Submitted for review"}</h2>
             <div class="copy-status" role="status">
                 ${escapeHtml(props.name || "Unnamed site")} ${props.task_id ? `(${escapeHtml(props.task_id)})` : ""} —
-                ${unresolved
-                    ? "saved as an unresolved note for review."
-                    : "saved to the shared backend and submitted for review."}
+                ${skipped
+                    ? "skipped in the shared backend."
+                    : unresolved
+                        ? "saved as an unresolved note for review."
+                        : "saved to the shared backend and submitted for review."}
             </div>
             <div class="pilot-note" role="note">
                 Pick another task from the map or list.${this.filterActiveHint()}
@@ -3300,10 +3500,12 @@ class NzVerificationMap {
                     reason: reason || undefined,
                 });
                 await this.refreshBackendTasks();
+                // a recorded skip closes the task for this ra too: same
+                // return-to-list as submit, with skip wording
+                this.selectedTask = null;
                 this.applyFilters();
-                if (status) {
-                    status.textContent = `Skipped in the shared backend. Pick another task from the map or list.${this.filterActiveHint()}`;
-                }
+                this.renderSubmissionRecordedDetail(props, { skipped: true });
+                this.focusDetailPanel();
                 return;
             } catch (error) {
                 if (error.authExpired) {
