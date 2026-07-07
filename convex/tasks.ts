@@ -10,18 +10,47 @@ import {
   TASK_BRIEF_MAX,
   TASK_NAME_MAX,
   TASK_REASON_MAX,
+  assertClientContextLimit,
   assertMaxString,
+  assertTaskReasonLimit,
 } from "./lib/limits";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { evidenceDraftDoc, reviewDecisionDoc, taskDoc, taskEventDoc } from "./lib/validators";
 
-function manualTaskId(countryCode: string, name: string, now: number): string {
+type IssueTaskType =
+  | "possible_duplicate"
+  | "verify_existing_site"
+  | "geometry_check"
+  | "osm_identity_link"
+  | "other";
+
+function taskIdSlug(name: string): string {
+  // keep human-readable task ids stable without letting names dominate ids
   const slug = name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 48);
-  return `${countryCode.toLowerCase()}-candidate-${now}-${slug || "pow"}`;
+  return slug || "pow";
+}
+
+function manualTaskId(countryCode: string, name: string, now: number): string {
+  return `${countryCode.toLowerCase()}-candidate-${now}-${taskIdSlug(name)}`;
+}
+
+function issueTaskBrief(issueType: IssueTaskType): string {
+  switch (issueType) {
+    case "possible_duplicate":
+      return "Review this RA-reported possible duplicate and confirm whether the two points are one place of worship before any export.";
+    case "verify_existing_site":
+      return "Review this RA-reported existing-site concern and confirm the mapped place of worship state before any export.";
+    case "geometry_check":
+      return "Review this RA-reported geometry concern and confirm that the point location represents the worship site before any export.";
+    case "osm_identity_link":
+      return "Review this RA-reported OSM identity link and confirm the matched OSM object before any export.";
+    case "other":
+      return "Review this RA-reported issue and decide the required triage action before any export.";
+  }
 }
 
 async function getTaskOrThrow(ctx: QueryCtx | MutationCtx, taskId: string): Promise<Doc<"tasks">> {
@@ -448,6 +477,43 @@ export const skipTask = mutation({
   },
 });
 
+export const unskipTask = mutation({
+  args: {
+    taskId: v.string(),
+    reason: v.optional(v.string()),
+  },
+  returns: v.object({
+    task_id: v.string(),
+    status: v.literal("in_progress"),
+  }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
+    const task = await getTaskOrThrow(ctx, args.taskId);
+    assertOwnsOrCanReview(user._id, user.roles, task.assigned_to);
+    if (task.status !== "skipped") {
+      throw new Error("Only skipped tasks can be unskipped.");
+    }
+    assertTaskReasonLimit("unskip reason", args.reason);
+
+    const now = Date.now();
+    await ctx.db.patch(task._id, {
+      status: "in_progress",
+      updated_at: now,
+      last_event_at: now,
+    });
+    await appendTaskEvent(ctx, {
+      taskId: args.taskId,
+      eventType: "reopened",
+      actorUserId: user._id,
+      actorRole: chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]),
+      previousStatus: task.status,
+      newStatus: "in_progress",
+      reason: args.reason ?? "Unskipped by the assignee.",
+    });
+    return { task_id: args.taskId, status: "in_progress" as const };
+  },
+});
+
 export const markProvisionallyClosed = mutation({
   args: {
     taskId: v.string(),
@@ -541,6 +607,170 @@ export const addTaskNote = mutation({
     });
     await ctx.db.patch(task._id, { last_event_at: Date.now() });
     return { task_id: args.taskId };
+  },
+});
+
+export const createIssueTask = mutation({
+  args: {
+    countryCode: v.string(),
+    name: v.string(),
+    issueType: v.union(
+      v.literal("possible_duplicate"),
+      v.literal("verify_existing_site"),
+      v.literal("geometry_check"),
+      v.literal("osm_identity_link"),
+      v.literal("other"),
+    ),
+    note: v.string(),
+    latitude: v.number(),
+    longitude: v.number(),
+    siteId: v.optional(v.string()),
+    osmId: v.optional(v.string()),
+    relatedSiteId: v.optional(v.string()),
+    sourceTitle: v.optional(v.string()),
+    sourceUrl: v.optional(v.string()),
+    targetYears: v.optional(v.array(v.number())),
+    clientContext: v.optional(v.any()),
+  },
+  returns: v.union(
+    v.object({
+      task_id: v.string(),
+      status: v.literal("open"),
+      deduped: v.literal(true),
+    }),
+    v.object({
+      task_id: v.string(),
+      batch_id: v.string(),
+      status: v.literal("open"),
+      deduped: v.literal(false),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
+    assertMaxString("issue country code", args.countryCode, SHORT_TEXT_MAX);
+    assertMaxString("issue task name", args.name, TASK_NAME_MAX);
+    assertTaskReasonLimit("issue note", args.note);
+    assertMaxString("issue matched current site id", args.siteId, MEDIUM_TEXT_MAX);
+    assertMaxString("issue matched OSM id", args.osmId, MEDIUM_TEXT_MAX);
+    assertMaxString("issue related site id", args.relatedSiteId, MEDIUM_TEXT_MAX);
+    assertMaxString("issue source title", args.sourceTitle, MEDIUM_TEXT_MAX);
+    assertMaxString("issue source URL", args.sourceUrl, MEDIUM_TEXT_MAX);
+    assertClientContextLimit(args.clientContext);
+
+    const cc = args.countryCode.toLowerCase();
+    const batchId = `ra-issues-${cc}`;
+    const actorRole = chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]);
+
+    let duplicateTask: Doc<"tasks"> | null = null;
+    if (args.siteId !== undefined) {
+      const candidates = await ctx.db
+        .query("tasks")
+        .withIndex("by_matched_site", (q) => q.eq("matched_current_site_id", args.siteId))
+        .collect();
+      for (const task of candidates) {
+        if (task.batch_id === batchId && task.status === "open") {
+          duplicateTask = task;
+          break;
+        }
+      }
+    } else if (args.osmId !== undefined) {
+      const candidates = await ctx.db
+        .query("tasks")
+        .withIndex("by_osm", (q) => q.eq("matched_osm_id", args.osmId))
+        .collect();
+      for (const task of candidates) {
+        if (task.batch_id === batchId && task.status === "open") {
+          duplicateTask = task;
+          break;
+        }
+      }
+    }
+
+    if (duplicateTask !== null) {
+      await appendTaskEvent(ctx, {
+        taskId: duplicateTask.task_id,
+        eventType: "note_added",
+        actorUserId: user._id,
+        actorRole,
+        previousStatus: duplicateTask.status,
+        newStatus: duplicateTask.status,
+        reason: args.note,
+        clientContext: args.clientContext,
+      });
+      await ctx.db.patch(duplicateTask._id, { last_event_at: Date.now() });
+      return { task_id: duplicateTask.task_id, status: "open" as const, deduped: true as const };
+    }
+
+    const now = Date.now();
+    const existingBatch = await ctx.db
+      .query("task_batches")
+      .withIndex("by_batch_id", (q) => q.eq("batch_id", batchId))
+      .unique();
+    if (existingBatch === null) {
+      await ctx.db.insert("task_batches", {
+        batch_id: batchId,
+        country_code: args.countryCode,
+        source_kind: "ra_nomination",
+        target_years: args.targetYears ?? [],
+        status: "active",
+        created_by: user._id,
+        created_at: now,
+        updated_at: now,
+        notes: "ad-hoc issue reports from ra map inspection",
+      });
+    }
+
+    const taskId = `${cc}-issue-${now}-${taskIdSlug(args.name)}`;
+    const taskRecord = {
+      task_id: taskId,
+      batch_id: batchId,
+      country_code: args.countryCode,
+      task_type: args.issueType,
+      priority: "medium" as const,
+      status: "open" as const,
+      target_years: args.targetYears ?? [],
+      matched_current_site_id: args.siteId,
+      matched_osm_id: args.osmId,
+      name: args.name,
+      geometry: {
+        type: "Point",
+        coordinates: [args.longitude, args.latitude],
+      },
+      nearby_site_refs: [],
+      automated_checks: [
+        {
+          check_id: "ra_issue_report",
+          severity: "info",
+          message: args.note,
+          suggested_action: args.issueType,
+        },
+      ],
+      task_brief: issueTaskBrief(args.issueType),
+      source_context: {
+        issue_report: {
+          reported_by: user._id,
+          ...(args.relatedSiteId !== undefined ? { related_site_id: args.relatedSiteId } : {}),
+          ...(args.sourceTitle !== undefined ? { source_title: args.sourceTitle } : {}),
+          ...(args.sourceUrl !== undefined ? { source_url: args.sourceUrl } : {}),
+        },
+      },
+      created_at: now,
+      updated_at: now,
+      last_event_at: now,
+    };
+    assertTaskSeedTextLimits(taskRecord);
+
+    await ctx.db.insert("tasks", taskRecord);
+    await appendTaskEvent(ctx, {
+      taskId,
+      eventType: "opened",
+      actorUserId: user._id,
+      actorRole,
+      newStatus: "open",
+      reason: args.note,
+      clientContext: args.clientContext,
+    });
+    return { task_id: taskId, batch_id: batchId, status: "open" as const, deduped: false as const };
   },
 });
 
