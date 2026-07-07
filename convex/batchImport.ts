@@ -250,12 +250,16 @@ export const importNominationBatch = mutation({
         .query("evidence_drafts")
         .withIndex("by_source_claim_key", (q) => q.eq("source_claim_key", sourceClaimKey))
         .first();
+      // the hash test is scoped to this file's source: an identical row
+      // in a different corpus is not a duplicate of this one
       const byHash = byKey
         ? null
-        : await ctx.db
-            .query("evidence_drafts")
-            .withIndex("by_claim_hash", (q) => q.eq("claim_hash", row.claim_hash))
-            .first();
+        : (
+            await ctx.db
+              .query("evidence_drafts")
+              .withIndex("by_claim_hash", (q) => q.eq("claim_hash", row.claim_hash))
+              .take(20)
+          ).find((doc) => doc.source_claim_key?.startsWith(`${args.source.title}#`)) ?? null;
       if (byKey !== null || byHash !== null) {
         skippedExisting += 1;
         rowReports.push({

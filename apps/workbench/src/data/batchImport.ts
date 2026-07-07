@@ -203,10 +203,12 @@ export function isParkedSensitive(row: ImportRow, countryCode: string): boolean 
   return sensitive !== "yes" && sensitive !== "no";
 }
 
-// fnv-1a over the normalised known columns: the content half of the
-// idempotency test (locator OR hash marks a duplicate)
+// fnv-1a over the normalised known columns EXCLUDING the locator: the
+// content half of the idempotency test exists to catch renumbered rows,
+// so the locator must not participate or renumbering changes both keys
 export function claimHash(row: ImportRow): string {
   const normalised = [...KNOWN_HEADERS]
+    .filter((key) => key !== "source_locator")
     .sort()
     .map((key) => `${key}=${(row.values[key] ?? "").trim().toLowerCase()}`)
     .join("|");
