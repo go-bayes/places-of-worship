@@ -23,6 +23,19 @@
   covers its urban-derivation and island-published caveats.
   Shared-asset token 20260707h on all eight pages.
 
+- Extended the Mexico data map with the 2000 census wave (JB ruling
+  2026-07-07): religious affiliation and no religion derived from the
+  three CGPV 2000 ITER fields (affiliation = Catholic plus any
+  non-Catholic religion; no religion by subtraction), on the
+  ages-5-and-over universe — flagged in every popup and the onboarding
+  as not directly comparable with the full-population 2010-2020 waves,
+  and carried on each 2000 row as construct_two_field_age5plus_derivation
+  with universe_age5plus. Join coverage 2,443/2,469 (the 26
+  municipalities created after 2000 render as no data); the national
+  denominator, affiliation, and no-religion sums reconcile against the
+  raw archive to zero difference, verified independently twice. The
+  manifest moved to mx-census-religion-2000-2020.json.
+
 - Added Mexico as the seventh country data map: municipality-level
   census religion for 2010 and 2020 from INEGI ITER (4,938 rows across
   2,469 municipalities on 2020 Marco Geoestadistico boundaries; 2020

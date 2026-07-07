@@ -1,9 +1,9 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
   "schema_version": "data-manifest.v1",
-  "manifest_id": "manifest:mx-census-religion:mx:2010-2020:c7bed9982486",
-  "dataset_id": "mx-census-religion:mx:2010-2020:inegi-iter",
-  "dataset_version_id": "mx-census-religion:mx:2010-2020:inegi-iter:c7bed9982486",
+  "manifest_id": "manifest:mx-census-religion:mx:2000-2020:d06f6339e272",
+  "dataset_id": "mx-census-religion:mx:2000-2020:inegi-iter",
+  "dataset_version_id": "mx-census-religion:mx:2000-2020:inegi-iter:d06f6339e272",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -18,23 +18,17 @@
     "snapshot_anchor": null,
     "pipeline_stage": "public"
   },
-  "created_at": "2026-07-07T00:26:12Z",
+  "created_at": "2026-07-07T01:21:58Z",
   "created_by": "scripts/build_mx_area_summary.R",
   "pipeline": {
     "script": "scripts/build_mx_area_summary.R",
     "git_commit": null,
     "command": "Rscript scripts/build_mx_area_summary.R",
     "parameters": {
-      "waves": ["2010", "2020"],
-      "excluded_waves": [
-        {
-          "year": "2000",
-          "reason": "The 2000 ITER file has Catholic, non-Catholic religion, and non-Catholic including no-religion fields, but does not expose PCATOLICA, PRO_CRIEVA, POTRAS_REL, and PSIN_RELIG separately."
-        }
-      ],
+      "waves": ["2000", "2010", "2020"],
       "municipality_boundary_set": "mx-municipality-2020-inegi-marco",
       "municipality_boundary_simplification_tolerance_m": 1000,
-      "denominator": "sum of the four retained INEGI ITER constructs",
+      "denominator": "2000: p5_catolic plus p5_sinreli for ages 5+; 2010 and 2020: sum of the four retained INEGI ITER constructs",
       "omitted_metrics": ["religious_change", "places_per_10000_residents", "place_density_per_sq_km"]
     },
     "software_versions": {
@@ -47,11 +41,11 @@
   },
   "source": {
     "provider": "Instituto Nacional de Estadistica y Geografia (INEGI)",
-    "source_dataset_ids": ["inegi-cpv-2010-iter-locality", "inegi-cpv-2020-iter-locality", "inegi-marco-geoestadistico-cpv2020-municipal", "inegi-cgpv-2000-iter-locality-excluded"],
-    "source_urls": ["https://www.inegi.org.mx/contenidos/programas/ccpv/2010/datosabiertos/iter_nal_2010_csv.zip", "https://www.inegi.org.mx/contenidos/programas/ccpv/2020/datosabiertos/iter/iter_00_cpv2020_csv.zip", "https://www.inegi.org.mx/contenidos/programas/ccpv/2000/datosabiertos/cgpv2000_iter_00_csv.zip", "https://www.inegi.org.mx/contenidos/productos/prod_serv/contenidos/espanol/bvinegi/productos/geografia/marcogeo/889463807469/mg_2020_integrado.zip", "https://www.inegi.org.mx/app/biblioteca/ficha.html?upc=889463807469", "https://www.inegi.org.mx/inegi/terminos.html"],
+    "source_dataset_ids": ["inegi-cgpv-2000-iter-locality", "inegi-cpv-2010-iter-locality", "inegi-cpv-2020-iter-locality", "inegi-marco-geoestadistico-cpv2020-municipal"],
+    "source_urls": ["https://www.inegi.org.mx/contenidos/programas/ccpv/2000/datosabiertos/cgpv2000_iter_00_csv.zip", "https://www.inegi.org.mx/contenidos/programas/ccpv/2010/datosabiertos/iter_nal_2010_csv.zip", "https://www.inegi.org.mx/contenidos/programas/ccpv/2020/datosabiertos/iter/iter_00_cpv2020_csv.zip", "https://www.inegi.org.mx/contenidos/productos/prod_serv/contenidos/espanol/bvinegi/productos/geografia/marcogeo/889463807469/mg_2020_integrado.zip", "https://www.inegi.org.mx/app/biblioteca/ficha.html?upc=889463807469", "https://www.inegi.org.mx/inegi/terminos.html"],
     "retrieved_at": "2026-07-07T00:00:00Z",
     "licence": "INEGI open downloads subject to INEGI terms at https://www.inegi.org.mx/inegi/terminos.html and product/source attribution. The Marco Geoestadistico CPV 2020 product page marks SHP downloads with INEGI's data-open standard.",
-    "citation": "INEGI, Censos de Poblacion y Vivienda 2010 and 2020, ITER; INEGI, Marco Geoestadistico, Censo de Poblacion y Vivienda 2020.",
+    "citation": "INEGI, Censos de Poblacion y Vivienda 2000, 2010 and 2020, ITER; INEGI, Marco Geoestadistico, Censo de Poblacion y Vivienda 2020.",
     "raw_redistribution": "Raw INEGI ZIP archives and the local municipality extract are not committed. They remain in data/raw/mx_census/ with sources.csv checksums and await any project-controlled raw archive upload."
   },
   "input_manifests": [],
@@ -84,10 +78,10 @@
       "format": "zip",
       "bytes": 18450968,
       "sha256": "52a45e0b9e7cbee2831b23583cc9a6c71da6c813770b7e126728e53232e6bb01",
-      "source_dataset_id": "inegi-cgpv-2000-iter-locality-excluded",
-      "used_in_public_product": false,
+      "source_dataset_id": "inegi-cgpv-2000-iter-locality",
+      "used_in_public_product": true,
       "periods": "2000",
-      "notes": "Downloaded and checksummed, but excluded from the public product because the 2000 ITER file does not expose the four requested constructs separately."
+      "notes": "INEGI CGPV 2000 ITER national CSV ZIP; used for the 2000 municipality rows with the ages 5+ derivation ratified on 2026-07-07."
     },
     {
       "uri": "data/raw/mx_census/mg_2020_integrado.zip",
@@ -101,14 +95,14 @@
       "notes": "INEGI Marco Geoestadistico, Censo de Poblacion y Vivienda 2020, integrated product; municipal layer conjunto_de_datos/00mun.* is used."
     },
     {
-      "uri": "data/raw/mx_census/mx_iter_religion_municipality_extract_2010_2020.csv",
-      "url": "data/raw/mx_census/mx_iter_religion_municipality_extract_2010_2020.csv",
+      "uri": "data/raw/mx_census/mx_iter_religion_municipality_extract_2000_2020.csv",
+      "url": "data/raw/mx_census/mx_iter_religion_municipality_extract_2000_2020.csv",
       "format": "csv",
-      "bytes": 1121544,
-      "sha256": "7d9927d1f381d65d37dfd0a2bba3def97c6dcd25bd170f311d89dd3fc20acba2",
-      "source_dataset_id": "mx-iter-religion-municipality-extract-2010-2020",
+      "bytes": 2010006,
+      "sha256": "155f469d5d9b3762046f407b79e899c25f040fe89bad1039110c10c5061dfb3e",
+      "source_dataset_id": "mx-iter-religion-municipality-extract-2000-2020",
       "used_in_public_product": true,
-      "periods": "2010|2020",
+      "periods": "2000|2010|2020",
       "notes": "Ignored local extract of municipality-level religion counts used to build the area-summary product."
     }
   ],
@@ -117,10 +111,10 @@
       "uri": "repo:apps/regions/mx/data/area_summary_municipality.json",
       "storage_provider": "git_repository",
       "format": "json",
-      "bytes": 5397779,
-      "sha256": "c7bed9982486bd7c6bf1790605a0d2d3547481c91b3d83d9bf4da95bbf7ccc9b",
-      "row_count": 4938,
-      "content": "Mexico municipality area summary with INEGI ITER four-construct religion metrics.",
+      "bytes": 8084544,
+      "sha256": "d06f6339e2727e27a91d69eba19be3d0e875d0e1efe002f586f5487276065cbd",
+      "row_count": 7407,
+      "content": "Mexico municipality area summary with INEGI ITER religion metrics.",
       "privacy": "public",
       "licence_status": "inegi_terms_attribution_required"
     },
@@ -128,10 +122,10 @@
       "uri": "repo:apps/regions/mx/data/area_summary_municipality.csv",
       "storage_provider": "git_repository",
       "format": "csv",
-      "bytes": 2363378,
-      "sha256": "8a2255496431dc3aea99e9196e055facb66bac0a0527de00b1d7b7c32e4afbf9",
-      "row_count": 4938,
-      "content": "Flattened Mexico municipality area summary with INEGI ITER four-construct religion metrics.",
+      "bytes": 3534973,
+      "sha256": "dd6b2153c5cdaa950473b1f567d95e7afa61a1dce3b61971588d742b19aa8cd1",
+      "row_count": 7407,
+      "content": "Flattened Mexico municipality area summary with INEGI ITER religion metrics.",
       "privacy": "public",
       "licence_status": "inegi_terms_attribution_required"
     },
@@ -150,9 +144,9 @@
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/mx/data/area_summary_municipality.json",
-      "sha256": "c7bed9982486bd7c6bf1790605a0d2d3547481c91b3d83d9bf4da95bbf7ccc9b",
+      "sha256": "d06f6339e2727e27a91d69eba19be3d0e875d0e1efe002f586f5487276065cbd",
       "built_by": "scripts/build_mx_area_summary.R",
-      "notes": "2469 municipalities x 2 census years; 2010 has source rows for fewer municipality codes than the 2020 boundary set."
+      "notes": "2469 municipalities x 3 census years; 2000 and 2010 have source rows for fewer municipality codes than the 2020 boundary set."
     },
     {
       "uri": "repo:apps/regions/mx/data/mx_municipality_2020.geojson",
@@ -162,12 +156,49 @@
     }
   ],
   "validation": {
-    "checks": ["All four downloaded INEGI ZIP archives pass unzip integrity tests before this script is run.", "INEGI 2020 municipal boundary layer has 2469 source features and 2469 output features.", "Municipal boundary GeoJSON writes to 2502305 bytes after 1000 m simplification.", "Published counts use official ITER municipality total rows (LOC=0000); locality-sum reconciliation results are recorded because 2020 small-locality suppression prevents exact reconstruction from locality rows alone.", "State and national totals are reconciled from municipality rows for each built wave and retained in validation.state_validation and validation.national_validation.", "The 2000 ITER archive is checksummed but excluded because it does not expose the requested four top-level constructs separately."],
+    "checks": ["All four downloaded INEGI ZIP archives pass unzip integrity tests before this script is run.", "INEGI 2020 municipal boundary layer has 2469 source features and 2469 output features.", "Municipal boundary GeoJSON writes to 2502305 bytes after 1000 m simplification.", "Published counts use official ITER municipality total rows (LOC=0000); locality-sum reconciliation results are recorded because 2020 small-locality suppression prevents exact reconstruction from locality rows alone.", "State and national totals are reconciled from municipality rows for each built wave and retained in validation.state_validation and validation.national_validation.", "The 2000 guard found 0 municipality rows where p5_sinreli is smaller than p5_ncatoli.", "The 2000 source has 1 municipality total row with unavailable public metric values."],
     "join_coverage": {
       "municipality": [
         {
+          "year": 2000,
+          "matched_area_count": 2443,
+          "matched_value_count": 2442,
+          "expected_area_count": 2469,
+          "source_area_count": 2443,
+          "missing_area_codes": [
+            "02006",
+            "04012",
+            "07120",
+            "07121",
+            "07122",
+            "07123",
+            "07124",
+            "07125",
+            "12077",
+            "12078",
+            "12079",
+            "12080",
+            "12081",
+            "14125",
+            "15123",
+            "15124",
+            "15125",
+            "17034",
+            "17035",
+            "17036",
+            "23009",
+            "23010",
+            "23011",
+            "30211",
+            "30212",
+            "32058"
+          ],
+          "extra_source_area_codes": []
+        },
+        {
           "year": 2010,
           "matched_area_count": 2456,
+          "matched_value_count": 2456,
           "expected_area_count": 2469,
           "source_area_count": 2456,
           "missing_area_codes": [
@@ -190,6 +221,7 @@
         {
           "year": 2020,
           "matched_area_count": 2469,
+          "matched_value_count": 2469,
           "expected_area_count": 2469,
           "source_area_count": 2469,
           "missing_area_codes": [],
@@ -198,6 +230,29 @@
       ]
     },
     "state_validation": [
+      [
+        {
+          "metric": "catholic",
+          "source_field": "P5_CATOLIC",
+          "state_count": 32,
+          "states_with_difference": 0,
+          "max_abs_difference": 0
+        },
+        {
+          "metric": "non_catholic_religion",
+          "source_field": "P5_NCATOLI",
+          "state_count": 32,
+          "states_with_difference": 0,
+          "max_abs_difference": 0
+        },
+        {
+          "metric": "non_catholic_or_no_religion",
+          "source_field": "P5_SINRELI",
+          "state_count": 32,
+          "states_with_difference": 0,
+          "max_abs_difference": 0
+        }
+      ],
       [
         {
           "metric": "catholic",
@@ -263,6 +318,29 @@
       [
         {
           "metric": "catholic",
+          "source_field": "P5_CATOLIC",
+          "municipality_sum": 74612373,
+          "national_total": 74612373,
+          "difference": 0
+        },
+        {
+          "metric": "non_catholic_religion",
+          "source_field": "P5_NCATOLI",
+          "municipality_sum": 6466522,
+          "national_total": 6466522,
+          "difference": 0
+        },
+        {
+          "metric": "non_catholic_or_no_religion",
+          "source_field": "P5_SINRELI",
+          "municipality_sum": 9449451,
+          "national_total": 9449451,
+          "difference": 0
+        }
+      ],
+      [
+        {
+          "metric": "catholic",
           "source_field": "PCATOLICA",
           "municipality_sum": 92924489,
           "national_total": 92924489,
@@ -321,7 +399,109 @@
         }
       ]
     ],
+    "headline_national_validation": [
+      [
+        {
+          "year": 2000,
+          "metric": "population_total",
+          "municipality_sum": 84061824,
+          "national_total": 84061824,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "metric": "religious_affiliation_count",
+          "municipality_sum": 81078895,
+          "national_total": 81078895,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "metric": "no_religion_count",
+          "municipality_sum": 2982929,
+          "national_total": 2982929,
+          "difference": 0
+        }
+      ],
+      [
+        {
+          "year": 2010,
+          "metric": "population_total",
+          "municipality_sum": 109284029,
+          "national_total": 109284029,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "metric": "religious_affiliation_count",
+          "municipality_sum": 104021483,
+          "national_total": 104021483,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "metric": "no_religion_count",
+          "municipality_sum": 5262546,
+          "national_total": 5262546,
+          "difference": 0
+        }
+      ],
+      [
+        {
+          "year": 2020,
+          "metric": "population_total",
+          "municipality_sum": 125522210,
+          "national_total": 125522210,
+          "difference": 0
+        },
+        {
+          "year": 2020,
+          "metric": "religious_affiliation_count",
+          "municipality_sum": 112207694,
+          "national_total": 112207694,
+          "difference": 0
+        },
+        {
+          "year": 2020,
+          "metric": "no_religion_count",
+          "municipality_sum": 13314516,
+          "national_total": 13314516,
+          "difference": 0
+        }
+      ]
+    ],
     "locality_sum_validation": [
+      {
+        "year": 2000,
+        "locality_rows": 203139,
+        "official_municipality_total_rows": 2443,
+        "checks": [
+          {
+            "metric": "catholic",
+            "source_field": "P5_CATOLIC",
+            "suppressed_locality_cells": 91848,
+            "municipality_count": 2443,
+            "municipalities_with_difference": 537,
+            "max_abs_difference": 2836
+          },
+          {
+            "metric": "non_catholic_religion",
+            "source_field": "P5_NCATOLI",
+            "suppressed_locality_cells": 91848,
+            "municipality_count": 2443,
+            "municipalities_with_difference": 85,
+            "max_abs_difference": 2837
+          },
+          {
+            "metric": "non_catholic_or_no_religion",
+            "source_field": "P5_SINRELI",
+            "suppressed_locality_cells": 91848,
+            "municipality_count": 2443,
+            "municipalities_with_difference": 111,
+            "max_abs_difference": 17
+          }
+        ]
+      },
       {
         "year": 2010,
         "locality_rows": 195933,
@@ -401,6 +581,18 @@
         ]
       }
     ],
+    "source_inconsistency_guard": {
+      "year": 2000,
+      "condition": "p5_sinreli < p5_ncatoli",
+      "inconsistent_row_count": 0
+    },
+    "source_value_missing": {
+      "year": 2000,
+      "unavailable_value_count": 1,
+      "unavailable_area_codes": [
+        "07058"
+      ]
+    },
     "boundary_validation": {
       "municipality_source_feature_count": 2469,
       "municipality_output_feature_count": 2469,
@@ -411,10 +603,12 @@
     }
   },
   "construct_notes": [
-    "The public map displays only four stable top-level constructs: Catholic, Protestant/evangelical/biblical, other religion, and no religion.",
+    "The public map displays two headline metrics across 2000, 2010, and 2020: religious affiliation percent and no religion percent.",
+    "For 2000, population_total = p5_catolic + p5_sinreli; religious_affiliation_count = p5_catolic + p5_ncatoli; no_religion_count = p5_sinreli - p5_ncatoli.",
+    "The 2000 source universe is people aged 5 and over with a stated response; 2010 and 2020 count the full population in the four retained religion constructs.",
+    "Every 2000 row carries quality_flag universe_age5plus. Rows would also carry source_inconsistent and null public metric values if p5_sinreli were smaller than p5_ncatoli.",
     "The 2010 source field pncatolica is mapped to the Protestant/evangelical/biblical construct because the dictionary label names Protestantes, evangelicas y biblicas.",
     "The 2020 source fields are PCATOLICA, PRO_CRIEVA, POTRAS_REL, and PSIN_RELIG.",
-    "The 2000 ITER archive is documented but not rendered because it does not expose the four constructs separately.",
     "No full denomination crosswalk or trend layer is attempted; category labels changed across waves.",
     "Municipality rows use 2020 boundaries without a split/merge concordance for 2010."
   ],
@@ -422,6 +616,23 @@
   "licence_status": "inegi_terms_attribution_required",
   "downstream_status": "public",
   "source_datasets": [
+    {
+      "source_dataset_id": "inegi-cgpv-2000-iter-locality",
+      "name": "INEGI CGPV 2000 ITER national locality CSV",
+      "provider": "Instituto Nacional de Estadistica y Geografia (INEGI)",
+      "url": "https://www.inegi.org.mx/contenidos/programas/ccpv/2000/datosabiertos/cgpv2000_iter_00_csv.zip",
+      "retrieval_date": "2026-07-07",
+      "local_path": "data/raw/mx_census/cgpv2000_iter_00_csv.zip",
+      "licence": {
+        "name": "INEGI terms",
+        "url": "https://www.inegi.org.mx/inegi/terminos.html",
+        "attribution": "Instituto Nacional de Estadistica y Geografia (INEGI)"
+      },
+      "citation": "INEGI, XII Censo General de Poblacion y Vivienda 2000, ITER national CSV.",
+      "access_limits": null,
+      "redistribution_limits": "Raw archive is not committed; derived public products attribute INEGI and link to the source.",
+      "notes": "Used for 2000 municipality rows. The public metrics use p5_catolic, p5_ncatoli, and p5_sinreli for the population aged 5 and over."
+    },
     {
       "source_dataset_id": "inegi-cpv-2010-iter-locality",
       "name": "INEGI CPV 2010 ITER national locality CSV",

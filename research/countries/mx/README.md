@@ -3,7 +3,7 @@
 ## Status
 
 - **Tier**: A (buildable now)
-- **Build state**: municipality data map built for 2010 and 2020; 2000 raw archive downloaded and documented but excluded from the public product because it does not expose the four requested constructs separately.
+- **Build state**: municipality data map built for 2000-2020. The 2000 wave uses the population aged 5 and over and the JB-ratified two-field derivation. The 2010 and 2020 waves use full-population four-construct rows.
 - **Last verified**: 2026-07-07; verified INEGI ITER and Marco Geoestadistico routes:
   <https://www.inegi.org.mx/contenidos/programas/ccpv/2020/datosabiertos/iter/iter_00_cpv2020_csv.zip>,
   <https://www.inegi.org.mx/programas/ccpv/2010/>,
@@ -30,11 +30,11 @@
 
 ## First visualisation
 
-Religious-affiliation percent by municipality, 2010-2020, on 2020 Marco Geoestadistico municipal boundaries. The 2000 ITER route is open, but its religion fields are a different, coarser format; the first public product therefore omits 2000 rather than imposing a substitute crosswalk.
+Religious-affiliation percent by municipality, 2000-2020, on 2020 Marco Geoestadistico municipal boundaries. The 2000 wave uses the population aged 5 and over. The build derives the two headline metrics from `p5_catolic`, `p5_ncatoli`, and `p5_sinreli`; 2000-to-2010 change needs care.
 
 ## Build recipe
 
-1. Extract: parse ITER files for `PCATOLICA`, `PRO_CRIEVA`, `POTRAS_REL`, and `PSIN_RELIG`, aggregate or reconcile localities to municipality, and retain INEGI source metadata. For 2010, `pncatolica` maps to the Protestant/evangelical/biblical construct named in the dictionary. For 2020, suppressed small-locality cells mean the public rows use official `LOC=0000` municipality totals with locality-sum reconciliation results in the manifest.
+1. Extract: parse the 2000 ITER fields `p5_catolic`, `p5_ncatoli`, and `p5_sinreli`. Parse the 2010 and 2020 ITER fields `PCATOLICA`, `PRO_CRIEVA`, `POTRAS_REL`, and `PSIN_RELIG`. Aggregate or reconcile localities to municipality and retain INEGI source metadata. For 2000, `population_total = p5_catolic + p5_sinreli`, `religious_affiliation_count = p5_catolic + p5_ncatoli`, and `no_religion_count = p5_sinreli - p5_ncatoli`. For 2010, `pncatolica` maps to the Protestant/evangelical/biblical construct named in the dictionary. For 2020, suppressed small-locality cells mean the public rows use official `LOC=0000` municipality totals with locality-sum reconciliation results in the manifest.
 2. Governed product: `area_summary` per `schemas/area-summary.schema.json`, with a tracked manifest per `docs/data-storage-pipeline.md`.
 3. Boundaries: use INEGI 2020 municipal Marco Geoestadistico and join by state and municipality codes.
 4. Region page: `REGION_CONFIG` per `docs/development/adding-a-region.md`.
@@ -42,9 +42,12 @@ Religious-affiliation percent by municipality, 2010-2020, on 2020 Marco Geoestad
 
 ## Risks and open questions
 
-- Category labels changed across waves; the current map keeps only the four top-level constructs and omits change layers until a full crosswalk is adjudicated.
-- The 2000 ITER file does not separate the requested four constructs; keep it documented as a source gap unless a governed crosswalk is approved.
+- Category labels changed across waves; the current map keeps only the two headline metrics and omits change layers until a full crosswalk is adjudicated.
 - Locality identifiers need careful treatment where localities split, close, or change code.
+
+## Resolved notes
+
+- JB's 2026-07-07 ruling permits the 2000 wave in the public product. The ruling ratifies deriving `population_total`, `religious_affiliation_count`, and `no_religion_count` from the ages-5+ fields. The previous source-gap risk is resolved.
 
 ## Deep-history potential
 

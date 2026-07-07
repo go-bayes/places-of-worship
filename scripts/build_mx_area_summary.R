@@ -1,12 +1,11 @@
 # build the mexico area-summary product from INEGI ITER census religion data.
-# inputs: INEGI ITER CSV ZIPs for 2010 and 2020, the downloaded 2000 ITER
-# archive for exclusion documentation, and the INEGI 2020 Marco Geoestadistico
-# integrated municipal boundary ZIP. Raw archives remain ignored under
-# data/raw/mx_census/.
+# inputs: INEGI ITER CSV ZIPs for 2000, 2010, and 2020, and the INEGI 2020
+# Marco Geoestadistico integrated municipal boundary ZIP. Raw archives remain
+# ignored under data/raw/mx_census/.
 # outputs: apps/regions/mx/data/mx_municipality_2020.geojson,
 # apps/regions/mx/data/area_summary_municipality.{json,csv},
 # data/raw/mx_census/sources.csv, and
-# docs/manifests/mx-census-religion-2010-2020.json.
+# docs/manifests/mx-census-religion-2000-2020.json.
 # run from the repo root: Rscript scripts/build_mx_area_summary.R
 
 suppressMessages({
@@ -32,7 +31,7 @@ boundary_set_id <- "mx-municipality-2020-inegi-marco"
 boundary_dataset_id <- "inegi-marco-geoestadistico-cpv2020-municipal"
 census_2010_dataset_id <- "inegi-cpv-2010-iter-locality"
 census_2020_dataset_id <- "inegi-cpv-2020-iter-locality"
-census_2000_dataset_id <- "inegi-cgpv-2000-iter-locality-excluded"
+census_2000_dataset_id <- "inegi-cgpv-2000-iter-locality"
 
 iter_2020_url <- "https://www.inegi.org.mx/contenidos/programas/ccpv/2020/datosabiertos/iter/iter_00_cpv2020_csv.zip"
 iter_2010_url <- "https://www.inegi.org.mx/contenidos/programas/ccpv/2010/datosabiertos/iter_nal_2010_csv.zip"
@@ -50,6 +49,25 @@ licence_text <- paste(
 
 iter_specs <- list(
   list(
+    year = 2000L,
+    dataset_id = census_2000_dataset_id,
+    filename = "cgpv2000_iter_00_csv.zip",
+    url = iter_2000_url,
+    member = "cgpv2000_iter_00/conjunto_de_datos/cgpv2000_iter_00.csv",
+    fields = c(
+      catholic = "p5_catolic",
+      non_catholic_religion = "p5_ncatoli",
+      non_catholic_or_no_religion = "p5_sinreli"
+    ),
+    derivation = "age5plus_two_field",
+    quality_flags = c(
+      "construct_two_field_age5plus_derivation",
+      "universe_age5plus"
+    ),
+    denominator_note = "population aged 5 and over with a stated response: p5_catolic plus p5_sinreli in INEGI CGPV 2000 ITER (ages 5+ universe; later waves count the full population)",
+    construct_note = "JB's 2026-07-07 ruling ratifies the 2000 derivation: population_total is p5_catolic + p5_sinreli, religious_affiliation_count is p5_catolic + p5_ncatoli, and no_religion_count is p5_sinreli - p5_ncatoli."
+  ),
+  list(
     year = 2010L,
     dataset_id = census_2010_dataset_id,
     filename = "iter_nal_2010_csv.zip",
@@ -60,6 +78,11 @@ iter_specs <- list(
       protestant_evangelical = "pncatolica",
       other_religion = "potras_rel",
       no_religion = "psin_relig"
+    ),
+    quality_flags = c(
+      "category_crosswalk_limited_to_four_top_level_constructs",
+      "uses_2020_municipality_boundary_without_split_merge_concordance",
+      "source_field_pncatolica_mapped_to_pro_crieva_construct"
     ),
     denominator_note = "sum of pcatolica, pncatolica, potras_rel, and psin_relig in INEGI CPV 2010 ITER",
     construct_note = "The 2010 source field pncatolica is used for the Protestant/evangelical/biblical construct described by the INEGI dictionary."
@@ -75,6 +98,10 @@ iter_specs <- list(
       protestant_evangelical = "PRO_CRIEVA",
       other_religion = "POTRAS_REL",
       no_religion = "PSIN_RELIG"
+    ),
+    quality_flags = c(
+      "category_crosswalk_limited_to_four_top_level_constructs",
+      "uses_iter_municipality_total_due_locality_suppression"
     ),
     denominator_note = "sum of PCATOLICA, PRO_CRIEVA, POTRAS_REL, and PSIN_RELIG in INEGI CPV 2020 ITER",
     construct_note = "The 2020 source exposes the four requested top-level constructs directly."
@@ -105,9 +132,9 @@ raw_downloads <- list(
     url = iter_2000_url,
     publisher = "Instituto Nacional de Estadistica y Geografia (INEGI)",
     source_dataset_id = census_2000_dataset_id,
-    used_in_public_product = FALSE,
+    used_in_public_product = TRUE,
     periods = "2000",
-    notes = "Downloaded and checksummed, but excluded from the public product because the 2000 ITER file does not expose the four requested constructs separately."
+    notes = "INEGI CGPV 2000 ITER national CSV ZIP; used for the 2000 municipality rows with the ages 5+ derivation ratified on 2026-07-07."
   ),
   list(
     filename = "mg_2020_integrado.zip",
@@ -152,6 +179,15 @@ parse_inegi_count <- function(value) {
   suppressWarnings(as.numeric(value))
 }
 
+# derive ratified 2000 age-5-plus counts from INEGI p5 fields.
+derive_age5plus_counts <- function(p5_catolic, p5_ncatoli, p5_sinreli) {
+  list(
+    population_total = p5_catolic + p5_sinreli,
+    religious_affiliation_count = p5_catolic + p5_ncatoli,
+    no_religion_count = p5_sinreli - p5_ncatoli
+  )
+}
+
 # convert an R value to NULL when JSON should carry a missing scalar.
 null_if_na <- function(value) {
   if (length(value) == 0L || is.na(value) || !is.finite(value)) return(NULL)
@@ -160,9 +196,17 @@ null_if_na <- function(value) {
 
 # return the source dataset id for one built census year.
 census_dataset_for_year <- function(year) {
+  if (year == 2000L) return(census_2000_dataset_id)
   if (year == 2010L) return(census_2010_dataset_id)
   if (year == 2020L) return(census_2020_dataset_id)
   stop("unsupported year: ", year, call. = FALSE)
+}
+
+# return the ITER wave specification for one built census year.
+iter_spec_for_year <- function(year) {
+  hits <- Filter(function(spec) spec[["year"]] == year, iter_specs)
+  if (length(hits) != 1L) stop("unsupported year: ", year, call. = FALSE)
+  hits[[1]]
 }
 
 # compare municipality rows with state and national total rows from one ITER file.
@@ -215,6 +259,55 @@ validate_iter_totals <- function(df, field_map, year) {
     state_validation = state_checks,
     national_validation = national_checks
   )
+}
+
+# compare derived public metrics with the source national total row.
+validate_headline_totals <- function(df, counts, spec) {
+  field_map <- toupper(spec[["fields"]])
+  names(field_map) <- names(spec[["fields"]])
+  national <- df[df[["ENTIDAD"]] == "00" & df[["MUN"]] == "000" & df[["LOC"]] == "0000", ]
+
+  if (identical(spec[["derivation"]], "age5plus_two_field")) {
+    p5_catolic <- parse_inegi_count(national[[field_map[["catholic"]]]])[1]
+    p5_ncatoli <- parse_inegi_count(national[[field_map[["non_catholic_religion"]]]])[1]
+    p5_sinreli <- parse_inegi_count(national[[field_map[["non_catholic_or_no_religion"]]]])[1]
+    if (is.finite(p5_sinreli) && is.finite(p5_ncatoli) && p5_sinreli < p5_ncatoli) {
+      stop(
+        sprintf(
+          "national 2000 source inconsistency: p5_sinreli (%s) is smaller than p5_ncatoli (%s); input appears corrupted",
+          p5_sinreli,
+          p5_ncatoli
+        ),
+        call. = FALSE
+      )
+    }
+    national_totals <- unlist(
+      derive_age5plus_counts(p5_catolic, p5_ncatoli, p5_sinreli),
+      use.names = TRUE
+    )
+  } else {
+    catholic <- parse_inegi_count(national[[field_map[["catholic"]]]])[1]
+    protestant_evangelical <- parse_inegi_count(national[[field_map[["protestant_evangelical"]]]])[1]
+    other_religion <- parse_inegi_count(national[[field_map[["other_religion"]]]])[1]
+    no_religion <- parse_inegi_count(national[[field_map[["no_religion"]]]])[1]
+    religious_affiliation <- catholic + protestant_evangelical + other_religion
+    national_totals <- c(
+      population_total = religious_affiliation + no_religion,
+      religious_affiliation_count = religious_affiliation,
+      no_religion_count = no_religion
+    )
+  }
+
+  lapply(names(national_totals), function(metric) {
+    municipality_sum <- sum(counts[[metric]], na.rm = TRUE)
+    list(
+      year = spec[["year"]],
+      metric = metric,
+      municipality_sum = municipality_sum,
+      national_total = national_totals[[metric]],
+      difference = municipality_sum - national_totals[[metric]]
+    )
+  })
 }
 
 # compare summed locality rows with official ITER municipality total rows.
@@ -281,25 +374,73 @@ read_iter_wave <- function(spec) {
   }
 
   municipalities <- df[df[["ENTIDAD"]] != "00" & df[["MUN"]] != "000" & df[["LOC"]] == "0000", required]
-  counts <- data.frame(
+  base_counts <- data.frame(
     year = spec[["year"]],
     state_code = municipalities[["ENTIDAD"]],
     municipality_code = municipalities[["MUN"]],
     area_code = paste0(municipalities[["ENTIDAD"]], municipalities[["MUN"]]),
     state_name_source = municipalities[["NOM_ENT"]],
     municipality_name_source = municipalities[["NOM_MUN"]],
-    catholic_count = parse_inegi_count(municipalities[[field_map[["catholic"]]]]),
-    protestant_evangelical_count = parse_inegi_count(municipalities[[field_map[["protestant_evangelical"]]]]),
-    other_religion_count = parse_inegi_count(municipalities[[field_map[["other_religion"]]]]),
-    no_religion_count = parse_inegi_count(municipalities[[field_map[["no_religion"]]]]),
     source_dataset_id = spec[["dataset_id"]],
     source_fields = paste(names(field_map), field_map, sep = "=", collapse = "|"),
     stringsAsFactors = FALSE
   )
-  counts[["religious_affiliation_count"]] <- counts[["catholic_count"]] +
-    counts[["protestant_evangelical_count"]] +
-    counts[["other_religion_count"]]
-  counts[["population_total"]] <- counts[["religious_affiliation_count"]] + counts[["no_religion_count"]]
+
+  if (identical(spec[["derivation"]], "age5plus_two_field")) {
+    p5_catolic <- parse_inegi_count(municipalities[[field_map[["catholic"]]]])
+    p5_ncatoli <- parse_inegi_count(municipalities[[field_map[["non_catholic_religion"]]]])
+    p5_sinreli <- parse_inegi_count(municipalities[[field_map[["non_catholic_or_no_religion"]]]])
+    inconsistent <- is.finite(p5_sinreli) & is.finite(p5_ncatoli) & p5_sinreli < p5_ncatoli
+    age5plus_counts <- derive_age5plus_counts(p5_catolic, p5_ncatoli, p5_sinreli)
+    no_religion <- age5plus_counts[["no_religion_count"]]
+    religious_affiliation <- age5plus_counts[["religious_affiliation_count"]]
+    population_total <- age5plus_counts[["population_total"]]
+    no_religion[inconsistent] <- NA_real_
+    religious_affiliation[inconsistent] <- NA_real_
+    population_total[inconsistent] <- NA_real_
+
+    counts <- data.frame(
+      base_counts,
+      catholic_count = p5_catolic,
+      protestant_evangelical_count = NA_real_,
+      other_religion_count = NA_real_,
+      non_catholic_religion_count = p5_ncatoli,
+      non_catholic_or_no_religion_count = p5_sinreli,
+      no_religion_count = no_religion,
+      religious_affiliation_count = religious_affiliation,
+      population_total = population_total,
+      source_quality_flag = ifelse(inconsistent, "source_inconsistent", ""),
+      stringsAsFactors = FALSE
+    )
+    counts[["source_fields"]] <- paste(
+      c(
+        "catholic=p5_catolic",
+        "non_catholic_religion=p5_ncatoli",
+        "non_catholic_or_no_religion=p5_sinreli",
+        "population_total=p5_catolic+p5_sinreli",
+        "religious_affiliation_count=p5_catolic+p5_ncatoli",
+        "no_religion_count=p5_sinreli-p5_ncatoli"
+      ),
+      collapse = "|"
+    )
+  } else {
+    counts <- data.frame(
+      base_counts,
+      catholic_count = parse_inegi_count(municipalities[[field_map[["catholic"]]]]),
+      protestant_evangelical_count = parse_inegi_count(municipalities[[field_map[["protestant_evangelical"]]]]),
+      other_religion_count = parse_inegi_count(municipalities[[field_map[["other_religion"]]]]),
+      non_catholic_religion_count = NA_real_,
+      non_catholic_or_no_religion_count = NA_real_,
+      no_religion_count = parse_inegi_count(municipalities[[field_map[["no_religion"]]]]),
+      source_quality_flag = "",
+      stringsAsFactors = FALSE
+    )
+    counts[["religious_affiliation_count"]] <- counts[["catholic_count"]] +
+      counts[["protestant_evangelical_count"]] +
+      counts[["other_religion_count"]]
+    counts[["population_total"]] <- counts[["religious_affiliation_count"]] + counts[["no_religion_count"]]
+  }
+
   counts[["religious_affiliation_percent"]] <- ifelse(
     counts[["population_total"]] > 0,
     round(100 * counts[["religious_affiliation_count"]] / counts[["population_total"]], 2),
@@ -314,7 +455,9 @@ read_iter_wave <- function(spec) {
   list(
     counts = counts,
     total_validation = validate_iter_totals(df, spec[["fields"]], spec[["year"]]),
-    locality_validation = validate_locality_sums(df, spec[["fields"]], spec[["year"]])
+    locality_validation = validate_locality_sums(df, spec[["fields"]], spec[["year"]]),
+    headline_validation = validate_headline_totals(df, counts, spec),
+    source_inconsistent_count = sum(counts[["source_quality_flag"]] == "source_inconsistent", na.rm = TRUE)
   )
 }
 
@@ -388,20 +531,21 @@ build_area_row <- function(area, year, count_rows) {
   area_code <- area[["area_code"]][1]
   source <- count_rows[count_rows[["year"]] == year & count_rows[["area_code"]] == area_code, ]
   source_ids <- c(census_dataset_for_year(year), boundary_dataset_id)
-  flags <- c("category_crosswalk_limited_to_four_top_level_constructs")
-  if (year == 2010L) {
-    flags <- c(
-      flags,
-      "uses_2020_municipality_boundary_without_split_merge_concordance",
-      "source_field_pncatolica_mapped_to_pro_crieva_construct"
-    )
-  }
-  if (year == 2020L) {
-    flags <- c(flags, "uses_iter_municipality_total_due_locality_suppression")
-  }
+  flags <- iter_spec_for_year(year)[["quality_flags"]]
 
-  if (!nrow(source) || !is.finite(source[["population_total"]][1])) {
-    flags <- c(flags, "source_area_missing_for_wave")
+  source_quality_flag <- if (nrow(source)) source[["source_quality_flag"]][1] else ""
+  if (nzchar(source_quality_flag)) {
+    flags <- c(flags, strsplit(source_quality_flag, ";", fixed = TRUE)[[1]])
+  }
+  source_inconsistent <- "source_inconsistent" %in% flags
+
+  if (!nrow(source) || source_inconsistent || !is.finite(source[["population_total"]][1])) {
+    if (!nrow(source)) {
+      flags <- c(flags, "source_area_missing_for_wave")
+    }
+    if (nrow(source) && !source_inconsistent && !is.finite(source[["population_total"]][1])) {
+      flags <- c(flags, "source_values_missing_for_wave")
+    }
     population_total <- NULL
     religious_affiliation_count <- NULL
     religious_affiliation_percent <- NULL
@@ -415,11 +559,7 @@ build_area_row <- function(area, year, count_rows) {
     no_religion_percent <- null_if_na(source[["no_religion_percent"]][1])
   }
 
-  basis <- if (year == 2010L) {
-    iter_specs[[1]][["denominator_note"]]
-  } else {
-    iter_specs[[2]][["denominator_note"]]
-  }
+  basis <- iter_spec_for_year(year)[["denominator_note"]]
 
   list(
     country_code = country_code,
@@ -442,7 +582,7 @@ build_area_row <- function(area, year, count_rows) {
     site_snapshot_date = NULL,
     place_count_basis = NULL,
     source_dataset_ids = source_ids,
-    quality_flag = paste(flags, collapse = ";")
+    quality_flag = paste(unique(flags), collapse = ";")
   )
 }
 
@@ -479,40 +619,40 @@ flatten_rows <- function(rows) {
 # create shared indicator metadata for the municipality product.
 indicators_for_municipality <- function() {
   caveat <- paste(
-    "The denominator is the sum of four top-level INEGI ITER constructs.",
-    "The 2000 file is not mapped because it does not expose those four constructs separately."
+    "The 2000 denominator covers people aged 5 and over with a stated response.",
+    "The 2010 and 2020 denominators sum the four retained INEGI ITER constructs."
   )
   list(
     list(
       indicator_id = "population_total",
-      label = "Four-construct religion denominator",
-      description = "People counted in the four retained INEGI religion constructs: Catholic, Protestant/evangelical/biblical, other religion, and no religion.",
+      label = "Religion-response denominator",
+      description = "People counted in the public religion denominator for each wave.",
       unit = "count",
       denominator_indicator_id = NULL,
-      method = "For each built wave, sum the four retained ITER constructs after using INEGI municipality total rows.",
-      temporal_coverage = "2010 and 2020",
+      method = "For 2000, sum p5_catolic and p5_sinreli. For 2010 and 2020, sum the four retained ITER constructs after using INEGI municipality total rows.",
+      temporal_coverage = "2000, 2010, 2020",
       spatial_coverage = "Mexico municipalities on INEGI 2020 Marco Geoestadistico boundaries",
       quality_notes = caveat
     ),
     list(
       indicator_id = "religious_affiliation_percent",
       label = "Religious affiliation %",
-      description = "Share of the four-construct denominator in Catholic, Protestant/evangelical/biblical, or other-religion categories.",
+      description = "Share of the wave-specific denominator in the retained religious-affiliation categories.",
       unit = "percent",
       denominator_indicator_id = "population_total",
-      method = "100 * (Catholic + Protestant/evangelical/biblical + other religion) / four-construct denominator.",
-      temporal_coverage = "2010 and 2020",
+      method = "For 2000, 100 * (p5_catolic + p5_ncatoli) / (p5_catolic + p5_sinreli). For 2010 and 2020, 100 * (Catholic + Protestant/evangelical/biblical + other religion) / four-construct denominator.",
+      temporal_coverage = "2000, 2010, 2020",
       spatial_coverage = "Mexico municipalities on INEGI 2020 Marco Geoestadistico boundaries",
       quality_notes = caveat
     ),
     list(
       indicator_id = "no_religion_percent",
       label = "No religion %",
-      description = "Share of the four-construct denominator in the INEGI no-religion/no-affiliation category.",
+      description = "Share of the wave-specific denominator in the INEGI no-religion/no-affiliation category.",
       unit = "percent",
       denominator_indicator_id = "population_total",
-      method = "100 * no religion / four-construct denominator.",
-      temporal_coverage = "2010 and 2020",
+      method = "For 2000, 100 * (p5_sinreli - p5_ncatoli) / (p5_catolic + p5_sinreli). For 2010 and 2020, 100 * no religion / four-construct denominator.",
+      temporal_coverage = "2000, 2010, 2020",
       spatial_coverage = "Mexico municipalities on INEGI 2020 Marco Geoestadistico boundaries",
       quality_notes = caveat
     )
@@ -525,7 +665,7 @@ visual_layers_for_municipality <- function() {
     list(
       visual_layer_id = "mx-municipality-religious-affiliation",
       label = "Religious affiliation %",
-      description = "Mexico census four-construct religion affiliation share.",
+      description = "Mexico census religion affiliation share.",
       layer_type = "choropleth",
       indicator_ids = list("religious_affiliation_percent"),
       geometry_unit_type = "area_unit",
@@ -535,12 +675,12 @@ visual_layers_for_municipality <- function() {
       aggregation_rule = "reported area value",
       uncertainty_display = "quality_flag",
       default_visibility = TRUE,
-      notes = "2010 rows use 2020 boundaries without a split/merge concordance; 2000 is not rendered because it lacks the four separate constructs."
+      notes = "2000 rows cover people aged 5 and over; 2010 rows use 2020 boundaries without a split/merge concordance."
     ),
     list(
       visual_layer_id = "mx-municipality-no-religion",
       label = "No religion %",
-      description = "Mexico census no-religion share in the retained four-construct denominator.",
+      description = "Mexico census no-religion share in the wave-specific denominator.",
       layer_type = "choropleth",
       indicator_ids = list("no_religion_percent"),
       geometry_unit_type = "area_unit",
@@ -550,7 +690,7 @@ visual_layers_for_municipality <- function() {
       aggregation_rule = "reported area value",
       uncertainty_display = "quality_flag",
       default_visibility = FALSE,
-      notes = "The no-religion label is PSIN_RELIG in 2020 and psin_relig in 2010."
+      notes = "The 2000 no-religion count is p5_sinreli minus p5_ncatoli. The no-religion label is PSIN_RELIG in 2020 and psin_relig in 2010."
     )
   )
 }
@@ -558,6 +698,19 @@ visual_layers_for_municipality <- function() {
 # create source-dataset records for the area-summary document.
 source_datasets <- function() {
   list(
+    list(
+      source_dataset_id = census_2000_dataset_id,
+      name = "INEGI CGPV 2000 ITER national locality CSV",
+      provider = "Instituto Nacional de Estadistica y Geografia (INEGI)",
+      url = iter_2000_url,
+      retrieval_date = retrieval_date,
+      local_path = file.path(raw_dir, "cgpv2000_iter_00_csv.zip"),
+      licence = list(name = "INEGI terms", url = inegi_terms_url, attribution = "Instituto Nacional de Estadistica y Geografia (INEGI)"),
+      citation = "INEGI, XII Censo General de Poblacion y Vivienda 2000, ITER national CSV.",
+      access_limits = NULL,
+      redistribution_limits = "Raw archive is not committed; derived public products attribute INEGI and link to the source.",
+      notes = "Used for 2000 municipality rows. The public metrics use p5_catolic, p5_ncatoli, and p5_sinreli for the population aged 5 and over."
+    ),
     list(
       source_dataset_id = census_2010_dataset_id,
       name = "INEGI CPV 2010 ITER national locality CSV",
@@ -664,12 +817,14 @@ manifest_file_record <- function(path, content, licence_status = "inegi_terms_at
 
 # report join coverage for one built census year.
 join_coverage <- function(boundary_codes, count_rows, year) {
-  source_codes <- unique(count_rows[count_rows[["year"]] == year & is.finite(count_rows[["population_total"]]), "area_code"])
+  source_codes <- unique(count_rows[count_rows[["year"]] == year, "area_code"])
+  value_codes <- unique(count_rows[count_rows[["year"]] == year & is.finite(count_rows[["population_total"]]), "area_code"])
   missing <- sort(setdiff(boundary_codes, source_codes))
   extra <- sort(setdiff(source_codes, boundary_codes))
   list(
     year = year,
     matched_area_count = length(intersect(boundary_codes, source_codes)),
+    matched_value_count = length(intersect(boundary_codes, value_codes)),
     expected_area_count = length(boundary_codes),
     source_area_count = length(source_codes),
     missing_area_codes = as.list(missing),
@@ -703,11 +858,11 @@ area_table <- boundary_info[["area_table"]][order(boundary_info[["area_table"]][
 wave_results <- lapply(iter_specs, read_iter_wave)
 count_rows <- do.call(rbind, lapply(wave_results, `[[`, "counts"))
 count_rows <- count_rows[order(count_rows[["year"]], count_rows[["area_code"]]), ]
-extract_path <- file.path(raw_dir, "mx_iter_religion_municipality_extract_2010_2020.csv")
+extract_path <- file.path(raw_dir, "mx_iter_religion_municipality_extract_2000_2020.csv")
 write.csv(count_rows, extract_path, row.names = FALSE, na = "")
 
 area_split <- split(area_table, seq_len(nrow(area_table)))
-years <- c(2010L, 2020L)
+years <- c(2000L, 2010L, 2020L)
 # unname: split() names the pieces "1","2",... and unlist would weld those
 # onto inner indices, turning rows into a named list that serialises as a
 # json object; the runtime requires rows to be an array
@@ -724,9 +879,9 @@ derived_extract_record <- list(
   filename = basename(extract_path),
   url = extract_path,
   publisher = "Places of Worship project derivation from INEGI ITER",
-  source_dataset_id = "mx-iter-religion-municipality-extract-2010-2020",
+  source_dataset_id = "mx-iter-religion-municipality-extract-2000-2020",
   used_in_public_product = TRUE,
-  periods = "2010|2020",
+  periods = "2000|2010|2020",
   notes = "Ignored local extract of municipality-level religion counts used to build the area-summary product."
 )
 sources_csv <- do.call(rbind, c(lapply(raw_downloads, source_record), list(source_record(derived_extract_record))))
@@ -735,6 +890,18 @@ write.csv(sources_csv, file.path(raw_dir, "sources.csv"), row.names = FALSE, na 
 join_checks <- lapply(years, function(year) join_coverage(area_table[["area_code"]], count_rows, year))
 total_validation <- lapply(wave_results, `[[`, "total_validation")
 locality_validation <- lapply(wave_results, `[[`, "locality_validation")
+headline_validation <- lapply(wave_results, `[[`, "headline_validation")
+source_inconsistent_counts <- setNames(
+  vapply(wave_results, `[[`, integer(1), "source_inconsistent_count"),
+  vapply(iter_specs, function(spec) as.character(spec[["year"]]), character(1))
+)
+source_value_missing_counts <- setNames(
+  vapply(years, function(year) {
+    rows <- count_rows[count_rows[["year"]] == year, ]
+    sum(!is.finite(rows[["population_total"]]) & rows[["source_quality_flag"]] != "source_inconsistent", na.rm = TRUE)
+  }, integer(1)),
+  as.character(years)
+)
 
 validation_checks <- c(
   "All four downloaded INEGI ZIP archives pass unzip integrity tests before this script is run.",
@@ -742,15 +909,20 @@ validation_checks <- c(
   sprintf("Municipal boundary GeoJSON writes to %d bytes after %d m simplification.", boundary_info[["output_bytes"]], boundary_info[["simplification_tolerance_m"]]),
   "Published counts use official ITER municipality total rows (LOC=0000); locality-sum reconciliation results are recorded because 2020 small-locality suppression prevents exact reconstruction from locality rows alone.",
   "State and national totals are reconciled from municipality rows for each built wave and retained in validation.state_validation and validation.national_validation.",
-  "The 2000 ITER archive is checksummed but excluded because it does not expose the requested four top-level constructs separately."
+  sprintf("The 2000 guard found %d municipality rows where p5_sinreli is smaller than p5_ncatoli.", source_inconsistent_counts[["2000"]]),
+  sprintf(
+    "The 2000 source has %d municipality total row%s with unavailable public metric values.",
+    source_value_missing_counts[["2000"]],
+    ifelse(source_value_missing_counts[["2000"]] == 1L, "", "s")
+  )
 )
 
 docs_manifest <- list(
   "$schema" = "../../schemas/data-manifest.schema.json",
   schema_version = "data-manifest.v1",
-  manifest_id = paste0("manifest:mx-census-religion:mx:2010-2020:", substr(sha256_file(summary_out), 1, 12)),
-  dataset_id = "mx-census-religion:mx:2010-2020:inegi-iter",
-  dataset_version_id = paste0("mx-census-religion:mx:2010-2020:inegi-iter:", substr(sha256_file(summary_out), 1, 12)),
+  manifest_id = paste0("manifest:mx-census-religion:mx:2000-2020:", substr(sha256_file(summary_out), 1, 12)),
+  dataset_id = "mx-census-religion:mx:2000-2020:inegi-iter",
+  dataset_version_id = paste0("mx-census-religion:mx:2000-2020:inegi-iter:", substr(sha256_file(summary_out), 1, 12)),
   manifest_sha256 = NULL,
   supersedes_manifest_id = NULL,
   superseded_by_manifest_id = NULL,
@@ -770,16 +942,10 @@ docs_manifest <- list(
     git_commit = NULL,
     command = paste("Rscript", script_id),
     parameters = list(
-      waves = c("2010", "2020"),
-      excluded_waves = list(
-        list(
-          year = "2000",
-          reason = "The 2000 ITER file has Catholic, non-Catholic religion, and non-Catholic including no-religion fields, but does not expose PCATOLICA, PRO_CRIEVA, POTRAS_REL, and PSIN_RELIG separately."
-        )
-      ),
+      waves = c("2000", "2010", "2020"),
       municipality_boundary_set = boundary_set_id,
       municipality_boundary_simplification_tolerance_m = boundary_info[["simplification_tolerance_m"]],
-      denominator = "sum of the four retained INEGI ITER constructs",
+      denominator = "2000: p5_catolic plus p5_sinreli for ages 5+; 2010 and 2020: sum of the four retained INEGI ITER constructs",
       omitted_metrics = c("religious_change", "places_per_10000_residents", "place_density_per_sq_km")
     ),
     software_versions = list(
@@ -792,18 +958,18 @@ docs_manifest <- list(
   ),
   source = list(
     provider = "Instituto Nacional de Estadistica y Geografia (INEGI)",
-    source_dataset_ids = c(census_2010_dataset_id, census_2020_dataset_id, boundary_dataset_id, census_2000_dataset_id),
-    source_urls = c(iter_2010_url, iter_2020_url, iter_2000_url, boundary_url, boundary_product_url, inegi_terms_url),
+    source_dataset_ids = c(census_2000_dataset_id, census_2010_dataset_id, census_2020_dataset_id, boundary_dataset_id),
+    source_urls = c(iter_2000_url, iter_2010_url, iter_2020_url, boundary_url, boundary_product_url, inegi_terms_url),
     retrieved_at = paste0(retrieval_date, "T00:00:00Z"),
     licence = licence_text,
-    citation = "INEGI, Censos de Poblacion y Vivienda 2010 and 2020, ITER; INEGI, Marco Geoestadistico, Censo de Poblacion y Vivienda 2020.",
+    citation = "INEGI, Censos de Poblacion y Vivienda 2000, 2010 and 2020, ITER; INEGI, Marco Geoestadistico, Censo de Poblacion y Vivienda 2020.",
     raw_redistribution = "Raw INEGI ZIP archives and the local municipality extract are not committed. They remain in data/raw/mx_census/ with sources.csv checksums and await any project-controlled raw archive upload."
   ),
   input_manifests = list(),
   raw_sources = raw_source_manifest_records(sources_csv),
   durable_files = list(
-    manifest_file_record(summary_out, "Mexico municipality area summary with INEGI ITER four-construct religion metrics."),
-    manifest_file_record(csv_out, "Flattened Mexico municipality area summary with INEGI ITER four-construct religion metrics."),
+    manifest_file_record(summary_out, "Mexico municipality area summary with INEGI ITER religion metrics."),
+    manifest_file_record(csv_out, "Flattened Mexico municipality area summary with INEGI ITER religion metrics."),
     manifest_file_record(boundary_out, "Simplified Mexico 2020 municipality boundary GeoJSON derived from INEGI Marco Geoestadistico CPV 2020.")
   ),
   derived_outputs = list(
@@ -811,7 +977,7 @@ docs_manifest <- list(
       uri = paste0("repo:", summary_out),
       sha256 = sha256_file(summary_out),
       built_by = script_id,
-      notes = sprintf("%d municipalities x 2 census years; 2010 has source rows for fewer municipality codes than the 2020 boundary set.", nrow(area_table))
+      notes = sprintf("%d municipalities x 3 census years; 2000 and 2010 have source rows for fewer municipality codes than the 2020 boundary set.", nrow(area_table))
     ),
     list(
       uri = paste0("repo:", boundary_out),
@@ -825,7 +991,18 @@ docs_manifest <- list(
     join_coverage = list(municipality = join_checks),
     state_validation = lapply(total_validation, `[[`, "state_validation"),
     national_validation = lapply(total_validation, `[[`, "national_validation"),
+    headline_national_validation = headline_validation,
     locality_sum_validation = locality_validation,
+    source_inconsistency_guard = list(
+      year = 2000,
+      condition = "p5_sinreli < p5_ncatoli",
+      inconsistent_row_count = source_inconsistent_counts[["2000"]]
+    ),
+    source_value_missing = list(
+      year = 2000,
+      unavailable_value_count = source_value_missing_counts[["2000"]],
+      unavailable_area_codes = as.list(sort(count_rows[count_rows[["year"]] == 2000L & !is.finite(count_rows[["population_total"]]), "area_code"]))
+    ),
     boundary_validation = list(
       municipality_source_feature_count = boundary_info[["source_feature_count"]],
       municipality_output_feature_count = boundary_info[["output_feature_count"]],
@@ -836,10 +1013,12 @@ docs_manifest <- list(
     )
   ),
   construct_notes = list(
-    "The public map displays only four stable top-level constructs: Catholic, Protestant/evangelical/biblical, other religion, and no religion.",
+    "The public map displays two headline metrics across 2000, 2010, and 2020: religious affiliation percent and no religion percent.",
+    "For 2000, population_total = p5_catolic + p5_sinreli; religious_affiliation_count = p5_catolic + p5_ncatoli; no_religion_count = p5_sinreli - p5_ncatoli.",
+    "The 2000 source universe is people aged 5 and over with a stated response; 2010 and 2020 count the full population in the four retained religion constructs.",
+    "Every 2000 row carries quality_flag universe_age5plus. Rows would also carry source_inconsistent and null public metric values if p5_sinreli were smaller than p5_ncatoli.",
     "The 2010 source field pncatolica is mapped to the Protestant/evangelical/biblical construct because the dictionary label names Protestantes, evangelicas y biblicas.",
     "The 2020 source fields are PCATOLICA, PRO_CRIEVA, POTRAS_REL, and PSIN_RELIG.",
-    "The 2000 ITER archive is documented but not rendered because it does not expose the four constructs separately.",
     "No full denomination crosswalk or trend layer is attempted; category labels changed across waves.",
     "Municipality rows use 2020 boundaries without a split/merge concordance for 2010."
   ),
@@ -850,7 +1029,7 @@ docs_manifest <- list(
   notes = "The committed products contain derived area summaries and simplified boundaries only. On-page attribution must cite INEGI, INEGI terms, and the Marco Geoestadistico boundary source."
 )
 
-manifest_out <- file.path(manifest_dir, "mx-census-religion-2010-2020.json")
+manifest_out <- file.path(manifest_dir, "mx-census-religion-2000-2020.json")
 write_json(docs_manifest, manifest_out, auto_unbox = TRUE, pretty = TRUE, null = "null", na = "null", digits = NA)
 
 cat(sprintf("wrote %s: %d rows\n", summary_out, length(municipality_rows)))
