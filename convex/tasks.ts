@@ -13,6 +13,7 @@ import {
   assertMaxString,
 } from "./lib/limits";
 import { appendTaskEvent } from "./lib/taskEvents";
+import { evidenceDraftDoc, reviewDecisionDoc, taskDoc, taskEventDoc } from "./lib/validators";
 
 function manualTaskId(countryCode: string, name: string, now: number): string {
   const slug = name
@@ -80,6 +81,7 @@ export const listTasks = query({
     priority: v.optional(taskPriority),
     limit: v.optional(v.number()),
   },
+  returns: v.array(taskDoc),
   handler: async (ctx, args) => {
     await requireUser(ctx, ["ra", "reviewer", "curator", "admin", "service"]);
     const limit = Math.min(Math.max(args.limit ?? 250, 1), 1000);
@@ -166,6 +168,11 @@ export const listMyTasks = query({
     batchId: v.optional(v.string()),
     limit: v.optional(v.number()),
   },
+  returns: v.array(v.object({
+    task: taskDoc,
+    latestDraft: v.union(evidenceDraftDoc, v.null()),
+    latestReview: v.union(reviewDecisionDoc, v.null()),
+  })),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const limit = Math.min(Math.max(args.limit ?? 100, 1), 500);
@@ -209,6 +216,10 @@ export const getTask = query({
   args: {
     taskId: v.string(),
   },
+  returns: v.object({
+    task: taskDoc,
+    latestDraft: v.union(evidenceDraftDoc, v.null()),
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin", "service"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
@@ -222,6 +233,7 @@ export const getTaskEvents = query({
     taskId: v.string(),
     limit: v.optional(v.number()),
   },
+  returns: v.array(taskEventDoc),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin", "service"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
@@ -244,6 +256,11 @@ export const upsertTasksFromStaticMap = mutation({
     batch: taskBatchInput,
     tasks: v.array(taskInput),
   },
+  returns: v.object({
+    batch_id: v.string(),
+    inserted: v.number(),
+    updated: v.number(),
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["admin", "service"]);
     const actorRole = chooseActorRole(user, ["service", "admin"]);
@@ -328,6 +345,10 @@ export const claimTask = mutation({
   args: {
     taskId: v.string(),
   },
+  returns: v.object({
+    task_id: v.string(),
+    status: taskStatus,
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
@@ -360,6 +381,10 @@ export const releaseTask = mutation({
     taskId: v.string(),
     reason: v.optional(v.string()),
   },
+  returns: v.object({
+    task_id: v.string(),
+    status: v.literal("open"),
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
@@ -383,7 +408,7 @@ export const releaseTask = mutation({
       newStatus: "open",
       reason: args.reason,
     });
-    return { task_id: args.taskId, status: "open" };
+    return { task_id: args.taskId, status: "open" as const };
   },
 });
 
@@ -392,6 +417,10 @@ export const skipTask = mutation({
     taskId: v.string(),
     reason: v.optional(v.string()),
   },
+  returns: v.object({
+    task_id: v.string(),
+    status: v.literal("skipped"),
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
@@ -415,7 +444,7 @@ export const skipTask = mutation({
       newStatus: "skipped",
       reason: args.reason,
     });
-    return { task_id: args.taskId, status: "skipped" };
+    return { task_id: args.taskId, status: "skipped" as const };
   },
 });
 
@@ -425,6 +454,10 @@ export const markProvisionallyClosed = mutation({
     evidenceDraftId: v.optional(v.string()),
     reason: v.optional(v.string()),
   },
+  returns: v.object({
+    task_id: v.string(),
+    status: v.literal("provisionally_closed"),
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
@@ -449,7 +482,7 @@ export const markProvisionallyClosed = mutation({
       reason: args.reason,
       evidenceDraftId: args.evidenceDraftId,
     });
-    return { task_id: args.taskId, status: "provisionally_closed" };
+    return { task_id: args.taskId, status: "provisionally_closed" as const };
   },
 });
 
@@ -458,6 +491,10 @@ export const reopenTask = mutation({
     taskId: v.string(),
     reason: v.string(),
   },
+  returns: v.object({
+    task_id: v.string(),
+    status: v.literal("reopened"),
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
@@ -476,7 +513,7 @@ export const reopenTask = mutation({
       newStatus: "reopened",
       reason: args.reason,
     });
-    return { task_id: args.taskId, status: "reopened" };
+    return { task_id: args.taskId, status: "reopened" as const };
   },
 });
 
@@ -486,6 +523,9 @@ export const addTaskNote = mutation({
     note: v.string(),
     clientContext: v.optional(v.any()),
   },
+  returns: v.object({
+    task_id: v.string(),
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
@@ -518,6 +558,11 @@ export const createManualCandidateTask = mutation({
     taskBrief: v.optional(v.string()),
     sourceNote: v.optional(v.string()),
   },
+  returns: v.object({
+    task_id: v.string(),
+    candidate_site_id: v.string(),
+    status: v.literal("in_progress"),
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     assertMaxString("nomination country code", args.countryCode, SHORT_TEXT_MAX);
@@ -575,6 +620,6 @@ export const createManualCandidateTask = mutation({
       newStatus: "in_progress",
       reason: args.sourceNote,
     });
-    return { task_id: taskId, candidate_site_id: candidateSiteId, status: "in_progress" };
+    return { task_id: taskId, candidate_site_id: candidateSiteId, status: "in_progress" as const };
   },
 });

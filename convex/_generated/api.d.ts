@@ -16,9 +16,11 @@ import type * as exports from "../exports.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_limits from "../lib/limits.js";
 import type * as lib_taskEvents from "../lib/taskEvents.js";
+import type * as lib_validators from "../lib/validators.js";
 import type * as model from "../model.js";
 import type * as reviews from "../reviews.js";
 import type * as tasks from "../tasks.js";
+import type * as trainingSeed from "../trainingSeed.js";
 import type * as users from "../users.js";
 
 import type {
@@ -36,9 +38,11 @@ declare const fullApi: ApiFromModules<{
   "lib/auth": typeof lib_auth;
   "lib/limits": typeof lib_limits;
   "lib/taskEvents": typeof lib_taskEvents;
+  "lib/validators": typeof lib_validators;
   model: typeof model;
   reviews: typeof reviews;
   tasks: typeof tasks;
+  trainingSeed: typeof trainingSeed;
   users: typeof users;
 }>;
 

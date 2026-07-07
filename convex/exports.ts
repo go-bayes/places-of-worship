@@ -4,6 +4,13 @@ import type { Doc } from "./_generated/dataModel";
 import { exportFormat, exportBatchStatus } from "./model";
 import { chooseActorRole, requireUser } from "./lib/auth";
 import { appendTaskEvent } from "./lib/taskEvents";
+import {
+  evidenceDraftDoc,
+  exportBatchDoc,
+  reviewDecisionDoc,
+  taskDoc,
+  taskEventDoc,
+} from "./lib/validators";
 
 async function taskByTaskId(ctx: any, taskId: string): Promise<Doc<"tasks"> | null> {
   return await ctx.db
@@ -123,6 +130,7 @@ export const listExportBatches = query({
     status: v.optional(exportBatchStatus),
     limit: v.optional(v.number()),
   },
+  returns: v.array(exportBatchDoc),
   handler: async (ctx, args) => {
     await requireUser(ctx, ["curator", "admin"]);
     const limit = Math.min(Math.max(args.limit ?? 50, 1), 200);
@@ -145,6 +153,11 @@ export const createExportBatch = mutation({
     exportFormat: v.optional(exportFormat),
     notes: v.optional(v.string()),
   },
+  returns: v.object({
+    export_batch_id: v.string(),
+    included_task_count: v.number(),
+    included_review_decision_count: v.number(),
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["curator", "admin"]);
     const now = Date.now();
@@ -207,6 +220,10 @@ export const freezeExportBatch = mutation({
   args: {
     exportBatchId: v.string(),
   },
+  returns: v.object({
+    export_batch_id: v.string(),
+    status: v.literal("frozen"),
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["curator", "admin"]);
     const batch = await ctx.db
@@ -247,7 +264,7 @@ export const freezeExportBatch = mutation({
       });
     }
 
-    return { export_batch_id: args.exportBatchId, status: "frozen" };
+    return { export_batch_id: args.exportBatchId, status: "frozen" as const };
   },
 });
 
@@ -255,6 +272,34 @@ export const getExportBundle = query({
   args: {
     exportBatchId: v.string(),
   },
+  returns: v.object({
+    export_manifest: v.object({
+      export_batch_id: v.string(),
+      country_code: v.string(),
+      created_at: v.number(),
+      frozen_at: v.optional(v.number()),
+      schema_version: v.string(),
+      export_format: exportFormat,
+      included_task_count: v.number(),
+      included_evidence_count: v.number(),
+      included_review_decision_count: v.number(),
+      pow_validation_status: v.optional(
+        v.union(v.literal("not_run"), v.literal("passed"), v.literal("failed")),
+      ),
+    }),
+    tasks: v.array(taskDoc),
+    task_events: v.array(taskEventDoc),
+    evidence_drafts: v.array(evidenceDraftDoc),
+    review_decisions: v.array(reviewDecisionDoc),
+    files: v.object({
+      export_manifest_json: v.string(),
+      tasks_jsonl: v.string(),
+      task_events_jsonl: v.string(),
+      evidence_drafts_jsonl: v.string(),
+      review_decisions_jsonl: v.string(),
+      site_evidence_wide_csv: v.string(),
+    }),
+  }),
   handler: async (ctx, args) => {
     await requireUser(ctx, ["curator", "admin"]);
     const batch = await ctx.db

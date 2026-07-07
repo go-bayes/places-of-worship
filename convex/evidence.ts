@@ -13,6 +13,7 @@ import {
   assertTaskReasonLimit,
 } from "./lib/limits";
 import { appendTaskEvent } from "./lib/taskEvents";
+import { evidenceDraftDoc } from "./lib/validators";
 
 async function getTaskOrThrow(ctx: any, taskId: string): Promise<Doc<"tasks">> {
   const task = await ctx.db
@@ -40,6 +41,7 @@ export const getEvidenceDraft = query({
   args: {
     evidenceDraftId: v.string(),
   },
+  returns: evidenceDraftDoc,
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const draft = await getDraftOrThrow(ctx, args.evidenceDraftId);
@@ -58,6 +60,7 @@ export const listTaskEvidence = query({
     taskId: v.string(),
     limit: v.optional(v.number()),
   },
+  returns: v.array(evidenceDraftDoc),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
@@ -111,7 +114,12 @@ async function supersedeOtherActiveDrafts(
 const closedTaskStatuses = new Set(["reviewed", "exported"]);
 const finalDraftStatuses = new Set(["accepted_for_export", "rejected"]);
 
-async function upsertSpreadsheetBatch(ctx: any, batch: any, user: Doc<"users">, now: number) {
+async function upsertSpreadsheetBatch(
+  ctx: any,
+  batch: any,
+  user: Doc<"users">,
+  now: number,
+): Promise<"inserted" | "updated"> {
   assertMaxString("batch id", batch.batch_id, MEDIUM_TEXT_MAX);
   assertMaxString("batch notes", batch.notes, TASK_BRIEF_MAX);
   const existing = await ctx.db
@@ -203,7 +211,7 @@ async function importSubmittedSpreadsheetDraft(
   item: any,
   user: Doc<"users">,
   now: number,
-) {
+): Promise<"inserted" | "updated" | "skipped_final"> {
   assertMaxString("submitter email", item.submitter_email, MEDIUM_TEXT_MAX);
   assertMaxString("submitter name", item.submitter_name, MEDIUM_TEXT_MAX);
   assertTaskReasonLimit("submission note", item.submit_note);
@@ -271,6 +279,11 @@ export const saveEvidenceDraft = mutation({
     draft: evidenceDraftInput,
     clientContext: v.optional(v.any()),
   },
+  returns: v.object({
+    evidence_draft_id: v.string(),
+    task_id: v.string(),
+    task_status: v.union(v.literal("needs_review"), v.literal("reviewed"), v.literal("draft_saved")),
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
@@ -317,7 +330,7 @@ export const saveEvidenceDraft = mutation({
       });
     }
 
-    const newTaskStatus = task.status === "needs_review" || task.status === "reviewed" ? task.status : "draft_saved";
+    const newTaskStatus = task.status === "needs_review" || task.status === "reviewed" ? task.status : ("draft_saved" as const);
     await ctx.db.patch(task._id, {
       assigned_to: task.assigned_to ?? user._id,
       claimed_by: task.claimed_by ?? user._id,
@@ -353,6 +366,12 @@ export const importSubmittedEvidenceDrafts = mutation({
       submitter_name: v.optional(v.string()),
     })),
   },
+  returns: v.object({
+    batch_id: v.string(),
+    batch: v.union(v.literal("inserted"), v.literal("updated")),
+    tasks: v.object({ inserted: v.number(), updated: v.number() }),
+    drafts: v.object({ inserted: v.number(), updated: v.number(), skipped_final: v.number() }),
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["admin", "service"]);
     const now = Date.now();
@@ -469,6 +488,11 @@ export const submitEvidenceDraft = mutation({
     evidenceDraftId: v.string(),
     note: v.optional(v.string()),
   },
+  returns: v.object({
+    task_id: v.string(),
+    evidence_draft_id: v.string(),
+    task_status: v.literal("needs_review"),
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     assertTaskReasonLimit("submission note", args.note);
@@ -499,7 +523,7 @@ export const submitEvidenceDraft = mutation({
       evidenceDraftId: args.evidenceDraftId,
       reason: args.note,
     });
-    return { task_id: draft.task_id, evidence_draft_id: args.evidenceDraftId, task_status: "needs_review" };
+    return { task_id: draft.task_id, evidence_draft_id: args.evidenceDraftId, task_status: "needs_review" as const };
   },
 });
 
@@ -508,6 +532,11 @@ export const submitUnresolvedNote = mutation({
     evidenceDraftId: v.string(),
     note: v.optional(v.string()),
   },
+  returns: v.object({
+    task_id: v.string(),
+    evidence_draft_id: v.string(),
+    task_status: v.literal("unresolved_note"),
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     assertTaskReasonLimit("unresolved note", args.note);
@@ -541,6 +570,6 @@ export const submitUnresolvedNote = mutation({
       evidenceDraftId: args.evidenceDraftId,
       reason: args.note,
     });
-    return { task_id: draft.task_id, evidence_draft_id: args.evidenceDraftId, task_status: "unresolved_note" };
+    return { task_id: draft.task_id, evidence_draft_id: args.evidenceDraftId, task_status: "unresolved_note" as const };
   },
 });
