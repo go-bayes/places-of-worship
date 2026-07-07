@@ -4,6 +4,19 @@
 
 ### 2026-07-07
 
+- Re-ranked the unbuilt country queue by attainable wave depth (JB
+  rule: fetch all waves; three-plus-wave countries outrank) after a
+  source-verification pass: Canada leads with five attainable waves,
+  Portugal likely five, Slovakia and Romania four, South Korea four
+  (promoted from tier B, with KOSIS table identifiers recorded on the
+  card). Recorded the Australia correspondence findings (2016-to-2021
+  exists, so a 2016 backfill is attainable; no official 2011 route)
+  and opened New Zealand wave-extension research notes: the 1991-2006
+  religion tables did not migrate from the decommissioned NZ.Stat, so
+  that extension needs identifier recovery or a customised-data
+  request, while 1966 and earlier remain deep-history extraction
+  candidates.
+
 - Separated caveat flagging from value-quality washing in the shared
   runtime: a distinguishing per-row quality flag now earns the popup
   asterisk and the page's flag note (universe breaks, boundary

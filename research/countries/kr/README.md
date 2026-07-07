@@ -33,6 +33,12 @@ Map 2015 si/gun/gu religion shares, with a note that the 2020 census round does 
 
 Start with the KOSIS 2015 si/gun/gu table `Population by sex, age and religion` and geoBoundaries KOR ADM2. Add 2005, 1995, and 1985 after method and boundary differences are documented.
 
+Resolved KOSIS table IDs (verification pass 2026-07-07): 1985
+`DT_1IN8505`, 1995 `DT_1IN9506`, 2005 `DT_1IN0505`, 2015 `DT_1PM1502`.
+Four official waves promote this card above two-wave candidates under
+the all-waves queue rule; 2005/2015 are si/gun/gu, 1985 is sido-level,
+1995 needs an extraction check.
+
 ## Risks and open questions
 
 The 2015 census method differs from earlier enumeration practice, and the missing 2020 religion wave limits current trend mapping. Public maps should separate census affiliation from denominational directories and from places-of-worship density.

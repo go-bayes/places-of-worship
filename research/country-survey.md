@@ -162,6 +162,33 @@ New Zealand and the United States use their adjacent survey supplements for matr
 
 The queue ranks tier-A countries by present buildability, wave depth, and construct match with the existing regional maps. Each note gives the first source table where the card has one, plus the boundary source recorded in the card.
 
+Wave-depth re-rank (JB rule 2026-07-07: fetch all attainable waves;
+countries with at least three attainable waves outrank two-wave
+candidates). A verification pass that day found several cards
+understate wave depth. Unbuilt queue in wave order:
+
+1. **CA Canada** — five attainable waves (1981, 1991, 2001, 2011 NHS,
+   2021) at census-subdivision/division level; the card's 2001-2021
+   note understates it.
+2. **PT Portugal** — likely five waves (1981-2021) via the INE
+   tabulator at municipality level; per-table URLs still to pin, so
+   treat as five pending verification (card says two).
+3. **SK Slovakia** — four waves (1991, 2001, 2011, 2021), municipality
+   for 2021; boundary concordance is the main build work.
+4. **RO Romania** — four waves (1992, 2002, 2011, 2021); 1992 is
+   coarser (county/locality categories), so it adds depth without a
+   UAT-equivalent longitudinal claim.
+5. **KR South Korea** — four waves on KOSIS (1985, 1995, 2005, 2015;
+   si/gun/gu from 2005; 1985 sido-level) — promote from tier B.
+6. **IN India** — three waves (1991, 2001, 2011) at district, with
+   substantial harmonisation work and no 2021.
+
+Backfill candidates on live countries: AU 2016 (official 2016→2021 SA2
+correspondence exists, population-weighted, CC BY 4.0; 2011 stays
+deferred — no official 2011→2021 correspondence and no ABS-documented
+chaining rule), BR 1991 (SIDRA aggregate 137, needs period boundaries),
+UK Northern Ireland 2001/2011 and the Scotland extraction.
+
 1. **NZ New Zealand** - First table: Stats NZ 2023 Census religious affiliation metadata. Boundary source: Stats NZ Geographic Data Service and datafinder statistical boundaries, including territorial authority and SA2 boundaries, generally Creative Commons Attribution 4.0 International. Already live; keep the Stats NZ affiliation workflow as the reference country build.
 2. **US United States** - First table: IPUMS NHGIS nineteenth-century census church statistics. Boundary source: existing live map uses U.S. Census Bureau 2020 counties for 1952-2020 and NHGIS period county boundaries for 1850, 1860, 1870, 1890, and 1930. Already live; maintain separate labels for seating, members, and adherents or members.
 3. **UK United Kingdom** - First table: Nomis, Census 2021 table TS030 Religion. Boundary source: ONS Open Geography Portal output areas; Scotland Census output-area FeatureServer; NISRA/OSNI Local Government Districts. Build England/Wales and Scotland from output-area census downloads first; keep Northern Ireland as Local Government District until the ward route is pinned.
