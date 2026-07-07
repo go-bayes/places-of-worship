@@ -4,6 +4,25 @@
 
 ### 2026-07-07
 
+- Separated caveat flagging from value-quality washing in the shared
+  runtime: a distinguishing per-row quality flag now earns the popup
+  asterisk and the page's flag note (universe breaks, boundary
+  vintages, construct derivations), while only the value-quality flags
+  (suppressed/perturbed denominators, boundary crosswalks) continue to
+  wash the choropleth. Browser verification caught the original
+  defect — the asterisk pathway recognised only the value-quality
+  vocabulary, so Brazil's 2022 age-universe note and Mexico's
+  boundary-vintage and ages-5+ notes never rendered — and then caught
+  the first fix over-correcting on New Zealand, where a caveat carried
+  by every row asterisked everything and attached the rr3 note to
+  areas it is false for. The shipped design excludes flags common to
+  every row of a product (computed from the data, no vocabulary
+  hardcoded): a caveat that distinguishes nothing marks nothing, and
+  product-level facts stay in the pages' unconditional copy. A flag
+  audit against every country's note text followed; Vanuatu's note now
+  covers its urban-derivation and island-published caveats.
+  Shared-asset token 20260707h on all eight pages.
+
 - Added Mexico as the seventh country data map: municipality-level
   census religion for 2010 and 2020 from INEGI ITER (4,938 rows across
   2,469 municipalities on 2020 Marco Geoestadistico boundaries; 2020

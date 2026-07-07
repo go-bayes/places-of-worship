@@ -2682,6 +2682,37 @@ function rowFlagged(row) {
       row.quality_flag.includes("rr3_small_denominator") ||
       row.quality_flag.includes("boundary_change_crosswalked"));
 }
+// caveats and value quality are different judgements: a distinguishing
+// flag earns the popup asterisk and the page's flag note (universe
+// breaks, boundary vintages, construct derivations), while only the
+// value-quality flags above wash the choropleth — a comparability
+// caveat does not make the value itself unreliable
+function flagTokens(row) {
+  return typeof row?.quality_flag === "string" && row.quality_flag.length > 0
+    ? row.quality_flag.split(";")
+    : [];
+}
+// a caveat carried by EVERY row is a product-level fact (the page's
+// unconditional copy carries it), not a per-row distinction: asterisking
+// every row of every popup would mark nothing. the universal set is
+// computed from the data, so no flag vocabulary is hardcoded here.
+function computeUniversalFlags(rows) {
+  if (!rows.length) return new Set();
+  let universal = null;
+  for (const row of rows) {
+    const tokens = new Set(flagTokens(row));
+    if (universal === null) {
+      universal = tokens;
+    } else {
+      for (const t of [...universal]) if (!tokens.has(t)) universal.delete(t);
+    }
+    if (!universal.size) break;
+  }
+  return universal || new Set();
+}
+function rowNoted(row, universalFlags) {
+  return flagTokens(row).some((t) => !(universalFlags && universalFlags.has(t)));
+}
 function metricUsesDenominator(metric) {
   return metric !== "place_density_per_sq_km";
 }
@@ -2820,6 +2851,7 @@ async function loadCensusData(level) {
     store.byAreaYear = new Map(store.rows.map((r) => [`${r.area_code}|${r.year}`, r]));
     store.years = [...new Set(store.rows.map((r) => r.year))].sort((a, b) => a - b);
     store.hasFlags = store.rows.some(rowFlagged);
+    store.universalFlags = computeUniversalFlags(store.rows);
     computeCensusDomains(store);
   } catch (err) {
     store.geojson = null;
@@ -3006,7 +3038,7 @@ function openCensusPopup(feature, lngLat) {
   const rowsHtml = store.years.map((year) => {
     const row = store.byAreaYear.get(`${code}|${year}`);
     if (!row) return "";
-    const flagged = rowFlagged(row);
+    const flagged = rowNoted(row, store.universalFlags);
     if (flagged) anyFlagged = true;
     const selected = year === censusState.year ? ' class="census-year-selected"' : "";
     return `<tr${selected}>
@@ -3016,7 +3048,7 @@ function openCensusPopup(feature, lngLat) {
       ${hasPlaces ? `<td>${fmtCount(row.place_count)}</td><td>${fmtRate(row.places_per_10000_residents)}</td>` : ""}
     </tr>`;
   }).join("");
-  const flagNote = anyFlagged
+  const flagNote = anyFlagged && RC.censusFlagNote
     ? `<div class="place-note">${RC.censusFlagNote}</div>`
     : "";
   const html =
