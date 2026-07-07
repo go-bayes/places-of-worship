@@ -4,6 +4,18 @@
 
 ### 2026-07-07
 
+- Developed the multi-domain overlay brief into a proposed design
+  (docs/development/multi-domain-overlay-design.md, awaiting JB
+  ratification): an overlays config block with a permanent legacy shim
+  so existing pages never change until they opt in; one governed
+  product per domain and level with metric definitions read from the
+  product's own indicators registry; a domain select that appears only
+  on multi-domain pages; place dots and the Points control as
+  religion-domain furniture; one timeline with per-domain year sets;
+  survey estimates as a third construct class carrying intervals and a
+  wide-interval wash; and a three-phase rollout (runtime shim, VU
+  language pilot from Guy's tables, GFS survey construct).
+
 - Added place-dot visibility modes to every country map (JB directive):
   a Points control in the census panel with period (only dated dots
   alive at the selected year; the undated snapshot hidden entirely
