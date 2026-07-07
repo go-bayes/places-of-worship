@@ -65,7 +65,7 @@ Three research passes closed the public routes: the ADE carries only
 2013+; no old NZ.Stat dataflow identifier could be recovered (the
 DataInfo+ records are metadata identifiers, not SDMX dataflows); the
 archived 2006 pages are HTML, not bulk workbooks. The route is a
-customised-data request to Stats NZ (JB action). Draft request:
+customised-data request to Stats NZ — SENT by JB 2026-07-07, response pending. The request as drafted:
 
 > Subject: Customised data request — census religious affiliation by
 > territorial authority, 1991-2006
