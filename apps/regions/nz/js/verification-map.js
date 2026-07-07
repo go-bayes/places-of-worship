@@ -444,6 +444,14 @@ const DATE_PRECISION_OPTIONS = [
     ["bounded", "Bounded / inferred"],
     ["unknown", "Unknown"],
 ];
+// incidence vs ascertainment: the annual census counts genuine change and
+// rewrites history for map corrections, so every claim is classed; the
+// uncertain default means the select is always answered
+const CHANGE_CLASS_OPTIONS = [
+    ["uncertain", "Can't tell yet"],
+    ["genuine_change", "Genuine change — this place actually opened, closed, or changed use around a date"],
+    ["map_correction", "Map correction — the map record was wrong or incomplete; the world did not change"],
+];
 const LIFECYCLE_EVENT_OPTIONS = [
     ["", "No extra opening/closure/change date"],
     ["organisation_founded", "Organisation/congregation founded"],
@@ -3169,6 +3177,15 @@ class NzVerificationMap {
                         <input id="lifecycleNoteInput" type="text" placeholder="e.g. source says shared Anglican/Methodist use began in 2024">
                     </label>
                 </div>
+                <label>
+                    What kind of claim is this?
+                    <select id="changeClassSelect">
+                        ${selectOptionsHtml(CHANGE_CLASS_OPTIONS, "uncertain")}
+                    </select>
+                </label>
+                <div class="copy-help">
+                    This distinction drives the annual census: real change is counted, map corrections rewrite history.
+                </div>
                 <div class="source-url-row">
                     <label>
                         Source URL or file reference
@@ -3435,6 +3452,7 @@ class NzVerificationMap {
         setValue("lifecycleDateInput", draft.lifecycle_date, false);
         setValue("lifecycleDatePrecisionSelect", draft.lifecycle_date_precision);
         setValue("lifecycleNoteInput", draft.lifecycle_note, false);
+        setValue("changeClassSelect", draft.change_class);
         setValue("sourceUrlInput", draft.source_url_or_file, false);
         setValue("relatedIdsInput", draft.related_ids_or_note, false);
         setValue("decisionNote", draft.evidence_note, true);
@@ -3509,6 +3527,7 @@ class NzVerificationMap {
             lifecycleDate: document.getElementById("lifecycleDateInput")?.value || "",
             lifecycleDatePrecision: document.getElementById("lifecycleDatePrecisionSelect")?.value || "unknown",
             lifecycleNote: document.getElementById("lifecycleNoteInput")?.value || "",
+            changeClass: document.getElementById("changeClassSelect")?.value || "uncertain",
             sourceUrl: document.getElementById("sourceUrlInput")?.value || "",
             relatedIds: document.getElementById("relatedIdsInput")?.value || "",
             note: document.getElementById("decisionNote")?.value || "",
@@ -3747,6 +3766,7 @@ class NzVerificationMap {
             lifecycle_date: values.lifecycleDate || undefined,
             lifecycle_date_precision: values.lifecycleEvent ? values.lifecycleDatePrecision : undefined,
             lifecycle_note: values.lifecycleNote || undefined,
+            change_class: values.changeClass || "uncertain",
             related_ids_or_note: values.relatedIds || undefined,
             evidence_note: values.note,
             generated_wide_row: {
@@ -3952,6 +3972,15 @@ class NzVerificationMap {
                             How do you know this place? (source note)
                             <textarea id="pinSourceNoteInput" rows="3" placeholder="e.g. I attend services here; no URL exists."></textarea>
                         </label>
+                        <label>
+                            What kind of claim is this?
+                            <select id="pinChangeClassSelect">
+                                ${selectOptionsHtml(CHANGE_CLASS_OPTIONS, "uncertain")}
+                            </select>
+                        </label>
+                        <div class="copy-help">
+                            This distinction drives the annual census: real change is counted, map corrections rewrite history.
+                        </div>
                         <div class="button-row">
                             <button id="pinSubmitButton" type="button">Create candidate task</button>
                             <button id="pinFormCancelButton" type="button" class="secondary">Cancel</button>
@@ -4183,10 +4212,15 @@ class NzVerificationMap {
             // a fresh task has no drafts; recording that skips the async
             // draft fetch whose re-render would wipe the success message
             this.latestDraftsByTaskId.set(result.task_id, null);
+            const pinChangeClass = document.getElementById("pinChangeClassSelect")?.value || "uncertain";
             await this.refreshBackendTasks();
             this.applyFilters();
             this.exitPinMode();
             this.selectTaskById(result.task_id, { focusDetail: true });
+            // client-side carry only: the pin form's change class prefills
+            // the evidence form and persists once the ra saves evidence
+            const changeClassSelect = document.getElementById("changeClassSelect");
+            if (changeClassSelect) changeClassSelect.value = pinChangeClass;
             const copyStatus = document.getElementById("copyStatus");
             if (copyStatus) copyStatus.textContent = "Candidate task created. Record your evidence, then submit for review.";
         } catch (error) {
