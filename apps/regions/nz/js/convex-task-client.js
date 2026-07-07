@@ -280,6 +280,12 @@
             return await this.request("query", "tasks:getTaskEvents", args);
         }
 
+        async getTaskHistory(args) {
+            // role-aware provenance: events newest-first plus draft count and
+            // latest review; takes { taskId, limit? }
+            return await this.request("query", "tasks:getTaskHistory", args);
+        }
+
         async listReviewQueue(args) {
             return await this.request("query", "reviews:listReviewQueue", args);
         }

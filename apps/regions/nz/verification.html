@@ -1104,6 +1104,112 @@
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.45);
         }
 
+        /* verification-state treatments: weight and shape, not hue, so the
+           distinction survives colour-blind viewing on the light basemap */
+        .verification-marker.vm-verified {
+            box-shadow: 0 0 0 2px #ffffff, 0 0 0 5px #1b4332, 0 0 5px rgba(0, 0, 0, 0.45);
+        }
+
+        .verification-marker.vm-under-review {
+            background: #ffffff;
+            border-width: 3px;
+            border-style: dashed;
+        }
+
+        .points-legend-control {
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid #b6c2cf;
+            border-radius: 5px;
+            padding: 8px 10px;
+            display: grid;
+            gap: 6px;
+            font-size: 12px;
+            color: #34495e;
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.25);
+        }
+
+        .points-legend-control select {
+            font-size: 12px;
+            padding: 3px 6px;
+            border: 1px solid #b6c2cf;
+            border-radius: 4px;
+            background: #ffffff;
+            color: #34495e;
+        }
+
+        .map-legend {
+            display: grid;
+            gap: 3px;
+        }
+
+        .legend-row {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            flex: none;
+            display: inline-block;
+        }
+
+        .legend-dot.vm-verified-swatch {
+            background: #2874a6;
+            box-shadow: 0 0 0 1.5px #ffffff, 0 0 0 3.5px #1b4332;
+        }
+
+        .legend-dot.vm-under-review-swatch {
+            background: #ffffff;
+            border: 2.5px dashed #2874a6;
+        }
+
+        .legend-dot.vm-default-swatch {
+            background: #2874a6;
+            border: 1.5px solid #ffffff;
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
+        }
+
+        .legend-dot.context-dot-swatch {
+            background: rgba(148, 163, 184, 0.6);
+            border: 1px solid #64748b;
+            width: 8px;
+            height: 8px;
+        }
+
+        .task-row-title .legend-dot {
+            margin-right: 4px;
+        }
+
+        .history-body {
+            font-size: 13px;
+        }
+
+        .history-summary {
+            font-weight: 700;
+            color: #34495e;
+        }
+
+        .history-timeline {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 6px;
+        }
+
+        .history-timeline li {
+            border-left: 2px solid #b6c2cf;
+            padding-left: 8px;
+        }
+
+        .history-reason {
+            color: #5d6d7e;
+            font-size: 12px;
+        }
+
         @media (max-width: 900px) {
             .app-shell {
                 grid-template-columns: 1fr;
@@ -1250,7 +1356,7 @@
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
     <script src="js/convex-config.js?v=20260707-changes-requested"></script>
-    <script src="js/convex-task-client.js?v=20260708d"></script>
-    <script src="js/verification-map.js?v=20260708d"></script>
+    <script src="js/convex-task-client.js?v=20260708e"></script>
+    <script src="js/verification-map.js?v=20260708e"></script>
 </body>
 </html>

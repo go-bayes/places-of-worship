@@ -18,6 +18,7 @@ const COUNTRY_CONFIGS = {
         mapSource: "nz_verification_static_map_workbench",
         nominationSource: "nz_verification_static_map_nomination",
         defaultAssignmentBatchId: "nz-temporal-ra-workpack-001",
+        datedPlaces: "../nz/data/dated_places.geojson",
         assignmentHeading: "New Zealand source-first test",
         temporalLossAction: {
             value: "present_2013_absent_2018",
@@ -141,6 +142,7 @@ const COUNTRY_CONFIGS = {
         mapSource: "ie_verification_static_map_workbench",
         nominationSource: "ie_verification_static_map_nomination",
         defaultAssignmentBatchId: "ie-source-first-test-001",
+        datedPlaces: "../ie/data/dated_places.geojson",
         assignmentHeading: "Ireland verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
@@ -213,6 +215,7 @@ const COUNTRY_CONFIGS = {
         mapSource: "us_verification_static_map_workbench",
         nominationSource: "us_verification_static_map_nomination",
         defaultAssignmentBatchId: "us-source-first-test-001",
+        datedPlaces: "../us/data/dated_places.geojson",
         assignmentHeading: "United States verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
@@ -391,6 +394,49 @@ const SKIP_REASON_CHIPS = [
 // confirm step gates on zoom, and nearby existing tasks are offered first
 const PIN_MIN_PLACEMENT_ZOOM = 15;
 const PIN_PROXIMITY_METRES = 150;
+// verification-state buckets for task markers and list rows, derived from
+// backend task status (reviewed/exported have passed review; needs_review
+// and unresolved_note sit in the review queue; everything else is default)
+function verificationState(status) {
+    if (status === "reviewed" || status === "exported") return "verified";
+    if (status === "needs_review" || status === "unresolved_note") return "under-review";
+    return "default";
+}
+// human labels for task-event provenance in the history timeline
+const EVENT_TYPE_LABELS = {
+    imported: "Imported",
+    opened: "Opened",
+    claimed: "Claimed",
+    unclaimed: "Unclaimed",
+    draft_saved: "Draft saved",
+    row_copied: "Row copied",
+    skipped: "Skipped",
+    submitted_for_review: "Submitted for review",
+    submitted_unresolved_note: "Unresolved note submitted",
+    provisionally_closed: "Provisionally closed",
+    review_started: "Review started",
+    review_decided: "Review decided",
+    changes_requested: "Changes requested",
+    reopened: "Reopened",
+    exported: "Exported",
+    note_added: "Note added",
+};
+// coarse relative date for zero-fetch hover provenance
+function relativeTimeText(ms) {
+    if (!Number.isFinite(ms) || ms <= 0) return "";
+    const diff = Date.now() - ms;
+    if (diff < 60000) return "just now";
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days} day${days === 1 ? "" : "s"} ago`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months} month${months === 1 ? "" : "s"} ago`;
+    const years = Math.floor(months / 12);
+    return `${years} year${years === 1 ? "" : "s"} ago`;
+}
 const DATE_PRECISION_OPTIONS = [
     ["day", "Day"],
     ["month", "Month"],
@@ -1089,6 +1135,13 @@ class NzVerificationMap {
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
         this.manualTasksById = new Map();
+        // context dots: lazily fetched dated places, keyed off the target
+        // year in period mode; task history responses cached per task
+        this.pointsMode = "off";
+        this.contextDotLayer = null;
+        this.datedFeatures = null;
+        this.datedLoadPromise = null;
+        this.taskHistoryByTaskId = new Map();
         this.init();
     }
 
@@ -1634,8 +1687,108 @@ class NzVerificationMap {
             minZoom: Math.min(5, Math.floor(COUNTRY_CONFIG.mapZoom)),
         }).addTo(this.map);
 
+        // context dots ride the canvas (preferCanvas), so they always paint
+        // beneath the dom-based task markers
+        this.contextDotLayer = L.layerGroup();
+        this.map.addLayer(this.contextDotLayer);
         this.markerLayer = L.layerGroup();
         this.map.addLayer(this.markerLayer);
+        this.addPointsLegendControl();
+    }
+
+    // corner control: the points-mode select plus the always-visible
+    // verification-state legend; period is offered only where the country
+    // ships a dated context layer with real features (config-gated, like
+    // the data maps)
+    addPointsLegendControl() {
+        const control = L.control({ position: "bottomleft" });
+        control.onAdd = () => {
+            const div = L.DomUtil.create("div", "points-legend-control");
+            const modes = COUNTRY_CONFIG.datedPlaces
+                ? [["all", "Points: all"], ["period", "Points: period"], ["off", "Points: off"]]
+                : [["all", "Points: all"], ["off", "Points: off"]];
+            div.innerHTML = `
+                <select id="portalPointsSelect" aria-label="Context dots">
+                    ${modes.map(([value, label]) => `<option value="${value}"${value === this.pointsMode ? " selected" : ""}>${label}</option>`).join("")}
+                </select>
+                <div class="map-legend">
+                    <span class="legend-row"><span class="legend-dot vm-verified-swatch"></span>verified</span>
+                    <span class="legend-row"><span class="legend-dot vm-under-review-swatch"></span>under review</span>
+                    <span class="legend-row"><span class="legend-dot vm-default-swatch"></span>other tasks</span>
+                    ${COUNTRY_CONFIG.datedPlaces ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>context dots</span>` : ""}
+                </div>
+            `;
+            // keep map gestures away from the control
+            L.DomEvent.disableClickPropagation(div);
+            L.DomEvent.disableScrollPropagation(div);
+            div.querySelector("#portalPointsSelect").addEventListener("change", (event) => {
+                this.setPointsMode(event.target.value);
+            });
+            return div;
+        };
+        control.addTo(this.map);
+    }
+
+    setPointsMode(mode) {
+        this.pointsMode = mode;
+        if (mode === "off") {
+            this.contextDotLayer.clearLayers();
+            return;
+        }
+        // lazy, cached load on the first non-off selection
+        this.ensureDatedPlaces().then(() => this.syncContextDots());
+    }
+
+    ensureDatedPlaces() {
+        if (this.datedFeatures) return Promise.resolve(this.datedFeatures);
+        if (!COUNTRY_CONFIG.datedPlaces) {
+            this.datedFeatures = [];
+            return Promise.resolve(this.datedFeatures);
+        }
+        if (!this.datedLoadPromise) {
+            this.datedLoadPromise = fetch(COUNTRY_CONFIG.datedPlaces)
+                .then(response => response.ok ? response.json() : { features: [] })
+                .then(geo => {
+                    this.datedFeatures = geo.features || [];
+                    return this.datedFeatures;
+                })
+                .catch(() => {
+                    this.datedFeatures = [];
+                    return this.datedFeatures;
+                });
+        }
+        return this.datedLoadPromise;
+    }
+
+    // context dots for the current mode; period mirrors the data maps'
+    // DATED filter: start_year present and <= year, end_year absent, null,
+    // or >= year (open-ended places carry an explicit null end_year)
+    syncContextDots() {
+        if (!this.contextDotLayer) return;
+        this.contextDotLayer.clearLayers();
+        if (this.pointsMode === "off" || !this.datedFeatures) return;
+        const year = Number(this.targetYear);
+        const show = this.pointsMode === "period"
+            ? this.datedFeatures.filter(feature => {
+                const props = feature.properties || {};
+                if (props.start_year === undefined || props.start_year === null) return false;
+                if (props.start_year > year) return false;
+                return props.end_year === undefined || props.end_year === null || props.end_year >= year;
+            })
+            : this.datedFeatures;
+        show.forEach(feature => {
+            const coords = feature.geometry?.coordinates || [];
+            if (coords.length < 2) return;
+            this.contextDotLayer.addLayer(L.circleMarker([coords[1], coords[0]], {
+                radius: 3,
+                color: "#64748b",
+                weight: 1,
+                fillColor: "#94a3b8",
+                fillOpacity: 0.45,
+                opacity: 0.6,
+                interactive: false,
+            }));
+        });
     }
 
     setupPageMode() {
@@ -1729,6 +1882,8 @@ class NzVerificationMap {
                 const selectedYear = TARGET_YEARS.find(year => String(year) === targetYearSelect.value);
                 this.targetYear = selectedYear === undefined ? DEFAULT_TARGET_YEAR : selectedYear;
                 this.applyFilters();
+                // period-mode context dots key off the same year select
+                this.syncContextDots();
                 if (this.selectedTask) {
                     this.renderDetail(this.selectedTask);
                 }
@@ -1881,25 +2036,48 @@ class NzVerificationMap {
             props.google_maps_url = mapUrlForCoordinates(coordinates) || props.google_maps_url || "";
             props.street_view_url = streetViewUrlForCoordinates(coordinates) || props.street_view_url || "";
             const temporal = deriveTargetYearStatus(props, this.targetYear);
+            const verifState = verificationState(this.backendTasksById.get(props.task_id)?.status);
             const marker = L.marker([lat, lng], {
-                icon: this.createIcon(props.verification_priority, temporal.status),
-                title: props.name || props.master_site_id,
+                icon: this.createIcon(props.verification_priority, temporal.status, verifState),
             });
 
             marker.on("click", () => this.selectTask(feature, true));
             marker.bindPopup(this.popupHtml(props), { maxWidth: 360 });
             marker.on("popupopen", event => this.bindPopupOpenTask(event.popup));
+            // hover provenance from data already client-side; built lazily at
+            // hover time so it reflects the current backend snapshot, and it
+            // replaces the old native title (tooltip and click popup coexist)
+            marker.bindTooltip(() => this.markerTooltipText(props), { direction: "top", offset: [0, -10], opacity: 0.95 });
             this.markerLayer.addLayer(marker);
             this.markersByTaskId.set(props.task_id, marker);
         });
     }
 
-    createIcon(priority, status) {
+    // zero-fetch hover summary: name, backend status, last activity
+    markerTooltipText(props) {
+        const backendTask = this.backendTasksById.get(props.task_id);
+        const statusText = (backendTask?.status || "not started").replaceAll("_", " ");
+        const lastActivity = relativeTimeText(backendTask?.last_event_at || backendTask?.updated_at);
+        return [
+            props.name || "Unnamed site",
+            statusText,
+            lastActivity ? `last activity ${lastActivity}` : "",
+        ].filter(Boolean).join(" · ");
+    }
+
+    createIcon(priority, status, verifState = "default") {
         const size = priority === "high" ? 15 : priority === "medium" ? 13 : 11;
         const color = statusColor(status);
+        // verification state changes shape weight, not hue, so the treatment
+        // survives colour-blind viewing: verified = filled with a dark ring,
+        // under review = hollow with a heavy coloured border
+        const stateClass = verifState === "verified" ? " vm-verified" : verifState === "under-review" ? " vm-under-review" : "";
+        const style = verifState === "under-review"
+            ? `width:${size}px;height:${size}px;border-color:${color};`
+            : `width:${size}px;height:${size}px;background:${color};`;
         return L.divIcon({
             className: "",
-            html: `<div class="verification-marker" style="width:${size}px;height:${size}px;background:${color};"></div>`,
+            html: `<div class="verification-marker${stateClass}" style="${style}"></div>`,
             iconSize: [size, size],
             iconAnchor: [size / 2, size / 2],
         });
@@ -1969,11 +2147,16 @@ class NzVerificationMap {
                     ? `<span class="skip-badge">skipped</span>`
                     : `<span class="closed-badge">tentatively closed</span>`)
                 : "");
+            // subtle state dot mirroring the map's verification treatment
+            const verifState = verificationState(backendTask?.status);
+            const stateDot = verifState === "default"
+                ? ""
+                : `<span class="legend-dot ${verifState === "verified" ? "vm-verified-swatch" : "vm-under-review-swatch"}" title="${verifState === "verified" ? "verified" : "under review"}"></span>`;
             return `
                 <button class="task-row${activeClass}" type="button" data-task-id="${escapeHtml(props.task_id)}">
                     <span class="task-row-title">
                         <span class="priority-dot priority-${escapeHtml(props.verification_priority)}"></span>
-                        ${escapeHtml(props.name || "Unnamed site")}${outcomeBadge}
+                        ${stateDot}${escapeHtml(props.name || "Unnamed site")}${outcomeBadge}
                     </span>
                     <span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))}</span>
                     <span class="task-row-meta">${escapeHtml(cap(props.religion)) || "Unknown"} | ${escapeHtml(props.master_site_id || props.source_record_id || "")}</span>
@@ -2194,6 +2377,7 @@ class NzVerificationMap {
         if (status) status.textContent = "Undoing the skip...";
         try {
             const result = await this.backend.unskipTask({ taskId });
+            this.taskHistoryByTaskId.delete(taskId);
             await this.refreshBackendTasks();
             this.applyFilters();
             // land the ra back in the reopened task's detail panel
@@ -2502,6 +2686,13 @@ class NzVerificationMap {
             </div>
 
             <div class="detail-section">
+                <details id="taskHistoryDetails" class="skip-form history-section">
+                    <summary>History</summary>
+                    <div id="taskHistoryBody" class="history-body">Loading history...</div>
+                </details>
+            </div>
+
+            <div class="detail-section">
                 ${this.temporalSummaryHtml(props)}
             </div>
 
@@ -2539,6 +2730,77 @@ class NzVerificationMap {
             this.bindRaActionForm(props);
         }
         this.bindIssueForm(issueContext);
+        this.bindTaskHistory(props.task_id);
+    }
+
+    // history timeline: fetch-on-open with a per-task cache; write actions
+    // invalidate the cache so reopening shows the fresh events
+    bindTaskHistory(taskId) {
+        const details = document.getElementById("taskHistoryDetails");
+        if (!details) return;
+        details.addEventListener("toggle", () => {
+            if (details.open) this.loadTaskHistory(taskId);
+        });
+    }
+
+    async loadTaskHistory(taskId) {
+        const body = document.getElementById("taskHistoryBody");
+        if (!body || !taskId) return;
+        if (!this.backend?.configured || !this.backend.signedIn) {
+            body.innerHTML = `
+                <div class="demo-warning" role="alert">
+                    Sign in with Google at the top of this panel to see task history.
+                </div>
+            `;
+            return;
+        }
+        const cached = this.taskHistoryByTaskId.get(taskId);
+        if (cached) {
+            body.innerHTML = this.taskHistoryHtml(cached);
+            return;
+        }
+        body.textContent = "Loading history...";
+        try {
+            const history = await this.backend.getTaskHistory({ taskId });
+            this.taskHistoryByTaskId.set(taskId, history);
+            body.innerHTML = this.taskHistoryHtml(history);
+        } catch (error) {
+            if (error.authExpired) {
+                this.backendUser = null;
+                this.backendLastError = error.message;
+                this.renderBackendPanel();
+            }
+            body.innerHTML = `<div class="copy-status">${escapeHtml(error.message || "Could not load task history.")}</div>`;
+        }
+    }
+
+    taskHistoryHtml(history) {
+        const events = history?.events || [];
+        const draftCount = history?.draft_count ?? 0;
+        const latestReview = history?.latest_review || null;
+        const summary = `${draftCount} draft${draftCount === 1 ? "" : "s"} · latest review: ${latestReview ? escapeHtml(latestReview.decision_status.replaceAll("_", " ")) : "none"}`;
+        if (!events.length) {
+            return `
+                <div class="history-summary">${summary}</div>
+                <div class="copy-help">No recorded events for this task yet.</div>
+            `;
+        }
+        return `
+            <div class="history-summary">${summary}</div>
+            <ul class="history-timeline">
+                ${events.map(event => {
+                    const label = EVENT_TYPE_LABELS[event.event_type] || cap(String(event.event_type || "").replaceAll("_", " "));
+                    const when = new Date(event.occurred_at).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+                    const actor = `${escapeHtml(event.actor_role || "")}${event.is_self ? " (you)" : ""}`;
+                    return `
+                        <li>
+                            <strong>${escapeHtml(label)}</strong> — ${escapeHtml(when)} · ${actor}
+                            ${event.reason ? `<div class="history-reason">${escapeHtml(event.reason)}</div>` : ""}
+                        </li>
+                    `;
+                }).join("")}
+            </ul>
+        `;
     }
 
     siteTaskBriefHtml(props) {
@@ -3570,6 +3832,8 @@ class NzVerificationMap {
             if ((unresolved || submit) && revisionDraftId) {
                 this.revisionDraftIdsByTaskId.delete(props.task_id);
             }
+            // the write added task events; drop the cached history
+            this.taskHistoryByTaskId.delete(props.task_id);
             await this.refreshBackendTasks();
             if (unresolved || submit) {
                 // a recorded submission closes the task for this ra: mirror
@@ -4097,6 +4361,7 @@ class NzVerificationMap {
                     taskId: props.task_id,
                     reason: reason || undefined,
                 });
+                this.taskHistoryByTaskId.delete(props.task_id);
                 await this.refreshBackendTasks();
                 // a recorded skip closes the task for this ra too: same
                 // return-to-list as submit, with skip wording
