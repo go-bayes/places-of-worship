@@ -370,6 +370,23 @@ const SOURCE_TYPE_OPTIONS = [
     ["heritage_list", "Heritage list"],
     ["other", "Other"],
 ];
+// issue reports: portal labels for tasks:createIssueTask issue types
+const ISSUE_TYPE_OPTIONS = [
+    ["possible_duplicate", "Possible duplicate"],
+    ["geometry_check", "Wrong location"],
+    ["verify_existing_site", "Not / no longer a place of worship"],
+    ["osm_identity_link", "OSM link wrong"],
+    ["other", "Other"],
+];
+// quick skip reasons; the duplicate and data-error chips also point the ra
+// at the issue pipeline so real data problems stay visible for review
+const SKIP_REASON_CHIPS = [
+    { reason: "Can't find a source" },
+    { reason: "Ambiguous identity" },
+    { reason: "Needs local knowledge" },
+    { reason: "Looks like a duplicate", issueHint: true },
+    { reason: "Data error on the map", issueHint: true },
+];
 const DATE_PRECISION_OPTIONS = [
     ["day", "Day"],
     ["month", "Month"],
@@ -1058,6 +1075,8 @@ class NzVerificationMap {
         this.myWorkItems = [];
         this.revisionDraftIdsByTaskId = new Map();
         this.backendLastError = "";
+        // which task's issue form should render expanded (survives re-renders)
+        this.issueFormOpenTaskId = null;
         this.init();
     }
 
@@ -1315,6 +1334,7 @@ class NzVerificationMap {
         await this.refreshBackendTasks();
         this.applyFilters();
         this.renderSessionPanel();
+        this.maybeOpenIssueDeepLink();
         if (DEMO_MODE && !ASSIGNMENT_MODE) {
             this.renderRaInitialsBadge();
             // Defer the initials prompt so the map paints first.
@@ -1871,16 +1891,26 @@ class NzVerificationMap {
             <div class="popup-actions">
                 <button class="popup-open-task" type="button" data-task-id="${escapeHtml(props.task_id)}">Open task</button>
                 ${this.linkHtml("Street View", props.street_view_url, "popup-link")}
+                <button class="popup-report-issue" type="button" data-task-id="${escapeHtml(props.task_id)}">Report an issue</button>
             </div>
         `;
     }
 
     bindPopupOpenTask(popup) {
         const button = popup.getElement()?.querySelector(".popup-open-task");
-        if (!button) return;
-        button.addEventListener("click", () => {
-            this.selectTaskById(button.dataset.taskId, { focusDetail: true });
-        });
+        if (button) {
+            button.addEventListener("click", () => {
+                this.selectTaskById(button.dataset.taskId, { focusDetail: true });
+            });
+        }
+        // low-prominence issue entry: open the task with its issue form expanded
+        const issueButton = popup.getElement()?.querySelector(".popup-report-issue");
+        if (issueButton) {
+            issueButton.addEventListener("click", () => {
+                this.issueFormOpenTaskId = issueButton.dataset.taskId;
+                this.selectTaskById(issueButton.dataset.taskId, { focusDetail: true });
+            });
+        }
     }
 
     renderTaskList() {
@@ -2102,10 +2132,200 @@ class NzVerificationMap {
                         ? "saved as an unresolved note for review."
                         : "saved to the shared backend and submitted for review."}
             </div>
+            <div class="button-row">
+                <button id="openNextTaskButton" type="button">Open next task</button>
+                ${skipped ? `<button id="undoSkipButton" class="secondary" type="button">Undo skip</button>` : ""}
+            </div>
+            <div id="confirmPaneStatus" class="copy-status" aria-live="polite"></div>
             <div class="pilot-note" role="note">
                 Pick another task from the map or list.${this.filterActiveHint()}
             </div>
         `;
+        document.getElementById("openNextTaskButton")?.addEventListener("click", () => this.openNextAvailableTask());
+        document.getElementById("undoSkipButton")?.addEventListener("click", () => this.undoSkip(props.task_id));
+    }
+
+    // first task in the current filtered list order — the same
+    // this.filteredTasks order the task list renders
+    openNextAvailableTask() {
+        const next = this.filteredTasks[0];
+        if (!next) {
+            const status = document.getElementById("confirmPaneStatus");
+            if (status) status.textContent = "No more tasks match your filters.";
+            return;
+        }
+        this.selectTaskById(next.properties?.task_id, { focusDetail: true });
+    }
+
+    async undoSkip(taskId) {
+        const status = document.getElementById("confirmPaneStatus");
+        if (!taskId) return;
+        if (!this.backend?.configured || !this.backend.signedIn) {
+            if (status) status.textContent = "Sign in to the shared backend before undoing the skip.";
+            return;
+        }
+        const button = document.getElementById("undoSkipButton");
+        if (button) button.disabled = true;
+        if (status) status.textContent = "Undoing the skip...";
+        try {
+            const result = await this.backend.unskipTask({ taskId });
+            await this.refreshBackendTasks();
+            this.applyFilters();
+            // land the ra back in the reopened task's detail panel
+            this.selectTaskById(result.task_id, { focusDetail: true });
+            const copyStatus = document.getElementById("copyStatus");
+            if (copyStatus) copyStatus.textContent = "Skip undone. The task is back in progress.";
+        } catch (error) {
+            if (error.authExpired) {
+                this.backendUser = null;
+                this.backendLastError = error.message;
+                this.renderBackendPanel();
+            }
+            if (button) button.disabled = false;
+            if (status) status.textContent = `${error.message || "Could not undo the skip."} The task stays skipped.`;
+        }
+    }
+
+    // low-prominence issue report: files map problems (duplicates, wrong
+    // locations, non-places) as open tasks in the country's ra-issues batch
+    issueFormHtml(context, { open = false } = {}) {
+        const signedIn = Boolean(this.backend?.configured && this.backend.signedIn);
+        return `
+            <details id="issueReportDetails" class="skip-form issue-form"${open ? " open" : ""}>
+                <summary>Report an issue with this place</summary>
+                ${signedIn ? "" : `
+                    <div class="demo-warning" role="alert">
+                        Sign in with Google at the top of this panel to file an issue.
+                    </div>
+                `}
+                <label>
+                    What is wrong?
+                    <select id="issueTypeSelect">
+                        ${selectOptionsHtml(ISSUE_TYPE_OPTIONS, "other")}
+                    </select>
+                </label>
+                <label>
+                    Describe the issue (required)
+                    <textarea id="issueNoteInput" rows="3" placeholder="What did you notice, and how could a reviewer confirm it?"></textarea>
+                </label>
+                <label>
+                    Source title (optional)
+                    <input id="issueSourceTitleInput" type="text">
+                </label>
+                <label>
+                    Source URL (optional)
+                    <input id="issueSourceUrlInput" type="url">
+                </label>
+                <div class="button-row">
+                    <button id="issueSubmitButton" type="button"${signedIn ? "" : " disabled"}>File issue for review</button>
+                    <button id="issueCancelButton" class="secondary" type="button">Cancel</button>
+                </div>
+                <div id="issueStatus" class="copy-status" aria-live="polite"></div>
+            </details>
+        `;
+    }
+
+    bindIssueForm(context) {
+        const details = document.getElementById("issueReportDetails");
+        if (!details) return;
+        // remember the open state so async detail re-renders keep the form up
+        details.addEventListener("toggle", () => {
+            this.issueFormOpenTaskId = details.open ? (context.taskId || "__standalone__") : null;
+        });
+        document.getElementById("issueSubmitButton")?.addEventListener("click", () => this.submitIssueReport(context));
+        document.getElementById("issueCancelButton")?.addEventListener("click", () => {
+            details.open = false;
+            const status = document.getElementById("issueStatus");
+            if (status) status.textContent = "";
+        });
+    }
+
+    async submitIssueReport(context) {
+        const status = document.getElementById("issueStatus");
+        const note = (document.getElementById("issueNoteInput")?.value || "").trim();
+        if (!note) {
+            if (status) status.textContent = "Describe the issue before filing it. Nothing was sent.";
+            return;
+        }
+        if (!this.backend?.configured || !this.backend.signedIn) {
+            if (status) status.textContent = "Sign in to the shared backend before filing an issue.";
+            return;
+        }
+        if (!Number.isFinite(context.latitude) || !Number.isFinite(context.longitude)) {
+            if (status) status.textContent = "This place has no usable coordinates, so the issue cannot be filed from here.";
+            return;
+        }
+        const button = document.getElementById("issueSubmitButton");
+        if (button) button.disabled = true;
+        if (status) status.textContent = "Filing the issue...";
+        try {
+            const result = await this.backend.createIssueTask({
+                countryCode: COUNTRY_CONFIG.countryCode,
+                name: context.name || "Unnamed site",
+                issueType: document.getElementById("issueTypeSelect")?.value || "other",
+                note,
+                latitude: context.latitude,
+                longitude: context.longitude,
+                siteId: context.siteId || undefined,
+                osmId: context.osmId || undefined,
+                sourceTitle: (document.getElementById("issueSourceTitleInput")?.value || "").trim() || undefined,
+                sourceUrl: (document.getElementById("issueSourceUrlInput")?.value || "").trim() || undefined,
+                targetYears: COUNTRY_CONFIG.targetYears.map(Number),
+                clientContext: {
+                    source: "portal_issue_report",
+                    country_code: COUNTRY_CONFIG.countryCode,
+                    page_path: window.location.pathname,
+                },
+            });
+            if (status) {
+                status.textContent = result.deduped
+                    ? `An open issue for this place already exists — your note was added to it (task ${result.task_id}).`
+                    : `Issue filed for review (task ${result.task_id}).`;
+            }
+            // clear the note so a stray second click cannot double-file
+            const noteInput = document.getElementById("issueNoteInput");
+            if (noteInput) noteInput.value = "";
+        } catch (error) {
+            if (error.authExpired) {
+                this.backendUser = null;
+                this.backendLastError = error.message;
+                this.renderBackendPanel();
+            }
+            // the form stays open with the error visible; nothing is cleared
+            if (status) status.textContent = `${error.message || "Could not file the issue."} Nothing was filed — adjust and try again.`;
+        } finally {
+            if (button) button.disabled = false;
+        }
+    }
+
+    // public-map hand-off: ?report_issue=1&name=..&lat=..&lng=..&site_id=..
+    // &osm_id=.. opens a prefilled standalone issue form; tolerant of
+    // missing params — submit validation names anything absent
+    maybeOpenIssueDeepLink() {
+        if (SEARCH_PARAMS.get("report_issue") !== "1") return;
+        const context = {
+            taskId: "",
+            name: (SEARCH_PARAMS.get("name") || "").trim(),
+            latitude: Number.parseFloat(SEARCH_PARAMS.get("lat") || ""),
+            longitude: Number.parseFloat(SEARCH_PARAMS.get("lng") || ""),
+            siteId: (SEARCH_PARAMS.get("site_id") || "").trim() || undefined,
+            osmId: (SEARCH_PARAMS.get("osm_id") || "").trim() || undefined,
+        };
+        const panel = document.getElementById("detailPanel");
+        if (!panel) return;
+        const hasCoords = Number.isFinite(context.latitude) && Number.isFinite(context.longitude);
+        panel.innerHTML = `
+            <h2>Report an issue</h2>
+            <div class="pilot-note" role="note">
+                Reporting an issue for <strong>${escapeHtml(context.name || "an unnamed place")}</strong>${hasCoords ? ` at ${context.latitude.toFixed(5)}, ${context.longitude.toFixed(5)}` : ""}.
+            </div>
+            ${this.issueFormHtml(context, { open: true })}
+        `;
+        this.bindIssueForm(context);
+        if (hasCoords) {
+            this.map.setView([context.latitude, context.longitude], Math.max(this.map.getZoom(), 16));
+        }
+        this.focusDetailPanel();
     }
 
     focusNominationPanel() {
@@ -2212,6 +2432,15 @@ class NzVerificationMap {
         props.street_view_url = streetViewUrlForCoordinates(coordinates) || props.street_view_url || "";
         const checks = props.automated_checks || [];
         const searches = props.search_queries || {};
+        // issue reports need the point itself, not the task state
+        const issueContext = {
+            taskId: props.task_id || "",
+            name: props.name || "",
+            latitude: Number(coordinates[1]),
+            longitude: Number(coordinates[0]),
+            siteId: props.master_site_id || undefined,
+            osmId: props.osm_id || undefined,
+        };
         const panel = document.getElementById("detailPanel");
         if (!panel) return;
 
@@ -2241,6 +2470,10 @@ class NzVerificationMap {
 
             <div class="detail-section">
                 ${INTAKE_ENABLED ? this.reviewFormHtml(props) : this.disabledIntakeHtml()}
+            </div>
+
+            <div class="detail-section">
+                ${this.issueFormHtml(issueContext, { open: this.issueFormOpenTaskId === props.task_id })}
             </div>
 
             <div class="detail-section">
@@ -2280,6 +2513,7 @@ class NzVerificationMap {
         if (INTAKE_ENABLED) {
             this.bindRaActionForm(props);
         }
+        this.bindIssueForm(issueContext);
     }
 
     siteTaskBriefHtml(props) {
@@ -2481,6 +2715,29 @@ class NzVerificationMap {
         `;
     }
 
+    // skip control with quick-reason chips; free text stays allowed, and the
+    // duplicate/data-error chips surface a pointer at the issue pipeline
+    skipFormHtml() {
+        return `
+            <details class="skip-form">
+                <summary>Nothing to record for this task — skip it</summary>
+                <div class="skip-reason-chips">
+                    ${SKIP_REASON_CHIPS.map(chip => `
+                        <button type="button" class="tertiary skip-chip" data-reason="${escapeHtml(chip.reason)}"${chip.issueHint ? ` data-issue-hint="1"` : ""}>${escapeHtml(chip.reason)}</button>
+                    `).join("")}
+                </div>
+                <label>
+                    Reason (optional)
+                    <input id="skipReasonInput" type="text" placeholder="e.g. evidence already covered by another task">
+                </label>
+                <div id="skipIssueHint" class="copy-help" hidden>
+                    Consider filing this as an issue instead — <strong>Report an issue</strong> keeps it visible for review.
+                </div>
+                <button type="button" class="skip-confirm" id="skipTaskButton">Skip this task</button>
+            </details>
+        `;
+    }
+
     reviewFormHtml(props) {
         const taskId = props?.task_id || "";
         if (ASSIGNMENT_MODE && !this.backendUser) {
@@ -2507,26 +2764,8 @@ class NzVerificationMap {
         const revisionMode = taskId ? this.taskIsRevisionMode(taskId) : false;
         const canRevise = taskId ? this.taskCanRevise(taskId) : false;
         const skipControl = ASSIGNMENT_MODE
-            ? (assignmentTaskAvailable && !readOnly && !revisionMode ? `
-                <details class="skip-form">
-                    <summary>Nothing to record for this task — skip it</summary>
-                    <label>
-                        Reason (optional)
-                        <input id="skipReasonInput" type="text" placeholder="e.g. evidence already covered by another task">
-                    </label>
-                    <button type="button" class="skip-confirm" id="skipTaskButton">Skip this task</button>
-                </details>
-            ` : "")
-            : `
-                <details class="skip-form">
-                    <summary>Nothing to record for this task — skip it</summary>
-                    <label>
-                        Reason (optional)
-                        <input id="skipReasonInput" type="text" placeholder="e.g. evidence already covered by another task">
-                    </label>
-                    <button type="button" class="skip-confirm" id="skipTaskButton">Skip this task</button>
-                </details>
-            `;
+            ? (assignmentTaskAvailable && !readOnly && !revisionMode ? this.skipFormHtml() : "")
+            : this.skipFormHtml();
         return `
             <h3>2. Choose what your evidence shows</h3>
             <div class="review-form">
@@ -2849,6 +3088,16 @@ class NzVerificationMap {
         document.getElementById("skipTaskButton")?.addEventListener("click", () => {
             const reason = (document.getElementById("skipReasonInput")?.value || "").trim();
             this.skipCurrentTask(props, reason);
+        });
+        // quick-reason chips fill the input; the two data-quality chips also
+        // reveal the pointer at the issue pipeline
+        document.querySelectorAll(".skip-chip").forEach(chip => {
+            chip.addEventListener("click", () => {
+                const input = document.getElementById("skipReasonInput");
+                if (input) input.value = chip.dataset.reason || "";
+                const hint = document.getElementById("skipIssueHint");
+                if (hint) hint.hidden = chip.dataset.issueHint !== "1";
+            });
         });
 
         if (this.taskIsReadOnly(props.task_id)) {

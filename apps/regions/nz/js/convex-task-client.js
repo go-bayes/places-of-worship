@@ -306,6 +306,17 @@
             return await this.request("mutation", "tasks:skipTask", args);
         }
 
+        async unskipTask(args) {
+            // reopens a skipped task for the assignee; takes { taskId, reason? }
+            return await this.request("mutation", "tasks:unskipTask", args);
+        }
+
+        async createIssueTask(args) {
+            // files an ad-hoc issue report as an open task in the country's
+            // ra-issues batch; dedups onto an existing open issue for the site
+            return await this.request("mutation", "tasks:createIssueTask", args);
+        }
+
         async recordReviewDecision(args) {
             return await this.request("mutation", "reviews:recordReviewDecision", args);
         }

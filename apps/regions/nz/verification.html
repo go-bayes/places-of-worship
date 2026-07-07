@@ -383,6 +383,38 @@
             justify-content: center;
         }
 
+        /* low-prominence issue entry: quiet text button under the pair */
+        .popup-actions .popup-report-issue {
+            grid-column: 1 / -1;
+            min-height: 28px;
+            background: transparent;
+            border: none;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 400;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .skip-reason-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .skip-reason-chips .skip-chip {
+            min-height: 28px;
+            font-size: 12px;
+            font-weight: 400;
+            padding: 4px 8px;
+        }
+
+        .issue-form textarea {
+            width: 100%;
+            box-sizing: border-box;
+            font: inherit;
+        }
+
         .check-list {
             margin: 0;
             padding: 0;
@@ -1170,7 +1202,7 @@
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
     <script src="js/convex-config.js?v=20260707-changes-requested"></script>
-    <script src="js/convex-task-client.js?v=20260707-changes-requested"></script>
-    <script src="js/verification-map.js?v=20260708b"></script>
+    <script src="js/convex-task-client.js?v=20260708c"></script>
+    <script src="js/verification-map.js?v=20260708c"></script>
 </body>
 </html>
