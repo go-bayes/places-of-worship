@@ -11,6 +11,7 @@ database/dumps/
 .env.*.local
 .pow/
 frontend/config.js
+apps/global/config.js
 config/local.yml
 config/secrets.yml
 
