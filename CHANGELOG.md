@@ -23,6 +23,24 @@
   covers its urban-derivation and island-published caveats.
   Shared-asset token 20260707h on all eight pages.
 
+- Added Australia as the eighth country data map: statistical-area-2
+  census religious affiliation for 2021 from the ABS Census General
+  Community Profile DataPacks table G14 (2,472 SA2 rows on ASGS
+  Edition 3 GDA2020 boundaries, join 2,472/2,472 plus the
+  Outside-Australia shell kept boundary-only). The denominator is
+  stated responses (total persons minus religious affiliation not
+  stated); "no religion" is the ABS secular-beliefs, other-spiritual-
+  beliefs and no-religious-affiliation group, named as such on the
+  page. State and national reconciliations differ by at most 100 and
+  198 people — the expected signature of the ABS small random
+  adjustment, now documented in the manifest with a coded acceptance
+  bound. The 2011 and 2016 waves are deferred until the official ABS
+  boundary correspondences are both available; no project crosswalk
+  was constructed. Each source was verified separately against its own
+  raw archive per the standing directive. Build by codex per the
+  standard brief; a code-review pass (eight findings, all fixed) ran
+  before ship, with data values proven byte-identical across the fixes.
+
 - Extended the Mexico data map with the 2000 census wave (JB ruling
   2026-07-07): religious affiliation and no religion derived from the
   three CGPV 2000 ITER fields (affiliation = Catholic plus any

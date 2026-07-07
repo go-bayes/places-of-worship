@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Australia Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260707h" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // australia-specific data and copy; shared map behaviour lives in
+    // ../_shared/region-map.js.
+    window.REGION_CONFIG = {
+      countryCode: "AU",
+      title: "Places of Worship | Australia Research Map",
+      center: [134.5, -25.5],
+      initialZoom: 3.2,
+      censusLevels: {
+        sa2: {
+          label: "SA2",
+          boundaries: "data/sa2_2021.geojson",
+          summary: "data/area_summary_sa2.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries &copy; Australian Bureau of Statistics, ASGS Edition 3 SA2 2021, GDA2020"
+        }
+      },
+      defaultLevel: "sa2",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      popupDenominatorNote: "Percentages use people counted at place of usual residence with a stated religious-affiliation response: ABS G14 Total Persons minus Religious affiliation not stated, which comprises Not stated and Inadequately described. No religion % uses the ABS top-level Secular Beliefs and Other Spiritual Beliefs and No Religious Affiliation total.",
+      cityPresets: [
+        { label: "Sydney", coords: [151.2093, -33.8688], zoom: 10 },
+        { label: "Melbourne", coords: [144.9631, -37.8136], zoom: 10 },
+        { label: "Brisbane", coords: [153.0260, -27.4705], zoom: 10 },
+        { label: "Perth", coords: [115.8605, -31.9505], zoom: 10 },
+        { label: "Adelaide", coords: [138.6007, -34.9285], zoom: 10 },
+        { label: "Canberra", coords: [149.1300, -35.2809], zoom: 10 },
+        { label: "Hobart", coords: [147.3272, -42.8821], zoom: 11 },
+        { label: "Darwin", coords: [130.8456, -12.4634], zoom: 11 }
+      ],
+      geocode: { country: "au", biasLngLat: [134.5, -25.5] },
+      onboarding: {
+        title: "Australia research map",
+        intro: "SA2 census religious-affiliation overlay for Australia, 2021.",
+        bullets: [
+          "The census overlay is on: areas are shaded by religious affiliation among people with a stated religious-affiliation response.",
+          "No religion % uses the ABS top-level Secular Beliefs and Other Spiritual Beliefs and No Religious Affiliation total.",
+          "Only the 2021 wave is rendered. The 2011 and 2016 waves are deferred until the official ABS SA2 correspondences are available and unambiguous.",
+          "Open <strong>Census</strong> (top centre) for the metric selector.",
+          "Tap an area for its census detail."
+        ],
+        links: [
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion and ASGS boundaries &copy; <a href="https://www.abs.gov.au/" target="_blank" rel="noopener">Australian Bureau of Statistics</a> &middot; ABS data used with permission from the Australian Bureau of Statistics &middot; DataPacks licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> &middot; <a href="https://www.abs.gov.au/website-privacy-copyright-and-disclaimer" target="_blank" rel="noopener">ABS website copyright terms</a>'
+      // no per-row caveats in the 2021-only product; the wave-deferral
+      // note lives in the onboarding copy, which always renders
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260707h"></script>
+</body>
+</html>
