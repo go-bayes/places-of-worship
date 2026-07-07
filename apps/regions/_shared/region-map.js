@@ -81,6 +81,9 @@ document.title = RC.title;
     <button id="filters-clear" class="shell-pill" type="button" hidden aria-label="Clear filters"></button>
     <button id="near-me" class="shell-pill" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
   </div>
+  <!-- top-left row: the denomination key and the census control sit side by
+       side in one strip, each panel dropping below the shared button row -->
+  <div id="top-left-controls">
   <!-- top-left: the denomination key for the place dots -->
   <div id="key-wrap">
     <div id="counts-bar">
@@ -93,8 +96,9 @@ document.title = RC.title;
       <div class="count-total" id="countsTotal">Total: 0</div>
     </div>
   </div>
-  <!-- top-centre: the census data control, holding its options, colour key and time slider -->
-  <div id="census-wrap" class="shell-top-centre">
+  <!-- census data control: options, colour key and time slider; anchored in
+       the top-left strip beside the key (moved off top-centre) -->
+  <div id="census-wrap">
     <button id="census-toggle" class="shell-pill" type="button" aria-controls="census-panel" aria-expanded="true">
       <span>Census</span><span class="census-caret" aria-hidden="true">▴</span>
     </button>
@@ -115,6 +119,7 @@ document.title = RC.title;
         <div id="census-time" hidden></div>
       </div>
     </div>
+  </div>
   </div>
   <div id="dock">
     <div class="dock-panel">

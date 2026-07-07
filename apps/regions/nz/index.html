@@ -7,7 +7,7 @@
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
   <link href="../../shared/map-shell.css" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
-  <link href="../_shared/region-map.css?v=20260707i" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260708a" rel="stylesheet">
 </head>
 <body>
   <div id="region-root"></div>
@@ -66,7 +66,7 @@
         intro: "Places of worship across Aotearoa New Zealand, with census religious-affiliation overlays.",
         bullets: [
           "The census overlay is on: areas are shaded by religious affiliation.",
-          "Open <strong>Census</strong> (top centre) for the metric, geography and 2013–2023 slider.",
+          "Open <strong>Census</strong> (top left) for the metric, geography and 2013–2023 slider.",
           "Tap any dot for a place; tap an area for its census detail."
         ],
         links: [
@@ -77,7 +77,8 @@
       wordmarkLinks: [
         { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
         { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" },
-        { id: "verification-link", label: "Verification", href: "verification.html", title: "Open the RA verification map" }
+        { id: "verification-link", label: "Verification", href: "verification.html", title: "Open the RA verification map" },
+        { id: "review-link", label: "Review", href: "review.html", title: "Review submitted evidence" }
       ],
       raPortalHref: "verification.html",
       datedPlaces: "data/dated_places.geojson",
@@ -85,6 +86,6 @@
       censusFlagNote: "* small or suppressed denominator under Stats NZ rr3 rounding; treat percentages as indicative."
     };
   </script>
-  <script src="../_shared/region-map.js?v=20260707i"></script>
+  <script src="../_shared/region-map.js?v=20260708a"></script>
 </body>
 </html>

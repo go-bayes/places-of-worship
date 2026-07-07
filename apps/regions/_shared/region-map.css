@@ -90,21 +90,42 @@
 .census-table th:first-child, .census-table td:first-child { text-align: left; }
 .census-table th { color: #94a3b8; font-weight: 600; }
 .census-year-selected td { background: rgba(59, 130, 246, 0.18); }
-/* the denomination key sits in the top-left corner */
-#key-wrap {
+/* top-left control strip: the denomination key and the census control share
+   one fixed row in the top-left corner. moving census off top-centre stops
+   the centred panel colliding with the growing top-right cluster. the strip
+   is the positioned ancestor both drop-down panels anchor to, and it passes
+   clicks through its empty flanks so map interaction beneath is preserved. */
+#top-left-controls {
   position: fixed;
   left: var(--safe-left);
   top: var(--safe-top);
   z-index: 13;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: flex-start;
-  gap: 4px;
+  gap: 8px;
   pointer-events: none;
 }
-#key-wrap > * { pointer-events: auto; }
-/* the census data control sits front and centre; its caret mirrors the
-   Key button's disclosure idiom */
+/* only the buttons and the two panels catch clicks; the flanks stay
+   transparent so pans and taps reach the map */
+#top-left-controls button,
+#top-left-controls #counts,
+#top-left-controls #census-panel { pointer-events: auto; }
+/* key-wrap anchors its own panel; census-wrap stays unpositioned so its
+   panel anchors to the strip's left edge instead (see #census-panel) */
+#key-wrap { position: relative; }
+#census-wrap { position: static; }
+/* buttons ride above the panels so both controls stay clickable even when a
+   wide panel is open beneath them */
+#counts-bar, #census-toggle { position: relative; z-index: 20; }
+/* panels drop below the button row, taken out of flow so opening one never
+   widens the row or shoves its neighbour sideways */
+#counts { position: absolute; top: 100%; left: 0; margin-top: 4px; }
+/* anchor the census panel to the strip's left edge (its unpositioned wrap
+   lets it resolve against the fixed container), so the wide census-long
+   variant stays fully on-screen at 360px however far right the button sits */
+#census-panel { position: absolute; top: 100%; left: 0; z-index: 12; }
+/* the census caret mirrors the Key button's disclosure idiom */
 #census-toggle {
   display: inline-flex;
   align-items: center;
@@ -115,7 +136,7 @@
 .census-caret { color: #94a3b8; font-size: 12px; }
 @media (max-width: 640px) {
   /* the top row is tight on phones: the key shrinks to its colour dots
-     beside the centre Census control so the two never collide */
+     beside the census control so the two buttons never collide */
   #counts-toggle .key-label { display: none; }
   #census-panel { width: min(300px, 76vw); }
 }
