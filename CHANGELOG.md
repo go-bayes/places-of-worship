@@ -4,6 +4,21 @@
 
 ### 2026-07-07
 
+- Redesigned how whole-wave caveats render in the shared runtime: a
+  wash flag carried by every row of a displayed year no longer washes
+  the map pale (which erased a wave's information entirely — caught
+  live on Canada 2011 before ship); the year instead gets a legend
+  caveat line naming the reason, while scattered value-quality flags
+  keep the pale wash. The wash legend is composed from the flags that
+  actually wash, fixing the United Kingdom's long-standing mislabel
+  (its crosswalked areas were attributed to "small or suppressed
+  denominators"). Voluntary-survey waves joined the recognised caveat
+  vocabulary. The later-foundations rings are restyled dark slate and
+  the legend now reports how many qualifying dots exist ("2 in this
+  dataset"), so sparse historical data reads as sparse rather than
+  broken.
+
+
 - Merged the portal session's research-workbench pull request (#17):
   the free-contribution portal is browser-verified against every
   playbook acceptance check (place-first and source-first creation,

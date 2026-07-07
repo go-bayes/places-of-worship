@@ -2676,11 +2676,25 @@ function requestCensusYear(year) {
 }
 // rr3 makes percentages on small denominators volatile, and suppressed
 // cells carry no value at all; both wash out instead of implying precision
+const WASH_FLAG_SUBSTRINGS = [
+  "suppressed_denominator",
+  "rr3_small_denominator",
+  "boundary_change_crosswalked",
+  "voluntary_survey"
+];
+function rowWashTokens(row) {
+  return flagTokens(row).filter((t) => WASH_FLAG_SUBSTRINGS.some((s) => t.includes(s)));
+}
 function rowFlagged(row) {
-  return typeof row?.quality_flag === "string" &&
-    (row.quality_flag.includes("suppressed_denominator") ||
-      row.quality_flag.includes("rr3_small_denominator") ||
-      row.quality_flag.includes("boundary_change_crosswalked"));
+  return rowWashTokens(row).length > 0;
+}
+// the flat pale wash exists for SCATTERED unreliable rows; a wash flag
+// carried by every row of a displayed year would erase that whole
+// year's information, so year-universal wash flags surface as a legend
+// caveat instead of washing (the same distinguishes-nothing principle
+// the popup asterisk uses)
+function rowWashes(row, universalForYear) {
+  return rowWashTokens(row).some((t) => !(universalForYear && universalForYear.has(t)));
 }
 // caveats and value quality are different judgements: a distinguishing
 // flag earns the popup asterisk and the page's flag note (universe
@@ -2746,10 +2760,11 @@ function censusWashed(code, year, metric) {
   if (metric === "religious_change") {
     const idx = store.years.indexOf(year);
     if (idx <= 0) return true;
-    return rowFlagged(store.byAreaYear.get(`${code}|${year}`)) ||
-      rowFlagged(store.byAreaYear.get(`${code}|${store.years[idx - 1]}`));
+    const prev = store.years[idx - 1];
+    return rowWashes(store.byAreaYear.get(`${code}|${year}`), store.universalFlagsByYear?.get(year)) ||
+      rowWashes(store.byAreaYear.get(`${code}|${prev}`), store.universalFlagsByYear?.get(prev));
   }
-  return rowFlagged(store.byAreaYear.get(`${code}|${year}`));
+  return rowWashes(store.byAreaYear.get(`${code}|${year}`), store.universalFlagsByYear?.get(year));
 }
 
 // domains span all years so colours stay comparable across the year
@@ -2770,7 +2785,10 @@ function computeCensusDomains(store) {
   for (const metric of Object.keys(CENSUS_METRICS)) {
     const values = [];
     for (const row of store.rows) {
-      if (metricUsesDenominator(metric) && rowFlagged(row)) continue;
+      // skip only rows that actually wash: a year-universal wash flag
+      // does not wash, so those rows must still shape the colour domain
+      if (metricUsesDenominator(metric) &&
+        rowWashes(row, store.universalFlagsByYear?.get(row.year))) continue;
       const v = storeValue(store, row.area_code, row.year, metric);
       if (v !== null) values.push(v);
     }
@@ -2852,6 +2870,11 @@ async function loadCensusData(level) {
     store.years = [...new Set(store.rows.map((r) => r.year))].sort((a, b) => a - b);
     store.hasFlags = store.rows.some(rowFlagged);
     store.universalFlags = computeUniversalFlags(store.rows);
+    store.universalFlagsByYear = new Map();
+    for (const year of new Set(store.rows.map((r) => r.year))) {
+      store.universalFlagsByYear.set(year,
+        computeUniversalFlags(store.rows.filter((r) => r.year === year)));
+    }
     computeCensusDomains(store);
   } catch (err) {
     store.geojson = null;
@@ -3091,6 +3114,7 @@ function effectivePointsMode() {
 }
 const DATED = { source: "pow-dated", layer: "pow-dated-points", futureLayer: "pow-dated-future-points" };
 let datedHandlersAttached = false;
+let datedStartYears = null;
 function addDatedPlacesLayer() {
   if (!RC.datedPlaces || map.getSource(DATED.source)) return;
   map.addSource(DATED.source, { type: "geojson", data: RC.datedPlaces });
@@ -3108,20 +3132,32 @@ function addDatedPlacesLayer() {
     }
   });
   // prospective tier: dated places founded after the selected year render
-  // as hollow grey rings when "show later foundations" is on — with
-  // perfect information one would see where future places were to be built
+  // as hollow rings when "show later foundations" is on — with perfect
+  // information one would see where future places were to be built. the
+  // stroke is dark slate: the lighter grey vanished on the pale basemap
   map.addLayer({
     id: DATED.futureLayer,
     type: "circle",
     source: DATED.source,
     layout: { visibility: "none" },
     paint: {
-      "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 3.2, 9, 5.2, 16, 7.0],
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 3.6, 9, 5.6, 16, 7.4],
       "circle-color": "rgba(0, 0, 0, 0)",
-      "circle-stroke-width": 2,
-      "circle-stroke-color": "#94a3b8"
+      "circle-stroke-width": 2.5,
+      "circle-stroke-color": "#334155"
     }
   });
+  // the future count feeds the legend: an honest "2 places founded after
+  // 2018" stops an almost-empty layer reading as a broken control
+  if (!datedStartYears) {
+    datedStartYears = [];
+    fetch(RC.datedPlaces).then((r) => r.json()).then((geo) => {
+      datedStartYears = (geo.features || [])
+        .map((f) => f.properties && f.properties.start_year)
+        .filter((y) => Number.isFinite(y));
+      updateCensusLegend();
+    }).catch(() => { /* count stays empty; the legend simply omits it */ });
+  }
   if (!datedHandlersAttached) {
     datedHandlersAttached = true;
     const openDatedPopup = (e) => {
@@ -3280,15 +3316,48 @@ function updateCensusLegend() {
   }
   const def = CENSUS_METRICS[censusState.metric];
   const stops = def.kind === "div" ? DIV_STOPS : SEQ_STOPS;
-  const washNote = store.hasFlags && metricUsesDenominator(censusState.metric)
-    ? `<div class="census-legend-note">pale areas: small or suppressed denominators</div>`
+  // the wash legend states why areas are pale from the flags that
+  // actually wash (year-universal wash flags do not wash — they get the
+  // year-caveat line below instead); naming the wrong reason misleads
+  const washTokenClause = (tokens) => {
+    const clauses = [];
+    if (tokens.some((t) => t.includes("suppressed_denominator") || t.includes("rr3_small_denominator"))) {
+      clauses.push("small or suppressed denominators");
+    }
+    if (tokens.some((t) => t.includes("boundary_change_crosswalked"))) {
+      clauses.push("values converted across boundary vintages");
+    }
+    if (tokens.some((t) => t.includes("voluntary_survey"))) {
+      clauses.push("voluntary-survey estimates, not census counts");
+    }
+    return clauses;
+  };
+  const washingTokens = [];
+  for (const row of store.rows) {
+    const uni = store.universalFlagsByYear?.get(row.year);
+    for (const t of rowWashTokens(row)) if (!(uni && uni.has(t))) washingTokens.push(t);
+  }
+  const washReasons = washTokenClause(washingTokens);
+  const washNote = washReasons.length && metricUsesDenominator(censusState.metric)
+    ? `<div class="census-legend-note">pale areas: ${washReasons.join("; ")}</div>`
+    : "";
+  // a wash flag on every row of the selected year is a property of the
+  // whole wave: say so once, without erasing the wave's colours
+  const activeUniversal = [...(store.universalFlagsByYear?.get(censusState.year) || [])]
+    .filter((t) => WASH_FLAG_SUBSTRINGS.some((s) => t.includes(s)));
+  const yearCaveats = washTokenClause(activeUniversal);
+  const yearCaveatNote = yearCaveats.length
+    ? `<div class="census-legend-note">${censusState.year}: ${yearCaveats.join("; ")} — details in area popups</div>`
     : "";
   // the dot note tracks the points mode: period explains the dated-only
   // view, all keeps the interim honesty note on historical years, off
   // needs no note because the control itself says so
   const pointsMode = effectivePointsMode();
+  const futureCount = placesDotState.future && Array.isArray(datedStartYears)
+    ? datedStartYears.filter((y) => y > censusState.year).length
+    : null;
   const dotEraNote = pointsMode === "period"
-    ? `<div class="census-legend-note">showing only places whose OpenStreetMap date tags say they existed in ${censusState.year} — today's undated snapshot is hidden${placesDotState.future ? `; hollow grey rings mark places founded after ${censusState.year}` : ""}</div>`
+    ? `<div class="census-legend-note">showing only places whose OpenStreetMap date tags say they existed in ${censusState.year} — today's undated snapshot is hidden${placesDotState.future ? `; hollow rings mark places founded after ${censusState.year}${futureCount !== null ? ` (${futureCount} in this dataset)` : ""}` : ""}</div>`
     : pointsMode === "all" && placeSnapshotStale()
       ? `<div class="census-legend-note">place dots show today's OpenStreetMap places, not ${censusState.year} places${RC.datedPlaces ? ` — amber-ringed dots carry OpenStreetMap date tags saying they existed in ${censusState.year}` : " — historical place layers are being assembled from evidence"}</div>`
       : "";
@@ -3305,6 +3374,7 @@ function updateCensusLegend() {
     `<div class="census-legend-range"><span>${loLabel}</span><span>${hiLabel}</span></div>` +
     `<div class="census-legend-note">${def.note}</div>` +
     washNote +
+    yearCaveatNote +
     dotEraNote;
   markActiveTick();
 }
