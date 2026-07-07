@@ -1,6 +1,10 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import {
+  agentReviewAgreement,
+  agentReviewBatchStatus,
+  agentReviewRecommendation,
+  agentSourceCheck,
   automatedCheck,
   evidenceDraftStatus,
   exportBatchStatus,
@@ -162,6 +166,8 @@ export default defineSchema({
     identity_decision: v.optional(identityDecision),
     target_year_affects: v.optional(v.array(targetYearAffect)),
     required_follow_up: v.optional(v.string()),
+    agent_review_id: v.optional(v.string()),
+    agent_review_agreement: v.optional(agentReviewAgreement),
     created_at: v.number(),
     updated_at: v.number(),
   })
@@ -169,6 +175,59 @@ export default defineSchema({
     .index("by_task", ["task_id"])
     .index("by_reviewer_time", ["reviewer_user_id", "created_at"])
     .index("by_decision_status", ["decision_status"]),
+
+  // append-only AI review artifacts (docs/portal-claude-batch-review.md).
+  // one row per (claim version, prompt version); re-reviews append with a
+  // higher version, never overwrite. Advisory only: no function that
+  // writes here may change tasks, drafts, or review decisions.
+  agent_reviews: defineTable({
+    agent_review_id: v.string(),
+    task_id: v.string(),
+    evidence_draft_id: v.string(),
+    batch_id: v.string(),
+    version: v.number(),
+    recommendation: agentReviewRecommendation,
+    reasoning: v.string(),
+    sources_checked: v.array(agentSourceCheck),
+    cultural_sensitivity: v.object({
+      flagged: v.boolean(),
+      basis: v.optional(v.string()),
+    }),
+    agent_name: v.string(),
+    model_provider: v.string(),
+    model_name: v.string(),
+    source_check_model: v.optional(v.string()),
+    prompt_version: v.string(),
+    actor_user_id: v.id("users"),
+    ai_generated: v.literal(true),
+    created_at: v.number(),
+  })
+    .index("by_agent_review_id", ["agent_review_id"])
+    .index("by_task", ["task_id"])
+    .index("by_draft", ["evidence_draft_id"])
+    .index("by_batch", ["batch_id"]),
+
+  // run manifest per batch invocation: the ratified bulk-lane controls
+  // (caps, trigger, counts) made inspectable.
+  agent_review_batches: defineTable({
+    batch_id: v.string(),
+    trigger: v.union(v.literal("jb_cli"), v.literal("cron")),
+    country_code: v.optional(v.string()),
+    prompt_version: v.string(),
+    model_name: v.string(),
+    source_check_model: v.string(),
+    max_items: v.number(),
+    status: agentReviewBatchStatus,
+    reviewed_count: v.number(),
+    skipped_existing_count: v.number(),
+    deferred_cultural_count: v.number(),
+    failed_count: v.number(),
+    error_notes: v.optional(v.array(v.string())),
+    started_at: v.number(),
+    completed_at: v.optional(v.number()),
+  })
+    .index("by_batch_id", ["batch_id"])
+    .index("by_started", ["started_at"]),
 
   export_batches: defineTable({
     export_batch_id: v.string(),

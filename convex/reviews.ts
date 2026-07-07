@@ -36,7 +36,7 @@ async function getDraft(ctx: any, draftId: string | undefined): Promise<Doc<"evi
 
 function taskStatusForDecision(
   decisionStatus: "accepted_for_export" | "rejected" | "needs_more_evidence" | "duplicate_task" | "deferred",
-) {
+): "changes_requested" | "reviewed" {
   if (decisionStatus === "needs_more_evidence") {
     return "changes_requested";
   }
@@ -68,6 +68,17 @@ async function latestDraftForReview(ctx: any, taskId: string): Promise<Doc<"evid
     ?? null;
 }
 
+// newest Claude batch-review artifact for the task, if any: advisory
+// context for the reviewer, never a decision input the server acts on
+async function latestAgentReview(ctx: any, taskId: string): Promise<Doc<"agent_reviews"> | null> {
+  const artifacts = await ctx.db
+    .query("agent_reviews")
+    .withIndex("by_task", (q: any) => q.eq("task_id", taskId))
+    .order("desc")
+    .take(1);
+  return artifacts[0] ?? null;
+}
+
 async function latestReviewDecision(ctx: any, taskId: string): Promise<Doc<"review_decisions"> | null> {
   const decisions = await ctx.db
     .query("review_decisions")
@@ -85,6 +96,14 @@ export const listReviewQueue = query({
     status: v.optional(taskStatus),
     limit: v.optional(v.number()),
   },
+  returns: v.array(
+    v.object({
+      task: v.any(),
+      latestDraft: v.any(),
+      latestReview: v.any(),
+      latestAgentReview: v.any(),
+    }),
+  ),
   handler: async (ctx, args) => {
     await requireUser(ctx, ["reviewer", "curator", "admin"]);
     const status = args.status ?? "needs_review";
@@ -107,7 +126,8 @@ export const listReviewQueue = query({
     for (const task of tasks) {
       const latestDraft = await latestDraftForReview(ctx, task.task_id);
       const latestReview = await latestReviewDecision(ctx, task.task_id);
-      rows.push({ task, latestDraft, latestReview });
+      const agentReview = await latestAgentReview(ctx, task.task_id);
+      rows.push({ task, latestDraft, latestReview, latestAgentReview: agentReview });
     }
     return rows;
   },
@@ -118,6 +138,11 @@ export const recordReviewDecision = mutation({
     taskId: v.string(),
     decision: reviewDecisionInput,
   },
+  returns: v.object({
+    task_id: v.string(),
+    review_decision_id: v.string(),
+    task_status: taskStatus,
+  }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
@@ -130,6 +155,24 @@ export const recordReviewDecision = mutation({
     }
     if (args.decision.decision_status === "accepted_for_export" && draft === null) {
       throw new Error("Accepted-for-export decisions require an evidence draft.");
+    }
+    // provenance of the AI recommendation the reviewer saw: the artifact
+    // must exist and belong to this task; agreement without an artifact
+    // reference is meaningless and rejected
+    if (args.decision.agent_review_agreement !== undefined && args.decision.agent_review_id === undefined) {
+      throw new Error("Recording agreement with an AI recommendation requires its agent_review_id.");
+    }
+    if (args.decision.agent_review_id !== undefined) {
+      const artifact = await ctx.db
+        .query("agent_reviews")
+        .withIndex("by_agent_review_id", (q) => q.eq("agent_review_id", args.decision.agent_review_id!))
+        .unique();
+      if (artifact === null) {
+        throw new Error(`Agent review not found: ${args.decision.agent_review_id}`);
+      }
+      if (artifact.task_id !== args.taskId) {
+        throw new Error("Agent review belongs to a different task.");
+      }
     }
     if ((args.decision.decision_note ?? "").trim().length < 8) {
       throw new Error("Review decisions require a short decision note.");
@@ -154,6 +197,8 @@ export const recordReviewDecision = mutation({
       identity_decision: args.decision.identity_decision,
       target_year_affects: args.decision.target_year_affects ?? [],
       required_follow_up: args.decision.required_follow_up,
+      agent_review_id: args.decision.agent_review_id,
+      agent_review_agreement: args.decision.agent_review_agreement,
       created_at: now,
       updated_at: now,
     });

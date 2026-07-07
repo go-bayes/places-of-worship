@@ -12,6 +12,10 @@
         drafts: [],
         events: [],
         busy: false,
+        // explicit reviewer stance on the AI recommendation, set by the
+        // Use-recommendation / Decide-differently buttons; null = no
+        // explicit choice, agreement derives from the decision itself
+        agentAgreementChoice: null,
     };
 
     const els = {
@@ -77,12 +81,15 @@
         return [task.locality, task.address].filter(Boolean).join(" | ") || task.task_id;
     }
 
-    function taskPills(task, draft) {
+    function taskPills(task, draft, agentReview) {
         const pills = [
             `<span class="pill">${escapeHtml(task.status)}</span>`,
             `<span class="pill">${escapeHtml(task.task_type)}</span>`,
             `<span class="pill amber">${escapeHtml(task.priority)}</span>`,
         ];
+        if (agentReview && window.PowClaudeReviewPanel) {
+            pills.push(window.PowClaudeReviewPanel.queuePillHtml(agentReview));
+        }
         if (draft?.draft_status) {
             pills.push(`<span class="pill green">${escapeHtml(draft.draft_status)}</span>`);
         }
@@ -271,13 +278,13 @@
             return;
         }
         els.queueList.innerHTML = state.queue
-            .map(({ task, latestDraft, latestReview }) => `
+            .map(({ task, latestDraft, latestReview, latestAgentReview }) => `
                 <button class="task-button ${state.selected?.task?.task_id === task.task_id ? "active" : ""}"
                     type="button"
                     data-task-id="${escapeHtml(task.task_id)}">
                     <strong>${escapeHtml(task.name)}</strong>
                     <span class="muted">${escapeHtml(taskSubtitle(task))}</span>
-                    <span class="pill-row">${taskPills(task, latestDraft)}</span>
+                    <span class="pill-row">${taskPills(task, latestDraft, latestAgentReview)}</span>
                     ${latestReview?.decision_status ? `<span class="muted">Last decision: ${escapeHtml(decisionLabel(latestReview.decision_status))}</span>` : ""}
                 </button>
             `)
@@ -293,6 +300,7 @@
         state.selected = row;
         state.drafts = [];
         state.events = [];
+        state.agentAgreementChoice = null;
         renderQueue();
         renderDetail(true);
         try {
@@ -330,6 +338,7 @@
         const { task } = row;
         const draft = currentDraft();
         const review = currentReview();
+        const agentReview = row.latestAgentReview || null;
         const coordinates = Array.isArray(task.geometry?.coordinates)
             ? `${task.geometry.coordinates[1]}, ${task.geometry.coordinates[0]}`
             : "";
@@ -338,7 +347,7 @@
             <section class="panel">
                 <h2>${escapeHtml(task.name)}</h2>
                 <p class="muted">${escapeHtml(task.task_brief || "")}</p>
-                <div class="pill-row">${taskPills(task, draft)}</div>
+                <div class="pill-row">${taskPills(task, draft, agentReview)}</div>
                 ${loading ? `<div class="status">Loading evidence and task history...</div>` : ""}
                 ${errorMessage ? `<div class="status error">${escapeHtml(errorMessage)}</div>` : ""}
                 ${review ? `
@@ -415,6 +424,8 @@
                 ${draft ? targetYearTable(draft.target_year_statuses, draft.target_year_evidence) : `<p class="muted">No target-year statuses recorded.</p>`}
             </section>
 
+            ${window.PowClaudeReviewPanel ? window.PowClaudeReviewPanel.panelHtml(agentReview) : ""}
+
             <section class="panel">
                 <h3>Review decision</h3>
                 ${decisionForm(task, draft)}
@@ -445,6 +456,33 @@
             wireDecisionForm(form);
             form.addEventListener("submit", submitDecision);
         }
+        wireAgentReviewPanel(form, agentReview);
+    }
+
+    // the explicit affordances on the AI recommendation: prefill-and-agree
+    // or record disagreement. Neither submits; the decision note and the
+    // Record button remain the human act.
+    function wireAgentReviewPanel(form, agentReview) {
+        if (!form || !agentReview || !window.PowClaudeReviewPanel) return;
+        const statusLine = document.getElementById("agentAgreementStatus");
+        document.getElementById("useAgentRecommendation")?.addEventListener("click", () => {
+            const mapped = window.PowClaudeReviewPanel.decisionForRecommendation(agentReview.recommendation);
+            if (mapped) {
+                setDecisionFormValues(form, { decisionStatus: mapped });
+            }
+            state.agentAgreementChoice = "followed";
+            if (statusLine) {
+                statusLine.textContent = "Decision prefilled from the recommendation. Add your decision note, then record.";
+            }
+            form.decisionNote.focus();
+        });
+        document.getElementById("disagreeAgentRecommendation")?.addEventListener("click", () => {
+            state.agentAgreementChoice = "disagreed";
+            if (statusLine) {
+                statusLine.textContent = "Your disagreement will be recorded with the decision. Choose your own decision below.";
+            }
+            form.decisionStatus.focus();
+        });
     }
 
     function setDecisionFormValues(form, values) {
@@ -576,9 +614,22 @@
                 : undefined,
             required_follow_up: form.requiredFollowUp.value.trim() || undefined,
         };
+        // provenance: which AI recommendation was on screen and whether the
+        // human followed it — explicit button choice wins, otherwise derived
+        // from the decision so the record never overstates agreement
+        const agentReview = state.selected.latestAgentReview;
+        if (agentReview && window.PowClaudeReviewPanel) {
+            decision.agent_review_id = agentReview.agent_review_id;
+            decision.agent_review_agreement = window.PowClaudeReviewPanel.deriveAgreement(
+                agentReview,
+                decisionStatus,
+                state.agentAgreementChoice || undefined,
+            );
+        }
 
         state.busy = true;
-        form.querySelector("button").disabled = true;
+        const submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton) submitButton.disabled = true;
         statusText.textContent = "Recording review decision...";
         statusText.className = "muted";
         try {
@@ -596,8 +647,7 @@
             statusText.className = "status error";
         } finally {
             state.busy = false;
-            const button = form.querySelector("button");
-            if (button) button.disabled = false;
+            if (submitButton) submitButton.disabled = false;
         }
     }
 

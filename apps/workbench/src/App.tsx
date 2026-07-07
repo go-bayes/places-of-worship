@@ -33,11 +33,13 @@ export function App() {
     const work = await provider.listMyWork(countryCode);
     setMyWork(work);
     // keep an open My-work record in step with its persisted version, so a
-    // later save cannot write back a stale snapshot
+    // later save cannot write back a stale snapshot; a draft that has
+    // disappeared from the provider closes rather than lingering stale
+    // (matters once ConvexProvider can drop drafts between refreshes)
     setOpenRecord((prev) => {
       if (!prev) return prev;
       const fresh = work.find((d) => d.draftId === prev.draft.draftId);
-      return fresh ? { task: prev.task, draft: fresh } : prev;
+      return fresh ? { task: prev.task, draft: fresh } : null;
     });
   }, [countryCode]);
 

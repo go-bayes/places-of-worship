@@ -257,6 +257,54 @@ export const evidenceDraftInput = v.object({
   validation_summary: v.optional(v.any()),
 });
 
+// batch-review lane (docs/portal-claude-batch-review.md): AI review
+// artifacts are advisory annotations on the queue; they never change a
+// task, draft, or decision. Humans decide; Claude recommends.
+export const agentReviewRecommendation = v.union(
+  v.literal("accept"),
+  v.literal("revise"),
+  v.literal("reject"),
+  v.literal("defer_cultural"),
+);
+
+// per-source verification record: what was checked, how, and what the
+// check found. An unchecked source is recorded as unchecked, never
+// silently passed (JB attribution directive, 2026-07-07).
+export const agentSourceCheck = v.object({
+  source_title: v.optional(v.string()),
+  url_or_file: v.optional(v.string()),
+  check: v.union(
+    v.literal("existence"),
+    v.literal("date_support"),
+    v.literal("location_plausibility"),
+  ),
+  method: v.union(
+    v.literal("http_fetch"),
+    v.literal("model_assessment"),
+    v.literal("not_checked"),
+  ),
+  outcome: v.union(
+    v.literal("supported"),
+    v.literal("not_supported"),
+    v.literal("unclear"),
+    v.literal("unreachable"),
+    v.literal("requires_human_access"),
+  ),
+  note: v.optional(v.string()),
+});
+
+export const agentReviewAgreement = v.union(
+  v.literal("followed"),
+  v.literal("disagreed"),
+  v.literal("not_considered"),
+);
+
+export const agentReviewBatchStatus = v.union(
+  v.literal("running"),
+  v.literal("completed"),
+  v.literal("failed"),
+);
+
 export const reviewDecisionInput = v.object({
   evidence_draft_id: v.optional(v.string()),
   decision_status: reviewDecisionStatus,
@@ -265,4 +313,6 @@ export const reviewDecisionInput = v.object({
   identity_decision: v.optional(identityDecision),
   target_year_affects: v.optional(v.array(targetYearAffect)),
   required_follow_up: v.optional(v.string()),
+  agent_review_id: v.optional(v.string()),
+  agent_review_agreement: v.optional(agentReviewAgreement),
 });
