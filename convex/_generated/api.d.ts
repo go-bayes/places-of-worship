@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as claudeReviews from "../claudeReviews.js";
 import type * as evidence from "../evidence.js";
 import type * as exports from "../exports.js";
 import type * as lib_auth from "../lib/auth.js";
@@ -25,6 +26,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  claudeReviews: typeof claudeReviews;
   evidence: typeof evidence;
   exports: typeof exports;
   "lib/auth": typeof lib_auth;
