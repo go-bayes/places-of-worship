@@ -398,6 +398,18 @@ export const importSubmittedEvidenceDrafts = mutation({
   },
 });
 
+// per-status transition rules for starting a revision. a revision start
+// moves the task only when the reviewer has already handed it back
+// (changes_requested); while a submission or unresolved note awaits review
+// the task keeps its queue status and the revision rides alongside until
+// submitted. reviews:feedbackLoopMetrics keys on the changes_requested ->
+// in_progress draft_saved event, so that pair must stay stable
+const revisionTransitions = {
+  changes_requested: "in_progress",
+  needs_review: "needs_review",
+  unresolved_note: "unresolved_note",
+} as const;
+
 export const reviseEvidenceDraft = mutation({
   args: {
     taskId: v.string(),
@@ -406,79 +418,117 @@ export const reviseEvidenceDraft = mutation({
     task_id: v.string(),
     previous_evidence_draft_id: v.string(),
     evidence_draft_id: v.string(),
-    task_status: v.literal("in_progress"),
+    task_status: v.union(
+      v.literal("in_progress"),
+      v.literal("needs_review"),
+      v.literal("unresolved_note"),
+    ),
   }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
-    if (task.status !== "changes_requested") {
-      throw new Error("A revision can only start when the task status is changes_requested.");
+    const nextStatus = revisionTransitions[task.status as keyof typeof revisionTransitions];
+    if (nextStatus === undefined) {
+      throw new Error(
+        "A revision can only start when the task status is changes_requested, needs_review, or unresolved_note.",
+      );
     }
-    // the task is the natural key from the RA UI; resolve the submitted
-    // version server-side so a stale client cannot clone the wrong draft
-    const submittedDrafts = await ctx.db
-      .query("evidence_drafts")
-      .withIndex("by_task_status", (q) => q.eq("task_id", args.taskId).eq("draft_status", "submitted"))
-      .collect();
-    const submittedDraft = submittedDrafts.sort((left, right) => right._creationTime - left._creationTime)[0] ?? null;
-    if (!submittedDraft) {
-      throw new Error("No submitted evidence draft found for this task.");
+    // the task is the natural key from the RA UI; resolve the active
+    // submission server-side so a stale client cannot clone the wrong
+    // draft. unresolved-note tasks hold their evidence under the
+    // unresolved_note draft status rather than submitted
+    const latestByStatus = (status: "submitted" | "unresolved_note" | "draft") =>
+      ctx.db
+        .query("evidence_drafts")
+        .withIndex("by_task_status", (q) => q.eq("task_id", args.taskId).eq("draft_status", status))
+        .order("desc")
+        .first();
+    const candidates = [await latestByStatus("submitted"), await latestByStatus("unresolved_note")]
+      .filter((draft): draft is Doc<"evidence_drafts"> => draft !== null)
+      .sort((left, right) => right._creationTime - left._creationTime);
+    const sourceDraft = candidates[0] ?? null;
+    if (sourceDraft === null) {
+      throw new Error("No submitted evidence draft or unresolved note found for this task.");
     }
-    if (submittedDraft.created_by !== user._id && !canReview(user.roles)) {
+    if (sourceDraft.created_by !== user._id && !canReview(user.roles)) {
       throw new Error("Evidence draft belongs to another user.");
     }
 
     const now = Date.now();
-    const revisionDraftId = `${submittedDraft.task_id}:${submittedDraft.created_by}:revision:${now}`;
-    // import dedup keys stay on the original: the clone's content will be
-    // edited, so a carried-over content hash would lie about what it holds
-    const {
-      _id: _submittedRowId,
-      _creationTime: _submittedCreationTime,
-      evidence_draft_id: _submittedDraftId,
-      draft_status: _submittedDraftStatus,
-      created_at: _submittedCreatedAt,
-      updated_at: _submittedUpdatedAt,
-      source_claim_key: _submittedSourceClaimKey,
-      claim_hash: _submittedClaimHash,
-      import_batch_id: _submittedImportBatchId,
-      ...draftContent
-    } = submittedDraft;
+    // reuse the author's newest editable draft instead of minting a second
+    // clone: a repeat click or an unfinished earlier revision should
+    // continue, not fork
+    const latestEditable = await latestByStatus("draft");
+    const existingRevision =
+      latestEditable !== null && latestEditable.created_by === sourceDraft.created_by
+        ? latestEditable
+        : null;
+    if (existingRevision !== null && task.status === nextStatus) {
+      // no status transition pending and an editable draft already exists;
+      // return it without a duplicate task event
+      return {
+        task_id: args.taskId,
+        previous_evidence_draft_id: sourceDraft.evidence_draft_id,
+        evidence_draft_id: existingRevision.evidence_draft_id,
+        task_status: nextStatus,
+      };
+    }
 
-    await ctx.db.insert("evidence_drafts", {
-      ...draftContent,
-      evidence_draft_id: revisionDraftId,
-      draft_status: "draft",
-      created_at: now,
-      updated_at: now,
-    });
+    let revisionDraftId: string;
+    if (existingRevision !== null) {
+      revisionDraftId = existingRevision.evidence_draft_id;
+    } else {
+      revisionDraftId = `${sourceDraft.task_id}:${sourceDraft.created_by}:revision:${now}`;
+      // import dedup keys stay on the original: the clone's content will be
+      // edited, so a carried-over content hash would lie about what it holds
+      const {
+        _id: _sourceRowId,
+        _creationTime: _sourceCreationTime,
+        evidence_draft_id: _sourceDraftId,
+        draft_status: _sourceDraftStatus,
+        created_at: _sourceCreatedAt,
+        updated_at: _sourceUpdatedAt,
+        source_claim_key: _sourceSourceClaimKey,
+        claim_hash: _sourceClaimHash,
+        import_batch_id: _sourceImportBatchId,
+        ...draftContent
+      } = sourceDraft;
+
+      await ctx.db.insert("evidence_drafts", {
+        ...draftContent,
+        evidence_draft_id: revisionDraftId,
+        draft_status: "draft",
+        created_at: now,
+        updated_at: now,
+      });
+    }
     await ctx.db.patch(task._id, {
-      status: "in_progress",
-      assigned_to: task.assigned_to ?? submittedDraft.created_by,
-      claimed_by: task.claimed_by ?? submittedDraft.created_by,
+      status: nextStatus,
+      assigned_to: task.assigned_to ?? sourceDraft.created_by,
+      claimed_by: task.claimed_by ?? sourceDraft.created_by,
       claimed_at: task.claimed_at ?? now,
       updated_at: now,
       last_event_at: now,
     });
     await appendTaskEvent(ctx, {
-      taskId: submittedDraft.task_id,
+      taskId: sourceDraft.task_id,
       eventType: "draft_saved",
       actorUserId: user._id,
       actorRole: chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]),
       previousStatus: task.status,
-      newStatus: "in_progress",
+      newStatus: nextStatus,
       evidenceDraftId: revisionDraftId,
-      reason: `Started revision from submitted draft ${submittedDraft.evidence_draft_id}.`,
+      reason: `Started revision from ${sourceDraft.draft_status === "unresolved_note" ? "unresolved note" : "submitted draft"} ${sourceDraft.evidence_draft_id}.`,
       clientContext: {
-        revision_of_evidence_draft_id: submittedDraft.evidence_draft_id,
+        revision_of_evidence_draft_id: sourceDraft.evidence_draft_id,
       },
     });
 
     return {
-      task_id: submittedDraft.task_id,
-      previous_evidence_draft_id: submittedDraft.evidence_draft_id,
+      task_id: sourceDraft.task_id,
+      previous_evidence_draft_id: sourceDraft.evidence_draft_id,
       evidence_draft_id: revisionDraftId,
-      task_status: "in_progress" as const,
+      task_status: nextStatus,
     };
   },
 });

@@ -89,7 +89,15 @@ const MY_WORK_STATUSES = [
     "reviewed",
     "exported",
 ];
+// statuses whose tasks may start a revision; must match the server's
+// revisionTransitions table in convex/evidence.ts
 const REVISION_ELIGIBLE_STATUSES = new Set(["needs_review", "unresolved_note", "changes_requested"]);
+// statuses where a loaded editable draft can be re-attached as the active
+// revision without a server call: the task keeps its queue status while the
+// revision rides alongside. changes_requested is deliberately absent — its
+// revision must start through the server so the transition to in_progress
+// and the task event are recorded (reviews:feedbackLoopMetrics keys on them)
+const REVISION_AUTO_ATTACH_STATUSES = new Set(["needs_review", "unresolved_note"]);
 const READ_ONLY_ASSIGNMENT_STATUSES = new Set([
     "needs_review",
     "unresolved_note",
@@ -1172,9 +1180,14 @@ class NzVerificationMap {
         }
         const items = this.myWorkItems || [];
         const total = items.length;
-        const revisionDrafts = items.filter(item => item.task?.status === "needs_review" && item.latestDraft?.draft_status === "draft").length;
-        const submitted = items.filter(item => item.task?.status === "needs_review").length - revisionDrafts;
-        const unresolved = items.filter(item => item.task?.status === "unresolved_note").length;
+        // a task awaiting review with an editable draft alongside is a
+        // revision in progress; count it as a draft, not as submitted work
+        const isRevisionItem = item =>
+            (item.task?.status === "needs_review" || item.task?.status === "unresolved_note")
+            && item.latestDraft?.draft_status === "draft";
+        const revisionDrafts = items.filter(isRevisionItem).length;
+        const submitted = items.filter(item => item.task?.status === "needs_review" && !isRevisionItem(item)).length;
+        const unresolved = items.filter(item => item.task?.status === "unresolved_note" && !isRevisionItem(item)).length;
         const drafts = items.filter(item => item.task?.status === "draft_saved").length + revisionDrafts;
         const changesRequested = items.filter(item => item.task?.status === "changes_requested");
         const needsMore = changesRequested.length;
@@ -1244,8 +1257,10 @@ class NzVerificationMap {
         `;
     }
 
-    // starts an editable revision for a changes_requested task via the new server
-    // mutation, then refreshes work state and opens the task for editing.
+    // starts an editable revision for a changes_requested task via the server
+    // mutation, then refreshes work state and opens the task for editing. the
+    // returned draft id is tracked so the next save writes the clone, not the
+    // immutable submitted draft.
     async reviseNow(taskId, entryEl) {
         if (!taskId || !this.backend?.signedIn) return;
         const button = entryEl?.querySelector(".revise-now");
@@ -1256,7 +1271,9 @@ class NzVerificationMap {
             button.textContent = "Starting revision...";
         }
         try {
-            await this.backend.reviseEvidenceDraft({ taskId });
+            const result = await this.backend.reviseEvidenceDraft({ taskId });
+            this.revisionDraftIdsByTaskId.set(taskId, result.evidence_draft_id);
+            this.latestDraftsByTaskId.delete(taskId);
             await this.refreshBackendTasks();
             this.selectTaskById(taskId, { focusDetail: true });
             const status = document.getElementById("copyStatus");
@@ -1297,7 +1314,7 @@ class NzVerificationMap {
         const draft = item.latestDraft || {};
         const review = item.latestReview || {};
         const status = task.status || "unknown";
-        const label = status === "needs_review" && draft.draft_status === "draft"
+        const label = (status === "needs_review" || status === "unresolved_note") && draft.draft_status === "draft"
             ? "revision draft saved"
             : status === "needs_review"
             ? "submitted, waiting for review"
@@ -1795,7 +1812,7 @@ class NzVerificationMap {
             if (
                 latestDraft?.draft_status === "draft"
                 && backendTask
-                && REVISION_ELIGIBLE_STATUSES.has(backendTask.status)
+                && REVISION_AUTO_ATTACH_STATUSES.has(backendTask.status)
                 && latestDraft.evidence_draft_id
             ) {
                 this.revisionDraftIdsByTaskId.set(taskId, latestDraft.evidence_draft_id);
@@ -1899,16 +1916,44 @@ class NzVerificationMap {
         return READ_ONLY_ASSIGNMENT_STATUSES.has(backendTask.status) && !this.taskIsRevisionMode(taskId);
     }
 
-    startSubmissionRevision(props) {
+    // starts a revision for the selected task through the same server
+    // mutation as the changes-requested panel: the server clones the active
+    // submission into an editable draft, applies the per-status transition,
+    // and records a task event, so every revision start reaches
+    // reviews:feedbackLoopMetrics rather than only the changes_requested ones.
+    async startSubmissionRevision(props) {
         const taskId = props?.task_id || "";
-        if (!taskId || !this.taskCanRevise(taskId)) return;
-        if (!this.revisionDraftIdsByTaskId.has(taskId)) {
-            this.revisionDraftIdsByTaskId.set(taskId, `${taskId}:${this.backendUser?._id || "user"}:revision:${Date.now()}`);
+        if (!taskId || !this.taskCanRevise(taskId) || !this.backend?.signedIn) return;
+        const button = document.getElementById("reviseSubmissionButton");
+        if (button) {
+            button.disabled = true;
+            button.textContent = "Starting revision...";
         }
-        this.renderDetail(this.featureForTaskId(taskId) || this.selectedTask);
-        const status = document.getElementById("copyStatus");
-        if (status) {
-            status.textContent = "Revision started. Save a revision draft while working, then submit the revision for review when ready.";
+        try {
+            const result = await this.backend.reviseEvidenceDraft({ taskId });
+            this.revisionDraftIdsByTaskId.set(taskId, result.evidence_draft_id);
+            this.latestDraftsByTaskId.delete(taskId);
+            await this.refreshBackendTasks();
+            await this.loadLatestDraftForTask(taskId);
+            this.renderDetail(this.featureForTaskId(taskId) || this.selectedTask);
+            const status = document.getElementById("copyStatus");
+            if (status) {
+                status.textContent = "Revision started. Save a revision draft while working, then submit the revision for review when ready.";
+            }
+        } catch (error) {
+            if (error.authExpired) {
+                this.backendUser = null;
+                this.backendLastError = error.message;
+                this.renderBackendPanel();
+            }
+            if (button) {
+                button.disabled = false;
+                button.textContent = "Revise submission";
+            }
+            const status = document.getElementById("copyStatus");
+            if (status) {
+                status.textContent = `${error.message || "Could not start a revision."} Nothing was changed.`;
+            }
         }
     }
 
@@ -2983,7 +3028,13 @@ class NzVerificationMap {
 
         const row = this.buildWideEvidenceRow(props);
         const draft = this.buildEvidenceDraft(props, row, { unresolved });
-        const revisionDraftId = this.revisionDraftIdsByTaskId.get(props.task_id);
+        // prefer the tracked revision draft; otherwise continue the latest
+        // editable draft. the fallback covers a reload after a server-side
+        // revision start (task in_progress, clone loaded), where the default
+        // draft id would collide with the immutable submitted draft.
+        const latestKnownDraft = this.latestDraftsByTaskId.get(props.task_id);
+        const revisionDraftId = this.revisionDraftIdsByTaskId.get(props.task_id)
+            || (latestKnownDraft?.draft_status === "draft" ? latestKnownDraft.evidence_draft_id : undefined);
         try {
             if (status) {
                 status.textContent = unresolved

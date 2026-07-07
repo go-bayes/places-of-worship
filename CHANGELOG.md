@@ -4,6 +4,24 @@
 
 ### 2026-07-07
 
+- Consolidated the portal's two revision-start paths onto the server.
+  The `reviseEvidenceDraft` mutation now serves every revision-eligible
+  status with per-status transition rules: changes-requested moves to
+  in-progress (the pair `feedbackLoopMetrics` keys on, unchanged),
+  while needs-review and unresolved-note keep their queue status so
+  the submission stays reviewable while the revision rides alongside.
+  The clone source now includes unresolved notes, and a repeat start
+  reuses the author's existing editable draft instead of minting a
+  second clone. The portal's "Revise submission" button, which
+  previously fabricated a local draft id with no server clone and no
+  task event until the next save, now calls the same mutation, so
+  every revision start is recorded as a task event. Also fixed the
+  Revise-now save path: the client now tracks the server-returned
+  clone id and, after a reload, falls back to the latest editable
+  draft — before this, the first save after a server-side revision
+  start fell back to the default draft id, collided with the immutable
+  submitted draft, and failed.
+
 - Built the ratified RA feedback and training designs
   (docs/portal-ra-feedback-and-training.md). Guy's training workpack:
   an internal seeder (`trainingSeed:seedGuyTrainingWorkpack`) creates

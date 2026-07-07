@@ -85,7 +85,7 @@ configuration before wider country rollout.
 | `importSubmittedEvidenceDrafts` | mutation | `admin`, `service` | Import spreadsheet-submitted rows as provisional tasks and submitted evidence drafts so they enter the reviewer queue. | `task_batches`, `tasks`, `evidence_drafts`, `task_events` |
 | `submitEvidenceDraft` | mutation | draft owner, `reviewer`, `curator`, `admin` | Submit a draft for reviewer attention and mark the task needs-review. | `evidence_drafts`, `tasks`, `task_events` |
 | `submitUnresolvedNote` | mutation | draft owner, `reviewer`, `curator`, `admin` | Submit useful but incomplete evidence for reviewer triage and mark the task unresolved-note. | `evidence_drafts`, `tasks`, `task_events` |
-| `reviseEvidenceDraft` | mutation | draft owner, `reviewer`, `curator`, `admin` | Clone a task's submitted draft into a new editable version and move the task changes-requested to in-progress; the submitted version stays immutable. | `evidence_drafts`, `tasks`, `task_events` |
+| `reviseEvidenceDraft` | mutation | draft owner, `reviewer`, `curator`, `admin` | Start a revision from a task's active submission (submitted draft or unresolved note): clone it into a new editable version, or reuse the author's existing editable draft, and record a task event. Per-status transitions: changes-requested moves to in-progress; needs-review and unresolved-note keep their queue status while the revision rides alongside. The submitted version stays immutable. | `evidence_drafts`, `tasks`, `task_events` |
 
 ## `reviews.ts`
 
