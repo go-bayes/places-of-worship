@@ -55,16 +55,26 @@ function draftStatusForDecision(
   return "submitted";
 }
 
+// indexed per-status lookups: the old .filter() scanned the whole
+// evidence_drafts table per task, which blew the 16MB per-execution
+// read limit once the queue held ~40 tasks with large drafts
 async function latestDraftForReview(ctx: any, taskId: string): Promise<Doc<"evidence_drafts"> | null> {
-  const drafts = await ctx.db
-    .query("evidence_drafts")
-    .filter((q: any) => q.eq(q.field("task_id"), taskId))
-    .order("desc")
-    .take(50);
-  return drafts.find((draft: Doc<"evidence_drafts">) => draft.draft_status === "submitted")
-    ?? drafts.find((draft: Doc<"evidence_drafts">) => draft.draft_status === "unresolved_note")
-    ?? drafts.find((draft: Doc<"evidence_drafts">) => draft.draft_status === "accepted_for_export")
-    ?? drafts[0]
+  const byStatus = (status: string) =>
+    ctx.db
+      .query("evidence_drafts")
+      .withIndex("by_task_status", (q: any) => q.eq("task_id", taskId).eq("draft_status", status))
+      .order("desc")
+      .first();
+  return (await byStatus("submitted"))
+    ?? (await byStatus("unresolved_note"))
+    ?? (await byStatus("accepted_for_export"))
+    // fallback: newest draft in the task's index range (ordered by
+    // status then creation — fine for tasks with no reviewable draft)
+    ?? (await ctx.db
+      .query("evidence_drafts")
+      .withIndex("by_task_status", (q: any) => q.eq("task_id", taskId))
+      .order("desc")
+      .first())
     ?? null;
 }
 
