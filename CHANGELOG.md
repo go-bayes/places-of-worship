@@ -4,6 +4,19 @@
 
 ### 2026-07-07
 
+- Added place-dot visibility modes to every country map (JB directive):
+  a Points control in the census panel with period (only dated dots
+  alive at the selected year; the undated snapshot hidden entirely
+  rather than faded), all (the previous behaviour), and off (the
+  choropleth alone). Historical years now open in period mode where a
+  country ships dated places; a user's choice persists across year and
+  level changes. Within period mode a "show later foundations" checkbox
+  renders places founded after the selected year as hollow grey rings -
+  with perfect information one would see where future places were to be
+  built - and their popups say so. Legend copy tracks the mode.
+  Countries without a dated layer offer all/off only. Shared-asset
+  token bumped to 20260707f on all six pages.
+
 - Added Brazil as the sixth country data map: municipality-level census
   religion for 2000, 2010, and 2022 from IBGE SIDRA (16,710 rows across
   5,570 municipalities, join coverage 5,507/5,565/5,570 per wave,

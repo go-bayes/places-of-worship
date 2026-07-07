@@ -103,6 +103,13 @@ document.title = RC.title;
         <select id="censusMetric" aria-label="Census metric"></select>
         <select id="censusLevel" aria-label="Census geography"></select>
       </div>
+      <div id="census-points-row">
+        <select id="censusPoints" aria-label="Place dots"></select>
+        <label id="census-points-future" hidden>
+          <input id="censusPointsFuture" type="checkbox">
+          <span>show later foundations</span>
+        </label>
+      </div>
       <div id="census-legend">
         <div id="census-legend-scale"></div>
         <div id="census-time" hidden></div>
@@ -3038,7 +3045,19 @@ function placeSnapshotStale() {
   return censusState.enabled &&
     (new Date().getFullYear() - censusState.year) > PLACE_SNAPSHOT_HORIZON;
 }
-const DATED = { source: "pow-dated", layer: "pow-dated-points" };
+// place-dot visibility modes (docs/development/temporal-place-layer.md):
+// period = only dated dots alive at the selected year, undated snapshot
+// hidden; all = snapshot plus dated layer (the pre-modes behaviour);
+// off = choropleth alone. mode null means the user has not chosen, so
+// the year decides: historical years open in period (where dated data
+// exists), recent years in all. a user choice persists across year and
+// level changes until they change it again.
+const placesDotState = { mode: null, future: false };
+function effectivePointsMode() {
+  if (placesDotState.mode) return placesDotState.mode;
+  return placeSnapshotStale() && RC.datedPlaces ? "period" : "all";
+}
+const DATED = { source: "pow-dated", layer: "pow-dated-points", futureLayer: "pow-dated-future-points" };
 let datedHandlersAttached = false;
 function addDatedPlacesLayer() {
   if (!RC.datedPlaces || map.getSource(DATED.source)) return;
@@ -3056,14 +3075,31 @@ function addDatedPlacesLayer() {
       "circle-stroke-color": "#d68910"
     }
   });
+  // prospective tier: dated places founded after the selected year render
+  // as hollow grey rings when "show later foundations" is on — with
+  // perfect information one would see where future places were to be built
+  map.addLayer({
+    id: DATED.futureLayer,
+    type: "circle",
+    source: DATED.source,
+    layout: { visibility: "none" },
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 3.2, 9, 5.2, 16, 7.0],
+      "circle-color": "rgba(0, 0, 0, 0)",
+      "circle-stroke-width": 2,
+      "circle-stroke-color": "#94a3b8"
+    }
+  });
   if (!datedHandlersAttached) {
     datedHandlersAttached = true;
-    map.on("click", DATED.layer, (e) => {
+    const openDatedPopup = (e) => {
       const f = e.features && e.features[0];
       if (!f) return;
       const pr = f.properties || {};
       const name = pr.name || "Unnamed place";
       const span = `${pr.start_year || "?"}–${pr.end_year || "present"}`;
+      const prospective = censusState.enabled &&
+        Number.isFinite(pr.start_year) && pr.start_year > censusState.year;
       const [lng, lat] = f.geometry.coordinates;
       const popup = new maplibregl.Popup({ maxWidth: "320px" })
         .setLngLat(f.geometry.coordinates)
@@ -3074,6 +3110,7 @@ function addDatedPlacesLayer() {
           (pr.denomination ? `<div class="place-attr"><span class="place-attr-key">Denomination</span><span class="place-attr-val">${pr.denomination}</span></div>` : "") +
           `<div class="place-attr"><span class="place-attr-key">Dated</span><span class="place-attr-val">${span}</span></div>` +
           `</div>` +
+          (prospective ? `<div class="place-note">Founded after ${censusState.year} — shown because "show later foundations" is on.</div>` : "") +
           `<div class="place-note">Dates from OpenStreetMap tags — provisional until reviewed evidence replaces them.</div>` +
           `<div class="popup-actions">` +
           `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat.toFixed(6)},${lng.toFixed(6)}" target="_blank" rel="noopener">Streetview</a>` +
@@ -3082,16 +3119,19 @@ function addDatedPlacesLayer() {
         )
         .addTo(map);
       trackPlacePopup(popup);
-    });
-    map.on("mouseenter", DATED.layer, () => { map.getCanvas().style.cursor = "pointer"; });
-    map.on("mouseleave", DATED.layer, () => { map.getCanvas().style.cursor = ""; });
+    };
+    for (const layerId of [DATED.layer, DATED.futureLayer]) {
+      map.on("click", layerId, openDatedPopup);
+      map.on("mouseenter", layerId, () => { map.getCanvas().style.cursor = "pointer"; });
+      map.on("mouseleave", layerId, () => { map.getCanvas().style.cursor = ""; });
+    }
   }
 }
-function syncDatedPlaces(stale) {
+function syncDatedPlaces(showAlive, showFuture) {
   if (!RC.datedPlaces) return;
   addDatedPlacesLayer();
   if (!map.getLayer(DATED.layer)) return;
-  if (stale) {
+  if (showAlive) {
     // open-ended places carry end_year as an explicit null (the key is
     // present), so ["has","end_year"] is true for them; test the value for
     // null as well, or every still-open place would be filtered out.
@@ -3107,11 +3147,37 @@ function syncDatedPlaces(stale) {
   } else {
     map.setLayoutProperty(DATED.layer, "visibility", "none");
   }
+  if (!map.getLayer(DATED.futureLayer)) return;
+  if (showFuture) {
+    map.setFilter(DATED.futureLayer, ["all",
+      ["has", "start_year"],
+      [">", ["get", "start_year"], censusState.year]
+    ]);
+    map.setLayoutProperty(DATED.futureLayer, "visibility", "visible");
+  } else {
+    map.setLayoutProperty(DATED.futureLayer, "visibility", "none");
+  }
 }
 
 function syncPlaceDotEra() {
   const stale = placeSnapshotStale();
-  try { syncDatedPlaces(stale); } catch (e) { /* dated layer is optional */ }
+  const mode = censusState.enabled ? effectivePointsMode() : "all";
+  // period mode shows only the dated tier; all mode keeps the pre-modes
+  // behaviour where the dated tier joins the faded snapshot on
+  // historical years; off shows no dots at all
+  const showAlive = censusState.enabled &&
+    (mode === "period" || (mode === "all" && stale));
+  const showFuture = censusState.enabled && mode === "period" && placesDotState.future;
+  try { syncDatedPlaces(showAlive, showFuture); } catch (e) { /* dated layer is optional */ }
+  // the undated snapshot tiers hide entirely (not fade) in period and
+  // off modes; hidden layers also drop out of click hit-testing
+  const hideSnapshot = censusState.enabled && mode !== "all";
+  if (map.getLayer(LAYERS.overview)) {
+    map.setLayoutProperty(LAYERS.overview, "visibility", hideSnapshot ? "none" : "visible");
+  }
+  if (map.getLayer(LAYERS.places)) {
+    map.setLayoutProperty(LAYERS.places, "visibility", hideSnapshot ? "none" : "visible");
+  }
   const overviewBase = RC.overviewDotOpacity ?? 0.75;
   const ov = stale ? overviewBase * 0.15 : overviewBase;
   if (map.getLayer(LAYERS.overview)) {
@@ -3126,6 +3192,18 @@ function syncPlaceDotEra() {
         ? ["interpolate", ["linear"], ["zoom"], 6, 0.08, 8, 0.45, 9, 0.85, 12, 0.75, 18, 0.7]
         : ["interpolate", ["linear"], ["zoom"], 6, 0.2, 9, 0.85, 12, 0.75, 18, 0.7]);
   }
+  syncPointsControl(mode);
+}
+
+// keep the points control in step with the effective mode: the select
+// shows what the map is doing even before the user has chosen, and the
+// later-foundations checkbox only makes sense inside period mode
+function syncPointsControl(mode) {
+  const select = document.getElementById("censusPoints");
+  const futureRow = document.getElementById("census-points-future");
+  if (!select) return;
+  if (select.value !== mode) select.value = mode;
+  if (futureRow) futureRow.hidden = mode !== "period" || !RC.datedPlaces;
 }
 
 function applyCensusPaint() {
@@ -3173,9 +3251,15 @@ function updateCensusLegend() {
   const washNote = store.hasFlags && metricUsesDenominator(censusState.metric)
     ? `<div class="census-legend-note">pale areas: small or suppressed denominators</div>`
     : "";
-  const dotEraNote = placeSnapshotStale()
-    ? `<div class="census-legend-note">place dots show today's OpenStreetMap places, not ${censusState.year} places${RC.datedPlaces ? ` — amber-ringed dots carry OpenStreetMap date tags saying they existed in ${censusState.year}` : " — historical place layers are being assembled from evidence"}</div>`
-    : "";
+  // the dot note tracks the points mode: period explains the dated-only
+  // view, all keeps the interim honesty note on historical years, off
+  // needs no note because the control itself says so
+  const pointsMode = effectivePointsMode();
+  const dotEraNote = pointsMode === "period"
+    ? `<div class="census-legend-note">showing only places whose OpenStreetMap date tags say they existed in ${censusState.year} — today's undated snapshot is hidden${placesDotState.future ? `; hollow grey rings mark places founded after ${censusState.year}` : ""}</div>`
+    : pointsMode === "all" && placeSnapshotStale()
+      ? `<div class="census-legend-note">place dots show today's OpenStreetMap places, not ${censusState.year} places${RC.datedPlaces ? ` — amber-ringed dots carry OpenStreetMap date tags saying they existed in ${censusState.year}` : " — historical place layers are being assembled from evidence"}</div>`
+      : "";
   // the ramp clamps at the 2nd-98th percentile; mark the ends when
   // values continue beyond them
   const isClamped = store.clamped && store.clamped[censusState.metric];
@@ -3329,6 +3413,34 @@ if (censusMetricSelect) {
     censusState.metric = censusMetricSelect.value;
     applyCensusPaint();
   });
+}
+{
+  // points control: period only exists where the country ships a dated
+  // layer; choosing any mode pins it until the user chooses again
+  const censusPointsSelect = document.getElementById("censusPoints");
+  if (censusPointsSelect) {
+    const modes = RC.datedPlaces
+      ? [["period", "Points: period"], ["all", "Points: all"], ["off", "Points: off"]]
+      : [["all", "Points: all"], ["off", "Points: off"]];
+    for (const [value, label] of modes) {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = label;
+      censusPointsSelect.appendChild(option);
+    }
+    censusPointsSelect.value = "all";
+    censusPointsSelect.addEventListener("change", () => {
+      placesDotState.mode = censusPointsSelect.value;
+      applyCensusPaint();
+    });
+    const futureBox = document.getElementById("censusPointsFuture");
+    if (futureBox) {
+      futureBox.addEventListener("change", () => {
+        placesDotState.future = futureBox.checked;
+        applyCensusPaint();
+      });
+    }
+  }
 }
 
 map.on("movestart", showTileStatus);

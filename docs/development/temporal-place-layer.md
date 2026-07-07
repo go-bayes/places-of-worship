@@ -23,7 +23,13 @@ conditionals; the census choropleth (which IS year-true) stays fully
 saturated. Recent years keep normal dots because a current snapshot is a
 reasonable stand-in within roughly one census cycle.
 
-## Place-dot visibility modes (JB directive 2026-07-07, to implement)
+## Place-dot visibility modes (JB directive 2026-07-07, implemented)
+
+Implemented in the shared runtime 2026-07-07: a `Points` select in the
+census panel (period/all/off; period offered only where the country
+ships a dated layer), the later-foundations checkbox inside period
+mode, mode persistence across year and level changes, and legend copy
+per mode. The design below is the spec it implements.
 
 A `Points` control joins the census panel with three modes:
 

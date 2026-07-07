@@ -34,6 +34,31 @@
   cursor: pointer;
 }
 #census-options select:focus { outline: 1px solid rgba(148, 163, 184, 0.6); }
+/* place-dot visibility control: mode select plus the later-foundations
+   checkbox that only period mode offers */
+#census-points-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+#census-points-row select {
+  flex: 0 1 auto;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+#census-points-row select:focus { outline: 1px solid rgba(148, 163, 184, 0.6); }
+#census-points-future {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #94a3b8;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#census-points-future[hidden] { display: none; }
+#census-points-future input { accent-color: #94a3b8; cursor: pointer; margin: 0; }
 .census-legend-title { font-weight: 600; color: #e2e8f0; margin-bottom: 6px; }
 .census-legend-bar {
   height: 10px;
