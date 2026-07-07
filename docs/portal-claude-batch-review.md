@@ -205,7 +205,7 @@ artifact per task:
 | Idempotency | One artifact per (evidence draft, prompt version); reruns require `forceRerun`. |
 | Text limits | `reasoning` ≤ LONG_TEXT_MAX; `sources_checked` JSON ≤ VALIDATION_SUMMARY_MAX; over-limit model output is truncated with a recorded note. |
 | Fetch budget | One GET per source URL with at most 3 manually-walked redirects, each hop checked against the private-host block; 10 s timeout; first 20,000 characters of stripped text; no retries. |
-| Batch deadline | The runner stops starting new items 8 minutes in and closes the manifest with a deadline note, so the Convex action time cap never leaves a batch stuck `running`. |
+| Batch deadline | The runner stops starting new items 7 minutes in and closes the manifest with a deadline note, leaving budget for one worst-case in-flight item inside the Convex action time cap. A batch found stuck at `running` (crash, cap overrun) is safe to re-run: artifacts are idempotent per (draft, prompt version). |
 | API key | `ANTHROPIC_API_KEY` lives in the Convex deployment environment, server-side only (the action proxy pattern from `ra-ai-interaction-options.md`). Never in the browser, never committed. |
 | Pause | An absent key fails the run loudly before any artifact is written. The service user is created on demand and cannot block a run. |
 

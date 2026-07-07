@@ -40,13 +40,14 @@ const FETCH_TIMEOUT_MS = 10_000;
 const MODEL_TIMEOUT_MS = 60_000;
 const FETCH_TEXT_MAX = 20_000;
 const FETCH_MAX_REDIRECTS = 3;
-// a worst-case item costs one page fetch plus two model calls
-// (~2.5 min); the batch deadline below closes the manifest cleanly
-// before Convex's 10-minute action cap can kill the run, and
+// a worst-case item costs up to four fetch hops plus two model calls
+// (~2.7 min); the deadline below is checked between items, so the
+// budget must leave room for one full worst-case item inside Convex's
+// 10-minute action cap (7 + 2.7 = 9.7 min, ~20 s spare for closeBatch).
 // idempotent re-runs continue the remaining queue.
 const DEFAULT_MAX_ITEMS = 10;
 const HARD_MAX_ITEMS = 50;
-const BATCH_DEADLINE_MS = 8 * 60 * 1000;
+const BATCH_DEADLINE_MS = 7 * 60 * 1000;
 // clamps keep three check records well under VALIDATION_SUMMARY_MAX
 // even for maximum-length titles and urls
 const CHECK_TITLE_MAX = 300;
@@ -772,12 +773,15 @@ export const runBatch = internalAction({
     const runStartedAt = Date.now();
 
     for (const { task, draft } of pending) {
-      // close the manifest cleanly before the action time cap can kill
-      // the run; idempotent re-runs continue the remaining queue
+      // stop starting items once the deadline passes, leaving budget
+      // for the in-flight worst case plus closeBatch; idempotent
+      // re-runs continue the remaining queue
       if (Date.now() - runStartedAt > BATCH_DEADLINE_MS) {
-        errorNotes.push(
-          `deadline: stopped after ${attempted} of ${pending.length} items; re-run to continue the queue.`,
-        );
+        if (errorNotes.length < ERROR_NOTES_MAX) {
+          errorNotes.push(
+            `deadline: stopped after ${attempted} of ${pending.length} items; re-run to continue the queue.`,
+          );
+        }
         break;
       }
       attempted += 1;
