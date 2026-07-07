@@ -254,6 +254,8 @@ function PlaceFirstFlow(props: {
           id="place-first-sensitive"
           value=""
           onChange={(event) => {
+            // the empty placeholder is not an answer; the gate stays closed
+            if (event.target.value === "") return;
             setCulturallySensitive(event.target.value === "yes");
             setSensitivityAnswered(true);
           }}
