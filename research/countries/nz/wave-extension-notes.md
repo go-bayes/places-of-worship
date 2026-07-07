@@ -59,6 +59,32 @@ stays the build spec.
   customised-data request to Stats NZ. Next narrow pass targets (a)
   and (b).
 
+## Route decision for 1991-2006 (2026-07-07)
+
+Three research passes closed the public routes: the ADE carries only
+2013+; no old NZ.Stat dataflow identifier could be recovered (the
+DataInfo+ records are metadata identifiers, not SDMX dataflows); the
+archived 2006 pages are HTML, not bulk workbooks. The route is a
+customised-data request to Stats NZ (JB action). Draft request:
+
+> Subject: Customised data request — census religious affiliation by
+> territorial authority, 1991-2006
+>
+> I am requesting religious-affiliation counts from the 1991, 1996,
+> 2001, and 2006 Censuses of Population and Dwellings at territorial
+> authority level (regional council as a fallback), for a research
+> programme mapping religious change (placesmap.org; Victoria
+> University of Wellington). Specifically: (1) total responses by
+> top-level religious-affiliation categories per TA per census,
+> including no religion, object to answering, and not stated; (2) the
+> category classification used in each wave (so we can document breaks
+> rather than harmonise silently); (3) the denominator conventions per
+> wave (census usually resident population and the treatment of
+> non-response); and (4) the matching digital TA boundary vintages, or
+> guidance on obtaining pre-2007 vintages. CSV or Excel preferred.
+> Please indicate any cost and the licence the extract would carry —
+> we publish only derived rates with attribution.
+
 ## Open questions
 
 - Exact machine-readable routes for 1991/1996/2001/2006 religion at TA
