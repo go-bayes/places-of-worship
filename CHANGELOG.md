@@ -4,6 +4,36 @@
 
 ### 2026-07-07
 
+- Added the Claude batch-review lane (PR #18): before reviewers open
+  the queue, an internal Convex action reviews each pending submission
+  and appends a versioned, source-first AI recommendation (accept,
+  revise, reject, or defer to human cultural judgement) with per-source
+  verification records that state exactly what was checked and how.
+  The reviewer portal shows the latest recommendation inline —
+  expandable reasoning, checks table, a use-recommendation prefill and
+  an explicit decide-differently affordance — and each recorded
+  decision carries which artifact was on screen and whether the human
+  followed it. Two hard lines hold throughout: the ratified
+  human_confirmed gate is untouched (the lane appends artifacts and
+  audit events only; humans decide), and kastom-flagged items get
+  source checks only, with privacy-flagged content never sent to
+  external services. Independently line-reviewed by a second Fable
+  instance over two passes (fixes included a batch-deadline
+  arithmetic error, an SSRF guard with per-hop private-host blocking,
+  and truncation-proof structured model calls). The lane is inert
+  until JB deploys; the activation checklist is in
+  docs/portal-claude-batch-review.md. The same PR fixed all four
+  non-blocking findings from the PR #17 review, including field
+  provenance on the generic agent-draft confirm path.
+
+- Ratified design notes for the portal's next arc
+  (docs/portal-batch-import-and-corrections.md, reviewed by the same
+  second instance): curator-lane batch import of site nominations with
+  per-row repairable validation and locator-plus-hash idempotency (the
+  RA path stays one-by-one), map-dot corrections as evidence against
+  existing sites through the standard queue, and targeted visual
+  alignment of the workbench with the map shell.
+
 - Added Canada as the ninth country data map: census-division religion
   for 2001, 2011, and 2021 from Statistics Canada (288/293/293 rows,
   all joins complete), each wave on its own boundary vintage via the
