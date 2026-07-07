@@ -4,6 +4,28 @@
 
 ### 2026-07-07
 
+- Merged the portal session's research-workbench pull request (#17):
+  the free-contribution portal is browser-verified against every
+  playbook acceptance check (place-first and source-first creation,
+  offline archive sources without coordinates, reason-gated dedup
+  continuation, read-only submitted records, the localStorage-only
+  demo boundary), the Vanuatu kastom gate is hardened against the
+  synthetic empty-placeholder change event and holds through
+  navigation and reopening, and a friendliness pass lets My-work items
+  open their records (drafts editable, submitted read-only, agent
+  drafts with a confirm-as-own-work path honouring the ratified
+  human-confirmed gate), with plain-language task cards, step cues,
+  guidance-toned validation, and explained empty states. The sitting
+  also added the step-by-step publication and Convex-binding plan with
+  its five-item JB decision checklist, an RA-AI interaction options
+  note, and a deferred playbook for agent-autonomous external evidence
+  gathering (task #12). Publication, the Convex binding, and invites
+  remain deliberately unperformed — each is a JB-gated decision in
+  docs/development/workbench-publication-plan.md.
+
+- Bumped starlette to 1.3.1 across pyproject.toml, uv.lock, and
+  api/requirements.txt (dependabot #16; #15 closed as its subset).
+
 - Re-ranked the unbuilt country queue by attainable wave depth (JB
   rule: fetch all waves; three-plus-wave countries outrank) after a
   source-verification pass: Canada leads with five attainable waves,
