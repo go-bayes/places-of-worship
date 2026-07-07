@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
-import { taskBatchInput, taskInput, taskPriority, taskStatus, taskType } from "./model";
+import { taskBatchInput, taskInput, taskPriority, taskStatus, taskStatusValues, taskType } from "./model";
 import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser } from "./lib/auth";
 import {
   MEDIUM_TEXT_MAX,
@@ -105,10 +105,20 @@ export const listTasks = query({
         )
         .take(limit);
     } else {
-      tasks = await ctx.db
-        .query("tasks")
-        .filter((q) => q.eq(q.field("country_code"), args.countryCode))
-        .take(limit);
+      // per-status indexed reads keep every status bucket represented; a
+      // single prefix take would fill up on alphabetically-early statuses
+      const collected: Doc<"tasks">[] = [];
+      for (const status of taskStatusValues) {
+        collected.push(
+          ...(await ctx.db
+            .query("tasks")
+            .withIndex("by_country_status", (q) => q.eq("country_code", args.countryCode).eq("status", status))
+            .take(limit)),
+        );
+      }
+      tasks = collected
+        .sort((left, right) => left._creationTime - right._creationTime)
+        .slice(0, limit);
     }
 
     if (batchId !== undefined) {
@@ -127,11 +137,14 @@ async function latestDraftForTask(
   taskId: string,
   user: Doc<"users">,
 ): Promise<Doc<"evidence_drafts"> | null> {
-  const drafts = await ctx.db
+  // collect the task's drafts (indexed prefix bounds reads to one task) and
+  // sort in js: the index orders by draft_status before creation time, so a
+  // take() here would truncate by status, not recency
+  const drafts = (await ctx.db
     .query("evidence_drafts")
-    .filter((q) => q.eq(q.field("task_id"), taskId))
-    .order("desc")
-    .take(20);
+    .withIndex("by_task_status", (q) => q.eq("task_id", taskId))
+    .collect())
+    .sort((left, right) => right._creationTime - left._creationTime);
   if (canReview(user.roles)) {
     return drafts[0] ?? null;
   }

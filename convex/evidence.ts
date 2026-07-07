@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import type { MutationCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { evidenceDraftInput, taskBatchInput, taskInput } from "./model";
 import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser } from "./lib/auth";
@@ -63,11 +64,16 @@ export const listTaskEvidence = query({
     if (!canReview(user.roles)) {
       assertOwnsOrCanReview(user._id, user.roles, task.assigned_to);
     }
-    const drafts = await ctx.db
+    // collect the task's drafts (indexed prefix bounds reads to one task) and
+    // sort in js: the index orders by draft_status before creation time, so a
+    // take() here would truncate by status, not recency
+    const limit = Math.min(Math.max(args.limit ?? 50, 1), 200);
+    const drafts = (await ctx.db
       .query("evidence_drafts")
-      .filter((q) => q.eq(q.field("task_id"), args.taskId))
-      .order("desc")
-      .take(Math.min(Math.max(args.limit ?? 50, 1), 200));
+      .withIndex("by_task_status", (q) => q.eq("task_id", args.taskId))
+      .collect())
+      .sort((left, right) => right._creationTime - left._creationTime)
+      .slice(0, limit);
     return canReview(user.roles)
       ? drafts
       : drafts.filter((draft) => draft.created_by === user._id);
@@ -76,6 +82,30 @@ export const listTaskEvidence = query({
 
 function canReviewEvidence(user: Doc<"users">): boolean {
   return canReview(user.roles);
+}
+
+// marks the author's other active (submitted/unresolved_note) drafts on the
+// task as superseded so only one active submission exists per author; indexed
+// per-status reads cover every draft, however many the task holds
+async function supersedeOtherActiveDrafts(
+  ctx: MutationCtx,
+  draft: Doc<"evidence_drafts">,
+  now: number,
+): Promise<void> {
+  for (const status of ["submitted", "unresolved_note"] as const) {
+    const others = await ctx.db
+      .query("evidence_drafts")
+      .withIndex("by_task_status", (q) => q.eq("task_id", draft.task_id).eq("draft_status", status))
+      .collect();
+    for (const otherDraft of others) {
+      if (otherDraft._id !== draft._id && otherDraft.created_by === draft.created_by) {
+        await ctx.db.patch(otherDraft._id, {
+          draft_status: "superseded",
+          updated_at: now,
+        });
+      }
+    }
+  }
 }
 
 const closedTaskStatuses = new Set(["reviewed", "exported"]);
@@ -349,6 +379,91 @@ export const importSubmittedEvidenceDrafts = mutation({
   },
 });
 
+export const reviseEvidenceDraft = mutation({
+  args: {
+    taskId: v.string(),
+  },
+  returns: v.object({
+    task_id: v.string(),
+    previous_evidence_draft_id: v.string(),
+    evidence_draft_id: v.string(),
+    task_status: v.literal("in_progress"),
+  }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
+    const task = await getTaskOrThrow(ctx, args.taskId);
+    if (task.status !== "changes_requested") {
+      throw new Error("A revision can only start when the task status is changes_requested.");
+    }
+    // the task is the natural key from the RA UI; resolve the submitted
+    // version server-side so a stale client cannot clone the wrong draft
+    const submittedDrafts = await ctx.db
+      .query("evidence_drafts")
+      .withIndex("by_task_status", (q) => q.eq("task_id", args.taskId).eq("draft_status", "submitted"))
+      .collect();
+    const submittedDraft = submittedDrafts.sort((left, right) => right._creationTime - left._creationTime)[0] ?? null;
+    if (!submittedDraft) {
+      throw new Error("No submitted evidence draft found for this task.");
+    }
+    if (submittedDraft.created_by !== user._id && !canReview(user.roles)) {
+      throw new Error("Evidence draft belongs to another user.");
+    }
+
+    const now = Date.now();
+    const revisionDraftId = `${submittedDraft.task_id}:${submittedDraft.created_by}:revision:${now}`;
+    // import dedup keys stay on the original: the clone's content will be
+    // edited, so a carried-over content hash would lie about what it holds
+    const {
+      _id: _submittedRowId,
+      _creationTime: _submittedCreationTime,
+      evidence_draft_id: _submittedDraftId,
+      draft_status: _submittedDraftStatus,
+      created_at: _submittedCreatedAt,
+      updated_at: _submittedUpdatedAt,
+      source_claim_key: _submittedSourceClaimKey,
+      claim_hash: _submittedClaimHash,
+      import_batch_id: _submittedImportBatchId,
+      ...draftContent
+    } = submittedDraft;
+
+    await ctx.db.insert("evidence_drafts", {
+      ...draftContent,
+      evidence_draft_id: revisionDraftId,
+      draft_status: "draft",
+      created_at: now,
+      updated_at: now,
+    });
+    await ctx.db.patch(task._id, {
+      status: "in_progress",
+      assigned_to: task.assigned_to ?? submittedDraft.created_by,
+      claimed_by: task.claimed_by ?? submittedDraft.created_by,
+      claimed_at: task.claimed_at ?? now,
+      updated_at: now,
+      last_event_at: now,
+    });
+    await appendTaskEvent(ctx, {
+      taskId: submittedDraft.task_id,
+      eventType: "draft_saved",
+      actorUserId: user._id,
+      actorRole: chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]),
+      previousStatus: task.status,
+      newStatus: "in_progress",
+      evidenceDraftId: revisionDraftId,
+      reason: `Started revision from submitted draft ${submittedDraft.evidence_draft_id}.`,
+      clientContext: {
+        revision_of_evidence_draft_id: submittedDraft.evidence_draft_id,
+      },
+    });
+
+    return {
+      task_id: submittedDraft.task_id,
+      previous_evidence_draft_id: submittedDraft.evidence_draft_id,
+      evidence_draft_id: revisionDraftId,
+      task_status: "in_progress" as const,
+    };
+  },
+});
+
 export const submitEvidenceDraft = mutation({
   args: {
     evidenceDraftId: v.string(),
@@ -368,22 +483,7 @@ export const submitEvidenceDraft = mutation({
       draft_status: "submitted",
       updated_at: now,
     });
-    const otherDrafts = await ctx.db
-      .query("evidence_drafts")
-      .filter((q) => q.eq(q.field("task_id"), draft.task_id))
-      .take(100);
-    for (const otherDraft of otherDrafts) {
-      if (
-        otherDraft._id !== draft._id
-        && otherDraft.created_by === draft.created_by
-        && (otherDraft.draft_status === "submitted" || otherDraft.draft_status === "unresolved_note")
-      ) {
-        await ctx.db.patch(otherDraft._id, {
-          draft_status: "superseded",
-          updated_at: now,
-        });
-      }
-    }
+    await supersedeOtherActiveDrafts(ctx, draft, now);
     await ctx.db.patch(task._id, {
       status: "needs_review",
       updated_at: now,
@@ -425,22 +525,7 @@ export const submitUnresolvedNote = mutation({
       draft_status: "unresolved_note",
       updated_at: now,
     });
-    const otherDrafts = await ctx.db
-      .query("evidence_drafts")
-      .filter((q) => q.eq(q.field("task_id"), draft.task_id))
-      .take(100);
-    for (const otherDraft of otherDrafts) {
-      if (
-        otherDraft._id !== draft._id
-        && otherDraft.created_by === draft.created_by
-        && (otherDraft.draft_status === "submitted" || otherDraft.draft_status === "unresolved_note")
-      ) {
-        await ctx.db.patch(otherDraft._id, {
-          draft_status: "superseded",
-          updated_at: now,
-        });
-      }
-    }
+    await supersedeOtherActiveDrafts(ctx, draft, now);
     await ctx.db.patch(task._id, {
       status: "unresolved_note",
       updated_at: now,

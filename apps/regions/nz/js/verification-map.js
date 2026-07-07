@@ -1167,6 +1167,7 @@ class NzVerificationMap {
     renderMyWorkPanel(panel) {
         if (!this.backend?.configured || !this.backendUser) {
             panel.innerHTML = "";
+            this.renderChangesRequestedBadge(0);
             return;
         }
         const items = this.myWorkItems || [];
@@ -1175,10 +1176,12 @@ class NzVerificationMap {
         const submitted = items.filter(item => item.task?.status === "needs_review").length - revisionDrafts;
         const unresolved = items.filter(item => item.task?.status === "unresolved_note").length;
         const drafts = items.filter(item => item.task?.status === "draft_saved").length + revisionDrafts;
-        const needsMore = items.filter(item => item.task?.status === "changes_requested").length;
+        const changesRequested = items.filter(item => item.task?.status === "changes_requested");
+        const needsMore = changesRequested.length;
         const skipped = items.filter(item => item.task?.status === "skipped").length;
         const reviewed = items.filter(item => item.task?.status === "reviewed" || item.task?.status === "exported").length;
         panel.innerHTML = `
+            ${this.changesRequestedPanelHtml(changesRequested)}
             <details ${total > 0 ? "open" : ""}>
                 <summary>My work
                     <span class="ra-initials">${escapeHtml(`${total} item${total === 1 ? "" : "s"}: ${drafts} draft, ${submitted} submitted, ${unresolved} unresolved, ${needsMore} needs more evidence, ${skipped} skipped, ${reviewed} reviewed`)}</span>
@@ -1196,6 +1199,97 @@ class NzVerificationMap {
         panel.querySelectorAll(".my-work-open").forEach(btn => {
             btn.addEventListener("click", () => this.selectTaskById(btn.dataset.taskId, { focusDetail: true }));
         });
+        panel.querySelectorAll(".revise-now").forEach(btn => {
+            btn.addEventListener("click", () => this.reviseNow(btn.dataset.taskId, btn.closest(".changes-entry")));
+        });
+        this.renderChangesRequestedBadge(needsMore);
+    }
+
+    // pinned panel above My work; shows the reviewer's verbatim decision note and
+    // required follow-up for each changes_requested task, with a one-click path to
+    // an editable revision. renders nothing when there are no such tasks.
+    changesRequestedPanelHtml(items) {
+        if (!items || items.length === 0) return "";
+        return `
+            <section class="changes-panel" role="alert" aria-label="Changes requested">
+                <div class="changes-panel-head">Changes requested (${items.length})</div>
+                <div class="changes-entries" role="list">
+                    ${items.map(item => this.changesRequestedEntryHtml(item)).join("")}
+                </div>
+            </section>
+        `;
+    }
+
+    changesRequestedEntryHtml(item) {
+        const task = item.task || {};
+        const review = item.latestReview || {};
+        const taskId = task.task_id || "";
+        const note = review.decision_note
+            ? `<div class="changes-note"><span class="changes-label">Reviewer note</span>${escapeHtml(review.decision_note)}</div>`
+            : "";
+        const followUp = review.required_follow_up
+            ? `<div class="changes-note"><span class="changes-label">Required follow-up</span>${escapeHtml(review.required_follow_up)}</div>`
+            : "";
+        return `
+            <div class="changes-entry" role="listitem">
+                <span class="entry-title">${escapeHtml(task.name || "Unnamed site")}</span>
+                <span class="entry-meta">${escapeHtml(taskId)}</span>
+                ${note}
+                ${followUp}
+                <div class="changes-error" role="alert"></div>
+                <div class="entry-actions">
+                    <button type="button" class="revise-now" data-task-id="${escapeHtml(taskId)}">Revise now</button>
+                </div>
+            </div>
+        `;
+    }
+
+    // starts an editable revision for a changes_requested task via the new server
+    // mutation, then refreshes work state and opens the task for editing.
+    async reviseNow(taskId, entryEl) {
+        if (!taskId || !this.backend?.signedIn) return;
+        const button = entryEl?.querySelector(".revise-now");
+        const errorEl = entryEl?.querySelector(".changes-error");
+        if (errorEl) errorEl.textContent = "";
+        if (button) {
+            button.disabled = true;
+            button.textContent = "Starting revision...";
+        }
+        try {
+            await this.backend.reviseEvidenceDraft({ taskId });
+            await this.refreshBackendTasks();
+            this.selectTaskById(taskId, { focusDetail: true });
+            const status = document.getElementById("copyStatus");
+            if (status) {
+                status.textContent = "Editable revision draft ready. Update the evidence, then submit the revision for review when ready.";
+            }
+        } catch (error) {
+            if (button) {
+                button.disabled = false;
+                button.textContent = "Revise now";
+            }
+            if (errorEl) {
+                errorEl.textContent = error.message || "Could not start a revision. Try again.";
+            }
+        }
+    }
+
+    // count badge near sign-in; hidden when no changes_requested items remain.
+    renderChangesRequestedBadge(count) {
+        const host = document.getElementById("modeNotice");
+        if (!host) return;
+        let badge = document.getElementById("changesRequestedBadge");
+        if (!count) {
+            if (badge) badge.remove();
+            return;
+        }
+        if (!badge) {
+            badge = document.createElement("span");
+            badge.id = "changesRequestedBadge";
+            badge.className = "changes-badge";
+            host.appendChild(badge);
+        }
+        badge.textContent = `${count} change${count === 1 ? "" : "s"} requested`;
     }
 
     myWorkEntryHtml(item) {

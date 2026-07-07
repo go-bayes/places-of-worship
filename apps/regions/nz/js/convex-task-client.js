@@ -296,6 +296,12 @@
             return await this.request("mutation", "evidence:submitUnresolvedNote", args);
         }
 
+        async reviseEvidenceDraft(args) {
+            // clones the submitted draft into a new editable version and moves
+            // the task changes_requested -> in_progress; takes { taskId }
+            return await this.request("mutation", "evidence:reviseEvidenceDraft", args);
+        }
+
         async skipTask(args) {
             return await this.request("mutation", "tasks:skipTask", args);
         }

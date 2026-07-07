@@ -853,6 +853,101 @@
             font-weight: 700;
         }
 
+        .changes-panel {
+            margin-bottom: 12px;
+            padding: 10px 12px;
+            border: 1px solid var(--uncertain);
+            border-left-width: 4px;
+            border-radius: 5px;
+            background: var(--warning-bg);
+            color: var(--warning-ink);
+        }
+
+        .changes-panel-head {
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .changes-entries {
+            display: grid;
+            gap: 8px;
+        }
+
+        .changes-entry {
+            border: 1px solid var(--uncertain);
+            border-radius: 5px;
+            padding: 8px 10px;
+            background: #ffffff;
+            display: grid;
+            gap: 4px;
+            line-height: 1.4;
+        }
+
+        .changes-entry .entry-title {
+            font-weight: 700;
+            color: #17202a;
+        }
+
+        .changes-entry .entry-meta {
+            color: #5d6d7e;
+            font-size: 12px;
+        }
+
+        .changes-note {
+            font-size: 13px;
+            color: #17202a;
+            white-space: pre-wrap;
+        }
+
+        .changes-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--uncertain-ink);
+        }
+
+        .changes-error {
+            color: var(--danger);
+            font-size: 12px;
+        }
+
+        .changes-error:empty {
+            display: none;
+        }
+
+        .changes-entry .entry-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .changes-entry button.revise-now {
+            width: auto;
+            min-height: 44px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            background: var(--uncertain);
+            border-color: var(--uncertain);
+            color: #ffffff;
+        }
+
+        .changes-badge {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: var(--warning-bg);
+            color: var(--warning-ink);
+            border: 1px solid var(--uncertain);
+            font-size: 12px;
+            font-weight: 700;
+            vertical-align: middle;
+        }
+
         .session-buttons {
             display: flex;
             gap: 8px;
@@ -1074,8 +1169,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
-    <script src="js/convex-config.js?v=20260523-vanuatu"></script>
-    <script src="js/convex-task-client.js?v=20260523-vanuatu"></script>
-    <script src="js/verification-map.js?v=20260523-vanuatu"></script>
+    <script src="js/convex-config.js?v=20260707-changes-requested"></script>
+    <script src="js/convex-task-client.js?v=20260707-changes-requested"></script>
+    <script src="js/verification-map.js?v=20260707-changes-requested"></script>
 </body>
 </html>

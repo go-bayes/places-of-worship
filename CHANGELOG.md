@@ -4,6 +4,27 @@
 
 ### 2026-07-07
 
+- Built the ratified RA feedback and training designs
+  (docs/portal-ra-feedback-and-training.md). Guy's training workpack:
+  an internal seeder (`trainingSeed:seedGuyTrainingWorkpack`) creates
+  batch `guy-vu-training-001` with ten `[TRAINING]`-marked Vanuatu
+  cases covering every paid flow, each carrying its expected outcome
+  and reviewer checks; export bundling now enforces the training
+  exclusion rather than relying on naming convention. RA feedback
+  loop: a `reviseEvidenceDraft` mutation clones the submitted draft
+  into a new editable version (submitted versions stay immutable) and
+  moves the task changes-requested to in-progress with a task event;
+  the verification portal pins a "Changes requested" panel above My
+  work showing the reviewer's note and required follow-up verbatim
+  with a one-click Revise now button, plus a count badge by sign-in.
+  A reviewer-gated `feedbackLoopMetrics` query reports revision
+  turnaround from task events. The multi-agent review pass also
+  converted every remaining unindexed `.filter()` scan (evidence,
+  tasks, exports) to indexed lookups — completing the 16MB read-limit
+  fix — and corrected take-before-sort truncation, a
+  status-bucket-dropping country listing, and stale import dedup keys
+  on revision clones that the first conversion introduced.
+
 - Added the Claude batch-review lane (PR #18): before reviewers open
   the queue, an internal Convex action reviews each pending submission
   and appends a versioned, source-first AI recommendation (accept,

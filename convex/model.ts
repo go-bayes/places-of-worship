@@ -14,6 +14,22 @@ export const userStatus = v.union(
   v.literal("pending"),
 );
 
+// keep in step with the taskStatus validator below; used for per-status
+// indexed loops
+export const taskStatusValues = [
+  "open",
+  "in_progress",
+  "draft_saved",
+  "skipped",
+  "provisionally_closed",
+  "needs_review",
+  "unresolved_note",
+  "changes_requested",
+  "reviewed",
+  "exported",
+  "reopened",
+] as const;
+
 export const taskStatus = v.union(
   v.literal("open"),
   v.literal("in_progress"),

@@ -85,12 +85,14 @@ configuration before wider country rollout.
 | `importSubmittedEvidenceDrafts` | mutation | `admin`, `service` | Import spreadsheet-submitted rows as provisional tasks and submitted evidence drafts so they enter the reviewer queue. | `task_batches`, `tasks`, `evidence_drafts`, `task_events` |
 | `submitEvidenceDraft` | mutation | draft owner, `reviewer`, `curator`, `admin` | Submit a draft for reviewer attention and mark the task needs-review. | `evidence_drafts`, `tasks`, `task_events` |
 | `submitUnresolvedNote` | mutation | draft owner, `reviewer`, `curator`, `admin` | Submit useful but incomplete evidence for reviewer triage and mark the task unresolved-note. | `evidence_drafts`, `tasks`, `task_events` |
+| `reviseEvidenceDraft` | mutation | draft owner, `reviewer`, `curator`, `admin` | Clone a task's submitted draft into a new editable version and move the task changes-requested to in-progress; the submitted version stays immutable. | `evidence_drafts`, `tasks`, `task_events` |
 
 ## `reviews.ts`
 
 | Function | Kind | Roles | Purpose | Writes |
 | --- | --- | --- | --- | --- |
 | `listReviewQueue` | query | `reviewer`, `curator`, `admin` | List review-relevant tasks by status with latest draft evidence and latest review decision. | None |
+| `feedbackLoopMetrics` | query | `reviewer`, `curator`, `admin` | Report, per task, the time from a changes-requested event to the revision that answered it. | None |
 | `recordReviewDecision` | mutation | `reviewer`, `curator`, `admin` | Record accept, reject, needs-more-evidence, duplicate, or defer decisions and update task state. Decisions require a short size-limited note; accepted-for-export decisions require an evidence draft from the same task. | `review_decisions`, `tasks`, `evidence_drafts`, `task_events` |
 
 The review decision is not a master write. It becomes eligible for export only

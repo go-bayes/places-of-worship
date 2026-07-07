@@ -148,7 +148,7 @@ export const createExportBatch = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["curator", "admin"]);
     const now = Date.now();
-    const taskIds =
+    const requestedTaskIds =
       args.taskIds ??
       (
         await ctx.db
@@ -156,6 +156,19 @@ export const createExportBatch = mutation({
           .withIndex("by_country_status", (q) => q.eq("country_code", args.countryCode).eq("status", "reviewed"))
           .take(1000)
       ).map((task) => task.task_id);
+
+    // training tasks never enter an export bundle, even when named explicitly
+    const taskIds: string[] = [];
+    for (const taskId of requestedTaskIds) {
+      const task = await ctx.db
+        .query("tasks")
+        .withIndex("by_task_id", (q) => q.eq("task_id", taskId))
+        .unique();
+      if (task?.source_context?.training?.exclude_from_exports === true) {
+        continue;
+      }
+      taskIds.push(taskId);
+    }
 
     const reviewDecisionIds: string[] = [];
     for (const taskId of taskIds) {
@@ -269,7 +282,7 @@ export const getExportBundle = query({
       evidenceDrafts.push(
         ...(await ctx.db
           .query("evidence_drafts")
-          .filter((q) => q.eq(q.field("task_id"), taskId))
+          .withIndex("by_task_status", (q) => q.eq("task_id", taskId))
           .collect()),
       );
     }

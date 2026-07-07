@@ -143,6 +143,82 @@ export const listReviewQueue = query({
   },
 });
 
+export const feedbackLoopMetrics = query({
+  args: {
+    limit: v.optional(v.number()),
+  },
+  returns: v.array(
+    v.object({
+      task_id: v.string(),
+      changes_requested_event_id: v.string(),
+      revision_event_id: v.string(),
+      changes_requested_at: v.number(),
+      revision_started_at: v.number(),
+      revision_elapsed_ms: v.number(),
+      revision_evidence_draft_id: v.optional(v.string()),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    await requireUser(ctx, ["reviewer", "curator", "admin"]);
+    const limit = Math.min(Math.max(args.limit ?? 100, 1), 500);
+    const changesRequestedEvents = await ctx.db
+      .query("task_events")
+      .withIndex("by_event_type_time", (q) => q.eq("event_type", "changes_requested"))
+      .order("desc")
+      .take(limit);
+
+    const completedTaskIds = new Set<string>();
+    const rows = [];
+    for (const changesRequestedEvent of changesRequestedEvents) {
+      if (completedTaskIds.has(changesRequestedEvent.task_id)) {
+        continue;
+      }
+      const taskEvents = await ctx.db
+        .query("task_events")
+        .withIndex("by_task_time", (q) =>
+          q.eq("task_id", changesRequestedEvent.task_id).gte("occurred_at", changesRequestedEvent.occurred_at),
+        )
+        .order("asc")
+        .take(200);
+
+      let revisionEvent: Doc<"task_events"> | null = null;
+      for (const taskEvent of taskEvents) {
+        if (taskEvent.occurred_at <= changesRequestedEvent.occurred_at) {
+          continue;
+        }
+        // any actor role counts: reviseEvidenceDraft lets a reviewer or
+        // curator start the revision on the ra's behalf
+        if (
+          taskEvent.event_type === "draft_saved"
+          && taskEvent.previous_status === "changes_requested"
+          && taskEvent.new_status === "in_progress"
+        ) {
+          revisionEvent = taskEvent;
+          break;
+        }
+      }
+
+      if (revisionEvent === null) {
+        continue;
+      }
+      rows.push({
+        task_id: changesRequestedEvent.task_id,
+        changes_requested_event_id: changesRequestedEvent.event_id,
+        revision_event_id: revisionEvent.event_id,
+        changes_requested_at: changesRequestedEvent.occurred_at,
+        revision_started_at: revisionEvent.occurred_at,
+        revision_elapsed_ms: revisionEvent.occurred_at - changesRequestedEvent.occurred_at,
+        revision_evidence_draft_id: revisionEvent.evidence_draft_id,
+      });
+      completedTaskIds.add(changesRequestedEvent.task_id);
+      if (rows.length >= limit) {
+        break;
+      }
+    }
+    return rows;
+  },
+});
+
 export const recordReviewDecision = mutation({
   args: {
     taskId: v.string(),
