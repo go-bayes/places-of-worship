@@ -2,6 +2,40 @@
 
 ## Unreleased
 
+### 2026-07-09
+
+- Added the Portugal regional map: municipality census religion for
+  2011 and 2021 from INE database API indicators 0006396 and 0011644
+  (população residente aged 15+, CC BY 4.0), on DGT CAOP 2021
+  municipality boundaries (CC BY 4.0, 308 features, simplified to
+  1.39 MB at 100 m tolerance). Denominator is the stated-response
+  15+ population: 2011 excludes Não resposta; the 2021 API extract
+  exposes only stated categories, whose sum equals its Total exactly.
+  Validation: both waves reconcile to the national API rows with zero
+  difference on denominator, religious affiliation, and no religion;
+  join coverage 308/308. Detailed categories changed between waves and
+  are not crosswalked; the change layer uses the any-religion headline
+  only. 1981, 1991, and 2001 are deferred (no stable INE municipality
+  indicator found; recorded in the manifest's deferred sources).
+  Build: `scripts/build_pt_area_summary.R`; manifest
+  `docs/manifests/pt-census-religion-2011-2021.json`.
+- Added the Slovakia regional map: municipality and city-part census
+  religion for 2021 from SODB 2021 table Z01_15 (Statistical Office of
+  the Slovak Republic; 79 district JSON extracts plus the national
+  reconciliation row), on the SODB 2021 OB GeoJSON boundary layer
+  (2,927 reporting units, simplified to 2.57 MB at 200 m tolerance).
+  Denominator is the SODB published total population including
+  nezistené, flagged on every row. Validation: municipality sums equal
+  the national row exactly for total, religious affiliation, no
+  religion, and nezistené; join coverage 2,927/2,927 with no missing
+  or extra boundary codes. 1991, 2001, and 2011 subnational routes are
+  pinned but deferred (archived hyper-cube and DATAcube application
+  routes need a browser-driven extraction pass); no change layer ships
+  with a single wave. SODB pages carry no explicit licence statement —
+  attribution cites the Statistical Office; flag for licence review.
+  Build: `scripts/build_sk_area_summary.R`; manifest
+  `docs/manifests/sk-census-religion-2021.json`.
+
 ### 2026-07-08
 
 - Extended the Vanuatu map back to the 1967 first census and added a

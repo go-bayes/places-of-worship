@@ -16,6 +16,8 @@ Building historical datasets fit for scientific inferences is remarkably difficu
 - [Brazil regional map](https://www.placesmap.org/apps/regions/br/)
 - [Canada regional map](https://www.placesmap.org/apps/regions/ca/)
 - [Mexico regional map](https://www.placesmap.org/apps/regions/mx/)
+- [Portugal regional map](https://www.placesmap.org/apps/regions/pt/)
+- [Slovakia regional map](https://www.placesmap.org/apps/regions/sk/)
 - [United Kingdom regional map](https://www.placesmap.org/apps/regions/uk/)
 - [United States regional map](https://www.placesmap.org/apps/regions/us/)
 - [Vanuatu regional map](https://www.placesmap.org/apps/regions/vu/)
