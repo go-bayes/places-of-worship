@@ -80,10 +80,8 @@ document.title = RC.title;
     <button id="filters-clear" class="shell-pill" type="button" hidden aria-label="Clear filters"></button>
     <button id="near-me" class="shell-pill" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
   </div>
-  <!-- top-left row: the denomination key and the census control sit side by
-       side in one strip, each panel dropping below the shared button row -->
-  <div id="top-left-controls">
   <!-- top-left: the denomination key for the place dots -->
+  <div id="top-left-controls">
   <div id="key-wrap">
     <div id="counts-bar">
       <button id="counts-toggle" class="shell-pill" type="button" aria-controls="counts" aria-expanded="false">Show Denomination Key</button>
@@ -95,11 +93,14 @@ document.title = RC.title;
       <div class="count-total" id="countsTotal">Total: 0</div>
     </div>
   </div>
-  <!-- census data control: options, colour key and time slider; anchored in
-       the top-left strip beside the key (moved off top-centre) -->
+  </div>
+  <!-- census data control: options, colour key and time slider; front and
+       centre (jb 2026-07-09) now the top strip has room — the button matches
+       the key button's size idiom, with a short label on phones -->
+  <div id="top-center-controls">
   <div id="census-wrap">
     <button id="census-toggle" class="shell-pill" type="button" aria-controls="census-panel" aria-expanded="true">
-      <span>Census</span><span class="census-caret" aria-hidden="true">▴</span>
+      <span class="census-label-long">Show Census Data</span><span class="census-label-short">Census</span><span class="census-caret" aria-hidden="true">▴</span>
     </button>
     <div id="census-panel">
       <div id="census-options">

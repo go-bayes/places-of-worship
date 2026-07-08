@@ -90,11 +90,10 @@
 .census-table th:first-child, .census-table td:first-child { text-align: left; }
 .census-table th { color: #94a3b8; font-weight: 600; }
 .census-year-selected td { background: rgba(59, 130, 246, 0.18); }
-/* top-left control strip: the denomination key and the census control share
-   one fixed row in the top-left corner. moving census off top-centre stops
-   the centred panel colliding with the growing top-right cluster. the strip
-   is the positioned ancestor both drop-down panels anchor to, and it passes
-   clicks through its empty flanks so map interaction beneath is preserved. */
+/* top-left strip holds the denomination key; the census control sits front
+   and centre in its own fixed container (jb 2026-07-09 — the tidied top
+   strip has room again). both containers pass clicks through their empty
+   flanks so map interaction beneath is preserved. */
 #top-left-controls {
   position: fixed;
   left: var(--safe-left);
@@ -106,38 +105,67 @@
   gap: 8px;
   pointer-events: none;
 }
+#top-center-controls {
+  position: fixed;
+  left: 50%;
+  top: var(--safe-top);
+  transform: translateX(-50%);
+  z-index: 13;
+  pointer-events: none;
+}
+/* the top-right wordmark cluster is right-anchored and reaches the screen
+   centre below ~1150px; the census button slips one row down there so the
+   two never collide (the old 641-728px brush, generalised) */
+@media (max-width: 1150px) {
+  #top-center-controls { top: calc(var(--safe-top) + 38px); }
+}
 /* only the buttons and the two panels catch clicks; the flanks stay
    transparent so pans and taps reach the map */
 #top-left-controls button,
 #top-left-controls #counts,
-#top-left-controls #census-panel { pointer-events: auto; }
-/* key-wrap anchors its own panel; census-wrap stays unpositioned so its
-   panel anchors to the strip's left edge instead (see #census-panel) */
+#top-center-controls button,
+#top-center-controls #census-panel { pointer-events: auto; }
+/* each wrap anchors its own drop-down panel */
 #key-wrap { position: relative; }
-#census-wrap { position: static; }
+#census-wrap { position: relative; }
 /* buttons ride above the panels so both controls stay clickable even when a
    wide panel is open beneath them */
 #counts-bar, #census-toggle { position: relative; z-index: 20; }
 /* panels drop below the button row, taken out of flow so opening one never
    widens the row or shoves its neighbour sideways */
 #counts { position: absolute; top: 100%; left: 0; margin-top: 4px; }
-/* anchor the census panel to the strip's left edge (its unpositioned wrap
-   lets it resolve against the fixed container), so the wide census-long
-   variant stays fully on-screen at 360px however far right the button sits */
-#census-panel { position: absolute; top: 100%; left: 0; z-index: 12; }
-/* the census caret mirrors the Key button's disclosure idiom */
+/* the census panel centres under its button; translateX keeps the wide
+   census-long variant on-screen because the button itself is centred */
+#census-panel {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 12;
+}
+/* the census caret mirrors the Key button's disclosure idiom; the long
+   label matches the key button's size so the two primary controls carry
+   equal visual weight */
 #census-toggle {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   white-space: nowrap;
   cursor: pointer;
+  /* size parity with the key button (#counts-toggle in maplibre-flat.css):
+     same padding and type so the two primary controls read as peers */
+  padding: 7px 14px;
+  font-size: 14px;
+  letter-spacing: 0.01em;
 }
 .census-caret { color: #94a3b8; font-size: 12px; }
+.census-label-short { display: none; }
 @media (max-width: 640px) {
-  /* the top row is tight on phones: the key shrinks to its colour dots
-     beside the census control so the two buttons never collide */
+  /* the top row is tight on phones: the key shrinks to its colour dots and
+     the census button drops to its short label */
   #counts-toggle .key-label { display: none; }
+  .census-label-long { display: none; }
+  .census-label-short { display: inline; }
   #census-panel { width: min(300px, 76vw); }
 }
 
