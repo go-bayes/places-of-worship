@@ -9,6 +9,8 @@
         ca: { code: "CA", label: "Canada" },
         ie: { code: "IE", label: "Ireland" },
         mx: { code: "MX", label: "Mexico" },
+        pt: { code: "PT", label: "Portugal" },
+        sk: { code: "SK", label: "Slovakia" },
         uk: { code: "UK", label: "United Kingdom" },
         us: { code: "US", label: "United States" },
     };

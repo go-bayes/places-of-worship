@@ -11,6 +11,8 @@ export const DEFAULT_TARGET_YEARS: Record<string, number[]> = {
   CA: [2001, 2011, 2021],
   IE: [2011, 2016, 2022],
   MX: [2000, 2010, 2020],
+  PT: [2011, 2021],
+  SK: [2021],
   UK: [2001, 2011, 2021],
   US: [2000, 2010, 2020],
 };
