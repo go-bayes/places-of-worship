@@ -18,6 +18,16 @@
 | Statistics Canada, 2001 Census tabulation `95F0450XCB2001006` | census religious affiliation, 20 percent sample | census division | 2001 | web table and XML full table | open | Statistics Canada Open Licence |
 | Statistics Canada historical census volumes | census religious affiliation | varies; province or county-equivalent extraction likely | 1871 onward where asked | scanned volumes or PDFs | open | confirm volume-level terms |
 
+## Access the data yourself
+
+This project does not redistribute source data; the map shows derived rates with attribution. To obtain the data from the source of record:
+
+- **Source of record**: Statistics Canada, <https://www12.statcan.gc.ca/census-recensement/2021/dp-pd/prof/details/download-telecharger/comp/GetFile.cfm?Lang=E&FILETYPE=CSV&GEONO=005>, with 2011 and 2001 source URLs listed in the manifest.
+- **Exact tables**: 2021 Census Profile religion topic (source table identifier absent; see manifest `docs/manifests/ca-census-religion-2001-2021.json`), 2011 National Household Survey Profile `CTLG=99-004-XWE2011001`, and 2001 Census tabulation `95F0450XCB2001006`.
+- **Licence**: Statistics Canada Open Licence. Contains information licensed under the Statistics Canada Open Licence; adapted products do not constitute an endorsement by Statistics Canada. https://www.statcan.gc.ca/en/reference/licence
+- **Our extraction script**: `scripts/build_ca_area_summary.R`.
+- **Retrieval recipe and hashes**: `docs/manifests/ca-census-religion-2001-2021.json`.
+
 ## Boundaries
 
 - Official boundary files: Statistics Canada 2021, 2011, and 2001

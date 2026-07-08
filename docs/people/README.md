@@ -30,6 +30,8 @@ facts set the policy:
   collaborator.
 - Engineering and agents: `docs/development/`, `docs/playbooks/`,
   `AGENTS.md` (unchanged homes).
+- `docs/people/research-tier-onboarding.md` — how team members join the
+  private research tier (repo + data bucket); membership is JB's grant.
 
 Each directory's README is the entry point; deeper documents live
 alongside. When instructions change, change the document — do not rely

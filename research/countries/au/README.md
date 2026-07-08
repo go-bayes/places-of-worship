@@ -19,6 +19,16 @@
 | Australian Bureau of Statistics (ABS), Census General Community Profile DataPacks, table `G14` | census religious affiliation | SA2 built first | 2016 and 2021 built; 2011 deferred | ZIP of CSV files plus metadata | open | ABS DataPacks are licensed under Creative Commons Attribution 4.0; ABS website copyright terms; attribute ABS |
 | ABS, historical census volumes, `2112.0 Census of the Commonwealth of Australia, 1911` and later volumes | census religious affiliation | varies by volume; usually state or larger historical areas | 1911 onward | PDF or scanned statistical volumes | open | ABS or public-domain historical reporting; confirm per volume |
 
+## Access the data yourself
+
+This project does not redistribute source data; the map shows derived rates with attribution. To obtain the data from the source of record:
+
+- **Source of record**: Australian Bureau of Statistics, <https://www.abs.gov.au/census/find-census-data/datapacks/download/2021_GCP_SA2_for_AUS_short-header.zip>, with related DataPacks and ASGS files listed in the manifest.
+- **Exact tables**: ABS Census General Community Profile table `G14`; source IDs `abs-2021-gcp-g14-sa2-aus`, `abs-2021-gcp-g14-ste-aus`, `abs-2021-gcp-g14-aus-aus`, `abs-2016-gcp-g14-sa2-aus`, `abs-2016-gcp-g14-ste-aus`, `abs-2016-gcp-g14-au-aus`, and `abs-cg-sa2-2016-sa2-2021`.
+- **Licence**: Australian Bureau of Statistics DataPacks are licensed under Creative Commons Attribution 4.0. ABS data used with permission from the Australian Bureau of Statistics. The ASGS Edition 3 SA2 2016 to 2021 correspondence is licensed under Creative Commons Attribution 4.0. ASGS Edition 3 SA2 boundaries are credited to the Australian Bureau of Statistics under ABS website copyright terms.
+- **Our extraction script**: `scripts/build_au_area_summary.R`.
+- **Retrieval recipe and hashes**: `docs/manifests/au-census-religion-2016-2021.json`.
+
 ## Boundaries
 
 - Official boundary files: ABS Australian Statistical Geography Standard

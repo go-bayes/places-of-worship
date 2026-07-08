@@ -53,6 +53,17 @@ records dataset codes, table codes, shapefile codes, retrieval date,
 downloaded ZIP hashes, the IPUMS NHGIS citation, and JB's licence
 position. Raw NHGIS ZIPs are not committed.
 
+## Access the data yourself
+
+This project does not redistribute source data; the map shows derived rates with attribution. To obtain the data from the source of record:
+
+- **Source of record**: IPUMS NHGIS, University of Minnesota, <https://api.ipums.org/metadata/nhgis/datasets/1850_cPAX?version=2>; Association of Religion Data Archives (ARDA), <https://www.thearda.com/data-archive?fid=CMS52CNT>.
+- **Exact tables**: NHGIS datasets `1850_cPAX`/`ds10`, `1860_cPAX`/`ds14`, `1870_cPAX`/`ds17`, `1890_cRelig`/`ds28`, `1906_cRelig`/`ds33`, `1916_cRelig`/`ds41`, `1926_cRelig`/`ds51`, and `1936_cRelig`/`ds74`; RCMS/ARDA county files `CMS52CNT`, `CMS71CNT`, `CMS80CNT`, `CMS90CNT`, `RCMSCY`, `RCMSCY10`, and `RCMSCY20`.
+- **Licence**: NHGIS: derived rates are published with citation and a pointer to the original NHGIS data, per the project ruling recorded in the manifest (`licence_position`); IPUMS's licensing reply is pending. RCMS: ARDA click-through research-use terms for source workbooks; U.S. Census Bureau boundary files public domain. Derived products attribute ARDA, the original studies, and the U.S. Census Bureau.
+- **Our extraction scripts**: `scripts/build_us_nhgis_deep_past.R` and `scripts/build_us_area_summary.R`.
+- **Retrieval recipe and hashes**: `docs/manifests/us-nhgis-county-1850-1936.json` and `docs/manifests/us-rcms-county-1952-2020.json`.
+- **Restricted extracts**: NHGIS source extracts live in the project's private research tier and are not redistributed; the retrieval recipe remains public.
+
 ## Boundaries
 
 - The existing `county` level remains the 2020 U.S. Census Bureau county

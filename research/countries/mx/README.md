@@ -18,6 +18,16 @@
 | INEGI 2010 Census ITER CSV, <https://www.inegi.org.mx/programas/ccpv/2010/> | census affiliation | locality | 2010 | CSV zip | open | INEGI terms |
 | INEGI 2000 Census ITER CSV, <https://www.inegi.org.mx/programas/ccpv/2000/> | census affiliation | locality | 2000 | CSV zip | open | INEGI terms |
 
+## Access the data yourself
+
+This project does not redistribute source data; the map shows derived rates with attribution. To obtain the data from the source of record:
+
+- **Source of record**: Instituto Nacional de Estadistica y Geografia (INEGI), <https://www.inegi.org.mx/contenidos/programas/ccpv/2020/datosabiertos/iter/iter_00_cpv2020_csv.zip>, <https://www.inegi.org.mx/contenidos/programas/ccpv/2010/datosabiertos/iter_nal_2010_csv.zip>, and <https://www.inegi.org.mx/contenidos/programas/ccpv/2000/datosabiertos/cgpv2000_iter_00_csv.zip>.
+- **Exact tables**: `inegi-cpv-2020-iter-locality`, `inegi-cpv-2010-iter-locality`, `inegi-cgpv-2000-iter-locality`, and `inegi-marco-geoestadistico-cpv2020-municipal`; 2020 field set `PCATOLICA`, `PRO_CRIEVA`, `POTRAS_REL`, `PSIN_RELIG`.
+- **Licence**: INEGI open downloads subject to INEGI terms at https://www.inegi.org.mx/inegi/terminos.html and product/source attribution. The Marco Geoestadistico CPV 2020 product page marks SHP downloads with INEGI's data-open standard.
+- **Our extraction script**: `scripts/build_mx_area_summary.R`.
+- **Retrieval recipe and hashes**: `docs/manifests/mx-census-religion-2000-2020.json`.
+
 ## Boundaries
 
 - Official boundary files: INEGI Marco Geoestadistico municipal and locality products, <https://www.inegi.org.mx/temas/mg/>; geoBoundaries MEX ADM2 is a fallback.

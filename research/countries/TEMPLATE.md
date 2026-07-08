@@ -22,6 +22,19 @@ attendance counts, adherents, and congregation directories measure
 different things. Name the construct for every source and never merge
 constructs in one map layer.
 
+## Access the data yourself
+
+This project does not redistribute source data; the map shows derived
+rates with attribution. To obtain the data from the source of record:
+
+- **Source of record**: {statistical office, portal URL}
+- **Exact tables**: {table identifiers as the source names them}
+- **Licence**: {licence name and what it permits, one line}
+- **Our extraction script**: {`scripts/…` path — public code that turns
+  the source tables into the map's `area_summary` product}
+- **Retrieval recipe and hashes**: {`docs/manifests/…` — URLs, retrieval
+  steps, and SHA-256s for every object used}
+
 ## Boundaries
 
 - Official boundary files: {source, licence} or geoBoundaries ADM{n}.

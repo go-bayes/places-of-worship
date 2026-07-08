@@ -18,6 +18,16 @@
 | CSO, Census 2022 Profile 5 interactive census map | census religious affiliation | Small Area for 2022 exploration | 2022 | web app and table export route | open | CSO copyright and re-use policy; attribute CSO |
 | CSO, Census 1926 Volume 3, Table 09, counties 1861-1926 | census religious affiliation | county and county borough | 1861, 1871, 1881, 1891, 1901, 1911, 1926 | image-only PDF table | open | CSO copyright and re-use policy; attribute CSO |
 
+## Access the data yourself
+
+This project does not redistribute source data; the map shows derived rates with attribution. To obtain the data from the source of record:
+
+- **Source of record**: Central Statistics Office (CSO), Ireland; Tailte Éireann, <https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/F5051/CSV/1.0/en>.
+- **Exact tables**: CSO PxStat `F5051`, `tailte-administrative-areas-2019`, and deferred CSO Census 1926 Volume 3 `Table 09` (`cso-census-1926-volume3-table09-counties-1861-1926`).
+- **Licence**: CSO statistics are Government of Ireland copyright and licensed under Creative Commons Attribution 4.0; reproduction is authorised subject to acknowledgement of the source. Tailte Éireann open data are licensed under Creative Commons Attribution 4.0.
+- **Our extraction script**: `scripts/build_ie_area_summary.R`.
+- **Retrieval recipe and hashes**: `docs/manifests/ie-census-religion-2011-2022.json`.
+
 ## Boundaries
 
 - Official boundary files: Tailte Eireann and CSO national statistical

@@ -18,6 +18,16 @@ England and Wales, Scotland, and Northern Ireland.
 - **Default metric**: religious-affiliation percent among people with a stated
   current-religion response.
 
+## Access the data yourself
+
+This project does not redistribute source data; the map shows derived rates with attribution. To obtain the data from the source of record:
+
+- **Source of record**: Office for National Statistics via Nomis, <https://www.nomisweb.co.uk/api/v01/dataset/nm_2049_1.bulk.csv?time=latest&measures=20100&c2021_religion_10=0,1,9&geography=TYPE154>; Northern Ireland Statistics and Research Agency, <https://www.nisra.gov.uk/system/files/statistics/census-2021-ms-b19.xlsx>; other UK source URLs are listed in the manifest.
+- **Exact tables**: Nomis `C2021TS030` / `TS030`, `KS209EW`, and `KS007`; NISRA `MS-B19`; Scotland 2001/2011/2022 and Northern Ireland 2001/2011 extraction routes are pending in the manifest.
+- **Licence**: Contains public sector information licensed under the Open Government Licence v3.0.
+- **Our extraction script**: `scripts/build_uk_area_summary.R`.
+- **Retrieval recipe and hashes**: `docs/manifests/uk-census-religion-2001-2022.json`.
+
 ## England and Wales
 
 ### Status
