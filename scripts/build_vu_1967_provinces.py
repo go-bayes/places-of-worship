@@ -8,17 +8,18 @@
 # religion_label_normalised, count) so scripts/build_vu_area_summary.R can
 # consume it exactly like the 1999/2009/2020 extracts.
 #
-# input:  data/VAN/religion_proportion_by_island_1967.xlsx (committed)
+# input:  apps/regions/vu/data/source/vu_religion_by_island_1967_mcarthur_tableA.csv
+#         (the digitised Table A, committed: island x denomination per-1,000
+#         rates plus aged-15+ totals; small public-census source kept in git so
+#         it cannot be lost to an ignored working folder)
 # output: data/raw/vu_census_extracts/vu_religion_by_province_1967_mcarthur_tableA.csv
-# run from the repo root: uv run --with openpyxl python3 scripts/build_vu_1967_provinces.py
+# run from the repo root: uv run python3 scripts/build_vu_1967_provinces.py
 
 import csv
 import os
 from collections import defaultdict
 
-import openpyxl
-
-XLSX = "data/VAN/religion_proportion_by_island_1967.xlsx"
+SRC = "apps/regions/vu/data/source/vu_religion_by_island_1967_mcarthur_tableA.csv"
 OUT = "data/raw/vu_census_extracts/vu_religion_by_province_1967_mcarthur_tableA.csv"
 
 # per-1,000 columns of Table A, in sheet order, mapped to the project's
@@ -80,23 +81,22 @@ CITATION_LABEL = {norm: src for src, norm in CATEGORIES}
 
 
 def read_islands():
-    # returns list of (island_name, pop15, {normalised_label: per_1000_rate})
-    wb = openpyxl.load_workbook(XLSX, data_only=True)
-    ws = wb["Sheet1"]
-    rows = list(ws.iter_rows(values_only=True))
+    # returns list of (island_name, pop15, {normalised_label: per_1000_rate}).
+    # the csv carries one row per island with the normalised denomination
+    # columns and the aged-15+ total; the "New Hebrides" row is the national
+    # total, held out for validation
     islands = []
     national = None
-    # data begins after the header row (index 4); columns 1..9 are the rate
-    # columns in CATEGORIES order, column 10 is the aged-15+ total
-    for r in rows[5:]:
-        if not r or r[0] is None:
-            continue
-        name = str(r[0]).strip()
-        rec = (name, r[10] or 0, {norm: (r[1 + i] or 0) for i, (_, norm) in enumerate(CATEGORIES)})
-        if name == "New Hebrides":
-            national = rec
-        else:
-            islands.append(rec)
+    with open(SRC, newline="") as f:
+        for row in csv.DictReader(f):
+            name = row["island"].strip()
+            pop15 = int(row["total_aged_15_plus"])
+            rates = {norm: int(row[norm]) for _, norm in CATEGORIES}
+            rec = (name, pop15, rates)
+            if name == "New Hebrides":
+                national = rec
+            else:
+                islands.append(rec)
     return islands, national
 
 
