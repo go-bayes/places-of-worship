@@ -76,6 +76,18 @@ product.
   and sample-design differences need a source-era label.
 - Very small census subdivisions may have suppression or high sampling error;
   Canada currently ships at CD for all built waves.
+- 1981/1991 backfill (pinned 2026-07-09): religion tables are public on
+  Borealis under the Statistics Canada Open Licence — 1981 Basic Summary
+  Tabulations CSD level, DOI 10.5683/SP3/4GDC7D, table SDC81B16
+  "Population by religion (10) and sex (3)"; 1991 Basic Summary
+  Tabulations CSD level, DOI 10.5683/SP3/2LVKL9, 29-category religion
+  table (R9101 family). BLOCKED on a boundary-licence decision:
+  StatCan digital boundaries stop at 2001; the only workable period
+  boundaries (1981/1991 CD/CSD) are UNI-CEN (Western University, on
+  Borealis) under Custom Dataset Terms, not an open licence — needs
+  JB's documented licence review before build. Render on period
+  boundaries as the US map does; no 1981/1991→2021 correspondence
+  exists. Effort once unblocked: ~8-12 hours per wave.
 
 ## Deep-history potential
 

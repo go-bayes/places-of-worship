@@ -12,6 +12,11 @@ country-survey playbook; current authoritative record: changelog,
   first census (1967) onward — see
   `docs/playbooks/guy-vu-spreadsheets.md`; 1999 island rows await
   transcription; pre-1994 waves need the eleven-region crosswalk.
+- **Proposed (Guy, 2026-07-09)**: island-level estimates over time as
+  the longitudinal spine — ~66 inhabited islands, stable and
+  identifiable across all censuses 1967-2020, sidestepping area-council
+  and eleven-region boundary churn; design sketch and open questions in
+  the playbook's island-lane section.
 - **Deep-history potential**: mission archives (PAMBU, Presbyterian,
   Melanesian Mission, Marist), New Hebrides colonial records, National
   Archives of Vanuatu; kastom-site sensitivity is first-class in the

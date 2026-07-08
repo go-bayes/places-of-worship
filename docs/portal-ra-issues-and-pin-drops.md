@@ -58,3 +58,46 @@ have nowhere to go unless a task already exists.
   keyed to the portal's target-year selector; verified-state dot
   styling. Public verified layer deferred until the first frozen
   export product ships (JB-gated).
+
+## Point validation-status principle (JB, 2026-07-09)
+
+Every point is UNVALIDATED until validated. No point on any project
+surface may present as verified by default: OSM-snapshot dots, dated
+dots, imported candidates, and pin-drops all start unvalidated, and
+validation is earned only through the task workflow (RA evidence →
+reviewer decision → frozen export batch for the public "verified"
+tier, which stays JB-gated).
+
+Status vocabulary for colour coding — one scale, allowing intermediate
+and edge cases, to be worn by dots as a STATUS RING around the
+religion-coloured (or context-grey) fill so status never competes with
+the religion encoding:
+
+1. `unvalidated` — no human decision recorded. The default. Neutral
+   ring (current plain dot); never a "verified" visual.
+2. `in_review` — claimed or evidence submitted, awaiting a reviewer
+   decision (portal already styles task markers for this: white with
+   dashed blue border).
+3. `validated_present` — reviewer-accepted evidence that the site
+   exists/worships at the target year(s) (portal verified swatch
+   #2874a6 with double ring).
+4. `validated_absent` — reviewer-accepted evidence the site does NOT
+   exist (closed, demolished, never existed). An edge case the scale
+   must carry: this is a validation success, not a missing point; on
+   period surfaces the point drops out of its non-living years, on
+   review surfaces it renders with a distinct closed-ring treatment.
+5. `disputed` — open issue or unresolved note on a previously decided
+   point; drops visual trust back to an intermediate treatment until
+   re-reviewed.
+6. `stale_validation` — validated in a prior wave but not re-confirmed
+   in the current September census wave; intermediate ring so re-check
+   work is visible (denominator work for wave-on-wave change rates
+   depends on this state being explicit).
+
+Ergonomics rules: status ring + fill only (no shape changes that break
+at small radii); colourblind-safe ring hues distinct from the religion
+palette; a legend row per status wherever statuses render; statuses map
+1:1 onto task/export states already in Convex (no new UI-only states).
+Implementation lands with phase 6 verified-dot styling; the public map
+shows only `validated_present`/`validated_absent` from frozen exports,
+never intermediate states.
