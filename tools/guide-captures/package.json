@@ -1,0 +1,16 @@
+{
+  "name": "guide-captures",
+  "version": "1.0.0",
+  "description": "playwright walkthrough recorder behind apps/guides/. setup:",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "playwright": "^1.61.1"
+  }
+}

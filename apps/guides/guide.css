@@ -160,15 +160,6 @@ main {
   padding-left: 22px;
 }
 
-.video-frame {
-  margin: 18px 0 22px;
-  border: 1px solid var(--line-strong);
-  border-radius: 6px;
-  overflow: hidden;
-  background: #0f172a;
-}
-
-video,
 img {
   display: block;
   width: 100%;
@@ -279,9 +270,7 @@ footer p {
   }
 
   body::before,
-  .site-nav,
-  video,
-  .video-frame {
+  .site-nav {
     display: none;
   }
 

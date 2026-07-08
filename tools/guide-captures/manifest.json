@@ -20,8 +20,7 @@
         "file": "orientation/orientation-04.png",
         "caption": "Hovering a marker shows the task name, status, and last activity."
       }
-    ],
-    "video": "orientation/orientation.mp4"
+    ]
   },
   {
     "flow_id": "open-and-verify",
@@ -44,8 +43,7 @@
         "file": "open-and-verify/open-and-verify-04.png",
         "caption": "Answer the change-class question: genuine change is counted by the annual census; map corrections rewrite history."
       }
-    ],
-    "video": "open-and-verify/open-and-verify.mp4"
+    ]
   },
   {
     "flow_id": "submit-flow",
@@ -64,8 +62,7 @@
         "file": "submit-flow/submit-flow-03.png",
         "caption": "Open next task lands you in the next available task in your filtered list."
       }
-    ],
-    "video": "submit-flow/submit-flow.mp4"
+    ]
   },
   {
     "flow_id": "skip-and-undo",
@@ -88,8 +85,7 @@
         "file": "skip-and-undo/skip-and-undo-04.png",
         "caption": "Undo skip reopens the task and returns you to its detail panel."
       }
-    ],
-    "video": "skip-and-undo/skip-and-undo.mp4"
+    ]
   },
   {
     "flow_id": "report-issue",
@@ -112,8 +108,7 @@
         "file": "report-issue/report-issue-04.png",
         "caption": "If an open issue already exists for the place, your note is added to it instead."
       }
-    ],
-    "video": "report-issue/report-issue.mp4"
+    ]
   },
   {
     "flow_id": "pin-drop",
@@ -148,8 +143,7 @@
         "file": "pin-drop/pin-drop-07.png",
         "caption": "Creating the candidate lands you in its task, ready for the normal evidence flow."
       }
-    ],
-    "video": "pin-drop/pin-drop.mp4"
+    ]
   },
   {
     "flow_id": "revise-after-changes",
@@ -164,8 +158,7 @@
         "file": "revise-after-changes/revise-after-changes-02.png",
         "caption": "Revise now opens an editable revision of your submission with the task detail loaded."
       }
-    ],
-    "video": "revise-after-changes/revise-after-changes.mp4"
+    ]
   },
   {
     "flow_id": "history-and-provenance",
@@ -180,8 +173,7 @@
         "file": "history-and-provenance/history-and-provenance-02.png",
         "caption": "Hover any marker for the same provenance at a glance: name, status, last activity."
       }
-    ],
-    "video": "history-and-provenance/history-and-provenance.mp4"
+    ]
   },
   {
     "flow_id": "review-queue",
@@ -204,8 +196,7 @@
         "file": "review-queue/review-queue-04.png",
         "caption": "Recording the decision returns you to the queue for the next task."
       }
-    ],
-    "video": "review-queue/review-queue.mp4"
+    ]
   },
   {
     "flow_id": "ai-review-panel",
@@ -228,7 +219,6 @@
         "file": "ai-review-panel/ai-review-panel-04.png",
         "caption": "Use recommendation prefills the decision; Decide differently records disagreement — the note and Record button stay yours."
       }
-    ],
-    "video": "ai-review-panel/ai-review-panel.mp4"
+    ]
   }
 ]

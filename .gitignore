@@ -238,3 +238,7 @@ test_datasets/
 
 # the global gitignore excludes *.csv; source extracts in archive are project records
 !archive/statsnz-2023-census-totals-sa2/*.csv
+
+# guide-capture run artifacts: screenshots live on R2, reports are ephemeral
+tools/guide-captures/*/
+tools/guide-captures/_run-report.json

@@ -3,14 +3,12 @@
 // every visible datum is demo data (St Demo Church, task_demo_*); backend
 // calls are stubbed in-page or at the network layer, never live Convex.
 import { chromium } from "playwright";
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const OUT = path.dirname(fileURLToPath(import.meta.url));
 const BASE = "http://localhost:5182/apps/regions/nz";
-const FFMPEG = "/opt/homebrew/bin/ffmpeg";
 const manifest = [];
 const flowErrors = {};
 
@@ -511,14 +509,12 @@ async function runFlow(browser, flow) {
   const flowDir = path.join(OUT, flow.id);
   fs.rmSync(flowDir, { recursive: true, force: true });
   fs.mkdirSync(flowDir, { recursive: true });
+  // videos have been scrapped from the guides; capture stills only. the
+  // two-pane portal layout fills the 1280px frame, so the old left-1280 crop
+  // step is no longer needed — each screenshot is used as-is.
   const context = await browser.newContext({
     viewport: { width: 1280, height: 800 },
     deviceScaleFactor: 2,
-    // recordVideo must match the viewport: playwright's screencast captures at
-    // css-pixel size and PADS (grey) rather than upscales when asked for more,
-    // so 2560x1600 recording was tested and rejected — it yields quarter-frame
-    // content. sharpness is recovered in the mp4 encode (crf 18) instead.
-    recordVideo: { dir: path.join(flowDir, "_video"), size: { width: 1280, height: 800 } },
   });
   const page = await context.newPage();
   const errors = [];
@@ -539,17 +535,8 @@ async function runFlow(browser, flow) {
   } catch (error) {
     failure = String(error).split("\n")[0];
   }
-  const video = page.video();
   await context.close();
-  let videoFile = "";
-  if (video) {
-    const webm = await video.path();
-    videoFile = `${flow.id}/${flow.id}.mp4`;
-    // crf 18 + slow preset: keep map tiles and small labels legible in the guides
-    execFileSync(FFMPEG, ["-y", "-i", webm, "-c:v", "libx264", "-crf", "18", "-preset", "slow", "-pix_fmt", "yuv420p", "-movflags", "+faststart", path.join(flowDir, `${flow.id}.mp4`)], { stdio: "ignore" });
-    if (!process.env.KEEP_WEBM) fs.rmSync(path.join(flowDir, "_video"), { recursive: true, force: true });
-  }
-  manifest.push({ flow_id: flow.id, title: flow.title, audience: flow.audience, steps, video: videoFile });
+  manifest.push({ flow_id: flow.id, title: flow.title, audience: flow.audience, steps });
   flowErrors[flow.id] = { consoleErrors: errors, failure };
   console.log(`${flow.id}: ${steps.length} steps${failure ? ` FAILED: ${failure}` : ""}${errors.length ? ` consoleErrors: ${JSON.stringify(errors.slice(0, 3))}` : " console clean"}`);
 }
