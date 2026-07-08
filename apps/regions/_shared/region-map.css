@@ -127,7 +127,7 @@
    transparent so pans and taps reach the map */
 #top-left-controls button,
 #top-left-controls #counts,
-#top-center-controls button,
+#top-center-controls #data-pill,
 #top-center-controls #census-panel { pointer-events: auto; }
 /* each wrap anchors its own drop-down panel */
 #key-wrap { position: relative; }
