@@ -646,12 +646,13 @@ export const reopenTask = mutation({
     const task = await getTaskOrThrow(ctx, args.taskId);
     // ra-initiated reopens are limited to tasks under review or closed
     // pending review; reviewers/curators/admins may reopen any task
+    // exported tasks stay closed to ra reopens so export bookkeeping
+    // is undisturbed (JB ruling 2026-07-08)
     const raReopenable = new Set([
       "needs_review",
       "unresolved_note",
       "provisionally_closed",
       "reviewed",
-      "exported",
     ]);
     if (!canReview(user.roles) && !raReopenable.has(task.status)) {
       throw new Error("This task is not in a state a research assistant can reopen.");

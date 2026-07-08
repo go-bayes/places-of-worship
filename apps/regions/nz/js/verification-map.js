@@ -296,7 +296,6 @@ const REOPEN_ELIGIBLE_STATUSES = new Set([
     "unresolved_note",
     "provisionally_closed",
     "reviewed",
-    "exported",
 ]);
 const WIDE_EVIDENCE_FIELDS = [
     "evidence_row_id", "collection_batch", "country_code", "area_hint",
