@@ -323,6 +323,13 @@
             return await this.request("mutation", "tasks:createIssueTask", args);
         }
 
+        async reopenTask(args) {
+            // reopens a task that is under review or provisionally/closed
+            // pending review for another verification pass; takes
+            // { taskId, reason }
+            return await this.request("mutation", "tasks:reopenTask", args);
+        }
+
         async createManualCandidateTask(args) {
             // nominates a missing place of worship as an in-progress task in
             // the country's manual batch, assigned to the nominating ra

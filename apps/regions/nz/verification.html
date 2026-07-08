@@ -330,7 +330,8 @@
             gap: 6px;
         }
 
-        .link-grid a {
+        .link-grid a,
+        .link-grid button.coord-copy {
             border: 1px solid #d8dee4;
             border-radius: 5px;
             padding: 10px 8px;
@@ -339,6 +340,8 @@
             text-decoration: none;
             font-size: 14px;
             font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
             background: #ffffff;
             min-height: 44px;
             display: flex;
@@ -346,7 +349,8 @@
             justify-content: center;
         }
 
-        .link-grid a:hover {
+        .link-grid a:hover,
+        .link-grid button.coord-copy:hover {
             background: #f2f8fc;
         }
 
@@ -377,10 +381,15 @@
             text-decoration: none;
             font-size: 13px;
             font-weight: 700;
+            font-family: inherit;
             background: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        .popup-actions button.popup-link {
+            cursor: pointer;
         }
 
         /* low-prominence issue entry: quiet text button under the pair */
@@ -1173,8 +1182,8 @@
         }
 
         .legend-dot.context-dot-swatch {
-            background: rgba(148, 163, 184, 0.6);
-            border: 1px solid #64748b;
+            background: rgba(100, 116, 139, 0.75);
+            border: 1px solid #475569;
             width: 8px;
             height: 8px;
         }

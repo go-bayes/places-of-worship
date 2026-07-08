@@ -640,8 +640,22 @@ export const reopenTask = mutation({
     status: v.literal("reopened"),
   }),
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx, ["reviewer", "curator", "admin"]);
+    // RAs can reopen from the map's context-dot inspection flow, alongside
+    // reviewers/curators/admins (portal feature, 2026-07-08)
+    const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
+    // ra-initiated reopens are limited to tasks under review or closed
+    // pending review; reviewers/curators/admins may reopen any task
+    const raReopenable = new Set([
+      "needs_review",
+      "unresolved_note",
+      "provisionally_closed",
+      "reviewed",
+      "exported",
+    ]);
+    if (!canReview(user.roles) && !raReopenable.has(task.status)) {
+      throw new Error("This task is not in a state a research assistant can reopen.");
+    }
     const now = Date.now();
     await ctx.db.patch(task._id, {
       status: "reopened",
@@ -652,7 +666,7 @@ export const reopenTask = mutation({
       taskId: args.taskId,
       eventType: "reopened",
       actorUserId: user._id,
-      actorRole: chooseActorRole(user, ["reviewer", "curator", "admin"]),
+      actorRole: chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]),
       previousStatus: task.status,
       newStatus: "reopened",
       reason: args.reason,

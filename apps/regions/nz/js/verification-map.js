@@ -289,6 +289,15 @@ const READ_ONLY_ASSIGNMENT_STATUSES = new Set([
     "reviewed",
     "exported",
 ]);
+// statuses where a matched context-dot task can be reopened for another
+// pass: under review or closed pending review (never already open/active)
+const REOPEN_ELIGIBLE_STATUSES = new Set([
+    "needs_review",
+    "unresolved_note",
+    "provisionally_closed",
+    "reviewed",
+    "exported",
+]);
 const WIDE_EVIDENCE_FIELDS = [
     "evidence_row_id", "collection_batch", "country_code", "area_hint",
     "source_dataset_id", "source_type", "provider", "source_title",
@@ -1011,6 +1020,14 @@ function streetViewUrlForCoordinates(coordinates) {
     if (!Array.isArray(coordinates) || coordinates.length < 2) return "";
     const [lng, lat] = coordinates;
     return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${encodeURIComponent(`${lat},${lng}`)}`;
+}
+
+// osm "show this point" deep link, matching the public map's popup action
+// row (region-map.js:916): lat/lng to 5 dp
+function osmPointUrl(lat, lng) {
+    const latFixed = Number(lat).toFixed(5);
+    const lngFixed = Number(lng).toFixed(5);
+    return `https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}`;
 }
 
 function featureFromBackendTask(task) {
@@ -1787,16 +1804,175 @@ class NzVerificationMap {
         show.forEach(feature => {
             const coords = feature.geometry?.coordinates || [];
             if (coords.length < 2) return;
-            this.contextDotLayer.addLayer(L.circleMarker([coords[1], coords[0]], {
-                radius: 3,
-                color: "#64748b",
+            // legible but subordinate to task markers: a touch larger and
+            // darker than before, and now interactive so each dot opens the
+            // shared action row plus an issue/reopen entry
+            const dot = L.circleMarker([coords[1], coords[0]], {
+                radius: 4,
+                color: "#475569",
                 weight: 1,
-                fillColor: "#94a3b8",
-                fillOpacity: 0.45,
-                opacity: 0.6,
-                interactive: false,
-            }));
+                fillColor: "#64748b",
+                fillOpacity: 0.65,
+                opacity: 0.85,
+                interactive: true,
+            });
+            dot.bindPopup(() => this.contextDotPopupHtml(feature), { maxWidth: 320 });
+            dot.on("popupopen", event => this.bindContextDotPopup(event.popup, feature));
+            this.contextDotLayer.addLayer(dot);
         });
+    }
+
+    // matches a dated context feature to a loaded portal task: first by OSM
+    // id (against loaded task features, then backend tasks), then by exact
+    // 5 dp coordinate. Returns the task props (carrying task_id) or null.
+    matchContextTask(feature) {
+        const props = feature.properties || {};
+        const osmId = props.osm_id !== undefined && props.osm_id !== null ? String(props.osm_id) : "";
+        const osmType = props.osm_type ? String(props.osm_type) : "";
+        const coords = feature.geometry?.coordinates || [];
+        if (osmId) {
+            // ids alone collide across osm object types (node/123 vs way/123),
+            // so require the type to agree whenever both sides carry one
+            const byFeature = this.tasks.find(f => {
+                const p = f.properties || {};
+                if (String(p.osm_id || "") !== osmId) return false;
+                const t = p.osm_type ? String(p.osm_type) : "";
+                return !osmType || !t || t === osmType;
+            });
+            if (byFeature) return byFeature.properties;
+            for (const task of this.backendTasksById.values()) {
+                if (String(task.matched_osm_id || "") === osmId) {
+                    return featureFromBackendTask(task).properties;
+                }
+            }
+        }
+        if (coords.length >= 2) {
+            const key = `${Number(coords[1]).toFixed(5)},${Number(coords[0]).toFixed(5)}`;
+            const byCoord = this.tasks.find(f => {
+                const c = f.geometry?.coordinates || [];
+                return c.length >= 2 && `${Number(c[1]).toFixed(5)},${Number(c[0]).toFixed(5)}` === key;
+            });
+            if (byCoord) return byCoord.properties;
+        }
+        return null;
+    }
+
+    // popup for an interactive context dot: name, coords, the shared action
+    // row (Street View / Open OSM / Copy coords), and an issue entry that
+    // reopens a matched under-review task or files a fresh issue report
+    contextDotPopupHtml(feature) {
+        const props = feature.properties || {};
+        const coords = feature.geometry?.coordinates || [];
+        const lat = Number(coords[1]);
+        const lng = Number(coords[0]);
+        const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
+        const name = props.name || "Unnamed place";
+        const coordStr = hasCoords ? `${lat.toFixed(5)},${lng.toFixed(5)}` : "";
+        const matched = this.matchContextTask(feature);
+        const matchedTaskId = matched?.task_id || "";
+        const backendTask = matchedTaskId ? this.backendTasksById.get(matchedTaskId) : null;
+        const canReopen = Boolean(backendTask && REOPEN_ELIGIBLE_STATUSES.has(backendTask.status));
+        let issueButton;
+        if (matchedTaskId && canReopen) {
+            issueButton = `<button class="popup-report-issue" type="button" data-reopen-task-id="${escapeHtml(matchedTaskId)}">Reopen issue</button>`;
+        } else if (matchedTaskId) {
+            // matched a task not in a reopenable state: route into its issue form
+            issueButton = `<button class="popup-report-issue" type="button" data-open-task-id="${escapeHtml(matchedTaskId)}">Report an issue here</button>`;
+        } else {
+            issueButton = `<button class="popup-report-issue" type="button" data-report-issue="1">Report an issue here</button>`;
+        }
+        return `
+            <strong>${escapeHtml(name)}</strong><br>
+            <span>${escapeHtml(coordStr)}</span><br>
+            <div class="popup-actions">
+                ${hasCoords ? `
+                ${this.linkHtml("Street View", streetViewUrlForCoordinates(coords), "popup-link")}
+                <a class="popup-link" href="${escapeHtml(osmPointUrl(lat, lng))}" target="_blank" rel="noopener noreferrer">Open OSM</a>
+                <button class="popup-link popup-copy-coords" type="button" data-copy="${escapeHtml(coordStr)}">Copy coords</button>` : ""}
+                ${issueButton}
+            </div>
+        `;
+    }
+
+    bindContextDotPopup(popup, feature) {
+        const el = popup.getElement();
+        if (!el) return;
+        this.bindCopyCoords(el);
+        el.querySelector("[data-reopen-task-id]")?.addEventListener("click", (event) => {
+            this.reopenIssueFromContext(event.currentTarget.dataset.reopenTaskId, feature);
+        });
+        el.querySelector("[data-open-task-id]")?.addEventListener("click", (event) => {
+            const taskId = event.currentTarget.dataset.openTaskId;
+            this.issueFormOpenTaskId = taskId;
+            this.map.closePopup();
+            this.selectTaskById(taskId, { focusDetail: true });
+        });
+        el.querySelector("[data-report-issue]")?.addEventListener("click", () => {
+            this.openContextIssueForm(feature);
+        });
+    }
+
+    // routes an unmatched (or non-reopenable) context dot into the existing
+    // standalone issue form, pre-filled with the place name and coordinates.
+    // Reuses issueFormHtml/bindIssueForm, so signed-out degrades the same way
+    // (disabled submit plus a sign-in prompt).
+    openContextIssueForm(feature) {
+        const props = feature.properties || {};
+        const coords = feature.geometry?.coordinates || [];
+        const context = {
+            taskId: "",
+            name: props.name || "",
+            latitude: Number(coords[1]),
+            longitude: Number(coords[0]),
+            siteId: undefined,
+            osmId: props.osm_id !== undefined && props.osm_id !== null ? String(props.osm_id) : undefined,
+        };
+        const panel = document.getElementById("detailPanel");
+        if (!panel) return;
+        this.map.closePopup();
+        const hasCoords = Number.isFinite(context.latitude) && Number.isFinite(context.longitude);
+        panel.innerHTML = `
+            <h2>Report an issue</h2>
+            <div class="pilot-note" role="note">
+                Reporting an issue for <strong>${escapeHtml(context.name || "an unnamed place")}</strong>${hasCoords ? ` at ${context.latitude.toFixed(5)}, ${context.longitude.toFixed(5)}` : ""}.
+            </div>
+            ${this.issueFormHtml(context, { open: true })}
+        `;
+        this.bindIssueForm(context);
+        this.bindCopyCoords(panel);
+        this.focusDetailPanel();
+    }
+
+    // reopens a matched under-review/closed task through the existing
+    // reopenTask mutation, then refreshes the task list and lands on it.
+    // Signed-out or misconfigured backends fall back to the issue form.
+    async reopenIssueFromContext(taskId, feature) {
+        if (!this.backend?.configured || !this.backend.signedIn) {
+            this.openContextIssueForm(feature);
+            return;
+        }
+        this.map.closePopup();
+        try {
+            await this.backend.reopenTask({
+                taskId,
+                reason: "Reopened from map context-dot inspection.",
+            });
+            // drop the cached history so the new reopened event shows
+            this.taskHistoryByTaskId.delete(taskId);
+            await this.refreshBackendTasks();
+            this.applyFilters();
+            this.selectTaskById(taskId, { focusDetail: true });
+        } catch (error) {
+            if (error.authExpired) {
+                this.backendUser = null;
+                this.backendLastError = error.message;
+                this.renderBackendPanel();
+            }
+            // land on the task so the reviewer sees its state and the error
+            this.selectTaskById(taskId, { focusDetail: true });
+            const status = document.getElementById("copyStatus");
+            if (status) status.textContent = `${error.message || "Could not reopen the task."}`;
+        }
     }
 
     setupPageMode() {
@@ -2050,7 +2226,7 @@ class NzVerificationMap {
             });
 
             marker.on("click", () => this.selectTask(feature, true));
-            marker.bindPopup(this.popupHtml(props), { maxWidth: 360 });
+            marker.bindPopup(this.popupHtml(props, lat, lng), { maxWidth: 360 });
             marker.on("popupopen", event => this.bindPopupOpenTask(event.popup));
             // hover provenance from data already client-side; built lazily at
             // hover time so it reflects the current backend snapshot, and it
@@ -2091,8 +2267,11 @@ class NzVerificationMap {
         });
     }
 
-    popupHtml(props) {
+    popupHtml(props, lat, lng) {
         const temporal = deriveTargetYearStatus(props, this.targetYear);
+        // same action affordances as the public map popup row: Street View,
+        // Open OSM, Copy coords (lat/lng to 5 dp)
+        const coordStr = `${Number(lat).toFixed(5)},${Number(lng).toFixed(5)}`;
         return `
             <strong>${escapeHtml(props.name || "Unnamed site")}</strong><br>
             <span>${escapeHtml(cap(props.religion))}${props.denomination ? ` | ${escapeHtml(cap(props.denomination))}` : ""}</span><br>
@@ -2102,12 +2281,16 @@ class NzVerificationMap {
             <div class="popup-actions">
                 <button class="popup-open-task" type="button" data-task-id="${escapeHtml(props.task_id)}">Open task</button>
                 ${this.linkHtml("Street View", props.street_view_url, "popup-link")}
+                <a class="popup-link" href="${escapeHtml(osmPointUrl(lat, lng))}" target="_blank" rel="noopener noreferrer">Open OSM</a>
+                <button class="popup-link popup-copy-coords" type="button" data-copy="${escapeHtml(coordStr)}">Copy coords</button>
                 <button class="popup-report-issue" type="button" data-task-id="${escapeHtml(props.task_id)}">Report an issue</button>
             </div>
         `;
     }
 
     bindPopupOpenTask(popup) {
+        // mirror the public map's data-copy handler for the Copy coords button
+        this.bindCopyCoords(popup.getElement());
         const button = popup.getElement()?.querySelector(".popup-open-task");
         if (button) {
             button.addEventListener("click", () => {
@@ -2122,6 +2305,30 @@ class NzVerificationMap {
                 this.selectTaskById(issueButton.dataset.taskId, { focusDetail: true });
             });
         }
+    }
+
+    // shared Copy coords binder mirroring the public map's data-copy handler
+    // (region-map.js:1040): writes "lat,lng" and flashes brief "Copied"
+    // feedback, restoring the original label after 1.2 s. Works in Leaflet
+    // popup DOM (root from popup.getElement()) and in the detail panel.
+    bindCopyCoords(rootEl) {
+        if (!rootEl) return;
+        rootEl.querySelectorAll("[data-copy]").forEach(button => {
+            if (button.dataset.copyBound === "1") return;
+            button.dataset.copyBound = "1";
+            const original = button.textContent;
+            button.addEventListener("click", async (event) => {
+                event.preventDefault();
+                const value = button.getAttribute("data-copy");
+                try {
+                    await navigator.clipboard.writeText(value || "");
+                    button.textContent = "Copied";
+                } catch (error) {
+                    button.textContent = "Copy failed";
+                }
+                window.setTimeout(() => { button.textContent = original; }, 1200);
+            });
+        });
     }
 
     renderTaskList() {
@@ -2678,6 +2885,9 @@ class NzVerificationMap {
                 <div class="link-grid">
                     ${this.linkHtml("Street View", props.street_view_url, "source-link-primary")}
                     ${this.linkHtml("Google Maps", props.google_maps_url, "source-link-primary")}
+                    ${Number.isFinite(issueContext.latitude) && Number.isFinite(issueContext.longitude) ? `
+                    ${this.linkHtml("Open OSM", osmPointUrl(issueContext.latitude, issueContext.longitude))}
+                    <button class="coord-copy" type="button" data-copy="${escapeHtml(`${issueContext.latitude.toFixed(5)},${issueContext.longitude.toFixed(5)}`)}">Copy coords</button>` : ""}
                     ${this.linkHtml("OSM object", props.osm_object_url)}
                     ${this.linkHtml("OSM history", props.osm_history_url)}
                     ${this.linkHtml("OSM map", props.osm_map_url)}
@@ -2738,6 +2948,7 @@ class NzVerificationMap {
             this.bindRaActionForm(props);
         }
         this.bindIssueForm(issueContext);
+        this.bindCopyCoords(panel);
         this.bindTaskHistory(props.task_id);
     }
 
