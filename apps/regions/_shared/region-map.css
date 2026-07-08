@@ -36,7 +36,11 @@
 #census-options select:focus { outline: 1px solid rgba(148, 163, 184, 0.6); }
 /* place-dot visibility control: mode select plus the later-foundations
    checkbox that only period mode offers */
+/* the points select moved up into the split data pill; this row now only
+   carries the later-foundations checkbox, so it collapses when that is
+   hidden rather than leaving an empty gap in the panel */
 #census-points-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+#census-points-row:not(:has(#census-points-future:not([hidden]))) { display: none; }
 #census-points-row select {
   flex: 0 1 auto;
   min-width: 0;
@@ -130,7 +134,23 @@
 #census-wrap { position: relative; }
 /* buttons ride above the panels so both controls stay clickable even when a
    wide panel is open beneath them */
-#counts-bar, #census-toggle { position: relative; z-index: 20; }
+#counts-bar, #data-pill { position: relative; z-index: 20; }
+/* the split data pill: census-data segment (panel toggle) and the points
+   segment (place-dot mode select) share one pill so both primary data
+   controls sit front and centre at equal weight */
+#data-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+}
+#data-pill .shell-pill-select {
+  font-size: 14px;
+  padding-right: 16px;
+  white-space: nowrap;
+}
 /* panels drop below the button row, taken out of flow so opening one never
    widens the row or shoves its neighbour sideways */
 #counts { position: absolute; top: 100%; left: 0; margin-top: 4px; }
@@ -143,20 +163,20 @@
   transform: translateX(-50%);
   z-index: 12;
 }
-/* the census caret mirrors the Key button's disclosure idiom; the long
-   label matches the key button's size so the two primary controls carry
-   equal visual weight */
+/* the census caret mirrors the Key button's disclosure idiom; the segment
+   is unstyled inside the pill (the pill carries the chrome) */
 #census-toggle {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   white-space: nowrap;
   cursor: pointer;
-  /* size parity with the key button (#counts-toggle in maplibre-flat.css):
-     same padding and type so the two primary controls read as peers */
-  padding: 7px 14px;
-  font-size: 14px;
-  letter-spacing: 0.01em;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  color: #e2e8f0;
+  font: inherit;
 }
 .census-caret { color: #94a3b8; font-size: 12px; }
 .census-label-short { display: none; }

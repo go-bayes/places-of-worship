@@ -95,20 +95,23 @@ document.title = RC.title;
   </div>
   </div>
   <!-- census data control: options, colour key and time slider; front and
-       centre (jb 2026-07-09) now the top strip has room — the button matches
-       the key button's size idiom, with a short label on phones -->
+       centre (jb 2026-07-09) now the top strip has room. the pill is split:
+       the census-data half toggles the panel, the points half is the place-
+       dot mode select promoted out of the panel so it cannot be missed -->
   <div id="top-center-controls">
   <div id="census-wrap">
-    <button id="census-toggle" class="shell-pill" type="button" aria-controls="census-panel" aria-expanded="true">
-      <span class="census-label-long">Show Census Data</span><span class="census-label-short">Census</span><span class="census-caret" aria-hidden="true">▴</span>
-    </button>
+    <div id="data-pill" class="shell-pill">
+      <button id="census-toggle" type="button" aria-controls="census-panel" aria-expanded="true">
+        <span class="census-label-long">Show Census Data</span><span class="census-label-short">Census</span><span class="census-caret" aria-hidden="true">▴</span>
+      </button>
+      <select id="censusPoints" class="shell-pill-select" aria-label="Place dots"></select>
+    </div>
     <div id="census-panel">
       <div id="census-options">
         <select id="censusMetric" aria-label="Census metric"></select>
         <select id="censusLevel" aria-label="Census geography"></select>
       </div>
       <div id="census-points-row">
-        <select id="censusPoints" aria-label="Place dots"></select>
         <label id="census-points-future" hidden>
           <input id="censusPointsFuture" type="checkbox">
           <span>show later foundations</span>

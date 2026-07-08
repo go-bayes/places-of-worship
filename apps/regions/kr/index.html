@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | South Korea Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709c" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific configuration only; all runtime behaviour lives in
+    // ../_shared/region-map.js and keys on this object plus the data files
+    window.REGION_CONFIG = {
+      countryCode: "KR",
+      title: "Places of Worship | South Korea Research Map",
+      center: [127.8, 36.3],
+      initialZoom: 6.5,
+      censusLevels: {
+        si_gun_gu: {
+          label: "Si/gun/gu",
+          boundaries: "data/kr_si_gun_gu_2018_harmonised.geojson",
+          summary: "data/area_summary_si_gun_gu.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries derived from KoStat 2018 municipalities via southkorea-maps; selected district geometries dissolved to harmonised reporting units"
+        }
+      },
+      defaultLevel: "si_gun_gu",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2015,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "sum of KOSIS named religion categories divided by the table total"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "KOSIS no-religion category divided by the table total"
+        }
+      },
+      popupDenominatorNote: "Percentages use the KOSIS table total: 2005 내국인 (명), including 미상 (unknown), and 2015 계. The 2015 religion item came from the 20% sample survey of the register-based census, so no change layer is shown.",
+      cityPresets: [
+        { label: "Seoul", coords: [126.9780, 37.5665], zoom: 10 },
+        { label: "Busan", coords: [129.0756, 35.1796], zoom: 10 },
+        { label: "Incheon", coords: [126.7052, 37.4563], zoom: 10 },
+        { label: "Daegu", coords: [128.6014, 35.8714], zoom: 10 },
+        { label: "Daejeon", coords: [127.3845, 36.3504], zoom: 10 },
+        { label: "Gwangju", coords: [126.8526, 35.1595], zoom: 10 },
+        { label: "Ulsan", coords: [129.3114, 35.5384], zoom: 10 },
+        { label: "Jeju", coords: [126.5312, 33.4996], zoom: 10 }
+      ],
+      geocode: { country: "kr", biasLngLat: [127.8, 36.3] },
+      onboarding: {
+        title: "South Korea research map",
+        intro: "KOSIS Population Census religion overlays for harmonised si/gun/gu reporting units, 2005 and 2015.",
+        bullets: [
+          "Areas are shaded by religious affiliation or the KOSIS no-religion category.",
+          "The 2015 values are 20% sample-survey estimates from the register-based census.",
+          "The boundary layer dissolves selected 2018 district geometries to parent-city reporting units and uses documented 2005 predecessor-code aggregations.",
+          "No religious-change layer is shown because the waves do not share a clean full-count basis.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric, geography and year controls."
+        ],
+        links: [
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" },
+        { id: "verification-link", label: "Submit evidence", href: "verification.html", title: "Open the RA verification map" },
+        { id: "review-link", label: "Review evidence", href: "review.html", title: "Review submitted evidence" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1PM1502&amp;conn_path=I3" target="_blank" rel="noopener">KOSIS DT_1PM1502</a> and <a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1IN0505&amp;conn_path=I3" target="_blank" rel="noopener">KOSIS DT_1IN0505</a> &middot; Licence: <a href="https://www.kogl.or.kr/info/license.do" target="_blank" rel="noopener">KOGL Type 1 attribution</a> &middot; Boundaries derived from <a href="https://github.com/southkorea/southkorea-maps" target="_blank" rel="noopener">southkorea-maps / KoStat</a>',
+      censusFlagNote: "* 2015 rows are sample_survey_20pct. The harmonised boundary dissolves selected 2018 district geometries to parent cities and aggregates documented 2005 predecessor codes for Sejong, Yeoju, Cheongju, Gyeryong, Dangjin, Changwon and Jeju. The 1985 and 1995 waves are deferred in the manifest."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260709c"></script>
+</body>
+</html>
