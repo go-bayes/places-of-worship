@@ -1,7 +1,70 @@
 # Temporal place layers — linking PoW points to the timeline
 
 Status: DESIGN (2026-07-07, JB-prompted). The interim honesty rule is
-implemented; the event-derived layers are the destination.
+implemented; the event-derived layers are the destination. The
+cross-surface standard below (2026-07-09) is normative for every
+surface that shows historical points.
+
+## The historical-points standard (normative, 2026-07-09)
+
+Two runtimes render historical points: the shared country-map module
+(`apps/regions/_shared/region-map.js`, MapLibre) and the shared portal
+(`apps/regions/nz/js/verification-map.js`, Leaflet). The global map
+(`apps/global/`) has no year control, so no dot modes apply there; it
+joins this standard only if it ever gains one. Both runtimes MUST
+follow the rules below; where a rule is surface-specific, the standard
+says so and says why.
+
+**Modes.** Internal values `period` / `all` / `off`; user-facing labels
+"Points: period", "Points: all", "Points: off"; option order
+period, all, off on every surface. `period` is offered only when the
+country wires a dated-places product containing at least one feature.
+
+**Date predicate (identical on every surface).** In `period` mode a
+feature renders for selected year Y iff `start_year` is present and
+`start_year <= Y` and (`end_year` is absent or null or `end_year >=
+Y`). Features without `start_year` never render in `period` mode.
+The prospective tier ("show later foundations", country maps only)
+renders features with `start_year > Y`. Because the runtimes cannot
+share a module, the predicate is deliberately duplicated: a MapLibre
+filter expression in `region-map.js` and a plain JS filter in
+`verification-map.js`. Any change to the predicate MUST update both
+files and this section in the same commit.
+
+**Defaults (surface-specific, deliberate).** Country maps auto-select:
+`period` when the selected year is more than 15 years stale and a
+dated product is wired, else `all`; an explicit user choice persists
+across year and level changes. The portal defaults to `off`: context
+dots are subordinate to task markers, and every portal target year is
+historical by construction, so an auto-`period` default would clutter
+every task view.
+
+**Styling (surface-specific, deliberate).** Country maps colour dated
+dots by religion with the amber date-tag stroke, scale radius by zoom,
+and fade the undated snapshot tiers on stale years (the interim
+honesty rule below). The portal keeps uniform slate-grey fixed-radius
+context dots so task markers dominate visually; it has no undated
+snapshot tier and therefore no fading rule. The portal has no
+prospective tier — later foundations serve research reading, not
+point-verification at a target year.
+
+**Legend.** Every surface offering dot modes MUST explain the active
+mode in one line: what the dots are (dated OSM evidence vs today's
+snapshot) and what the year filter means. The requirement is the
+presence of those content elements, not identical strings — each
+surface words its note for its own tiers (the portal has no undated
+snapshot tier, so the country maps' longer copy would mislead there).
+The country maps do this via `dotEraNote`; the portal via
+`updatePointsNote`.
+
+**Wiring rule for data products.** A `dated_places.geojson` with zero
+features is unwired everywhere (no `datedPlaces` key in the region
+config, no `datedPlaces` in the portal's `COUNTRY_CONFIGS`) — an empty
+product in `period` mode would blank every dot and read as "no places
+existed", which is false. When a real dated product ships for a
+country, wire it in BOTH surfaces in the same commit. Vanuatu is the
+current example of the empty-product rule; AU/BR/CA/MX/UK simply have
+no product yet.
 
 ## The problem
 

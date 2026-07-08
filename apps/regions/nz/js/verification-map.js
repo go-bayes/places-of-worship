@@ -1728,13 +1728,17 @@ class NzVerificationMap {
         const control = L.control({ position: "bottomleft" });
         control.onAdd = () => {
             const div = L.DomUtil.create("div", "points-legend-control");
+            // uniform option order across surfaces (per the historical-points
+            // standard): period first where a dated product is wired, then all,
+            // then off; all/off only where no dated product exists
             const modes = COUNTRY_CONFIG.datedPlaces
-                ? [["all", "Points: all"], ["period", "Points: period"], ["off", "Points: off"]]
+                ? [["period", "Points: period"], ["all", "Points: all"], ["off", "Points: off"]]
                 : [["all", "Points: all"], ["off", "Points: off"]];
             div.innerHTML = `
                 <select id="portalPointsSelect" aria-label="Context dots">
                     ${modes.map(([value, label]) => `<option value="${value}"${value === this.pointsMode ? " selected" : ""}>${label}</option>`).join("")}
                 </select>
+                <div id="portalPointsNote" class="points-mode-note" hidden></div>
                 <div class="map-legend">
                     <span class="legend-row"><span class="legend-dot vm-verified-swatch"></span>verified</span>
                     <span class="legend-row"><span class="legend-dot vm-under-review-swatch"></span>under review</span>
@@ -1751,10 +1755,33 @@ class NzVerificationMap {
             return div;
         };
         control.addTo(this.map);
+        // seed the per-mode note for the initial (default off) state
+        this.updatePointsNote();
+    }
+
+    // one-line note under the points select explaining the active mode, per
+    // the historical-points standard: period names the date filter, all warns
+    // the dots are today's snapshot, off hides the note. Updates on both mode
+    // change and target-year change (the year appears in the copy).
+    updatePointsNote() {
+        const note = document.getElementById("portalPointsNote");
+        if (!note) return;
+        const year = this.targetYear;
+        if (this.pointsMode === "period") {
+            note.textContent = `showing places whose OpenStreetMap date tags say they existed in ${year}`;
+            note.hidden = false;
+        } else if (this.pointsMode === "all") {
+            note.textContent = `dots show today's OpenStreetMap places, not ${year} places`;
+            note.hidden = false;
+        } else {
+            note.textContent = "";
+            note.hidden = true;
+        }
     }
 
     setPointsMode(mode) {
         this.pointsMode = mode;
+        this.updatePointsNote();
         if (mode === "off") {
             this.contextDotLayer.clearLayers();
             return;
@@ -2067,6 +2094,8 @@ class NzVerificationMap {
                 this.applyFilters();
                 // period-mode context dots key off the same year select
                 this.syncContextDots();
+                // the note copy carries the year, so refresh it too
+                this.updatePointsNote();
                 if (this.selectedTask) {
                     this.renderDetail(this.selectedTask);
                 }

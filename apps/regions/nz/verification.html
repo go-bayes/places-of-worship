@@ -1146,6 +1146,19 @@
             color: #34495e;
         }
 
+        /* per-mode helper line under the points select: quiet, matches the
+           control's own small-text register (12px slate) at a step down */
+        .points-mode-note {
+            font-size: 11px;
+            line-height: 1.35;
+            color: #5d6d7e;
+            max-width: 210px;
+        }
+
+        .points-mode-note[hidden] {
+            display: none;
+        }
+
         .map-legend {
             display: grid;
             gap: 3px;
@@ -1327,6 +1340,7 @@
                 <div class="nav-links">
                     <a href="./">NZ map</a>
                     <a href="../../global/">Global map</a>
+                    <a href="https://www.placesmap.org/apps/guides/ra.html" target="_blank" rel="noopener">Guide</a>
                 </div>
                 <div id="modeNotice" class="pilot-note"></div>
             </header>
@@ -1408,6 +1422,6 @@
             crossorigin=""></script>
     <script src="js/convex-config.js?v=20260707-changes-requested"></script>
     <script src="js/convex-task-client.js?v=20260708e"></script>
-    <script src="js/verification-map.js?v=20260708g"></script>
+    <script src="js/verification-map.js?v=20260709a"></script>
 </body>
 </html>
