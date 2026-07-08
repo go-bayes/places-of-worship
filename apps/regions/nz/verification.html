@@ -1210,6 +1210,48 @@
             font-size: 12px;
         }
 
+        /* Two-pane desktop lock (>900px, above the mobile stack breakpoint).
+           The app shell is already height:100vh, but its single grid row was
+           auto-sized, so a long sidebar grew the row past the viewport and the
+           whole page scrolled — dragging the height-capped map off-screen and
+           leaving the right half blank. Pinning the row to the shell height and
+           letting the sidebar own its own scroll gives a true two-pane layout:
+           the map fills its column and never scrolls away, the sidebar scrolls
+           independently. Scoped to desktop so the mobile stacked/page-scroll
+           layout in the max-width:900px block is untouched. */
+        @media (min-width: 901px) {
+            .app-shell {
+                /* cap the single row to the shell height; minmax(0,...) lets
+                   the children shrink below content so they can scroll */
+                grid-template-rows: minmax(0, 1fr);
+            }
+
+            .sidebar {
+                /* the sidebar becomes the independent scroll container; block
+                   flow keeps every section at natural height so content
+                   overflows into the scroll rather than being squeezed */
+                display: block;
+                min-height: 0;
+                overflow-y: auto;
+            }
+
+            .detail-panel {
+                /* no longer the internal flex scroller; it flows into the
+                   sidebar scroll like the other sections */
+                flex: none;
+                overflow: visible;
+            }
+
+            #map {
+                /* fill the grid cell (== viewport height here) instead of a raw
+                   100vh, so the map is bound to its column and cannot scroll
+                   away; min-height:0 drops the 680px floor that could exceed
+                   the cell on short viewports */
+                height: 100%;
+                min-height: 0;
+            }
+        }
+
         @media (max-width: 900px) {
             .app-shell {
                 grid-template-columns: 1fr;
