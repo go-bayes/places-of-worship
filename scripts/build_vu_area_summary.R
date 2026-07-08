@@ -19,9 +19,19 @@ stamp <- format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
 # affiliation = stated denominator minus no-religion; refusals and
 # not-stated leave the denominator entirely (matches the nz product)
 
+# the denomination percent metrics carried alongside affiliation; every one
+# is present in the 1967, 1999, 2009 and 2020 province tables, so the
+# choropleth stays comparable across all four censuses. customary beliefs is
+# the headline diversification signal; the four mission-era churches trace the
+# denominational geography (Anglican in the Banks/Torba, Presbyterian in the
+# central islands, Catholic and SDA scattered)
+DENOM_LABELS <- c("customary_beliefs", "presbyterian", "anglican",
+                  "catholic", "seventh_day_adventist")
+
 # read one extracted census csv into per-geography religion aggregates.
 # returns geography, denominator (stated responses), affiliated count,
-# no-religion count
+# no-religion count, and a stated-denominator count for each DENOM_LABELS
+# category
 aggregate_census <- function(path, level_filter = NULL, geo_col = "geography") {
   raw <- read.csv(path, stringsAsFactors = FALSE)
   if (!is.null(level_filter)) raw <- raw[raw$geo_level %in% level_filter, ]
@@ -36,36 +46,56 @@ aggregate_census <- function(path, level_filter = NULL, geo_col = "geography") {
     # stated denominator excludes refusals and not-stated, matching the
     # nz product's "stated religious-affiliation response" basis
     stated <- total - refuse - not_stated
-    data.frame(
+    row <- data.frame(
       geography = g$geography[1],
       population_total = stated,
       religious_affiliation_count = stated - no_rel,
       no_religion_count = no_rel,
       stringsAsFactors = FALSE
     )
+    # one count column per tracked denomination (0 where the census did not
+    # tabulate that category); percents are derived in fill_rows
+    for (d in DENOM_LABELS) {
+      row[[paste0(d, "_count")]] <- sum(g$count[lbl == d], na.rm = TRUE)
+    }
+    row
   }))
   rownames(out) <- NULL
   out
 }
 
 # fill religion fields on scaffold rows for one census year from an
-# aggregate table keyed by lowercase geography name
-fill_rows <- function(rows, agg, year, extra_flag, source_ids_added) {
+# aggregate table keyed by lowercase geography name. mode "full" fills
+# affiliation, no-religion, denominations and the place rate; mode
+# "denominations_only" is for 1967, whose Table A tabulates adherents of
+# religious groups aged 15+ with no no-religion category, so affiliation,
+# no-religion and the place rate (a different, total-population denominator)
+# are left null and only the denomination shares are comparable
+fill_rows <- function(rows, agg, year, extra_flag, source_ids_added,
+                      mode = "full", pop_basis = NULL) {
   key <- tolower(trimws(agg$geography))
   for (i in seq_len(nrow(rows))) {
     if (rows$year[i] != year) next
     j <- match(tolower(trimws(rows$area_name[i])), key)
     if (is.na(j)) next
     pop <- agg$population_total[j]
-    aff <- agg$religious_affiliation_count[j]
-    no_rel <- agg$no_religion_count[j]
     rows$population_total[i] <- pop
-    rows$population_total_basis[i] <- "total people with a stated religious-affiliation response (census total in private households minus refusals and not-stated)"
-    rows$religious_affiliation_count[i] <- aff
-    rows$religious_affiliation_percent[i] <- round(100 * aff / pop, 2)
-    rows$no_religion_count[i] <- no_rel
-    rows$no_religion_percent[i] <- round(100 * no_rel / pop, 2)
-    rows$places_per_10000_residents[i] <- round(10000 * rows$place_count[i] / pop, 2)
+    rows$population_total_basis[i] <- if (!is.null(pop_basis)) pop_basis else
+      "total people with a stated religious-affiliation response (census total in private households minus refusals and not-stated)"
+    # denomination shares over the stated denominator (present in every year)
+    for (d in DENOM_LABELS) {
+      cnt <- agg[[paste0(d, "_count")]][j]
+      rows[[paste0(d, "_percent")]][i] <- round(100 * cnt / pop, 2)
+    }
+    if (mode == "full") {
+      aff <- agg$religious_affiliation_count[j]
+      no_rel <- agg$no_religion_count[j]
+      rows$religious_affiliation_count[i] <- aff
+      rows$religious_affiliation_percent[i] <- round(100 * aff / pop, 2)
+      rows$no_religion_count[i] <- no_rel
+      rows$no_religion_percent[i] <- round(100 * no_rel / pop, 2)
+      rows$places_per_10000_residents[i] <- round(10000 * rows$place_count[i] / pop, 2)
+    }
     flags <- c("current_place_counts_repeated_across_census_years", extra_flag)
     rows$quality_flag[i] <- paste(flags[nzchar(flags)], collapse = ";")
     rows$source_dataset_ids[[i]] <- unique(c(rows$source_dataset_ids[[i]], source_ids_added))
@@ -74,6 +104,21 @@ fill_rows <- function(rows, agg, year, extra_flag, source_ids_added) {
 }
 
 census_source_datasets <- list(
+  list(
+    source_dataset_id = "mcarthur-yaxley-1967-census-table-a",
+    name = "1967 Census of the New Hebrides, Table A: adherence to principal religious groups per 1,000 persons aged 15+, by island",
+    provider = "Norma McArthur and J. F. Yaxley for the Condominium of the New Hebrides; digitised by the Places of Worship project",
+    url = NA,
+    retrieval_date = "2026-07-08",
+    local_path = "data/VAN/religion_proportion_by_island_1967.xlsx",
+    licence = list(
+      name = "government census report, attributed research use",
+      url = NA,
+      attribution = "McArthur & Yaxley (1968), Condominium of the New Hebrides"
+    ),
+    citation = "McArthur, Norma, and J. F. Yaxley (1968). Condominium of the New Hebrides: A Report on the First Census of the Population 1967. Sydney: V.C.N. Blight, Government Printer. Table A, p. 67.",
+    notes = "Island-level per-1,000 adherence rates for persons aged 15+ were aggregated to the six modern provinces by scripts/build_vu_1967_provinces.py, weighting each island by its aged-15+ population and using the island->province crosswalk implied by the 2009 census island rows. The reconstructed national customary share (14.65%) matches the report's national row (14.6%) and province populations sum to the national aged-15+ total minus the 262 ship-board residents. The 1967 census tabulated adherents of religious groups aged 15+ with no no-religion category, so only denomination shares are comparable to later censuses."
+  ),
   list(
     source_dataset_id = "vnso-1999-census-main-report-t2-10",
     name = "1999 Vanuatu National Population and Housing Census, Main Report, Table 2.10: population by religion and island of residence",
@@ -162,13 +207,20 @@ build_level <- function(summary_path, level) {
     df$source_dataset_ids <- I(list(r[["source_dataset_ids"]]))
     df
   }))
+  # denomination percent columns start empty and are filled per year by
+  # fill_rows; pre-creating them at full length keeps the assignment safe
+  for (d in DENOM_LABELS) rows[[paste0(d, "_percent")]] <- NA_real_
 
   if (level == "adm1") {
-    # provinces gain 1999 (main report table 2.10, digitised by guy lavender
-    # forsyth): clone the 2009 rows as the 1999 scaffold, then fill all years
-    if (!any(rows$year == 1999)) {
+    # provinces gain earlier waves by cloning the 2009 rows as a blank
+    # scaffold for the year, then filling from that year's extract. 1999 is
+    # the main report table 2.10 (digitised by guy lavender forsyth); 1967 is
+    # McArthur & Yaxley Table A, aggregated island->province by
+    # scripts/build_vu_1967_provinces.py
+    seed_year <- function(rows, year) {
+      if (any(rows$year == year)) return(rows)
       seed <- rows[rows$year == 2009, ]
-      seed$year <- 1999
+      seed$year <- year
       seed$population_total <- NA
       seed$population_total_basis <- "stated religious-affiliation response (pending)"
       seed$religious_affiliation_count <- NA
@@ -176,12 +228,23 @@ build_level <- function(summary_path, level) {
       seed$no_religion_count <- NA
       seed$no_religion_percent <- NA
       seed$places_per_10000_residents <- NA
+      for (d in DENOM_LABELS) seed[[paste0(d, "_percent")]] <- NA_real_
+      # the clone carries 2009's census source id; a seeded year owns only the
+      # boundary and OSM base until its own census fill adds the right id
+      seed$source_dataset_ids <- I(lapply(seed$source_dataset_ids, function(ids)
+        ids[!grepl("census|derived|mcarthur|t2-10|t3-5", ids)]))
       rows <- rbind(rows, seed)
-      rows <- rows[order(rows$area_code, rows$year), ]
+      rows[order(rows$area_code, rows$year), ]
     }
+    rows <- seed_year(rows, 1999)
+    rows <- seed_year(rows, 1967)
+    agg1967 <- aggregate_census(file.path(src_dir, "vu_religion_by_province_1967_mcarthur_tableA.csv"), "province")
     agg1999 <- aggregate_census(file.path(src_dir, "vu_religion_by_province_1999_mainreport_t2_10.csv"), "province")
     agg2009 <- aggregate_census(file.path(src_dir, "vu_religion_by_province_2009_basictables_t3_5.csv"), "province")
     agg2020 <- aggregate_census(file.path(src_dir, "vu_religion_by_province_2020_incl_urban_DERIVED.csv"), geo_col = "province")
+    rows <- fill_rows(rows, agg1967, 1967, "religion_aged_15_plus_no_no_religion_category_1967",
+                      "mcarthur-yaxley-1967-census-table-a", mode = "denominations_only",
+                      pop_basis = "persons aged 15+ professing adherence to a religious group (McArthur & Yaxley 1967 first-census Table A; no no-religion category, so affiliation and no-religion shares are not defined)")
     rows <- fill_rows(rows, agg1999, 1999, "", "vnso-1999-census-main-report-t2-10")
     rows <- fill_rows(rows, agg2009, 2009, "", "vnso-2009-census-basic-tables-t3-5")
     rows <- fill_rows(rows, agg2020, 2020, "province_2020_includes_urban_derived",
@@ -209,7 +272,7 @@ build_level <- function(summary_path, level) {
 
   existing_ids <- vapply(d$source_datasets, function(s) s$source_dataset_id, "")
   for (s in census_source_datasets) {
-    if (level == "adm2" && s$source_dataset_id %in% c("vnso-1999-census-main-report-t2-10", "vnso-2009-census-basic-tables-t3-5", "vu-2020-province-incl-urban-derived")) next
+    if (level == "adm2" && s$source_dataset_id %in% c("mcarthur-yaxley-1967-census-table-a", "vnso-1999-census-main-report-t2-10", "vnso-2009-census-basic-tables-t3-5", "vu-2020-province-incl-urban-derived")) next
     if (!(s$source_dataset_id %in% existing_ids)) d$source_datasets <- c(d$source_datasets, list(s))
   }
 
@@ -258,11 +321,49 @@ build_level <- function(summary_path, level) {
          quality_notes = "Repeated across census years.")
   )
 
+  # one indicator per tracked denomination. all five are present in every
+  # province census wave, so they carry the fullest temporal coverage on the
+  # map: 1967 (provinces only) through 2020
+  denom_meta <- list(
+    customary_beliefs_percent = list(label = "Customary beliefs %",
+      description = "Share of the stated-response denominator reporting customary (kastom) beliefs.",
+      notes = "The headline diversification signal: nationally 14.6% of adults in 1967, concentrated in Tafea (Tanna), falling across later censuses. Customary beliefs count as religious affiliation."),
+    presbyterian_percent = list(label = "Presbyterian %",
+      description = "Share of the stated-response denominator affiliated with the Presbyterian Church.",
+      notes = "The largest denomination nationally; strongest in the central islands (Shefa, Malampa)."),
+    anglican_percent = list(label = "Anglican %",
+      description = "Share of the stated-response denominator affiliated with the Anglican Church (historically the Melanesian Mission).",
+      notes = "Concentrated in the north (Torba/Banks and Penama)."),
+    catholic_percent = list(label = "Catholic %",
+      description = "Share of the stated-response denominator affiliated with the Roman Catholic Church.",
+      notes = "Scattered across the archipelago; the 1967 label is Roman Catholic."),
+    seventh_day_adventist_percent = list(label = "Seventh-day Adventist %",
+      description = "Share of the stated-response denominator affiliated with the Seventh-day Adventist Church.",
+      notes = "A minority denomination present in every census wave.")
+  )
+  # the 1967 caveats apply only at province level (adm1); the area-council
+  # product (adm2) carries denomination shares for 2020 alone, so its method
+  # and notes must not reference the aged-15+ 1967 basis
+  denom_indicators <- lapply(names(denom_meta), function(id) {
+    m <- denom_meta[[id]]
+    list(indicator_id = id, label = m$label, description = m$description,
+         unit = "percent", denominator_indicator_id = "population_total",
+         method = if (level == "adm1")
+           "Denomination count over the stated-response denominator (aged-15+ adherents for 1967)."
+           else "Denomination count over the stated-response denominator.",
+         temporal_coverage = if (level == "adm1") "1967, 1999, 2009, 2020" else "2020",
+         spatial_coverage = if (level == "adm1") "Vanuatu provinces (1967 aggregated island->province)" else "Vanuatu area councils and urban municipalities",
+         quality_notes = if (level == "adm1")
+           paste(m$notes, "1967 uses persons aged 15+ (no no-religion category); later years use the whole stated-response population.")
+           else m$notes)
+  })
+  d$indicators <- c(d$indicators, denom_indicators)
+
   d$data_status <- "census_religion_live"
   d$data_status_note <- if (level == "adm1") {
-    "Census religious affiliation is live for provinces in 1999, 2009 and 2020 (1999 Main Report Table 2.10, digitised by Guy Lavender Forsyth; Basic Tables Volume 1 Table 3.5 for 2009 and 2020). The 2020 provincial values include the urban municipalities by derivation so all years share one basis. National religion series back to 1989 sits in apps/regions/vu/data/source/."
+    "Census religious affiliation is live for provinces in 1999, 2009 and 2020 (1999 Main Report Table 2.10, digitised by Guy Lavender Forsyth; Basic Tables Volume 1 Table 3.5 for 2009 and 2020). Denomination shares, including customary beliefs, extend back to the 1967 first census (McArthur & Yaxley Table A, aggregated island->province); the 1967 wave covers persons aged 15+ with no no-religion category, so its affiliation and no-religion shares are left undefined. The 2020 provincial values include the urban municipalities by derivation so all years share one basis. National religion series back to 1989 sits in apps/regions/vu/data/source/."
   } else {
-    "Census religious affiliation is live for area councils and urban municipalities in 2020. 2009 sub-provincial religion was published by island, not area council, so 2009 stays pending at this level. The Torres area council is absent from the geoBoundaries ADM2 layer, so its 2020 counts are not mapped at this level."
+    "Census religious affiliation and denomination shares are live for area councils and urban municipalities in 2020. 2009 sub-provincial religion was published by island, not area council, so 2009 stays pending at this level. The Torres area council is absent from the geoBoundaries ADM2 layer, so its 2020 counts are not mapped at this level."
   }
   d$generated_at <- stamp
   d$generated_by <- "scripts/build_vu_area_summary.R"

@@ -4,6 +4,28 @@
 
 ### 2026-07-08
 
+- Extended the Vanuatu map back to the 1967 first census and added a
+  denomination overlay. `scripts/build_vu_1967_provinces.py` digitises
+  McArthur & Yaxley (1968) Table A (per-1,000 adherence by island,
+  persons aged 15+) and aggregates islands to the six modern provinces,
+  weighting by aged-15+ population and using the island→province
+  crosswalk implied by the 2009 census island rows; validation
+  reproduces the report's national customary share (14.65% vs 14.6%)
+  and reconciles province populations to the national total minus the
+  262 ship-board residents. `scripts/build_vu_area_summary.R` now
+  carries five denomination shares (customary beliefs, Presbyterian,
+  Anglican, Catholic, Seventh-day Adventist) across 1967/1999/2009/2020
+  at province level (and 2020 at area council). Because affiliation sits
+  at 94–100% in every province and year, the VU map now opens on
+  customary (kastom) beliefs — the headline diversification signal,
+  which falls from 70% of Tafea adults in 1967 to 17% in 2020. The
+  shared region module gained opt-in denomination metrics (hidden from
+  countries that do not list them), config-ordered metric dropdowns,
+  and an area popup that leads with the metric on display so a 1967 row
+  reads even though its affiliation column is undefined by construction.
+  1967 tabulated adults with no no-religion category, so its affiliation
+  and no-religion shares are left blank and flagged.
+
 - Added static RA and PI/reviewer guide pages under `apps/guides/`
   with shared light styling, hosted demonstration media references, and
   print-friendly screenshot layouts.

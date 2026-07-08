@@ -2600,16 +2600,60 @@ const CENSUS_METRICS_BASE = {
     kind: "div",
     format: (v) => `${v > 0 ? "+" : ""}${v.toFixed(1)} pt`,
     note: "percentage-point change since the previous census"
+  },
+  // denomination shares (opt-in: shown only for a country that lists them in
+  // metricsAvailable, so countries without a denomination breakdown are
+  // unaffected). Vanuatu carries all five back to the 1967 first census
+  customary_beliefs_percent: {
+    label: "Customary beliefs %", kind: "seq", optIn: true,
+    format: (v) => `${v.toFixed(1)}%`,
+    note: "share reporting customary (kastom) beliefs"
+  },
+  presbyterian_percent: {
+    label: "Presbyterian %", kind: "seq", optIn: true,
+    format: (v) => `${v.toFixed(1)}%`,
+    note: "share affiliated with the Presbyterian Church"
+  },
+  anglican_percent: {
+    label: "Anglican %", kind: "seq", optIn: true,
+    format: (v) => `${v.toFixed(1)}%`,
+    note: "share affiliated with the Anglican Church"
+  },
+  catholic_percent: {
+    label: "Catholic %", kind: "seq", optIn: true,
+    format: (v) => `${v.toFixed(1)}%`,
+    note: "share affiliated with the Roman Catholic Church"
+  },
+  seventh_day_adventist_percent: {
+    label: "Seventh-day Adventist %", kind: "seq", optIn: true,
+    format: (v) => `${v.toFixed(1)}%`,
+    note: "share affiliated with the Seventh-day Adventist Church"
   }
 };
+// when a country sets metricsAvailable, its order also sets the dropdown
+// order (so a country can lead with its most informative metric); otherwise
+// the base order stands and opt-in metrics stay hidden
 function buildCensusMetrics() {
   const allow = Array.isArray(RC.metricsAvailable) ? RC.metricsAvailable : null;
   const overrides = RC.metricLabels || {};
-  const out = {};
-  for (const [id, def] of Object.entries(CENSUS_METRICS_BASE)) {
-    if (allow && !allow.includes(id)) continue;
+  const withOverride = (id) => {
+    const def = CENSUS_METRICS_BASE[id];
+    if (!def) return null;
     const override = overrides[id];
-    out[id] = override ? { ...def, ...override } : def;
+    return override ? { ...def, ...override } : def;
+  };
+  const out = {};
+  if (allow) {
+    for (const id of allow) {
+      const def = withOverride(id);
+      if (def) out[id] = def;
+    }
+  } else {
+    for (const [id, def] of Object.entries(CENSUS_METRICS_BASE)) {
+      if (def.optIn) continue;
+      const override = overrides[id];
+      out[id] = override ? { ...def, ...override } : def;
+    }
   }
   return out;
 }
@@ -3062,6 +3106,17 @@ function openCensusPopup(feature, lngLat) {
   // the columns and the OSM credit instead of showing dashes
   const hasPlaces = "places_per_10000_residents" in CENSUS_METRICS ||
     "place_density_per_sq_km" in CENSUS_METRICS;
+  // when the map is showing a metric the fixed columns do not carry (a
+  // denomination share, for example), lead the table with that metric so the
+  // popup answers the same question the choropleth does — and a 1967 row,
+  // whose affiliation column is blank by construction, still reads
+  const fixedColumnMetrics = ["religious_affiliation_percent", "no_religion_percent",
+    "places_per_10000_residents", "place_density_per_sq_km"];
+  const activeDef = CENSUS_METRICS[censusState.metric];
+  const showActive = activeDef && activeDef.kind !== "div" &&
+    !fixedColumnMetrics.includes(censusState.metric);
+  const activeMetric = censusState.metric;
+  const fmtActive = (v) => (Number.isFinite(v) ? activeDef.format(v) : "–");
   let anyFlagged = false;
   const rowsHtml = store.years.map((year) => {
     const row = store.byAreaYear.get(`${code}|${year}`);
@@ -3071,6 +3126,7 @@ function openCensusPopup(feature, lngLat) {
     const selected = year === censusState.year ? ' class="census-year-selected"' : "";
     return `<tr${selected}>
       <td>${year}${flagged ? "*" : ""}</td>
+      ${showActive ? `<td>${fmtActive(row[activeMetric])}</td>` : ""}
       <td>${fmtPercent(row.religious_affiliation_percent)}</td>
       ${hasNoReligion ? `<td>${fmtPercent(row.no_religion_percent)}</td>` : ""}
       ${hasPlaces ? `<td>${fmtCount(row.place_count)}</td><td>${fmtRate(row.places_per_10000_residents)}</td>` : ""}
@@ -3082,7 +3138,7 @@ function openCensusPopup(feature, lngLat) {
   const html =
     `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
     `<table class="census-table">` +
-    `<thead><tr><th>Census</th><th>${affiliationLabel}</th>${hasNoReligion ? `<th>${noReligionLabel}</th>` : ""}${hasPlaces ? "<th>Places</th><th>Per 10k</th>" : ""}</tr></thead>` +
+    `<thead><tr><th>Census</th>${showActive ? `<th>${activeDef.label}</th>` : ""}<th>${affiliationLabel}</th>${hasNoReligion ? `<th>${noReligionLabel}</th>` : ""}${hasPlaces ? "<th>Places</th><th>Per 10k</th>" : ""}</tr></thead>` +
     `<tbody>${rowsHtml}</tbody></table>` +
     flagNote +
     `<div class="place-note">${RC.popupDenominatorNote || "Percentages use the stated religion-response denominator."}` +
