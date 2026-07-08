@@ -1,0 +1,234 @@
+[
+  {
+    "flow_id": "orientation",
+    "title": "Orientation: the verification workspace",
+    "audience": "ra",
+    "steps": [
+      {
+        "file": "orientation/orientation-01.png",
+        "caption": "The workspace: assigned tasks on the left, the task map on the right."
+      },
+      {
+        "file": "orientation/orientation-02.png",
+        "caption": "Filter the task list by name, priority, map suggestion, or status."
+      },
+      {
+        "file": "orientation/orientation-03.png",
+        "caption": "The Points control adds muted context dots; the legend explains marker states."
+      },
+      {
+        "file": "orientation/orientation-04.png",
+        "caption": "Hovering a marker shows the task name, status, and last activity."
+      }
+    ],
+    "video": "orientation/orientation.mp4"
+  },
+  {
+    "flow_id": "open-and-verify",
+    "title": "Open a task and record evidence",
+    "audience": "ra",
+    "steps": [
+      {
+        "file": "open-and-verify/open-and-verify-01.png",
+        "caption": "Open a task from the list; the detail panel shows the brief and source links."
+      },
+      {
+        "file": "open-and-verify/open-and-verify-02.png",
+        "caption": "Choose what your evidence shows; target-year statuses prefill from the action."
+      },
+      {
+        "file": "open-and-verify/open-and-verify-03.png",
+        "caption": "Record the source title, date, URL, and a short evidence note."
+      },
+      {
+        "file": "open-and-verify/open-and-verify-04.png",
+        "caption": "Answer the change-class question: genuine change is counted by the annual census; map corrections rewrite history."
+      }
+    ],
+    "video": "open-and-verify/open-and-verify.mp4"
+  },
+  {
+    "flow_id": "submit-flow",
+    "title": "Save a draft, submit, and open the next task",
+    "audience": "ra",
+    "steps": [
+      {
+        "file": "submit-flow/submit-flow-01.png",
+        "caption": "Save draft keeps the task open while you work; the status line confirms the save."
+      },
+      {
+        "file": "submit-flow/submit-flow-02.png",
+        "caption": "Submit for review closes the task and confirms it in the panel."
+      },
+      {
+        "file": "submit-flow/submit-flow-03.png",
+        "caption": "Open next task lands you in the next available task in your filtered list."
+      }
+    ],
+    "video": "submit-flow/submit-flow.mp4"
+  },
+  {
+    "flow_id": "skip-and-undo",
+    "title": "Skip a task with a reason, then undo",
+    "audience": "ra",
+    "steps": [
+      {
+        "file": "skip-and-undo/skip-and-undo-01.png",
+        "caption": "The skip control sits under the evidence form for tasks with nothing to record."
+      },
+      {
+        "file": "skip-and-undo/skip-and-undo-02.png",
+        "caption": "Reason chips fill the skip reason with one click; free text still works."
+      },
+      {
+        "file": "skip-and-undo/skip-and-undo-03.png",
+        "caption": "Skipping confirms in the panel; Undo skip is right there if you change your mind."
+      },
+      {
+        "file": "skip-and-undo/skip-and-undo-04.png",
+        "caption": "Undo skip reopens the task and returns you to its detail panel."
+      }
+    ],
+    "video": "skip-and-undo/skip-and-undo.mp4"
+  },
+  {
+    "flow_id": "report-issue",
+    "title": "Report a map issue from a task",
+    "audience": "ra",
+    "steps": [
+      {
+        "file": "report-issue/report-issue-01.png",
+        "caption": "Report an issue opens a small form under the evidence form."
+      },
+      {
+        "file": "report-issue/report-issue-02.png",
+        "caption": "Choose the issue type and describe what you noticed."
+      },
+      {
+        "file": "report-issue/report-issue-03.png",
+        "caption": "A new issue is filed as an open task for curator triage."
+      },
+      {
+        "file": "report-issue/report-issue-04.png",
+        "caption": "If an open issue already exists for the place, your note is added to it instead."
+      }
+    ],
+    "video": "report-issue/report-issue.mp4"
+  },
+  {
+    "flow_id": "pin-drop",
+    "title": "Nominate a missing place with a pin drop (Vanuatu)",
+    "audience": "ra",
+    "steps": [
+      {
+        "file": "pin-drop/pin-drop-01.png",
+        "caption": "Add missing place of worship lives in the nomination panel."
+      },
+      {
+        "file": "pin-drop/pin-drop-02.png",
+        "caption": "Click the map to drop a draggable pin; the confirm card tracks its position."
+      },
+      {
+        "file": "pin-drop/pin-drop-03.png",
+        "caption": "Below zoom 15 the confirm button stays disabled: placement must be building-accurate."
+      },
+      {
+        "file": "pin-drop/pin-drop-04.png",
+        "caption": "Zoom in to pass the gate, then confirm the location."
+      },
+      {
+        "file": "pin-drop/pin-drop-05.png",
+        "caption": "Existing tasks near the pin are offered first, with their distance and status."
+      },
+      {
+        "file": "pin-drop/pin-drop-06.png",
+        "caption": "Describe how you know the place; local knowledge counts, and the change-class question rides along."
+      },
+      {
+        "file": "pin-drop/pin-drop-07.png",
+        "caption": "Creating the candidate lands you in its task, ready for the normal evidence flow."
+      }
+    ],
+    "video": "pin-drop/pin-drop.mp4"
+  },
+  {
+    "flow_id": "revise-after-changes",
+    "title": "Respond to a changes-requested review",
+    "audience": "ra",
+    "steps": [
+      {
+        "file": "revise-after-changes/revise-after-changes-01.png",
+        "caption": "Changes requested pins the reviewer's note and required follow-up above My work."
+      },
+      {
+        "file": "revise-after-changes/revise-after-changes-02.png",
+        "caption": "Revise now opens an editable revision of your submission with the task detail loaded."
+      }
+    ],
+    "video": "revise-after-changes/revise-after-changes.mp4"
+  },
+  {
+    "flow_id": "history-and-provenance",
+    "title": "Task history and hover provenance",
+    "audience": "ra",
+    "steps": [
+      {
+        "file": "history-and-provenance/history-and-provenance-01.png",
+        "caption": "History shows the task's full event trail; your own actions are marked (you)."
+      },
+      {
+        "file": "history-and-provenance/history-and-provenance-02.png",
+        "caption": "Hover any marker for the same provenance at a glance: name, status, last activity."
+      }
+    ],
+    "video": "history-and-provenance/history-and-provenance.mp4"
+  },
+  {
+    "flow_id": "review-queue",
+    "title": "Review a submitted task and record a decision",
+    "audience": "pi",
+    "steps": [
+      {
+        "file": "review-queue/review-queue-01.png",
+        "caption": "The review queue lists submitted tasks with their status pills."
+      },
+      {
+        "file": "review-queue/review-queue-02.png",
+        "caption": "Selecting a task loads the evidence, lifecycle fields, and task history."
+      },
+      {
+        "file": "review-queue/review-queue-03.png",
+        "caption": "Choose a decision and write the decision note; the record stays yours."
+      },
+      {
+        "file": "review-queue/review-queue-04.png",
+        "caption": "Recording the decision returns you to the queue for the next task."
+      }
+    ],
+    "video": "review-queue/review-queue.mp4"
+  },
+  {
+    "flow_id": "ai-review-panel",
+    "title": "Read the Claude review panel before deciding",
+    "audience": "pi",
+    "steps": [
+      {
+        "file": "ai-review-panel/ai-review-panel-01.png",
+        "caption": "The Claude recommendation panel is labelled AI-generated and never decides for you."
+      },
+      {
+        "file": "ai-review-panel/ai-review-panel-02.png",
+        "caption": "Reasoning explains the recommendation in plain language."
+      },
+      {
+        "file": "ai-review-panel/ai-review-panel-03.png",
+        "caption": "Source checks record every outcome, including what could not be checked."
+      },
+      {
+        "file": "ai-review-panel/ai-review-panel-04.png",
+        "caption": "Use recommendation prefills the decision; Decide differently records disagreement — the note and Record button stay yours."
+      }
+    ],
+    "video": "ai-review-panel/ai-review-panel.mp4"
+  }
+]
