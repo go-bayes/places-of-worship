@@ -1,16 +1,19 @@
 # Playbook: ingest Guy's historical Vanuatu census spreadsheets
 
-Status: PARTIALLY DONE 2026-07-06 (commit f50f4ed) — Guy's first delivery
+Status: PARTIALLY DONE 2026-07-08 (commit 78d3c52) — Guy's first delivery
 was scans of the 1999/2009/2020 census table volumes; 2009/2020 were
 byte-identical to files already extracted, and the 1999 Main Report
-(print-only until now) yielded province-level religion, now live on the
-map (slider 1999–2020). REMAINING: the 1999 island-level rows (in the
-scan, for AC harmonisation), earlier censuses (1967, 1979, 1989), and
-Guy's promised single harmonised AC-level spreadsheet (religion,
-demographics, language) from first census to present — his backbone for
-the religious-diversification paper linking Bob's historical missions
-data. Guy's Google account is on file with JB for the portal invite;
-keep personal emails out of this public repo.
+(print-only until now) yielded province-level religion. The 1967 first
+census (McArthur & Yaxley Table A) is now digitised and aggregated
+island→province (scripts/build_vu_1967_provinces.py), so the province
+slider runs 1967–2020 and the map carries five denomination shares
+(customary beliefs plus four mission churches). REMAINING: the 1999
+island-level rows (in the scan, for AC harmonisation), the 1979 and 1989
+censuses, and Guy's promised single harmonised AC-level spreadsheet
+(religion, demographics, language) from first census to present — his
+backbone for the religious-diversification paper linking Bob's
+historical missions data. Guy's Google account is on file with JB for
+the portal invite; keep personal emails out of this public repo.
 Task: #11. Effort: one sitting per delivery.
 
 ## Why this matters
