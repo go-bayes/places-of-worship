@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Slovakia Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260708a" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // the country page stays declarative; shared behaviour lives in
+    // ../_shared/region-map.js and keys on this config plus the data files
+    window.REGION_CONFIG = {
+      countryCode: "SK",
+      title: "Places of Worship | Slovakia Research Map",
+      center: [19.7, 48.7],
+      initialZoom: 7,
+      censusLevels: {
+        municipality: {
+          label: "Municipality",
+          boundaries: "data/sk_municipality_2021.geojson",
+          summary: "data/area_summary_municipality.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries &copy; Statistical Office of the Slovak Republic, SODB 2021 OB GeoJSON"
+        }
+      },
+      defaultLevel: "municipality",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "total population minus no religion and not found out"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "SODB code 28, bez náboženského vyznania"
+        }
+      },
+      popupDenominatorNote: "Percentages use the SODB 2021 total population denominator. This follows SUSR's published shares and includes code 00, nezistené / not found out, in the denominator.",
+      cityPresets: [
+        { label: "Bratislava", coords: [17.1077, 48.1486], zoom: 11 },
+        { label: "Košice", coords: [21.2611, 48.7164], zoom: 11 },
+        { label: "Prešov", coords: [21.2393, 48.9977], zoom: 11 },
+        { label: "Žilina", coords: [18.7408, 49.2232], zoom: 11 },
+        { label: "Banská Bystrica", coords: [19.1462, 48.7363], zoom: 11 },
+        { label: "Nitra", coords: [18.0833, 48.3061], zoom: 11 },
+        { label: "Trnava", coords: [17.5872, 48.3774], zoom: 11 },
+        { label: "Trenčín", coords: [18.0443, 48.8945], zoom: 11 }
+      ],
+      geocode: { country: "sk", biasLngLat: [19.7, 48.7] },
+      onboarding: {
+        title: "Slovakia research map",
+        intro: "SODB 2021 religious-belief overlays for Slovakia municipalities and Bratislava/Košice city parts.",
+        bullets: [
+          "Municipalities are shaded by religious affiliation or the source no-religion category.",
+          "The denominator is total population, including the SODB not-found-out category, so values match SUSR's published shares.",
+          "Older subnational census waves are deferred until the official extraction route and boundary concordance are pinned.",
+          "Open <strong>Census</strong> (top left) for the metric, geography and year controls."
+        ],
+        links: [
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" },
+        { id: "verification-link", label: "Submit evidence", href: "verification.html", title: "Open the RA verification map" },
+        { id: "review-link", label: "Review evidence", href: "review.html", title: "Review submitted evidence" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://www.scitanie.sk/en/population/basic-results/structure-of-population-by-religious-belief/SR/SK0/SR" target="_blank" rel="noopener">Statistical Office of the Slovak Republic, SODB 2021</a> &middot; Boundaries &copy; <a href="https://www.scitanie.sk/en/population/basic-results/structure-of-population-by-religious-belief/SR/SK0/SR" target="_blank" rel="noopener">SODB 2021 OB GeoJSON</a>',
+      censusFlagNote: "* SODB 2021 reports Bratislava and Košice by city parts. The denominator includes nezistené / not found out. No 1991-2011 change layer is shown because the older subnational extraction route and official boundary concordance are deferred."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260708a"></script>
+</body>
+</html>
