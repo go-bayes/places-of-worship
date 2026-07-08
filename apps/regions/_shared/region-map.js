@@ -60,7 +60,6 @@ document.title = RC.title;
   <div id="wordmark" class="shell-pill shell-top-right shell-divided">
     ${wordmarkLinks}
     <a id="fixmap-link" href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener" title="Improve this map area on OpenStreetMap">fix map</a>
-    ${RC.raPortalHref ? `<a id="raportal-link" href="${RC.raPortalHref}" title="RA portal — sign in with your invited Google account">RA portal</a>` : ""}
     <select id="basemapSelect" class="shell-pill-select" aria-label="Theme"></select>
   </div>
   <button id="corner-reset" class="shell-pill shell-top-left" type="button" aria-label="Set North">
