@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### 2026-07-08
+
+- Added static RA and PI/reviewer guide pages under `apps/guides/`
+  with shared light styling, hosted demonstration media references, and
+  print-friendly screenshot layouts.
+
 ### 2026-07-07
 
 - Consolidated the portal's two revision-start paths onto the server.

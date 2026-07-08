@@ -1,0 +1,316 @@
+/* Static guide pages for the RA and PI portal walkthroughs. */
+:root {
+  --bg: #f4f6f7;
+  --surface: #ffffff;
+  --surface-soft: #f8fafc;
+  --ink: #17202a;
+  --muted: #566573;
+  --line: #d8dee4;
+  --line-strong: #ccd3da;
+  --action: #1f618d;
+  --action-active-bg: #e8f1fb;
+  --shadow: 0 16px 40px rgba(23, 32, 42, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--bg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+body::before {
+  content: "";
+  display: block;
+  height: 6px;
+  background: var(--action);
+}
+
+main,
+.header-inner,
+footer {
+  width: min(100% - 32px, 880px);
+  margin: 0 auto;
+}
+
+.page-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.header-inner {
+  padding: 34px 0 28px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--action);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+p,
+ol,
+ul,
+figure {
+  margin-top: 0;
+}
+
+h1 {
+  max-width: 760px;
+  margin-bottom: 12px;
+  color: #1f2d3d;
+  font-size: clamp(2rem, 1.72rem + 1.1vw, 2.7rem);
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+h2 {
+  margin-bottom: 16px;
+  color: #1f2d3d;
+  font-size: clamp(1.42rem, 1.28rem + 0.45vw, 1.75rem);
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+.purpose {
+  max-width: 720px;
+  margin-bottom: 18px;
+  color: #34495e;
+  font-size: 1.04rem;
+}
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.site-nav a,
+.toc a,
+.prose-section a {
+  color: var(--action);
+  font-weight: 700;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.site-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid var(--action);
+  border-radius: 5px;
+  background: var(--surface);
+  text-decoration: none;
+}
+
+.site-nav a:hover,
+.site-nav a:focus-visible {
+  background: var(--action-active-bg);
+}
+
+.storage-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.94rem;
+}
+
+main {
+  padding: 28px 0 48px;
+}
+
+.toc,
+.guide-section {
+  margin-bottom: 28px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.toc h2 {
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+}
+
+.toc ol {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 24px;
+  margin-bottom: 0;
+  padding-left: 22px;
+}
+
+.video-frame {
+  margin: 18px 0 22px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #0f172a;
+}
+
+video,
+img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.step-list {
+  display: grid;
+  gap: 20px;
+  margin: 0;
+  padding-left: 26px;
+}
+
+.step-list > li::marker {
+  color: var(--action);
+  font-weight: 800;
+}
+
+figure {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-soft);
+}
+
+.image-link {
+  display: block;
+  background: #ffffff;
+}
+
+.image-link:hover img,
+.image-link:focus-visible img {
+  filter: saturate(1.02) contrast(1.02);
+}
+
+figcaption {
+  padding: 12px 14px;
+  border-top: 1px solid var(--line);
+  color: #34495e;
+  font-size: 0.95rem;
+}
+
+.prose-section p:last-child,
+.prose-section ol:last-child,
+.prose-section ul:last-child {
+  margin-bottom: 0;
+}
+
+.prose-list {
+  padding-left: 24px;
+}
+
+.prose-list li {
+  margin-bottom: 10px;
+}
+
+.section-note {
+  margin-bottom: 14px;
+  color: #34495e;
+  font-weight: 700;
+}
+
+footer {
+  padding: 0 0 30px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+footer p {
+  margin-bottom: 0;
+}
+
+:focus-visible {
+  outline: 3px solid var(--action-active-bg);
+  outline-offset: 3px;
+}
+
+@media (max-width: 700px) {
+  main,
+  .header-inner,
+  footer {
+    width: min(100% - 24px, 880px);
+  }
+
+  .header-inner {
+    padding: 28px 0 24px;
+  }
+
+  .toc,
+  .guide-section {
+    padding: 18px;
+  }
+
+  .toc ol {
+    grid-template-columns: 1fr;
+  }
+
+  .step-list {
+    padding-left: 22px;
+  }
+}
+
+@media print {
+  body {
+    background: #ffffff;
+    color: #000000;
+    font-size: 11pt;
+  }
+
+  body::before,
+  .site-nav,
+  video,
+  .video-frame {
+    display: none;
+  }
+
+  main,
+  .header-inner,
+  footer {
+    width: 100%;
+  }
+
+  .page-header,
+  .toc,
+  .guide-section,
+  figure {
+    border-color: #999999;
+    box-shadow: none;
+  }
+
+  .toc,
+  .guide-section {
+    break-inside: avoid;
+    padding: 14pt;
+  }
+
+  img {
+    max-width: 100%;
+    page-break-inside: avoid;
+  }
+
+  a {
+    color: #000000;
+  }
+}

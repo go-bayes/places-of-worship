@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship — PI &amp; reviewer guide</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="guide.css">
+</head>
+<body class="pi-guide">
+  <header class="page-header">
+    <div class="header-inner">
+      <p class="eyebrow">Places of Worship research project</p>
+      <h1>Places of Worship — PI &amp; reviewer guide</h1>
+      <p class="purpose">A reviewer walkthrough for deciding submissions, interpreting AI annotations, and following audit trails.</p>
+      <nav class="site-nav" aria-label="Guide links">
+        <a href="ra.html">RA field guide</a>
+        <a href="../regions/">Data maps</a>
+      </nav>
+      <p class="storage-note">Media plays from project storage; screenshots use demonstration data only.</p>
+    </div>
+  </header>
+  <main>
+  <nav class="toc" aria-labelledby="contents-heading">
+    <h2 id="contents-heading">Contents</h2>
+    <ol>
+      <li><a href="#review-queue">Review a submitted task and record a decision</a></li>
+      <li><a href="#ai-review-panel">Read the Claude review panel before deciding</a></li>
+      <li><a href="#ai-evidence-checks">How the AI evidence checks work</a></li>
+      <li><a href="#decision-records-and-hashes">How decisions are recorded and hashed</a></li>
+      <li><a href="#change-class">Genuine change versus map correction</a></li>
+      <li><a href="#seeding-and-exports">Seeding and exports</a></li>
+    </ol>
+  </nav>
+
+<section class="guide-section flow-section" id="review-queue">
+  <h2>Review a submitted task and record a decision</h2>
+  <div class="video-frame">
+    <video controls preload="none" poster="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/review-queue/review-queue-01.png">
+      <source src="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/review-queue/review-queue.mp4" type="video/mp4">
+      Your browser does not support the video element.
+    </video>
+  </div>
+  <ol class="step-list">
+    <li id="review-queue-step-1">
+      <figure data-step-file="review-queue/review-queue-01.png" data-media-key="review-queue/review-queue-01.png">
+        <a class="image-link" href="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/review-queue/review-queue-01.png" aria-label="Open screenshot full size">
+          <img src="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/review-queue/review-queue-01.png" alt="Review a submitted task and record a decision: The review queue lists submitted tasks with their status pills." loading="lazy" decoding="async">
+        </a>
+        <figcaption>The review queue lists submitted tasks with their status pills.</figcaption>
+      </figure>
+    </li>
+    <li id="review-queue-step-2">
+      <figure data-step-file="review-queue/review-queue-02.png" data-media-key="review-queue/review-queue-02.png">
+        <a class="image-link" href="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/review-queue/review-queue-02.png" aria-label="Open screenshot full size">
+          <img src="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/review-queue/review-queue-02.png" alt="Review a submitted task and record a decision: Selecting a task loads the evidence, lifecycle fields, and task history." loading="lazy" decoding="async">
+        </a>
+        <figcaption>Selecting a task loads the evidence, lifecycle fields, and task history.</figcaption>
+      </figure>
+    </li>
+    <li id="review-queue-step-3">
+      <figure data-step-file="review-queue/review-queue-03.png" data-media-key="review-queue/review-queue-03.png">
+        <a class="image-link" href="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/review-queue/review-queue-03.png" aria-label="Open screenshot full size">
+          <img src="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/review-queue/review-queue-03.png" alt="Review a submitted task and record a decision: Choose a decision and write the decision note; the record stays yours." loading="lazy" decoding="async">
+        </a>
+        <figcaption>Choose a decision and write the decision note; the record stays yours.</figcaption>
+      </figure>
+    </li>
+    <li id="review-queue-step-4">
+      <figure data-step-file="review-queue/review-queue-04.png" data-media-key="review-queue/review-queue-04-crop.png">
+        <a class="image-link" href="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/review-queue/review-queue-04-crop.png" aria-label="Open screenshot full size">
+          <img src="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/review-queue/review-queue-04-crop.png" alt="Review a submitted task and record a decision: Recording the decision returns you to the queue for the next task." loading="lazy" decoding="async">
+        </a>
+        <figcaption>Recording the decision returns you to the queue for the next task.</figcaption>
+      </figure>
+    </li>
+  </ol>
+</section>
+
+<section class="guide-section flow-section" id="ai-review-panel">
+  <h2>Read the Claude review panel before deciding</h2>
+  <div class="video-frame">
+    <video controls preload="none" poster="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/ai-review-panel/ai-review-panel-01.png">
+      <source src="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/ai-review-panel/ai-review-panel.mp4" type="video/mp4">
+      Your browser does not support the video element.
+    </video>
+  </div>
+  <ol class="step-list">
+    <li id="ai-review-panel-step-1">
+      <figure data-step-file="ai-review-panel/ai-review-panel-01.png" data-media-key="ai-review-panel/ai-review-panel-01.png">
+        <a class="image-link" href="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/ai-review-panel/ai-review-panel-01.png" aria-label="Open screenshot full size">
+          <img src="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/ai-review-panel/ai-review-panel-01.png" alt="Read the Claude review panel before deciding: The Claude recommendation panel is labelled AI-generated and never decides for you." loading="lazy" decoding="async">
+        </a>
+        <figcaption>The Claude recommendation panel is labelled AI-generated and never decides for you.</figcaption>
+      </figure>
+    </li>
+    <li id="ai-review-panel-step-2">
+      <figure data-step-file="ai-review-panel/ai-review-panel-02.png" data-media-key="ai-review-panel/ai-review-panel-02.png">
+        <a class="image-link" href="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/ai-review-panel/ai-review-panel-02.png" aria-label="Open screenshot full size">
+          <img src="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/ai-review-panel/ai-review-panel-02.png" alt="Read the Claude review panel before deciding: Reasoning explains the recommendation in plain language." loading="lazy" decoding="async">
+        </a>
+        <figcaption>Reasoning explains the recommendation in plain language.</figcaption>
+      </figure>
+    </li>
+    <li id="ai-review-panel-step-3">
+      <figure data-step-file="ai-review-panel/ai-review-panel-03.png" data-media-key="ai-review-panel/ai-review-panel-03.png">
+        <a class="image-link" href="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/ai-review-panel/ai-review-panel-03.png" aria-label="Open screenshot full size">
+          <img src="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/ai-review-panel/ai-review-panel-03.png" alt="Read the Claude review panel before deciding: Source checks record every outcome, including what could not be checked." loading="lazy" decoding="async">
+        </a>
+        <figcaption>Source checks record every outcome, including what could not be checked.</figcaption>
+      </figure>
+    </li>
+    <li id="ai-review-panel-step-4">
+      <figure data-step-file="ai-review-panel/ai-review-panel-04.png" data-media-key="ai-review-panel/ai-review-panel-04.png">
+        <a class="image-link" href="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/ai-review-panel/ai-review-panel-04.png" aria-label="Open screenshot full size">
+          <img src="https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev/ai-review-panel/ai-review-panel-04.png" alt="Read the Claude review panel before deciding: Use recommendation prefills the decision; Decide differently records disagreement — the note and Record button stay yours." loading="lazy" decoding="async">
+        </a>
+        <figcaption>Use recommendation prefills the decision; Decide differently records disagreement — the note and Record button stay yours.</figcaption>
+      </figure>
+    </li>
+  </ol>
+</section>
+
+<section class="guide-section prose-section" id="ai-evidence-checks">
+  <h2>How the AI evidence checks work</h2>
+  <p>Some tasks in the review queue carry an AI recommendation beside the human controls. Here is what that recommendation is, and what it is not.</p>
+<p>The AI review is advisory. It cannot accept a claim, change a task, edit evidence, or record a decision — the tables it writes to are append-only annotations, and the portal renders them beside the evidence, never in place of it. Every recommendation you see was produced by a versioned prompt against one specific version of the claim; if the claim is revised, the old recommendation stays attached to the old version and a new review must be run. The human decision is the gate: when you record a decision you also record whether you followed, disagreed with, or did not consider the AI recommendation, and that agreement record is part of the audit trail.</p>
+<p>Each recommendation carries its evidence work. For every source in the claim, the reviewer run records what was checked (existence, date support, location plausibility), how it was checked (fetched over the web, assessed by the model, or not checked), and what the check found (supported, not supported, unclear, unreachable, or requires human access). A source that was not checked is recorded as not checked — never silently passed. If a fetched page contains text that tries to instruct the AI, that content is treated as data, and the human decision remains the gate.</p>
+<p>Two further guards matter for this project. First, the kastom / cultural-sensitivity gate: where a claim touches culturally sensitive material, the AI does not judge the cultural question; the review is deferred and the portal shows &quot;Requires human cultural judgement&quot;. Second, restricted material never leaves the deployment: sources flagged restricted are not fetched by the runner at all.</p>
+</section>
+
+<section class="guide-section prose-section" id="decision-records-and-hashes">
+  <h2>How decisions are recorded and hashed</h2>
+  <p>Every consequential act in the portal leaves a verifiable trail, at four layers.</p>
+<ol class="prose-list">
+  <li><strong>Sources.</strong> Raw source files (census scans, registers) are archived with sha256 checksums in durable storage; the checksum in the manifest must match the archived file.</li>
+  <li><strong>Claims.</strong> Imported evidence carries a content hash and a source claim key; a re-imported duplicate is detected by hash rather than by trust.</li>
+  <li><strong>Decisions.</strong> From July 2026, every review decision is hashed at the moment it is written: the decision&#x27;s content fields (what was decided, about which task and evidence, by which reviewer, when) are serialised in a canonical order and the sha256 of that serialisation is stored on the row. Anyone holding an exported decision can recompute the hash from the row&#x27;s own fields; if a stored decision were altered after the fact, its hash would no longer match.</li>
+  <li><strong>Exports.</strong> Data leaves the system only in frozen export batches: a batch lists exactly which tasks and decisions it contains, and freezing it stamps the tasks exported and writes the event to the append-only task log.</li>
+</ol>
+<p>Alongside the hashes, the task event log records every transition — imported, claimed, drafted, submitted, decided, exported — with actor, role, time, and reason. RAs see this history anonymised (what happened and when, by role); reviewers and the PI see full attribution.</p>
+</section>
+
+<section class="guide-section prose-section" id="change-class">
+  <h2>Genuine change versus map correction</h2>
+  <p class="section-note">RAs answer this question on every existence-changing claim:</p>
+  <p>When your evidence adds or removes a place, the form asks: what kind of claim is this? The answer drives the annual September census.</p>
+<ul class="prose-list">
+  <li><strong>Genuine change</strong> — the place actually opened, closed, or changed use around a date. These are the events the census counts: real gain and loss of places of worship.</li>
+  <li><strong>Map correction</strong> — the world did not change; the map record was wrong or incomplete (a missed place, a double count, a wrong location). Corrections rewrite the historical record; they are never counted as gain or loss.</li>
+  <li><strong>Can&#x27;t tell yet</strong> — the honest default. Leave it selected unless your evidence supports one of the other two; a reviewer or a later source can upgrade it.</li>
+</ul>
+<p>If this distinction were ignored, every improvement in the map would masquerade as religious change — a wave of &quot;new&quot; places that were always there. Answering it carefully is one of the most consequential things an RA does in this project.</p>
+</section>
+
+<section class="guide-section prose-section" id="seeding-and-exports">
+  <h2>Seeding and exports</h2>
+  <p>Batch seeding and export freezing run from the deployment CLI and are documented in <a href="https://github.com/go-bayes/places-of-worship/blob/main/docs/portal-batch-import-and-corrections.md">docs/portal-batch-import-and-corrections.md</a>.</p>
+</section>
+  </main>
+  <footer>
+    <p>Places of Worship research project · guides generated 2026-07-08 · media: demonstration data only</p>
+  </footer>
+</body>
+</html>
