@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { internalMutation } from "./_generated/server";
+import { defaultTargetYears } from "./lib/countryYears";
 
 // dev-only seeding for LOCAL/dev deployments: one reviewable task with a
 // submitted draft, so the batch-review dry run has a queue to triage.
@@ -37,7 +38,7 @@ export const seedReviewQueueFixture = internalMutation({
       batch_id: "devseed-batch",
       country_code: countryCode,
       source_kind: "manual_curator",
-      target_years: [2013, 2018, 2023],
+      target_years: defaultTargetYears(countryCode),
       status: "active",
       created_by: userId,
       created_at: now,
@@ -50,7 +51,7 @@ export const seedReviewQueueFixture = internalMutation({
       task_type: "verify_existing_site",
       priority: "medium",
       status: "needs_review",
-      target_years: [2013, 2018, 2023],
+      target_years: defaultTargetYears(countryCode),
       name: "St Andrew's on The Terrace",
       locality: "Wellington",
       geometry: { type: "Point", coordinates: [174.7772, -41.2846] },

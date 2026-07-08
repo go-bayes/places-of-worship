@@ -71,9 +71,14 @@ and export bundles. Accepted changes become research data only after export,
 | `addTaskNote` | mutation | `ra`, `reviewer`, `curator`, `admin` | Add a size-limited note to the task history without changing the data contract. | `task_events` |
 | `createManualCandidateTask` | mutation | `ra`, `reviewer`, `curator`, `admin` | Create a provisional candidate task for a nominated missing place of worship. | `tasks`, `task_events` |
 
-Current caveat: `createManualCandidateTask` still has temporary target-year
-fallbacks for New Zealand and Vanuatu. Move these values into country
-configuration before wider country rollout.
+Target-year defaults: when a caller omits `targetYears`,
+`createManualCandidateTask` resolves the country's shipped census waves
+from `convex/lib/countryYears.ts` (all nine live countries) and throws
+for unknown country codes rather than inheriting another country's
+years. Callers should still pass `targetYears` explicitly; the portal
+does. `countryYears.ts` mirrors the portal's `COUNTRY_CONFIGS`
+`targetYears` — update both in the same commit when a country's waves
+change.
 
 ## `evidence.ts`
 

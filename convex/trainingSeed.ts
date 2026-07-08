@@ -10,9 +10,10 @@ import {
   assertMaxString,
 } from "./lib/limits";
 import { appendTaskEvent } from "./lib/taskEvents";
+import { DEFAULT_TARGET_YEARS } from "./lib/countryYears";
 
 const TRAINING_BATCH_ID = "guy-vu-training-001";
-const TARGET_YEARS = [1989, 1999, 2009, 2020];
+const TARGET_YEARS = DEFAULT_TARGET_YEARS.VU;
 
 type PointGeometry = {
   type: "Point";

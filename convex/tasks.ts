@@ -14,6 +14,7 @@ import {
   taskType,
 } from "./model";
 import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser } from "./lib/auth";
+import { defaultTargetYears } from "./lib/countryYears";
 import {
   MEDIUM_TEXT_MAX,
   SHORT_TEXT_MAX,
@@ -913,7 +914,7 @@ export const createManualCandidateTask = mutation({
       assigned_to: user._id,
       claimed_by: user._id,
       claimed_at: now,
-      target_years: args.targetYears ?? (args.countryCode === "VU" ? [1989, 1999, 2009, 2020] : [2013, 2018, 2023]),
+      target_years: args.targetYears ?? defaultTargetYears(args.countryCode),
       candidate_site_id: candidateSiteId,
       name: args.name,
       address: args.address,
