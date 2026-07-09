@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Germany Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Germany's Zensus RELZG2 item records legal membership in a
+    // public-law religious society (Evangelische Kirche or the
+    // Roemisch-katholische Kirche), never belief or attendance. The two
+    // waves, 2011 and 2022, sit on separate period Kreis boundary
+    // vintages (412 vs 400 Kreise) with no cross-vintage concordance, so
+    // each wave is its own census level pointed at a filtered, per-year
+    // summary file (apps/regions/de/data/area_summary_kreis_2011.json,
+    // _2022.json — derived views of the committed area_summary_kreis.json,
+    // see scripts/build_de_level_summaries.py) rather than one level
+    // offering both years against a single boundary set. no_religion_percent
+    // is not shipped: the RELZG2 residual category combines other
+    // religions, no public-law membership and no response, so it is not a
+    // no-religion count, and no change metric is offered because the two
+    // waves cannot be compared area-by-area across a boundary reform.
+    window.REGION_CONFIG = {
+      countryCode: "DE",
+      title: "Places of Worship | Germany Research Map",
+      center: [10.45, 51.16],
+      initialZoom: 5.4,
+      censusLevels: {
+        kreis_2011: {
+          label: "Kreis (2011 boundaries)",
+          boundaries: "data/de_kreis_2011.geojson",
+          summary: "data/area_summary_kreis_2011.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Zensus 2011 table 1000X-1014, GEOLK1 Kreis export (412 Kreise, 9 May 2011 territory) · Boundaries © GeoBasis-DE / BKG, VG250 2011-01-01 (dl-de/by-2-0)"
+        },
+        kreis_2022: {
+          label: "Kreis (2022 boundaries)",
+          boundaries: "data/de_kreis_2022.geojson",
+          summary: "data/area_summary_kreis_2022.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Zensus 2022 table 1000A-1018, GEOLK4 Kreis export (400 Kreise, 15 May 2022 territory) · Boundaries © GeoBasis-DE / BKG, VG250 2022-01-01 (dl-de/by-2-0)"
+        }
+      },
+      defaultLevel: "kreis_2022",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2022,
+      // only one metric ships in this product: no_religion_percent is
+      // withheld because RELZG2's residual category is not a no-religion
+      // count, and religious_change is withheld because the two waves
+      // use separate period boundary vintages with no area-by-area
+      // correspondence
+      metricsAvailable: [
+        "religious_affiliation_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Members of Protestant or Catholic public-law church (%)",
+          note: "legal membership in the Evangelische Kirche (öffentlich-rechtlich) or the Römisch-katholische Kirche (öffentlich-rechtlich), 100 × (REL-EV-OR + REL-RK-OR) / Insgesamt from the Zensus compact RELZG2 item; this is registered public-law church membership, never belief or attendance"
+        }
+      },
+      popupDenominatorNote: "Percentages use the Zensus compact RELZG2 table total (Insgesamt) for the Kreis and wave. RELZG2 has three compact categories: Evangelische Kirche (öffentlich-rechtlich), Römisch-katholische Kirche (öffentlich-rechtlich), and Sonstige, keine, ohne Angabe; the residual combines other religions, no public-law membership, and no response, so no separate no-religion share is shown.",
+      cityPresets: [
+        { label: "Berlin", coords: [13.4050, 52.5200], zoom: 10 },
+        { label: "Hamburg", coords: [9.9937, 53.5511], zoom: 10 },
+        { label: "Munich", coords: [11.5820, 48.1351], zoom: 10 },
+        { label: "Cologne", coords: [6.9603, 50.9375], zoom: 10 },
+        { label: "Frankfurt", coords: [8.6821, 50.1109], zoom: 10 },
+        { label: "Stuttgart", coords: [9.1829, 48.7758], zoom: 10 },
+        { label: "Dusseldorf", coords: [6.7735, 51.2277], zoom: 10 },
+        { label: "Leipzig", coords: [12.3731, 51.3397], zoom: 10 },
+        { label: "Dresden", coords: [13.7373, 51.0504], zoom: 10 },
+        { label: "Hanover", coords: [9.7320, 52.3759], zoom: 10 }
+      ],
+      geocode: { country: "de", biasLngLat: [10.45, 51.16] },
+      onboarding: {
+        title: "Germany research map",
+        intro: "Zensus legal public-law church membership overlays for Germany's Kreise (districts), 2011 and 2022. This is registered membership in the Evangelische Kirche or the Römisch-katholische Kirche, never belief or attendance.",
+        bullets: [
+          "Kreise are shaded by the share legally belonging to the Protestant or Catholic public-law church.",
+          "2011 and 2022 sit on separate period Kreis boundary vintages (412 vs 400 Kreise), so each wave is its own geography level; switch the geography control to move between them.",
+          "No no-religion layer is shown: the residual category combines other religions, no public-law membership, and no response, so it is not a no-religion count.",
+          "No change-since-previous-wave metric is shown: the two waves' boundary sets have no area-by-area correspondence.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric, geography and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      datedPlaces: "data/dated_places.geojson",
+      censusSourceAttribution: 'Zensus religion © <a href="https://ergebnisse.zensus2022.de/datenbank/online/" target="_blank" rel="noopener">Zensusdatenbank</a>, Statistische Ämter des Bundes und der Länder (dl-de/by-2-0) &middot; Boundaries © <a href="https://gdz.bkg.bund.de/index.php/default/digitale-geodaten/verwaltungsgebiete/verwaltungsgebiete-1-250-000-stand-01-01-vg250-01-01.html" target="_blank" rel="noopener">GeoBasis-DE / BKG, VG250</a> (dl-de/by-2-0)',
+      censusFlagNote: "* RELZG2 records legal membership in a public-law religious society, not belief or attendance. 2011 (412 Kreise, 9 May 2011 territory) and 2022 (400 Kreise, 15 May 2022 territory) use separate period boundary vintages with no cross-vintage concordance, so each wave is offered as its own geography level and no area-by-area change metric is shown. The published Deutschland national rows do not sum exactly from the Kreis rows: Deutschland totals include persons assignable to no Kreis (for example personnel stationed abroad), and the Zensus results database documents subpopulation non-additivity; see docs/manifests/de-census-religion-2011-2022.json."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710b"></script>
+</body>
+</html>

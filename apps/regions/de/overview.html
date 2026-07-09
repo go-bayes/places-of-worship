@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Germany map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Germany research map; every string traces to
+    // research/countries/de/README.md, docs/manifests/de-census-religion-2011-2022.json,
+    // or the live REGION_CONFIG in apps/regions/de/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "DE",
+      countryName: "Germany",
+      mapHref: "./",
+      intro: "Zensus legal public-law church membership overlays for Germany's Kreise (districts), 2011 and 2022. RELZG2, the compact Zensus religion item, records legal membership in the Evangelische Kirche (öffentlich-rechtlich) or the Römisch-katholische Kirche (öffentlich-rechtlich), never belief, practice, or attendance, and never the voluntary 2011 faith item that some Länder collected separately.",
+      facts: {
+        waves: "Zensus 2011 and 2022 (2 waves)",
+        geographies: "Kreis, on each wave's own period boundary vintage: 412 Kreise (9 May 2011 territory), 400 Kreise (15 May 2022 territory)",
+        metrics: "Members of Protestant or Catholic public-law church (%)"
+      },
+      reading: [
+        "Kreise are shaded by the share of the Zensus compact table total legally belonging to the Evangelische Kirche or the Römisch-katholische Kirche, both public-law religious societies: 100 × (REL-EV-OR + REL-RK-OR) / Insgesamt.",
+        "RELZG2 has three compact categories: Evangelische Kirche (öffentlich-rechtlich), Römisch-katholische Kirche (öffentlich-rechtlich), and Sonstige, keine, ohne Angabe. The third category combines other religions, no public-law membership, and no response, so it is not a no-religion count and no no-religion layer is shown.",
+        "2011 and 2022 use separate period Kreis boundary vintages rather than a cross-vintage concordance, so cross-vintage aggregation is avoided across Mecklenburg-Vorpommern's September 2011 reform, the 2016 Göttingen merger, the 2021 Eisenach change, and other Kreis-set changes. Each wave is offered as its own geography level on the map (Kreis, 2011 boundaries; Kreis, 2022 boundaries), and no area-by-area change metric is shown because the two boundary sets do not correspond area by area.",
+        "The 2011 product uses the main de1101 Kreis layer because table 1000X-1014 is dated 9 May 2011, before the September 2011 Mecklenburg-Vorpommern reform. The 2022 product uses the 2022 VG250 Kreis layer for the 15 May 2022 Zensus geography.",
+        "Regional sums do not exactly match the published Deutschland national rows. The tested regional rows use content code PRS018 and the tested Deutschland rows use PRS001; Zensus metadata labels both codes Persons. The metadata-supported explanation is that Deutschland totals include persons assignable to no Kreis, including German personnel stationed abroad, and that the Zensus results database documents subpopulation non-additivity. The 2011 regional sums differ from the Deutschland row by -9,698 total, +17 Protestant, -6 Catholic, -9,662 residual; the 2022 regional sums differ by -8,258 total, +4 Protestant, +10 Catholic, -8,258 residual. Protestant and Catholic regional sums match the Deutschland rows within ±17 persons, which supports category integrity. The build preserves the regional source counts and does not distribute the residual across Kreise; see docs/manifests/de-census-religion-2011-2022.json.",
+        "No governed Germany OpenStreetMap place-of-worship snapshot is included in this release, so place-density metrics are hidden rather than shown as null."
+      ],
+      sources: [
+        {
+          name: "Zensusdatenbank table 1000X-1014: Personen: Religion, GEOLK1 Kreis export",
+          href: "https://ergebnisse.zensus2022.de/datenbank/online/",
+          construct: "Legal membership in a public-law religious society (RELZG2), Landkreise und kreisfreie Städte",
+          years: "2011 (9 May 2011 territory, 412 Kreise)",
+          licence: "Datenlizenz Deutschland - Namensnennung - Version 2.0 (dl-de/by-2-0); attribution: Statistische Ämter des Bundes und der Länder"
+        },
+        {
+          name: "Zensusdatenbank table 1000A-1018: Personen, GEOLK4 Kreis export",
+          href: "https://ergebnisse.zensus2022.de/datenbank/online/",
+          construct: "Legal membership in a public-law religious society (RELZG2), Landkreise u. krsfr. Städte",
+          years: "2022 (15 May 2022 territory, 400 Kreise)",
+          licence: "Datenlizenz Deutschland - Namensnennung - Version 2.0 (dl-de/by-2-0); attribution: Statistische Ämter des Bundes und der Länder"
+        },
+        {
+          name: "BKG VG250 annual archive, Kreis layer",
+          href: "https://gdz.bkg.bund.de/index.php/default/digitale-geodaten/verwaltungsgebiete/verwaltungsgebiete-1-250-000-stand-01-01-vg250-01-01.html",
+          construct: "Boundary geometry, matched to each wave's Zensus geography date",
+          years: "2011-01-01 (412 features), 2022-01-01 (400 features)",
+          licence: "Datenlizenz Deutschland - Namensnennung - Version 2.0 (dl-de/by-2-0); attribution: © GeoBasis-DE / BKG"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Statistische Ämter des Bundes und der Länder, <a href=\"https://ergebnisse.zensus2022.de/datenbank/online/\" target=\"_blank\" rel=\"noopener\">Zensusdatenbank</a>; boundaries from <a href=\"https://gdz.bkg.bund.de/\" target=\"_blank\" rel=\"noopener\">Bundesamt für Kartographie und Geodäsie (BKG)</a>.",
+        tables: "Zensusdatenbank tables 1000X-1014 (GEOLK1, 2011) and 1000A-1018 (GEOLK4, 2022), variable RELZG2 (legal membership in a public-law religious society), compact categories REL-EV-OR, REL-RK-OR and REL-SONST-X. BKG VG250 annual Kreis boundary archives, 2011-01-01 and 2022-01-01 vintages.",
+        licence: "Zensus religion data and BKG VG250 boundaries are both released under Datenlizenz Deutschland - Namensnennung - Version 2.0 (dl-de/by-2-0); boundary attribution: © GeoBasis-DE / BKG.",
+        script: "scripts/build_de_area_summary.R",
+        manifests: [
+          { label: "de-census-religion-2011-2022", href: "docs/manifests/de-census-religion-2011-2022.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "No governed Germany OpenStreetMap place-of-worship snapshot is included in this release, so there is no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
