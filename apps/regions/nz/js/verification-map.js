@@ -157,6 +157,31 @@ const COUNTRY_CONFIGS = {
             note: "Evidence appears to support closure or changed use by the target year; reviewer to confirm dates and status.",
         },
     },
+    gh: {
+        countryCode: "GH",
+        countryName: "Ghana",
+        targetYears: ["2021"],
+        defaultTargetYear: "2021",
+        dataPath: "",
+        mapCentre: [7.9, -1.2],
+        mapZoom: 6,
+        collectionBatch: "gh-map-workbench-demo",
+        sourceDatasetId: "gh_static_verification_map",
+        mapSource: "gh_verification_static_map_workbench",
+        nominationSource: "gh_verification_static_map_nomination",
+        defaultAssignmentBatchId: "gh-source-first-test-001",
+        assignmentHeading: "Ghana verification tasks",
+        // single shipped wave: the loss action reads as closed/changed
+        // use by the target year rather than a two-year contrast
+        temporalLossAction: {
+            value: "target_year_loss_or_changed_use",
+            label: "Closed or changed use by the target year",
+            statuses: {
+                "2021": "absent",
+            },
+            note: "Evidence appears to support closure or changed use by the target year; reviewer to confirm dates and status.",
+        },
+    },
     ie: {
         countryCode: "IE",
         countryName: "Ireland",

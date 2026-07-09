@@ -8,6 +8,7 @@
         br: { code: "BR", label: "Brazil" },
         ca: { code: "CA", label: "Canada" },
         cz: { code: "CZ", label: "Czechia" },
+        gh: { code: "GH", label: "Ghana" },
         ie: { code: "IE", label: "Ireland" },
         in: { code: "IN", label: "India" },
         ke: { code: "KE", label: "Kenya" },

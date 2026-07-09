@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Ghana Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    window.REGION_CONFIG = {
+      countryCode: "GH",
+      title: "Places of Worship | Ghana Research Map",
+      center: [-1.2, 7.9],
+      initialZoom: 6.4,
+      censusLevels: {
+        region: {
+          label: "Region",
+          boundaries: "data/gh_region_2019.geojson",
+          summary: "data/area_summary_region.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries © geoBoundaries GHA ADM1 (CC BY-SA 2.0, source OpenStreetMap contributors) · census religion from GSS 2021 PHC General Report Vol. 3C, table 5.7"
+        }
+      },
+      defaultLevel: "region",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "all named religions (Catholic, Protestant, Pentecostal/Charismatic, Other Christian, Islam, Traditionalist, Other) as a share of the persons counted in the religion table"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "the No Religion group as a share of the persons counted in the religion table"
+        }
+      },
+      popupDenominatorNote: "Percentages use the GSS table 5.7 regional total (all locality types, both sexes). Religious affiliation combines every named religion; the census allocates every person to one of eight groups, so there is no not-stated category. Volume 3C publishes religion at region level only.",
+      cityPresets: [
+        { label: "Accra", coords: [-0.1870, 5.6037], zoom: 11 },
+        { label: "Kumasi", coords: [-1.6163, 6.6885], zoom: 11 },
+        { label: "Tamale", coords: [-0.8393, 9.4008], zoom: 11 },
+        { label: "Takoradi", coords: [-1.7554, 4.8845], zoom: 11 },
+        { label: "Cape Coast", coords: [-1.2466, 5.1053], zoom: 11 },
+        { label: "Sunyani", coords: [-2.3268, 7.3349], zoom: 11 },
+        { label: "Ho", coords: [0.4713, 6.6008], zoom: 11 },
+        { label: "Bolgatanga", coords: [-0.8514, 10.7856], zoom: 11 }
+      ],
+      geocode: { country: "gh", biasLngLat: [-1.2, 7.9] },
+      onboarding: {
+        title: "Ghana research map",
+        intro: "Census religion overlays for Ghana at region level, built from the Ghana Statistical Service 2021 Population and Housing Census General Report Volume 3C, table 5.7.",
+        bullets: [
+          "Areas are shaded by religious affiliation or no religion among the persons counted in the religion table.",
+          "Religious affiliation combines all named religions: Catholic, Protestant, Pentecostal/Charismatic, Other Christian, Islam, Traditionalist and Other. Christian is a census subtotal of the four Christian groups.",
+          "No religion is the census's No Religion group; the census allocates every person to one of eight groups, so there is no not-stated category.",
+          "Volume 3C publishes religion at region level only; the 16 regions are the post-2019 regional structure.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" },
+        { id: "verification-link", label: "Submit evidence", href: "verification.html", title: "Open the RA verification map" },
+        { id: "review-link", label: "Review evidence", href: "review.html", title: "Review submitted evidence" }
+      ],
+      censusSourceAttribution: 'Census religion from <a href="https://census2021.statsghana.gov.gh/" target="_blank" rel="noopener">GSS 2021 PHC General Report Vol. 3C, table 5.7</a> &middot; Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries GHA ADM1</a> (CC BY-SA 2.0, source OpenStreetMap contributors) &middot; GSS census report, open download, attribution requested, no explicit reuse licence stated',
+      censusFlagNote: "* Percentages use the table 5.7 regional total (all locality types, both sexes). The census allocates every person to one of eight religion groups, so there is no not-stated category. Volume 3C publishes religion at region level only."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260709e"></script>
+</body>
+</html>

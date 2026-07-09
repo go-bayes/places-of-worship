@@ -1,0 +1,254 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:gh-census-religion:gh:2021:gss-vol3c-table-5-7",
+  "dataset_id": "gh-census-religion:gh:2021:gss-vol3c-table-5-7",
+  "dataset_version_id": "gh-census-religion:gh:2021:gss-vol3c-table-5-7:415848505920",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "gh-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "GH"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-09T02:46:58Z",
+  "created_by": "scripts/build_gh_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_gh_area_summary.R",
+    "git_commit": null,
+    "command": "Rscript scripts/build_gh_area_summary.R",
+    "parameters": {
+      "waves": "2021",
+      "region_boundary_set": "gh-region-2019-geoboundaries-adm1",
+      "region_boundary_simplification_tolerance_m": 50,
+      "pdf_extraction": "poppler pdftotext -layout, table 5.7 Both Sexes / all-locality block",
+      "denominator": "table 5.7 regional total (no not-stated category)",
+      "omitted_metrics": ["religious_change", "places_per_10000_residents", "place_density_per_sq_km"]
+    },
+    "software_versions": {
+      "r": "4.6.1",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "pdftotext": "poppler pdftotext (system)"
+    }
+  },
+  "source": {
+    "provider": "Ghana Statistical Service (GSS); geoBoundaries (William & Mary geoLab)",
+    "source_dataset_ids": ["gss-2021-phc-vol3c-table-5-7-religion-by-region", "geoboundaries-gha-adm1-2019"],
+    "source_urls": ["https://census2021.statsghana.gov.gh/gssmain/fileUpload/reportthemelist/2021%20PHC%20General%20Report%20Vol%203C_Background%20Characteristics_181121.pdf", "https://census2021.statsghana.gov.gh/", "https://www.geoboundaries.org/api/current/gbOpen/GHA/ADM1/", "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GHA/ADM1/geoBoundaries-GHA-ADM1.geojson"],
+    "retrieved_at": "2026-07-09T00:00:00Z",
+    "licence": "GSS 2021 Population and Housing Census General Report Volume 3C (Background Characteristics), table 5.7 (population by religious affiliation, sex and region). The Ghana Statistical Service publishes the census report for open download on the census portal; no explicit reuse licence is stated, so the derived product attributes GSS and links the source of record. Boundaries are geoBoundaries GHA ADM1 (16 post-2019 regions), Creative Commons Attribution-ShareAlike 2.0, boundary source OpenStreetMap contributors.",
+    "citation": "GSS, 2021 PHC General Report Volume 3C, Table 5.7; geoBoundaries GHA ADM1 (gbOpen).",
+    "raw_redistribution": "The census PDF and the geoBoundaries source GeoJSON are not committed. They remain in data/raw/gh_census/ and await any project-controlled raw archive upload."
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/gh_census/gh_2021_vol3c.pdf",
+      "url": "https://census2021.statsghana.gov.gh/gssmain/fileUpload/reportthemelist/2021%20PHC%20General%20Report%20Vol%203C_Background%20Characteristics_181121.pdf",
+      "format": "pdf",
+      "bytes": 3563303,
+      "sha256": "9c489543914aebc323bbbb8562d758ddb739f7102bb9c01a8f3f083d9ff6ced3",
+      "row_count": 16,
+      "source_dataset_id": "gss-2021-phc-vol3c-table-5-7-religion-by-region",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 PHC General Report Volume 3C PDF (GSS census portal); table 5.7 yields the eight religion groups for the 16 regions plus the national Number column."
+    },
+    {
+      "uri": "data/raw/gh_census/geoBoundaries-GHA-ADM1.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GHA/ADM1/geoBoundaries-GHA-ADM1.geojson",
+      "format": "geojson",
+      "bytes": 2093457,
+      "sha256": "ee73028cfcfbfc5a5bb851c118d47136086de499d23a5e0e27dc2876b6796bca",
+      "row_count": 16,
+      "source_dataset_id": "geoboundaries-gha-adm1-2019",
+      "used_in_public_product": true,
+      "periods": "2019",
+      "notes": "geoBoundaries GHA ADM1 GeoJSON; 16 region features with ISO 3166-2 shapeISO codes, matching the post-2019 regional structure."
+    },
+    {
+      "uri": "data/raw/gh_census/gb_gha_adm1_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/GHA/ADM1/",
+      "format": "json",
+      "bytes": 1669,
+      "sha256": "d7bee38893595ae211fd16d5a88c214af835799a1345a4dbefbb3fa1fc4a4ab5",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-gha-adm1-2019",
+      "used_in_public_product": false,
+      "periods": "2019",
+      "notes": "geoBoundaries GHA ADM1 metadata; records the CC BY-SA 2.0 licence and the OpenStreetMap boundary source."
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/gh/data/area_summary_region.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 25126,
+      "sha256": "4158485059205cd1444733033a2110c204012c69d1b8450fb25f9a45fdd799d9",
+      "row_count": 16,
+      "content": "Ghana region area summary with GSS census 2021 religious-affiliation and no-religion metrics.",
+      "privacy": "public",
+      "licence_status": "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0"
+    },
+    {
+      "uri": "repo:apps/regions/gh/data/area_summary_region.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 8539,
+      "sha256": "f6560639fdb14d53768187198339ec8777dcaace9e645c919b2a0344a8355c30",
+      "row_count": 16,
+      "content": "Flattened Ghana region area summary with GSS census 2021 religious-affiliation and no-religion metrics.",
+      "privacy": "public",
+      "licence_status": "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0"
+    },
+    {
+      "uri": "repo:apps/regions/gh/data/gh_region_2019.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 360530,
+      "sha256": "3ddb73e5f14c6aa15f09be755e56b114a5029c6842ea67b5139dde14e88049b0",
+      "row_count": 16,
+      "content": "Simplified Ghana region boundary GeoJSON derived from geoBoundaries GHA ADM1 (16 post-2019 regions).",
+      "privacy": "public",
+      "licence_status": "geoboundaries_cc_by_sa_2_0"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/gh/data/area_summary_region.json",
+      "sha256": "4158485059205cd1444733033a2110c204012c69d1b8450fb25f9a45fdd799d9",
+      "built_by": "scripts/build_gh_area_summary.R",
+      "notes": "16 region reporting units x 1 census year; denominator is the table 5.7 regional total."
+    },
+    {
+      "uri": "repo:apps/regions/gh/data/gh_region_2019.geojson",
+      "sha256": "3ddb73e5f14c6aa15f09be755e56b114a5029c6842ea67b5139dde14e88049b0",
+      "built_by": "scripts/build_gh_area_summary.R",
+      "notes": "16 geoBoundaries GHA ADM1 region features simplified at 50 m tolerance."
+    }
+  ],
+  "validation": {
+    "checks": ["Table 5.7 is the 2021 PHC General Report Volume 3C population-by-religious-affiliation-sex-and-region table; the Both Sexes / all-locality block gives the eight religion groups for the 16 regions plus a national Number column, parsed with pdftotext -layout.", "Every region's eight religion groups sum exactly to its printed regional total, and the eight national numbers sum exactly to the national total.", "Each religion group's 16 region values sum exactly to its printed national Number.", "The 16 region rows sum exactly to the national total for the denominator, religious affiliation, and no religion.", "All 16 census region rows join to the 16 geoBoundaries GHA ADM1 features by normalised name (the boundary ' Region' suffix dropped).", "The simplified region boundary GeoJSON writes to 360530 bytes after 50 m simplification.", "Percentages use the table 5.7 regional total as the denominator; the census allocates every person to one of eight groups, so nothing is excluded.", "The table 5.7 total (30753327) is 78692 below the enumerated 2021 population (30832019, Table 1.1); the gap is outside the religion table and there is no not-stated category within it.", "The 2021 census wave is the only wave shipped: 2010 and 2000 region religion use the pre-2019 ten-region geography and district religion for 2021 lives in the interactive StatsBank PxWeb table whose REST API returned server errors during this build, so those routes are deferred."],
+    "join_coverage": {
+      "region": [
+        {
+          "boundary_level": "region",
+          "year": 2021,
+          "matched_area_count": 16,
+          "expected_area_count": 16,
+          "missing_area_names": []
+        }
+      ]
+    },
+    "national_reconciliation": [
+      {
+        "year": 2021,
+        "metric": "population_total",
+        "region_sum": 30753327,
+        "national_total": 30753327,
+        "difference": 0
+      },
+      {
+        "year": 2021,
+        "metric": "religious_affiliation_count",
+        "region_sum": 30424606,
+        "national_total": 30424606,
+        "difference": 0
+      },
+      {
+        "year": 2021,
+        "metric": "no_religion_count",
+        "region_sum": 328721,
+        "national_total": 328721,
+        "difference": 0
+      }
+    ],
+    "national_excluded_share_percent": 0,
+    "boundary_validation": {
+      "source_gh_feature_count": 16,
+      "output_feature_count": 16,
+      "expected_feature_count": 16,
+      "output_bytes": 360530,
+      "simplification_tolerance_m": 50,
+      "unmatched_boundary_features": [],
+      "unmatched_census_areas": []
+    }
+  },
+  "construct_notes": [
+    "The public map displays two headline metrics for 2021: religious affiliation percent and no religion percent.",
+    "The denominator is the table 5.7 regional total (all locality types, both sexes); the census allocates every person to one of eight religion groups, so there is no not-stated category to exclude.",
+    "Religious affiliation combines the seven named-religion groups: Catholic, Protestant, Pentecostal/Charismatic, Other Christian, Islam, Traditionalist, and Other Religion. Christian in table 5.7 is a printed subtotal of the four Christian groups and is not double-counted.",
+    "No religion is the No Religion group.",
+    "The table 5.7 total (30753327) is 78692 below the enumerated 2021 population (30832019, Table 1.1); the gap sits outside the religion table and there is no not-stated category within table 5.7.",
+    "The finest religion geography published in Volume 3C is the region; district religion is not in Volume 3C. The 2021 StatsBank PxWeb table publishes religion by district, but its REST API returned server errors during this build, so the district route is recorded as deferred."
+  ],
+  "deferred_sources": [
+    {
+      "source_dataset_id": "gss-2021-statsbank-religion-by-district",
+      "url": "https://statsbank.statsghana.gov.gh/pxweb/en/PHC%202021%20StatsBank/PHC%202021%20StatsBank__Population/religion_table.px/",
+      "local_path": null,
+      "notes": "The 2021 StatsBank PxWeb table 'Population by Religious Affiliation, District, Region, Type of Locality, Age, Sex, and Education' publishes 2021 religion by district (261 units). Its PxWeb REST API returned HTTP 500/404 during this build, so a clean district extract was not attainable. A district product is deferred until the PxWeb API is queryable or a district analytical report PDF is located; the ADM2 boundary route is geoBoundaries GHA ADM2 (CC BY 4.0)."
+    },
+    {
+      "source_dataset_id": "gss-2010-phc-national-analytical-report-religion-by-region",
+      "url": "https://new-ndpc-static1.s3.amazonaws.com/pubication/2010PHC+National+Analytical+Report.pdf",
+      "local_path": null,
+      "notes": "The 2010 PHC National Analytical Report Table 4.17 publishes population by religious affiliation and region, but on the pre-2019 ten-region geography (Western, Central, Greater Accra, Volta, Eastern, Ashanti, Brong Ahafo, Northern, Upper East, Upper West). The 2019 reform split four of those regions into the 16 the 2021 map uses, so 2010 region religion is not comparable on the 2021 boundaries without a concordance. Deferred pending a ten-to-sixteen region crosswalk."
+    },
+    {
+      "source_dataset_id": "gss-2000-phc-religion-by-region",
+      "url": "https://statsbank.statsghana.gov.gh/censusatlas/Religion.html",
+      "local_path": null,
+      "notes": "The 2000 PHC published religion using the same eight-group scheme on the pre-2019 ten-region geography (GSS StatsBank census atlas and the IPUMS International 10% microdata sample). As with 2010, the ten-region geography is incompatible with the 2021 sixteen-region boundaries. Deferred pending a concordance."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0",
+  "downstream_status": "public",
+  "source_datasets": [
+    {
+      "source_dataset_id": "gss-2021-phc-vol3c-table-5-7-religion-by-region",
+      "name": "GSS 2021 PHC General Report Volume 3C (Background Characteristics), table 5.7: population by religious affiliation, sex and region",
+      "provider": "Ghana Statistical Service (GSS)",
+      "url": "https://census2021.statsghana.gov.gh/gssmain/fileUpload/reportthemelist/2021%20PHC%20General%20Report%20Vol%203C_Background%20Characteristics_181121.pdf",
+      "retrieval_date": "2026-07-09",
+      "local_path": "data/raw/gh_census/gh_2021_vol3c.pdf",
+      "licence": {
+        "name": "GSS census report, open download on the census portal; no explicit reuse licence stated",
+        "url": "https://census2021.statsghana.gov.gh/",
+        "attribution": "Ghana Statistical Service (GSS)"
+      },
+      "citation": "Ghana Statistical Service, 2021 Population and Housing Census General Report Volume 3C: Background Characteristics, Table 5.7.",
+      "access_limits": null,
+      "redistribution_limits": "The census PDF is not committed; the derived public product attributes GSS and links the source.",
+      "notes": "Table 5.7 gives the eight religion groups (Catholic, Protestant, Pentecostal/Charismatic, Other Christian, Islam, Traditionalist, Other Religion, No Religion) for all 16 regions plus a national Number column; parsed with pdftotext -layout from the Both Sexes / all-locality block. Every person is allocated, so no not-stated residual exists. District religion is not published in Volume 3C."
+    },
+    {
+      "source_dataset_id": "geoboundaries-gha-adm1-2019",
+      "name": "geoBoundaries GHA ADM1 (16 post-2019 regions)",
+      "provider": "geoBoundaries (William & Mary geoLab)",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GHA/ADM1/geoBoundaries-GHA-ADM1.geojson",
+      "retrieval_date": "2026-07-09",
+      "local_path": "data/raw/gh_census/geoBoundaries-GHA-ADM1.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution-ShareAlike 2.0 (CC BY-SA 2.0); boundary source OpenStreetMap contributors",
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/GHA/ADM1/",
+        "attribution": "geoBoundaries (gbOpen); boundary source OpenStreetMap contributors"
+      },
+      "citation": "Runfola et al., geoBoundaries GHA ADM1 (gbOpen), region boundaries.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed with CC BY-SA 2.0 attribution to OpenStreetMap contributors.",
+      "notes": "16 ADM1 regions matching the post-2019 regional structure the 2021 census reports; shapeISO carries the ISO 3166-2 GH-NN codes used as area codes. Boundary source OpenStreetMap, sourceDataUpdateDate 2023."
+    }
+  ],
+  "notes": "The committed products contain the derived region area summary and simplified boundary only. On-page attribution cites GSS and geoBoundaries (CC BY-SA 2.0, OpenStreetMap)."
+}

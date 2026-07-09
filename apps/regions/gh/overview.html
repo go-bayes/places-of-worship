@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Ghana map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the ghana research map; every string traces to
+    // research/countries/gh/README.md, the gh-census-religion-2021 manifest,
+    // or the live REGION_CONFIG in apps/regions/gh/index.html. authors nothing.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "GH",
+      countryName: "Ghana",
+      mapHref: "./",
+      intro: "Census religion overlays for Ghana at region level, built from the Ghana Statistical Service 2021 Population and Housing Census General Report Volume 3C, table 5.7.",
+      facts: {
+        waves: "Census 2021",
+        geographies: "Region (16)",
+        metrics: "Religious affiliation %, no religion %",
+        placeDots: "OpenStreetMap places (amenity=place_of_worship), ODbL-1.0; no governed place layer or place metric is built yet."
+      },
+      reading: [
+        "Areas are shaded by religious affiliation or no religion among the persons counted in the religion table.",
+        "Religious affiliation combines the seven named-religion groups in the census table: Catholic, Protestant, Pentecostal/Charismatic, Other Christian, Islam, Traditionalist and Other. No religion is the census's No Religion group. Christian in table 5.7 is a printed subtotal of the four Christian groups and is not counted twice.",
+        "Percentages use the region total (all locality types, both sexes) as the denominator. The census allocates every person to one of the eight religion groups, so there is no not-stated category to exclude.",
+        "The table 5.7 total (30,753,327) is 78,692 below the enumerated 2021 population (30,832,019, Table 1.1); that gap sits outside the religion table, which has no not-stated category within it.",
+        "Volume 3C publishes religion at region level only. The 2021 StatsBank publishes religion by district, but its data API returned server errors during this build, so district detail is deferred.",
+        "2010 and 2000 region religion use the pre-2019 ten-region geography; the 2019 reform split four regions into the 16 shown here, so earlier waves are not comparable on these boundaries and are deferred pending a concordance.",
+        "Boundaries are geoBoundaries GHA ADM1 regions (16 post-2019 regions, CC BY-SA 2.0, boundary source OpenStreetMap contributors)."
+      ],
+      sources: [
+        {
+          name: "GSS 2021 PHC General Report Volume 3C: Background Characteristics (table 5.7, religious affiliation by sex and region)",
+          href: "https://census2021.statsghana.gov.gh/",
+          construct: "Census religious affiliation",
+          years: "2021",
+          licence: "Open download from the GSS census portal; attribution requested, no explicit reuse licence stated"
+        },
+        {
+          name: "geoBoundaries GHA ADM1 regions",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/GHA/ADM1/",
+          construct: "Boundary geometry (16 post-2019 regions)",
+          years: "2019",
+          licence: "CC BY-SA 2.0 (boundary source OpenStreetMap contributors)"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Ghana Statistical Service, <a href=\"https://census2021.statsghana.gov.gh/\" target=\"_blank\" rel=\"noopener\">2021 Population and Housing Census</a>.",
+        tables: "General Report Volume 3C: Background Characteristics, table 5.7 (population by religious affiliation, sex and region). Each region's eight religion groups reconcile exactly to its printed regional total, and the 16 regions reconcile exactly to the national total.",
+        licence: "The GSS census report is an open download from the census portal with attribution requested and no explicit reuse licence stated; boundaries are geoBoundaries GHA ADM1 (16 post-2019 regions), CC BY-SA 2.0, boundary source OpenStreetMap contributors.",
+        script: "scripts/build_gh_area_summary.R",
+        manifests: [
+          { label: "gh-census-religion-2021", href: "docs/manifests/gh-census-religion-2021.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
