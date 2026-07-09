@@ -206,6 +206,31 @@ const COUNTRY_CONFIGS = {
             note: "Evidence appears to support worship use in one target year and absence or changed use in a later target year; reviewer to confirm dates and status.",
         },
     },
+    ke: {
+        countryCode: "KE",
+        countryName: "Kenya",
+        targetYears: ["2019"],
+        defaultTargetYear: "2019",
+        dataPath: "",
+        mapCentre: [0.2, 37.9],
+        mapZoom: 6,
+        collectionBatch: "ke-map-workbench-demo",
+        sourceDatasetId: "ke_static_verification_map",
+        mapSource: "ke_verification_static_map_workbench",
+        nominationSource: "ke_verification_static_map_nomination",
+        defaultAssignmentBatchId: "ke-source-first-test-001",
+        assignmentHeading: "Kenya verification tasks",
+        // single shipped wave: the loss action reads as closed/changed
+        // use by the target year rather than a two-year contrast
+        temporalLossAction: {
+            value: "target_year_loss_or_changed_use",
+            label: "Closed or changed use by the target year",
+            statuses: {
+                "2019": "absent",
+            },
+            note: "Evidence appears to support closure or changed use by the target year; reviewer to confirm dates and status.",
+        },
+    },
     kr: {
         countryCode: "KR",
         countryName: "South Korea",

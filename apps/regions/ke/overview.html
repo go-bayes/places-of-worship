@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Kenya map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the kenya research map; every string traces to
+    // research/countries/ke/README.md, the ke-census-religion-2019 manifest,
+    // or the live REGION_CONFIG in apps/regions/ke/index.html. authors nothing.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "KE",
+      countryName: "Kenya",
+      mapHref: "./",
+      intro: "Census religion overlays for Kenya at county level, built from the Kenya National Bureau of Statistics 2019 Population and Housing Census, Volume IV, table 2.30.",
+      facts: {
+        waves: "Census 2019",
+        geographies: "County (47)",
+        metrics: "Religious affiliation %, no religion %",
+        placeDots: "OpenStreetMap places (amenity=place_of_worship), ODbL-1.0; no governed place layer or place metric is built yet."
+      },
+      reading: [
+        "Areas are shaded by religious affiliation or no religion among people who stated a religion response.",
+        "Religious affiliation combines all named religions in the census table: Catholic, Protestant, Evangelical, African Instituted and Orthodox churches, Other Christian, Islam, Hindu, Traditionists and Other Religion. No religion is the census's No religion/Atheists category.",
+        "Percentages use a stated-response denominator: the county total minus Don't Know and Not Stated (together 0.17% of the table total). Both residuals are excluded from the denominator, not counted as no religion.",
+        "The religion question was not asked of people enumerated in institutions, hotels, hospitals, prisons, or as travellers and outdoor sleepers, so the table total (47,213,282) sits below the enumerated population (47,564,296).",
+        "The 2009 census reports religion only as a single national column, so no earlier county wave can be mapped; the 2009 wave is deferred.",
+        "Boundaries are geoBoundaries KEN ADM1 counties (2020, public domain); the county the boundary file abbreviates as Tharaka is shown under its official name, Tharaka-Nithi."
+      ],
+      sources: [
+        {
+          name: "KNBS 2019 Kenya Population and Housing Census, Volume IV (table 2.30, religion by county)",
+          href: "https://www.knbs.or.ke/reports/kenya-census-2019/",
+          construct: "Census religious affiliation",
+          years: "2019",
+          licence: "Open download from KNBS; attribution requested, no explicit reuse licence stated"
+        },
+        {
+          name: "geoBoundaries KEN ADM1 counties",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/KEN/ADM1/",
+          construct: "Boundary geometry (47 counties)",
+          years: "2020",
+          licence: "Public domain (boundary source RCMRD GeoPortal)"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Kenya National Bureau of Statistics census reports, <a href=\"https://www.knbs.or.ke/reports/kenya-census-2019/\" target=\"_blank\" rel=\"noopener\">2019 Kenya Population and Housing Census</a>.",
+        tables: "Volume IV, table 2.30 (distribution of population by religious affiliation and county). The 47 county rows reconcile exactly against the national row on every category.",
+        licence: "KNBS census reports are open downloads with attribution requested and no explicit reuse licence stated; boundaries are geoBoundaries KEN ADM1, public domain.",
+        script: "scripts/build_ke_area_summary.R",
+        manifests: [
+          { label: "ke-census-religion-2019", href: "docs/manifests/ke-census-religion-2019.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

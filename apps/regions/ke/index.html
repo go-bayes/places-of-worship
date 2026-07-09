@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Kenya Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    window.REGION_CONFIG = {
+      countryCode: "KE",
+      title: "Places of Worship | Kenya Research Map",
+      center: [37.9, 0.2],
+      initialZoom: 6,
+      censusLevels: {
+        county: {
+          label: "County",
+          boundaries: "data/ke_county_2020.geojson",
+          summary: "data/area_summary_county.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries © geoBoundaries KEN ADM1 (public domain) · census religion from KNBS 2019 KPHC Volume IV, table 2.30"
+        }
+      },
+      defaultLevel: "county",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2019,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "all named religions (Christian denominations, Islam, Hindu, Traditionists, other) as a share of the stated religion-response denominator"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "the No religion/Atheists category as a share of the stated religion-response denominator"
+        }
+      },
+      popupDenominatorNote: "Percentages use a stated-response denominator: the KNBS table 2.30 county total minus Don't Know and Not Stated. Religious affiliation combines every named religion; Don't Know and Not Stated are excluded from the denominator, not counted as no religion.",
+      cityPresets: [
+        { label: "Nairobi", coords: [36.8219, -1.2921], zoom: 10 },
+        { label: "Mombasa", coords: [39.6682, -4.0435], zoom: 11 },
+        { label: "Kisumu", coords: [34.7617, -0.0917], zoom: 11 },
+        { label: "Nakuru", coords: [36.0800, -0.3031], zoom: 11 },
+        { label: "Eldoret", coords: [35.2698, 0.5143], zoom: 11 },
+        { label: "Nyeri", coords: [36.9476, -0.4197], zoom: 11 },
+        { label: "Garissa", coords: [39.6583, -0.4536], zoom: 11 },
+        { label: "Kakamega", coords: [34.7523, 0.2827], zoom: 11 }
+      ],
+      geocode: { country: "ke", biasLngLat: [37.9, 0.2] },
+      onboarding: {
+        title: "Kenya research map",
+        intro: "Census religion overlays for Kenya at county level, built from the Kenya National Bureau of Statistics 2019 Population and Housing Census, Volume IV, table 2.30.",
+        bullets: [
+          "Areas are shaded by religious affiliation or no religion among people who stated a religion response.",
+          "Religious affiliation combines all named religions: Catholic, Protestant, Evangelical, African Instituted and Orthodox churches, Other Christian, Islam, Hindu, Traditionists and Other Religion.",
+          "No religion is the No religion/Atheists category; Don't Know and Not Stated are excluded from the denominator, not counted as no religion.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" },
+        { id: "verification-link", label: "Submit evidence", href: "verification.html", title: "Open the RA verification map" },
+        { id: "review-link", label: "Review evidence", href: "review.html", title: "Review submitted evidence" }
+      ],
+      censusSourceAttribution: 'Census religion from <a href="https://www.knbs.or.ke/reports/kenya-census-2019/" target="_blank" rel="noopener">KNBS 2019 KPHC Volume IV, table 2.30</a> &middot; Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries KEN ADM1</a> (public domain) &middot; KNBS census reports, open download, attribution requested',
+      censusFlagNote: "* Percentages use a stated-response denominator: the table 2.30 county total minus Don't Know and Not Stated (0.17% nationally in 2019). Those residuals are excluded, not counted as no religion. The religion question was not asked of people in institutions, hotels, hospitals, prisons, or among travellers and outdoor sleepers."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260709e"></script>
+</body>
+</html>

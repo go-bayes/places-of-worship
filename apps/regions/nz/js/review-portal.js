@@ -10,6 +10,7 @@
         cz: { code: "CZ", label: "Czechia" },
         ie: { code: "IE", label: "Ireland" },
         in: { code: "IN", label: "India" },
+        ke: { code: "KE", label: "Kenya" },
         kr: { code: "KR", label: "South Korea" },
         mx: { code: "MX", label: "Mexico" },
         pt: { code: "PT", label: "Portugal" },
