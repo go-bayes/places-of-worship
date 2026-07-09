@@ -3,7 +3,7 @@
   "schema_version": "data-manifest.v1",
   "manifest_id": "manifest:bs-census-religion:bs:2010:bnsi-island-reports",
   "dataset_id": "bs-census-religion:bs:2010:bnsi-island-reports",
-  "dataset_version_id": "bs-census-religion:bs:2010:bnsi-island-reports:9fb71f81398f",
+  "dataset_version_id": "bs-census-religion:bs:2010:bnsi-island-reports:ee7870b7bad7",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -18,7 +18,7 @@
     "snapshot_anchor": null,
     "pipeline_stage": "public"
   },
-  "created_at": "2026-07-09T04:09:47Z",
+  "created_at": "2026-07-09T07:55:38Z",
   "created_by": "scripts/build_bs_area_summary.R",
   "pipeline": {
     "script": "scripts/build_bs_area_summary.R",
@@ -27,7 +27,12 @@
     "parameters": {
       "waves": "2010",
       "island_boundary_set": "bs-island-2020-geoboundaries-adm1-dissolved",
-      "island_boundary_simplification_tolerance_m": 2000,
+      "island_boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 40,
+        "bytes": 2334748
+      },
       "pdf_extraction": "poppler pdftotext -layout for Table 7.0 of each island report and the national First Release Report",
       "denominator": "stated responses (island total minus not stated); affiliation = named religions, no religion = NONE",
       "subnational_geography": "geoBoundaries BHS ADM1 (32 districts) dissolved to the eighteen census islands the 2010 reports use",
@@ -323,7 +328,7 @@
       "storage_provider": "git_repository",
       "format": "json",
       "bytes": 34530,
-      "sha256": "9fb71f81398f1f361bb68fa195dc56925360e84fff4b5e5d62fbf4640b5e138d",
+      "sha256": "ee7870b7bad74da195981caa71de7aaa72b9d9478a7b39e2282647ac6f33cee9",
       "row_count": 18,
       "content": "Bahamas island area summary with census 2010 religious-affiliation and no-religion metrics.",
       "privacy": "public",
@@ -344,8 +349,8 @@
       "uri": "repo:apps/regions/bs/data/bs_island_2020.geojson",
       "storage_provider": "git_repository",
       "format": "geojson",
-      "bytes": 2827854,
-      "sha256": "b75459b50241781cf9c895f290157f2b26b9a1218be4b3920c9aeb3346832cfe",
+      "bytes": 2334748,
+      "sha256": "2350a252ff9b467f18d2bbac8dc4465260da7a7d65101932c3e6acb6fd976c0f",
       "row_count": 18,
       "content": "Simplified Bahamas island boundary GeoJSON derived from geoBoundaries BHS ADM1 (32 districts) dissolved to 18 islands.",
       "privacy": "public",
@@ -355,19 +360,19 @@
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/bs/data/area_summary_island.json",
-      "sha256": "9fb71f81398f1f361bb68fa195dc56925360e84fff4b5e5d62fbf4640b5e138d",
+      "sha256": "ee7870b7bad74da195981caa71de7aaa72b9d9478a7b39e2282647ac6f33cee9",
       "built_by": "scripts/build_bs_area_summary.R",
       "notes": "18 island reporting units x 1 census year (2010); stated-response denominator."
     },
     {
       "uri": "repo:apps/regions/bs/data/bs_island_2020.geojson",
-      "sha256": "b75459b50241781cf9c895f290157f2b26b9a1218be4b3920c9aeb3346832cfe",
+      "sha256": "2350a252ff9b467f18d2bbac8dc4465260da7a7d65101932c3e6acb6fd976c0f",
       "built_by": "scripts/build_bs_area_summary.R",
-      "notes": "18 island features dissolved from 32 geoBoundaries BHS ADM1 districts, simplified at 2000 m tolerance."
+      "notes": "18 island features dissolved from 32 geoBoundaries BHS ADM1 districts, simplified with mapshaper weighted keep-shapes at 40% keep and cleaned with allow-overlaps."
     }
   ],
   "validation": {
-    "checks": ["Each of the eighteen BNSI 2010 island reports prints Table 7.0 (total population by sex, age group and religion), parsed with pdftotext -layout.", "Within each island report the named religions plus NONE plus NOT STATED reconcile exactly to the island total.", "The eighteen islands sum exactly to the national First Release Report Table 7.0: total 351461, no religion 6561, not stated 9050, affiliation 335850.", "Percentages use the stated-response denominator (island total minus not stated); religious affiliation and no religion sum to 100 percent of stated responses.", "The 32 geoBoundaries BHS ADM1 districts map disjointly and exhaustively onto the eighteen census islands; Rum Cay (no separate report) is dissolved into San Salvador, matching the census's historical San Salvador & Rum Cay unit.", "The dissolved island boundary GeoJSON writes to 2827854 bytes after 2000 m simplification (18 island features).", "2022 religion is national only: the 2022 First Release states religion is reported by age group and sex for All Bahamas, so no 2022 subnational religion table exists to map. 2022 national figures are recorded as context."],
+    "checks": ["Each of the eighteen BNSI 2010 island reports prints Table 7.0 (total population by sex, age group and religion), parsed with pdftotext -layout.", "Within each island report the named religions plus NONE plus NOT STATED reconcile exactly to the island total.", "The eighteen islands sum exactly to the national First Release Report Table 7.0: total 351461, no religion 6561, not stated 9050, affiliation 335850.", "Percentages use the stated-response denominator (island total minus not stated); religious affiliation and no religion sum to 100 percent of stated responses.", "The 32 geoBoundaries BHS ADM1 districts map disjointly and exhaustively onto the eighteen census islands; Rum Cay (no separate report) is dissolved into San Salvador, matching the census's historical San Salvador & Rum Cay unit.", "The dissolved island boundary GeoJSON writes to 2334748 bytes after mapshaper weighted keep-shapes simplification at 40% keep, cleaned with allow-overlaps (18 island features).", "2022 religion is national only: the 2022 First Release states religion is reported by age group and sex for All Bahamas, so no 2022 subnational religion table exists to map. 2022 national figures are recorded as context."],
     "join_coverage": {
       "island": [
         {
@@ -415,8 +420,10 @@
       "dissolved_island_count": 18,
       "output_feature_count": 18,
       "expected_feature_count": 18,
-      "output_bytes": 2827854,
-      "simplification_tolerance_m": 2000,
+      "output_bytes": 2334748,
+      "simplification_method": "mapshaper weighted keep-shapes",
+      "simplification_clean_option": "allow-overlaps",
+      "simplification_keep_percent": 40,
       "unmatched_boundary_features": [],
       "unmatched_census_areas": []
     }

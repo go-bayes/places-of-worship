@@ -231,8 +231,8 @@ parse_religion <- function(pdf_path) {
   stop("no religion data region with TOTAL and NONE in ", pdf_path, call. = FALSE)
 }
 
-# metric CRS for area computation and metre-tolerance simplification; Lambert
-# azimuthal equal area centred on the archipelago keeps every island true.
+# metric CRS for area computation; Lambert azimuthal equal area centred on the
+# archipelago keeps every island true.
 bahamas_laea <- "+proj=laea +lat_0=24.5 +lon_0=-76 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"
 
 # dissolve the geoBoundaries ADM1 district layer up to the eighteen census
@@ -284,29 +284,57 @@ build_island_boundary <- function(path) {
     boundary_set_id = boundary_set_id,
     boundary_level = boundary_level,
     land_area_sq_km = round(areas, 2),
-    geometry = st_sfc(do.call(c, lapply(geoms, function(g) st_geometry(g)[[1]])), crs = 4326)
+    # one sfg per island: c() would concatenate the sfg list into a single
+    # union geometry that st_sf silently recycles across every row.
+    geometry = do.call(st_sfc, c(lapply(geoms, function(g) st_geometry(g)[[1]]),
+                                 list(crs = 4326)))
   )
   out <- st_make_valid(out)
   out
 }
 
-# write the boundary, increasing simplification tolerance until it is small.
+# write the boundary with mapshaper's topology-preserving simplification.
 write_simplified_boundary <- function(boundary, output_path, field_names) {
   boundary_fields <- boundary[, field_names]
-  tolerances <- c(50, 100, 200, 500, 1000, 2000, 3000, 5000)
-  for (tolerance in tolerances) {
-    candidate <- st_transform(boundary_fields, bahamas_laea)
-    candidate <- st_simplify(candidate, dTolerance = tolerance, preserveTopology = TRUE)
-    candidate <- st_make_valid(st_transform(candidate, 4326))
-    if (any(st_is_empty(candidate))) next
-    st_write(candidate, output_path, driver = "GeoJSON", delete_dsn = TRUE,
-             quiet = TRUE, layer_options = c("COORDINATE_PRECISION=5"))
+  tmp_input <- tempfile(fileext = ".geojson")
+  on.exit(unlink(tmp_input), add = TRUE)
+  npm_cache <- tempfile("npm-cache-")
+  dir.create(npm_cache, showWarnings = FALSE, recursive = TRUE)
+  on.exit(unlink(npm_cache, recursive = TRUE), add = TRUE)
+  st_write(boundary_fields, tmp_input, driver = "GeoJSON", delete_dsn = TRUE,
+           quiet = TRUE, layer_options = c("COORDINATE_PRECISION=5"))
+
+  # 3% remains above the byte ceiling after dissolving the full source, so 2.5%
+  # is the final fallback while still retaining more vertices than the old layer.
+  keep_percentages <- c(40, 30, 20, 15, 10, 7, 5, 3, 2.5)
+  method <- "mapshaper weighted keep-shapes"
+  clean_option <- "allow-overlaps"
+  for (keep_percent in keep_percentages) {
+    unlink(output_path)
+    status <- system2(
+      "npx",
+      c(
+        "--yes", "mapshaper", tmp_input,
+        "-simplify", "weighted", "keep-shapes", sprintf("%g%%", keep_percent),
+        "-clean", clean_option,
+        "-o", "precision=0.00001", "format=geojson", output_path
+      ),
+      env = paste0("NPM_CONFIG_CACHE=", npm_cache)
+    )
+    if (status != 0L || !file.exists(output_path)) {
+      stop("mapshaper simplification failed at ", keep_percent, "%", call. = FALSE)
+    }
     bytes <- file_bytes(output_path)
-    # the archipelago's thousands of cays inflate the vertex count, so the
-    # island layer settles nearer the 3 MB ceiling than a compact country would.
-    if (bytes <= 3000000L) return(list(tolerance_m = tolerance, bytes = bytes))
+    # the archipelago's thousands of cays need mapshaper's weighted
+    # Visvalingam path: it preserves coastline character at the same byte size
+    # better than a metre tolerance over dissolved island polygons. allow-overlaps
+    # stops clean from treating sea gaps between separate islands as errors.
+    if (bytes <= 3000000L) {
+      return(list(method = method, clean_option = clean_option,
+                  keep_percent = keep_percent, bytes = bytes))
+    }
   }
-  stop("simplified BS island boundary remains above 3 MB", call. = FALSE)
+  stop("mapshaper-simplified BS island boundary remains above 3 MB", call. = FALSE)
 }
 
 # build one schema-shaped area-summary row (2010, percent + count).
@@ -690,8 +718,9 @@ validation_checks <- c(
           as.integer(national_2010[["not_stated"]]), as.integer(national_2010[["affiliation"]])),
   "Percentages use the stated-response denominator (island total minus not stated); religious affiliation and no religion sum to 100 percent of stated responses.",
   "The 32 geoBoundaries BHS ADM1 districts map disjointly and exhaustively onto the eighteen census islands; Rum Cay (no separate report) is dissolved into San Salvador, matching the census's historical San Salvador & Rum Cay unit.",
-  sprintf("The dissolved island boundary GeoJSON writes to %d bytes after %d m simplification (18 island features).",
-          as.integer(boundary_write[["bytes"]]), boundary_write[["tolerance_m"]]),
+  sprintf("The dissolved island boundary GeoJSON writes to %d bytes after %s simplification at %g%% keep, cleaned with %s (18 island features).",
+          as.integer(boundary_write[["bytes"]]), boundary_write[["method"]],
+          boundary_write[["keep_percent"]], boundary_write[["clean_option"]]),
   "2022 religion is national only: the 2022 First Release states religion is reported by age group and sex for All Bahamas, so no 2022 subnational religion table exists to map. 2022 national figures are recorded as context."
 )
 
@@ -717,7 +746,12 @@ manifest <- list(
     parameters = list(
       waves = c("2010"),
       island_boundary_set = boundary_set_id,
-      island_boundary_simplification_tolerance_m = boundary_write[["tolerance_m"]],
+      island_boundary_simplification = list(
+        method = boundary_write[["method"]],
+        clean_option = boundary_write[["clean_option"]],
+        keep_percent = boundary_write[["keep_percent"]],
+        bytes = boundary_write[["bytes"]]
+      ),
       pdf_extraction = "poppler pdftotext -layout for Table 7.0 of each island report and the national First Release Report",
       denominator = "stated responses (island total minus not stated); affiliation = named religions, no religion = NONE",
       subnational_geography = "geoBoundaries BHS ADM1 (32 districts) dissolved to the eighteen census islands the 2010 reports use",
@@ -770,7 +804,9 @@ manifest <- list(
     list(uri = paste0("repo:", summary_json_out), sha256 = sha256_file(summary_json_out),
          built_by = script_id, notes = "18 island reporting units x 1 census year (2010); stated-response denominator."),
     list(uri = paste0("repo:", boundary_out), sha256 = sha256_file(boundary_out),
-         built_by = script_id, notes = sprintf("18 island features dissolved from 32 geoBoundaries BHS ADM1 districts, simplified at %d m tolerance.", boundary_write[["tolerance_m"]]))
+         built_by = script_id, notes = sprintf("18 island features dissolved from 32 geoBoundaries BHS ADM1 districts, simplified with %s at %g%% keep and cleaned with %s.",
+                                               boundary_write[["method"]], boundary_write[["keep_percent"]],
+                                               boundary_write[["clean_option"]]))
   ),
   validation = list(
     checks = validation_checks,
@@ -783,7 +819,9 @@ manifest <- list(
       output_feature_count = row_count_file(boundary_out),
       expected_feature_count = nrow(boundary),
       output_bytes = boundary_write[["bytes"]],
-      simplification_tolerance_m = boundary_write[["tolerance_m"]],
+      simplification_method = boundary_write[["method"]],
+      simplification_clean_option = boundary_write[["clean_option"]],
+      simplification_keep_percent = boundary_write[["keep_percent"]],
       unmatched_boundary_features = list(),
       unmatched_census_areas = list()
     )
@@ -822,8 +860,9 @@ if (!jsonlite::validate(manifest_text)) stop("manifest JSON failed jsonlite vali
 
 cat(sprintf("wrote %s: %d rows\n", summary_json_out, length(rows)))
 cat(sprintf("wrote %s: %d rows\n", summary_csv_out, row_count_file(summary_csv_out)))
-cat(sprintf("wrote %s: %d features, %d bytes at %d m\n", boundary_out, row_count_file(boundary_out),
-            as.integer(file_bytes(boundary_out)), boundary_write[["tolerance_m"]]))
+cat(sprintf("wrote %s: %d features, %d bytes with %s at %g%% keep, clean %s\n", boundary_out, row_count_file(boundary_out),
+            as.integer(file_bytes(boundary_out)), boundary_write[["method"]], boundary_write[["keep_percent"]],
+            boundary_write[["clean_option"]]))
 cat(sprintf("wrote %s\n", manifest_out))
 cat(sprintf("join coverage: %d/%d islands for 2010\n", length(islands), nrow(boundary)))
 cat(sprintf("2010 national denominator: %d; stated: %d; affiliation: %d (%.2f%%); no religion: %d (%.2f%%); not stated: %d (%.2f%%)\n",
