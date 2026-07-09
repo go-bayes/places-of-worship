@@ -92,22 +92,28 @@
   indicator found; recorded in the manifest's deferred sources).
   Build: `scripts/build_pt_area_summary.R`; manifest
   `docs/manifests/pt-census-religion-2011-2021.json`.
-- Added the Slovakia regional map: municipality and city-part census
-  religion for 2021 from SODB 2021 table Z01_15 (Statistical Office of
-  the Slovak Republic; 79 district JSON extracts plus the national
-  reconciliation row), on the SODB 2021 OB GeoJSON boundary layer
-  (2,927 reporting units, simplified to 2.57 MB at 200 m tolerance).
-  Denominator is the SODB published total population including
-  nezistené, flagged on every row. Validation: municipality sums equal
-  the national row exactly for total, religious affiliation, no
-  religion, and nezistené; join coverage 2,927/2,927 with no missing
-  or extra boundary codes. 1991, 2001, and 2011 subnational routes are
-  pinned but deferred (archived hyper-cube and DATAcube application
-  routes need a browser-driven extraction pass); no change layer ships
-  with a single wave. SODB pages carry no explicit licence statement —
-  attribution cites the Statistical Office; flag for licence review.
-  Build: `scripts/build_sk_area_summary.R`; manifest
-  `docs/manifests/sk-census-religion-2021.json`.
+- Added the Slovakia regional map and current-kraj companion product.
+  The live map keeps municipality and city-part census religion for
+  2021 from SODB 2021 table Z01_15 (Statistical Office of the Slovak
+  Republic; 79 district JSON extracts plus the national reconciliation
+  row), on the SODB 2021 OB GeoJSON boundary layer (2,927 reporting
+  units, simplified to 2.57 MB at 200 m tolerance). The companion
+  product adds eight current kraje for 2001, 2011, and 2021: 2001 from
+  Infostat `data118.aspx` HTML kraj tables, 2011 from SODB 2011 `TAB.
+  118` XLS files, and 2021 by exact sums from the existing municipality
+  product. Denominator is total population including `nezistené` / not
+  found out; religious affiliation excludes no religion and `nezistené`.
+  Validation: municipality sums equal the SODB 2021 national row exactly;
+  2001 and 2011 kraj rows equal their national source rows for every
+  reported category; 2021 kraj sums equal the municipality product totals
+  exactly. The dissolved kraj boundary has eight features and writes to
+  561 KB with mapshaper weighted keep-shapes at 100% keep. 1991 is
+  deferred because the source has 42 district/obvod rows and
+  macro-regions, while current kraje did not exist until 1996. SODB and
+  Infostat pages carry no explicit licence statement; attribution cites
+  the Statistical Office and Infostat, and the product remains flagged
+  for licence review. Build: `scripts/build_sk_area_summary.R`;
+  manifest `docs/manifests/sk-census-religion-2001-2021.json`.
 
 ### 2026-07-08
 

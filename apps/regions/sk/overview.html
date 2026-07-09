@@ -16,10 +16,10 @@
       countryCode: "SK",
       countryName: "Slovakia",
       mapHref: "./",
-      intro: "Municipality and city-part census religious-belief overlays for Slovakia, from SODB 2021.",
+      intro: "Municipality and city-part census religious-belief overlays for Slovakia, from SODB 2021, with a current-kraj companion product for 2001, 2011, and 2021.",
       facts: {
-        waves: "Census 2021",
-        geographies: "Municipality and Bratislava/Košice city part (2,927 units)",
+        waves: "Census 2021 on the live map; 2001, 2011, and 2021 in the kraj companion product",
+        geographies: "Municipality and Bratislava/Košice city part (2,927 units); current kraj (8 units)",
         metrics: "Religious affiliation %, no religion %",
         placeDots: "A single Overpass test returned 7,440 amenity=place_of_worship objects for Slovakia; no governed place layer is built yet."
       },
@@ -27,14 +27,14 @@
         "Percentages use the SODB 2021 total population denominator. This follows SUSR's published shares and includes code 00, nezistené / not found out, in the denominator.",
         "Reporting units are shaded by SODB 2021 religious belief (religious affiliation is total population minus no religion and not found out; no religion is code 28, bez náboženského vyznania). Religion, ethnicity, language, and Roma/Rusyn/Hungarian identity are separate constructs and are not combined.",
         "SODB 2021 reports Bratislava and Košice by city parts. The denominator includes nezistené / not found out.",
-        "The product ships 2021 municipality/city-part geography only. No official 1991-2021 municipality correspondence was pinned, so no change layer is shown; the 1991, 2001 and 2011 subnational waves are deferred."
+        "The live map ships 2021 municipality/city-part geography only. The companion product adds current-kraj rows for 2001, 2011, and 2021; 1991 remains deferred because the source geography predates current kraje."
       ],
       sources: [
         {
-          name: "SODB 2021 Z01_15, structure of population by religious belief",
+          name: "Infostat 2001 data118; SODB 2011 TAB. 118; SODB 2021 Z01_15",
           href: "https://www.scitanie.sk/en/population/basic-results/structure-of-population-by-religious-belief/SR/SK0/SR",
           construct: "Census religious belief",
-          years: "2021",
+          years: "2001, 2011, 2021",
           licence: "SUSR attribution; exact CC BY statement not located in this pass"
         },
         {
@@ -46,12 +46,12 @@
         }
       ],
       accessData: {
-        sourceOfRecord: "Statistical Office of the Slovak Republic, <a href=\"https://www.scitanie.sk/en/population/basic-results/structure-of-population-by-religious-belief/SR/SK0/SR\" target=\"_blank\" rel=\"noopener\">SODB 2021 basic results</a>.",
-        tables: "SODB 2021 <code>Z01_15</code>, \"Structure of population by religious belief\"; SODB 2021 <code>C01_11</code>, the national 1880-2021 time series; previous-census routes from \"Data from the previous censuses since 1991\".",
-        licence: "SODB pages identify the Statistical Office of the Slovak Republic as content administrator and technical operator. This build attributes SUSR; the exact CC BY statement was not located during this pass.",
+        sourceOfRecord: "Statistical Office of the Slovak Republic and Infostat, including <a href=\"https://www.scitanie.sk/en/population/basic-results/structure-of-population-by-religious-belief/SR/SK0/SR\" target=\"_blank\" rel=\"noopener\">SODB 2021 basic results</a>.",
+        tables: "Infostat 2001 <code>data118.aspx</code>; SODB 2011 <code>TAB. 118</code>; SODB 2021 <code>Z01_15</code>, \"Structure of population by religious belief\"; SODB 2021 <code>C01_11</code>, the national 1880-2021 time series.",
+        licence: "SODB pages identify the Statistical Office of the Slovak Republic as content administrator and technical operator. This build attributes SUSR and Infostat; the exact CC BY statement was not located during this pass.",
         script: "scripts/build_sk_area_summary.R",
         manifests: [
-          { label: "sk-census-religion-2021", href: "docs/manifests/sk-census-religion-2021.json" }
+          { label: "sk-census-religion-2001-2021", href: "docs/manifests/sk-census-religion-2001-2021.json" }
         ]
       },
       contribute: {

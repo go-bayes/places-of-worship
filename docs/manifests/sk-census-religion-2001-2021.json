@@ -1,11 +1,11 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
   "schema_version": "data-manifest.v1",
-  "manifest_id": "manifest:sk-census-religion:sk:2021:sodb2021-z01-15",
-  "dataset_id": "sk-census-religion:sk:2021:sodb2021-z01-15",
-  "dataset_version_id": "sk-census-religion:sk:2021:sodb2021-z01-15:034e96a01ee4",
+  "manifest_id": "manifest:sk-census-religion:sk:2001-2021:5d875dcceb2c",
+  "dataset_id": "sk-census-religion:sk:2001-2021:sodb-infostat",
+  "dataset_version_id": "sk-census-religion:sk:2001-2021:sodb-infostat:5d875dcceb2c",
   "manifest_sha256": null,
-  "supersedes_manifest_id": null,
+  "supersedes_manifest_id": "manifest:sk-census-religion:sk:2021:sodb2021-z01-15",
   "superseded_by_manifest_id": null,
   "dataset_family": "sk-census-religion",
   "dataset_role": "public_product",
@@ -18,36 +18,425 @@
     "snapshot_anchor": null,
     "pipeline_stage": "public"
   },
-  "created_at": "2026-07-08T22:48:56Z",
+  "created_at": "2026-07-09T08:42:14Z",
   "created_by": "scripts/build_sk_area_summary.R",
   "pipeline": {
     "script": "scripts/build_sk_area_summary.R",
     "git_commit": null,
     "command": "Rscript scripts/build_sk_area_summary.R",
     "parameters": {
-      "waves": "2021",
+      "waves": ["2001", "2011", "2021"],
       "municipality_boundary_set": "sk-municipality-2021-sodb",
+      "kraj_boundary_set": "sk-kraj-2021-sodb-dissolved",
       "municipality_boundary_simplification_tolerance_m": 200,
-      "denominator": "SODB Z01_15 total population denominator, including code 00 nezistené / not found out",
+      "kraj_boundary_mapshaper_keep_percent": 100,
+      "denominator": "All Slovakia waves use the source total population denominator; Nezistené / not found out remains in the denominator and outside religious_affiliation_count.",
       "omitted_metrics": ["religious_change", "places_per_10000_residents", "place_density_per_sq_km"]
     },
     "software_versions": {
       "r": "4.6.1",
       "sf": "1.1.1",
-      "jsonlite": "2.0.0"
+      "jsonlite": "2.0.0",
+      "readxl": "1.5.0",
+      "xml2": "1.6.0",
+      "mapshaper": "npx --yes mapshaper 0.7.33 or current npx-resolved package"
     }
   },
   "source": {
-    "provider": "Statistical Office of the Slovak Republic",
-    "source_dataset_ids": ["sodb2021-z01-15-religious-belief-basic-results", "sodb2021-disem-ob-geojson"],
-    "source_urls": ["https://www.scitanie.sk/en/population/basic-results/structure-of-population-by-religious-belief/SR/SK0/SR", "https://www.scitanie.sk/themes/web-sodb/assets/public/disem/data/Z01_15_OK_SK0101_OB.json?v=10", "https://www.scitanie.sk/themes/web-sodb/assets/public/disem/data/Z01_15_SR_SK0_SR.json?v=10", "https://www.scitanie.sk/themes/web-sodb/assets/public/disem/data/Z01_15_SR_SK0_OK.json?v=10", "https://www.scitanie.sk/themes/web-sodb/assets/public/disem/geojson/OB.geojson", "https://www.scitanie.sk/en/data-from-the-previous-censuses-since-1991", "https://www.scitanie.sk/en/content-and-technical-operator"],
+    "provider": "Statistical Office of the Slovak Republic; Infostat",
+    "source_dataset_ids": ["sodb2001-infostat-data118-religion-kraj", "sodb2011-tab118-religion-kraj", "sodb2021-z01-15-religious-belief-basic-results", "sodb2021-disem-ob-geojson"],
+    "source_urls": ["http://sodb.infostat.sk/scitanie/sk/2001/navigation.htm", "http://sodb.infostat.sk/scitanie/sk/2001/data118.aspx?u=100000&okr=0", "http://sodb.infostat.sk/scitanie/sk/2001/data118.aspx?txtUroven=310100&okr=0", "http://sodb.infostat.sk/scitanie/sk/2001/data118.aspx?txtUroven=320200&okr=0", "http://sodb.infostat.sk/scitanie/sk/2001/data118.aspx?txtUroven=320300&okr=0", "http://sodb.infostat.sk/scitanie/sk/2001/data118.aspx?txtUroven=320400&okr=0", "http://sodb.infostat.sk/scitanie/sk/2001/data118.aspx?txtUroven=330500&okr=0", "http://sodb.infostat.sk/scitanie/sk/2001/data118.aspx?txtUroven=330600&okr=0", "http://sodb.infostat.sk/scitanie/sk/2001/data118.aspx?txtUroven=340700&okr=0", "http://sodb.infostat.sk/scitanie/sk/2001/data118.aspx?txtUroven=340800&okr=0", "https://census2011.statistics.sk/data.php", "https://census2011.statistics.sk/SR/TAB.%20118%20Obyvate%C4%BEstvo%20pod%C4%BEa%20pohlavia%20a%20n%C3%A1bo%C5%BEensk%C3%A9ho%20vyznania.xls", "https://census2011.statistics.sk/SR/Bratislavsk%C3%BD%20kraj/Bratislavsk%C3%BD%20kraj/TAB.%20118%20Obyvate%C4%BEstvo%20pod%C4%BEa%20pohlavia%20a%20n%C3%A1bo%C5%BEensk%C3%A9ho%20vyznania.xls", "https://census2011.statistics.sk/SR/Z%C3%A1padn%C3%A9%20Slovensko/Trnavsk%C3%BD%20kraj/TAB.%20118%20Obyvate%C4%BEstvo%20pod%C4%BEa%20pohlavia%20a%20n%C3%A1bo%C5%BEensk%C3%A9ho%20vyznania.xls", "https://census2011.statistics.sk/SR/Z%C3%A1padn%C3%A9%20Slovensko/Tren%C4%8Diansky%20kraj/TAB.%20118%20Obyvate%C4%BEstvo%20pod%C4%BEa%20pohlavia%20a%20n%C3%A1bo%C5%BEensk%C3%A9ho%20vyznania.xls", "https://census2011.statistics.sk/SR/Z%C3%A1padn%C3%A9%20Slovensko/Nitriansky%20kraj/TAB.%20118%20Obyvate%C4%BEstvo%20pod%C4%BEa%20pohlavia%20a%20n%C3%A1bo%C5%BEensk%C3%A9ho%20vyznania.xls", "https://census2011.statistics.sk/SR/Stredn%C3%A9%20Slovensko/%C5%BDilinsk%C3%BD%20kraj/TAB.%20118%20Obyvate%C4%BEstvo%20pod%C4%BEa%20pohlavia%20a%20n%C3%A1bo%C5%BEensk%C3%A9ho%20vyznania.xls", "https://census2011.statistics.sk/SR/Stredn%C3%A9%20Slovensko/Banskobystrick%C3%BD%20kraj/TAB.%20118%20Obyvate%C4%BEstvo%20pod%C4%BEa%20pohlavia%20a%20n%C3%A1bo%C5%BEensk%C3%A9ho%20vyznania.xls", "https://census2011.statistics.sk/SR/V%C3%BDchodn%C3%A9%20Slovensko/Pre%C5%A1ovsk%C3%BD%20kraj/TAB.%20118%20Obyvate%C4%BEstvo%20pod%C4%BEa%20pohlavia%20a%20n%C3%A1bo%C5%BEensk%C3%A9ho%20vyznania.xls", "https://census2011.statistics.sk/SR/V%C3%BDchodn%C3%A9%20Slovensko/Ko%C5%A1ick%C3%BD%20kraj/TAB.%20118%20Obyvate%C4%BEstvo%20pod%C4%BEa%20pohlavia%20a%20n%C3%A1bo%C5%BEensk%C3%A9ho%20vyznania.xls", "https://www.scitanie.sk/en/population/basic-results/structure-of-population-by-religious-belief/SR/SK0/SR", "https://www.scitanie.sk/themes/web-sodb/assets/public/disem/data/Z01_15_SR_SK0_SR.json?v=10", "https://www.scitanie.sk/themes/web-sodb/assets/public/disem/data/Z01_15_SR_SK0_OK.json?v=10", "https://www.scitanie.sk/themes/web-sodb/assets/public/disem/geojson/OB.geojson", "https://www.scitanie.sk/en/data-from-the-previous-censuses-since-1991", "https://www.scitanie.sk/en/content-and-technical-operator"],
     "retrieved_at": "2026-07-09T00:00:00Z",
-    "licence": "SODB 2021 public website assets are published by the Statistical Office of the Slovak Republic. This build attributes SUSR and links the source; a specific CC BY statement was not located on the SODB pages during this pass.",
-    "citation": "Statistical Office of the Slovak Republic, SODB 2021 basic results Z01_15; SODB 2021 DISem OB GeoJSON.",
-    "raw_redistribution": "Raw SODB JSON, GeoJSON, and source-discovery files are not committed. They remain in data/raw/sk_census/ and await any project-controlled raw archive upload."
+    "licence": "SODB 2021 public website assets are published by the Statistical Office of the Slovak Republic. This build attributes SUSR and links the source; a specific CC BY statement was not located on the SODB pages during this pass. The 2001 Infostat and 2011 SODB archive routes are also attributed to SUSR; their exact reuse statements were not located during the pinned probe.",
+    "citation": "Štatistický úrad Slovenskej republiky / Infostat SODB 2001 data118; Štatistický úrad Slovenskej republiky SODB 2011 TAB. 118; Statistical Office of the Slovak Republic SODB 2021 basic results Z01_15 and DISem OB GeoJSON.",
+    "raw_redistribution": "Raw SODB JSON, Infostat HTML, SODB 2011 XLS, GeoJSON, and source-discovery files are not committed. They remain in data/raw/sk_census/ and await any project-controlled raw archive upload."
   },
   "input_manifests": [],
   "raw_sources": [
+    {
+      "uri": "data/raw/sk_census/sodb2001_infostat_data118_kraj/navigation.htm",
+      "url": "http://sodb.infostat.sk/scitanie/sk/2001/navigation.htm",
+      "format": "htm",
+      "bytes": 9730,
+      "sha256": "cd408e5573b91237da8960e089088cda2f8a9d5f0554fb638227e1cf62acc935",
+      "row_count": 0,
+      "source_dataset_id": "sodb2001-infostat-data118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2001",
+      "notes": "Infostat 2001 navigation tree used to verify the eight current kraj data118 routes."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2001_infostat_data118_kraj/data118_national.html",
+      "url": "http://sodb.infostat.sk/scitanie/sk/2001/data118.aspx?u=100000&okr=0",
+      "format": "html",
+      "bytes": 14326,
+      "sha256": "fd89bd1f09921809af7a5a615c5ee378c7d744656ddfde064174b150d924f521",
+      "row_count": 19,
+      "source_dataset_id": "sodb2001-infostat-data118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2001",
+      "notes": "Infostat 2001 national data118 table used for exact category reconciliation."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2001_infostat_data118_kraj/data118_kraj_310100.html",
+      "url": "http://sodb.infostat.sk/scitanie/sk/2001/data118.aspx?txtUroven=310100&okr=0",
+      "format": "html",
+      "bytes": 14209,
+      "sha256": "9ff75a8d47a412fcba437c9ae46988b30a756be3f6e862756ad839b262c651a5",
+      "row_count": 19,
+      "source_dataset_id": "sodb2001-infostat-data118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2001",
+      "notes": "Infostat 2001 data118 table for Bratislavský kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2001_infostat_data118_kraj/data118_kraj_320200.html",
+      "url": "http://sodb.infostat.sk/scitanie/sk/2001/data118.aspx?txtUroven=320200&okr=0",
+      "format": "html",
+      "bytes": 14161,
+      "sha256": "ae951062b56c72b11f7101553bb6f0dce3110dcc21aca8683a8858045208ba7c",
+      "row_count": 19,
+      "source_dataset_id": "sodb2001-infostat-data118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2001",
+      "notes": "Infostat 2001 data118 table for Trnavský kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2001_infostat_data118_kraj/data118_kraj_320300.html",
+      "url": "http://sodb.infostat.sk/scitanie/sk/2001/data118.aspx?txtUroven=320300&okr=0",
+      "format": "html",
+      "bytes": 14154,
+      "sha256": "2bcc51f3b97653e906e94b751b66c69c5f56889701318b4ee922067c5e7da378",
+      "row_count": 19,
+      "source_dataset_id": "sodb2001-infostat-data118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2001",
+      "notes": "Infostat 2001 data118 table for Trenčiansky kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2001_infostat_data118_kraj/data118_kraj_320400.html",
+      "url": "http://sodb.infostat.sk/scitanie/sk/2001/data118.aspx?txtUroven=320400&okr=0",
+      "format": "html",
+      "bytes": 14189,
+      "sha256": "96d4ccaff2ba1ace482502ba2f78f2228022f4498e5b81be782741dee285206e",
+      "row_count": 19,
+      "source_dataset_id": "sodb2001-infostat-data118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2001",
+      "notes": "Infostat 2001 data118 table for Nitriansky kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2001_infostat_data118_kraj/data118_kraj_330500.html",
+      "url": "http://sodb.infostat.sk/scitanie/sk/2001/data118.aspx?txtUroven=330500&okr=0",
+      "format": "html",
+      "bytes": 14161,
+      "sha256": "a0feef07cd63d0d406f06576b6f1bcc85de078306461c904f49c975578de060f",
+      "row_count": 19,
+      "source_dataset_id": "sodb2001-infostat-data118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2001",
+      "notes": "Infostat 2001 data118 table for Žilinský kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2001_infostat_data118_kraj/data118_kraj_330600.html",
+      "url": "http://sodb.infostat.sk/scitanie/sk/2001/data118.aspx?txtUroven=330600&okr=0",
+      "format": "html",
+      "bytes": 14208,
+      "sha256": "f766070837c8e43fbf611d8e2a8a450041bd13b6760ea5bb34a712f6cd400cdb",
+      "row_count": 19,
+      "source_dataset_id": "sodb2001-infostat-data118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2001",
+      "notes": "Infostat 2001 data118 table for Banskobystrický kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2001_infostat_data118_kraj/data118_kraj_340700.html",
+      "url": "http://sodb.infostat.sk/scitanie/sk/2001/data118.aspx?txtUroven=340700&okr=0",
+      "format": "html",
+      "bytes": 14196,
+      "sha256": "2c6a0e393fac76337bc8079e519beb328c06381dd3bd06aaf2f79df82e10d304",
+      "row_count": 19,
+      "source_dataset_id": "sodb2001-infostat-data118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2001",
+      "notes": "Infostat 2001 data118 table for Prešovský kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2001_infostat_data118_kraj/data118_kraj_340800.html",
+      "url": "http://sodb.infostat.sk/scitanie/sk/2001/data118.aspx?txtUroven=340800&okr=0",
+      "format": "html",
+      "bytes": 14224,
+      "sha256": "8e5846cd7127cceede68e6fc46dd65d46d35afc83abf5a4585801d2606c13389",
+      "row_count": 19,
+      "source_dataset_id": "sodb2001-infostat-data118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2001",
+      "notes": "Infostat 2001 data118 table for Košický kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/data_php_root.json",
+      "url": "https://census2011.statistics.sk/data.php",
+      "format": "json",
+      "bytes": 20020,
+      "sha256": "2b520d5200ebbdaf885b4180acab76de08143fc3c2d45d95a88bc19f71086c60",
+      "row_count": 60,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 root data.php tree used to verify national TAB. 118 and parent folders."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/TAB_118_national.xls",
+      "url": "https://census2011.statistics.sk/SR/TAB.%20118%20Obyvate%C4%BEstvo%20pod%C4%BEa%20pohlavia%20a%20n%C3%A1bo%C5%BEensk%C3%A9ho%20vyznania.xls",
+      "format": "xls",
+      "bytes": 27136,
+      "sha256": "2a8d3109f8e1873100d262aaa1ad84fd280ffead5589eda2be8ff0d71de0121e",
+      "row_count": 28,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 national TAB. 118 XLS used for exact category reconciliation."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/data_php_parent_bratislavsky.json",
+      "url": "https://census2011.statistics.sk/data.php?id=SR%2FBratislavsk%C3%BD+kraj",
+      "format": "json",
+      "bytes": 21098,
+      "sha256": "b340b172ae72ec55333e2a90299d815a584aa4aeb51a7b3a4f163f28f61ad535",
+      "row_count": 57,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 data.php parent tree for bratislavsky Slovakia."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/data_php_parent_zapadne.json",
+      "url": "https://census2011.statistics.sk/data.php?id=SR%2FZ%C3%A1padn%C3%A9+Slovensko",
+      "format": "json",
+      "bytes": 21673,
+      "sha256": "0378ecf5aeabc8cc4c1eb0f98cce8dc5c302a0a31e3a006420e81e64d7f59d26",
+      "row_count": 59,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 data.php parent tree for zapadne Slovakia."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/data_php_parent_stredne.json",
+      "url": "https://census2011.statistics.sk/data.php?id=SR%2FStredn%C3%A9+Slovensko",
+      "format": "json",
+      "bytes": 21258,
+      "sha256": "22fdf77a5c6c8260e69bdd0b83669e940dd69123b9c2e6bb57f246f1f3712d0d",
+      "row_count": 58,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 data.php parent tree for stredne Slovakia."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/data_php_parent_vychodne.json",
+      "url": "https://census2011.statistics.sk/data.php?id=SR%2FV%C3%BDchodn%C3%A9+Slovensko",
+      "format": "json",
+      "bytes": 21602,
+      "sha256": "a956fda84be1ca8d962b874b771e79eddc5609840927d21440ef7834c1e5c128",
+      "row_count": 58,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 data.php parent tree for vychodne Slovakia."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/data_php_kraj_SK010.json",
+      "url": "https://census2011.statistics.sk/data.php?id=SR%2FBratislavsk%C3%BD+kraj%2FBratislavsk%C3%BD+kraj",
+      "format": "json",
+      "bytes": 23728,
+      "sha256": "a56c224b46cbf6811e300a6c09fe9151763fda4b1c2edba8a5e34aaa7caf6204",
+      "row_count": 64,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 data.php tree for Bratislavský kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/data_php_kraj_SK021.json",
+      "url": "https://census2011.statistics.sk/data.php?id=SR%2FZ%C3%A1padn%C3%A9+Slovensko%2FTrnavsk%C3%BD+kraj",
+      "format": "json",
+      "bytes": 23822,
+      "sha256": "946e13fda03d7e4d0fbc18d81e5d841323ea1ab65963f818f23f3f8146b2589f",
+      "row_count": 63,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 data.php tree for Trnavský kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/data_php_kraj_SK022.json",
+      "url": "https://census2011.statistics.sk/data.php?id=SR%2FZ%C3%A1padn%C3%A9+Slovensko%2FTren%C4%8Diansky+kraj",
+      "format": "json",
+      "bytes": 24457,
+      "sha256": "e0684947106bac66c552438fdb67f485338dc8f1b840dfb0f1d5b3037e97f157",
+      "row_count": 65,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 data.php tree for Trenčiansky kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/data_php_kraj_SK023.json",
+      "url": "https://census2011.statistics.sk/data.php?id=SR%2FZ%C3%A1padn%C3%A9+Slovensko%2FNitriansky+kraj",
+      "format": "json",
+      "bytes": 23479,
+      "sha256": "afe4eb01aeb9cffdcfd2e6bf937ba6ea8c6443dba9a9cb039147fde0625dc9bb",
+      "row_count": 63,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 data.php tree for Nitriansky kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/data_php_kraj_SK031.json",
+      "url": "https://census2011.statistics.sk/data.php?id=SR%2FStredn%C3%A9+Slovensko%2F%C5%BDilinsk%C3%BD+kraj",
+      "format": "json",
+      "bytes": 24440,
+      "sha256": "2b5a76a9be2e63951d58b2c106385b015f9238c4489a34705253154933b4238e",
+      "row_count": 67,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 data.php tree for Žilinský kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/data_php_kraj_SK032.json",
+      "url": "https://census2011.statistics.sk/data.php?id=SR%2FStredn%C3%A9+Slovensko%2FBanskobystrick%C3%BD+kraj",
+      "format": "json",
+      "bytes": 24872,
+      "sha256": "9817500383fb12a562e57e47447d124f01453af26e813d18cab028e2c565bd38",
+      "row_count": 69,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 data.php tree for Banskobystrický kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/data_php_kraj_SK041.json",
+      "url": "https://census2011.statistics.sk/data.php?id=SR%2FV%C3%BDchodn%C3%A9+Slovensko%2FPre%C5%A1ovsk%C3%BD+kraj",
+      "format": "json",
+      "bytes": 25149,
+      "sha256": "230978190a68495ab9dd85c5222da97ac707d03fc3ca9b6f9933a0c8a12c69b7",
+      "row_count": 69,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 data.php tree for Prešovský kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/data_php_kraj_SK042.json",
+      "url": "https://census2011.statistics.sk/data.php?id=SR%2FV%C3%BDchodn%C3%A9+Slovensko%2FKo%C5%A1ick%C3%BD+kraj",
+      "format": "json",
+      "bytes": 24723,
+      "sha256": "ed5396f7a2b9aa59b62f5bc1f8806f2f4e5b6ac4613a3628c873c4bb2da96828",
+      "row_count": 67,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 data.php tree for Košický kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/TAB_118_kraj_SK010.xls",
+      "url": "https://census2011.statistics.sk/SR/Bratislavsk%C3%BD%20kraj/Bratislavsk%C3%BD%20kraj/TAB.%20118%20Obyvate%C4%BEstvo%20pod%C4%BEa%20pohlavia%20a%20n%C3%A1bo%C5%BEensk%C3%A9ho%20vyznania.xls",
+      "format": "xls",
+      "bytes": 27136,
+      "sha256": "df139516faeb448daf36928538f503401f592531341f8f81fc9b5ae9d407b64a",
+      "row_count": 28,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 TAB. 118 XLS for Bratislavský kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/TAB_118_kraj_SK021.xls",
+      "url": "https://census2011.statistics.sk/SR/Z%C3%A1padn%C3%A9%20Slovensko/Trnavsk%C3%BD%20kraj/TAB.%20118%20Obyvate%C4%BEstvo%20pod%C4%BEa%20pohlavia%20a%20n%C3%A1bo%C5%BEensk%C3%A9ho%20vyznania.xls",
+      "format": "xls",
+      "bytes": 27136,
+      "sha256": "f8bf19af8e7f9fdafda9324cc60db8f48ec089732f1a98f676fb26e3304764e7",
+      "row_count": 28,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 TAB. 118 XLS for Trnavský kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/TAB_118_kraj_SK022.xls",
+      "url": "https://census2011.statistics.sk/SR/Z%C3%A1padn%C3%A9%20Slovensko/Tren%C4%8Diansky%20kraj/TAB.%20118%20Obyvate%C4%BEstvo%20pod%C4%BEa%20pohlavia%20a%20n%C3%A1bo%C5%BEensk%C3%A9ho%20vyznania.xls",
+      "format": "xls",
+      "bytes": 27136,
+      "sha256": "cb7b3025bf0f04095c298bed4c86026bb166e908bedf2f64562a37d7ecec4702",
+      "row_count": 28,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 TAB. 118 XLS for Trenčiansky kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/TAB_118_kraj_SK023.xls",
+      "url": "https://census2011.statistics.sk/SR/Z%C3%A1padn%C3%A9%20Slovensko/Nitriansky%20kraj/TAB.%20118%20Obyvate%C4%BEstvo%20pod%C4%BEa%20pohlavia%20a%20n%C3%A1bo%C5%BEensk%C3%A9ho%20vyznania.xls",
+      "format": "xls",
+      "bytes": 27136,
+      "sha256": "c641de4b3736237cf210d2eca93ef9c60d8100435bfeb04a58d0c3eccd72bdbf",
+      "row_count": 28,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 TAB. 118 XLS for Nitriansky kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/TAB_118_kraj_SK031.xls",
+      "url": "https://census2011.statistics.sk/SR/Stredn%C3%A9%20Slovensko/%C5%BDilinsk%C3%BD%20kraj/TAB.%20118%20Obyvate%C4%BEstvo%20pod%C4%BEa%20pohlavia%20a%20n%C3%A1bo%C5%BEensk%C3%A9ho%20vyznania.xls",
+      "format": "xls",
+      "bytes": 27136,
+      "sha256": "cfbca35cfec9ee423a9b6794946ff82d2806bd154ad28b16231d5e2531dce7d4",
+      "row_count": 28,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 TAB. 118 XLS for Žilinský kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/TAB_118_kraj_SK032.xls",
+      "url": "https://census2011.statistics.sk/SR/Stredn%C3%A9%20Slovensko/Banskobystrick%C3%BD%20kraj/TAB.%20118%20Obyvate%C4%BEstvo%20pod%C4%BEa%20pohlavia%20a%20n%C3%A1bo%C5%BEensk%C3%A9ho%20vyznania.xls",
+      "format": "xls",
+      "bytes": 27136,
+      "sha256": "1f945ec9214da40957930e4824d9fd452a20510e3a90ca9e44bb7c30562267e5",
+      "row_count": 28,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 TAB. 118 XLS for Banskobystrický kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/TAB_118_kraj_SK041.xls",
+      "url": "https://census2011.statistics.sk/SR/V%C3%BDchodn%C3%A9%20Slovensko/Pre%C5%A1ovsk%C3%BD%20kraj/TAB.%20118%20Obyvate%C4%BEstvo%20pod%C4%BEa%20pohlavia%20a%20n%C3%A1bo%C5%BEensk%C3%A9ho%20vyznania.xls",
+      "format": "xls",
+      "bytes": 27136,
+      "sha256": "9d4016422cfb0b8d1cdcc50e37a0db768efe794493e79c0b741ba06eb3a3d798",
+      "row_count": 28,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 TAB. 118 XLS for Prešovský kraj."
+    },
+    {
+      "uri": "data/raw/sk_census/sodb2011_tab118_kraj/TAB_118_kraj_SK042.xls",
+      "url": "https://census2011.statistics.sk/SR/V%C3%BDchodn%C3%A9%20Slovensko/Ko%C5%A1ick%C3%BD%20kraj/TAB.%20118%20Obyvate%C4%BEstvo%20pod%C4%BEa%20pohlavia%20a%20n%C3%A1bo%C5%BEensk%C3%A9ho%20vyznania.xls",
+      "format": "xls",
+      "bytes": 27136,
+      "sha256": "bd911c6ec569061d3bb91b52c83884486a8b504d11db654b776155a42c9147d5",
+      "row_count": 28,
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "SODB 2011 TAB. 118 XLS for Košický kraj."
+    },
     {
       "uri": "data/raw/sk_census/sodb2021_z01_15_by_district/Z01_15_OK_SK0221_OB.json",
       "url": "https://www.scitanie.sk/themes/web-sodb/assets/public/disem/data/Z01_15_OK_SK0221_OB.json?v=10",
@@ -1030,7 +1419,7 @@
       "source_dataset_id": "sodb2021-disem-ob-geojson",
       "used_in_public_product": true,
       "periods": "2021",
-      "notes": "SODB 2021 OB GeoJSON; 87 helper features are filtered out before writing the municipality boundary product."
+      "notes": "SODB 2021 OB GeoJSON; 87 helper features are filtered out before writing the municipality boundary product and the municipality product is dissolved to kraje."
     },
     {
       "uri": "data/raw/sk_census/sodb2021_c01_11_religious_belief_time_series.json",
@@ -1075,7 +1464,7 @@
       "storage_provider": "git_repository",
       "format": "json",
       "bytes": 2979744,
-      "sha256": "034e96a01ee4f29665c48507c587c1b3871aa57feb3733d196b35a5e70e60559",
+      "sha256": "a8d7ed91bd268c96978104f0aab336954d915640f31572591c9748cfd924bf2c",
       "row_count": 2927,
       "content": "Slovakia municipality/city-part area summary with SODB 2021 religious-belief metrics.",
       "privacy": "public",
@@ -1102,12 +1491,45 @@
       "content": "Simplified Slovakia SODB 2021 municipality/city-part boundary GeoJSON.",
       "privacy": "public",
       "licence_status": "susr_public_sodb_attribution_required_statement_not_located"
+    },
+    {
+      "uri": "repo:apps/regions/sk/data/area_summary_kraj.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 34642,
+      "sha256": "5d875dcceb2c651bf9f6043ae486775f95e458ffcab33fd7483fe867ce63fa6a",
+      "row_count": 24,
+      "content": "Slovakia current-kraj area summary with 2001, 2011, and 2021 census religious-belief metrics.",
+      "privacy": "public",
+      "licence_status": "susr_public_sodb_attribution_required_statement_not_located"
+    },
+    {
+      "uri": "repo:apps/regions/sk/data/area_summary_kraj.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 11076,
+      "sha256": "0b035c685b2c020077f68e7d6303e82c56cec52e115088d2d02e12c1d6754bbc",
+      "row_count": 24,
+      "content": "Flattened Slovakia current-kraj area summary with 2001, 2011, and 2021 census religious-belief metrics.",
+      "privacy": "public",
+      "licence_status": "susr_public_sodb_attribution_required_statement_not_located"
+    },
+    {
+      "uri": "repo:apps/regions/sk/data/sk_kraj_2021.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 561476,
+      "sha256": "abcf878218f297175494955dba354badcb1eb67ed731ed6236d5d3e5aacda5f7",
+      "row_count": 8,
+      "content": "Simplified Slovakia current-kraj boundary GeoJSON dissolved from the SODB 2021 municipality boundary product.",
+      "privacy": "public",
+      "licence_status": "susr_public_sodb_attribution_required_statement_not_located"
     }
   ],
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/sk/data/area_summary_municipality.json",
-      "sha256": "034e96a01ee4f29665c48507c587c1b3871aa57feb3733d196b35a5e70e60559",
+      "sha256": "a8d7ed91bd268c96978104f0aab336954d915640f31572591c9748cfd924bf2c",
       "built_by": "scripts/build_sk_area_summary.R",
       "notes": "2,927 SODB municipality/city-part reporting units x 1 census year; denominator is SODB total population including not found out."
     },
@@ -1116,10 +1538,22 @@
       "sha256": "f2ad4a40c5561fd6d19e21ecd080284452e05d30cbd599bf94eba7bb288366e1",
       "built_by": "scripts/build_sk_area_summary.R",
       "notes": "SODB 2021 OB municipality/city-part layer simplified at 200 m tolerance."
+    },
+    {
+      "uri": "repo:apps/regions/sk/data/area_summary_kraj.json",
+      "sha256": "5d875dcceb2c651bf9f6043ae486775f95e458ffcab33fd7483fe867ce63fa6a",
+      "built_by": "scripts/build_sk_area_summary.R",
+      "notes": "8 current Slovakia kraje x 3 waves. The 2001 and 2011 rows use source kraj tables; 2021 rows are exact sums of the municipality product."
+    },
+    {
+      "uri": "repo:apps/regions/sk/data/sk_kraj_2021.geojson",
+      "sha256": "abcf878218f297175494955dba354badcb1eb67ed731ed6236d5d3e5aacda5f7",
+      "built_by": "scripts/build_sk_area_summary.R",
+      "notes": "SODB 2021 municipality boundary product dissolved to 8 current kraje and simplified with mapshaper weighted keep-shapes at 100% keep."
     }
   ],
   "validation": {
-    "checks": ["SODB 2021 Z01_15 municipality rows were downloaded as 79 official district-scoped JSON files.", "The 2,927 SODB municipality/city-part rows have unique official area codes.", "All 2,927 SODB municipality/city-part rows join exactly to the OB GeoJSON municipality/city-part features.", "Municipality sums match the SODB national row exactly for total population, religious affiliation, no religion, and not found out.", "The simplified municipality boundary GeoJSON writes to 2570989 bytes after 200 m simplification.", "SODB 2021 percentages use the total population denominator, including the not-found-out category, matching SUSR's published shares.", "1991, 2001, and 2011 subnational waves are deferred because no official boundary concordance or clean machine-readable extraction route was completed in this timebox."],
+    "checks": ["SODB 2021 Z01_15 municipality rows were downloaded as 79 official district-scoped JSON files.", "The 2,927 SODB municipality/city-part rows have unique official area codes.", "All 2,927 SODB municipality/city-part rows join exactly to the OB GeoJSON municipality/city-part features.", "Municipality sums match the SODB national row exactly for total population, religious affiliation, no religion, and not found out.", "The simplified municipality boundary GeoJSON writes to 2570989 bytes after 200 m simplification.", "SODB 2021 percentages use the total population denominator, including the not-found-out category, matching SUSR's published shares.", "Infostat 2001 data118 HTML kraj rows reconcile exactly to the 2001 national data118 row for every reported category.", "SODB 2011 TAB. 118 XLS kraj rows reconcile exactly to the 2011 national TAB. 118 XLS row for every reported category.", "The 2021 kraj product is aggregated from the existing municipality product rows, and its national sums are identical to the municipality product sums.", "The dissolved kraj boundary GeoJSON writes to 561476 bytes after mapshaper weighted keep-shapes at 100% keep."],
     "join_coverage": {
       "municipality": [
         {
@@ -1128,55 +1562,415 @@
           "expected_area_count": 2927,
           "missing_area_names": []
         }
+      ],
+      "kraj": [
+        {
+          "year": 2001,
+          "matched_area_count": 8,
+          "expected_area_count": 8,
+          "missing_area_names": []
+        },
+        {
+          "year": 2011,
+          "matched_area_count": 8,
+          "expected_area_count": 8,
+          "missing_area_names": []
+        },
+        {
+          "year": 2021,
+          "matched_area_count": 8,
+          "expected_area_count": 8,
+          "missing_area_names": []
+        }
       ]
     },
-    "national_validation": [
+    "national_validation": {
+      "municipality_2021": [
+        {
+          "year": 2021,
+          "metric": "population_total",
+          "municipality_sum": 5449270,
+          "national_total": 5449270,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "metric": "religious_affiliation_count",
+          "municipality_sum": 3799331,
+          "national_total": 3799331,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "metric": "no_religion_count",
+          "municipality_sum": 1296142,
+          "national_total": 1296142,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "metric": "not_found_out_count",
+          "municipality_sum": 353797,
+          "national_total": 353797,
+          "difference": 0
+        }
+      ],
+      "kraj_2001_categories": [
+        {
+          "category": "Apoštolská cirkev",
+          "kraj_sum": 3905,
+          "national_total": 3905,
+          "difference": 0
+        },
+        {
+          "category": "Bez vyznania",
+          "kraj_sum": 697308,
+          "national_total": 697308,
+          "difference": 0
+        },
+        {
+          "category": "Bratská jednota baptistov",
+          "kraj_sum": 3562,
+          "national_total": 3562,
+          "difference": 0
+        },
+        {
+          "category": "Cirkev adventistov siedmeho dňa",
+          "kraj_sum": 3429,
+          "national_total": 3429,
+          "difference": 0
+        },
+        {
+          "category": "Cirkev bratská",
+          "kraj_sum": 3217,
+          "national_total": 3217,
+          "difference": 0
+        },
+        {
+          "category": "Cirkev československá husitská",
+          "kraj_sum": 1696,
+          "national_total": 1696,
+          "difference": 0
+        },
+        {
+          "category": "Evanjelická cirkev augsburského vyznania",
+          "kraj_sum": 372858,
+          "national_total": 372858,
+          "difference": 0
+        },
+        {
+          "category": "Evanjelická cirkev metodistická",
+          "kraj_sum": 7347,
+          "national_total": 7347,
+          "difference": 0
+        },
+        {
+          "category": "Gréckokatolícka cirkev",
+          "kraj_sum": 219831,
+          "national_total": 219831,
+          "difference": 0
+        },
+        {
+          "category": "Kresťanské zbory",
+          "kraj_sum": 6519,
+          "national_total": 6519,
+          "difference": 0
+        },
+        {
+          "category": "Náboženská spoločnosť Jehovovi svedkovia",
+          "kraj_sum": 20630,
+          "national_total": 20630,
+          "difference": 0
+        },
+        {
+          "category": "Nezistené",
+          "kraj_sum": 160598,
+          "national_total": 160598,
+          "difference": 0
+        },
+        {
+          "category": "Ostatné",
+          "kraj_sum": 6294,
+          "national_total": 6294,
+          "difference": 0
+        },
+        {
+          "category": "Pravoslávna cirkev",
+          "kraj_sum": 50363,
+          "national_total": 50363,
+          "difference": 0
+        },
+        {
+          "category": "Reformovaná kresťanská cirkev",
+          "kraj_sum": 109735,
+          "national_total": 109735,
+          "difference": 0
+        },
+        {
+          "category": "Rímskokatolícka cirkev",
+          "kraj_sum": 3708120,
+          "national_total": 3708120,
+          "difference": 0
+        },
+        {
+          "category": "Spolu",
+          "kraj_sum": 5379455,
+          "national_total": 5379455,
+          "difference": 0
+        },
+        {
+          "category": "Starokatolícka cirkev",
+          "kraj_sum": 1733,
+          "national_total": 1733,
+          "difference": 0
+        },
+        {
+          "category": "Židovské náboženské obce",
+          "kraj_sum": 2310,
+          "national_total": 2310,
+          "difference": 0
+        }
+      ],
+      "kraj_2011_categories": [
+        {
+          "category": "Apoštolská cirkev",
+          "kraj_sum": 5831,
+          "national_total": 5831,
+          "difference": 0
+        },
+        {
+          "category": "Bahájske spoločenstvo",
+          "kraj_sum": 1065,
+          "national_total": 1065,
+          "difference": 0
+        },
+        {
+          "category": "Bez vyznania",
+          "kraj_sum": 725362,
+          "national_total": 725362,
+          "difference": 0
+        },
+        {
+          "category": "Bratská jednota baptistov",
+          "kraj_sum": 3486,
+          "national_total": 3486,
+          "difference": 0
+        },
+        {
+          "category": "Cirkev adventistov siedmeho dňa",
+          "kraj_sum": 2915,
+          "national_total": 2915,
+          "difference": 0
+        },
+        {
+          "category": "Cirkev bratská",
+          "kraj_sum": 3396,
+          "national_total": 3396,
+          "difference": 0
+        },
+        {
+          "category": "Cirkev československá husitská",
+          "kraj_sum": 1782,
+          "national_total": 1782,
+          "difference": 0
+        },
+        {
+          "category": "Cirkev Ježiša Krista Svätých neskorších dní",
+          "kraj_sum": 972,
+          "national_total": 972,
+          "difference": 0
+        },
+        {
+          "category": "Evanjelická cirkev augsburského vyznania",
+          "kraj_sum": 316250,
+          "national_total": 316250,
+          "difference": 0
+        },
+        {
+          "category": "Evanjelická cirkev metodistická",
+          "kraj_sum": 10328,
+          "national_total": 10328,
+          "difference": 0
+        },
+        {
+          "category": "Gréckokatolícka cirkev",
+          "kraj_sum": 206871,
+          "national_total": 206871,
+          "difference": 0
+        },
+        {
+          "category": "Iné",
+          "kraj_sum": 23340,
+          "national_total": 23340,
+          "difference": 0
+        },
+        {
+          "category": "Kresťanské zbory",
+          "kraj_sum": 7720,
+          "national_total": 7720,
+          "difference": 0
+        },
+        {
+          "category": "Náboženská spoločnosť Jehovovi svedkovia",
+          "kraj_sum": 17222,
+          "national_total": 17222,
+          "difference": 0
+        },
+        {
+          "category": "Nezistené",
+          "kraj_sum": 571437,
+          "national_total": 571437,
+          "difference": 0
+        },
+        {
+          "category": "Novoapoštolská cirkev",
+          "kraj_sum": 166,
+          "national_total": 166,
+          "difference": 0
+        },
+        {
+          "category": "Pravoslávna cirkev",
+          "kraj_sum": 49133,
+          "national_total": 49133,
+          "difference": 0
+        },
+        {
+          "category": "Reformovaná kresťanská cirkev",
+          "kraj_sum": 98797,
+          "national_total": 98797,
+          "difference": 0
+        },
+        {
+          "category": "Rímskokatolícka cirkev",
+          "kraj_sum": 3347277,
+          "national_total": 3347277,
+          "difference": 0
+        },
+        {
+          "category": "Spolu",
+          "kraj_sum": 5397036,
+          "national_total": 5397036,
+          "difference": 0
+        },
+        {
+          "category": "Starokatolícka cirkev",
+          "kraj_sum": 1687,
+          "national_total": 1687,
+          "difference": 0
+        },
+        {
+          "category": "Ústredný zväz židovských náboženských obcí",
+          "kraj_sum": 1999,
+          "national_total": 1999,
+          "difference": 0
+        }
+      ],
+      "kraj_2021_from_municipality": [
+        {
+          "year": 2021,
+          "metric": "population_total",
+          "kraj_sum": 5449270,
+          "municipality_product_sum": 5449270,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "metric": "religious_affiliation_count",
+          "kraj_sum": 3799331,
+          "municipality_product_sum": 3799331,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "metric": "no_religion_count",
+          "kraj_sum": 1296142,
+          "municipality_product_sum": 1296142,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "metric": "not_stated_count",
+          "kraj_sum": 353797,
+          "municipality_product_sum": 353797,
+          "difference": 0
+        }
+      ]
+    },
+    "category_mapping": [
       {
-        "year": 2021,
-        "metric": "population_total",
-        "municipality_sum": 5449270,
-        "national_total": 5449270,
-        "difference": 0
+        "year": 2001,
+        "population_total": "Spolu",
+        "religious_affiliation_count": "All reported categories except Bez vyznania, Nezistené, and Spolu; includes Ostatné.",
+        "no_religion_count": "Bez vyznania",
+        "not_stated_excluded_category": "Nezistené",
+        "denominator": "Spolu, with Nezistené retained in the denominator"
+      },
+      {
+        "year": 2011,
+        "population_total": "Spolu",
+        "religious_affiliation_count": "All reported categories except Bez vyznania, Nezistené, and Spolu; includes Iné.",
+        "no_religion_count": "Bez vyznania",
+        "not_stated_excluded_category": "Nezistené",
+        "denominator": "Spolu, with Nezistené retained in the denominator"
       },
       {
         "year": 2021,
-        "metric": "religious_affiliation_count",
-        "municipality_sum": 3799331,
-        "national_total": 3799331,
-        "difference": 0
-      },
-      {
-        "year": 2021,
-        "metric": "no_religion_count",
-        "municipality_sum": 1296142,
-        "national_total": 1296142,
-        "difference": 0
-      },
-      {
-        "year": 2021,
-        "metric": "not_found_out_count",
-        "municipality_sum": 353797,
-        "national_total": 353797,
-        "difference": 0
+        "population_total": "SODB Z01_15 total",
+        "religious_affiliation_count": "SODB Z01_15 total minus code 28 bez náboženského vyznania and code 00 nezistené.",
+        "no_religion_count": "Code 28 bez náboženského vyznania",
+        "not_stated_excluded_category": "Code 00 nezistené",
+        "denominator": "SODB total population, with code 00 nezistené retained in the denominator"
       }
     ],
+    "embedded_kraj_code_validation": {
+      "checked_municipality_rows": 2927,
+      "mismatches": 0,
+      "rule": "substr(area_code, 1, 5) equals SODB OB GeoJSON kraj_kod"
+    },
+    "navigation_validation_2001": {
+      "expected_kraj_count": 8,
+      "matched_kraj_count": 8,
+      "source_codes": [
+        "310100",
+        "320200",
+        "320300",
+        "320400",
+        "330500",
+        "330600",
+        "340700",
+        "340800"
+      ]
+    },
     "boundary_validation": {
-      "source_feature_count": 3014,
-      "municipality_output_feature_count": 2927,
-      "expected_municipality_feature_count": 2927,
-      "parent_helper_feature_count_filtered": 87,
-      "output_bytes": 2570989,
-      "simplification_tolerance_m": 200,
-      "missing_boundary_codes": [],
-      "extra_boundary_codes": []
+      "municipality": {
+        "source_feature_count": 3014,
+        "municipality_output_feature_count": 2927,
+        "expected_municipality_feature_count": 2927,
+        "parent_helper_feature_count_filtered": 87,
+        "output_bytes": 2570989,
+        "simplification_tolerance_m": 200,
+        "missing_boundary_codes": [],
+        "extra_boundary_codes": []
+      },
+      "kraj": {
+        "source": "Dissolved from repo:apps/regions/sk/data/sk_municipality_2021.geojson, which is derived from the SODB 2021 OB GeoJSON and carries region_code / kraj membership.",
+        "source_feature_count": 2927,
+        "output_feature_count": 8,
+        "output_bytes": 561476,
+        "input_bytes": 655583,
+        "mapshaper_keep_percent": 100,
+        "target_bytes": 800000
+      }
     }
   },
   "construct_notes": [
     "The public map displays two headline metrics for 2021: religious affiliation percent and no religion percent.",
-    "Religious affiliation count is total population minus code 28 bez náboženského vyznania and code 00 nezistené.",
-    "No religion count is code 28 bez náboženského vyznania.",
-    "The denominator is SODB total population because SUSR's published Z01_15 shares use total population, including code 00 nezistené.",
-    "No cross-wave denomination crosswalk is attempted; older subnational waves are deferred until their official extraction route and boundary concordance are pinned."
+    "The companion kraj product displays the same headline metrics for 2001, 2011, and 2021.",
+    "Religious affiliation count is total population minus no religion and Nezistené / not found out. This matches the existing SODB 2021 municipality denominator convention.",
+    "For 2001, religious_affiliation_count sums all data118 categories except Bez vyznania, Nezistené, and Spolu; Ostatné is included in religious affiliation.",
+    "For 2011, religious_affiliation_count sums all TAB. 118 categories except Bez vyznania, Nezistené, and Spolu; Iné is included in religious affiliation.",
+    "For 2021, the kraj rows aggregate the existing municipality product by SODB area-code prefix and OB GeoJSON kraj_kod; code 00 nezistené remains in the denominator.",
+    "No cross-wave denomination crosswalk is attempted."
   ],
   "deferred_sources": [
     {
@@ -1186,28 +1980,52 @@
       "notes": "Downloaded national time-series file C01_11, 'Number of population by religious belief in the Slovak Republic in 1880-2021'. It is not used in the map because its time-series categories collapse 'other and not found out', which prevents the requested no-religion/not-ascertained denominator treatment."
     },
     {
-      "source_dataset_id": "sodb2011-datacube-and-hypercubes",
-      "url": "http://datacube.statistics.sk/#!/folder/sk/1000398",
-      "local_path": "data/raw/sk_census/sodb2011_hypercube_variable_names.xlsx",
-      "notes": "The official previous-censuses page points 2011 users to DATAcube, archived hyper-cubes, multidimensional tables, and other results. The static hyper-cube tree was checked, but a reliable religious-belief municipality extraction was not completed in the timebox."
-    },
-    {
-      "source_dataset_id": "sodb2001-infostat-results",
-      "url": "http://sodb.infostat.sk/scitanie/sk/2001/format.htm",
-      "local_path": null,
-      "notes": "Official 2001 source route from the SODB previous-censuses page. The endpoint did not return usable content during the bounded probe; extraction is deferred."
-    },
-    {
-      "source_dataset_id": "sodb1991-infostat-results",
+      "source_dataset_id": "sodb1991-infostat-data118-religion-source-geography",
       "url": "http://sodb.infostat.sk/scitanie/sk/1991/format.htm",
       "local_path": null,
-      "notes": "Official 1991 source route from the SODB previous-censuses page. The endpoint did not return usable content during the bounded probe; extraction is deferred."
+      "status": "deferred",
+      "geography": "source district/obvod and macro-region geography",
+      "notes": "1991 is deferred because the Infostat source has 42 district/obvod rows and three macro-regions, while current kraje did not exist until 1996. No official correspondence to the current eight kraje was pinned. A future ruling could publish 1991 at its own source geography."
     }
   ],
   "privacy": "public",
   "licence_status": "susr_public_sodb_attribution_required_statement_not_located",
   "downstream_status": "public",
   "source_datasets": [
+    {
+      "source_dataset_id": "sodb2001-infostat-data118-religion-kraj",
+      "name": "Infostat SODB 2001 data118: Obyvateľstvo podľa pohlavia a náboženstva",
+      "provider": "Statistical Office of the Slovak Republic / Infostat",
+      "url": "http://sodb.infostat.sk/scitanie/sk/2001/format.htm",
+      "retrieval_date": "2026-07-09",
+      "local_path": "data/raw/sk_census/sodb2001_infostat_data118_kraj",
+      "licence": {
+        "name": "SUSR attribution; exact previous-census reuse statement not located",
+        "url": "https://www.scitanie.sk/en/data-from-the-previous-censuses-since-1991",
+        "attribution": "Štatistický úrad Slovenskej republiky"
+      },
+      "citation": "Štatistický úrad Slovenskej republiky / Infostat. SODB 2001 data118, Obyvateľstvo podľa pohlavia a náboženstva.",
+      "access_limits": null,
+      "redistribution_limits": "Raw HTML files are not committed; derived public products attribute SUSR and link to the exact routes.",
+      "notes": "Used for the eight current kraj rows and national reconciliation row. Religious affiliation sums every reported category except Bez vyznania, Nezistené, and Spolu; Nezistené remains in the denominator."
+    },
+    {
+      "source_dataset_id": "sodb2011-tab118-religion-kraj",
+      "name": "SODB 2011 TAB. 118: Obyvateľstvo podľa pohlavia a náboženského vyznania",
+      "provider": "Statistical Office of the Slovak Republic",
+      "url": "https://census2011.statistics.sk/tabulky.html",
+      "retrieval_date": "2026-07-09",
+      "local_path": "data/raw/sk_census/sodb2011_tab118_kraj",
+      "licence": {
+        "name": "SUSR attribution; exact SODB 2011 archive reuse statement not located",
+        "url": "https://www.scitanie.sk/en/data-from-the-previous-censuses-since-1991",
+        "attribution": "Štatistický úrad Slovenskej republiky"
+      },
+      "citation": "Štatistický úrad Slovenskej republiky. SODB 2011 multidimensional table TAB. 118, Obyvateľstvo podľa pohlavia a náboženského vyznania.",
+      "access_limits": null,
+      "redistribution_limits": "Raw XLS files are not committed; derived public products attribute SUSR and link to the exact routes.",
+      "notes": "Used for the eight current kraj rows and national reconciliation row. Religious affiliation sums every reported category except Bez vyznania, Nezistené, and Spolu; Iné remains in religious affiliation and Nezistené remains in the denominator."
+    },
     {
       "source_dataset_id": "sodb2021-z01-15-religious-belief-basic-results",
       "name": "SODB 2021 Z01_15: Structure of population by religious belief",
@@ -1243,5 +2061,5 @@
       "notes": "The raw GeoJSON includes 87 non-output helper features and 2,927 municipality/city-part output features. Bratislava and Košice are represented by city parts, matching SODB basic-results reporting."
     }
   ],
-  "notes": "The committed products contain derived area summaries and simplified boundaries only. On-page attribution cites SUSR and the SODB 2021 source pages."
+  "notes": "The committed products contain derived area summaries and simplified boundaries only. On-page attribution cites SUSR, Infostat, SODB 2011, and SODB 2021 source pages."
 }
