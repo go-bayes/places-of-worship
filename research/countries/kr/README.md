@@ -2,46 +2,71 @@
 
 ## Status
 
-- **Tier**: B
-- **Build state**: Surveyed; KOSIS has multi-wave religion census tables, with extraction and 2020-round absence to document.
-- **Last verified**: 2026-07-07
+- **Tier**: A
+- **Build state**: map built for KOSIS census religion, 2005 and 2015
+- **Last verified**: 2026-07-09
 
 ## Religious data over time
 
 | Source | Construct | Smallest public unit | Years | Format | Access | Licence |
 | --- | --- | --- | --- | --- | --- | --- |
-| [KOSIS Korean Statistical Information Service](https://kosis.kr/) | Census religion by person | Si/gun/gu in 2005 and 2015 table route | 1985, 1995, 2005, 2015 | Web tables | Open web | KOSIS public statistics; confirm reuse terms before republication |
-| [Statistics Korea](https://kostat.go.kr/) | Population and housing census products | Si/gun/gu where religion table released | 2020 round did not provide a comparable religion census table found in this survey | Web/PDF | Open web | Government statistics; confirm reuse terms before republication |
+| [KOSIS Korean Statistical Information Service](https://kosis.kr/) table `DT_1IN0505` | census religion by person | si/gun/gu | 2005 | Mass CSV ZIP | Open web table and mass-download route | KOGL Type 1 attribution |
+| [KOSIS Korean Statistical Information Service](https://kosis.kr/) table `DT_1PM1502` | census religion by person | si/gun/gu | 2015 | Mass CSV ZIP | Open web table and mass-download route | KOGL Type 1 attribution |
+| [KOSIS Korean Statistical Information Service](https://kosis.kr/) table `DT_1IN9506` | census religion by person | municipal and province rows | 1995 | Mass CSV ZIP | Open web table and mass-download route | KOGL Type 1 attribution |
+| [KOSIS Korean Statistical Information Service](https://kosis.kr/) table `DT_1IN8505` | census religion by person | sido | 1985 | Web table | Open web table; no no-key mass CSV found in this build | KOGL Type 1 attribution |
+
+The built map uses the 2005 and 2015 si/gun/gu tables. The 2015 religion item came from the 20% sample survey of the register-based census; the map therefore does not calculate a change layer.
+
+## Access the data yourself
+
+This project does not redistribute source data. The map shows derived rates with attribution. To obtain the data from the source of record:
+
+- **Source of record**: [KOSIS](https://kosis.kr/), Population Census religion tables.
+- **Exact tables**: `DT_1IN0505` (2005), `DT_1PM1502` (2015), `DT_1IN9506` (1995, deferred), and `DT_1IN8505` (1985, deferred).
+- **Licence**: KOGL Type 1 attribution is recorded for KOSIS and KoStat-derived inputs.
+- **Our extraction script**: `scripts/build_kr_area_summary.R`.
+- **Retrieval recipe and hashes**: `docs/manifests/kr-census-religion-2005-2015.json`.
 
 ## Boundaries
 
-| Source | Unit | Match note |
-| --- | --- | --- |
-| [geoBoundaries KOR ADM2](https://www.geoboundaries.org/api/current/gbOpen/KOR/ADM2/) | Si/gun/gu | Boundary changes and metropolitan reorganisations need a crosswalk before longitudinal display. |
+- The boundary layer starts from `skorea-municipalities-2018-geo.json` in the [southkorea-maps](https://github.com/southkorea/southkorea-maps) KoStat-derived files.
+- The builder dissolves selected 2018 district geometries to parent-city reporting units and aggregates documented 2005 predecessor codes for Sejong, Yeoju, Cheongju, Gyeryong, Dangjin, Changwon, and Jeju.
+- The boundary product path is `apps/regions/kr/data/kr_si_gun_gu_2018_harmonised.geojson`.
 
 ## Places-of-worship layer
 
 | Source | Role | Note |
 | --- | --- | --- |
-| [OpenStreetMap](https://www.openstreetmap.org) | Candidate site layer | OSM coverage was not counted in this source sweep. Church and temple tagging should be compared against local official or denominational directories. |
+| [OpenStreetMap](https://www.openstreetmap.org) | Candidate site layer | OSM coverage was not counted in this build. Church and temple tagging should be compared with local official or denominational directories before a governed place layer is added. |
 
 ## First visualisation
 
-Map 2015 si/gun/gu religion shares, with a note that the 2020 census round does not supply the same public religion construct.
+The first visualisation maps religious-affiliation percent and no-religion percent by harmonised si/gun/gu, 2005 and 2015, using KOSIS table totals as denominators.
+
+## Built Map
+
+- **App route**: `apps/regions/kr/index.html`
+- **Product paths**: `apps/regions/kr/data/area_summary_si_gun_gu.json`, `apps/regions/kr/data/area_summary_si_gun_gu.csv`, and `apps/regions/kr/data/kr_si_gun_gu_2018_harmonised.geojson`
+- **Script**: `scripts/build_kr_area_summary.R`
+- **Manifest**: `docs/manifests/kr-census-religion-2005-2015.json`
+- **Waves**: 2005 and 2015
+- **Denominator statement**: 2005 uses KOSIS `내국인 (명)`, including `미상`; 2015 uses KOSIS `계` from the 20% sample survey of the register-based census.
+- **Boundary basis**: 229 harmonised si/gun/gu units from a 2018 KoStat-derived municipality file.
 
 ## Build recipe
 
-Start with the KOSIS 2015 si/gun/gu table `Population by sex, age and religion` and geoBoundaries KOR ADM2. Add 2005, 1995, and 1985 after method and boundary differences are documented.
-
-Resolved KOSIS table IDs (verification pass 2026-07-07): 1985
-`DT_1IN8505`, 1995 `DT_1IN9506`, 2005 `DT_1IN0505`, 2015 `DT_1PM1502`.
-Four official waves promote this card above two-wave candidates under
-the all-waves queue rule; 2005/2015 are si/gun/gu, 1985 is sido-level,
-1995 needs an extraction check.
+1. Extract the KOSIS mass CSV ZIPs for `DT_1IN0505` and `DT_1PM1502` into `data/raw/kr_census/`.
+2. Build `area_summary` from the source totals, summing named religion categories for religious affiliation and using the source no-religion category directly.
+3. Dissolve 2018 KoStat-derived municipality geometries to the harmonised reporting units used by the public product.
+4. Run `Rscript scripts/build_kr_area_summary.R` from the repository root.
+5. Confirm exact national reconciliation, full join coverage, a boundary under 3 MB, and manifest JSON validity.
 
 ## Risks and open questions
 
-The 2015 census method differs from earlier enumeration practice, and the missing 2020 religion wave limits current trend mapping. Public maps should separate census affiliation from denominational directories and from places-of-worship density.
+- The 1985 table is pinned as `DT_1IN8505`, but no no-key mass CSV was available during this build. A reproducible session-backed export is still needed.
+- The 1995 mass CSV is pinned as `DT_1IN9506`, but the pre-2005 administrative-code history needs a separate concordance before public mapping.
+- The 2015 sample-survey basis differs from the 2005 full-count basis. The built page therefore omits religious change.
+- The harmonised 2005 rows use documented predecessor-code aggregations. Sejong is flagged because the 2012 boundary does not map cleanly to a single 2005 source unit.
 
 ## Deep-history potential
 
