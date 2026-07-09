@@ -94,11 +94,72 @@
             font-weight: 700;
         }
 
+        /* the one dominant action in the sidebar: adding a missing place.
+           shown only in assignment mode (the demo/full map keeps its own
+           JSON nomination form lower down) */
+        .sidebar-actions {
+            display: none;
+            margin-top: 14px;
+        }
+
+        body.assignment-mode .sidebar-actions {
+            display: block;
+        }
+
+        .primary-action {
+            width: 100%;
+            border: 1px solid var(--action);
+            background: var(--action);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 15px;
+            min-height: 48px;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+        }
+
+        .primary-action:hover {
+            background: #17527a;
+            border-color: #17527a;
+        }
+
+        .primary-action:focus-visible {
+            outline: 3px solid #9ecbe8;
+            outline-offset: 2px;
+        }
+
+        .primary-action:disabled {
+            opacity: 0.6;
+            cursor: default;
+            box-shadow: none;
+        }
+
         .filters {
             display: grid;
-            gap: 10px;
-            padding: 14px 16px;
-            border-bottom: 1px solid #d8dee4;
+            gap: 8px;
+            padding: 10px 16px;
+            border-bottom: 1px solid #e7ebef;
+        }
+
+        /* secondary filters fold away so Search and Target year lead */
+        .more-filters {
+            font-size: 12px;
+        }
+
+        .more-filters > summary {
+            cursor: pointer;
+            color: #5d6d7e;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 2px 0;
+            list-style-position: inside;
+        }
+
+        .more-filters-body {
+            display: grid;
+            gap: 8px;
+            margin-top: 8px;
         }
 
         label {
@@ -150,37 +211,39 @@
         .stats {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            padding: 12px 16px;
-            border-bottom: 1px solid #d8dee4;
+            gap: 6px;
+            padding: 8px 16px;
+            border-bottom: 1px solid #e7ebef;
         }
 
         .stat {
-            padding: 8px;
-            border: 1px solid #e2e8f0;
+            padding: 6px;
+            border: 1px solid #eef1f4;
             border-radius: 4px;
-            background: #f8fafc;
+            background: #fafbfc;
         }
 
         .stat strong {
             display: block;
-            font-size: 18px;
-            color: #17202a;
+            font-size: 15px;
+            color: #34495e;
         }
 
         .stat span {
             display: block;
-            margin-top: 2px;
-            color: #566573;
-            font-size: 12px;
+            margin-top: 1px;
+            color: #7b8794;
+            font-size: 11px;
         }
 
+        /* the task list is the primary working surface: give it the room
+           and the solid divider the quieter panels above no longer carry */
         .task-list {
             overflow: auto;
             padding: 8px;
             border-bottom: 1px solid #d8dee4;
-            min-height: 150px;
-            max-height: 34vh;
+            min-height: 180px;
+            max-height: 40vh;
         }
 
         .task-row {
@@ -556,6 +619,27 @@
             border-bottom: 1px solid #d8dee4;
         }
 
+        /* transient pin-drop cards render here, at the top of the working
+           column next to the map, while pin mode is active */
+        .pin-card-host {
+            padding: 12px 16px;
+            border-bottom: 1px solid #d8dee4;
+            background: #f2f8fc;
+            display: grid;
+            gap: 8px;
+        }
+
+        .pin-card-host[hidden] {
+            display: none;
+        }
+
+        .pin-host-title {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 700;
+            color: #1f4e79;
+        }
+
         .nomination-panel summary {
             cursor: pointer;
             font-size: 13px;
@@ -654,31 +738,35 @@
         }
 
         .quickstart {
-            margin: 14px 16px 0 16px;
-            padding: 12px 14px;
-            border: 1px solid #cfe1ef;
-            border-left: 4px solid var(--action);
-            background: #f2f8fc;
+            margin: 10px 16px 0 16px;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            background: #fafbfc;
             border-radius: 5px;
-            font-size: 13px;
+            font-size: 12px;
             line-height: 1.5;
-            color: #1f2d3d;
+            color: #5d6d7e;
         }
 
         .quickstart strong {
             display: inline;
-            margin-bottom: 6px;
-            color: #1f4e79;
-            font-size: 14px;
+            margin-bottom: 4px;
+            color: #5d6d7e;
+            font-size: 12px;
         }
 
         .quickstart > summary {
             cursor: pointer;
-            color: #1f4e79;
-            font-size: 14px;
+            color: #5d6d7e;
+            font-size: 12px;
             font-weight: 700;
             list-style-position: inside;
             padding: 2px 0;
+        }
+
+        .quickstart a {
+            color: var(--action);
+            font-weight: 700;
         }
 
         .quickstart[open] > summary {
@@ -1342,6 +1430,7 @@
                     <a href="../../global/">Global map</a>
                     <a href="https://www.placesmap.org/apps/guides/ra.html" target="_blank" rel="noopener">Guide</a>
                 </div>
+                <div class="sidebar-actions"><button type="button" id="addPlaceButton" class="primary-action">＋ Add a place that's missing</button></div>
                 <div id="modeNotice" class="pilot-note"></div>
             </header>
 
@@ -1355,24 +1444,6 @@
                     <input id="searchInput" type="search" placeholder="Name, address, OSM id">
                 </label>
                 <label>
-                    Priority
-                    <select id="priorityFilter">
-                        <option value="all">All priorities</option>
-                        <option value="high">High</option>
-                        <option value="medium">Medium</option>
-                        <option value="low">Low</option>
-                    </select>
-                </label>
-                <label>
-                    Suggested action
-                    <select id="actionFilter">
-                        <option value="all">All actions</option>
-                        <option value="needs_human_review">Needs human review</option>
-                        <option value="review_when_sampling">Spot-check in sample</option>
-                        <option value="candidate_no_action">Candidate no action</option>
-                    </select>
-                </label>
-                <label>
                     Target year
                     <select id="targetYearSelect">
                         <option value="2023">2023</option>
@@ -1380,16 +1451,39 @@
                         <option value="2013">2013</option>
                     </select>
                 </label>
-                <label>
-                    Target-year status
-                    <select id="statusFilter">
-                        <option value="all">All statuses</option>
-                        <option value="present">Present</option>
-                        <option value="absent">Absent</option>
-                        <option value="uncertain">Uncertain</option>
-                        <option value="not_assessed">Not assessed</option>
-                    </select>
-                </label>
+                <details class="more-filters">
+                    <summary>More filters</summary>
+                    <div class="more-filters-body">
+                        <label>
+                            Priority
+                            <select id="priorityFilter">
+                                <option value="all">All priorities</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </label>
+                        <label>
+                            Suggested action
+                            <select id="actionFilter">
+                                <option value="all">All actions</option>
+                                <option value="needs_human_review">Needs human review</option>
+                                <option value="review_when_sampling">Spot-check in sample</option>
+                                <option value="candidate_no_action">Candidate no action</option>
+                            </select>
+                        </label>
+                        <label>
+                            Target-year status
+                            <select id="statusFilter">
+                                <option value="all">All statuses</option>
+                                <option value="present">Present</option>
+                                <option value="absent">Absent</option>
+                                <option value="uncertain">Uncertain</option>
+                                <option value="not_assessed">Not assessed</option>
+                            </select>
+                        </label>
+                    </div>
+                </details>
                 <div class="pilot-note temporal-note">
                     Target-year colours are provisional. OSM date tags are evidence to check, not final historical truth.
                     <div class="temporal-legend" aria-label="Target-year colour legend">
@@ -1411,6 +1505,7 @@
             <section id="taskList" class="task-list" aria-label="Verification tasks"></section>
             <section id="sessionPanel" class="session-panel"></section>
             <section id="nominationPanel" class="nomination-panel"></section>
+            <section id="pinCardHost" class="pin-card-host" hidden></section>
             <section id="detailPanel" class="detail-panel" tabindex="-1"></section>
         </aside>
 
@@ -1422,6 +1517,6 @@
             crossorigin=""></script>
     <script src="js/convex-config.js?v=20260707-changes-requested"></script>
     <script src="js/convex-task-client.js?v=20260708e"></script>
-    <script src="js/verification-map.js?v=20260709b"></script>
+    <script src="js/verification-map.js?v=20260709c"></script>
 </body>
 </html>

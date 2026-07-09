@@ -151,9 +151,14 @@ const flows = [
       await page.locator("#taskList").scrollIntoViewIfNeeded();
       await step("The workspace: assigned tasks on the left, the task map on the right.");
       await page.fill("#searchInput", "demo");
+      // the priority/action/status filters now fold into "More filters";
+      // open it and scroll to the top so the caption still matches the frame
+      await page.locator(".more-filters > summary").click();
+      await page.evaluate(() => { const sb = document.querySelector(".sidebar"); if (sb) sb.scrollTop = 0; });
       await page.waitForTimeout(400);
       await step("Filter the task list by name, priority, map suggestion, or status.");
       await page.fill("#searchInput", "");
+      await page.locator(".more-filters > summary").click();
       await page.selectOption("#portalPointsSelect", "all");
       await page.waitForTimeout(1200);
       await step("The Points control adds muted context dots; the legend explains marker states.");
@@ -275,10 +280,9 @@ const flows = [
         app.latestDraftsByTaskId.set("task_demo_vu_001", null);
         app.applyFilters();
       });
-      await page.locator("#nominationDetails summary").click();
       await page.waitForTimeout(300);
-      await step("Add missing place of worship lives in the nomination panel.");
-      await page.click("#pinModeButton");
+      await step("Add a place that's missing sits at the top of the sidebar, above the task panel.");
+      await page.click("#addPlaceButton");
       await page.evaluate(() => {
         const app = window.nzVerificationMap;
         app.map.setView([-17.7404, 168.3155], 13, { animate: false });

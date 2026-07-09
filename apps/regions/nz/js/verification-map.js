@@ -2080,9 +2080,12 @@ class NzVerificationMap {
             ? `pow_ra_quickstart_dismissed_v1:${ASSIGNMENT_BATCH_ID}`
             : "pow_ra_quickstart_dismissed_v1";
         if (quickstart && DEMO_MODE && localStorage.getItem(quickstartKey) !== "1") {
+            // closed by default and shrunk to a one-line pointer at the full
+            // Guide; the detailed steps stay one click away for anyone who
+            // wants them, and the dismiss/localStorage plumbing is unchanged
             quickstart.innerHTML = `
-                <details class="quickstart" role="note" open>
-                    <summary><strong>${ASSIGNMENT_MODE ? "How this assignment works" : "How this pilot works"}</strong></summary>
+                <details class="quickstart" role="note">
+                    <summary><strong>New here? Follow the step-by-step <a href="https://www.placesmap.org/apps/guides/ra.html" target="_blank" rel="noopener">Guide</a>.</strong></summary>
                     ${ASSIGNMENT_MODE ? `
                         ${assignmentQuickstartHtml()}
                     ` : `
@@ -2117,7 +2120,9 @@ class NzVerificationMap {
                 </div>
             `;
             if (ASSIGNMENT_MODE) {
-                this.bindPinNomination();
+                // the single pin-drop entry point lives in the header now;
+                // the transient cards render into #pinCardHost on demand
+                document.getElementById("addPlaceButton")?.addEventListener("click", () => this.enterPinMode());
             }
         }
 
@@ -4219,73 +4224,92 @@ class NzVerificationMap {
     // panel. drop a draggable pin, confirm at building-accurate zoom, offer
     // any existing task within 150 m first, then create the candidate task
     // through tasks:createManualCandidateTask and land in its detail panel
+    // assignment-mode nomination panel: a single one-line helper. the
+    // actionable entry point is the header "Add a place" button; the
+    // transient cards render into #pinCardHost when pin mode is armed
     pinNominationHtml() {
         return `
-            <details id="nominationDetails">
-                <summary>Add missing place of worship</summary>
-                <div class="nomination-form">
-                    <div class="copy-help">
-                        Know a place of worship that is not on the map? Drop a pin on the building, confirm the location, then describe how you know it. Local knowledge counts as evidence.
-                    </div>
-                    <button id="pinModeButton" type="button" class="secondary">Add missing place — drop a pin</button>
-                    <div id="pinConfirmCard" class="pin-card" hidden>
-                        <div class="pin-coords">Pin: <span id="pinLat"></span>, <span id="pinLng"></span></div>
-                        <div id="pinZoomGate" class="pin-zoom-gate">
-                            Zoom in further to place the pin precisely — the recorded location must be building-accurate.
-                        </div>
-                        <div class="button-row">
-                            <button id="pinConfirmButton" type="button" disabled>Confirm location</button>
-                            <button id="pinCancelButton" type="button" class="secondary">Cancel</button>
-                        </div>
-                    </div>
-                    <div id="pinProximityCard" class="pin-card" hidden></div>
-                    <div id="pinFormCard" class="pin-card" hidden>
-                        <label>
-                            Name (optional)
-                            <input id="pinNameInput" type="text" placeholder="Unknown place of worship">
-                        </label>
-                        <label>
-                            Address (optional)
-                            <input id="pinAddressInput" type="text">
-                        </label>
-                        <label>
-                            Locality (optional)
-                            <input id="pinLocalityInput" type="text">
-                        </label>
-                        <label>
-                            Observed or source date (optional)
-                            <input id="pinObservedDateInput" type="text" placeholder="e.g. 2026-07 or 'seen last month'">
-                        </label>
-                        <label>
-                            How do you know this place? (source note)
-                            <textarea id="pinSourceNoteInput" rows="3" placeholder="e.g. I attend services here; no URL exists."></textarea>
-                        </label>
-                        <label>
-                            What kind of claim is this?
-                            <select id="pinChangeClassSelect">
-                                ${selectOptionsHtml(CHANGE_CLASS_OPTIONS, "uncertain")}
-                            </select>
-                        </label>
-                        <div class="copy-help">
-                            This distinction drives the annual census: real change is counted, map corrections rewrite history.
-                        </div>
-                        <div class="button-row">
-                            <button id="pinSubmitButton" type="button">Create candidate task</button>
-                            <button id="pinFormCancelButton" type="button" class="secondary">Cancel</button>
-                        </div>
-                    </div>
-                    <div id="pinStatus" class="copy-status" aria-live="polite"></div>
-                </div>
-            </details>
+            <div class="copy-help">
+                Know a place of worship that is not on the map? Use <strong>Add a place that's missing</strong> at the top of this panel, drop a pin on the building, then describe how you know it. Local knowledge counts as evidence.
+            </div>
         `;
     }
 
-    bindPinNomination() {
-        document.getElementById("pinModeButton")?.addEventListener("click", () => this.enterPinMode());
+    // the transient pin-drop cards, rendered into #pinCardHost while pin
+    // mode is active (kept here, near the map, rather than buried in the
+    // nomination panel). ids are unchanged so all pin logic still binds
+    pinCardsHtml() {
+        return `
+            <h2 class="pin-host-title">Add a place that's missing</h2>
+            <div id="pinConfirmCard" class="pin-card" hidden>
+                <div class="pin-coords">Pin: <span id="pinLat"></span>, <span id="pinLng"></span></div>
+                <div id="pinZoomGate" class="pin-zoom-gate">
+                    Zoom in further to place the pin precisely — the recorded location must be building-accurate.
+                </div>
+                <div class="button-row">
+                    <button id="pinConfirmButton" type="button" disabled>Confirm location</button>
+                    <button id="pinCancelButton" type="button" class="secondary">Cancel</button>
+                </div>
+            </div>
+            <div id="pinProximityCard" class="pin-card" hidden></div>
+            <div id="pinFormCard" class="pin-card" hidden>
+                <label>
+                    Name (optional)
+                    <input id="pinNameInput" type="text" placeholder="Unknown place of worship">
+                </label>
+                <label>
+                    Address (optional)
+                    <input id="pinAddressInput" type="text">
+                </label>
+                <label>
+                    Locality (optional)
+                    <input id="pinLocalityInput" type="text">
+                </label>
+                <label>
+                    Observed or source date (optional)
+                    <input id="pinObservedDateInput" type="text" placeholder="e.g. 2026-07 or 'seen last month'">
+                </label>
+                <label>
+                    How do you know this place? (source note)
+                    <textarea id="pinSourceNoteInput" rows="3" placeholder="e.g. I attend services here; no URL exists."></textarea>
+                </label>
+                <label>
+                    What kind of claim is this?
+                    <select id="pinChangeClassSelect">
+                        ${selectOptionsHtml(CHANGE_CLASS_OPTIONS, "uncertain")}
+                    </select>
+                </label>
+                <div class="copy-help">
+                    This distinction drives the annual census: real change is counted, map corrections rewrite history.
+                </div>
+                <div class="button-row">
+                    <button id="pinSubmitButton" type="button">Create candidate task</button>
+                    <button id="pinFormCancelButton" type="button" class="secondary">Cancel</button>
+                </div>
+            </div>
+            <div id="pinStatus" class="copy-status" aria-live="polite"></div>
+        `;
+    }
+
+    // renders the transient cards into the host and wires their buttons.
+    // called each time pin mode is armed, since the host is cleared on exit
+    mountPinCards() {
+        const host = document.getElementById("pinCardHost");
+        if (!host) return;
+        host.innerHTML = this.pinCardsHtml();
+        host.hidden = false;
         document.getElementById("pinConfirmButton")?.addEventListener("click", () => this.confirmPinLocation());
         document.getElementById("pinCancelButton")?.addEventListener("click", () => this.exitPinMode());
         document.getElementById("pinFormCancelButton")?.addEventListener("click", () => this.exitPinMode());
         document.getElementById("pinSubmitButton")?.addEventListener("click", () => this.submitPinNomination());
+        this.revealPinHost();
+    }
+
+    // pull the pin-card host to the top of the sidebar scroll so the armed
+    // flow is never left below the fold on a long signed-in sidebar.
+    // instant (not smooth): a nested-scroll smooth animation was unreliable
+    revealPinHost() {
+        document.getElementById("pinCardHost")?.scrollIntoView({ block: "start" });
     }
 
     enterPinMode() {
@@ -4293,8 +4317,9 @@ class NzVerificationMap {
         this.pinMode = true;
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
+        this.mountPinCards();
         this.map.getContainer().classList.add("pin-placement");
-        document.getElementById("pinModeButton")?.setAttribute("disabled", "true");
+        document.getElementById("addPlaceButton")?.setAttribute("disabled", "true");
         const status = document.getElementById("pinStatus");
         if (status) status.textContent = "Click the building on the map to drop the pin. Press Escape to cancel.";
         this._pinClickHandler = (event) => this.placePin(event.latlng);
@@ -4325,6 +4350,7 @@ class NzVerificationMap {
         const status = document.getElementById("pinStatus");
         if (status) status.textContent = "Drag the pin onto the building, zoom in, then confirm the location.";
         this.updatePinConfirmCard();
+        this.revealPinHost();
     }
 
     updatePinConfirmCard() {
@@ -4417,6 +4443,7 @@ class NzVerificationMap {
         });
         const status = document.getElementById("pinStatus");
         if (status) status.textContent = "";
+        this.revealPinHost();
     }
 
     showPinForm() {
@@ -4424,6 +4451,7 @@ class NzVerificationMap {
         if (card) card.hidden = false;
         const status = document.getElementById("pinStatus");
         if (status) status.textContent = "";
+        this.revealPinHost();
         document.getElementById("pinNameInput")?.focus({ preventScroll: true });
     }
 
@@ -4544,13 +4572,14 @@ class NzVerificationMap {
             this.pinMarker = null;
         }
         this.map?.getContainer().classList.remove("pin-placement");
-        ["pinConfirmCard", "pinProximityCard", "pinFormCard"].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.hidden = true;
-        });
-        document.getElementById("pinModeButton")?.removeAttribute("disabled");
-        const status = document.getElementById("pinStatus");
-        if (status) status.textContent = "";
+        // tear down the transient cards entirely so the host leaves no
+        // empty panel behind the working column
+        const host = document.getElementById("pinCardHost");
+        if (host) {
+            host.innerHTML = "";
+            host.hidden = true;
+        }
+        document.getElementById("addPlaceButton")?.removeAttribute("disabled");
     }
 
     nominationFormHtml() {
