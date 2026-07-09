@@ -455,6 +455,30 @@ const COUNTRY_CONFIGS = {
             note: "Evidence appears to support worship use in one target year and absence or changed use in a later target year; reviewer to confirm dates and status.",
         },
     },
+    zm: {
+        countryCode: "ZM",
+        countryName: "Zambia",
+        targetYears: ["2010", "2022"],
+        defaultTargetYear: "2022",
+        dataPath: "",
+        mapCentre: [-13.5, 27.8],
+        mapZoom: 6,
+        collectionBatch: "zm-map-workbench-demo",
+        sourceDatasetId: "zm_static_verification_map",
+        mapSource: "zm_verification_static_map_workbench",
+        nominationSource: "zm_verification_static_map_nomination",
+        defaultAssignmentBatchId: "zm-source-first-test-001",
+        assignmentHeading: "Zambia verification tasks",
+        temporalLossAction: {
+            value: "target_year_loss_or_changed_use",
+            label: "Present in one target year, absent in a later target year",
+            statuses: {
+                "2010": "present",
+                "2022": "absent",
+            },
+            note: "Evidence appears to support worship use in one target year and absence or changed use in a later target year; reviewer to confirm dates and status.",
+        },
+    },
 };
 function countryConfigKey(value) {
     const key = String(value || "").toLowerCase();

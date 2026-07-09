@@ -20,6 +20,7 @@
         sk: { code: "SK", label: "Slovakia" },
         uk: { code: "UK", label: "United Kingdom" },
         us: { code: "US", label: "United States" },
+        zm: { code: "ZM", label: "Zambia" },
     };
     const countryFromQuery = countryLabels[String(searchParams.get("country") || "").toLowerCase()];
     const countryFromConfig = countryLabels[String(config.countryCode || "").toLowerCase()];

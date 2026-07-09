@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Zambia map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the zambia research map; every string traces to
+    // research/countries/zm/README.md, the zm-census-religion-2010-2022
+    // manifest, or the live REGION_CONFIG in apps/regions/zm/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "ZM",
+      countryName: "Zambia",
+      mapHref: "./",
+      intro: "Census religion overlays for Zambia at province level, built from the Zambia Statistics Agency 2022 Census Religion Descriptive Tables (table B.1) and the ten 2010 Census provincial analytical reports (figure 4.10).",
+      facts: {
+        waves: "Census 2010 (percent-only), census 2022",
+        geographies: "Province (10)",
+        metrics: "Religious affiliation %, no religion %",
+        placeDots: "OpenStreetMap places (amenity=place_of_worship), ODbL-1.0; no governed place layer or place metric is built yet."
+      },
+      reading: [
+        "Areas are shaded by religious affiliation or no religion among the persons counted in the census religion tabulation.",
+        "Religious affiliation combines all named religions. In 2022 these are the nine named groups of table B.1 (Christianity, Islam, African Traditional, Hinduism, Buddhism, Bahai, Sikhism, Judaism, Other Religious Groups); in 2010 they are Protestant, Catholic, Muslim and Other as printed in each provincial report. No religion is the census's non-religious category in both waves.",
+        "2022 percentages use the table B.1 de facto province total as the denominator. The census allocates every de facto person to one of ten religion groups, so there is no not-stated category to exclude. The de facto religion-table total (18,340,343) sits below the de jure 2022 census population (19,693,423); the gap sits outside the religion tables.",
+        "Table B.1 prints its column header in the questionnaire's code order, but the value columns cannot carry those labels: the census's own analytical figures (None 1.3%, African Traditional 0.2%, Other 0.1% nationally, with matching sex and rural/urban splits) are consistent only with Non-Religious at 233,260 and African Traditional at 30,502 nationally. The build adopts that unique consistent assignment and asserts it against the printed figures; the split among the small named-religion groups does not affect either headline metric.",
+        "2010 values are the percentages printed in each provincial analytical report's religion figure (one decimal per category); counts were not published at province level, so the 2010 wave carries percentages only. The reports re-tabulate the 2010 census on the current ten provinces, including Muchinga (created 2011), so both waves share one boundary set.",
+        "Religion below province level is published only as Christianity against a bundled remainder that includes the non-religious (tables B.4/B.5), so district detail (116 districts) is deferred until the full category breakdown is published below province level.",
+        "The 2000 census provincial analytical reports carry no religion content, so no 2000 wave is shown.",
+        "Boundaries are geoBoundaries ZMB ADM1 provinces (10, CC BY 4.0, boundary source Zambia Data Hub)."
+      ],
+      sources: [
+        {
+          name: "ZamStats 2022 Census of Population and Housing, Series B Religion Descriptive Tables (table B.1, population (de facto) by religion affiliation and province)",
+          href: "https://www.zamstats.gov.zm/population-census/",
+          construct: "Census religious affiliation (de facto population)",
+          years: "2022",
+          licence: "Open download from the ZamStats census pages; attribution requested, no explicit reuse licence stated"
+        },
+        {
+          name: "ZamStats 2010 Census provincial analytical reports (ten volumes; figure 4.10, percentage distribution of population by religious affiliation)",
+          href: "https://www.zamstats.gov.zm/census-and-statistics/",
+          construct: "Census religious affiliation (printed percentages; no province counts)",
+          years: "2010",
+          licence: "Open download from the ZamStats census pages; attribution requested, no explicit reuse licence stated"
+        },
+        {
+          name: "ZamStats 2022 Census National Analytical Report (religion figures 3.13-3.16; 2010/2022 population by province)",
+          href: "https://www.zamstats.gov.zm/population-census/",
+          construct: "Category reconciliation authority and 2010 province populations",
+          years: "2010, 2022",
+          licence: "Open download from the ZamStats census pages; attribution requested, no explicit reuse licence stated"
+        },
+        {
+          name: "geoBoundaries ZMB ADM1 provinces",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/ZMB/ADM1/",
+          construct: "Boundary geometry (10 post-2011 provinces)",
+          years: "2011 structure, source data 2023",
+          licence: "CC BY 4.0 (boundary source Zambia Data Hub)"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Zambia Statistics Agency, <a href=\"https://www.zamstats.gov.zm/population-census/\" target=\"_blank\" rel=\"noopener\">Population census pages</a>.",
+        tables: "2022: Series B Religion Descriptive Tables, table B.1 (population (de facto) by religion affiliation and province); every row's ten religion groups reconcile exactly to its printed total, the ten provinces reconcile exactly to the national row, and the counts reproduce the analytical report's printed percentages. 2010: each provincial analytical report's figure 4.10 (religion percentages; sums 99.7-100.0 per province).",
+        licence: "ZamStats census reports are open downloads with attribution requested and no explicit reuse licence stated; boundaries are geoBoundaries ZMB ADM1 (10 provinces), CC BY 4.0, boundary source Zambia Data Hub.",
+        script: "scripts/build_zm_area_summary.R",
+        manifests: [
+          { label: "zm-census-religion-2010-2022", href: "docs/manifests/zm-census-religion-2010-2022.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
