@@ -4,6 +4,63 @@
 
 ### 2026-07-09
 
+- Added the South Korea regional map: municipal (si/gun/gu) census
+  religion for 2005 and 2015 from KOSIS tables DT_1IN0505 and
+  DT_1PM1502 (KOGL Type 1 attribution), on a KoStat-derived 2018
+  municipal boundary layer harmonised to 229 reporting units
+  (parent-city dissolves; predecessor-code aggregation for the 2005
+  wave). 2015 values come from the register-based census's 20% sample
+  survey and every 2015 row is flagged sample_survey_20pct; no change
+  layer ships across the full-count/sample basis break. Validation:
+  both waves reconcile exactly to the national rows for population,
+  religious affiliation, no religion, and the 2005 unknown category;
+  join coverage 229/229. 1985 (sido table pinned, no keyless export
+  route yet) and 1995 (mass CSV downloaded and checksummed, pre-2005
+  concordance pending) are deferred. Build:
+  `scripts/build_kr_area_summary.R`; manifest
+  `docs/manifests/kr-census-religion-2005-2015.json`.
+- Added the Romania regional map: census religion for 2011 (RPL
+  sR_TAB_13) and 2021 (RPL Tabel 2.04.2) at two levels — county
+  (județ, 42 units, GISCO NUTS3 2021, complete headline coverage,
+  the default view) and commune/LAU (3,181 units, GISCO LAU 2021,
+  2011 bridged by LAU id). Denominator is the stated-response
+  population per wave (undeclared excluded: 6.26% nationally in 2011,
+  13.95% in 2021); no-religion is Fără religie plus Atei; Agnostic
+  stays in the denominator without counting as no-religion.
+  Small-count suppression leaves 31% (2011) and 57% (2021) of commune
+  rows without headline percentages — published as unavailable, never
+  imputed; the county level carries the complete view. Validation:
+  county and LAU sums reconcile exactly to the national rows on every
+  component in both waves. 1992 and 2002 deferred. INS census-portal
+  workbooks carry no explicit reuse statement — attributed, flagged
+  for licence review. Build: `scripts/build_ro_area_summary.R`;
+  manifest `docs/manifests/ro-census-religion-2011-2021.json`.
+- Added the India regional map: district census religious community
+  (C-01) for 2001 (593 districts) and 2011 (640 districts), each wave
+  on its own DataMeet period district boundaries (CC BY 2.5 IN) with
+  the timeline switching vintage — no cross-wave district crosswalk
+  exists, so no change layer ships. The Census of India has no
+  no-religion category: no-religion fields are null on every row
+  (flagged no_religion_category_absent) and "Religion not stated" is
+  excluded from religious affiliation without being counted as
+  no-religion. There is no 2021 census. Validation: district sums
+  reconcile exactly to the national row AND to every state row for
+  all categories in both waves; join coverage 593/593 and 640/640.
+  1991 pinned (C-9, J&K not enumerated) but deferred. Licence:
+  GODL-India recorded. Build: `scripts/build_in_area_summary.R`;
+  manifest `docs/manifests/in-census-religion-2001-2011.json`.
+- Added OSM date-tagged place layers (dated_places.geojson) for
+  Australia (58 features), Brazil (548), Canada (163), Mexico (16),
+  the United Kingdom (693), Portugal (357), and Slovakia (323) via
+  the ohsome API at snapshot 2025-09-01, following the NZ extraction
+  pattern (amenity=place_of_worship, lifecycle date tags; former-use
+  tags without an explicit end date get the snapshot date as a
+  provisional end_date). Every live country now offers the
+  "Points: period" mode on both the country maps and the RA portal;
+  Vanuatu remains deliberately unwired until a real dated product
+  ships. Manifest:
+  `docs/manifests/osm-pow-dated-7countries-346eb8505e00.json`.
+
 - Added the Portugal regional map: municipality census religion for
   2011 and 2021 from INE database API indicators 0006396 and 0011644
   (população residente aged 15+, CC BY 4.0), on DGT CAOP 2021
