@@ -28,7 +28,7 @@
           summary: "data/area_summary_region.json",
           codeProp: "area_code",
           nameProp: "area_name",
-          credit: "Boundaries © geoBoundaries GHA ADM1 (CC BY-SA 2.0, source OpenStreetMap contributors) · census religion from GSS 2021 PHC General Report Vol. 3C, table 5.7"
+          credit: "Boundaries © geoBoundaries GHA ADM1 (CC BY-SA 2.0, source OpenStreetMap contributors) · census religion from GSS StatsBank PHC2010 POP16 re-tabulated to the current 16-region frame (2010) and GSS 2021 PHC General Report Vol. 3C, table 5.7 (2021)"
         },
         region_2010_ten: {
           label: "Region (pre-2019 ten)",
@@ -44,7 +44,8 @@
       defaultYear: 2021,
       metricsAvailable: [
         "religious_affiliation_percent",
-        "no_religion_percent"
+        "no_religion_percent",
+        "religious_change"
       ],
       metricLabels: {
         religious_affiliation_percent: {
@@ -54,6 +55,10 @@
         no_religion_percent: {
           label: "No religion %",
           note: "the No Religion group as a share of the persons counted in the religion table"
+        },
+        religious_change: {
+          label: "Religious affiliation change",
+          note: "percentage-point change in religious affiliation between the two census waves; on the 16 regions the 2010 rows are GSS's re-tabulation of the 2010 enumeration onto the current 16-region frame, and on the pre-2019 ten regions the 2021 counts are aggregated to those ten regions"
         }
       },
       popupDenominatorNote: "Percentages use the GSS table 5.7 regional total (all locality types, both sexes). Religious affiliation combines every named religion; the census allocates every person to one of eight groups; there is no not-stated category. Volume 3C publishes religion at region level only.",
@@ -70,13 +75,14 @@
       geocode: { country: "gh", biasLngLat: [-1.2, 7.9] },
       onboarding: {
         title: "Ghana research map",
-        intro: "Census religion overlays for Ghana at region level, built from the Ghana Statistical Service 2021 Population and Housing Census General Report Volume 3C, table 5.7, with a pre-2019 ten-region companion adding the 2010 wave.",
+        intro: "Census religion overlays for Ghana at region level, built from the Ghana Statistical Service 2010 StatsBank PHC2010 POP16 and the 2021 Population and Housing Census General Report Volume 3C, table 5.7, spanning 2010–2021, with a pre-2019 ten-region companion carrying the same two waves.",
         bullets: [
           "Areas are shaded by religious affiliation or no religion among the persons counted in the religion table.",
           "Religious affiliation combines all named religions: Catholic, Protestant, Pentecostal/Charismatic, Other Christian, Islam, Traditionalist and Other. Christian is a census subtotal of the four Christian groups.",
           "No religion is the census's No Religion group; the census allocates every person to one of eight groups; there is no not-stated category.",
           "Volume 3C publishes religion at region level only; the 16 regions are the post-2019 regional structure.",
-          "Switch the geography control to Region (pre-2019 ten) for the two-wave series; the 2010 wave is available on the pre-2019 ten-region frame only, alongside the 2021 counts aggregated to those ten regions.",
+          "Both geographies carry two census waves: on the 16 regions the 2010 rows are GSS's re-tabulation of the 2010 enumeration onto the current 16-region frame; on the pre-2019 ten-region companion the 2021 counts are aggregated to those ten regions.",
+          "Choose the <strong>Religious affiliation change</strong> metric and move the year slider to 2021 to shade regions by the 2010–2021 percentage-point change.",
           "Open <strong>Show Census Data</strong> (top centre) for the metric, geography and year controls."
         ],
         links: [
@@ -91,7 +97,7 @@
         { id: "review-link", label: "Review evidence", href: "review.html", title: "Review submitted evidence" }
       ],
       censusSourceAttribution: 'Census religion from <a href="https://census2021.statsghana.gov.gh/" target="_blank" rel="noopener">GSS 2021 PHC General Report Vol. 3C, table 5.7</a> &middot; Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries GHA ADM1</a> (CC BY-SA 2.0, source OpenStreetMap contributors) &middot; GSS census report, open download, attribution requested, no explicit reuse licence stated',
-      censusFlagNote: "* Percentages use the table 5.7 regional total (all locality types, both sexes). The census allocates every person to one of eight religion groups; there is no not-stated category. Volume 3C publishes religion at region level only. The pre-2019 ten-region companion carries the 2010 wave (GSS StatsBank PHC2010 POP16), with 2021 counts aggregated to the same ten regions; its boundaries dissolve the geoBoundaries GHA ADM1 derivative (CC BY-SA 2.0, source OpenStreetMap contributors) to the pre-2019 ten-region frame."
+      censusFlagNote: "* Percentages use the table 5.7 regional total (all locality types, both sexes). The census allocates every person to one of eight religion groups; there is no not-stated category. Volume 3C publishes religion at region level only. The 16 regions carry both waves: the 2010 rows are GSS's re-tabulation of the StatsBank PHC2010 POP16 enumeration onto the current 16-region frame, with no areal interpolation, alongside the 2021 counts from table 5.7. The pre-2019 ten-region companion also carries both waves (2010 from GSS StatsBank PHC2010 POP16, 2021 aggregated to the same ten regions); its boundaries dissolve the geoBoundaries GHA ADM1 derivative (CC BY-SA 2.0, source OpenStreetMap contributors) to the pre-2019 ten-region frame."
     };
   </script>
   <script src="../_shared/region-map.js?v=20260709n"></script>
