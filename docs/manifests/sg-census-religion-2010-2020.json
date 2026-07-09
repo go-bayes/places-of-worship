@@ -1,0 +1,177 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:sg-census-religion:sg:2010-2020:singstat",
+  "dataset_id": "sg-census-religion:sg:2010-2020:singstat",
+  "dataset_version_id": "sg-census-religion:sg:2010-2020:singstat:dfb242296522",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "sg-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "SG"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-09T23:43:20Z",
+  "created_by": "scripts/build_sg_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_sg_area_summary.R",
+    "git_commit": "11c2845",
+    "command": "Rscript scripts/build_sg_area_summary.R",
+    "parameters": {
+      "waves_built": "2010, 2020",
+      "geography": "planning area; each wave uses its own URA Master Plan vintage",
+      "boundary_sets": "sg-pa-2008-ura-mp2008, sg-pa-2019-ura-mp2019",
+      "denominator": "Resident Population Aged 15 Years and Over",
+      "category_mapping": "No Religion remains separate; all named religion categories sum to religious affiliation.",
+      "omitted_metrics": "cross-wave planning-area change; all place-of-worship count and density metrics",
+      "reconciliation": "planning-area sums include Others and are compared with each table's published national Total row; residuals are reported and never distributed"
+    },
+    "software_versions": {
+      "r": "4.6.1",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0"
+    }
+  },
+  "source": {
+    "provider": "Singapore Department of Statistics; Urban Redevelopment Authority, via data.gov.sg",
+    "source_dataset_ids": ["singstat-ct-8628-planning-area-religion-2010", "singstat-ct-17592-planning-area-religion-2020", "singstat-ct-6364-national-religion-2010", "singstat-ct-17459-national-religion-2020", "data-gov-sg-d-773f010a4eaae0ce6d81cbe78d251642", "data-gov-sg-d-4765db0e87b9c86336792efe8a1f7a66"],
+    "source_urls": ["https://tablebuilder.singstat.gov.sg/api/doswebcontent/1/CrossSectionalFileUpload/CrossSectional/8628", "https://tablebuilder.singstat.gov.sg/api/doswebcontent/1/CrossSectionalFileUpload/CrossSectional/17592", "https://tablebuilder.singstat.gov.sg/api/doswebcontent/1/CrossSectionalFileUpload/CrossSectional/6364", "https://tablebuilder.singstat.gov.sg/api/doswebcontent/1/CrossSectionalFileUpload/CrossSectional/17459", "https://data.gov.sg/datasets/d_773f010a4eaae0ce6d81cbe78d251642/view", "https://data.gov.sg/datasets/d_4765db0e87b9c86336792efe8a1f7a66/view", "https://www.singstat.gov.sg/find-data/explore-data-themes/population/religion/latest-news-data", "https://data.gov.sg/open-data-licence"],
+    "retrieved_at": "2026-07-10T00:00:00Z",
+    "licence": "Singapore Department of Statistics tables and Urban Redevelopment Authority planning-area boundaries are reused under the Singapore Open Data Licence. Source acknowledgement is required and reuse must not suggest endorsement by the Singapore Government.",
+    "citation": "SingStat Census of Population tables CT 8628, CT 17592, CT 6364, and CT 17459; URA Master Plan 2008 and 2019 planning-area boundaries."
+  },
+  "input_manifests": [],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/sg/data/area_summary_pa.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 74784,
+      "sha256": "dfb242296522da6738164ec227562747e2684c0b115bfe8ba3e66e0c056015ff",
+      "row_count": 65,
+      "feature_count": null,
+      "content": "Combined Singapore planning-area census religion product; per-vintage geography only.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/sg/data/area_summary_pa.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 25355,
+      "sha256": "9223ec31b4f4126c645182ce7e74d00f5c50714cca9e71eaedda249b096fa0a6",
+      "row_count": 65,
+      "feature_count": null,
+      "content": "Flattened combined Singapore planning-area census religion rows.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/sg/data/area_summary_pa_2010.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 43935,
+      "sha256": "040522e8df47694d48a56f81d273c6912e6d67a4a3840d635db8cf8d62e018de",
+      "row_count": 35,
+      "feature_count": null,
+      "content": "Derived 2010-only view for the MP2008 planning-area level.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/sg/data/area_summary_pa_2020.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 38891,
+      "sha256": "f8af6eeabf3287ddf16c10c0596cb4e7533846f7075817ace6572f83c5c45362",
+      "row_count": 30,
+      "feature_count": null,
+      "content": "Derived 2020-only view for the MP2019 planning-area level.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/sg/data/sg_pa_2008.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 88137,
+      "sha256": "4b9ef0eec13c33905bb01f067eabcea547d89a6246241242227f79d6a4cdf1ff",
+      "row_count": null,
+      "feature_count": 35,
+      "content": "Simplified mapped subset of URA Master Plan 2008 planning-area boundaries.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/sg/data/sg_pa_2019.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 75182,
+      "sha256": "1886d35be90d0c8e120a3968b3833e954781cc8ffdfe632f9bf3ac371f2fe44f",
+      "row_count": null,
+      "feature_count": 30,
+      "content": "Simplified mapped subset of URA Master Plan 2019 planning-area boundaries.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    }
+  ],
+  "partitions": [
+    {
+      "partition_id": "country:SG:2010",
+      "partition_type": "country",
+      "country_code": "SG",
+      "file_uri": "repo:apps/regions/sg/data/area_summary_pa_2010.json",
+      "sha256": "040522e8df47694d48a56f81d273c6912e6d67a4a3840d635db8cf8d62e018de",
+      "row_count": 35,
+      "feature_count": 35
+    },
+    {
+      "partition_id": "country:SG:2020",
+      "partition_type": "country",
+      "country_code": "SG",
+      "file_uri": "repo:apps/regions/sg/data/area_summary_pa_2020.json",
+      "sha256": "f8af6eeabf3287ddf16c10c0596cb4e7533846f7075817ace6572f83c5c45362",
+      "row_count": 30,
+      "feature_count": 30
+    }
+  ],
+  "stats": {
+    "waves": 2,
+    "mapped_rows_2010": 35,
+    "mapped_rows_2020": 30,
+    "source_rows_including_others_2010": 36,
+    "source_rows_including_others_2020": 31,
+    "national_total_2010": 3105748,
+    "national_total_2020": 3459093,
+    "total_residual_2010": 3,
+    "total_residual_2020": 1,
+    "affiliation_residual_2010": -2,
+    "affiliation_residual_2020": 0,
+    "no_religion_residual_2010": 4,
+    "no_religion_residual_2020": 0
+  },
+  "local_cache_hint": "Raw SingStat CSVs and URA GeoJSON files are cached under data/raw/sg_census/. The git-ignored cache should be promoted to project-controlled storage before reuse outside this build.",
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_sg_area_summary.R",
+      "uv run --with jsonschema python -m jsonschema -i apps/regions/sg/data/area_summary_pa.json schemas/area-summary.schema.json",
+      "uv run --with jsonschema python -m jsonschema -i apps/regions/sg/data/area_summary_pa_2010.json schemas/area-summary.schema.json",
+      "uv run --with jsonschema python -m jsonschema -i apps/regions/sg/data/area_summary_pa_2020.json schemas/area-summary.schema.json",
+      "uv run --with jsonschema python -m jsonschema -i docs/manifests/sg-census-religion-2010-2020.json schemas/data-manifest.schema.json"
+    ],
+    "warnings": ["Published planning-area category sums have small additivity residuals against the published national rows.", "No residual is distributed across planning areas.", "The two waves use different planning-area vintages and expose no cross-wave area change metric.", "The Others source row is included in reconciliation and excluded from mapped rows because it has no polygon."],
+    "notes": "The build takes the two-vintage branch: CT 8628 uses Master Plan 2008 boundaries and CT 17592 uses Master Plan 2019 boundaries.\nThe 2010 table contributes 35 mapped planning-area rows; the 2020 table contributes 30 mapped planning-area rows. Each table's Others row is included in national reconciliation and excluded from map rows because it has no planning-area polygon.\n2010 planning-area sums including Others minus the published national Total row: total +3; religious_affiliation -2; no_religion +4.\n2020 planning-area sums including Others minus the published national Total row: total +1; religious_affiliation +0; no_religion +0.\nAcross the 32 complete 2010 rows, Total minus No Religion minus the sum of named religion categories ranges from -2 to 2 persons; 17 rows are non-zero. Another 4 rows contain source 'na' markers.\nAcross the 30 complete 2020 rows, Total minus No Religion minus the sum of named religion categories ranges from -1 to 2 persons; 16 rows are non-zero. Another 1 row contains a source dash.\nThe small residuals are consistent with whole-person cell rounding. The build preserves every source value and does not distribute residuals.\nThe headline religious-affiliation count is Total minus No Religion. This retains the complete with-religion construct without imputing the 'na' and dash category cells.\nCT 6364 independently reports the 2010 national total as 3105748, matching CT 8628 Total.\nCT 17459 independently reports the 2020 national total as 3459093, matching CT 17592 Total.\nThe 2010 wave uses Master Plan 2008 planning areas and the 2020 wave uses Master Plan 2019 planning areas. Each wave ships as its own geography level. No cross-wave planning-area change metric is calculated.\nThe 2008 boundary writes to 88137 bytes; existing output revalidated.\nThe 2019 boundary writes to 75182 bytes; existing output revalidated."
+  },
+  "privacy": "public",
+  "licence_status": "accepted",
+  "downstream_status": "public",
+  "notes": "The build takes the two-vintage branch: CT 8628 uses Master Plan 2008 boundaries and CT 17592 uses Master Plan 2019 boundaries.\nThe 2010 table contributes 35 mapped planning-area rows; the 2020 table contributes 30 mapped planning-area rows. Each table's Others row is included in national reconciliation and excluded from map rows because it has no planning-area polygon.\n2010 planning-area sums including Others minus the published national Total row: total +3; religious_affiliation -2; no_religion +4.\n2020 planning-area sums including Others minus the published national Total row: total +1; religious_affiliation +0; no_religion +0.\nAcross the 32 complete 2010 rows, Total minus No Religion minus the sum of named religion categories ranges from -2 to 2 persons; 17 rows are non-zero. Another 4 rows contain source 'na' markers.\nAcross the 30 complete 2020 rows, Total minus No Religion minus the sum of named religion categories ranges from -1 to 2 persons; 16 rows are non-zero. Another 1 row contains a source dash.\nThe small residuals are consistent with whole-person cell rounding. The build preserves every source value and does not distribute residuals.\nThe headline religious-affiliation count is Total minus No Religion. This retains the complete with-religion construct without imputing the 'na' and dash category cells.\nCT 6364 independently reports the 2010 national total as 3105748, matching CT 8628 Total.\nCT 17459 independently reports the 2020 national total as 3459093, matching CT 17592 Total.\nThe 2010 wave uses Master Plan 2008 planning areas and the 2020 wave uses Master Plan 2019 planning areas. Each wave ships as its own geography level. No cross-wave planning-area change metric is calculated.\nThe 2008 boundary writes to 88137 bytes; existing output revalidated.\nThe 2019 boundary writes to 75182 bytes; existing output revalidated. Raw source records: [{\"uri\":\"data/raw/sg_census/ct8628_planning_area_religion_2010.csv\",\"url\":\"https://api-open.data.gov.sg/v1/public/api/datasets/d_d4be7f8ba23ba93e5d59564d1dfb5eaa/poll-download\",\"format\":\"csv\",\"bytes\":2357,\"sha256\":\"70abe703f6d75b949daf4247b5db09d32b7bd7785bc048d553de15062500d1eb\",\"row_count\":37,\"source_dataset_id\":\"singstat-ct-8628-planning-area-religion-2010\",\"used_in_public_product\":true,\"notes\":\"CT 8628: Total, 35 named planning areas, and Others.\"},{\"uri\":\"data/raw/sg_census/ct17592_planning_area_religion_2020.csv\",\"url\":\"https://api-open.data.gov.sg/v1/public/api/datasets/d_a58564fbed922609a0f79af96069dd9b/poll-download\",\"format\":\"csv\",\"bytes\":2136,\"sha256\":\"921d7d727b078c18f681411c0680589a73332074437f4af2715357266ce03d45\",\"row_count\":32,\"source_dataset_id\":\"singstat-ct-17592-planning-area-religion-2020\",\"used_in_public_product\":true,\"notes\":\"CT 17592: Total, 30 named planning areas, and Others.\"},{\"uri\":\"data/raw/sg_census/ct6364_national_religion_2010.csv\",\"url\":\"https://api-open.data.gov.sg/v1/public/api/datasets/d_9fa1b6a53c80f89d93b7c795d5b2e9ee/poll-download\",\"format\":\"csv\",\"bytes\":1356,\"sha256\":\"6a5b9ac4b478e2f7a73b426a1c2ba5ebb42b5e19ea5eacab01b7ea1636a2a569\",\"row_count\":12,\"source_dataset_id\":\"singstat-ct-6364-national-religion-2010\",\"used_in_public_product\":true,\"notes\":\"CT 6364 national religion table used to verify the published total.\"},{\"uri\":\"data/raw/sg_census/ct17459_national_religion_2020.csv\",\"url\":\"https://api-open.data.gov.sg/v1/public/api/datasets/d_4f6dc35cb00308f67bf9d429cfa30e65/poll-download\",\"format\":\"csv\",\"bytes\":1367,\"sha256\":\"999b21c882f4d1e392527009f022aad377498e981b565819706b03bd563c127a\",\"row_count\":12,\"source_dataset_id\":\"singstat-ct-17459-national-religion-2020\",\"used_in_public_product\":true,\"notes\":\"CT 17459 national religion table used to verify the published total.\"},{\"uri\":\"data/raw/sg_census/master_plan_2008_planning_area_no_sea.geojson\",\"url\":\"https://api-open.data.gov.sg/v1/public/api/datasets/d_773f010a4eaae0ce6d81cbe78d251642/poll-download\",\"format\":\"geojson\",\"bytes\":2052099,\"sha256\":\"055a8f3dd7cd284d6a9aae5bbd5a01d6168ccd09143b5c9c1740de3fc44d4dd2\",\"row_count\":55,\"source_dataset_id\":\"data-gov-sg-d-773f010a4eaae0ce6d81cbe78d251642\",\"used_in_public_product\":true,\"notes\":\"Full URA MP2008 planning-area source; mapped subset ships.\"},{\"uri\":\"data/raw/sg_census/master_plan_2019_planning_area_no_sea.geojson\",\"url\":\"https://api-open.data.gov.sg/v1/public/api/datasets/d_4765db0e87b9c86336792efe8a1f7a66/poll-download\",\"format\":\"geojson\",\"bytes\":2092229,\"sha256\":\"f23856251b467089f788d0fff72ef5a38e753f21aa69b4352401d7ed50d380cc\",\"row_count\":55,\"source_dataset_id\":\"data-gov-sg-d-4765db0e87b9c86336792efe8a1f7a66\",\"used_in_public_product\":true,\"notes\":\"Full URA MP2019 planning-area source; mapped subset ships.\"}] Category mapping: No Religion => no_religion_count; Buddhism => religious_affiliation_count; Taoism => religious_affiliation_count; Islam => religious_affiliation_count; Hinduism => religious_affiliation_count; Sikhism => religious_affiliation_count; Christianity - Catholic => religious_affiliation_count; Christianity - Other Christians => religious_affiliation_count; Other Religions => religious_affiliation_count Religion definition: Religion refers to the religious faith or spiritual belief declared by the person. Regular attendance at religious ceremonies and regular practice are not required for the declaration."
+}

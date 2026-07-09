@@ -9,6 +9,60 @@
 
 ### 2026-07-10
 
+- Added Switzerland canton religion products as two separate constructs. The
+  census product ships FSO/BFS PX-Web affiliation counts for 1970, 1980, 1990,
+  and 2000 on the current 26-canton swisstopo `swissBOUNDARIES3D` frame; all
+  15 religion categories reconcile exactly to the national row in every wave.
+  The structural-survey product ships FSO/BFS annual canton estimates for
+  2010-2024, flagged as sample-survey estimates for the resident population
+  aged 15+. The survey source includes confidence intervals in the workbook;
+  the manifest records that the legacy area-summary schema has no confidence
+  interval fields, no-religion estimates differ from the national row by at
+  most three estimated persons before integer rounding, and 23 canton-years
+  suppress unknown affiliation. Affiliation-excluding-unknown fields are null
+  there. Build: `scripts/build_ch_area_summary.R`; manifests:
+  `docs/manifests/ch-census-religion-1970-2000.json` and
+  `docs/manifests/ch-structural-survey-religion-2010-2024.json`.
+- Added the Singapore planning-area census religion product for 2010 and
+  2020. The 2010 wave ships 35 mapped areas on Master Plan 2008 boundaries;
+  the 2020 wave ships 30 mapped areas on Master Plan 2019 boundaries. Each
+  wave has its own summary and boundary file, and the product reports no
+  cross-wave planning-area change metric. The denominator is the resident
+  population aged 15 years and over. Religious affiliation equals `Total -
+  No Religion`, which retains rows with unavailable minor-category cells.
+  Planning-area sums include `Others` during reconciliation. The headline
+  residuals against the published national rows are +3 total, -2 with
+  religion, and +4 No Religion in 2010; the 2020 residuals are +1 total and
+  zero for both with religion and No Religion. The build preserves the
+  source counts and distributes no residual. Build:
+  `scripts/build_sg_area_summary.R`; manifest
+  `docs/manifests/sg-census-religion-2010-2020.json`.
+- Added the Mauritius census-religion product for 2000, 2011, and 2022:
+  nine districts on Mauritius island plus Rodrigues, with 30 area-year rows
+  on a 10-feature geoBoundaries `MUS ADM1` boundary. Table D6 named religious
+  groups form the longitudinal affiliation metric over the full table total;
+  explicit no religion is available only in 2022 because the 2000 and 2011
+  district tables combine `Other` and `Not stated`. Every shipped field sums
+  exactly to the printed national row. The 1990 image-only scan remains
+  excluded under the no-OCR and no-hand-entry rule. The country card and
+  manifest state that religion must never be interpreted as an ethnic proxy.
+  Build: `scripts/build_mu_area_summary.R`; manifest:
+  `docs/manifests/mu-census-religion-2000-2022.json`.
+- Added the Austria Bundesland religious-affiliation product for the 1951,
+  1961, 1971, 1981, 1991, and 2001 population censuses and the separate 2021
+  mixed estimate. The 2021 source combines a voluntary Microcensus Labour
+  Force Survey module, parent-based imputation for children, and an estimate
+  for the institutional population; religion was absent from the register
+  census. The product contains 63 rows across nine Bundesländer and seven
+  waves. All four headline counts reconcile to the national source rows; the
+  reconciliation table records zero census differences and only sub-micro-person
+  binary floating-point residuals for 2021. Added a nine-feature geoBoundaries
+  ADM1 layer (170 KB), simplified from the 2017 source. The complete Statistics
+  Austria open-data catalogue contained no religion dataset. The manifest pins
+  the main-site ODS routes and website reuse terms and makes no CC BY 4.0 claim.
+  The boundary's CC BY-SA 2.0 source licence is recorded separately.
+  Build: `scripts/build_at_area_summary.R`; manifest:
+  `docs/manifests/at-religious-affiliation-1951-2021.json`.
 - Added separate Netherlands province survey products for self-reported
   religious affiliation and religious-service attendance from CBS StatLine
   `83288NED`. Each product contains 72 rows: 12 provinces across annual
