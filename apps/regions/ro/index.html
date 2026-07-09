@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Romania Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709d" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    window.REGION_CONFIG = {
+      countryCode: "RO",
+      title: "Places of Worship | Romania Research Map",
+      center: [24.97, 45.85],
+      initialZoom: 6,
+      censusLevels: {
+        judet: {
+          label: "County (județ)",
+          boundaries: "data/ro_judet_2021.geojson",
+          summary: "data/area_summary_judet.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries © Eurostat GISCO NUTS3 2021 · source county rows from INS RPL tables"
+        },
+        lau_2021: {
+          label: "LAU 2021 (detail)",
+          boundaries: "data/ro_lau_2021.geojson",
+          summary: "data/area_summary_lau_2021.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries © Eurostat GISCO LAU 2021 · 2011 rows bridged from GISCO LAU 2011 by LAU_ID"
+        }
+      },
+      defaultLevel: "judet",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the stated religion-response denominator in named-religion categories"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "Fără religie plus Atei/Ateu as a share of the stated religion-response denominator"
+        }
+      },
+      popupDenominatorNote: "Percentages use a stated-response denominator. 2011 uses POPULATIA STABILA TOTAL minus Informatie nedisponibila; 2021 uses POPULATIA REZIDENTA TOTAL minus Informatie nedisponibila. 2021 Agnostic remains in the denominator and outside the no-religion construct.",
+      cityPresets: [
+        { label: "București", coords: [26.1025, 44.4268], zoom: 11 },
+        { label: "Cluj-Napoca", coords: [23.5899, 46.7712], zoom: 11 },
+        { label: "Timișoara", coords: [21.2087, 45.7489], zoom: 11 },
+        { label: "Iași", coords: [27.6014, 47.1585], zoom: 11 },
+        { label: "Constanța", coords: [28.6348, 44.1598], zoom: 11 },
+        { label: "Brașov", coords: [25.6012, 45.6427], zoom: 11 },
+        { label: "Craiova", coords: [23.7949, 44.3302], zoom: 11 },
+        { label: "Galați", coords: [28.0425, 45.4353], zoom: 11 }
+      ],
+      geocode: { country: "ro", biasLngLat: [24.97, 45.85] },
+      onboarding: {
+        title: "Romania research map",
+        intro: "Census religion overlays for Romania at county and LAU level, built from INS RPL 2011 and 2021 tables.",
+        bullets: [
+          "Areas are shaded by religious affiliation or no religion among people with a stated religion response.",
+          "The default county view uses complete source county rows; the LAU detail view preserves suppressed local cells as unavailable.",
+          "The 2011 layer is matched through GISCO LAU 2011 and bridged to the 2021 LAU boundary by LAU_ID.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" },
+        { id: "verification-link", label: "Submit evidence", href: "verification.html", title: "Open the RA verification map" },
+        { id: "review-link", label: "Review evidence", href: "review.html", title: "Review submitted evidence" }
+      ],
+      censusSourceAttribution: 'Census religion from <a href="https://www.recensamantromania.ro/rezultate-rpl-2021/rezultate-definitive/" target="_blank" rel="noopener">INS RPL 2021 final results, Tabel 2.04.2</a> and <a href="https://www.recensamantromania.ro/istoric/rpl-2011/" target="_blank" rel="noopener">INS RPL 2011 sR_TAB_13</a> &middot; Boundaries from <a href="https://gisco-services.ec.europa.eu/distribution/v2/lau/" target="_blank" rel="noopener">Eurostat GISCO LAU</a> and <a href="https://gisco-services.ec.europa.eu/distribution/v2/nuts/" target="_blank" rel="noopener">NUTS</a> &middot; INS reuse statement not located during build; attribution retained',
+      censusFlagNote: "* The denominator excludes Informatie nedisponibila: 6.26% nationally in 2011 and 13.95% nationally in 2021. 2021 Agnostic is not counted as no religion. Commune-level cells are suppressed for small counts; the county view is complete for headline percentages."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260709c"></script>
+</body>
+</html>
