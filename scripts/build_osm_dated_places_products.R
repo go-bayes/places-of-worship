@@ -27,6 +27,8 @@ default_object_types <- c("node", "way")
 default_cache_dir <- file.path(tempdir(), "places-of-worship-dated-places-ohsome")
 ohsome_endpoint <- "https://api.ohsome.org/v1/elements/centroid"
 osm_attribution <- paste0(intToUtf8(169), " OpenStreetMap contributors, ODbL 1.0")
+ohsome_request_timeout_seconds <- 120
+ohsome_retry_wait_seconds <- c(30, 60)
 lifecycle_key_filter <- paste(
   "start_date=*",
   "old_start_date=*",
@@ -40,6 +42,10 @@ lifecycle_key_filter <- paste(
 strict_pow_filter <- "amenity=place_of_worship"
 
 country_configs <- list(
+  AL = list(
+    boundary_files = "apps/regions/al/data/al_prefecture_2023.geojson",
+    bboxes = "albania:19.2,39.6,21.1,42.8"
+  ),
   AU = list(
     boundary_files = "apps/regions/au/data/sa2_2021.geojson",
     bboxes = paste(
@@ -53,6 +59,10 @@ country_configs <- list(
     boundary_files = "apps/regions/br/data/br_municipality_2022.geojson",
     bboxes = "brazil:-74,-34,-32,6"
   ),
+  BS = list(
+    boundary_files = "apps/regions/bs/data/bs_island_2020.geojson",
+    bboxes = "bahamas:-80.6,20.8,-72.6,27.4"
+  ),
   CA = list(
     boundary_files = "apps/regions/ca/data/cd_2021.geojson",
     bboxes = paste(
@@ -63,6 +73,52 @@ country_configs <- list(
       "north:-141,60,-52,90",
       sep = "|"
     )
+  ),
+  CZ = list(
+    boundary_files = "apps/regions/cz/data/cz_kraj_2021.geojson",
+    bboxes = "czechia:12,48.5,19,51.1"
+  ),
+  GH = list(
+    boundary_files = "apps/regions/gh/data/gh_region_2019.geojson",
+    bboxes = paste(
+      "ghana_south:-3.4,4.6,1.3,7.8",
+      "ghana_north:-3.4,7.8,1.3,11.3",
+      sep = "|"
+    )
+  ),
+  IE = list(
+    boundary_files = "apps/regions/ie/data/county_city_2019.geojson",
+    bboxes = "ireland:-10.8,51.3,-5.9,55.5"
+  ),
+  IN = list(
+    boundary_files = "apps/regions/in/data/districts_2011.geojson",
+    bboxes = "india:68,6.5,98,36.2"
+  ),
+  IT = list(
+    boundary_files = "apps/regions/it/data/it_region_2026.geojson",
+    bboxes = paste(
+      "italy_north:6.5,44,14,47.2",
+      "italy_centre:8,41,16,44.5",
+      "italy_south:12,35.4,18.8,42",
+      "italy_sardinia:8,38.7,10,41.4",
+      sep = "|"
+    )
+  ),
+  KE = list(
+    boundary_files = "apps/regions/ke/data/ke_county_2020.geojson",
+    bboxes = paste(
+      "kenya_west:33.8,-4.8,38,5.5",
+      "kenya_east:38,-4.8,42.1,5.5",
+      sep = "|"
+    )
+  ),
+  KR = list(
+    boundary_files = "apps/regions/kr/data/kr_si_gun_gu_2018_harmonised.geojson",
+    bboxes = "south_korea:124.5,33,132,38.7"
+  ),
+  MW = list(
+    boundary_files = "apps/regions/mw/data/mw_district_2020.geojson",
+    bboxes = "malawi:32.6,-17.2,36,-9.3"
   ),
   MX = list(
     boundary_files = "apps/regions/mx/data/mx_municipality_2020.geojson",
@@ -89,9 +145,25 @@ country_configs <- list(
       sep = "|"
     )
   ),
+  RO = list(
+    boundary_files = "apps/regions/ro/data/ro_judet_2021.geojson",
+    bboxes = "romania:20.2,43.5,29.8,48.4"
+  ),
+  RW = list(
+    boundary_files = "apps/regions/rw/data/rw_district_2012.geojson",
+    bboxes = "rwanda:28.8,-2.9,31,-1"
+  ),
   SK = list(
     boundary_files = "apps/regions/sk/data/sk_municipality_2021.geojson",
     bboxes = "slovakia:16.8,47.7,22.6,49.7"
+  ),
+  ZA = list(
+    boundary_files = "apps/regions/za/data/za_province_2020.geojson",
+    bboxes = "south_africa:16.4,-35,33,-22"
+  ),
+  ZM = list(
+    boundary_files = "apps/regions/zm/data/zm_province_2011.geojson",
+    bboxes = "zambia:21.9,-18.2,33.8,-8.2"
   )
 )
 
@@ -188,7 +260,7 @@ urlencode_query <- function(query) {
   )
 }
 
-request_url <- function(country_code, object_type, snapshot_date) {
+request_url <- function(country_code, object_type, snapshot_date, bbox_query) {
   # build the ohsome elements/centroid URL for one country and OSM object type.
   type_filter <- paste0(
     strict_pow_filter,
@@ -198,7 +270,7 @@ request_url <- function(country_code, object_type, snapshot_date) {
     object_type
   )
   query <- list(
-    bboxes = country_configs[[country_code]]$bboxes,
+    bboxes = bbox_query,
     time = snapshot_date,
     filter = type_filter,
     properties = "tags,metadata",
@@ -207,31 +279,93 @@ request_url <- function(country_code, object_type, snapshot_date) {
   paste0(ohsome_endpoint, "?", urlencode_query(query))
 }
 
+country_bbox_queries <- function(country_code) {
+  # split a country's configured bbox string into sequential ohsome requests.
+  strsplit(country_configs[[country_code]]$bboxes, "|", fixed = TRUE)[[1]]
+}
+
+download_with_backoff <- function(url, output_path, country_code, object_type) {
+  # download one ohsome response and back off between retryable failures.
+  partial_path <- paste0(output_path, ".part")
+  attempts <- length(ohsome_retry_wait_seconds) + 1L
+  old_timeout <- getOption("timeout")
+  on.exit(options(timeout = old_timeout), add = TRUE)
+
+  for (attempt in seq_len(attempts)) {
+    unlink(partial_path)
+    options(timeout = ohsome_request_timeout_seconds)
+    status <- tryCatch(
+      utils::download.file(url, partial_path, quiet = TRUE, mode = "wb"),
+      error = function(error) error
+    )
+
+    if (identical(status, 0L)) {
+      file.rename(partial_path, output_path)
+      return(output_path)
+    }
+
+    status_message <- if (inherits(status, "error")) conditionMessage(status) else as.character(status)
+    unlink(partial_path)
+
+    if (attempt < attempts) {
+      wait_seconds <- ohsome_retry_wait_seconds[[attempt]]
+      message(
+        "ohsome fetch failed for ",
+        country_code,
+        " ",
+        object_type,
+        " on attempt ",
+        attempt,
+        " (",
+        status_message,
+        "); retrying in ",
+        wait_seconds,
+        " seconds..."
+      )
+      Sys.sleep(wait_seconds)
+    } else {
+      stop("ohsome request failed for ", country_code, " ", object_type, ": ", status_message)
+    }
+  }
+}
+
 fetch_ohsome <- function(country_code, object_type, snapshot_date, cache_dir, fetch) {
   # fetch or reuse one raw ohsome GeoJSON response.
   country_cache_dir <- file.path(cache_dir, tolower(country_code))
   dir.create(country_cache_dir, recursive = TRUE, showWarnings = FALSE)
-  output_path <- file.path(
-    country_cache_dir,
-    paste0(tolower(country_code), "_", object_type, "_", snapshot_date, ".geojson")
-  )
+  bbox_queries <- country_bbox_queries(country_code)
 
-  if (isTRUE(fetch) || !file.exists(output_path)) {
-    url <- request_url(country_code, object_type, snapshot_date)
-    message("Fetching ", country_code, " ", object_type, " from ohsome...")
-    status <- tryCatch(
-      utils::download.file(url, output_path, quiet = TRUE, mode = "wb"),
-      error = function(error) error
-    )
-    if (inherits(status, "error") || !identical(status, 0L)) {
-      status_message <- if (inherits(status, "error")) conditionMessage(status) else as.character(status)
-      stop("ohsome request failed for ", country_code, " ", object_type, ": ", status_message)
+  map_chr(seq_along(bbox_queries), function(index) {
+    output_stem <- paste0(tolower(country_code), "_", object_type, "_", snapshot_date)
+    if (length(bbox_queries) > 1L) {
+      output_stem <- paste0(output_stem, "_", sprintf("%02d", index))
     }
-  } else {
-    message("Reusing cached ", country_code, " ", object_type, " ohsome response.")
-  }
+    output_path <- file.path(country_cache_dir, paste0(output_stem, ".geojson"))
 
-  output_path
+    if (isTRUE(fetch) || !file.exists(output_path)) {
+      url <- request_url(country_code, object_type, snapshot_date, bbox_queries[[index]])
+      message(
+        "Fetching ",
+        country_code,
+        " ",
+        object_type,
+        if (length(bbox_queries) > 1L) paste0(" bbox ", index, "/", length(bbox_queries)) else "",
+        " from ohsome..."
+      )
+      download_with_backoff(url, output_path, country_code, object_type)
+    } else {
+      message(
+        "Reusing cached ",
+        country_code,
+        " ",
+        object_type,
+        if (length(bbox_queries) > 1L) paste0(" bbox ", index, "/", length(bbox_queries)) else "",
+        " ohsome response."
+      )
+    }
+
+    output_path
+  })
 }
 
 read_ohsome_features <- function(raw_paths) {
@@ -671,9 +805,10 @@ sha256_file <- function(path) {
 
 build_country <- function(country_code, args) {
   # fetch, filter, transform, and write one country's dated product.
-  raw_paths <- map_chr(args$object_types, function(object_type) {
+  raw_paths <- map(args$object_types, function(object_type) {
     fetch_ohsome(country_code, object_type, args$snapshot_date, args$cache_dir, args$fetch)
-  })
+  }) |>
+    unlist(use.names = FALSE)
   raw_features <- read_ohsome_features(raw_paths)
   raw_features <- dedupe_features(raw_features)
   boundary <- read_country_boundary(country_code)
@@ -697,6 +832,23 @@ build_country <- function(country_code, args) {
   )
 }
 
+build_country_safely <- function(country_code, args) {
+  # build one country while preserving failures for the batch report.
+  tryCatch(
+    list(result = build_country(country_code, args), failure = NULL),
+    error = function(error) {
+      message("Failed ", country_code, ": ", conditionMessage(error))
+      list(
+        result = NULL,
+        failure = list(
+          country_code = country_code,
+          message = conditionMessage(error)
+        )
+      )
+    }
+  )
+}
+
 country_result_manifest <- function(result, args, retrieved_at) {
   # describe one country result for the manifest's raw source section.
   list(
@@ -716,15 +868,23 @@ country_result_manifest <- function(result, args, retrieved_at) {
   )
 }
 
+manifest_dataset_id <- function(results) {
+  # name the manifest by the number of successful country products.
+  country_count <- length(results)
+  country_label <- if (country_count == 1L) "1country" else paste0(country_count, "countries")
+  paste0("osm-pow-dated-", country_label)
+}
+
 write_manifest <- function(results, args, retrieved_at) {
   # write one data-manifest entry covering all country dated products.
   combined_hash <- digest(paste(map_chr(results, "output_sha256"), collapse = "\n"), algo = "sha256")
   short_id <- substr(combined_hash, 1L, 12L)
+  dataset_id <- manifest_dataset_id(results)
   manifest_path <- file.path(
     repo_root,
     "docs",
     "manifests",
-    paste0("osm-pow-dated-7countries-", short_id, ".json")
+    paste0(dataset_id, "-", short_id, ".json")
   )
   git_commit <- tryCatch(
     system2("git", c("rev-parse", "--short=12", "HEAD"), stdout = TRUE, stderr = FALSE)[[1]],
@@ -777,9 +937,9 @@ write_manifest <- function(results, args, retrieved_at) {
   manifest <- list(
     `$schema` = "../../schemas/data-manifest.schema.json",
     schema_version = "data-manifest.v1",
-    manifest_id = paste0("manifest:osm-pow:dated-7countries:", short_id),
-    dataset_id = "osm-pow-dated-7countries",
-    dataset_version_id = paste0("osm-pow-dated-7countries:", short_id),
+    manifest_id = paste0("manifest:osm-pow:dated-", length(results), "countries:", short_id),
+    dataset_id = dataset_id,
+    dataset_version_id = paste0(dataset_id, ":", short_id),
     manifest_sha256 = NULL,
     supersedes_manifest_id = NULL,
     superseded_by_manifest_id = NULL,
@@ -892,7 +1052,14 @@ main <- function() {
   dir.create(args$cache_dir, recursive = TRUE, showWarnings = FALSE)
   retrieved_at <- format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
 
-  results <- map(args$countries, function(country_code) build_country(country_code, args))
+  outcomes <- map(args$countries, function(country_code) build_country_safely(country_code, args))
+  results <- compact(map(outcomes, "result"))
+  failures <- compact(map(outcomes, "failure"))
+
+  if (length(results) == 0) {
+    stop("No dated-place products were generated.")
+  }
+
   manifest_path <- write_manifest(results, args, retrieved_at)
 
   message("Wrote manifest: ", repo_relative(manifest_path))
@@ -904,6 +1071,9 @@ main <- function() {
       " features -> ",
       repo_relative(result$output_path)
     )
+  })
+  walk(failures, function(failure) {
+    message("FAILED ", failure$country_code, ": ", failure$message)
   })
 }
 

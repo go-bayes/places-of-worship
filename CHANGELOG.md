@@ -4,6 +4,17 @@
 
 ### 2026-07-09
 
+- Added OSM date-tagged place layers (`dated_places.geojson`) via the
+  ohsome API at snapshot 2025-09-01. Non-empty products cover Albania
+  (7 features), the Bahamas (2), Czechia (929), Ghana (4), and India (76).
+  Non-empty products also cover Italy (2,463), Kenya (1), South Korea (10),
+  Romania (1,401), and South Africa (101). The same build generated
+  zero-feature products for Malawi, Rwanda, and Zambia; those products remain
+  unwired under the
+  historical-points standard. The builder now includes those country masks,
+  bounded ohsome retries, split bbox requests for Ghana, Italy, and Kenya,
+  and per-country failure continuation. Manifest:
+  `docs/manifests/osm-pow-dated-13countries-fbbb18ea1735.json`.
 - Extended Ghana's current 16-region census religion product to 2010 and
   2021. GSS StatsBank PHC2010 POP16 provides exact 2010 religion-category
   counts re-tabulated by GSS from the 2010 enumeration to the current

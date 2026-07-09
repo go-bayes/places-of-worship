@@ -70,6 +70,7 @@ const COUNTRY_CONFIGS = {
         mapSource: "al_verification_static_map_workbench",
         nominationSource: "al_verification_static_map_nomination",
         defaultAssignmentBatchId: "al-source-first-test-001",
+        datedPlaces: "../al/data/dated_places.geojson",
         assignmentHeading: "Albania verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
@@ -144,6 +145,7 @@ const COUNTRY_CONFIGS = {
         mapSource: "bs_verification_static_map_workbench",
         nominationSource: "bs_verification_static_map_nomination",
         defaultAssignmentBatchId: "bs-source-first-test-001",
+        datedPlaces: "../bs/data/dated_places.geojson",
         assignmentHeading: "Bahamas verification tasks",
         // single shipped wave: the loss action reads as closed/changed
         // use by the target year rather than a two-year contrast
@@ -194,6 +196,7 @@ const COUNTRY_CONFIGS = {
         mapSource: "cz_verification_static_map_workbench",
         nominationSource: "cz_verification_static_map_nomination",
         defaultAssignmentBatchId: "cz-source-first-test-001",
+        datedPlaces: "../cz/data/dated_places.geojson",
         assignmentHeading: "Czechia verification tasks",
         // single shipped wave: the loss action reads as closed/changed
         // use by the target year rather than a two-year contrast
@@ -219,6 +222,7 @@ const COUNTRY_CONFIGS = {
         mapSource: "gh_verification_static_map_workbench",
         nominationSource: "gh_verification_static_map_nomination",
         defaultAssignmentBatchId: "gh-source-first-test-001",
+        datedPlaces: "../gh/data/dated_places.geojson",
         assignmentHeading: "Ghana verification tasks",
         // single shipped wave: the loss action reads as closed/changed
         // use by the target year rather than a two-year contrast
@@ -269,6 +273,7 @@ const COUNTRY_CONFIGS = {
         mapSource: "in_verification_static_map_workbench",
         nominationSource: "in_verification_static_map_nomination",
         defaultAssignmentBatchId: "in-source-first-test-001",
+        datedPlaces: "../in/data/dated_places.geojson",
         assignmentHeading: "India verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
@@ -293,6 +298,7 @@ const COUNTRY_CONFIGS = {
         mapSource: "ke_verification_static_map_workbench",
         nominationSource: "ke_verification_static_map_nomination",
         defaultAssignmentBatchId: "ke-source-first-test-001",
+        datedPlaces: "../ke/data/dated_places.geojson",
         assignmentHeading: "Kenya verification tasks",
         // single shipped wave: the loss action reads as closed/changed
         // use by the target year rather than a two-year contrast
@@ -318,6 +324,7 @@ const COUNTRY_CONFIGS = {
         mapSource: "kr_verification_static_map_workbench",
         nominationSource: "kr_verification_static_map_nomination",
         defaultAssignmentBatchId: "kr-source-first-test-001",
+        datedPlaces: "../kr/data/dated_places.geojson",
         assignmentHeading: "South Korea verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
@@ -417,6 +424,7 @@ const COUNTRY_CONFIGS = {
         mapSource: "ro_verification_static_map_workbench",
         nominationSource: "ro_verification_static_map_nomination",
         defaultAssignmentBatchId: "ro-source-first-test-001",
+        datedPlaces: "../ro/data/dated_places.geojson",
         assignmentHeading: "Romania verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
@@ -541,6 +549,7 @@ const COUNTRY_CONFIGS = {
         mapSource: "za_verification_static_map_workbench",
         nominationSource: "za_verification_static_map_nomination",
         defaultAssignmentBatchId: "za-source-first-test-001",
+        datedPlaces: "../za/data/dated_places.geojson",
         assignmentHeading: "South Africa verification tasks",
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",

@@ -1,0 +1,729 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:osm-pow:dated-13countries:fbbb18ea1735",
+  "dataset_id": "osm-pow-dated-13countries",
+  "dataset_version_id": "osm-pow-dated-13countries:fbbb18ea1735",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "osm-pow",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "KR",
+      "RO",
+      "IN",
+      "CZ",
+      "KE",
+      "MW",
+      "GH",
+      "ZM",
+      "RW",
+      "ZA",
+      "AL",
+      "BS",
+      "IT"
+    ],
+    "snapshot_date": "2025-09-01",
+    "snapshot_anchor": "09-01",
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-09T12:02:57Z",
+  "created_by": "scripts/build_osm_dated_places_products.R",
+  "pipeline": {
+    "script": "scripts/build_osm_dated_places_products.R",
+    "git_commit": "9bd4bdb33a51",
+    "command": "Rscript scripts/build_osm_dated_places_products.R --countries KR,RO,IN,CZ,KE,MW,GH,ZM,RW,ZA,AL,BS,IT --snapshot-date 2025-09-01 --cache-dir /private/tmp/pow-dated-places-ohsome",
+    "parameters": {
+      "snapshot_date": "2025-09-01",
+      "types": "node,way",
+      "strict_filter": "amenity=place_of_worship",
+      "lifecycle_key_filter": "start_date=* or old_start_date=* or end_date=* or disused:amenity=* or abandoned:amenity=* or was:amenity=* or demolished:amenity=*",
+      "provider_endpoint": "https://api.ohsome.org/v1/elements/centroid",
+      "raw_sources": [
+        {
+          "country_code": "KR",
+          "provider": "OpenStreetMap via ohsome API",
+          "endpoint": "https://api.ohsome.org/v1/elements/centroid",
+          "retrieved_at": "2026-07-09T12:02:57Z",
+          "snapshot_date": "2025-09-01",
+          "bboxes": "south_korea:124.5,33,132,38.7",
+          "filter": "amenity=place_of_worship and (start_date=* or old_start_date=* or end_date=* or disused:amenity=* or abandoned:amenity=* or was:amenity=* or demolished:amenity=*)",
+          "object_types": [
+            "node",
+            "way"
+          ],
+          "raw_cache_files": [
+            "/private/tmp/pow-dated-places-ohsome/kr/kr_node_2025-09-01.geojson",
+            "/private/tmp/pow-dated-places-ohsome/kr/kr_way_2025-09-01.geojson"
+          ],
+          "raw_feature_count": 23,
+          "country_feature_count": 10,
+          "output_feature_count": 10,
+          "boundary_files": [
+            "apps/regions/kr/data/kr_si_gun_gu_2018_harmonised.geojson"
+          ]
+        },
+        {
+          "country_code": "RO",
+          "provider": "OpenStreetMap via ohsome API",
+          "endpoint": "https://api.ohsome.org/v1/elements/centroid",
+          "retrieved_at": "2026-07-09T12:02:57Z",
+          "snapshot_date": "2025-09-01",
+          "bboxes": "romania:20.2,43.5,29.8,48.4",
+          "filter": "amenity=place_of_worship and (start_date=* or old_start_date=* or end_date=* or disused:amenity=* or abandoned:amenity=* or was:amenity=* or demolished:amenity=*)",
+          "object_types": [
+            "node",
+            "way"
+          ],
+          "raw_cache_files": [
+            "/private/tmp/pow-dated-places-ohsome/ro/ro_node_2025-09-01.geojson",
+            "/private/tmp/pow-dated-places-ohsome/ro/ro_way_2025-09-01.geojson"
+          ],
+          "raw_feature_count": 1575,
+          "country_feature_count": 1401,
+          "output_feature_count": 1401,
+          "boundary_files": [
+            "apps/regions/ro/data/ro_judet_2021.geojson"
+          ]
+        },
+        {
+          "country_code": "IN",
+          "provider": "OpenStreetMap via ohsome API",
+          "endpoint": "https://api.ohsome.org/v1/elements/centroid",
+          "retrieved_at": "2026-07-09T12:02:57Z",
+          "snapshot_date": "2025-09-01",
+          "bboxes": "india:68,6.5,98,36.2",
+          "filter": "amenity=place_of_worship and (start_date=* or old_start_date=* or end_date=* or disused:amenity=* or abandoned:amenity=* or was:amenity=* or demolished:amenity=*)",
+          "object_types": [
+            "node",
+            "way"
+          ],
+          "raw_cache_files": [
+            "/private/tmp/pow-dated-places-ohsome/in/in_node_2025-09-01.geojson",
+            "/private/tmp/pow-dated-places-ohsome/in/in_way_2025-09-01.geojson"
+          ],
+          "raw_feature_count": 117,
+          "country_feature_count": 76,
+          "output_feature_count": 76,
+          "boundary_files": [
+            "apps/regions/in/data/districts_2011.geojson"
+          ]
+        },
+        {
+          "country_code": "CZ",
+          "provider": "OpenStreetMap via ohsome API",
+          "endpoint": "https://api.ohsome.org/v1/elements/centroid",
+          "retrieved_at": "2026-07-09T12:02:57Z",
+          "snapshot_date": "2025-09-01",
+          "bboxes": "czechia:12,48.5,19,51.1",
+          "filter": "amenity=place_of_worship and (start_date=* or old_start_date=* or end_date=* or disused:amenity=* or abandoned:amenity=* or was:amenity=* or demolished:amenity=*)",
+          "object_types": [
+            "node",
+            "way"
+          ],
+          "raw_cache_files": [
+            "/private/tmp/pow-dated-places-ohsome/cz/cz_node_2025-09-01.geojson",
+            "/private/tmp/pow-dated-places-ohsome/cz/cz_way_2025-09-01.geojson"
+          ],
+          "raw_feature_count": 1744,
+          "country_feature_count": 929,
+          "output_feature_count": 929,
+          "boundary_files": [
+            "apps/regions/cz/data/cz_kraj_2021.geojson"
+          ]
+        },
+        {
+          "country_code": "KE",
+          "provider": "OpenStreetMap via ohsome API",
+          "endpoint": "https://api.ohsome.org/v1/elements/centroid",
+          "retrieved_at": "2026-07-09T12:02:57Z",
+          "snapshot_date": "2025-09-01",
+          "bboxes": "kenya_west:33.8,-4.8,38,5.5|kenya_east:38,-4.8,42.1,5.5",
+          "filter": "amenity=place_of_worship and (start_date=* or old_start_date=* or end_date=* or disused:amenity=* or abandoned:amenity=* or was:amenity=* or demolished:amenity=*)",
+          "object_types": [
+            "node",
+            "way"
+          ],
+          "raw_cache_files": [
+            "/private/tmp/pow-dated-places-ohsome/ke/ke_node_2025-09-01_01.geojson",
+            "/private/tmp/pow-dated-places-ohsome/ke/ke_node_2025-09-01_02.geojson",
+            "/private/tmp/pow-dated-places-ohsome/ke/ke_way_2025-09-01_01.geojson",
+            "/private/tmp/pow-dated-places-ohsome/ke/ke_way_2025-09-01_02.geojson"
+          ],
+          "raw_feature_count": 1,
+          "country_feature_count": 1,
+          "output_feature_count": 1,
+          "boundary_files": [
+            "apps/regions/ke/data/ke_county_2020.geojson"
+          ]
+        },
+        {
+          "country_code": "MW",
+          "provider": "OpenStreetMap via ohsome API",
+          "endpoint": "https://api.ohsome.org/v1/elements/centroid",
+          "retrieved_at": "2026-07-09T12:02:57Z",
+          "snapshot_date": "2025-09-01",
+          "bboxes": "malawi:32.6,-17.2,36,-9.3",
+          "filter": "amenity=place_of_worship and (start_date=* or old_start_date=* or end_date=* or disused:amenity=* or abandoned:amenity=* or was:amenity=* or demolished:amenity=*)",
+          "object_types": [
+            "node",
+            "way"
+          ],
+          "raw_cache_files": [
+            "/private/tmp/pow-dated-places-ohsome/mw/mw_node_2025-09-01.geojson",
+            "/private/tmp/pow-dated-places-ohsome/mw/mw_way_2025-09-01.geojson"
+          ],
+          "raw_feature_count": 11,
+          "country_feature_count": 0,
+          "output_feature_count": 0,
+          "boundary_files": [
+            "apps/regions/mw/data/mw_district_2020.geojson"
+          ]
+        },
+        {
+          "country_code": "GH",
+          "provider": "OpenStreetMap via ohsome API",
+          "endpoint": "https://api.ohsome.org/v1/elements/centroid",
+          "retrieved_at": "2026-07-09T12:02:57Z",
+          "snapshot_date": "2025-09-01",
+          "bboxes": "ghana_south:-3.4,4.6,1.3,7.8|ghana_north:-3.4,7.8,1.3,11.3",
+          "filter": "amenity=place_of_worship and (start_date=* or old_start_date=* or end_date=* or disused:amenity=* or abandoned:amenity=* or was:amenity=* or demolished:amenity=*)",
+          "object_types": [
+            "node",
+            "way"
+          ],
+          "raw_cache_files": [
+            "/private/tmp/pow-dated-places-ohsome/gh/gh_node_2025-09-01_01.geojson",
+            "/private/tmp/pow-dated-places-ohsome/gh/gh_node_2025-09-01_02.geojson",
+            "/private/tmp/pow-dated-places-ohsome/gh/gh_way_2025-09-01_01.geojson",
+            "/private/tmp/pow-dated-places-ohsome/gh/gh_way_2025-09-01_02.geojson"
+          ],
+          "raw_feature_count": 4,
+          "country_feature_count": 4,
+          "output_feature_count": 4,
+          "boundary_files": [
+            "apps/regions/gh/data/gh_region_2019.geojson"
+          ]
+        },
+        {
+          "country_code": "ZM",
+          "provider": "OpenStreetMap via ohsome API",
+          "endpoint": "https://api.ohsome.org/v1/elements/centroid",
+          "retrieved_at": "2026-07-09T12:02:57Z",
+          "snapshot_date": "2025-09-01",
+          "bboxes": "zambia:21.9,-18.2,33.8,-8.2",
+          "filter": "amenity=place_of_worship and (start_date=* or old_start_date=* or end_date=* or disused:amenity=* or abandoned:amenity=* or was:amenity=* or demolished:amenity=*)",
+          "object_types": [
+            "node",
+            "way"
+          ],
+          "raw_cache_files": [
+            "/private/tmp/pow-dated-places-ohsome/zm/zm_node_2025-09-01.geojson",
+            "/private/tmp/pow-dated-places-ohsome/zm/zm_way_2025-09-01.geojson"
+          ],
+          "raw_feature_count": 0,
+          "country_feature_count": 0,
+          "output_feature_count": 0,
+          "boundary_files": [
+            "apps/regions/zm/data/zm_province_2011.geojson"
+          ]
+        },
+        {
+          "country_code": "RW",
+          "provider": "OpenStreetMap via ohsome API",
+          "endpoint": "https://api.ohsome.org/v1/elements/centroid",
+          "retrieved_at": "2026-07-09T12:02:57Z",
+          "snapshot_date": "2025-09-01",
+          "bboxes": "rwanda:28.8,-2.9,31,-1",
+          "filter": "amenity=place_of_worship and (start_date=* or old_start_date=* or end_date=* or disused:amenity=* or abandoned:amenity=* or was:amenity=* or demolished:amenity=*)",
+          "object_types": [
+            "node",
+            "way"
+          ],
+          "raw_cache_files": [
+            "/private/tmp/pow-dated-places-ohsome/rw/rw_node_2025-09-01.geojson",
+            "/private/tmp/pow-dated-places-ohsome/rw/rw_way_2025-09-01.geojson"
+          ],
+          "raw_feature_count": 34,
+          "country_feature_count": 0,
+          "output_feature_count": 0,
+          "boundary_files": [
+            "apps/regions/rw/data/rw_district_2012.geojson"
+          ]
+        },
+        {
+          "country_code": "ZA",
+          "provider": "OpenStreetMap via ohsome API",
+          "endpoint": "https://api.ohsome.org/v1/elements/centroid",
+          "retrieved_at": "2026-07-09T12:02:57Z",
+          "snapshot_date": "2025-09-01",
+          "bboxes": "south_africa:16.4,-35,33,-22",
+          "filter": "amenity=place_of_worship and (start_date=* or old_start_date=* or end_date=* or disused:amenity=* or abandoned:amenity=* or was:amenity=* or demolished:amenity=*)",
+          "object_types": [
+            "node",
+            "way"
+          ],
+          "raw_cache_files": [
+            "/private/tmp/pow-dated-places-ohsome/za/za_node_2025-09-01.geojson",
+            "/private/tmp/pow-dated-places-ohsome/za/za_way_2025-09-01.geojson"
+          ],
+          "raw_feature_count": 103,
+          "country_feature_count": 101,
+          "output_feature_count": 101,
+          "boundary_files": [
+            "apps/regions/za/data/za_province_2020.geojson"
+          ]
+        },
+        {
+          "country_code": "AL",
+          "provider": "OpenStreetMap via ohsome API",
+          "endpoint": "https://api.ohsome.org/v1/elements/centroid",
+          "retrieved_at": "2026-07-09T12:02:57Z",
+          "snapshot_date": "2025-09-01",
+          "bboxes": "albania:19.2,39.6,21.1,42.8",
+          "filter": "amenity=place_of_worship and (start_date=* or old_start_date=* or end_date=* or disused:amenity=* or abandoned:amenity=* or was:amenity=* or demolished:amenity=*)",
+          "object_types": [
+            "node",
+            "way"
+          ],
+          "raw_cache_files": [
+            "/private/tmp/pow-dated-places-ohsome/al/al_node_2025-09-01.geojson",
+            "/private/tmp/pow-dated-places-ohsome/al/al_way_2025-09-01.geojson"
+          ],
+          "raw_feature_count": 41,
+          "country_feature_count": 7,
+          "output_feature_count": 7,
+          "boundary_files": [
+            "apps/regions/al/data/al_prefecture_2023.geojson"
+          ]
+        },
+        {
+          "country_code": "BS",
+          "provider": "OpenStreetMap via ohsome API",
+          "endpoint": "https://api.ohsome.org/v1/elements/centroid",
+          "retrieved_at": "2026-07-09T12:02:57Z",
+          "snapshot_date": "2025-09-01",
+          "bboxes": "bahamas:-80.6,20.8,-72.6,27.4",
+          "filter": "amenity=place_of_worship and (start_date=* or old_start_date=* or end_date=* or disused:amenity=* or abandoned:amenity=* or was:amenity=* or demolished:amenity=*)",
+          "object_types": [
+            "node",
+            "way"
+          ],
+          "raw_cache_files": [
+            "/private/tmp/pow-dated-places-ohsome/bs/bs_node_2025-09-01.geojson",
+            "/private/tmp/pow-dated-places-ohsome/bs/bs_way_2025-09-01.geojson"
+          ],
+          "raw_feature_count": 9,
+          "country_feature_count": 2,
+          "output_feature_count": 2,
+          "boundary_files": [
+            "apps/regions/bs/data/bs_island_2020.geojson"
+          ]
+        },
+        {
+          "country_code": "IT",
+          "provider": "OpenStreetMap via ohsome API",
+          "endpoint": "https://api.ohsome.org/v1/elements/centroid",
+          "retrieved_at": "2026-07-09T12:02:57Z",
+          "snapshot_date": "2025-09-01",
+          "bboxes": "italy_north:6.5,44,14,47.2|italy_centre:8,41,16,44.5|italy_south:12,35.4,18.8,42|italy_sardinia:8,38.7,10,41.4",
+          "filter": "amenity=place_of_worship and (start_date=* or old_start_date=* or end_date=* or disused:amenity=* or abandoned:amenity=* or was:amenity=* or demolished:amenity=*)",
+          "object_types": [
+            "node",
+            "way"
+          ],
+          "raw_cache_files": [
+            "/private/tmp/pow-dated-places-ohsome/it/it_node_2025-09-01_01.geojson",
+            "/private/tmp/pow-dated-places-ohsome/it/it_node_2025-09-01_02.geojson",
+            "/private/tmp/pow-dated-places-ohsome/it/it_node_2025-09-01_03.geojson",
+            "/private/tmp/pow-dated-places-ohsome/it/it_node_2025-09-01_04.geojson",
+            "/private/tmp/pow-dated-places-ohsome/it/it_way_2025-09-01_01.geojson",
+            "/private/tmp/pow-dated-places-ohsome/it/it_way_2025-09-01_02.geojson",
+            "/private/tmp/pow-dated-places-ohsome/it/it_way_2025-09-01_03.geojson",
+            "/private/tmp/pow-dated-places-ohsome/it/it_way_2025-09-01_04.geojson"
+          ],
+          "raw_feature_count": 3024,
+          "country_feature_count": 2463,
+          "output_feature_count": 2463,
+          "boundary_files": [
+            "apps/regions/it/data/it_region_2026.geojson"
+          ]
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "4.6.1",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39"
+    }
+  },
+  "source": {
+    "provider": "OpenStreetMap via ohsome API",
+    "source_dataset_ids": [
+      "osm-ohsome-elements-centroid"
+    ],
+    "source_urls": [
+      "https://api.ohsome.org/v1/elements/centroid",
+      "https://www.openstreetmap.org/copyright"
+    ],
+    "retrieved_at": "2026-07-09T12:02:57Z",
+    "licence": "ODbL-1.0",
+    "citation": "OpenStreetMap contributors; ohsome API."
+  },
+  "input_manifests": [],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/kr/data/dated_places.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 2810,
+      "sha256": "fd332bf01dd60286ada80df5c96bb14e511226795a667ff7e2b55d724bbe826e",
+      "content_sha256": null,
+      "row_count": null,
+      "feature_count": 10,
+      "content": "KR OSM date-tag places of worship product for country map period mode.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/ro/data/dated_places.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 432122,
+      "sha256": "222e1d5da401a19ae24613055889a1119c5ee9b60e8ac1b6cbc1afa0765a55a6",
+      "content_sha256": null,
+      "row_count": null,
+      "feature_count": 1401,
+      "content": "RO OSM date-tag places of worship product for country map period mode.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/in/data/dated_places.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 21365,
+      "sha256": "7de4bcd47ed533edb5fa08ce7e2930b53bacd49d20e3012f774ba2a1d3859081",
+      "content_sha256": null,
+      "row_count": null,
+      "feature_count": 76,
+      "content": "IN OSM date-tag places of worship product for country map period mode.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/cz/data/dated_places.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 264220,
+      "sha256": "d934c35617d4ab80f07ae8f40e63192e5bd320f858daf627d5e4dad00f23eff9",
+      "content_sha256": null,
+      "row_count": null,
+      "feature_count": 929,
+      "content": "CZ OSM date-tag places of worship product for country map period mode.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/ke/data/dated_places.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 404,
+      "sha256": "b589583cab4bb59dd02704483cda6bc5ecd35c89cd66fded190351eb88ccc8c8",
+      "content_sha256": null,
+      "row_count": null,
+      "feature_count": 1,
+      "content": "KE OSM date-tag places of worship product for country map period mode.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/mw/data/dated_places.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 99,
+      "sha256": "dcfd8acfa178a14e12305c208234f5b4f54e6797dc5f5d7206bd9ac3f1553795",
+      "content_sha256": null,
+      "row_count": null,
+      "feature_count": 0,
+      "content": "MW OSM date-tag places of worship product for country map period mode.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/gh/data/dated_places.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 1238,
+      "sha256": "f8e098aedcf7bf00734d3a2f158571e46a133800c2336ac30bdccb73fd163691",
+      "content_sha256": null,
+      "row_count": null,
+      "feature_count": 4,
+      "content": "GH OSM date-tag places of worship product for country map period mode.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/zm/data/dated_places.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 99,
+      "sha256": "dcfd8acfa178a14e12305c208234f5b4f54e6797dc5f5d7206bd9ac3f1553795",
+      "content_sha256": null,
+      "row_count": null,
+      "feature_count": 0,
+      "content": "ZM OSM date-tag places of worship product for country map period mode.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/rw/data/dated_places.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 99,
+      "sha256": "dcfd8acfa178a14e12305c208234f5b4f54e6797dc5f5d7206bd9ac3f1553795",
+      "content_sha256": null,
+      "row_count": null,
+      "feature_count": 0,
+      "content": "RW OSM date-tag places of worship product for country map period mode.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/za/data/dated_places.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 28741,
+      "sha256": "dbbb70d8a406741b62c18060675a7ded8b933a65a4918d6b5d1971ac2b8542d4",
+      "content_sha256": null,
+      "row_count": null,
+      "feature_count": 101,
+      "content": "ZA OSM date-tag places of worship product for country map period mode.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/al/data/dated_places.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 2074,
+      "sha256": "c7c2d0b0286026a7ddc57aa7d0dbd77e66cb2f9f846fbe74c9b6b528a40bc720",
+      "content_sha256": null,
+      "row_count": null,
+      "feature_count": 7,
+      "content": "AL OSM date-tag places of worship product for country map period mode.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/bs/data/dated_places.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 680,
+      "sha256": "9eb1d67ae24458ff0d306b4060853d7f746db00e914f64e3dc680859d8443397",
+      "content_sha256": null,
+      "row_count": null,
+      "feature_count": 2,
+      "content": "BS OSM date-tag places of worship product for country map period mode.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/it/data/dated_places.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 715063,
+      "sha256": "472021dce049bfb7056e046339b429f0713c9a2b1d3171efef61ea858c97fc07",
+      "content_sha256": null,
+      "row_count": null,
+      "feature_count": 2463,
+      "content": "IT OSM date-tag places of worship product for country map period mode.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    }
+  ],
+  "partitions": [
+    {
+      "partition_id": "country:KR",
+      "partition_type": "country",
+      "country_code": "KR",
+      "file_uri": "repo:apps/regions/kr/data/dated_places.geojson",
+      "sha256": "fd332bf01dd60286ada80df5c96bb14e511226795a667ff7e2b55d724bbe826e",
+      "row_count": null,
+      "feature_count": 10
+    },
+    {
+      "partition_id": "country:RO",
+      "partition_type": "country",
+      "country_code": "RO",
+      "file_uri": "repo:apps/regions/ro/data/dated_places.geojson",
+      "sha256": "222e1d5da401a19ae24613055889a1119c5ee9b60e8ac1b6cbc1afa0765a55a6",
+      "row_count": null,
+      "feature_count": 1401
+    },
+    {
+      "partition_id": "country:IN",
+      "partition_type": "country",
+      "country_code": "IN",
+      "file_uri": "repo:apps/regions/in/data/dated_places.geojson",
+      "sha256": "7de4bcd47ed533edb5fa08ce7e2930b53bacd49d20e3012f774ba2a1d3859081",
+      "row_count": null,
+      "feature_count": 76
+    },
+    {
+      "partition_id": "country:CZ",
+      "partition_type": "country",
+      "country_code": "CZ",
+      "file_uri": "repo:apps/regions/cz/data/dated_places.geojson",
+      "sha256": "d934c35617d4ab80f07ae8f40e63192e5bd320f858daf627d5e4dad00f23eff9",
+      "row_count": null,
+      "feature_count": 929
+    },
+    {
+      "partition_id": "country:KE",
+      "partition_type": "country",
+      "country_code": "KE",
+      "file_uri": "repo:apps/regions/ke/data/dated_places.geojson",
+      "sha256": "b589583cab4bb59dd02704483cda6bc5ecd35c89cd66fded190351eb88ccc8c8",
+      "row_count": null,
+      "feature_count": 1
+    },
+    {
+      "partition_id": "country:MW",
+      "partition_type": "country",
+      "country_code": "MW",
+      "file_uri": "repo:apps/regions/mw/data/dated_places.geojson",
+      "sha256": "dcfd8acfa178a14e12305c208234f5b4f54e6797dc5f5d7206bd9ac3f1553795",
+      "row_count": null,
+      "feature_count": 0
+    },
+    {
+      "partition_id": "country:GH",
+      "partition_type": "country",
+      "country_code": "GH",
+      "file_uri": "repo:apps/regions/gh/data/dated_places.geojson",
+      "sha256": "f8e098aedcf7bf00734d3a2f158571e46a133800c2336ac30bdccb73fd163691",
+      "row_count": null,
+      "feature_count": 4
+    },
+    {
+      "partition_id": "country:ZM",
+      "partition_type": "country",
+      "country_code": "ZM",
+      "file_uri": "repo:apps/regions/zm/data/dated_places.geojson",
+      "sha256": "dcfd8acfa178a14e12305c208234f5b4f54e6797dc5f5d7206bd9ac3f1553795",
+      "row_count": null,
+      "feature_count": 0
+    },
+    {
+      "partition_id": "country:RW",
+      "partition_type": "country",
+      "country_code": "RW",
+      "file_uri": "repo:apps/regions/rw/data/dated_places.geojson",
+      "sha256": "dcfd8acfa178a14e12305c208234f5b4f54e6797dc5f5d7206bd9ac3f1553795",
+      "row_count": null,
+      "feature_count": 0
+    },
+    {
+      "partition_id": "country:ZA",
+      "partition_type": "country",
+      "country_code": "ZA",
+      "file_uri": "repo:apps/regions/za/data/dated_places.geojson",
+      "sha256": "dbbb70d8a406741b62c18060675a7ded8b933a65a4918d6b5d1971ac2b8542d4",
+      "row_count": null,
+      "feature_count": 101
+    },
+    {
+      "partition_id": "country:AL",
+      "partition_type": "country",
+      "country_code": "AL",
+      "file_uri": "repo:apps/regions/al/data/dated_places.geojson",
+      "sha256": "c7c2d0b0286026a7ddc57aa7d0dbd77e66cb2f9f846fbe74c9b6b528a40bc720",
+      "row_count": null,
+      "feature_count": 7
+    },
+    {
+      "partition_id": "country:BS",
+      "partition_type": "country",
+      "country_code": "BS",
+      "file_uri": "repo:apps/regions/bs/data/dated_places.geojson",
+      "sha256": "9eb1d67ae24458ff0d306b4060853d7f746db00e914f64e3dc680859d8443397",
+      "row_count": null,
+      "feature_count": 2
+    },
+    {
+      "partition_id": "country:IT",
+      "partition_type": "country",
+      "country_code": "IT",
+      "file_uri": "repo:apps/regions/it/data/dated_places.geojson",
+      "sha256": "472021dce049bfb7056e046339b429f0713c9a2b1d3171efef61ea858c97fc07",
+      "row_count": null,
+      "feature_count": 2463
+    }
+  ],
+  "stats": {
+    "country_count": 13,
+    "total_feature_count": 4994,
+    "total_raw_lifecycle_feature_count": 6686,
+    "kr_feature_count": 10,
+    "ro_feature_count": 1401,
+    "in_feature_count": 76,
+    "cz_feature_count": 929,
+    "ke_feature_count": 1,
+    "mw_feature_count": 0,
+    "gh_feature_count": 4,
+    "zm_feature_count": 0,
+    "rw_feature_count": 0,
+    "za_feature_count": 101,
+    "al_feature_count": 7,
+    "bs_feature_count": 2,
+    "it_feature_count": 2463,
+    "kr_raw_lifecycle_feature_count": 23,
+    "ro_raw_lifecycle_feature_count": 1575,
+    "in_raw_lifecycle_feature_count": 117,
+    "cz_raw_lifecycle_feature_count": 1744,
+    "ke_raw_lifecycle_feature_count": 1,
+    "mw_raw_lifecycle_feature_count": 11,
+    "gh_raw_lifecycle_feature_count": 4,
+    "zm_raw_lifecycle_feature_count": 0,
+    "rw_raw_lifecycle_feature_count": 34,
+    "za_raw_lifecycle_feature_count": 103,
+    "al_raw_lifecycle_feature_count": 41,
+    "bs_raw_lifecycle_feature_count": 9,
+    "it_raw_lifecycle_feature_count": 3024
+  },
+  "local_cache_hint": "/private/tmp/pow-dated-places-ohsome",
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_osm_dated_places_products.R --countries KR,RO,IN,CZ,KE,MW,GH,ZM,RW,ZA,AL,BS,IT --snapshot-date 2025-09-01 --cache-dir /private/tmp/pow-dated-places-ohsome",
+      "Rscript -e 'jsonlite::validate(paste(readLines(\"docs/manifests/osm-pow-dated-13countries-fbbb18ea1735.json\", warn = FALSE), collapse = \"\\\\n\"))'",
+      "Rscript -e 'jsonlite::validate(paste(readLines(\"apps/regions/kr/data/dated_places.geojson\", warn = FALSE), collapse = \"\\\\n\"))'",
+      "Rscript -e 'jsonlite::validate(paste(readLines(\"apps/regions/ro/data/dated_places.geojson\", warn = FALSE), collapse = \"\\\\n\"))'",
+      "Rscript -e 'jsonlite::validate(paste(readLines(\"apps/regions/in/data/dated_places.geojson\", warn = FALSE), collapse = \"\\\\n\"))'",
+      "Rscript -e 'jsonlite::validate(paste(readLines(\"apps/regions/cz/data/dated_places.geojson\", warn = FALSE), collapse = \"\\\\n\"))'",
+      "Rscript -e 'jsonlite::validate(paste(readLines(\"apps/regions/ke/data/dated_places.geojson\", warn = FALSE), collapse = \"\\\\n\"))'",
+      "Rscript -e 'jsonlite::validate(paste(readLines(\"apps/regions/mw/data/dated_places.geojson\", warn = FALSE), collapse = \"\\\\n\"))'",
+      "Rscript -e 'jsonlite::validate(paste(readLines(\"apps/regions/gh/data/dated_places.geojson\", warn = FALSE), collapse = \"\\\\n\"))'",
+      "Rscript -e 'jsonlite::validate(paste(readLines(\"apps/regions/zm/data/dated_places.geojson\", warn = FALSE), collapse = \"\\\\n\"))'",
+      "Rscript -e 'jsonlite::validate(paste(readLines(\"apps/regions/rw/data/dated_places.geojson\", warn = FALSE), collapse = \"\\\\n\"))'",
+      "Rscript -e 'jsonlite::validate(paste(readLines(\"apps/regions/za/data/dated_places.geojson\", warn = FALSE), collapse = \"\\\\n\"))'",
+      "Rscript -e 'jsonlite::validate(paste(readLines(\"apps/regions/al/data/dated_places.geojson\", warn = FALSE), collapse = \"\\\\n\"))'",
+      "Rscript -e 'jsonlite::validate(paste(readLines(\"apps/regions/bs/data/dated_places.geojson\", warn = FALSE), collapse = \"\\\\n\"))'",
+      "Rscript -e 'jsonlite::validate(paste(readLines(\"apps/regions/it/data/dated_places.geojson\", warn = FALSE), collapse = \"\\\\n\"))'"
+    ],
+    "warnings": [
+      "OSM date tags are provisional lifecycle evidence, not accepted historical worship-use states.",
+      "Country extraction uses named ohsome bboxes followed by exact local boundary filtering."
+    ],
+    "notes": "Generated dated_places.geojson products for country-map period mode."
+  },
+  "privacy": "public",
+  "licence_status": "accepted",
+  "downstream_status": "public",
+  "notes": "Products include only amenity=place_of_worship node/way objects carrying start_date, old_start_date, end_date, or NZ-extractor former-use lifecycle tags at the selected OSM snapshot."
+}
