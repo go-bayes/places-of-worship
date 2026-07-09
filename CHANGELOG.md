@@ -4,6 +4,20 @@
 
 ### 2026-07-10
 
+- Added the Denmark Church of Denmark membership products. The parish
+  product ships KM1 Q1 points for 2023-2026 only, on current DAWA/DAGI
+  sogn boundaries (`dk_sogn_2026.geojson`, 2,097 features, 2.99 MB at
+  3% mapshaper keep). Earlier KM1 parish waves remain deferred because
+  parish mergers and code churn need a governed concordance layer; the
+  manifest records per-year dropped source parish-code rates and the
+  dropped member/non-member counts for every shipped year. Added the
+  KM6 municipality companion for 99 kommuner, 2011-2026, on current
+  DAWA/DAGI kommune boundaries (`dk_kommune_2026.geojson`, 495 KB at
+  1% mapshaper keep). Municipality rows reconcile exactly to complete
+  KM6 municipality national sums, and those sums match KM1 national Q1
+  totals exactly for 2011-2026. Build:
+  `scripts/build_dk_area_summary.R`; manifest
+  `docs/manifests/dk-membership-2011-2026.json`.
 - Added the Germany Kreis census-religion product for Zensus 2011 and
   Zensus 2022 legal membership in public-law religious societies
   (`RELZG2`). The two waves ship on their own period Kreis geographies:
