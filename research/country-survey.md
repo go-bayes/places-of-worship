@@ -211,6 +211,44 @@ UK Northern Ireland 2001/2011 and the Scotland extraction.
 20. **ZA South Africa** - First table: Statistics South Africa Census 2022 statistical release, https://www.statssa.gov.za/publications/P03014/P030142022.pdf. Boundary source: geoBoundaries ADM1 provinces, 2020, CC BY 3.0 IGO; ADM2 district municipalities also exist for later downscaling. Province-level route is buildable but coarser than the district and municipality candidates.
 21. **AL Albania** - First table: INSTAT Census 2023 table 1.13. Boundary source: ASIG/INSTAT administrative boundaries; geoBoundaries ADM1 supports prefecture joins. Prefecture route is usable, but the public geography and wave depth are coarser than other tier-A cards.
 
+## Practice lane (ratified 2026-07-09)
+
+The ranked build queue orders countries by construct match with the
+census-affiliation maps, so sources that measure religious practice
+rather than affiliation landed at tier B regardless of their value.
+JB ratified a parallel practice lane on 2026-07-09: attendance is
+behaviour at the sites themselves, and for the change-over-time
+objective an annual attendance series carries a signal the decennial
+affiliation waves cannot.
+
+Two facts make the lane cheaper than the tiering implies. First, the
+US map already ships a non-census construct (adherents reported by
+religious bodies) with `metricLabels`/`metricsAvailable` relabelling
+the metrics honestly, so the runtime needs no change. Second, the
+`area_summary` contract already admits distinct `construct` values,
+so attendance and affiliation products can share a country page
+without mixing constructs.
+
+Lane order:
+
+1. **PL Poland (pilot)** — ISKK dominicantes and communicantes,
+   annual Catholic-practice counts by diocese, with 2011/2021
+   voivodeship census affiliation as context (the card's own first
+   visualisation). The main work item is diocese polygons: church
+   GIS or manual digitisation, since diocese and civil boundaries do
+   not align. Parish-level panel access needs ISKK codes and stays
+   out of scope for the first product.
+2. **IT Italy** — ISTAT "Aspects of daily life" regional attendance
+   shares, 2001-2022. Easy I.Stat extraction on ISTAT regional
+   boundaries; coarse geography, long series. Attendance must be
+   labelled as a survey estimate, not a census count.
+3. **MT Malta (contingent)** — Catholic attendance by parish joins
+   the lane only if the parish tables prove recoverable.
+
+Every practice-lane product records attendance as its own
+`construct`, never as affiliation; the lane runs after or alongside
+the tier-A affiliation queue without displacing it.
+
 ## What is missing
 
 No country from the 149-card sweep is missing from the matrix. No regional sweep remains unsettled.
