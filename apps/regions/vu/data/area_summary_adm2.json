@@ -1,4 +1,10 @@
 {
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "no governed Vanuatu place-of-worship snapshot is included in this country data-map release",
+    "notes": "place_count and its derived metrics are null; the map’s place dots come from the shared global OpenStreetMap tiles, and the dated-places product is pending."
+  },
   "1": "seventh_day_adventist",
   "rows": [
     {
@@ -16,7 +22,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -44,7 +53,11 @@
       "anglican_percent": 0.13,
       "catholic_percent": 15.24,
       "seventh_day_adventist_percent": 33.85,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -61,7 +74,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -89,7 +105,11 @@
       "anglican_percent": 0,
       "catholic_percent": 0.22,
       "seventh_day_adventist_percent": 4.09,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -106,7 +126,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -134,7 +157,11 @@
       "anglican_percent": 9.55,
       "catholic_percent": 13.13,
       "seventh_day_adventist_percent": 14.34,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -151,7 +178,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -179,7 +209,11 @@
       "anglican_percent": 0.74,
       "catholic_percent": 10.02,
       "seventh_day_adventist_percent": 14.19,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -196,7 +230,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -224,7 +261,11 @@
       "anglican_percent": 34.14,
       "catholic_percent": 19.45,
       "seventh_day_adventist_percent": 5.26,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -241,7 +282,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -269,7 +313,11 @@
       "anglican_percent": 23.72,
       "catholic_percent": 73.14,
       "seventh_day_adventist_percent": 0.29,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -286,7 +334,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -314,7 +365,11 @@
       "anglican_percent": 71.06,
       "catholic_percent": 1.12,
       "seventh_day_adventist_percent": 5.85,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -331,7 +386,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -359,7 +417,11 @@
       "anglican_percent": 0.69,
       "catholic_percent": 4.66,
       "seventh_day_adventist_percent": 42.46,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -376,7 +438,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -404,7 +469,11 @@
       "anglican_percent": 7.31,
       "catholic_percent": 31.01,
       "seventh_day_adventist_percent": 4.47,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -421,7 +490,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -449,7 +521,11 @@
       "anglican_percent": 0.27,
       "catholic_percent": 0.14,
       "seventh_day_adventist_percent": 2.71,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -466,7 +542,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -494,7 +573,11 @@
       "anglican_percent": 3.96,
       "catholic_percent": 10.97,
       "seventh_day_adventist_percent": 19.07,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -511,7 +594,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -539,7 +625,11 @@
       "anglican_percent": 6.6,
       "catholic_percent": 9.71,
       "seventh_day_adventist_percent": 19.27,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -556,7 +646,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -584,7 +677,11 @@
       "anglican_percent": 1.82,
       "catholic_percent": 2.78,
       "seventh_day_adventist_percent": 25.57,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -601,7 +698,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -629,7 +729,11 @@
       "anglican_percent": 1.63,
       "catholic_percent": 0.54,
       "seventh_day_adventist_percent": 6.33,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -646,7 +750,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -674,7 +781,11 @@
       "anglican_percent": 70.79,
       "catholic_percent": 0.26,
       "seventh_day_adventist_percent": 7,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -691,7 +802,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -719,7 +833,11 @@
       "anglican_percent": 0.16,
       "catholic_percent": 0.94,
       "seventh_day_adventist_percent": 5.03,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -736,7 +854,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -764,7 +885,11 @@
       "anglican_percent": 14.17,
       "catholic_percent": 14.3,
       "seventh_day_adventist_percent": 22.97,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -781,7 +906,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -809,7 +937,11 @@
       "anglican_percent": 0,
       "catholic_percent": 0.73,
       "seventh_day_adventist_percent": 12.1,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -826,7 +958,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -854,7 +989,11 @@
       "anglican_percent": 2.32,
       "catholic_percent": 2.26,
       "seventh_day_adventist_percent": 13.34,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -871,7 +1010,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -899,7 +1041,11 @@
       "anglican_percent": 2.35,
       "catholic_percent": 4.82,
       "seventh_day_adventist_percent": 9.77,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -916,7 +1062,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -944,7 +1093,11 @@
       "anglican_percent": 81.14,
       "catholic_percent": 0,
       "seventh_day_adventist_percent": 0,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -961,7 +1114,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -989,7 +1145,11 @@
       "anglican_percent": 0.31,
       "catholic_percent": 10.14,
       "seventh_day_adventist_percent": 11.64,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1006,7 +1166,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1034,7 +1197,11 @@
       "anglican_percent": 95.98,
       "catholic_percent": 0,
       "seventh_day_adventist_percent": 0.5,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1051,7 +1218,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1079,7 +1249,11 @@
       "anglican_percent": 54.98,
       "catholic_percent": 0.12,
       "seventh_day_adventist_percent": 10.79,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1096,7 +1270,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1124,7 +1301,11 @@
       "anglican_percent": 0.45,
       "catholic_percent": 0.67,
       "seventh_day_adventist_percent": 10.61,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1141,7 +1322,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1169,7 +1353,11 @@
       "anglican_percent": 43.52,
       "catholic_percent": 19.72,
       "seventh_day_adventist_percent": 16.43,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1186,7 +1374,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1214,7 +1405,11 @@
       "anglican_percent": 0.45,
       "catholic_percent": 22.51,
       "seventh_day_adventist_percent": 25.15,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1231,7 +1426,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1259,7 +1457,11 @@
       "anglican_percent": 0.27,
       "catholic_percent": 46.24,
       "seventh_day_adventist_percent": 18.91,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1276,7 +1478,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1304,7 +1509,11 @@
       "anglican_percent": 0.92,
       "catholic_percent": 0.73,
       "seventh_day_adventist_percent": 11.4,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1321,7 +1530,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1349,7 +1561,11 @@
       "anglican_percent": 0.7,
       "catholic_percent": 0.88,
       "seventh_day_adventist_percent": 44.57,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1366,7 +1582,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1394,7 +1613,11 @@
       "anglican_percent": 87.16,
       "catholic_percent": 0.26,
       "seventh_day_adventist_percent": 0.26,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1411,7 +1634,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1439,7 +1665,11 @@
       "anglican_percent": 84.43,
       "catholic_percent": 5.49,
       "seventh_day_adventist_percent": 1.46,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1456,7 +1686,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1484,7 +1717,11 @@
       "anglican_percent": 18,
       "catholic_percent": 20.75,
       "seventh_day_adventist_percent": 18.57,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1501,7 +1738,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1529,7 +1769,11 @@
       "anglican_percent": 0.02,
       "catholic_percent": 3.7,
       "seventh_day_adventist_percent": 10.43,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1546,7 +1790,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1574,7 +1821,11 @@
       "anglican_percent": 0.25,
       "catholic_percent": 3.15,
       "seventh_day_adventist_percent": 12.1,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1591,7 +1842,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1619,7 +1873,11 @@
       "anglican_percent": 0.3,
       "catholic_percent": 18.42,
       "seventh_day_adventist_percent": 33.56,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1636,7 +1894,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1664,7 +1925,11 @@
       "anglican_percent": 0.69,
       "catholic_percent": 0.5,
       "seventh_day_adventist_percent": 9.38,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1681,7 +1946,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1709,7 +1977,11 @@
       "anglican_percent": 0.66,
       "catholic_percent": 0.33,
       "seventh_day_adventist_percent": 27.4,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1726,7 +1998,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1754,7 +2029,11 @@
       "anglican_percent": 2.51,
       "catholic_percent": 4.45,
       "seventh_day_adventist_percent": 14.85,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1771,7 +2050,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1799,7 +2081,11 @@
       "anglican_percent": 7.89,
       "catholic_percent": 12.38,
       "seventh_day_adventist_percent": 18.48,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1816,7 +2102,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1844,7 +2133,11 @@
       "anglican_percent": 51.45,
       "catholic_percent": 0.17,
       "seventh_day_adventist_percent": 30.39,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1861,7 +2154,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1889,7 +2185,11 @@
       "anglican_percent": 0.1,
       "catholic_percent": 5.34,
       "seventh_day_adventist_percent": 6.94,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1906,7 +2206,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1934,7 +2237,11 @@
       "anglican_percent": 0.33,
       "catholic_percent": 0.48,
       "seventh_day_adventist_percent": 11.7,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1951,7 +2258,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -1979,7 +2289,11 @@
       "anglican_percent": 16.77,
       "catholic_percent": 7.85,
       "seventh_day_adventist_percent": 16.98,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -1996,7 +2310,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2024,7 +2341,11 @@
       "anglican_percent": 0,
       "catholic_percent": 0.06,
       "seventh_day_adventist_percent": 44.32,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2041,7 +2362,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2069,7 +2393,11 @@
       "anglican_percent": 0,
       "catholic_percent": 0.15,
       "seventh_day_adventist_percent": 53.27,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2086,7 +2414,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2114,7 +2445,11 @@
       "anglican_percent": 54.2,
       "catholic_percent": 0.64,
       "seventh_day_adventist_percent": 18.26,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2131,7 +2466,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2159,7 +2497,11 @@
       "anglican_percent": 0.67,
       "catholic_percent": 28.37,
       "seventh_day_adventist_percent": 4.72,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2176,7 +2518,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2204,7 +2549,11 @@
       "anglican_percent": 7.52,
       "catholic_percent": 38.9,
       "seventh_day_adventist_percent": 1.64,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2221,7 +2570,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2249,7 +2601,11 @@
       "anglican_percent": 0.62,
       "catholic_percent": 7.58,
       "seventh_day_adventist_percent": 8.53,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2266,7 +2622,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2294,7 +2653,11 @@
       "anglican_percent": 0.12,
       "catholic_percent": 45.41,
       "seventh_day_adventist_percent": 20.61,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2311,7 +2674,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2339,7 +2705,11 @@
       "anglican_percent": 0.28,
       "catholic_percent": 6.27,
       "seventh_day_adventist_percent": 5.94,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2356,7 +2726,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2384,7 +2757,11 @@
       "anglican_percent": 0.08,
       "catholic_percent": 9.59,
       "seventh_day_adventist_percent": 14.78,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2401,7 +2778,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2429,7 +2809,11 @@
       "anglican_percent": 0,
       "catholic_percent": 0.29,
       "seventh_day_adventist_percent": 15.95,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2446,7 +2830,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2474,7 +2861,11 @@
       "anglican_percent": 93.78,
       "catholic_percent": 0.21,
       "seventh_day_adventist_percent": 3,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2491,7 +2882,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2519,7 +2913,11 @@
       "anglican_percent": 82.58,
       "catholic_percent": 1.21,
       "seventh_day_adventist_percent": 5.82,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2536,7 +2934,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2564,7 +2965,11 @@
       "anglican_percent": 0.45,
       "catholic_percent": 0.4,
       "seventh_day_adventist_percent": 28.85,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2581,7 +2986,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2609,7 +3017,11 @@
       "anglican_percent": 0.35,
       "catholic_percent": 0.26,
       "seventh_day_adventist_percent": 9.92,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2626,7 +3038,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2654,7 +3069,11 @@
       "anglican_percent": 0.17,
       "catholic_percent": 3.06,
       "seventh_day_adventist_percent": 14.51,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2671,7 +3090,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2699,7 +3121,11 @@
       "anglican_percent": 16.21,
       "catholic_percent": 1.13,
       "seventh_day_adventist_percent": 10.77,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2716,7 +3142,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2744,7 +3173,11 @@
       "anglican_percent": 0.26,
       "catholic_percent": 27.11,
       "seventh_day_adventist_percent": 24.25,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2761,7 +3194,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2789,7 +3225,11 @@
       "anglican_percent": 2.67,
       "catholic_percent": 0.38,
       "seventh_day_adventist_percent": 12.2,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2806,7 +3246,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2834,7 +3277,11 @@
       "anglican_percent": 4.19,
       "catholic_percent": 0.23,
       "seventh_day_adventist_percent": 2.24,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2851,7 +3298,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2879,7 +3329,11 @@
       "anglican_percent": 0.12,
       "catholic_percent": 6.5,
       "seventh_day_adventist_percent": 10.44,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     },
     {
       "country_code": "VU",
@@ -2896,7 +3350,10 @@
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship"
+      ]
     },
     {
       "country_code": "VU",
@@ -2924,7 +3381,11 @@
       "anglican_percent": 0.3,
       "catholic_percent": 9.35,
       "seventh_day_adventist_percent": 9.29,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": [
+        "vu-adm2-geoboundaries",
+        "osm-vu-place-of-worship",
+        "vbos-2020-census-basic-tables-t3-5"
+      ]
     }
   ],
   "source_datasets": [

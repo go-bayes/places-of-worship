@@ -69,7 +69,8 @@
       ],
       "properties": {
         "source_dataset_id": {
-          "type": "string"
+          "type": ["string", "null"],
+          "description": "Null is legitimate and means the release ships no governed place-of-worship snapshot; the basis string must say so. A string names the governed snapshot dataset the place metrics derive from."
         },
         "snapshot_date": {
           "type": ["string", "null"],
@@ -179,7 +180,8 @@
           "type": ["number", "null"]
         },
         "place_count": {
-          "type": "integer"
+          "type": ["integer", "null"],
+          "description": "Null when the release ships no governed place-of-worship snapshot (see site_snapshot.basis); the derived place metrics are then null too."
         },
         "places_per_10000_residents": {
           "type": ["number", "null"]
@@ -195,7 +197,8 @@
           "format": "date"
         },
         "place_count_basis": {
-          "type": "string"
+          "type": ["string", "null"],
+          "description": "Null when place_count is null (no governed place snapshot in the release)."
         },
         "source_dataset_ids": {
           "type": "array",

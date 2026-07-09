@@ -828,8 +828,16 @@ flatten_rows <- function(rows) {
 
 # write area-summary json and csv siblings with an array-valued rows field.
 write_area_summary <- function(rows, json_path, csv_path) {
+  # every product states its place-layer position; canada ships no governed
+  # place snapshot in this release (the schema admits the null id)
+  site_snapshot <- list(
+    source_dataset_id = NA,
+    snapshot_date = NA,
+    basis = "no governed Canada place-of-worship snapshot is included in this country data-map release",
+    notes = "place_count and its derived metrics are null; the map’s place dots come from the shared global OpenStreetMap tiles, not from this product."
+  )
   write_json(
-    list(schema_version = "area-summary.v1", country_code = "CA", rows = unname(rows)),
+    list(schema_version = "area-summary.v1", country_code = "CA", site_snapshot = site_snapshot, rows = unname(rows)),
     json_path,
     auto_unbox = TRUE,
     pretty = TRUE,

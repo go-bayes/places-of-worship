@@ -1,6 +1,12 @@
 {
   "schema_version": "area-summary.v1",
   "country_code": "CA",
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "no governed Canada place-of-worship snapshot is included in this country data-map release",
+    "notes": "place_count and its derived metrics are null; the map’s place dots come from the shared global OpenStreetMap tiles, not from this product."
+  },
   "rows": [
     {
       "country_code": "CA",
@@ -22,7 +28,10 @@
       "land_area_sq_km": 3066.56,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "33.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -46,7 +55,10 @@
       "land_area_sq_km": 27652.35,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "35.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -70,7 +82,10 @@
       "land_area_sq_km": 44823.11,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -94,7 +109,10 @@
       "land_area_sq_km": 99804.68,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -118,7 +136,10 @@
       "land_area_sq_km": 3582.97,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -142,7 +163,10 @@
       "land_area_sq_km": 59403.3,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "31.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -166,7 +190,10 @@
       "land_area_sq_km": 5853.76,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "31.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -190,7 +217,10 @@
       "land_area_sq_km": 15981.71,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "25.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -214,7 +244,10 @@
       "land_area_sq_km": 18036.06,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "33.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -238,7 +271,10 @@
       "land_area_sq_km": 75456.07,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -262,7 +298,10 @@
       "land_area_sq_km": 33912.5,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "34.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -286,7 +325,10 @@
       "land_area_sq_km": 4638.21,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "49.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -310,7 +352,10 @@
       "land_area_sq_km": 81056.33,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "28.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -334,7 +379,10 @@
       "land_area_sq_km": 20893.55,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "29.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -358,7 +406,10 @@
       "land_area_sq_km": 579.86,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "21.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -382,7 +433,10 @@
       "land_area_sq_km": 3811.12,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "36.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -406,7 +460,10 @@
       "land_area_sq_km": 22789.96,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "32.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -430,7 +487,10 @@
       "land_area_sq_km": 3122.51,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "27.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -454,7 +514,10 @@
       "land_area_sq_km": 4049.99,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "28.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -478,7 +541,10 @@
       "land_area_sq_km": 20961.76,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "33.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -502,7 +568,10 @@
       "land_area_sq_km": 1730.83,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "22.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -526,7 +595,10 @@
       "land_area_sq_km": 18467.44,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "23.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -550,7 +622,10 @@
       "land_area_sq_km": 28109.17,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "34.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -574,7 +649,10 @@
       "land_area_sq_km": 5267.21,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "27.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -598,7 +676,10 @@
       "land_area_sq_km": 19775.55,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "31.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -622,7 +703,10 @@
       "land_area_sq_km": 17099.07,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -646,7 +730,10 @@
       "land_area_sq_km": 7639.08,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "28.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -670,7 +757,10 @@
       "land_area_sq_km": 16868.7,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "38.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -694,7 +784,10 @@
       "land_area_sq_km": 50392.9,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "25.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -718,7 +811,10 @@
       "land_area_sq_km": 81847.15,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "36.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -742,7 +838,10 @@
       "land_area_sq_km": 5324.69,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "37.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -766,7 +865,10 @@
       "land_area_sq_km": 24278.81,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "39.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -790,7 +892,10 @@
       "land_area_sq_km": 114545.95,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "26.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -814,7 +919,10 @@
       "land_area_sq_km": 20476.6,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "33.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -838,7 +946,10 @@
       "land_area_sq_km": 14082.25,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "38.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -862,7 +973,10 @@
       "land_area_sq_km": 19765.7,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "34.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -886,7 +1000,10 @@
       "land_area_sq_km": 9919.82,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "42.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -910,7 +1027,10 @@
       "land_area_sq_km": 102238.58,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "26.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -934,7 +1054,10 @@
       "land_area_sq_km": 17772,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "37.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -958,7 +1081,10 @@
       "land_area_sq_km": 8127.89,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "38.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -982,7 +1108,10 @@
       "land_area_sq_km": 21628.44,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "42.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1006,7 +1135,10 @@
       "land_area_sq_km": 2375.33,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "23.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1030,7 +1162,10 @@
       "land_area_sq_km": 26459.63,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "31.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1054,7 +1189,10 @@
       "land_area_sq_km": 17813.09,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "25.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1078,7 +1216,10 @@
       "land_area_sq_km": 16453.41,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "35.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1102,7 +1243,10 @@
       "land_area_sq_km": 2869.79,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "32.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1126,7 +1270,10 @@
       "land_area_sq_km": 18631.05,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "42.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1150,7 +1297,10 @@
       "land_area_sq_km": 29523.96,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "35.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1174,7 +1324,10 @@
       "land_area_sq_km": 24566.6,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "35.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1198,7 +1351,10 @@
       "land_area_sq_km": 15326.3,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1222,7 +1378,10 @@
       "land_area_sq_km": 20172.19,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "34.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1246,7 +1405,10 @@
       "land_area_sq_km": 4858.05,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "40.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1270,7 +1432,10 @@
       "land_area_sq_km": 306867.77,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "28.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1294,7 +1459,10 @@
       "land_area_sq_km": 23023.35,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "34.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1318,7 +1486,10 @@
       "land_area_sq_km": 22590.13,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "29.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1342,7 +1513,10 @@
       "land_area_sq_km": 13955.58,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "36.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1366,7 +1540,10 @@
       "land_area_sq_km": 115568.51,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "46.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1390,7 +1567,10 @@
       "land_area_sq_km": 32317.48,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "34.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1414,7 +1594,10 @@
       "land_area_sq_km": 15366.34,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "31.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1438,7 +1621,10 @@
       "land_area_sq_km": 12897.34,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "35.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1462,7 +1648,10 @@
       "land_area_sq_km": 21877.73,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "42.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1486,7 +1675,10 @@
       "land_area_sq_km": 5778.13,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "25.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1510,7 +1702,10 @@
       "land_area_sq_km": 2069.3,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "22.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1534,7 +1729,10 @@
       "land_area_sq_km": 19563.38,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "43.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1558,7 +1756,10 @@
       "land_area_sq_km": 18906.06,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "42.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1582,7 +1783,10 @@
       "land_area_sq_km": 31216.73,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1606,7 +1810,10 @@
       "land_area_sq_km": 188099.37,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "32.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1630,7 +1837,10 @@
       "land_area_sq_km": 12682.01,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1654,7 +1864,10 @@
       "land_area_sq_km": 10042.73,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "31.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1678,7 +1891,10 @@
       "land_area_sq_km": 8457.47,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "41.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1702,7 +1918,10 @@
       "land_area_sq_km": 14947.87,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "35.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1726,7 +1945,10 @@
       "land_area_sq_km": 9439.87,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "41.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1750,7 +1972,10 @@
       "land_area_sq_km": 14278.6,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "42.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1774,7 +1999,10 @@
       "land_area_sq_km": 22997.6,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "37.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1798,7 +2026,10 @@
       "land_area_sq_km": 13844.45,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "28.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1822,7 +2053,10 @@
       "land_area_sq_km": 3034.88,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1846,7 +2080,10 @@
       "land_area_sq_km": 17240.74,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "35.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1870,7 +2107,10 @@
       "land_area_sq_km": 1912.6,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "28.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1894,7 +2134,10 @@
       "land_area_sq_km": 20102.3,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "29.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1918,7 +2161,10 @@
       "land_area_sq_km": 6872.07,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "28.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1942,7 +2188,10 @@
       "land_area_sq_km": 10561.42,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "35.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1966,7 +2215,10 @@
       "land_area_sq_km": 3747.52,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "37.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -1990,7 +2242,10 @@
       "land_area_sq_km": 19548.39,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "38.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2014,7 +2269,10 @@
       "land_area_sq_km": 1991.1,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "27.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2038,7 +2296,10 @@
       "land_area_sq_km": 1019.01,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "22.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2062,7 +2323,10 @@
       "land_area_sq_km": 15497.15,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "39.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2086,7 +2350,10 @@
       "land_area_sq_km": 3523.31,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "23.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2110,7 +2377,10 @@
       "land_area_sq_km": 5548.21,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2134,7 +2404,10 @@
       "land_area_sq_km": 3089.41,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "33.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2158,7 +2431,10 @@
       "land_area_sq_km": 18704.54,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "32.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2182,7 +2458,10 @@
       "land_area_sq_km": 2256.21,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2206,7 +2485,10 @@
       "land_area_sq_km": 2985.48,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "21.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2230,7 +2512,10 @@
       "land_area_sq_km": 14508.18,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "39.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2254,7 +2539,10 @@
       "land_area_sq_km": 2133.34,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2278,7 +2566,10 @@
       "land_area_sq_km": 1166.81,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "28.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2302,7 +2593,10 @@
       "land_area_sq_km": 3307.81,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "39.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2326,7 +2620,10 @@
       "land_area_sq_km": 888.82,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "19.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2350,7 +2647,10 @@
       "land_area_sq_km": 755.96,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2374,7 +2674,10 @@
       "land_area_sq_km": 3296.12,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "31.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2398,7 +2701,10 @@
       "land_area_sq_km": 1209.13,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "29.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2422,7 +2728,10 @@
       "land_area_sq_km": 20029.41,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2446,7 +2755,10 @@
       "land_area_sq_km": 4319.98,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "33.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2470,7 +2782,10 @@
       "land_area_sq_km": 2078.46,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "36.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2494,7 +2809,10 @@
       "land_area_sq_km": 4392.35,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "29.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2518,7 +2836,10 @@
       "land_area_sq_km": 2191.15,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "22.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2542,7 +2863,10 @@
       "land_area_sq_km": 4712.44,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "47.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2566,7 +2890,10 @@
       "land_area_sq_km": 8293.35,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "33.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2590,7 +2917,10 @@
       "land_area_sq_km": 6528.83,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2614,7 +2944,10 @@
       "land_area_sq_km": 10579.09,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "40.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2638,7 +2971,10 @@
       "land_area_sq_km": 27534.5,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "32.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2662,7 +2998,10 @@
       "land_area_sq_km": 2164.44,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "27.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2686,7 +3025,10 @@
       "land_area_sq_km": 4682,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "41.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2710,7 +3052,10 @@
       "land_area_sq_km": 1364.2,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "29.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2734,7 +3079,10 @@
       "land_area_sq_km": 3235.17,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "21.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2758,7 +3106,10 @@
       "land_area_sq_km": 2741.46,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "38.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2782,7 +3133,10 @@
       "land_area_sq_km": 2738.08,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "28.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2806,7 +3160,10 @@
       "land_area_sq_km": 212.65,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "14.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2830,7 +3187,10 @@
       "land_area_sq_km": 3435.09,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "32.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2854,7 +3214,10 @@
       "land_area_sq_km": 3585.61,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "31.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2878,7 +3241,10 @@
       "land_area_sq_km": 3705.85,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "27.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2902,7 +3268,10 @@
       "land_area_sq_km": 252.32,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "12.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2926,7 +3295,10 @@
       "land_area_sq_km": 1124.26,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "37.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2950,7 +3322,10 @@
       "land_area_sq_km": 478.8,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "18.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2974,7 +3349,10 @@
       "land_area_sq_km": 1456,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "23.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -2998,7 +3376,10 @@
       "land_area_sq_km": 4738.52,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "36.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3022,7 +3403,10 @@
       "land_area_sq_km": 1564.27,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "37.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3046,7 +3430,10 @@
       "land_area_sq_km": 52969.1,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "32.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3070,7 +3457,10 @@
       "land_area_sq_km": 2643.16,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "22.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3094,7 +3484,10 @@
       "land_area_sq_km": 3094.06,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "33.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3118,7 +3511,10 @@
       "land_area_sq_km": 3628.62,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "33.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3142,7 +3538,10 @@
       "land_area_sq_km": 3476.01,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "37.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3166,7 +3565,10 @@
       "land_area_sq_km": 2336.94,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "27.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3190,7 +3592,10 @@
       "land_area_sq_km": 2829.38,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "29.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3214,7 +3619,10 @@
       "land_area_sq_km": 14443.88,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "47.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3238,7 +3646,10 @@
       "land_area_sq_km": 393.35,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "23.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3262,7 +3673,10 @@
       "land_area_sq_km": 14389.9,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "42.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3286,7 +3700,10 @@
       "land_area_sq_km": 3468.4,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "40.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3310,7 +3727,10 @@
       "land_area_sq_km": 665.03,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "26.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3334,7 +3754,10 @@
       "land_area_sq_km": 489.21,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "33.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3358,7 +3781,10 @@
       "land_area_sq_km": 1998.84,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "26.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3382,7 +3808,10 @@
       "land_area_sq_km": 500.75,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "12.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3406,7 +3835,10 @@
       "land_area_sq_km": 1988.32,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "28.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3430,7 +3862,10 @@
       "land_area_sq_km": 44582.1,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "36.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3454,7 +3889,10 @@
       "land_area_sq_km": 6577.78,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "32.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3478,7 +3916,10 @@
       "land_area_sq_km": 4381.31,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "38.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3502,7 +3943,10 @@
       "land_area_sq_km": 16600.99,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "34.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3526,7 +3970,10 @@
       "land_area_sq_km": 7958.93,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "33.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3550,7 +3997,10 @@
       "land_area_sq_km": 1316.44,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "25.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3574,7 +4024,10 @@
       "land_area_sq_km": 1220.13,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "41.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3598,7 +4051,10 @@
       "land_area_sq_km": 22523.59,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "27.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3622,7 +4078,10 @@
       "land_area_sq_km": 2287.5,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "26.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3646,7 +4105,10 @@
       "land_area_sq_km": 2301.24,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "32.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3670,7 +4132,10 @@
       "land_area_sq_km": 1339.72,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "44.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3694,7 +4159,10 @@
       "land_area_sq_km": 1331.34,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "25.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3718,7 +4186,10 @@
       "land_area_sq_km": 5093.45,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "21.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3742,7 +4213,10 @@
       "land_area_sq_km": 4447.28,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "39.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3766,7 +4240,10 @@
       "land_area_sq_km": 10149.25,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "31.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3790,7 +4267,10 @@
       "land_area_sq_km": 5673.43,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "36.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3814,7 +4294,10 @@
       "land_area_sq_km": 1202.06,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "19.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3838,7 +4321,10 @@
       "land_area_sq_km": 2744.3,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "45.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3862,7 +4348,10 @@
       "land_area_sq_km": 668.77,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "22.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3886,7 +4375,10 @@
       "land_area_sq_km": 4097.68,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3910,7 +4402,10 @@
       "land_area_sq_km": 817.9,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "26.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3934,7 +4429,10 @@
       "land_area_sq_km": 2418.09,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "21.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3958,7 +4456,10 @@
       "land_area_sq_km": 2665.81,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "27.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -3982,7 +4483,10 @@
       "land_area_sq_km": 4013.41,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "33.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4006,7 +4510,10 @@
       "land_area_sq_km": 3787.55,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "25.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4030,7 +4537,10 @@
       "land_area_sq_km": 3540.68,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "28.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4054,7 +4564,10 @@
       "land_area_sq_km": 7494.46,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "28.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4078,7 +4591,10 @@
       "land_area_sq_km": 2989.07,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "31.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4102,7 +4618,10 @@
       "land_area_sq_km": 196.21,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "43.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4126,7 +4645,10 @@
       "land_area_sq_km": 17774.33,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "28.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4150,7 +4672,10 @@
       "land_area_sq_km": 3780.81,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4174,7 +4699,10 @@
       "land_area_sq_km": 2076.77,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "38.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4198,7 +4726,10 @@
       "land_area_sq_km": 10081.53,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "35.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4222,7 +4753,10 @@
       "land_area_sq_km": 2800.29,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "31.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4246,7 +4780,10 @@
       "land_area_sq_km": 2147.63,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "25.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4270,7 +4807,10 @@
       "land_area_sq_km": 3823.68,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "25.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4294,7 +4834,10 @@
       "land_area_sq_km": 2373.28,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "21.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4318,7 +4861,10 @@
       "land_area_sq_km": 2034.59,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "26.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4342,7 +4888,10 @@
       "land_area_sq_km": 813.24,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "25.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4366,7 +4915,10 @@
       "land_area_sq_km": 3105.99,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "28.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4390,7 +4942,10 @@
       "land_area_sq_km": 1865.47,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "22.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4414,7 +4969,10 @@
       "land_area_sq_km": 1305.16,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "28.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4438,7 +4996,10 @@
       "land_area_sq_km": 1347.5,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "21.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4462,7 +5023,10 @@
       "land_area_sq_km": 623.23,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "19.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4486,7 +5050,10 @@
       "land_area_sq_km": 4426.8,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "35.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4510,7 +5077,10 @@
       "land_area_sq_km": 3427,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "22.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4534,7 +5104,10 @@
       "land_area_sq_km": 2891.2,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "38.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4558,7 +5131,10 @@
       "land_area_sq_km": 1494.34,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "26.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4582,7 +5158,10 @@
       "land_area_sq_km": 1394.24,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "18.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4606,7 +5185,10 @@
       "land_area_sq_km": 567.91,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "21.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4630,7 +5212,10 @@
       "land_area_sq_km": 4721.43,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4654,7 +5239,10 @@
       "land_area_sq_km": 3283.24,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "29.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4678,7 +5266,10 @@
       "land_area_sq_km": 504.89,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "18.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4702,7 +5293,10 @@
       "land_area_sq_km": 1798.59,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "28.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4726,7 +5320,10 @@
       "land_area_sq_km": 1892.9,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4750,7 +5347,10 @@
       "land_area_sq_km": 10704.8,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "34.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4774,7 +5374,10 @@
       "land_area_sq_km": 13330.69,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "33.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4798,7 +5401,10 @@
       "land_area_sq_km": 2810.02,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4822,7 +5428,10 @@
       "land_area_sq_km": 2026.58,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "25.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4846,7 +5455,10 @@
       "land_area_sq_km": 4092.92,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "45.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4870,7 +5482,10 @@
       "land_area_sq_km": 1472.67,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "21.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4894,7 +5509,10 @@
       "land_area_sq_km": 2344.8,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "43.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4918,7 +5536,10 @@
       "land_area_sq_km": 600.63,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4942,7 +5563,10 @@
       "land_area_sq_km": 3560.29,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "37.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4966,7 +5590,10 @@
       "land_area_sq_km": 1047.18,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "25.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -4990,7 +5617,10 @@
       "land_area_sq_km": 2546.66,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "22.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5014,7 +5644,10 @@
       "land_area_sq_km": 624.93,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "21.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5038,7 +5671,10 @@
       "land_area_sq_km": 5089.77,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "29.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5062,7 +5698,10 @@
       "land_area_sq_km": 3910.34,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "25.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5086,7 +5725,10 @@
       "land_area_sq_km": 11474.11,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "32.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5110,7 +5752,10 @@
       "land_area_sq_km": 1611.78,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "31.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5134,7 +5779,10 @@
       "land_area_sq_km": 1007.61,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5158,7 +5806,10 @@
       "land_area_sq_km": 5468.81,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "38.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5182,7 +5833,10 @@
       "land_area_sq_km": 1740.18,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "22.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5206,7 +5860,10 @@
       "land_area_sq_km": 1777.05,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "42.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5230,7 +5887,10 @@
       "land_area_sq_km": 4148.8,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5254,7 +5914,10 @@
       "land_area_sq_km": 1670.22,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "22.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5278,7 +5941,10 @@
       "land_area_sq_km": 3240.15,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "25.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5302,7 +5968,10 @@
       "land_area_sq_km": 4781.06,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5326,7 +5995,10 @@
       "land_area_sq_km": 377.01,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "16.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5350,7 +6022,10 @@
       "land_area_sq_km": 1702.36,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "26.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5374,7 +6049,10 @@
       "land_area_sq_km": 1513.28,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "25.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5398,7 +6076,10 @@
       "land_area_sq_km": 1734.83,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5422,7 +6103,10 @@
       "land_area_sq_km": 291.96,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "20.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5446,7 +6130,10 @@
       "land_area_sq_km": 12389.35,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "25.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5470,7 +6157,10 @@
       "land_area_sq_km": 4379.86,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "31.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5494,7 +6184,10 @@
       "land_area_sq_km": 4144.22,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "34.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5518,7 +6211,10 @@
       "land_area_sq_km": 2824.8,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5542,7 +6238,10 @@
       "land_area_sq_km": 2912.16,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "25.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5566,7 +6265,10 @@
       "land_area_sq_km": 1312,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "32.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5590,7 +6292,10 @@
       "land_area_sq_km": 2169.12,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "28.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5614,7 +6319,10 @@
       "land_area_sq_km": 3657.19,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "32.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5638,7 +6346,10 @@
       "land_area_sq_km": 1178.67,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5662,7 +6373,10 @@
       "land_area_sq_km": 236.82,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "41.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5686,7 +6400,10 @@
       "land_area_sq_km": 266.42,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "21.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5710,7 +6427,10 @@
       "land_area_sq_km": 2450.82,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "37.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5734,7 +6454,10 @@
       "land_area_sq_km": 2958.43,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5758,7 +6481,10 @@
       "land_area_sq_km": 6180.84,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5782,7 +6508,10 @@
       "land_area_sq_km": 3598.44,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "27.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5806,7 +6535,10 @@
       "land_area_sq_km": 1959.58,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "22.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5830,7 +6562,10 @@
       "land_area_sq_km": 865.32,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5854,7 +6589,10 @@
       "land_area_sq_km": 935.05,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5878,7 +6616,10 @@
       "land_area_sq_km": 8676.03,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "26.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5902,7 +6643,10 @@
       "land_area_sq_km": 3427.89,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "27.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5926,7 +6670,10 @@
       "land_area_sq_km": 464.18,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "16.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5950,7 +6697,10 @@
       "land_area_sq_km": 8763.38,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5974,7 +6724,10 @@
       "land_area_sq_km": 6665.01,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -5998,7 +6751,10 @@
       "land_area_sq_km": 3345.27,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "23.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6022,7 +6778,10 @@
       "land_area_sq_km": 3383.97,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "33.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6046,7 +6805,10 @@
       "land_area_sq_km": 355.86,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "22.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6070,7 +6832,10 @@
       "land_area_sq_km": 1152.95,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "27.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6094,7 +6859,10 @@
       "land_area_sq_km": 69414.81,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "11.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6118,7 +6886,10 @@
       "land_area_sq_km": 32087.15,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "23.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6142,7 +6913,10 @@
       "land_area_sq_km": 378336.87,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "19.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6166,7 +6940,10 @@
       "land_area_sq_km": 1813.52,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "29.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6190,7 +6967,10 @@
       "land_area_sq_km": 196029.61,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "13.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6214,7 +6994,10 @@
       "land_area_sq_km": 84346.01,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "19.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6238,7 +7021,10 @@
       "land_area_sq_km": 224696.39,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "14.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6262,7 +7048,10 @@
       "land_area_sq_km": 508031.15,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6286,7 +7075,10 @@
       "land_area_sq_km": 104021.39,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "22.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6310,7 +7102,10 @@
       "land_area_sq_km": 259960.46,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6334,7 +7129,10 @@
       "land_area_sq_km": 15268.7,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "40.1",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6358,7 +7156,10 @@
       "land_area_sq_km": 1847.29,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "31.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6382,7 +7183,10 @@
       "land_area_sq_km": 193774.02,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "15.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6406,7 +7210,10 @@
       "land_area_sq_km": 252054.46,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "16.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6430,7 +7237,10 @@
       "land_area_sq_km": 455686.87,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "29.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6454,7 +7264,10 @@
       "land_area_sq_km": 4404.44,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "33.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6478,7 +7291,10 @@
       "land_area_sq_km": 144383.63,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6502,7 +7318,10 @@
       "land_area_sq_km": 433363.05,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "34.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6526,7 +7345,10 @@
       "land_area_sq_km": 831.89,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "35.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6550,7 +7372,10 @@
       "land_area_sq_km": 37989.01,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "16.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6574,7 +7399,10 @@
       "land_area_sq_km": 29879.87,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "25.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6598,7 +7426,10 @@
       "land_area_sq_km": 434.57,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6622,7 +7453,10 @@
       "land_area_sq_km": 19391.91,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "29.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6646,7 +7480,10 @@
       "land_area_sq_km": 10653.2,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "31.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6670,7 +7507,10 @@
       "land_area_sq_km": 5695.81,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "32.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6694,7 +7534,10 @@
       "land_area_sq_km": 254.22,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "17.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6718,7 +7561,10 @@
       "land_area_sq_km": 439.26,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "24.5",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6742,7 +7588,10 @@
       "land_area_sq_km": 1016573,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "27.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6766,7 +7615,10 @@
       "land_area_sq_km": 118387.73,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "28.2",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6790,7 +7642,10 @@
       "land_area_sq_km": 820283.77,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "22.9",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6814,7 +7669,10 @@
       "land_area_sq_km": 514.88,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "20.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6838,7 +7696,10 @@
       "land_area_sq_km": 269.68,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "14.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6862,7 +7723,10 @@
       "land_area_sq_km": 737.24,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.7",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6886,7 +7750,10 @@
       "land_area_sq_km": 216660.33,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "30.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6910,7 +7777,10 @@
       "land_area_sq_km": 39465.66,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "19.8",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6934,7 +7804,10 @@
       "land_area_sq_km": 14665.97,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "40.3",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6958,7 +7831,10 @@
       "land_area_sq_km": 103474.25,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "49.6",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -6982,7 +7858,10 @@
       "land_area_sq_km": 44868.5,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "21.0",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -7006,7 +7885,10 @@
       "land_area_sq_km": 109304.37,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "29.4",
       "quality_flag": "voluntary_survey_nhs"
     },
@@ -7030,7 +7912,10 @@
       "land_area_sq_km": 486213.28,
       "site_snapshot_date": null,
       "place_count_basis": null,
-      "source_dataset_ids": ["statcan-2011-nhs-profile-religion-cd", "statcan-2011-cd-cartographic-boundary"],
+      "source_dataset_ids": [
+        "statcan-2011-nhs-profile-religion-cd",
+        "statcan-2011-cd-cartographic-boundary"
+      ],
       "source_data_quality_flag": "20.7",
       "quality_flag": "voluntary_survey_nhs"
     }

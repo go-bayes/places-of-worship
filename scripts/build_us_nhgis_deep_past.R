@@ -410,6 +410,14 @@ write_level_summary <- function(level_key, boundary_year, rows, specs_for_level)
     generated_at = stamp,
     generated_by = "scripts/build_us_nhgis_deep_past.R",
     country_code = "US",
+    # every product states its place-layer position; the historical-era
+    # products carry religious-bodies rates only (schema admits the null id)
+    site_snapshot = list(
+      source_dataset_id = NA,
+      snapshot_date = NA,
+      basis = "no OpenStreetMap place-of-worship layer built yet for the US",
+      notes = "this historical-era product carries religious-bodies rates only; place_count and its derived metrics are null."
+    ),
     boundary_set = list(
       boundary_set_id = sprintf("us-county-%s-tl2008", boundary_year),
       country_code = "US",

@@ -24,3 +24,25 @@ JSON Schemas that define the core data structures used across the project.
 
 Keep these schemas versioned and update them before changing any dataset shape
 that depends on them.
+
+## area-summary validation state (2026-07-09)
+
+Null is a legitimate value in three places, each meaning the release ships
+no governed place-of-worship snapshot: `site_snapshot.source_dataset_id`,
+`rows[].place_count`, and `rows[].place_count_basis`. The `site_snapshot`
+block itself is required — every product states its place-layer position
+explicitly, with the reason in `basis`.
+
+A full validation of the 37 shipped country products against
+`area-summary.schema.json` passes 23. The 14 failures are structural
+generation differences, not data defects, and need a schema-versioning
+ruling before they are reconciled:
+
+- Canada (3 files): `area-summary.v1` row-array shape without the
+  `boundary_set`/`source_datasets`/`indicators`/`visual_layers` blocks.
+- US (6 files) and Romania (2): `0.2.0`-generation shape with extra
+  top-level provenance fields and differing sub-object contracts.
+- Vanuatu (2): no `schema_version`/`country_code`, plus a stray top-level
+  `"1"` key — an R serialisation bug in `build_vu_area_summary.R` to fix
+  at the next VU regeneration.
+- NZ SA2 (1): a single extra `service_url` property.

@@ -367,6 +367,14 @@ build_level <- function(summary_path, level) {
   }
   d$generated_at <- stamp
   d$generated_by <- "scripts/build_vu_area_summary.R"
+  # every product states its place-layer position; vanuatu ships no governed
+  # place snapshot in this release (the schema admits the null id)
+  d$site_snapshot <- list(
+    source_dataset_id = NA,
+    snapshot_date = NA,
+    basis = "no governed Vanuatu place-of-worship snapshot is included in this country data-map release",
+    notes = "place_count and its derived metrics are null; the map’s place dots come from the shared global OpenStreetMap tiles, and the dated-places product is pending."
+  )
 
   write_json(d, summary_path, auto_unbox = TRUE, pretty = TRUE, null = "null", na = "null", digits = NA)
 
