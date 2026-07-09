@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Poland Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Poland is the second practice-lane map, and the pilot's COUNT
+    // construct against Italy's SURVEY construct: ISKK's Annuarium
+    // Statisticum runs a full annual head-count of Sunday Mass attendance
+    // in every parish (dominicantes = physically present, communicantes =
+    // received communion), one October or November Sunday per year, over
+    // 41 Latin-rite territorial dioceses. The two legacy area-summary slots
+    // are reused (Italy precedent): religious_affiliation_percent carries
+    // dominicantes and no_religion_percent carries communicantes, both
+    // rates over obligati (Catholics obliged to attend Mass), never
+    // affiliation and never a population share. Ten counted years ship,
+    // 2014-2019 and 2021-2024; 2020 was not counted (COVID-19) and 2013 is
+    // not freely published, so the change metric measures 2021 against
+    // 2019. The 41-diocese boundary layer is mixed and provisional: 24
+    // dioceses carry complete OpenStreetMap religious-administration
+    // polygons, and 17 are approximate digitisations from Eurostat/GISCO
+    // gmina geometry assigned by parish/deanery evidence, seven of those
+    // flagged low confidence (see docs/manifests/pl-attendance-2014-2024.json).
+    // Authoritative GIS-Expert/KUL church polygons remain pending.
+    window.REGION_CONFIG = {
+      countryCode: "PL",
+      title: "Places of Worship | Poland Research Map",
+      dataNoun: "Attendance",
+      center: [19.3, 52.05],
+      initialZoom: 5.6,
+      censusLevels: {
+        diocese: {
+          label: "Diocese",
+          boundaries: "data/pl_diocese_2004.geojson",
+          summary: "data/area_summary_diocese.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "ISKK Annuarium Statisticum Ecclesiae in Polonia, dominicantes and communicantes by diocese, 2014–2024 (2020 not counted) · Boundaries: © OpenStreetMap contributors (ODbL) for 24 dioceses, Eurostat/GISCO LAU 2024 gmina digitisation for 17 (7 low confidence), authoritative GIS-Expert/KUL polygons pending"
+        }
+      },
+      defaultLevel: "diocese",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2024,
+      // the two legacy area-summary slots carry ISKK's counts-based rates;
+      // religious_change reads honestly here because the ten-year series is
+      // a single boundary set with an explicit "previous counted year"
+      // (the Italy precedent for the same annual-series reasoning; store.years
+      // skips the uncounted 2020, so 2021 is measured against 2019 automatically)
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Mass attendance (dominicantes), % of obliged Catholics",
+          note: "ISKK dominicantes: persons physically present at Sunday Mass on the annual count Sunday, divided by obligati (Catholics obliged to attend Mass); a counts-based rate, never a survey and never religious affiliation"
+        },
+        no_religion_percent: {
+          label: "Communion (communicantes), % of obliged Catholics",
+          note: "ISKK communicantes: persons receiving communion on the same count Sunday, divided by obligati; a counts-based rate, never a survey and never a no-religion affiliation category"
+        },
+        religious_change: {
+          label: "Change since previous counted year (pp)",
+          note: "percentage-point change in the dominicantes rate since the previous counted year; the series starts 2014, no count took place in 2020 (COVID-19); 2021 is therefore measured against 2019"
+        }
+      },
+      popupDenominatorNote: "Percentages are already rates over obligati: Catholics obliged to attend Sunday Mass, that is, the nominal Catholic population minus those the Church excuses — children under seven, the sick and infirm, the very elderly, and travellers. ISKK counts everyone physically present (dominicantes) or receiving communion (communicantes) on a single October or November Sunday each year; this is a head count, not a survey, and not census religious affiliation.",
+      cityPresets: [
+        { label: "Warsaw", coords: [21.0122, 52.2297], zoom: 10 },
+        { label: "Kraków", coords: [19.9445, 50.0647], zoom: 10 },
+        { label: "Łódź", coords: [19.4560, 51.7592], zoom: 10 },
+        { label: "Wrocław", coords: [17.0385, 51.1079], zoom: 10 },
+        { label: "Poznań", coords: [16.9252, 52.4064], zoom: 10 },
+        { label: "Gdańsk", coords: [18.6466, 54.3520], zoom: 10 },
+        { label: "Szczecin", coords: [14.5528, 53.4285], zoom: 10 },
+        { label: "Bydgoszcz", coords: [18.0084, 53.1235], zoom: 10 },
+        { label: "Lublin", coords: [22.5684, 51.2465], zoom: 10 },
+        { label: "Białystok", coords: [23.1688, 53.1325], zoom: 10 }
+      ],
+      geocode: { country: "pl", biasLngLat: [19.3, 52.05] },
+      onboarding: {
+        title: "Poland research map",
+        intro: "Mass attendance by Catholic diocese, from ISKK's annual head-count of everyone physically present at Sunday Mass, dominicantes, and everyone receiving communion, communicantes, on one October or November Sunday each year, 2014–2024 (2020 not counted). This is Catholic religious practice, its own construct, distinct from census religious affiliation and from Italy's self-reported attendance survey.",
+        bullets: [
+          "The 41 Latin-rite territorial dioceses are shaded by the dominicantes rate, the share of obligati (Catholics obliged to attend Sunday Mass) physically present at Mass on the count Sunday, or the communicantes rate, the share receiving communion.",
+          "This is a head count taken on one Sunday a year, never a survey and never census religious affiliation; the denominator is obligati, not the total population and not all Catholics.",
+          "Ten counted years ship: 2014–2019 and 2021–2024. 2020 was not counted because of COVID-19, and 2013 is not freely published; the change metric therefore measures 2021 against 2019.",
+          "Diocese boundaries are mixed and provisional: 24 of 41 dioceses carry complete OpenStreetMap religious-administration polygons; the other 17, including seven flagged low confidence, are approximate digitisations built from municipal (gmina) boundaries assigned by parish and deanery evidence, not mapped diocese lines. Authoritative GIS-Expert/KUL church polygons are pending; the low-confidence dioceses are named in the manifest.",
+          "These rates are never comparable on one axis to census religious affiliation or to Italy's self-reported attendance survey: different construct, different denominator, different collection.",
+          "Open <strong>Show Attendance Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Catholic Mass attendance rates (dominicantes, communicantes) from <a href="https://iskk.pl/publikacje/" target="_blank" rel="noopener">ISKK, Annuarium Statisticum Ecclesiae in Polonia</a>, by diocese, 2014&ndash;2024 (2020 not counted) &middot; Diocese boundaries mix <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a> religious-administration polygons (&copy; OpenStreetMap contributors, ODbL) for 24 dioceses with digitisation from <a href="https://gisco-services.ec.europa.eu/distribution/v2/lau/download/" target="_blank" rel="noopener">Eurostat/GISCO</a> Local Administrative Units 2024 gmina geometry for 17 dioceses; authoritative GIS-Expert/KUL church polygons pending',
+      censusFlagNote: "* This diocese boundary layer is mixed-source and provisional: 24 of 41 dioceses use complete OpenStreetMap religious-administration polygons (© OpenStreetMap contributors, ODbL); the other 17 are approximate digitisations, built from Eurostat/GISCO gmina (municipality) boundaries assigned by parish and deanery evidence rather than mapped diocese lines, and seven of those carry low confidence: Białystok, Bydgoszcz, Gdańsk, Łomża, Lublin, Włocławek, Zielona Góra-Gorzów (see docs/manifests/pl-attendance-2014-2024.json). Authoritative GIS-Expert/KUL church polygons are pending. Dominicantes and communicantes are ISKK's counts-based Mass-attendance rates over obliged Catholics, never census religious affiliation, and never comparable on one axis to Italy's self-reported attendance survey."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710b"></script>
+</body>
+</html>
