@@ -6,6 +6,7 @@
         vu: { code: "VU", label: "Vanuatu" },
         au: { code: "AU", label: "Australia" },
         br: { code: "BR", label: "Brazil" },
+        bs: { code: "BS", label: "Bahamas" },
         ca: { code: "CA", label: "Canada" },
         cz: { code: "CZ", label: "Czechia" },
         gh: { code: "GH", label: "Ghana" },

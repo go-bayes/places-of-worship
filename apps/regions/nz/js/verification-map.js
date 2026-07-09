@@ -107,6 +107,31 @@ const COUNTRY_CONFIGS = {
             note: "Evidence appears to support worship use in one target year and absence or changed use in a later target year; reviewer to confirm dates and status.",
         },
     },
+    bs: {
+        countryCode: "BS",
+        countryName: "Bahamas",
+        targetYears: ["2010"],
+        defaultTargetYear: "2010",
+        dataPath: "",
+        mapCentre: [24.7, -77.4],
+        mapZoom: 6,
+        collectionBatch: "bs-map-workbench-demo",
+        sourceDatasetId: "bs_static_verification_map",
+        mapSource: "bs_verification_static_map_workbench",
+        nominationSource: "bs_verification_static_map_nomination",
+        defaultAssignmentBatchId: "bs-source-first-test-001",
+        assignmentHeading: "Bahamas verification tasks",
+        // single shipped wave: the loss action reads as closed/changed
+        // use by the target year rather than a two-year contrast
+        temporalLossAction: {
+            value: "target_year_loss_or_changed_use",
+            label: "Closed or changed use by the target year",
+            statuses: {
+                "2010": "absent",
+            },
+            note: "Evidence appears to support closure or changed use by the target year; reviewer to confirm dates and status.",
+        },
+    },
     ca: {
         countryCode: "CA",
         countryName: "Canada",

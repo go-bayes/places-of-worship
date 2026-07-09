@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Bahamas map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the bahamas research map; every string traces to
+    // research/countries/bs/README.md, the bs-census-religion-2010 manifest,
+    // or the live REGION_CONFIG in apps/regions/bs/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "BS",
+      countryName: "Bahamas",
+      mapHref: "./",
+      intro: "Census religion overlays for the Bahamas at island level, built from the Bahamas National Statistical Institute (BNSI) 2010 Census island reports (Table 7.0, total population by sex, age group and religion). The eighteen island reports reconcile exactly to the national 2010 First Release Report.",
+      facts: {
+        waves: "Census 2010 (island level). 2022 religion is national only (see below).",
+        geographies: "Island (18), from geoBoundaries ADM1 (32 local government districts) dissolved to the census islands",
+        metrics: "Religious affiliation %, no religion %",
+        placeDots: "OpenStreetMap places (amenity=place_of_worship), ODbL-1.0; no governed place layer or place metric is built yet."
+      },
+      reading: [
+        "Islands are shaded by religious affiliation or no religion among the persons who stated a response in the census religion tabulation.",
+        "Religious affiliation combines every named religion (Anglican, Baptist, Roman Catholic, Pentecostal, Seventh Day Adventist, Church of God, Methodist, Brethren and the rest, plus each report's Other category). No religion is the census's None category. The two shares sum to 100% of stated responses.",
+        "Percentages use the stated-response denominator: the island total population minus the not-stated count. Nationally in 2010, 9,050 of 351,461 persons (2.6%) did not state a religion and are excluded from the denominator; 6,561 (1.9% of stated responses) reported no religion.",
+        "Counts are the exact figures printed in each island report's Table 7.0. Smaller islands collapse minor denominations (Lutheran, Methodist, Presbyterian, Judaism) into an Other category, which does not affect either headline metric. Each report's named religions plus None plus Not stated reconcile exactly to its island total, and the eighteen islands sum exactly to the national 2010 total (total 351,461; no religion 6,561; not stated 9,050).",
+        "The islands are the geoBoundaries BHS ADM1 32 local government districts dissolved up to the islands the census reports use: Abaco combines six districts, Andros four, Eleuthera and Grand Bahama three each, Exuma and San Salvador two each, and the remaining islands one each. Rum Cay carries no separate 2010 report and is tabulated with San Salvador, matching the census's historical San Salvador and Rum Cay unit.",
+        "2022 religion is national only. The 2022 Census First Release states plainly that religion (and other topics) are reported by age group and sex for All Bahamas, so no 2022 island or district religion table exists to map. The national 2022 figures are recorded as context: Baptist rose to 135,875, Anglican held at 47,456, Other Christian and non-denominational churches counted 35,296, and Roman Catholic fell to 34,749, while the None category rose to 24,677. These are not mappable subnationally yet.",
+        "Boundaries are geoBoundaries BHS ADM1 (32 districts, CC BY 4.0), dissolved to 18 islands. The gbOpen metadata records the boundary source field as Haiti GeoPortal, which appears to be a metadata error; the source URL resolves to the Caribbean GeoPortal."
+      ],
+      sources: [
+        {
+          name: "BNSI 2010 Census of Population and Housing, island reports (eighteen volumes; Table 7.0, total population by sex, age group and religion)",
+          href: "https://stats.gov.bs/subjects/population-and-demography/",
+          construct: "Census religious affiliation (exact counts by island)",
+          years: "2010",
+          licence: "Open download from the BNSI population and demography pages; attribution requested, no explicit reuse licence stated"
+        },
+        {
+          name: "BNSI 2010 Census First Release Report (Table 7.0, All Bahamas religion)",
+          href: "https://stats.gov.bs/wp-content/uploads/2020/08/Microsoft-Word-2010-CENSUS-FIRST-RELEASE-REPORT.pdf",
+          construct: "National reconciliation authority for the island sums",
+          years: "2010",
+          licence: "Open download from the BNSI population and demography pages; attribution requested, no explicit reuse licence stated"
+        },
+        {
+          name: "BNSI 2022 Census First Release Report (Table 6.0, All Bahamas religion; recorded as national context, not mapped)",
+          href: "https://www.bnsi.stats.gov.bs/population-census",
+          construct: "National religion 2022 (not published subnationally)",
+          years: "2022",
+          licence: "Open download from the BNSI census pages; attribution requested, no explicit reuse licence stated"
+        },
+        {
+          name: "geoBoundaries BHS ADM1 (32 local government districts)",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/BHS/ADM1/",
+          construct: "Boundary geometry (32 districts dissolved to 18 islands)",
+          years: "2020 structure, source data 2023",
+          licence: "CC BY 4.0 (boundary source recorded as Caribbean GeoPortal)"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Bahamas National Statistical Institute, <a href=\"https://stats.gov.bs/subjects/population-and-demography/\" target=\"_blank\" rel=\"noopener\">Population and demography pages</a>.",
+        tables: "2010: each island report's Table 7.0 (total population by sex, age group and religion); the eighteen islands reconcile exactly to the national First Release Report (total 351,461; no religion 6,561; not stated 9,050; affiliation 335,850). 2022: Table 6.0 (All Bahamas) is national only and is recorded as context, not mapped.",
+        licence: "BNSI census reports are open downloads with attribution requested and no explicit reuse licence stated; boundaries are geoBoundaries BHS ADM1 (32 districts) dissolved to 18 islands, CC BY 4.0, boundary source Caribbean GeoPortal.",
+        script: "scripts/build_bs_area_summary.R",
+        manifests: [
+          { label: "bs-census-religion-2010", href: "docs/manifests/bs-census-religion-2010.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

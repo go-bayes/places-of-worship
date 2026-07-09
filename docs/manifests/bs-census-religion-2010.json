@@ -1,0 +1,519 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:bs-census-religion:bs:2010:bnsi-island-reports",
+  "dataset_id": "bs-census-religion:bs:2010:bnsi-island-reports",
+  "dataset_version_id": "bs-census-religion:bs:2010:bnsi-island-reports:9fb71f81398f",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "bs-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "BS"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-09T04:09:47Z",
+  "created_by": "scripts/build_bs_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_bs_area_summary.R",
+    "git_commit": null,
+    "command": "Rscript scripts/build_bs_area_summary.R",
+    "parameters": {
+      "waves": "2010",
+      "island_boundary_set": "bs-island-2020-geoboundaries-adm1-dissolved",
+      "island_boundary_simplification_tolerance_m": 2000,
+      "pdf_extraction": "poppler pdftotext -layout for Table 7.0 of each island report and the national First Release Report",
+      "denominator": "stated responses (island total minus not stated); affiliation = named religions, no religion = NONE",
+      "subnational_geography": "geoBoundaries BHS ADM1 (32 districts) dissolved to the eighteen census islands the 2010 reports use",
+      "omitted_metrics": ["religious_change", "places_per_10000_residents", "place_density_per_sq_km"],
+      "national_only_wave_2022": "2022 religion is All Bahamas only; recorded as context, not mapped"
+    },
+    "software_versions": {
+      "r": "4.6.1",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "pdftotext": "poppler pdftotext (system)"
+    }
+  },
+  "source": {
+    "provider": "Bahamas National Statistical Institute (BNSI); geoBoundaries (William & Mary geoLab)",
+    "source_dataset_ids": ["bnsi-2010-census-island-reports-table-7-religion", "bnsi-2010-census-first-release-table-7-religion-all-bahamas", "bnsi-2022-census-first-release-table-6-religion-all-bahamas", "geoboundaries-bhs-adm1-2020"],
+    "source_urls": ["https://stats.gov.bs/subjects/population-and-demography/", "https://stats.gov.bs/wp-content/uploads/2020/08/Microsoft-Word-2010-CENSUS-FIRST-RELEASE-REPORT.pdf", "https://cdn.bahamas.gov.bs/tenant/tenantbnsi/documents/2022-Census-Report-1st-Release-12-February-2025-FINAL-20250526040559.pdf", "https://www.geoboundaries.org/api/current/gbOpen/BHS/ADM1/", "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BHS/ADM1/geoBoundaries-BHS-ADM1.geojson"],
+    "retrieved_at": "2026-07-09T00:00:00Z",
+    "licence": "BNSI 2010 Census of Population and Housing island reports (eighteen volumes, each Table 7.0, total population by sex, age group and religion) and the 2010 Census First Release Report (Table 7.0, All Bahamas). The Bahamas National Statistical Institute publishes the census reports for open download; no explicit reuse licence is stated, so the derived product attributes BNSI and links the source of record. Boundaries are geoBoundaries BHS ADM1 (32 local government districts) dissolved to the eighteen census islands, Creative Commons Attribution 4.0 International, boundary source recorded by geoBoundaries as the Caribbean GeoPortal.",
+    "citation": "BNSI, 2010 Census island reports, Table 7.0; BNSI, 2010 Census First Release Report, Table 7.0; geoBoundaries BHS ADM1 (gbOpen).",
+    "raw_redistribution": "The census PDFs and the geoBoundaries source GeoJSON are not committed. They remain in data/raw/bs_census/ and await any project-controlled raw archive upload."
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/bs_census/bs_2010_abaco.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/ABACO-2010-CENSUS-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 14835027,
+      "sha256": "0783f5ed0b258cb2115866391a43c23d21662ca615d43376bffc72b22ccd9315",
+      "row_count": 1,
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census Abaco report; Table 7.0 supplies the island's total, none and not-stated religion counts."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2010_acklins.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/ACKLINS-2010-CENSUS-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 14604874,
+      "sha256": "30bf372b179d4740ad6d79d74932560496fd2bf44ad31a52a29b0792d92e72bf",
+      "row_count": 1,
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census Acklins report; Table 7.0 supplies the island's total, none and not-stated religion counts."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2010_andros.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/ANDROS-2010-CENSUS-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 14640290,
+      "sha256": "3f16e28e07785e9f1e9ea8e47489db1014c77596fb49225dd004f9ea8dfd0c3a",
+      "row_count": 1,
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census Andros report; Table 7.0 supplies the island's total, none and not-stated religion counts."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2010_berry_islands.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/BERRY-ISLANDS-2010-CENSUS-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 14311865,
+      "sha256": "2008bfb9c1c15adeaaceb8c8041a64952007d71e63c8afdf5f0be5dce43ed234",
+      "row_count": 1,
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census Berry Islands report; Table 7.0 supplies the island's total, none and not-stated religion counts."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2010_bimini.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/BIMINIS-2010-CENSUS-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 14819500,
+      "sha256": "a362e6f80c9e2ef6560145f0341d238ded17259f4d0fb75da151e44454023519",
+      "row_count": 1,
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census Bimini report; Table 7.0 supplies the island's total, none and not-stated religion counts."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2010_cat_island.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/CAT-ISLAND-2010-CENSUS-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 14553784,
+      "sha256": "8aba0cd9cb45c3d1ae8264b9f3f85a0d3af0ecefb7d28753059eeee827669a0f",
+      "row_count": 1,
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census Cat Island report; Table 7.0 supplies the island's total, none and not-stated religion counts."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2010_crooked_island.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/CROOKED-ISLAND-2010-CENSUS-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 14586222,
+      "sha256": "663cfe38640fce97e3fc0235a383af4b2a5112948c0c8fed7efba633c26da6f7",
+      "row_count": 1,
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census Crooked Island report; Table 7.0 supplies the island's total, none and not-stated religion counts."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2010_eleuthera.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/ELEUTHERA-2010-CENSUS-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 14513278,
+      "sha256": "9bff86ba9a9a208a797d2165d69db002e179d387060c814f9b9e393bc6e4f9b6",
+      "row_count": 1,
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census Eleuthera report; Table 7.0 supplies the island's total, none and not-stated religion counts."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2010_exuma_cays.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/EXUMA-CAYS-2010-CENSUS-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 14570139,
+      "sha256": "4527217e88cd028d60b973708639b6a0583b2732f73ac57ab994d8c9a17b2d63",
+      "row_count": 1,
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census Exuma and Cays report; Table 7.0 supplies the island's total, none and not-stated religion counts."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2010_grand_bahama.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/GRAND-BAHAMA-2010-CENSUS-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 14913754,
+      "sha256": "ad9a38191753ba7c06fd93e014253b2fa99a70ce2533f355b7caf7287972bea3",
+      "row_count": 1,
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census Grand Bahama report; Table 7.0 supplies the island's total, none and not-stated religion counts."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2010_harbour_island.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/HARBOUR-ISLAND-2010-CENSUS-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 14523071,
+      "sha256": "f64e761f207dea79d9df4fc2d145bec76e2eb89227baeee33f69a9b75b4bc31f",
+      "row_count": 1,
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census Harbour Island report; Table 7.0 supplies the island's total, none and not-stated religion counts."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2010_inagua.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/INAGUA-2010-CENSUS-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 14489671,
+      "sha256": "69fcc9d670c5bb326a31a6dfed058b5b7e1ebdfe14e0972c8a5b50db7386ec91",
+      "row_count": 1,
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census Inagua report; Table 7.0 supplies the island's total, none and not-stated religion counts."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2010_long_island.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/LONG-ISLAND-2010-CENSUS-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 14560867,
+      "sha256": "53725e7efade8bcc1a55b2177e5abebfaa6ddc66b710894e7464c93cc5b41668",
+      "row_count": 1,
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census Long Island report; Table 7.0 supplies the island's total, none and not-stated religion counts."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2010_mayaguana.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/MAYAGUANA-2010-CENSUS-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 14504859,
+      "sha256": "f4320ccc1648b52a9721b56748b201b85527166732f2f38c05fd512a9d2f6932",
+      "row_count": 1,
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census Mayaguana report; Table 7.0 supplies the island's total, none and not-stated religion counts."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2010_new_providence.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/NEW-PROVIDENCE-2010-CENSUS-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 14592531,
+      "sha256": "eb4d13a8028bd15a418daf59fe38a4818b13d27e4822616204e3e54f5247f88b",
+      "row_count": 1,
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census New Providence report; Table 7.0 supplies the island's total, none and not-stated religion counts."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2010_ragged_island.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/RAGGED-ISLAND-2010-CENSUS-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 14451233,
+      "sha256": "fc6bead4b7df47536c9b13d73a112016cd0e3247ce648019ccdc999f952b87f5",
+      "row_count": 1,
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census Ragged Island report; Table 7.0 supplies the island's total, none and not-stated religion counts."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2010_san_salvador.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/SAN-SALVADOR-2010-CENSUS-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 14599097,
+      "sha256": "b4d1f056578b26c9a16476a78fbdac31647c598e2b31e40ce3ac065b58712c0a",
+      "row_count": 1,
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census San Salvador report; Table 7.0 supplies the island's total, none and not-stated religion counts."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2010_spanish_wells.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/SPANISH-WELLS-2010-CENSUS-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 14493179,
+      "sha256": "54d6ee0eed8ea646bd8724a165c8dc47b3bee90c97d7b1295994e926ba52a388",
+      "row_count": 1,
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census Spanish Wells report; Table 7.0 supplies the island's total, none and not-stated religion counts."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2010_first_release.pdf",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/Microsoft-Word-2010-CENSUS-FIRST-RELEASE-REPORT.pdf",
+      "format": "pdf",
+      "bytes": 8070220,
+      "sha256": "7d83cfb38075a84ab11ff00afea6634d5e36dce575c844046acb40ffc8a7fb7e",
+      "row_count": null,
+      "source_dataset_id": "bnsi-2010-census-first-release-table-7-religion-all-bahamas",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census First Release Report; Table 7.0 (All Bahamas) is the national reconciliation authority for the island sums."
+    },
+    {
+      "uri": "data/raw/bs_census/bs_2022_first_release.pdf",
+      "url": "https://cdn.bahamas.gov.bs/tenant/tenantbnsi/documents/2022-Census-Report-1st-Release-12-February-2025-FINAL-20250526040559.pdf",
+      "format": "pdf",
+      "bytes": 4615935,
+      "sha256": "e0aef7ebe9f2911bfbb52ed80cd294e1ac5cd7dcad8de2aca3df755239461bab",
+      "row_count": null,
+      "source_dataset_id": "bnsi-2022-census-first-release-table-6-religion-all-bahamas",
+      "used_in_public_product": false,
+      "periods": "2022",
+      "notes": "2022 Census First Release Report; Table 6.0 (All Bahamas) religion, recorded as national context. Religion is reported by age and sex for All Bahamas only, so 2022 is not mapped."
+    },
+    {
+      "uri": "data/raw/bs_census/geoBoundaries-BHS-ADM1.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BHS/ADM1/geoBoundaries-BHS-ADM1.geojson",
+      "format": "geojson",
+      "bytes": 12184633,
+      "sha256": "f10a480530f18d4f5e3c1c4b5a3034a75488bfb0f81bf9ce7fb16bd12344a348",
+      "row_count": 32,
+      "source_dataset_id": "geoboundaries-bhs-adm1-2020",
+      "used_in_public_product": true,
+      "periods": "2020",
+      "notes": "geoBoundaries BHS ADM1 GeoJSON; 32 local government districts, dissolved to the eighteen census islands. CC BY 4.0."
+    },
+    {
+      "uri": "data/raw/bs_census/gb_bhs_adm1_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/BHS/ADM1/",
+      "format": "json",
+      "bytes": 1750,
+      "sha256": "9f91f2701099ad7fba8f32b97fd1386ab6b018d722ed9215bcd7783f804424fd",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-bhs-adm1-2020",
+      "used_in_public_product": false,
+      "periods": "2020",
+      "notes": "geoBoundaries BHS ADM1 metadata; records the CC BY 4.0 licence. The boundarySource field reads 'Haiti GeoPortal' (apparent metadata error); the boundarySourceURL resolves to the Caribbean GeoPortal."
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/bs/data/area_summary_island.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 34530,
+      "sha256": "9fb71f81398f1f361bb68fa195dc56925360e84fff4b5e5d62fbf4640b5e138d",
+      "row_count": 18,
+      "content": "Bahamas island area summary with census 2010 religious-affiliation and no-religion metrics.",
+      "privacy": "public",
+      "licence_status": "bnsi_census_open_report_attribution_geoboundaries_cc_by_4_0"
+    },
+    {
+      "uri": "repo:apps/regions/bs/data/area_summary_island.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 12893,
+      "sha256": "3bfda35680ebb308c097d4806e7edc52207f421242435330a66d014a44ef7191",
+      "row_count": 18,
+      "content": "Flattened Bahamas island area summary with census 2010 religious-affiliation and no-religion metrics.",
+      "privacy": "public",
+      "licence_status": "bnsi_census_open_report_attribution_geoboundaries_cc_by_4_0"
+    },
+    {
+      "uri": "repo:apps/regions/bs/data/bs_island_2020.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 2827854,
+      "sha256": "b75459b50241781cf9c895f290157f2b26b9a1218be4b3920c9aeb3346832cfe",
+      "row_count": 18,
+      "content": "Simplified Bahamas island boundary GeoJSON derived from geoBoundaries BHS ADM1 (32 districts) dissolved to 18 islands.",
+      "privacy": "public",
+      "licence_status": "geoboundaries_cc_by_4_0"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/bs/data/area_summary_island.json",
+      "sha256": "9fb71f81398f1f361bb68fa195dc56925360e84fff4b5e5d62fbf4640b5e138d",
+      "built_by": "scripts/build_bs_area_summary.R",
+      "notes": "18 island reporting units x 1 census year (2010); stated-response denominator."
+    },
+    {
+      "uri": "repo:apps/regions/bs/data/bs_island_2020.geojson",
+      "sha256": "b75459b50241781cf9c895f290157f2b26b9a1218be4b3920c9aeb3346832cfe",
+      "built_by": "scripts/build_bs_area_summary.R",
+      "notes": "18 island features dissolved from 32 geoBoundaries BHS ADM1 districts, simplified at 2000 m tolerance."
+    }
+  ],
+  "validation": {
+    "checks": ["Each of the eighteen BNSI 2010 island reports prints Table 7.0 (total population by sex, age group and religion), parsed with pdftotext -layout.", "Within each island report the named religions plus NONE plus NOT STATED reconcile exactly to the island total.", "The eighteen islands sum exactly to the national First Release Report Table 7.0: total 351461, no religion 6561, not stated 9050, affiliation 335850.", "Percentages use the stated-response denominator (island total minus not stated); religious affiliation and no religion sum to 100 percent of stated responses.", "The 32 geoBoundaries BHS ADM1 districts map disjointly and exhaustively onto the eighteen census islands; Rum Cay (no separate report) is dissolved into San Salvador, matching the census's historical San Salvador & Rum Cay unit.", "The dissolved island boundary GeoJSON writes to 2827854 bytes after 2000 m simplification (18 island features).", "2022 religion is national only: the 2022 First Release states religion is reported by age group and sex for All Bahamas, so no 2022 subnational religion table exists to map. 2022 national figures are recorded as context."],
+    "join_coverage": {
+      "island": [
+        {
+          "boundary_level": "island",
+          "year": 2010,
+          "matched_area_count": 18,
+          "expected_area_count": 18,
+          "missing_area_names": []
+        }
+      ]
+    },
+    "national_reconciliation": [
+      {
+        "year": 2010,
+        "metric": "population_total",
+        "area_sum": 351461,
+        "national_total": 351461,
+        "difference": 0
+      },
+      {
+        "year": 2010,
+        "metric": "religious_affiliation_count",
+        "area_sum": 335850,
+        "national_total": 335850,
+        "difference": 0
+      },
+      {
+        "year": 2010,
+        "metric": "no_religion_count",
+        "area_sum": 6561,
+        "national_total": 6561,
+        "difference": 0
+      },
+      {
+        "year": 2010,
+        "metric": "not_stated_count",
+        "area_sum": 9050,
+        "national_total": 9050,
+        "difference": 0
+      }
+    ],
+    "national_excluded_share_percent": 2.57,
+    "boundary_validation": {
+      "source_bs_district_count": 32,
+      "dissolved_island_count": 18,
+      "output_feature_count": 18,
+      "expected_feature_count": 18,
+      "output_bytes": 2827854,
+      "simplification_tolerance_m": 2000,
+      "unmatched_boundary_features": [],
+      "unmatched_census_areas": []
+    }
+  },
+  "construct_notes": [
+    "The public map displays two headline metrics for 2010 at island level: religious affiliation percent and no religion percent.",
+    "Percentages use the stated-response denominator: island total population minus the not-stated count. Religious affiliation is every named religion (each report's listed denominations plus its OTHER catch-all); no religion is the NONE category. The two shares sum to 100 percent of stated responses.",
+    "Counts are the exact figures printed in each island report's Table 7.0. Smaller islands collapse minor denominations (Lutheran, Methodist, Presbyterian, Judaism) into OTHER, which does not affect either headline metric.",
+    "The eighteen census islands are the geoBoundaries BHS ADM1 32 local government districts dissolved up to islands; each district belongs to exactly one island. Rum Cay carries no separate 2010 report and is tabulated with San Salvador (the census's historical San Salvador & Rum Cay unit).",
+    "2022 religion is national only: the 2022 First Release Report states religion is reported by age group and sex for All Bahamas, so it cannot be mapped subnationally. 2022 national figures (Baptist 135,875; Anglican 47,456; Other Christian/Non-Denominational 35,296; Roman Catholic 34,749; none 24,677) are recorded as context."
+  ],
+  "deferred_sources": [
+    {
+      "source_dataset_id": "bnsi-2022-census-religion-by-island",
+      "url": "https://www.bnsi.stats.gov.bs/population-census",
+      "local_path": "data/raw/bs_census/bs_2022_first_release.pdf",
+      "notes": "The 2022 census publishes religion for All Bahamas only (by age and sex); no island or supervisory-district religion table is public. The 2022 First Release states 'more detailed Census data will be forthcoming'. A BNSI data request should ask for the 2022 religion tabulation by island and by supervisory district, the geography the 2022 population tables already use, which would add a mappable 2022 wave and a 2010-2022 change layer."
+    },
+    {
+      "source_dataset_id": "bnsi-2000-census-religion-by-island",
+      "url": "https://stats.gov.bs/subjects/population-and-demography/",
+      "local_path": null,
+      "notes": "The 2010 First Release notes a 2000 census religion comparison at national level. A 2000 subnational religion wave was not located in this sweep; a 2000 island tabulation (if held by BNSI) is deferred."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "bnsi_census_open_report_attribution_geoboundaries_cc_by_4_0",
+  "downstream_status": "public",
+  "source_datasets": [
+    {
+      "source_dataset_id": "bnsi-2010-census-island-reports-table-7-religion",
+      "name": "BNSI 2010 Census island reports (eighteen volumes), Table 7.0: total population by sex, age group and religion",
+      "provider": "Bahamas National Statistical Institute (BNSI)",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/NEW-PROVIDENCE-2010-CENSUS-REPORT.pdf",
+      "retrieval_date": "2026-07-09",
+      "local_path": "data/raw/bs_census/bs_2010_new_providence.pdf",
+      "licence": {
+        "name": "BNSI census reports, open download; no explicit reuse licence stated",
+        "url": "https://stats.gov.bs/subjects/population-and-demography/",
+        "attribution": "Bahamas National Statistical Institute (BNSI)"
+      },
+      "citation": "Bahamas National Statistical Institute, 2010 Census of Population and Housing, island reports (eighteen volumes), Table 7.0.",
+      "access_limits": null,
+      "redistribution_limits": "The census PDFs are not committed; the derived public product attributes BNSI and links the source.",
+      "notes": "Each island report prints Table 7.0 (total population by sex, age group and religion) for that island. The two headline metrics need each island's grand TOTAL, NONE and NOT STATED rows; smaller islands collapse minor denominations into an OTHER category (Lutheran, Methodist, Presbyterian, Judaism), which does not affect religious affiliation (every named religion) or no religion (the NONE category). Each report's named religions plus NONE plus NOT STATED reconcile exactly to its island total, and the eighteen islands reconcile exactly to the national First Release Report (total 351,461; none 6,561; not stated 9,050)."
+    },
+    {
+      "source_dataset_id": "bnsi-2010-census-first-release-table-7-religion-all-bahamas",
+      "name": "BNSI 2010 Census First Release Report, Table 7.0: total population by sex, age group and religion (All Bahamas)",
+      "provider": "Bahamas National Statistical Institute (BNSI)",
+      "url": "https://stats.gov.bs/wp-content/uploads/2020/08/Microsoft-Word-2010-CENSUS-FIRST-RELEASE-REPORT.pdf",
+      "retrieval_date": "2026-07-09",
+      "local_path": "data/raw/bs_census/bs_2010_first_release.pdf",
+      "licence": {
+        "name": "BNSI census report, open download; no explicit reuse licence stated",
+        "url": "https://stats.gov.bs/subjects/population-and-demography/",
+        "attribution": "Bahamas National Statistical Institute (BNSI)"
+      },
+      "citation": "Bahamas National Statistical Institute, 2010 Census First Release Report, Table 7.0 (All Bahamas).",
+      "access_limits": null,
+      "redistribution_limits": "The census PDF is not committed; the derived public product attributes BNSI and links the source.",
+      "notes": "National reconciliation authority: the eighteen island Table 7.0 values sum exactly to this All Bahamas table for total, no religion, not stated and affiliation."
+    },
+    {
+      "source_dataset_id": "bnsi-2022-census-first-release-table-6-religion-all-bahamas",
+      "name": "BNSI 2022 Census First Release Report, Table 6.0: leading religious denominations (All Bahamas, 2022 with 2010 comparison)",
+      "provider": "Bahamas National Statistical Institute (BNSI)",
+      "url": "https://cdn.bahamas.gov.bs/tenant/tenantbnsi/documents/2022-Census-Report-1st-Release-12-February-2025-FINAL-20250526040559.pdf",
+      "retrieval_date": "2026-07-09",
+      "local_path": "data/raw/bs_census/bs_2022_first_release.pdf",
+      "licence": {
+        "name": "BNSI census report, open download; no explicit reuse licence stated",
+        "url": "https://www.bnsi.stats.gov.bs/population-census",
+        "attribution": "Bahamas National Statistical Institute (BNSI)"
+      },
+      "citation": "Bahamas National Statistical Institute, 2022 Census of Population and Housing First Release Report, Table 6.0 (All Bahamas).",
+      "access_limits": null,
+      "redistribution_limits": "Recorded as national context only. The 2022 census states plainly that religion is reported by age group and sex for All Bahamas, so no 2022 subnational religion table exists to map.",
+      "notes": "National context, not a map layer. 2022 All Bahamas total 398,165; leading denominations Baptist 135,875, Anglican 47,456, Other Christian/Non-Denominational 35,296, Roman Catholic 34,749; none 24,677; not stated 19,075. The report states religion (and other topics) are reported by age group and sex for All Bahamas only, so 2022 cannot be mapped subnationally. A BNSI data request should ask for the 2022 religion tabulation by island (and by supervisory district), the geography the 2022 population tables already use."
+    },
+    {
+      "source_dataset_id": "geoboundaries-bhs-adm1-2020",
+      "name": "geoBoundaries BHS ADM1 (32 local government districts)",
+      "provider": "geoBoundaries (William & Mary geoLab)",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BHS/ADM1/geoBoundaries-BHS-ADM1.geojson",
+      "retrieval_date": "2026-07-09",
+      "local_path": "data/raw/bs_census/geoBoundaries-BHS-ADM1.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution 4.0 International (CC BY 4.0); boundary source recorded by geoBoundaries as the Caribbean GeoPortal",
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/BHS/ADM1/",
+        "attribution": "geoBoundaries (gbOpen); boundary source Caribbean GeoPortal"
+      },
+      "citation": "Runfola et al., geoBoundaries BHS ADM1 (gbOpen), district boundaries.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed with CC BY 4.0 attribution to geoBoundaries and the Caribbean GeoPortal.",
+      "notes": "32 ADM1 local government districts, dissolved to the eighteen census islands the 2010 reports use. The gbOpen metadata records the boundary source field as 'Haiti GeoPortal', which appears to be a metadata error; the boundarySourceURL resolves to the Caribbean GeoPortal (haiti.caribbeangeoportal.com/datasets/caribgeoportal). Source data update 2023-01-19."
+    }
+  ],
+  "notes": "The committed products contain the derived island area summary and simplified boundary only. On-page attribution cites BNSI and geoBoundaries (CC BY 4.0, Caribbean GeoPortal)."
+}
