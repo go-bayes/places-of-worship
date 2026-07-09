@@ -4,6 +4,21 @@
 
 ### 2026-07-10
 
+- Added the Poland diocesan Catholic-practice data product for ISKK
+  dominicantes and communicantes. The product contains 410 rows: 41
+  post-2004 Catholic dioceses across 2014-2019 and 2021-2024, with
+  `Ogółem` retained only as national context. The legacy
+  `religious_affiliation_percent` slot now carries Mass attendance
+  (dominicantes), and the legacy `no_religion_percent` slot carries
+  Communion (communicantes); both indicators state that the values are
+  counts-based rates over obliged Catholics. The values do not report
+  affiliation or population shares. The manifest records the ISKK PDF
+  URLs and SHA-256s, the mixed OSM plus Eurostat/GISCO-gmina boundary basis, the
+  41/41 join validation for every counted year, the Wikipedia comparison
+  summary, and deferred work for 2013, 2020, pre-2014 years, and
+  authoritative GIS-Expert/KUL polygons. Build:
+  `scripts/build_pl_area_summary.R`; manifest
+  `docs/manifests/pl-attendance-2014-2024.json`.
 - Added the Denmark Church of Denmark membership products. The parish
   product ships KM1 Q1 points for 2023-2026 only, on current DAWA/DAGI
   sogn boundaries (`dk_sogn_2026.geojson`, 2,097 features, 2.99 MB at
