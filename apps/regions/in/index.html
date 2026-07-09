@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | India Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709c" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // the country page stays declarative; shared behaviour lives in
+    // ../_shared/region-map.js and keys on this config plus the data files
+    window.REGION_CONFIG = {
+      countryCode: "IN",
+      title: "Places of Worship | India Research Map",
+      center: [79.0, 22.5],
+      initialZoom: 4.7,
+      censusLevels: {
+        district_2011: {
+          label: "District (2011)",
+          boundaries: "data/districts_2011.geojson",
+          summary: "data/area_summary_district_2011.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries &copy; DataMeet India community, Census 2011 district layer (CC BY 2.5 IN)"
+        },
+        district_2001: {
+          label: "District (2001)",
+          boundaries: "data/districts_2001.geojson",
+          summary: "data/area_summary_district_2001.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries &copy; DataMeet India community, Census 2001 district layer (CC BY 2.5 IN)"
+        }
+      },
+      defaultLevel: "district_2011",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2011,
+      metricsAvailable: [
+        "religious_affiliation_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "Hindu + Muslim + Christian + Sikh + Buddhist + Jain + Other religions and persuasions, divided by C-01 total persons"
+        }
+      },
+      timeline: [
+        { year: 2001, level: "district_2001" },
+        { year: 2011, level: "district_2011" }
+      ],
+      popupDenominatorNote: "Percentages use Census of India C-01 total persons as the denominator. The numerator sums Hindu, Muslim, Christian, Sikh, Buddhist, Jain, and Other religions and persuasions. Religion not stated is excluded from the numerator and is not treated as no religion.",
+      cityPresets: [
+        { label: "Delhi", coords: [77.2090, 28.6139], zoom: 10 },
+        { label: "Mumbai", coords: [72.8777, 19.0760], zoom: 10 },
+        { label: "Kolkata", coords: [88.3639, 22.5726], zoom: 10 },
+        { label: "Chennai", coords: [80.2707, 13.0827], zoom: 10 },
+        { label: "Bengaluru", coords: [77.5946, 12.9716], zoom: 10 },
+        { label: "Hyderabad", coords: [78.4867, 17.3850], zoom: 10 },
+        { label: "Ahmedabad", coords: [72.5714, 23.0225], zoom: 10 },
+        { label: "Pune", coords: [73.8567, 18.5204], zoom: 10 }
+      ],
+      geocode: { country: "in", biasLngLat: [79.0, 22.5] },
+      onboarding: {
+        title: "India research map",
+        intro: "Census of India C-01 religious-affiliation overlays by district, 2001 and 2011.",
+        bullets: [
+          "Districts are shaded by the share of total persons counted in the seven Census of India C-01 religious-affiliation categories.",
+          "Religion not stated is a non-response category. It is excluded from the affiliation numerator and is not shown as no religion.",
+          "The timeline switches boundary vintage: 2001 and 2011 each use their own DataMeet census district layer.",
+          "The 1991 religion workbook is pinned but not mapped here because the build does not include a clean 1991 district boundary or state-split harmonisation.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric, geography and year controls."
+        ],
+        links: [
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" },
+        { id: "verification-link", label: "Submit evidence", href: "verification.html", title: "Open the RA verification map" },
+        { id: "review-link", label: "Review evidence", href: "review.html", title: "Review submitted evidence" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://censusindia.gov.in/census.website/data/census-tables" target="_blank" rel="noopener">Office of the Registrar General and Census Commissioner, India</a> &middot; Licence basis: <a href="https://www.data.gov.in/sites/default/files/Gazette_Notification_OGDL.pdf" target="_blank" rel="noopener">Government Open Data License - India</a> attribution &middot; Boundaries &copy; <a href="https://github.com/datameet/maps/tree/master/Districts" target="_blank" rel="noopener">DataMeet India community district boundaries</a> (CC BY 2.5 IN)',
+      censusFlagNote: "* Census of India C-01 has no no-religion category. Religion not stated is not no religion; no-religion values are therefore null. The 2001 and 2011 waves use separate period district boundary sets; no change layer is calculated. The 1991 C-9 religion workbook is pinned but deferred."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260709c"></script>
+</body>
+</html>
