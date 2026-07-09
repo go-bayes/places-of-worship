@@ -751,13 +751,41 @@ const SKIP_REASON_CHIPS = [
 // confirm step gates on zoom, and nearby existing tasks are offered first
 const PIN_MIN_PLACEMENT_ZOOM = 15;
 const PIN_PROXIMITY_METRES = 150;
-// verification-state buckets for task markers and list rows, derived from
-// backend task status (reviewed/exported have passed review; needs_review
-// and unresolved_note sit in the review queue; everything else is default)
-function verificationState(status) {
-    if (status === "reviewed" || status === "exported") return "verified";
-    if (status === "needs_review" || status === "unresolved_note") return "under-review";
-    return "default";
+// six-state validation ring for task markers and list rows, per
+// docs/portal-ra-issues-and-pin-drops.md. Status rides as a RING around the
+// religion-coloured (or context-grey) fill, so it never competes with the
+// religion encoding. Every state is derived at render time from data the
+// portal already holds — the backend task status plus the target-year
+// existence the review recorded — with no stored state and a 1:1 map onto
+// task statuses already in Convex:
+//   unvalidated       no human decision yet: open / in_progress / draft_saved
+//                     / skipped, or no backend task. The default; never verified.
+//   in_review         submitted, awaiting a first reviewer decision
+//                     (needs_review / unresolved_note).
+//   validated_present reviewer-accepted and existing at the target year
+//                     (reviewed / exported, target-year status not absent).
+//   validated_absent  reviewer-accepted evidence the site does NOT exist —
+//                     closed, demolished, never existed (reviewed / exported,
+//                     target-year status absent). A validation success.
+//   disputed          a decided or reviewed point now carrying an open concern
+//                     (changes_requested / reopened); trust drops to an
+//                     intermediate ring until re-reviewed.
+//   stale_validation  validated in a prior wave but not re-confirmed in the
+//                     current September census wave. UNDERIVABLE today — see
+//                     the guarded branch below — so this state never renders yet.
+function validationState(backendStatus, temporalStatus) {
+    if (backendStatus === "reviewed" || backendStatus === "exported") {
+        // stale_validation is UNREACHABLE today: distinguishing a
+        // current-wave confirmation from a prior-wave one needs per-wave
+        // re-confirmation data (which September census wave last confirmed
+        // this point) that no task field carries yet. When a
+        // last_confirmed_wave field lands, add the prior-wave test here and
+        // return "stale_validation" before the present/absent split.
+        return temporalStatus === "absent" ? "validated_absent" : "validated_present";
+    }
+    if (backendStatus === "changes_requested" || backendStatus === "reopened") return "disputed";
+    if (backendStatus === "needs_review" || backendStatus === "unresolved_note") return "in_review";
+    return "unvalidated";
 }
 // human labels for task-event provenance in the history timeline
 const EVENT_TYPE_LABELS = {
@@ -2089,9 +2117,12 @@ class NzVerificationMap {
                 </select>
                 <div id="portalPointsNote" class="points-mode-note" hidden></div>
                 <div class="map-legend">
-                    <span class="legend-row"><span class="legend-dot vm-verified-swatch"></span>verified</span>
-                    <span class="legend-row"><span class="legend-dot vm-under-review-swatch"></span>under review</span>
-                    <span class="legend-row"><span class="legend-dot vm-default-swatch"></span>other tasks</span>
+                    <span class="legend-caption">Validation ring</span>
+                    <span class="legend-row"><span class="legend-dot vm-validated-present-swatch"></span>validated present</span>
+                    <span class="legend-row"><span class="legend-dot vm-validated-absent-swatch"></span>validated absent</span>
+                    <span class="legend-row"><span class="legend-dot vm-in-review-swatch"></span>in review</span>
+                    <span class="legend-row"><span class="legend-dot vm-disputed-swatch"></span>disputed</span>
+                    <span class="legend-row"><span class="legend-dot vm-default-swatch"></span>unvalidated</span>
                     ${COUNTRY_CONFIG.datedPlaces ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>context dots</span>` : ""}
                 </div>
             `;
@@ -2602,7 +2633,7 @@ class NzVerificationMap {
             props.google_maps_url = mapUrlForCoordinates(coordinates) || props.google_maps_url || "";
             props.street_view_url = streetViewUrlForCoordinates(coordinates) || props.street_view_url || "";
             const temporal = deriveTargetYearStatus(props, this.targetYear);
-            const verifState = verificationState(this.backendTasksById.get(props.task_id)?.status);
+            const verifState = validationState(this.backendTasksById.get(props.task_id)?.status, temporal.status);
             const marker = L.marker([lat, lng], {
                 icon: this.createIcon(props.verification_priority, temporal.status, verifState),
             });
@@ -2631,15 +2662,28 @@ class NzVerificationMap {
         ].filter(Boolean).join(" · ");
     }
 
-    createIcon(priority, status, verifState = "default") {
+    createIcon(priority, status, verifState = "unvalidated") {
         const size = priority === "high" ? 15 : priority === "medium" ? 13 : 11;
         const color = statusColor(status);
-        // verification state changes shape weight, not hue, so the treatment
-        // survives colour-blind viewing: verified = filled with a dark ring,
-        // under review = hollow with a heavy coloured border
-        const stateClass = verifState === "verified" ? " vm-verified" : verifState === "under-review" ? " vm-under-review" : "";
-        const style = verifState === "under-review"
-            ? `width:${size}px;height:${size}px;border-color:${color};`
+        // the validation state is worn as a RING (box-shadow) or, for in_review,
+        // a dashed hollow border — never as the fill hue, so it never competes
+        // with the religion/context colour. Ring hues (blue, slate, amber,
+        // violet) are chosen colourblind-distinct from each other and from the
+        // religion palette. stale_validation is plumbed but unreachable today.
+        const stateClass = {
+            validated_present: " vm-validated-present",
+            validated_absent: " vm-validated-absent",
+            in_review: " vm-in-review",
+            disputed: " vm-disputed",
+            stale_validation: " vm-stale",
+            unvalidated: "",
+        }[verifState] || "";
+        // in_review is the only hollow treatment: white fill with a dashed
+        // validation-blue border (set in CSS), so the ring stays in the
+        // validation palette and never borrows the status/religion hue. All
+        // other states keep the status fill and add their ring via box-shadow.
+        const style = verifState === "in_review"
+            ? `width:${size}px;height:${size}px;`
             : `width:${size}px;height:${size}px;background:${color};`;
         return L.divIcon({
             className: "",
@@ -2744,11 +2788,18 @@ class NzVerificationMap {
                     ? `<span class="skip-badge">skipped</span>`
                     : `<span class="closed-badge">tentatively closed</span>`)
                 : "");
-            // subtle state dot mirroring the map's verification treatment
-            const verifState = verificationState(backendTask?.status);
-            const stateDot = verifState === "default"
-                ? ""
-                : `<span class="legend-dot ${verifState === "verified" ? "vm-verified-swatch" : "vm-under-review-swatch"}" title="${verifState === "verified" ? "verified" : "under review"}"></span>`;
+            // subtle state dot mirroring the map's validation ring
+            const verifState = validationState(backendTask?.status, temporal.status);
+            const stateSwatch = {
+                validated_present: ["vm-validated-present-swatch", "validated present"],
+                validated_absent: ["vm-validated-absent-swatch", "validated absent"],
+                in_review: ["vm-in-review-swatch", "in review"],
+                disputed: ["vm-disputed-swatch", "disputed"],
+                stale_validation: ["vm-stale-swatch", "stale validation"],
+            }[verifState];
+            const stateDot = stateSwatch
+                ? `<span class="legend-dot ${stateSwatch[0]}" title="${stateSwatch[1]}"></span>`
+                : "";
             return `
                 <button class="task-row${activeClass}" type="button" data-task-id="${escapeHtml(props.task_id)}">
                     <span class="task-row-title">
