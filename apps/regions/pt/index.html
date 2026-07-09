@@ -35,6 +35,8 @@
       defaultLevel: "municipality",
       defaultMetric: "religious_affiliation_percent",
       defaultYear: 2021,
+      // dense osm coverage buries the northern-municipality choropleth at national zoom; fade the overview dot tier (dots ramp back in from z6)
+      overviewDotOpacity: 0.2,
       metricsAvailable: [
         "religious_affiliation_percent",
         "no_religion_percent",

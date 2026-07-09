@@ -58,6 +58,8 @@
       defaultYear: 2021,
       // no governed united kingdom places-of-worship snapshot is included
       // yet, so the place-rate metrics are hidden until that layer exists
+      // dense gb osm coverage carpets the map with dots at national zoom; fade the overview dot tier (dots ramp back in from z6)
+      overviewDotOpacity: 0.12,
       metricsAvailable: [
         "religious_affiliation_percent",
         "no_religion_percent",
