@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | South Africa Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    window.REGION_CONFIG = {
+      countryCode: "ZA",
+      title: "Places of Worship | South Africa Research Map",
+      center: [24.7, -29.0],
+      initialZoom: 5.3,
+      censusLevels: {
+        province: {
+          label: "Province",
+          boundaries: "data/za_province_2020.geojson",
+          summary: "data/area_summary_province.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries © geoBoundaries ZAF ADM1 (CC BY 3.0 IGO, source OCHA ROSEA and the South African Municipal Demarcation Board) · census religion from Stats SA Cultural Dynamics (Report 03-01-84, Table 4.1) with province populations from the Census 2022 Statistical Release (P0301.4, Table 2.1)"
+        }
+      },
+      defaultLevel: "province",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2022,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "all named religions (Christianity, Islam, Traditional African Religion, Hinduism, Jewish Faith/Hebrew, Other beliefs) as a share of stated responses in the census religion tabulation"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "the census's No religious affiliation/belief category as a share of stated responses in the census religion tabulation"
+        }
+      },
+      popupDenominatorNote: "Percentages use the stated-response denominator (named religions plus no religion, excluding the Undetermined residual); religious affiliation and no religion sum to 100 percent of stated responses. Religion is published as percentages in Stats SA's harmonised cross-wave table (Cultural Dynamics Report 03-01-84, Table 4.1); the exact province population (Census 2022 Statistical Release, Table 2.1) is the denominator. The 2011 census dropped the religion question, so only 1996, 2001 and 2022 are shown. The 1996 Undetermined share is high (about 9 percent nationally), so 1996 stated-response shares rest on a smaller base.",
+      cityPresets: [
+        { label: "Johannesburg", coords: [28.0473, -26.2041], zoom: 10 },
+        { label: "Cape Town", coords: [18.4241, -33.9249], zoom: 10 },
+        { label: "Durban", coords: [31.0218, -29.8587], zoom: 10 },
+        { label: "Pretoria", coords: [28.1878, -25.7479], zoom: 10 },
+        { label: "Gqeberha (Port Elizabeth)", shortLabel: "Gqeberha", aliases: ["Port Elizabeth"], coords: [25.6022, -33.9608], zoom: 10 },
+        { label: "Bloemfontein", coords: [26.1596, -29.0852], zoom: 10 },
+        { label: "Polokwane", coords: [29.4689, -23.9045], zoom: 10 },
+        { label: "Nelspruit (Mbombela)", shortLabel: "Nelspruit", aliases: ["Mbombela"], coords: [30.9700, -25.4753], zoom: 10 }
+      ],
+      geocode: { country: "za", biasLngLat: [24.7, -29.0] },
+      onboarding: {
+        title: "South Africa research map",
+        intro: "Census religion overlays for South Africa at province level, built from Statistics South Africa's Cultural Dynamics report (harmonised 1996, 2001 and 2022 religion table) with province population denominators from the Census 2022 Statistical Release.",
+        bullets: [
+          "Provinces are shaded by religious affiliation or no religion among stated responses in the census religion tabulation.",
+          "Religious affiliation combines all named religions; no religion is the census's No religious affiliation/belief category.",
+          "Three census waves are mapped: 1996, 2001 and 2022. The 2011 census dropped the religion question, so there is no 2011 layer.",
+          "Percentages use the stated-response denominator (excluding the Undetermined residual); province populations are exact. The 1996 Undetermined share is high, so 1996 shares rest on a smaller base.",
+          "The 2016 Community Survey reintroduced religion but is a survey, not a census, so it is deferred rather than mixed in.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" },
+        { id: "verification-link", label: "Submit evidence", href: "verification.html", title: "Open the RA verification map" },
+        { id: "review-link", label: "Review evidence", href: "review.html", title: "Review submitted evidence" }
+      ],
+      censusSourceAttribution: 'Census religion from <a href="https://www.statssa.gov.za/publications/03-01-84/03-01-84.pdf" target="_blank" rel="noopener">Stats SA Cultural Dynamics (Report 03-01-84, Table 4.1)</a> with province populations from the <a href="https://census.statssa.gov.za/assets/documents/2022/P03014_Census_2022_Statistical_Release.pdf" target="_blank" rel="noopener">Census 2022 Statistical Release (P0301.4)</a> &middot; Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries ZAF ADM1</a> (CC BY 3.0 IGO, source OCHA ROSEA and the South African Municipal Demarcation Board) &middot; Stats SA census releases, open download, attribution requested, no explicit reuse licence stated',
+      censusFlagNote: "* Percentages use the stated-response denominator (named religions plus no religion, excluding the Undetermined residual). Religion shares carry one-decimal source precision; province populations are exact. The 2011 census dropped religion, so only 1996, 2001 and 2022 are mapped, and the 1996 wave carries a high Undetermined share."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260709m"></script>
+</body>
+</html>

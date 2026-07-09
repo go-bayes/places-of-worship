@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | South Africa map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the south africa research map; every string traces to
+    // research/countries/za/README.md, the za-census-religion-1996-2022
+    // manifest, or the live REGION_CONFIG in apps/regions/za/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "ZA",
+      countryName: "South Africa",
+      mapHref: "./",
+      intro: "Census religion overlays for South Africa at province level, built from Statistics South Africa's Cultural Dynamics report (the harmonised 1996, 2001 and 2022 religion-by-province table) with exact province population denominators from the Census 2022 Statistical Release.",
+      facts: {
+        waves: "Census 1996, census 2001, census 2022",
+        geographies: "Province (9)",
+        metrics: "Religious affiliation %, no religion %",
+        placeDots: "OpenStreetMap places (amenity=place_of_worship), ODbL-1.0; no governed place layer or place metric is built yet."
+      },
+      reading: [
+        "Provinces are shaded by religious affiliation or no religion among stated responses in the census religion tabulation.",
+        "Religious affiliation combines all named religions: Christianity, Islam, Traditional African Religion, Hinduism, Jewish Faith/Hebrew and Other beliefs. No religion is the census's No religious affiliation/belief category.",
+        "Percentages use the stated-response denominator: named religions plus no religion, excluding the Undetermined residual. Religious affiliation and no religion sum to 100 percent of stated responses. The Undetermined share is large in 1996 (about 9 percent nationally, reflecting 1996 census processing) and small in 2001 and 2022 (about 1 to 2 percent), so 1996 stated-response shares rest on a smaller base.",
+        "Religion is published as percentages in Stats SA's harmonised cross-wave table (Cultural Dynamics, Report 03-01-84, Table 4.1), so the product ships percentages with the exact province population (Census 2022 Statistical Release, Table 2.1) as the denominator. Religion counts are not published, so the count fields are null.",
+        "Three census waves are mapped: 1996, 2001 and 2022. The 2011 census dropped the religion question, so there is no 2011 religion layer; 2011 appears only in the population table. Nationally, no religion fell from about 11,7 percent (1996) to 15,1 percent (2001) and then to 2,9 percent (2022), while Christianity rose from about 75,9 to 84,5 percent.",
+        "The 2016 Community Survey reintroduced a religion question after the 2011 gap (reporting the religiously unaffiliated at about 10,7 percent), but it is an intercensal household survey, a separate construct from a census, so it is deferred and not mixed into the census layers.",
+        "The 1996 wave codes Traditional African Religion as 0,0 in every province, an artefact of 1996 census processing rather than of the population; Traditional African Religion appears from 2001 and rises to 7,8 percent nationally in 2022. Comparisons of that category across 1996 are treated with care.",
+        "Provincial boundaries shifted slightly between the 1996/2001 and 2022 waves (cross-border municipality reallocations), but Stats SA tabulates all three waves by the same nine province names, so the product follows the source and maps every wave on the 2020 province boundaries.",
+        "Boundaries are geoBoundaries ZAF ADM1 provinces (9, CC BY 3.0 IGO, boundary source OCHA ROSEA and the South African Municipal Demarcation Board)."
+      ],
+      sources: [
+        {
+          name: "Stats SA Cultural Dynamics in South Africa (Report 03-01-84), Table 4.1 (religious denomination by province, Censuses 1996, 2001 and 2022)",
+          href: "https://www.statssa.gov.za/publications/03-01-84/03-01-84.pdf",
+          construct: "Census religious affiliation (harmonised provincial shares across waves)",
+          years: "1996, 2001, 2022",
+          licence: "Open download from Stats SA; attribution requested, no explicit reuse licence stated"
+        },
+        {
+          name: "Stats SA Census 2022 Statistical Release (P0301.4), Table 2.1 (population by province) and Table 2.10 (2022 religion by province)",
+          href: "https://census.statssa.gov.za/assets/documents/2022/P03014_Census_2022_Statistical_Release.pdf",
+          construct: "Census province populations (denominators) and corroborating 2022 religion table",
+          years: "1996, 2001, 2011, 2022 (population); 2022 (religion)",
+          licence: "Open download from Stats SA; attribution requested, no explicit reuse licence stated"
+        },
+        {
+          name: "geoBoundaries ZAF ADM1 provinces",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/ZAF/ADM1/",
+          construct: "Boundary geometry (9 provinces)",
+          years: "2020 structure, source data 2023",
+          licence: "CC BY 3.0 IGO (boundary source OCHA ROSEA and the South African Municipal Demarcation Board; licence source data.humdata.org)"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Statistics South Africa, <a href=\"https://www.statssa.gov.za/?page_id=3839\" target=\"_blank\" rel=\"noopener\">Census products</a>.",
+        tables: "Religion: Cultural Dynamics in South Africa (Report 03-01-84), Table 4.1 (percentage distribution of population by religious denomination and province, Censuses 1996, 2001 and 2022). Population denominators: Census 2022 Statistical Release (P0301.4), Table 2.1 (distribution of population by province and sex, 1996-2022). The population-weighted provincial aggregate reproduces the printed national religion row (Figure 4.1) within about a tenth of a percentage point for every wave.",
+        licence: "Stats SA census releases are open downloads with attribution requested and no explicit reuse licence stated; boundaries are geoBoundaries ZAF ADM1 (9 provinces), CC BY 3.0 IGO, boundary source OCHA ROSEA and the South African Municipal Demarcation Board.",
+        script: "scripts/build_za_area_summary.R",
+        manifests: [
+          { label: "za-census-religion-1996-2022", href: "docs/manifests/za-census-religion-1996-2022.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
