@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Czechia map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the czechia research map; every string traces to
+    // research/countries/cz/README.md, the cz-census-religion-2021 manifest,
+    // or the live REGION_CONFIG in apps/regions/cz/index.html. authors nothing.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "CZ",
+      countryName: "Czechia",
+      mapHref: "./",
+      intro: "Census religion overlays for Czechia at regional (kraj) level, built from the Czech Statistical Office census 2021 table SLD008T02.",
+      facts: {
+        waves: "Census 2021",
+        geographies: "Region (kraj)",
+        metrics: "Religious affiliation %, no religion %",
+        placeDots: "OpenStreetMap places (amenity=place_of_worship), ODbL-1.0; the survey's Overpass country count did not complete, so no governed place layer or place metric is built yet."
+      },
+      reading: [
+        "Areas are shaded by religious affiliation or no religion among people who stated a religion response.",
+        "Percentages use a stated-response denominator: total population minus neuvedeno (not stated). Neuvedeno is large in Czechia — 30.05% nationally in 2021 — and is excluded from the denominator, not counted as no religion.",
+        "Religious affiliation combines believers with a church (věřící – hlásící se k církvi) and believers without a church (věřící – nehlásící se k církvi); no religion is bez náboženské víry.",
+        "The 2021 census asked religion as a voluntary write-in question, which affects comparability with earlier census lists. Earlier waves (1991, 2001, 2011) are not retrievable at kraj level through the DataStat table and are deferred.",
+        "Boundaries are Eurostat GISCO NUTS3 2021 polygons (kraje are NUTS3 in Czechia), © EuroGeographics."
+      ],
+      sources: [
+        {
+          name: "CZSO DataStat table SLD008T02 (population by religious faith and region)",
+          href: "https://scitani.gov.cz/datastat/api/katalog/vybery/SLD008T02?jazyk=cs",
+          construct: "Census religious affiliation (voluntary write-in)",
+          years: "2021",
+          licence: "CZSO open data; reuse with attribution under the CZSO conditions for using and further publishing statistical data"
+        },
+        {
+          name: "CZSO Census 2021 religion page (national 1991–2021 comparison and reconciliation tables)",
+          href: "https://scitani.gov.cz/nabozenska-vira",
+          construct: "Census affiliation by church or religious society",
+          years: "2021 (national comparison 1991–2021)",
+          licence: "CZSO open data; reuse with attribution"
+        },
+        {
+          name: "Eurostat GISCO NUTS3 2021 boundaries",
+          href: "https://ec.europa.eu/eurostat/web/gisco/geodata/statistical-units",
+          construct: "Boundary geometry (kraje = NUTS3)",
+          years: "2021",
+          licence: "Eurostat GISCO download provisions, © EuroGeographics for the administrative boundaries"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "CZSO DataStat API: catalogue <a href=\"https://scitani.gov.cz/datastat/api/katalog/vybery/SLD008T02?jazyk=cs\" target=\"_blank\" rel=\"noopener\">SLD008T02</a> and its <a href=\"https://scitani.gov.cz/datastat/api/dotaz/data/vybery/SLD008T02?jazyk=cs\" target=\"_blank\" rel=\"noopener\">data endpoint</a>.",
+        tables: "<code>SLD008T02</code> (population by religious faith and region, census 2021); reconciliation workbook <code>sldb2021_pv_obyvatelstvo_podle_cirkvi_a_kraju.xlsx</code> from the CZSO religion page. The 14 kraj rows reconcile exactly against the national row.",
+        licence: "CZSO open data, reuse with attribution; boundaries under Eurostat GISCO download provisions with attribution to © EuroGeographics.",
+        script: "scripts/build_cz_area_summary.R",
+        manifests: [
+          { label: "cz-census-religion-2021", href: "docs/manifests/cz-census-religion-2021.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
