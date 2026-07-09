@@ -83,6 +83,28 @@ fill the single Sosnowiec gap by hand or from the OSM parish/deanery
 members, and validate the geometry against the GIS-Expert/KUL maps and the
 Annuarium diocese list. Reserve GIS-Expert as the licensed fallback.
 
+**Extraction outcome (2026-07-10): the OSM route is BLOCKED short of a
+complete layer.** Two extraction passes (flat Overpass, then recursive
+super-relation assembly through the OSM API with per-diocese area gates)
+established the ground truth behind the optimistic relation count: 24 of
+41 dioceses have complete level-6 boundary geometry; the other 17 exist
+as relations whose member deaneries are only fragmentarily mapped, so
+member-union assembly recovers 700-2,200 km^2 of dioceses that actually
+span 8,000-12,000 km^2. The union of everything assemblable covers 59% of
+Poland; Sosnowiec has no boundary object at all. Artefacts preserved
+under `data/raw/pl_practice/` (24-diocese partial layer
+`pl_diocese_2004_partial24.geojson`, per-diocese assembly report,
+relation dumps, name concordance) and the replayable assembler at
+`scripts/assemble_pl_diocese_boundaries.py`. The ISKK rates lane is NOT
+blocked: 2014-2024 diocese rates are transcribed with provenance in
+`data/raw/pl_practice/iskk_diocese_rates.csv` (2020 = no count, COVID;
+2013 not freely published). The polygon decision now sits with the PI:
+(a) approach GIS-Expert/KUL for the authoritative polygons (permission or
+purchase), or (b) commission a digitisation from the published raster
+maps, with the 24 OSM dioceses as validation; option (c), waiting for OSM
+completion, has no timeline. The pilot cannot ship a choropleth before
+one of these lands.
+
 ## Years and boundary-vintage mapping
 
 Polish diocese boundaries were reorganised twice within the ISKK series, so
