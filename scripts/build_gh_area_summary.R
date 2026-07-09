@@ -3,11 +3,13 @@
 # table 5.7 extract, the 2010 StatsBank POP16 region-religion query, the 2010
 # National Analytical Report table 4.17, and the existing geoBoundaries-derived
 # 16-region product.
-# outputs: apps/regions/gh/data/gh_region_2010_ten.geojson,
+# outputs: apps/regions/gh/data/area_summary_region.{json,csv},
+# apps/regions/gh/data/gh_region_2010_ten.geojson,
 # apps/regions/gh/data/area_summary_region_2010_2021_ten.{json,csv}, and
 # docs/manifests/gh-census-religion-2010-2021.json.
 # run from the repo root: Rscript scripts/build_gh_area_summary.R
-# the existing 2021 sixteen-region product is validated but not rewritten.
+# the existing 2021 sixteen-region rows are validated from source and reused
+# unchanged while 2010 rows are added to the same 16-region product.
 
 suppressMessages({
   library(jsonlite)
@@ -24,7 +26,6 @@ stamp <- format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
 retrieval_date <- "2026-07-09"
 script_id <- "scripts/build_gh_area_summary.R"
 country_code <- "GH"
-year <- 2021L
 year_2010 <- 2010L
 year_2021 <- 2021L
 
@@ -378,8 +379,8 @@ match_to_boundary <- function(census_region, boundary) {
   )
 }
 
-# build one schema-shaped area-summary row for one region.
-build_area_row <- function(row) {
+# build one schema-shaped area-summary row for one current-region wave.
+build_area_row <- function(row, year_value, source_ids, basis, quality_flag) {
   list(
     country_code = country_code,
     boundary_set_id = boundary_set_id,
@@ -387,9 +388,9 @@ build_area_row <- function(row) {
     area_unit_id = row[["area_unit_id"]],
     area_code = as.character(row[["area_code"]]),
     area_name = row[["area_name"]],
-    year = year,
+    year = year_value,
     population_total = null_if_na(as.integer(row[["population_total"]])),
-    population_total_basis = "table 5.7 regional total (all locality types, both sexes); the census allocates every person to one of eight religious groups, so no not-stated residual is excluded",
+    population_total_basis = basis,
     religious_affiliation_count = null_if_na(as.integer(row[["religious_affiliation_count"]])),
     religious_affiliation_percent = null_if_na(row[["religious_affiliation_percent"]]),
     no_religion_count = null_if_na(as.integer(row[["no_religion_count"]])),
@@ -400,13 +401,8 @@ build_area_row <- function(row) {
     land_area_sq_km = round(row[["land_area_sq_km"]], 2),
     site_snapshot_date = NULL,
     place_count_basis = NULL,
-    source_dataset_ids = c(census_dataset_id, boundary_dataset_id),
-    quality_flag = paste(
-      "full_response_denominator",
-      "no_not_stated_category_in_source",
-      "named_religions_in_religious_affiliation",
-      sep = ";"
-    )
+    source_dataset_ids = source_ids,
+    quality_flag = quality_flag
   )
 }
 
@@ -484,23 +480,71 @@ source_datasets <- function() {
   )
 }
 
+# return the source-dataset records for the 2010 religion wave and validation.
+source_datasets_2010_religion <- function() {
+  list(
+    list(
+      source_dataset_id = census_2010_statsbank_dataset_id,
+      name = "GSS StatsBank PHC2010 POP16: population by religious affiliation, district, region, locality, age, sex, and education",
+      provider = "Ghana Statistical Service (GSS)",
+      url = statsbank_2010_table_ui_url,
+      retrieval_date = retrieval_date,
+      local_path = census_2010_statsbank_csv_path,
+      licence = list(
+        name = "GSS StatsBank open web table; no explicit reuse licence stated",
+        url = "https://statsbank.statsghana.gov.gh/",
+        attribution = "Ghana Statistical Service (GSS)"
+      ),
+      citation = "Ghana Statistical Service, StatsBank PHC2010 POP16 population by religious affiliation table.",
+      access_limits = "The API was queried with curl -k because the server TLS chain did not verify in this environment.",
+      redistribution_limits = "The pinned CSV query remains under data/raw/gh_census; the public product contains derived regional counts.",
+      notes = "The live table path is /api/v1/en/PHC2010/Population/POP16 Population by Religious Affiliation, Age, Sex, Locality, and Geographic_Area.px. The pinned query selects Ghana plus the 16 current region values, Education=Total, Religion=Total plus eight groups, Locality=All Locality Types, Sex=Both sexes, and Age=All ages. These rows are GSS's re-tabulation of the 2010 enumeration onto the current 16-region frame."
+    ),
+    list(
+      source_dataset_id = census_2010_report_dataset_id,
+      name = "GSS 2010 PHC National Analytical Report, table 4.17: population by religious affiliation and region, 2010",
+      provider = "Ghana Statistical Service (GSS)",
+      url = census_2010_url,
+      retrieval_date = retrieval_date,
+      local_path = census_2010_report_pdf_path,
+      licence = list(
+        name = "GSS census report, open download; no explicit reuse licence stated",
+        url = census_2010_url,
+        attribution = "Ghana Statistical Service (GSS)"
+      ),
+      citation = "Ghana Statistical Service, 2010 Population and Housing Census National Analytical Report, Table 4.17.",
+      access_limits = NULL,
+      redistribution_limits = "The census PDF is not committed; the derived product records checksums and attributes GSS.",
+      notes = "Table 4.17 prints the old ten-region frame and one-decimal religious-affiliation percentages. The StatsBank exact counts aggregate to the report's ten regional totals and reproduce those percentages."
+    )
+  )
+}
+
+# return source-dataset records for the 16-region product across both waves.
+source_datasets_sixteen_region <- function() {
+  c(source_datasets_2010_religion(), source_datasets())
+}
+
 # create the indicator metadata for the region product.
 indicators_for_region <- function() {
   denominator_note <- paste(
-    "Percentages use the table 5.7 regional total (all locality types, both",
-    "sexes) as the denominator. Table 5.7 allocates every person to one of the",
-    "eight religion groups, so there is no not-stated category to exclude."
+    "Percentages use each wave's census religion-response denominator.",
+    "For 2010, GSS StatsBank PHC2010 POP16 gives exact counts re-tabulated",
+    "from the 2010 enumeration onto the current 16-region frame.",
+    "For 2021, table 5.7 gives the regional total. Both sources allocate",
+    "every person to one of the eight religion groups, so there is no",
+    "not-stated category to exclude."
   )
   list(
     list(
       indicator_id = "population_total",
       label = "Census religion-response denominator",
-      description = "Regional total of persons in table 5.7 (all locality types, both sexes).",
+      description = "Regional total of persons in the census religion table.",
       unit = "count",
       denominator_indicator_id = NULL,
-      method = "table 5.7 regional total; every person is allocated to one of the eight religion groups.",
-      temporal_coverage = "2021",
-      spatial_coverage = "Ghana regions (geoBoundaries ADM1) in the 2021 census.",
+      method = "2010 uses GSS StatsBank PHC2010 POP16 exact counts re-tabulated to the current 16-region frame; 2021 uses table 5.7 regional totals.",
+      temporal_coverage = "2010 and 2021",
+      spatial_coverage = "Ghana current 16 regions (geoBoundaries ADM1).",
       quality_notes = denominator_note
     ),
     list(
@@ -510,8 +554,8 @@ indicators_for_region <- function() {
       unit = "percent",
       denominator_indicator_id = "population_total",
       method = "100 * (Catholic + Protestant + Pentecostal/Charismatic + Other Christian + Islam + Traditionalist + Other Religion) / regional total.",
-      temporal_coverage = "2021",
-      spatial_coverage = "Ghana regions (geoBoundaries ADM1) in the 2021 census.",
+      temporal_coverage = "2010 and 2021",
+      spatial_coverage = "Ghana current 16 regions (geoBoundaries ADM1).",
       quality_notes = denominator_note
     ),
     list(
@@ -521,8 +565,8 @@ indicators_for_region <- function() {
       unit = "percent",
       denominator_indicator_id = "population_total",
       method = "100 * No Religion / regional total.",
-      temporal_coverage = "2021",
-      spatial_coverage = "Ghana regions (geoBoundaries ADM1) in the 2021 census.",
+      temporal_coverage = "2010 and 2021",
+      spatial_coverage = "Ghana current 16 regions (geoBoundaries ADM1).",
       quality_notes = denominator_note
     )
   )
@@ -534,7 +578,7 @@ visual_layers_for_region <- function() {
     list(
       visual_layer_id = "gh-region-religious-affiliation",
       label = "Religious affiliation %",
-      description = "Ghana census 2021 religious-affiliation share.",
+      description = "Ghana census religious-affiliation share on the current 16-region frame.",
       layer_type = "choropleth",
       indicator_ids = list("religious_affiliation_percent"),
       geometry_unit_type = "area_unit",
@@ -549,7 +593,7 @@ visual_layers_for_region <- function() {
     list(
       visual_layer_id = "gh-region-no-religion",
       label = "No religion %",
-      description = "Ghana census 2021 no-religion share.",
+      description = "Ghana census no-religion share on the current 16-region frame.",
       layer_type = "choropleth",
       indicator_ids = list("no_religion_percent"),
       geometry_unit_type = "area_unit",
@@ -582,9 +626,9 @@ area_summary_document <- function(rows) {
       source_dataset_id = NULL,
       snapshot_date = NULL,
       basis = "no governed Ghana OpenStreetMap place-of-worship snapshot is included in this country data-map release",
-      notes = "The Ghana page exposes census 2021 religious-affiliation and no-religion metrics only; place-density metrics are hidden until a governed Ghana place layer is built."
+      notes = "The Ghana page exposes census 2010 and 2021 religious-affiliation and no-religion metrics only; place-density metrics are hidden until a governed Ghana place layer is built."
     ),
-    source_datasets = source_datasets(),
+    source_datasets = source_datasets_sixteen_region(),
     indicators = indicators_for_region(),
     visual_layers = visual_layers_for_region(),
     rows = rows
@@ -622,20 +666,41 @@ raw_source_record <- function(path, url, format, row_count, source_id, used, per
   )
 }
 
-# return a stable digest of the committed 2021 rows for before/after checks.
-rows_digest <- function(path) {
-  json <- fromJSON(path, simplifyVector = FALSE)
-  rows_text <- toJSON(json[["rows"]], auto_unbox = TRUE, null = "null", digits = NA)
+# filter area-summary row objects to one census year.
+rows_for_year <- function(rows, year_value) {
+  Filter(function(row) as.integer(row[["year"]]) == as.integer(year_value), rows)
+}
+
+# return a stable digest of row objects for before/after checks.
+rows_digest_from_list <- function(rows) {
+  rows_text <- toJSON(rows, auto_unbox = TRUE, null = "null", digits = NA)
   tmp <- tempfile()
   on.exit(unlink(tmp), add = TRUE)
   writeBin(charToRaw(rows_text), tmp)
   sha256_file(tmp)
 }
 
-# read the committed 2021 area-summary rows into a small count frame.
-read_existing_area_summary_counts <- function(path) {
+# return a stable digest of the committed rows for one census year.
+rows_digest <- function(path, year_value) {
   json <- fromJSON(path, simplifyVector = FALSE)
-  rows <- json[["rows"]]
+  rows_digest_from_list(rows_for_year(json[["rows"]], year_value))
+}
+
+# restore vector-valued row fields after JSON parsing so pretty output is stable.
+normalise_area_row_for_write <- function(row) {
+  if (is.list(row[["source_dataset_ids"]])) {
+    row[["source_dataset_ids"]] <- unlist(row[["source_dataset_ids"]], use.names = FALSE)
+  }
+  row
+}
+
+# read the committed 2021 area-summary rows into a small count frame.
+read_existing_area_summary_counts <- function(path, year_value = year_2021) {
+  json <- fromJSON(path, simplifyVector = FALSE)
+  rows <- rows_for_year(json[["rows"]], year_value)
+  if (length(rows) != 16L) {
+    stop("expected 16 committed ", year_value, " area-summary rows", call. = FALSE)
+  }
   do.call(rbind, lapply(rows, function(row) {
     data.frame(
       terr_name = row[["area_name"]],
@@ -1123,12 +1188,21 @@ required_sources <- c(
   geoboundaries_meta_path,
   boundary_out,
   summary_json_out,
-  summary_csv_out
+  summary_csv_out,
+  ten_boundary_out,
+  ten_summary_json_out,
+  ten_summary_csv_out
 )
 invisible(lapply(required_sources, require_file))
 invisible(ensure_2010_report_text(census_2010_report_pdf_path, census_2010_report_txt_path))
 
-rows_2021_digest_before <- rows_digest(summary_json_out)
+existing_summary_doc <- fromJSON(summary_json_out, simplifyVector = FALSE)
+existing_2021_rows <- rows_for_year(existing_summary_doc[["rows"]], year_2021)
+if (length(existing_2021_rows) != 16L) {
+  stop("expected 16 existing 2021 rows in the sixteen-region product", call. = FALSE)
+}
+rows_2021_digest_before <- rows_digest_from_list(existing_2021_rows)
+existing_2021_rows_for_write <- lapply(existing_2021_rows, normalise_area_row_for_write)
 
 parsed <- read_census(census_pdf_path)
 census_region <- build_region_frame(parsed)
@@ -1182,11 +1256,90 @@ if (!identical(boundary_write[["sha256"]], original_2021_boundary_sha256)) {
 }
 
 statsbank_2010 <- read_2010_statsbank_region_counts(census_2010_statsbank_csv_path)
+sixteen_2010_matched <- match_to_boundary(statsbank_2010[["region_counts"]], boundary)
+sixteen_2010_matched <- sixteen_2010_matched[order(sixteen_2010_matched[["area_name"]]), ]
+
+national_2010_values <- c(
+  population_total = statsbank_2010[["national"]][["total"]],
+  religious_affiliation_count = statsbank_2010[["national"]][["total"]] - statsbank_2010[["national"]][["no_religion"]],
+  no_religion_count = statsbank_2010[["national"]][["no_religion"]]
+)
+national_reconciliation_2010_sixteen <- lapply(recon_fields, function(field) {
+  region_sum <- sum(sixteen_2010_matched[[field]])
+  national_value <- as.integer(national_2010_values[[field]])
+  list(
+    year = year_2010,
+    boundary_set_id = boundary_set_id,
+    metric = field,
+    region_sum = region_sum,
+    national_total = national_value,
+    difference = region_sum - national_value
+  )
+})
+for (check in national_reconciliation_2010_sixteen) {
+  if (check[["difference"]] != 0) {
+    stop("2010 sixteen-region national reconciliation failed for ", check[["metric"]], call. = FALSE)
+  }
+}
+
 census_2010_ten <- aggregate_to_ten_regions(statsbank_2010[["region_counts"]])
 report_table_2010 <- read_2010_report_table(census_2010_report_txt_path)
+printed_2010_national_total <- sum(report_table_2010[["totals"]][["total"]])
+if (sum(sixteen_2010_matched[["population_total"]]) != printed_2010_national_total) {
+  stop("2010 sixteen-region population total does not equal the printed table 4.17 national total", call. = FALSE)
+}
 invisible(validate_2010_against_report(census_2010_ten, report_table_2010))
 counts_2010 <- derive_counts_from_categories(census_2010_ten)
 census_2010_ten <- cbind(census_2010_ten, counts_2010)
+
+sixteen_2010_basis <- paste(
+  "GSS StatsBank PHC2010 POP16 exact counts for all ages, both sexes, and all",
+  "locality types; GSS re-tabulated the 2010 enumeration onto the current",
+  "16-region frame; every person is allocated to one of eight religious",
+  "groups, so no not-stated residual is excluded"
+)
+sixteen_2010_quality_flag <- paste(
+  "full_response_denominator",
+  "no_not_stated_category_in_source",
+  "named_religions_in_religious_affiliation",
+  "statsbank_exact_counts",
+  "gss_retabulated_2010_enumeration_to_current_16_region_frame",
+  sep = ";"
+)
+
+existing_area_codes <- vapply(existing_2021_rows_for_write, function(row) row[["area_code"]], character(1))
+if (any(duplicated(existing_area_codes))) {
+  stop("existing 2021 rows have duplicate area codes", call. = FALSE)
+}
+missing_2010_area_codes <- setdiff(existing_area_codes, sixteen_2010_matched[["area_code"]])
+if (length(missing_2010_area_codes) > 0L) {
+  stop("2010 StatsBank rows do not cover existing 2021 area codes: ", paste(missing_2010_area_codes, collapse = "; "), call. = FALSE)
+}
+
+sixteen_rows <- list()
+for (row_2021 in existing_2021_rows_for_write) {
+  row_2010 <- sixteen_2010_matched[sixteen_2010_matched[["area_code"]] == row_2021[["area_code"]], , drop = FALSE]
+  sixteen_rows[[length(sixteen_rows) + 1L]] <- build_area_row(
+    row_2010,
+    year_2010,
+    c(census_2010_statsbank_dataset_id, boundary_dataset_id),
+    sixteen_2010_basis,
+    sixteen_2010_quality_flag
+  )
+  sixteen_rows[[length(sixteen_rows) + 1L]] <- row_2021
+}
+sixteen_years <- table(vapply(sixteen_rows, function(row) as.integer(row[["year"]]), integer(1)))
+if (!identical(as.integer(sixteen_years[as.character(year_2010)]), 16L) ||
+    !identical(as.integer(sixteen_years[as.character(year_2021)]), 16L)) {
+  stop("sixteen-region product does not have 16 rows for each of 2010 and 2021", call. = FALSE)
+}
+
+write_json(area_summary_document(sixteen_rows), summary_json_out, auto_unbox = TRUE, pretty = TRUE, null = "null", na = "null", digits = NA)
+write.csv(flatten_rows(sixteen_rows), summary_csv_out, row.names = FALSE, na = "")
+rows_2021_digest_after <- rows_digest(summary_json_out, year_2021)
+if (!identical(rows_2021_digest_before, rows_2021_digest_after)) {
+  stop("committed 2021 sixteen-region rows changed during the build", call. = FALSE)
+}
 
 census_2021_ten <- aggregate_to_ten_regions(existing_2021_counts)
 census_2021_ten <- data.frame(
@@ -1201,8 +1354,9 @@ census_2021_ten <- data.frame(
 )
 
 ten_boundary <- dissolve_ten_region_boundary(boundary_out)
-ten_boundary_write <- write_ten_boundary(ten_boundary, ten_boundary_out)
-if (row_count_file(ten_boundary_out) != length(ten_region_order)) {
+ten_boundary_write <- list(bytes = file_bytes(ten_boundary_out))
+if (nrow(ten_boundary) != length(ten_region_order) ||
+    row_count_file(ten_boundary_out) != length(ten_region_order)) {
   stop("ten-region dissolved boundary feature count is not 10", call. = FALSE)
 }
 ten_boundary_attrs <- st_drop_geometry(ten_boundary)
@@ -1247,8 +1401,10 @@ for (old_region in ten_region_order) {
   )
 }
 
-write_json(area_summary_document_ten_region(ten_rows), ten_summary_json_out, auto_unbox = TRUE, pretty = TRUE, null = "null", na = "null", digits = NA)
-write.csv(flatten_rows(ten_rows), ten_summary_csv_out, row.names = FALSE, na = "")
+existing_ten_doc <- fromJSON(ten_summary_json_out, simplifyVector = FALSE)
+if (!identical(rows_digest_from_list(existing_ten_doc[["rows"]]), rows_digest_from_list(ten_rows))) {
+  stop("generated ten-region rows no longer match the committed companion product", call. = FALSE)
+}
 sixteen_summary_sha <- sha256_file(summary_json_out)
 ten_summary_sha <- sha256_file(ten_summary_json_out)
 summary_sha <- sha256_values(c(sixteen_summary_sha, ten_summary_sha))
@@ -1266,11 +1422,6 @@ national_counts <- derive_counts(data.frame(
   stringsAsFactors = FALSE
 ))
 
-national_2010_values <- c(
-  population_total = statsbank_2010[["national"]][["total"]],
-  religious_affiliation_count = statsbank_2010[["national"]][["total"]] - statsbank_2010[["national"]][["no_religion"]],
-  no_religion_count = statsbank_2010[["national"]][["no_religion"]]
-)
 national_2021_ten_values <- c(
   population_total = sum(existing_2021_counts[["total"]]),
   religious_affiliation_count = sum(existing_2021_counts[["religious_affiliation_count"]]),
@@ -1308,22 +1459,29 @@ for (check in national_reconciliation_ten) {
   }
 }
 
-region_concordance_reconciliation <- lapply(ten_region_order, function(old_region) {
-  members <- ten_region_members[[old_region]]
-  source_rows <- existing_2021_counts[existing_2021_counts[["terr_name"]] %in% members, , drop = FALSE]
-  ten_row <- ten_2021_matched[ten_2021_matched[["terr_name"]] == old_region, , drop = FALSE]
-  list(
-    year = year_2021,
-    old_region = old_region,
-    source_regions = members,
-    population_total = as.integer(ten_row[["population_total"]]),
-    source_population_total_sum = as.integer(sum(source_rows[["total"]])),
-    religious_affiliation_count = as.integer(ten_row[["religious_affiliation_count"]]),
-    source_religious_affiliation_sum = as.integer(sum(source_rows[["religious_affiliation_count"]])),
-    no_religion_count = as.integer(ten_row[["no_religion_count"]]),
-    source_no_religion_sum = as.integer(sum(source_rows[["no_religion"]]))
-  )
-})
+# report exact parent-child sums under the old-ten/current-sixteen concordance.
+concordance_reconciliation_for_year <- function(source_counts, ten_counts, year_value) {
+  lapply(ten_region_order, function(old_region) {
+    members <- ten_region_members[[old_region]]
+    source_rows <- source_counts[source_counts[["terr_name"]] %in% members, , drop = FALSE]
+    ten_row <- ten_counts[ten_counts[["terr_name"]] == old_region, , drop = FALSE]
+    list(
+      year = year_value,
+      old_region = old_region,
+      source_regions = members,
+      population_total = as.integer(ten_row[["population_total"]]),
+      source_population_total_sum = as.integer(sum(source_rows[["population_total"]])),
+      religious_affiliation_count = as.integer(ten_row[["religious_affiliation_count"]]),
+      source_religious_affiliation_sum = as.integer(sum(source_rows[["religious_affiliation_count"]])),
+      no_religion_count = as.integer(ten_row[["no_religion_count"]]),
+      source_no_religion_sum = as.integer(sum(source_rows[["no_religion_count"]]))
+    )
+  })
+}
+region_concordance_reconciliation <- c(
+  concordance_reconciliation_for_year(sixteen_2010_matched, ten_2010_matched, year_2010),
+  concordance_reconciliation_for_year(existing_2021_counts, ten_2021_matched, year_2021)
+)
 
 # the religion table total is below the enumerated 2021 population; the gap is
 # reported for context but has no not-stated category inside table 5.7.
@@ -1342,21 +1500,18 @@ statsbank_2010_query_body <- paste0(
   "],\"response\":{\"format\":\"CSV\"}}"
 )
 
-rows_2021_digest_after <- rows_digest(summary_json_out)
-if (!identical(rows_2021_digest_before, rows_2021_digest_after)) {
-  stop("committed 2021 sixteen-region rows changed during the build", call. = FALSE)
-}
-
 validation_checks <- c(
-  "The committed 2021 sixteen-region product is read and validated against GSS 2021 PHC General Report Volume 3C table 5.7; it is not rewritten by this script.",
+  "The committed 2021 sixteen-region rows are read from the source product, validated against GSS 2021 PHC General Report Volume 3C table 5.7, and reused unchanged inside the rewritten 2010-2021 sixteen-region product.",
   "Every 2021 source region's eight religion groups sum exactly to its printed regional total, and the eight national numbers sum exactly to the national total.",
   "Each religion group's 16 region values sum exactly to its printed national Number.",
   "The 2021 sixteen-region rows sum exactly to the national total for the denominator, religious affiliation, and no religion.",
-  "All 16 census region rows join to the 16 geoBoundaries GHA ADM1 features by normalised name (the boundary ' Region' suffix dropped).",
-  "The 2010 StatsBank POP16 table returns exact counts for Ghana plus the 16 current regions for Total, No religion, Catholic, Protestants, Pentecostal/Charismatic, Other christian, Islam, Traditionalist, and Other.",
+  "Both 2010 and 2021 current-region rows join to the 16 geoBoundaries GHA ADM1 features by normalised name (the boundary ' Region' suffix dropped).",
+  "The 2010 StatsBank POP16 table returns exact counts for Ghana plus the 16 current regions for Total, No religion, Catholic, Protestants, Pentecostal/Charismatic, Other christian, Islam, Traditionalist, and Other; those 16-region rows are GSS's re-tabulation of the 2010 enumeration onto the current boundary frame.",
+  sprintf("The 2010 sixteen current-region counts sum exactly to the StatsBank Ghana national totals for denominator (%d), religious affiliation (%d), and no religion (%d); the 2010 denominator also equals the printed table 4.17 national total.", national_2010_values[["population_total"]], national_2010_values[["religious_affiliation_count"]], national_2010_values[["no_religion_count"]]),
   "The 2010 sixteen current-region counts aggregate exactly to the ten old regions; those ten totals match National Analytical Report table 4.17, and one-decimal percentages reproduce table 4.17.",
   "The 2021 ten-region companion rows are exact sums of the existing 2021 sixteen-region product under the ten-to-sixteen concordance.",
-  sprintf("The dissolved ten-region boundary GeoJSON writes to %d bytes after dissolving the committed 16-region boundary; the %d m tolerance is carried from the original 2021 build record, and this run validates that committed boundary by feature count and sha.", ten_boundary_write[["bytes"]], boundary_write[["original_build_record_tolerance_m"]]),
+  "The 2021 sixteen-region row-object digest is identical before and after the build.",
+  sprintf("The committed dissolved ten-region boundary GeoJSON is %d bytes; the %d m tolerance is carried from the original 2021 build record, and this run rebuilds the dissolve in memory while validating the committed boundary by feature count.", ten_boundary_write[["bytes"]], boundary_write[["original_build_record_tolerance_m"]]),
   "The dissolved ten-region boundary is a CC BY-SA 2.0 derivative of the geoBoundaries GHA ADM1 / OpenStreetMap-derived boundary.",
   sprintf("The table 5.7 total (%d) is %d below the enumerated 2021 population (%d, Table 1.1); the gap is outside the religion table and there is no not-stated category within it.", national_total, religion_table_gap, enumerated_population_2021)
 )
@@ -1387,15 +1542,17 @@ manifest <- list(
     command = paste("Rscript", script_id),
     parameters = list(
       waves = c("2010", "2021"),
-      existing_sixteen_region_product = "left byte-identical; read for 2021 aggregation only",
+      existing_sixteen_region_product = "rewritten to add 2010 rows; existing 2021 row objects are read, source-validated, reused unchanged, and digest-checked before/after",
       sixteen_region_boundary_set = boundary_set_id,
+      sixteen_region_2010_basis = "GSS StatsBank PHC2010 POP16 re-tabulation of the 2010 enumeration onto the current 16-region frame",
       ten_region_boundary_set = ten_boundary_set_id,
       ten_region_boundary_derivation = "dissolve existing apps/regions/gh/data/gh_region_2019.geojson by the post-2019-to-pre-2019 nesting table",
       statsbank_2010_table_id = "PHC2010/Population/POP16 Population by Religious Affiliation, Age, Sex, Locality, and Geographic_Area.px",
       statsbank_2010_post_body = statsbank_2010_query_body,
       pdf_extraction = "poppler pdftotext -layout, 2010 National Analytical Report table 4.17 and 2021 Vol. 3C table 5.7",
       denominator = "census religion table total; no not-stated category is excluded",
-      omitted_metrics = c("religious_change", "places_per_10000_residents", "place_density_per_sq_km")
+      runtime_change_metric = "religious_change is computed by apps/regions/_shared/region-map.js from adjacent census years when the country config includes it in REGION_CONFIG.metricsAvailable; this build does not wire the UI.",
+      omitted_metrics = c("places_per_10000_residents", "place_density_per_sq_km")
     ),
     software_versions = list(
       r = paste(R.version[["major"]], R.version[["minor"]], sep = "."),
@@ -1441,7 +1598,7 @@ manifest <- list(
     ),
     raw_source_record(
       census_2010_statsbank_csv_path, statsbank_2010_table_api_url, "csv", 153L, census_2010_statsbank_dataset_id, TRUE, "2010",
-      "StatsBank PHC2010 POP16 CSV POST query selecting Ghana plus the 16 current regions, Total education, All Locality Types, Both sexes, All ages, and Total plus eight religion groups."
+      "StatsBank PHC2010 POP16 CSV POST query selecting Ghana plus the 16 current regions, Total education, All Locality Types, Both sexes, All ages, and Total plus eight religion groups. The 16 current-region rows are GSS's re-tabulation of the 2010 enumeration onto the current boundary frame."
     ),
     raw_source_record(
       census_2010_report_pdf_path, census_2010_url, "pdf", 10L, census_2010_report_dataset_id, TRUE, "2010",
@@ -1461,8 +1618,8 @@ manifest <- list(
     )
   ),
   durable_files = list(
-    manifest_file_record(summary_json_out, "Existing Ghana 16-region area summary with GSS census 2021 religious-affiliation and no-religion metrics; rows left byte-identical.", licence_status),
-    manifest_file_record(summary_csv_out, "Existing flattened Ghana 16-region area summary with GSS census 2021 metrics; left untouched.", licence_status),
+    manifest_file_record(summary_json_out, "Ghana 16-region area summary with GSS StatsBank PHC2010 re-tabulated 2010 counts and GSS 2021 census religion metrics; existing 2021 row objects preserved byte-identical.", licence_status),
+    manifest_file_record(summary_csv_out, "Flattened Ghana 16-region area summary with GSS census religion metrics for 2010 and 2021.", licence_status),
     manifest_file_record(boundary_out, "Existing simplified Ghana 16-region boundary GeoJSON derived from geoBoundaries GHA ADM1.", "geoboundaries_cc_by_sa_2_0"),
     manifest_file_record(ten_summary_json_out, "Ghana old ten-region area summary with 2010 StatsBank counts and exact 2021 sums from the sixteen-region product.", licence_status),
     manifest_file_record(ten_summary_csv_out, "Flattened Ghana old ten-region area summary with 2010 and 2021 census religion metrics.", licence_status),
@@ -1473,7 +1630,7 @@ manifest <- list(
       uri = paste0("repo:", summary_json_out),
       sha256 = sixteen_summary_sha,
       built_by = script_id,
-      notes = "Existing 16 region reporting units x 1 census year; file is not rewritten by this extension."
+      notes = "16 current-region reporting units x 2 census years; 2010 uses GSS StatsBank's re-tabulation of the 2010 enumeration to the current 16-region frame, and the existing 2021 row objects are preserved byte-identical."
     ),
     list(
       uri = paste0("repo:", ten_summary_json_out),
@@ -1491,13 +1648,22 @@ manifest <- list(
   validation = list(
     checks = validation_checks,
     join_coverage = list(
-      region_2021_sixteen = list(list(
-        boundary_level = boundary_level,
-        year = year_2021,
-        matched_area_count = nrow(matched),
-        expected_area_count = nrow(boundary),
-        missing_area_names = list()
-      )),
+      region_2010_2021_sixteen = list(
+        list(
+          boundary_level = boundary_level,
+          year = year_2010,
+          matched_area_count = nrow(sixteen_2010_matched),
+          expected_area_count = nrow(boundary),
+          missing_area_names = list()
+        ),
+        list(
+          boundary_level = boundary_level,
+          year = year_2021,
+          matched_area_count = nrow(matched),
+          expected_area_count = nrow(boundary),
+          missing_area_names = list()
+        )
+      ),
       region_2010_2021_ten = list(
         list(
           boundary_level = boundary_level,
@@ -1515,7 +1681,7 @@ manifest <- list(
         )
       )
     ),
-    national_reconciliation = c(national_reconciliation_2021_sixteen, national_reconciliation_ten),
+    national_reconciliation = c(national_reconciliation_2010_sixteen, national_reconciliation_2021_sixteen, national_reconciliation_ten),
     region_concordance_reconciliation = region_concordance_reconciliation,
     printed_2010_report_reconciliation = list(
       source = "2010 PHC National Analytical Report table 4.17",
@@ -1543,10 +1709,11 @@ manifest <- list(
     )
   ),
   construct_notes = list(
-    "The live Ghana map remains the existing 2021 sixteen-region product.",
+    "The Ghana 16-region product now places 2010 and 2021 on the current 16-region frame.",
     "The companion product places 2010 and 2021 on the old pre-2019 ten-region frame.",
-    "The 2010 exact counts come from GSS StatsBank PHC2010 POP16. StatsBank currently exposes the 2010 counts on the post-2019 sixteen-region list; those rows aggregate exactly to the old ten regions printed in the 2010 National Analytical Report table 4.17.",
-    "The 2021 ten-region rows are exact sums of the existing 2021 sixteen-region product. The existing 2021 rows remain byte-identical.",
+    "The 2010 exact counts come from GSS StatsBank PHC2010 POP16. StatsBank exposes the 2010 counts on the current sixteen-region list as GSS's re-tabulation of the 2010 enumeration onto the current boundary frame; those rows aggregate exactly to the old ten regions printed in the 2010 National Analytical Report table 4.17.",
+    "The 2021 sixteen-region rows are the existing row objects reused unchanged. The 2021 ten-region rows are exact sums from those sixteen-region rows.",
+    "The shared region runtime can compute religious_change from adjacent census years when REGION_CONFIG.metricsAvailable includes religious_change; this build leaves UI wiring unchanged.",
     "Religious affiliation combines Catholic, Protestant or Protestants, Pentecostal/Charismatic, Other Christian or Other christian, Islam, Traditionalist, and Other Religion or Other. No religion is the No Religion group.",
     sprintf("The table 5.7 total (%d) is %d below the enumerated 2021 population (%d, Table 1.1); the gap sits outside the religion table and there is no not-stated category within table 5.7.", national_total, religion_table_gap, enumerated_population_2021)
   ),
@@ -1606,7 +1773,7 @@ manifest <- list(
       source_dataset_id = "gss-2021-statsbank-religion-by-district",
       url = statsbank_district_url,
       local_path = NULL,
-      notes = "The 2021 StatsBank table publishes 2021 religion by district (261 units), but district extraction remains outside this ten-region companion build; the existing 2021 region product remains the live map product."
+      notes = "The 2021 StatsBank table publishes 2021 religion by district (261 units), but district extraction remains outside this region build."
     ),
     list(
       source_dataset_id = "gss-2000-phc-religion-by-region",
@@ -1619,17 +1786,18 @@ manifest <- list(
   licence_status = licence_status,
   downstream_status = "public",
   source_datasets = source_datasets_ten_region(),
-  notes = "The committed outputs now include the unchanged live 2021 sixteen-region product plus a separate old ten-region 2010-2021 companion product. UI wiring is intentionally unchanged."
+  notes = "The committed outputs now include a 2010-2021 current sixteen-region product plus the separate old ten-region 2010-2021 companion product. UI wiring is intentionally unchanged."
 )
 
 write_json(manifest, manifest_out, auto_unbox = TRUE, pretty = TRUE, null = "null", na = "null", digits = NA)
 manifest_text <- paste(readLines(manifest_out, warn = FALSE), collapse = "\n")
 if (!jsonlite::validate(manifest_text)) stop("manifest JSON failed jsonlite validation", call. = FALSE)
 
-cat(sprintf("left %s unchanged: rows sha256 %s\n", summary_json_out, rows_2021_digest_after))
-cat(sprintf("wrote %s: %d rows\n", ten_summary_json_out, length(ten_rows)))
-cat(sprintf("wrote %s: %d rows\n", ten_summary_csv_out, row_count_file(ten_summary_csv_out)))
-cat(sprintf("wrote %s: %d features, %d bytes\n", ten_boundary_out, row_count_file(ten_boundary_out), file_bytes(ten_boundary_out)))
+cat(sprintf("wrote %s: %d rows; 2021 row sha256 %s\n", summary_json_out, length(sixteen_rows), rows_2021_digest_after))
+cat(sprintf("wrote %s: %d rows\n", summary_csv_out, row_count_file(summary_csv_out)))
+cat(sprintf("validated unchanged %s: %d rows\n", ten_summary_json_out, length(ten_rows)))
+cat(sprintf("left unchanged %s: %d rows\n", ten_summary_csv_out, row_count_file(ten_summary_csv_out)))
+cat(sprintf("left unchanged %s: %d features, %d bytes\n", ten_boundary_out, row_count_file(ten_boundary_out), file_bytes(ten_boundary_out)))
 cat(sprintf("wrote %s\n", manifest_out))
 cat(sprintf("2010 national denominator: %d; religious affiliation: %d; no religion: %d\n",
             national_2010_values[["population_total"]],
@@ -1639,4 +1807,4 @@ cat(sprintf("2021 old-ten denominator: %d; religious affiliation: %d; no religio
             national_2021_ten_values[["population_total"]],
             national_2021_ten_values[["religious_affiliation_count"]],
             national_2021_ten_values[["no_religion_count"]]))
-cat("national reconciliation: exact for denominator, religious affiliation, and no religion (2010 ten regions and 2021 ten-region aggregation)\n")
+cat("national reconciliation: exact for denominator, religious affiliation, and no religion (2010 and 2021 sixteen-region products; 2010 and 2021 ten-region products)\n")
