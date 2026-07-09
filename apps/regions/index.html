@@ -36,7 +36,21 @@
       transition: background 120ms ease, border-color 120ms ease;
     }
     a.map-card:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(148, 163, 184, 0.5); }
-    .map-card-title { font-weight: 600; font-size: 16px; }
+    .map-card-title { font-weight: 600; font-size: 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    /* affordance badges: teal depth encodes wave count (change over time),
+       neutral marks a single snapshot, purple marks a non-census construct.
+       colour reinforces the text; the label reads without it */
+    .wave-badge {
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 2px 9px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .wave-badge.w1 { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.10); color: #94a3b8; }
+    .wave-badge.w2 { background: rgba(29, 158, 117, 0.18); color: #5dcaa5; }
+    .wave-badge.w3 { background: rgba(29, 158, 117, 0.32); color: #9fe1cb; }
+    .wave-badge.construct-badge { background: rgba(127, 119, 221, 0.20); color: #afa9ec; }
     .map-card-note { color: #94a3b8; font-size: 13px; margin-top: 2px; }
     .back { display: inline-block; margin-top: 18px; color: #cbd5f5; font-size: 13px; text-decoration: none; }
     .back:hover { color: #fff; text-decoration: underline; }
@@ -48,76 +62,80 @@
     <p class="lede">Places of worship with census and religion-data overlays, by country.</p>
     <nav class="map-list">
       <a class="map-card" href="au/">
-        <div class="map-card-title">Australia</div>
-        <div class="map-card-note">Statistical-area-2 census religious affiliation, 2021; earlier waves await official boundary correspondences.</div>
+        <div class="map-card-title">Australia <span class="wave-badge w2">2 waves · 2016–2021</span></div>
+        <div class="map-card-note">Statistical-area-2 census religious affiliation, 2016&ndash;2021; the 2011 wave awaits an official boundary correspondence.</div>
       </a>
       <a class="map-card" href="br/">
-        <div class="map-card-title">Brazil</div>
+        <div class="map-card-title">Brazil <span class="wave-badge w3">3 waves · 2000–2022</span></div>
         <div class="map-card-note">Municipality and state census religion overlays, 2000&ndash;2022.</div>
       </a>
       <a class="map-card" href="ca/">
-        <div class="map-card-title">Canada</div>
+        <div class="map-card-title">Canada <span class="wave-badge w3">3 waves · 2001–2021</span></div>
         <div class="map-card-note">Census-division religion, 2001&ndash;2021, each wave on its own boundary vintage (2011 is the voluntary NHS).</div>
       </a>
       <a class="map-card" href="cz/">
-        <div class="map-card-title">Czechia</div>
+        <div class="map-card-title">Czechia <span class="wave-badge w1">1 wave · 2021</span></div>
         <div class="map-card-note">Regional (kraj) census religion, 2021; earlier waves used an incompatible write-in classification and are deferred.</div>
       </a>
       <a class="map-card" href="gh/">
-        <div class="map-card-title">Ghana</div>
+        <div class="map-card-title">Ghana <span class="wave-badge w1">1 wave · 2021</span></div>
         <div class="map-card-note">Regional census religious-affiliation overlays, 2021; district religion and the 2000&ndash;2010 waves are deferred.</div>
       </a>
       <a class="map-card" href="in/">
-        <div class="map-card-title">India</div>
+        <div class="map-card-title">India <span class="wave-badge w2">2 waves · 2001–2011</span></div>
         <div class="map-card-note">District census religious-community overlays, 2001&ndash;2011, each wave on its own period districts (no no-religion category; no 2021 census).</div>
       </a>
       <a class="map-card" href="ie/">
-        <div class="map-card-title">Ireland</div>
+        <div class="map-card-title">Ireland <span class="wave-badge w3">3 waves · 2011–2022</span></div>
         <div class="map-card-note">County-and-city census religious-affiliation overlays, 2011–2022.</div>
       </a>
       <a class="map-card" href="ke/">
-        <div class="map-card-title">Kenya</div>
+        <div class="map-card-title">Kenya <span class="wave-badge w1">1 wave · 2019</span></div>
         <div class="map-card-note">County census religious-affiliation overlays, 2019; 2009 religion was published at national level only.</div>
       </a>
       <a class="map-card" href="kr/">
-        <div class="map-card-title">South Korea</div>
+        <div class="map-card-title">South Korea <span class="wave-badge w2">2 waves · 2005–2015</span></div>
         <div class="map-card-note">Municipal (si/gun/gu) census religion, 2005&ndash;2015 (2015 is the 20% sample survey; religion last asked 2015).</div>
       </a>
       <a class="map-card" href="mw/">
-        <div class="map-card-title">Malawi</div>
+        <div class="map-card-title">Malawi <span class="wave-badge w1">1 wave · 2018</span></div>
         <div class="map-card-note">District census religious-affiliation overlays, 2018; 2008 religion was published at national level only.</div>
       </a>
       <a class="map-card" href="mx/">
-        <div class="map-card-title">Mexico</div>
+        <div class="map-card-title">Mexico <span class="wave-badge w3">3 waves · 2000–2020</span></div>
         <div class="map-card-note">Municipality census religion overlays, 2010&ndash;2020 (four-construct denominator).</div>
       </a>
       <a class="map-card" href="nz/">
-        <div class="map-card-title">New Zealand</div>
+        <div class="map-card-title">New Zealand <span class="wave-badge w3">3 waves · 2013–2023</span></div>
         <div class="map-card-note">Territorial-authority and statistical-area-2 census overlays, 2013–2023.</div>
       </a>
       <a class="map-card" href="pt/">
-        <div class="map-card-title">Portugal</div>
+        <div class="map-card-title">Portugal <span class="wave-badge w2">2 waves · 2011–2021</span></div>
         <div class="map-card-note">Municipality census religion overlays, 2011&ndash;2021 (residents aged 15+; earlier waves deferred).</div>
       </a>
       <a class="map-card" href="ro/">
-        <div class="map-card-title">Romania</div>
+        <div class="map-card-title">Romania <span class="wave-badge w2">2 waves · 2011–2021</span></div>
         <div class="map-card-note">County census religion 2011&ndash;2021 with commune detail (small-count cells suppressed at commune level).</div>
       </a>
       <a class="map-card" href="sk/">
-        <div class="map-card-title">Slovakia</div>
+        <div class="map-card-title">Slovakia <span class="wave-badge w1">1 wave · 2021</span></div>
         <div class="map-card-note">Municipality and city-part census religion, 2021; 1991&ndash;2011 extraction routes pinned but deferred.</div>
       </a>
       <a class="map-card" href="uk/">
-        <div class="map-card-title">United Kingdom</div>
+        <div class="map-card-title">United Kingdom <span class="wave-badge w3">3 waves · 2001–2021</span></div>
         <div class="map-card-note">Local-authority census religion: England &amp; Wales 2001&ndash;2021, Northern Ireland 2021; Scotland boundary-ready, extraction pending.</div>
       </a>
       <a class="map-card" href="us/">
-        <div class="map-card-title">United States</div>
+        <div class="map-card-title">United States <span class="wave-badge w3">15 waves · 1850–2020</span><span class="wave-badge construct-badge">religious bodies</span></div>
         <div class="map-card-note">County seating, members, or adherents per 100 population, 1850–2020 (not a census affiliation question).</div>
       </a>
       <a class="map-card" href="vu/">
-        <div class="map-card-title">Vanuatu</div>
+        <div class="map-card-title">Vanuatu <span class="wave-badge w3">4 waves · 1967–2020</span></div>
         <div class="map-card-note">Province and area-council census religion overlays, 1999–2020.</div>
+      </a>
+      <a class="map-card" href="zm/">
+        <div class="map-card-title">Zambia <span class="wave-badge w2">2 waves · 2010–2022</span></div>
+        <div class="map-card-note">Province census religion overlays, 2010&ndash;2022 (2010 percent-only; district religion is published only as a bundled remainder and is deferred).</div>
       </a>
     </nav>
     <a class="back" href="../global/">← Global map</a>
