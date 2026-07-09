@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+### 2026-07-10
+
+- Added the Germany Kreis census-religion product for Zensus 2011 and
+  Zensus 2022 legal membership in public-law religious societies
+  (`RELZG2`). The two waves ship on their own period Kreis geographies:
+  412 `GEOLK1` rows with BKG VG250 2011 boundaries, and 400 `GEOLK4`
+  rows with BKG VG250 2022 boundaries. Religious affiliation is
+  Protestant public-law membership plus Roman Catholic public-law
+  membership; no-religion metrics are null because the compact residual
+  category combines other religion, no public-law membership, and no
+  response. The source regional cubes do not reconcile exactly to the
+  exposed Deutschland rows. The metadata-supported explanation is that
+  Deutschland totals include persons assignable to no Kreis, including
+  German personnel stationed abroad, and that the Zensus results database
+  documents subpopulation non-additivity. The tested routes use `PRS018`
+  for regional rows and `PRS001` for Deutschland rows; Zensus metadata
+  entries label both codes as Persons, and the code difference is recorded
+  only as an observation.
+  Protestant and Catholic regional sums match the Deutschland rows
+  within ±17 persons, which supports category integrity. The build
+  preserves the source counts and records the residuals in the manifest.
+  Build: `scripts/build_de_area_summary.R`; manifest
+  `docs/manifests/de-census-religion-2011-2022.json`.
+
 ### 2026-07-09
 
 - Added OSM date-tagged place layers (`dated_places.geojson`) via the
