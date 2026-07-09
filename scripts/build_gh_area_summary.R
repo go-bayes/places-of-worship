@@ -36,6 +36,8 @@ ten_boundary_set_id <- "gh-region-2010-ten-geoboundaries-adm1-dissolved"
 ten_boundary_dataset_id <- "geoboundaries-gha-adm1-2019-dissolved-to-2010-ten-region"
 census_2010_statsbank_dataset_id <- "gss-statsbank-phc2010-pop16-religion-by-region"
 census_2010_report_dataset_id <- "gss-2010-phc-national-analytical-report-table-4-17"
+original_2021_boundary_simplification_tolerance_m <- 50L
+original_2021_boundary_sha256 <- "3ddb73e5f14c6aa15f09be755e56b114a5029c6842ea67b5139dde14e88049b0"
 
 # source urls recorded in the manifest and the on-page attribution. the census
 # pdf is the 2021 PHC General Report Volume 3C, hosted on the GSS census portal.
@@ -148,6 +150,14 @@ require_file <- function(path) {
 # compute the sha-256 digest for a local file.
 sha256_file <- function(path) {
   unname(tools::sha256sum(path))
+}
+
+# hash ordered product hashes for manifest version tokens.
+sha256_values <- function(values) {
+  tmp <- tempfile()
+  on.exit(unlink(tmp), add = TRUE)
+  writeBin(charToRaw(paste(values, collapse = "")), tmp)
+  sha256_file(tmp)
 }
 
 # return file size in bytes for manifest records.
@@ -434,29 +444,6 @@ flatten_rows <- function(rows) {
   }))
 }
 
-# write the boundary, increasing simplification tolerance until it is small.
-write_simplified_boundary <- function(boundary, output_path, field_names) {
-  boundary_fields <- boundary[, field_names]
-  tolerances <- c(50, 100, 200, 500, 1000, 1500, 2000)
-  for (tolerance in tolerances) {
-    candidate <- st_transform(boundary_fields, africa_aea)
-    candidate <- st_simplify(candidate, dTolerance = tolerance, preserveTopology = TRUE)
-    candidate <- st_make_valid(st_transform(candidate, 4326))
-    if (any(st_is_empty(candidate))) next
-    st_write(
-      candidate,
-      output_path,
-      driver = "GeoJSON",
-      delete_dsn = TRUE,
-      quiet = TRUE,
-      layer_options = c("COORDINATE_PRECISION=5")
-    )
-    bytes <- file_bytes(output_path)
-    if (bytes <= 3000000L) return(list(tolerance_m = tolerance, bytes = bytes))
-  }
-  stop("simplified GH boundary remains above 3 MB", call. = FALSE)
-}
-
 # create the source-dataset records for the area-summary document.
 source_datasets <- function() {
   list(
@@ -655,8 +642,12 @@ read_existing_area_summary_counts <- function(path) {
       area_code = row[["area_code"]],
       area_unit_id = row[["area_unit_id"]],
       total = as.integer(row[["population_total"]]),
+      population_total = as.integer(row[["population_total"]]),
       religious_affiliation_count = as.integer(row[["religious_affiliation_count"]]),
+      religious_affiliation_percent = as.numeric(row[["religious_affiliation_percent"]]),
       no_religion = as.integer(row[["no_religion_count"]]),
+      no_religion_count = as.integer(row[["no_religion_count"]]),
+      no_religion_percent = as.numeric(row[["no_religion_percent"]]),
       land_area_sq_km = as.numeric(row[["land_area_sq_km"]]),
       stringsAsFactors = FALSE
     )
@@ -668,6 +659,7 @@ validate_existing_2021_rows <- function(existing_counts, source_counts) {
   expected <- data.frame(
     terr_name = source_counts[["terr_name"]],
     derive_counts(source_counts),
+    land_area_sq_km = round(source_counts[["land_area_sq_km"]], 2),
     stringsAsFactors = FALSE
   )
   rownames(expected) <- expected[["terr_name"]]
@@ -676,16 +668,25 @@ validate_existing_2021_rows <- function(existing_counts, source_counts) {
   if (length(missing) > 0L) {
     stop("committed 2021 area-summary rows are missing: ", paste(missing, collapse = "; "), call. = FALSE)
   }
-  fields <- c("population_total", "religious_affiliation_count", "no_religion_count")
-  existing_compare <- data.frame(
-    population_total = existing_counts[expected[["terr_name"]], "total"],
-    religious_affiliation_count = existing_counts[expected[["terr_name"]], "religious_affiliation_count"],
-    no_religion_count = existing_counts[expected[["terr_name"]], "no_religion"],
-    stringsAsFactors = FALSE
+  fields <- c(
+    "population_total",
+    "religious_affiliation_count",
+    "no_religion_count",
+    "religious_affiliation_percent",
+    "no_religion_percent",
+    "land_area_sq_km"
   )
+  existing_compare <- existing_counts[expected[["terr_name"]], fields, drop = FALSE]
   expected_compare <- expected[, fields, drop = FALSE]
-  for (field in fields) {
+  count_fields <- c("population_total", "religious_affiliation_count", "no_religion_count")
+  for (field in count_fields) {
     if (!all(as.integer(existing_compare[[field]]) == as.integer(expected_compare[[field]]))) {
+      stop("committed 2021 area-summary rows no longer match the source counts for ", field, call. = FALSE)
+    }
+  }
+  decimal_fields <- c("religious_affiliation_percent", "no_religion_percent", "land_area_sq_km")
+  for (field in decimal_fields) {
+    if (!all(sprintf("%.2f", as.numeric(existing_compare[[field]])) == sprintf("%.2f", as.numeric(expected_compare[[field]])))) {
       stop("committed 2021 area-summary rows no longer match the source counts for ", field, call. = FALSE)
     }
   }
@@ -894,7 +895,7 @@ write_ten_boundary <- function(boundary, output_path) {
     quiet = TRUE,
     layer_options = c("COORDINATE_PRECISION=5")
   )
-  list(tolerance_m = 50L, bytes = file_bytes(output_path))
+  list(bytes = file_bytes(output_path))
 }
 
 # derive headline counts and percentages from exact category counts.
@@ -1167,10 +1168,17 @@ for (check in national_reconciliation_2021_sixteen) {
 }
 
 existing_2021_counts <- read_existing_area_summary_counts(summary_json_out)
-invisible(validate_existing_2021_rows(existing_2021_counts, census_region))
-boundary_write <- list(tolerance_m = 50L, bytes = file_bytes(boundary_out))
+invisible(validate_existing_2021_rows(existing_2021_counts, matched))
+boundary_write <- list(
+  original_build_record_tolerance_m = original_2021_boundary_simplification_tolerance_m,
+  bytes = file_bytes(boundary_out),
+  sha256 = sha256_file(boundary_out)
+)
 if (row_count_file(boundary_out) != nrow(boundary)) {
   stop("committed 2021 region boundary feature count is not 16", call. = FALSE)
+}
+if (!identical(boundary_write[["sha256"]], original_2021_boundary_sha256)) {
+  stop("committed 2021 region boundary sha no longer matches the original build record", call. = FALSE)
 }
 
 statsbank_2010 <- read_2010_statsbank_region_counts(census_2010_statsbank_csv_path)
@@ -1241,6 +1249,9 @@ for (old_region in ten_region_order) {
 
 write_json(area_summary_document_ten_region(ten_rows), ten_summary_json_out, auto_unbox = TRUE, pretty = TRUE, null = "null", na = "null", digits = NA)
 write.csv(flatten_rows(ten_rows), ten_summary_csv_out, row.names = FALSE, na = "")
+sixteen_summary_sha <- sha256_file(summary_json_out)
+ten_summary_sha <- sha256_file(ten_summary_json_out)
+summary_sha <- sha256_values(c(sixteen_summary_sha, ten_summary_sha))
 
 national_counts <- derive_counts(data.frame(
   total = national_total,
@@ -1339,11 +1350,13 @@ if (!identical(rows_2021_digest_before, rows_2021_digest_after)) {
 validation_checks <- c(
   "The committed 2021 sixteen-region product is read and validated against GSS 2021 PHC General Report Volume 3C table 5.7; it is not rewritten by this script.",
   "Every 2021 source region's eight religion groups sum exactly to its printed regional total, and the eight national numbers sum exactly to the national total.",
+  "Each religion group's 16 region values sum exactly to its printed national Number.",
   "The 2021 sixteen-region rows sum exactly to the national total for the denominator, religious affiliation, and no religion.",
+  "All 16 census region rows join to the 16 geoBoundaries GHA ADM1 features by normalised name (the boundary ' Region' suffix dropped).",
   "The 2010 StatsBank POP16 table returns exact counts for Ghana plus the 16 current regions for Total, No religion, Catholic, Protestants, Pentecostal/Charismatic, Other christian, Islam, Traditionalist, and Other.",
   "The 2010 sixteen current-region counts aggregate exactly to the ten old regions; those ten totals match National Analytical Report table 4.17, and one-decimal percentages reproduce table 4.17.",
   "The 2021 ten-region companion rows are exact sums of the existing 2021 sixteen-region product under the ten-to-sixteen concordance.",
-  sprintf("The dissolved ten-region boundary GeoJSON writes to %d bytes after dissolving the existing 50 m simplified 16-region boundary.", ten_boundary_write[["bytes"]]),
+  sprintf("The dissolved ten-region boundary GeoJSON writes to %d bytes after dissolving the committed 16-region boundary; the %d m tolerance is carried from the original 2021 build record, and this run validates that committed boundary by feature count and sha.", ten_boundary_write[["bytes"]], boundary_write[["original_build_record_tolerance_m"]]),
   "The dissolved ten-region boundary is a CC BY-SA 2.0 derivative of the geoBoundaries GHA ADM1 / OpenStreetMap-derived boundary.",
   sprintf("The table 5.7 total (%d) is %d below the enumerated 2021 population (%d, Table 1.1); the gap is outside the religion table and there is no not-stated category within it.", national_total, religion_table_gap, enumerated_population_2021)
 )
@@ -1353,7 +1366,7 @@ manifest <- list(
   schema_version = "data-manifest.v1",
   manifest_id = "manifest:gh-census-religion:gh:2010-2021:gss-statsbank-pop16-vol3c",
   dataset_id = "gh-census-religion:gh:2010-2021:gss-statsbank-pop16-vol3c",
-  dataset_version_id = paste0("gh-census-religion:gh:2010-2021:gss-statsbank-pop16-vol3c:", substr(sha256_file(ten_summary_json_out), 1, 12)),
+  dataset_version_id = paste0("gh-census-religion:gh:2010-2021:gss-statsbank-pop16-vol3c:", substr(summary_sha, 1, 12)),
   manifest_sha256 = NULL,
   supersedes_manifest_id = NULL,
   superseded_by_manifest_id = NULL,
@@ -1458,13 +1471,13 @@ manifest <- list(
   derived_outputs = list(
     list(
       uri = paste0("repo:", summary_json_out),
-      sha256 = sha256_file(summary_json_out),
+      sha256 = sixteen_summary_sha,
       built_by = script_id,
       notes = "Existing 16 region reporting units x 1 census year; file is not rewritten by this extension."
     ),
     list(
       uri = paste0("repo:", ten_summary_json_out),
-      sha256 = sha256_file(ten_summary_json_out),
+      sha256 = ten_summary_sha,
       built_by = script_id,
       notes = "10 old-region reporting units x 2 census years; 2010 exact StatsBank counts and 2021 exact sums from the existing 16-region product."
     ),
@@ -1520,7 +1533,10 @@ manifest <- list(
       expected_feature_count_2010_ten = length(ten_region_order),
       output_bytes_2021_sixteen = boundary_write[["bytes"]],
       output_bytes_2010_ten = ten_boundary_write[["bytes"]],
-      simplification_tolerance_m_2021_sixteen = boundary_write[["tolerance_m"]],
+      original_build_record_simplification_tolerance_m_2021_sixteen = boundary_write[["original_build_record_tolerance_m"]],
+      original_build_record_boundary_sha256_2021_sixteen = original_2021_boundary_sha256,
+      committed_boundary_sha256_2021_sixteen = boundary_write[["sha256"]],
+      committed_boundary_validation_basis_2021_sixteen = "feature count and sha matched this run; simplification tolerance is carried from the original 2021 build record",
       dissolved_from_existing_2021_boundary = TRUE,
       unmatched_boundary_features = list(),
       unmatched_census_areas = list()

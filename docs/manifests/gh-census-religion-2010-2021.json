@@ -3,7 +3,7 @@
   "schema_version": "data-manifest.v1",
   "manifest_id": "manifest:gh-census-religion:gh:2010-2021:gss-statsbank-pop16-vol3c",
   "dataset_id": "gh-census-religion:gh:2010-2021:gss-statsbank-pop16-vol3c",
-  "dataset_version_id": "gh-census-religion:gh:2010-2021:gss-statsbank-pop16-vol3c:b2aa5875e450",
+  "dataset_version_id": "gh-census-religion:gh:2010-2021:gss-statsbank-pop16-vol3c:d1bf7a3c3202",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -18,7 +18,7 @@
     "snapshot_anchor": null,
     "pipeline_stage": "public"
   },
-  "created_at": "2026-07-09T08:27:57Z",
+  "created_at": "2026-07-09T09:23:42Z",
   "created_by": "scripts/build_gh_area_summary.R",
   "pipeline": {
     "script": "scripts/build_gh_area_summary.R",
@@ -166,7 +166,7 @@
       "storage_provider": "git_repository",
       "format": "json",
       "bytes": 34737,
-      "sha256": "b2aa5875e4504c173dc50a325f04358b9b8207e0a7c80fcf85ecf31d7b87a1fb",
+      "sha256": "d0a029f4d251c90ba7ebf54d55461634299147cedf6cf1c0d0be71616b68aaa8",
       "row_count": 20,
       "content": "Ghana old ten-region area summary with 2010 StatsBank counts and exact 2021 sums from the sixteen-region product.",
       "privacy": "public",
@@ -204,7 +204,7 @@
     },
     {
       "uri": "repo:apps/regions/gh/data/area_summary_region_2010_2021_ten.json",
-      "sha256": "b2aa5875e4504c173dc50a325f04358b9b8207e0a7c80fcf85ecf31d7b87a1fb",
+      "sha256": "d0a029f4d251c90ba7ebf54d55461634299147cedf6cf1c0d0be71616b68aaa8",
       "built_by": "scripts/build_gh_area_summary.R",
       "notes": "10 old-region reporting units x 2 census years; 2010 exact StatsBank counts and 2021 exact sums from the existing 16-region product."
     },
@@ -216,7 +216,7 @@
     }
   ],
   "validation": {
-    "checks": ["The committed 2021 sixteen-region product is read and validated against GSS 2021 PHC General Report Volume 3C table 5.7; it is not rewritten by this script.", "Every 2021 source region's eight religion groups sum exactly to its printed regional total, and the eight national numbers sum exactly to the national total.", "The 2021 sixteen-region rows sum exactly to the national total for the denominator, religious affiliation, and no religion.", "The 2010 StatsBank POP16 table returns exact counts for Ghana plus the 16 current regions for Total, No religion, Catholic, Protestants, Pentecostal/Charismatic, Other christian, Islam, Traditionalist, and Other.", "The 2010 sixteen current-region counts aggregate exactly to the ten old regions; those ten totals match National Analytical Report table 4.17, and one-decimal percentages reproduce table 4.17.", "The 2021 ten-region companion rows are exact sums of the existing 2021 sixteen-region product under the ten-to-sixteen concordance.", "The dissolved ten-region boundary GeoJSON writes to 285098 bytes after dissolving the existing 50 m simplified 16-region boundary.", "The dissolved ten-region boundary is a CC BY-SA 2.0 derivative of the geoBoundaries GHA ADM1 / OpenStreetMap-derived boundary.", "The table 5.7 total (30753327) is 78692 below the enumerated 2021 population (30832019, Table 1.1); the gap is outside the religion table and there is no not-stated category within it."],
+    "checks": ["The committed 2021 sixteen-region product is read and validated against GSS 2021 PHC General Report Volume 3C table 5.7; it is not rewritten by this script.", "Every 2021 source region's eight religion groups sum exactly to its printed regional total, and the eight national numbers sum exactly to the national total.", "Each religion group's 16 region values sum exactly to its printed national Number.", "The 2021 sixteen-region rows sum exactly to the national total for the denominator, religious affiliation, and no religion.", "All 16 census region rows join to the 16 geoBoundaries GHA ADM1 features by normalised name (the boundary ' Region' suffix dropped).", "The 2010 StatsBank POP16 table returns exact counts for Ghana plus the 16 current regions for Total, No religion, Catholic, Protestants, Pentecostal/Charismatic, Other christian, Islam, Traditionalist, and Other.", "The 2010 sixteen current-region counts aggregate exactly to the ten old regions; those ten totals match National Analytical Report table 4.17, and one-decimal percentages reproduce table 4.17.", "The 2021 ten-region companion rows are exact sums of the existing 2021 sixteen-region product under the ten-to-sixteen concordance.", "The dissolved ten-region boundary GeoJSON writes to 285098 bytes after dissolving the committed 16-region boundary; the 50 m tolerance is carried from the original 2021 build record, and this run validates that committed boundary by feature count and sha.", "The dissolved ten-region boundary is a CC BY-SA 2.0 derivative of the geoBoundaries GHA ADM1 / OpenStreetMap-derived boundary.", "The table 5.7 total (30753327) is 78692 below the enumerated 2021 population (30832019, Table 1.1); the gap is outside the religion table and there is no not-stated category within it."],
     "join_coverage": {
       "region_2021_sixteen": [
         {
@@ -446,7 +446,10 @@
       "expected_feature_count_2010_ten": 10,
       "output_bytes_2021_sixteen": 360530,
       "output_bytes_2010_ten": 285098,
-      "simplification_tolerance_m_2021_sixteen": 50,
+      "original_build_record_simplification_tolerance_m_2021_sixteen": 50,
+      "original_build_record_boundary_sha256_2021_sixteen": "3ddb73e5f14c6aa15f09be755e56b114a5029c6842ea67b5139dde14e88049b0",
+      "committed_boundary_sha256_2021_sixteen": "3ddb73e5f14c6aa15f09be755e56b114a5029c6842ea67b5139dde14e88049b0",
+      "committed_boundary_validation_basis_2021_sixteen": "feature count and sha matched this run; simplification tolerance is carried from the original 2021 build record",
       "dissolved_from_existing_2021_boundary": true,
       "unmatched_boundary_features": [],
       "unmatched_census_areas": []

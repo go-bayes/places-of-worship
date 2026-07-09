@@ -324,6 +324,12 @@ write_simplified_boundary <- function(boundary, output_path, field_names) {
     if (status != 0L || !file.exists(output_path)) {
       stop("mapshaper simplification failed at ", keep_percent, "%", call. = FALSE)
     }
+    # mapshaper output is trusted but verified; the old sf ladder had this guard.
+    written <- st_read(output_path, quiet = TRUE)
+    written_valid <- st_is_valid(written)
+    if (any(st_is_empty(written)) || any(is.na(written_valid)) || any(!written_valid)) {
+      stop("mapshaper simplification produced empty or invalid BS geometries", call. = FALSE)
+    }
     bytes <- file_bytes(output_path)
     # the archipelago's thousands of cays need mapshaper's weighted
     # Visvalingam path: it preserves coastline character at the same byte size

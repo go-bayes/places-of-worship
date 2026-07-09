@@ -1,6 +1,6 @@
 {
   "schema_version": "0.2.0",
-  "generated_at": "2026-07-09T08:00:29Z",
+  "generated_at": "2026-07-09T09:23:09Z",
   "generated_by": "scripts/build_kr_area_summary.R",
   "country_code": "KR",
   "boundary_set": {

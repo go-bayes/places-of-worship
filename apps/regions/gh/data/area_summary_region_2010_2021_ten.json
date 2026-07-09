@@ -1,6 +1,6 @@
 {
   "schema_version": "0.2.0",
-  "generated_at": "2026-07-09T08:27:57Z",
+  "generated_at": "2026-07-09T09:23:42Z",
   "generated_by": "scripts/build_gh_area_summary.R",
   "country_code": "GH",
   "boundary_set": {

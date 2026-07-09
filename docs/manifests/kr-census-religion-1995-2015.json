@@ -1,9 +1,9 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
   "schema_version": "data-manifest.v1",
-  "manifest_id": "manifest:kr-census-religion:kr:1995-2015:ac84e8e005d5",
+  "manifest_id": "manifest:kr-census-religion:kr:1995-2015:aa96b3383fa7",
   "dataset_id": "kr-census-religion:kr:1995-2015:kosis",
-  "dataset_version_id": "kr-census-religion:kr:1995-2015:kosis:ac84e8e005d5",
+  "dataset_version_id": "kr-census-religion:kr:1995-2015:kosis:aa96b3383fa7",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -18,7 +18,7 @@
     "snapshot_anchor": null,
     "pipeline_stage": "public"
   },
-  "created_at": "2026-07-09T08:00:29Z",
+  "created_at": "2026-07-09T09:23:09Z",
   "created_by": "scripts/build_kr_area_summary.R",
   "pipeline": {
     "script": "scripts/build_kr_area_summary.R",
@@ -109,7 +109,7 @@
       "storage_provider": "git_repository",
       "format": "json",
       "bytes": 480025,
-      "sha256": "78acbac618116092f90ca18ca3c3937996673f51e3ad0206837bdde4017634b0",
+      "sha256": "aa90d860c6cc9c2c081ff7a15fb01765f187d45770e065e008245dc54cedc8fc",
       "row_count": 458,
       "content": "South Korea harmonised si/gun/gu area summary with KOSIS census religion metrics for 2005 and 2015.",
       "privacy": "public",
@@ -142,7 +142,7 @@
       "storage_provider": "git_repository",
       "format": "json",
       "bytes": 64737,
-      "sha256": "ac84e8e005d549897a66dbb4c2e89e39d41273ac60d695a60daac77ec00eb028",
+      "sha256": "ace1dae8f37db62a56f6d14271c3f43a4e333a403f03d05a9c37c33132549636",
       "row_count": 51,
       "content": "South Korea current-sido area summary with KOSIS census religion metrics for 1995, 2005, and 2015.",
       "privacy": "public",
@@ -174,13 +174,13 @@
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/kr/data/area_summary_si_gun_gu.json",
-      "sha256": "78acbac618116092f90ca18ca3c3937996673f51e3ad0206837bdde4017634b0",
+      "sha256": "aa90d860c6cc9c2c081ff7a15fb01765f187d45770e065e008245dc54cedc8fc",
       "built_by": "scripts/build_kr_area_summary.R",
       "notes": "229 harmonised si/gun/gu units x 2 census years."
     },
     {
       "uri": "repo:apps/regions/kr/data/area_summary_sido.json",
-      "sha256": "ac84e8e005d549897a66dbb4c2e89e39d41273ac60d695a60daac77ec00eb028",
+      "sha256": "ace1dae8f37db62a56f6d14271c3f43a4e333a403f03d05a9c37c33132549636",
       "built_by": "scripts/build_kr_area_summary.R",
       "notes": "17 current-sido units x 3 census years; 1995 Sejong row is null by concordance."
     },

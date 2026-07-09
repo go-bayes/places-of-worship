@@ -1,9 +1,9 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
   "schema_version": "data-manifest.v1",
-  "manifest_id": "manifest:sk-census-religion:sk:2001-2021:5d875dcceb2c",
+  "manifest_id": "manifest:sk-census-religion:sk:2001-2021:1aa45f5a99d8",
   "dataset_id": "sk-census-religion:sk:2001-2021:sodb-infostat",
-  "dataset_version_id": "sk-census-religion:sk:2001-2021:sodb-infostat:5d875dcceb2c",
+  "dataset_version_id": "sk-census-religion:sk:2001-2021:sodb-infostat:1aa45f5a99d8",
   "manifest_sha256": null,
   "supersedes_manifest_id": "manifest:sk-census-religion:sk:2021:sodb2021-z01-15",
   "superseded_by_manifest_id": null,
@@ -18,7 +18,7 @@
     "snapshot_anchor": null,
     "pipeline_stage": "public"
   },
-  "created_at": "2026-07-09T08:42:14Z",
+  "created_at": "2026-07-09T09:27:21Z",
   "created_by": "scripts/build_sk_area_summary.R",
   "pipeline": {
     "script": "scripts/build_sk_area_summary.R",
@@ -29,7 +29,7 @@
       "municipality_boundary_set": "sk-municipality-2021-sodb",
       "kraj_boundary_set": "sk-kraj-2021-sodb-dissolved",
       "municipality_boundary_simplification_tolerance_m": 200,
-      "kraj_boundary_mapshaper_keep_percent": 100,
+      "kraj_boundary_mapshaper_keep_percent": 75,
       "denominator": "All Slovakia waves use the source total population denominator; Nezistené / not found out remains in the denominator and outside religious_affiliation_count.",
       "omitted_metrics": ["religious_change", "places_per_10000_residents", "place_density_per_sq_km"]
     },
@@ -1464,7 +1464,7 @@
       "storage_provider": "git_repository",
       "format": "json",
       "bytes": 2979744,
-      "sha256": "a8d7ed91bd268c96978104f0aab336954d915640f31572591c9748cfd924bf2c",
+      "sha256": "d6b2d60627a5531083157b345593cc18b4be6413b906e536b8bcf7d8959f42e9",
       "row_count": 2927,
       "content": "Slovakia municipality/city-part area summary with SODB 2021 religious-belief metrics.",
       "privacy": "public",
@@ -1497,7 +1497,7 @@
       "storage_provider": "git_repository",
       "format": "json",
       "bytes": 34642,
-      "sha256": "5d875dcceb2c651bf9f6043ae486775f95e458ffcab33fd7483fe867ce63fa6a",
+      "sha256": "1e1f2207926a4c8f886744d76bc89b8e8000108a78f4799313dd8b5cbdcca521",
       "row_count": 24,
       "content": "Slovakia current-kraj area summary with 2001, 2011, and 2021 census religious-belief metrics.",
       "privacy": "public",
@@ -1518,8 +1518,8 @@
       "uri": "repo:apps/regions/sk/data/sk_kraj_2021.geojson",
       "storage_provider": "git_repository",
       "format": "geojson",
-      "bytes": 561476,
-      "sha256": "abcf878218f297175494955dba354badcb1eb67ed731ed6236d5d3e5aacda5f7",
+      "bytes": 129045,
+      "sha256": "6016189cdf87e1a8043adb137a3f794e066e642815e2980f81d6109d7a95eb13",
       "row_count": 8,
       "content": "Simplified Slovakia current-kraj boundary GeoJSON dissolved from the SODB 2021 municipality boundary product.",
       "privacy": "public",
@@ -1529,7 +1529,7 @@
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/sk/data/area_summary_municipality.json",
-      "sha256": "a8d7ed91bd268c96978104f0aab336954d915640f31572591c9748cfd924bf2c",
+      "sha256": "d6b2d60627a5531083157b345593cc18b4be6413b906e536b8bcf7d8959f42e9",
       "built_by": "scripts/build_sk_area_summary.R",
       "notes": "2,927 SODB municipality/city-part reporting units x 1 census year; denominator is SODB total population including not found out."
     },
@@ -1541,19 +1541,19 @@
     },
     {
       "uri": "repo:apps/regions/sk/data/area_summary_kraj.json",
-      "sha256": "5d875dcceb2c651bf9f6043ae486775f95e458ffcab33fd7483fe867ce63fa6a",
+      "sha256": "1e1f2207926a4c8f886744d76bc89b8e8000108a78f4799313dd8b5cbdcca521",
       "built_by": "scripts/build_sk_area_summary.R",
       "notes": "8 current Slovakia kraje x 3 waves. The 2001 and 2011 rows use source kraj tables; 2021 rows are exact sums of the municipality product."
     },
     {
       "uri": "repo:apps/regions/sk/data/sk_kraj_2021.geojson",
-      "sha256": "abcf878218f297175494955dba354badcb1eb67ed731ed6236d5d3e5aacda5f7",
+      "sha256": "6016189cdf87e1a8043adb137a3f794e066e642815e2980f81d6109d7a95eb13",
       "built_by": "scripts/build_sk_area_summary.R",
-      "notes": "SODB 2021 municipality boundary product dissolved to 8 current kraje and simplified with mapshaper weighted keep-shapes at 100% keep."
+      "notes": "SODB 2021 municipality boundary product dissolved to 8 current kraje and simplified with mapshaper weighted keep-shapes at 75% keep."
     }
   ],
   "validation": {
-    "checks": ["SODB 2021 Z01_15 municipality rows were downloaded as 79 official district-scoped JSON files.", "The 2,927 SODB municipality/city-part rows have unique official area codes.", "All 2,927 SODB municipality/city-part rows join exactly to the OB GeoJSON municipality/city-part features.", "Municipality sums match the SODB national row exactly for total population, religious affiliation, no religion, and not found out.", "The simplified municipality boundary GeoJSON writes to 2570989 bytes after 200 m simplification.", "SODB 2021 percentages use the total population denominator, including the not-found-out category, matching SUSR's published shares.", "Infostat 2001 data118 HTML kraj rows reconcile exactly to the 2001 national data118 row for every reported category.", "SODB 2011 TAB. 118 XLS kraj rows reconcile exactly to the 2011 national TAB. 118 XLS row for every reported category.", "The 2021 kraj product is aggregated from the existing municipality product rows, and its national sums are identical to the municipality product sums.", "The dissolved kraj boundary GeoJSON writes to 561476 bytes after mapshaper weighted keep-shapes at 100% keep."],
+    "checks": ["SODB 2021 Z01_15 municipality rows were downloaded as 79 official district-scoped JSON files.", "The 2,927 SODB municipality/city-part rows have unique official area codes.", "All 2,927 SODB municipality/city-part rows join exactly to the OB GeoJSON municipality/city-part features.", "Municipality sums match the SODB national row exactly for total population, religious affiliation, no religion, and not found out.", "The simplified municipality boundary GeoJSON writes to 2570989 bytes after 200 m simplification.", "SODB 2021 percentages use the total population denominator, including the not-found-out category, matching SUSR's published shares.", "Infostat 2001 data118 HTML kraj rows reconcile exactly to the 2001 national data118 row for every reported category.", "SODB 2011 TAB. 118 XLS kraj rows reconcile exactly to the 2011 national TAB. 118 XLS row for every reported category.", "The 2021 kraj product is aggregated from the existing municipality product rows, and its national sums are identical to the municipality product sums.", "The dissolved kraj boundary GeoJSON writes to 129045 bytes after mapshaper weighted keep-shapes at 75% keep."],
     "join_coverage": {
       "municipality": [
         {
@@ -1956,10 +1956,10 @@
         "source": "Dissolved from repo:apps/regions/sk/data/sk_municipality_2021.geojson, which is derived from the SODB 2021 OB GeoJSON and carries region_code / kraj membership.",
         "source_feature_count": 2927,
         "output_feature_count": 8,
-        "output_bytes": 561476,
+        "output_bytes": 129045,
         "input_bytes": 655583,
-        "mapshaper_keep_percent": 100,
-        "target_bytes": 800000
+        "mapshaper_keep_percent": 75,
+        "target_bytes": 300000
       }
     }
   },

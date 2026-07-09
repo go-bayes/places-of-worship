@@ -16,7 +16,7 @@ not a build; nothing here is committed to a product.
   parish, run by ISKK with the Polish Episcopate since 1980 (pilots 1978,
   1979; Zdaniewicz and Adamczuk methodology). The operational unit is the
   parish; the analytical unit is the diocese. A single October or November
-  Sunday is counted each year, so the series is a decades-long annual panel
+  Sunday is counted each year; the series is therefore a decades-long annual panel
   at diocese level.
 - **e-Dominicantes** — interactive dashboard and current-year reporting
   workflow: https://iskk.pl/dominicantes/ (2025 collection cycle at
@@ -74,7 +74,7 @@ not a build; nothing here is committed to a product.
    dioceses in Poland). Raster images only; usable as a digitisation
    reference or visual cross-check, not as polygons.
 5. **GADM / geoBoundaries / civil administrative files.** Dioceses do not
-   align with voivodeships, powiaty, or gminy, so civil polygons cannot
+   align with voivodeships, powiaty, or gminy; civil polygons therefore cannot
    approximate diocese boundaries. Useful only as a digitisation base if a
    diocese has to be drawn by hand.
 
@@ -88,9 +88,9 @@ complete layer.** Two extraction passes (flat Overpass, then recursive
 super-relation assembly through the OSM API with per-diocese area gates)
 established the ground truth behind the optimistic relation count: 24 of
 41 dioceses have complete level-6 boundary geometry; the other 17 exist
-as relations whose member deaneries are only fragmentarily mapped, so
-member-union assembly recovers 700-2,200 km^2 of dioceses that actually
-span 8,000-12,000 km^2. The union of everything assemblable covers 59% of
+as relations whose member deaneries are only fragmentarily mapped;
+member-union assembly therefore recovers 700-2,200 km^2 of dioceses that
+actually span 8,000-12,000 km^2. The union of everything assemblable covers 59% of
 Poland; Sosnowiec has no boundary object at all. Artefacts preserved
 under `data/raw/pl_practice/` (24-diocese partial layer
 `pl_diocese_2004_partial24.geojson`, per-diocese assembly report,
@@ -107,8 +107,8 @@ one of these lands.
 
 ## Years and boundary-vintage mapping
 
-Polish diocese boundaries were reorganised twice within the ISKK series, so
-each attendance year must join the polygons of its own era:
+Polish diocese boundaries were reorganised twice within the ISKK series;
+each attendance year must therefore join the polygons of its own era:
 
 - **1980–1992**: the old 27-diocese configuration.
 - **1992–2004**: after the bull *Totus Tuus Poloniae Populus* (1992),
@@ -139,7 +139,7 @@ product. State the anchor plainly: dominicantes by diocese on current
 
 ## Denominator (honest description)
 
-Both rates are already rates, so polygons plus the published percentages
+Both rates are already rates; polygons plus the published percentages therefore
 suffice — no separate denominator download is required. The denominator is
 *obligati*: Catholics obliged to attend Sunday Mass, i.e. the nominal
 Catholic population minus those the Church excuses (children under seven,
@@ -172,7 +172,7 @@ beside the practice layer, not the same axis.
    `boundary=religious_administration` diocese relations for Poland via
    Overpass; verify all 41 Latin dioceses (resolve Sosnowiec); add the
    Military Ordinariate only if it is to be shown (it is non-territorial and
-   overlaps every diocese, so exclude it from the choropleth). Simplify and
+   overlaps every diocese; exclude it from the choropleth). Simplify and
    store at `apps/regions/pl/data/`.
 2. Extract rates: transcribe diocese-level dominicantes and communicantes
    from the Annuarium PDFs for the chosen span, with recorded provenance

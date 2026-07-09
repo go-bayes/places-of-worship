@@ -228,10 +228,9 @@ GEOBOUNDARIES <- list(
 
 build_level <- function(summary_path, level) {
   d <- fromJSON(summary_path, simplifyVector = TRUE, simplifyDataFrame = FALSE)
-  # this script reads its own prior output as the next run's scaffold, so a
-  # stray top-level "1" key baked in by the now-fixed denom_lbl loop-variable
-  # bug (see below) would otherwise pass through forever even after the loop
-  # itself stopped introducing new corruption; purge it defensively
+  # historical one-time purge: the committed scaffold once carried a stray
+  # "1" key from the loop-variable bug fixed at d432479; regenerated files no
+  # longer carry it, and this line only guards a stale checkout
   d[["1"]] <- NULL
   # scaffold rows -> data frame with the source-id list column preserved
   rows <- do.call(rbind, lapply(d$rows, function(r) {

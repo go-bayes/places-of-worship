@@ -217,6 +217,14 @@ sha256_file <- function(path) {
   unname(tools::sha256sum(path))
 }
 
+# hash ordered product hashes for manifest version tokens.
+sha256_values <- function(values) {
+  tmp <- tempfile()
+  on.exit(unlink(tmp), add = TRUE)
+  writeBin(charToRaw(paste(values, collapse = "")), tmp)
+  sha256_file(tmp)
+}
+
 # return file size in bytes for manifest and validation records.
 file_bytes <- function(path) {
   as.integer(unname(file.info(path)[["size"]]))
@@ -1384,8 +1392,9 @@ raw_sources <- list(
   )
 )
 
-summary_sha <- sha256_file(sido_summary_json_out)
 si_summary_sha <- sha256_file(summary_json_out)
+sido_summary_sha <- sha256_file(sido_summary_json_out)
+summary_sha <- sha256_values(c(si_summary_sha, sido_summary_sha))
 sido_boundary_sha <- sha256_file(sido_boundary_out)
 boundary_sha <- sha256_file(boundary_out)
 docs_manifest <- list(
@@ -1456,7 +1465,7 @@ docs_manifest <- list(
     ),
     list(
       uri = paste0("repo:", sido_summary_json_out),
-      sha256 = summary_sha,
+      sha256 = sido_summary_sha,
       built_by = script_id,
       notes = sprintf("%d current-sido units x 3 census years; 1995 Sejong row is null by concordance.", nrow(sido_area_table))
     ),

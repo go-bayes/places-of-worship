@@ -35,6 +35,7 @@ year <- 2021L
 
 boundary_set_id <- "sk-municipality-2021-sodb"
 kraj_boundary_set_id <- "sk-kraj-2021-sodb-dissolved"
+kraj_boundary_target_bytes <- 300000L
 census_2001_dataset_id <- "sodb2001-infostat-data118-religion-kraj"
 census_2011_dataset_id <- "sodb2011-tab118-religion-kraj"
 census_2021_dataset_id <- "sodb2021-z01-15-religious-belief-basic-results"
@@ -217,6 +218,14 @@ require_file <- function(path) {
 # compute the sha-256 digest for a local file.
 sha256_file <- function(path) {
   unname(tools::sha256sum(path))
+}
+
+# hash ordered product hashes for manifest version tokens.
+sha256_values <- function(values) {
+  tmp <- tempfile()
+  on.exit(unlink(tmp), add = TRUE)
+  writeBin(charToRaw(paste(values, collapse = "")), tmp)
+  sha256_file(tmp)
 }
 
 # return file size in bytes for manifest records.
@@ -421,14 +430,22 @@ write_boundary_product <- function(boundary_path, census_codes) {
 
 # run mapshaper simplification for one keep percentage.
 run_mapshaper <- function(input_path, output_path, keep_percent) {
-  Sys.setenv(NPM_CONFIG_CACHE = "/private/tmp/npm-cache")
-  dir.create(Sys.getenv("NPM_CONFIG_CACHE"), showWarnings = FALSE, recursive = TRUE)
+  npm_cache <- tempfile("npm-cache-")
+  dir.create(npm_cache, showWarnings = FALSE, recursive = TRUE)
+  on.exit(unlink(npm_cache, recursive = TRUE), add = TRUE)
+  unlink(output_path)
   args <- c(
     "--yes", "mapshaper", input_path,
     "-simplify", "weighted", "keep-shapes", paste0(keep_percent, "%"),
-    "-o", "force", "format=geojson", output_path
+    "-clean",
+    "-o", "precision=0.00001", "format=geojson", output_path
   )
-  result <- system2("npx", args, stdout = TRUE, stderr = TRUE)
+  result <- system2(
+    "npx", args,
+    stdout = TRUE,
+    stderr = TRUE,
+    env = paste0("NPM_CONFIG_CACHE=", npm_cache)
+  )
   status <- attr(result, "status")
   if (!is.null(status) && status != 0L) {
     stop("mapshaper failed: ", paste(result, collapse = "\n"), call. = FALSE)
@@ -481,17 +498,17 @@ write_kraj_boundary_product <- function(municipality_boundary_path, municipality
   temp_input <- file.path(tempdir(), "sk_kraj_2021_unsimplified.geojson")
   st_write(st_make_valid(st_transform(dissolved, 4326)), temp_input, delete_dsn = TRUE, quiet = TRUE)
 
-  keep_ladder <- c(100, 75, 50, 35, 25, 15, 10, 7.5, 5, 3, 2, 1)
+  keep_ladder <- c(75, 50, 35, 25, 15, 10, 7.5, 5, 3, 2, 1)
   chosen_keep <- tail(keep_ladder, 1)
   chosen_bytes <- NA_integer_
   for (keep_percent in keep_ladder) {
     run_mapshaper(temp_input, output_path, keep_percent)
     chosen_bytes <- file_bytes(output_path)
     chosen_keep <- keep_percent
-    if (chosen_bytes <= 800000L) break
+    if (chosen_bytes <= kraj_boundary_target_bytes) break
   }
-  if (chosen_bytes > 800000L) {
-    stop("simplified SK kraj boundary exceeds 800 KB: ", chosen_bytes, call. = FALSE)
+  if (chosen_bytes > kraj_boundary_target_bytes) {
+    stop("simplified SK kraj boundary exceeds target bytes: ", chosen_bytes, call. = FALSE)
   }
 
   simplified <- st_read(output_path, quiet = TRUE)
@@ -1529,11 +1546,15 @@ join_coverage <- list(
 )
 
 kraj_join_coverage <- lapply(c(2001L, 2011L, 2021L), function(wave) {
+  wave_rows <- kraj_count_rows[vapply(kraj_count_rows, function(row) row[["year"]] == wave, logical(1))]
+  wave_codes <- unique(vapply(wave_rows, function(row) row[["area_code"]], character(1)))
+  boundary_codes <- unique(kraj_area_table[["area_code"]])
+  missing_codes <- setdiff(boundary_codes, wave_codes)
   list(
     year = wave,
-    matched_area_count = length(kraj_names),
+    matched_area_count = length(intersect(wave_codes, boundary_codes)),
     expected_area_count = length(kraj_names),
-    missing_area_names = list()
+    missing_area_names = as.list(unname(kraj_names[missing_codes]))
   )
 })
 
@@ -1550,7 +1571,9 @@ validation_checks <- c(
   sprintf("The dissolved kraj boundary GeoJSON writes to %d bytes after mapshaper weighted keep-shapes at %s%% keep.", kraj_boundary_info[["output_bytes"]], kraj_boundary_info[["mapshaper_keep_percent"]])
 )
 
-summary_sha <- sha256_file(kraj_summary_json_out)
+municipality_summary_sha <- sha256_file(summary_json_out)
+kraj_summary_sha <- sha256_file(kraj_summary_json_out)
+summary_sha <- sha256_values(c(municipality_summary_sha, kraj_summary_sha))
 manifest <- list(
   "$schema" = "../../schemas/data-manifest.schema.json",
   schema_version = "data-manifest.v1",
@@ -1632,7 +1655,7 @@ manifest <- list(
   derived_outputs = list(
     list(
       uri = paste0("repo:", summary_json_out),
-      sha256 = sha256_file(summary_json_out),
+      sha256 = municipality_summary_sha,
       built_by = script_id,
       notes = "2,927 SODB municipality/city-part reporting units x 1 census year; denominator is SODB total population including not found out."
     ),
@@ -1644,7 +1667,7 @@ manifest <- list(
     ),
     list(
       uri = paste0("repo:", kraj_summary_json_out),
-      sha256 = sha256_file(kraj_summary_json_out),
+      sha256 = kraj_summary_sha,
       built_by = script_id,
       notes = "8 current Slovakia kraje x 3 waves. The 2001 and 2011 rows use source kraj tables; 2021 rows are exact sums of the municipality product."
     ),
@@ -1685,7 +1708,7 @@ manifest <- list(
         output_bytes = kraj_boundary_info[["output_bytes"]],
         input_bytes = kraj_boundary_info[["input_bytes"]],
         mapshaper_keep_percent = kraj_boundary_info[["mapshaper_keep_percent"]],
-        target_bytes = 800000L
+        target_bytes = kraj_boundary_target_bytes
       )
     )
   ),

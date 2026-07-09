@@ -3,7 +3,7 @@
   "schema_version": "data-manifest.v1",
   "manifest_id": "manifest:bs-census-religion:bs:2010:bnsi-island-reports",
   "dataset_id": "bs-census-religion:bs:2010:bnsi-island-reports",
-  "dataset_version_id": "bs-census-religion:bs:2010:bnsi-island-reports:ee7870b7bad7",
+  "dataset_version_id": "bs-census-religion:bs:2010:bnsi-island-reports:dd43326ee13a",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -18,7 +18,7 @@
     "snapshot_anchor": null,
     "pipeline_stage": "public"
   },
-  "created_at": "2026-07-09T07:55:38Z",
+  "created_at": "2026-07-09T09:23:47Z",
   "created_by": "scripts/build_bs_area_summary.R",
   "pipeline": {
     "script": "scripts/build_bs_area_summary.R",
@@ -328,7 +328,7 @@
       "storage_provider": "git_repository",
       "format": "json",
       "bytes": 34530,
-      "sha256": "ee7870b7bad74da195981caa71de7aaa72b9d9478a7b39e2282647ac6f33cee9",
+      "sha256": "dd43326ee13a51c9e0c6f9668326cd1c8d4f14b41eac4a0105f306569ddb567a",
       "row_count": 18,
       "content": "Bahamas island area summary with census 2010 religious-affiliation and no-religion metrics.",
       "privacy": "public",
@@ -360,7 +360,7 @@
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/bs/data/area_summary_island.json",
-      "sha256": "ee7870b7bad74da195981caa71de7aaa72b9d9478a7b39e2282647ac6f33cee9",
+      "sha256": "dd43326ee13a51c9e0c6f9668326cd1c8d4f14b41eac4a0105f306569ddb567a",
       "built_by": "scripts/build_bs_area_summary.R",
       "notes": "18 island reporting units x 1 census year (2010); stated-response denominator."
     },

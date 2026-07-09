@@ -204,14 +204,18 @@ def relation_from_payload(data: dict[str, Any], relation_id: int) -> dict[str, A
     raise RuntimeError(f"relation {relation_id} missing from osm api payload")
 
 
-def relation_member_ids(relation: dict[str, Any]) -> list[int]:
-    """return relation-member ids in their osm member order."""
+def relation_member_ids(relation: dict[str, Any], roles: set[str] | None = None) -> list[int]:
+    """return filtered relation-member ids in their osm member order."""
 
-    return [
-        int(member["ref"])
-        for member in relation.get("members", [])
-        if member.get("type") == "relation"
-    ]
+    member_ids: list[int] = []
+    for member in relation.get("members", []):
+        if member.get("type") != "relation":
+            continue
+        role = member.get("role", "") or ""
+        if roles is not None and role not in roles:
+            continue
+        member_ids.append(int(member["ref"]))
+    return member_ids
 
 
 def boundary_way_members(relation: dict[str, Any]) -> list[dict[str, Any]]:
@@ -245,15 +249,15 @@ def choose_polygon_relations(
 
     data = fetch_relation_full(relation_id, reuse_cache)
     relation = relation_from_payload(data, relation_id)
-    child_ids = relation_member_ids(relation)
+    child_ids = relation_member_ids(relation, roles={"subarea", ""})
     has_boundary_ways = bool(boundary_way_members(relation))
 
     if has_boundary_ways and not is_root:
         return [relation_id]
-    if has_boundary_ways and is_root and not child_ids:
-        return [relation_id]
 
     candidates: list[int] = []
+    if has_boundary_ways and is_root:
+        candidates.append(relation_id)
     for child_id in child_ids:
         candidates.extend(
             choose_polygon_relations(
