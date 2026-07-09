@@ -1,6 +1,6 @@
 {
   "schema_version": "0.2.0",
-  "generated_at": "2026-07-09T09:23:47Z",
+  "generated_at": "2026-07-09T14:31:11Z",
   "generated_by": "scripts/build_bs_area_summary.R",
   "country_code": "BS",
   "boundary_set": {

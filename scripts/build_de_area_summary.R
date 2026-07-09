@@ -12,6 +12,7 @@ suppressMessages({
   library(jsonlite)
   library(sf)
 })
+source("scripts/lib/simplify_boundary.R")
 
 raw_dir <- "data/raw/de_census"
 de_dir <- "apps/regions/de/data"
@@ -429,39 +430,19 @@ read_vg250_kreis <- function(zip_path, boundary_set_id, census_rows, use_mv_refo
 
 # write a simplified GeoJSON with mapshaper's clean and precision ladder.
 write_simplified_boundary <- function(boundary, output_path, field_names, max_bytes = 1500000L) {
-  input <- tempfile(fileext = ".geojson")
   candidate <- st_transform(boundary[, field_names], 4326)
-  st_write(candidate, input, driver = "GeoJSON", delete_dsn = TRUE, quiet = TRUE,
-           layer_options = c("COORDINATE_PRECISION=6"))
-  npx <- Sys.which("npx")
-  if (!nzchar(npx)) stop("npx is required so mapshaper can write the simplified boundary", call. = FALSE)
-  npm_cache <- "/private/tmp/pow-npm-cache"
-  dir.create(npm_cache, recursive = TRUE, showWarnings = FALSE)
-  npx_env <- c(
-    paste0("npm_config_cache=", npm_cache),
-    paste0("NPM_CONFIG_CACHE=", npm_cache),
-    "npm_config_update_notifier=false"
+  ladder <- c(40, 30, 20, 15, 10, 7.5, 5, 3, 2, 1)
+  attr(ladder, "mapshaper_method") <- "dp"
+  simplification <- mapshaper_simplify_to_cap(
+    candidate,
+    output_path,
+    max_bytes = max_bytes,
+    keep_percentages = ladder,
+    clean_option = NULL
   )
-  ladder <- c("40%", "30%", "20%", "15%", "10%", "7.5%", "5%", "3%", "2%", "1%")
-  for (keep in ladder) {
-    if (file.exists(output_path)) unlink(output_path)
-    args <- c(
-      "--yes", "mapshaper", input,
-      "-clean",
-      "-simplify", "dp", "keep-shapes", keep,
-      "-o", "precision=0.00001", "format=geojson", output_path
-    )
-    status <- tryCatch(
-      system2(npx, args, stdout = TRUE, stderr = TRUE, env = npx_env),
-      warning = function(w) structure(conditionMessage(w), status = 1L)
-    )
-    if (!file.exists(output_path)) next
-    bytes <- file_bytes(output_path)
-    if (bytes <= max_bytes) {
-      return(list(keep = keep, bytes = bytes, mapshaper_output = paste(status, collapse = "\n")))
-    }
-  }
-  stop("simplified Germany Kreis boundary remains above size budget or mapshaper failed", call. = FALSE)
+  simplification[["keep"]] <- sprintf("%g%%", simplification[["keep_percent"]])
+  simplification[["mapshaper_output"]] <- NA_character_
+  simplification
 }
 
 # derive legal-membership affiliation counts and shares from compact categories.

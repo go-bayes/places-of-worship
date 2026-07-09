@@ -15,6 +15,7 @@ suppressMessages({
   library(sf)
   library(xml2)
 })
+source("scripts/lib/simplify_boundary.R")
 
 raw_dir <- "data/raw/sk_census"
 district_dir <- file.path(raw_dir, "sodb2021_z01_15_by_district")
@@ -428,31 +429,6 @@ write_boundary_product <- function(boundary_path, census_codes) {
   )
 }
 
-# run mapshaper simplification for one keep percentage.
-run_mapshaper <- function(input_path, output_path, keep_percent) {
-  npm_cache <- tempfile("npm-cache-")
-  dir.create(npm_cache, showWarnings = FALSE, recursive = TRUE)
-  on.exit(unlink(npm_cache, recursive = TRUE), add = TRUE)
-  unlink(output_path)
-  args <- c(
-    "--yes", "mapshaper", input_path,
-    "-simplify", "weighted", "keep-shapes", paste0(keep_percent, "%"),
-    "-clean",
-    "-o", "precision=0.00001", "format=geojson", output_path
-  )
-  result <- system2(
-    "npx", args,
-    stdout = TRUE,
-    stderr = TRUE,
-    env = paste0("NPM_CONFIG_CACHE=", npm_cache)
-  )
-  status <- attr(result, "status")
-  if (!is.null(status) && status != 0L) {
-    stop("mapshaper failed: ", paste(result, collapse = "\n"), call. = FALSE)
-  }
-  invisible(result)
-}
-
 # dissolve the existing municipality boundary product to the eight current kraje.
 write_kraj_boundary_product <- function(municipality_boundary_path, municipality_area_table, output_path) {
   boundary <- st_read(municipality_boundary_path, quiet = TRUE)
@@ -499,17 +475,13 @@ write_kraj_boundary_product <- function(municipality_boundary_path, municipality
   st_write(st_make_valid(st_transform(dissolved, 4326)), temp_input, delete_dsn = TRUE, quiet = TRUE)
 
   keep_ladder <- c(75, 50, 35, 25, 15, 10, 7.5, 5, 3, 2, 1)
-  chosen_keep <- tail(keep_ladder, 1)
-  chosen_bytes <- NA_integer_
-  for (keep_percent in keep_ladder) {
-    run_mapshaper(temp_input, output_path, keep_percent)
-    chosen_bytes <- file_bytes(output_path)
-    chosen_keep <- keep_percent
-    if (chosen_bytes <= kraj_boundary_target_bytes) break
-  }
-  if (chosen_bytes > kraj_boundary_target_bytes) {
-    stop("simplified SK kraj boundary exceeds target bytes: ", chosen_bytes, call. = FALSE)
-  }
+  simplification <- mapshaper_simplify_to_cap(
+    temp_input,
+    output_path,
+    max_bytes = kraj_boundary_target_bytes,
+    keep_percentages = keep_ladder,
+    clean_option = NULL
+  )
 
   simplified <- st_read(output_path, quiet = TRUE)
   if (nrow(simplified) != length(kraj_names)) {
@@ -520,8 +492,8 @@ write_kraj_boundary_product <- function(municipality_boundary_path, municipality
     area_table = st_drop_geometry(dissolved)[c("area_code", "area_name", "land_area_sq_km", "source_boundary_codes")],
     source_feature_count = nrow(boundary),
     output_feature_count = row_count_file(output_path),
-    output_bytes = chosen_bytes,
-    mapshaper_keep_percent = chosen_keep,
+    output_bytes = simplification[["bytes"]],
+    mapshaper_keep_percent = simplification[["keep_percent"]],
     input_bytes = file_bytes(temp_input)
   )
 }

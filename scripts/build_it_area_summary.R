@@ -13,6 +13,7 @@ suppressMessages({
   library(jsonlite)
   library(sf)
 })
+source("scripts/lib/simplify_boundary.R")
 
 raw_dir <- "data/raw/it_practice"
 it_dir <- "apps/regions/it/data"
@@ -360,43 +361,14 @@ read_boundary <- function(path) {
 # write a mapshaper-simplified GeoJSON and assert it remains valid.
 write_simplified_boundary <- function(boundary, output_path, field_names) {
   boundary_fields <- boundary[, field_names]
-  tmp_input <- tempfile(fileext = ".geojson")
-  on.exit(unlink(tmp_input), add = TRUE)
-  npm_cache <- tempfile("npm-cache-")
-  dir.create(npm_cache, showWarnings = FALSE, recursive = TRUE)
-  on.exit(unlink(npm_cache, recursive = TRUE), add = TRUE)
-  st_write(boundary_fields, tmp_input, driver = "GeoJSON", delete_dsn = TRUE,
-           quiet = TRUE, layer_options = c("COORDINATE_PRECISION=5"))
-
   keep_percentages <- c(90, 75, 60, 45, 30, 20, 15, 10, 7, 5, 3, 2, 1)
-  method <- "mapshaper weighted keep-shapes"
-  for (keep_percent in keep_percentages) {
-    unlink(output_path)
-    status <- system2(
-      "npx",
-      c(
-        "--yes", "mapshaper", tmp_input,
-        "-simplify", "weighted", "keep-shapes", sprintf("%g%%", keep_percent),
-        "-clean",
-        "-o", "precision=0.00001", "format=geojson", output_path
-      ),
-      env = paste0("NPM_CONFIG_CACHE=", npm_cache)
-    )
-    if (status != 0L || !file.exists(output_path)) {
-      stop("mapshaper simplification failed at ", keep_percent, "%", call. = FALSE)
-    }
-    written <- st_read(output_path, quiet = TRUE)
-    written_valid <- st_is_valid(written)
-    if (any(st_is_empty(written)) || any(is.na(written_valid)) || any(!written_valid)) {
-      stop("mapshaper simplification produced empty or invalid IT geometries", call. = FALSE)
-    }
-    bytes <- file_bytes(output_path)
-    if (bytes <= 800000L) {
-      return(list(method = method, clean_option = "-clean",
-                  keep_percent = keep_percent, bytes = bytes))
-    }
-  }
-  stop("mapshaper-simplified IT region boundary remains above 800 KB", call. = FALSE)
+  mapshaper_simplify_to_cap(
+    boundary_fields,
+    output_path,
+    max_bytes = 800000L,
+    keep_percentages = keep_percentages,
+    clean_option = NULL
+  )
 }
 
 # flatten area-summary rows for the CSV sidecar.

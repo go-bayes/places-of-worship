@@ -13,6 +13,7 @@ suppressMessages({
   library(jsonlite)
   library(sf)
 })
+source("scripts/lib/simplify_boundary.R")
 
 raw_dir <- "data/raw/dk_membership"
 dk_dir <- "apps/regions/dk/data"
@@ -478,44 +479,25 @@ read_municipality_boundary <- function() {
 
 # write a mapshaper-simplified GeoJSON and assert the output stays valid and under target.
 write_simplified_boundary <- function(boundary, output_path, target_bytes, label) {
-  tmp_input <- tempfile(fileext = ".geojson")
-  npm_cache <- tempfile("npm-cache-")
-  dir.create(npm_cache, showWarnings = FALSE, recursive = TRUE)
-  on.exit(unlink(c(tmp_input, npm_cache), recursive = TRUE), add = TRUE)
-  st_write(boundary, tmp_input, driver = "GeoJSON", delete_dsn = TRUE,
-           quiet = TRUE, layer_options = c("COORDINATE_PRECISION=5"))
-
   keep_percentages <- c(5, 3, 2, 1, 0.75, 0.5, 0.35, 0.25)
-  method <- "mapshaper weighted keep-shapes"
-  for (keep_percent in keep_percentages) {
-    unlink(c(output_path, sub("\\.geojson$", "-1.geojson", output_path),
-             sub("\\.geojson$", "-2.geojson", output_path)))
-    status <- system2(
-      "npx",
-      c(
-        "--yes", "mapshaper", tmp_input,
-        "-target", "type=polygon",
-        "-simplify", "weighted", "keep-shapes", sprintf("%g%%", keep_percent),
-        "-clean",
-        "-o", "precision=0.00001", "format=geojson", output_path
-      ),
-      env = paste0("NPM_CONFIG_CACHE=", npm_cache)
-    )
-    if (status != 0L || !file.exists(output_path)) {
-      stop("mapshaper simplification failed for ", label, " at ", keep_percent, "%", call. = FALSE)
-    }
-    written <- st_read(output_path, quiet = TRUE)
-    written_valid <- st_is_valid(written)
-    if (nrow(written) != nrow(boundary) || any(st_is_empty(written)) || any(is.na(written_valid)) || any(!written_valid)) {
-      stop("mapshaper produced invalid ", label, " geometries at ", keep_percent, "%", call. = FALSE)
-    }
-    bytes <- file_bytes(output_path)
-    if (bytes <= target_bytes) {
-      return(list(method = method, clean_option = "-clean", keep_percent = keep_percent,
-                  bytes = bytes, byte_ceiling = target_bytes))
-    }
+  attr(keep_percentages, "mapshaper_target") <- "type=polygon"
+  attr(keep_percentages, "mapshaper_extra_output_paths") <- c(
+    sub("\\.geojson$", "-1.geojson", output_path),
+    sub("\\.geojson$", "-2.geojson", output_path)
+  )
+  simplification <- mapshaper_simplify_to_cap(
+    boundary,
+    output_path,
+    max_bytes = target_bytes,
+    keep_percentages = keep_percentages,
+    clean_option = NULL
+  )
+  written <- st_read(output_path, quiet = TRUE)
+  if (nrow(written) != nrow(boundary)) {
+    stop("mapshaper changed the ", label, " feature count", call. = FALSE)
   }
-  stop("mapshaper-simplified ", label, " boundary remains above target bytes", call. = FALSE)
+  simplification[["byte_ceiling"]] <- target_bytes
+  simplification
 }
 
 # compute join/drop validation for every KM1 parish source year.

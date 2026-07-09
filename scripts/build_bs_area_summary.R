@@ -19,6 +19,7 @@ suppressMessages({
   library(jsonlite)
   library(sf)
 })
+source("scripts/lib/simplify_boundary.R")
 
 raw_dir <- "data/raw/bs_census"
 bs_dir <- "apps/regions/bs/data"
@@ -296,51 +297,18 @@ build_island_boundary <- function(path) {
 # write the boundary with mapshaper's topology-preserving simplification.
 write_simplified_boundary <- function(boundary, output_path, field_names) {
   boundary_fields <- boundary[, field_names]
-  tmp_input <- tempfile(fileext = ".geojson")
-  on.exit(unlink(tmp_input), add = TRUE)
-  npm_cache <- tempfile("npm-cache-")
-  dir.create(npm_cache, showWarnings = FALSE, recursive = TRUE)
-  on.exit(unlink(npm_cache, recursive = TRUE), add = TRUE)
-  st_write(boundary_fields, tmp_input, driver = "GeoJSON", delete_dsn = TRUE,
-           quiet = TRUE, layer_options = c("COORDINATE_PRECISION=5"))
-
   # 3% remains above the byte ceiling after dissolving the full source, so 2.5%
   # is the final fallback while still retaining more vertices than the old layer.
   keep_percentages <- c(40, 30, 20, 15, 10, 7, 5, 3, 2.5)
-  method <- "mapshaper weighted keep-shapes"
-  clean_option <- "allow-overlaps"
-  for (keep_percent in keep_percentages) {
-    unlink(output_path)
-    status <- system2(
-      "npx",
-      c(
-        "--yes", "mapshaper", tmp_input,
-        "-simplify", "weighted", "keep-shapes", sprintf("%g%%", keep_percent),
-        "-clean", clean_option,
-        "-o", "precision=0.00001", "format=geojson", output_path
-      ),
-      env = paste0("NPM_CONFIG_CACHE=", npm_cache)
-    )
-    if (status != 0L || !file.exists(output_path)) {
-      stop("mapshaper simplification failed at ", keep_percent, "%", call. = FALSE)
-    }
-    # mapshaper output is trusted but verified; the old sf ladder had this guard.
-    written <- st_read(output_path, quiet = TRUE)
-    written_valid <- st_is_valid(written)
-    if (any(st_is_empty(written)) || any(is.na(written_valid)) || any(!written_valid)) {
-      stop("mapshaper simplification produced empty or invalid BS geometries", call. = FALSE)
-    }
-    bytes <- file_bytes(output_path)
-    # the archipelago's thousands of cays need mapshaper's weighted
-    # Visvalingam path: it preserves coastline character at the same byte size
-    # better than a metre tolerance over dissolved island polygons. allow-overlaps
-    # stops clean from treating sea gaps between separate islands as errors.
-    if (bytes <= 3000000L) {
-      return(list(method = method, clean_option = clean_option,
-                  keep_percent = keep_percent, bytes = bytes))
-    }
-  }
-  stop("mapshaper-simplified BS island boundary remains above 3 MB", call. = FALSE)
+  # the archipelago's thousands of cays need mapshaper's weighted Visvalingam
+  # path; allow-overlaps stops clean from treating sea gaps as errors.
+  mapshaper_simplify_to_cap(
+    boundary_fields,
+    output_path,
+    max_bytes = 3000000L,
+    keep_percentages = keep_percentages,
+    clean_option = "allow-overlaps"
+  )
 }
 
 # build one schema-shaped area-summary row (2010, percent + count).

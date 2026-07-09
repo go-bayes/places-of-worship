@@ -115,6 +115,59 @@ and footnote treatment NZ's `rr3_small_denominator` gets (for example,
 `county_boundary_change_crosswalked`) — add the substring to the
 existing `||` chain rather than branching on country identity.
 
+## Companion products on a stable frame
+
+A companion product fits when a real earlier wave can be stated on a
+coarser stable frame with an auditable concordance while the live
+finest geography cannot support it. The pattern is now established by
+South Korea's current-sido companion for 1995 (`1588acf`), Ghana's
+pre-2019 ten-region companion for 2010 (`9103a3d`), and Slovakia's
+current-kraj companion for 2001 and 2011 (`4cb754a`).
+
+Use the coarsest official frame that preserves the source claim and the
+map reader's interpretation. The stable frame may be current geography
+(Korea current sido, Slovakia current kraj) or a historical geography
+(Ghana old ten-region frame). Name the frame in the boundary set id,
+area-summary filename, manifest parameters, overview copy, and source
+notes.
+
+Set `target_years` from the waves the product actually ships. Deferred
+source waves stay in `deferred_sources` and do not widen the map slider,
+hub badge, task years, or public claim. The shipped-wave rule prevents a
+country card from promising a year that exists only as a source lead.
+
+Every companion roll-up must reconcile exactly. Area rows should sum to
+the source national row for every headline count, and any aggregation
+from an existing finer product must sum exactly back to the component
+rows. Record both validations in the manifest. Ghana's 2021 ten-region
+rows and Slovakia's 2021 kraj rows are the model: they are exact sums of
+the already shipped finer product, with the finer product left
+byte-identical.
+
+Absent units require explicit rows. If a current unit did not exist in
+an earlier wave, emit the area row with null metrics and explain the
+absence in the quality flag, popup note, and manifest. Korea's 1995
+Sejong row is the precedent. Use predecessor assignment only when the
+concordance preserves the whole partition and the national totals
+exactly.
+
+Rename the manifest to the shipped span when the companion changes the
+public product's temporal coverage. Use the convention
+`<cc>-<family>-<first-year>-<last-year>.json`. Replace the narrower
+active manifest in references rather than leaving two active public
+manifests for the same family.
+
+Wire the companion as a second geography level in `REGION_CONFIG`.
+Avoid country-conditional runtime logic. The Korea UI change (`88dd4c0`)
+is the reference: add the companion to `censusLevels`, keep the default
+on the primary live level when appropriate, update onboarding and popup
+copy, and let the shared runtime derive the available years per level
+from the summary files.
+
+Hub wave badges are hand-authored. When touching a country card, verify
+the badge count and year span against the shipped products; deriving
+badges at render time remains an open improvement.
+
 ## Deploy parity
 
 A local static server serves every file; GitHub Pages does not

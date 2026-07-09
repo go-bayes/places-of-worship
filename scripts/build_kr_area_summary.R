@@ -142,6 +142,10 @@ sido_summary_json_out <- file.path(kr_dir, "area_summary_sido.json")
 sido_summary_csv_out <- file.path(kr_dir, "area_summary_sido.csv")
 manifest_out <- file.path(manifest_dir, "kr-census-religion-1995-2015.json")
 
+# korea keeps the historical binary 3 MiB ceiling; scripts that already used
+# decimal caps keep those decimal byte ceilings in the mapshaper helper calls.
+kr_boundary_max_bytes <- 3 * 1024 * 1024
+
 district_groups <- list(
   "31010" = c("31011", "31012", "31013", "31014"),
   "31020" = c("31021", "31022", "31023"),
@@ -1177,9 +1181,9 @@ write_boundary_product <- function(input_path, output_path) {
     st_write(candidate, output_path, delete_dsn = TRUE, quiet = TRUE)
     chosen_bytes <- file_bytes(output_path)
     chosen_tolerance <- tolerance
-    if (chosen_bytes <= 3 * 1024 * 1024) break
+    if (chosen_bytes <= kr_boundary_max_bytes) break
   }
-  if (chosen_bytes > 3 * 1024 * 1024) {
+  if (chosen_bytes > kr_boundary_max_bytes) {
     stop("boundary output remains above 3 MB after simplification", call. = FALSE)
   }
 
@@ -1237,9 +1241,9 @@ write_sido_boundary_product <- function(input_path, output_path) {
     st_write(candidate, output_path, delete_dsn = TRUE, quiet = TRUE)
     chosen_bytes <- file_bytes(output_path)
     chosen_tolerance <- tolerance
-    if (chosen_bytes <= 3 * 1024 * 1024) break
+    if (chosen_bytes <= kr_boundary_max_bytes) break
   }
-  if (chosen_bytes > 3 * 1024 * 1024) {
+  if (chosen_bytes > kr_boundary_max_bytes) {
     stop("sido boundary output remains above 3 MB after simplification", call. = FALSE)
   }
 

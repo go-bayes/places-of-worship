@@ -34,6 +34,8 @@ eggs/
 .eggs/
 lib/
 lib64/
+!scripts/lib/
+!scripts/lib/*.R
 !convex/lib/
 !convex/lib/*.ts
 parts/

@@ -10,6 +10,7 @@ suppressMessages({
   library(readxl)
   library(jsonlite)
 })
+source("scripts/lib/simplify_boundary.R")
 
 raw_dir <- "data/raw/uk_census"
 uk_dir <- "apps/regions/uk/data"
@@ -332,47 +333,14 @@ religion_layers <- function(prefix, geography_label) {
 
 # run mapshaper over path and return the chosen keep percentage.
 postprocess_boundary_geojson <- function(path, keep_percentages, max_bytes) {
-  source_path <- tempfile(fileext = ".geojson")
-  if (!file.copy(path, source_path, overwrite = TRUE)) {
-    stop("could not stage boundary input for mapshaper: ", path, call. = FALSE)
-  }
-  on.exit(unlink(source_path), add = TRUE)
-
-  candidate_paths <- character(0)
-  chosen_path <- NULL
-  chosen_keep <- NA_real_
-  chosen_bytes <- Inf
-  for (keep_percentage in keep_percentages) {
-    candidate_path <- tempfile(fileext = ".geojson")
-    candidate_paths <- c(candidate_paths, candidate_path)
-    args <- c(
-      "--yes", "mapshaper", source_path,
-      "-simplify", "weighted", "keep-shapes", paste0(keep_percentage, "%"),
-      "-clean",
-      "-o", "precision=0.00001", "format=geojson", candidate_path
-    )
-    output <- system2("npx", args, stdout = TRUE, stderr = TRUE)
-    status <- attr(output, "status")
-    if (!is.null(status) && status != 0) {
-      stop("mapshaper failed for ", path, " at ", keep_percentage, "%:\n", paste(output, collapse = "\n"),
-           call. = FALSE)
-    }
-    if (length(output) > 0) message(paste(output, collapse = "\n"))
-    chosen_path <- candidate_path
-    chosen_keep <- keep_percentage
-    chosen_bytes <- file_bytes(candidate_path)
-    if (chosen_bytes <= max_bytes) break
-  }
-
-  if (is.null(chosen_path) || !file.copy(chosen_path, path, overwrite = TRUE)) {
-    stop("could not write mapshaper output: ", path, call. = FALSE)
-  }
-  unlink(setdiff(candidate_paths, chosen_path))
-  on.exit(unlink(chosen_path), add = TRUE)
-  if (chosen_bytes > max_bytes) {
-    warning("mapshaper output remains above target for ", path, ": ", chosen_bytes, " bytes", call. = FALSE)
-  }
-  chosen_keep
+  mapshaper_simplification <- mapshaper_simplify_to_cap(
+    path,
+    path,
+    max_bytes = max_bytes,
+    keep_percentages = keep_percentages,
+    clean_option = NULL
+  )
+  mapshaper_simplification[["keep_percent"]]
 }
 
 # write boundary to path and return the selected simplification settings.
