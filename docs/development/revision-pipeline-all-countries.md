@@ -37,9 +37,17 @@ governance.
 
 Purpose: give RAs work items derived from each country's shipped points.
 
-- One seeding action per country creates a `task_batches` row
-  (`source_kind: "map_snapshot"`, `batch_id: "revise-<cc>-001"`) and
-  imports tasks via the existing `upsertTasksFromStaticMap` path.
+- One seeding mutation per country creates a `task_batches` row
+  (`source_kind: "static_map_import"` — the schema's existing vocabulary;
+  the draft's proposed `map_snapshot` value does not exist —
+  `batch_id: "revise-<cc>-001"`) and seeds tasks through the same shape
+  the static-map import validates. BUILT 2026-07-10:
+  `convex/revisionSeed.ts` (`seedRevisionBatch`, `promoteRevisionBatch`),
+  with the promotion gate enforced in `listTasks` (the gate had been
+  procedural only; it is now real code). Pilot draft batches
+  `revise-nz-001` (100 of 3,618 sites, capped per the sizing rule) and
+  `revise-vu-001` (208 sites, kastom handling per the training-seed
+  precedent) are seeded on dev, unpromoted.
 - `target_years` derive from the country's shipped census waves (the
   `area_summary` product's year set): the revision question per site is
   "did this place stand and function at each wave year". Countries with a
@@ -95,14 +103,18 @@ pipeline and the Points: period layer.
 
 ## Phase R5 — deployment governance (PI ruling required before scale)
 
-Everything — portal traffic included — runs on the single dev deployment
-`pastel-goshawk-398`. Before tranche-two seeding or any additional RA
-beyond Guy:
+Correction from the R1 build (2026-07-10): a prod deployment already
+exists (`prod:valiant-octopus-914`) with an empty users table by design;
+the portals and all data live on the dev deployment
+(`pastel-goshawk-398`). The ruling is therefore a CUTOVER question, not a
+creation question. Before tranche-two seeding or any additional RA beyond
+Guy:
 
-- create the prod Convex deployment and point the portals at it;
-- migrate (or deliberately re-seed) users, batches, and training data;
-- keep dev as staging; deploys become `npx convex dev --once` (staging)
-  then `npx convex deploy` (prod), matching the documented convention.
+- decide the cutover: point the portals at prod and migrate (or
+  deliberately re-seed) users, batches, and training data — or ratify
+  dev-as-production explicitly and record that;
+- keep the non-serving deployment as staging; deploys become
+  `npx convex dev --once` (staging) then `npx convex deploy` (prod).
 
 This is the one structural decision that gets more expensive every week it
 waits.
