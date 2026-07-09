@@ -40,12 +40,20 @@ mapshaper_simplify_to_cap <- function(input_sf_or_path, output_path, max_bytes,
   )
 
   chosen <- NULL
-  clean_args <- if (is.null(clean_option) || identical(clean_option, "")) {
+  clean_args <- if (identical(clean_option, "skip")) {
+    character()
+  } else if (is.null(clean_option) || identical(clean_option, "")) {
     "-clean"
   } else {
     c("-clean", clean_option)
   }
-  clean_label <- if (is.null(clean_option) || identical(clean_option, "")) "-clean" else clean_option
+  clean_label <- if (identical(clean_option, "skip")) {
+    "skipped"
+  } else if (is.null(clean_option) || identical(clean_option, "")) {
+    "-clean"
+  } else {
+    clean_option
+  }
 
   for (keep_percent in keep_percentages) {
     unlink(c(output_path, extra_output_paths))
@@ -82,7 +90,19 @@ mapshaper_simplify_to_cap <- function(input_sf_or_path, output_path, max_bytes,
       )
     }
     if (!file.exists(output_path)) {
-      stop("mapshaper did not create output at ", keep_percent, "%", call. = FALSE)
+      output_base <- tools::file_path_sans_ext(basename(output_path))
+      split_paths <- Sys.glob(file.path(dirname(output_path), paste0(output_base, "-*.geojson")))
+      polygon_candidates <- split_paths[vapply(split_paths, function(path) {
+        candidate <- tryCatch(sf::st_read(path, quiet = TRUE), error = function(e) NULL)
+        if (is.null(candidate) || nrow(candidate) != nrow(input_layer)) return(FALSE)
+        all(grepl("POLYGON", as.character(sf::st_geometry_type(candidate))))
+      }, logical(1))]
+      if (length(polygon_candidates) == 1L) {
+        file.copy(polygon_candidates, output_path, overwrite = TRUE)
+        unlink(split_paths)
+      } else {
+        stop("mapshaper did not create output at ", keep_percent, "%", call. = FALSE)
+      }
     }
 
     written <- sf::st_read(output_path, quiet = TRUE)
