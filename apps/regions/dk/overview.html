@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Denmark map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Denmark research map; every string traces to
+    // research/countries/dk/README.md, docs/manifests/dk-membership-2011-2026.json,
+    // or the live REGION_CONFIG in apps/regions/dk/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "DK",
+      countryName: "Denmark",
+      mapHref: "./",
+      intro: "Administrative Church of Denmark (Folkekirken) membership register overlays, by municipality (kommune) and by parish (sogn). Membership here is register status: a baptised member of the National Church who has not opted out by resignation, drawn from Statistics Denmark's StatBank tables KM1 and KM6 (source item FKMED). This is never attendance and never belief, and it is not the same construct as a census religious-affiliation question.",
+      facts: {
+        waves: "Municipality: 16 annual waves, 2011–2026 (StatBank KM6). Parish: 4 annual waves, 2023–2026 Q1 (StatBank KM1)",
+        geographies: "Municipality (99 current kommuner) and parish (about 2,100 current sogne), both on current DAWA/DAGI boundaries",
+        metrics: "Church of Denmark member share, not-registered share, change since previous year"
+      },
+      reading: [
+        "Municipalities and parishes are shaded by the Church of Denmark member share: 100 × member / (member + non-member) in the same StatBank FKMED row and period.",
+        "This is an administrative register construct, a headcount of who is on the Folkekirken membership rolls. It is not a survey, not a count of who attends, and not a statement of belief. The not-member share includes everyone not registered as a member, whatever their own religion or lack of one; it is not a no-religion affiliation category.",
+        "The municipality product carries the full 16-year annual series, 2011–2026, on the 99 current DAWA/DAGI kommune boundaries; every year reconciles exactly to the national total in the full KM6 extract.",
+        "The parish product ships 2023–2026 Q1 only, on current DAWA/DAGI sogn boundaries. Earlier KM1 parish waves (2007–2022) are deferred: parish mergers and source-code churn mean pre-2023 rows cannot be matched to current parish polygons without a governed concordance layer. For each shipped year, the dropped source parish codes and their member/non-member counts are recorded against the national KM1 total in the manifest so the omission is auditable rather than silent; the dropped population share falls from about 1.9% in 2023 to about 0.2% by 2026 as the current boundary set converges with the source geography.",
+        "Both geography levels support a change metric, reporting the percentage-point change in the member share since the previous annual register year.",
+        "No governed Denmark place-of-worship snapshot is included in this release; place-density metrics are therefore hidden rather than shown as null."
+      ],
+      sources: [
+        {
+          name: "Statistics Denmark StatBank KM6: Population 1 January by municipality, sex, age, member of the National Church and time",
+          href: "https://api.statbank.dk/v1/tableinfo/KM6?lang=en",
+          construct: "Administrative Church of Denmark membership (FKMED), by municipality",
+          years: "2011–2026 (1 January)",
+          licence: "StatBank free reuse, corresponding to Creative Commons Attribution 4.0 International; attribution: Statistics Denmark"
+        },
+        {
+          name: "Statistics Denmark StatBank KM1: Population at the first day of the quarter by parish, member of the National Church and time",
+          href: "https://api.statbank.dk/v1/tableinfo/KM1?lang=en",
+          construct: "Administrative Church of Denmark membership (FKMED), by parish",
+          years: "2023–2026 Q1 shipped (2007–2022 extracted and deferred)",
+          licence: "StatBank free reuse, corresponding to Creative Commons Attribution 4.0 International; attribution: Statistics Denmark"
+        },
+        {
+          name: "DAWA/DAGI current kommune and sogn GeoJSON",
+          href: "https://api.dataforsyningen.dk/",
+          construct: "Boundary geometry, current municipalities and parishes",
+          years: "2026 vintage",
+          licence: "Creative Commons Attribution 4.0 International; attribution: Klimadatastyrelsen"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Statistics Denmark, <a href=\"https://api.statbank.dk/v1/tableinfo/KM1?lang=en\" target=\"_blank\" rel=\"noopener\">StatBank</a> tables KM1 and KM6; boundaries from Klimadatastyrelsen/Dataforsyningen <a href=\"https://api.dataforsyningen.dk/\" target=\"_blank\" rel=\"noopener\">DAWA/DAGI</a>.",
+        tables: "KM1 (variables SOGN, FKMED, Tid) for parish and KM6 (variables KOMK, KØN, ALDER, FKMED, Tid) for municipality. FKMED F is member of the National Church, FKMED U is not a member. The area-summary religious_affiliation fields carry member counts/shares and the no_religion fields carry not-member counts/shares (Italy-precedent slot reuse, declared in the product's indicators block).",
+        licence: "StatBank data are free to reuse with source reference, corresponding to Creative Commons Attribution 4.0 International; DAWA/DAGI boundaries are Creative Commons Attribution 4.0 International with Klimadatastyrelsen attribution.",
+        script: "scripts/build_dk_area_summary.R",
+        manifests: [
+          { label: "dk-membership-2011-2026", href: "docs/manifests/dk-membership-2011-2026.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "No governed Denmark OpenStreetMap place-of-worship snapshot is included in this release; there is therefore no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

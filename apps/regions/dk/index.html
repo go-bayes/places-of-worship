@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Denmark Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Denmark's Folkekirken membership item (StatBank FKMED, tables KM1
+    // and KM6) records administrative membership in the Church of Denmark,
+    // a baptised member on the civil population register who has not
+    // opted out by resignation. It is never attendance and never belief.
+    // The two legacy area-summary slots are reused (Italy precedent):
+    // religious_affiliation_percent carries the member share and
+    // no_religion_percent carries the not-member share. Two geography
+    // levels ship, each with its own year range auto-derived from its
+    // summary file: kommune (municipality) is the default, 16 annual
+    // waves 2011-2026 on 99 current DAWA/DAGI municipalities; sogn
+    // (parish) is the detail view, 2023-2026 only on ~2,100 current
+    // DAWA/DAGI parishes, because pre-2023 KM1 parish waves need a
+    // governed parish concordance layer before they can be interpreted
+    // on current polygons (dropped-parish rates and counts are recorded
+    // in docs/manifests/dk-membership-2011-2026.json).
+    window.REGION_CONFIG = {
+      countryCode: "DK",
+      title: "Places of Worship | Denmark Research Map",
+      dataNoun: "Register",
+      center: [10.5, 56.0],
+      initialZoom: 6.3,
+      censusLevels: {
+        kommune: {
+          label: "Municipality (kommune)",
+          boundaries: "data/dk_kommune_2026.geojson",
+          summary: "data/area_summary_kommune.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Statistics Denmark StatBank KM6, Church of Denmark membership by municipality, 2011–2026, CC BY 4.0 correspondence · Boundaries from Klimadatastyrelsen/Dataforsyningen DAWA/DAGI current kommuner, CC BY 4.0"
+        },
+        sogn: {
+          label: "Parish (sogn)",
+          boundaries: "data/dk_sogn_2026.geojson",
+          summary: "data/area_summary_sogn.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Statistics Denmark StatBank KM1, Church of Denmark membership by parish, 2023–2026 Q1, CC BY 4.0 correspondence · Boundaries from Klimadatastyrelsen/Dataforsyningen DAWA/DAGI current sogne, CC BY 4.0"
+        }
+      },
+      defaultLevel: "kommune",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2026,
+      // religious_change reads honestly at both levels: kommune's 16
+      // annual waves and sogn's 4 annual waves are both single-boundary,
+      // single-source annual series; "change since previous year" is
+      // literally true at either level (see the Italy precedent for the
+      // same annual-series reasoning)
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Members of the Church of Denmark (%)",
+          note: "administrative Church of Denmark membership share, 100 × member / (member + non-member) from StatBank FKMED; this is register membership — a baptised member who has not opted out by resignation — never attendance or belief"
+        },
+        no_religion_percent: {
+          label: "Not registered as a member (%)",
+          note: "share not registered as a Church of Denmark member in the same StatBank FKMED row; this is register non-membership, not a no-religion affiliation category, since it includes people of any or no religion who are simply not on the Folkekirken membership register"
+        },
+        religious_change: {
+          label: "Change since previous year (pp)",
+          note: "percentage-point change in the Church of Denmark member share since the previous annual register year"
+        }
+      },
+      popupDenominatorNote: "Percentages are the member share of member plus non-member in the same StatBank FKMED row: 100 × member / (member + non-member). This is the administrative Church of Denmark membership register (StatBank KM1 for parish, KM6 for municipality), not census religious affiliation, not all-religion membership, and not attendance or belief.",
+      cityPresets: [
+        { label: "Copenhagen", coords: [12.5683, 55.6761], zoom: 10 },
+        { label: "Aarhus", coords: [10.2039, 56.1629], zoom: 10 },
+        { label: "Odense", coords: [10.3833, 55.4038], zoom: 10 },
+        { label: "Aalborg", coords: [9.9217, 57.0488], zoom: 10 },
+        { label: "Esbjerg", coords: [8.4594, 55.4765], zoom: 10 },
+        { label: "Randers", coords: [10.0369, 56.4607], zoom: 10 },
+        { label: "Kolding", coords: [9.4721, 55.4904], zoom: 10 },
+        { label: "Horsens", coords: [9.8502, 55.8607], zoom: 10 },
+        { label: "Vejle", coords: [9.5350, 55.7091], zoom: 10 },
+        { label: "Roskilde", coords: [12.0800, 55.6415], zoom: 10 }
+      ],
+      geocode: { country: "dk", biasLngLat: [10.5, 56.0] },
+      onboarding: {
+        title: "Denmark research map",
+        intro: "Administrative Church of Denmark (Folkekirken) membership register overlays, by municipality and by parish. Membership is a baptised member of the National Church who has not opted out by resignation, on the civil population register — never attendance, and never belief.",
+        bullets: [
+          "Municipalities (99 kommuner) are shaded by the Church of Denmark member share, 16 annual waves 2011–2026, from Statistics Denmark StatBank KM6.",
+          "Switch the geography control to Parish (sogn) for the detail view: about 2,100 current parishes, 2023–2026 only. Pre-2023 parish waves are deferred pending a parish concordance for mergers and code changes; the dropped codes and counts are documented in the manifest.",
+          "This is a register construct, a headcount of who is on the membership rolls, not a survey and not a count of who attends or believes.",
+          "Both geography levels support a change metric: the percentage-point change in the member share since the previous annual register year.",
+          "No Denmark place-of-worship layer ships in this release; place-density metrics are hidden rather than shown as zero.",
+          "Open <strong>Show Register Data</strong> (top centre) for the metric, geography and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Administrative Church of Denmark membership from <a href="https://api.statbank.dk/v1/tableinfo/KM6?lang=en" target="_blank" rel="noopener">Statistics Denmark StatBank KM6</a> (municipality, 2011&ndash;2026) and <a href="https://api.statbank.dk/v1/tableinfo/KM1?lang=en" target="_blank" rel="noopener">KM1</a> (parish, 2023&ndash;2026 Q1), StatBank free reuse corresponding to Creative Commons Attribution 4.0 International &middot; Boundaries from <a href="https://api.dataforsyningen.dk/" target="_blank" rel="noopener">Klimadatastyrelsen/Dataforsyningen DAWA/DAGI</a> current kommuner and sogne, CC BY 4.0; attribution: Klimadatastyrelsen',
+      censusFlagNote: "* Church of Denmark membership is an administrative register construct: a baptised member of the National Church who has not opted out by resignation, on the civil population register. It is never census religious affiliation, all-religion membership, attendance, or belief. The parish (sogn) level ships 2023–2026 only; pre-2023 parish waves are deferred pending a governed parish concordance for mergers and code churn, with dropped-parish rates and counts recorded in docs/manifests/dk-membership-2011-2026.json. The municipality (kommune) level carries the full 2011–2026 series on 99 current boundaries."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710b"></script>
+</body>
+</html>
