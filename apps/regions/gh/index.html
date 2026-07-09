@@ -29,6 +29,14 @@
           codeProp: "area_code",
           nameProp: "area_name",
           credit: "Boundaries © geoBoundaries GHA ADM1 (CC BY-SA 2.0, source OpenStreetMap contributors) · census religion from GSS 2021 PHC General Report Vol. 3C, table 5.7"
+        },
+        region_2010_ten: {
+          label: "Region (pre-2019 ten)",
+          boundaries: "data/gh_region_2010_ten.geojson",
+          summary: "data/area_summary_region_2010_2021_ten.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries dissolved from the geoBoundaries GHA ADM1 derivative (CC BY-SA 2.0, source OpenStreetMap contributors) to the pre-2019 ten-region frame · census religion from GSS StatsBank PHC2010 POP16 (2010) and GSS 2021 PHC Vol. 3C table 5.7 aggregated to the ten regions (2021)"
         }
       },
       defaultLevel: "region",
@@ -62,13 +70,14 @@
       geocode: { country: "gh", biasLngLat: [-1.2, 7.9] },
       onboarding: {
         title: "Ghana research map",
-        intro: "Census religion overlays for Ghana at region level, built from the Ghana Statistical Service 2021 Population and Housing Census General Report Volume 3C, table 5.7.",
+        intro: "Census religion overlays for Ghana at region level, built from the Ghana Statistical Service 2021 Population and Housing Census General Report Volume 3C, table 5.7, with a pre-2019 ten-region companion adding the 2010 wave.",
         bullets: [
           "Areas are shaded by religious affiliation or no religion among the persons counted in the religion table.",
           "Religious affiliation combines all named religions: Catholic, Protestant, Pentecostal/Charismatic, Other Christian, Islam, Traditionalist and Other. Christian is a census subtotal of the four Christian groups.",
           "No religion is the census's No Religion group; the census allocates every person to one of eight groups, so there is no not-stated category.",
           "Volume 3C publishes religion at region level only; the 16 regions are the post-2019 regional structure.",
-          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+          "Switch the geography control to Region (pre-2019 ten) for the two-wave series; the 2010 wave is available on the pre-2019 ten-region frame only, alongside the 2021 counts aggregated to those ten regions.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric, geography and year controls."
         ],
         links: [
           { label: "About this map", href: "overview.html" },
@@ -82,7 +91,7 @@
         { id: "review-link", label: "Review evidence", href: "review.html", title: "Review submitted evidence" }
       ],
       censusSourceAttribution: 'Census religion from <a href="https://census2021.statsghana.gov.gh/" target="_blank" rel="noopener">GSS 2021 PHC General Report Vol. 3C, table 5.7</a> &middot; Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries GHA ADM1</a> (CC BY-SA 2.0, source OpenStreetMap contributors) &middot; GSS census report, open download, attribution requested, no explicit reuse licence stated',
-      censusFlagNote: "* Percentages use the table 5.7 regional total (all locality types, both sexes). The census allocates every person to one of eight religion groups, so there is no not-stated category. Volume 3C publishes religion at region level only."
+      censusFlagNote: "* Percentages use the table 5.7 regional total (all locality types, both sexes). The census allocates every person to one of eight religion groups, so there is no not-stated category. Volume 3C publishes religion at region level only. The pre-2019 ten-region companion carries the 2010 wave (GSS StatsBank PHC2010 POP16), with 2021 counts aggregated to the same ten regions; its boundaries dissolve the geoBoundaries GHA ADM1 derivative (CC BY-SA 2.0, source OpenStreetMap contributors) to the pre-2019 ten-region frame."
     };
   </script>
   <script src="../_shared/region-map.js?v=20260709n"></script>
