@@ -2,41 +2,61 @@
 
 ## Status
 
-- **Tier**: B
-- **Build state**: Surveyed; CBS has strong annual and census-like population-by-religion series, while locality-level download details need confirmation.
-- **Last verified**: 2026-07-07
+- **Tier**: awaiting scope ruling
+- **Build state**: awaiting scope ruling; probe only
+- **Last verified**: 2026-07-10
+
+No extraction, boundary preparation, or map build may begin until the project
+lead rules on geographic scope and sensitivity. The evidence and the three
+scope options are in [scope-options.md](scope-options.md).
 
 ## Religious data over time
 
 | Source | Construct | Smallest public unit | Years | Format | Access | Licence |
 | --- | --- | --- | --- | --- | --- | --- |
-| [Israel CBS population subject page](https://www.cbs.gov.il/en/subjects/Pages/Population.aspx) | Official population by religion/population group | District/locality route in CBS tables | Annual series; 2022 within the 2020-2024 period | Web/PDF/statistical tables | Open web | Government statistics; confirm reuse terms before republication |
-| [Israel CBS StatBank](https://statbank.cbs.gov.il/) | Downloadable statistical tables | Locality/district route to verify | Annual and census-related series back to early state period | Web tables/download | Open web | Government statistics; confirm reuse terms before republication |
+| Israel Central Bureau of Statistics (CBS), Statistical Abstract table 2.2 | Registry-based population by religion | National | Annual, 1995–2024 | XLSX/PDF | Open web | CBS open licence |
+| CBS geographic dictionary API | Main religion of locality; Jewish, Arab, and total population counts | Locality | Annual, 1995–2024 | API (JSON/XML) | Open web | CBS open licence |
+| CBS Statistical Abstract table 2.11 | Registry-based population by religion | District/sub-district | 1948, 1961, 1972, 1983, 1995, 2008, 2022, and 2024 | XLSX/PDF | Open web | CBS open licence |
+| CBS Social Survey | Self-defined Jewish religiosity among people aged 20 and over | National annual estimates; district analysis would require microdata and precision assessment | Annual survey since 2002 | Tables/microdata | Open web | CBS terms |
+
+These constructs are not interchangeable. The locality API does not provide
+all-age counts for every religion, and self-defined religiosity is a survey
+indicator rather than registry religion.
+
+## Access the data yourself
+
+- **Source of record**: [CBS population publications](https://www.cbs.gov.il/en/Pages/SubjectPublications.aspx?CbsSubject=%D7%90%D7%95%D7%9B%D7%9C%D7%95%D7%A1%D7%99%D7%99%D7%94)
+- **Exact routes**: recorded in [scope-options.md](scope-options.md)
+- **Licence**: [CBS Open License for information on its website](https://www.cbs.gov.il/en/Pages/Enduser-license.aspx)
+- **Extraction script**: none; building is out of scope pending the ruling
+- **Retrieval recipe and hashes**: none; building is out of scope pending the ruling
 
 ## Boundaries
 
-| Source | Unit | Match note |
-| --- | --- | --- |
-| [geoBoundaries ISR ADM2](https://www.geoboundaries.org/api/current/gbOpen/ISR/ADM2/) | District/subdistrict route | Official CBS locality codes should govern joins where possible. |
+Boundary choices depend on the scope ruling. CBS publishes 2021 locality
+points and 2022 statistical-area polygons. The public files follow CBS
+statistical coverage; they are not a neutral Green Line mask. See
+[scope-options.md](scope-options.md) for the files, limitations, and terms.
 
 ## Places-of-worship layer
 
-| Source | Role | Note |
-| --- | --- | --- |
-| [OpenStreetMap](https://www.openstreetmap.org) | Candidate site layer | OSM coverage was not counted in this source sweep. Site mapping should be reviewed for disputed places, mixed localities, and minority communities. |
+Not probed. Site-layer assessment is outside this scope-options task.
 
 ## First visualisation
 
-Map CBS district or locality shares by official religion/population group only after the downloadable table and geography are confirmed.
+Awaiting scope ruling. No visualisation is specified or built.
 
 ## Build recipe
 
-Start with the CBS StatBank locality or district table for population by religion/population group and an official locality-code boundary layer or geoBoundaries ISR ADM2. Keep Jewish religiosity, legal population group, and religious affiliation distinct.
+Awaiting scope ruling. No build recipe is authorised.
 
 ## Risks and open questions
 
-Religion and population-group data in Israel are highly sensitive because they intersect with ethnicity, citizenship, territory, and conflict. Public products should use official categories, avoid site-level inference, and clearly state geographic coverage.
+- The project lead must choose among the three documented geographic scopes.
+- Registry religion, locality main religion, and survey self-definition must
+  remain separate indicators.
+- A locality-row filter cannot split Jerusalem at the Green Line.
 
 ## Deep-history potential
 
-High. Ottoman registers, Mandatory Palestine censuses from 1922 and 1931, Survey of Palestine maps, Israel State Archives holdings, CBS locality series, waqf records, church records, synagogue records, and antiquities registers can support deep histories.
+Not assessed in this probe.
