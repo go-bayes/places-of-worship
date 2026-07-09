@@ -7,6 +7,7 @@
         au: { code: "AU", label: "Australia" },
         br: { code: "BR", label: "Brazil" },
         ca: { code: "CA", label: "Canada" },
+        cz: { code: "CZ", label: "Czechia" },
         ie: { code: "IE", label: "Ireland" },
         in: { code: "IN", label: "India" },
         kr: { code: "KR", label: "South Korea" },

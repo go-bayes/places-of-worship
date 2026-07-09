@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Czechia Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    window.REGION_CONFIG = {
+      countryCode: "CZ",
+      title: "Places of Worship | Czechia Research Map",
+      center: [15.47, 49.82],
+      initialZoom: 7,
+      censusLevels: {
+        kraj: {
+          label: "Region (kraj)",
+          boundaries: "data/cz_kraj_2021.geojson",
+          summary: "data/area_summary_kraj.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries © EuroGeographics via Eurostat GISCO NUTS3 2021 · census religion from CZSO SLD008T02"
+        }
+      },
+      defaultLevel: "kraj",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      // dense central-european osm coverage buries the kraj choropleth at
+      // national zoom; fade the overview dot tier (dots ramp back in from z6)
+      overviewDotOpacity: 0.12,
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "believers with a church plus believers without a church (věřící), as a share of the stated religion-response denominator"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "bez náboženské víry as a share of the stated religion-response denominator"
+        }
+      },
+      popupDenominatorNote: "Percentages use a stated-response denominator: obyvatelstvo celkem minus neuvedeno (not stated). Věřící - nehlásící se k církvi (believers without a church) counts as religious affiliation; neuvedeno is excluded from the denominator, not counted as no religion.",
+      cityPresets: [
+        { label: "Praha", coords: [14.4378, 50.0755], zoom: 11 },
+        { label: "Brno", coords: [16.6068, 49.1951], zoom: 11 },
+        { label: "Ostrava", coords: [18.2820, 49.8209], zoom: 11 },
+        { label: "Plzeň", coords: [13.3776, 49.7384], zoom: 11 },
+        { label: "Liberec", coords: [15.0543, 50.7663], zoom: 11 },
+        { label: "Olomouc", coords: [17.2509, 49.5938], zoom: 11 },
+        { label: "České Budějovice", coords: [14.4747, 48.9747], zoom: 11 },
+        { label: "Hradec Králové", coords: [15.8327, 50.2103], zoom: 11 }
+      ],
+      geocode: { country: "cz", biasLngLat: [15.47, 49.82] },
+      onboarding: {
+        title: "Czechia research map",
+        intro: "Census religion overlays for Czechia at regional (kraj) level, built from the Czech Statistical Office census 2021 table SLD008T02.",
+        bullets: [
+          "Areas are shaded by religious affiliation or no religion among people who stated a religion response.",
+          "Religious affiliation combines believers with a church and believers without a church; no religion is bez náboženské víry.",
+          "Neuvedeno (not stated) is large in Czechia and is excluded from the denominator, not counted as no religion.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" },
+        { id: "verification-link", label: "Submit evidence", href: "verification.html", title: "Open the RA verification map" },
+        { id: "review-link", label: "Review evidence", href: "review.html", title: "Review submitted evidence" }
+      ],
+      censusSourceAttribution: 'Census religion from <a href="https://scitani.gov.cz/nabozenska-vira" target="_blank" rel="noopener">CZSO Census 2021, table SLD008T02</a> (DataStat) &middot; Boundaries from <a href="https://ec.europa.eu/eurostat/web/gisco/geodata/statistical-units" target="_blank" rel="noopener">Eurostat GISCO NUTS3 2021</a>, © EuroGeographics &middot; CZSO open data, reuse with attribution',
+      censusFlagNote: "* Percentages use a stated-response denominator: total population minus neuvedeno (not stated), 30.05% nationally in 2021. Neuvedeno is excluded, not counted as no religion. Believers without a church count as religious affiliation."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260709e"></script>
+</body>
+</html>

@@ -132,6 +132,31 @@ const COUNTRY_CONFIGS = {
             note: "Evidence appears to support worship use in one target year and absence or changed use in a later target year; reviewer to confirm dates and status.",
         },
     },
+    cz: {
+        countryCode: "CZ",
+        countryName: "Czechia",
+        targetYears: ["2021"],
+        defaultTargetYear: "2021",
+        dataPath: "",
+        mapCentre: [49.82, 15.47],
+        mapZoom: 7,
+        collectionBatch: "cz-map-workbench-demo",
+        sourceDatasetId: "cz_static_verification_map",
+        mapSource: "cz_verification_static_map_workbench",
+        nominationSource: "cz_verification_static_map_nomination",
+        defaultAssignmentBatchId: "cz-source-first-test-001",
+        assignmentHeading: "Czechia verification tasks",
+        // single shipped wave: the loss action reads as closed/changed
+        // use by the target year rather than a two-year contrast
+        temporalLossAction: {
+            value: "target_year_loss_or_changed_use",
+            label: "Closed or changed use by the target year",
+            statuses: {
+                "2021": "absent",
+            },
+            note: "Evidence appears to support closure or changed use by the target year; reviewer to confirm dates and status.",
+        },
+    },
     ie: {
         countryCode: "IE",
         countryName: "Ireland",
