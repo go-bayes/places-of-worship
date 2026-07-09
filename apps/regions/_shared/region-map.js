@@ -1685,6 +1685,9 @@ function resetSite() {
   clearFiltersIfAny();
   map.flyTo({ center: CONFIG.center, zoom: CONFIG.initialZoom, bearing: 0, pitch: 0, speed: 1.6 });
   clearDragTransforms(); // reset also snaps any dragged pills back home
+  // resurface the onboarding card (jb 2026-07-09): reset is how a visitor
+  // recovers the how-to and the about-this-map link after dismissing it
+  showOnboard();
   showClickHint("Map reset");
 }
 if (cornerRefresh) cornerRefresh.addEventListener("click", resetSite);
