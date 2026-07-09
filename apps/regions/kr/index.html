@@ -30,6 +30,14 @@
           codeProp: "area_code",
           nameProp: "area_name",
           credit: "Boundaries derived from KoStat 2018 municipalities via southkorea-maps; selected district geometries dissolved to harmonised reporting units"
+        },
+        sido: {
+          label: "Sido (province/metro)",
+          boundaries: "data/kr_sido_2018_harmonised.geojson",
+          summary: "data/area_summary_sido.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries derived from KoStat 2018 municipalities via southkorea-maps, dissolved to the 17 current sido; the 1995 wave maps one-to-one to the current sido frame, except Sejong, which was created in 2012 and is shown as no data for 1995"
         }
       },
       defaultLevel: "si_gun_gu",
@@ -49,7 +57,7 @@
           note: "KOSIS no-religion category divided by the table total"
         }
       },
-      popupDenominatorNote: "Percentages use the KOSIS table total: 2005 내국인 (명), including 미상 (unknown), and 2015 계. The 2015 religion item came from the 20% sample survey of the register-based census, so no change layer is shown.",
+      popupDenominatorNote: "Percentages use the KOSIS table total: 1995 계 and 2005 내국인 (명), both including 미상 (unknown), and 2015 계. The 2015 religion item came from the 20% sample survey of the register-based census, so no change layer is shown.",
       cityPresets: [
         { label: "Seoul", coords: [126.9780, 37.5665], zoom: 10 },
         { label: "Busan", coords: [129.0756, 35.1796], zoom: 10 },
@@ -63,11 +71,12 @@
       geocode: { country: "kr", biasLngLat: [127.8, 36.3] },
       onboarding: {
         title: "South Korea research map",
-        intro: "KOSIS Population Census religion overlays for harmonised si/gun/gu reporting units, 2005 and 2015.",
+        intro: "KOSIS Population Census religion overlays: harmonised si/gun/gu reporting units for 2005 and 2015, plus a current-sido companion adding 1995.",
         bullets: [
           "Areas are shaded by religious affiliation or the KOSIS no-religion category.",
           "The 2015 values are 20% sample-survey estimates from the register-based census.",
-          "The boundary layer dissolves selected 2018 district geometries to parent-city reporting units and uses documented 2005 predecessor-code aggregations.",
+          "The si/gun/gu boundary layer dissolves selected 2018 district geometries to parent-city reporting units and uses documented 2005 predecessor-code aggregations.",
+          "Switch the geography control to Sido (province/metro) for the three-wave series; 1995 is available at sido level only, and Sejong (created 2012) is shown as no data for 1995.",
           "No religious-change layer is shown because the waves do not share a clean full-count basis.",
           "Open <strong>Show Census Data</strong> (top centre) for the metric, geography and year controls."
         ],
@@ -83,7 +92,7 @@
         { id: "review-link", label: "Review evidence", href: "review.html", title: "Review submitted evidence" }
       ],
       censusSourceAttribution: 'Census religion &copy; <a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1PM1502&amp;conn_path=I3" target="_blank" rel="noopener">KOSIS DT_1PM1502</a> and <a href="https://kosis.kr/statHtml/statHtml.do?orgId=101&amp;tblId=DT_1IN0505&amp;conn_path=I3" target="_blank" rel="noopener">KOSIS DT_1IN0505</a> &middot; Licence: <a href="https://www.kogl.or.kr/info/license.do" target="_blank" rel="noopener">KOGL Type 1 attribution</a> &middot; Boundaries derived from <a href="https://github.com/southkorea/southkorea-maps" target="_blank" rel="noopener">southkorea-maps / KoStat</a>',
-      censusFlagNote: "* 2015 rows are sample_survey_20pct. The harmonised boundary dissolves selected 2018 district geometries to parent cities and aggregates documented 2005 predecessor codes for Sejong, Yeoju, Cheongju, Gyeryong, Dangjin, Changwon and Jeju. The 1985 and 1995 waves are deferred in the manifest."
+      censusFlagNote: "* 2015 rows are sample_survey_20pct. At si/gun/gu level the harmonised boundary dissolves selected 2018 district geometries to parent cities and aggregates documented 2005 predecessor codes for Sejong, Yeoju, Cheongju, Gyeryong, Dangjin, Changwon and Jeju. The 1995 wave is a companion product available at sido level only, mapped one-to-one to the current 17 sido; Sejong did not exist in 1995 and is shown as no data. The 1985 wave is deferred in the manifest."
     };
   </script>
   <script src="../_shared/region-map.js?v=20260709n"></script>
