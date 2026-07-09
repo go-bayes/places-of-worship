@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Italy Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Italy is the project's first PRACTICE-lane map: the two field slots
+    // carry self-reported religious-attendance survey estimates, not
+    // affiliation. The two legacy metric ids are relabelled below.
+    window.REGION_CONFIG = {
+      countryCode: "IT",
+      title: "Places of Worship | Italy Research Map",
+      dataNoun: "Survey",
+      center: [12.6, 42.2],
+      initialZoom: 5.2,
+      censusLevels: {
+        region: {
+          label: "Region",
+          boundaries: "data/it_region_2026.geojson",
+          summary: "data/area_summary_region.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Self-reported weekly-attendance survey estimates from ISTAT Aspetti della vita quotidiana (AVQ), regions 2001–2025 (2004 absent from source), CC BY 4.0, Istat · Boundaries from ISTAT generalised administrative boundaries, regions 2026, CC BY 4.0, Istat"
+        }
+      },
+      defaultLevel: "region",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2025,
+      // the two legacy area-summary slots are reused for the attendance
+      // construct; metricsAvailable also enables the survey-to-survey change
+      // metric, honest here because the annual series makes "previous census"
+      // read as "previous survey year" (see the relabelled note below).
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Attends religious services weekly (%)",
+          note: "self-reported share of the resident population aged 6 and over who report attending a place of worship at least once a week, from ISTAT's Aspetti della vita quotidiana survey; this is attendance frequency, not religious affiliation"
+        },
+        no_religion_percent: {
+          label: "Never attends religious services (%)",
+          note: "self-reported share of the resident population aged 6 and over who report never attending a place of worship, from ISTAT's Aspetti della vita quotidiana survey; this is non-attendance, not a no-religion affiliation category"
+        },
+        religious_change: {
+          label: "Change since previous survey year (pp)",
+          note: "percentage-point change in the weekly-attendance survey estimate since the previous survey year in the annual series (2004 is absent from source; 2005 is therefore measured against 2003)"
+        }
+      },
+      popupDenominatorNote: "These are self-reported survey estimates, already published as percentages of the survey base. Persons aged 6 and over (the survey's standard base for this item). Respondents aged 14+ answer directly; for children aged 6-13 a parent answers by proxy. The base is the resident population aged 6+, not total population; the figure carries sampling error and the known upward bias of self-reported attendance.",
+      cityPresets: [
+        { label: "Rome", coords: [12.4964, 41.9028], zoom: 10 },
+        { label: "Milan", coords: [9.1900, 45.4642], zoom: 10 },
+        { label: "Naples", coords: [14.2681, 40.8518], zoom: 10 },
+        { label: "Turin", coords: [7.6869, 45.0703], zoom: 10 },
+        { label: "Palermo", coords: [13.3615, 38.1157], zoom: 10 },
+        { label: "Bologna", coords: [11.3426, 44.4949], zoom: 10 },
+        { label: "Florence", coords: [11.2558, 43.7696], zoom: 10 },
+        { label: "Venice", coords: [12.3155, 45.4408], zoom: 10 },
+        { label: "Bari", coords: [16.8719, 41.1171], zoom: 10 },
+        { label: "Cagliari", coords: [9.1217, 39.2238], zoom: 10 }
+      ],
+      geocode: { country: "it", biasLngLat: [12.6, 42.2] },
+      onboarding: {
+        title: "Italy research map",
+        intro: "This is the project's first practice-lane map. It shows religious practice, how often people attend a place of worship, a distinct construct from the affiliation maps for other countries. The estimates are self-reported and come from ISTAT's annual household survey Aspetti della vita quotidiana (AVQ), by region, 2001–2025 (2004 absent from source).",
+        bullets: [
+          "Regions are shaded by the self-reported share of the resident population aged 6+ who attend a place of worship weekly, or the share who never attend.",
+          "This is attendance frequency as stated by respondents, its own construct: never religious affiliation, and never a headcount at the door.",
+          "The estimates are a sample survey, not a count. They carry sampling error, documented in the survey's annual Nota metodologica, and the known upward bias of self-reported attendance.",
+          "The annual series lets you read change since the previous survey year; 2004 is absent from source, and 2005 is therefore measured against 2003.",
+          "These figures are not comparable to census religious affiliation, nor to Poland's dominicantes count of Mass attendance: a survey estimate over the resident population aged 6+ is a different measure with a different denominator.",
+          "Open <strong>Show Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Self-reported weekly-attendance survey estimates from <a href="https://esploradati.istat.it/databrowser/" target="_blank" rel="noopener">ISTAT Aspetti della vita quotidiana</a> (AVQ), religious observances by region, 2001&ndash;2025 (2004 absent from source) &middot; Boundaries from <a href="https://www.istat.it/it/archivio/222527" target="_blank" rel="noopener">ISTAT generalised administrative boundaries</a>, regions 2026 &middot; Both released under Creative Commons Attribution 4.0 International (CC BY 4.0); attribution: Istat',
+      censusFlagNote: "* These are self-reported sample-survey estimates from ISTAT's Aspetti della vita quotidiana, not a count at the door. Regional estimates carry sampling error, documented in the survey's annual Nota metodologica. They measure attendance frequency, never census religious affiliation, and are not comparable to Poland's dominicantes count of Mass attendance."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710b"></script>
+</body>
+</html>

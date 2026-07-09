@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Italy map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the italy research map; every string traces to
+    // research/countries/it-practice-lane-scoping.md, the
+    // it-attendance-2001-2025 manifest, or the live REGION_CONFIG in
+    // apps/regions/it/index.html. Italy is the first practice-lane map:
+    // a self-reported attendance survey, never a census affiliation count.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "IT",
+      countryName: "Italy",
+      mapHref: "./",
+      intro: "Italy is the project's first practice-lane map: it shows religious practice (how often people attend a place of worship), a distinct construct from the affiliation maps for other countries. The estimates are self-reported and come from ISTAT's annual household survey Aspetti della vita quotidiana (AVQ), disseminated as the indicator Pratica religiosa (religious practice) by region, 2001–2025 (2004 absent from source). This is a sample survey, not a count, and its regional estimates carry sampling error.",
+      facts: {
+        waves: "Annual survey, 2001–2025 (24 years; 2004 absent from source)",
+        geographies: "Region (20 ISTAT regions)",
+        metrics: "Attends religious services weekly %, never attends %, change since previous survey year"
+      },
+      reading: [
+        "Regions are shaded by the self-reported share of the resident population aged 6+ who report attending a place of worship at least once a week, or the share who report never attending.",
+        "This is a practice construct: attendance frequency as stated by respondents. It is not religious affiliation and it is not a headcount at the door. Italy has no census religion question; no affiliation layer is therefore offered.",
+        "The measure is a sample-survey estimate. It carries sampling error, and self-reported religious attendance is known to run above observed attendance. ISTAT reports regional relative sampling errors in the survey's annual Nota metodologica; the SDMX pull gives point estimates only; the map therefore ships the point estimate with a standing survey-estimate caveat rather than a per-region confidence band.",
+        "The denominator is the resident population aged 6 and over, the survey's standard base for this item. Respondents aged 14+ answer directly; for children aged 6-13 a parent answers by proxy. The published figure is already a percentage of that base; no separate denominator is downloaded.",
+        "The annual series supports a change metric: the percentage-point change in weekly attendance since the previous survey year. Because 2004 is absent from source, 2005 is measured against 2003.",
+        "This survey estimate must never be placed on one axis with, or compared directly to, Poland's dominicantes count. Poland's figure is a census of persons physically present at Mass on one count Sunday, expressed over obliged Catholics; Italy's is a sample survey of self-reported weekly attendance over the resident population aged 6+. Different collection, different denominator, different error structure.",
+        "The 20 ISTAT regions are stable across the entire AVQ series; a single generalised region vintage (2026) therefore joins cleanly to every attendance year. National context: weekly attendance fell from about 37% in the early series to a historical minimum of 18.8% in 2022."
+      ],
+      sources: [
+        {
+          name: "ISTAT Aspetti della vita quotidiana (AVQ), dataflow 83_63_DF_DCCV_AVQ_PERSONE_136: religious observances by region and type of municipality",
+          href: "https://esploradati.istat.it/databrowser/",
+          construct: "Self-reported frequency of attendance at a place of worship (weekly / never), population aged 6+, by region",
+          years: "2001–2025 (2004 absent from source)",
+          licence: "Creative Commons Attribution 4.0 International (CC BY 4.0); attribution: Istat"
+        },
+        {
+          name: "ISTAT Confini delle unità amministrative a fini statistici, regions, 2026 generalised version (Reg01012026_g)",
+          href: "https://www.istat.it/it/archivio/222527",
+          construct: "Boundary geometry (20 regions)",
+          years: "2026 vintage",
+          licence: "Creative Commons Attribution 4.0 International (CC BY 4.0); attribution: Istat"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Istituto Nazionale di Statistica (ISTAT), <a href=\"https://esploradati.istat.it/databrowser/\" target=\"_blank\" rel=\"noopener\">IstatData</a>, survey Aspetti della vita quotidiana (AVQ).",
+        tables: "Attendance: IstatData dataflow 83_63_DF_DCCV_AVQ_PERSONE_136, DATA_TYPE 6_WEEK_RELIG (at least once a week) and 6_NEVER_RELIG (never), MEASURE HSC (per 100 persons with the same characteristics), total sex, age 6+, by the 20 ISTAT regions. The published values are already percentages of the resident population aged 6+.",
+        licence: "ISTAT data are Creative Commons Attribution 4.0 International (CC BY 4.0), per the ISTAT legal notice; attribution: Istat. Boundaries are ISTAT generalised administrative boundaries (regions, 2026), CC BY 4.0, attribution: Istat.",
+        script: "scripts/build_it_area_summary.R",
+        manifests: [
+          { label: "it-attendance-2001-2025", href: "docs/manifests/it-attendance-2001-2025.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Italy practice-lane map is a survey-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

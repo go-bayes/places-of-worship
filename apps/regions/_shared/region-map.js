@@ -102,14 +102,14 @@ document.title = RC.title;
   <div id="census-wrap">
     <div id="data-pill" class="shell-pill">
       <button id="census-toggle" type="button" aria-controls="census-panel" aria-expanded="true">
-        <span class="census-label-long">Show Census Data</span><span class="census-label-short">Census</span><span class="census-caret" aria-hidden="true">▴</span>
+        <span class="census-label-long">Show ${RC.dataNoun || "Census"} Data</span><span class="census-label-short">${RC.dataNoun || "Census"}</span><span class="census-caret" aria-hidden="true">▴</span>
       </button>
       <select id="censusPoints" class="shell-pill-select" aria-label="Place dots"></select>
     </div>
     <div id="census-panel">
       <div id="census-options">
-        <select id="censusMetric" aria-label="Census metric"></select>
-        <select id="censusLevel" aria-label="Census geography"></select>
+        <select id="censusMetric" aria-label="${RC.dataNoun || "Census"} metric"></select>
+        <select id="censusLevel" aria-label="${RC.dataNoun || "Census"} geography"></select>
       </div>
       <div id="census-points-row">
         <label id="census-points-future" hidden>
@@ -2997,7 +2997,7 @@ async function loadCensusData(level) {
   const def = CENSUS_LEVELS[level];
   const store = { geojson: null, rows: [], byAreaYear: new Map(), years: [], domains: {}, hasFlags: false, loading: true };
   censusState.levels[level] = store;
-  showClickHint("Loading census boundaries…");
+  showClickHint(`Loading ${(RC.dataNoun || "Census").toLowerCase()} boundaries…`);
   try {
     const [boundariesRes, summaryRes] = await Promise.all([
       fetch(def.boundaries),
@@ -3019,7 +3019,7 @@ async function loadCensusData(level) {
     computeCensusDomains(store);
   } catch (err) {
     store.geojson = null;
-    showClickHint("Census data failed to load");
+    showClickHint(`${RC.dataNoun || "Census"} data failed to load`);
   } finally {
     store.loading = false;
   }
@@ -3211,11 +3211,18 @@ function openCensusPopup(feature, lngLat) {
   const levelDef = censusLevelDef();
   const code = feature.properties[levelDef.codeProp];
   const name = feature.properties[levelDef.nameProp];
-  // boundaries-only scaffold: no row for this area carries a denominator,
-  // so show the area and its pending status rather than a table of dashes
+  // boundaries-only scaffold: no row for this area carries a population
+  // total or a religious-affiliation/no-religion metric (survey products,
+  // for example Italy, carry the latter with population_total null by
+  // design), so show the area and its pending status rather than a table
+  // of dashes
   const areaHasData = store.years.some((year) => {
     const row = store.byAreaYear.get(`${code}|${year}`);
-    return row && Number.isFinite(row.population_total);
+    return row && (
+      Number.isFinite(row.population_total) ||
+      Number.isFinite(row.religious_affiliation_percent) ||
+      Number.isFinite(row.no_religion_percent)
+    );
   });
   if (!areaHasData) {
     // religion is pending, but place-of-worship density is computed
@@ -3230,7 +3237,7 @@ function openCensusPopup(feature, lngLat) {
     const html =
       `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
       placeInfo +
-      `<div class="place-note">Place density from OpenStreetMap. Census religious-affiliation data is pending for this area.</div>` +
+      `<div class="place-note">Place density from OpenStreetMap. ${RC.dataNoun || "Census"} religious-affiliation data is pending for this area.</div>` +
       `<div class="place-note">${levelDef.credit} · places © OpenStreetMap (ODbL)</div>`;
     trackPlacePopup(new maplibregl.Popup({ maxWidth: "320px" }).setLngLat(lngLat).setHTML(html).addTo(map));
     return;
@@ -3284,7 +3291,7 @@ function openCensusPopup(feature, lngLat) {
   const html =
     `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
     `<table class="census-table">` +
-    `<thead><tr><th>Census</th>${showActive ? `<th>${activeDef.label}</th>` : ""}<th>${affiliationLabel}</th>${hasNoReligion ? `<th>${noReligionLabel}</th>` : ""}${hasPlaces ? "<th>Places</th><th>Per 10k</th>" : ""}</tr></thead>` +
+    `<thead><tr><th>${RC.dataNoun || "Census"}</th>${showActive ? `<th>${activeDef.label}</th>` : ""}<th>${affiliationLabel}</th>${hasNoReligion ? `<th>${noReligionLabel}</th>` : ""}${hasPlaces ? "<th>Places</th><th>Per 10k</th>" : ""}</tr></thead>` +
     `<tbody>${rowsHtml}</tbody></table>` +
     flagNote +
     `<div class="place-note">${RC.popupDenominatorNote || "Percentages use the stated religion-response denominator."}` +
@@ -3506,9 +3513,9 @@ function updateCensusLegend() {
     censusLegend.hidden = false;
     scale.innerHTML =
       `<div class="census-legend-title">${censusLevelDef().label} boundaries</div>` +
-      `<div class="census-legend-note">Census religious-affiliation data is pending. ` +
+      `<div class="census-legend-note">${RC.dataNoun || "Census"} religious-affiliation data is pending. ` +
       `The areas are ready to receive it.</div>` +
-      (years ? `<div class="census-legend-note">Census years: ${years}</div>` : "");
+      (years ? `<div class="census-legend-note">${RC.dataNoun || "Census"} years: ${years}</div>` : "");
     return;
   }
   // this metric has no values, but others do (religion metrics can be
@@ -3619,7 +3626,7 @@ function syncCensusTimeSlider() {
   timeEl.hidden = false;
   timeEl.innerHTML =
     `<div class="census-time-row">` +
-      `<input id="census-slider" class="census-slider" type="range" min="0" max="${years.length - 1}" step="1" value="${idx}" aria-label="Census year">` +
+      `<input id="census-slider" class="census-slider" type="range" min="0" max="${years.length - 1}" step="1" value="${idx}" aria-label="${RC.dataNoun || "Census"} year">` +
     `</div>` +
     `<div class="census-ticks">${years.map((y) => `<span data-year="${y}">${y}</span>`).join("")}</div>`;
   attachCensusTimeListeners();
@@ -3684,6 +3691,16 @@ async function setCensusLevel(level) {
   if (!data) {
     updateCensusLegend();
     return;
+  }
+  // the year slider keeps its index across a level switch, but the new
+  // level's store.years rarely matches the old one's; clamp to the closest
+  // available year rather than leaving censusState.year pointing at a year
+  // this level has no data for (which paints the choropleth grey)
+  const newStore = censusActive();
+  if (newStore && newStore.years.length && !newStore.years.includes(censusState.year)) {
+    const current = censusState.year;
+    const notAfter = newStore.years.filter((y) => y <= current);
+    censusState.year = notAfter.length ? Math.max(...notAfter) : Math.min(...newStore.years);
   }
   syncCensusYearSelect();
   syncCensusTimeSlider();
