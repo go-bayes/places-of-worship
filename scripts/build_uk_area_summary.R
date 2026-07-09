@@ -330,8 +330,63 @@ religion_layers <- function(prefix, geography_label) {
   )
 }
 
-# write a simplified GeoJSON while keeping the output under the target size.
-write_boundary_geojson <- function(boundary, path, tolerances = c(0, 25, 50, 100, 200, 500)) {
+# run mapshaper over path and return the chosen keep percentage.
+postprocess_boundary_geojson <- function(path, keep_percentages, max_bytes) {
+  source_path <- tempfile(fileext = ".geojson")
+  if (!file.copy(path, source_path, overwrite = TRUE)) {
+    stop("could not stage boundary input for mapshaper: ", path, call. = FALSE)
+  }
+  on.exit(unlink(source_path), add = TRUE)
+
+  candidate_paths <- character(0)
+  chosen_path <- NULL
+  chosen_keep <- NA_real_
+  chosen_bytes <- Inf
+  for (keep_percentage in keep_percentages) {
+    candidate_path <- tempfile(fileext = ".geojson")
+    candidate_paths <- c(candidate_paths, candidate_path)
+    args <- c(
+      "--yes", "mapshaper", source_path,
+      "-simplify", "weighted", "keep-shapes", paste0(keep_percentage, "%"),
+      "-clean",
+      "-o", "precision=0.00001", "format=geojson", candidate_path
+    )
+    output <- system2("npx", args, stdout = TRUE, stderr = TRUE)
+    status <- attr(output, "status")
+    if (!is.null(status) && status != 0) {
+      stop("mapshaper failed for ", path, " at ", keep_percentage, "%:\n", paste(output, collapse = "\n"),
+           call. = FALSE)
+    }
+    if (length(output) > 0) message(paste(output, collapse = "\n"))
+    chosen_path <- candidate_path
+    chosen_keep <- keep_percentage
+    chosen_bytes <- file_bytes(candidate_path)
+    if (chosen_bytes <= max_bytes) break
+  }
+
+  if (is.null(chosen_path) || !file.copy(chosen_path, path, overwrite = TRUE)) {
+    stop("could not write mapshaper output: ", path, call. = FALSE)
+  }
+  unlink(setdiff(candidate_paths, chosen_path))
+  on.exit(unlink(chosen_path), add = TRUE)
+  if (chosen_bytes > max_bytes) {
+    warning("mapshaper output remains above target for ", path, ": ", chosen_bytes, " bytes", call. = FALSE)
+  }
+  chosen_keep
+}
+
+# write boundary to path and return the selected simplification settings.
+write_boundary_geojson <- function(boundary, path, tolerances = c(0, 25, 50, 100, 200, 500),
+                                   mapshaper_keep_percentages = NULL,
+                                   mapshaper_max_bytes = 800000) {
+  if (!is.null(mapshaper_keep_percentages)) {
+    candidate <- st_transform(boundary, 4326)
+    st_write(candidate, path, delete_dsn = TRUE, quiet = TRUE)
+    # mapshaper trims over-detailed boundaries after field selection.
+    chosen_keep <- postprocess_boundary_geojson(path, mapshaper_keep_percentages, mapshaper_max_bytes)
+    return(list(sf_tolerance_m = 0, mapshaper_keep_percentage = chosen_keep))
+  }
+
   chosen_tolerance <- NA_real_
   for (tolerance in tolerances) {
     candidate <- boundary
@@ -346,7 +401,7 @@ write_boundary_geojson <- function(boundary, path, tolerances = c(0, 25, 50, 100
     chosen_tolerance <- tolerance
     if (file_bytes(path) <= 3 * 1024 * 1024) break
   }
-  chosen_tolerance
+  list(sf_tolerance_m = chosen_tolerance, mapshaper_keep_percentage = NULL)
 }
 
 # create a source-dataset record for the area-summary product.
@@ -395,7 +450,13 @@ ew_boundary_export <- ew_boundary[c(
   "boundary_level", "land_area_sq_km"
 )]
 ew_boundary_out <- file.path(uk_dir, "ew_ltla_2021.geojson")
-ew_tolerance <- write_boundary_geojson(ew_boundary_export, ew_boundary_out)
+ew_boundary_simplification <- write_boundary_geojson(
+  ew_boundary_export,
+  ew_boundary_out,
+  mapshaper_keep_percentages = c(50, 40, 30, 20, 15, 10, 8, 6, 5, 4, 3, 2)
+)
+ew_tolerance <- ew_boundary_simplification[["sf_tolerance_m"]]
+ew_mapshaper_keep_percentage <- ew_boundary_simplification[["mapshaper_keep_percentage"]]
 ew_boundary_lookup <- st_drop_geometry(ew_boundary_export)
 
 lookup_json <- fromJSON(ew_lookup_raw, simplifyDataFrame = TRUE)
@@ -566,7 +627,13 @@ sco_boundary_export <- sco_boundary[c(
   "boundary_level", "land_area_sq_km"
 )]
 sco_boundary_out <- file.path(uk_dir, "sco_council_area_2019.geojson")
-sco_tolerance <- write_boundary_geojson(sco_boundary_export, sco_boundary_out)
+sco_boundary_simplification <- write_boundary_geojson(
+  sco_boundary_export,
+  sco_boundary_out,
+  mapshaper_keep_percentages = c(50, 40, 30, 20, 15, 10, 8, 6, 5, 4, 3, 2)
+)
+sco_tolerance <- sco_boundary_simplification[["sf_tolerance_m"]]
+sco_mapshaper_keep_percentage <- sco_boundary_simplification[["mapshaper_keep_percentage"]]
 sco_boundary_lookup <- st_drop_geometry(sco_boundary_export)
 sco_rows <- unlist(lapply(seq_len(nrow(sco_boundary_lookup)), function(index) {
   lapply(c(2001L, 2011L, 2022L), function(year) {
@@ -647,7 +714,8 @@ ni_boundary_export <- ni_boundary[c(
   "boundary_level", "land_area_sq_km"
 )]
 ni_boundary_out <- file.path(uk_dir, "ni_lgd_2012.geojson")
-ni_tolerance <- write_boundary_geojson(ni_boundary_export, ni_boundary_out)
+ni_boundary_simplification <- write_boundary_geojson(ni_boundary_export, ni_boundary_out)
+ni_tolerance <- ni_boundary_simplification[["sf_tolerance_m"]]
 ni_boundary_lookup <- st_drop_geometry(ni_boundary_export)
 
 # parse the NISRA MS-B19 LGD count table.
@@ -891,7 +959,9 @@ manifest <- list(
       ),
       denominator = "all usual residents minus not answered or religion not stated",
       ew_boundary_simplification_tolerance_m = ew_tolerance,
+      ew_boundary_mapshaper_keep_percentage = ew_mapshaper_keep_percentage,
       sco_boundary_simplification_tolerance_m = sco_tolerance,
+      sco_boundary_mapshaper_keep_percentage = sco_mapshaper_keep_percentage,
       ni_boundary_simplification_tolerance_m = ni_tolerance
     ),
     software_versions = list(
