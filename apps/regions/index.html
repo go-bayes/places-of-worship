@@ -8,8 +8,12 @@
   <style>
     /* a small hub linking the per-country data maps; styled from the shared
        tokens so it reads as part of the same project */
+    /* the map shell pins html/body at viewport height for map surfaces;
+       this hub is a document — let it grow and scroll (the centred clip
+       dropped vanuatu once the list passed one screen, jb 2026-07-09) */
+    html, body { height: auto; min-height: 100%; }
     body {
-      min-height: 100%;
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
