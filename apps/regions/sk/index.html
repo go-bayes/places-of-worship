@@ -30,6 +30,14 @@
           codeProp: "area_code",
           nameProp: "area_name",
           credit: "Boundaries &copy; Statistical Office of the Slovak Republic, SODB 2021 OB GeoJSON"
+        },
+        kraj: {
+          label: "Kraj (region)",
+          boundaries: "data/sk_kraj_2021.geojson",
+          summary: "data/area_summary_kraj.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries dissolved from the SODB 2021 OB GeoJSON to the eight current kraje &middot; census religion from Infostat SODB 2001 data118 (2001), SODB 2011 TAB. 118 (2011) and the SODB 2021 municipality product summed to kraj (2021); Nezistené / not found out remains in the denominator"
         }
       },
       defaultLevel: "municipality",
@@ -63,11 +71,12 @@
       geocode: { country: "sk", biasLngLat: [19.7, 48.7] },
       onboarding: {
         title: "Slovakia research map",
-        intro: "SODB 2021 religious-belief overlays for Slovakia municipalities and Bratislava/Košice city parts.",
+        intro: "SODB 2021 religious-belief overlays for Slovakia municipalities and Bratislava/Košice city parts, with a kraj (region) companion adding the 2001 and 2011 waves.",
         bullets: [
           "Municipalities are shaded by religious affiliation or the source no-religion category.",
           "The denominator is total population, including the SODB not-found-out category, so values match SUSR's published shares.",
-          "Older subnational census waves are deferred until the official extraction route and boundary concordance are pinned.",
+          "Switch the geography control to Kraj (region) for the three-wave series; 2001 and 2011 are available at kraj level only, on the eight current kraje, and Nezistené / not found out stays in the denominator across all three waves.",
+          "Older subnational municipality waves are deferred until the official extraction route and boundary concordance are pinned.",
           "Open <strong>Show Census Data</strong> (top centre) for the metric, geography and year controls."
         ],
         links: [
@@ -83,7 +92,7 @@
       ],
       datedPlaces: "data/dated_places.geojson",
       censusSourceAttribution: 'Census religion &copy; <a href="https://www.scitanie.sk/en/population/basic-results/structure-of-population-by-religious-belief/SR/SK0/SR" target="_blank" rel="noopener">Statistical Office of the Slovak Republic, SODB 2021</a> &middot; Boundaries &copy; <a href="https://www.scitanie.sk/en/population/basic-results/structure-of-population-by-religious-belief/SR/SK0/SR" target="_blank" rel="noopener">SODB 2021 OB GeoJSON</a>',
-      censusFlagNote: "* SODB 2021 reports Bratislava and Košice by city parts. The denominator includes nezistené / not found out. No 1991-2011 change layer is shown because the older subnational extraction route and official boundary concordance are deferred."
+      censusFlagNote: "* SODB 2021 reports Bratislava and Košice by city parts. The denominator includes nezistené / not found out. The kraj (region) companion carries the 2001 and 2011 waves (Infostat SODB 2001 data118 and SODB 2011 TAB. 118), with 2021 counts summed to the eight current kraje; its boundaries dissolve the SODB 2021 OB GeoJSON to those kraje. No municipality-level 1991-2011 change layer is shown because the older subnational extraction route and official boundary concordance are deferred."
     };
   </script>
   <script src="../_shared/region-map.js?v=20260709n"></script>
