@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Slovakia map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Slovakia research map; every string traces to
+    // research/countries/sk/README.md, the manifest, or the live REGION_CONFIG.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "SK",
+      countryName: "Slovakia",
+      mapHref: "./",
+      intro: "Municipality and city-part census religious-belief overlays for Slovakia, from SODB 2021.",
+      facts: {
+        waves: "Census 2021",
+        geographies: "Municipality and Bratislava/Košice city part (2,927 units)",
+        metrics: "Religious affiliation %, no religion %",
+        placeDots: "A single Overpass test returned 7,440 amenity=place_of_worship objects for Slovakia; no governed place layer is built yet."
+      },
+      reading: [
+        "Percentages use the SODB 2021 total population denominator. This follows SUSR's published shares and includes code 00, nezistené / not found out, in the denominator.",
+        "Reporting units are shaded by SODB 2021 religious belief (religious affiliation is total population minus no religion and not found out; no religion is code 28, bez náboženského vyznania). Religion, ethnicity, language, and Roma/Rusyn/Hungarian identity are separate constructs and are not combined.",
+        "SODB 2021 reports Bratislava and Košice by city parts. The denominator includes nezistené / not found out.",
+        "The product ships 2021 municipality/city-part geography only. No official 1991-2021 municipality correspondence was pinned, so no change layer is shown; the 1991, 2001 and 2011 subnational waves are deferred."
+      ],
+      sources: [
+        {
+          name: "SODB 2021 Z01_15, structure of population by religious belief",
+          href: "https://www.scitanie.sk/en/population/basic-results/structure-of-population-by-religious-belief/SR/SK0/SR",
+          construct: "Census religious belief",
+          years: "2021",
+          licence: "SUSR attribution; exact CC BY statement not located in this pass"
+        },
+        {
+          name: "SODB 2021 OB GeoJSON",
+          href: "https://www.scitanie.sk/en/population/basic-results/structure-of-population-by-religious-belief/SR/SK0/SR",
+          construct: "Boundary geometry",
+          years: "2021",
+          licence: "SUSR attribution"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Statistical Office of the Slovak Republic, <a href=\"https://www.scitanie.sk/en/population/basic-results/structure-of-population-by-religious-belief/SR/SK0/SR\" target=\"_blank\" rel=\"noopener\">SODB 2021 basic results</a>.",
+        tables: "SODB 2021 <code>Z01_15</code>, \"Structure of population by religious belief\"; SODB 2021 <code>C01_11</code>, the national 1880-2021 time series; previous-census routes from \"Data from the previous censuses since 1991\".",
+        licence: "SODB pages identify the Statistical Office of the Slovak Republic as content administrator and technical operator. This build attributes SUSR; the exact CC BY statement was not located during this pass.",
+        script: "scripts/build_sk_area_summary.R",
+        manifests: [
+          { label: "sk-census-religion-2021", href: "docs/manifests/sk-census-religion-2021.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Romania map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Romania research map; every string traces to
+    // research/countries/ro/README.md, the manifest, or the live REGION_CONFIG.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "RO",
+      countryName: "Romania",
+      mapHref: "./",
+      intro: "County (județ) and LAU census religion overlays for Romania, from INS RPL tables, for the 2011 and 2021 censuses.",
+      facts: {
+        waves: "Censuses 2011, 2021",
+        geographies: "County (județ); LAU 2021 (detail)",
+        metrics: "Religious affiliation %, no religion %",
+        placeDots: "OpenStreetMap places (amenity=place_of_worship); an Overpass count did not complete reliably in the survey sweep, so no governed Romania place extract exists yet."
+      },
+      reading: [
+        "Percentages use a stated-response denominator. 2011 uses POPULATIA STABILA TOTAL minus Informatie nedisponibila; 2021 uses POPULATIA REZIDENTA TOTAL minus Informatie nedisponibila. 2021 Agnostic remains in the denominator and outside the no-religion construct.",
+        "Areas are shaded by census affiliation over the stated-response denominator; no religion is Fără religie plus Atei/Ateu. The field measures self-declared affiliation rather than practice.",
+        "The denominator excludes Informatie nedisponibila: 6.26% nationally in 2011 and 13.95% nationally in 2021. Commune-level cells are suppressed for small counts and are not imputed; the default county view is complete for headline percentages.",
+        "The default county view uses source county rows on GISCO NUTS3 2021 boundaries; the LAU detail layer uses GISCO LAU 2021, with 2011 rows bridged from GISCO LAU 2011 by LAU ID. The 2002 and 1992 waves need separate extraction work and are deferred."
+      ],
+      sources: [
+        {
+          name: "INS RPL 2021 final results, Tabel 2.04.2",
+          href: "https://www.recensamantromania.ro/rezultate-rpl-2021/rezultate-definitive/",
+          construct: "Census religion",
+          years: "2021",
+          licence: "INS public download; explicit reuse statement not located"
+        },
+        {
+          name: "INS RPL 2011 sR_TAB_13",
+          href: "https://www.recensamantromania.ro/istoric/rpl-2011/",
+          construct: "Census religion",
+          years: "2011",
+          licence: "INS public download; explicit reuse statement not located"
+        },
+        {
+          name: "Eurostat GISCO NUTS3 2021, LAU 2021 and LAU 2011",
+          href: "https://gisco-services.ec.europa.eu/distribution/v2/lau/",
+          construct: "Boundary geometry",
+          years: "2021 (2011 LAU bridge)",
+          licence: "GISCO download provisions require attribution"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Institutul National de Statistica through the <a href=\"https://www.recensamantromania.ro/\" target=\"_blank\" rel=\"noopener\">Recensamant Romania portal</a>.",
+        tables: "RPL 2021 <code>Tabel 2.04.2</code>; RPL 2011 <code>sR_TAB_13</code>.",
+        licence: "The files are public downloads from the census portal; an explicit reuse statement was not located during this build.",
+        script: "scripts/build_ro_area_summary.R",
+        manifests: [
+          { label: "ro-census-religion-2011-2021", href: "docs/manifests/ro-census-religion-2011-2021.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

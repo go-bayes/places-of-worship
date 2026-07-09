@@ -1,0 +1,207 @@
+/* overview.css — document typography and section chrome for the per-country
+   overview page. loaded after map-shell.css so it can override the map-shell
+   body rules (which pin the page to viewport height and a light --bg for map
+   surfaces). this page is a readable single column in the project's dark-slate
+   voice, kin to the Data-maps hub (apps/regions/index.html).
+   contract: docs/development/country-overview-page.md. */
+
+/* the shell pins html/body at 100% for map surfaces; a document must grow and
+   scroll, and it wears the dark hub palette rather than the light map --bg */
+html, body {
+  height: auto;
+  min-height: 100%;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+body { line-height: 1.55; }
+
+.overview {
+  width: min(720px, 94vw);
+  margin: 0 auto;
+  padding: 40px 0 64px;
+}
+
+/* header: kicker, country name, primary Open-the-map action */
+.overview-header { margin-bottom: 26px; }
+.overview-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+.overview-title {
+  margin: 4px 0 18px;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+/* primary filled button per docs/ui-style-guide.md (action blue, light text) */
+.overview-open-map {
+  display: inline-block;
+  background: #1f618d;
+  color: #e8f1fb;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 11px 20px;
+  border-radius: 12px;
+  transition: background 120ms ease;
+}
+.overview-open-map:hover { background: #2a76a8; }
+
+.overview-intro {
+  margin: 0 0 28px;
+  font-size: 17px;
+  color: #cbd5e1;
+}
+
+/* facts strip: a quiet card of labelled at-a-glance rows */
+.overview-facts {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 34px;
+}
+.overview-facts-grid {
+  display: grid;
+  grid-template-columns: minmax(96px, auto) 1fr;
+  gap: 6px 18px;
+  margin: 0;
+}
+.overview-fact-key {
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 13px;
+}
+.overview-fact-val {
+  margin: 0;
+  font-size: 14px;
+  color: #e2e8f0;
+}
+
+/* sections: a titled block with a hairline rule above the heading */
+.overview-section {
+  margin: 0 0 34px;
+  padding-top: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.overview-section-title {
+  margin: 0 0 14px;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* how to read this map: the honesty bullets */
+.overview-reading {
+  margin: 0;
+  padding-left: 20px;
+}
+.overview-reading li {
+  margin-bottom: 10px;
+  font-size: 15px;
+  color: #cbd5e1;
+}
+
+/* sources table: wide content scrolls inside its own container */
+.overview-table-wrap { overflow-x: auto; }
+.overview-sources {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  min-width: 520px;
+}
+.overview-sources th,
+.overview-sources td {
+  text-align: left;
+  vertical-align: top;
+  padding: 9px 12px 9px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.overview-sources th {
+  color: #94a3b8;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.overview-source-name { font-weight: 500; }
+.overview-sources a { color: #cbd5f5; }
+.overview-sources a:hover { color: #fff; }
+
+/* get the data yourself: lede plus a definition list */
+.overview-access-lede,
+.overview-access-note {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: #94a3b8;
+}
+.overview-defs {
+  display: grid;
+  grid-template-columns: minmax(120px, auto) 1fr;
+  gap: 8px 18px;
+  margin: 0;
+  font-size: 14px;
+}
+.overview-defs dt {
+  color: #94a3b8;
+  font-weight: 600;
+}
+.overview-defs dd {
+  margin: 0;
+  color: #e2e8f0;
+  overflow-wrap: anywhere;
+}
+.overview-defs a { color: #cbd5f5; }
+.overview-defs a:hover { color: #fff; }
+
+/* contribute: a row of action links, or the pending note */
+.overview-contribute-pending {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: #94a3b8;
+}
+.overview-link-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.overview-action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 8px 15px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e2e8f0;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+.overview-action:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(148, 163, 184, 0.5);
+}
+
+/* footer: quiet navigation back out of the document */
+.overview-footer {
+  margin-top: 44px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.overview-footer a {
+  color: #cbd5f5;
+  font-size: 14px;
+  text-decoration: none;
+}
+.overview-footer a:hover { color: #fff; text-decoration: underline; }
+
+@media (max-width: 520px) {
+  .overview { padding: 28px 0 48px; }
+  .overview-title { font-size: 26px; }
+  .overview-facts-grid,
+  .overview-defs { grid-template-columns: 1fr; gap: 2px 0; }
+  .overview-fact-key,
+  .overview-defs dt { margin-top: 8px; }
+}

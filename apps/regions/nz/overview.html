@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | New Zealand map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // renders the public record for the NZ research map; every string is
+    // traceable to research/countries/nz/README.md, the manifests, or the
+    // live REGION_CONFIG in apps/regions/nz/index.html. authors nothing.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "NZ",
+      countryName: "New Zealand",
+      mapHref: "./",
+      intro: "Places of worship across Aotearoa New Zealand, shown alongside census religious-affiliation overlays at territorial-authority and statistical-area-2 level for the 2013, 2018 and 2023 censuses.",
+      facts: {
+        waves: "Censuses 2013, 2018, 2023",
+        geographies: "Territorial authority; statistical area 2",
+        metrics: "Religious affiliation %, no religion %, place density (per 10,000 residents and per km²), and wave-to-wave change",
+        placeDots: "OpenStreetMap places (amenity=place_of_worship), ODbL-1.0"
+      },
+      reading: [
+        "Areas are shaded by census religious affiliation. This is a multiple-response question: a person may report more than one affiliation, so the shares are not mutually exclusive.",
+        "Percentages use the stated religion-response denominator.",
+        "A flagged area (*) has a small or suppressed denominator under Stats NZ rr3 rounding; treat those percentages as indicative. Statistical-area-2 counts are rr3-rounded.",
+        "Boundary vintages differ by level: territorial-authority areas use Stats NZ 2025 boundaries and statistical-area-2 areas use 2023 boundaries. Historical census religion volumes reach into the nineteenth century but are not yet harmonised onto these boundaries.",
+        "Place dots show today's OpenStreetMap places, not the places present in each census year; amber-ringed dots carry OpenStreetMap date tags saying they existed in the selected year."
+      ],
+      sources: [
+        {
+          name: "Figure.NZ table from Stats NZ, religious affiliation by territorial authority",
+          href: "https://figure.nz/table/ITPm3h6kNu9LqEZt",
+          construct: "Census religious affiliation",
+          years: "2013, 2018, 2023",
+          licence: "Creative Commons Attribution 4.0 International"
+        },
+        {
+          name: "Stats NZ 2023 Census religious affiliation metadata (SA2)",
+          href: "https://datainfoplus.stats.govt.nz/item/nz.govt.stats/f0032908-16db-40de-b543-a41ac1dda574",
+          construct: "Census religious affiliation, multiple response",
+          years: "2023",
+          licence: "Creative Commons Attribution 4.0 International where applied by Stats NZ"
+        },
+        {
+          name: "Stats NZ statistical boundaries (territorial authority, statistical area 2)",
+          href: "https://www.stats.govt.nz/",
+          construct: "Boundary geometry",
+          years: "2025 (TA), 2023 (SA2)",
+          licence: "Creative Commons Attribution 4.0 International"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "OpenStreetMap via ohsome API, <a href=\"https://api.ohsome.org/v1/elements/centroid\" target=\"_blank\" rel=\"noopener\">https://api.ohsome.org/v1/elements/centroid</a>.",
+        tables: "<code>osm-ohsome-elements-centroid</code>; no census table ID appears in the OSM manifests. Filter <code>amenity=place_of_worship</code>; 1 September snapshots for 2013-2025. Source-data access for the census data map is pending a Stats NZ customised-data request.",
+        licence: "ODbL-1.0",
+        script: "scripts/build_nz_osm_temporal_candidates.R",
+        manifests: [
+          { label: "osm-pow-nz-2013-2025-raw-ohsome", href: "docs/manifests/osm-pow-nz-2013-2025-raw-ohsome-dffb55663f94.json" },
+          { label: "osm-pow-nz-2013-2025-places-to-check", href: "docs/manifests/osm-pow-nz-2013-2025-places-to-check-ef64ba809ced.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

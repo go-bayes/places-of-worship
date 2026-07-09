@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Portugal map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Portugal research map; every string traces to
+    // research/countries/pt/README.md, the manifest, or the live REGION_CONFIG.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "PT",
+      countryName: "Portugal",
+      mapHref: "./",
+      intro: "Municipality census religion overlays for Portugal, from INE, for the 2011 and 2021 censuses, covering residents aged 15 and over.",
+      facts: {
+        waves: "Censuses 2011, 2021",
+        geographies: "Municipality (308)",
+        metrics: "Religious affiliation %, no religion %, wave-to-wave change",
+        placeDots: "OpenStreetMap places (amenity=place_of_worship)"
+      },
+      reading: [
+        "Percentages use INE's age-15-plus religion-response denominator. In 2011 this is Total minus Não resposta. In 2021 this is Total because the API extract exposes no Não resposta category.",
+        "Municipalities are shaded by census religion for residents aged 15 and over. The map sums all named religion categories into one broad religious-affiliation measure and does not crosswalk denominations.",
+        "Religion is reported for residents aged 15 and over. The 2011 source has an explicit Não resposta category, excluded from the denominator; the 2021 API extract exposes no Não resposta category, so Total is used as the stated-response denominator. Detailed religion categories changed between waves and are not crosswalked.",
+        "Rows use CAOP 2021 municipality boundaries dissolved from official parish-level polygons. The 1981, 1991 and 2001 waves remain deferred until exact official tables and a clean geography correspondence are pinned."
+      ],
+      sources: [
+        {
+          name: "INE indicator 0011644, resident population aged 15+ by religion",
+          href: "https://www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_indicadores&indOcorrCod=0011644&contexto=bd&selTab=tab2",
+          construct: "Census religion, residents aged 15+",
+          years: "2021",
+          licence: "Creative Commons Attribution 4.0 with INE attribution"
+        },
+        {
+          name: "INE indicator 0006396, resident population aged 15+ by religion",
+          href: "https://www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_indicadores&indOcorrCod=0006396&contexto=bd&selTab=tab2",
+          construct: "Census religion, residents aged 15+",
+          years: "2011",
+          licence: "Creative Commons Attribution 4.0 with INE attribution"
+        },
+        {
+          name: "DGT Carta Administrativa Oficial de Portugal (CAOP) 2021",
+          href: "https://www.dgterritorio.gov.pt/atividades/cartografia/cartografia-tematica/caop",
+          construct: "Boundary geometry",
+          years: "2021",
+          licence: "Creative Commons Attribution 4.0"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Instituto Nacional de Estatística (INE), Portugal, through the <a href=\"https://www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_api_v2\" target=\"_blank\" rel=\"noopener\">INE database API</a>.",
+        tables: "<code>0011644</code>, \"População residente com 15 e mais anos de idade por Local de residência (Censos 2021) e Religião\"; <code>0006396</code>, the equivalent 2011 indicator.",
+        licence: "INE states that statistical information on its portal is free and reusable under Creative Commons CC BY Atribuição 4.0 when the source is identified.",
+        script: "scripts/build_pt_area_summary.R",
+        manifests: [
+          { label: "pt-census-religion-2011-2021", href: "docs/manifests/pt-census-religion-2011-2021.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Canada map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Canada research map; every string traces to
+    // research/countries/ca/README.md, the manifest, or the live REGION_CONFIG.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "CA",
+      countryName: "Canada",
+      mapHref: "./",
+      intro: "Census-division religion overlays for Canada, from Statistics Canada, for 2001, 2011 and 2021, each wave rendered on its own boundary vintage.",
+      facts: {
+        waves: "Census 2001, 2021; 2011 National Household Survey",
+        geographies: "Census division (2001, 2011, 2021 vintages)",
+        metrics: "Religious affiliation %, no religion %",
+        placeDots: "OpenStreetMap places (amenity=place_of_worship)"
+      },
+      reading: [
+        "Percentages use the published religion universe for that wave: 2021 Census Profile 25% sample religion responses, 2011 voluntary National Household Survey religion responses, and 2001 Census 20% sample religion by total age responses.",
+        "Census divisions are shaded by religious affiliation. The 2011 data come from the voluntary National Household Survey, which has different non-response properties from the census long-form waves.",
+        "The 2011 rows are flagged voluntary_survey_nhs; the 2021 religion data are 25% sample data. Boundaries switch by year.",
+        "Each wave renders on its own Statistics Canada census-division vintage; no cross-vintage correspondence was built, and the religious-change metric is not exposed because year-over-year comparison cannot span level-switching stores."
+      ],
+      sources: [
+        {
+          name: "Statistics Canada, Census Profile 2021, religion topic (25% sample)",
+          href: "https://www12.statcan.gc.ca/census-recensement/2021/dp-pd/prof/index.cfm?Lang=E",
+          construct: "Census religious affiliation",
+          years: "2021",
+          licence: "Statistics Canada Open Licence"
+        },
+        {
+          name: "Statistics Canada, 2011 National Household Survey Profile, religion topic",
+          href: "https://www12.statcan.gc.ca/nhs-enm/2011/dp-pd/prof/index.cfm?Lang=E",
+          construct: "Voluntary survey religious affiliation",
+          years: "2011",
+          licence: "Statistics Canada Open Licence"
+        },
+        {
+          name: "Statistics Canada, 2001 Census tabulation 95F0450XCB2001006 (20% sample)",
+          href: "https://www12.statcan.gc.ca/english/census01/products/standard/themes/index.cfm",
+          construct: "Census religious affiliation",
+          years: "2001",
+          licence: "Statistics Canada Open Licence"
+        },
+        {
+          name: "Statistics Canada cartographic boundary files (census division)",
+          href: "https://www.statcan.gc.ca/en/reference/licence",
+          construct: "Boundary geometry",
+          years: "2001, 2011, 2021 vintages",
+          licence: "Statistics Canada Open Licence"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Statistics Canada, <a href=\"https://www12.statcan.gc.ca/census-recensement/2021/dp-pd/prof/details/download-telecharger/comp/GetFile.cfm?Lang=E&FILETYPE=CSV&GEONO=005\" target=\"_blank\" rel=\"noopener\">2021 Census Profile complete-geography CSV</a>, with 2011 and 2001 source URLs listed in the manifest.",
+        tables: "2021 Census Profile religion topic (source table identifier absent; see the manifest), 2011 National Household Survey Profile <code>CTLG=99-004-XWE2011001</code>, and 2001 Census tabulation <code>95F0450XCB2001006</code>.",
+        licence: "Statistics Canada Open Licence. Contains information licensed under the Statistics Canada Open Licence; adapted products do not constitute an endorsement by Statistics Canada. <a href=\"https://www.statcan.gc.ca/en/reference/licence\" target=\"_blank\" rel=\"noopener\">Licence terms</a>.",
+        script: "scripts/build_ca_area_summary.R",
+        manifests: [
+          { label: "ca-census-religion-2001-2021", href: "docs/manifests/ca-census-religion-2001-2021.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

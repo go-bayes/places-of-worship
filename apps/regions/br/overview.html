@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Brazil map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Brazil research map; every string traces to
+    // research/countries/br/README.md, the manifest, or the live REGION_CONFIG.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "BR",
+      countryName: "Brazil",
+      mapHref: "./",
+      intro: "Municipality and state (UF) census religion overlays for Brazil, from IBGE/SIDRA, for the 2000, 2010 and 2022 censuses, on 2022 boundaries.",
+      facts: {
+        waves: "Censuses 2000, 2010, 2022",
+        geographies: "Municipality; state (UF)",
+        metrics: "Religious affiliation %, Sem religião % (no religion)",
+        placeDots: "OpenStreetMap places (amenity=place_of_worship)"
+      },
+      reading: [
+        "Percentages use the SIDRA religion-response denominator: Total minus Sem declaração. The 2022 wave covers people aged 10 years or older; 2000 and 2010 cover resident population.",
+        "Municipalities and UFs are shaded by census affiliation (IBGE/SIDRA aggregate 137 for 2000-2010 and aggregate 9537 for 2022) or the source Sem religião category.",
+        "A flagged row (*) either covers people aged 10 years or older (2022) or, for pre-2022 municipalities, uses 2022 boundaries without a split/merge concordance.",
+        "Municipality rows use 2022 IBGE malha boundaries without a split/merge concordance, so this release does not calculate a change layer."
+      ],
+      sources: [
+        {
+          name: "IBGE SIDRA aggregate 137 (variable 93, classification 133 Religião)",
+          href: "https://servicodados.ibge.gov.br/api/v3/agregados/137/metadados",
+          construct: "Census affiliation: resident population by religion",
+          years: "2000, 2010",
+          licence: "IBGE public API; reuse terms not explicit in API response"
+        },
+        {
+          name: "IBGE SIDRA aggregate 9537 (variable 140, classification 133 Religião)",
+          href: "https://servicodados.ibge.gov.br/api/v3/agregados/9537/metadados",
+          construct: "Census affiliation for people aged 10 years or older",
+          years: "2022",
+          licence: "IBGE public API; reuse terms not explicit in API response"
+        },
+        {
+          name: "IBGE 2022 municipal and UF malhas",
+          href: "https://servicodados.ibge.gov.br/api/docs/malhas?versao=3",
+          construct: "Boundary geometry",
+          years: "2022",
+          licence: "IBGE public API; reuse terms not machine-readable in source responses"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Instituto Brasileiro de Geografia e Estatística (IBGE), SIDRA and malhas APIs, <a href=\"https://servicodados.ibge.gov.br/api/v3/agregados/137/metadados\" target=\"_blank\" rel=\"noopener\">aggregate 137</a> and <a href=\"https://servicodados.ibge.gov.br/api/v3/agregados/9537/metadados\" target=\"_blank\" rel=\"noopener\">aggregate 9537</a>.",
+        tables: "<code>ibge-sidra-137-religion-2000-2010</code> (aggregate_id 137, variable_id 93, classification_ids 133) and <code>ibge-sidra-9537-religion-age10plus-2022</code> (aggregate_id 9537, variable_id 140, classification_ids 133|2|58).",
+        licence: "IBGE public API data; no explicit machine-readable redistribution licence was found in the SIDRA, malhas, or localities API responses during this build. Derived public products attribute Instituto Brasileiro de Geografia e Estatística (IBGE) and link to the source API URLs.",
+        script: "scripts/build_br_area_summary.R",
+        manifests: [
+          { label: "br-census-religion-2000-2022", href: "docs/manifests/br-census-religion-2000-2022.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Australia map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Australia research map; every string traces to
+    // research/countries/au/README.md, the manifest, or the live REGION_CONFIG.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "AU",
+      countryName: "Australia",
+      mapHref: "./",
+      intro: "Statistical-area-2 census religious-affiliation overlays for Australia, from the ABS Census General Community Profile table G14, for the 2016 and 2021 censuses.",
+      facts: {
+        waves: "Censuses 2016, 2021 (2011 deferred)",
+        geographies: "Statistical area 2 (SA2)",
+        metrics: "Religious affiliation %, no religion %",
+        placeDots: "OpenStreetMap places (amenity=place_of_worship)"
+      },
+      reading: [
+        "Percentages use people counted at place of usual residence with a stated religious-affiliation response: ABS G14 Total Persons minus Religious affiliation not stated, which comprises Not stated and Inadequately described. No religion % uses the ABS top-level Secular Beliefs and Other Spiritual Beliefs and No Religious Affiliation total.",
+        "Areas are shaded by census religious affiliation (ABS Census table G14). Religious affiliation is voluntary and differs from attendance, membership, or site counts.",
+        "The no-religion metric uses the ABS top-level Secular Beliefs and Other Spiritual Beliefs and No Religious Affiliation aggregate, which is broader than the narrower ABS no-religion subcategory.",
+        "A flagged area (*) has its 2016 counts converted to 2021 SA2 boundaries with the official ABS population-weighted correspondence; treat small areas as approximate.",
+        "All areas use ABS ASGS Edition 3 SA2 2021 boundaries (GDA2020). The 2011 wave stays deferred until an official ABS 2011-to-2021 SA2 correspondence exists; the project does not construct its own."
+      ],
+      sources: [
+        {
+          name: "ABS Census General Community Profile DataPacks, table G14",
+          href: "https://www.abs.gov.au/census/find-census-data/datapacks",
+          construct: "Census religious affiliation",
+          years: "2016, 2021",
+          licence: "Creative Commons Attribution 4.0; ABS data used with permission from the Australian Bureau of Statistics; ABS website copyright terms"
+        },
+        {
+          name: "ABS ASGS Edition 3 SA2 boundaries and 2016-to-2021 correspondence",
+          href: "https://www.abs.gov.au/statistics/standards/australian-statistical-geography-standard-asgs/edition-3-july-2021-june-2026/access-and-downloads/digital-boundary-files",
+          construct: "Boundary geometry",
+          years: "2021",
+          licence: "Correspondence and DataPacks CC BY 4.0; ASGS SA2 boundaries credited to ABS under ABS website copyright terms"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Australian Bureau of Statistics, <a href=\"https://www.abs.gov.au/census/find-census-data/datapacks/download/2021_GCP_SA2_for_AUS_short-header.zip\" target=\"_blank\" rel=\"noopener\">2021 GCP SA2 DataPack</a>, with related DataPacks and ASGS files listed in the manifest.",
+        tables: "ABS Census General Community Profile table <code>G14</code>; source IDs <code>abs-2021-gcp-g14-sa2-aus</code>, <code>abs-2021-gcp-g14-ste-aus</code>, <code>abs-2021-gcp-g14-aus-aus</code>, <code>abs-2016-gcp-g14-sa2-aus</code>, <code>abs-2016-gcp-g14-ste-aus</code>, <code>abs-2016-gcp-g14-au-aus</code>, and <code>abs-cg-sa2-2016-sa2-2021</code>.",
+        licence: "ABS DataPacks are licensed under Creative Commons Attribution 4.0. ABS data used with permission from the Australian Bureau of Statistics. The ASGS Edition 3 SA2 2016 to 2021 correspondence is licensed under Creative Commons Attribution 4.0. ASGS Edition 3 SA2 boundaries are credited to the Australian Bureau of Statistics under ABS website copyright terms.",
+        script: "scripts/build_au_area_summary.R",
+        manifests: [
+          { label: "au-census-religion-2016-2021", href: "docs/manifests/au-census-religion-2016-2021.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

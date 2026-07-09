@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | India map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the India research map; every string traces to
+    // research/countries/in/README.md, the manifest, or the live REGION_CONFIG.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "IN",
+      countryName: "India",
+      mapHref: "./",
+      intro: "District census religious-community overlays for India, from Census of India table C-01, for the 2001 and 2011 censuses.",
+      facts: {
+        waves: "Censuses 2001, 2011 (no 2021 census)",
+        geographies: "District (2001 and 2011 period districts)",
+        metrics: "Religious affiliation %",
+        placeDots: "OpenStreetMap coverage has not yet been counted for India; place-density metrics are hidden until a governed India place extract exists."
+      },
+      reading: [
+        "Percentages use Census of India C-01 total persons as the denominator. The numerator sums Hindu, Muslim, Christian, Sikh, Buddhist, Jain, and Other religions and persuasions. Religion not stated is excluded from the numerator and is not treated as no religion.",
+        "Districts are shaded by religious affiliation. The Census of India C-01 category set has no no-religion category; Religion not stated is a non-response category and must never be equated with no religion.",
+        "The Census of India C-01 has no no-religion category, so no-religion values are null. The 2001 and 2011 waves use separate period district boundary sets; no change layer is calculated. The 1991 C-9 religion workbook is pinned but deferred.",
+        "District boundaries changed heavily between waves; the map switches boundary vintage by year and does not calculate a change layer. The 1991 wave is deferred because Jammu and Kashmir was not enumerated in 1991 and clean 1991 district boundaries are not included."
+      ],
+      sources: [
+        {
+          name: "Census of India C-01: Population by religious community (PC11_C01)",
+          href: "https://censusindia.gov.in/census.website/data/census-tables",
+          construct: "Census religious affiliation by community",
+          years: "2011",
+          licence: "Government Open Data License - India (attribution basis)"
+        },
+        {
+          name: "Census of India C-01: Population by religious community (PC01_C01)",
+          href: "https://censusindia.gov.in/census.website/data/census-tables",
+          construct: "Census religious affiliation by community",
+          years: "2001",
+          licence: "Government Open Data License - India (attribution basis)"
+        },
+        {
+          name: "DataMeet India community district boundaries (Census 2001, 2011)",
+          href: "https://github.com/datameet/maps/tree/master/Districts",
+          construct: "Boundary geometry",
+          years: "2001, 2011",
+          licence: "Creative Commons Attribution 2.5 India"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Office of the Registrar General and Census Commissioner, India, through the <a href=\"https://censusindia.gov.in/census.website/data/census-tables\" target=\"_blank\" rel=\"noopener\">Census tables portal</a> and NADA table API.",
+        tables: "<code>PC11_C01</code> and <code>PC01_C01</code>, both titled C-01: Population by religious community; deferred source <code>1991-C09T</code>, titled C-9 Religion.",
+        licence: "The build records the Government Open Data License - India as the attribution basis for public Census of India data.",
+        script: "scripts/build_in_area_summary.R",
+        manifests: [
+          { label: "in-census-religion-2001-2011", href: "docs/manifests/in-census-religion-2001-2011.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

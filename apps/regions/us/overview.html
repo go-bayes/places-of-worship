@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | United States map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the United States research map; every string traces to
+    // research/countries/us/README.md, the manifests, or the live REGION_CONFIG.
+    // the licence position stays pending in the card's words: the project's
+    // IPUMS/NHGIS reply has not arrived, so the page says pending, not resolved.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "US",
+      countryName: "United States",
+      mapHref: "./",
+      intro: "County-level institutional religion overlays for the United States, 1850 to 2020, from IPUMS NHGIS church statistics, the Census of Religious Bodies, and ARDA's U.S. Religion Census. The United States census asks no religion question, so this is not census self-identification.",
+      facts: {
+        waves: "1850, 1860, 1870, 1890, 1906, 1916, 1926, 1936, 1952, 1971, 1980, 1990, 2000, 2010, 2020",
+        geographies: "County (2020); NHGIS period counties (1850, 1860, 1870, 1890, 1930)",
+        metrics: "Seating, members, or adherents per 100 population; change in the per-100 measure",
+        placeDots: "OpenStreetMap global places-overview layer; no US-specific extraction is built yet, and the dot tier is faded at national zoom."
+      },
+      reading: [
+        "Rates use the source-supplied county population denominator. The construct shifts from church seating to members to adherents across the historical series.",
+        "Counties are shaded by an institutional religion rate, not census affiliation: the series counts church seating (1850-1890), members (1906-1936), and adherents or members reported by religious bodies (1952-2020). Treat adjacent-wave changes as descriptive institutional changes; they do not measure stable affiliation change.",
+        "A flagged row (*) has historical wave coverage differing across source series, a period-boundary vintage differing from the source wave, or a 1952-2020 county boundary crosswalked to the 2020 county layer (see the manifests).",
+        "Participating bodies and definitions differ by wave: the 1952 file has only a limited Black-denomination estimate, the 1971 file does not systematically cover historically Black denominations, and the 2000 wave excludes historically African-American denominations.",
+        "The nineteenth-century waves are not crosswalked onto 2020 counties; each joins by NHGIS GISJOIN to its period boundary, and the 1906-1936 waves share one 1930 boundary level."
+      ],
+      sources: [
+        {
+          name: "IPUMS NHGIS, nineteenth-century census church statistics",
+          href: "https://www.nhgis.org/",
+          construct: "Churches or church edifices, seating, and church property value by denomination",
+          years: "1850, 1860, 1870, 1890",
+          licence: "Raw redistribution requires permission; The project publishes attributed derived rates/counts for the research map, pending IPUMS/NHGIS confirmation"
+        },
+        {
+          name: "IPUMS NHGIS, Census of Religious Bodies",
+          href: "https://www.nhgis.org/",
+          construct: "Members reported by religious bodies",
+          years: "1906, 1916, 1926, 1936",
+          licence: "Same NHGIS terms and project licence position (pending IPUMS/NHGIS confirmation)"
+        },
+        {
+          name: "Churches and Church Membership / U.S. Religion Census (RCMS), ARDA",
+          href: "https://www.thearda.com/",
+          construct: "Congregations and adherents or members reported by religious bodies",
+          years: "1952, 1971, 1980, 1990, 2000, 2010, 2020",
+          licence: "ARDA click-through research-use terms; cite ARDA and the original collectors; no redistribution restriction on derived or aggregated products found"
+        },
+        {
+          name: "U.S. Census Bureau (2020) and IPUMS NHGIS period county boundaries",
+          href: "https://www.census.gov/",
+          construct: "Boundary geometry",
+          years: "2020; NHGIS 1850-1930 vintages",
+          licence: "U.S. Census Bureau boundary files public domain; NHGIS 2008 TIGER/Line+ basis"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "IPUMS NHGIS, University of Minnesota, <a href=\"https://www.nhgis.org/\" target=\"_blank\" rel=\"noopener\">nhgis.org</a>; Association of Religion Data Archives (ARDA), <a href=\"https://www.thearda.com/\" target=\"_blank\" rel=\"noopener\">thearda.com</a>.",
+        tables: "NHGIS datasets <code>1850_cPAX</code>/<code>ds10</code>, <code>1860_cPAX</code>/<code>ds14</code>, <code>1870_cPAX</code>/<code>ds17</code>, <code>1890_cRelig</code>/<code>ds28</code>, <code>1906_cRelig</code>/<code>ds33</code>, <code>1916_cRelig</code>/<code>ds41</code>, <code>1926_cRelig</code>/<code>ds51</code>, and <code>1936_cRelig</code>/<code>ds74</code>; RCMS/ARDA county files <code>CMS52CNT</code>, <code>CMS71CNT</code>, <code>CMS80CNT</code>, <code>CMS90CNT</code>, <code>RCMSCY</code>, <code>RCMSCY10</code>, and <code>RCMSCY20</code>.",
+        licence: "NHGIS: derived rates are published with citation and a pointer to the original NHGIS data, per the project ruling recorded in the manifest (licence_position); IPUMS's licensing reply is pending. RCMS: ARDA click-through research-use terms for source workbooks; U.S. Census Bureau boundary files public domain. Derived products attribute ARDA, the original studies, and the U.S. Census Bureau.",
+        note: "Pending: the project has asked IPUMS/NHGIS whether attributed derived county rates on a research map are within their licence or require permission; the answer will be recorded in the manifest when it arrives. Raw NHGIS ZIPs are not committed or redistributed, and the NHGIS source extracts live in the project's private research tier; the retrieval recipe remains public.",
+        script: ["scripts/build_us_nhgis_deep_past.R", "scripts/build_us_area_summary.R"],
+        manifests: [
+          { label: "us-nhgis-county-1850-1936", href: "docs/manifests/us-nhgis-county-1850-1936.json" },
+          { label: "us-rcms-county-1952-2020", href: "docs/manifests/us-rcms-county-1952-2020.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

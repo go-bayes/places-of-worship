@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Ireland map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Ireland research map; every string traces to
+    // research/countries/ie/README.md, the manifest, or the live REGION_CONFIG.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "IE",
+      countryName: "Ireland",
+      mapHref: "./",
+      intro: "County-and-city census religious-affiliation overlays for Ireland, from the CSO PxStat F5051 series, for the 2011, 2016 and 2022 censuses.",
+      facts: {
+        waves: "Censuses 2011, 2016, 2022",
+        geographies: "County and city (30 reporting units)",
+        metrics: "Religious affiliation %, no religion %, wave-to-wave change",
+        placeDots: "OpenStreetMap places (amenity=place_of_worship)"
+      },
+      reading: [
+        "Percentages use people usually resident and present in the State with a stated religion response: CSO F5051 All religions minus Not stated.",
+        "County-and-city areas are shaded by census religious affiliation (CSO PxStat table F5051). Religion categories change over time; the map uses broad categories and keeps raw source labels.",
+        "A flagged area (*) marks Cork: Cork City and Cork County are dissolved from two Tailte administrative-area features because CSO F5051 publishes them as one reporting unit.",
+        "The live 2011-2022 layer uses Tailte Éireann 2019 administrative-area boundaries rather than a historical boundary series. The 1861-1926 CSO Volume 3 Table 09 extension is deferred: the source is an image-only PDF needing OCR and a county/county-borough concordance."
+      ],
+      sources: [
+        {
+          name: "CSO PxStat table F5051, population by religion, sex, census year, county and city",
+          href: "https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/F5051/CSV/1.0/en",
+          construct: "Census religious affiliation",
+          years: "2011, 2016, 2022",
+          licence: "CSO copyright; Creative Commons Attribution 4.0"
+        },
+        {
+          name: "Tailte Éireann 2019 administrative areas",
+          href: "https://www.tailte.ie/",
+          construct: "Boundary geometry",
+          years: "2019",
+          licence: "Creative Commons Attribution 4.0"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Central Statistics Office (CSO), Ireland; Tailte Éireann, <a href=\"https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/F5051/CSV/1.0/en\" target=\"_blank\" rel=\"noopener\">F5051 CSV API</a>.",
+        tables: "CSO PxStat <code>F5051</code>, <code>tailte-administrative-areas-2019</code>, and deferred CSO Census 1926 Volume 3 <code>Table 09</code> (<code>cso-census-1926-volume3-table09-counties-1861-1926</code>).",
+        licence: "CSO statistics are Government of Ireland copyright and licensed under Creative Commons Attribution 4.0; reproduction is authorised subject to acknowledgement of the source. Tailte Éireann open data are licensed under Creative Commons Attribution 4.0.",
+        script: "scripts/build_ie_area_summary.R",
+        manifests: [
+          { label: "ie-census-religion-2011-2022", href: "docs/manifests/ie-census-religion-2011-2022.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

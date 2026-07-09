@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | United Kingdom map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the United Kingdom research map; every string traces to
+    // research/countries/uk/README.md, the manifest, or the live REGION_CONFIG.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "UK",
+      countryName: "United Kingdom",
+      mapHref: "./",
+      intro: "Census religious-affiliation overlays for the United Kingdom, split by the census geography used in each jurisdiction: England and Wales local authorities (2001-2021) and Northern Ireland Local Government Districts (2021).",
+      facts: {
+        waves: "England & Wales 2001, 2011, 2021; Northern Ireland 2021 (Scotland and NI 2001/2011 pending)",
+        geographies: "England & Wales local authority; Scotland council area; Northern Ireland LGD",
+        metrics: "Religious affiliation %, no religion %, wave-to-wave change",
+        placeDots: "OpenStreetMap places (amenity=place_of_worship)"
+      },
+      reading: [
+        "Percentages use the stated current-religion response denominator: all usual residents minus not answered or religion not stated.",
+        "Areas are shaded by census current-religion affiliation among people with a stated response. The census religion question is voluntary. Religion or religion brought up in, and community-background tables, are separate constructs and are not shown.",
+        "England and Wales 2001/2011 rows use a documented LAD11-to-LAD21 concordance; small published-row national-total residuals are recorded in the manifest. Scotland rows and Northern Ireland 2001/2011 rows are placeholders until their census-table extraction is pinned.",
+        "Scotland is boundary-ready (council-area 2019) but its counts are pending; Northern Ireland shows 2021 Local Government Districts, with 2001 and 2011 pending. The 1851 Religious Census measures institutions and attendance, not individual affiliation, and is kept in a separate layer."
+      ],
+      sources: [
+        {
+          name: "Nomis, Census 2021 table TS030 Religion (England & Wales)",
+          href: "https://www.nomisweb.co.uk/datasets/c2021ts030",
+          construct: "Census religious affiliation",
+          years: "2021",
+          licence: "Open Government Licence v3.0"
+        },
+        {
+          name: "Nomis, Census 2011 table KS209EW Religion (England & Wales)",
+          href: "https://www.nomisweb.co.uk/census/2011/ks209ew",
+          construct: "Census religious affiliation",
+          years: "2011",
+          licence: "Open Government Licence v3.0"
+        },
+        {
+          name: "Nomis, Census 2001 table KS007 Religion (England & Wales)",
+          href: "https://www.nomisweb.co.uk/",
+          construct: "Census religious affiliation",
+          years: "2001",
+          licence: "Open Government Licence v3.0"
+        },
+        {
+          name: "NISRA, Census 2021 main statistics religion table MS-B19 (Northern Ireland)",
+          href: "https://www.nisra.gov.uk/publications/census-2021-main-statistics-religion-tables",
+          construct: "Census religious affiliation",
+          years: "2021",
+          licence: "Open Government Licence v3.0"
+        },
+        {
+          name: "ONS Open Geography Portal, National Records of Scotland, OSNI/OpenDataNI boundaries",
+          href: "https://geoportal.statistics.gov.uk/",
+          construct: "Boundary geometry",
+          years: "LAD 2021, Scotland CA 2019, NI LGD 2012",
+          licence: "Open Government Licence v3.0"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Office for National Statistics via <a href=\"https://www.nomisweb.co.uk/\" target=\"_blank\" rel=\"noopener\">Nomis</a>; Northern Ireland Statistics and Research Agency via <a href=\"https://www.nisra.gov.uk/\" target=\"_blank\" rel=\"noopener\">NISRA</a>; other UK source URLs are listed in the manifest.",
+        tables: "Nomis <code>C2021TS030</code> / <code>TS030</code>, <code>KS209EW</code>, and <code>KS007</code>; NISRA <code>MS-B19</code>; Scotland 2001/2011/2022 and Northern Ireland 2001/2011 extraction routes are pending in the manifest.",
+        licence: "Contains public sector information licensed under the Open Government Licence v3.0.",
+        script: "scripts/build_uk_area_summary.R",
+        manifests: [
+          { label: "uk-census-religion-2001-2022", href: "docs/manifests/uk-census-religion-2001-2022.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

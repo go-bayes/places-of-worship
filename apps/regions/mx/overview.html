@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Mexico map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Mexico research map; every string traces to
+    // research/countries/mx/README.md, the manifest, or the live REGION_CONFIG.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "MX",
+      countryName: "Mexico",
+      mapHref: "./",
+      intro: "Municipality census religion overlays for Mexico, from INEGI census ITER files, for the 2000 (ages 5+), 2010 and 2020 censuses, on 2020 municipality boundaries.",
+      facts: {
+        waves: "Censuses 2000 (ages 5+), 2010, 2020",
+        geographies: "Municipality",
+        metrics: "Religious affiliation %, no religion %",
+        placeDots: "OpenStreetMap places (amenity=place_of_worship)"
+      },
+      reading: [
+        "Percentages use the sum of four retained INEGI ITER constructs: PCATOLICA, PRO_CRIEVA, POTRAS_REL and PSIN_RELIG in 2020; pcatolica, pncatolica, potras_rel and psin_relig in 2010. Category labels changed across waves, and no full denomination crosswalk is attempted. In 2000 the base is the population aged 5 and over (p5_catolic plus p5_sinreli): affiliation is Catholic plus any non-Catholic religion, and no religion is p5_sinreli minus p5_ncatoli.",
+        "Municipalities are shaded by census affiliation, derived from INEGI ITER category fields.",
+        "The 2000 wave counts the population aged 5 and over, so its levels are not directly comparable with 2010-2020, which count the full population. 2010 rows use 2020 municipality boundaries without a split/merge concordance. 2020 rows use official ITER municipality totals because locality-cell suppression prevents exact reconstruction from locality rows.",
+        "Rows use 2020 INEGI Marco Geoestadistico municipality boundaries; the map omits change layers until a full category crosswalk is adjudicated."
+      ],
+      sources: [
+        {
+          name: "INEGI 2020 Census ITER",
+          href: "https://www.inegi.org.mx/contenidos/programas/ccpv/2020/datosabiertos/iter/iter_00_cpv2020_csv.zip",
+          construct: "Census affiliation",
+          years: "2020",
+          licence: "INEGI terms"
+        },
+        {
+          name: "INEGI 2010 Census ITER",
+          href: "https://www.inegi.org.mx/programas/ccpv/2010/",
+          construct: "Census affiliation",
+          years: "2010",
+          licence: "INEGI terms"
+        },
+        {
+          name: "INEGI 2000 Census ITER (ages 5+)",
+          href: "https://www.inegi.org.mx/programas/ccpv/2000/",
+          construct: "Census affiliation, population aged 5 and over",
+          years: "2000",
+          licence: "INEGI terms"
+        },
+        {
+          name: "INEGI Marco Geoestadistico CPV 2020 municipal",
+          href: "https://www.inegi.org.mx/temas/mg/",
+          construct: "Boundary geometry",
+          years: "2020",
+          licence: "INEGI open-data standard"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Instituto Nacional de Estadistica y Geografia (INEGI), <a href=\"https://www.inegi.org.mx/contenidos/programas/ccpv/2020/datosabiertos/iter/iter_00_cpv2020_csv.zip\" target=\"_blank\" rel=\"noopener\">2020 ITER</a>, with the 2010 and 2000 ITER zips listed in the manifest.",
+        tables: "<code>inegi-cpv-2020-iter-locality</code>, <code>inegi-cpv-2010-iter-locality</code>, <code>inegi-cgpv-2000-iter-locality</code>, and <code>inegi-marco-geoestadistico-cpv2020-municipal</code>; 2020 field set PCATOLICA, PRO_CRIEVA, POTRAS_REL, PSIN_RELIG.",
+        licence: "INEGI open downloads subject to INEGI terms and product/source attribution. The Marco Geoestadistico CPV 2020 product page marks SHP downloads with INEGI's data-open standard.",
+        script: "scripts/build_mx_area_summary.R",
+        manifests: [
+          { label: "mx-census-religion-2000-2020", href: "docs/manifests/mx-census-religion-2000-2020.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

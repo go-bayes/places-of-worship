@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Vanuatu map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Vanuatu research map; every string traces to
+    // research/countries/vu/README.md, the manifest, or the live REGION_CONFIG.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "VU",
+      countryName: "Vanuatu",
+      mapHref: "./",
+      intro: "Places of worship across Vanuatu, with census denomination overlays back to the 1967 first census, at province level (1967-2020) and area-council level (2020).",
+      facts: {
+        waves: "Censuses 1967, 1999, 2009, 2020",
+        geographies: "Province; area council (2020)",
+        metrics: "Customary (kastom) beliefs %, Presbyterian %, Anglican %, Catholic %, Seventh-day Adventist %, religious affiliation %, no religion %, places per 10,000 residents, places per km²",
+        placeDots: "OpenStreetMap places (amenity=place_of_worship)"
+      },
+      reading: [
+        "Percentages use the stated religion-response denominator.",
+        "Provinces (and 2020 area councils) are shaded by denominational share. Affiliation is 94-100% in every province and year, so the informative signal is denominational; the map opens on customary (kastom) beliefs, which fell sharply after 1967.",
+        "1967 is the first census (McArthur & Yaxley Table A), tabulating adherents of religious groups aged 15+ with no no-religion category, aggregated from islands to the modern provinces — so affiliation and no-religion are blank for 1967 and only the denomination shares are comparable across years.",
+        "2020 province rows include the urban municipalities by derivation so all years share one basis; 2009 area-council religion is published by island, so area-council rows carry island-level values. Published cells carry small (±1-2) internal inconsistencies consistent with confidentiality perturbation — treat close percentages as equal."
+      ],
+      sources: [
+        {
+          name: "VNSO/VBoS census religion (1999 Main Report T2.10; 2009 & 2020 Basic Tables T3.5; 2020 Analytical Report T30/T31)",
+          href: "https://vbos.gov.vu/",
+          construct: "Census religious affiliation and denomination",
+          years: "1999, 2009, 2020",
+          licence: "No explicit licence on Basic Tables volumes; 2020 Analytical Report authorises research/educational reproduction with acknowledgement of SPC and VBoS; project-approved attributed use, 2026-07-04"
+        },
+        {
+          name: "McArthur & Yaxley (1968), 1967 first census Table A",
+          href: "https://sdd.spc.int/",
+          construct: "Adherents of religious groups aged 15+",
+          years: "1967",
+          licence: "© McArthur & Yaxley (1968)"
+        },
+        {
+          name: "geoBoundaries (province ADM1, area-council ADM2)",
+          href: "https://www.geoboundaries.org/",
+          construct: "Boundary geometry",
+          years: "2020",
+          licence: "ODbL (ADM1); CC BY 3.0 IGO (ADM2)"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Vanuatu Bureau of Statistics (VBoS) / Vanuatu National Statistics Office (VNSO), via SPC Digital Library, <a href=\"https://www.spc.int/digitallibrary/get/2dwwa\" target=\"_blank\" rel=\"noopener\">2dwwa</a> and <a href=\"https://www.spc.int/digitallibrary/get/aazaf\" target=\"_blank\" rel=\"noopener\">aazaf</a>.",
+        tables: "VNSO 1999 Main Report <code>T2.10</code>, VBoS 2020 Basic Tables Volume 1 <code>T3.5</code>, VNSO 2009 Basic Tables Volume 1 <code>T3.5</code>, 2020 Analytical Report Volume 2 <code>T30</code> and <code>T31</code>, and derived <code>vu-2020-province-incl-urban-derived</code>.",
+        licence: "No explicit licence on Basic Tables volumes; the 2020 Analytical Report authorises research/educational reproduction with acknowledgement of SPC and VBoS. The project reviewed and approved the attributed-use position on 2026-07-04: publication as attributed map products (VBoS & SPC credited on the map and in this manifest) is approved; any redistribution beyond that returns for review.",
+        note: "VU census source extracts live in the project's private research tier and are not redistributed; the retrieval recipe remains public.",
+        script: ["scripts/extract_vu_census_religion.py", "scripts/build_vu_area_summary.R"],
+        manifests: [
+          { label: "vu-census-religion-2009-2020", href: "docs/manifests/vu-census-religion-2009-2020-d17f5596eca1.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
