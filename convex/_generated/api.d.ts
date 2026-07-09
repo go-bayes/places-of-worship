@@ -21,6 +21,7 @@ import type * as lib_taskEvents from "../lib/taskEvents.js";
 import type * as lib_validators from "../lib/validators.js";
 import type * as model from "../model.js";
 import type * as reviews from "../reviews.js";
+import type * as revisionSeed from "../revisionSeed.js";
 import type * as tasks from "../tasks.js";
 import type * as trainingSeed from "../trainingSeed.js";
 import type * as users from "../users.js";
@@ -45,6 +46,7 @@ declare const fullApi: ApiFromModules<{
   "lib/validators": typeof lib_validators;
   model: typeof model;
   reviews: typeof reviews;
+  revisionSeed: typeof revisionSeed;
   tasks: typeof tasks;
   trainingSeed: typeof trainingSeed;
   users: typeof users;

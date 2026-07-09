@@ -1,0 +1,465 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:it-attendance:it:2001-2025:istat-avq-region",
+  "dataset_id": "it-attendance:it:2001-2025:istat-avq-region",
+  "dataset_version_id": "it-attendance:it:2001-2025:istat-avq-region:27a795d0a266",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "it-attendance",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "IT"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-09T11:28:09Z",
+  "created_by": "scripts/build_it_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_it_area_summary.R",
+    "git_commit": null,
+    "command": "Rscript scripts/build_it_area_summary.R",
+    "parameters": {
+      "sdmx_dataflow_id": "83_63_DF_DCCV_AVQ_PERSONE_136",
+      "sdmx_dataflow_label": "Religious observances - regions and type of municipality",
+      "sdmx_queries": {
+        "dataflow_list": "https://esploradati.istat.it/SDMXWS/rest/dataflow/IT1?detail=allstubs",
+        "dsd": "https://esploradati.istat.it/SDMXWS/rest/dataflow/IT1/83_63_DF_DCCV_AVQ_PERSONE_136/1.0?references=children",
+        "codelists": "https://esploradati.istat.it/SDMXWS/rest/codelist/IT1/CL_FREQ+CL_ITTER107+CL_TIPO_DATO_AVQ+CL_MISURA_AVQ+CL_SEXISTAT1+CL_ETA1+CL_TITOLO_STUDIO+CL_CONDIZIONE_DICH+CL_FLAG+CL_UNIT_MEASURE+CL_UNIT_MULT/1.0",
+        "data": "https://esploradati.istat.it/SDMXWS/rest/data/83_63_DF_DCCV_AVQ_PERSONE_136/A.IT+ITC1+ITC2+ITC3+ITC4+ITDA+ITD3+ITD4+ITD5+ITE1+ITE2+ITE3+ITE4+ITF1+ITF2+ITF3+ITF4+ITF5+ITF6+ITG1+ITG2.6_WEEK_RELIG+6_NEVER_RELIG.HSC....?detail=full"
+      },
+      "coverage_decision": "include every source year published in the pulled regional table: 2001-2003 and 2005-2025; 2004 is absent and is not imputed",
+      "headline_metric": "weekly attendance at a place of worship, percent of resident population aged 6+",
+      "secondary_metric": "never attending a place of worship, percent of resident population aged 6+",
+      "denominator": "Resident population aged 6+; respondents aged 14+ answer directly, and for children aged 6-13 a parent answers by proxy. The published value is already a percentage.",
+      "boundary_set": "it-region-2026-istat-generalised",
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "-clean",
+        "keep_percent": 60,
+        "bytes": 780915,
+        "byte_ceiling": 800000
+      },
+      "omitted_metrics": ["religious_affiliation", "places_per_10000_residents", "place_density_per_sq_km"]
+    },
+    "software_versions": {
+      "r": "4.6.1",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "mapshaper": "npx --yes mapshaper"
+    }
+  },
+  "source": {
+    "provider": "Istat",
+    "source_dataset_ids": ["istat-avq-religious-observances-regions-2001-2025", "istat-sdmx-dataflow-it1-allstubs", "istat-avq-persons-dsd", "istat-avq-persons-codelists", "istat-confini-amministrativi-regioni-2026-generalizzati", "istat-boundary-landing-page", "istat-legal-notice"],
+    "source_urls": ["https://esploradati.istat.it/SDMXWS/rest/dataflow/IT1?detail=allstubs", "https://esploradati.istat.it/SDMXWS/rest/dataflow/IT1/83_63_DF_DCCV_AVQ_PERSONE_136/1.0?references=children", "https://esploradati.istat.it/SDMXWS/rest/codelist/IT1/CL_FREQ+CL_ITTER107+CL_TIPO_DATO_AVQ+CL_MISURA_AVQ+CL_SEXISTAT1+CL_ETA1+CL_TITOLO_STUDIO+CL_CONDIZIONE_DICH+CL_FLAG+CL_UNIT_MEASURE+CL_UNIT_MULT/1.0", "https://esploradati.istat.it/SDMXWS/rest/data/83_63_DF_DCCV_AVQ_PERSONE_136/A.IT+ITC1+ITC2+ITC3+ITC4+ITDA+ITD3+ITD4+ITD5+ITE1+ITE2+ITE3+ITE4+ITF1+ITF2+ITF3+ITF4+ITF5+ITF6+ITG1+ITG2.6_WEEK_RELIG+6_NEVER_RELIG.HSC....?detail=full", "https://www.istat.it/storage/cartografia/confini_amministrativi/generalizzati/2026/Limiti01012026_g.zip", "https://www.istat.it/notizia/confini-delle-unita-amministrative-a-fini-statistici-al-1-gennaio-2018-2/", "https://www.istat.it/en/legal-notice/", "https://creativecommons.org/licenses/by/4.0/"],
+    "retrieved_at": "2026-07-09T00:00:00Z",
+    "licence": "ISTAT AVQ aggregate data and ISTAT boundary/source pages are used under Istat's legal notice: unless otherwise stated, website content is licensed under Creative Commons Attribution 4.0 International. Attribution: Istat. The boundary source is ISTAT Confini delle unità amministrative a fini statistici, 2026, versione generalizzata, WGS84.",
+    "citation": "Istat, Aspetti della vita quotidiana (AVQ), religious observances by region and type of municipality; Istat, Confini delle unità amministrative a fini statistici, 2026.",
+    "raw_redistribution": "Raw SDMX responses, HTML pages and the source shapefile ZIP are not committed. They remain in gitignored data/raw/it_practice/ with SHA-256 sidecars."
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/it_practice/istat_dataflow_it1_allstubs.json",
+      "url": "https://esploradati.istat.it/SDMXWS/rest/dataflow/IT1?detail=allstubs",
+      "format": "json",
+      "bytes": 1747842,
+      "sha256": "e672b33551a3d0fe08b4e6b911500eb269e1749ec851181074a185935fb82914",
+      "source_dataset_id": "istat-sdmx-dataflow-it1-allstubs",
+      "used_in_public_product": true,
+      "periods": "not applicable",
+      "retrieved_at": "2026-07-09T11:11:54Z",
+      "http_status": 200,
+      "notes": "Filtered locally to pin dataflow 83_63_DF_DCCV_AVQ_PERSONE_136. The API response contains the full IT1 allstubs list because the SDMX dataflow endpoint does not provide a text-search filter."
+    },
+    {
+      "uri": "data/raw/it_practice/istat_83_63_DF_DCCV_AVQ_PERSONE_136_dataflow_references_children.json",
+      "url": "https://esploradati.istat.it/SDMXWS/rest/dataflow/IT1/83_63_DF_DCCV_AVQ_PERSONE_136/1.0?references=children",
+      "format": "json",
+      "bytes": 9864,
+      "sha256": "29e4a4dd685986c192070036e81b34552ea0186d7723940e32554471a3755cd3",
+      "source_dataset_id": "istat-avq-persons-dsd",
+      "used_in_public_product": true,
+      "periods": "not applicable",
+      "retrieved_at": "2026-07-09T11:12:59Z",
+      "http_status": 200,
+      "notes": "Dataflow metadata call with references=children; used to assert the DSD and dimension order."
+    },
+    {
+      "uri": "data/raw/it_practice/istat_avq_dimension_codelists.json",
+      "url": "https://esploradati.istat.it/SDMXWS/rest/codelist/IT1/CL_FREQ+CL_ITTER107+CL_TIPO_DATO_AVQ+CL_MISURA_AVQ+CL_SEXISTAT1+CL_ETA1+CL_TITOLO_STUDIO+CL_CONDIZIONE_DICH+CL_FLAG+CL_UNIT_MEASURE+CL_UNIT_MULT/1.0",
+      "format": "json",
+      "bytes": 2841478,
+      "sha256": "6ac48af6b459fff22e4e0b89abb65db57d5b7489e3d8a8d8171c2df0c1a95d9a",
+      "source_dataset_id": "istat-avq-persons-codelists",
+      "used_in_public_product": true,
+      "periods": "not applicable",
+      "retrieved_at": "2026-07-09T11:13:37Z",
+      "http_status": 200,
+      "notes": "Combined codelist call for the dimension codelists named by the DSD; used to pin DATA_TYPE labels and denominator codes."
+    },
+    {
+      "uri": "data/raw/it_practice/istat_83_63_DF_DCCV_AVQ_PERSONE_136_attendance_weekly_never_regions.csv",
+      "url": "https://esploradati.istat.it/SDMXWS/rest/data/83_63_DF_DCCV_AVQ_PERSONE_136/A.IT+ITC1+ITC2+ITC3+ITC4+ITDA+ITD3+ITD4+ITD5+ITE1+ITE2+ITE3+ITE4+ITF1+ITF2+ITF3+ITF4+ITF5+ITF6+ITG1+ITG2.6_WEEK_RELIG+6_NEVER_RELIG.HSC....?detail=full",
+      "format": "csv",
+      "bytes": 102291,
+      "sha256": "60bc0bc78e1726d87c420b7dc4cf0679a415d079e0c1812dc323c9dd19f3316f",
+      "source_dataset_id": "istat-avq-religious-observances-regions-2001-2025",
+      "used_in_public_product": true,
+      "periods": "2001,2002,2003,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025",
+      "retrieved_at": "2026-07-09T11:15:12Z",
+      "http_status": 200,
+      "notes": "Single data call for annual HSC percentages, Italy plus 20 regions, DATA_TYPE 6_WEEK_RELIG and 6_NEVER_RELIG. The returned rows use SEX=9, AGE=Y_GE6, EDU=99 and LABOUR=99."
+    },
+    {
+      "uri": "data/raw/it_practice/istat_limiti01012026_g.zip",
+      "url": "https://www.istat.it/storage/cartografia/confini_amministrativi/generalizzati/2026/Limiti01012026_g.zip",
+      "format": "zip",
+      "bytes": 10450609,
+      "sha256": "b011a590656c3a3ebc297fba80726a376aa843b6f164641cf6a4a990021a81d6",
+      "source_dataset_id": "istat-confini-amministrativi-regioni-2026-generalizzati",
+      "used_in_public_product": true,
+      "periods": "2026",
+      "retrieved_at": "2026-07-09T11:16:16Z",
+      "http_status": 200,
+      "notes": "ISTAT 2026 generalised administrative-boundary ZIP; only Reg01012026_g_WGS84 is used."
+    },
+    {
+      "uri": "data/raw/it_practice/istat_boundary_landing.html",
+      "url": "https://www.istat.it/notizia/confini-delle-unita-amministrative-a-fini-statistici-al-1-gennaio-2018-2/",
+      "format": "html",
+      "bytes": 131359,
+      "sha256": "668ca97f3d36dd675b80dc9aa1d31dea02c8d7ca7c74f10cd283b98590490419",
+      "source_dataset_id": "istat-boundary-landing-page",
+      "used_in_public_product": false,
+      "periods": "2026",
+      "retrieved_at": "2026-07-09T11:16:45Z",
+      "http_status": 200,
+      "notes": "ISTAT boundary landing page cached for the 2026 generalised WGS84 link and boundary description."
+    },
+    {
+      "uri": "data/raw/it_practice/istat_legal_notice.html",
+      "url": "https://www.istat.it/en/legal-notice/",
+      "format": "html",
+      "bytes": 97922,
+      "sha256": "ddc846ad435de01e885d41183e3cfa3053bc4ba86108421511381008ab28d306",
+      "source_dataset_id": "istat-legal-notice",
+      "used_in_public_product": false,
+      "periods": "not applicable",
+      "retrieved_at": "2026-07-09T11:16:49Z",
+      "http_status": 200,
+      "notes": "ISTAT legal notice cached for the CC BY 4.0 licence statement."
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/it/data/area_summary_region.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 589795,
+      "sha256": "27a795d0a266de88e9af52861dfcdac22f03ceca3f29032d0e9f4ce895392cf9",
+      "row_count": 480,
+      "content": "Italy regional area summary with AVQ self-reported weekly and never attendance metrics.",
+      "privacy": "public",
+      "licence_status": "istat_cc_by_4_0"
+    },
+    {
+      "uri": "repo:apps/regions/it/data/area_summary_region.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 282906,
+      "sha256": "de5300fcbcce680110add20cd4922e6d0258523fb7954e13dd47321b9024a9bf",
+      "row_count": 480,
+      "content": "Flattened Italy regional area summary with AVQ self-reported weekly and never attendance metrics.",
+      "privacy": "public",
+      "licence_status": "istat_cc_by_4_0"
+    },
+    {
+      "uri": "repo:apps/regions/it/data/it_region_2026.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 780915,
+      "sha256": "15b32df4507c81a5484264239530176244251dfe74747d6cf323434861233bf5",
+      "row_count": 20,
+      "content": "Simplified ISTAT 2026 generalised region boundary GeoJSON, 20 features.",
+      "privacy": "public",
+      "licence_status": "istat_cc_by_4_0"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/it/data/area_summary_region.json",
+      "sha256": "27a795d0a266de88e9af52861dfcdac22f03ceca3f29032d0e9f4ce895392cf9",
+      "built_by": "scripts/build_it_area_summary.R",
+      "notes": "20 regions x 24 source years; 2004 absent from source."
+    },
+    {
+      "uri": "repo:apps/regions/it/data/it_region_2026.geojson",
+      "sha256": "15b32df4507c81a5484264239530176244251dfe74747d6cf323434861233bf5",
+      "built_by": "scripts/build_it_area_summary.R",
+      "notes": "20 ISTAT region features simplified with mapshaper weighted keep-shapes at 60% keep and -clean."
+    }
+  ],
+  "validation": {
+    "tests": ["Dataflow-list cache contains 83_63_DF_DCCV_AVQ_PERSONE_136, labelled Religious observances - regions and type of municipality.", "DSD dimension order is FREQ, REF_AREA, DATA_TYPE, MEASURE, SEX, AGE, EDU_LEV_HIGHEST, LABOUR_PROFESS_STATUS_B, TIME_PERIOD.", "One data call retrieved annual HSC percentages for Italy plus the 20 regions, DATA_TYPE 6_WEEK_RELIG and 6_NEVER_RELIG, all available years.", "The product includes source years 2001-2003 and 2005-2025. The source pull does not publish 2004 for this table; no 2004 row is created.", "Every covered source year has all 20 regions for weekly attendance and never attending.", "All attendance percentages are within [0, 100].", "The official ISTAT boundary source has 20 non-empty valid region geometries; the simplified output also has 20 non-empty valid features and is below 800 KB.", "Sampling-error band values were not present in the SDMX machine-readable pull; the quality flag points readers to the annual Nota metodologica."],
+    "join_coverage": {
+      "region": [
+        {
+          "boundary_level": "region",
+          "year": 2001,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2002,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2003,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2005,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2006,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2007,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2008,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2009,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2010,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2011,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2012,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2013,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2014,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2015,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2016,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2017,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2018,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2019,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2020,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2021,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2022,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2023,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2024,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2025,
+          "matched_area_count": 20,
+          "expected_area_count": 20,
+          "missing_area_names": []
+        }
+      ]
+    },
+    "national_spot_checks": [
+      {
+        "year": 2001,
+        "source_area": "IT",
+        "weekly_attendance_percent": 36.4,
+        "never_attending_percent": 15.9,
+        "status": "matched published national row in the ISTAT AVQ source table"
+      },
+      {
+        "year": 2019,
+        "source_area": "IT",
+        "weekly_attendance_percent": 25.1,
+        "never_attending_percent": 27,
+        "status": "matched published national row in the ISTAT AVQ source table"
+      },
+      {
+        "year": 2022,
+        "source_area": "IT",
+        "weekly_attendance_percent": 18.8,
+        "never_attending_percent": 31.1,
+        "status": "matched published national row in the ISTAT AVQ source table"
+      }
+    ],
+    "boundary_validation": {
+      "source_region_count": 20,
+      "output_feature_count": 20,
+      "expected_feature_count": 20,
+      "output_bytes": 780915,
+      "simplification_method": "mapshaper weighted keep-shapes",
+      "simplification_clean_option": "-clean",
+      "simplification_keep_percent": 60,
+      "unmatched_boundary_features": [],
+      "unmatched_attendance_regions": []
+    }
+  },
+  "construct_notes": [
+    "Italy's AVQ measure is a self-reported sample-survey estimate of worship attendance frequency among the resident population aged 6 and over. It is not religious affiliation and not a doorway count. Poland's dominicantes is a count of persons physically present at Mass on one count Sunday, expressed over obliged Catholics. The Italy survey percentages and Poland count percentages must not be placed on one axis or compared directly.",
+    "The area-summary schema currently uses legacy metric keys religious_affiliation_percent and no_religion_percent. In this Italy product those keys are mapped to weekly attendance percent and never-attending percent respectively; the indicators and visual layer labels carry the practice construct.",
+    "Resident population aged 6+; respondents aged 14+ answer directly, and for children aged 6-13 a parent answers by proxy. The published value is already a percentage.",
+    "The SDMX pull gives point estimates only. Regional estimates are sample-survey estimates with sampling error; sampling-error bands should be taken from the annual Nota metodologica when a page or report needs bands.",
+    "CC BY 4.0 attribution: Istat."
+  ],
+  "privacy": "public",
+  "licence_status": "istat_cc_by_4_0",
+  "downstream_status": "public",
+  "source_datasets": [
+    {
+      "source_dataset_id": "istat-avq-religious-observances-regions-2001-2025",
+      "name": "ISTAT AVQ IstatData dataflow 83_63_DF_DCCV_AVQ_PERSONE_136: Religious observances - regions and type of municipality",
+      "provider": "Istat",
+      "url": "https://esploradati.istat.it/SDMXWS/rest/data/83_63_DF_DCCV_AVQ_PERSONE_136/A.IT+ITC1+ITC2+ITC3+ITC4+ITDA+ITD3+ITD4+ITD5+ITE1+ITE2+ITE3+ITE4+ITF1+ITF2+ITF3+ITF4+ITF5+ITF6+ITG1+ITG2.6_WEEK_RELIG+6_NEVER_RELIG.HSC....?detail=full",
+      "retrieval_date": "2026-07-09",
+      "local_path": "data/raw/it_practice/istat_83_63_DF_DCCV_AVQ_PERSONE_136_attendance_weekly_never_regions.csv",
+      "licence": {
+        "name": "Creative Commons Attribution 4.0 International (CC BY 4.0), unless otherwise stated",
+        "url": "https://www.istat.it/en/legal-notice/",
+        "attribution": "Istat"
+      },
+      "citation": "Istat, Aspetti della vita quotidiana (AVQ), religious observances by region and type of municipality.",
+      "access_limits": "Istat SDMX endpoint rate limit: about five queries per minute per IP; cached source used for builds.",
+      "redistribution_limits": "The committed product contains derived regional percentages and source attribution; raw SDMX responses stay in gitignored data/raw/it_practice/.",
+      "notes": "Rows use DATA_TYPE 6_WEEK_RELIG and 6_NEVER_RELIG, MEASURE HSC (per 100 people with the same characteristics), SEX 9, AGE Y_GE6, EDU_LEV_HIGHEST 99, and LABOUR_PROFESS_STATUS_B 99. The denominator is resident population aged 6 and over; 6-13 responses are supplied by parental proxy. Source years are 2001-2003 and 2005-2025; 2004 is not present in the source pull."
+    },
+    {
+      "source_dataset_id": "istat-confini-amministrativi-regioni-2026-generalizzati",
+      "name": "Istat 2026 generalised administrative boundaries, regions",
+      "provider": "Istat",
+      "url": "https://www.istat.it/storage/cartografia/confini_amministrativi/generalizzati/2026/Limiti01012026_g.zip",
+      "retrieval_date": "2026-07-09",
+      "local_path": "data/raw/it_practice/istat_limiti01012026_g.zip",
+      "licence": {
+        "name": "Creative Commons Attribution 4.0 International (CC BY 4.0), unless otherwise stated",
+        "url": "https://www.istat.it/en/legal-notice/",
+        "attribution": "Istat"
+      },
+      "citation": "Istat, Confini delle unità amministrative a fini statistici, 2026, versione generalizzata, Reg01012026_g.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived region GeoJSON is committed with Istat CC BY 4.0 attribution.",
+      "notes": "The source ZIP contains the WGS84 generalised region shapefile Reg01012026_g_WGS84; the product keeps the 20 region features and transforms them to EPSG:4326 GeoJSON."
+    }
+  ],
+  "notes": "The committed products contain derived AVQ practice estimates and the simplified ISTAT regional boundary. The Italy region page, hub card and overview are out of scope for this lane."
+}
