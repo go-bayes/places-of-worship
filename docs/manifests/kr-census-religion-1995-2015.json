@@ -1,0 +1,476 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:kr-census-religion:kr:1995-2015:ac84e8e005d5",
+  "dataset_id": "kr-census-religion:kr:1995-2015:kosis",
+  "dataset_version_id": "kr-census-religion:kr:1995-2015:kosis:ac84e8e005d5",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "kr-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "KR"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-09T08:00:29Z",
+  "created_by": "scripts/build_kr_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_kr_area_summary.R",
+    "git_commit": null,
+    "command": "Rscript scripts/build_kr_area_summary.R",
+    "parameters": {
+      "waves": ["1995", "2005", "2015"],
+      "boundary_sets": {
+        "si_gun_gu": "kr-si-gun-gu-2018-kostat-harmonised",
+        "sido": "kr-sido-2018-kostat-harmonised"
+      },
+      "boundary_simplification_tolerance_m": {
+        "si_gun_gu": 50,
+        "sido": 50
+      },
+      "denominator": "KOSIS table total: 1995 계 and 2005 내국인 (명), both including 미상 (unknown), and 2015 계; 2015 is a 20% sample-survey estimate.",
+      "omitted_metrics": ["religious_change", "places_per_10000_residents", "place_density_per_sq_km"]
+    },
+    "software_versions": {
+      "r": "4.6.1",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0"
+    }
+  },
+  "source": {
+    "provider": "Korean Statistical Information Service (KOSIS), Statistics Korea; southkorea-maps / KoStat boundaries",
+    "source_dataset_ids": ["kosis-dt-1in9506-religion-admin-1995", "kosis-dt-1in0505-religion-si-gun-gu-2005", "kosis-dt-1pm1502-religion-si-gun-gu-2015", "southkorea-maps-kostat-municipalities-2018"],
+    "source_urls": ["https://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1IN9506&conn_path=I3", "https://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1IN0505&conn_path=I3", "https://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1PM1502&conn_path=I3", "https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2018/json/skorea-municipalities-2018-geo.json", "https://github.com/southkorea/southkorea-maps", "https://www.kogl.or.kr/info/license.do"],
+    "retrieved_at": "2026-07-09T00:00:00Z",
+    "licence": "KOSIS and KoStat-derived inputs are recorded as Korea Open Government License Type 1 / source-indication attribution material; the southkorea-maps README describes KOSTAT data as free to share or remix.",
+    "citation": "KOSIS tables DT_1IN9506, DT_1IN0505, and DT_1PM1502; southkorea-maps skorea-municipalities-2018-geo.json derived from KoStat administrative boundary geodata.",
+    "raw_redistribution": "Raw KOSIS ZIPs and the KoStat-derived raw boundary file are not committed. They remain in data/raw/kr_census/ with manifest checksums."
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/kr_census/kosis_101_DT_1IN9506_F_1995.zip",
+      "url": "http://kosis.kr/statisticsList/mass/mass_list.jsp?org_id=101&tbl_id=DT_1IN9506&vw_cd=MT_ZTITLE&list_id=&process=statHtml",
+      "format": "zip",
+      "bytes": 2072396,
+      "sha256": "4f40d3354de656dde0ae71b35e5ea89c5479a2d63a83f7303cf5865d26074cbb",
+      "row_count": 97965,
+      "source_dataset_id": "kosis-dt-1in9506-religion-admin-1995",
+      "used_in_public_product": true,
+      "periods": "1995",
+      "notes": "KOSIS mass CSV ZIP 101_DT_1IN9506_F_1995; used for current-sido rows with Ulsan split from Gyeongsangnam-do and Sejong null."
+    },
+    {
+      "uri": "data/raw/kr_census/kosis_101_DT_1IN0505_F_2005.zip",
+      "url": "http://kosis.kr/statisticsList/mass/mass_list.jsp?org_id=101&tbl_id=DT_1IN0505&vw_cd=MT_ZTITLE&list_id=&process=statHtml",
+      "format": "zip",
+      "bytes": 2194207,
+      "sha256": "6c25b5b1f176a819a429417c431d4ae6e5f8e7175944b0f44ce9a1bd5d8db893",
+      "row_count": 99528,
+      "source_dataset_id": "kosis-dt-1in0505-religion-si-gun-gu-2005",
+      "used_in_public_product": true,
+      "periods": "2005",
+      "notes": "KOSIS mass CSV ZIP 101_DT_1IN0505_F_2005; used for 2005 harmonised si/gun/gu rows and current-sido rows."
+    },
+    {
+      "uri": "data/raw/kr_census/kosis_101_DT_1PM1502_F_2015.zip",
+      "url": "http://kosis.kr/statisticsList/mass/mass_list.jsp?org_id=101&tbl_id=DT_1PM1502&vw_cd=MT_ZTITLE&list_id=&process=statHtml",
+      "format": "zip",
+      "bytes": 2263179,
+      "sha256": "8547a1afe53969d3639fc1a90393aae9fb77a54223809ec62e71986c5831e64a",
+      "row_count": 102024,
+      "source_dataset_id": "kosis-dt-1pm1502-religion-si-gun-gu-2015",
+      "used_in_public_product": true,
+      "periods": "2015",
+      "notes": "KOSIS mass CSV ZIP 101_DT_1PM1502_F_2015; used for 2015 harmonised si/gun/gu rows and current-sido rows."
+    },
+    {
+      "uri": "data/raw/kr_census/skorea_municipalities_2018_geo.json",
+      "url": "https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2018/json/skorea-municipalities-2018-geo.json",
+      "format": "json",
+      "bytes": 18160927,
+      "sha256": "14c174c880d45c3c62aa97d9d4fc0d8605f0999560a4b70096567a8eb77f2ca9",
+      "row_count": 250,
+      "source_dataset_id": "southkorea-maps-kostat-municipalities-2018",
+      "used_in_public_product": true,
+      "periods": "2018",
+      "notes": "KoStat-derived 2018 municipality GeoJSON from southkorea-maps; dissolved to harmonised si/gun/gu and current-sido units."
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/kr/data/area_summary_si_gun_gu.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 480025,
+      "sha256": "78acbac618116092f90ca18ca3c3937996673f51e3ad0206837bdde4017634b0",
+      "row_count": 458,
+      "content": "South Korea harmonised si/gun/gu area summary with KOSIS census religion metrics for 2005 and 2015.",
+      "privacy": "public",
+      "licence_status": "kogl_type_1_attribution"
+    },
+    {
+      "uri": "repo:apps/regions/kr/data/area_summary_si_gun_gu.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 191861,
+      "sha256": "7a49fd0e2ffe1070d73e1c4df3749b8c6c320542a123dc79c2ecfc0b4c3e7381",
+      "row_count": 458,
+      "content": "Flattened South Korea harmonised si/gun/gu area summary with KOSIS census religion metrics for 2005 and 2015.",
+      "privacy": "public",
+      "licence_status": "kogl_type_1_attribution"
+    },
+    {
+      "uri": "repo:apps/regions/kr/data/kr_si_gun_gu_2018_harmonised.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 2422913,
+      "sha256": "9a0f267f5bcabe8bb230954fde56e96533f78756e5e57696fc0abfab249be78a",
+      "row_count": 229,
+      "content": "Simplified South Korea harmonised si/gun/gu boundary GeoJSON derived from KoStat 2018 municipalities.",
+      "privacy": "public",
+      "licence_status": "kogl_type_1_attribution"
+    },
+    {
+      "uri": "repo:apps/regions/kr/data/area_summary_sido.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 64737,
+      "sha256": "ac84e8e005d549897a66dbb4c2e89e39d41273ac60d695a60daac77ec00eb028",
+      "row_count": 51,
+      "content": "South Korea current-sido area summary with KOSIS census religion metrics for 1995, 2005, and 2015.",
+      "privacy": "public",
+      "licence_status": "kogl_type_1_attribution"
+    },
+    {
+      "uri": "repo:apps/regions/kr/data/area_summary_sido.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 24466,
+      "sha256": "a391f24b41fcdeba81a217e29a10a6b10528e937bf7609662159caa4112bf011",
+      "row_count": 51,
+      "content": "Flattened South Korea current-sido area summary with KOSIS census religion metrics for 1995, 2005, and 2015.",
+      "privacy": "public",
+      "licence_status": "kogl_type_1_attribution"
+    },
+    {
+      "uri": "repo:apps/regions/kr/data/kr_sido_2018_harmonised.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 1553333,
+      "sha256": "f7fff3e6058e70b85499b9b0e4965e0b823a8d5c1824c91144b6eba4d7d7c809",
+      "row_count": 17,
+      "content": "Simplified South Korea current-sido boundary GeoJSON derived from KoStat 2018 municipalities.",
+      "privacy": "public",
+      "licence_status": "kogl_type_1_attribution"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/kr/data/area_summary_si_gun_gu.json",
+      "sha256": "78acbac618116092f90ca18ca3c3937996673f51e3ad0206837bdde4017634b0",
+      "built_by": "scripts/build_kr_area_summary.R",
+      "notes": "229 harmonised si/gun/gu units x 2 census years."
+    },
+    {
+      "uri": "repo:apps/regions/kr/data/area_summary_sido.json",
+      "sha256": "ac84e8e005d549897a66dbb4c2e89e39d41273ac60d695a60daac77ec00eb028",
+      "built_by": "scripts/build_kr_area_summary.R",
+      "notes": "17 current-sido units x 3 census years; 1995 Sejong row is null by concordance."
+    },
+    {
+      "uri": "repo:apps/regions/kr/data/kr_si_gun_gu_2018_harmonised.geojson",
+      "sha256": "9a0f267f5bcabe8bb230954fde56e96533f78756e5e57696fc0abfab249be78a",
+      "built_by": "scripts/build_kr_area_summary.R",
+      "notes": "KoStat-derived 2018 municipality layer dissolved to 229 si/gun/gu units and simplified at 50 m tolerance."
+    },
+    {
+      "uri": "repo:apps/regions/kr/data/kr_sido_2018_harmonised.geojson",
+      "sha256": "f7fff3e6058e70b85499b9b0e4965e0b823a8d5c1824c91144b6eba4d7d7c809",
+      "built_by": "scripts/build_kr_area_summary.R",
+      "notes": "KoStat-derived 2018 municipality layer dissolved to 17 current-sido units and simplified at 50 m tolerance."
+    }
+  ],
+  "validation": {
+    "checks": ["KOSIS 1995, 2005, and 2015 mass CSV ZIPs are present under data/raw/kr_census/.", "The 1995 source is read as CP949/EUC-KR-style text and contains province/metropolitan and sub-provincial total rows.", "Religious affiliation is recomputed as the sum of named religion columns and validated against the source religious total column for every used source row.", "Si/gun/gu rows reconcile exactly to the 2005 and 2015 national source rows for population_total, religious_affiliation_count, no_religion_count, and 2005 unknown_count.", "Current-sido rows reconcile exactly to the 1995, 2005, and 2015 national source rows for population_total, religious_affiliation_count, no_religion_count, and unknown_count.", "The 1995 Gyeongsangnam-do plus Ulsan split reconciles exactly to the printed 1995 Gyeongsangnam-do row.", "KoStat-derived boundary source has 250 features; outputs have 229 si/gun/gu features and 17 current-sido features.", "Boundary GeoJSON writes to 2422913 si/gun/gu bytes after 50 m simplification and 1553333 sido bytes after 50 m simplification.", "Religious change is omitted because 2005 is a full-count census table while 2015 is a 20% sample survey and several rows use predecessor-code or boundary-concordance assignments."],
+    "join_coverage": {
+      "si_gun_gu": [
+        {
+          "year": 2005,
+          "matched_area_count": 229,
+          "expected_area_count": 229,
+          "missing_area_names": [],
+          "notes": "All 229 harmonised units are matched after documented 2005 predecessor-code aggregation."
+        },
+        {
+          "year": 2015,
+          "matched_area_count": 229,
+          "expected_area_count": 229,
+          "missing_area_names": [],
+          "notes": "All 229 harmonised units are matched to 2015 KOSIS rows."
+        }
+      ],
+      "sido": [
+        {
+          "year": 1995,
+          "matched_area_count": 17,
+          "expected_area_count": 17,
+          "non_null_area_count": 16,
+          "missing_area_names": [],
+          "notes": "All 17 current sido rows are emitted; Sejong is null because it did not exist, Ulsan uses the Ulsan-si row, and Gyeongsangnam-do subtracts Ulsan-si."
+        },
+        {
+          "year": 2005,
+          "matched_area_count": 17,
+          "expected_area_count": 17,
+          "non_null_area_count": 17,
+          "missing_area_names": [],
+          "notes": "All 17 current sido rows are emitted; Sejong uses Yeongi-gun and Chungcheongnam-do subtracts Yeongi-gun to preserve the national partition."
+        },
+        {
+          "year": 2015,
+          "matched_area_count": 17,
+          "expected_area_count": 17,
+          "non_null_area_count": 17,
+          "missing_area_names": [],
+          "notes": "All 17 current sido rows are matched to 2015 KOSIS current-sido rows."
+        }
+      ]
+    },
+    "national_validation": {
+      "si_gun_gu": [
+        {
+          "year": 2005,
+          "area_count": 229,
+          "population_total_area_sum": 47041434,
+          "population_total_national": 47041434,
+          "population_total_difference": 0,
+          "religious_affiliation_area_sum": 24970766,
+          "religious_affiliation_national": 24970766,
+          "religious_affiliation_difference": 0,
+          "no_religion_area_sum": 21865160,
+          "no_religion_national": 21865160,
+          "no_religion_difference": 0,
+          "unknown_area_sum": 205508,
+          "unknown_national": 205508,
+          "unknown_difference": 0
+        },
+        {
+          "year": 2015,
+          "area_count": 229,
+          "population_total_area_sum": 49052389,
+          "population_total_national": 49052389,
+          "population_total_difference": 0,
+          "religious_affiliation_area_sum": 21553674,
+          "religious_affiliation_national": 21553674,
+          "religious_affiliation_difference": 0,
+          "no_religion_area_sum": 27498715,
+          "no_religion_national": 27498715,
+          "no_religion_difference": 0,
+          "unknown_area_sum": 0,
+          "unknown_national": 0,
+          "unknown_difference": 0
+        }
+      ],
+      "sido": [
+        {
+          "year": 1995,
+          "area_count": 17,
+          "non_null_population_area_count": 16,
+          "population_total_area_sum": 44553710,
+          "population_total_national": 44553710,
+          "population_total_difference": 0,
+          "religious_affiliation_area_sum": 22597824,
+          "religious_affiliation_national": 22597824,
+          "religious_affiliation_difference": 0,
+          "no_religion_area_sum": 21953315,
+          "no_religion_national": 21953315,
+          "no_religion_difference": 0,
+          "unknown_area_sum": 2571,
+          "unknown_national": 2571,
+          "unknown_difference": 0
+        },
+        {
+          "year": 2005,
+          "area_count": 17,
+          "non_null_population_area_count": 17,
+          "population_total_area_sum": 47041434,
+          "population_total_national": 47041434,
+          "population_total_difference": 0,
+          "religious_affiliation_area_sum": 24970766,
+          "religious_affiliation_national": 24970766,
+          "religious_affiliation_difference": 0,
+          "no_religion_area_sum": 21865160,
+          "no_religion_national": 21865160,
+          "no_religion_difference": 0,
+          "unknown_area_sum": 205508,
+          "unknown_national": 205508,
+          "unknown_difference": 0
+        },
+        {
+          "year": 2015,
+          "area_count": 17,
+          "non_null_population_area_count": 17,
+          "population_total_area_sum": 49052389,
+          "population_total_national": 49052389,
+          "population_total_difference": 0,
+          "religious_affiliation_area_sum": 21553674,
+          "religious_affiliation_national": 21553674,
+          "religious_affiliation_difference": 0,
+          "no_religion_area_sum": 27498715,
+          "no_religion_national": 27498715,
+          "no_religion_difference": 0,
+          "unknown_area_sum": 0,
+          "unknown_national": 0,
+          "unknown_difference": 0
+        }
+      ]
+    },
+    "concordance": {
+      "branch": "adm2_split",
+      "evidence": "The 1995 total-sex/total-age source rows include Gyeongsangnam-do (code 38) and Ulsan-si (울산시, code 38020); Ulsan is therefore separable.",
+      "gyeongnam_ulsan_validation": {
+        "branch": "adm2_split",
+        "status": "passed",
+        "printed_gyeongsangnam_do_population_total": 3841553,
+        "built_gyeongsangnam_do_plus_ulsan_population_total": 3841553,
+        "population_total_difference": 0,
+        "printed_gyeongsangnam_do_religious_affiliation_count": 1936979,
+        "built_gyeongsangnam_do_plus_ulsan_religious_affiliation_count": 1936979,
+        "religious_affiliation_difference": 0,
+        "printed_gyeongsangnam_do_no_religion_count": 1904559,
+        "built_gyeongsangnam_do_plus_ulsan_no_religion_count": 1904559,
+        "no_religion_difference": 0,
+        "printed_gyeongsangnam_do_unknown_count": 15,
+        "built_gyeongsangnam_do_plus_ulsan_unknown_count": 15,
+        "unknown_difference": 0
+      },
+      "sejong_1995": "Sejong is null for 1995 because it did not exist in 1995."
+    },
+    "category_mapping_1995": {
+      "printed_categories": ["계", "종교있음", "불교", "개신교", "천주교", "유교", "원불교", "천도교", "대종교", "대순진리회", "기타", "종교없음", "미상"],
+      "religious_affiliation_count": ["불교", "개신교", "천주교", "유교", "원불교", "천도교", "대종교", "대순진리회", "기타"],
+      "other_residual": "기타",
+      "no_religion_count": "종교없음",
+      "denominator": "계, with 미상 retained in the denominator"
+    },
+    "boundary_validation": {
+      "si_gun_gu": {
+        "source_feature_count": 250,
+        "output_feature_count": 229,
+        "output_bytes": 2422913,
+        "simplification_tolerance_m": 50,
+        "harmonised_area_count": 229,
+        "dissolved_parent_codes": ["31010", "31020", "31040", "31090", "31100", "31190", "33040", "34010", "35010", "37010", "38110"]
+      },
+      "sido": {
+        "source_feature_count": 250,
+        "output_feature_count": 17,
+        "output_bytes": 1553333,
+        "simplification_tolerance_m": 50,
+        "harmonised_area_count": 17
+      }
+    }
+  },
+  "deferred_sources": [
+    {
+      "source_dataset_id": "kosis-dt-1in8505-religion-sido-1985",
+      "table_id": "DT_1IN8505",
+      "year": 1985,
+      "geography": "sido",
+      "status": "deferred",
+      "reason": "KOSIS exposes the table page and metadata, but no mass CSV file was available through the no-key bulk route during this build; scripted grid export requires session state that is not yet reproducible in the builder."
+    }
+  ],
+  "construct_notes": [
+    "The public product keeps the country's own broad any-religion and no-religion constructs; no denomination crosswalk is attempted.",
+    "1995 religious_affiliation_count sums Buddhist, Protestant, Catholic, Confucianism, Won Buddhism, Cheondogyo, Daejonggyo, Daesoon Jinrihoe, and other; the 1995 기타 category maps to the product's other/residual component.",
+    "2005 religious_affiliation_count sums Buddhist, Protestant, Catholic, Confucianism, Won Buddhism, Jeungsan, Cheondogyo, Daejonggyo, and other.",
+    "2015 religious_affiliation_count sums Buddhist, Protestant, Catholic, Won Buddhism, Confucianism, Cheondogyo, Daesoon Jinrihoe, Daejonggyo, and other.",
+    "1995 uses KOSIS table total 계, including 미상. 2005 uses KOSIS table total 내국인 (명), including 미상. 2015 uses KOSIS table total 계.",
+    "The 1995 current-sido concordance uses the source Ulsan-si row inside Gyeongsangnam-do as current Ulsan and subtracts Ulsan-si from Gyeongsangnam-do; Sejong is null because it did not exist in 1995.",
+    "The 2005 current-sido concordance assigns Yeongi-gun to current Sejong and subtracts Yeongi-gun from Chungcheongnam-do, matching the existing si/gun/gu convention.",
+    "2015 religion came from the 20% sample survey of the register-based census; rows carry sample_survey_20pct.",
+    "The harmonised si/gun/gu boundary set dissolves 2018 district geometries to parent cities where KOSIS uses parent-city totals, and aggregates documented 2005 predecessor codes for Sejong, Yeoju, Cheongju, Gyeryong, Dangjin, Changwon, and Jeju."
+  ],
+  "privacy": "public",
+  "licence_status": "kogl_type_1_attribution",
+  "downstream_status": "public",
+  "source_datasets": [
+    {
+      "source_dataset_id": "kosis-dt-1in9506-religion-admin-1995",
+      "name": "KOSIS DT_1IN9506: 행정구역/성/연령별 종교인구",
+      "provider": "Korean Statistical Information Service (KOSIS), Statistics Korea",
+      "url": "https://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1IN9506&conn_path=I3",
+      "retrieval_date": "2026-07-09",
+      "local_path": "data/raw/kr_census/kosis_101_DT_1IN9506_F_1995.zip",
+      "licence": {
+        "name": "Korea Open Government License Type 1 (source indication)",
+        "url": "https://www.kogl.or.kr/info/license.do",
+        "attribution": "Korean Statistical Information Service (KOSIS), Statistics Korea"
+      },
+      "citation": "KOSIS table DT_1IN9506, 행정구역/성/연령별 종교인구, 1995 Population Census.",
+      "access_limits": null,
+      "redistribution_limits": "Raw KOSIS mass CSV ZIP is not committed; derived public products attribute KOSIS.",
+      "notes": "Used for 1995 current-sido rows. The table includes province/metropolitan rows and sub-provincial rows; Ulsan-si is split from the printed Gyeongsangnam-do total, and Sejong is null because it did not exist in 1995. The denominator is 계, and 미상 (unknown) remains in the denominator. Printed 1995 categories map as follows: 불교, 개신교, 천주교, 유교, 원불교, 천도교, 대종교, 대순진리회, and 기타 all contribute to religious_affiliation_count; 기타 is the residual other category; 종교없음 maps to no_religion_count."
+    },
+    {
+      "source_dataset_id": "kosis-dt-1in0505-religion-si-gun-gu-2005",
+      "name": "KOSIS DT_1IN0505: 성/연령/종교별 인구-시군구",
+      "provider": "Korean Statistical Information Service (KOSIS), Statistics Korea",
+      "url": "https://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1IN0505&conn_path=I3",
+      "retrieval_date": "2026-07-09",
+      "local_path": "data/raw/kr_census/kosis_101_DT_1IN0505_F_2005.zip",
+      "licence": {
+        "name": "Korea Open Government License Type 1 (source indication)",
+        "url": "https://www.kogl.or.kr/info/license.do",
+        "attribution": "Korean Statistical Information Service (KOSIS), Statistics Korea"
+      },
+      "citation": "KOSIS table DT_1IN0505, 성/연령/종교별 인구-시군구, 2005 Population Census.",
+      "access_limits": null,
+      "redistribution_limits": "Raw KOSIS mass CSV ZIP is not committed; derived public products attribute KOSIS.",
+      "notes": "Used for 2005 rows. The denominator is 내국인 (명), and 미상 (unknown) remains in the denominator."
+    },
+    {
+      "source_dataset_id": "kosis-dt-1pm1502-religion-si-gun-gu-2015",
+      "name": "KOSIS DT_1PM1502: 성별/연령별/종교별 인구-시군구",
+      "provider": "Korean Statistical Information Service (KOSIS), Statistics Korea",
+      "url": "https://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1PM1502&conn_path=I3",
+      "retrieval_date": "2026-07-09",
+      "local_path": "data/raw/kr_census/kosis_101_DT_1PM1502_F_2015.zip",
+      "licence": {
+        "name": "Korea Open Government License Type 1 (source indication)",
+        "url": "https://www.kogl.or.kr/info/license.do",
+        "attribution": "Korean Statistical Information Service (KOSIS), Statistics Korea"
+      },
+      "citation": "KOSIS table DT_1PM1502, 성별/연령별/종교별 인구-시군구, 2015 Population Census.",
+      "access_limits": null,
+      "redistribution_limits": "Raw KOSIS mass CSV ZIP is not committed; derived public products attribute KOSIS.",
+      "notes": "Used for 2015 rows. Religion was asked in the 20% sample survey of the register-based census."
+    },
+    {
+      "source_dataset_id": "southkorea-maps-kostat-municipalities-2018",
+      "name": "southkorea-maps KoStat 2018 municipalities GeoJSON",
+      "provider": "southkorea-maps from KoStat administrative boundary geodata",
+      "url": "https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2018/json/skorea-municipalities-2018-geo.json",
+      "retrieval_date": "2026-07-09",
+      "local_path": "data/raw/kr_census/skorea_municipalities_2018_geo.json",
+      "licence": {
+        "name": "Korea Open Government License Type 1 / KOSTAT free share-remix attribution basis",
+        "url": "https://www.kogl.or.kr/info/license.do",
+        "attribution": "KoStat / southkorea-maps"
+      },
+      "citation": "southkorea-maps, skorea-municipalities-2018-geo.json, derived from KoStat administrative division geodata.",
+      "access_limits": null,
+      "redistribution_limits": "Derived simplified boundary GeoJSON attributes KoStat and southkorea-maps.",
+      "notes": "The product dissolves 2018 district geometries to parent cities where KOSIS publishes parent-city rows and uses documented predecessor-code aggregations for 2005."
+    }
+  ],
+  "notes": "The committed products contain derived area summaries and simplified boundaries only. On-page attribution must cite KOSIS, KoStat, southkorea-maps, and KOGL Type 1 attribution."
+}

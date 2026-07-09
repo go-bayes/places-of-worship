@@ -24,9 +24,9 @@
         placeDots: "OSM coverage was not counted in this build; church and temple tagging should be compared with official or denominational directories before a governed place layer is added."
       },
       reading: [
-        "Percentages use the KOSIS table total: 2005 내국인 (명), including 미상 (unknown), and 2015 계. The 2015 religion item came from the 20% sample survey of the register-based census, so no change layer is shown.",
+        "Percentages use the KOSIS table total: 2005 내국인 (명), including 미상 (unknown), and 2015 계. The 2015 religion item came from the 20% sample survey of the register-based census; no change layer is shown.",
         "Reporting units are shaded by religious affiliation (sum of KOSIS named religion categories) or the KOSIS no-religion category, each divided by the table total.",
-        "The 2015 rows are flagged sample_survey_20pct. The 1985 and 1995 waves are deferred in the manifest.",
+        "The 2015 rows are flagged sample_survey_20pct. The 1995 wave is available only in the current-sido product; 1985 remains deferred in the manifest.",
         "The harmonised boundary dissolves selected 2018 KoStat district geometries to parent cities and aggregates documented 2005 predecessor codes for Sejong, Yeoju, Cheongju, Gyeryong, Dangjin, Changwon and Jeju. Sejong is flagged because the 2012 boundary does not map cleanly to a single 2005 source unit."
       ],
       sources: [
@@ -54,11 +54,11 @@
       ],
       accessData: {
         sourceOfRecord: "<a href=\"https://kosis.kr/\" target=\"_blank\" rel=\"noopener\">KOSIS</a>, Population Census religion tables.",
-        tables: "<code>DT_1IN0505</code> (2005), <code>DT_1PM1502</code> (2015), <code>DT_1IN9506</code> (1995, deferred), and <code>DT_1IN8505</code> (1985, deferred).",
+        tables: "<code>DT_1IN9506</code> (1995 current-sido), <code>DT_1IN0505</code> (2005), <code>DT_1PM1502</code> (2015), and <code>DT_1IN8505</code> (1985, deferred).",
         licence: "KOGL Type 1 attribution is recorded for KOSIS and KoStat-derived inputs.",
         script: "scripts/build_kr_area_summary.R",
         manifests: [
-          { label: "kr-census-religion-2005-2015", href: "docs/manifests/kr-census-religion-2005-2015.json" }
+          { label: "kr-census-religion-1995-2015", href: "docs/manifests/kr-census-religion-1995-2015.json" }
         ]
       },
       contribute: {

@@ -14,11 +14,16 @@
   layer ships across the full-count/sample basis break. Validation:
   both waves reconcile exactly to the national rows for population,
   religious affiliation, no religion, and the 2005 unknown category;
-  join coverage 229/229. 1985 (sido table pinned, no keyless export
-  route yet) and 1995 (mass CSV downloaded and checksummed, pre-2005
-  concordance pending) are deferred. Build:
+  join coverage 229/229. Added a current-sido companion product for
+  1995, 2005, and 2015. The 1995 KOSIS DT_1IN9506 source includes an
+  Ulsan-si row inside Gyeongsangnam-do; the build therefore reports Ulsan
+  separately and subtracts Ulsan-si from Gyeongsangnam-do; Sejong is null
+  because it did not exist in 1995. The current-sido rows reconcile
+  exactly to the national rows for every wave, and the 1995
+  Gyeongsangnam-do plus Ulsan split recovers the printed 1995
+  Gyeongsangnam-do row exactly. 1985 remains deferred. Build:
   `scripts/build_kr_area_summary.R`; manifest
-  `docs/manifests/kr-census-religion-2005-2015.json`.
+  `docs/manifests/kr-census-religion-1995-2015.json`.
 - Added the Romania regional map: census religion for 2011 (RPL
   sR_TAB_13) and 2021 (RPL Tabel 2.04.2) at two levels — county
   (județ, 42 units, GISCO NUTS3 2021, complete headline coverage,
