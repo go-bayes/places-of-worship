@@ -1,0 +1,158 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:nl-survey-religion:nl:2010-2015:cbs-province",
+  "dataset_id": "nl-survey-religion:nl:2010-2015:cbs-province",
+  "dataset_version_id": "nl-survey-religion:nl:2010-2015:cbs-province:18a90e9df74e",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "nl-survey-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "NL"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-09T23:33:06Z",
+  "created_by": "scripts/build_nl_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_nl_area_summary.R",
+    "git_commit": "45c725a03384",
+    "command": "Rscript scripts/build_nl_area_summary.R",
+    "parameters": {
+      "regional_table": "83288NED",
+      "national_comparison_table": "82904NED",
+      "province_years": [
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015
+      ],
+      "affiliation_product": "separate",
+      "attendance_product": "separate",
+      "uncertainty": "confidence intervals and standard errors are not published in 83288NED",
+      "boundary_set": "nl-province-2026-pdok-brk",
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 20,
+        "bytes": 508811
+      }
+    },
+    "software_versions": {
+      "r": "4.6.1",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "mapshaper": "npx --yes mapshaper"
+    }
+  },
+  "source": {
+    "provider": "Statistics Netherlands (CBS) and Kadaster / PDOK",
+    "source_dataset_ids": [
+      "cbs-statline-83288ned-religious-involvement-province-2010-2015",
+      "cbs-statline-82904ned-religious-involvement-national-2010-2025",
+      "pdok-brk-bestuurlijke-gebieden-province-current-2026"
+    ],
+    "source_urls": [
+      "https://opendata.cbs.nl/ODataApi/OData/83288NED",
+      "https://opendata.cbs.nl/ODataApi/OData/82904NED",
+      "https://api.pdok.nl/kadaster/brk-bestuurlijke-gebieden/ogc/v1/collections/provinciegebied/items?f=json&limit=100",
+      "https://api.pdok.nl/kadaster/brk-bestuurlijke-gebieden/ogc/v1?f=json",
+      "https://opendata.cbs.nl/portal.html?_catalog=CBS&_la=nl&tableId=83288NED",
+      "https://creativecommons.org/licenses/by/4.0/"
+    ],
+    "retrieved_at": "2026-07-10T00:00:00Z",
+    "licence": "CBS StatLine 83288NED and 82904NED are CC BY 4.0 with CBS attribution; PDOK Bestuurlijke Gebieden is CC BY 4.0 with Kadaster / PDOK attribution.",
+    "citation": "Statistics Netherlands (CBS), StatLine 83288NED and 82904NED; Kadaster via PDOK, Bestuurlijke Gebieden, provinciegebied."
+  },
+  "input_manifests": [],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/nl/data/area_summary_affiliation_province.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 92652,
+      "sha256": "18a90e9df74ec1fad5b404260d601aaf0894fb8c3c913fb0b51d064655eed577",
+      "row_count": 72,
+      "content": "Province affiliation survey area summary, 2010-2015.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/nl/data/area_summary_affiliation_province.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 42984,
+      "sha256": "058cccc366dad2b625d9e40118a57beefb3cd753dfc575de0ea67621129b2bb8",
+      "row_count": 72,
+      "content": "Flattened province affiliation survey area summary.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/nl/data/area_summary_attendance_province.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 94588,
+      "sha256": "8c7c15cf64b8039f5bb37182604bcae36b527ac1f1828d28328e3f597769e516",
+      "row_count": 72,
+      "content": "Province attendance survey area summary, 2010-2015.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/nl/data/area_summary_attendance_province.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 44761,
+      "sha256": "6428efa1f9ac16b67ce3c9f874319db200ec5bd53380292071d263138d683ada",
+      "row_count": 72,
+      "content": "Flattened province attendance survey area summary.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/nl/data/nl_province_2026.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 508811,
+      "sha256": "b9d4a892b73093f22e77263bdd33c6ba4fe8f794600405cf1969bbcfc25b55f2",
+      "row_count": 12,
+      "content": "Simplified current PDOK province boundary GeoJSON.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    }
+  ],
+  "stats": {
+    "province_count": 12,
+    "year_count": 6,
+    "affiliation_row_count": 72,
+    "attendance_row_count": 72,
+    "boundary_bytes": 508811
+  },
+  "local_cache_hint": "data/raw/nl_religion",
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_nl_area_summary.R",
+      "uv run python -m jsonschema -i docs/manifests/nl-survey-religion-2010-2015.json schemas/data-manifest.schema.json"
+    ],
+    "warnings": [
+      "CBS 83288NED states that sampling uncertainty exists but does not publish standard errors or confidence intervals.",
+      "The annual estimates are rounded to whole percentages.",
+      "Current 2026 province boundaries display annual estimates from 2010-2015; province codes remain stable, but small boundary corrections are not represented historically."
+    ],
+    "notes": "Every year has 12/12 province rows for both constructs. Four national metrics match table 82904NED exactly in 2010, 2012, and 2015. The 12 simplified boundary features are valid and non-empty."
+  },
+  "privacy": "public",
+  "licence_status": "accepted",
+  "downstream_status": "public",
+  "notes": "raw_sources=[{\"uri\":\"data/raw/nl_religion/cbs_83288ned_tableinfos.json\",\"url\":\"https://opendata.cbs.nl/ODataApi/OData/83288NED/TableInfos\",\"format\":\"json\",\"bytes\":5995,\"sha256\":\"13642abf2bd6c0735805fec9d11d9a980997389667c69288ec1edd0e480b2aa1\",\"source_dataset_id\":\"cbs-statline-83288ned-religious-involvement-province-2010-2015\",\"used_in_public_product\":true,\"retrieved_at\":\"2026-07-09T23:22:39Z\",\"http_status\":200},{\"uri\":\"data/raw/nl_religion/cbs_83288ned_dataproperties.json\",\"url\":\"https://opendata.cbs.nl/ODataApi/OData/83288NED/DataProperties\",\"format\":\"json\",\"bytes\":6309,\"sha256\":\"eee9974f927740604a2f581c8baa8244b3d5e36df625ea061c651f4372f605f1\",\"source_dataset_id\":\"cbs-statline-83288ned-religious-involvement-province-2010-2015\",\"used_in_public_product\":true,\"retrieved_at\":\"2026-07-09T23:22:39Z\",\"http_status\":200},{\"uri\":\"data/raw/nl_religion/cbs_83288ned_regios.json\",\"url\":\"https://opendata.cbs.nl/ODataApi/OData/83288NED/RegioS\",\"format\":\"json\",\"bytes\":4551,\"sha256\":\"57c5285a937c5190bb6e582f496492dc41909f9147df44a0ec1d6212ab1293ca\",\"source_dataset_id\":\"cbs-statline-83288ned-religious-involvement-province-2010-2015\",\"used_in_public_product\":true,\"retrieved_at\":\"2026-07-09T23:22:39Z\",\"http_status\":200},{\"uri\":\"data/raw/nl_religion/cbs_83288ned_perioden.json\",\"url\":\"https://opendata.cbs.nl/ODataApi/OData/83288NED/Perioden\",\"format\":\"json\",\"bytes\":662,\"sha256\":\"034b4a76c49b7af0fc21cd713242f449012e98dfe7e9d0268caef68097efa635\",\"source_dataset_id\":\"cbs-statline-83288ned-religious-involvement-province-2010-2015\",\"used_in_public_product\":true,\"retrieved_at\":\"2026-07-09T23:22:39Z\",\"http_status\":200},{\"uri\":\"data/raw/nl_religion/cbs_83288ned_typeddataset.json\",\"url\":\"https://opendata.cbs.nl/ODataApi/OData/83288NED/TypedDataSet\",\"format\":\"json\",\"bytes\":40642,\"sha256\":\"1d05b8ae2e50680981448604357bf88f20c871447a112e1ff72008a63d345828\",\"source_dataset_id\":\"cbs-statline-83288ned-religious-involvement-province-2010-2015\",\"used_in_public_product\":true,\"retrieved_at\":\"2026-07-09T23:22:39Z\",\"http_status\":200},{\"uri\":\"data/raw/nl_religion/cbs_82904ned_tableinfos.json\",\"url\":\"https://opendata.cbs.nl/ODataApi/OData/82904NED/TableInfos\",\"format\":\"json\",\"bytes\":7423,\"sha256\":\"876dacbe9eac8f3c8ede8f41d3e0d3d8d5bba8834053d2cfd0d5a72b80d75dda\",\"source_dataset_id\":\"cbs-statline-82904ned-religious-involvement-national-2010-2025\",\"used_in_public_product\":false,\"retrieved_at\":\"2026-07-09T23:22:39Z\",\"http_status\":200},{\"uri\":\"data/raw/nl_religion/cbs_82904ned_persoonskenmerken.json\",\"url\":\"https://opendata.cbs.nl/ODataApi/OData/82904NED/Persoonskenmerken\",\"format\":\"json\",\"bytes\":2670,\"sha256\":\"4aa1c9281ca07fc6484072073cacf6dff77f8837ac937a614baf3238dcab8c2c\",\"source_dataset_id\":\"cbs-statline-82904ned-religious-involvement-national-2010-2025\",\"used_in_public_product\":false,\"retrieved_at\":\"2026-07-09T23:22:39Z\",\"http_status\":200},{\"uri\":\"data/raw/nl_religion/cbs_82904ned_kerkelijkegezindte.json\",\"url\":\"https://opendata.cbs.nl/ODataApi/OData/82904NED/KerkelijkeGezindte\",\"format\":\"json\",\"bytes\":4624,\"sha256\":\"bc377c08a9a6e86d327152a42b8553f7a9e774dd2d2e9f6385826fde4950ef5c\",\"source_dataset_id\":\"cbs-statline-82904ned-religious-involvement-national-2010-2025\",\"used_in_public_product\":false,\"retrieved_at\":\"2026-07-09T23:22:39Z\",\"http_status\":200},{\"uri\":\"data/raw/nl_religion/cbs_82904ned_perioden.json\",\"url\":\"https://opendata.cbs.nl/ODataApi/OData/82904NED/Perioden\",\"format\":\"json\",\"bytes\":1552,\"sha256\":\"f485858a95e59012fd6a3ee1ee93863c27105af190918b1a9ae8834e7c063d09\",\"source_dataset_id\":\"cbs-statline-82904ned-religious-involvement-national-2010-2025\",\"used_in_public_product\":false,\"retrieved_at\":\"2026-07-09T23:22:39Z\",\"http_status\":200},{\"uri\":\"data/raw/nl_religion/cbs_82904ned_typeddataset.json\",\"url\":\"https://opendata.cbs.nl/ODataApi/OData/82904NED/TypedDataSet\",\"format\":\"json\",\"bytes\":510655,\"sha256\":\"204ba5421ae85b3ab725e8a4b9373940c28d16a9ed9b239f8181b917702fcb15\",\"source_dataset_id\":\"cbs-statline-82904ned-religious-involvement-national-2010-2025\",\"used_in_public_product\":false,\"retrieved_at\":\"2026-07-09T23:22:39Z\",\"http_status\":200},{\"uri\":\"data/raw/nl_religion/pdok_provinciegebied_current.geojson\",\"url\":\"https://api.pdok.nl/kadaster/brk-bestuurlijke-gebieden/ogc/v1/collections/provinciegebied/items?f=json&limit=100\",\"format\":\"geojson\",\"bytes\":5469898,\"sha256\":\"7ae3016d7d495dd0524be2ad2fde72d5614e772cc8c9e23905c6bf3bf3e0e0e6\",\"source_dataset_id\":\"pdok-brk-bestuurlijke-gebieden-province-current-2026\",\"used_in_public_product\":true,\"retrieved_at\":\"2026-07-09T23:23:16Z\",\"http_status\":200},{\"uri\":\"data/raw/nl_religion/pdok_bestuurlijke_gebieden_landing.json\",\"url\":\"https://api.pdok.nl/kadaster/brk-bestuurlijke-gebieden/ogc/v1?f=json\",\"format\":\"json\",\"bytes\":4908,\"sha256\":\"aeec2a224c785c9ab5c262f14435d141b938224dd86542e4dc755fb42e392740\",\"source_dataset_id\":\"pdok-brk-bestuurlijke-gebieden-province-current-2026\",\"used_in_public_product\":true,\"retrieved_at\":\"2026-07-09T23:22:39Z\",\"http_status\":200},{\"uri\":\"data/raw/nl_religion/cbs_open_data_portal_83288ned.html\",\"url\":\"https://opendata.cbs.nl/portal.html?_catalog=CBS&_la=nl&tableId=83288NED\",\"format\":\"html\",\"bytes\":13095,\"sha256\":\"24faf2dcb433a4ab936c26c17a8a863c5695a860f1469d456f2170c1638dc182\",\"source_dataset_id\":\"cbs-statline-83288ned-religious-involvement-province-2010-2015\",\"used_in_public_product\":false,\"retrieved_at\":\"2026-07-09T23:22:39Z\",\"http_status\":200}]; national_spot_values=[{\"indicator\":\"affiliation\",\"year\":2010,\"regional_table_value\":55,\"national_table_value\":55,\"difference\":0},{\"indicator\":\"affiliation\",\"year\":2012,\"regional_table_value\":52,\"national_table_value\":52,\"difference\":0},{\"indicator\":\"affiliation\",\"year\":2015,\"regional_table_value\":50,\"national_table_value\":50,\"difference\":0},{\"indicator\":\"no_affiliation\",\"year\":2010,\"regional_table_value\":45,\"national_table_value\":45,\"difference\":0},{\"indicator\":\"no_affiliation\",\"year\":2012,\"regional_table_value\":48,\"national_table_value\":48,\"difference\":0},{\"indicator\":\"no_affiliation\",\"year\":2015,\"regional_table_value\":50,\"national_table_value\":50,\"difference\":0},{\"indicator\":\"weekly_attendance\",\"year\":2010,\"regional_table_value\":10,\"national_table_value\":10,\"difference\":0},{\"indicator\":\"weekly_attendance\",\"year\":2012,\"regional_table_value\":10,\"national_table_value\":10,\"difference\":0},{\"indicator\":\"weekly_attendance\",\"year\":2015,\"regional_table_value\":10,\"national_table_value\":10,\"difference\":0},{\"indicator\":\"seldom_or_never_attendance\",\"year\":2010,\"regional_table_value\":74,\"national_table_value\":74,\"difference\":0},{\"indicator\":\"seldom_or_never_attendance\",\"year\":2012,\"regional_table_value\":76,\"national_table_value\":76,\"difference\":0},{\"indicator\":\"seldom_or_never_attendance\",\"year\":2015,\"regional_table_value\":77,\"national_table_value\":77,\"difference\":0}]"
+}
