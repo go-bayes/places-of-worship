@@ -1,0 +1,679 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:gh-census-religion:gh:2010-2021:gss-statsbank-pop16-vol3c",
+  "dataset_id": "gh-census-religion:gh:2010-2021:gss-statsbank-pop16-vol3c",
+  "dataset_version_id": "gh-census-religion:gh:2010-2021:gss-statsbank-pop16-vol3c:b2aa5875e450",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "gh-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "GH"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-09T08:27:57Z",
+  "created_by": "scripts/build_gh_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_gh_area_summary.R",
+    "git_commit": null,
+    "command": "Rscript scripts/build_gh_area_summary.R",
+    "parameters": {
+      "waves": ["2010", "2021"],
+      "existing_sixteen_region_product": "left byte-identical; read for 2021 aggregation only",
+      "sixteen_region_boundary_set": "gh-region-2019-geoboundaries-adm1",
+      "ten_region_boundary_set": "gh-region-2010-ten-geoboundaries-adm1-dissolved",
+      "ten_region_boundary_derivation": "dissolve existing apps/regions/gh/data/gh_region_2019.geojson by the post-2019-to-pre-2019 nesting table",
+      "statsbank_2010_table_id": "PHC2010/Population/POP16 Population by Religious Affiliation, Age, Sex, Locality, and Geographic_Area.px",
+      "statsbank_2010_post_body": "{\"query\":[{\"code\":\"Geographical_Area\",\"selection\":{\"filter\":\"item\",\"values\":[\"Ghana\",\"Western\",\"Central\",\"Greater Accra\",\"Volta\",\"Eastern\",\"Ashanti\",\"Western North\",\"Ahafo\",\"Bono\",\"Bono East\",\"Oti\",\"Northern\",\"Savannah\",\"North East\",\"Upper East\",\"Upper West\"]}},{\"code\":\"Education\",\"selection\":{\"filter\":\"item\",\"values\":[\"Total\"]}},{\"code\":\"Religion\",\"selection\":{\"filter\":\"item\",\"values\":[\"Total\",\"No religion\",\"Catholic\",\"Protestants\",\"Pentecostal/Charismatic\",\"Other christian\",\"Islam\",\"Traditionalist\",\"Other\"]}},{\"code\":\"Locality\",\"selection\":{\"filter\":\"item\",\"values\":[\"All Locality Types\"]}},{\"code\":\"Sex\",\"selection\":{\"filter\":\"item\",\"values\":[\"Both sexes\"]}},{\"code\":\"Age\",\"selection\":{\"filter\":\"item\",\"values\":[\"All ages\"]}}],\"response\":{\"format\":\"CSV\"}}",
+      "pdf_extraction": "poppler pdftotext -layout, 2010 National Analytical Report table 4.17 and 2021 Vol. 3C table 5.7",
+      "denominator": "census religion table total; no not-stated category is excluded",
+      "omitted_metrics": ["religious_change", "places_per_10000_residents", "place_density_per_sq_km"]
+    },
+    "software_versions": {
+      "r": "4.6.1",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "pdftotext": "poppler pdftotext (system)"
+    }
+  },
+  "source": {
+    "provider": "Ghana Statistical Service (GSS); geoBoundaries (William & Mary geoLab)",
+    "source_dataset_ids": ["gss-statsbank-phc2010-pop16-religion-by-region", "gss-2010-phc-national-analytical-report-table-4-17", "gss-2021-phc-vol3c-table-5-7-religion-by-region", "geoboundaries-gha-adm1-2019", "geoboundaries-gha-adm1-2019-dissolved-to-2010-ten-region"],
+    "source_urls": ["https://statsbank.statsghana.gov.gh/api/v1/en/PHC2010/Population/POP16%20Population%20by%20Religious%20Affiliation,%20Age,%20Sex,%20Locality,%20and%20Geographic_Area.px", "https://statsbank.statsghana.gov.gh/pxweb/en/PHC2010/PHC2010__Population/POP16%20Population%20by%20Religious%20Affiliation,%20Age,%20Sex,%20Locality,%20and%20Geographic_Area.px/", "https://new-ndpc-static1.s3.amazonaws.com/pubication/2010PHC+National+Analytical+Report.pdf", "https://census2021.statsghana.gov.gh/gssmain/fileUpload/reportthemelist/2021%20PHC%20General%20Report%20Vol%203C_Background%20Characteristics_181121.pdf", "https://census2021.statsghana.gov.gh/", "https://www.geoboundaries.org/api/current/gbOpen/GHA/ADM1/", "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GHA/ADM1/geoBoundaries-GHA-ADM1.geojson"],
+    "retrieved_at": "2026-07-09T00:00:00Z",
+    "licence": "GSS StatsBank PHC2010 POP16 and the GSS 2010 and 2021 census reports are open web sources with no explicit reuse licence stated; derived products attribute GSS and link the source of record. The 16-region boundary and the dissolved ten-region derivative are geoBoundaries GHA ADM1 / OpenStreetMap-derived material under CC BY-SA 2.0.",
+    "citation": "GSS StatsBank PHC2010 POP16; GSS 2010 PHC National Analytical Report Table 4.17; GSS 2021 PHC General Report Volume 3C Table 5.7; geoBoundaries GHA ADM1 (gbOpen).",
+    "raw_redistribution": "Raw census PDFs, StatsBank query files, and geoBoundaries source GeoJSON remain in data/raw/gh_census/ and await any project-controlled raw archive upload."
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/gh_census/statsbank_phc2010_pop16_meta.json",
+      "url": "https://statsbank.statsghana.gov.gh/api/v1/en/PHC2010/Population/POP16%20Population%20by%20Religious%20Affiliation,%20Age,%20Sex,%20Locality,%20and%20Geographic_Area.px",
+      "format": "json",
+      "bytes": 16444,
+      "sha256": "291588ac1bf1ddf6ad0478a237169e5954cb035ffb338d354d006705fa118bda",
+      "row_count": null,
+      "source_dataset_id": "gss-statsbank-phc2010-pop16-religion-by-region",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "StatsBank PHC2010 POP16 metadata for the religious-affiliation table; queried with curl -k because the server TLS chain did not verify locally."
+    },
+    {
+      "uri": "data/raw/gh_census/statsbank_phc2010_pop16_region_religion.csv",
+      "url": "https://statsbank.statsghana.gov.gh/api/v1/en/PHC2010/Population/POP16%20Population%20by%20Religious%20Affiliation,%20Age,%20Sex,%20Locality,%20and%20Geographic_Area.px",
+      "format": "csv",
+      "bytes": 11404,
+      "sha256": "16758890793178525e969e4f5615ec24a6a146e448d7a9a4f13819e6b8c01d5e",
+      "row_count": 153,
+      "source_dataset_id": "gss-statsbank-phc2010-pop16-religion-by-region",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "StatsBank PHC2010 POP16 CSV POST query selecting Ghana plus the 16 current regions, Total education, All Locality Types, Both sexes, All ages, and Total plus eight religion groups."
+    },
+    {
+      "uri": "data/raw/gh_census/gh_2010_national_analytical_report.pdf",
+      "url": "https://new-ndpc-static1.s3.amazonaws.com/pubication/2010PHC+National+Analytical+Report.pdf",
+      "format": "pdf",
+      "bytes": 8651839,
+      "sha256": "1a49be386669763e46668f19363a0bc2dcda91042cd9e6c177957b6911cfff20",
+      "row_count": 10,
+      "source_dataset_id": "gss-2010-phc-national-analytical-report-table-4-17",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 PHC National Analytical Report PDF; table 4.17 gives the printed old ten-region frame and one-decimal religion percentages used to validate the StatsBank exact counts."
+    },
+    {
+      "uri": "data/raw/gh_census/gh_2021_vol3c.pdf",
+      "url": "https://census2021.statsghana.gov.gh/gssmain/fileUpload/reportthemelist/2021%20PHC%20General%20Report%20Vol%203C_Background%20Characteristics_181121.pdf",
+      "format": "pdf",
+      "bytes": 3563303,
+      "sha256": "9c489543914aebc323bbbb8562d758ddb739f7102bb9c01a8f3f083d9ff6ced3",
+      "row_count": 16,
+      "source_dataset_id": "gss-2021-phc-vol3c-table-5-7-religion-by-region",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 PHC General Report Volume 3C PDF (GSS census portal); table 5.7 yields the eight religion groups for the 16 regions plus the national Number column."
+    },
+    {
+      "uri": "data/raw/gh_census/geoBoundaries-GHA-ADM1.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GHA/ADM1/geoBoundaries-GHA-ADM1.geojson",
+      "format": "geojson",
+      "bytes": 2093457,
+      "sha256": "ee73028cfcfbfc5a5bb851c118d47136086de499d23a5e0e27dc2876b6796bca",
+      "row_count": 16,
+      "source_dataset_id": "geoboundaries-gha-adm1-2019",
+      "used_in_public_product": true,
+      "periods": "2019",
+      "notes": "geoBoundaries GHA ADM1 GeoJSON; 16 region features with ISO 3166-2 shapeISO codes, matching the post-2019 regional structure."
+    },
+    {
+      "uri": "data/raw/gh_census/gb_gha_adm1_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/GHA/ADM1/",
+      "format": "json",
+      "bytes": 1669,
+      "sha256": "d7bee38893595ae211fd16d5a88c214af835799a1345a4dbefbb3fa1fc4a4ab5",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-gha-adm1-2019",
+      "used_in_public_product": false,
+      "periods": "2019",
+      "notes": "geoBoundaries GHA ADM1 metadata; records the CC BY-SA 2.0 licence and the OpenStreetMap boundary source."
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/gh/data/area_summary_region.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 25126,
+      "sha256": "4158485059205cd1444733033a2110c204012c69d1b8450fb25f9a45fdd799d9",
+      "row_count": 16,
+      "content": "Existing Ghana 16-region area summary with GSS census 2021 religious-affiliation and no-religion metrics; rows left byte-identical.",
+      "privacy": "public",
+      "licence_status": "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0"
+    },
+    {
+      "uri": "repo:apps/regions/gh/data/area_summary_region.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 8539,
+      "sha256": "f6560639fdb14d53768187198339ec8777dcaace9e645c919b2a0344a8355c30",
+      "row_count": 16,
+      "content": "Existing flattened Ghana 16-region area summary with GSS census 2021 metrics; left untouched.",
+      "privacy": "public",
+      "licence_status": "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0"
+    },
+    {
+      "uri": "repo:apps/regions/gh/data/gh_region_2019.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 360530,
+      "sha256": "3ddb73e5f14c6aa15f09be755e56b114a5029c6842ea67b5139dde14e88049b0",
+      "row_count": 16,
+      "content": "Existing simplified Ghana 16-region boundary GeoJSON derived from geoBoundaries GHA ADM1.",
+      "privacy": "public",
+      "licence_status": "geoboundaries_cc_by_sa_2_0"
+    },
+    {
+      "uri": "repo:apps/regions/gh/data/area_summary_region_2010_2021_ten.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 34737,
+      "sha256": "b2aa5875e4504c173dc50a325f04358b9b8207e0a7c80fcf85ecf31d7b87a1fb",
+      "row_count": 20,
+      "content": "Ghana old ten-region area summary with 2010 StatsBank counts and exact 2021 sums from the sixteen-region product.",
+      "privacy": "public",
+      "licence_status": "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0"
+    },
+    {
+      "uri": "repo:apps/regions/gh/data/area_summary_region_2010_2021_ten.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 11354,
+      "sha256": "afd9d3fdbdd38e269d1a8dae1c1b2023ac23908221358596c0e4536d786cf8ae",
+      "row_count": 20,
+      "content": "Flattened Ghana old ten-region area summary with 2010 and 2021 census religion metrics.",
+      "privacy": "public",
+      "licence_status": "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0"
+    },
+    {
+      "uri": "repo:apps/regions/gh/data/gh_region_2010_ten.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 285098,
+      "sha256": "a61bdece8b9f6b2c47ce09b9daa80b2a8014de6a7921bedd125b9e3eba3d6502",
+      "row_count": 10,
+      "content": "Dissolved Ghana old ten-region boundary GeoJSON derived from the existing geoBoundaries GHA ADM1 product.",
+      "privacy": "public",
+      "licence_status": "geoboundaries_cc_by_sa_2_0"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/gh/data/area_summary_region.json",
+      "sha256": "4158485059205cd1444733033a2110c204012c69d1b8450fb25f9a45fdd799d9",
+      "built_by": "scripts/build_gh_area_summary.R",
+      "notes": "Existing 16 region reporting units x 1 census year; file is not rewritten by this extension."
+    },
+    {
+      "uri": "repo:apps/regions/gh/data/area_summary_region_2010_2021_ten.json",
+      "sha256": "b2aa5875e4504c173dc50a325f04358b9b8207e0a7c80fcf85ecf31d7b87a1fb",
+      "built_by": "scripts/build_gh_area_summary.R",
+      "notes": "10 old-region reporting units x 2 census years; 2010 exact StatsBank counts and 2021 exact sums from the existing 16-region product."
+    },
+    {
+      "uri": "repo:apps/regions/gh/data/gh_region_2010_ten.geojson",
+      "sha256": "a61bdece8b9f6b2c47ce09b9daa80b2a8014de6a7921bedd125b9e3eba3d6502",
+      "built_by": "scripts/build_gh_area_summary.R",
+      "notes": "10 pre-2019 region features dissolved from the existing 16-region boundary product."
+    }
+  ],
+  "validation": {
+    "checks": ["The committed 2021 sixteen-region product is read and validated against GSS 2021 PHC General Report Volume 3C table 5.7; it is not rewritten by this script.", "Every 2021 source region's eight religion groups sum exactly to its printed regional total, and the eight national numbers sum exactly to the national total.", "The 2021 sixteen-region rows sum exactly to the national total for the denominator, religious affiliation, and no religion.", "The 2010 StatsBank POP16 table returns exact counts for Ghana plus the 16 current regions for Total, No religion, Catholic, Protestants, Pentecostal/Charismatic, Other christian, Islam, Traditionalist, and Other.", "The 2010 sixteen current-region counts aggregate exactly to the ten old regions; those ten totals match National Analytical Report table 4.17, and one-decimal percentages reproduce table 4.17.", "The 2021 ten-region companion rows are exact sums of the existing 2021 sixteen-region product under the ten-to-sixteen concordance.", "The dissolved ten-region boundary GeoJSON writes to 285098 bytes after dissolving the existing 50 m simplified 16-region boundary.", "The dissolved ten-region boundary is a CC BY-SA 2.0 derivative of the geoBoundaries GHA ADM1 / OpenStreetMap-derived boundary.", "The table 5.7 total (30753327) is 78692 below the enumerated 2021 population (30832019, Table 1.1); the gap is outside the religion table and there is no not-stated category within it."],
+    "join_coverage": {
+      "region_2021_sixteen": [
+        {
+          "boundary_level": "region",
+          "year": 2021,
+          "matched_area_count": 16,
+          "expected_area_count": 16,
+          "missing_area_names": []
+        }
+      ],
+      "region_2010_2021_ten": [
+        {
+          "boundary_level": "region",
+          "year": 2010,
+          "matched_area_count": 10,
+          "expected_area_count": 10,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2021,
+          "matched_area_count": 10,
+          "expected_area_count": 10,
+          "missing_area_names": []
+        }
+      ]
+    },
+    "national_reconciliation": [
+      {
+        "year": 2021,
+        "boundary_set_id": "gh-region-2019-geoboundaries-adm1",
+        "metric": "population_total",
+        "region_sum": 30753327,
+        "national_total": 30753327,
+        "difference": 0
+      },
+      {
+        "year": 2021,
+        "boundary_set_id": "gh-region-2019-geoboundaries-adm1",
+        "metric": "religious_affiliation_count",
+        "region_sum": 30424606,
+        "national_total": 30424606,
+        "difference": 0
+      },
+      {
+        "year": 2021,
+        "boundary_set_id": "gh-region-2019-geoboundaries-adm1",
+        "metric": "no_religion_count",
+        "region_sum": 328721,
+        "national_total": 328721,
+        "difference": 0
+      },
+      {
+        "year": 2010,
+        "boundary_set_id": "gh-region-2010-ten-geoboundaries-adm1-dissolved",
+        "metric": "population_total",
+        "region_sum": 24658823,
+        "national_total": 24658823,
+        "difference": 0
+      },
+      {
+        "year": 2010,
+        "boundary_set_id": "gh-region-2010-ten-geoboundaries-adm1-dissolved",
+        "metric": "religious_affiliation_count",
+        "region_sum": 23356746,
+        "national_total": 23356746,
+        "difference": 0
+      },
+      {
+        "year": 2010,
+        "boundary_set_id": "gh-region-2010-ten-geoboundaries-adm1-dissolved",
+        "metric": "no_religion_count",
+        "region_sum": 1302077,
+        "national_total": 1302077,
+        "difference": 0
+      },
+      {
+        "year": 2021,
+        "boundary_set_id": "gh-region-2010-ten-geoboundaries-adm1-dissolved",
+        "metric": "population_total",
+        "region_sum": 30753327,
+        "national_total": 30753327,
+        "difference": 0
+      },
+      {
+        "year": 2021,
+        "boundary_set_id": "gh-region-2010-ten-geoboundaries-adm1-dissolved",
+        "metric": "religious_affiliation_count",
+        "region_sum": 30424606,
+        "national_total": 30424606,
+        "difference": 0
+      },
+      {
+        "year": 2021,
+        "boundary_set_id": "gh-region-2010-ten-geoboundaries-adm1-dissolved",
+        "metric": "no_religion_count",
+        "region_sum": 328721,
+        "national_total": 328721,
+        "difference": 0
+      }
+    ],
+    "region_concordance_reconciliation": [
+      {
+        "year": 2021,
+        "old_region": "Western",
+        "source_regions": ["Western", "Western North"],
+        "population_total": 2933718,
+        "source_population_total_sum": 2933718,
+        "religious_affiliation_count": 2896522,
+        "source_religious_affiliation_sum": 2896522,
+        "no_religion_count": 37196,
+        "source_no_religion_sum": 37196
+      },
+      {
+        "year": 2021,
+        "old_region": "Central",
+        "source_regions": "Central",
+        "population_total": 2853335,
+        "source_population_total_sum": 2853335,
+        "religious_affiliation_count": 2815245,
+        "source_religious_affiliation_sum": 2815245,
+        "no_religion_count": 38090,
+        "source_no_religion_sum": 38090
+      },
+      {
+        "year": 2021,
+        "old_region": "Greater Accra",
+        "source_regions": "Greater Accra",
+        "population_total": 5437084,
+        "source_population_total_sum": 5437084,
+        "religious_affiliation_count": 5386384,
+        "source_religious_affiliation_sum": 5386384,
+        "no_religion_count": 50700,
+        "source_no_religion_sum": 50700
+      },
+      {
+        "year": 2021,
+        "old_region": "Volta",
+        "source_regions": ["Volta", "Oti"],
+        "population_total": 2399133,
+        "source_population_total_sum": 2399133,
+        "religious_affiliation_count": 2372139,
+        "source_religious_affiliation_sum": 2372139,
+        "no_religion_count": 26994,
+        "source_no_religion_sum": 26994
+      },
+      {
+        "year": 2021,
+        "old_region": "Eastern",
+        "source_regions": "Eastern",
+        "population_total": 2918623,
+        "source_population_total_sum": 2918623,
+        "religious_affiliation_count": 2877852,
+        "source_religious_affiliation_sum": 2877852,
+        "no_religion_count": 40771,
+        "source_no_religion_sum": 40771
+      },
+      {
+        "year": 2021,
+        "old_region": "Ashanti",
+        "source_regions": "Ashanti",
+        "population_total": 5428181,
+        "source_population_total_sum": 5428181,
+        "religious_affiliation_count": 5378992,
+        "source_religious_affiliation_sum": 5378992,
+        "no_religion_count": 49189,
+        "source_no_religion_sum": 49189
+      },
+      {
+        "year": 2021,
+        "old_region": "Brong Ahafo",
+        "source_regions": ["Ahafo", "Bono", "Bono East"],
+        "population_total": 2968891,
+        "source_population_total_sum": 2968891,
+        "religious_affiliation_count": 2914224,
+        "source_religious_affiliation_sum": 2914224,
+        "no_religion_count": 54667,
+        "source_no_religion_sum": 54667
+      },
+      {
+        "year": 2021,
+        "old_region": "Northern",
+        "source_regions": ["Northern", "Savannah", "North East"],
+        "population_total": 3617213,
+        "source_population_total_sum": 3617213,
+        "religious_affiliation_count": 3602498,
+        "source_religious_affiliation_sum": 3602498,
+        "no_religion_count": 14715,
+        "source_no_religion_sum": 14715
+      },
+      {
+        "year": 2021,
+        "old_region": "Upper East",
+        "source_regions": "Upper East",
+        "population_total": 1298179,
+        "source_population_total_sum": 1298179,
+        "religious_affiliation_count": 1285558,
+        "source_religious_affiliation_sum": 1285558,
+        "no_religion_count": 12621,
+        "source_no_religion_sum": 12621
+      },
+      {
+        "year": 2021,
+        "old_region": "Upper West",
+        "source_regions": "Upper West",
+        "population_total": 898970,
+        "source_population_total_sum": 898970,
+        "religious_affiliation_count": 895192,
+        "source_religious_affiliation_sum": 895192,
+        "no_religion_count": 3778,
+        "source_no_religion_sum": 3778
+      }
+    ],
+    "printed_2010_report_reconciliation": {
+      "source": "2010 PHC National Analytical Report table 4.17",
+      "totals_exact": true,
+      "one_decimal_percentages_match": true
+    },
+    "national_excluded_share_percent": 0,
+    "existing_2021_rows_sha256_before": "4e9bbe58f1652de52ec8eba0e7be99ef59fb80d8abdc152211ff414dec43ab5e",
+    "existing_2021_rows_sha256_after": "4e9bbe58f1652de52ec8eba0e7be99ef59fb80d8abdc152211ff414dec43ab5e",
+    "existing_2021_rows_byte_identical": true,
+    "boundary_validation": {
+      "source_gh_feature_count": 16,
+      "output_feature_count_2021_sixteen": 16,
+      "output_feature_count_2010_ten": 10,
+      "expected_feature_count_2010_ten": 10,
+      "output_bytes_2021_sixteen": 360530,
+      "output_bytes_2010_ten": 285098,
+      "simplification_tolerance_m_2021_sixteen": 50,
+      "dissolved_from_existing_2021_boundary": true,
+      "unmatched_boundary_features": [],
+      "unmatched_census_areas": []
+    }
+  },
+  "construct_notes": [
+    "The live Ghana map remains the existing 2021 sixteen-region product.",
+    "The companion product places 2010 and 2021 on the old pre-2019 ten-region frame.",
+    "The 2010 exact counts come from GSS StatsBank PHC2010 POP16. StatsBank currently exposes the 2010 counts on the post-2019 sixteen-region list; those rows aggregate exactly to the old ten regions printed in the 2010 National Analytical Report table 4.17.",
+    "The 2021 ten-region rows are exact sums of the existing 2021 sixteen-region product. The existing 2021 rows remain byte-identical.",
+    "Religious affiliation combines Catholic, Protestant or Protestants, Pentecostal/Charismatic, Other Christian or Other christian, Islam, Traditionalist, and Other Religion or Other. No religion is the No Religion group.",
+    "The table 5.7 total (30753327) is 78692 below the enumerated 2021 population (30832019, Table 1.1); the gap sits outside the religion table and there is no not-stated category within table 5.7."
+  ],
+  "category_mapping": [
+    {
+      "source_year": 2010,
+      "source_category": "Total",
+      "product_field": "population_total",
+      "product_role": "denominator"
+    },
+    {
+      "source_year": 2010,
+      "source_category": "No religion",
+      "product_field": "no_religion_count",
+      "product_role": "no religion"
+    },
+    {
+      "source_year": 2010,
+      "source_category": "Catholic",
+      "product_field": "religious_affiliation_count",
+      "product_role": "named religion"
+    },
+    {
+      "source_year": 2010,
+      "source_category": "Protestants",
+      "product_field": "religious_affiliation_count",
+      "product_role": "named religion"
+    },
+    {
+      "source_year": 2010,
+      "source_category": "Pentecostal/Charismatic",
+      "product_field": "religious_affiliation_count",
+      "product_role": "named religion"
+    },
+    {
+      "source_year": 2010,
+      "source_category": "Other christian",
+      "product_field": "religious_affiliation_count",
+      "product_role": "named religion"
+    },
+    {
+      "source_year": 2010,
+      "source_category": "Islam",
+      "product_field": "religious_affiliation_count",
+      "product_role": "named religion"
+    },
+    {
+      "source_year": 2010,
+      "source_category": "Traditionalist",
+      "product_field": "religious_affiliation_count",
+      "product_role": "named religion"
+    },
+    {
+      "source_year": 2010,
+      "source_category": "Other",
+      "product_field": "religious_affiliation_count",
+      "product_role": "named religion"
+    },
+    {
+      "source_year": 2021,
+      "source_category": "Total",
+      "product_field": "population_total",
+      "product_role": "denominator"
+    },
+    {
+      "source_year": 2021,
+      "source_category": "No Religion",
+      "product_field": "no_religion_count",
+      "product_role": "no religion"
+    },
+    {
+      "source_year": 2021,
+      "source_category": "Catholic; Protestant; Pentecostal/Charismatic; Other Christian; Islam; Traditionalist; Other Religion",
+      "product_field": "religious_affiliation_count",
+      "product_role": "named religion"
+    }
+  ],
+  "retrieval_calls": [
+    {
+      "purpose": "StatsBank root",
+      "method": "GET",
+      "url": "https://statsbank.statsghana.gov.gh/api/v1/en",
+      "note": "The working API root is /api/v1/en; /pxweb/api/v1/en returned a 500 error."
+    },
+    {
+      "purpose": "StatsBank PHC2010 Population table list",
+      "method": "GET",
+      "url": "https://statsbank.statsghana.gov.gh/api/v1/en/PHC2010/Population"
+    },
+    {
+      "purpose": "StatsBank PHC2010 POP16 metadata",
+      "method": "GET",
+      "url": "https://statsbank.statsghana.gov.gh/api/v1/en/PHC2010/Population/POP16%20Population%20by%20Religious%20Affiliation,%20Age,%20Sex,%20Locality,%20and%20Geographic_Area.px",
+      "local_path": "data/raw/gh_census/statsbank_phc2010_pop16_meta.json",
+      "sha256": "291588ac1bf1ddf6ad0478a237169e5954cb035ffb338d354d006705fa118bda"
+    },
+    {
+      "purpose": "StatsBank PHC2010 POP16 region-religion CSV",
+      "method": "POST",
+      "url": "https://statsbank.statsghana.gov.gh/api/v1/en/PHC2010/Population/POP16%20Population%20by%20Religious%20Affiliation,%20Age,%20Sex,%20Locality,%20and%20Geographic_Area.px",
+      "content_type": "application/json",
+      "body": "{\"query\":[{\"code\":\"Geographical_Area\",\"selection\":{\"filter\":\"item\",\"values\":[\"Ghana\",\"Western\",\"Central\",\"Greater Accra\",\"Volta\",\"Eastern\",\"Ashanti\",\"Western North\",\"Ahafo\",\"Bono\",\"Bono East\",\"Oti\",\"Northern\",\"Savannah\",\"North East\",\"Upper East\",\"Upper West\"]}},{\"code\":\"Education\",\"selection\":{\"filter\":\"item\",\"values\":[\"Total\"]}},{\"code\":\"Religion\",\"selection\":{\"filter\":\"item\",\"values\":[\"Total\",\"No religion\",\"Catholic\",\"Protestants\",\"Pentecostal/Charismatic\",\"Other christian\",\"Islam\",\"Traditionalist\",\"Other\"]}},{\"code\":\"Locality\",\"selection\":{\"filter\":\"item\",\"values\":[\"All Locality Types\"]}},{\"code\":\"Sex\",\"selection\":{\"filter\":\"item\",\"values\":[\"Both sexes\"]}},{\"code\":\"Age\",\"selection\":{\"filter\":\"item\",\"values\":[\"All ages\"]}}],\"response\":{\"format\":\"CSV\"}}",
+      "local_path": "data/raw/gh_census/statsbank_phc2010_pop16_region_religion.csv",
+      "sha256": "16758890793178525e969e4f5615ec24a6a146e448d7a9a4f13819e6b8c01d5e",
+      "note": "curl used -k because local certificate verification failed for statsbank.statsghana.gov.gh."
+    },
+    {
+      "purpose": "2010 National Analytical Report PDF",
+      "method": "GET",
+      "url": "https://new-ndpc-static1.s3.amazonaws.com/pubication/2010PHC+National+Analytical+Report.pdf",
+      "local_path": "data/raw/gh_census/gh_2010_national_analytical_report.pdf",
+      "sha256": "1a49be386669763e46668f19363a0bc2dcda91042cd9e6c177957b6911cfff20"
+    }
+  ],
+  "deferred_sources": [
+    {
+      "source_dataset_id": "gss-2021-statsbank-religion-by-district",
+      "url": "https://statsbank.statsghana.gov.gh/pxweb/en/PHC%202021%20StatsBank/PHC%202021%20StatsBank__Population/religion_table.px/",
+      "local_path": null,
+      "notes": "The 2021 StatsBank table publishes 2021 religion by district (261 units), but district extraction remains outside this ten-region companion build; the existing 2021 region product remains the live map product."
+    },
+    {
+      "source_dataset_id": "gss-2000-phc-religion-by-region",
+      "url": "https://statsbank.statsghana.gov.gh/censusatlas/Religion.html",
+      "local_path": null,
+      "notes": "The 2000 PHC published religion using the same eight-group scheme on the pre-2019 ten-region geography. It remains deferred."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0",
+  "downstream_status": "public",
+  "source_datasets": [
+    {
+      "source_dataset_id": "gss-statsbank-phc2010-pop16-religion-by-region",
+      "name": "GSS StatsBank PHC2010 POP16: population by religious affiliation, district, region, locality, age, sex, and education",
+      "provider": "Ghana Statistical Service (GSS)",
+      "url": "https://statsbank.statsghana.gov.gh/pxweb/en/PHC2010/PHC2010__Population/POP16%20Population%20by%20Religious%20Affiliation,%20Age,%20Sex,%20Locality,%20and%20Geographic_Area.px/",
+      "retrieval_date": "2026-07-09",
+      "local_path": "data/raw/gh_census/statsbank_phc2010_pop16_region_religion.csv",
+      "licence": {
+        "name": "GSS StatsBank open web table; no explicit reuse licence stated",
+        "url": "https://statsbank.statsghana.gov.gh/",
+        "attribution": "Ghana Statistical Service (GSS)"
+      },
+      "citation": "Ghana Statistical Service, StatsBank PHC2010 POP16 population by religious affiliation table.",
+      "access_limits": "The API was queried with curl -k because the server TLS chain did not verify in this environment.",
+      "redistribution_limits": "The pinned CSV query remains under data/raw/gh_census; the public product contains derived regional counts.",
+      "notes": "The live table path is /api/v1/en/PHC2010/Population/POP16 Population by Religious Affiliation, Age, Sex, Locality, and Geographic_Area.px. The pinned query selects Ghana plus the 16 current region values, Education=Total, Religion=Total plus eight groups, Locality=All Locality Types, Sex=Both sexes, and Age=All ages."
+    },
+    {
+      "source_dataset_id": "gss-2010-phc-national-analytical-report-table-4-17",
+      "name": "GSS 2010 PHC National Analytical Report, table 4.17: population by religious affiliation and region, 2010",
+      "provider": "Ghana Statistical Service (GSS)",
+      "url": "https://new-ndpc-static1.s3.amazonaws.com/pubication/2010PHC+National+Analytical+Report.pdf",
+      "retrieval_date": "2026-07-09",
+      "local_path": "data/raw/gh_census/gh_2010_national_analytical_report.pdf",
+      "licence": {
+        "name": "GSS census report, open download; no explicit reuse licence stated",
+        "url": "https://new-ndpc-static1.s3.amazonaws.com/pubication/2010PHC+National+Analytical+Report.pdf",
+        "attribution": "Ghana Statistical Service (GSS)"
+      },
+      "citation": "Ghana Statistical Service, 2010 Population and Housing Census National Analytical Report, Table 4.17.",
+      "access_limits": null,
+      "redistribution_limits": "The census PDF is not committed; the derived product records checksums and attributes GSS.",
+      "notes": "Table 4.17 prints the old ten-region frame and one-decimal religious-affiliation percentages. The StatsBank exact counts aggregate to the report's ten regional totals and reproduce those percentages."
+    },
+    {
+      "source_dataset_id": "gss-2021-phc-vol3c-table-5-7-religion-by-region",
+      "name": "GSS 2021 PHC General Report Volume 3C (Background Characteristics), table 5.7: population by religious affiliation, sex and region",
+      "provider": "Ghana Statistical Service (GSS)",
+      "url": "https://census2021.statsghana.gov.gh/gssmain/fileUpload/reportthemelist/2021%20PHC%20General%20Report%20Vol%203C_Background%20Characteristics_181121.pdf",
+      "retrieval_date": "2026-07-09",
+      "local_path": "data/raw/gh_census/gh_2021_vol3c.pdf",
+      "licence": {
+        "name": "GSS census report, open download on the census portal; no explicit reuse licence stated",
+        "url": "https://census2021.statsghana.gov.gh/",
+        "attribution": "Ghana Statistical Service (GSS)"
+      },
+      "citation": "Ghana Statistical Service, 2021 Population and Housing Census General Report Volume 3C: Background Characteristics, Table 5.7.",
+      "access_limits": null,
+      "redistribution_limits": "The census PDF is not committed; the derived public product attributes GSS and links the source.",
+      "notes": "Table 5.7 gives the eight religion groups (Catholic, Protestant, Pentecostal/Charismatic, Other Christian, Islam, Traditionalist, Other Religion, No Religion) for all 16 regions plus a national Number column; parsed with pdftotext -layout from the Both Sexes / all-locality block. Every person is allocated, so no not-stated residual exists. District religion is not published in Volume 3C."
+    },
+    {
+      "source_dataset_id": "geoboundaries-gha-adm1-2019",
+      "name": "geoBoundaries GHA ADM1 (16 post-2019 regions)",
+      "provider": "geoBoundaries (William & Mary geoLab)",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GHA/ADM1/geoBoundaries-GHA-ADM1.geojson",
+      "retrieval_date": "2026-07-09",
+      "local_path": "data/raw/gh_census/geoBoundaries-GHA-ADM1.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution-ShareAlike 2.0 (CC BY-SA 2.0); boundary source OpenStreetMap contributors",
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/GHA/ADM1/",
+        "attribution": "geoBoundaries (gbOpen); boundary source OpenStreetMap contributors"
+      },
+      "citation": "Runfola et al., geoBoundaries GHA ADM1 (gbOpen), region boundaries.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed with CC BY-SA 2.0 attribution to OpenStreetMap contributors.",
+      "notes": "16 ADM1 regions matching the post-2019 regional structure the 2021 census reports; shapeISO carries the ISO 3166-2 GH-NN codes used as area codes. Boundary source OpenStreetMap, sourceDataUpdateDate 2023."
+    },
+    {
+      "source_dataset_id": "geoboundaries-gha-adm1-2019-dissolved-to-2010-ten-region",
+      "name": "Ghana ten-region boundary dissolved from geoBoundaries GHA ADM1 post-2019 regions",
+      "provider": "Places of Worship project, derived from geoBoundaries (William & Mary geoLab)",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GHA/ADM1/geoBoundaries-GHA-ADM1.geojson",
+      "retrieval_date": "2026-07-09",
+      "local_path": "apps/regions/gh/data/gh_region_2010_ten.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution-ShareAlike 2.0 (CC BY-SA 2.0); boundary source OpenStreetMap contributors",
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/GHA/ADM1/",
+        "attribution": "geoBoundaries (gbOpen); boundary source OpenStreetMap contributors"
+      },
+      "citation": "Derived dissolve of geoBoundaries GHA ADM1 (gbOpen) to the pre-2019 ten-region frame.",
+      "access_limits": null,
+      "redistribution_limits": "The dissolved boundary is a CC BY-SA 2.0 derivative of the committed geoBoundaries-derived 16-region boundary.",
+      "notes": "The 2019 splits nest exactly inside the old ten regions: Western includes Western North; Volta includes Oti; Northern includes Savannah and North East; Brong Ahafo includes Ahafo, Bono, and Bono East; the other six regions are unchanged."
+    }
+  ],
+  "notes": "The committed outputs now include the unchanged live 2021 sixteen-region product plus a separate old ten-region 2010-2021 companion product. UI wiring is intentionally unchanged."
+}

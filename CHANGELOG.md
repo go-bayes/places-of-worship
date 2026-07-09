@@ -4,6 +4,17 @@
 
 ### 2026-07-09
 
+- Added a Ghana ten-region companion product for census religion in 2010 and
+  2021. GSS StatsBank PHC2010 POP16 provides exact 2010 religion-category
+  counts on the current 16-region list; the build aggregates those rows to the
+  old ten-region frame and validates the totals and one-decimal shares against
+  the 2010 National Analytical Report table 4.17. The 2021 companion rows are
+  exact sums from the existing 16-region product, whose rows remain
+  byte-identical. The ten-region boundary dissolves the committed
+  geoBoundaries GHA ADM1 derivative and keeps the CC BY-SA 2.0 attribution to
+  geoBoundaries/OpenStreetMap contributors. UI wiring is unchanged. Build:
+  `scripts/build_gh_area_summary.R`; manifest
+  `docs/manifests/gh-census-religion-2010-2021.json`.
 - Added the South Korea regional map: municipal (si/gun/gu) census
   religion for 2005 and 2015 from KOSIS tables DT_1IN0505 and
   DT_1PM1502 (KOGL Type 1 attribution), on a KoStat-derived 2018
