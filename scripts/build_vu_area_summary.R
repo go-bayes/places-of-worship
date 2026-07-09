@@ -181,8 +181,58 @@ census_source_datasets <- list(
   )
 )
 
+# geoBoundaries provenance for each admin level; the same values the
+# boundaries-only scaffold shipped before the loop-variable bug (see
+# denom_lbl comment below) wiped them from the regenerated product.
+# schema_version follows the "0.2.0" convention used by the other
+# country builders (e.g. scripts/build_in_area_summary.R), superseding
+# the scaffold-era "0.1.0"
+GEOBOUNDARIES <- list(
+  adm1 = list(
+    boundary_set_id = "vu-adm1-geoboundaries",
+    level = "province",
+    source_dataset = list(
+      source_dataset_id = "vu-adm1-geoboundaries",
+      name = "geoBoundaries gbOpen VUT ADM1",
+      provider = "geoBoundaries (William & Mary geoLab)",
+      url = "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/VUT/ADM1/geoBoundaries-VUT-ADM1_simplified.geojson",
+      retrieval_date = "2026-06-13T03:09:00Z",
+      licence = list(
+        name = "ODbL-1.0",
+        url = "https://opendatacommons.org/licenses/odbl/1-0/",
+        attribution = "geoBoundaries (William & Mary geoLab)"
+      ),
+      citation = "Runfola et al. (2020) geoBoundaries: A global database of political administrative boundaries.",
+      notes = "Simplified release 9469f09 re-tagged to the project area schema."
+    )
+  ),
+  adm2 = list(
+    boundary_set_id = "vu-adm2-geoboundaries",
+    level = "area_council",
+    source_dataset = list(
+      source_dataset_id = "vu-adm2-geoboundaries",
+      name = "geoBoundaries gbOpen VUT ADM2",
+      provider = "geoBoundaries (William & Mary geoLab)",
+      url = "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/VUT/ADM2/geoBoundaries-VUT-ADM2_simplified.geojson",
+      retrieval_date = "2026-06-13T03:09:00Z",
+      licence = list(
+        name = "CC-BY-3.0-IGO",
+        url = "https://creativecommons.org/licenses/by/3.0/igo/",
+        attribution = "geoBoundaries (William & Mary geoLab)"
+      ),
+      citation = "Runfola et al. (2020) geoBoundaries: A global database of political administrative boundaries.",
+      notes = "Simplified release 9469f09 re-tagged to the project area schema."
+    )
+  )
+)
+
 build_level <- function(summary_path, level) {
   d <- fromJSON(summary_path, simplifyVector = TRUE, simplifyDataFrame = FALSE)
+  # this script reads its own prior output as the next run's scaffold, so a
+  # stray top-level "1" key baked in by the now-fixed denom_lbl loop-variable
+  # bug (see below) would otherwise pass through forever even after the loop
+  # itself stopped introducing new corruption; purge it defensively
+  d[["1"]] <- NULL
   # scaffold rows -> data frame with the source-id list column preserved
   rows <- do.call(rbind, lapply(d$rows, function(r) {
     df <- data.frame(
@@ -208,8 +258,16 @@ build_level <- function(summary_path, level) {
     df
   }))
   # denomination percent columns start empty and are filled per year by
-  # fill_rows; pre-creating them at full length keeps the assignment safe
-  for (d in DENOM_LABELS) rows[[paste0(d, "_percent")]] <- NA_real_
+  # fill_rows; pre-creating them at full length keeps the assignment safe.
+  # loop variable must not be named `d`: this function's `d` is the
+  # top-level area-summary list read above, and a for-loop variable
+  # persists after the loop, so `for (d in DENOM_LABELS)` used to clobber
+  # it with the last DENOM_LABELS value ("seventh_day_adventist"); every
+  # later `d$field <- ...` then silently coerced that string into a list
+  # (R's $<- coerces atomic LHS to a list, see ?"$<-"), losing the
+  # parsed scaffold and surfacing the orphaned string as a top-level "1"
+  # key when jsonlite serialised the unnamed first element
+  for (denom_lbl in DENOM_LABELS) rows[[paste0(denom_lbl, "_percent")]] <- NA_real_
 
   if (level == "adm1") {
     # provinces gain earlier waves by cloning the 2009 rows as a blank
@@ -375,6 +433,26 @@ build_level <- function(summary_path, level) {
     basis = "no governed Vanuatu place-of-worship snapshot is included in this country data-map release",
     notes = "place_count and its derived metrics are null; the map’s place dots come from the shared global OpenStreetMap tiles, and the dated-places product is pending."
   )
+
+  # required top-level fields set explicitly rather than left to scaffold
+  # passthrough (passthrough is what let the loop-variable bug silently
+  # drop them on a prior regeneration); values match sibling products
+  # (schemas/area-summary.schema.json, e.g. apps/regions/bs/data/area_summary_island.json)
+  geo <- GEOBOUNDARIES[[level]]
+  d$schema_version <- "0.2.0"
+  d$country_code <- "VU"
+  d$boundary_set <- list(
+    boundary_set_id = geo$boundary_set_id,
+    country_code = "VU",
+    level = geo$level,
+    vintage = "geoBoundaries gbOpen",
+    source_dataset_id = geo$boundary_set_id
+  )
+  if (is.null(d$visual_layers)) d$visual_layers <- list()
+  existing_ids <- vapply(d$source_datasets, function(s) s$source_dataset_id, "")
+  if (!(geo$source_dataset$source_dataset_id %in% existing_ids)) {
+    d$source_datasets <- c(list(geo$source_dataset), d$source_datasets)
+  }
 
   write_json(d, summary_path, auto_unbox = TRUE, pretty = TRUE, null = "null", na = "null", digits = NA)
 

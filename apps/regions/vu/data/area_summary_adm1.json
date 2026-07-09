@@ -5,7 +5,6 @@
     "basis": "no governed Vanuatu place-of-worship snapshot is included in this country data-map release",
     "notes": "place_count and its derived metrics are null; the map’s place dots come from the shared global OpenStreetMap tiles, and the dated-places product is pending."
   },
-  "1": "seventh_day_adventist",
   "rows": [
     {
       "country_code": "VU",
@@ -28,11 +27,7 @@
       "anglican_percent": 0.51,
       "catholic_percent": 20.57,
       "seventh_day_adventist_percent": 9.97,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "mcarthur-yaxley-1967-census-table-a"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "mcarthur-yaxley-1967-census-table-a"]
     },
     {
       "country_code": "VU",
@@ -60,11 +55,7 @@
       "anglican_percent": 1.21,
       "catholic_percent": 21.2,
       "seventh_day_adventist_percent": 14.45,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "vnso-1999-census-main-report-t2-10"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vnso-1999-census-main-report-t2-10"]
     },
     {
       "country_code": "VU",
@@ -92,11 +83,7 @@
       "anglican_percent": 3.16,
       "catholic_percent": 19.66,
       "seventh_day_adventist_percent": 15.72,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "vnso-2009-census-basic-tables-t3-5"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vnso-2009-census-basic-tables-t3-5"]
     },
     {
       "country_code": "VU",
@@ -124,12 +111,7 @@
       "anglican_percent": 0.41,
       "catholic_percent": 19.06,
       "seventh_day_adventist_percent": 17.14,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "vbos-2020-census-basic-tables-t3-5",
-        "vu-2020-province-incl-urban-derived"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5", "vu-2020-province-incl-urban-derived"]
     },
     {
       "country_code": "VU",
@@ -152,11 +134,7 @@
       "anglican_percent": 43.1,
       "catholic_percent": 19.1,
       "seventh_day_adventist_percent": 4.27,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "mcarthur-yaxley-1967-census-table-a"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "mcarthur-yaxley-1967-census-table-a"]
     },
     {
       "country_code": "VU",
@@ -184,11 +162,7 @@
       "anglican_percent": 45.77,
       "catholic_percent": 18.33,
       "seventh_day_adventist_percent": 6.94,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "vnso-1999-census-main-report-t2-10"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vnso-1999-census-main-report-t2-10"]
     },
     {
       "country_code": "VU",
@@ -216,11 +190,7 @@
       "anglican_percent": 46.31,
       "catholic_percent": 18.31,
       "seventh_day_adventist_percent": 6.89,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "vnso-2009-census-basic-tables-t3-5"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vnso-2009-census-basic-tables-t3-5"]
     },
     {
       "country_code": "VU",
@@ -248,12 +218,7 @@
       "anglican_percent": 44.89,
       "catholic_percent": 21.68,
       "seventh_day_adventist_percent": 5.95,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "vbos-2020-census-basic-tables-t3-5",
-        "vu-2020-province-incl-urban-derived"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5", "vu-2020-province-incl-urban-derived"]
     },
     {
       "country_code": "VU",
@@ -276,11 +241,7 @@
       "anglican_percent": 8.16,
       "catholic_percent": 19.86,
       "seventh_day_adventist_percent": 9.54,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "mcarthur-yaxley-1967-census-table-a"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "mcarthur-yaxley-1967-census-table-a"]
     },
     {
       "country_code": "VU",
@@ -308,11 +269,7 @@
       "anglican_percent": 9.04,
       "catholic_percent": 14.64,
       "seventh_day_adventist_percent": 12.23,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "vnso-1999-census-main-report-t2-10"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vnso-1999-census-main-report-t2-10"]
     },
     {
       "country_code": "VU",
@@ -340,11 +297,7 @@
       "anglican_percent": 12.78,
       "catholic_percent": 12.49,
       "seventh_day_adventist_percent": 13.21,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "vnso-2009-census-basic-tables-t3-5"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vnso-2009-census-basic-tables-t3-5"]
     },
     {
       "country_code": "VU",
@@ -372,12 +325,7 @@
       "anglican_percent": 9.9,
       "catholic_percent": 12.54,
       "seventh_day_adventist_percent": 15.85,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "vbos-2020-census-basic-tables-t3-5",
-        "vu-2020-province-incl-urban-derived"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5", "vu-2020-province-incl-urban-derived"]
     },
     {
       "country_code": "VU",
@@ -400,11 +348,7 @@
       "anglican_percent": 3.04,
       "catholic_percent": 15.96,
       "seventh_day_adventist_percent": 2.4,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "mcarthur-yaxley-1967-census-table-a"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "mcarthur-yaxley-1967-census-table-a"]
     },
     {
       "country_code": "VU",
@@ -432,11 +376,7 @@
       "anglican_percent": 5.08,
       "catholic_percent": 9.18,
       "seventh_day_adventist_percent": 11.05,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "vnso-1999-census-main-report-t2-10"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vnso-1999-census-main-report-t2-10"]
     },
     {
       "country_code": "VU",
@@ -464,11 +404,7 @@
       "anglican_percent": 7.18,
       "catholic_percent": 9.16,
       "seventh_day_adventist_percent": 14.19,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "vnso-2009-census-basic-tables-t3-5"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vnso-2009-census-basic-tables-t3-5"]
     },
     {
       "country_code": "VU",
@@ -496,12 +432,7 @@
       "anglican_percent": 5.09,
       "catholic_percent": 8.57,
       "seventh_day_adventist_percent": 17.62,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "vbos-2020-census-basic-tables-t3-5",
-        "vu-2020-province-incl-urban-derived"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5", "vu-2020-province-incl-urban-derived"]
     },
     {
       "country_code": "VU",
@@ -524,11 +455,7 @@
       "anglican_percent": 0.23,
       "catholic_percent": 3.03,
       "seventh_day_adventist_percent": 2.56,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "mcarthur-yaxley-1967-census-table-a"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "mcarthur-yaxley-1967-census-table-a"]
     },
     {
       "country_code": "VU",
@@ -556,11 +483,7 @@
       "anglican_percent": 0.49,
       "catholic_percent": 9.11,
       "seventh_day_adventist_percent": 10.71,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "vnso-1999-census-main-report-t2-10"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vnso-1999-census-main-report-t2-10"]
     },
     {
       "country_code": "VU",
@@ -588,11 +511,7 @@
       "anglican_percent": 3.61,
       "catholic_percent": 9.66,
       "seventh_day_adventist_percent": 11.38,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "vnso-2009-census-basic-tables-t3-5"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vnso-2009-census-basic-tables-t3-5"]
     },
     {
       "country_code": "VU",
@@ -620,12 +539,7 @@
       "anglican_percent": 0.2,
       "catholic_percent": 8.93,
       "seventh_day_adventist_percent": 14.01,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "vbos-2020-census-basic-tables-t3-5",
-        "vu-2020-province-incl-urban-derived"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5", "vu-2020-province-incl-urban-derived"]
     },
     {
       "country_code": "VU",
@@ -648,11 +562,7 @@
       "anglican_percent": 99.58,
       "catholic_percent": 0.1,
       "seventh_day_adventist_percent": 0.16,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "mcarthur-yaxley-1967-census-table-a"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "mcarthur-yaxley-1967-census-table-a"]
     },
     {
       "country_code": "VU",
@@ -680,11 +590,7 @@
       "anglican_percent": 83.41,
       "catholic_percent": 0.49,
       "seventh_day_adventist_percent": 2.89,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "vnso-1999-census-main-report-t2-10"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vnso-1999-census-main-report-t2-10"]
     },
     {
       "country_code": "VU",
@@ -712,11 +618,7 @@
       "anglican_percent": 76.69,
       "catholic_percent": 0.35,
       "seventh_day_adventist_percent": 5.17,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "vnso-2009-census-basic-tables-t3-5"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vnso-2009-census-basic-tables-t3-5"]
     },
     {
       "country_code": "VU",
@@ -744,15 +646,24 @@
       "anglican_percent": 77.28,
       "catholic_percent": 0.47,
       "seventh_day_adventist_percent": 5.82,
-      "source_dataset_ids": [
-        "vu-adm1-geoboundaries",
-        "osm-vu-place-of-worship",
-        "vbos-2020-census-basic-tables-t3-5",
-        "vu-2020-province-incl-urban-derived"
-      ]
+      "source_dataset_ids": ["vu-adm1-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5", "vu-2020-province-incl-urban-derived"]
     }
   ],
   "source_datasets": [
+    {
+      "source_dataset_id": "vu-adm1-geoboundaries",
+      "name": "geoBoundaries gbOpen VUT ADM1",
+      "provider": "geoBoundaries (William & Mary geoLab)",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/VUT/ADM1/geoBoundaries-VUT-ADM1_simplified.geojson",
+      "retrieval_date": "2026-06-13T03:09:00Z",
+      "licence": {
+        "name": "ODbL-1.0",
+        "url": "https://opendatacommons.org/licenses/odbl/1-0/",
+        "attribution": "geoBoundaries (William & Mary geoLab)"
+      },
+      "citation": "Runfola et al. (2020) geoBoundaries: A global database of political administrative boundaries.",
+      "notes": "Simplified release 9469f09 re-tagged to the project area schema."
+    },
     {
       "source_dataset_id": "mcarthur-yaxley-1967-census-table-a",
       "name": "1967 Census of the New Hebrides, Table A: adherence to principal religious groups per 1,000 persons aged 15+, by island",
@@ -954,6 +865,16 @@
   ],
   "data_status": "census_religion_live",
   "data_status_note": "Census religious affiliation is live for provinces in 1999, 2009 and 2020 (1999 Main Report Table 2.10, digitised by Guy Lavender Forsyth; Basic Tables Volume 1 Table 3.5 for 2009 and 2020). Denomination shares, including customary beliefs, extend back to the 1967 first census (McArthur & Yaxley Table A, aggregated island->province); the 1967 wave covers persons aged 15+ with no no-religion category, so its affiliation and no-religion shares are left undefined. The 2020 provincial values include the urban municipalities by derivation so all years share one basis. National religion series back to 1989 sits in apps/regions/vu/data/source/.",
-  "generated_at": "2026-07-08T03:20:30Z",
-  "generated_by": "scripts/build_vu_area_summary.R"
+  "generated_at": "2026-07-09T07:28:12Z",
+  "generated_by": "scripts/build_vu_area_summary.R",
+  "schema_version": "0.2.0",
+  "country_code": "VU",
+  "boundary_set": {
+    "boundary_set_id": "vu-adm1-geoboundaries",
+    "country_code": "VU",
+    "level": "province",
+    "vintage": "geoBoundaries gbOpen",
+    "source_dataset_id": "vu-adm1-geoboundaries"
+  },
+  "visual_layers": []
 }

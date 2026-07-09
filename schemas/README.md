@@ -42,7 +42,12 @@ ruling before they are reconciled:
   `boundary_set`/`source_datasets`/`indicators`/`visual_layers` blocks.
 - US (6 files) and Romania (2): `0.2.0`-generation shape with extra
   top-level provenance fields and differing sub-object contracts.
-- Vanuatu (2): no `schema_version`/`country_code`, plus a stray top-level
-  `"1"` key — an R serialisation bug in `build_vu_area_summary.R` to fix
-  at the next VU regeneration.
+- Vanuatu (2): the stray top-level `"1"` key and missing
+  `schema_version`/`country_code` were fixed at the 2026-07-09 VU
+  regeneration (loop-variable clobber in `build_vu_area_summary.R`).
+  The remaining failure is a row-shape difference: the VU rows carry
+  denomination-percent fields the schema does not admit and omit
+  `NA`-valued fields the schema requires present-but-nullable. Same
+  class as the US/Romania generation differences; awaiting the
+  schema-versioning ruling.
 - NZ SA2 (1): a single extra `service_url` property.
