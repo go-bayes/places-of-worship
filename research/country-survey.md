@@ -207,6 +207,15 @@ UK Northern Ireland 2001/2011 and the Scotland extraction.
 16. **MW Malawi** - First table: Malawi National Statistical Office 2018 Population and Housing Census page, https://www.nsomalawi.mw/2018-population-and-housing-census/. Boundary source: geoBoundaries ADM2 districts, 2020, CC BY 3.0 IGO. District census waves and DHS depth are useful; extraction is more report-led than API-led.
 17. **GH Ghana** - First table: Ghana Statistical Service 2021 PHC General Report Vol. 3C: Background Characteristics, https://census2021.statsghana.gov.gh/gssmain/fileUpload/reportthemelist/2021%20PHC%20General%20Report%20Vol%203C_Background%20Characteristics_181121.pdf. Boundary source: geoBoundaries ADM2 districts, 2019, CC BY 4.0, sourced from USAID Ghana HPNO and Ghana Statistical Service. District tables have wave depth; licence is not stated; attribution and reuse need care.
 18. **ZM Zambia** - First table: Zambia Statistics Agency population census page, https://www.zamstats.gov.zm/population-census/. Boundary source: geoBoundaries ADM2 districts, 2020, CC BY 4.0. District route is plausible from open web sources; licence and table route need pinning.
+18a. **BS Bahamas** (tier-B promotion, JB directive 2026-07-09:
+    priority raised) - First source: BNSI census releases,
+    https://www.bahamas.gov.bs/, censuses 2010 and 2022. Boundary
+    source: BNSI/national GIS district or island boundaries;
+    geoBoundaries BHS ADM1 fallback. Known risk from the card: the
+    subnational religion release route was not located in the sweep —
+    the build must probe island/district tables, and if only national
+    figures are public, ship a boundaries-pending scaffold (the
+    Vanuatu precedent) and record the probe.
 19. **RW Rwanda** - First table: National Institute of Statistics of Rwanda RPHC5 publications and district profiles, https://statistics.gov.rw/statistical-publications. Boundary source: geoBoundaries ADM2 districts, 2012, CC BY 4.0; ADM1 provinces, 2020, CC BY 4.0. District route has two modern waves; less wave depth than the higher queue entries.
 20. **ZA South Africa** - First table: Statistics South Africa Census 2022 statistical release, https://www.statssa.gov.za/publications/P03014/P030142022.pdf. Boundary source: geoBoundaries ADM1 provinces, 2020, CC BY 3.0 IGO; ADM2 district municipalities also exist for later downscaling. Province-level route is buildable but coarser than the district and municipality candidates.
 21. **AL Albania** - First table: INSTAT Census 2023 table 1.13. Boundary source: ASIG/INSTAT administrative boundaries; geoBoundaries ADM1 supports prefecture joins. Prefecture route is usable, but the public geography and wave depth are coarser than other tier-A cards.
