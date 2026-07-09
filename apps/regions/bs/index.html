@@ -19,8 +19,10 @@
     window.REGION_CONFIG = {
       countryCode: "BS",
       title: "Places of Worship | Bahamas Research Map",
-      center: [-77.4, 24.7],
-      initialZoom: 6.5,
+      // camera biased north-west so the archipelago opens centre-right,
+      // clear of the top-left census panel and key (jb 2026-07-09)
+      center: [-78.6, 25.35],
+      initialZoom: 6.2,
       censusLevels: {
         island: {
           label: "Island",
@@ -38,6 +40,10 @@
         "religious_affiliation_percent",
         "no_religion_percent"
       ],
+      // a light wash for the archipelago: at the default 0.55 the fill
+      // turns the small islands into solid blobs and hides every feature
+      // beneath them
+      censusFillOpacity: 0.35,
       metricLabels: {
         religious_affiliation_percent: {
           label: "Religious affiliation %",
@@ -83,6 +89,6 @@
       censusFlagNote: "* 2010 percentages use the stated-response denominator (island total minus not stated). Religion is published subnationally for 2010 only; 2022 religion is reported for All Bahamas alone and is not mapped by island."
     };
   </script>
-  <script src="../_shared/region-map.js?v=20260709e"></script>
+  <script src="../_shared/region-map.js?v=20260709m"></script>
 </body>
 </html>

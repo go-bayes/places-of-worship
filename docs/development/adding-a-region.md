@@ -55,6 +55,11 @@ clamp colour domains wherever they appear in the data.
      low-zoom place-dot overview tier. A country whose OSM dot density
      would bury the census choropleth at national zoom (the US) sets a
      low value; the detailed places tier still ramps in from zoom 6.
+   - `censusFillOpacity` (optional, default 0.55): opacity of the
+     census choropleth fill. An archipelago or other small-landmass
+     geography (the Bahamas) sets a lighter value so island features
+     stay visible beneath the wash; continental countries keep the
+     default.
    - `popupDenominatorNote` (optional): the popup footnote explaining
      the percentage denominator. Defaults to the census stated-response
      wording; a country whose construct uses a different denominator

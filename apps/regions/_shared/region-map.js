@@ -3070,7 +3070,10 @@ function addCensusLayers() {
     id: CENSUS.fill,
     type: "fill",
     source: CENSUS.source,
-    paint: { "fill-color": censusFillExpression(), "fill-opacity": 0.55 }
+    // fill opacity is configurable per country: archipelagos and other
+    // small-landmass geographies need a lighter wash so island features
+    // stay visible beneath the choropleth (jb 2026-07-09, bahamas)
+    paint: { "fill-color": censusFillExpression(), "fill-opacity": RC.censusFillOpacity ?? 0.55 }
   }, beforeId);
   map.addLayer({
     id: CENSUS.line,
