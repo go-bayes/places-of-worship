@@ -75,7 +75,8 @@ async function getTaskOrThrow(ctx: QueryCtx | MutationCtx, taskId: string): Prom
   return task;
 }
 
-function assertTaskSeedTextLimits(taskRecord: {
+// shared with revisionSeed.ts, which seeds through the same task shape
+export function assertTaskSeedTextLimits(taskRecord: {
   task_id: string;
   batch_id: string;
   country_code: string;
@@ -123,9 +124,23 @@ export const listTasks = query({
   },
   returns: v.array(taskDoc),
   handler: async (ctx, args) => {
-    await requireUser(ctx, ["ra", "reviewer", "curator", "admin", "service"]);
+    const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin", "service"]);
+    // promotion gate (docs/development/revision-pipeline-all-countries.md,
+    // phase R1): tasks in a draft batch stay invisible to RA queues until a
+    // curator promotes the batch to active. Reviewers and above still see
+    // draft batches so they can inspect a seed before promotion.
+    const privileged = canReview(user.roles);
     const limit = Math.min(Math.max(args.limit ?? 250, 1), 1000);
     const batchId = args.batchId;
+    if (batchId !== undefined && !privileged) {
+      const scopedBatch = await ctx.db
+        .query("task_batches")
+        .withIndex("by_batch_id", (q) => q.eq("batch_id", batchId))
+        .unique();
+      if (scopedBatch !== null && scopedBatch.status === "draft") {
+        return [];
+      }
+    }
     let tasks: Doc<"tasks">[];
     if (batchId !== undefined && args.status !== undefined) {
       const status = args.status;
@@ -165,6 +180,21 @@ export const listTasks = query({
 
     if (batchId !== undefined) {
       tasks = tasks.filter((task) => task.country_code === args.countryCode);
+    }
+
+    // country-wide reads for non-privileged users also exclude draft
+    // batches; a country has at most a handful of them at a time
+    if (!privileged) {
+      const draftBatches = await ctx.db
+        .query("task_batches")
+        .withIndex("by_country_status", (q) =>
+          q.eq("country_code", args.countryCode).eq("status", "draft"),
+        )
+        .collect();
+      if (draftBatches.length > 0) {
+        const draftBatchIds = new Set(draftBatches.map((batch) => batch.batch_id));
+        tasks = tasks.filter((task) => !draftBatchIds.has(task.batch_id));
+      }
     }
 
     if (args.priority !== undefined) {
