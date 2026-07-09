@@ -269,11 +269,12 @@ const maptilerStyles = hasMaptilerKey
   ]
 : [];
 const basemapOptions = [cartoStyle, ...maptilerStyles];
-// default to maptiler's low-saturation dataviz theme: it is built to sit
-// under data overlays, so the census choropleth reads clearly above it.
-// fall back to dataviz-absent backdrop, then the free carto style; the
-// error handler below also drops to carto if maptiler credit runs out
-const DEFAULT_BASEMAP_ID = "dataviz";
+// default to maptiler's backdrop theme (jb 2026-07-09): terrain-shaded
+// with buildings, streets, and the topographic features places sit in;
+// dataviz stays selectable for a quieter canvas under the choropleth.
+// fall back to the free carto style when no maptiler key is configured;
+// the error handler below also drops to carto if maptiler credit runs out
+const DEFAULT_BASEMAP_ID = "backdrop";
 const defaultBasemapId = hasMaptilerKey
   ? (basemapOptions.some((s) => s.id === DEFAULT_BASEMAP_ID) ? DEFAULT_BASEMAP_ID : BACKDROP_BASEMAP_ID)
   : cartoStyle.id;
@@ -1683,9 +1684,94 @@ function resetSite() {
   setDockOpen(false);
   clearFiltersIfAny();
   map.flyTo({ center: CONFIG.center, zoom: CONFIG.initialZoom, bearing: 0, pitch: 0, speed: 1.6 });
+  clearDragTransforms(); // reset also snaps any dragged pills back home
   showClickHint("Map reset");
 }
 if (cornerRefresh) cornerRefresh.addEventListener("click", resetSite);
+
+// draggable floating pills: mouse/pen only (touch still pans the map). the
+// wrap carries the inline transform so its drop-down panel travels with it.
+// a 4px threshold keeps a tap a click; past it the gesture is a drag and its
+// trailing click is swallowed so the pill never toggles on release.
+const DRAG_SELECTORS = ["#census-wrap", "#key-wrap", "#wordmark"];
+
+// snap every pill home by dropping its inline transform (reset + resize)
+function clearDragTransforms() {
+  DRAG_SELECTORS.forEach((sel) => {
+    const el = document.querySelector(sel);
+    if (el) el.style.transform = "";
+  });
+}
+
+// wire one wrap for pointer dragging; closes over its own gesture state
+function makeDraggable(el) {
+  if (!el) return;
+  let startX = 0, startY = 0, baseX = 0, baseY = 0;
+  let layoutLeft = 0, layoutTop = 0, boxW = 0, boxH = 0;
+  let pointerId = null, captureEl = null;
+  let dragging = false, moved = false, suppressClick = false;
+
+  // read the offset already applied so a second drag continues from there
+  const readOffset = () => {
+    const m = /translate\(([-\d.]+)px,\s*([-\d.]+)px\)/.exec(el.style.transform || "");
+    return m ? { x: parseFloat(m[1]), y: parseFloat(m[2]) } : { x: 0, y: 0 };
+  };
+
+  el.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "touch" || e.button !== 0) return;
+    const t = e.target;
+    if (!(t instanceof Element)) return;
+    // native selects/inputs open on mousedown, so never drag from them
+    if (t.closest("select, input")) return;
+    const off = readOffset();
+    const rect = el.getBoundingClientRect();
+    // layout position with zero transform, so clamping is transform-agnostic
+    layoutLeft = rect.left - off.x;
+    layoutTop = rect.top - off.y;
+    boxW = rect.width; boxH = rect.height;
+    baseX = off.x; baseY = off.y;
+    startX = e.clientX; startY = e.clientY;
+    dragging = true; moved = false; suppressClick = false;
+    pointerId = e.pointerId;
+    // capture on the hit element (it has pointer-events; the wrap may not)
+    captureEl = t;
+    try { t.setPointerCapture(e.pointerId); } catch (_) { /* capture unsupported */ }
+  });
+
+  el.addEventListener("pointermove", (e) => {
+    if (!dragging || e.pointerId !== pointerId) return;
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    if (!moved && Math.hypot(dx, dy) < 4) return; // under threshold: still a click
+    moved = true;
+    const margin = 8; // keep the box at least this far inside the viewport
+    let nx = baseX + dx, ny = baseY + dy;
+    nx = Math.min(Math.max(nx, margin - layoutLeft), window.innerWidth - margin - boxW - layoutLeft);
+    ny = Math.min(Math.max(ny, margin - layoutTop), window.innerHeight - margin - boxH - layoutTop);
+    el.style.transform = `translate(${nx}px, ${ny}px)`;
+  });
+
+  const endDrag = (e) => {
+    if (!dragging || e.pointerId !== pointerId) return;
+    dragging = false;
+    if (captureEl) { try { captureEl.releasePointerCapture(pointerId); } catch (_) { /* already released */ } }
+    if (moved) suppressClick = true; // a real drag: swallow the click it fires
+    captureEl = null;
+  };
+  el.addEventListener("pointerup", endDrag);
+  el.addEventListener("pointercancel", endDrag);
+
+  // capture-phase so the click dies before any inner button/link handler runs
+  el.addEventListener("click", (e) => {
+    if (!suppressClick) return;
+    suppressClick = false;
+    e.stopPropagation();
+    e.preventDefault();
+  }, true);
+}
+
+DRAG_SELECTORS.forEach((sel) => makeDraggable(document.querySelector(sel)));
+// a resize can strand a dragged pill off-screen, so snap them all home
+window.addEventListener("resize", clearDragTransforms);
 
 let clickHintTimer = null;
 function showClickHint(message, options = {}) {

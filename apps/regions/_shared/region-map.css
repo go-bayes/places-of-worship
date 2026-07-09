@@ -109,19 +109,22 @@
   gap: 8px;
   pointer-events: none;
 }
+/* the data pill sits at the quarter-width mark (not dead centre) so long
+   wordmarks on the right never reach it; the 340px floor keeps its left
+   edge clear of the denomination-key button on mid-width screens */
 #top-center-controls {
   position: fixed;
-  left: 50%;
+  left: max(25%, 340px);
   top: var(--safe-top);
   transform: translateX(-50%);
   z-index: 13;
   pointer-events: none;
 }
 /* the top-right wordmark cluster is right-anchored and reaches the screen
-   centre below ~1150px; the census button slips one row down there so the
-   two never collide (the old 641-728px brush, generalised) */
+   centre below ~1150px; the pill drops one row down there so the two never
+   collide, and recentres because 25% would clip it on a phone */
 @media (max-width: 1150px) {
-  #top-center-controls { top: calc(var(--safe-top) + 38px); }
+  #top-center-controls { top: calc(var(--safe-top) + 38px); left: 50%; }
 }
 /* only the buttons and the two panels catch clicks; the flanks stay
    transparent so pans and taps reach the map */
