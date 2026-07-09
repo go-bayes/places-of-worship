@@ -40,10 +40,14 @@
         "religious_affiliation_percent",
         "no_religion_percent"
       ],
-      // a light wash for the archipelago: at the default 0.55 the fill
-      // turns the small islands into solid blobs and hides every feature
-      // beneath them
-      censusFillOpacity: 0.35,
+      // a slightly lighter wash for the archipelago. the census fill now
+      // interleaves beneath the basemap's streets, buildings, and labels
+      // (region-map.js censusBeforeId), so those features draw on top of the
+      // choropleth rather than being buried; the earlier 0.35 was a crutch for
+      // the old full-cover stacking and read too faint once the bug was fixed.
+      // 0.5 keeps the choropleth legible while trimming a little saturation off
+      // the small islands so they do not read as flat solid chips (jb 2026-07-09)
+      censusFillOpacity: 0.5,
       metricLabels: {
         religious_affiliation_percent: {
           label: "Religious affiliation %",
@@ -89,6 +93,6 @@
       censusFlagNote: "* 2010 percentages use the stated-response denominator (island total minus not stated). Religion is published subnationally for 2010 only; 2022 religion is reported for All Bahamas alone and is not mapped by island."
     };
   </script>
-  <script src="../_shared/region-map.js?v=20260709m"></script>
+  <script src="../_shared/region-map.js?v=20260709n"></script>
 </body>
 </html>

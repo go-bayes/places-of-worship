@@ -3046,10 +3046,61 @@ function censusFillExpression() {
   return expr;
 }
 
-// points keep priority: census layers slide beneath the lowest point layer
+// where to slot the census choropleth in the layer stack. two constraints:
+// (1) it must stay beneath the project's own point/polygon layers so a place
+// dot is never buried under the wash; (2) on a vector basemap it must also sit
+// beneath streets, buildings, borders, and labels so infrastructure and place
+// names draw on top of the fill. previously the fill anchored on the lowest
+// point layer only, which on the MapTiler vector styles left it washing over
+// the entire basemap (jb 2026-07-09: bahamas islands read as solid blobs).
+const CENSUS_POINT_ANCHORS = [
+  LAYERS.overview,
+  LAYERS.polygonsFill,
+  LAYERS.buildingsFill,
+  LAYERS.places
+];
+// matches the first basemap layer that carries infrastructure or labels:
+// roads, rail, aeroways, tunnels, bridges, buildings, transit, admin borders,
+// waterway names, and place/poi symbols. land, water, landcover, and hillshade
+// fills fall below this line and stay beneath the wash.
+const CENSUS_INFRA_RE = /road|street|highway|motorway|bridge|tunnel|building|transit|rail|aeroway|label|place|poi|waterway[-_ ]?name|boundary|admin/i;
 function censusBeforeId() {
-  return [LAYERS.overview, LAYERS.polygonsFill, LAYERS.buildingsFill, LAYERS.places]
-    .find((id) => map.getLayer(id));
+  const style = map.getStyle();
+  const layers = (style && style.layers) || [];
+  // never anchor on our own layers when scanning the basemap
+  const ours = new Set([
+    ...Object.values(LAYERS),
+    CENSUS.fill,
+    CENSUS.line,
+    CENSUS.hover
+  ]);
+  // vector anchor: first infrastructure/label layer. anchoring on the first
+  // match keeps everything from that layer upward (and every label) above the
+  // fill. the raster fallback (CARTO: one raster layer, no symbols) yields no
+  // match, so this stays -1 and we degrade to the point-layer anchor below.
+  let anchorIndex = -1;
+  for (let i = 0; i < layers.length; i++) {
+    const layer = layers[i];
+    if (ours.has(layer.id)) continue;
+    const src = layer["source-layer"] || "";
+    if (layer.type === "symbol" || CENSUS_INFRA_RE.test(layer.id) || CENSUS_INFRA_RE.test(src)) {
+      anchorIndex = i;
+      break;
+    }
+  }
+  // lowest project point/polygon layer already in the stack (if any)
+  let pointIndex = -1;
+  for (let i = 0; i < layers.length; i++) {
+    if (CENSUS_POINT_ANCHORS.includes(layers[i].id)) {
+      pointIndex = i;
+      break;
+    }
+  }
+  // insert before whichever valid anchor sits lower in the stack, so the fill
+  // stays beneath both the basemap infrastructure and our own points
+  const candidates = [anchorIndex, pointIndex].filter((i) => i >= 0);
+  if (candidates.length === 0) return undefined;
+  return layers[Math.min(...candidates)].id;
 }
 
 let censusHandlersAttached = false;
