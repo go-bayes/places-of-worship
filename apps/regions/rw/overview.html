@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Rwanda map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the rwanda research map; every string traces to
+    // research/countries/rw/README.md, the rw-census-religion-2012-2022
+    // manifest, or the live REGION_CONFIG in apps/regions/rw/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "RW",
+      countryName: "Rwanda",
+      mapHref: "./",
+      intro: "Census religion overlays for Rwanda at district level, built from the National Institute of Statistics of Rwanda RPHC4 (2012) and RPHC5 (2022) socio-cultural thematic reports.",
+      facts: {
+        waves: "Census 2012, census 2022",
+        geographies: "District (30)",
+        metrics: "Religious affiliation %, no religion %",
+        placeDots: "OpenStreetMap places (amenity=place_of_worship), ODbL-1.0; no governed place layer or place metric is built yet."
+      },
+      reading: [
+        "Districts are shaded by religious affiliation or no religion among stated responses in the census religion tabulation.",
+        "Religious affiliation combines all named religions. In 2012 these are Catholic, Protestant, Adventist, Muslim, Jehovah's Witness, Traditionalist/Animist and Other Religion; in 2022 the census adds an Other Christians category (ten modalities). No religion is the census's No Religion category in both waves.",
+        "Percentages use the stated-response denominator: the district resident population minus the not-stated count. Religious affiliation and no religion sum to 100 percent of stated responses. The not-stated share is small (1.3 percent nationally in 2012, 0.1 percent in 2022).",
+        "2012 (RPHC4 Table 26) prints nine religion shares and the exact population for each of the 416 sectors but no district subtotal, so the sectors are aggregated to the 30 districts by summing the exact populations and the population-weighted shares; 2012 district shares therefore carry one-decimal source precision. 2022 (RPHC5 Table D.1) prints an exact district Total row per district (two-decimal shares), read directly. District populations are exact in both years and reconcile to the national totals (2012: 10,515,973; 2022: 13,246,394).",
+        "Religion counts are not published in either report, so the product ships percentages with the exact district population as the denominator.",
+        "The 2022 census did collect religion: RPHC5 asked the religion question with ten modalities, so both 2012 and 2022 are mapped. Nationally, no religion rose from about 2.5 percent (2012) to about 3.0 percent (2022) and the Catholic share fell from about 44 to about 40 percent.",
+        "Both waves use the 30 districts of the post-2006 administrative structure, so 2012 and 2022 are directly comparable on one boundary set.",
+        "The 2002 census (RPHC3) enumerated religion on the pre-2006 twelve-prefecture geography, which the 2006 reform replaced with five provinces and thirty districts; 2002 does not join the modern districts and is deferred pending a re-tabulation on modern boundaries.",
+        "Boundaries are geoBoundaries RWA ADM2 districts (30, CC BY 4.0, boundary source Open Data Rwanda / NISR geoportal)."
+      ],
+      sources: [
+        {
+          name: "NISR RPHC4 (2012) Socio-cultural Characteristics of the Population, Table 26 (religious affiliation by sector)",
+          href: "https://www.statistics.gov.rw/statistical-publications",
+          construct: "Census religious affiliation (sector shares aggregated to districts)",
+          years: "2012",
+          licence: "Open download from the NISR statistical publications; attribution requested, no explicit reuse licence stated"
+        },
+        {
+          name: "NISR RPHC5 (2022) Social-cultural Characteristics of the Population, Table D.1 (religious affiliation by sector, with district Total rows)",
+          href: "https://www.statistics.gov.rw/statistical-publications",
+          construct: "Census religious affiliation (exact district Total rows)",
+          years: "2022",
+          licence: "Open download from the NISR statistical publications; attribution requested, no explicit reuse licence stated"
+        },
+        {
+          name: "geoBoundaries RWA ADM2 districts",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/RWA/ADM2/",
+          construct: "Boundary geometry (30 post-2006 districts)",
+          years: "2012 structure, source data 2023",
+          licence: "CC BY 4.0 (boundary source Open Data Rwanda / NISR geoportal, licence source statistics.gov.rw/terms-use)"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "National Institute of Statistics of Rwanda, <a href=\"https://www.statistics.gov.rw/statistical-publications\" target=\"_blank\" rel=\"noopener\">Statistical publications</a>.",
+        tables: "2012: RPHC4 Socio-cultural Characteristics of the Population, Table 26 (distribution % of the resident population by religious affiliation and sector of residence); the 416 sector populations sum exactly to the national total and the aggregate reproduces the printed national religion shares. 2022: RPHC5 Social-cultural Characteristics of the Population, Table D.1 (the same table with an exact district Total row per district); the 30 district populations sum exactly to the national total.",
+        licence: "NISR census reports are open downloads with attribution requested and no explicit reuse licence stated; boundaries are geoBoundaries RWA ADM2 (30 districts), CC BY 4.0, boundary source Open Data Rwanda (NISR geoportal).",
+        script: "scripts/build_rw_area_summary.R",
+        manifests: [
+          { label: "rw-census-religion-2012-2022", href: "docs/manifests/rw-census-religion-2012-2022.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

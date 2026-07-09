@@ -18,6 +18,7 @@
         mx: { code: "MX", label: "Mexico" },
         pt: { code: "PT", label: "Portugal" },
         ro: { code: "RO", label: "Romania" },
+        rw: { code: "RW", label: "Rwanda" },
         sk: { code: "SK", label: "Slovakia" },
         uk: { code: "UK", label: "United Kingdom" },
         us: { code: "US", label: "United States" },
