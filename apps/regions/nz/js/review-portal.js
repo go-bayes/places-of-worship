@@ -4,6 +4,7 @@
     const countryLabels = {
         nz: { code: "NZ", label: "New Zealand" },
         vu: { code: "VU", label: "Vanuatu" },
+        al: { code: "AL", label: "Albania" },
         au: { code: "AU", label: "Australia" },
         br: { code: "BR", label: "Brazil" },
         bs: { code: "BS", label: "Bahamas" },

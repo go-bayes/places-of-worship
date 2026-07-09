@@ -57,6 +57,30 @@ const COUNTRY_CONFIGS = {
     },
     // target years are the census waves each country's data map ships;
     // backend-only queues until task batches are seeded.
+    al: {
+        countryCode: "AL",
+        countryName: "Albania",
+        targetYears: ["2011", "2023"],
+        defaultTargetYear: "2023",
+        dataPath: "",
+        mapCentre: [41.15, 20.05],
+        mapZoom: 7,
+        collectionBatch: "al-map-workbench-demo",
+        sourceDatasetId: "al_static_verification_map",
+        mapSource: "al_verification_static_map_workbench",
+        nominationSource: "al_verification_static_map_nomination",
+        defaultAssignmentBatchId: "al-source-first-test-001",
+        assignmentHeading: "Albania verification tasks",
+        temporalLossAction: {
+            value: "target_year_loss_or_changed_use",
+            label: "Present in one target year, absent in a later target year",
+            statuses: {
+                "2011": "present",
+                "2023": "absent",
+            },
+            note: "Evidence appears to support worship use in one target year and absence or changed use in a later target year; reviewer to confirm dates and status.",
+        },
+    },
     au: {
         countryCode: "AU",
         countryName: "Australia",

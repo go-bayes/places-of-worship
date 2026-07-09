@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Albania Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    window.REGION_CONFIG = {
+      countryCode: "AL",
+      title: "Places of Worship | Albania Research Map",
+      center: [20.05, 41.15],
+      initialZoom: 7.3,
+      censusLevels: {
+        prefecture: {
+          label: "Prefecture",
+          boundaries: "data/al_prefecture_2023.geojson",
+          summary: "data/area_summary_prefecture.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries © geoBoundaries ALB ADM1 (Public Domain, source geoBoundaries and Wikipedia) · census religion from INSTAT Population and Housing Census 2023 (Tab. 1.13) and 2011 (prefecture booklets, table 1.1.13)"
+        }
+      },
+      defaultLevel: "prefecture",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2023,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "all named religions (Muslim, Bektashi, Catholic, Orthodox, Evangelical, other religion) plus believers without denomination, as a share of stated responses in the census religion tabulation"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "the census's Atheist category as a share of stated responses in the census religion tabulation"
+        }
+      },
+      popupDenominatorNote: "Percentages use the stated-response denominator (named religions plus atheists, excluding the non-response categories: prefer-not-to-answer and not-stated/not-available); religious affiliation and no religion sum to 100 percent of stated responses. Religion is a contested census question in Albania and non-response is large: nationally about 16 percent of residents in 2011 and 2023 gave no usable religious answer and are excluded from the denominator. Believers without denomination (those who said they belong to no religion but are believers) are counted as affiliation; their share grew from about 5 percent of residents in 2011 to about 14 percent in 2023.",
+      cityPresets: [
+        { label: "Tirana", coords: [19.8187, 41.3275], zoom: 11 },
+        { label: "Durrës", coords: [19.4416, 41.3231], zoom: 11 },
+        { label: "Vlorë", coords: [19.4890, 40.4667], zoom: 11 },
+        { label: "Shkodër", coords: [19.5126, 42.0684], zoom: 11 },
+        { label: "Elbasan", coords: [20.0822, 41.1125], zoom: 11 },
+        { label: "Korçë", coords: [20.7808, 40.6186], zoom: 11 },
+        { label: "Gjirokastër", coords: [20.1389, 40.0758], zoom: 11 },
+        { label: "Kukës", coords: [20.4219, 42.0769], zoom: 11 }
+      ],
+      geocode: { country: "al", biasLngLat: [20.05, 41.15] },
+      onboarding: {
+        title: "Albania research map",
+        intro: "Census religion overlays for Albania at prefecture level, built from the Institute of Statistics (INSTAT) Population and Housing Census: the 2023 religion-by-prefecture table and the 2011 prefecture result booklets.",
+        bullets: [
+          "Prefectures are shaded by religious affiliation or no religion among stated responses in the census religion tabulation.",
+          "Religious affiliation combines all named religions and believers without denomination; no religion is the census's Atheist category.",
+          "Two census waves are mapped: 2011 and 2023, both on the same twelve prefectures.",
+          "Percentages use the stated-response denominator (excluding prefer-not-to-answer and not-stated/not-available). Non-response is historically large in Albania: about one resident in six gave no usable religious answer in both waves, so the shares rest on a smaller base.",
+          "Believers without denomination are counted as affiliation; that undenominational share rose sharply between 2011 and 2023.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" },
+        { id: "verification-link", label: "Submit evidence", href: "verification.html", title: "Open the RA verification map" },
+        { id: "review-link", label: "Review evidence", href: "review.html", title: "Review submitted evidence" }
+      ],
+      censusSourceAttribution: 'Census religion from <a href="https://www.instat.gov.al/en/themes/censuses/census-of-population-and-housing/" target="_blank" rel="noopener">INSTAT Population and Housing Census</a> (2023 Tab. 1.13 by prefecture; 2011 prefecture booklets, table 1.1.13) &middot; Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries ALB ADM1</a> (Public Domain, source geoBoundaries and Wikipedia) &middot; INSTAT census results, open download, attribution requested, no explicit reuse licence stated',
+      censusFlagNote: "* Percentages use the stated-response denominator (named religions plus atheists, excluding prefer-not-to-answer and not-stated/not-available). Non-response is large in both waves (about 16 percent of residents nationally), and believers without denomination are counted as affiliation."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260709m"></script>
+</body>
+</html>
