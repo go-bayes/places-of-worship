@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Malawi Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    window.REGION_CONFIG = {
+      countryCode: "MW",
+      title: "Places of Worship | Malawi Research Map",
+      center: [34.3, -13.4],
+      initialZoom: 6.3,
+      censusLevels: {
+        district: {
+          label: "District",
+          boundaries: "data/mw_district_2020.geojson",
+          summary: "data/area_summary_district.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries © geoBoundaries MWI ADM2 (CC BY 3.0 IGO, source NSO Malawi / OCHA ROSEA) · census religion from NSO 2018 Malawi PHC Main Report, table E5"
+        }
+      },
+      defaultLevel: "district",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2018,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "all named denominations (Catholic, CCAP, SDA/Baptist/Apostolic, Anglican, Pentecostal, Other Christian, Islam, Traditional, Other) as a share of usual residents"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "the No Religion category as a share of usual residents"
+        }
+      },
+      popupDenominatorNote: "Percentages use the NSO table E5 district total of usual residents. Religious affiliation combines every named denomination; the census allocates every resident, so there is no not-stated category. The four cities (Lilongwe City, Blantyre City, Zomba City, Mzuzu City) are folded into the districts that enclose them.",
+      cityPresets: [
+        { label: "Lilongwe", coords: [33.7703, -13.9626], zoom: 11 },
+        { label: "Blantyre", coords: [35.0058, -15.7861], zoom: 11 },
+        { label: "Mzuzu", coords: [34.0200, -11.4656], zoom: 11 },
+        { label: "Zomba", coords: [35.3188, -15.3833], zoom: 11 },
+        { label: "Kasungu", coords: [33.4800, -13.0333], zoom: 11 },
+        { label: "Mangochi", coords: [35.2645, -14.4781], zoom: 11 },
+        { label: "Karonga", coords: [33.9333, -9.9333], zoom: 11 },
+        { label: "Salima", coords: [34.4333, -13.7833], zoom: 11 }
+      ],
+      geocode: { country: "mw", biasLngLat: [34.3, -13.4] },
+      onboarding: {
+        title: "Malawi research map",
+        intro: "Census religion overlays for Malawi at district level, built from the National Statistical Office 2018 Malawi Population and Housing Census Main Report, table E5.",
+        bullets: [
+          "Areas are shaded by religious affiliation or no religion among usual residents.",
+          "Religious affiliation combines all named denominations: Catholic, CCAP, SDA/Baptist/Apostolic, Anglican, Pentecostal, Other Christian, Islam, Traditional and Other Denomination.",
+          "No religion is the census's No Religion category; the census allocates every resident, so there is no not-stated category.",
+          "The four cities are folded into the districts that enclose them, matching the district boundaries.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" },
+        { id: "verification-link", label: "Submit evidence", href: "verification.html", title: "Open the RA verification map" },
+        { id: "review-link", label: "Review evidence", href: "review.html", title: "Review submitted evidence" }
+      ],
+      censusSourceAttribution: 'Census religion from <a href="https://www.nsomalawi.mw/2018-population-and-housing-census/" target="_blank" rel="noopener">NSO 2018 Malawi PHC Main Report, table E5</a> &middot; Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries MWI ADM2</a> (CC BY 3.0 IGO, source NSO Malawi / OCHA ROSEA) &middot; NSO census report, open download, attribution requested',
+      censusFlagNote: "* Percentages use the table E5 district total of usual residents. The census allocates every resident to a denomination or to No Religion, so there is no not-stated category. The four cities (Lilongwe City, Blantyre City, Zomba City, Mzuzu City) are folded into their enclosing districts."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260709e"></script>
+</body>
+</html>

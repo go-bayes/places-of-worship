@@ -255,6 +255,31 @@ const COUNTRY_CONFIGS = {
             note: "Evidence appears to support worship use in one target year and absence or changed use in a later target year; reviewer to confirm dates and status.",
         },
     },
+    mw: {
+        countryCode: "MW",
+        countryName: "Malawi",
+        targetYears: ["2018"],
+        defaultTargetYear: "2018",
+        dataPath: "",
+        mapCentre: [-13.4, 34.3],
+        mapZoom: 6,
+        collectionBatch: "mw-map-workbench-demo",
+        sourceDatasetId: "mw_static_verification_map",
+        mapSource: "mw_verification_static_map_workbench",
+        nominationSource: "mw_verification_static_map_nomination",
+        defaultAssignmentBatchId: "mw-source-first-test-001",
+        assignmentHeading: "Malawi verification tasks",
+        // single shipped wave: the loss action reads as closed/changed
+        // use by the target year rather than a two-year contrast
+        temporalLossAction: {
+            value: "target_year_loss_or_changed_use",
+            label: "Closed or changed use by the target year",
+            statuses: {
+                "2018": "absent",
+            },
+            note: "Evidence appears to support closure or changed use by the target year; reviewer to confirm dates and status.",
+        },
+    },
     mx: {
         countryCode: "MX",
         countryName: "Mexico",

@@ -12,6 +12,7 @@
         in: { code: "IN", label: "India" },
         ke: { code: "KE", label: "Kenya" },
         kr: { code: "KR", label: "South Korea" },
+        mw: { code: "MW", label: "Malawi" },
         mx: { code: "MX", label: "Mexico" },
         pt: { code: "PT", label: "Portugal" },
         ro: { code: "RO", label: "Romania" },

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Malawi map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the malawi research map; every string traces to
+    // research/countries/mw/README.md, the mw-census-religion-2018 manifest,
+    // or the live REGION_CONFIG in apps/regions/mw/index.html. authors nothing.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "MW",
+      countryName: "Malawi",
+      mapHref: "./",
+      intro: "Census religion overlays for Malawi at district level, built from the National Statistical Office 2018 Malawi Population and Housing Census Main Report, table E5.",
+      facts: {
+        waves: "Census 2018",
+        geographies: "District (28)",
+        metrics: "Religious affiliation %, no religion %",
+        placeDots: "OpenStreetMap places (amenity=place_of_worship), ODbL-1.0; no governed place layer or place metric is built yet."
+      },
+      reading: [
+        "Areas are shaded by religious affiliation or no religion among usual residents.",
+        "Religious affiliation combines all named denominations in the census table: Catholic, CCAP, SDA/Baptist/Apostolic, Anglican, Pentecostal, Other Christian Denominations, Islam, Traditional and Other Denomination. No religion is the census's No Religion category.",
+        "Percentages use the district total of usual residents as the denominator. The census allocates every resident to a denomination or to No Religion, so there is no not-stated category to exclude.",
+        "Table E5's Other Denomination column folds Buddhism, Hinduism, and other non-Christian denominations that the national religion table reports as separate rows.",
+        "The census breaks out four cities (Lilongwe City, Blantyre City, Zomba City, Mzuzu City) as their own rows. The district boundaries have no city polygons, so each city is folded into the district that encloses it (Mzuzu City into Mzimba); district values cover the whole district including its city.",
+        "The 2008 census reports religion only as a single national table with four coarse categories, so no earlier district wave can be mapped; the 2008 wave is deferred.",
+        "Boundaries are geoBoundaries MWI ADM2 districts (2020, CC BY 3.0 IGO, boundary source NSO Malawi and OCHA ROSEA)."
+      ],
+      sources: [
+        {
+          name: "NSO 2018 Malawi Population and Housing Census Main Report (table E5, denomination by region and district)",
+          href: "https://www.nsomalawi.mw/2018-population-and-housing-census/",
+          construct: "Census religious denomination",
+          years: "2018",
+          licence: "Open download from NSO Malawi; attribution requested, no explicit reuse licence stated"
+        },
+        {
+          name: "geoBoundaries MWI ADM2 districts",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/MWI/ADM2/",
+          construct: "Boundary geometry (28 districts)",
+          years: "2020",
+          licence: "CC BY 3.0 IGO (boundary source NSO Malawi and OCHA ROSEA via HDX)"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "National Statistical Office of Malawi, <a href=\"https://www.nsomalawi.mw/2018-population-and-housing-census/\" target=\"_blank\" rel=\"noopener\">2018 Malawi Population and Housing Census</a>.",
+        tables: "Main Report, table E5 (population of Malawi by denomination, region, and district). The 32 district and city rows reconcile exactly against the national row, and again after the four cities are folded into their districts.",
+        licence: "The NSO census report is an open download with attribution requested and no explicit reuse licence stated; boundaries are geoBoundaries MWI ADM2, CC BY 3.0 IGO.",
+        script: "scripts/build_mw_area_summary.R",
+        manifests: [
+          { label: "mw-census-religion-2018", href: "docs/manifests/mw-census-religion-2018.json" }
+        ]
+      },
+      contribute: {
+        submit: "verification.html",
+        review: "review.html",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
