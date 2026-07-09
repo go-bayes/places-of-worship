@@ -2,13 +2,24 @@
 
 ## Status
 
-- **Tier**: awaiting scope ruling
-- **Build state**: awaiting scope ruling; probe only
-- **Last verified**: 2026-07-10
+- **Tier**: scope approved; construct extension required
+- **Build state**: stopped at the construct gate; no product shipped
+- **Last verified**: 2026-07-11
 
-No extraction, boundary preparation, or map build may begin until the project
-lead rules on geographic scope and sensitivity. The evidence and the three
-scope options are in [scope-options.md](scope-options.md).
+The project lead selected CBS statistical coverage as published. The selected
+coverage includes East Jerusalem within Jerusalem District and Golan
+Sub-District within Northern District under CBS statistical definitions. It
+also includes any localities beyond the Green Line present in the CBS files,
+including the separately labelled Judea and Samaria Area. The project records
+the statistical source's definitions without endorsing any boundary position.
+
+The build stopped because CBS table 2.11 publishes five Population Register
+categories: Jews, Muslims, Christians, Druze, and people not classified by
+religion. The last category records missing religious classification in the
+Population Register. It does not record a no-religion response. The current
+area-summary rows provide only two fixed religion metric pairs, and the shared
+runtime has no generic route for these five CBS groups. No category was forced
+into the legacy `no_religion` fields.
 
 ## Religious data over time
 
@@ -28,14 +39,17 @@ indicator rather than registry religion.
 - **Source of record**: [CBS population publications](https://www.cbs.gov.il/en/Pages/SubjectPublications.aspx?CbsSubject=%D7%90%D7%95%D7%9B%D7%9C%D7%95%D7%A1%D7%99%D7%99%D7%94)
 - **Exact routes**: recorded in [scope-options.md](scope-options.md)
 - **Licence**: [CBS Open License for information on its website](https://www.cbs.gov.il/en/Pages/Enduser-license.aspx)
-- **Extraction script**: none; building is out of scope pending the ruling
-- **Retrieval recipe and hashes**: none; building is out of scope pending the ruling
+- **Extraction script**: none; the construct gate stopped the build before a
+  product script was created
+- **Retrieval recipe and hashes**: none committed; source workbooks were
+  inspected locally to resolve the construct
 
 ## Boundaries
 
-Boundary choices depend on the scope ruling. CBS publishes 2021 locality
-points and 2022 statistical-area polygons. The public files follow CBS
-statistical coverage; they are not a neutral Green Line mask. See
+The selected boundary convention is CBS statistical coverage. CBS publishes
+2021 locality points and 2022 statistical-area polygons under its open licence.
+The public catalogue located during the scope probe did not expose a current
+district or sub-district polygon download. See
 [scope-options.md](scope-options.md) for the files, limitations, and terms.
 
 ## Places-of-worship layer
@@ -44,17 +58,33 @@ Not probed. Site-layer assessment is outside this scope-options task.
 
 ## First visualisation
 
-Awaiting scope ruling. No visualisation is specified or built.
+No visualisation was built because the construct gate stopped the product.
 
 ## Build recipe
 
-Awaiting scope ruling. No build recipe is authorised.
+A later build should extend the area-summary contract with generic indicator
+values keyed by `indicator_id`, or attach `indicator_observation` records to
+each district-year. It should register Jewish, Muslim, Christian, Druze, and
+not-classified-by-religion counts and shares as separate indicators. The shared
+runtime should derive its metric selector from those indicator definitions.
+The legacy `religious_affiliation` and `no_religion` fields should remain null
+unless the project separately approves an aggregate construct with precise
+labels.
+
+After that extension, the build can extract the eight machine-readable
+reference years in CBS table 2.11: 1948, 1961, 1972, 1983, 1995, 2008, 2022,
+and 2024. The source omits several sub-district rows for smaller groups, while
+its district rows provide the most complete subnational breakdown. The source
+does not provide an annual subnational five-group panel.
 
 ## Risks and open questions
 
-- The project lead must choose among the three documented geographic scopes.
+- The area-summary schema and shared runtime need a generic multi-group
+  indicator route before the CBS product can ship.
 - Registry religion, locality main religion, and survey self-definition must
   remain separate indicators.
+- The published district table supplies eight reference years rather than an
+  annual panel.
 - A locality-row filter cannot split Jerusalem at the Green Line.
 
 ## Deep-history potential

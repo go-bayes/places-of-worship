@@ -2,8 +2,26 @@
 
 ## Unreleased
 
+### 2026-07-11
+
+- Recorded the approved Israel scope as CBS statistical coverage and documented
+  the multi-group construct blocker that stops the district religion build.
+
 ### 2026-07-10
 
+- Added separate Netherlands province survey products for self-reported
+  religious affiliation and religious-service attendance from CBS StatLine
+  `83288NED`. Each product contains 72 rows: 12 provinces across annual
+  2010-2015 estimates for the total population aged 15+. The affiliation
+  product reports affiliation and no affiliation; the attendance product
+  reports weekly-or-more and seldom-or-never attendance. Every row records
+  that the values are sample-survey estimates rounded to whole percentages
+  and that CBS does not publish confidence intervals in the table. The four
+  national indicators match CBS table `82904NED` exactly in 2010, 2012, and
+  2015. Added current PDOK/Kadaster province boundaries (12 features, 509 KB),
+  with CBS and PDOK reuse recorded as CC BY 4.0. Build:
+  `scripts/build_nl_area_summary.R`; manifest
+  `docs/manifests/nl-survey-religion-2010-2015.json`.
 - Added the Poland diocesan Catholic-practice data product for ISKK
   dominicantes and communicantes. The product contains 410 rows: 41
   post-2004 Catholic dioceses across 2014-2019 and 2021-2024, with

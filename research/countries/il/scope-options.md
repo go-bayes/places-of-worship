@@ -2,9 +2,10 @@
 
 ## Purpose and status
 
-This probe records the choices that must precede any Israel data product. Its
-status is **awaiting scope ruling**. It makes no recommendation, and it does
-not authorise extraction, boundary preparation, or a map build.
+This probe records the choices that must precede any Israel data product. The
+project lead selected **Option B: CBS statistical coverage as published** on
+2026-07-11. The construct review subsequently stopped the build because the
+current area-summary contract cannot represent all five CBS religion groups.
 
 The three options differ in what defines the study area. Option A uses the
 Green Line as a spatial mask. Option B reproduces CBS statistical coverage.
@@ -202,9 +203,22 @@ rows, and treatment of disputed lines in the metadata and legend.
 
 ## Ruling record
 
-- **Selected option**: awaiting project-lead ruling
-- **Jerusalem treatment**: awaiting project-lead ruling
-- **Golan treatment**: awaiting project-lead ruling
-- **Judea and Samaria locality treatment**: awaiting project-lead ruling
-- **Boundary source and displayed disclaimer**: awaiting project-lead ruling
-- **Sensitivity conditions for any later product**: awaiting project-lead ruling
+- **Selected option**: Option B, CBS statistical coverage as published,
+  approved by the project lead on 2026-07-11.
+- **Jerusalem treatment**: retain East Jerusalem within Jerusalem District
+  under CBS statistical definitions.
+- **Golan treatment**: retain Golan Sub-District within Northern District
+  under CBS statistical definitions.
+- **Judea and Samaria locality treatment**: retain any localities beyond the
+  Green Line present in the CBS files, including the separately labelled Judea
+  and Samaria Area.
+- **Boundary source and displayed disclaimer**: use CBS geography and label
+  the extent as CBS statistical coverage. The project records the statistical
+  source's definitions without endorsing any boundary position.
+- **Sensitivity conditions for any later product**: keep the published data
+  unchanged. Record the Option A filter as district code `7`, sub-district code
+  `29`, and natural-area codes `291`-`294`, with Jerusalem locality code `3000`
+  requiring a finer spatial split rather than a row filter. Record the Option C
+  filter as district code `7`, sub-district code `29`, and natural-area codes
+  `291`-`294`; its configuration must separately choose whether Jerusalem
+  locality code `3000` is retained, excluded, or replaced with finer 2022 data.
