@@ -7,7 +7,7 @@
 **Current campaign (PI directive, 2026-07-11): select a region, then tick countries.** The active region is Central and Eastern Europe — the six machine-readable three-wave census rows at ranks 25-30. Tick each country when its data product commits; strike its queue row when the country page ships. Côte d'Ivoire (rank 16) is the highest-ranked actionable row outside the region and resumes after the campaign.
 
 - [x] Hungary (HU, rank 25) — data committed 51cc172; page pending
-- [ ] Lithuania (LT, rank 26)
+- [x] Lithuania (LT, rank 26) — data committed 5b3a469; page pending
 - [ ] Estonia (EE, rank 27)
 - [ ] Croatia (HR, rank 28)
 - [ ] Serbia (RS, rank 29)
