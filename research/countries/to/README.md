@@ -2,45 +2,65 @@
 
 ## Status
 
-- **Tier**: B (feasible with extraction work)
-- **Build state**: survey verified
-- **Last verified**: 2026-07-07
+- **Tier**: A (buildable now)
+- **Build state**: data extracted (2021 district product; country page pending)
+- **Last verified**: 2026-07-10
 
 ## Religious data over time
 
 | Source | Construct | Smallest public unit | Years | Format | Access | Licence |
 | --- | --- | --- | --- | --- | --- | --- |
-| [Tonga Statistics Department 2021 religion table](https://tongastats.gov.to/download/266/general-tables/7664/4-religion.xlsx) | census affiliation | village | 2021 | XLSX | open | website terms; confirm reuse |
-| [Tonga Statistics Department 2021 census reports](https://tongastats.gov.to/census-2/population-census-3/census-report-and-factsheet/) | census affiliation context | division, district, village in table set | 2021 | PDF | open | website terms; confirm reuse |
-| [PDH Tonga 1996 Population and Housing Census](https://microdata.pacificdata.org/index.php/catalog/182) | census affiliation metadata | record-level metadata; public subnational table not verified | 1996 | metadata | open metadata; data access varies | PDH terms |
+| [Tonga Statistics Department 2021 religion workbook](https://tongastats.gov.to/download/266/general-tables/7664/4-religion.xlsx), `G 19` | census affiliation | district (village rows also published in `G 20`) | 2021 | XLSX | open download | partial scientific, educational, or research reproduction authorised with acknowledgement; commercial reproduction reserved |
+| [Tonga 2021 Census of Population and Housing, Volume 1](https://tongastats.gov.to/download/272/census-report-and-factsheet/7647/census-report-vol1-2021.pdf), `G 17` | census affiliation and table definitions | district (village rows also published in `G 18`) | 2021 | PDF | open download | publication-specific TSD terms |
+| [Tonga 2016 Census report, Volume 1](https://tongastats.gov.to/download/60/2016/4062/2016-census-report-volume-1-2nd-edition.pdf) | census affiliation | village | 2016 | PDF | open download | TSD publication terms; not shipped |
+| [PDH-hosted Tonga 2011 basic tables](https://microdata.pacificdata.org/index.php/catalog/184/download/2684) | census affiliation | village | 2011 | PDF | open download | publication terms; not shipped |
+| [PDH-hosted Tonga 2006 basic tables](https://microdata.pacificdata.org/index.php/catalog/183/download/935) | census affiliation | village | 2006 | PDF | open download | publication terms; not shipped |
+| [PDH Tonga 1996 Population and Housing Census](https://microdata.pacificdata.org/index.php/catalog/182) | census affiliation metadata | aggregate subnational table not pinned | 1996 | metadata | open metadata; microdata access varies | PDH terms |
+
+The shipped snapshot maps census affiliation. It does not measure religious practice, attendance, or registered membership. Earlier official reports contain district and village religion tables, but their category frames and denominators require a separate extraction before they can support a defensible change series.
+
+## Access the data yourself
+
+This project does not redistribute the source workbook or reports; the governed product contains derived district rates with attribution. To obtain the source data:
+
+- **Source of record**: [Tonga Statistics Department census report and factsheet hub](https://tongastats.gov.to/census-2/population-census-3/census-report-and-factsheet/).
+- **Exact tables**: 2021 religion workbook `G 19`, *Population religious affiliation by division and district*, with `G 20` as the village route; Census Volume 1 `G 17` and `G 18` print the corresponding district and village tables.
+- **Licence**: the 2021 report authorises partial reproduction for scientific, educational, or research purposes with acknowledgement and reserves commercial or for-profit reproduction. The project does not describe these terms as an unrestricted open licence.
+- **Our extraction script**: `scripts/build_to_area_summary.R`.
+- **Retrieval recipe and hashes**: `docs/manifests/to-census-religion-2021.json`; the full probe record is `research/countries/to/route-probe.md`.
 
 ## Boundaries
 
-- Official boundary files: geoBoundaries TON ADM1 can anchor divisions; village boundaries still need an official or SPC source.
-- Build 2021 first, then create concordances if earlier reports expose comparable district or village tables.
+- The product uses [geoBoundaries TON ADM2](https://www.geoboundaries.org/api/current/gbOpen/TON/ADM2/): 23 districts, represented year 2020, sourced from Pacific Data Hub, and licensed under Creative Commons Attribution 4.0 International (CC BY 4.0) according to the release metadata.
+- All 23 census districts join one-to-one. Three explicit spelling concordances preserve the census and boundary labels. No district is split or merged.
+- No licensed village boundary layer was pinned. The 2021 village counts remain a future route rather than a polygon product.
+- Earlier-wave boundary stability has not been verified. The 2020 district frame therefore supports the 2021 snapshot only.
 
 ## Places-of-worship layer
 
-- OSM coverage assessment (2026-07-07): public Overpass queries timed out; rerun before build.
-- Country registers to survey: Free Wesleyan Church, Catholic Diocese of Tonga, LDS mission records, and Tonga National Archives.
+- No governed Tonga place-of-worship snapshot ships with this product. Place counts and density metrics remain null.
+- OSM coverage has not been verified in this build.
+- Free Wesleyan, Catholic, Latter-day Saints, and other church directories could seed later site verification, subject to source and licence review.
 
 ## First visualisation
 
-Religious-affiliation percent by village for the 2021 census, with division and district roll-ups for navigation.
+Staged: 2021 religious-affiliation percent and no-religious-affiliation percent by district on the 2020 geoBoundaries ADM2 frame. Refused responses remain in the denominator and outside both headline numerators. A country page is outside this build lane.
 
 ## Build recipe
 
-1. Extract: read the 2021 `4-religion.xlsx` sheets G18-G20 and retain the workbook URL in provenance.
-2. Governed product: create `area_summary` rows for village, district, and division where labels join cleanly.
-3. Boundaries: begin with geoBoundaries TON ADM1; add a verified village boundary source before publishing village polygons.
-4. Region page: add `REGION_CONFIG` per `docs/development/adding-a-region.md`.
-5. Verification: test sheet totals against the 2021 census report and confirm denomination abbreviations.
+1. Extract workbook `G 19` and retain all 22 verbatim source categories.
+2. Require every row's categories to sum exactly to its printed `Total`, every district group to sum exactly to its division, and all 23 districts to sum exactly to the national row.
+3. Join the 23 district rows one-to-one to geoBoundaries TON ADM2, simplify with `scripts/lib/simplify_boundary.R`, and re-run validity, distinct-geometry, overlap, interior-gap, and size gates.
+4. Write the governed `area_summary` JSON and CSV, simplified boundary GeoJSON, and the tracked manifest.
+5. Add a country `REGION_CONFIG` page in the separate UI lane and display the denominator, exclusion, source, and licence notes on the shipped surface.
 
 ## Risks and open questions
 
-- Earlier waves need comparable subnational tables before this becomes a longitudinal map.
-- Village boundaries are the main blocker for the strongest first visualisation.
+- The 2016 district and village national rows disagree for at least two categories. A later extraction must identify the correct reconciliation authority before using that wave.
+- The 2006 district and village tables use different population bases. A longitudinal product must retain the total-population basis and must not substitute the private-household district table.
+- Village counts are public for 2006, 2011, 2016, and 2021, but licensed village geometry remains unpinned.
+- The 2021 publication terms permit partial research reuse with attribution and reserve commercial reproduction. Commercial downstream use requires separate permission.
 
 ## Deep-history potential
 
-Free Wesleyan, Catholic, LDS, and other church registers can document long-run site histories. Tonga National Archives and Wesleyan missionary records are the likely starting points.
+Free Wesleyan, Catholic, Latter-day Saints, and other denominational archives can document longer site histories. Tonga National Archives and Wesleyan missionary records are likely starting points, subject to a dedicated source and access survey.

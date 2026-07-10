@@ -1,12 +1,15 @@
-# Tonga wave-extension probe
+# Tonga wave-extension probe (historical)
 
 Last verified: 2026-07-10
 
+This historical probe applied a multi-wave machine-readable gate and stopped before construction. The current build brief superseded that gate through the small-country clause. The shipped 2021 district decision, publication terms, validation record, and retrieval hashes now live in `research/countries/to/route-probe.md` and `docs/manifests/to-census-religion-2021.json`.
+
 ## Status
 
-- **Build decision**: stopped after probe.
+- **Historical build decision**: stopped after probe under the earlier multi-wave machine-readable gate.
+- **Current decision**: the 2021 district snapshot has been built; `research/countries/to/route-probe.md` is authoritative.
 - **Stop condition met**: only one open aggregate religion wave is machine-readable by the build gate used here.
-- **Second stop condition**: the census table reuse licence remains unclear. The 2021 workbook and older report PDFs are public downloads. The Pacific Data Hub (PDH) pages provide access terms. I did not find an explicit open-data licence for derived redistribution of the table values.
+- **Second stop condition (historical, since resolved for 2021)**: at probe time the census table reuse licence was unclear. The current build resolved the 2021 position: the census report volume permits partial scientific, educational, or research reproduction with acknowledgement (`route-probe.md` records the terms). The older report PDFs are public downloads whose reuse position for derived redistribution has not been separately verified. The Pacific Data Hub (PDH) pages provide access terms.
 - **Boundary result**: district boundaries exist with a clear licence. Village boundaries were not found.
 
 For this probe, machine-readable aggregate means an XLSX, CSV, JSON, or API aggregate table that can be read without reconstructing tables from PDF page layout. The 2016, 2011, and 2006 religion aggregates are public report PDFs. They are text-extractable, but they still require page-layout table reconstruction and are not counted as machine-readable aggregate inputs for the build gate.
@@ -92,7 +95,7 @@ The 2006 PDH DDI notes that geographic identifiers could be used for PopGIS diss
 
 ## Prospective Product Mapping
 
-No product was built. If a later decision treats the report PDFs as buildable source material and resolves the census table reuse licence, the finest clean geography is district. Village remains unavailable without a boundary source.
+The historical probe built no product; the 2021 district product now exists and `route-probe.md` is its record. For the earlier waves, if a later decision treats the report PDFs as buildable source material and verifies their reuse terms, the finest clean geography is district. Village remains unavailable without a boundary source.
 
 The broad area-summary mapping should be:
 
@@ -108,9 +111,9 @@ For the existing `area_summary` schema, `population_total_basis` should state th
 
 Category detail changes across waves, especially the 2016 `Others` category and the later separation of Islam and Hinduism. A first product should publish only broad religious-affiliation and no-religion metrics unless a separate denomination concordance is approved.
 
-## Stop Record
+## Historical stop record
 
-The build did not proceed because:
+The earlier build did not proceed because:
 
 1. The only open machine-readable aggregate religion wave pinned here is the 2021 XLSX workbook.
 2. The older district and village tables are available as PDF report tables. No aggregate XLSX/CSV/API outputs were found.
