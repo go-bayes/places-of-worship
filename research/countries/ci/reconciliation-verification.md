@@ -47,3 +47,23 @@ The overrun is the image-transcribed category sum minus the image-transcribed pr
 ## Tally
 
 All 31 verified rows are source-arithmetic discrepancies. No row contains an extraction error, and no cell is illegible. The printed category sums exceed the printed resident totals by 41 people in aggregate. No extracted cell must change.
+
+## Extended verification: department and national rows (2026-07-11)
+
+The conductor's documented-discrepancy ruling (2026-07-10) covers every level of Table 11's printed arithmetic, so the verification was extended from the 31 leaf overruns to the aggregate rows. Two further discrepancy classes were confirmed by the same 300-dot-per-inch image readback method (`pdftoppm` render, then pixel transcription independent of `pdftotext`), and compared cell-for-cell with the current extraction.
+
+The first extended class is the department component-sum discrepancy: the printed department total minus the sum of that department's printed child sub-prefecture resident totals. Forty-eight of 110 departments differ by −3 to +2 persons. Five were image-verified, chosen to span the full range of the discrepancy and to include the department already spot-checked in the probe (ADIAKE). The render page number is the PDF page carrying the department's left-half sheet.
+
+| Department | Page | Printed child resident totals (image) | Child sum | Printed department total (image) | Difference | Matches extraction | Verdict |
+| --- | ---: | --- | ---: | ---: | ---: | :---: | --- |
+| ADIAKE | 7 | 50 556 + 21 941 + 15 510 | 88 007 | 88 006 | −1 | Yes | SOURCE ARITHMETIC |
+| BETTIE | 5 | 33 020 + 36 621 | 69 641 | 69 640 | −1 | Yes | SOURCE ARITHMETIC |
+| BONON | 21 | 116 871 + 50 525 | 167 396 | 167 397 | +1 | Yes | SOURCE ARITHMETIC |
+| ODIENNE | 7 | 28 373 + 10 151 + 20 285 + 86 279 + 11 644 | 156 732 | 156 730 | −2 | Yes | SOURCE ARITHMETIC |
+| SASSANDRA | 5 | 71 998 + 41 965 + 42 746 + 17 437 + 91 140 + 87 945 | 353 231 | 353 228 | −3 | Yes | SOURCE ARITHMETIC |
+
+The second extended class is the national row. The "Ensemble CÔTE D'IVOIRE" row was read from both paired sheet halves (PDF pages 31 and 32). The printed resident total is 29 389 150. The 16 categories read from the image are, in printed order, 3 685 173; 4 984 388; 678 962; 5 434 719; 134 332; 140 482; 32 489; 19 689; 276 522; 12 453 840; 629 938; 49 946; 57 084; 53 051; 645 256; 787. Every cell matched the extraction. The 16 categories sum to 29 276 658, which is 112 492 below the printed resident total (the collective-household residents and people without housing excluded from the religion universe) and 2 below the thematic report's Tome 1 Table 2.2 ordinary-household figure of 29 276 660.
+
+## Extended tally
+
+The five department rows and the national row match the extraction cell-for-cell; no image readback contradicted the extraction. The department component-sum discrepancies (48 departments, signed sum −6, absolute sum 52 persons) and the national row's under-sum are the source's own printed arithmetic, of the same class as the 31 leaf overruns. The leaf resident totals across the 519 sub-prefecture-or-commune leaves sum to 29 389 156, six above the printed national resident total; the leaf religion basis sums to 29 276 520, 138 below the national religion basis. All of these are pinned in `scripts/build_ci_area_summary.R`, which stops on any drift. No extracted cell must change.

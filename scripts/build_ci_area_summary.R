@@ -6,6 +6,7 @@
 suppressPackageStartupMessages({
   library(jsonlite)
   library(sf)
+  library(stringi)
 })
 
 source("scripts/lib/simplify_boundary.R")
@@ -53,7 +54,7 @@ boundary_parent_path <- file.path(raw_dir, "geoboundaries_civ_adm2.geojson")
 boundary_out <- file.path(product_dir, "ci_local_2021.geojson")
 summary_json_out <- file.path(product_dir, "area_summary_local.json")
 summary_csv_out <- file.path(product_dir, "area_summary_local.csv")
-manifest_out <- file.path(manifest_dir, "ci-census-religion-1988-2021.json")
+manifest_out <- file.path(manifest_dir, "ci-census-religion-2021.json")
 
 category_codes <- c(
   "SANS_RELIGION", "CATHOLIQUE", "METHODISTE_PROTESTANT", "EVANGELIQUE",
@@ -133,17 +134,41 @@ read_retrieval_meta <- function(path) {
 # convert a French printed integer with grouping spaces to an integer.
 parse_printed_integer <- function(value) as.integer(gsub(" ", "", value, fixed = TRUE))
 
-# repair the double-decoded UTF-8 strings found in the boundary source.
+# repair the doubly-UTF-8-encoded strings in the geoBoundaries shapeName field.
+# diagnosis (raw-byte inspection, 2026-07-11): the accented ADM3 names are
+# double-encoded. an original correctly-encoded UTF-8 byte pair such as e-acute
+# (0xC3 0xA9) was decoded once as Latin-1 (yielding "A-tilde ©") and then
+# re-encoded to UTF-8, so the file stores four bytes 0xC3 0x83 0xC2 0xA9 for a
+# single "é". the repair reverses exactly one such layer: re-encode the string's
+# code points to Latin-1 bytes, then reinterpret those bytes as UTF-8.
+# the transform is GATED on the mojibake signature (a string containing the
+# A-tilde / A-circumflex lead characters), never a place-name pattern list, and
+# never applied to clean strings: on macOS `iconv` silently drops invalid bytes
+# instead of returning NA, so an ungated round-trip would strip real accents
+# (e.g. "Aboudé" -> "Aboud"). the gate confines the round-trip to genuinely
+# double-encoded strings; 166 of the 510 ADM3 names carry the signature and are
+# repaired, leaving only legitimate French letters (é, è, ï) and zero residue.
 repair_mojibake <- function(value) {
-  bad <- grepl("Ã|Â", value)
-  value[bad] <- iconv(value[bad], from = "latin1", to = "UTF-8")
+  bad <- grepl("Ã|Â", value)   # U+00C3 (Ã) / U+00C2 (Â): double-encode lead chars
+  if (!any(bad)) return(value)
+  fix <- value[bad]
+  latin <- iconv(fix, from = "UTF-8", to = "latin1")   # code points -> Latin-1 bytes
+  Encoding(latin) <- "UTF-8"                            # reinterpret those bytes as UTF-8
+  ok <- !is.na(latin) & !is.na(iconv(latin, "UTF-8", "UTF-8"))
+  fix[ok] <- latin[ok]
+  value[bad] <- fix
   value
 }
 
 # normalise one place label for an explicit census-to-boundary join.
+# transliteration uses stringi's Latin-ASCII transform, not iconv
+# ASCII//TRANSLIT: the macOS iconv build renders "É" as "'E" (apostrophe-E),
+# which the punctuation split below would break into "E", silently destroying
+# every accented boundary name. stri_trans_general maps É->E and é->e cleanly
+# and portably.
 normalise_name <- function(value) {
   value <- repair_mojibake(enc2utf8(value))
-  value <- iconv(value, from = "UTF-8", to = "ASCII//TRANSLIT")
+  value <- stri_trans_general(value, "Latin-ASCII")
   value <- toupper(value)
   value <- gsub("\\(DE [^)]+\\)", "", value)
   value <- gsub("[^A-Z0-9]+", " ", value)
@@ -226,19 +251,19 @@ parse_2021_table <- function(path) {
   }
   rows <- do.call(rbind, paired)
   row.names(rows) <- NULL
+  rows[["order_index"]] <- seq_len(nrow(rows))   # printed reading order, for parent-child sweeps
   component_sum <- rowSums(rows[, category_codes, drop = FALSE])
   rows[["religion_basis_total"]] <- component_sum
+  # displayed printed resident total minus the exact 16-category sum. positive
+  # for ordinary rows (collective-household residents and people without housing
+  # excluded from the religion basis); negative for the 31 rows where the
+  # source's own printed category sums exceed its printed resident total. the PI
+  # ruled 2026-07-10 to SHIP these printed values unchanged with disclosure, so
+  # the former negative-count hard stop is replaced by a disclosed field. the
+  # discrepancies were re-read at 300 dpi and confirmed as source arithmetic in
+  # research/countries/ci/reconciliation-verification.md. every other gate below
+  # (paired-sheet keys, local-to-national reconciliation, geometry) stays hard.
   rows[["outside_religion_basis_count"]] <- rows[["population_total"]] - component_sum
-  if (any(rows[["outside_religion_basis_count"]] < 0L)) {
-    bad <- which(rows[["outside_religion_basis_count"]] < 0L)
-    labels <- ifelse(nzchar(rows[["local_label"]][bad]), rows[["local_label"]][bad], rows[["hierarchy_label"]][bad])
-    details <- paste0(labels, " (", rows[["outside_religion_basis_count"]][bad], ")")
-    stop(
-      "Table 11 categories exceed the printed resident total in ", length(bad),
-      " row(s): ", paste(details, collapse = "; "),
-      call. = FALSE
-    )
-  }
 
   rows[["reporting_level"]] <- "aggregate"
   local_candidate <- nzchar(rows[["local_label"]]) &
@@ -260,19 +285,110 @@ parse_2021_table <- function(path) {
 
   local <- rows[rows[["reporting_level"]] == "local", , drop = FALSE]
   national <- rows[grepl("^Ensemble C", rows[["hierarchy_label"]]), , drop = FALSE]
-  if (nrow(local) != 510L || nrow(national) != 1L) {
-    stop("expected 510 local rows and one national row", call. = FALSE)
+  # Table 11 yields 519 leaf sub-prefecture-or-commune rows (corrected from the
+  # probe's asserted 510; the 12 ordinary "District du/des/de X" rows and the two
+  # "District Autonome" rows are aggregates, not leaves). the 519 leaves partition
+  # the country.
+  if (nrow(local) != 519L || nrow(national) != 1L) {
+    stop("expected 519 local leaf rows and one national row; found ",
+         nrow(local), " and ", nrow(national), call. = FALSE)
   }
-  if (national[["religion_basis_total"]][[1L]] != 29276660L ||
-      national[["outside_religion_basis_count"]][[1L]] != 112490L) {
-    stop("national ordinary-household religion basis does not match RGPH 2021 Tome 1", call. = FALSE)
+  # BASIS CONSTANT (conductor ruling 2, 2026-07-10). the product's national
+  # religion basis is Table 11's OWN national row: its 16 categories sum to
+  # 29,276,658 (outside-basis 112,492 against the printed resident total
+  # 29,389,150). the thematic report's Tome 1 Table 2.2 gives 29,276,660
+  # ordinary-household residents; the 2-person difference is a between-publications
+  # discrepancy, disclosed, not corrected.
+  national_basis_tome1_table_2_2 <- 29276660L
+  if (national[["religion_basis_total"]][[1L]] != 29276658L ||
+      national[["outside_religion_basis_count"]][[1L]] != 112492L) {
+    stop("national religion basis is not Table 11's own 16-category sum (29,276,658)", call. = FALSE)
   }
-  for (field in c("population_total", "religion_basis_total", "outside_religion_basis_count", category_codes)) {
-    if (sum(local[[field]]) != national[[field]][[1L]]) {
-      stop("local rows do not sum to the printed national ", field, call. = FALSE)
-    }
+
+  # ---- documented-discrepancy set (conductor ruling 1): the source's printed
+  # arithmetic does not internally reconcile at any level. every printed value
+  # ships unchanged; each discrepancy is disclosed and asserted against this
+  # pinned, machine-derived record; the builder stops on drift. ----
+
+  # LEVEL 1 (leaf self): 31 rows whose printed 16-category sum exceeds the printed
+  # resident total (negative outside-basis), 41 persons in aggregate. re-read at
+  # 300 dpi in research/countries/ci/reconciliation-verification.md.
+  overrun_rows <- local[local[["outside_religion_basis_count"]] < 0L, , drop = FALSE]
+  overrun_rows <- data.frame(
+    local_label = overrun_rows[["local_label"]],
+    region_name = overrun_rows[["region_name"]],
+    printed_resident_total = as.integer(overrun_rows[["population_total"]]),
+    category_sum = as.integer(overrun_rows[["religion_basis_total"]]),
+    overrun_persons = as.integer(-overrun_rows[["outside_religion_basis_count"]]),
+    stringsAsFactors = FALSE
+  )
+  if (nrow(overrun_rows) != 31L || sum(overrun_rows[["overrun_persons"]]) != 41L) {
+    stop("leaf source-arithmetic set drifted: ", nrow(overrun_rows), " row(s), ",
+         sum(overrun_rows[["overrun_persons"]]),
+         " person(s); expected 31 rows and 41 persons (reconciliation-verification.md)", call. = FALSE)
   }
-  list(all_rows = rows, local_rows = local, national_row = national)
+
+  # LEVEL 2 (department component sum): printed department total minus the sum of
+  # that department's printed child-leaf resident totals. 48 of 110 departments
+  # differ by -3..+2 persons; five (ADIAKE, BETTIE, BONON, ODIENNE, SASSANDRA)
+  # were image-verified cell-for-cell (reconciliation-verification.md).
+  pinned_dept_discrepancy <- c(
+    "ABOISSO"=-1L,"ADIAKE"=-1L,"AGBOVILLE"=1L,"AGNIBILEKROU"=-1L,"AKOUPE"=-1L,
+    "BETTIE"=-1L,"BLOLEQUIN"=1L,"BOCANDA"=-1L,"BONDOUKOU"=-1L,"BONGOUANOU"=-1L,
+    "BONON"=1L,"BOUAFLE"=1L,"BOUNDIALI"=-1L,"BUYO"=-1L,"DABAKALA"=-1L,"DABOU"=1L,
+    "DAOUKRO"=-1L,"FERKESSEDOUGOU"=1L,"FRESCO"=1L,"GOHITAFLA"=-1L,"GRAND-LAHOU"=1L,
+    "GUIGLO"=-1L,"GUITRY"=1L,"KONG"=1L,"KORO"=-1L,"KOUIBLY"=1L,"KOUTO"=-1L,
+    "LAKOTA"=1L,"M'BAHIAKRO"=-1L,"MAN"=-1L,"MANKONO"=1L,"MEAGUI"=1L,"ODIENNE"=-2L,
+    "OUANGOLODOUGOU"=-1L,"OUELLE"=1L,"PRIKRO"=1L,"SAN PEDRO"=1L,"SANDEGUE"=1L,
+    "SASSANDRA"=-3L,"SEGUELA"=-1L,"SINEMATIALI"=-1L,"SINFRA"=-1L,"TABOU"=2L,
+    "TOUBA"=-1L,"TOUMODI"=1L,"TRANSUA"=1L,"YAMOUSSOUKRO"=-1L,"ZUENOULA"=1L
+  )
+  row_type <- rep("other", nrow(rows))
+  row_type[rows[["reporting_level"]] == "local"] <- "leaf"
+  row_type[grepl("^Total ", rows[["hierarchy_label"]])] <- "dept_total"
+  row_type[grepl("^Total-Ville|^Total-S/P", rows[["hierarchy_label"]])] <- "abidjan_aggregate"
+  row_type[grepl("^Région |^District ", rows[["hierarchy_label"]])] <- "region_or_district"
+  row_type[grepl("^Ensemble C", rows[["hierarchy_label"]])] <- "national"
+  pending <- integer(); dept_name <- character(); dept_printed <- integer(); dept_child <- integer()
+  for (i in seq_len(nrow(rows))) {
+    ty <- row_type[[i]]
+    if (ty == "leaf") pending <- c(pending, i)
+    else if (ty == "dept_total") {
+      dept_name <- c(dept_name, sub("^Total\\s+", "", rows[["hierarchy_label"]][[i]]))
+      dept_printed <- c(dept_printed, rows[["population_total"]][[i]])
+      dept_child <- c(dept_child, sum(rows[["population_total"]][pending]))
+      pending <- integer()
+    } else if (ty %in% c("abidjan_aggregate", "region_or_district", "national")) pending <- integer()
+  }
+  dept_diff <- dept_printed - dept_child
+  observed_dept <- setNames(as.integer(dept_diff[dept_diff != 0L]), dept_name[dept_diff != 0L])
+  if (length(observed_dept) != length(pinned_dept_discrepancy) ||
+      !setequal(names(observed_dept), names(pinned_dept_discrepancy)) ||
+      !all(observed_dept[names(pinned_dept_discrepancy)] == pinned_dept_discrepancy)) {
+    stop("department component-sum discrepancy set drifted from the pinned record (48 departments)", call. = FALSE)
+  }
+  dept_discrepancies <- data.frame(
+    department = names(pinned_dept_discrepancy),
+    printed_minus_child_sum = unname(pinned_dept_discrepancy), stringsAsFactors = FALSE
+  )
+
+  # LEVEL 3 (leaf -> national): the 519 leaf resident totals sum to 6 above the
+  # printed national resident total, and the leaf religion-basis sums to 138 below
+  # the national religion basis. these are the source's own non-reconciling
+  # printed totals; the former exact local-to-national gate is replaced by this
+  # pinned documented-tolerance assertion.
+  leaf_to_national <- list(
+    population_total = sum(local[["population_total"]]) - national[["population_total"]][[1L]],
+    religion_basis_total = sum(local[["religion_basis_total"]]) - national[["religion_basis_total"]][[1L]]
+  )
+  if (leaf_to_national[["population_total"]] != 6L || leaf_to_national[["religion_basis_total"]] != -138L) {
+    stop("leaf-to-national reconciliation drifted from the pinned record (+6 residents, -138 basis)", call. = FALSE)
+  }
+
+  list(all_rows = rows, local_rows = local, national_row = national,
+       overrun_rows = overrun_rows, dept_discrepancies = dept_discrepancies,
+       leaf_to_national = leaf_to_national,
+       national_basis_tome1_table_2_2 = national_basis_tome1_table_2_2)
 }
 
 # count polygon interior rings, which indicate uncovered internal gaps.
@@ -331,36 +447,69 @@ attach_boundary_regions <- function(local_boundary, region_boundary) {
   local_boundary
 }
 
-# build the 510-feature source boundary and match every census row.
-build_boundary <- function(census_rows) {
+# build the census 510-unit local join frame and match it to the 510 ADM3 features.
+# ruling 4(b): the Abidjan autonomous city (its 10 census communes) collapses to
+# the census's OWN printed "Total-Ville ABIDJAN" aggregate row, which serves the
+# single ADM3 "Abidjan" feature; the district's 4 sub-prefectures (Anyama,
+# Bingerville, Brofodoumé, Songon) stay as 1:1 leaves. Yamoussoukro needs no
+# collapse: each of its 4 census leaves (Attiégouakro, Lolobo, Yamoussoukro,
+# Kossou) has a distinct ADM3 feature. that yields 519 - 10 + 1 = 510 join units.
+build_boundary <- function(parsed) {
+  local_rows <- parsed[["local_rows"]]
+  all_rows <- parsed[["all_rows"]]
+
+  city <- all_rows[grepl("^Total-Ville ABIDJAN", all_rows[["hierarchy_label"]]), , drop = FALSE]
+  if (nrow(city) != 1L) stop("expected exactly one printed 'Total-Ville ABIDJAN' aggregate row", call. = FALSE)
+  city_pos <- city[["order_index"]][[1L]]
+  abidjan <- local_rows[local_rows[["region_name"]] == "ABIDJAN", , drop = FALSE]
+  communes <- abidjan[abidjan[["order_index"]] < city_pos, , drop = FALSE]   # the 10 city communes
+  if (nrow(communes) != 10L) stop("expected 10 Abidjan city communes preceding the printed city aggregate", call. = FALSE)
+  city_unit <- city                                # census-printed city aggregate as one join unit
+  city_unit[["local_label"]] <- "ABIDJAN"
+  city_unit[["region_name"]] <- "ABIDJAN"
+  city_unit[["reporting_level"]] <- "local"
+  census_rows <- rbind(
+    local_rows[!(local_rows[["order_index"]] %in% communes[["order_index"]]), , drop = FALSE],
+    city_unit[, names(local_rows), drop = FALSE]
+  )
+  if (nrow(census_rows) != 510L) stop("Abidjan-collapsed census join frame is not 510 units; got ", nrow(census_rows), call. = FALSE)
+
   boundary <- st_read(boundary_path, quiet = TRUE, stringsAsFactors = FALSE)
   regions <- st_read(boundary_parent_path, quiet = TRUE, stringsAsFactors = FALSE)
   if (nrow(boundary) != 510L || nrow(regions) != 33L) stop("geoBoundaries feature counts changed", call. = FALSE)
   boundary[["shapeName"]] <- repair_mojibake(boundary[["shapeName"]])
+  if (any(grepl("Ã|Â", boundary[["shapeName"]]))) stop("residual mojibake after boundary-name repair", call. = FALSE)
   boundary <- attach_boundary_regions(boundary, regions)
   boundary[["join_name"]] <- normalise_name(boundary[["shapeName"]])
-  boundary[["join_region"]] <- normalise_name(boundary[["region_name"]])
   census_rows[["join_name"]] <- normalise_name(census_rows[["local_label"]])
-  census_rows[["join_region"]] <- normalise_name(census_rows[["region_name"]])
 
-  aliases <- c(
-    "BINGERVILLE" = "BINGERVILLE",
-    "LOLOBO" = "LOLOBO"
-  )
-  census_rows[["join_name"]] <- ifelse(
-    census_rows[["join_name"]] %in% names(aliases),
-    unname(aliases[census_rows[["join_name"]]]),
-    census_rows[["join_name"]]
-  )
-
-  boundary_key <- paste(boundary[["join_name"]], boundary[["join_region"]], sep = "|")
-  census_key <- paste(census_rows[["join_name"]], census_rows[["join_region"]], sep = "|")
-  index <- match(census_key, boundary_key)
-  if (anyNA(index) || anyDuplicated(index)) {
-    missing <- census_rows[is.na(index), c("local_label", "region_name")]
+  # census-to-ADM3 join, name-primary (the ADM2 region layer is reserved to
+  # disambiguate duplicated names). no invented concordance and no self-summing
+  # are permitted; a residue is reported and stops the build (ruling 4c).
+  index <- match(census_rows[["join_name"]], boundary[["join_name"]])
+  unmatched <- census_rows[is.na(index), , drop = FALSE]
+  unused <- boundary[!(boundary[["join_name"]] %in% census_rows[["join_name"]]), , drop = FALSE]
+  if (nrow(unmatched) > 0L || nrow(unused) > 0L || anyDuplicated(index[!is.na(index)]) > 0L) {
+    unused_flat <- unused; st_geometry(unused_flat) <- NULL
+    residue_path <- file.path("research/countries/ci", "join-residue.csv")
+    write.csv(
+      rbind(
+        data.frame(side = "census_unit_unmatched", name = unmatched[["local_label"]],
+                   region = unmatched[["region_name"]], stringsAsFactors = FALSE),
+        data.frame(side = "adm3_feature_unused", name = unused_flat[["shapeName"]],
+                   region = unused_flat[["region_name"]], stringsAsFactors = FALSE)
+      ),
+      residue_path, row.names = FALSE, na = ""
+    )
     stop(
-      "unmatched or duplicate census-boundary join: ",
-      paste(apply(head(missing, 30L), 1L, paste, collapse = " / "), collapse = "; "),
+      "BLOCKED (ruling 4c): census-to-ADM3 join is not 1:1. ",
+      nrow(unmatched), " census unit(s) unmatched and ", nrow(unused),
+      " ADM3 feature(s) unused after mojibake repair, stringi transliteration, and the ",
+      "Abidjan aggregate collapse. The residue is census-vs-geoBoundaries spelling variants, ",
+      "a 2-leaf-to-1-feature merge (BOBI + DIARABANA -> Bobi-Diarabana, no census-printed ",
+      "aggregate to join), and an ADM3 feature with no census unit (Parc National de Bona). ",
+      "Closing it needs an invented concordance or self-summing, both forbidden. Residue written to ",
+      residue_path, "; see research/countries/ci/route-probe.md.",
       call. = FALSE
     )
   }
@@ -390,7 +539,7 @@ write_boundary <- function(boundary) {
   simplification <- mapshaper_simplify_to_cap(
     boundary,
     boundary_out,
-    max_bytes = 1800000,
+    max_bytes = 3000000,
     keep_percentages = c(25, 15, 10, 7.5, 5, 3, 2, 1, 0.5),
     clean_option = NULL
   )
@@ -412,6 +561,29 @@ null_if_na <- function(value) if (length(value) == 0L || is.na(value)) NULL else
 build_area_row <- function(source, area) {
   excluded <- source[["SANS_RELIGION"]] + source[["NE_SAIT_PAS"]] + source[["NON_DECLAREE"]]
   affiliation <- source[["religion_basis_total"]] - excluded
+  displayed_resident_total <- as.integer(source[["population_total"]])
+  outside_basis <- as.integer(source[["outside_religion_basis_count"]])
+  # the area-summary row schema fixes its keys (additionalProperties: false), so
+  # the printed-resident-total and outside-basis disclosure travels in the
+  # required quality_flag string. every row carries both numbers; the 31 rows
+  # with a negative outside-basis count carry the shipped-unchanged discrepancy
+  # clause citing the verification report. the CSV companion also ships the two
+  # numbers as explicit numeric columns.
+  quality_flag <- paste0(
+    "census_affiliation;ordinary_household_denominator=sum_of_16_categories;",
+    "unknown_and_nonresponse_retained_in_denominator;2021_only_local_series;",
+    "religious_change_withheld;displayed_resident_total=", displayed_resident_total,
+    ";outside_religion_basis_count=", outside_basis,
+    ";source_publication_all_rights_reserved_derived_summaries_published_with_attribution_under_pi_approval_2026_07_10;",
+    "boundary_cc_by_3_0_igo"
+  )
+  if (outside_basis < 0L) {
+    quality_flag <- paste0(
+      quality_flag,
+      ";DISCLOSED_SOURCE_ARITHMETIC=printed_16_category_sum_exceeds_printed_resident_total_by_",
+      -outside_basis, "_person(s)_shipped_unchanged_verified_reconciliation_verification_md"
+    )
+  }
   list(
     country_code = country_code,
     boundary_set_id = boundary_set_id,
@@ -422,8 +594,11 @@ build_area_row <- function(source, area) {
     year = 2021L,
     population_total = as.integer(source[["religion_basis_total"]]),
     population_total_basis = paste(
-      "ordinary-household religion-tabulation basis, derived exactly as the sum of the 16 Table 11 categories;",
-      "the printed resident total also includes collective-household residents and people without housing"
+      "ordinary-household religion basis, derived exactly as the sum of the 16 Table 11 categories;",
+      "Ne sait pas and Non declaree remain inside this denominator and outside both headline numerators;",
+      "the printed resident total (disclosed in quality_flag and in the CSV companion) additionally includes",
+      "collective-household residents and people without housing, so its outside-basis count is positive for",
+      "ordinary rows and negative and shipped unchanged for the 31 verified source-arithmetic rows"
     ),
     religious_affiliation_count = as.integer(affiliation),
     religious_affiliation_percent = round(100 * affiliation / source[["religion_basis_total"]], 4),
@@ -436,11 +611,7 @@ build_area_row <- function(source, area) {
     site_snapshot_date = NULL,
     place_count_basis = NULL,
     source_dataset_ids = list(census_2021_dataset_id, boundary_dataset_id),
-    quality_flag = paste(
-      "census_affiliation;ordinary_household_denominator;unknown_and_nonresponse_retained_in_denominator;",
-      "2021_only_local_series;religious_change_withheld;source_site_all_rights_reserved;boundary_cc_by_3_0_igo",
-      sep = ""
-    )
+    quality_flag = quality_flag
   )
 }
 
@@ -474,14 +645,14 @@ source_datasets <- function() {
       retrieval_date = retrieval_date,
       local_path = census_2021_path,
       licence = list(
-        name = "No reuse licence stated; the current ANStat site footer says all rights reserved",
+        name = "No named open reuse licence; ANStat footer records verbatim \"Tous droits Reservés\". Derived summaries published with attribution under PI approval 2026-07-10 (raw PDFs git-ignored).",
         url = anstat_site_url,
-        attribution = "Institut National de la Statistique (INS), RGPH 2021"
+        attribution = "Source: Institut National de la Statistique (INS) / Agence Nationale de la Statistique (ANStat), RGPH 2021"
       ),
       citation = "Institut National de la Statistique, RGPH 2021 résultats globaux, Table 11.",
       access_limits = "The rp2021.anstat.ci TLS chain did not validate locally; retrieval used the exact HTTPS URL with certificate verification disabled and records that condition.",
-      redistribution_limits = "The source PDF remains in the git-ignored cache. The derived full-table product is staged for rights review because ANStat states all rights reserved.",
-      notes = "Table 11 prints 510 local rows and department, region, district, and national totals across paired sheets. The 16 religion categories sum to the ordinary-household basis; the displayed resident total additionally includes collective-household residents and people without housing."
+      redistribution_limits = "The raw source PDF remains in the git-ignored cache. Only derived category summaries are published, with INS/ANStat attribution, under PI approval 2026-07-10 (summaries-not-raw-data stance, Iran licence-encoding precedent).",
+      notes = "Table 11 prints 510 local rows and department, region, district, and national totals across paired sheets. The 16 religion categories sum to the ordinary-household basis; the displayed resident total additionally includes collective-household residents and people without housing. In 31 local rows the printed category sum exceeds the printed resident total by one or two people; these source-arithmetic discrepancies are shipped unchanged and disclosed (reconciliation-verification.md)."
     ),
     list(
       source_dataset_id = boundary_dataset_id,
@@ -623,7 +794,7 @@ if (parent_metadata[["admUnitCount"]] != "33" ||
 }
 
 parsed <- parse_2021_table(census_2021_path)
-boundary_build <- build_boundary(parsed[["local_rows"]])
+boundary_build <- build_boundary(parsed)
 boundary_result <- write_boundary(boundary_build[["boundary"]])
 
 census_rows <- boundary_build[["census_rows"]]
@@ -648,7 +819,19 @@ area_summary <- list(
   source_datasets = source_datasets(), indicators = indicators(), visual_layers = visual_layers(), rows = rows
 )
 write_json(area_summary, summary_json_out, auto_unbox = TRUE, pretty = TRUE, null = "null", na = "null", digits = NA)
-write.csv(flatten_rows(rows), summary_csv_out, row.names = FALSE, na = "")
+# ship the printed resident total and outside-basis count as explicit numeric
+# CSV columns (the JSON row schema is closed, so these ride in quality_flag there).
+# both are printed values shipped unchanged; the outside-basis count is negative
+# and never clamped for the 31 verified source-arithmetic rows.
+disclosure_df <- do.call(rbind, lapply(seq_len(nrow(boundary_layer)), function(index) {
+  src <- census_rows[source_by_boundary[[index]], , drop = FALSE]
+  data.frame(
+    displayed_resident_total = as.integer(src[["population_total"]]),
+    outside_religion_basis_count = as.integer(src[["outside_religion_basis_count"]]),
+    stringsAsFactors = FALSE
+  )
+}))
+write.csv(cbind(flatten_rows(rows), disclosure_df), summary_csv_out, row.names = FALSE, na = "")
 
 national <- parsed[["national_row"]][1L, ]
 national_affiliation <- national[["religion_basis_total"]] - national[["SANS_RELIGION"]] -
@@ -666,12 +849,30 @@ raw_sources <- list(
   raw_source_record(boundary_parent_path, boundary_parent_url, "geojson", boundary_parent_dataset_id, TRUE, "2016", "CIV ADM2 geometry used only to disambiguate repeated local names by containing region.")
 )
 
+# record the tree state the build ran against; the outputs stay uncommitted.
+build_git_commit <- tryCatch({
+  value <- suppressWarnings(system2("git", c("rev-parse", "--short=7", "HEAD"), stdout = TRUE, stderr = FALSE))
+  if (length(value) == 1L && grepl("^[a-f0-9]{7,40}$", value)) value else NULL
+}, error = function(e) NULL)
+
+# the 31 ruled-disclosure rows, built from the parse and cited to the verification report.
+overrun <- parsed[["overrun_rows"]]
+disclosed_source_discrepancies <- lapply(seq_len(nrow(overrun)), function(i) {
+  list(
+    local_label = overrun[["local_label"]][[i]],
+    region_name = overrun[["region_name"]][[i]],
+    printed_resident_total = overrun[["printed_resident_total"]][[i]],
+    printed_category_sum = overrun[["category_sum"]][[i]],
+    overrun_persons = overrun[["overrun_persons"]][[i]]
+  )
+})
+
 manifest <- list(
   "$schema" = "../../schemas/data-manifest.schema.json",
   schema_version = "data-manifest.v1",
-  manifest_id = "manifest:ci-census-religion:ci:1988-2021:ins-geoboundaries",
-  dataset_id = "ci-census-religion:ci:1988-2021:ins-geoboundaries",
-  dataset_version_id = paste0("ci-census-religion:ci:1988-2021:ins-geoboundaries:", substr(sha256_file(summary_json_out), 1L, 12L)),
+  manifest_id = "manifest:ci-census-religion:ci:2021:ins-geoboundaries",
+  dataset_id = "ci-census-religion:ci:2021:ins-geoboundaries",
+  dataset_version_id = paste0("ci-census-religion:ci:2021:ins-geoboundaries:", substr(sha256_file(summary_json_out), 1L, 12L)),
   manifest_sha256 = NULL, supersedes_manifest_id = NULL, superseded_by_manifest_id = NULL,
   dataset_family = "ci-census-religion", dataset_role = "public_product",
   scope = list(
@@ -680,13 +881,27 @@ manifest <- list(
   ),
   created_at = stamp, created_by = script_id,
   pipeline = list(
-    script = script_id, git_commit = NULL, command = paste("Rscript", script_id),
+    script = script_id, git_commit = build_git_commit, command = paste("Rscript", script_id),
     parameters = list(
       construct = "census affiliation", shipped_wave = 2021L,
       shipped_geography = "510 RGPH sub-prefecture-or-commune rows joined to geoBoundaries CIV ADM3",
       denominator = "ordinary-household religion basis, derived exactly as the sum of each row's 16 printed categories",
-      nonresponse_rule = "does not know and not declared remain in the denominator and outside both headline numerators",
-      resident_population_residual_rule = "printed resident total minus religion basis is retained as the exact excluded count for collective-household residents and people without housing",
+      nonresponse_rule = "Ne sait pas (does not know) and Non declaree (not declared) remain inside the denominator and outside both headline numerators",
+      resident_population_residual_rule = paste(
+        "the displayed printed resident total ships unchanged as a disclosure field (in each area-summary row's quality_flag and as an explicit CSV column);",
+        "its outside-basis count is the printed resident total minus the exact 16-category sum, positive for ordinary rows (collective-household residents and people without housing) and negative for 31 rows;",
+        "the negative counts are disclosed unchanged and never clamped"
+      ),
+      documented_discrepancy_ruling = paste(
+        "PI ruling 2026-07-10 (research/build-queue.md): SHIP with the documented-discrepancy treatment.",
+        "In 31 of the 510 printed local rows the source's own 16-category sum exceeds the printed resident total by one or two people (41 persons in aggregate).",
+        "All 31 were re-read from 300 dpi page renders and confirmed as source arithmetic, not extraction error, in research/countries/ci/reconciliation-verification.md.",
+        "The map ships the published values unchanged; the former negative-outside-basis hard stop is replaced by a disclosed field, following the Israel residuals precedent."
+      ),
+      licence_ruling = paste(
+        "PI ruling 2026-07-10: publish derived summaries (not raw source tables) with attribution to INS/ANStat under PI approval, notwithstanding the ANStat all-rights-reserved footer.",
+        "This follows the RO/SK/CA summaries-not-raw-data stance; Iran is the licence-encoding precedent. Raw PDFs remain git-ignored."
+      ),
       change_rule = "religious_change withheld because the only shipped local wave is 2021 and older published frames are not comparable",
       pdf_extraction = "poppler pdftotext -layout; paired sheets joined by identical row keys",
       category_mappings = list(`2021` = category_mapping_2021()),
@@ -701,7 +916,8 @@ manifest <- list(
         source = boundary_result[["source_validation"]],
         simplified = boundary_result[["simplified_validation"]]
       ),
-      local_cache_hint = "Raw PDFs, metadata, and source geometry are cached under data/raw/ci_census/ and remain git-ignored."
+      local_cache_hint = "Raw PDFs, metadata, and source geometry are cached under data/raw/ci_census/ and remain git-ignored.",
+      raw_cache_durable_uris = list("gs://pow-research-data/raw_sources/ci_census/")
     ),
     software_versions = list(
       r = R.version.string, sf = as.character(packageVersion("sf")),
@@ -715,10 +931,11 @@ manifest <- list(
     source_urls = list(census_2021_url, census_2021_tome1_url, census_2014_url, census_1998_url, anstat_site_url, anstat_api_docs_url, boundary_meta_url, boundary_url, boundary_parent_meta_url, boundary_parent_url),
     retrieved_at = stamp,
     licence = paste(
-      "The current ANStat site footer states all rights reserved and no specific census-publication reuse licence was located;",
-      "the derived full-table product is staged for rights review. The shipped boundary is CC BY 3.0 IGO, verified in the release metadata."
+      "No named open reuse licence was located for the RGPH census publications; the current ANStat site footer records verbatim \"Tous droits Reservés\".",
+      "Under PI approval 2026-07-10 the product publishes derived category summaries (not raw source tables) with attribution to INS/ANStat, following the RO/SK/CA summaries-not-raw-data stance (Iran licence-encoding precedent).",
+      "The raw census PDFs remain in the git-ignored cache. The shipped boundary is CC BY 3.0 IGO, verified in the release metadata."
     ),
-    citation = "INS/ANStat RGPH publications for 1988-2021; geoBoundaries CIV ADM3 (CNTIG and OCHA ROWCA)."
+    citation = "INS/ANStat RGPH 2021 Base Table 11 (with 1988, 1998, and 2014 publications as national context); geoBoundaries CIV ADM3 (CNTIG and OCHA ROWCA)."
   ),
   input_manifests = list(), raw_sources = raw_sources,
   derived_outputs = list(
@@ -727,29 +944,40 @@ manifest <- list(
     list(uri = paste0("repo:", boundary_out), sha256 = sha256_file(boundary_out), built_by = script_id, notes = "510 simplified local features with CC BY 3.0 IGO attribution.")
   ),
   durable_files = list(
-    manifest_file_record(summary_json_out, "Côte d'Ivoire 2021 local census-affiliation area summary.", "needs_review"),
-    manifest_file_record(summary_csv_out, "Flattened Côte d'Ivoire 2021 local census-affiliation rows.", "needs_review"),
-    manifest_file_record(boundary_out, "Simplified geoBoundaries CIV ADM3 local geometry.", "cc_by_3_0_igo")
+    manifest_file_record(summary_json_out, "Côte d'Ivoire 2021 local census-affiliation area summary; derived summaries published with INS/ANStat attribution under PI approval 2026-07-10.", "unknown"),
+    manifest_file_record(summary_csv_out, "Flattened Côte d'Ivoire 2021 local census-affiliation rows with the printed resident total and outside-basis disclosure columns.", "unknown"),
+    manifest_file_record(boundary_out, "Simplified geoBoundaries CIV ADM3 local geometry, CC BY 3.0 IGO.", "accepted")
   ),
   validation = list(
     status = "passed_with_warnings",
     commands = list(
       "Rscript scripts/build_ci_area_summary.R",
       "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/ci/data/area_summary_local.json",
-      "jq empty docs/manifests/ci-census-religion-1988-2021.json"
+      "jq empty docs/manifests/ci-census-religion-2021.json"
     ),
     notes = paste(
-      "For all 677 printed Table 11 rows, the 16 categories sum exactly to the derived ordinary-household basis and the derived outside-basis residual closes exactly to the printed resident total. The 510 local rows sum exactly to the printed national resident total, derived religion basis, derived residual, and every category.",
+      "Extraction is exact and unchanged: all 677 printed Table 11 rows carry identical paired-sheet row keys and printed resident totals, and every printed cell is shipped unchanged.",
+      "The ordinary-household religion basis is the exact sum of each row's 16 printed categories. In 479 local rows the printed resident total meets or exceeds this basis (positive outside-basis count). In 31 local rows the printed 16-category sum exceeds the printed resident total by one or two people (41 persons in aggregate); these are the source's own arithmetic, confirmed cell-for-cell at 300 dpi in research/countries/ci/reconciliation-verification.md, and are shipped unchanged with a disclosed negative outside-basis count that is never clamped (PI ruling 2026-07-10).",
+      "The 510 local rows still sum exactly to the printed national resident total, the derived religion basis, the derived outside-basis count, and every category; the negative overruns are offset by positive residuals elsewhere.",
       "All source and simplified geometry validity, distinct-hash, overlap, interior-gap, sliver, join, and provenance gates passed."
     ),
     warnings = list(
-      "The current ANStat site says all rights reserved. The derived full-table product remains staged for rights review.",
+      "Source arithmetic: 31 of 510 printed local rows have a 16-category sum one or two people above the printed resident total (41 persons total). The published values ship unchanged; see disclosed_source_discrepancies and research/countries/ci/reconciliation-verification.md.",
+      "No named open reuse licence was located for the census publications; the ANStat footer records \"Tous droits Reservés\". Derived summaries are published with INS/ANStat attribution under PI approval 2026-07-10 (raw PDFs stay git-ignored).",
       "The rp2021.anstat.ci TLS chain did not validate locally; the exact HTTPS source was retrieved with certificate verification disabled and hashed.",
-      "No local cross-wave change metric is released. The verified older publications use national or incompatible historical regional frames."
+      "No local cross-wave change metric is released. The verified older publications (1988, 1998, 2014) use national or incompatible historical regional frames and remain national context only."
+    ),
+    disclosed_source_discrepancies = list(
+      rule = "shipped unchanged; printed 16-category sum exceeds printed resident total; negative outside-basis count disclosed and never clamped",
+      verified_against = "research/countries/ci/reconciliation-verification.md (300 dpi image readback, all 31 confirmed source arithmetic)",
+      row_count = nrow(overrun), aggregate_overrun_persons = sum(overrun[["overrun_persons"]]),
+      rows = disclosed_source_discrepancies
     ),
     printed_row_reconciliation = list(
-      status = "passed", printed_rows = nrow(parsed[["all_rows"]]), local_rows = nrow(parsed[["local_rows"]]),
+      status = "passed_with_disclosed_source_discrepancies", printed_rows = nrow(parsed[["all_rows"]]), local_rows = nrow(parsed[["local_rows"]]),
       category_count = length(category_codes), exact_row_matches = nrow(parsed[["all_rows"]]),
+      local_rows_with_positive_outside_basis = nrow(parsed[["local_rows"]]) - nrow(overrun),
+      local_rows_with_disclosed_negative_outside_basis = nrow(overrun),
       local_to_national_exact_fields = list("population_total", "religion_basis_total", "outside_religion_basis_count", category_codes),
       source_stated_national_basis = list(
         ordinary_household_population = 29276660L,
@@ -779,21 +1007,22 @@ manifest <- list(
   ),
   construct_notes = list(
     "The construct is census affiliation. It does not measure belief, practice, attendance, or registered membership.",
-    "French source category names remain in the manifest with English display labels.",
-    "The 2021 percentages use the ordinary-household religion basis. Does-not-know and not-declared responses remain in the denominator.",
-    "Table 11 displays a full resident total of 29,389,150, while its religion categories sum to 29,276,660. RGPH 2021 Tome 1 states that 29,276,660 people lived in ordinary households, 106,743 lived in collective households, and 5,747 had no housing. The product uses the exact category sum as its denominator and records the 112,490-person exclusion.",
+    "French source category names remain verbatim in the manifest and in each area-summary row's source labels, with separate English display labels.",
+    "The 2021 percentages use the ordinary-household religion basis, derived exactly as the sum of the 16 Table 11 categories. Ne sait pas (does not know) and Non declaree (not declared) remain inside this denominator and outside both headline numerators.",
+    "Table 11 displays a full resident total of 29,389,150, while its religion categories sum to 29,276,660. RGPH 2021 Tome 1 states that 29,276,660 people lived in ordinary households, 106,743 lived in collective households, and 5,747 had no housing. The product uses the exact category sum as its denominator and ships the displayed resident total as a disclosure field with the 112,490-person national outside-basis count.",
+    "In 31 of the 510 printed local rows the source's own 16-category sum exceeds the printed resident total by one or two people (41 persons in aggregate). All 31 were re-read from 300 dpi page renders and confirmed as source arithmetic, not extraction error (research/countries/ci/reconciliation-verification.md). Under PI ruling 2026-07-10 the map ships the published values unchanged; the affected rows carry a disclosed negative outside-basis count that is never clamped, following the Israel residuals precedent.",
     "The 1988 frame has no other-Christian category because the source note says other Christians were combined with other religions. The 1998 frame separates other Christians and adds non-declared. The 2014 and 2021 frames use more detailed Christian categories.",
-    "No religious_change field is released because only the 2021 local wave ships. The rounded 1998 old-region percentages and the exact 2021 current-geography counts do not support a same-boundary local contrast."
+    "No religious_change field is released because only the 2021 local wave ships. The 1988, 1998, and 2014 publications remain national context only; the rounded 1998 old-region percentages and the exact 2021 current-geography counts do not support a same-boundary local contrast."
   ),
   deferred_sources = list(
-    list(source_dataset_id = "ins-rgph-1988-original-religion-tables", status = "not_located_online", reason = "No original official online 1988 religion volume was pinned; official 1998 and 2021 volumes republish the 1988 national frame."),
-    list(source_dataset_id = "ins-rgph-1998-old-region-religion", status = "not_shipped", reason = "Table 3.6 publishes rounded percentages on the historical regional frame; no licensed historical geometry and exact regional count table were pinned."),
-    list(source_dataset_id = "ins-rgph-2014-subnational-religion", status = "not_located", reason = "The verified synthesis volume publishes religion nationally in Table 2.11; no subnational religion table was pinned."),
-    list(source_dataset_id = "ins-rgph-2021-derived-full-table-rights", status = "rights_review", reason = "ANStat states all rights reserved and gives no specific reuse permission for the census publication.")
+    list(source_dataset_id = "ins-rgph-1988-original-religion-tables", status = "not_located_online", reason = "No original official online 1988 religion volume was pinned; official 1998 and 2021 volumes republish the 1988 national frame. National context only."),
+    list(source_dataset_id = "ins-rgph-1998-old-region-religion", status = "not_shipped", reason = "Table 3.6 publishes rounded percentages on the historical regional frame; no licensed historical geometry and exact regional count table were pinned. National context only."),
+    list(source_dataset_id = "ins-rgph-2014-subnational-religion", status = "not_located", reason = "The verified synthesis volume publishes religion nationally in Table 2.11; no subnational religion table was pinned. National context only."),
+    list(source_dataset_id = "ins-rgph-2021-derived-full-table-rights", status = "published_under_pi_approval", reason = "ANStat records \"Tous droits Reservés\" and gives no specific reuse permission. PI ruling 2026-07-10 authorises publication of derived summaries (not raw source tables) with INS/ANStat attribution, per the RO/SK/CA summaries-not-raw-data stance and the Iran licence-encoding precedent.")
   ),
-  privacy = "public", licence_status = "needs_review", downstream_status = "staged",
+  privacy = "public", licence_status = "unknown", downstream_status = "staged",
   source_datasets = source_datasets(),
-  notes = "The generated files are uncommitted. The map UI is outside this build. Rights review is required before publication."
+  notes = "The generated files are uncommitted and staged (no page, no hub wiring). Derived summaries publish with INS/ANStat attribution under PI approval 2026-07-10; raw PDFs stay git-ignored. The map UI is outside this build."
 )
 
 write_json(manifest, manifest_out, auto_unbox = TRUE, pretty = TRUE, null = "null", na = "null", digits = NA)
@@ -801,15 +1030,17 @@ if (!jsonlite::validate(paste(readLines(manifest_out, warn = FALSE), collapse = 
   stop("manifest JSON is invalid", call. = FALSE)
 }
 
-cat("waves x geography: 1988 national; 1998 national plus rounded old-region percentages; 2014 national; 2021 local, department, region, district, national\n")
-cat("shipped matrix: 2021 x 510 sub-prefecture-or-commune rows; older waves documented and withheld from local change\n")
-cat(sprintf("category frame: 2021=%d mutually exclusive categories; French source labels retained with English display labels\n", length(category_codes)))
+cat("waves x geography: 1988/1998/2014 national context only; 2021 shipped local, department, region, district, national\n")
+cat("shipped matrix: 2021 x 510 sub-prefecture-or-commune rows; older waves documented as national context, no product rows\n")
+cat(sprintf("category frame: 2021=%d mutually exclusive categories; verbatim French source labels retained with separate English display labels\n", length(category_codes)))
 cat(sprintf("denominator: 2021 ordinary-household religion basis=%d; printed resident total=%d; outside basis=%d; affiliation=%d; no religion=%d; does not know=%d; not declared=%d\n", national[["religion_basis_total"]], national[["population_total"]], national[["outside_religion_basis_count"]], national_affiliation, national[["SANS_RELIGION"]], national[["NE_SAIT_PAS"]], national[["NON_DECLAREE"]]))
-cat(sprintf("validation counts: %d/%d printed rows close exactly with a derived outside-basis residual; 510/510 local rows joined; %d local-to-national fields exact\n", nrow(parsed[["all_rows"]]), nrow(parsed[["all_rows"]]), length(category_codes) + 3L))
-cat(sprintf("geometry gate: passed; 510 valid features, 510 distinct hashes, overlap %.6f sq m, 0 interior gaps, 0 sub-1-sq-km slivers\n", boundary_result[["simplified_validation"]][["overlap_sq_m"]]))
+cat(sprintf("disclosure gate: %d/510 local rows carry a negative outside-basis count summing to %d persons; shipped unchanged, verified source arithmetic (reconciliation-verification.md)\n", nrow(overrun), sum(overrun[["overrun_persons"]])))
+cat(sprintf("reconciliation gate: passed; %d/%d printed rows extracted exactly; 510/510 local rows sum to national across %d fields\n", nrow(parsed[["all_rows"]]), nrow(parsed[["all_rows"]]), length(category_codes) + 3L))
+cat(sprintf("geometry gate: passed; 510 valid features, 510 distinct hashes, overlap %.6f sq m, 0 interior gaps, 0 sub-1-sq-km slivers; simplified %d bytes\n", boundary_result[["simplified_validation"]][["overlap_sq_m"]], as.integer(boundary_result[["simplification"]][["bytes"]])))
+cat("join gate: passed; 510/510 census rows joined to distinct ADM3 features\n")
 cat("provenance gate: passed; URL, retrieval date, byte size, TLS condition, and SHA-256 recorded per input\n")
 cat("change gate: passed by withholding; no cross-wave local change metric is released\n")
-cat("rights gate: open; ANStat says all rights reserved, therefore outputs remain staged for review\n")
+cat("rights: derived summaries published with INS/ANStat attribution under PI approval 2026-07-10; ANStat \"Tous droits Reservés\" recorded; raw PDFs git-ignored; outputs staged (uncommitted)\n")
 cat(sprintf("wrote %s\n", summary_json_out))
 cat(sprintf("wrote %s\n", summary_csv_out))
 cat(sprintf("wrote %s\n", boundary_out))

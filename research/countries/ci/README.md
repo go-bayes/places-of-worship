@@ -2,9 +2,11 @@
 
 ## Status
 
-- **Tier**: B (feasible with source correction or clarification)
-- **Build state**: route verified; build blocked by 31 census 2021 local row-reconciliation failures
-- **Last verified**: 2026-07-10
+- **Tier**: B (feasible with a source-verified boundary concordance; every other blocker is now resolved)
+- **Build state**: disclosure, basis-constant, and verification rulings encoded and exercised; the geoBoundaries name-encoding defect is diagnosed and repaired and the Abidjan aggregate join is engineered; ship blocked only at the census-to-ADM3 join, where 22 census units and 21 ADM3 features cannot be matched 1:1 without an invented concordance or self-summing (see route-probe.md, Engineering fix lane 2026-07-11, and `join-residue.csv`)
+- **Last verified**: 2026-07-11
+
+Two PI rulings (2026-07-10) are encoded in `scripts/build_ci_area_summary.R`: the 31 source-arithmetic overrun rows ship unchanged with a disclosed, never-clamped negative outside-basis count; and derived category summaries publish with INS/ANStat attribution under PI approval, with the ANStat "Tous droits Reservés" footer recorded verbatim and raw PDFs kept git-ignored. Running the reworked builder to completion for the first time surfaced upstream blockers the held probe never validated, so no product was written.
 
 The Institut National de la Statistique (INS), now succeeded by the Agence Nationale de la Statistique (ANStat), produced the Recensement général de la population et de l'habitat (RGPH) publications used here.
 
@@ -56,10 +58,15 @@ Blocked: 2021 census religious-affiliation percent and no-religion percent by su
 
 ## Risks and open questions
 
-- Thirty-one 2021 local rows have category sums one or two people above their printed resident totals. The combined overrun is 41 people.
+- The census yields 519 leaf sub-prefecture-or-commune rows (corrected from the probe's asserted 510). Collapsing the 10 Abidjan city communes to the census's own printed "Total-Ville ABIDJAN" aggregate, which serves the single ADM3 "Abidjan" feature, gives 510 census join units against the 510 ADM3 features; Yamoussoukro needs no collapse. This is engineered in the builder.
+- The remaining and now sole ship blocker is the join residue: after the name-encoding repair, `stringi` transliteration, and the Abidjan collapse, 488 of 510 census join units match a distinct ADM3 feature by name, but 22 census units and 21 ADM3 features cannot be matched 1:1. The residue is spelling variants, a two-leaf-to-one-feature merge (BOBI + DIARABANA → Bobi-Diarabana, with no census-printed aggregate), and an ADM3 national-park polygon (Parc National de Bona) that is not a census unit. Closing it needs a source-verified concordance or a boundary layer that partitions the census units exactly; both are PI-level decisions (route-probe.md, `join-residue.csv`).
+- The source does not internally reconcile at any level, all confirmed source arithmetic by 300 dpi image readback: 31 leaf overruns (41 people); 48 of 110 departments differ from the sum of their child sub-prefectures by −3 to +2 (ADIAKE 88,007 vs printed 88,006); and the 519 leaves sum to 6 above the national resident total and 138 below the national religion basis. The builder pins this full set and stops on drift; every printed value ships unchanged (documented-discrepancy ruling).
+- The product's national religion basis is Table 11's own 16-category sum, 29,276,658 (outside-basis 112,492 against the printed resident total 29,389,150). Tome 1 Table 2.2's 29,276,660 differs by two people; that is disclosed as a between-publications discrepancy, not corrected. The builder is now pinned to 29,276,658.
+- The geoBoundaries CIV ADM3 `shapeName` field was doubly UTF-8-encoded (é stored as the four bytes for "Ã©"); the repair reverses one Latin-1→UTF-8 layer, gated on the "Ã"/"Â" signature so clean accents survive. 166 of 510 names are repaired with zero residue.
+- Thirty-one 2021 local rows have category sums one or two people above their printed resident totals (41 people combined). Under the PI ruling these ship unchanged with a disclosed negative outside-basis count; the builder now reaches and exercises this disclosure (it blocks downstream, at the join, not upstream).
 - The 2021 religion universe is the ordinary-household population. Collective-household residents and people without housing lack the individual characteristics collected through the ordinary-household questionnaire.
-- The 1998 regional percentages use a historical 19-region frame and one-decimal rounding.
-- No named open licence was located for the census publications.
+- The 1998 regional percentages use a historical 19-region frame and one-decimal rounding; 1988, 1998, and 2014 remain national context only.
+- No named open licence was located for the census publications; the ANStat footer records "Tous droits Reservés". Derived summaries are cleared to publish with attribution under PI approval 2026-07-10.
 
 ## Deep-history potential
 
