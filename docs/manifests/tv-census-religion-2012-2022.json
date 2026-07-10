@@ -1,0 +1,375 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:tv-census-religion:tv:2012-2022:csd-region-reports",
+  "dataset_id": "tv-census-religion:tv:2012-2022:csd-region-reports",
+  "dataset_version_id": "tv-census-religion:tv:2012-2022:csd-region-reports:952e85178fb3",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "tv-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "TV"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-10T13:00:49Z",
+  "created_by": "scripts/build_tv_area_summary.R",
+  "target_years": [2012, 2017],
+  "pipeline": {
+    "script": "scripts/build_tv_area_summary.R",
+    "git_commit": null,
+    "command": "Rscript scripts/build_tv_area_summary.R",
+    "parameters": {
+      "waves": ["2012", "2017"],
+      "geography": "two-region (Funafuti; Outer Islands)",
+      "region_boundary_set": "tv-region-2017-geoboundaries-adm1-dissolved",
+      "region_boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 52903
+      },
+      "extraction": "religion-by-region tables read from the 2012 Volume 1 and 2017 Mini-Census reports; counts embedded verbatim and reconciled",
+      "denominator": "region resident population; affiliation = named religions + Other; no religion = None; Refused retained in denominator outside numerators",
+      "subnational_geography": "geoBoundaries TUV ADM1 (8 island units) dissolved to two census regions",
+      "omitted_metrics": ["places_per_10000_residents", "place_density_per_sq_km"],
+      "national_only_wave_2022": "2022 religion is a national distribution (Figure 5 shares); recorded as context, not mapped",
+      "island_level_not_available": "no official Tuvalu census publishes religion by island; the finest official religion geography is the two-region Funafuti / Outer Islands split"
+    },
+    "software_versions": {
+      "r": "4.6.1",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0"
+    }
+  },
+  "source": {
+    "provider": "Central Statistics Division, Tuvalu; Pacific Community (SPC); geoBoundaries (William & Mary geoLab)",
+    "source_dataset_ids": ["tuvalu-2012-census-vol1-religion-by-region", "tuvalu-2017-minicensus-religion-by-region", "tuvalu-2022-census-religion-national", "geoboundaries-tuv-adm1-2017"],
+    "source_urls": ["https://www.fao.org/fileadmin/templates/ess/ess_test_folder/World_Census_Agriculture/Country_info_2010/Reports/Reports_6/TUV_ENG_REP_2012.pdf", "https://finance.gov.tv/wp-content/uploads/2022/05/Mini-Census-2017-Preliminary-Report.pdf", "https://stats.gov.tv/download/85/population-and-housing-census/1836/tuvalu_2022_census_report.pdf", "https://stats.gov.tv/category/census-and-surveys/population-census/", "https://www.geoboundaries.org/api/current/gbOpen/TUV/ADM1/", "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/TUV/ADM1/geoBoundaries-TUV-ADM1.geojson"],
+    "retrieved_at": "2026-07-11T00:00:00Z",
+    "licence": "Tuvalu 2012 Population and Housing Census Volume 1 Analytical Report (Central Statistics Division, Government of Tuvalu) and the Tuvalu 2017 Population & Housing Mini-Census Preliminary Report (Central Statistics Division, Ministry of Finance). Both reports reserve commercial or for-profit reproduction and authorise partial reproduction for scientific, educational or research purposes provided the CSD and the source document are acknowledged. The 2022 report adds the Pacific Community (SPC) as a joint copyright holder under the same partial-research-reuse terms. The derived product carries attribution and does not claim an unrestricted open-data licence for the census counts. Boundaries are geoBoundaries TUV ADM1 (8 island units), Open Data Commons Open Database License 1.0, boundary source recorded by geoBoundaries as OpenStreetMap and Wambacher.",
+    "citation": "CSD, Tuvalu 2012 Census Vol 1; CSD, Tuvalu 2017 Mini-Census Preliminary Report; SPC and CSD, Tuvalu 2022 Census Report; geoBoundaries TUV ADM1 (gbOpen).",
+    "raw_redistribution": "The census PDFs and the geoBoundaries source GeoJSON are not committed. They remain in data/raw/tv_census/ and await any project-controlled raw archive upload.",
+    "local_cache_hint": "data/raw/tv_census/ (git-ignored by .gitignore:120 'data/')",
+    "raw_cache_durable_uris": [
+      "gs://pow-research-data/raw_sources/tv_census/"
+    ]
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/tv_census/tv_2012_census_vol1_fao.pdf",
+      "url": "https://www.fao.org/fileadmin/templates/ess/ess_test_folder/World_Census_Agriculture/Country_info_2010/Reports/Reports_6/TUV_ENG_REP_2012.pdf",
+      "format": "pdf",
+      "bytes": 2571853,
+      "sha256": "eb3b6eb67d5abae53104dacf485328c00cc0e6931f8428d6c014ed13b8054986",
+      "row_count": null,
+      "source_dataset_id": "tuvalu-2012-census-vol1-religion-by-region",
+      "used_in_public_product": true,
+      "periods": "2012",
+      "notes": "2012 Volume 1 Analytical Report; 'Population of individual religions by region of residence' supplies the 2012 Funafuti and Outer Islands religion counts. Official CSD publication retrieved from the FAO country-reports mirror.",
+      "local_cache_hint": "data/raw/tv_census/tv_2012_census_vol1_fao.pdf (git-ignored)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/tv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/tv_census/tv_2017_minicensus_prelim.pdf",
+      "url": "https://finance.gov.tv/wp-content/uploads/2022/05/Mini-Census-2017-Preliminary-Report.pdf",
+      "format": "pdf",
+      "bytes": 1639847,
+      "sha256": "8b7ec1a48b16dd6b518bd0a168c287c78bc84d23b5a9f50dcb391d4a75a7c6fa",
+      "row_count": null,
+      "source_dataset_id": "tuvalu-2017-minicensus-religion-by-region",
+      "used_in_public_product": true,
+      "periods": "2017",
+      "notes": "2017 Mini-Census Preliminary Report; 'Resident population by religious denominations and region of residence' supplies the 2017 Funafuti and Outer Islands religion counts.",
+      "local_cache_hint": "data/raw/tv_census/tv_2017_minicensus_prelim.pdf (git-ignored)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/tv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/tv_census/tv_2022_census_report.pdf",
+      "url": "https://stats.gov.tv/download/85/population-and-housing-census/1836/tuvalu_2022_census_report.pdf",
+      "format": "pdf",
+      "bytes": 10674813,
+      "sha256": "2f91a61b3d40d7ca30989daba83b25edfb5e6f7c458fe8c721a5e23c42b59825",
+      "row_count": null,
+      "source_dataset_id": "tuvalu-2022-census-religion-national",
+      "used_in_public_product": false,
+      "periods": "2022",
+      "notes": "2022 Census Report; Figure 5 national religion shares, recorded as context. Religion is published for the whole country only; 2022 is therefore not mapped.",
+      "local_cache_hint": "data/raw/tv_census/tv_2022_census_report.pdf (git-ignored)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/tv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/tv_census/geoBoundaries-TUV-ADM1.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/TUV/ADM1/geoBoundaries-TUV-ADM1.geojson",
+      "format": "geojson",
+      "bytes": 79396,
+      "sha256": "3c06779be3173360c9a2927729798eacb5533c745e31313f11940041585030aa",
+      "row_count": 8,
+      "source_dataset_id": "geoboundaries-tuv-adm1-2017",
+      "used_in_public_product": true,
+      "periods": "2017",
+      "notes": "geoBoundaries TUV ADM1 GeoJSON; 8 island units dissolved to two census regions. ODbL 1.0.",
+      "local_cache_hint": "data/raw/tv_census/geoBoundaries-TUV-ADM1.geojson (git-ignored)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/tv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/tv_census/gb_tuv_adm1_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/TUV/ADM1/",
+      "format": "json",
+      "bytes": 1753,
+      "sha256": "d6878f7625da2b7a7e08d7a0c6641f46bcc4d3a3cd25bedd798137d445bc7199",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-tuv-adm1-2017",
+      "used_in_public_product": false,
+      "periods": "2017",
+      "notes": "geoBoundaries TUV ADM1 metadata; records the ODbL 1.0 licence, boundarySource 'OpenStreetMap, Wambacher', admUnitCount 8.",
+      "local_cache_hint": "data/raw/tv_census/gb_tuv_adm1_meta.json (git-ignored)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/tv_census/"
+      ]
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/tv/data/area_summary_region.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 17341,
+      "sha256": "952e85178fb3cc64752498905dc7c3a152c7d61ed877f23cafc967ece4d1bfaa",
+      "row_count": 4,
+      "content": "Tuvalu region area summary with census 2012 and 2017 religious-affiliation and no-religion metrics.",
+      "privacy": "public",
+      "licence_status": "tuvalu_census_partial_research_reuse_attribution_geoboundaries_odbl_1_0"
+    },
+    {
+      "uri": "repo:apps/regions/tv/data/area_summary_region.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 3332,
+      "sha256": "188888957cebb5c3df6aa1e1894adf1773f242b0ee5df31d65036fd146d79ea1",
+      "row_count": 4,
+      "content": "Flattened Tuvalu region area summary with census 2012 and 2017 religious-affiliation and no-religion metrics.",
+      "privacy": "public",
+      "licence_status": "tuvalu_census_partial_research_reuse_attribution_geoboundaries_odbl_1_0"
+    },
+    {
+      "uri": "repo:apps/regions/tv/data/tv_region_2017.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 52903,
+      "sha256": "a8cb8bc55ab4cfdd0ce4a46679aadd84f0a5addd382a71532512a5e2090eea36",
+      "row_count": 2,
+      "content": "Simplified Tuvalu region boundary GeoJSON derived from geoBoundaries TUV ADM1 (8 island units) dissolved to 2 regions.",
+      "privacy": "public",
+      "licence_status": "geoboundaries_odbl_1_0"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/tv/data/area_summary_region.json",
+      "sha256": "952e85178fb3cc64752498905dc7c3a152c7d61ed877f23cafc967ece4d1bfaa",
+      "built_by": "scripts/build_tv_area_summary.R",
+      "notes": "2 region reporting units x 2 census waves (2012, 2017); resident-population denominator."
+    },
+    {
+      "uri": "repo:apps/regions/tv/data/tv_region_2017.geojson",
+      "sha256": "a8cb8bc55ab4cfdd0ce4a46679aadd84f0a5addd382a71532512a5e2090eea36",
+      "built_by": "scripts/build_tv_area_summary.R",
+      "notes": "2 region features dissolved from 8 geoBoundaries TUV ADM1 island units, simplified with mapshaper weighted keep-shapes at 100% keep, cleaned with allow-overlaps."
+    }
+  ],
+  "validation": {
+    "checks": ["The 2012 Volume 1 Analytical Report and the 2017 Mini-Census Preliminary Report each publish religion only by region of residence (National / Funafuti / Outer Islands); neither publishes religion by island; a two-region frame is therefore the finest official geography.", "For every wave and category, Funafuti + Outer Islands equals the printed national value; the eleven-category column sums match the resident population (2012: 10,640 / 5,436 / 5,204; 2017: 10,507 / 6,320 / 4,187).", "Percentages use each region's resident-population denominator; religious affiliation is every named religion plus Other, no religion is None, and Refused stays in the denominator outside both numerators.", "The 8 geoBoundaries TUV ADM1 island units dissolve disjointly and exhaustively to the two census regions; Funafuti is one unit, the other seven form Outer Islands. Niulakita has no ADM1 feature and is counted within Outer Islands. Output geometries carry 2 distinct hashes.", "The dissolved region boundary GeoJSON writes to 52903 bytes after mapshaper weighted keep-shapes simplification at 100% keep, cleaned with allow-overlaps (2 region features).", "2022 religion is national only: the 2022 report publishes religion as a national distribution (Figure 5 shares); no 2022 subnational religion table therefore exists to map. 2022 national shares are recorded as context.", "Tuvalu is close to universally affiliated (about 99.7 percent); the headline affiliation and no-religion metrics therefore vary little between regions; the substantive subnational contrast is denominational (lower EKT share on Funafuti), which the shared headline metric set does not carry."],
+    "join_coverage": {
+      "region": [
+        {
+          "boundary_level": "region",
+          "year": 2012,
+          "matched_area_count": 2,
+          "expected_area_count": 2,
+          "missing_area_names": []
+        },
+        {
+          "boundary_level": "region",
+          "year": 2017,
+          "matched_area_count": 2,
+          "expected_area_count": 2,
+          "missing_area_names": []
+        }
+      ]
+    },
+    "national_reconciliation": [
+      {
+        "year": 2012,
+        "metric": "population_total",
+        "area_sum": 10640,
+        "national_total": 10640,
+        "difference": 0
+      },
+      {
+        "year": 2012,
+        "metric": "religious_affiliation_count",
+        "area_sum": 10621,
+        "national_total": 10621,
+        "difference": 0
+      },
+      {
+        "year": 2012,
+        "metric": "no_religion_count",
+        "area_sum": 17,
+        "national_total": 17,
+        "difference": 0
+      },
+      {
+        "year": 2017,
+        "metric": "population_total",
+        "area_sum": 10507,
+        "national_total": 10507,
+        "difference": 0
+      },
+      {
+        "year": 2017,
+        "metric": "religious_affiliation_count",
+        "area_sum": 10467,
+        "national_total": 10467,
+        "difference": 0
+      },
+      {
+        "year": 2017,
+        "metric": "no_religion_count",
+        "area_sum": 26,
+        "national_total": 26,
+        "difference": 0
+      }
+    ],
+    "boundary_validation": {
+      "source_tuv_island_count": 8,
+      "dissolved_region_count": 2,
+      "output_feature_count": 2,
+      "expected_feature_count": 2,
+      "distinct_geometry_hashes": 2,
+      "geometry_hashes": [
+        "b40607f4897446c7",
+        "47cf9546dbf581bc"
+      ],
+      "output_bytes": 52903,
+      "simplification_method": "mapshaper weighted keep-shapes",
+      "simplification_clean_option": "allow-overlaps",
+      "simplification_keep_percent": 100,
+      "niulakita_note": "Niulakita (the ninth Tuvaluan island) has no geoBoundaries ADM1 feature and is counted within the census Outer Islands region.",
+      "unmatched_boundary_features": [],
+      "unmatched_census_areas": []
+    }
+  },
+  "construct_notes": [
+    "The public product displays two headline metrics at region level for 2012 and 2017: religious affiliation percent and no religion percent.",
+    "Geography is two-region (Funafuti versus Outer Islands), the finest geography at which any Tuvalu census publishes religion. No official island-level religion table exists for any wave.",
+    "Percentages use the region resident-population denominator. Religious affiliation is every named religion plus the report's Other category; no religion is the None category. The census Refused count stays in the denominator and outside both numerators; the two shares therefore do not sum to 100 percent.",
+    "Tuvalu is close to universally religiously affiliated (about 99.7 percent); the headline affiliation and no-religion metrics therefore differ little between the two regions. The substantive subnational variation is denominational, notably a lower Ekalesia Kelisiano Tuvalu share on Funafuti than on the Outer Islands, which the shared headline metric set does not represent.",
+    "The two regions are the geoBoundaries TUV ADM1 8 island units dissolved up to Funafuti and Outer Islands; each island belongs to exactly one region. Niulakita has no separate ADM1 feature and is counted within Outer Islands.",
+    "2022 religion is national only: the 2022 report publishes religion as a national distribution (Figure 5 shares: EKT 86, Brethren 3, AOG 2, SDA 2, Catholic 1, LDS 1, Bahaii 1, Jehovah's Witness 1, Other 2, None 0, Refused 0, Not stated 1). It cannot be mapped subnationally and is recorded as context."
+  ],
+  "deferred_sources": [
+    {
+      "source_dataset_id": "tuvalu-census-religion-by-island-microdata",
+      "url": "https://microdata.pacificdata.org/index.php/catalog/269",
+      "local_path": null,
+      "notes": "PDH hosts the 2012 (catalog 50) and 2017 (catalog 269) census microdata with a record-level religion variable, from which an island-level religion tabulation could be built. Microdata access is licensed and any such tabulation would be a project-produced table, not an official published table. An island-level religion table request to the Tuvalu CSD (statistics@gov.tv) would supply the queue's island geography with official authority."
+    },
+    {
+      "source_dataset_id": "tuvalu-2022-census-religion-by-island",
+      "url": "https://stats.gov.tv/download/85/population-and-housing-census/1836/tuvalu_2022_census_report.pdf",
+      "local_path": "data/raw/tv_census/tv_2022_census_report.pdf",
+      "notes": "The 2022 report publishes religion for the whole country only (Figure 5). A 2022 island or region religion tabulation, if held by CSD/SPC, would add a mappable 2022 wave and a change layer on the same geography."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "tuvalu_census_partial_research_reuse_attribution_geoboundaries_odbl_1_0",
+  "downstream_status": "public",
+  "source_datasets": [
+    {
+      "source_dataset_id": "tuvalu-2012-census-vol1-religion-by-region",
+      "name": "Tuvalu 2012 Population and Housing Census, Volume 1 Analytical Report: religion by region of residence",
+      "provider": "Central Statistics Division (CSD), Government of Tuvalu",
+      "url": "https://www.fao.org/fileadmin/templates/ess/ess_test_folder/World_Census_Agriculture/Country_info_2010/Reports/Reports_6/TUV_ENG_REP_2012.pdf",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/tv_census/tv_2012_census_vol1_fao.pdf",
+      "licence": {
+        "name": "CSD census report; commercial reproduction reserved, partial reproduction authorised for scientific, educational or research purposes with acknowledgement",
+        "url": "https://stats.gov.tv/category/census-and-surveys/population-census/",
+        "attribution": "Central Statistics Division, Government of Tuvalu"
+      },
+      "citation": "Central Statistics Division, Tuvalu 2012 Population and Housing Census, Volume 1 Analytical Report.",
+      "access_limits": null,
+      "redistribution_limits": "The census PDF is not committed; the derived product attributes CSD and links the source. Official CSD publication retrieved from the FAO World Census of Agriculture country-reports mirror.",
+      "notes": "Summary-indicators table 'Population of individual religions by region of residence' gives National / Funafuti / Outer Islands counts for eleven categories. No island-level religion table is published. Region column sums reconcile to the resident population implied by the age-structure rows (national 10,640; Funafuti 5,436; Outer 5,204)."
+    },
+    {
+      "source_dataset_id": "tuvalu-2017-minicensus-religion-by-region",
+      "name": "Tuvalu 2017 Population & Housing Mini-Census Preliminary Report: religion by region of residence",
+      "provider": "Central Statistics Division, Ministry of Finance, Economic Planning and Industries, Tuvalu",
+      "url": "https://finance.gov.tv/wp-content/uploads/2022/05/Mini-Census-2017-Preliminary-Report.pdf",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/tv_census/tv_2017_minicensus_prelim.pdf",
+      "licence": {
+        "name": "CSD mini-census report; commercial reproduction reserved, partial reproduction authorised for scientific, educational or research purposes with acknowledgement",
+        "url": "https://stats.gov.tv/category/census-and-surveys/population-census/",
+        "attribution": "Central Statistics Division, Ministry of Finance, Tuvalu"
+      },
+      "citation": "Central Statistics Division, Tuvalu 2017 Population & Housing Mini-Census Preliminary Report.",
+      "access_limits": null,
+      "redistribution_limits": "The census PDF is not committed; the derived product attributes CSD and links the source.",
+      "notes": "Table 'Resident population by religious denominations and region of residence' gives National / Funafuti / Outer Islands counts for eleven categories. The 2017 collection is a mini-census, a lighter instrument than the 2012 full census. Region column sums match the printed resident population (national 10,507; Funafuti 6,320; Outer 4,187)."
+    },
+    {
+      "source_dataset_id": "tuvalu-2022-census-religion-national",
+      "name": "Tuvalu 2022 Census on Population and Housing Report: religion national distribution (Figure 5)",
+      "provider": "Pacific Community (SPC) and Central Statistics Division (CSD), Tuvalu",
+      "url": "https://stats.gov.tv/download/85/population-and-housing-census/1836/tuvalu_2022_census_report.pdf",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/tv_census/tv_2022_census_report.pdf",
+      "licence": {
+        "name": "SPC and Tuvalu CSD census report; commercial reproduction reserved, partial reproduction authorised for scientific, educational or research purposes with acknowledgement",
+        "url": "https://stats.gov.tv/category/census-and-surveys/population-census/",
+        "attribution": "Pacific Community (SPC) and Tuvalu Central Statistics Division"
+      },
+      "citation": "Pacific Community and Central Statistics Division, Tuvalu 2022 Census on Population and Housing Report.",
+      "access_limits": null,
+      "redistribution_limits": "Recorded as national context only. The 2022 report publishes religion for the whole country (Figure 5 shares); no 2022 subnational religion table therefore exists to map.",
+      "notes": "National context, not a map layer. Figure 5 gives the 2022 national religion distribution as percentages: EKT 86, Brethren 3, AOG 2, SDA 2, Catholic 1, LDS 1, Bahaii 1, Jehovah's Witness 1, Other 2, None 0, Refused 0, Not stated 1. These are chart shares, not an exact count table, and are not mapped."
+    },
+    {
+      "source_dataset_id": "geoboundaries-tuv-adm1-2017",
+      "name": "geoBoundaries TUV ADM1 (8 island units)",
+      "provider": "geoBoundaries (William & Mary geoLab)",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/TUV/ADM1/geoBoundaries-TUV-ADM1.geojson",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/tv_census/geoBoundaries-TUV-ADM1.geojson",
+      "licence": {
+        "name": "Open Data Commons Open Database License 1.0; boundary source recorded by geoBoundaries as OpenStreetMap and Wambacher",
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/TUV/ADM1/",
+        "attribution": "geoBoundaries (gbOpen); boundary source OpenStreetMap, Wambacher"
+      },
+      "citation": "Runfola et al., geoBoundaries TUV ADM1 (gbOpen), island boundaries.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed with ODbL 1.0 attribution to geoBoundaries and OpenStreetMap.",
+      "notes": "8 ADM1 island units (Nanumea, Nanumanga, Niutao, Nui, Vaitupu, Nukufetau, Funafuti, Nukulaelae), dissolved to two census regions: Funafuti alone, and the seven others as Outer Islands. Niulakita (the ninth Tuvaluan island, administered with Niutao) has no separate ADM1 feature and is counted within the census Outer Islands region. boundaryYearRepresented 2017; source data update 2023-01-19."
+    }
+  ],
+  "notes": "The committed products contain the derived region area summary and simplified boundary only. On-page attribution cites the Tuvalu CSD, SPC (2022), and geoBoundaries (ODbL 1.0, OpenStreetMap/Wambacher)."
+}
