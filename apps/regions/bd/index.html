@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Bangladesh Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // the country page stays declarative; shared behaviour lives in
+    // ../_shared/region-map.js and keys on this config plus the data files
+    window.REGION_CONFIG = {
+      countryCode: "BD",
+      title: "Places of Worship | Bangladesh Research Map",
+      center: [90.35, 23.7],
+      initialZoom: 6.3,
+      censusLevels: {
+        district_2022: {
+          label: "District (2022)",
+          boundaries: "data/bd_district_2022.geojson",
+          summary: "data/area_summary_district_2022.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Boundaries &copy; geoBoundaries; Bangladesh Bureau of Statistics; OCHA ROAP (CC BY 3.0 IGO)"
+        }
+      },
+      defaultLevel: "district_2022",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2022,
+      // the census frame classifies every person into a religion; affiliation
+      // is 100% in every district; the informative detail is the per-category
+      // composition, shown in each district popup and carried in the data
+      metricsAvailable: [
+        "religious_affiliation_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "Muslim + Hindu + Christian + Buddhist + Others, divided by the sex-classified population. Every person is classified into a religion; this is therefore 100% in every district. The composition is in the popup."
+        }
+      },
+      popupDenominatorNote: "Percentages use the sum of the five BBS census religion categories (Muslim, Hindu, Christian, Buddhist, Others) as the denominator. Table P08 is the sex-classified basis and excludes the 8,124 hijra (third gender) persons nationally, who are religion-classified only at division level. There is no no-religion and no not-stated category.",
+      cityPresets: [
+        { label: "Dhaka", coords: [90.4125, 23.8103], zoom: 10 },
+        { label: "Chattogram", aliases: ["Chittagong"], coords: [91.8123, 22.3569], zoom: 10 },
+        { label: "Khulna", coords: [89.5644, 22.8456], zoom: 10 },
+        { label: "Rajshahi", coords: [88.6042, 24.3745], zoom: 10 },
+        { label: "Sylhet", coords: [91.8687, 24.8949], zoom: 10 },
+        { label: "Barishal", aliases: ["Barisal"], coords: [90.3535, 22.7010], zoom: 10 },
+        { label: "Rangpur", coords: [89.2500, 25.7439], zoom: 10 },
+        { label: "Mymensingh", coords: [90.4074, 24.7471], zoom: 10 }
+      ],
+      geocode: { country: "bd", biasLngLat: [90.35, 23.7] },
+      onboarding: {
+        title: "Bangladesh research map",
+        intro: "Population and Housing Census 2022 religious-affiliation overlay by district (zila), from Bangladesh Bureau of Statistics Table P08.",
+        bullets: [
+          "Districts carry the census composition in five recognised categories: Muslim, Hindu, Christian, Buddhist and Others.",
+          "The census has no no-religion and no not-stated category; affiliation is therefore 100% everywhere. Tap a district for its Muslim, Hindu, Christian, Buddhist and Others counts.",
+          "The district table is the sex-classified basis and excludes the 8,124 hijra (third gender) persons, who are religion-classified only at division level.",
+          "Open <strong>Show Census Data</strong> (top centre) for the geography and metric controls."
+        ],
+        links: [
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://bbs.gov.bd/" target="_blank" rel="noopener">Bangladesh Bureau of Statistics</a>, Population and Housing Census 2022, National Report (Volume I), Table P08 &middot; Reuse terms unresolved (staging) &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a>; BBS; OCHA ROAP (CC BY 3.0 IGO)',
+      censusFlagNote: "* The BBS census religion frame is Muslim, Hindu, Christian, Buddhist and Others, with no no-religion and no not-stated category; no-religion values are therefore null and affiliation is 100% in every district. Table P08 is the sex-classified basis and excludes the 8,124 hijra (third gender) persons nationally. This product is held in staging until BBS census reuse terms are established."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710d"></script>
+</body>
+</html>
