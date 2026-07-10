@@ -4,6 +4,8 @@
 
 **Maintenance convention:** strike a row when built, never delete it.
 
+**PROPOSED campaign (conductor, 2026-07-12, awaiting PI ratification): the Pacific.** The region-then-tick directive points next at the Pacific rows. The proposed tick order runs pinned routes first, probes second: Tonga (TO, rank 31, 2021 village workbook pinned — proceeding now under ordinary rank order, campaign or not), Samoa (WS, 32), Tuvalu (TV, 36), Fiji (FJ, 37), then the Pacific Data Hub probe block — Palau (PW, 42), Nauru (NR, 51), Micronesia (FM, 53), Kiribati (KI, 54), Marshall Islands (MH, 55), Cook Islands (CK, 56), Solomon Islands (SB, 58). Papua New Guinea (113) stays out: no public subnational route. Vanuatu is already live, so the campaign would close the region. This block activates only on the PI's ruling; until then only Tonga proceeds.
+
 **Campaign CLOSED 2026-07-11 — all six shipped end-to-end (data + pages, hub at 42).** The region was Central and Eastern Europe — the six machine-readable three-wave census rows at ranks 25-30. Tick each country when its data product commits; strike its queue row when the country page ships. Côte d'Ivoire (rank 16) is the highest-ranked actionable row outside the region and resumes after the campaign.
 
 - [x] Hungary (HU, rank 25) — shipped
