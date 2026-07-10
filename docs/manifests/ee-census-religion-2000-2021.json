@@ -1,0 +1,2423 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:ee-census-religion:ee:2000-2021:b79d5d91359b",
+  "dataset_id": "ee-census-religion:ee:2000-2021:stat-ee-maaamet",
+  "dataset_version_id": "ee-census-religion:ee:2000-2021:stat-ee-maaamet:b79d5d91359b",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "ee-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "EE"
+    ],
+    "snapshot_date": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-10T08:02:19Z",
+  "created_by": "scripts/build_ee_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_ee_area_summary.R",
+    "git_commit": "2f108ea",
+    "command": "Rscript scripts/build_ee_area_summary.R",
+    "parameters": {
+      "waves": [
+        2000,
+        2011,
+        2021
+      ],
+      "geography": "15 counties on period-specific official boundaries",
+      "universe": "population aged 15 and over",
+      "pxweb_queries": {
+        "2000": {
+          "query": [
+            {
+              "code": "Sugu",
+              "selection": {
+                "filter": "item",
+                "values": [
+                  "+"
+                ]
+              }
+            },
+            {
+              "code": "Elukoht",
+              "selection": {
+                "filter": "item",
+                "values": [
+                  "000000",
+                  "370000",
+                  "390000",
+                  "440000",
+                  "490000",
+                  "510000",
+                  "570000",
+                  "590000",
+                  "650000",
+                  "670000",
+                  "700000",
+                  "740000",
+                  "780000",
+                  "820000",
+                  "840000",
+                  "860000"
+                ]
+              }
+            },
+            {
+              "code": "Suhtumine religiooni ja usk",
+              "selection": {
+                "filter": "all",
+                "values": [
+                  "*"
+                ]
+              }
+            }
+          ],
+          "response": {
+            "format": "json-stat2"
+          }
+        },
+        "2011": {
+          "query": [
+            {
+              "code": "Sugu",
+              "selection": {
+                "filter": "item",
+                "values": [
+                  "T"
+                ]
+              }
+            },
+            {
+              "code": "Maakond",
+              "selection": {
+                "filter": "item",
+                "values": [
+                  "EE00",
+                  "37",
+                  "39",
+                  "44",
+                  "49",
+                  "51",
+                  "57",
+                  "59",
+                  "65",
+                  "67",
+                  "70",
+                  "74",
+                  "78",
+                  "82",
+                  "84",
+                  "86"
+                ]
+              }
+            },
+            {
+              "code": "Usk",
+              "selection": {
+                "filter": "all",
+                "values": [
+                  "*"
+                ]
+              }
+            },
+            {
+              "code": "Vanuserühm",
+              "selection": {
+                "filter": "item",
+                "values": [
+                  "Y_TOTAL"
+                ]
+              }
+            }
+          ],
+          "response": {
+            "format": "json-stat2"
+          }
+        },
+        "2021": {
+          "query": [
+            {
+              "code": "Aasta",
+              "selection": {
+                "filter": "item",
+                "values": [
+                  "2021"
+                ]
+              }
+            },
+            {
+              "code": "Elukoht",
+              "selection": {
+                "filter": "item",
+                "values": [
+                  "1",
+                  "00370000000000",
+                  "00390000000000",
+                  "00450000000000",
+                  "00500000000000",
+                  "00520000000000",
+                  "00560000000000",
+                  "00600000000000",
+                  "00640000000000",
+                  "00680000000000",
+                  "00710000000000",
+                  "00740000000000",
+                  "00790000000000",
+                  "00810000000000",
+                  "00840000000000",
+                  "00870000000000"
+                ]
+              }
+            },
+            {
+              "code": "Usk",
+              "selection": {
+                "filter": "all",
+                "values": [
+                  "*"
+                ]
+              }
+            }
+          ],
+          "response": {
+            "format": "json-stat2"
+          }
+        }
+      },
+      "boundary_layers": {
+        "2000": {
+          "layer": "maakonnad_2000",
+          "vintage": "2000-12-04",
+          "boundary_set_id": "ee-county-2000-maaamet"
+        },
+        "2011": {
+          "layer": "maakonnad_2011",
+          "vintage": "2011-06-08",
+          "boundary_set_id": "ee-county-2011-maaamet"
+        },
+        "2021": {
+          "layer": "maakonnad_2021",
+          "vintage": "2021-01-01",
+          "boundary_set_id": "ee-county-2021-maaamet"
+        }
+      },
+      "category_mapping_location": "construct_notes entries with note_type=category_mapping",
+      "rounding_rule": "2021 published values must remain multiples of ten; discrepancies must remain within the deterministic source-rounding gate; no residual is distributed",
+      "boundary_simplification": "scripts/lib/simplify_boundary.R; 750000-byte cap per vintage"
+    },
+    "software_versions": {
+      "R": "4.6.1",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0"
+    }
+  },
+  "source": {
+    "provider": "Statistics Estonia; Estonian Land and Spatial Development Board",
+    "source_dataset_ids": [
+      "stat-ee-rl229-census-religion-2000",
+      "stat-ee-rl0453-census-religion-2011",
+      "stat-ee-rl21452-census-religion-2021",
+      "maaamet-historical-county-2000-12-04",
+      "maaamet-historical-county-2011-06-08",
+      "maaamet-historical-county-2021-01-01"
+    ],
+    "source_urls": [
+      "https://andmed.stat.ee/api/v1/en/stat/rahvaloendus/rel2000/usk/RL229.PX",
+      "https://andmed.stat.ee/api/v1/en/stat/rahvaloendus/rel2011/rahvastiku-demograafilised-ja-etno-kultuurilised-naitajad/usk/RL0453.PX",
+      "https://andmed.stat.ee/api/v1/en/stat/rahvaloendus/rel2021/rahvastiku-demograafilised-ja-etno-kultuurilised-naitajad/usk/RL21452.px",
+      "https://teenus.maaamet.ee/ows/wms-ajalooline-haldus?service=WFS&version=2.0.0&request=GetFeature&typeNames=maakonnad_2000&outputFormat=GEOJSON",
+      "https://teenus.maaamet.ee/ows/wms-ajalooline-haldus?service=WFS&version=2.0.0&request=GetFeature&typeNames=maakonnad_2011&outputFormat=GEOJSON",
+      "https://teenus.maaamet.ee/ows/wms-ajalooline-haldus?service=WFS&version=2.0.0&request=GetFeature&typeNames=maakonnad_2021&outputFormat=GEOJSON",
+      "https://www.stat.ee/en/statistics-estonia/about-us/strategy/principles-dissemination-official-statistics",
+      "https://www.stat.ee/en/news/population-census-proportion-people-religious-affiliation-remains-stable-orthodox-christianity-still-most-widespread",
+      "https://geoportaal.maaamet.ee/eng/spatial-data/administrative-and-settlement-division-p312.html",
+      "https://geoportaal.maaamet.ee/docs/Avaandmed/Licence-of-open-data-of-Estonian-Land-Board.pdf"
+    ],
+    "retrieved_at": "2026-07-10T00:00:00Z",
+    "licence": "Statistics Estonia open data: CC BY-SA 4.0 with source attribution. Maa-amet (Estonian Land Board) boundary data: official open-data licence with source and vintage attribution; no Creative Commons identifier claimed.",
+    "citation": "Statistics Estonia PXWeb RL229, RL0453, and RL21452; Estonian Land and Spatial Development Board historical administrative division WFS (Web Feature Service)."
+  },
+  "input_manifests": [],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/ee/data/area_summary_county.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 64457,
+      "sha256": "1966030aba4422ed296e4f0b917108a4940694db03f46501fbb9190cea20c794",
+      "content": "Estonia three-wave county area-summary JSON",
+      "privacy": "public",
+      "licence_status": "stat_ee_open_data_cc_by_sa_4_0_attribution_maaamet_open_data_licence_attribution",
+      "row_count": 45
+    },
+    {
+      "uri": "repo:apps/regions/ee/data/area_summary_county.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 21680,
+      "sha256": "f10be59fcfb183da6084160b9c04996dc03904d9ee1e240718e73d2be812240a",
+      "content": "Estonia three-wave county area-summary CSV",
+      "privacy": "public",
+      "licence_status": "stat_ee_open_data_cc_by_sa_4_0_attribution_maaamet_open_data_licence_attribution",
+      "row_count": 45
+    },
+    {
+      "uri": "repo:apps/regions/ee/data/ee_county_2000.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 331769,
+      "sha256": "ec29bb153155e7fc4c00fc83c5de6afbcb30ec29584358cbeb47abc2ca066a49",
+      "content": "Estonia 2000 county boundary",
+      "privacy": "public",
+      "licence_status": "maaamet_open_data_licence_attribution",
+      "feature_count": 15
+    },
+    {
+      "uri": "repo:apps/regions/ee/data/ee_county_2011.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 309333,
+      "sha256": "fd2a732f937ce35c75bb3c1d8758704929f814b9ac0bb4d095fd152db6148e8c",
+      "content": "Estonia 2011 county boundary",
+      "privacy": "public",
+      "licence_status": "maaamet_open_data_licence_attribution",
+      "feature_count": 15
+    },
+    {
+      "uri": "repo:apps/regions/ee/data/ee_county_2021.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 260227,
+      "sha256": "031f50adee82f5551bc87236f0e7e6738801892b8a1ec6754ee0de27e37bf6b3",
+      "content": "Estonia 2021 county boundary",
+      "privacy": "public",
+      "licence_status": "maaamet_open_data_licence_attribution",
+      "feature_count": 15
+    }
+  ],
+  "partitions": [
+    {
+      "partition_id": "ee-county-2000",
+      "partition_type": "area",
+      "file_uri": "repo:apps/regions/ee/data/area_summary_county.json",
+      "sha256": "1966030aba4422ed296e4f0b917108a4940694db03f46501fbb9190cea20c794",
+      "country_code": "EE",
+      "snapshot_date": null,
+      "stage": "public"
+    },
+    {
+      "partition_id": "ee-county-2011",
+      "partition_type": "area",
+      "file_uri": "repo:apps/regions/ee/data/area_summary_county.json",
+      "sha256": "1966030aba4422ed296e4f0b917108a4940694db03f46501fbb9190cea20c794",
+      "country_code": "EE",
+      "snapshot_date": null,
+      "stage": "public"
+    },
+    {
+      "partition_id": "ee-county-2021",
+      "partition_type": "area",
+      "file_uri": "repo:apps/regions/ee/data/area_summary_county.json",
+      "sha256": "1966030aba4422ed296e4f0b917108a4940694db03f46501fbb9190cea20c794",
+      "country_code": "EE",
+      "snapshot_date": null,
+      "stage": "public"
+    }
+  ],
+  "stats": {
+    "waves": 3,
+    "years": "2000, 2011, 2021",
+    "county_rows": 45,
+    "counties_per_wave": 15,
+    "categories_2000": 19,
+    "categories_2011": 22,
+    "categories_2021": 21,
+    "boundary_features_per_vintage": 15
+  },
+  "local_cache_hint": "data/raw/ee_census/ (git-ignored; every cached source is listed and hashed below)",
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "Rscript scripts/build_ee_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/ee/data/area_summary_county.json",
+      "jq empty docs/manifests/ee-census-religion-2000-2021.json"
+    ],
+    "warnings": [
+      "The three waves use period-specific county polygons. Repeated county names do not establish unchanged geography, and the product reports no cross-wave county change statistic.",
+      "The 2021 values are survey estimates published in tens. Source-unavailable minor religion cells remain null in raw data and are never imputed.",
+      "The 2000 age-15-plus universe also includes persons whose age was unknown, as stated in the source footnote."
+    ],
+    "notes": "All three waves are present with 15 county rows. Headline values are complete. The 2000 and 2011 complete county category sums reconcile exactly to the published national rows. The 2021 discrepancies remain within the source's documented rounding behaviour; published counts are unchanged. All three boundary outputs contain 15 valid, non-empty, distinctly hashed geometries.",
+    "reconciliation": {
+      "2000": {
+        "year": 2000,
+        "table_id": "RL229.PX",
+        "county_count": 15,
+        "category_count": 19,
+        "unavailable_county_cells": 0,
+        "headline_cells_complete": true,
+        "top_level_reconciliation_max_absolute_difference": 0,
+        "national_affiliation_child_difference": 0,
+        "county_affiliation_child_max_absolute_difference": 0,
+        "county_to_national_complete_category_max_absolute_difference": 0,
+        "geography_reconciliation_bound": 0,
+        "geography_reconciliation_bound_derivation": "Published integer counts reconcile exactly; no rounding allowance is used.",
+        "affiliation_child_reconciliation_bound": 0,
+        "affiliation_child_reconciliation_bound_derivation": "Published integer counts reconcile exactly; no rounding allowance is used.",
+        "rounding_treatment": "Published integer counts reconcile exactly; no rounding allowance is used.",
+        "category_reconciliation": [
+          {
+            "source_code": "+",
+            "source_label_et": "Kokku",
+            "display_label_en": "Religious affiliation total",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 1121582,
+            "published_national_total": 1121582,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "10",
+            "source_label_et": "Kindlat usku tunnistav",
+            "display_label_en": "Follower of a particular faith",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 327832,
+            "published_national_total": 327832,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "110",
+            "source_label_et": "..luterlane",
+            "display_label_en": "..Lutheran",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 152237,
+            "published_national_total": 152237,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "111",
+            "source_label_et": "..õigeusklik",
+            "display_label_en": "..Orthodox",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 143554,
+            "published_national_total": 143554,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "112",
+            "source_label_et": "..baptist",
+            "display_label_en": "..Baptist",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 6009,
+            "published_national_total": 6009,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "113",
+            "source_label_et": "..katoliiklane",
+            "display_label_en": "..Roman-Catholic",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 5745,
+            "published_national_total": 5745,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "114",
+            "source_label_et": "..jehoovatunnistaja",
+            "display_label_en": "..Jehovah Witness",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 3823,
+            "published_national_total": 3823,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "115",
+            "source_label_et": "..nelipühilane",
+            "display_label_en": "..Pentecostal",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 2648,
+            "published_national_total": 2648,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "116",
+            "source_label_et": "..vanausuline",
+            "display_label_en": "..Old Believer",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 2515,
+            "published_national_total": 2515,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "117",
+            "source_label_et": "..adventist",
+            "display_label_en": "..Adventist",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 1561,
+            "published_national_total": 1561,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "118",
+            "source_label_et": "..metodist",
+            "display_label_en": "..Methodist",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 1455,
+            "published_national_total": 1455,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "119",
+            "source_label_et": "..muslim/moslem",
+            "display_label_en": "..Muslim",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 1387,
+            "published_national_total": 1387,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "1M",
+            "source_label_et": "..muu usk",
+            "display_label_en": "..other religion",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 5008,
+            "published_national_total": 5008,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "1X",
+            "source_label_et": "..usk teadmata",
+            "display_label_en": "..faith unknown",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 1890,
+            "published_national_total": 1890,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "20",
+            "source_label_et": "Usu suhtes ükskõikne",
+            "display_label_en": "Has no religious affiliation",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 381911,
+            "published_national_total": 381911,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "30",
+            "source_label_et": "Ateist",
+            "display_label_en": "Atheist",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 68547,
+            "published_national_total": 68547,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "40",
+            "source_label_et": "Ei oska vastata",
+            "display_label_en": "Cannot define the affiliation",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 163304,
+            "published_national_total": 163304,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "50",
+            "source_label_et": "Ei soovi vastata",
+            "display_label_en": "Refused to answer",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 89691,
+            "published_national_total": 89691,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "60",
+            "source_label_et": "Suhtumine religiooni teadmata",
+            "display_label_en": "Religious affiliation unknown",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 90297,
+            "published_national_total": 90297,
+            "difference": 0,
+            "status": "exact"
+          }
+        ],
+        "affiliation_child_by_county": [
+          {
+            "area_code": "0037",
+            "county_cells_complete": true,
+            "affiliation_count": 138638,
+            "child_sum": 138638,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0039",
+            "county_cells_complete": true,
+            "affiliation_count": 1504,
+            "child_sum": 1504,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0044",
+            "county_cells_complete": true,
+            "affiliation_count": 55136,
+            "child_sum": 55136,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0049",
+            "county_cells_complete": true,
+            "affiliation_count": 7928,
+            "child_sum": 7928,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0051",
+            "county_cells_complete": true,
+            "affiliation_count": 5856,
+            "child_sum": 5856,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0057",
+            "county_cells_complete": true,
+            "affiliation_count": 5294,
+            "child_sum": 5294,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0059",
+            "county_cells_complete": true,
+            "affiliation_count": 11024,
+            "child_sum": 11024,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0065",
+            "county_cells_complete": true,
+            "affiliation_count": 8411,
+            "child_sum": 8411,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0067",
+            "county_cells_complete": true,
+            "affiliation_count": 17853,
+            "child_sum": 17853,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0070",
+            "county_cells_complete": true,
+            "affiliation_count": 7933,
+            "child_sum": 7933,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0074",
+            "county_cells_complete": true,
+            "affiliation_count": 8843,
+            "child_sum": 8843,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0078",
+            "county_cells_complete": true,
+            "affiliation_count": 31556,
+            "child_sum": 31556,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0082",
+            "county_cells_complete": true,
+            "affiliation_count": 8186,
+            "child_sum": 8186,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0084",
+            "county_cells_complete": true,
+            "affiliation_count": 9083,
+            "child_sum": 9083,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0086",
+            "county_cells_complete": true,
+            "affiliation_count": 10587,
+            "child_sum": 10587,
+            "difference": 0,
+            "status": "exact"
+          }
+        ]
+      },
+      "2011": {
+        "year": 2011,
+        "table_id": "RL0453.PX",
+        "county_count": 15,
+        "category_count": 22,
+        "unavailable_county_cells": 0,
+        "headline_cells_complete": true,
+        "top_level_reconciliation_max_absolute_difference": 0,
+        "national_affiliation_child_difference": 0,
+        "county_affiliation_child_max_absolute_difference": 0,
+        "county_to_national_complete_category_max_absolute_difference": 0,
+        "geography_reconciliation_bound": 0,
+        "geography_reconciliation_bound_derivation": "Published integer counts reconcile exactly; no rounding allowance is used.",
+        "affiliation_child_reconciliation_bound": 0,
+        "affiliation_child_reconciliation_bound_derivation": "Published integer counts reconcile exactly; no rounding allowance is used.",
+        "rounding_treatment": "Published integer counts reconcile exactly; no rounding allowance is used.",
+        "category_reconciliation": [
+          {
+            "source_code": "899",
+            "source_label_et": "Usk kokku",
+            "display_label_en": "Religion total",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 1094564,
+            "published_national_total": 1094564,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "898",
+            "source_label_et": "Peab omaks mõnd usku",
+            "display_label_en": "Feels an affiliation to a religion",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 320872,
+            "published_national_total": 320872,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "102",
+            "source_label_et": "Õigeusklik",
+            "display_label_en": "Orthodox",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 176773,
+            "published_national_total": 176773,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "101",
+            "source_label_et": "Luterlane",
+            "display_label_en": "Lutheran",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 108513,
+            "published_national_total": 108513,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "104",
+            "source_label_et": "Baptist",
+            "display_label_en": "Baptist",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 4507,
+            "published_national_total": 4507,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "103",
+            "source_label_et": "Katoliiklane",
+            "display_label_en": "Roman-Catholic",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 4501,
+            "published_national_total": 4501,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "105",
+            "source_label_et": "Jehoova tunnistaja",
+            "display_label_en": "Jehovah's Witness",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 3938,
+            "published_national_total": 3938,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "107",
+            "source_label_et": "Vanausuline",
+            "display_label_en": "Old Believer",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 2605,
+            "published_national_total": 2605,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "131",
+            "source_label_et": "Kristlikud vabakogudused",
+            "display_label_en": "Christian Free Congregations",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 2189,
+            "published_national_total": 2189,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "135",
+            "source_label_et": "Maausuline",
+            "display_label_en": "Earth Believer",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 1925,
+            "published_national_total": 1925,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "121",
+            "source_label_et": "Eristamata kristlane",
+            "display_label_en": "Unidentified Christian",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 1899,
+            "published_national_total": 1899,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "106",
+            "source_label_et": "Nelipühilane",
+            "display_label_en": "Pentecostal",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 1855,
+            "published_national_total": 1855,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "110",
+            "source_label_et": "Islamiusuline",
+            "display_label_en": "Muslim",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 1508,
+            "published_national_total": 1508,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "108",
+            "source_label_et": "Adventist",
+            "display_label_en": "Adventist",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 1194,
+            "published_national_total": 1194,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "119",
+            "source_label_et": "Budist",
+            "display_label_en": "Buddhist",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 1145,
+            "published_national_total": 1145,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "109",
+            "source_label_et": "Metodist",
+            "display_label_en": "Methodist",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 1098,
+            "published_national_total": 1098,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "157",
+            "source_label_et": "Taarausuline",
+            "display_label_en": "Taara Beliver",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 1047,
+            "published_national_total": 1047,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "OTH",
+            "source_label_et": "Muu usk",
+            "display_label_en": "Other religion",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 4371,
+            "published_national_total": 4371,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "893",
+            "source_label_et": "Usk teadmata",
+            "display_label_en": "Religion unknown",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 1804,
+            "published_national_total": 1804,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "892",
+            "source_label_et": "Ei pea omaks ühtegi usku",
+            "display_label_en": "Does not feel an affiliation to any religion",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 592588,
+            "published_national_total": 592588,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "891",
+            "source_label_et": "Ei soovinud vastata",
+            "display_label_en": "Refused to answer",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 157216,
+            "published_national_total": 157216,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "890",
+            "source_label_et": "Suhe religiooni teadmata",
+            "display_label_en": "Religious affiliation unknown",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 23888,
+            "published_national_total": 23888,
+            "difference": 0,
+            "status": "exact"
+          }
+        ],
+        "affiliation_child_by_county": [
+          {
+            "area_code": "0037",
+            "county_cells_complete": true,
+            "affiliation_count": 149959,
+            "child_sum": 149959,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0039",
+            "county_cells_complete": true,
+            "affiliation_count": 1264,
+            "child_sum": 1264,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0044",
+            "county_cells_complete": true,
+            "affiliation_count": 63859,
+            "child_sum": 63859,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0049",
+            "county_cells_complete": true,
+            "affiliation_count": 5723,
+            "child_sum": 5723,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0051",
+            "county_cells_complete": true,
+            "affiliation_count": 4006,
+            "child_sum": 4006,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0057",
+            "county_cells_complete": true,
+            "affiliation_count": 4649,
+            "child_sum": 4649,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0059",
+            "county_cells_complete": true,
+            "affiliation_count": 8842,
+            "child_sum": 8842,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0065",
+            "county_cells_complete": true,
+            "affiliation_count": 6239,
+            "child_sum": 6239,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0067",
+            "county_cells_complete": true,
+            "affiliation_count": 14114,
+            "child_sum": 14114,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0070",
+            "county_cells_complete": true,
+            "affiliation_count": 5401,
+            "child_sum": 5401,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0074",
+            "county_cells_complete": true,
+            "affiliation_count": 6869,
+            "child_sum": 6869,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0078",
+            "county_cells_complete": true,
+            "affiliation_count": 29025,
+            "child_sum": 29025,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0082",
+            "county_cells_complete": true,
+            "affiliation_count": 6575,
+            "child_sum": 6575,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0084",
+            "county_cells_complete": true,
+            "affiliation_count": 6223,
+            "child_sum": 6223,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "area_code": "0086",
+            "county_cells_complete": true,
+            "affiliation_count": 8124,
+            "child_sum": 8124,
+            "difference": 0,
+            "status": "exact"
+          }
+        ]
+      },
+      "2021": {
+        "year": 2021,
+        "table_id": "RL21452.px",
+        "county_count": 15,
+        "category_count": 21,
+        "unavailable_county_cells": 41,
+        "headline_cells_complete": true,
+        "top_level_reconciliation_max_absolute_difference": 10,
+        "national_affiliation_child_difference": -10,
+        "county_affiliation_child_max_absolute_difference": 20,
+        "county_to_national_complete_category_max_absolute_difference": 30,
+        "geography_reconciliation_bound": 75,
+        "geography_reconciliation_bound_derivation": "Each of the 15 county cells summed into a category's national total is independently rounded to the nearest ten (maximum rounding error 5 per cell); the bound is 5 x 15 = 75. The observed maximum absolute difference is 30.",
+        "affiliation_child_reconciliation_bound": 80,
+        "affiliation_child_reconciliation_bound_derivation": "Each of the 16 published affiliation child categories summed within a geography row is independently rounded to the nearest ten (maximum rounding error 5 per cell); the bound is 5 x 16 = 80. The observed maximum absolute difference across complete county rows is 20.",
+        "rounding_treatment": "Statistics Estonia publishes values in multiples of ten and states that aggregated values may differ from sums because of rounding. Published counts remain unchanged; no residual is distributed.",
+        "category_reconciliation": [
+          {
+            "source_code": "1",
+            "source_label_et": "Usk kokku",
+            "display_label_en": "Religion total",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 1114040,
+            "published_national_total": 1114030,
+            "difference": -10,
+            "status": "within_source_rounding"
+          },
+          {
+            "source_code": "2",
+            "source_label_et": "Peab omaks mõnd usku",
+            "display_label_en": "Feels an affiliation to a religion",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 321370,
+            "published_national_total": 321340,
+            "difference": -30,
+            "status": "within_source_rounding"
+          },
+          {
+            "source_code": "3",
+            "source_label_et": "..Luterlane",
+            "display_label_en": "..Lutheran",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 86030,
+            "published_national_total": 86030,
+            "difference": 0,
+            "status": "exact"
+          },
+          {
+            "source_code": "4",
+            "source_label_et": "..Õigeusklik",
+            "display_label_en": "..Orthodox",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 181750,
+            "published_national_total": 181770,
+            "difference": 20,
+            "status": "within_source_rounding"
+          },
+          {
+            "source_code": "5",
+            "source_label_et": "..Katoliiklane",
+            "display_label_en": "..Roman Catholic",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 8680,
+            "published_national_total": 8690,
+            "difference": 10,
+            "status": "within_source_rounding"
+          },
+          {
+            "source_code": "6",
+            "source_label_et": "..Baptist",
+            "display_label_en": "..Baptist",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 5200,
+            "published_national_total": 5190,
+            "difference": -10,
+            "status": "within_source_rounding"
+          },
+          {
+            "source_code": "7",
+            "source_label_et": "..Jehoova tunnistaja",
+            "display_label_en": "..Jehovah's Witness",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 3710,
+            "published_national_total": 3720,
+            "difference": 10,
+            "status": "within_source_rounding"
+          },
+          {
+            "source_code": "8",
+            "source_label_et": "..Nelipühilane",
+            "display_label_en": "..Pentecostal",
+            "county_cells_complete": false,
+            "unavailable_county_cells": 3,
+            "county_sum": null,
+            "published_national_total": 2310,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "source_code": "9",
+            "source_label_et": "..Vanausuline",
+            "display_label_en": "..Old Believer",
+            "county_cells_complete": false,
+            "unavailable_county_cells": 11,
+            "county_sum": null,
+            "published_national_total": 2290,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "source_code": "10",
+            "source_label_et": "..Adventist",
+            "display_label_en": "..Adventist",
+            "county_cells_complete": false,
+            "unavailable_county_cells": 4,
+            "county_sum": null,
+            "published_national_total": 950,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "source_code": "11",
+            "source_label_et": "..Metodist",
+            "display_label_en": "..Methodist",
+            "county_cells_complete": false,
+            "unavailable_county_cells": 6,
+            "county_sum": null,
+            "published_national_total": 1390,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "source_code": "12",
+            "source_label_et": "..Islamiusuline",
+            "display_label_en": "..Muslim",
+            "county_cells_complete": false,
+            "unavailable_county_cells": 9,
+            "county_sum": null,
+            "published_national_total": 5800,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "source_code": "13",
+            "source_label_et": "..Budist",
+            "display_label_en": "..Buddhist",
+            "county_cells_complete": false,
+            "unavailable_county_cells": 4,
+            "county_sum": null,
+            "published_national_total": 1880,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "source_code": "14",
+            "source_label_et": "..Kristlik vabakoguduslane",
+            "display_label_en": "..Christian Free Congregations",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 6080,
+            "published_national_total": 6070,
+            "difference": -10,
+            "status": "within_source_rounding"
+          },
+          {
+            "source_code": "15",
+            "source_label_et": "..Maausuline",
+            "display_label_en": "..Earth Believer",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 3870,
+            "published_national_total": 3860,
+            "difference": -10,
+            "status": "within_source_rounding"
+          },
+          {
+            "source_code": "16",
+            "source_label_et": "..Taarausuline",
+            "display_label_en": "..Taara Beliver",
+            "county_cells_complete": false,
+            "unavailable_county_cells": 3,
+            "county_sum": null,
+            "published_national_total": 1770,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "source_code": "17",
+            "source_label_et": "..Muu usk",
+            "display_label_en": "..Other religion",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 8090,
+            "published_national_total": 8100,
+            "difference": 10,
+            "status": "within_source_rounding"
+          },
+          {
+            "source_code": "18",
+            "source_label_et": "..Usk teadmata",
+            "display_label_en": "..Religion unknown",
+            "county_cells_complete": false,
+            "unavailable_county_cells": 1,
+            "county_sum": null,
+            "published_national_total": 1530,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "source_code": "19",
+            "source_label_et": "Ei pea omaks ühtegi usku",
+            "display_label_en": "Does not feel an affiliation to any religion",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 650930,
+            "published_national_total": 650900,
+            "difference": -30,
+            "status": "within_source_rounding"
+          },
+          {
+            "source_code": "20",
+            "source_label_et": "Ei soovinud vastata",
+            "display_label_en": "Refused to answer",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 126490,
+            "published_national_total": 126500,
+            "difference": 10,
+            "status": "within_source_rounding"
+          },
+          {
+            "source_code": "21",
+            "source_label_et": "Suhe religiooni teadmata",
+            "display_label_en": "Religious affiliation unknown",
+            "county_cells_complete": true,
+            "unavailable_county_cells": 0,
+            "county_sum": 15270,
+            "published_national_total": 15280,
+            "difference": 10,
+            "status": "within_source_rounding"
+          }
+        ],
+        "affiliation_child_by_county": [
+          {
+            "area_code": "0037",
+            "county_cells_complete": true,
+            "affiliation_count": 163440,
+            "child_sum": 163420,
+            "difference": 20,
+            "status": "within_source_rounding"
+          },
+          {
+            "area_code": "0039",
+            "county_cells_complete": false,
+            "affiliation_count": 1090,
+            "child_sum": null,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "area_code": "0045",
+            "county_cells_complete": false,
+            "affiliation_count": 60000,
+            "child_sum": null,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "area_code": "0050",
+            "county_cells_complete": false,
+            "affiliation_count": 4940,
+            "child_sum": null,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "area_code": "0052",
+            "county_cells_complete": false,
+            "affiliation_count": 3700,
+            "child_sum": null,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "area_code": "0056",
+            "county_cells_complete": false,
+            "affiliation_count": 4310,
+            "child_sum": null,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "area_code": "0060",
+            "county_cells_complete": false,
+            "affiliation_count": 8800,
+            "child_sum": null,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "area_code": "0064",
+            "county_cells_complete": false,
+            "affiliation_count": 4440,
+            "child_sum": null,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "area_code": "0068",
+            "county_cells_complete": false,
+            "affiliation_count": 14220,
+            "child_sum": null,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "area_code": "0071",
+            "county_cells_complete": false,
+            "affiliation_count": 4830,
+            "child_sum": null,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "area_code": "0074",
+            "county_cells_complete": false,
+            "affiliation_count": 5700,
+            "child_sum": null,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "area_code": "0079",
+            "county_cells_complete": true,
+            "affiliation_count": 26720,
+            "child_sum": 26710,
+            "difference": 10,
+            "status": "within_source_rounding"
+          },
+          {
+            "area_code": "0081",
+            "county_cells_complete": false,
+            "affiliation_count": 5580,
+            "child_sum": null,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "area_code": "0084",
+            "county_cells_complete": false,
+            "affiliation_count": 5620,
+            "child_sum": null,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          },
+          {
+            "area_code": "0087",
+            "county_cells_complete": false,
+            "affiliation_count": 7980,
+            "child_sum": null,
+            "difference": null,
+            "status": "not_reconciled_due_to_source_unavailable_cells"
+          }
+        ]
+      }
+    },
+    "geometry_validation": {
+      "2000": {
+        "boundary_vintage": "2000-12-04",
+        "source_feature_count": 15,
+        "output_feature_count": 15,
+        "all_valid": true,
+        "all_non_empty": true,
+        "distinct_geometry_hash_count": 15,
+        "feature_geometry_sha256": {
+          "0037": "eb69d5ffab3293edd400a2fe5bd89c883800dc07ca8c6fd27012c0078c2d4545",
+          "0039": "705eab2c2842f8fdcec12b0cd7b8f4f06527c5913ba92235d675a6e45b6653b4",
+          "0044": "d430c7fc01914fb5efa532b0c9c1458145e8443a506611035be58426a0197f89",
+          "0049": "ab424592681bc2be805a98540f5b08c0f074bdffe227172f2bb270a8d2d2380b",
+          "0051": "ead0a1650c1b21701ce6c8524c967bc2c2c98fed6478286faafa2cb898d81341",
+          "0057": "7c77f1957ea919da6cbd8ab4e03a92d1ad9b02f79871ad4fc0cd4fecd2383406",
+          "0059": "97418fde6bcb75ce530e44d1d52a806b9f95b729ca386d2a20c5717fab401878",
+          "0065": "f0ab49ca02001837823028e70e36f6c23b29b78b80a8dcf32ff9430086859d7e",
+          "0067": "b9748b35926bb4fc0b128e056f2dc57652e7f87aa8891089088805c83f65eb6c",
+          "0070": "faf7b663118906222a01c2483f0ed3fd1394d77fea2d7a2a8455bac1f70bcec9",
+          "0074": "9aea1536735ff4444ac7cbb8ae8abd0533092c83ada446b9f36327fa36da67f7",
+          "0078": "0f06b82ed63126431af2c59c57728f3b07569e4e40f03f24785b0a25365b30dd",
+          "0082": "2b2cf3432ec3d054a82031b725fca866145a8a9c249dd6e6865bfb28f18bfec8",
+          "0084": "b2d4c6d5bc97f4b5a06dc970787a9ff662e4a8d0b165820492014e92bf8cb686",
+          "0086": "e8b772177b89481f2a1f8937d8b1d14d6de9d965e2929d2e15be3e51e42404a4"
+        },
+        "output_bytes": 331769,
+        "simplification": {
+          "method": "mapshaper weighted keep-shapes",
+          "clean_option": "allow-overlaps",
+          "keep_percent": 5,
+          "bytes": 331769,
+          "byte_ceiling": 750000,
+          "helper": "scripts/lib/simplify_boundary.R"
+        }
+      },
+      "2011": {
+        "boundary_vintage": "2011-06-08",
+        "source_feature_count": 15,
+        "output_feature_count": 15,
+        "all_valid": true,
+        "all_non_empty": true,
+        "distinct_geometry_hash_count": 15,
+        "feature_geometry_sha256": {
+          "0037": "1399c643f29a326b4f8ce4ad0e0fce4732b09ecfcfab3c8de7522e62e2bb00bd",
+          "0039": "cdf034a303b3b1ccbf5ce779ecf088bce473fa7a5583ad839063da0b9225ab53",
+          "0044": "b5419fa62d64d7f126b2b06990b4b66167e38132c0b4ec408996b6c34365519f",
+          "0049": "45bf2d6370ca2bea9627a223d7df9d17658351db5649a926fa54161b236b1bd1",
+          "0051": "12e4c46289d06493676ba48ad0ce87f3a636d8a9bc56bd4186289a4656cc9366",
+          "0057": "eed73ff741c3580fafc74cff5689058ba149c9365b2985805e68d52973db8c4b",
+          "0059": "b6438653a36a978e7b19e14919aa9fadb97a76ddd9902e9da7d46d577b7bb31e",
+          "0065": "7ebf28318009d5b1fec24ddc478c8fe0e51d9247af2a60fcde4052bdaa87224f",
+          "0067": "022c33e9fa39f38676860b8ae11f4948603f86eb105b3509f058387c4f7845f0",
+          "0070": "76d95d5bede0d446db2527eab2645664ab7fdfa77cc477d61d251ff02c60611f",
+          "0074": "2165f5e59bb31d5c96b95643a601f6df0d6b65c61534d050ac4f07119f967745",
+          "0078": "cb5d2b291f6b9c56ad5222ff75cda7f4d918a850988fd9f0a4f4627ea8ab6ee4",
+          "0082": "4ea1e921d33199230b03e60e7b12403081953b5d058a425c255158d2a2349bf7",
+          "0084": "ff155e210cdf1145d00daa2904404bfd5f7728b18b309a069837d2d87795b0aa",
+          "0086": "61b58a51e3f7afca72cd30a22135d3c8f6ff00e620b42b59f8fcf0cc6b487c13"
+        },
+        "output_bytes": 309333,
+        "simplification": {
+          "method": "mapshaper weighted keep-shapes",
+          "clean_option": "allow-overlaps",
+          "keep_percent": 2,
+          "bytes": 309333,
+          "byte_ceiling": 750000,
+          "helper": "scripts/lib/simplify_boundary.R"
+        }
+      },
+      "2021": {
+        "boundary_vintage": "2021-01-01",
+        "source_feature_count": 15,
+        "output_feature_count": 15,
+        "all_valid": true,
+        "all_non_empty": true,
+        "distinct_geometry_hash_count": 15,
+        "feature_geometry_sha256": {
+          "0037": "65b95b9c483b2b3bcc15743dbea5d7bd50aa74874cc40d01ad005fd0b49ad440",
+          "0039": "7e453cd21d93a6a5d788819c8c1b337b7c4b2b3cc2bfac42d10412045362a4a2",
+          "0045": "2e45600ae0f5ac9af1a7ded7299037ef95e5a35c38fb68e2787dc466e0b2d140",
+          "0050": "9aae83d09b5c0b76add7589b73e76b968a7fb6ad722b83013ade669ad0c12ca5",
+          "0052": "4d82d96aa4097537f4b65059ffcf7007e50a641e9412260882e478094b5c259b",
+          "0056": "8e4e4736ea9306c7a60c473be1b1c8ffcc05bbb740cec3a48ebca3255ae54088",
+          "0060": "a4262e37620b43cf2bee3dac8b0ce88df2adff5a48f4ae794ed124981d0ff5ea",
+          "0064": "24bc3fdc886eca7188d8e4ea541783d6dc37c169d9c29c2717a398364d20c7b3",
+          "0068": "e97d8c62076ece98ff8f66a7def34fffd2b1b0920fa363d8ddfc5147e633673e",
+          "0071": "25d981ea9b7116a9f70cad0512cdcae987bf90492cee6f7b2f140429532e4042",
+          "0074": "fac18011ca4058f7a6905cd0b9a270fe0f68eb22ad484d2bea610ef20ac65f39",
+          "0079": "a368ccb1bfffa40b35dfc7be4ff136ea03c348940aacb531200cdec5fd50b36a",
+          "0081": "02d67459307c1de4c50ba3310ece960211e844029ef8289ad412a5094d6a7606",
+          "0084": "41b1f1f975f05774737cc32edf33265bb6e837e0352a9fbf0ee8914fdbe7fbb7",
+          "0087": "6d855d4ac6ce6e89e332beb31a13e5d67827382db766c89c5d7c473e7759c2b8"
+        },
+        "output_bytes": 260227,
+        "simplification": {
+          "method": "mapshaper weighted keep-shapes",
+          "clean_option": "allow-overlaps",
+          "keep_percent": 1,
+          "bytes": 260227,
+          "byte_ceiling": 750000,
+          "helper": "scripts/lib/simplify_boundary.R"
+        }
+      }
+    },
+    "provenance": {
+      "raw_source_count": 20,
+      "every_raw_source_has_url_date_sha256": true
+    }
+  },
+  "construct_notes": [
+    "Indicator declaration: self-reported census religious affiliation among the population aged 15 and over.",
+    "Every denominator is the published population aged 15 and over in the same county and wave. Total population is never used.",
+    "The 2021 religion characteristic comes from the census sample survey and is generalised to the full population aged 15 and over. Religion itself is not register-supplemented. Published counts remain rounded to tens.",
+    "The 2000 no-religion headline is Has no religious affiliation plus Atheist. The 2011 and 2021 headlines use Does not feel an affiliation to any religion.",
+    "Refused, cannot define, and relationship-unknown categories remain in the age-15-plus denominator and outside both headline numerators.",
+    "The product uses official county geography for each wave. Statistics Estonia does not publish these earlier religion tables rebased to current counties or municipalities, and the build creates no concordance.",
+    {
+      "note_type": "category_mapping",
+      "year": 2000,
+      "mappings": [
+        {
+          "source_code": "+",
+          "source_label_et": "Kokku",
+          "display_label_en": "Religious affiliation total",
+          "product_role": "age_15_plus_total"
+        },
+        {
+          "source_code": "10",
+          "source_label_et": "Kindlat usku tunnistav",
+          "display_label_en": "Follower of a particular faith",
+          "product_role": "headline_affiliation"
+        },
+        {
+          "source_code": "110",
+          "source_label_et": "..luterlane",
+          "display_label_en": "..Lutheran",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "111",
+          "source_label_et": "..õigeusklik",
+          "display_label_en": "..Orthodox",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "112",
+          "source_label_et": "..baptist",
+          "display_label_en": "..Baptist",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "113",
+          "source_label_et": "..katoliiklane",
+          "display_label_en": "..Roman-Catholic",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "114",
+          "source_label_et": "..jehoovatunnistaja",
+          "display_label_en": "..Jehovah Witness",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "115",
+          "source_label_et": "..nelipühilane",
+          "display_label_en": "..Pentecostal",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "116",
+          "source_label_et": "..vanausuline",
+          "display_label_en": "..Old Believer",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "117",
+          "source_label_et": "..adventist",
+          "display_label_en": "..Adventist",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "118",
+          "source_label_et": "..metodist",
+          "display_label_en": "..Methodist",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "119",
+          "source_label_et": "..muslim/moslem",
+          "display_label_en": "..Muslim",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "1M",
+          "source_label_et": "..muu usk",
+          "display_label_en": "..other religion",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "1X",
+          "source_label_et": "..usk teadmata",
+          "display_label_en": "..faith unknown",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "20",
+          "source_label_et": "Usu suhtes ükskõikne",
+          "display_label_en": "Has no religious affiliation",
+          "product_role": "headline_no_religion"
+        },
+        {
+          "source_code": "30",
+          "source_label_et": "Ateist",
+          "display_label_en": "Atheist",
+          "product_role": "headline_no_religion_component_atheist"
+        },
+        {
+          "source_code": "40",
+          "source_label_et": "Ei oska vastata",
+          "display_label_en": "Cannot define the affiliation",
+          "product_role": "response_or_unknown_outside_headline"
+        },
+        {
+          "source_code": "50",
+          "source_label_et": "Ei soovi vastata",
+          "display_label_en": "Refused to answer",
+          "product_role": "response_or_unknown_outside_headline"
+        },
+        {
+          "source_code": "60",
+          "source_label_et": "Suhtumine religiooni teadmata",
+          "display_label_en": "Religious affiliation unknown",
+          "product_role": "response_or_unknown_outside_headline"
+        }
+      ]
+    },
+    {
+      "note_type": "category_mapping",
+      "year": 2011,
+      "mappings": [
+        {
+          "source_code": "899",
+          "source_label_et": "Usk kokku",
+          "display_label_en": "Religion total",
+          "product_role": "age_15_plus_total"
+        },
+        {
+          "source_code": "898",
+          "source_label_et": "Peab omaks mõnd usku",
+          "display_label_en": "Feels an affiliation to a religion",
+          "product_role": "headline_affiliation"
+        },
+        {
+          "source_code": "102",
+          "source_label_et": "Õigeusklik",
+          "display_label_en": "Orthodox",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "101",
+          "source_label_et": "Luterlane",
+          "display_label_en": "Lutheran",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "104",
+          "source_label_et": "Baptist",
+          "display_label_en": "Baptist",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "103",
+          "source_label_et": "Katoliiklane",
+          "display_label_en": "Roman-Catholic",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "105",
+          "source_label_et": "Jehoova tunnistaja",
+          "display_label_en": "Jehovah's Witness",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "107",
+          "source_label_et": "Vanausuline",
+          "display_label_en": "Old Believer",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "131",
+          "source_label_et": "Kristlikud vabakogudused",
+          "display_label_en": "Christian Free Congregations",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "135",
+          "source_label_et": "Maausuline",
+          "display_label_en": "Earth Believer",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "121",
+          "source_label_et": "Eristamata kristlane",
+          "display_label_en": "Unidentified Christian",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "106",
+          "source_label_et": "Nelipühilane",
+          "display_label_en": "Pentecostal",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "110",
+          "source_label_et": "Islamiusuline",
+          "display_label_en": "Muslim",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "108",
+          "source_label_et": "Adventist",
+          "display_label_en": "Adventist",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "119",
+          "source_label_et": "Budist",
+          "display_label_en": "Buddhist",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "109",
+          "source_label_et": "Metodist",
+          "display_label_en": "Methodist",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "157",
+          "source_label_et": "Taarausuline",
+          "display_label_en": "Taara Beliver",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "OTH",
+          "source_label_et": "Muu usk",
+          "display_label_en": "Other religion",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "893",
+          "source_label_et": "Usk teadmata",
+          "display_label_en": "Religion unknown",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "892",
+          "source_label_et": "Ei pea omaks ühtegi usku",
+          "display_label_en": "Does not feel an affiliation to any religion",
+          "product_role": "headline_no_religion"
+        },
+        {
+          "source_code": "891",
+          "source_label_et": "Ei soovinud vastata",
+          "display_label_en": "Refused to answer",
+          "product_role": "response_or_unknown_outside_headline"
+        },
+        {
+          "source_code": "890",
+          "source_label_et": "Suhe religiooni teadmata",
+          "display_label_en": "Religious affiliation unknown",
+          "product_role": "response_or_unknown_outside_headline"
+        }
+      ]
+    },
+    {
+      "note_type": "category_mapping",
+      "year": 2021,
+      "mappings": [
+        {
+          "source_code": "1",
+          "source_label_et": "Usk kokku",
+          "display_label_en": "Religion total",
+          "product_role": "age_15_plus_total"
+        },
+        {
+          "source_code": "2",
+          "source_label_et": "Peab omaks mõnd usku",
+          "display_label_en": "Feels an affiliation to a religion",
+          "product_role": "headline_affiliation"
+        },
+        {
+          "source_code": "3",
+          "source_label_et": "..Luterlane",
+          "display_label_en": "..Lutheran",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "4",
+          "source_label_et": "..Õigeusklik",
+          "display_label_en": "..Orthodox",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "5",
+          "source_label_et": "..Katoliiklane",
+          "display_label_en": "..Roman Catholic",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "6",
+          "source_label_et": "..Baptist",
+          "display_label_en": "..Baptist",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "7",
+          "source_label_et": "..Jehoova tunnistaja",
+          "display_label_en": "..Jehovah's Witness",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "8",
+          "source_label_et": "..Nelipühilane",
+          "display_label_en": "..Pentecostal",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "9",
+          "source_label_et": "..Vanausuline",
+          "display_label_en": "..Old Believer",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "10",
+          "source_label_et": "..Adventist",
+          "display_label_en": "..Adventist",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "11",
+          "source_label_et": "..Metodist",
+          "display_label_en": "..Methodist",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "12",
+          "source_label_et": "..Islamiusuline",
+          "display_label_en": "..Muslim",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "13",
+          "source_label_et": "..Budist",
+          "display_label_en": "..Buddhist",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "14",
+          "source_label_et": "..Kristlik vabakoguduslane",
+          "display_label_en": "..Christian Free Congregations",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "15",
+          "source_label_et": "..Maausuline",
+          "display_label_en": "..Earth Believer",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "16",
+          "source_label_et": "..Taarausuline",
+          "display_label_en": "..Taara Beliver",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "17",
+          "source_label_et": "..Muu usk",
+          "display_label_en": "..Other religion",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "18",
+          "source_label_et": "..Usk teadmata",
+          "display_label_en": "..Religion unknown",
+          "product_role": "affiliation_detail_as_published"
+        },
+        {
+          "source_code": "19",
+          "source_label_et": "Ei pea omaks ühtegi usku",
+          "display_label_en": "Does not feel an affiliation to any religion",
+          "product_role": "headline_no_religion"
+        },
+        {
+          "source_code": "20",
+          "source_label_et": "Ei soovinud vastata",
+          "display_label_en": "Refused to answer",
+          "product_role": "response_or_unknown_outside_headline"
+        },
+        {
+          "source_code": "21",
+          "source_label_et": "Suhe religiooni teadmata",
+          "display_label_en": "Religious affiliation unknown",
+          "product_role": "response_or_unknown_outside_headline"
+        }
+      ]
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "stat_ee_open_data_cc_by_sa_4_0_attribution_maaamet_open_data_licence_attribution",
+  "downstream_status": "public",
+  "notes": "County census-affiliation product for the population aged 15 and over. A region page is outside this build.",
+  "raw_sources": [
+    {
+      "local_path": "data/raw/ee_census/px_2000_metadata_en.json",
+      "url": "https://andmed.stat.ee/api/v1/en/stat/rahvaloendus/rel2000/usk/RL229.PX",
+      "method": "GET",
+      "retrieval_date": "2026-07-10",
+      "bytes": 3468,
+      "sha256": "80208ff8e02ed993947558c24e8f99a1310d0ece7b8d7d2579ea2f8a3570e149"
+    },
+    {
+      "local_path": "data/raw/ee_census/px_2000_metadata_et.json",
+      "url": "https://andmed.stat.ee/api/v1/et/stat/rahvaloendus/rel2000/usk/RL229.PX",
+      "method": "GET",
+      "retrieval_date": "2026-07-10",
+      "bytes": 3025,
+      "sha256": "aba5db39903d6ba5afcfbe4637051c3b1a33ee54aa065e05d559f5c4f9d51d12"
+    },
+    {
+      "local_path": "data/raw/ee_census/px_2000_county_religion.json",
+      "url": "https://andmed.stat.ee/api/v1/en/stat/rahvaloendus/rel2000/usk/RL229.PX",
+      "method": "POST",
+      "retrieval_date": "2026-07-10",
+      "bytes": 3242,
+      "sha256": "e5e29f79491da9e5f75ef23ff7cc37cd3f92d4bd9a045800870a38684a50e895",
+      "request_body": {
+        "query": [
+          {
+            "code": "Sugu",
+            "selection": {
+              "filter": "item",
+              "values": [
+                "+"
+              ]
+            }
+          },
+          {
+            "code": "Elukoht",
+            "selection": {
+              "filter": "item",
+              "values": [
+                "000000",
+                "370000",
+                "390000",
+                "440000",
+                "490000",
+                "510000",
+                "570000",
+                "590000",
+                "650000",
+                "670000",
+                "700000",
+                "740000",
+                "780000",
+                "820000",
+                "840000",
+                "860000"
+              ]
+            }
+          },
+          {
+            "code": "Suhtumine religiooni ja usk",
+            "selection": {
+              "filter": "all",
+              "values": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "response": {
+          "format": "json-stat2"
+        }
+      }
+    },
+    {
+      "local_path": "data/raw/ee_census/maaamet_2000_county_raw.geojson",
+      "url": "https://teenus.maaamet.ee/ows/wms-ajalooline-haldus?service=WFS&version=2.0.0&request=GetFeature&typeNames=maakonnad_2000&outputFormat=GEOJSON",
+      "method": "GET",
+      "retrieval_date": "2026-07-10",
+      "bytes": 14591670,
+      "sha256": "f97a4d4dcd4216d8344514e90e5df9ca268e2488b0b528f7ad7d46c892b554f3"
+    },
+    {
+      "local_path": "data/raw/ee_census/px_2011_metadata_en.json",
+      "url": "https://andmed.stat.ee/api/v1/en/stat/rahvaloendus/rel2011/rahvastiku-demograafilised-ja-etno-kultuurilised-naitajad/usk/RL0453.PX",
+      "method": "GET",
+      "retrieval_date": "2026-07-10",
+      "bytes": 1750,
+      "sha256": "d04412d4e4bc30efde2bc405bf283611432c9a0d886f7b4fc0b793a03316a1fa"
+    },
+    {
+      "local_path": "data/raw/ee_census/px_2011_metadata_et.json",
+      "url": "https://andmed.stat.ee/api/v1/et/stat/rahvaloendus/rel2011/rahvastiku-demograafilised-ja-etno-kultuurilised-naitajad/usk/RL0453.PX",
+      "method": "GET",
+      "retrieval_date": "2026-07-10",
+      "bytes": 1706,
+      "sha256": "33bee54804f34472c247f37172df7762619bdb9e226dd3befaf15a9955a9bc36"
+    },
+    {
+      "local_path": "data/raw/ee_census/px_2011_county_religion.json",
+      "url": "https://andmed.stat.ee/api/v1/en/stat/rahvaloendus/rel2011/rahvastiku-demograafilised-ja-etno-kultuurilised-naitajad/usk/RL0453.PX",
+      "method": "POST",
+      "retrieval_date": "2026-07-10",
+      "bytes": 3374,
+      "sha256": "9e0cdf290458e1a405dc02e6edd273cac2fe87c9834f178efc27f7015b600b3e",
+      "request_body": {
+        "query": [
+          {
+            "code": "Sugu",
+            "selection": {
+              "filter": "item",
+              "values": [
+                "T"
+              ]
+            }
+          },
+          {
+            "code": "Maakond",
+            "selection": {
+              "filter": "item",
+              "values": [
+                "EE00",
+                "37",
+                "39",
+                "44",
+                "49",
+                "51",
+                "57",
+                "59",
+                "65",
+                "67",
+                "70",
+                "74",
+                "78",
+                "82",
+                "84",
+                "86"
+              ]
+            }
+          },
+          {
+            "code": "Usk",
+            "selection": {
+              "filter": "all",
+              "values": [
+                "*"
+              ]
+            }
+          },
+          {
+            "code": "Vanuserühm",
+            "selection": {
+              "filter": "item",
+              "values": [
+                "Y_TOTAL"
+              ]
+            }
+          }
+        ],
+        "response": {
+          "format": "json-stat2"
+        }
+      }
+    },
+    {
+      "local_path": "data/raw/ee_census/maaamet_2011_county_raw.geojson",
+      "url": "https://teenus.maaamet.ee/ows/wms-ajalooline-haldus?service=WFS&version=2.0.0&request=GetFeature&typeNames=maakonnad_2011&outputFormat=GEOJSON",
+      "method": "GET",
+      "retrieval_date": "2026-07-10",
+      "bytes": 32606699,
+      "sha256": "132018126d7b0c012a352f20d03973a511bd2886cbab8dc02692c804298289a4"
+    },
+    {
+      "local_path": "data/raw/ee_census/px_2021_metadata_en.json",
+      "url": "https://andmed.stat.ee/api/v1/en/stat/rahvaloendus/rel2021/rahvastiku-demograafilised-ja-etno-kultuurilised-naitajad/usk/RL21452.px",
+      "method": "GET",
+      "retrieval_date": "2026-07-10",
+      "bytes": 5590,
+      "sha256": "1172683bff0a5eac6a9898acaa38e65584048916345eae4fc7dcd81c3a3d0cf9"
+    },
+    {
+      "local_path": "data/raw/ee_census/px_2021_metadata_et.json",
+      "url": "https://andmed.stat.ee/api/v1/et/stat/rahvaloendus/rel2021/rahvastiku-demograafilised-ja-etno-kultuurilised-naitajad/usk/RL21452.px",
+      "method": "GET",
+      "retrieval_date": "2026-07-10",
+      "bytes": 4564,
+      "sha256": "0ff027aaeb624526745048af3d648287048ff62c4552cc825defa7f698f9a207"
+    },
+    {
+      "local_path": "data/raw/ee_census/px_2021_county_religion.json",
+      "url": "https://andmed.stat.ee/api/v1/en/stat/rahvaloendus/rel2021/rahvastiku-demograafilised-ja-etno-kultuurilised-naitajad/usk/RL21452.px",
+      "method": "POST",
+      "retrieval_date": "2026-07-10",
+      "bytes": 4029,
+      "sha256": "e70a8f71c47c8a21eadbf8c5aaecf7a2237ad012f100e5e5007affdba3f7ce88",
+      "request_body": {
+        "query": [
+          {
+            "code": "Aasta",
+            "selection": {
+              "filter": "item",
+              "values": [
+                "2021"
+              ]
+            }
+          },
+          {
+            "code": "Elukoht",
+            "selection": {
+              "filter": "item",
+              "values": [
+                "1",
+                "00370000000000",
+                "00390000000000",
+                "00450000000000",
+                "00500000000000",
+                "00520000000000",
+                "00560000000000",
+                "00600000000000",
+                "00640000000000",
+                "00680000000000",
+                "00710000000000",
+                "00740000000000",
+                "00790000000000",
+                "00810000000000",
+                "00840000000000",
+                "00870000000000"
+              ]
+            }
+          },
+          {
+            "code": "Usk",
+            "selection": {
+              "filter": "all",
+              "values": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "response": {
+          "format": "json-stat2"
+        }
+      }
+    },
+    {
+      "local_path": "data/raw/ee_census/maaamet_2021_county_raw.geojson",
+      "url": "https://teenus.maaamet.ee/ows/wms-ajalooline-haldus?service=WFS&version=2.0.0&request=GetFeature&typeNames=maakonnad_2021&outputFormat=GEOJSON",
+      "method": "GET",
+      "retrieval_date": "2026-07-10",
+      "bytes": 47378798,
+      "sha256": "e4095fa165d8edcd9deb0da0f210ad3f8999dc059afc932f2ff742ed40048cab"
+    },
+    {
+      "local_path": "data/raw/ee_census/px_2000_religion_branch_en.json",
+      "url": "https://andmed.stat.ee/api/v1/en/stat/rahvaloendus/rel2000/usk",
+      "method": "GET",
+      "retrieval_date": "2026-07-10",
+      "bytes": 401,
+      "sha256": "60bc5d3bd4b1f2262c14d0730abf703d3abe4705fae9d59323f48532a003301e"
+    },
+    {
+      "local_path": "data/raw/ee_census/px_2011_religion_branch_en.json",
+      "url": "https://andmed.stat.ee/api/v1/en/stat/rahvaloendus/rel2011/rahvastiku-demograafilised-ja-etno-kultuurilised-naitajad/usk",
+      "method": "GET",
+      "retrieval_date": "2026-07-10",
+      "bytes": 1294,
+      "sha256": "8ce699c566d7f47259359aa0800db3c5ab26a3ff7cd5cc9962e62fee333fe3a5"
+    },
+    {
+      "local_path": "data/raw/ee_census/px_2021_religion_branch_en.json",
+      "url": "https://andmed.stat.ee/api/v1/en/stat/rahvaloendus/rel2021/rahvastiku-demograafilised-ja-etno-kultuurilised-naitajad/usk",
+      "method": "GET",
+      "retrieval_date": "2026-07-10",
+      "bytes": 816,
+      "sha256": "6c7d8259628826272bb93bbf2ca0f870c6ac1d4a94516a6aa5ebd0c90745efd3"
+    },
+    {
+      "local_path": "data/raw/ee_census/statistics_estonia_dissemination_terms.html",
+      "url": "https://www.stat.ee/en/statistics-estonia/about-us/strategy/principles-dissemination-official-statistics",
+      "method": "GET",
+      "retrieval_date": "2026-07-10",
+      "bytes": 99884,
+      "sha256": "b9565f372501b993fa3de6c7d6ed785c225625d2b4df900906296816addedc88"
+    },
+    {
+      "local_path": "data/raw/ee_census/statistics_estonia_2021_religion_method.html",
+      "url": "https://www.stat.ee/en/news/population-census-proportion-people-religious-affiliation-remains-stable-orthodox-christianity-still-most-widespread",
+      "method": "GET",
+      "retrieval_date": "2026-07-10",
+      "bytes": 88427,
+      "sha256": "a07b862b61a3b320117edd15abdbe6da4dcd3053b029c0e4efcd65efa4416eef"
+    },
+    {
+      "local_path": "data/raw/ee_census/maaamet_administrative_division_catalogue.html",
+      "url": "https://geoportaal.maaamet.ee/eng/spatial-data/administrative-and-settlement-division-p312.html",
+      "method": "GET",
+      "retrieval_date": "2026-07-10",
+      "bytes": 39135,
+      "sha256": "82dead3264ca25672f1494789b29469ceeb8aeb2351deadf945d99d9ca2b9c70"
+    },
+    {
+      "local_path": "data/raw/ee_census/maaamet_open_data_licence.pdf",
+      "url": "https://geoportaal.maaamet.ee/docs/Avaandmed/Licence-of-open-data-of-Estonian-Land-Board.pdf",
+      "method": "GET",
+      "retrieval_date": "2026-07-10",
+      "bytes": 89977,
+      "sha256": "9dc6e53e760b794afd2a6efc1df3dc6bf227fcfa3f8c3821794e82f729b12fe9"
+    },
+    {
+      "local_path": "data/raw/ee_census/maaamet_historical_county_wfs_capabilities.xml",
+      "url": "https://teenus.maaamet.ee/ows/wms-ajalooline-haldus?service=WFS&request=GetCapabilities&version=2.0.0",
+      "method": "GET",
+      "retrieval_date": "2026-07-10",
+      "bytes": 157062,
+      "sha256": "11e46026ec84cb50c4fbceae8013f7c90e8608a4f270204e01b3d48370169e33"
+    }
+  ],
+  "derived_outputs": {
+    "1": {
+      "uri": "repo:apps/regions/ee/data/area_summary_county.json",
+      "sha256": "1966030aba4422ed296e4f0b917108a4940694db03f46501fbb9190cea20c794",
+      "built_by": "scripts/build_ee_area_summary.R"
+    },
+    "2": {
+      "uri": "repo:apps/regions/ee/data/area_summary_county.csv",
+      "sha256": "f10be59fcfb183da6084160b9c04996dc03904d9ee1e240718e73d2be812240a",
+      "built_by": "scripts/build_ee_area_summary.R"
+    },
+    "2000": {
+      "uri": "repo:apps/regions/ee/data/ee_county_2000.geojson",
+      "sha256": "ec29bb153155e7fc4c00fc83c5de6afbcb30ec29584358cbeb47abc2ca066a49",
+      "built_by": "scripts/build_ee_area_summary.R"
+    },
+    "2011": {
+      "uri": "repo:apps/regions/ee/data/ee_county_2011.geojson",
+      "sha256": "fd2a732f937ce35c75bb3c1d8758704929f814b9ac0bb4d095fd152db6148e8c",
+      "built_by": "scripts/build_ee_area_summary.R"
+    },
+    "2021": {
+      "uri": "repo:apps/regions/ee/data/ee_county_2021.geojson",
+      "sha256": "031f50adee82f5551bc87236f0e7e6738801892b8a1ec6754ee0de27e37bf6b3",
+      "built_by": "scripts/build_ee_area_summary.R"
+    }
+  },
+  "source_datasets": [
+    {
+      "source_dataset_id": "stat-ee-rl229-census-religion-2000",
+      "name": "RL229: POPULATION BY THE PLACE OF RESIDENCE AND RELIGIOUS AFFILIATION*",
+      "provider": "Statistics Estonia",
+      "url": "https://andmed.stat.ee/api/v1/en/stat/rahvaloendus/rel2000/usk/RL229.PX",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/ee_census/px_2000_county_religion.json",
+      "licence": {
+        "name": "Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)",
+        "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "attribution": "Statistics Estonia"
+      },
+      "citation": "Statistics Estonia, PXWeb table RL229.PX",
+      "access_limits": null,
+      "redistribution_limits": "Statistics Estonia requires source attribution and share-alike reuse under CC BY-SA 4.0. Raw API responses remain in the git-ignored cache.",
+      "notes": "The table footnote defines Population as persons aged 15 and older plus persons whose age was unknown. The product uses that published total as the age-15-plus denominator."
+    },
+    {
+      "source_dataset_id": "stat-ee-rl0453-census-religion-2011",
+      "name": "RL0453: AT LEAST 15-YEAR-OLD PERSONS BY RELIGION, SEX, AGE GROUP AND COUNTY, 31 DECEMBER 2011",
+      "provider": "Statistics Estonia",
+      "url": "https://andmed.stat.ee/api/v1/en/stat/rahvaloendus/rel2011/rahvastiku-demograafilised-ja-etno-kultuurilised-naitajad/usk/RL0453.PX",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/ee_census/px_2011_county_religion.json",
+      "licence": {
+        "name": "Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)",
+        "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "attribution": "Statistics Estonia"
+      },
+      "citation": "Statistics Estonia, PXWeb table RL0453.PX",
+      "access_limits": null,
+      "redistribution_limits": "Statistics Estonia requires source attribution and share-alike reuse under CC BY-SA 4.0. Raw API responses remain in the git-ignored cache.",
+      "notes": "The table is a full-enumeration census table for persons aged 15 and over. The religion question was voluntary."
+    },
+    {
+      "source_dataset_id": "stat-ee-rl21452-census-religion-2021",
+      "name": "RL21452: AT LEAST 15-YEAR-OLD PERSONS BY RELIGION AND PLACE OF RESIDENCE (ADMINISTRATIVE UNIT), 31 DECEMBER 2021",
+      "provider": "Statistics Estonia",
+      "url": "https://andmed.stat.ee/api/v1/en/stat/rahvaloendus/rel2021/rahvastiku-demograafilised-ja-etno-kultuurilised-naitajad/usk/RL21452.px",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/ee_census/px_2021_county_religion.json",
+      "licence": {
+        "name": "Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)",
+        "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "attribution": "Statistics Estonia"
+      },
+      "citation": "Statistics Estonia, PXWeb table RL21452.px",
+      "access_limits": null,
+      "redistribution_limits": "Statistics Estonia requires source attribution and share-alike reuse under CC BY-SA 4.0. Raw API responses remain in the git-ignored cache.",
+      "notes": "Religion was collected through the census sample survey and generalised to the population aged 15 and over. Religion was not supplemented from registers. Published counts are in tens, and the table warns that aggregates may differ from sums because of rounding."
+    },
+    {
+      "source_dataset_id": "maaamet-historical-county-2000-12-04",
+      "name": "Maa-amet (Estonian Land Board) historical county layer 2000-12-04",
+      "provider": "Estonian Land and Spatial Development Board (Maa- ja Ruumiamet; Maa-amet service)",
+      "url": "https://teenus.maaamet.ee/ows/wms-ajalooline-haldus?service=WFS&version=2.0.0&request=GetFeature&typeNames=maakonnad_2000&outputFormat=GEOJSON",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/ee_census/maaamet_2000_county_raw.geojson",
+      "licence": {
+        "name": "Estonian Land and Spatial Development Board open-data licence; source and data vintage attribution required",
+        "url": "https://geoportaal.maaamet.ee/docs/Avaandmed/Licence-of-open-data-of-Estonian-Land-Board.pdf",
+        "attribution": "Administrative and settlement units, Estonian Land and Spatial Development Board 2000-12-04"
+      },
+      "citation": "Estonian Land and Spatial Development Board historical administrative division WFS (Web Feature Service), county layer maakonnad_2000",
+      "access_limits": null,
+      "redistribution_limits": "The official open-data licence permits derivatives and redistribution with origin and data-vintage attribution. No Creative Commons identifier is claimed for the boundary.",
+      "notes": "Official per-vintage county boundary. The layer is not used to rebase another wave's counts."
+    },
+    {
+      "source_dataset_id": "maaamet-historical-county-2011-06-08",
+      "name": "Maa-amet historical county layer 2011-06-08",
+      "provider": "Estonian Land and Spatial Development Board (Maa- ja Ruumiamet; Maa-amet service)",
+      "url": "https://teenus.maaamet.ee/ows/wms-ajalooline-haldus?service=WFS&version=2.0.0&request=GetFeature&typeNames=maakonnad_2011&outputFormat=GEOJSON",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/ee_census/maaamet_2011_county_raw.geojson",
+      "licence": {
+        "name": "Estonian Land and Spatial Development Board open-data licence; source and data vintage attribution required",
+        "url": "https://geoportaal.maaamet.ee/docs/Avaandmed/Licence-of-open-data-of-Estonian-Land-Board.pdf",
+        "attribution": "Administrative and settlement units, Estonian Land and Spatial Development Board 2011-06-08"
+      },
+      "citation": "Estonian Land and Spatial Development Board historical administrative division WFS, county layer maakonnad_2011",
+      "access_limits": null,
+      "redistribution_limits": "The official open-data licence permits derivatives and redistribution with origin and data-vintage attribution. No Creative Commons identifier is claimed for the boundary.",
+      "notes": "Official per-vintage county boundary. The layer is not used to rebase another wave's counts."
+    },
+    {
+      "source_dataset_id": "maaamet-historical-county-2021-01-01",
+      "name": "Maa-amet historical county layer 2021-01-01",
+      "provider": "Estonian Land and Spatial Development Board (Maa- ja Ruumiamet; Maa-amet service)",
+      "url": "https://teenus.maaamet.ee/ows/wms-ajalooline-haldus?service=WFS&version=2.0.0&request=GetFeature&typeNames=maakonnad_2021&outputFormat=GEOJSON",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/ee_census/maaamet_2021_county_raw.geojson",
+      "licence": {
+        "name": "Estonian Land and Spatial Development Board open-data licence; source and data vintage attribution required",
+        "url": "https://geoportaal.maaamet.ee/docs/Avaandmed/Licence-of-open-data-of-Estonian-Land-Board.pdf",
+        "attribution": "Administrative and settlement units, Estonian Land and Spatial Development Board 2021-01-01"
+      },
+      "citation": "Estonian Land and Spatial Development Board historical administrative division WFS, county layer maakonnad_2021",
+      "access_limits": null,
+      "redistribution_limits": "The official open-data licence permits derivatives and redistribution with origin and data-vintage attribution. No Creative Commons identifier is claimed for the boundary.",
+      "notes": "Official per-vintage county boundary. The layer is not used to rebase another wave's counts."
+    }
+  ]
+}
