@@ -622,10 +622,18 @@
           className: "pinned-label"
         });
       }
+      // the label popup instance is reused across shows: reset any dragged
+      // offset and any drag-pinned anchor so every show opens at its anchor.
+      // the drag call below is guard-safe — setHTML retains the content
+      // element, so the module wires it once and only resets gesture state
+      // on repeat calls
+      pinnedLabel.setOffset([0, 0]);
+      pinnedLabel.options.anchor = undefined;
       pinnedLabel
         .setLngLat(coords)
         .setHTML(`<div style="font-weight:600;color:inherit;">${name}</div>`)
         .addTo(map);
+      makePopupDraggable(pinnedLabel);
       if (pinnedTimer) clearTimeout(pinnedTimer);
       pinnedTimer = setTimeout(() => pinnedLabel.remove(), 2200);
     }
@@ -788,9 +796,148 @@
     function trackPlacePopup(popup) {
       if (activePlacePopup && activePlacePopup !== popup) activePlacePopup.remove();
       activePlacePopup = popup;
+      makePopupDraggable(popup);
       popup.on("close", () => {
         if (activePlacePopup === popup) activePlacePopup = null;
       });
+    }
+
+    // ── popup offset helpers ────────────────────────────────────────
+    // the popup's current anchor: the configured one, or the auto-chosen
+    // one read from the wrapper element's anchor class
+    function popupAnchorOf(popup) {
+      if (popup.options.anchor) return popup.options.anchor;
+      const el = popup.getElement ? popup.getElement() : null;
+      const m = el ? /maplibregl-popup-anchor-([a-z-]+)/.exec(el.className) : null;
+      return m ? m[1] : "center";
+    }
+    // pin the auto-chosen anchor before applying an offset that must hold:
+    // a map pan re-chooses the auto anchor, and an anchor flip mirrors any
+    // held offset (an offset change alone never re-anchors in 3.6.1)
+    function pinPopupAnchor(popup) {
+      if (popup.options.anchor) return;
+      const el = popup.getElement ? popup.getElement() : null;
+      const m = el ? /maplibregl-popup-anchor-([a-z-]+)/.exec(el.className) : null;
+      if (m) popup.options.anchor = m[1];
+    }
+    // maplibre popup offsets take three forms — a number (radial, resolved
+    // per anchor), a PointLike, or a per-anchor object. resolve the
+    // effective x/y for the popup's current anchor so drags and clamps
+    // compose with a pre-set offset instead of discarding it
+    function resolvePopupOffset(popup) {
+      const anchor = popupAnchorOf(popup);
+      let o = popup.options.offset;
+      if (o && typeof o === "object" && !Array.isArray(o) && o.x === undefined) {
+        o = o[anchor] !== undefined ? o[anchor] : 0; // per-anchor object
+      }
+      if (typeof o === "number") {
+        // maplibre's radial convention: the offset points away from the
+        // anchored edge, with corners at sqrt(1/2) of the distance
+        const c = Math.round(Math.sqrt(0.5 * o * o));
+        const byAnchor = {
+          center: [0, 0],
+          top: [0, o], "top-left": [c, c], "top-right": [-c, c],
+          bottom: [0, -o], "bottom-left": [c, -c], "bottom-right": [-c, -c],
+          left: [o, 0], right: [-o, 0]
+        };
+        o = byAnchor[anchor] || [0, 0];
+      }
+      if (Array.isArray(o)) return { x: o[0] || 0, y: o[1] || 0 };
+      if (o && typeof o === "object") return { x: o.x || 0, y: o.y || 0 };
+      return { x: 0, y: 0 };
+    }
+
+    // popups drag like the pills (same 4px threshold, mouse/pen only, and
+    // trailing-click suppression), but by adjusting the maplibre offset, so
+    // the popup stays anchored to its feature: it pans and zooms with the
+    // map, displaced by the drag, and may leave the viewport — no clamping.
+    // nothing persists: every popup opens fresh at its anchor. the anchor
+    // is pinned when a real drag begins, leaving undragged popups on stock
+    // auto-anchor behaviour.
+    const POPUP_DRAG_WIRED = new WeakSet();
+    function makePopupDraggable(popup) {
+      const el = popup.getElement ? popup.getElement() : null;
+      const content = el ? el.querySelector(".maplibregl-popup-content") : null;
+      if (!content) return;
+      // maplibre's setHTML retains the content element and clears only its
+      // children, so a reused popup (the pinned label) presents the same
+      // element on every show: wire once, and only reset the gesture state
+      // on repeat calls — rewiring would stack listeners and multiply drags
+      if (POPUP_DRAG_WIRED.has(content)) {
+        if (content._powDragReset) content._powDragReset();
+        return;
+      }
+      POPUP_DRAG_WIRED.add(content);
+      let startX = 0, startY = 0, baseX = 0, baseY = 0;
+      let pointerId = null, captureEl = null;
+      let dragging = false, moved = false, suppressClick = false;
+      // shared cleanup: end any gesture WITHOUT arming click suppression (a
+      // cancelled pointer fires no trailing click, so arming would swallow
+      // the next legitimate one) and always restore text selection
+      const abortDrag = () => {
+        if (captureEl) { try { captureEl.releasePointerCapture(pointerId); } catch (_) { /* already released */ } }
+        captureEl = null;
+        dragging = false; moved = false;
+        document.body.style.userSelect = "";
+      };
+      content._powDragReset = () => { abortDrag(); suppressClick = false; };
+      // the pinned label's timer can remove the popup mid-drag: end the
+      // gesture and restore the page then too
+      popup.on("close", abortDrag);
+      content.addEventListener("pointerdown", (e) => {
+        if (e.pointerType === "touch" || e.button !== 0) return;
+        const t = e.target;
+        if (!(t instanceof Element)) return;
+        // links, controls and the street view pane keep their own gestures
+        if (t.closest("a, button, select, input, textarea, .streetview")) return;
+        startX = e.clientX; startY = e.clientY;
+        dragging = true; moved = false; suppressClick = false;
+        pointerId = e.pointerId;
+        captureEl = t;
+        try { t.setPointerCapture(e.pointerId); } catch (_) { /* capture unsupported */ }
+        // the popup sits inside the map container: keep the press from
+        // arming the map's own drag-pan
+        e.stopPropagation();
+      });
+      content.addEventListener("pointermove", (e) => {
+        if (!dragging || e.pointerId !== pointerId) return;
+        const dx = e.clientX - startX, dy = e.clientY - startY;
+        if (!moved && Math.hypot(dx, dy) < 4) return; // under threshold: still a click
+        if (!moved) {
+          moved = true;
+          // pin the anchor, then resolve whatever offset the popup already
+          // carries (number, PointLike, or per-anchor object) as the base
+          // the drag composes with — resolved against the pinned anchor
+          pinPopupAnchor(popup);
+          const base = resolvePopupOffset(popup);
+          baseX = base.x; baseY = base.y;
+          document.body.style.userSelect = "none";
+        }
+        popup.setOffset([baseX + dx, baseY + dy]);
+      });
+      content.addEventListener("pointerup", (e) => {
+        if (!dragging || e.pointerId !== pointerId) return;
+        if (moved) suppressClick = true; // a real drag: swallow the click it fires
+        abortDrag();
+      });
+      // a cancelled pointer produces no trailing click: end without arming
+      content.addEventListener("pointercancel", (e) => {
+        if (!dragging || e.pointerId !== pointerId) return;
+        abortDrag();
+      });
+      // capture loss (element leaving the DOM, OS-level grabs) ends the
+      // drag too; after a normal release this is a no-op
+      content.addEventListener("lostpointercapture", (e) => {
+        if (!dragging || e.pointerId !== pointerId) return;
+        abortDrag();
+      });
+      // capture-phase so the click dies before any inner button/link handler runs
+      content.addEventListener("click", (e) => {
+        if (!suppressClick) return;
+        suppressClick = false;
+        e.stopPropagation();
+        e.preventDefault();
+      }, true);
     }
 
     function clampPopupToViewport(popup, padding = 12) {
@@ -817,9 +964,14 @@
         if (popupRect.bottom > maxBottom) dy = maxBottom - popupRect.bottom;
       }
       if (!dx && !dy) return;
-      const current = map.project(popup.getLngLat());
-      const next = { x: current.x + dx, y: current.y + dy };
-      popup.setLngLat(map.unproject(next));
+      // keep the popup on-screen by adjusting its offset, never its lngLat:
+      // it stays anchored to its feature and pans with the map. pin the
+      // anchor first so a later auto re-anchor cannot mirror the shift, and
+      // compose with any offset already applied (a preset in any maplibre
+      // form, or a drag's) instead of clobbering it
+      pinPopupAnchor(popup);
+      const base = resolvePopupOffset(popup);
+      popup.setOffset([base.x + dx, base.y + dy]);
     }
 
     async function handlePlaceFeatureClick(feature, fallbackLngLat) {
@@ -880,57 +1032,9 @@
       const panoContainer = () => document.getElementById(panoId);
       const popupContent = popup.getElement();
       const popupBody = popupContent ? popupContent.querySelector(".maplibregl-popup-content") : null;
-      if (popupBody) {
-        const mapCanvas = map.getCanvas();
-        let dragging = false;
-        let startX = 0;
-        let startY = 0;
-
-        const canDragFromTarget = (event) => {
-          if (event.button !== undefined && event.button !== 0) return false;
-          const target = event.target;
-          if (!(target instanceof Element)) return false;
-          if (target.closest(".streetview")) return false;
-          if (target.closest(".popup-actions")) return false;
-          if (target.closest(".maplibregl-popup-close-button")) return false;
-          if (target.closest("button, a, input, select, textarea, label")) return false;
-          return true;
-        };
-
-        popupBody.addEventListener("mousedown", (event) => {
-          if (!canDragFromTarget(event)) return;
-          dragging = true;
-          popupBody.classList.add("dragging");
-          startX = event.clientX;
-          startY = event.clientY;
-          mapCanvas.style.cursor = "grabbing";
-          if (map.dragPan) map.dragPan.disable();
-          document.body.style.userSelect = "none";
-          event.stopPropagation();
-          event.preventDefault();
-        });
-
-        window.addEventListener("mousemove", (event) => {
-          if (!dragging) return;
-          const dx = event.clientX - startX;
-          const dy = event.clientY - startY;
-          startX = event.clientX;
-          startY = event.clientY;
-          const current = map.project(popup.getLngLat());
-          const next = { x: current.x + dx, y: current.y + dy };
-          const nextLngLat = map.unproject(next);
-          popup.setLngLat(nextLngLat);
-        });
-
-        window.addEventListener("mouseup", () => {
-          if (!dragging) return;
-          dragging = false;
-          popupBody.classList.remove("dragging");
-          mapCanvas.style.cursor = "";
-          if (map.dragPan) map.dragPan.enable();
-          document.body.style.userSelect = "";
-        });
-      }
+      // dragging comes from trackPlacePopup's universal offset drag; the old
+      // per-popup setLngLat drag (which detached the popup from its feature)
+      // is gone
       // ui wiring that must work whether or not street view ever starts:
       // expand, the drag hint, and copy-coords live outside the lazy path
       const popupEl = popup.getElement();

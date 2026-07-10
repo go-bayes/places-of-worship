@@ -116,6 +116,19 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
   .shell-touch { min-height: 44px; min-width: 44px; }
 }
 
+/* phones: the wordmark pill keeps only the navigation links — "Data
+   maps" and "Global map" on country pages, "Data maps" on the global
+   page. the OSM-edit link, the theme select, and the global page's
+   GitHub link hide below 640px. no stray divider results: the hidden
+   members are the trailing children in both layouts, so every remaining
+   border sits between two visible links (or nowhere, when only the
+   first child remains) */
+@media (max-width: 640px) {
+  #fixmap-link,
+  #basemapSelect,
+  #wordmark-repo { display: none; }
+}
+
 /* popup idiom: dark translucent card, no tip, pill close button,
    attribute grid, footnotes in white — never the grey whisper */
 .maplibregl-popup-content {
