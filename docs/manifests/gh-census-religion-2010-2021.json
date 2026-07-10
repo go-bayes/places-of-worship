@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:gh-census-religion:gh:2010-2021:gss-statsbank-pop16-vol3c",
   "dataset_id": "gh-census-religion:gh:2010-2021:gss-statsbank-pop16-vol3c",
   "dataset_version_id": "gh-census-religion:gh:2010-2021:gss-statsbank-pop16-vol3c:a1afdccf7e4b",
@@ -162,7 +162,8 @@
       "row_count": 32,
       "content": "Ghana 16-region area summary with GSS StatsBank PHC2010 re-tabulated 2010 counts and GSS 2021 census religion metrics; existing 2021 row objects preserved byte-identical.",
       "privacy": "public",
-      "licence_status": "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0"
+      "licence_status": "accepted",
+      "licence_basis": "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0"
     },
     {
       "uri": "repo:apps/regions/gh/data/area_summary_region.csv",
@@ -173,7 +174,8 @@
       "row_count": 32,
       "content": "Flattened Ghana 16-region area summary with GSS census religion metrics for 2010 and 2021.",
       "privacy": "public",
-      "licence_status": "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0"
+      "licence_status": "accepted",
+      "licence_basis": "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0"
     },
     {
       "uri": "repo:apps/regions/gh/data/gh_region_2019.geojson",
@@ -184,7 +186,8 @@
       "row_count": 16,
       "content": "Existing simplified Ghana 16-region boundary GeoJSON derived from geoBoundaries GHA ADM1.",
       "privacy": "public",
-      "licence_status": "geoboundaries_cc_by_sa_2_0"
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_cc_by_sa_2_0"
     },
     {
       "uri": "repo:apps/regions/gh/data/area_summary_region_2010_2021_ten.json",
@@ -195,7 +198,8 @@
       "row_count": 20,
       "content": "Ghana old ten-region area summary with 2010 StatsBank counts and exact 2021 sums from the sixteen-region product.",
       "privacy": "public",
-      "licence_status": "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0"
+      "licence_status": "accepted",
+      "licence_basis": "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0"
     },
     {
       "uri": "repo:apps/regions/gh/data/area_summary_region_2010_2021_ten.csv",
@@ -206,7 +210,8 @@
       "row_count": 20,
       "content": "Flattened Ghana old ten-region area summary with 2010 and 2021 census religion metrics.",
       "privacy": "public",
-      "licence_status": "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0"
+      "licence_status": "accepted",
+      "licence_basis": "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0"
     },
     {
       "uri": "repo:apps/regions/gh/data/gh_region_2010_ten.geojson",
@@ -217,7 +222,8 @@
       "row_count": 10,
       "content": "Dissolved Ghana old ten-region boundary GeoJSON derived from the existing geoBoundaries GHA ADM1 product.",
       "privacy": "public",
-      "licence_status": "geoboundaries_cc_by_sa_2_0"
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_cc_by_sa_2_0"
     }
   ],
   "derived_outputs": [
@@ -661,7 +667,8 @@
       "dissolved_from_existing_2021_boundary": true,
       "unmatched_boundary_features": [],
       "unmatched_census_areas": []
-    }
+    },
+    "status": "passed"
   },
   "construct_notes": [
     "The Ghana 16-region product now places 2010 and 2021 on the current 16-region frame.",
@@ -671,117 +678,6 @@
     "The shared region runtime can compute religious_change from adjacent census years when REGION_CONFIG.metricsAvailable includes religious_change; this build leaves UI wiring unchanged.",
     "Religious affiliation combines Catholic, Protestant or Protestants, Pentecostal/Charismatic, Other Christian or Other christian, Islam, Traditionalist, and Other Religion or Other. No religion is the No Religion group.",
     "The table 5.7 total (30753327) is 78692 below the enumerated 2021 population (30832019, Table 1.1); the gap sits outside the religion table and there is no not-stated category within table 5.7."
-  ],
-  "category_mapping": [
-    {
-      "source_year": 2010,
-      "source_category": "Total",
-      "product_field": "population_total",
-      "product_role": "denominator"
-    },
-    {
-      "source_year": 2010,
-      "source_category": "No religion",
-      "product_field": "no_religion_count",
-      "product_role": "no religion"
-    },
-    {
-      "source_year": 2010,
-      "source_category": "Catholic",
-      "product_field": "religious_affiliation_count",
-      "product_role": "named religion"
-    },
-    {
-      "source_year": 2010,
-      "source_category": "Protestants",
-      "product_field": "religious_affiliation_count",
-      "product_role": "named religion"
-    },
-    {
-      "source_year": 2010,
-      "source_category": "Pentecostal/Charismatic",
-      "product_field": "religious_affiliation_count",
-      "product_role": "named religion"
-    },
-    {
-      "source_year": 2010,
-      "source_category": "Other christian",
-      "product_field": "religious_affiliation_count",
-      "product_role": "named religion"
-    },
-    {
-      "source_year": 2010,
-      "source_category": "Islam",
-      "product_field": "religious_affiliation_count",
-      "product_role": "named religion"
-    },
-    {
-      "source_year": 2010,
-      "source_category": "Traditionalist",
-      "product_field": "religious_affiliation_count",
-      "product_role": "named religion"
-    },
-    {
-      "source_year": 2010,
-      "source_category": "Other",
-      "product_field": "religious_affiliation_count",
-      "product_role": "named religion"
-    },
-    {
-      "source_year": 2021,
-      "source_category": "Total",
-      "product_field": "population_total",
-      "product_role": "denominator"
-    },
-    {
-      "source_year": 2021,
-      "source_category": "No Religion",
-      "product_field": "no_religion_count",
-      "product_role": "no religion"
-    },
-    {
-      "source_year": 2021,
-      "source_category": "Catholic; Protestant; Pentecostal/Charismatic; Other Christian; Islam; Traditionalist; Other Religion",
-      "product_field": "religious_affiliation_count",
-      "product_role": "named religion"
-    }
-  ],
-  "retrieval_calls": [
-    {
-      "purpose": "StatsBank root",
-      "method": "GET",
-      "url": "https://statsbank.statsghana.gov.gh/api/v1/en",
-      "note": "The working API root is /api/v1/en; /pxweb/api/v1/en returned a 500 error."
-    },
-    {
-      "purpose": "StatsBank PHC2010 Population table list",
-      "method": "GET",
-      "url": "https://statsbank.statsghana.gov.gh/api/v1/en/PHC2010/Population"
-    },
-    {
-      "purpose": "StatsBank PHC2010 POP16 metadata",
-      "method": "GET",
-      "url": "https://statsbank.statsghana.gov.gh/api/v1/en/PHC2010/Population/POP16%20Population%20by%20Religious%20Affiliation,%20Age,%20Sex,%20Locality,%20and%20Geographic_Area.px",
-      "local_path": "data/raw/gh_census/statsbank_phc2010_pop16_meta.json",
-      "sha256": "291588ac1bf1ddf6ad0478a237169e5954cb035ffb338d354d006705fa118bda"
-    },
-    {
-      "purpose": "StatsBank PHC2010 POP16 region-religion CSV",
-      "method": "POST",
-      "url": "https://statsbank.statsghana.gov.gh/api/v1/en/PHC2010/Population/POP16%20Population%20by%20Religious%20Affiliation,%20Age,%20Sex,%20Locality,%20and%20Geographic_Area.px",
-      "content_type": "application/json",
-      "body": "{\"query\":[{\"code\":\"Geographical_Area\",\"selection\":{\"filter\":\"item\",\"values\":[\"Ghana\",\"Western\",\"Central\",\"Greater Accra\",\"Volta\",\"Eastern\",\"Ashanti\",\"Western North\",\"Ahafo\",\"Bono\",\"Bono East\",\"Oti\",\"Northern\",\"Savannah\",\"North East\",\"Upper East\",\"Upper West\"]}},{\"code\":\"Education\",\"selection\":{\"filter\":\"item\",\"values\":[\"Total\"]}},{\"code\":\"Religion\",\"selection\":{\"filter\":\"item\",\"values\":[\"Total\",\"No religion\",\"Catholic\",\"Protestants\",\"Pentecostal/Charismatic\",\"Other christian\",\"Islam\",\"Traditionalist\",\"Other\"]}},{\"code\":\"Locality\",\"selection\":{\"filter\":\"item\",\"values\":[\"All Locality Types\"]}},{\"code\":\"Sex\",\"selection\":{\"filter\":\"item\",\"values\":[\"Both sexes\"]}},{\"code\":\"Age\",\"selection\":{\"filter\":\"item\",\"values\":[\"All ages\"]}}],\"response\":{\"format\":\"CSV\"}}",
-      "local_path": "data/raw/gh_census/statsbank_phc2010_pop16_region_religion.csv",
-      "sha256": "16758890793178525e969e4f5615ec24a6a146e448d7a9a4f13819e6b8c01d5e",
-      "note": "curl used -k because local certificate verification failed for statsbank.statsghana.gov.gh."
-    },
-    {
-      "purpose": "2010 National Analytical Report PDF",
-      "method": "GET",
-      "url": "https://new-ndpc-static1.s3.amazonaws.com/pubication/2010PHC+National+Analytical+Report.pdf",
-      "local_path": "data/raw/gh_census/gh_2010_national_analytical_report.pdf",
-      "sha256": "1a49be386669763e46668f19363a0bc2dcda91042cd9e6c177957b6911cfff20"
-    }
   ],
   "deferred_sources": [
     {
@@ -798,7 +694,7 @@
     }
   ],
   "privacy": "public",
-  "licence_status": "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0",
+  "licence_status": "accepted",
   "downstream_status": "public",
   "source_datasets": [
     {
@@ -887,5 +783,119 @@
       "notes": "The 2019 splits nest exactly inside the old ten regions: Western includes Western North; Volta includes Oti; Northern includes Savannah and North East; Brong Ahafo includes Ahafo, Bono, and Bono East; the other six regions are unchanged."
     }
   ],
-  "notes": "The committed outputs now include a 2010-2021 current sixteen-region product plus the separate old ten-region 2010-2021 companion product. UI wiring is intentionally unchanged."
+  "notes": "The committed outputs now include a 2010-2021 current sixteen-region product plus the separate old ten-region 2010-2021 companion product. UI wiring is intentionally unchanged.",
+  "licence_basis": "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0",
+  "extensions": {
+    "category_mapping": [
+      {
+        "source_year": 2010,
+        "source_category": "Total",
+        "product_field": "population_total",
+        "product_role": "denominator"
+      },
+      {
+        "source_year": 2010,
+        "source_category": "No religion",
+        "product_field": "no_religion_count",
+        "product_role": "no religion"
+      },
+      {
+        "source_year": 2010,
+        "source_category": "Catholic",
+        "product_field": "religious_affiliation_count",
+        "product_role": "named religion"
+      },
+      {
+        "source_year": 2010,
+        "source_category": "Protestants",
+        "product_field": "religious_affiliation_count",
+        "product_role": "named religion"
+      },
+      {
+        "source_year": 2010,
+        "source_category": "Pentecostal/Charismatic",
+        "product_field": "religious_affiliation_count",
+        "product_role": "named religion"
+      },
+      {
+        "source_year": 2010,
+        "source_category": "Other christian",
+        "product_field": "religious_affiliation_count",
+        "product_role": "named religion"
+      },
+      {
+        "source_year": 2010,
+        "source_category": "Islam",
+        "product_field": "religious_affiliation_count",
+        "product_role": "named religion"
+      },
+      {
+        "source_year": 2010,
+        "source_category": "Traditionalist",
+        "product_field": "religious_affiliation_count",
+        "product_role": "named religion"
+      },
+      {
+        "source_year": 2010,
+        "source_category": "Other",
+        "product_field": "religious_affiliation_count",
+        "product_role": "named religion"
+      },
+      {
+        "source_year": 2021,
+        "source_category": "Total",
+        "product_field": "population_total",
+        "product_role": "denominator"
+      },
+      {
+        "source_year": 2021,
+        "source_category": "No Religion",
+        "product_field": "no_religion_count",
+        "product_role": "no religion"
+      },
+      {
+        "source_year": 2021,
+        "source_category": "Catholic; Protestant; Pentecostal/Charismatic; Other Christian; Islam; Traditionalist; Other Religion",
+        "product_field": "religious_affiliation_count",
+        "product_role": "named religion"
+      }
+    ],
+    "retrieval_calls": [
+      {
+        "purpose": "StatsBank root",
+        "method": "GET",
+        "url": "https://statsbank.statsghana.gov.gh/api/v1/en",
+        "note": "The working API root is /api/v1/en; /pxweb/api/v1/en returned a 500 error."
+      },
+      {
+        "purpose": "StatsBank PHC2010 Population table list",
+        "method": "GET",
+        "url": "https://statsbank.statsghana.gov.gh/api/v1/en/PHC2010/Population"
+      },
+      {
+        "purpose": "StatsBank PHC2010 POP16 metadata",
+        "method": "GET",
+        "url": "https://statsbank.statsghana.gov.gh/api/v1/en/PHC2010/Population/POP16%20Population%20by%20Religious%20Affiliation,%20Age,%20Sex,%20Locality,%20and%20Geographic_Area.px",
+        "local_path": "data/raw/gh_census/statsbank_phc2010_pop16_meta.json",
+        "sha256": "291588ac1bf1ddf6ad0478a237169e5954cb035ffb338d354d006705fa118bda"
+      },
+      {
+        "purpose": "StatsBank PHC2010 POP16 region-religion CSV",
+        "method": "POST",
+        "url": "https://statsbank.statsghana.gov.gh/api/v1/en/PHC2010/Population/POP16%20Population%20by%20Religious%20Affiliation,%20Age,%20Sex,%20Locality,%20and%20Geographic_Area.px",
+        "content_type": "application/json",
+        "body": "{\"query\":[{\"code\":\"Geographical_Area\",\"selection\":{\"filter\":\"item\",\"values\":[\"Ghana\",\"Western\",\"Central\",\"Greater Accra\",\"Volta\",\"Eastern\",\"Ashanti\",\"Western North\",\"Ahafo\",\"Bono\",\"Bono East\",\"Oti\",\"Northern\",\"Savannah\",\"North East\",\"Upper East\",\"Upper West\"]}},{\"code\":\"Education\",\"selection\":{\"filter\":\"item\",\"values\":[\"Total\"]}},{\"code\":\"Religion\",\"selection\":{\"filter\":\"item\",\"values\":[\"Total\",\"No religion\",\"Catholic\",\"Protestants\",\"Pentecostal/Charismatic\",\"Other christian\",\"Islam\",\"Traditionalist\",\"Other\"]}},{\"code\":\"Locality\",\"selection\":{\"filter\":\"item\",\"values\":[\"All Locality Types\"]}},{\"code\":\"Sex\",\"selection\":{\"filter\":\"item\",\"values\":[\"Both sexes\"]}},{\"code\":\"Age\",\"selection\":{\"filter\":\"item\",\"values\":[\"All ages\"]}}],\"response\":{\"format\":\"CSV\"}}",
+        "local_path": "data/raw/gh_census/statsbank_phc2010_pop16_region_religion.csv",
+        "sha256": "16758890793178525e969e4f5615ec24a6a146e448d7a9a4f13819e6b8c01d5e",
+        "note": "curl used -k because local certificate verification failed for statsbank.statsghana.gov.gh."
+      },
+      {
+        "purpose": "2010 National Analytical Report PDF",
+        "method": "GET",
+        "url": "https://new-ndpc-static1.s3.amazonaws.com/pubication/2010PHC+National+Analytical+Report.pdf",
+        "local_path": "data/raw/gh_census/gh_2010_national_analytical_report.pdf",
+        "sha256": "1a49be386669763e46668f19363a0bc2dcda91042cd9e6c177957b6911cfff20"
+      }
+    ]
+  }
 }

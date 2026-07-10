@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:al-census-religion:al:2011-2023:instat-census",
   "dataset_id": "al-census-religion:al:2011-2023:instat-census",
   "dataset_version_id": "al-census-religion:al:2011-2023:instat-census:363d654c44e1",
@@ -264,7 +264,8 @@
       "row_count": 24,
       "content": "Albania prefecture area summary with census 2011 and 2023 religious-affiliation and no-religion metrics.",
       "privacy": "public",
-      "licence_status": "instat_census_open_release_attribution_geoboundaries_public_domain"
+      "licence_status": "accepted",
+      "licence_basis": "instat_census_open_release_attribution_geoboundaries_public_domain"
     },
     {
       "uri": "repo:apps/regions/al/data/area_summary_prefecture.csv",
@@ -275,7 +276,8 @@
       "row_count": 24,
       "content": "Flattened Albania prefecture area summary with census 2011 and 2023 religious-affiliation and no-religion metrics.",
       "privacy": "public",
-      "licence_status": "instat_census_open_release_attribution_geoboundaries_public_domain"
+      "licence_status": "accepted",
+      "licence_basis": "instat_census_open_release_attribution_geoboundaries_public_domain"
     },
     {
       "uri": "repo:apps/regions/al/data/al_prefecture_2023.geojson",
@@ -286,7 +288,8 @@
       "row_count": 12,
       "content": "Simplified Albania prefecture boundary GeoJSON derived from geoBoundaries ALB ADM1 (12 prefectures).",
       "privacy": "public",
-      "licence_status": "geoboundaries_public_domain"
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_public_domain"
     }
   ],
   "derived_outputs": [
@@ -373,7 +376,8 @@
       "unmatched_boundary_features": [],
       "unmatched_census_areas": [],
       "name_fixes": []
-    }
+    },
+    "status": "passed"
   },
   "construct_notes": [
     "The public map displays two headline metrics for 2011 and 2023 at prefecture level: religious affiliation percent and no religion percent.",
@@ -398,7 +402,7 @@
     }
   ],
   "privacy": "public",
-  "licence_status": "instat_census_open_release_attribution_geoboundaries_public_domain",
+  "licence_status": "accepted",
   "downstream_status": "public",
   "source_datasets": [
     {
@@ -453,5 +457,6 @@
       "notes": "12 ADM1 prefectures. The geoBoundaries shapeName matches the census prefecture names exactly (with diacritics), so the join is by name with no correction. Source data update 2023-01-19."
     }
   ],
-  "notes": "The committed products contain the derived prefecture area summary and simplified boundary only. On-page attribution cites INSTAT and geoBoundaries (boundary licence Public Domain, source geoBoundaries and Wikipedia)."
+  "notes": "The committed products contain the derived prefecture area summary and simplified boundary only. On-page attribution cites INSTAT and geoBoundaries (boundary licence Public Domain, source geoBoundaries and Wikipedia).",
+  "licence_basis": "instat_census_open_release_attribution_geoboundaries_public_domain"
 }

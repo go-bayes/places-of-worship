@@ -481,7 +481,7 @@ manifest_file_record <- function(path, content) {
     row_count = row_count_file(path),
     content = content,
     privacy = "public",
-    licence_status = "statistics_li_cc_by_4_0_and_llv_boundary_terms"
+    licence_status = "accepted", licence_basis = "statistics_li_cc_by_4_0_and_llv_boundary_terms"
   )
 }
 

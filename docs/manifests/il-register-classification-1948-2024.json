@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:il-register-classification:il:1948-2024:cbs-table-2-11",
   "dataset_id": "il-register-classification:il:1948-2024:cbs-table-2-11",
   "dataset_version_id": "il-register-classification:il:1948-2024:cbs-table-2-11:ec961da0af88",
@@ -113,7 +113,8 @@
       "row_count": 56,
       "content": "Israel district Population Register classification area summary, eight reference waves including 1948 recorded context.",
       "privacy": "public",
-      "licence_status": "cbs_open_licence_and_official_boundary_terms"
+      "licence_status": "accepted",
+      "licence_basis": "cbs_open_licence_and_official_boundary_terms"
     },
     {
       "uri": "repo:apps/regions/il/data/area_summary_district.csv",
@@ -124,7 +125,8 @@
       "row_count": 56,
       "content": "Flattened Israel district Population Register classification area-summary rows.",
       "privacy": "public",
-      "licence_status": "cbs_open_licence_and_official_boundary_terms"
+      "licence_status": "accepted",
+      "licence_basis": "cbs_open_licence_and_official_boundary_terms"
     },
     {
       "uri": "repo:apps/regions/il/data/il_district_2022.geojson",
@@ -135,7 +137,8 @@
       "row_count": 7,
       "content": "Simplified source-aligned Israel district geometry: six official districts plus separately labelled CBS statistical-area coverage for Judea and Samaria Area.",
       "privacy": "public",
-      "licence_status": "cbs_open_licence_and_official_boundary_terms"
+      "licence_status": "accepted",
+      "licence_basis": "cbs_open_licence_and_official_boundary_terms"
     }
   ],
   "raw_sources": [
@@ -292,437 +295,6 @@
     "Option C recorded filter: exclude district code 7 and sub-district code 29 or natural-area codes 291-294; configuration must choose whether Jerusalem locality code 3000 is retained, excluded, or replaced with finer 2022 data.",
     "The separately labelled Judea and Samaria Area geometry unions CBS statistical-area polygons selected through locality district code 7. It shows CBS statistical-area coverage and is not a territorial boundary."
   ],
-  "national_reconciliation": [
-    {
-      "year": 1948,
-      "metric": "population_total",
-      "district_sum": 855600,
-      "cbs_national_total": 872700,
-      "national_minus_district_sum": 17100,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    },
-    {
-      "year": 1961,
-      "metric": "population_total",
-      "district_sum": 2179500,
-      "cbs_national_total": 2179500,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    },
-    {
-      "year": 1961,
-      "metric": "religious_affiliation_count",
-      "district_sum": 2177800,
-      "cbs_national_total": 2179500,
-      "national_minus_district_sum": 1700,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    },
-    {
-      "year": 1972,
-      "metric": "population_total",
-      "district_sum": 3147700,
-      "cbs_national_total": 3147800,
-      "national_minus_district_sum": 100,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    },
-    {
-      "year": 1972,
-      "metric": "religious_affiliation_count",
-      "district_sum": 3146500,
-      "cbs_national_total": 3147100,
-      "national_minus_district_sum": 600,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    },
-    {
-      "year": 1983,
-      "metric": "population_total",
-      "district_sum": 4037500,
-      "cbs_national_total": 4037400,
-      "national_minus_district_sum": -100,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    },
-    {
-      "year": 1983,
-      "metric": "religious_affiliation_count",
-      "district_sum": 4036100,
-      "cbs_national_total": 4036400,
-      "national_minus_district_sum": 300,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    },
-    {
-      "year": 1995,
-      "metric": "population_total",
-      "district_sum": 5612400,
-      "cbs_national_total": 5612300,
-      "national_minus_district_sum": -100,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    },
-    {
-      "year": 1995,
-      "metric": "religious_affiliation_count",
-      "district_sum": 5545600,
-      "cbs_national_total": 5546000,
-      "national_minus_district_sum": 400,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    },
-    {
-      "year": 1995,
-      "metric": "no_religion_count",
-      "district_sum": 66000,
-      "cbs_national_total": 66000,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    },
-    {
-      "year": 2008,
-      "metric": "population_total",
-      "district_sum": 7412200,
-      "cbs_national_total": 7412200,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    },
-    {
-      "year": 2008,
-      "metric": "religious_affiliation_count",
-      "district_sum": 7128000,
-      "cbs_national_total": 7129200,
-      "national_minus_district_sum": 1200,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    },
-    {
-      "year": 2008,
-      "metric": "no_religion_count",
-      "district_sum": 281100,
-      "cbs_national_total": 281100,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    },
-    {
-      "year": 2022,
-      "metric": "population_total",
-      "district_sum": 9389100,
-      "cbs_national_total": 9389100,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    },
-    {
-      "year": 2022,
-      "metric": "religious_affiliation_count",
-      "district_sum": 8999000,
-      "cbs_national_total": 9001900,
-      "national_minus_district_sum": 2900,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    },
-    {
-      "year": 2022,
-      "metric": "no_religion_count",
-      "district_sum": 387200,
-      "cbs_national_total": 387200,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    },
-    {
-      "year": 2024,
-      "metric": "population_total",
-      "district_sum": 9805100,
-      "cbs_national_total": 9805100,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    },
-    {
-      "year": 2024,
-      "metric": "religious_affiliation_count",
-      "district_sum": 9360000,
-      "cbs_national_total": 9363300,
-      "national_minus_district_sum": 3300,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    },
-    {
-      "year": 2024,
-      "metric": "no_religion_count",
-      "district_sum": 441800,
-      "cbs_national_total": 441700,
-      "national_minus_district_sum": -100,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
-      "residual_treatment": "reported, never distributed"
-    }
-  ],
-  "group_reconciliation": [
-    {
-      "year": 1948,
-      "group": "jewish",
-      "district_sum": 699600,
-      "national_total": 716700,
-      "national_minus_district_sum": 17100,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1948,
-      "group": "muslim",
-      "district_sum": null,
-      "national_total": null,
-      "national_minus_district_sum": null,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1948,
-      "group": "christian",
-      "district_sum": null,
-      "national_total": null,
-      "national_minus_district_sum": null,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1948,
-      "group": "druze",
-      "district_sum": null,
-      "national_total": null,
-      "national_minus_district_sum": null,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1961,
-      "group": "jewish",
-      "district_sum": 1932300,
-      "national_total": 1932300,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1961,
-      "group": "muslim",
-      "district_sum": 170900,
-      "national_total": 170900,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1961,
-      "group": "christian",
-      "district_sum": 50500,
-      "national_total": 50500,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1961,
-      "group": "druze",
-      "district_sum": 24100,
-      "national_total": 25800,
-      "national_minus_district_sum": 1700,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1972,
-      "group": "jewish",
-      "district_sum": 2686100,
-      "national_total": 2686100,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1972,
-      "group": "muslim",
-      "district_sum": 352000,
-      "national_total": 352000,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1972,
-      "group": "christian",
-      "district_sum": 72100,
-      "national_total": 72100,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1972,
-      "group": "druze",
-      "district_sum": 36300,
-      "national_total": 36900,
-      "national_minus_district_sum": 600,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1983,
-      "group": "jewish",
-      "district_sum": 3349900,
-      "national_total": 3349800,
-      "national_minus_district_sum": -100,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1983,
-      "group": "muslim",
-      "district_sum": 526600,
-      "national_total": 526600,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1983,
-      "group": "christian",
-      "district_sum": 94100,
-      "national_total": 94100,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1983,
-      "group": "druze",
-      "district_sum": 65500,
-      "national_total": 65900,
-      "national_minus_district_sum": 400,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1995,
-      "group": "jewish",
-      "district_sum": 4522300,
-      "national_total": 4522300,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1995,
-      "group": "muslim",
-      "district_sum": 811300,
-      "national_total": 811200,
-      "national_minus_district_sum": -100,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1995,
-      "group": "christian",
-      "district_sum": 120400,
-      "national_total": 120300,
-      "national_minus_district_sum": -100,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 1995,
-      "group": "druze",
-      "district_sum": 91600,
-      "national_total": 92200,
-      "national_minus_district_sum": 600,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 2008,
-      "group": "jewish",
-      "district_sum": 5603000,
-      "national_total": 5603000,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 2008,
-      "group": "muslim",
-      "district_sum": 1252900,
-      "national_total": 1253100,
-      "national_minus_district_sum": 200,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 2008,
-      "group": "christian",
-      "district_sum": 150500,
-      "national_total": 150700,
-      "national_minus_district_sum": 200,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 2008,
-      "group": "druze",
-      "district_sum": 121600,
-      "national_total": 122400,
-      "national_minus_district_sum": 800,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 2022,
-      "group": "jewish",
-      "district_sum": 6962000,
-      "national_total": 6962000,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 2022,
-      "group": "muslim",
-      "district_sum": 1712300,
-      "national_total": 1713100,
-      "national_minus_district_sum": 800,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 2022,
-      "group": "christian",
-      "district_sum": 177500,
-      "national_total": 178100,
-      "national_minus_district_sum": 600,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 2022,
-      "group": "druze",
-      "district_sum": 147200,
-      "national_total": 148700,
-      "national_minus_district_sum": 1500,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 2024,
-      "group": "jewish",
-      "district_sum": 7212900,
-      "national_total": 7212900,
-      "national_minus_district_sum": 0,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 2024,
-      "group": "muslim",
-      "district_sum": 1814800,
-      "national_total": 1815600,
-      "national_minus_district_sum": 800,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 2024,
-      "group": "christian",
-      "district_sum": 181100,
-      "national_total": 181800,
-      "national_minus_district_sum": 700,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    },
-    {
-      "year": 2024,
-      "group": "druze",
-      "district_sum": 151200,
-      "national_total": 153000,
-      "national_minus_district_sum": 1800,
-      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
-    }
-  ],
   "privacy": "public",
   "licence_status": "accepted",
   "downstream_status": "public",
@@ -796,5 +368,438 @@
       "notes": "District code 7 selects the localities used to query the separately labelled Judea and Samaria Area statistical-area polygons."
     }
   ],
-  "notes": "The committed product contains derived area summaries and simplified source-aligned geometry only. UI and hub wiring are outside this build."
+  "notes": "The committed product contains derived area summaries and simplified source-aligned geometry only. UI and hub wiring are outside this build.",
+  "extensions": {
+    "national_reconciliation": [
+      {
+        "year": 1948,
+        "metric": "population_total",
+        "district_sum": 855600,
+        "cbs_national_total": 872700,
+        "national_minus_district_sum": 17100,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      },
+      {
+        "year": 1961,
+        "metric": "population_total",
+        "district_sum": 2179500,
+        "cbs_national_total": 2179500,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      },
+      {
+        "year": 1961,
+        "metric": "religious_affiliation_count",
+        "district_sum": 2177800,
+        "cbs_national_total": 2179500,
+        "national_minus_district_sum": 1700,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      },
+      {
+        "year": 1972,
+        "metric": "population_total",
+        "district_sum": 3147700,
+        "cbs_national_total": 3147800,
+        "national_minus_district_sum": 100,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      },
+      {
+        "year": 1972,
+        "metric": "religious_affiliation_count",
+        "district_sum": 3146500,
+        "cbs_national_total": 3147100,
+        "national_minus_district_sum": 600,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      },
+      {
+        "year": 1983,
+        "metric": "population_total",
+        "district_sum": 4037500,
+        "cbs_national_total": 4037400,
+        "national_minus_district_sum": -100,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      },
+      {
+        "year": 1983,
+        "metric": "religious_affiliation_count",
+        "district_sum": 4036100,
+        "cbs_national_total": 4036400,
+        "national_minus_district_sum": 300,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      },
+      {
+        "year": 1995,
+        "metric": "population_total",
+        "district_sum": 5612400,
+        "cbs_national_total": 5612300,
+        "national_minus_district_sum": -100,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      },
+      {
+        "year": 1995,
+        "metric": "religious_affiliation_count",
+        "district_sum": 5545600,
+        "cbs_national_total": 5546000,
+        "national_minus_district_sum": 400,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      },
+      {
+        "year": 1995,
+        "metric": "no_religion_count",
+        "district_sum": 66000,
+        "cbs_national_total": 66000,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      },
+      {
+        "year": 2008,
+        "metric": "population_total",
+        "district_sum": 7412200,
+        "cbs_national_total": 7412200,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      },
+      {
+        "year": 2008,
+        "metric": "religious_affiliation_count",
+        "district_sum": 7128000,
+        "cbs_national_total": 7129200,
+        "national_minus_district_sum": 1200,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      },
+      {
+        "year": 2008,
+        "metric": "no_religion_count",
+        "district_sum": 281100,
+        "cbs_national_total": 281100,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      },
+      {
+        "year": 2022,
+        "metric": "population_total",
+        "district_sum": 9389100,
+        "cbs_national_total": 9389100,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      },
+      {
+        "year": 2022,
+        "metric": "religious_affiliation_count",
+        "district_sum": 8999000,
+        "cbs_national_total": 9001900,
+        "national_minus_district_sum": 2900,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      },
+      {
+        "year": 2022,
+        "metric": "no_religion_count",
+        "district_sum": 387200,
+        "cbs_national_total": 387200,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      },
+      {
+        "year": 2024,
+        "metric": "population_total",
+        "district_sum": 9805100,
+        "cbs_national_total": 9805100,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      },
+      {
+        "year": 2024,
+        "metric": "religious_affiliation_count",
+        "district_sum": 9360000,
+        "cbs_national_total": 9363300,
+        "national_minus_district_sum": 3300,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      },
+      {
+        "year": 2024,
+        "metric": "no_religion_count",
+        "district_sum": 441800,
+        "cbs_national_total": 441700,
+        "national_minus_district_sum": -100,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+        "residual_treatment": "reported, never distributed"
+      }
+    ],
+    "group_reconciliation": [
+      {
+        "year": 1948,
+        "group": "jewish",
+        "district_sum": 699600,
+        "national_total": 716700,
+        "national_minus_district_sum": 17100,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1948,
+        "group": "muslim",
+        "district_sum": null,
+        "national_total": null,
+        "national_minus_district_sum": null,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1948,
+        "group": "christian",
+        "district_sum": null,
+        "national_total": null,
+        "national_minus_district_sum": null,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1948,
+        "group": "druze",
+        "district_sum": null,
+        "national_total": null,
+        "national_minus_district_sum": null,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1961,
+        "group": "jewish",
+        "district_sum": 1932300,
+        "national_total": 1932300,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1961,
+        "group": "muslim",
+        "district_sum": 170900,
+        "national_total": 170900,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1961,
+        "group": "christian",
+        "district_sum": 50500,
+        "national_total": 50500,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1961,
+        "group": "druze",
+        "district_sum": 24100,
+        "national_total": 25800,
+        "national_minus_district_sum": 1700,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1972,
+        "group": "jewish",
+        "district_sum": 2686100,
+        "national_total": 2686100,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1972,
+        "group": "muslim",
+        "district_sum": 352000,
+        "national_total": 352000,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1972,
+        "group": "christian",
+        "district_sum": 72100,
+        "national_total": 72100,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1972,
+        "group": "druze",
+        "district_sum": 36300,
+        "national_total": 36900,
+        "national_minus_district_sum": 600,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1983,
+        "group": "jewish",
+        "district_sum": 3349900,
+        "national_total": 3349800,
+        "national_minus_district_sum": -100,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1983,
+        "group": "muslim",
+        "district_sum": 526600,
+        "national_total": 526600,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1983,
+        "group": "christian",
+        "district_sum": 94100,
+        "national_total": 94100,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1983,
+        "group": "druze",
+        "district_sum": 65500,
+        "national_total": 65900,
+        "national_minus_district_sum": 400,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1995,
+        "group": "jewish",
+        "district_sum": 4522300,
+        "national_total": 4522300,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1995,
+        "group": "muslim",
+        "district_sum": 811300,
+        "national_total": 811200,
+        "national_minus_district_sum": -100,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1995,
+        "group": "christian",
+        "district_sum": 120400,
+        "national_total": 120300,
+        "national_minus_district_sum": -100,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 1995,
+        "group": "druze",
+        "district_sum": 91600,
+        "national_total": 92200,
+        "national_minus_district_sum": 600,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 2008,
+        "group": "jewish",
+        "district_sum": 5603000,
+        "national_total": 5603000,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 2008,
+        "group": "muslim",
+        "district_sum": 1252900,
+        "national_total": 1253100,
+        "national_minus_district_sum": 200,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 2008,
+        "group": "christian",
+        "district_sum": 150500,
+        "national_total": 150700,
+        "national_minus_district_sum": 200,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 2008,
+        "group": "druze",
+        "district_sum": 121600,
+        "national_total": 122400,
+        "national_minus_district_sum": 800,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 2022,
+        "group": "jewish",
+        "district_sum": 6962000,
+        "national_total": 6962000,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 2022,
+        "group": "muslim",
+        "district_sum": 1712300,
+        "national_total": 1713100,
+        "national_minus_district_sum": 800,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 2022,
+        "group": "christian",
+        "district_sum": 177500,
+        "national_total": 178100,
+        "national_minus_district_sum": 600,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 2022,
+        "group": "druze",
+        "district_sum": 147200,
+        "national_total": 148700,
+        "national_minus_district_sum": 1500,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 2024,
+        "group": "jewish",
+        "district_sum": 7212900,
+        "national_total": 7212900,
+        "national_minus_district_sum": 0,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 2024,
+        "group": "muslim",
+        "district_sum": 1814800,
+        "national_total": 1815600,
+        "national_minus_district_sum": 800,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 2024,
+        "group": "christian",
+        "district_sum": 181100,
+        "national_total": 181800,
+        "national_minus_district_sum": 700,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      },
+      {
+        "year": 2024,
+        "group": "druze",
+        "district_sum": 151200,
+        "national_total": 153000,
+        "national_minus_district_sum": 1800,
+        "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+      }
+    ]
+  }
 }

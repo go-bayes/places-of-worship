@@ -22,7 +22,7 @@
   "created_by": "scripts/build_lc_area_summary.R",
   "pipeline": {
     "script": "scripts/build_lc_area_summary.R",
-    "git_commit": "4d7e2391496021f0ff2f252c8067810cbb0a05fb",
+    "git_commit": "e12b6cb9c3ccb579d68d51a58688c6efd1887446",
     "command": "Rscript scripts/build_lc_area_summary.R",
     "parameters": {
       "construct": "census affiliation",

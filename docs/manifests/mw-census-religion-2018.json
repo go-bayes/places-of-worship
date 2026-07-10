@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:mw-census-religion:mw:2018:nso-main-report-table-e5",
   "dataset_id": "mw-census-religion:mw:2018:nso-main-report-table-e5",
   "dataset_version_id": "mw-census-religion:mw:2018:nso-main-report-table-e5:45b449add89f",
@@ -125,7 +125,8 @@
       "row_count": 28,
       "content": "Malawi district area summary with NSO census 2018 religious-affiliation and no-religion metrics.",
       "privacy": "public",
-      "licence_status": "nso_census_open_report_attribution_geoboundaries_cc_by_3_igo"
+      "licence_status": "accepted",
+      "licence_basis": "nso_census_open_report_attribution_geoboundaries_cc_by_3_igo"
     },
     {
       "uri": "repo:apps/regions/mw/data/area_summary_district.csv",
@@ -136,7 +137,8 @@
       "row_count": 28,
       "content": "Flattened Malawi district area summary with NSO census 2018 religious-affiliation and no-religion metrics.",
       "privacy": "public",
-      "licence_status": "nso_census_open_report_attribution_geoboundaries_cc_by_3_igo"
+      "licence_status": "accepted",
+      "licence_basis": "nso_census_open_report_attribution_geoboundaries_cc_by_3_igo"
     },
     {
       "uri": "repo:apps/regions/mw/data/mw_district_2020.geojson",
@@ -147,7 +149,8 @@
       "row_count": 28,
       "content": "Simplified Malawi district boundary GeoJSON derived from geoBoundaries MWI ADM2 (2020).",
       "privacy": "public",
-      "licence_status": "geoboundaries_cc_by_3_0_igo"
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_cc_by_3_0_igo"
     }
   ],
   "derived_outputs": [
@@ -244,7 +247,8 @@
       "simplification_tolerance_m": 50,
       "unmatched_boundary_features": [],
       "unmatched_census_areas": []
-    }
+    },
+    "status": "passed"
   },
   "construct_notes": [
     "The public map displays two headline metrics for 2018: religious affiliation percent and no religion percent.",
@@ -263,7 +267,7 @@
     }
   ],
   "privacy": "public",
-  "licence_status": "nso_census_open_report_attribution_geoboundaries_cc_by_3_igo",
+  "licence_status": "accepted",
   "downstream_status": "public",
   "source_datasets": [
     {
@@ -301,5 +305,6 @@
       "notes": "28 ADM2 districts; shapeISO is empty for every feature, so a district-name slug is used as the area code."
     }
   ],
-  "notes": "The committed products contain the derived district area summary and simplified boundary only. On-page attribution cites NSO Malawi and geoBoundaries (CC BY 3.0 IGO)."
+  "notes": "The committed products contain the derived district area summary and simplified boundary only. On-page attribution cites NSO Malawi and geoBoundaries (CC BY 3.0 IGO).",
+  "licence_basis": "nso_census_open_report_attribution_geoboundaries_cc_by_3_igo"
 }

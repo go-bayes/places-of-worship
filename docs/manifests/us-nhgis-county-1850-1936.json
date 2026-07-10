@@ -1,5 +1,5 @@
 {
-  "schema_version": "us-nhgis-county-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:us-nhgis-county:us:1850-1936:9d050b2b794f",
   "dataset_id": "us-nhgis-county:us:1850-1936:public",
   "dataset_version_id": "us-nhgis-county:us:1850-1936:public:9d050b2b794f",
@@ -85,173 +85,8 @@
     "licence_todo": "JB will write to IPUMS/NHGIS asking whether attributed derived county rates on a research map are within their licence or need permission; record their answer here when it arrives.",
     "raw_redistribution": "Raw NHGIS extract ZIPs are not committed or redistributed. They remain in data/raw/us_nhgis/ and await upload to the private raw archive."
   },
-  "durable_files": {
-    "1": {
-      "uri": "repo:apps/regions/us/data/area_summary_county_1850.json",
-      "storage_provider": "other",
-      "format": "json",
-      "bytes": 1568554,
-      "sha256": "9d050b2b794f493665c7da15668dd1e7c38201bda6500c5abd4c7851fcb1c36c",
-      "row_count": 1626,
-      "content": "US NHGIS area summary for county_1850.",
-      "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
-    },
-    "2": {
-      "uri": "repo:apps/regions/us/data/area_summary_county_1850.csv",
-      "storage_provider": "other",
-      "format": "csv",
-      "bytes": 576737,
-      "sha256": "288a55649c86cfe0ad807eebdff15089dc4383b8d0d7acd7779f0846e4d12b87",
-      "row_count": 1626,
-      "content": "Flattened US NHGIS area summary for county_1850.",
-      "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
-    },
-    "3": {
-      "uri": "repo:apps/regions/us/data/area_summary_county_1860.json",
-      "storage_provider": "other",
-      "format": "json",
-      "bytes": 1994112,
-      "sha256": "a09ae6986d6309ed23f25f1c0b1704a90b2de9713ba4f45a656d0be499adc26f",
-      "row_count": 2097,
-      "content": "US NHGIS area summary for county_1860.",
-      "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
-    },
-    "4": {
-      "uri": "repo:apps/regions/us/data/area_summary_county_1860.csv",
-      "storage_provider": "other",
-      "format": "csv",
-      "bytes": 710648,
-      "sha256": "43e28d3b315e200c1ce0ce3daccb3014a2a41ff5cc4c0a058029c2b8f0b6ce24",
-      "row_count": 2097,
-      "content": "Flattened US NHGIS area summary for county_1860.",
-      "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
-    },
-    "5": {
-      "uri": "repo:apps/regions/us/data/area_summary_county_1870.json",
-      "storage_provider": "other",
-      "format": "json",
-      "bytes": 2221494,
-      "sha256": "3e5473bc5fb1baba35d8fad050278d1b93246bb4c638eba2ed765ba232b7f8f8",
-      "row_count": 2310,
-      "content": "US NHGIS area summary for county_1870.",
-      "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
-    },
-    "6": {
-      "uri": "repo:apps/regions/us/data/area_summary_county_1870.csv",
-      "storage_provider": "other",
-      "format": "csv",
-      "bytes": 809821,
-      "sha256": "a2a53103cb827acde5f094dcf63cb7326bb0139f6df9cb013ffc847ed33c174b",
-      "row_count": 2310,
-      "content": "Flattened US NHGIS area summary for county_1870.",
-      "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
-    },
-    "7": {
-      "uri": "repo:apps/regions/us/data/area_summary_county_1890.json",
-      "storage_provider": "other",
-      "format": "json",
-      "bytes": 2674078,
-      "sha256": "c0311c30cc7c40bc9ddee946fedc7423cb4dd26a8af9ae6c78af0a0d1d45309e",
-      "row_count": 2784,
-      "content": "US NHGIS area summary for county_1890.",
-      "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
-    },
-    "8": {
-      "uri": "repo:apps/regions/us/data/area_summary_county_1890.csv",
-      "storage_provider": "other",
-      "format": "csv",
-      "bytes": 975075,
-      "sha256": "e99bfae855f3147add580f5580e800b3f796bbecd1bbefd77e8196785c96efe0",
-      "row_count": 2784,
-      "content": "Flattened US NHGIS area summary for county_1890.",
-      "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
-    },
-    "9": {
-      "uri": "repo:apps/regions/us/data/area_summary_county_1930.json",
-      "storage_provider": "other",
-      "format": "json",
-      "bytes": 11945933,
-      "sha256": "0531e4851f0a4345ca541575131c2346cc8c5050522563ee07c495de29303954",
-      "row_count": 12105,
-      "content": "US NHGIS area summary for county_1930.",
-      "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
-    },
-    "10": {
-      "uri": "repo:apps/regions/us/data/area_summary_county_1930.csv",
-      "storage_provider": "other",
-      "format": "csv",
-      "bytes": 4427543,
-      "sha256": "4b53958521923a152f8ddf4e68fcbf1b2d37742f9dc1c707c24498092537945e",
-      "row_count": 12105,
-      "content": "Flattened US NHGIS area summary for county_1930.",
-      "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
-    },
-    "1850": {
-      "uri": "repo:apps/regions/us/data/counties_1850.geojson",
-      "storage_provider": "other",
-      "format": "geojson",
-      "bytes": 1456083,
-      "sha256": "9a779edc08974105f190fa06f214cf0df94876e3a705271213fb3838e3eeb87b",
-      "row_count": 1632,
-      "content": "Simplified NHGIS 1850 county boundary GeoJSON.",
-      "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
-    },
-    "1860": {
-      "uri": "repo:apps/regions/us/data/counties_1860.geojson",
-      "storage_provider": "other",
-      "format": "geojson",
-      "bytes": 1742574,
-      "sha256": "ae964e3d44a3eb51dc2be8fdaa8371a80be8c713a71ac100ae61d5a34cba1dfb",
-      "row_count": 2126,
-      "content": "Simplified NHGIS 1860 county boundary GeoJSON.",
-      "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
-    },
-    "1870": {
-      "uri": "repo:apps/regions/us/data/counties_1870.geojson",
-      "storage_provider": "other",
-      "format": "geojson",
-      "bytes": 1872161,
-      "sha256": "cd6d960a55cfef31e6dfa4261067b2e66c80e74295fda9f46da316c252429046",
-      "row_count": 2334,
-      "content": "Simplified NHGIS 1870 county boundary GeoJSON.",
-      "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
-    },
-    "1890": {
-      "uri": "repo:apps/regions/us/data/counties_1890.geojson",
-      "storage_provider": "other",
-      "format": "geojson",
-      "bytes": 2391190,
-      "sha256": "0e96bae1a309590a926195ba843d22a50184800d6c204c37a24d48fa102f4259",
-      "row_count": 2799,
-      "content": "Simplified NHGIS 1890 county boundary GeoJSON.",
-      "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
-    },
-    "1930": {
-      "uri": "repo:apps/regions/us/data/counties_1930.geojson",
-      "storage_provider": "other",
-      "format": "geojson",
-      "bytes": 2630180,
-      "sha256": "8c23442b89ef071af2c740608ac4d8b8b2e2d524ea791484358372d8fb97f7eb",
-      "row_count": 3110,
-      "content": "Simplified NHGIS 1930 county boundary GeoJSON.",
-      "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
-    },
-    "1850.1": {
+  "durable_files": [
+    {
       "uri": "repo:apps/regions/us/data/source/us_nhgis_county_1850_extract.csv",
       "storage_provider": "other",
       "format": "csv",
@@ -260,9 +95,10 @@
       "row_count": 1626,
       "content": "Derived NHGIS county extract with rates/counts only.",
       "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
     },
-    "1860.1": {
+    {
       "uri": "repo:apps/regions/us/data/source/us_nhgis_county_1860_extract.csv",
       "storage_provider": "other",
       "format": "csv",
@@ -271,9 +107,10 @@
       "row_count": 2097,
       "content": "Derived NHGIS county extract with rates/counts only.",
       "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
     },
-    "1870.1": {
+    {
       "uri": "repo:apps/regions/us/data/source/us_nhgis_county_1870_extract.csv",
       "storage_provider": "other",
       "format": "csv",
@@ -282,9 +119,10 @@
       "row_count": 2310,
       "content": "Derived NHGIS county extract with rates/counts only.",
       "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
     },
-    "1890.1": {
+    {
       "uri": "repo:apps/regions/us/data/source/us_nhgis_county_1890_extract.csv",
       "storage_provider": "other",
       "format": "csv",
@@ -293,9 +131,178 @@
       "row_count": 2784,
       "content": "Derived NHGIS county extract with rates/counts only.",
       "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
     },
-    "1906": {
+    {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1850.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 1568554,
+      "sha256": "9d050b2b794f493665c7da15668dd1e7c38201bda6500c5abd4c7851fcb1c36c",
+      "row_count": 1626,
+      "content": "US NHGIS area summary for county_1850.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1850.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 576737,
+      "sha256": "288a55649c86cfe0ad807eebdff15089dc4383b8d0d7acd7779f0846e4d12b87",
+      "row_count": 1626,
+      "content": "Flattened US NHGIS area summary for county_1850.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1860.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 1994112,
+      "sha256": "a09ae6986d6309ed23f25f1c0b1704a90b2de9713ba4f45a656d0be499adc26f",
+      "row_count": 2097,
+      "content": "US NHGIS area summary for county_1860.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1860.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 710648,
+      "sha256": "43e28d3b315e200c1ce0ce3daccb3014a2a41ff5cc4c0a058029c2b8f0b6ce24",
+      "row_count": 2097,
+      "content": "Flattened US NHGIS area summary for county_1860.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1870.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 2221494,
+      "sha256": "3e5473bc5fb1baba35d8fad050278d1b93246bb4c638eba2ed765ba232b7f8f8",
+      "row_count": 2310,
+      "content": "US NHGIS area summary for county_1870.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1870.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 809821,
+      "sha256": "a2a53103cb827acde5f094dcf63cb7326bb0139f6df9cb013ffc847ed33c174b",
+      "row_count": 2310,
+      "content": "Flattened US NHGIS area summary for county_1870.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1890.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 2674078,
+      "sha256": "c0311c30cc7c40bc9ddee946fedc7423cb4dd26a8af9ae6c78af0a0d1d45309e",
+      "row_count": 2784,
+      "content": "US NHGIS area summary for county_1890.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1890.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 975075,
+      "sha256": "e99bfae855f3147add580f5580e800b3f796bbecd1bbefd77e8196785c96efe0",
+      "row_count": 2784,
+      "content": "Flattened US NHGIS area summary for county_1890.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1930.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 11945933,
+      "sha256": "0531e4851f0a4345ca541575131c2346cc8c5050522563ee07c495de29303954",
+      "row_count": 12105,
+      "content": "US NHGIS area summary for county_1930.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    {
+      "uri": "repo:apps/regions/us/data/area_summary_county_1930.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 4427543,
+      "sha256": "4b53958521923a152f8ddf4e68fcbf1b2d37742f9dc1c707c24498092537945e",
+      "row_count": 12105,
+      "content": "Flattened US NHGIS area summary for county_1930.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    {
+      "uri": "repo:apps/regions/us/data/counties_1850.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 1456083,
+      "sha256": "9a779edc08974105f190fa06f214cf0df94876e3a705271213fb3838e3eeb87b",
+      "row_count": 1632,
+      "content": "Simplified NHGIS 1850 county boundary GeoJSON.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    {
+      "uri": "repo:apps/regions/us/data/counties_1860.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 1742574,
+      "sha256": "ae964e3d44a3eb51dc2be8fdaa8371a80be8c713a71ac100ae61d5a34cba1dfb",
+      "row_count": 2126,
+      "content": "Simplified NHGIS 1860 county boundary GeoJSON.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    {
+      "uri": "repo:apps/regions/us/data/counties_1870.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 1872161,
+      "sha256": "cd6d960a55cfef31e6dfa4261067b2e66c80e74295fda9f46da316c252429046",
+      "row_count": 2334,
+      "content": "Simplified NHGIS 1870 county boundary GeoJSON.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    {
+      "uri": "repo:apps/regions/us/data/counties_1890.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 2391190,
+      "sha256": "0e96bae1a309590a926195ba843d22a50184800d6c204c37a24d48fa102f4259",
+      "row_count": 2799,
+      "content": "Simplified NHGIS 1890 county boundary GeoJSON.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    {
       "uri": "repo:apps/regions/us/data/source/us_nhgis_county_1906_extract.csv",
       "storage_provider": "other",
       "format": "csv",
@@ -304,9 +311,10 @@
       "row_count": 2902,
       "content": "Derived NHGIS county extract with rates/counts only.",
       "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
     },
-    "1916": {
+    {
       "uri": "repo:apps/regions/us/data/source/us_nhgis_county_1916_extract.csv",
       "storage_provider": "other",
       "format": "csv",
@@ -315,9 +323,10 @@
       "row_count": 3005,
       "content": "Derived NHGIS county extract with rates/counts only.",
       "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
     },
-    "1926": {
+    {
       "uri": "repo:apps/regions/us/data/source/us_nhgis_county_1926_extract.csv",
       "storage_provider": "other",
       "format": "csv",
@@ -326,9 +335,22 @@
       "row_count": 3100,
       "content": "Derived NHGIS county extract with rates/counts only.",
       "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
     },
-    "1936": {
+    {
+      "uri": "repo:apps/regions/us/data/counties_1930.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 2630180,
+      "sha256": "8c23442b89ef071af2c740608ac4d8b8b2e2d524ea791484358372d8fb97f7eb",
+      "row_count": 3110,
+      "content": "Simplified NHGIS 1930 county boundary GeoJSON.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
+    },
+    {
       "uri": "repo:apps/regions/us/data/source/us_nhgis_county_1936_extract.csv",
       "storage_provider": "other",
       "format": "csv",
@@ -337,54 +359,8 @@
       "row_count": 3098,
       "content": "Derived NHGIS county extract with rates/counts only.",
       "privacy": "public",
-      "licence_status": "accepted_by_jb_pending_ipums_confirmation"
-    }
-  },
-  "raw_files": [
-    {
-      "local_path": "data/raw/us_nhgis/nhgis0001_csv_PREVIEW.zip",
-      "bytes": 23139,
-      "sha256": "df3f8717ba4cca3e301cfc8ada20e61e46a20c6832005bd147a41cab9e268bd0",
-      "content": "NHGIS codebook preview ZIP for county extract 1.",
-      "privacy": "private_cache",
-      "archive_status": "pending_private_gcs_upload",
-      "archive_target": "gs://places-of-worship-private-sync/raw_sources/us_nhgis/"
-    },
-    {
-      "local_path": "data/raw/us_nhgis/nhgis0001_csv.zip",
-      "bytes": 1366401,
-      "sha256": "cf2bbfb3477b34cef44ca908c65aa62fefd052a6af8d160d0ca132e10e07eb4a",
-      "content": "NHGIS county table-data ZIP for extract 1.",
-      "privacy": "private_cache",
-      "archive_status": "pending_private_gcs_upload",
-      "archive_target": "gs://places-of-worship-private-sync/raw_sources/us_nhgis/"
-    },
-    {
-      "local_path": "data/raw/us_nhgis/nhgis0001_shape.zip",
-      "bytes": 632156872,
-      "sha256": "b78844a058af3cabda578669adae7ea3ebad2da86b6cba120b7eeac7ffd84ed0",
-      "content": "NHGIS period-boundary shape ZIP for extract 1.",
-      "privacy": "private_cache",
-      "archive_status": "pending_private_gcs_upload",
-      "archive_target": "gs://places-of-worship-private-sync/raw_sources/us_nhgis/"
-    },
-    {
-      "local_path": "data/raw/us_nhgis/nhgis0002_csv_PREVIEW.zip",
-      "bytes": 34214,
-      "sha256": "ef79cc7924de1eb7c1011e054f59ad0f1386be762506e7031c5fdd43d610b723",
-      "content": "NHGIS codebook preview ZIP for validation extract 2.",
-      "privacy": "private_cache",
-      "archive_status": "pending_private_gcs_upload",
-      "archive_target": "gs://places-of-worship-private-sync/raw_sources/us_nhgis/"
-    },
-    {
-      "local_path": "data/raw/us_nhgis/nhgis0002_csv.zip",
-      "bytes": 98771,
-      "sha256": "429ef3c364f1951df5e0e5f38d1f7f89994a0d8f599166e2275bea6e9aacaee4",
-      "content": "NHGIS state/nation validation table-data ZIP for extract 2.",
-      "privacy": "private_cache",
-      "archive_status": "pending_private_gcs_upload",
-      "archive_target": "gs://places-of-worship-private-sync/raw_sources/us_nhgis/"
+      "licence_status": "needs_review",
+      "licence_basis": "accepted_by_jb_pending_ipums_confirmation"
     }
   ],
   "stats": {
@@ -2687,7 +2663,7 @@
     }
   },
   "privacy": "public",
-  "licence_status": "accepted_by_jb_pending_ipums_confirmation",
+  "licence_status": "needs_review",
   "downstream_status": "public",
   "source_datasets": [
     {
@@ -3194,5 +3170,55 @@
       "notes": "Selected as a period county boundary; the build does not crosswalk these rows onto 2020 counties."
     }
   ],
-  "notes": "The build uses matching period county boundaries for 1850, 1860, 1870, and 1890, and a single 1930 period boundary for 1906, 1916, 1926, and 1936. No nineteenth-century rows are crosswalked onto 2020 counties. Every new row carries wave_coverage_differs."
+  "notes": "The build uses matching period county boundaries for 1850, 1860, 1870, and 1890, and a single 1930 period boundary for 1906, 1916, 1926, and 1936. No nineteenth-century rows are crosswalked onto 2020 counties. Every new row carries wave_coverage_differs.",
+  "licence_basis": "accepted_by_jb_pending_ipums_confirmation",
+  "extensions": {
+    "raw_files": [
+      {
+        "local_path": "data/raw/us_nhgis/nhgis0001_csv_PREVIEW.zip",
+        "bytes": 23139,
+        "sha256": "df3f8717ba4cca3e301cfc8ada20e61e46a20c6832005bd147a41cab9e268bd0",
+        "content": "NHGIS codebook preview ZIP for county extract 1.",
+        "privacy": "private_cache",
+        "archive_status": "pending_private_gcs_upload",
+        "archive_target": "gs://places-of-worship-private-sync/raw_sources/us_nhgis/"
+      },
+      {
+        "local_path": "data/raw/us_nhgis/nhgis0001_csv.zip",
+        "bytes": 1366401,
+        "sha256": "cf2bbfb3477b34cef44ca908c65aa62fefd052a6af8d160d0ca132e10e07eb4a",
+        "content": "NHGIS county table-data ZIP for extract 1.",
+        "privacy": "private_cache",
+        "archive_status": "pending_private_gcs_upload",
+        "archive_target": "gs://places-of-worship-private-sync/raw_sources/us_nhgis/"
+      },
+      {
+        "local_path": "data/raw/us_nhgis/nhgis0001_shape.zip",
+        "bytes": 632156872,
+        "sha256": "b78844a058af3cabda578669adae7ea3ebad2da86b6cba120b7eeac7ffd84ed0",
+        "content": "NHGIS period-boundary shape ZIP for extract 1.",
+        "privacy": "private_cache",
+        "archive_status": "pending_private_gcs_upload",
+        "archive_target": "gs://places-of-worship-private-sync/raw_sources/us_nhgis/"
+      },
+      {
+        "local_path": "data/raw/us_nhgis/nhgis0002_csv_PREVIEW.zip",
+        "bytes": 34214,
+        "sha256": "ef79cc7924de1eb7c1011e054f59ad0f1386be762506e7031c5fdd43d610b723",
+        "content": "NHGIS codebook preview ZIP for validation extract 2.",
+        "privacy": "private_cache",
+        "archive_status": "pending_private_gcs_upload",
+        "archive_target": "gs://places-of-worship-private-sync/raw_sources/us_nhgis/"
+      },
+      {
+        "local_path": "data/raw/us_nhgis/nhgis0002_csv.zip",
+        "bytes": 98771,
+        "sha256": "429ef3c364f1951df5e0e5f38d1f7f89994a0d8f599166e2275bea6e9aacaee4",
+        "content": "NHGIS state/nation validation table-data ZIP for extract 2.",
+        "privacy": "private_cache",
+        "archive_status": "pending_private_gcs_upload",
+        "archive_target": "gs://places-of-worship-private-sync/raw_sources/us_nhgis/"
+      }
+    ]
+  }
 }

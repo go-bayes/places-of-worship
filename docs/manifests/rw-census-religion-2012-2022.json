@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:rw-census-religion:rw:2012-2022:nisr-socio-cultural-reports",
   "dataset_id": "rw-census-religion:rw:2012-2022:nisr-socio-cultural-reports",
   "dataset_version_id": "rw-census-religion:rw:2012-2022:nisr-socio-cultural-reports:399cdcc6e162",
@@ -131,7 +131,8 @@
       "row_count": 60,
       "content": "Rwanda district area summary with census 2012 and 2022 religious-affiliation and no-religion metrics.",
       "privacy": "public",
-      "licence_status": "nisr_census_open_report_attribution_geoboundaries_cc_by_4_0"
+      "licence_status": "accepted",
+      "licence_basis": "nisr_census_open_report_attribution_geoboundaries_cc_by_4_0"
     },
     {
       "uri": "repo:apps/regions/rw/data/area_summary_district.csv",
@@ -142,7 +143,8 @@
       "row_count": 60,
       "content": "Flattened Rwanda district area summary with census 2012 and 2022 religious-affiliation and no-religion metrics.",
       "privacy": "public",
-      "licence_status": "nisr_census_open_report_attribution_geoboundaries_cc_by_4_0"
+      "licence_status": "accepted",
+      "licence_basis": "nisr_census_open_report_attribution_geoboundaries_cc_by_4_0"
     },
     {
       "uri": "repo:apps/regions/rw/data/rw_district_2012.geojson",
@@ -153,7 +155,8 @@
       "row_count": 30,
       "content": "Simplified Rwanda district boundary GeoJSON derived from geoBoundaries RWA ADM2 (30 districts).",
       "privacy": "public",
-      "licence_status": "geoboundaries_cc_by_4_0"
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_cc_by_4_0"
     }
   ],
   "derived_outputs": [
@@ -225,7 +228,8 @@
       "simplification_tolerance_m": 50,
       "unmatched_boundary_features": [],
       "unmatched_census_areas": []
-    }
+    },
+    "status": "passed"
   },
   "construct_notes": [
     "The public map displays two headline metrics for 2012 and 2022 at district level: religious affiliation percent and no religion percent.",
@@ -250,7 +254,7 @@
     }
   ],
   "privacy": "public",
-  "licence_status": "nisr_census_open_report_attribution_geoboundaries_cc_by_4_0",
+  "licence_status": "accepted",
   "downstream_status": "public",
   "source_datasets": [
     {
@@ -305,5 +309,6 @@
       "notes": "30 ADM2 districts of the post-2006 administrative structure both census waves report on; geoBoundaries records the licence source as statistics.gov.rw/terms-use. No ISO 3166-2 code is published for districts, so the area code is a slug of the district name. Source data update 2023-01-19."
     }
   ],
-  "notes": "The committed products contain the derived district area summary and simplified boundary only. On-page attribution cites NISR and geoBoundaries (CC BY 4.0, Open Data Rwanda)."
+  "notes": "The committed products contain the derived district area summary and simplified boundary only. On-page attribution cites NISR and geoBoundaries (CC BY 4.0, Open Data Rwanda).",
+  "licence_basis": "nisr_census_open_report_attribution_geoboundaries_cc_by_4_0"
 }

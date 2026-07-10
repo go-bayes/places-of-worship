@@ -1,6 +1,6 @@
 {
   "schema_version": "0.2.0",
-  "generated_at": "2026-07-10T13:00:49Z",
+  "generated_at": "2026-07-10T22:09:59Z",
   "generated_by": "scripts/build_tv_area_summary.R",
   "country_code": "TV",
   "boundary_set": {

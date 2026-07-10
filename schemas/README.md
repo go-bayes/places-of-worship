@@ -25,6 +25,45 @@ JSON Schemas that define the core data structures used across the project.
 Keep these schemas versioned and update them before changing any dataset shape
 that depends on them.
 
+## data-manifest.v2 (2026-07-11)
+
+The manifest schema moved from `data-manifest.v1` to `data-manifest.v2`
+after a full-corpus validation found 36 of 57 committed manifests failing
+`v1` for dialect drift: builders had each evolved useful fields the strict
+schema forbade. `v2` legitimises the information-bearing dialect and keeps
+the contract strict everywhere it earns its keep. There are three parts to
+the change.
+
+The first part extends the schema. New optional top-level containers admit
+the enriched provenance the builders already record: `construct_notes`,
+`deferred_sources`, `derived_outputs`, `raw_sources`, `source_datasets`,
+`target_years`, and a catch-all `extensions` object for builder-specific
+extras relocated verbatim from the top level. `storage_provider` gains
+`git_repository`; `pipeline.git_commit` may be null (not recorded);
+`source` gains cache and licence-position fields; `stats` values may be
+structured; durable files accept `notes` where older manifests lack
+`content`; validation blocks accept structured gate evidence beyond the
+typed keys.
+
+The second part splits the licence contract. `licence_status` stays the
+strict four-value shipping decision (`accepted`, `needs_review`,
+`restricted`, `unknown`). The terms identity — the slug vocabulary the
+builders evolved, such as `kogl_type_1_attribution` — moves to the new
+`licence_basis` field at both the product and durable-file levels. The
+2026-07-11 migration relocated every slug verbatim and derived each
+decision value from the slug text; `accepted_by_jb_pending_ipums_confirmation`
+maps to `needs_review`, matching the standing IPUMS hold.
+
+The third part guards against recurrence. `bash scripts/validate_manifests.sh`
+validates every manifest and exits non-zero on any failure; review gates run
+it before any commit touching `docs/manifests/` or a manifest-writing
+builder. Builders were patched to emit the `licence_status`/`licence_basis`
+pair (21 scripts); the Tuvalu, Saint Lucia, and Bangladesh builders were
+re-run as round-trip proof. Residual: builders using the variable-threading
+pattern regenerate the product-level basis but not every per-file basis;
+the validator catches any such regeneration at gate time, and per-file
+wiring is routine follow-up when a builder is next touched.
+
 ## area-summary validation state (2026-07-09)
 
 Null is a legitimate value in three places, each meaning the release ships

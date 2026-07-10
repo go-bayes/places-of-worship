@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:pl-attendance:pl:2014-2024:iskk-diocese",
   "dataset_id": "pl-attendance:pl:2014-2024:iskk-diocese",
   "dataset_version_id": "pl-attendance:pl:2014-2024:iskk-diocese:98e28efcfa35",
@@ -650,28 +650,6 @@
     "The national Ogółem row is not a diocese and is not written to area-summary rows.",
     "The 41-diocese boundary layer mixes 24 OpenStreetMap religious administration anchor polygons, attributed to © OpenStreetMap contributors under the Open Database Licence (ODbL), with 17 polygons digitised from Eurostat/GISCO Local Administrative Units 2024 gmina geometry. The digitisation method is gmina_digitisation_from_GISCO_LAU_2024 with Wikipedia deanery evidence; authoritative GIS-Expert/KUL polygons remain pending."
   ],
-  "deferred_items": [
-    {
-      "item": "2013",
-      "status": "deferred",
-      "reason": "No freely published Annuarium PDF for 2013 was found on the ISKK publications index or by targeted URL/search probes during this run."
-    },
-    {
-      "item": "2020",
-      "status": "deferred",
-      "reason": "The 2020 Annuarium PDF was downloaded, but the source table reports b/d and states that the Sunday-practice count did not take place because of COVID-19."
-    },
-    {
-      "item": "pre-2014 series",
-      "status": "deferred",
-      "reason": "Earlier public series work needs source extraction plus period-specific diocese boundaries and concordances."
-    },
-    {
-      "item": "authoritative polygons",
-      "status": "deferred",
-      "reason": "GIS-Expert/KUL polygons remain pending permission or purchase; the current layer uses OSM anchors and GISCO-gmina digitisation."
-    }
-  ],
   "privacy": "public",
   "licence_status": "needs_review",
   "downstream_status": "public",
@@ -711,5 +689,29 @@
       "notes": "The 41-diocese boundary layer mixes 24 OpenStreetMap religious administration anchor polygons, attributed to © OpenStreetMap contributors under the Open Database Licence (ODbL), with 17 polygons digitised from Eurostat/GISCO Local Administrative Units 2024 gmina geometry. The digitisation method is gmina_digitisation_from_GISCO_LAU_2024 with Wikipedia deanery evidence; authoritative GIS-Expert/KUL polygons remain pending."
     }
   ],
-  "notes": "The Poland practice lane area-summary product is a data product only; page, index, and hub wiring are out of scope for this lane."
+  "notes": "The Poland practice lane area-summary product is a data product only; page, index, and hub wiring are out of scope for this lane.",
+  "extensions": {
+    "deferred_items": [
+      {
+        "item": "2013",
+        "status": "deferred",
+        "reason": "No freely published Annuarium PDF for 2013 was found on the ISKK publications index or by targeted URL/search probes during this run."
+      },
+      {
+        "item": "2020",
+        "status": "deferred",
+        "reason": "The 2020 Annuarium PDF was downloaded, but the source table reports b/d and states that the Sunday-practice count did not take place because of COVID-19."
+      },
+      {
+        "item": "pre-2014 series",
+        "status": "deferred",
+        "reason": "Earlier public series work needs source extraction plus period-specific diocese boundaries and concordances."
+      },
+      {
+        "item": "authoritative polygons",
+        "status": "deferred",
+        "reason": "GIS-Expert/KUL polygons remain pending permission or purchase; the current layer uses OSM anchors and GISCO-gmina digitisation."
+      }
+    ]
+  }
 }

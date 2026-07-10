@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:sk-census-religion:sk:2001-2021:1aa45f5a99d8",
   "dataset_id": "sk-census-religion:sk:2001-2021:sodb-infostat",
   "dataset_version_id": "sk-census-religion:sk:2001-2021:sodb-infostat:1aa45f5a99d8",
@@ -1511,7 +1511,8 @@
       "row_count": 2927,
       "content": "Slovakia municipality/city-part area summary with SODB 2021 religious-belief metrics.",
       "privacy": "public",
-      "licence_status": "susr_public_sodb_attribution_required_statement_not_located"
+      "licence_status": "needs_review",
+      "licence_basis": "susr_public_sodb_attribution_required_statement_not_located"
     },
     {
       "uri": "repo:apps/regions/sk/data/area_summary_municipality.csv",
@@ -1522,7 +1523,8 @@
       "row_count": 2927,
       "content": "Flattened Slovakia municipality/city-part area summary with SODB 2021 religious-belief metrics.",
       "privacy": "public",
-      "licence_status": "susr_public_sodb_attribution_required_statement_not_located"
+      "licence_status": "needs_review",
+      "licence_basis": "susr_public_sodb_attribution_required_statement_not_located"
     },
     {
       "uri": "repo:apps/regions/sk/data/sk_municipality_2021.geojson",
@@ -1533,7 +1535,8 @@
       "row_count": 2927,
       "content": "Simplified Slovakia SODB 2021 municipality/city-part boundary GeoJSON.",
       "privacy": "public",
-      "licence_status": "susr_public_sodb_attribution_required_statement_not_located"
+      "licence_status": "needs_review",
+      "licence_basis": "susr_public_sodb_attribution_required_statement_not_located"
     },
     {
       "uri": "repo:apps/regions/sk/data/area_summary_kraj.json",
@@ -1544,7 +1547,8 @@
       "row_count": 24,
       "content": "Slovakia current-kraj area summary with 2001, 2011, and 2021 census religious-belief metrics.",
       "privacy": "public",
-      "licence_status": "susr_public_sodb_attribution_required_statement_not_located"
+      "licence_status": "needs_review",
+      "licence_basis": "susr_public_sodb_attribution_required_statement_not_located"
     },
     {
       "uri": "repo:apps/regions/sk/data/area_summary_kraj.csv",
@@ -1555,7 +1559,8 @@
       "row_count": 24,
       "content": "Flattened Slovakia current-kraj area summary with 2001, 2011, and 2021 census religious-belief metrics.",
       "privacy": "public",
-      "licence_status": "susr_public_sodb_attribution_required_statement_not_located"
+      "licence_status": "needs_review",
+      "licence_basis": "susr_public_sodb_attribution_required_statement_not_located"
     },
     {
       "uri": "repo:apps/regions/sk/data/sk_kraj_2021.geojson",
@@ -1566,7 +1571,8 @@
       "row_count": 8,
       "content": "Simplified Slovakia current-kraj boundary GeoJSON dissolved from the SODB 2021 municipality boundary product.",
       "privacy": "public",
-      "licence_status": "susr_public_sodb_attribution_required_statement_not_located"
+      "licence_status": "needs_review",
+      "licence_basis": "susr_public_sodb_attribution_required_statement_not_located"
     }
   ],
   "derived_outputs": [
@@ -2015,7 +2021,8 @@
         "mapshaper_keep_percent": 75,
         "target_bytes": 300000
       }
-    }
+    },
+    "status": "passed"
   },
   "construct_notes": [
     "The public map displays two headline metrics for 2021: religious affiliation percent and no religion percent.",
@@ -2043,7 +2050,7 @@
     }
   ],
   "privacy": "public",
-  "licence_status": "susr_public_sodb_attribution_required_statement_not_located",
+  "licence_status": "needs_review",
   "downstream_status": "public",
   "source_datasets": [
     {
@@ -2115,5 +2122,6 @@
       "notes": "The raw GeoJSON includes 87 non-output helper features and 2,927 municipality/city-part output features. Bratislava and Košice are represented by city parts, matching SODB basic-results reporting."
     }
   ],
-  "notes": "The committed products contain derived area summaries and simplified boundaries only. On-page attribution cites SUSR, Infostat, SODB 2011, and SODB 2021 source pages."
+  "notes": "The committed products contain derived area summaries and simplified boundaries only. On-page attribution cites SUSR, Infostat, SODB 2011, and SODB 2021 source pages.",
+  "licence_basis": "susr_public_sodb_attribution_required_statement_not_located"
 }

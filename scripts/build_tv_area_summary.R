@@ -75,7 +75,9 @@ licence_text <- paste(
   "ADM1 (8 island units), Open Data Commons Open Database License 1.0, boundary",
   "source recorded by geoBoundaries as OpenStreetMap and Wambacher."
 )
-licence_status <- "tuvalu_census_partial_research_reuse_attribution_geoboundaries_odbl_1_0"
+licence_status <- "accepted"
+# terms identity preserved separately from the shipping decision (schema v2)
+licence_basis <- "tuvalu_census_partial_research_reuse_attribution_geoboundaries_odbl_1_0"
 
 # the two published regions: the geoBoundaries ADM1 island shapeNames that
 # dissolve up to each region. Funafuti is the single capital atoll; Outer
@@ -613,7 +615,7 @@ area_summary_document <- function(rows) {
   )
 }
 
-manifest_file_record <- function(path, content, licence_status_value) {
+manifest_file_record <- function(path, content, licence_status_value, licence_basis_value = licence_basis) {
   list(
     uri = paste0("repo:", path),
     storage_provider = "git_repository",
@@ -623,7 +625,8 @@ manifest_file_record <- function(path, content, licence_status_value) {
     row_count = row_count_file(path),
     content = content,
     privacy = "public",
-    licence_status = licence_status_value
+    licence_status = licence_status_value,
+    licence_basis = licence_basis_value
   )
 }
 
@@ -750,7 +753,7 @@ manifest <- list(
   durable_files = list(
     manifest_file_record(summary_json_out, "Tuvalu region area summary with census 2012 and 2017 religious-affiliation and no-religion metrics.", licence_status),
     manifest_file_record(summary_csv_out, "Flattened Tuvalu region area summary with census 2012 and 2017 religious-affiliation and no-religion metrics.", licence_status),
-    manifest_file_record(boundary_out, "Simplified Tuvalu region boundary GeoJSON derived from geoBoundaries TUV ADM1 (8 island units) dissolved to 2 regions.", "geoboundaries_odbl_1_0")
+    manifest_file_record(boundary_out, "Simplified Tuvalu region boundary GeoJSON derived from geoBoundaries TUV ADM1 (8 island units) dissolved to 2 regions.", "accepted", "geoboundaries_odbl_1_0")
   ),
   derived_outputs = list(
     list(uri = paste0("repo:", summary_json_out), sha256 = sha256_file(summary_json_out),
@@ -760,6 +763,7 @@ manifest <- list(
                                                boundary_write[["method"]], boundary_write[["keep_percent"]], boundary_write[["clean_option"]]))
   ),
   validation = list(
+    status = "passed",
     checks = validation_checks,
     join_coverage = list(region = join_coverage),
     national_reconciliation = national_reconciliation,
@@ -803,6 +807,7 @@ manifest <- list(
   ),
   privacy = "public",
   licence_status = licence_status,
+  licence_basis = licence_basis,
   downstream_status = "public",
   source_datasets = source_datasets(),
   notes = "The committed products contain the derived region area summary and simplified boundary only. On-page attribution cites the Tuvalu CSD, SPC (2022), and geoBoundaries (ODbL 1.0, OpenStreetMap/Wambacher)."

@@ -58,7 +58,9 @@ licence_text <- paste(
   "ADM2 (2020 districts), Creative Commons Attribution 3.0 IGO, boundary",
   "source National Statistics Office of Malawi and OCHA ROSEA via HDX."
 )
-licence_status <- "nso_census_open_report_attribution_geoboundaries_cc_by_3_igo"
+licence_status <- "accepted"
+# terms identity preserved separately from the shipping decision (schema v2)
+licence_basis <- "nso_census_open_report_attribution_geoboundaries_cc_by_3_igo"
 
 # the 11 columns of table E5, in printed order, plus the leading total.
 # other_denomination folds Buddhism, Hinduism, and other non-Christian
@@ -755,6 +757,7 @@ manifest <- list(
   ),
   privacy = "public",
   licence_status = licence_status,
+  licence_basis = licence_basis,
   downstream_status = "public",
   source_datasets = source_datasets(),
   notes = "The committed products contain the derived district area summary and simplified boundary only. On-page attribution cites NSO Malawi and geoBoundaries (CC BY 3.0 IGO)."

@@ -75,7 +75,9 @@ licence_text <- paste(
   "African Municipal Demarcation Board (licence source",
   "data.humdata.org/dataset/south-africa-admin-level-1-boundaries)."
 )
-licence_status <- "statssa_census_open_release_attribution_geoboundaries_cc_by_3_0_igo"
+licence_status <- "accepted"
+# terms identity preserved separately from the shipping decision (schema v2)
+licence_basis <- "statssa_census_open_release_attribution_geoboundaries_cc_by_3_0_igo"
 
 # the nine provinces, spelled as Stats SA Table 4.1 names them and in that table
 # order. these double as the census reporting units; geoBoundaries carries a
@@ -821,6 +823,7 @@ manifest <- list(
   ),
   privacy = "public",
   licence_status = licence_status,
+  licence_basis = licence_basis,
   downstream_status = "public",
   source_datasets = source_datasets(),
   notes = "The committed products contain the derived province area summary and simplified boundary only. On-page attribution cites Stats SA and geoBoundaries (CC BY 3.0 IGO, boundary source OCHA ROSEA and the South African Municipal Demarcation Board)."

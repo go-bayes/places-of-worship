@@ -72,7 +72,9 @@ licence_text <- paste(
   "districts, 2012), Creative Commons Attribution 4.0 International, boundary",
   "source Open Data Rwanda (NISR geoportal, statistics.gov.rw/terms-use)."
 )
-licence_status <- "nisr_census_open_report_attribution_geoboundaries_cc_by_4_0"
+licence_status <- "accepted"
+# terms identity preserved separately from the shipping decision (schema v2)
+licence_basis <- "nisr_census_open_report_attribution_geoboundaries_cc_by_4_0"
 
 # the 30 modern districts (post-2006 reform), spelled as geoBoundaries RWA ADM2
 # names them. these double as the district-header lines that group the sectors in
@@ -802,6 +804,7 @@ manifest <- list(
   ),
   privacy = "public",
   licence_status = licence_status,
+  licence_basis = licence_basis,
   downstream_status = "public",
   source_datasets = source_datasets(),
   notes = "The committed products contain the derived district area summary and simplified boundary only. On-page attribution cites NISR and geoBoundaries (CC BY 4.0, Open Data Rwanda)."

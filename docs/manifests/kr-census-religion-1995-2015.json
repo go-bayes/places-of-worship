@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:kr-census-religion:kr:1995-2015:aa96b3383fa7",
   "dataset_id": "kr-census-religion:kr:1995-2015:kosis",
   "dataset_version_id": "kr-census-religion:kr:1995-2015:kosis:aa96b3383fa7",
@@ -136,7 +136,8 @@
       "row_count": 458,
       "content": "South Korea harmonised si/gun/gu area summary with KOSIS census religion metrics for 2005 and 2015.",
       "privacy": "public",
-      "licence_status": "kogl_type_1_attribution"
+      "licence_status": "accepted",
+      "licence_basis": "kogl_type_1_attribution"
     },
     {
       "uri": "repo:apps/regions/kr/data/area_summary_si_gun_gu.csv",
@@ -147,7 +148,8 @@
       "row_count": 458,
       "content": "Flattened South Korea harmonised si/gun/gu area summary with KOSIS census religion metrics for 2005 and 2015.",
       "privacy": "public",
-      "licence_status": "kogl_type_1_attribution"
+      "licence_status": "accepted",
+      "licence_basis": "kogl_type_1_attribution"
     },
     {
       "uri": "repo:apps/regions/kr/data/kr_si_gun_gu_2018_harmonised.geojson",
@@ -158,7 +160,8 @@
       "row_count": 229,
       "content": "Simplified South Korea harmonised si/gun/gu boundary GeoJSON derived from KoStat 2018 municipalities.",
       "privacy": "public",
-      "licence_status": "kogl_type_1_attribution"
+      "licence_status": "accepted",
+      "licence_basis": "kogl_type_1_attribution"
     },
     {
       "uri": "repo:apps/regions/kr/data/area_summary_sido.json",
@@ -169,7 +172,8 @@
       "row_count": 51,
       "content": "South Korea current-sido area summary with KOSIS census religion metrics for 1995, 2005, and 2015.",
       "privacy": "public",
-      "licence_status": "kogl_type_1_attribution"
+      "licence_status": "accepted",
+      "licence_basis": "kogl_type_1_attribution"
     },
     {
       "uri": "repo:apps/regions/kr/data/area_summary_sido.csv",
@@ -180,7 +184,8 @@
       "row_count": 51,
       "content": "Flattened South Korea current-sido area summary with KOSIS census religion metrics for 1995, 2005, and 2015.",
       "privacy": "public",
-      "licence_status": "kogl_type_1_attribution"
+      "licence_status": "accepted",
+      "licence_basis": "kogl_type_1_attribution"
     },
     {
       "uri": "repo:apps/regions/kr/data/kr_sido_2018_harmonised.geojson",
@@ -191,7 +196,8 @@
       "row_count": 17,
       "content": "Simplified South Korea current-sido boundary GeoJSON derived from KoStat 2018 municipalities.",
       "privacy": "public",
-      "licence_status": "kogl_type_1_attribution"
+      "licence_status": "accepted",
+      "licence_basis": "kogl_type_1_attribution"
     }
   ],
   "derived_outputs": [
@@ -445,7 +451,8 @@
         "simplification_tolerance_m": 50,
         "harmonised_area_count": 17
       }
-    }
+    },
+    "status": "passed"
   },
   "deferred_sources": [
     {
@@ -469,7 +476,7 @@
     "The harmonised si/gun/gu boundary set dissolves 2018 district geometries to parent cities where KOSIS uses parent-city totals, and aggregates documented 2005 predecessor codes for Sejong, Yeoju, Cheongju, Gyeryong, Dangjin, Changwon, and Jeju."
   ],
   "privacy": "public",
-  "licence_status": "kogl_type_1_attribution",
+  "licence_status": "accepted",
   "downstream_status": "public",
   "source_datasets": [
     {
@@ -541,5 +548,6 @@
       "notes": "The product dissolves 2018 district geometries to parent cities where KOSIS publishes parent-city rows and uses documented predecessor-code aggregations for 2005."
     }
   ],
-  "notes": "The committed products contain derived area summaries and simplified boundaries only. On-page attribution must cite KOSIS, KoStat, southkorea-maps, and KOGL Type 1 attribution."
+  "notes": "The committed products contain derived area summaries and simplified boundaries only. On-page attribution must cite KOSIS, KoStat, southkorea-maps, and KOGL Type 1 attribution.",
+  "licence_basis": "kogl_type_1_attribution"
 }

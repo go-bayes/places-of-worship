@@ -61,9 +61,11 @@ cso_licence_name <- paste(
   "publish, distribute, and create derivative or value-added products from CSO information, subject to the",
   "required value-added-product acknowledgement."
 )
-# descriptive obligation token carried in free-form fields (quality_flag,
-# licence_obligation); the schema-constrained licence_status enum stays "accepted".
-census_licence_status <- "cso_open_licence_agreement_value_added_acknowledgement_required"
+# terms identity preserved separately from the shipping decision (schema v2);
+# the descriptive obligation token rides quality_flag and licence_obligation,
+# while the schema-constrained licence_status enum stays "accepted".
+licence_basis <- "cso_open_licence_agreement_value_added_acknowledgement_required"
+census_licence_status <- licence_basis
 licence_status_enum <- "accepted"
 storage_provider_value <- "other"
 licence_obligation <- paste(

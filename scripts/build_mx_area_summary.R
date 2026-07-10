@@ -801,7 +801,7 @@ source_record <- function(item) {
 }
 
 # create a manifest durable-file record for one generated output.
-manifest_file_record <- function(path, content, licence_status = "inegi_terms_attribution_required") {
+manifest_file_record <- function(path, content, licence_status = "accepted", licence_basis = "inegi_terms_attribution_required") {
   list(
     uri = paste0("repo:", path),
     storage_provider = "git_repository",
@@ -1023,7 +1023,7 @@ docs_manifest <- list(
     "Municipality rows use 2020 boundaries without a split/merge concordance for 2010."
   ),
   privacy = "public",
-  licence_status = "inegi_terms_attribution_required",
+  licence_status = "accepted", licence_basis = "inegi_terms_attribution_required",
   downstream_status = "public",
   source_datasets = source_datasets(),
   notes = "The committed products contain derived area summaries and simplified boundaries only. On-page attribution must cite INEGI, INEGI terms, and the Marco Geoestadistico boundary source."

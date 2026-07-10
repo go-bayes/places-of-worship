@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:ro-census-religion:ro:2011-2021:ins-rpl-gisco-lau",
   "dataset_id": "ro-census-religion:ro:2011-2021:ins-rpl-gisco-lau",
   "dataset_version_id": "ro-census-religion:ro:2011-2021:ins-rpl-gisco-lau:acc0a1c0fd95",
@@ -126,7 +126,8 @@
       "row_count": 6362,
       "content": "Romania LAU 2021 area summary with INS RPL 2011 and 2021 stated-response religion metrics.",
       "privacy": "public",
-      "licence_status": "ins_public_download_terms_unclear_gisco_attribution"
+      "licence_status": "needs_review",
+      "licence_basis": "ins_public_download_terms_unclear_gisco_attribution"
     },
     {
       "uri": "repo:apps/regions/ro/data/area_summary_lau_2021.csv",
@@ -137,7 +138,8 @@
       "row_count": 6362,
       "content": "Flattened Romania LAU 2021 area summary with INS RPL 2011 and 2021 stated-response religion metrics.",
       "privacy": "public",
-      "licence_status": "ins_public_download_terms_unclear_gisco_attribution"
+      "licence_status": "needs_review",
+      "licence_basis": "ins_public_download_terms_unclear_gisco_attribution"
     },
     {
       "uri": "repo:apps/regions/ro/data/ro_lau_2021.geojson",
@@ -148,7 +150,8 @@
       "row_count": 3181,
       "content": "Simplified Romania LAU 2021 boundary GeoJSON derived from GISCO LAU 2021.",
       "privacy": "public",
-      "licence_status": "gisco_download_provisions_with_attribution"
+      "licence_status": "accepted",
+      "licence_basis": "gisco_download_provisions_with_attribution"
     },
     {
       "uri": "repo:apps/regions/ro/data/area_summary_judet.json",
@@ -159,7 +162,8 @@
       "row_count": 84,
       "content": "Romania județ area summary with INS RPL 2011 and 2021 stated-response religion metrics from source county rows.",
       "privacy": "public",
-      "licence_status": "ins_public_download_terms_unclear_gisco_attribution"
+      "licence_status": "needs_review",
+      "licence_basis": "ins_public_download_terms_unclear_gisco_attribution"
     },
     {
       "uri": "repo:apps/regions/ro/data/area_summary_judet.csv",
@@ -170,7 +174,8 @@
       "row_count": 84,
       "content": "Flattened Romania județ area summary with INS RPL 2011 and 2021 stated-response religion metrics from source county rows.",
       "privacy": "public",
-      "licence_status": "ins_public_download_terms_unclear_gisco_attribution"
+      "licence_status": "needs_review",
+      "licence_basis": "ins_public_download_terms_unclear_gisco_attribution"
     },
     {
       "uri": "repo:apps/regions/ro/data/ro_judet_2021.geojson",
@@ -181,7 +186,8 @@
       "row_count": 42,
       "content": "Simplified Romania județ boundary GeoJSON derived from GISCO NUTS3 2021.",
       "privacy": "public",
-      "licence_status": "gisco_download_provisions_with_attribution"
+      "licence_status": "accepted",
+      "licence_basis": "gisco_download_provisions_with_attribution"
     }
   ],
   "derived_outputs": [
@@ -422,7 +428,8 @@
         "unmatched_boundary_features": [],
         "unmatched_census_areas": []
       }
-    }
+    },
+    "status": "passed"
   },
   "deferred_sources": [
     {
@@ -448,5 +455,6 @@
     "The județ product uses the workbook's source county rows and GISCO NUTS3 2021 boundaries. It does not aggregate suppressed LAU rows.",
     "The 2011 source is matched to GISCO LAU 2011 by county and UAT name, then bridged to GISCO LAU 2021 by LAU_ID. Official source IDs are used; no ad hoc split/merge mapping is invented.",
     "The 2011 Bucharest municipality row is used for the 2021 Bucharest LAU feature; six sector rows are excluded from the shipped LAU product."
-  ]
+  ],
+  "downstream_status": "public"
 }

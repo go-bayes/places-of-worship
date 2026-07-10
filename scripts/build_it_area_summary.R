@@ -110,7 +110,9 @@ licence_text <- paste(
   "The boundary source is ISTAT Confini delle unità amministrative a fini",
   "statistici, 2026, versione generalizzata, WGS84."
 )
-licence_status <- "istat_cc_by_4_0"
+licence_status <- "accepted"
+# terms identity preserved separately from the shipping decision (schema v2)
+licence_basis <- "istat_cc_by_4_0"
 
 sdmx_region_to_istat <- c(
   "ITC1" = "01",
@@ -802,6 +804,7 @@ manifest <- list(
   ),
   privacy = "public",
   licence_status = licence_status,
+  licence_basis = licence_basis,
   downstream_status = "public",
   source_datasets = source_datasets(),
   notes = "The committed products contain derived AVQ practice estimates and the simplified ISTAT regional boundary. The Italy region page, hub card and overview are out of scope for this lane."

@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:ee-census-religion:ee:2000-2021:b79d5d91359b",
   "dataset_id": "ee-census-religion:ee:2000-2021:stat-ee-maaamet",
   "dataset_version_id": "ee-census-religion:ee:2000-2021:stat-ee-maaamet:b79d5d91359b",
@@ -255,8 +255,9 @@
       "sha256": "1966030aba4422ed296e4f0b917108a4940694db03f46501fbb9190cea20c794",
       "content": "Estonia three-wave county area-summary JSON",
       "privacy": "public",
-      "licence_status": "stat_ee_open_data_cc_by_sa_4_0_attribution_maaamet_open_data_licence_attribution",
-      "row_count": 45
+      "licence_status": "accepted",
+      "row_count": 45,
+      "licence_basis": "stat_ee_open_data_cc_by_sa_4_0_attribution_maaamet_open_data_licence_attribution"
     },
     {
       "uri": "repo:apps/regions/ee/data/area_summary_county.csv",
@@ -266,8 +267,9 @@
       "sha256": "f10be59fcfb183da6084160b9c04996dc03904d9ee1e240718e73d2be812240a",
       "content": "Estonia three-wave county area-summary CSV",
       "privacy": "public",
-      "licence_status": "stat_ee_open_data_cc_by_sa_4_0_attribution_maaamet_open_data_licence_attribution",
-      "row_count": 45
+      "licence_status": "accepted",
+      "row_count": 45,
+      "licence_basis": "stat_ee_open_data_cc_by_sa_4_0_attribution_maaamet_open_data_licence_attribution"
     },
     {
       "uri": "repo:apps/regions/ee/data/ee_county_2000.geojson",
@@ -277,8 +279,9 @@
       "sha256": "ec29bb153155e7fc4c00fc83c5de6afbcb30ec29584358cbeb47abc2ca066a49",
       "content": "Estonia 2000 county boundary",
       "privacy": "public",
-      "licence_status": "maaamet_open_data_licence_attribution",
-      "feature_count": 15
+      "licence_status": "accepted",
+      "feature_count": 15,
+      "licence_basis": "maaamet_open_data_licence_attribution"
     },
     {
       "uri": "repo:apps/regions/ee/data/ee_county_2011.geojson",
@@ -288,8 +291,9 @@
       "sha256": "fd2a732f937ce35c75bb3c1d8758704929f814b9ac0bb4d095fd152db6148e8c",
       "content": "Estonia 2011 county boundary",
       "privacy": "public",
-      "licence_status": "maaamet_open_data_licence_attribution",
-      "feature_count": 15
+      "licence_status": "accepted",
+      "feature_count": 15,
+      "licence_basis": "maaamet_open_data_licence_attribution"
     },
     {
       "uri": "repo:apps/regions/ee/data/ee_county_2021.geojson",
@@ -299,8 +303,9 @@
       "sha256": "031f50adee82f5551bc87236f0e7e6738801892b8a1ec6754ee0de27e37bf6b3",
       "content": "Estonia 2021 county boundary",
       "privacy": "public",
-      "licence_status": "maaamet_open_data_licence_attribution",
-      "feature_count": 15
+      "licence_status": "accepted",
+      "feature_count": 15,
+      "licence_basis": "maaamet_open_data_licence_attribution"
     }
   ],
   "partitions": [
@@ -1971,7 +1976,7 @@
     }
   ],
   "privacy": "public",
-  "licence_status": "stat_ee_open_data_cc_by_sa_4_0_attribution_maaamet_open_data_licence_attribution",
+  "licence_status": "accepted",
   "downstream_status": "public",
   "notes": "County census-affiliation product for the population aged 15 and over. A region page is outside this build.",
   "raw_sources": [
@@ -2292,33 +2297,33 @@
       "sha256": "11e46026ec84cb50c4fbceae8013f7c90e8608a4f270204e01b3d48370169e33"
     }
   ],
-  "derived_outputs": {
-    "1": {
+  "derived_outputs": [
+    {
       "uri": "repo:apps/regions/ee/data/area_summary_county.json",
       "sha256": "1966030aba4422ed296e4f0b917108a4940694db03f46501fbb9190cea20c794",
       "built_by": "scripts/build_ee_area_summary.R"
     },
-    "2": {
+    {
       "uri": "repo:apps/regions/ee/data/area_summary_county.csv",
       "sha256": "f10be59fcfb183da6084160b9c04996dc03904d9ee1e240718e73d2be812240a",
       "built_by": "scripts/build_ee_area_summary.R"
     },
-    "2000": {
+    {
       "uri": "repo:apps/regions/ee/data/ee_county_2000.geojson",
       "sha256": "ec29bb153155e7fc4c00fc83c5de6afbcb30ec29584358cbeb47abc2ca066a49",
       "built_by": "scripts/build_ee_area_summary.R"
     },
-    "2011": {
+    {
       "uri": "repo:apps/regions/ee/data/ee_county_2011.geojson",
       "sha256": "fd2a732f937ce35c75bb3c1d8758704929f814b9ac0bb4d095fd152db6148e8c",
       "built_by": "scripts/build_ee_area_summary.R"
     },
-    "2021": {
+    {
       "uri": "repo:apps/regions/ee/data/ee_county_2021.geojson",
       "sha256": "031f50adee82f5551bc87236f0e7e6738801892b8a1ec6754ee0de27e37bf6b3",
       "built_by": "scripts/build_ee_area_summary.R"
     }
-  },
+  ],
   "source_datasets": [
     {
       "source_dataset_id": "stat-ee-rl229-census-religion-2000",
@@ -2422,5 +2427,6 @@
       "redistribution_limits": "The official open-data licence permits derivatives and redistribution with origin and data-vintage attribution. No Creative Commons identifier is claimed for the boundary.",
       "notes": "Official per-vintage county boundary. The layer is not used to rebase another wave's counts."
     }
-  ]
+  ],
+  "licence_basis": "stat_ee_open_data_cc_by_sa_4_0_attribution_maaamet_open_data_licence_attribution"
 }

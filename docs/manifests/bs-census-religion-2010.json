@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:bs-census-religion:bs:2010:bnsi-island-reports",
   "dataset_id": "bs-census-religion:bs:2010:bnsi-island-reports",
   "dataset_version_id": "bs-census-religion:bs:2010:bnsi-island-reports:478cd8e284e3",
@@ -350,7 +350,8 @@
       "row_count": 18,
       "content": "Bahamas island area summary with census 2010 religious-affiliation and no-religion metrics.",
       "privacy": "public",
-      "licence_status": "bnsi_census_open_report_attribution_geoboundaries_cc_by_4_0"
+      "licence_status": "accepted",
+      "licence_basis": "bnsi_census_open_report_attribution_geoboundaries_cc_by_4_0"
     },
     {
       "uri": "repo:apps/regions/bs/data/area_summary_island.csv",
@@ -361,7 +362,8 @@
       "row_count": 18,
       "content": "Flattened Bahamas island area summary with census 2010 religious-affiliation and no-religion metrics.",
       "privacy": "public",
-      "licence_status": "bnsi_census_open_report_attribution_geoboundaries_cc_by_4_0"
+      "licence_status": "accepted",
+      "licence_basis": "bnsi_census_open_report_attribution_geoboundaries_cc_by_4_0"
     },
     {
       "uri": "repo:apps/regions/bs/data/bs_island_2020.geojson",
@@ -372,7 +374,8 @@
       "row_count": 18,
       "content": "Simplified Bahamas island boundary GeoJSON derived from geoBoundaries BHS ADM1 (32 districts) dissolved to 18 islands.",
       "privacy": "public",
-      "licence_status": "geoboundaries_cc_by_4_0"
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_cc_by_4_0"
     }
   ],
   "derived_outputs": [
@@ -452,7 +455,8 @@
       "simplification_keep_percent": 40,
       "unmatched_boundary_features": [],
       "unmatched_census_areas": []
-    }
+    },
+    "status": "passed"
   },
   "construct_notes": [
     "The public map displays two headline metrics for 2010 at island level: religious affiliation percent and no religion percent.",
@@ -476,7 +480,7 @@
     }
   ],
   "privacy": "public",
-  "licence_status": "bnsi_census_open_report_attribution_geoboundaries_cc_by_4_0",
+  "licence_status": "accepted",
   "downstream_status": "public",
   "source_datasets": [
     {
@@ -548,5 +552,6 @@
       "notes": "32 ADM1 local government districts, dissolved to the eighteen census islands the 2010 reports use. The gbOpen metadata records the boundary source field as 'Haiti GeoPortal', which appears to be a metadata error; the boundarySourceURL resolves to the Caribbean GeoPortal (haiti.caribbeangeoportal.com/datasets/caribgeoportal). Source data update 2023-01-19."
     }
   ],
-  "notes": "The committed products contain the derived island area summary and simplified boundary only. On-page attribution cites BNSI and geoBoundaries (CC BY 4.0, Caribbean GeoPortal)."
+  "notes": "The committed products contain the derived island area summary and simplified boundary only. On-page attribution cites BNSI and geoBoundaries (CC BY 4.0, Caribbean GeoPortal).",
+  "licence_basis": "bnsi_census_open_report_attribution_geoboundaries_cc_by_4_0"
 }

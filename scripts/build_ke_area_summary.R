@@ -57,7 +57,9 @@ licence_text <- paste(
   "Boundaries are geoBoundaries KEN ADM1 (2020 counties), released to the",
   "public domain, derived from the RCMRD GeoPortal via the Africa GeoPortal."
 )
-licence_status <- "knbs_census_open_download_attribution_geoboundaries_public_domain"
+licence_status <- "accepted"
+# terms identity preserved separately from the shipping decision (schema v2)
+licence_basis <- "knbs_census_open_download_attribution_geoboundaries_public_domain"
 
 # the 13 religious-affiliation columns of table 2.30, in printed order, plus
 # the leading total. african_instituted = African Instituted Churches.
@@ -712,6 +714,7 @@ manifest <- list(
   ),
   privacy = "public",
   licence_status = licence_status,
+  licence_basis = licence_basis,
   downstream_status = "public",
   source_datasets = source_datasets(),
   notes = "The committed products contain the derived county area summary and simplified boundary only. On-page attribution cites KNBS and geoBoundaries."

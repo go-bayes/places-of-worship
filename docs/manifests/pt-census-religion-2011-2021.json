@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:pt-census-religion:pt:2011-2021:ine-api-caop2021",
   "dataset_id": "pt-census-religion:pt:2011-2021:ine-api-caop2021",
   "dataset_version_id": "pt-census-religion:pt:2011-2021:ine-api-caop2021:75d994ab64c9",
@@ -189,7 +189,8 @@
       "row_count": 616,
       "content": "Portugal municipality area summary with INE Census 2011 and 2021 stated-response religion metrics.",
       "privacy": "public",
-      "licence_status": "open_cc_by_4_0_with_attribution"
+      "licence_status": "accepted",
+      "licence_basis": "open_cc_by_4_0_with_attribution"
     },
     {
       "uri": "repo:apps/regions/pt/data/area_summary_municipality.csv",
@@ -200,7 +201,8 @@
       "row_count": 616,
       "content": "Flattened Portugal municipality area summary with INE Census 2011 and 2021 stated-response religion metrics.",
       "privacy": "public",
-      "licence_status": "open_cc_by_4_0_with_attribution"
+      "licence_status": "accepted",
+      "licence_basis": "open_cc_by_4_0_with_attribution"
     },
     {
       "uri": "repo:apps/regions/pt/data/pt_municipality_caop2021.geojson",
@@ -211,7 +213,8 @@
       "row_count": 308,
       "content": "Simplified Portugal municipality boundary GeoJSON dissolved from CAOP 2021 administrative areas.",
       "privacy": "public",
-      "licence_status": "open_cc_by_4_0_with_attribution"
+      "licence_status": "accepted",
+      "licence_basis": "open_cc_by_4_0_with_attribution"
     }
   ],
   "derived_outputs": [
@@ -299,7 +302,8 @@
       "unmapped_census_areas": [],
       "simplified_boundary_bytes": 1390143,
       "simplification_tolerance_m": 100
-    }
+    },
+    "status": "passed"
   },
   "deferred_sources": [
     {
@@ -332,5 +336,6 @@
       "no_religion_formula": "Sem religião",
       "source_categories": "1=Católica; 2=Ortodoxa; 3=Protestante/Evangélica; 4=Testemunhas do Jeová; 5=Outra cristã; 6=Budista; 7=Hindu; 8=Judaica; 9=Muçulmana; 10=Outra não cristã; 11=Sem religião"
     }
-  ]
+  ],
+  "downstream_status": "public"
 }

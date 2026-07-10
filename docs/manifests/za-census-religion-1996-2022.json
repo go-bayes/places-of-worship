@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:za-census-religion:za:1996-2022:statssa-cultural-dynamics-and-p0301-4",
   "dataset_id": "za-census-religion:za:1996-2022:statssa-cultural-dynamics-and-p0301-4",
   "dataset_version_id": "za-census-religion:za:1996-2022:statssa-cultural-dynamics-and-p0301-4:43624d89f943",
@@ -133,7 +133,8 @@
       "row_count": 27,
       "content": "South Africa province area summary with census 1996, 2001 and 2022 religious-affiliation and no-religion metrics.",
       "privacy": "public",
-      "licence_status": "statssa_census_open_release_attribution_geoboundaries_cc_by_3_0_igo"
+      "licence_status": "accepted",
+      "licence_basis": "statssa_census_open_release_attribution_geoboundaries_cc_by_3_0_igo"
     },
     {
       "uri": "repo:apps/regions/za/data/area_summary_province.csv",
@@ -144,7 +145,8 @@
       "row_count": 27,
       "content": "Flattened South Africa province area summary with census 1996, 2001 and 2022 religious-affiliation and no-religion metrics.",
       "privacy": "public",
-      "licence_status": "statssa_census_open_release_attribution_geoboundaries_cc_by_3_0_igo"
+      "licence_status": "accepted",
+      "licence_basis": "statssa_census_open_release_attribution_geoboundaries_cc_by_3_0_igo"
     },
     {
       "uri": "repo:apps/regions/za/data/za_province_2020.geojson",
@@ -155,7 +157,8 @@
       "row_count": 9,
       "content": "Simplified South Africa province boundary GeoJSON derived from geoBoundaries ZAF ADM1 (9 provinces).",
       "privacy": "public",
-      "licence_status": "geoboundaries_cc_by_3_0_igo"
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_cc_by_3_0_igo"
     }
   ],
   "derived_outputs": [
@@ -275,7 +278,8 @@
       "name_fixes": [
         "geoBoundaries 'Nothern Cape' (shapeISO NC) corrected to 'Northern Cape'"
       ]
-    }
+    },
+    "status": "passed"
   },
   "construct_notes": [
     "The public map displays two headline metrics for 1996, 2001 and 2022 at province level: religious affiliation percent and no religion percent.",
@@ -299,7 +303,7 @@
     }
   ],
   "privacy": "public",
-  "licence_status": "statssa_census_open_release_attribution_geoboundaries_cc_by_3_0_igo",
+  "licence_status": "accepted",
   "downstream_status": "public",
   "source_datasets": [
     {
@@ -371,5 +375,6 @@
       "notes": "9 ADM1 provinces. Joined by the clean geoBoundaries shapeISO code (WC, EC, NC, FS, KZ, NW, GT, MP, LI); the feature carrying ISO code NC has the misspelled shapeName 'Nothern Cape', corrected to 'Northern Cape' in the product. Source data update 2023-01-19."
     }
   ],
-  "notes": "The committed products contain the derived province area summary and simplified boundary only. On-page attribution cites Stats SA and geoBoundaries (CC BY 3.0 IGO, boundary source OCHA ROSEA and the South African Municipal Demarcation Board)."
+  "notes": "The committed products contain the derived province area summary and simplified boundary only. On-page attribution cites Stats SA and geoBoundaries (CC BY 3.0 IGO, boundary source OCHA ROSEA and the South African Municipal Demarcation Board).",
+  "licence_basis": "statssa_census_open_release_attribution_geoboundaries_cc_by_3_0_igo"
 }

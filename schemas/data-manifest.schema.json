@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://go-bayes.github.io/places-of-worship/schemas/data-manifest.schema.json",
   "title": "Data Manifest",
-  "description": "Recoverable, checksummed manifest for raw, intermediate, staged, accepted, or public data artefacts.",
+  "description": "Recoverable, checksummed manifest for raw, intermediate, staged, accepted, or public data artefacts. v2 (2026-07-11) legitimises the enriched builder dialect: optional provenance containers (construct_notes, deferred_sources, derived_outputs, raw_sources, source_datasets, target_years), the git_repository storage provider, nullable pipeline.git_commit, source.raw_redistribution, durable-file notes and licence_basis, open validation evidence keys, and partition snapshot_date/stage. licence_status stays the strict shipping-decision enum; the terms identifier lives in licence_basis.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -25,7 +25,10 @@
       "type": "string"
     },
     "schema_version": {
-      "const": "data-manifest.v1"
+      "enum": [
+        "data-manifest.v1",
+        "data-manifest.v2"
+      ]
     },
     "manifest_id": {
       "type": "string",
@@ -40,15 +43,24 @@
       "pattern": "^[a-z0-9][a-z0-9._:-]*:[a-f0-9]{12,64}$"
     },
     "manifest_sha256": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^[a-f0-9]{64}$"
     },
     "supersedes_manifest_id": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^manifest:[a-z0-9][a-z0-9._:-]*$"
     },
     "superseded_by_manifest_id": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^manifest:[a-z0-9][a-z0-9._:-]*$"
     },
     "dataset_family": {
@@ -67,10 +79,19 @@
     "scope": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["level"],
+      "required": [
+        "level"
+      ],
       "properties": {
         "level": {
-          "enum": ["global", "country", "area", "site", "grid", "batch"]
+          "enum": [
+            "global",
+            "country",
+            "area",
+            "site",
+            "grid",
+            "batch"
+          ]
         },
         "country_codes": {
           "type": "array",
@@ -88,11 +109,17 @@
           "uniqueItems": true
         },
         "snapshot_date": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "format": "date"
         },
         "snapshot_anchor": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "pattern": "^\\d{2}-\\d{2}$"
         },
         "pipeline_stage": {
@@ -119,14 +146,26 @@
     "pipeline": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["script", "git_commit", "command"],
+      "required": [
+        "script",
+        "git_commit",
+        "command"
+      ],
       "properties": {
         "script": {
           "type": "string"
         },
         "git_commit": {
-          "type": "string",
-          "pattern": "^[a-f0-9]{7,40}$"
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{7,40}$"
+            }
+          ],
+          "description": "Build-time commit; null when not recorded."
         },
         "command": {
           "type": "string"
@@ -147,7 +186,10 @@
       "additionalProperties": false,
       "properties": {
         "provider": {
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "source_dataset_ids": {
           "type": "array",
@@ -166,14 +208,66 @@
           "uniqueItems": true
         },
         "retrieved_at": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "format": "date-time"
         },
         "licence": {
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "citation": {
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "raw_redistribution": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Redistribution position for the raw source files."
+        },
+        "local_cache_hint": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "raw_cache_durable_uris": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "licence_position": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "licence_position_verbatim_from_playbook": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "licence_todo": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "short_citation": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     },
@@ -198,20 +292,28 @@
     },
     "stats": {
       "type": "object",
-      "additionalProperties": {
-        "type": ["string", "number", "integer", "boolean", "null"]
-      }
+      "description": "Build statistics; values may be scalars or structured records."
     },
     "local_cache_hint": {
-      "type": ["string", "null"]
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "validation": {
       "type": "object",
-      "additionalProperties": false,
-      "required": ["status"],
+      "additionalProperties": true,
+      "required": [
+        "status"
+      ],
       "properties": {
         "status": {
-          "enum": ["not_run", "passed", "passed_with_warnings", "failed"]
+          "enum": [
+            "not_run",
+            "passed",
+            "passed_with_warnings",
+            "failed"
+          ]
         },
         "commands": {
           "type": "array",
@@ -226,39 +328,130 @@
           }
         },
         "notes": {
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         }
-      }
+      },
+      "description": "Validation outcome. status is the one-glance verdict; additional keys carry structured gate evidence recorded by the build."
     },
     "privacy": {
-      "enum": ["public", "project_private", "restricted", "sensitive"]
+      "enum": [
+        "public",
+        "project_private",
+        "restricted",
+        "sensitive"
+      ]
     },
     "licence_status": {
-      "enum": ["accepted", "needs_review", "restricted", "unknown"]
+      "enum": [
+        "accepted",
+        "needs_review",
+        "restricted",
+        "unknown"
+      ]
     },
     "downstream_status": {
-      "enum": ["lead", "staged", "accepted", "exported", "public", "superseded", "discarded"]
+      "enum": [
+        "lead",
+        "staged",
+        "accepted",
+        "exported",
+        "public",
+        "superseded",
+        "discarded"
+      ]
     },
     "notes": {
-      "type": ["string", "null"]
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "construct_notes": {
+      "description": "Construct framing notes: how the shipped indicators relate to the source's construct.",
+      "anyOf": [
+        {
+          "type": "array"
+        },
+        {
+          "type": "object"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "deferred_sources": {
+      "description": "Sources located but deliberately not shipped, with reasons and recovery routes.",
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "derived_outputs": {
+      "description": "Derived artefacts written by the build, with uris and checksums.",
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "raw_sources": {
+      "description": "Raw retrieval records: cached inputs with checksums, sizes, and retrieval detail.",
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "source_datasets": {
+      "description": "Named upstream datasets with citation and licence detail.",
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "target_years": {
+      "description": "Years the product targets.",
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "licence_basis": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_]*$",
+      "description": "Slug identifying the product-level licence terms; licence_status carries the shipping decision."
+    },
+    "extensions": {
+      "type": "object",
+      "description": "Builder-specific extras relocated from the top level during the v2 migration; content preserved verbatim under its original key."
     }
   },
   "$defs": {
     "ManifestRef": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["manifest_id"],
+      "required": [
+        "manifest_id"
+      ],
       "properties": {
         "manifest_id": {
           "type": "string",
           "pattern": "^manifest:[a-z0-9][a-z0-9._:-]*$"
         },
         "dataset_version_id": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "pattern": "^[a-z0-9][a-z0-9._:-]*:[a-f0-9]{12,64}$"
         },
         "manifest_sha256": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "pattern": "^[a-f0-9]{64}$"
         }
       }
@@ -266,13 +459,25 @@
     "DurableFile": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["uri", "storage_provider", "format", "bytes", "sha256", "content"],
+      "required": [
+        "uri",
+        "storage_provider",
+        "format",
+        "bytes",
+        "sha256"
+      ],
       "properties": {
         "uri": {
           "type": "string"
         },
         "storage_provider": {
-          "enum": ["google_drive", "google_cloud_storage", "github_release", "other"]
+          "enum": [
+            "google_drive",
+            "google_cloud_storage",
+            "github_release",
+            "git_repository",
+            "other"
+          ]
         },
         "format": {
           "type": "string"
@@ -286,41 +491,95 @@
           "pattern": "^[a-f0-9]{64}$"
         },
         "content_sha256": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "pattern": "^[a-f0-9]{64}$"
         },
         "row_count": {
-          "type": ["integer", "null"],
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 0
         },
         "feature_count": {
-          "type": ["integer", "null"],
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 0
         },
         "content": {
           "type": "string"
         },
         "privacy": {
-          "enum": ["public", "project_private", "restricted", "sensitive"]
+          "enum": [
+            "public",
+            "project_private",
+            "restricted",
+            "sensitive"
+          ]
         },
         "licence_status": {
-          "enum": ["accepted", "needs_review", "restricted", "unknown"]
+          "enum": [
+            "accepted",
+            "needs_review",
+            "restricted",
+            "unknown"
+          ]
+        },
+        "notes": {
+          "type": "string",
+          "description": "Free-form description; older manifests use notes where newer ones use content."
+        },
+        "licence_basis": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_]*$",
+          "description": "Slug identifying the licence terms this file ships under (e.g. kogl_type_1_attribution). licence_status carries the shipping decision; licence_basis carries the terms identity."
         }
-      }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "content"
+          ]
+        },
+        {
+          "required": [
+            "notes"
+          ]
+        }
+      ]
     },
     "Partition": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["partition_id", "partition_type", "file_uri", "sha256"],
+      "required": [
+        "partition_id",
+        "partition_type",
+        "file_uri",
+        "sha256"
+      ],
       "properties": {
         "partition_id": {
           "type": "string"
         },
         "partition_type": {
-          "enum": ["country", "tile", "grid", "area", "batch"]
+          "enum": [
+            "country",
+            "tile",
+            "grid",
+            "area",
+            "batch"
+          ]
         },
         "country_code": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "pattern": "^[A-Z]{2}$"
         },
         "file_uri": {
@@ -331,12 +590,28 @@
           "pattern": "^[a-f0-9]{64}$"
         },
         "row_count": {
-          "type": ["integer", "null"],
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 0
         },
         "feature_count": {
-          "type": ["integer", "null"],
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 0
+        },
+        "snapshot_date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "stage": {
+          "type": "string"
         }
       }
     }

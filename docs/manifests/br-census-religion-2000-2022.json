@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:br-census-religion:br:2000-2022:4b72458a326d",
   "dataset_id": "br-census-religion:br:2000-2022:ibge-sidra",
   "dataset_version_id": "br-census-religion:br:2000-2022:ibge-sidra:4b72458a326d",
@@ -956,7 +956,8 @@
       "row_count": 16710,
       "content": "Brazil municipality area summary with IBGE SIDRA stated-response religion metrics.",
       "privacy": "public",
-      "licence_status": "ibge_public_api_terms_not_explicit"
+      "licence_status": "needs_review",
+      "licence_basis": "ibge_public_api_terms_not_explicit"
     },
     {
       "uri": "repo:apps/regions/br/data/area_summary_municipality.csv",
@@ -967,7 +968,8 @@
       "row_count": 16710,
       "content": "Flattened Brazil municipality area summary with IBGE SIDRA stated-response religion metrics.",
       "privacy": "public",
-      "licence_status": "ibge_public_api_terms_not_explicit"
+      "licence_status": "needs_review",
+      "licence_basis": "ibge_public_api_terms_not_explicit"
     },
     {
       "uri": "repo:apps/regions/br/data/br_municipality_2022.geojson",
@@ -978,7 +980,8 @@
       "row_count": 5570,
       "content": "Simplified Brazil 2022 municipality boundary GeoJSON derived from IBGE malhas.",
       "privacy": "public",
-      "licence_status": "ibge_public_api_terms_not_explicit"
+      "licence_status": "needs_review",
+      "licence_basis": "ibge_public_api_terms_not_explicit"
     },
     {
       "uri": "repo:apps/regions/br/data/area_summary_uf.json",
@@ -989,7 +992,8 @@
       "row_count": 81,
       "content": "Brazil UF area summary with IBGE SIDRA stated-response religion metrics.",
       "privacy": "public",
-      "licence_status": "ibge_public_api_terms_not_explicit"
+      "licence_status": "needs_review",
+      "licence_basis": "ibge_public_api_terms_not_explicit"
     },
     {
       "uri": "repo:apps/regions/br/data/area_summary_uf.csv",
@@ -1000,7 +1004,8 @@
       "row_count": 81,
       "content": "Flattened Brazil UF area summary with IBGE SIDRA stated-response religion metrics.",
       "privacy": "public",
-      "licence_status": "ibge_public_api_terms_not_explicit"
+      "licence_status": "needs_review",
+      "licence_basis": "ibge_public_api_terms_not_explicit"
     },
     {
       "uri": "repo:apps/regions/br/data/br_uf_2022.geojson",
@@ -1011,7 +1016,8 @@
       "row_count": 27,
       "content": "Simplified Brazil 2022 UF boundary GeoJSON derived from IBGE malhas.",
       "privacy": "public",
-      "licence_status": "ibge_public_api_terms_not_explicit"
+      "licence_status": "needs_review",
+      "licence_basis": "ibge_public_api_terms_not_explicit"
     }
   ],
   "derived_outputs": [
@@ -1341,7 +1347,8 @@
       "unmapped_locality_rows": [
         "5101837"
       ]
-    }
+    },
+    "status": "passed"
   },
   "construct_notes": [
     "2000 and 2010 use SIDRA aggregate 137, variable 93: População residente.",
@@ -1350,7 +1357,7 @@
     "The municipality layer is anchored on 2022 municipality boundaries. Pre-2022 municipality rows are not concorded across splits and mergers, and the page omits the religious_change metric."
   ],
   "privacy": "public",
-  "licence_status": "ibge_public_api_terms_not_explicit",
+  "licence_status": "needs_review",
   "downstream_status": "public",
   "source_datasets": [
     {
@@ -1439,5 +1446,6 @@
       "notes": "Used to add municipality and UF names to the malha features and area-summary rows."
     }
   ],
-  "notes": "Portuguese SIDRA category labels are preserved in the ignored long source extracts with normalised labels alongside. The committed products contain only derived area summaries and simplified boundaries."
+  "notes": "Portuguese SIDRA category labels are preserved in the ignored long source extracts with normalised labels alongside. The committed products contain only derived area summaries and simplified boundaries.",
+  "licence_basis": "ibge_public_api_terms_not_explicit"
 }

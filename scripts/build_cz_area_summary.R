@@ -54,7 +54,9 @@ licence_text <- paste(
   "2021 (kraje are NUTS3 in Czechia), used under GISCO download provisions",
   "with attribution to EuroGeographics for the administrative boundaries."
 )
-licence_status <- "czso_open_data_attribution_gisco_eurogeographics_attribution"
+licence_status <- "accepted"
+# terms identity preserved separately from the shipping decision (schema v2)
+licence_basis <- "czso_open_data_attribution_gisco_eurogeographics_attribution"
 
 # order of the eight NABVIRAWS1 religion categories in the JSON-stat response.
 # codes: 0 total, 20 believers with church, 9 Roman Catholic, 6 Hussite,
@@ -666,6 +668,7 @@ manifest <- list(
   ),
   privacy = "public",
   licence_status = licence_status,
+  licence_basis = licence_basis,
   downstream_status = "public",
   source_datasets = source_datasets(),
   notes = "The committed products contain the derived kraj area summary and simplified boundary only. On-page attribution cites CZSO and Eurostat GISCO/EuroGeographics."

@@ -952,7 +952,7 @@ docs_manifest <- list(
     "2001 and 2011 use their own period district boundary sets rather than a crosswalk."
   ),
   privacy = "public",
-  licence_status = "censusindia_godl_india_attribution_basis_and_datameet_cc_by_2_5_in",
+  licence_status = "accepted", licence_basis = "censusindia_godl_india_attribution_basis_and_datameet_cc_by_2_5_in",
   downstream_status = "public",
   source_datasets = c(source_datasets_for_year(2001L), source_datasets_for_year(2011L)),
   notes = "The committed products contain derived area summaries and simplified district boundaries only. On-page attribution must cite Census of India, GODL-India attribution basis, DataMeet, and the DataMeet district boundary licence."

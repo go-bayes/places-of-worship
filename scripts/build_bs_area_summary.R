@@ -69,7 +69,9 @@ licence_text <- paste(
   "Commons Attribution 4.0 International, boundary source recorded by",
   "geoBoundaries as the Caribbean GeoPortal."
 )
-licence_status <- "bnsi_census_open_report_attribution_geoboundaries_cc_by_4_0"
+licence_status <- "accepted"
+# terms identity preserved separately from the shipping decision (schema v2)
+licence_basis <- "bnsi_census_open_report_attribution_geoboundaries_cc_by_4_0"
 
 # the eighteen census islands: report file, the census label, an area-code slug,
 # and the geoBoundaries ADM1 district shapeNames that dissolve up to the island.
@@ -823,6 +825,7 @@ manifest <- list(
   ),
   privacy = "public",
   licence_status = licence_status,
+  licence_basis = licence_basis,
   downstream_status = "public",
   source_datasets = source_datasets(),
   notes = "The committed products contain the derived island area summary and simplified boundary only. On-page attribution cites BNSI and geoBoundaries (CC BY 4.0, Caribbean GeoPortal)."

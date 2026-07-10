@@ -1,9 +1,9 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
   "schema_version": "data-manifest.v1",
-  "manifest_id": "manifest:bd-census-religion:bd:2022:a15357561998",
+  "manifest_id": "manifest:bd-census-religion:bd:2022:9bfa7b0559a2",
   "dataset_id": "bd-census-religion:bd:2022:bbs-phc2022-district",
-  "dataset_version_id": "bd-census-religion:bd:2022:bbs-phc2022-district:a15357561998",
+  "dataset_version_id": "bd-census-religion:bd:2022:bbs-phc2022-district:9bfa7b0559a2",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -18,7 +18,7 @@
     "snapshot_anchor": null,
     "pipeline_stage": "staged"
   },
-  "created_at": "2026-07-10T12:00:12Z",
+  "created_at": "2026-07-10T22:09:15Z",
   "created_by": "scripts/build_bd_area_summary.R",
   "pipeline": {
     "script": "scripts/build_bd_area_summary.R",
@@ -51,15 +51,7 @@
       ],
       "boundary_source_vintage": "geoBoundaries BGD ADM2, boundaryYearRepresented 2020",
       "boundary_simplification_tolerance_m": 250,
-      "omitted_metrics": [
-        "no_religion_percent visual layer",
-        "religious_change",
-        "places_per_10000_residents",
-        "place_density_per_sq_km"
-      ],
-      "raw_cache_durable_uris": [
-        "gs://pow-research-data/raw_sources/bd_census/"
-      ]
+      "omitted_metrics": ["no_religion_percent visual layer", "religious_change", "places_per_10000_residents", "place_density_per_sq_km"]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -69,16 +61,8 @@
   },
   "source": {
     "provider": "Bangladesh Bureau of Statistics (BBS); geoBoundaries (W&M geoLab), BBS/OCHA ROAP",
-    "source_dataset_ids": [
-      "bbs-phc-2022-table-p08-religion-district",
-      "geoboundaries-bgd-adm2"
-    ],
-    "source_urls": [
-      "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2024/12/9ce5bd160bb14a1ab1eabe886adddb9a.pdf",
-      "https://bbs.gov.bd/",
-      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BGD/ADM2/geoBoundaries-BGD-ADM2.geojson",
-      "https://www.geoboundaries.org/api/current/gbOpen/BGD/ADM2/"
-    ],
+    "source_dataset_ids": ["bbs-phc-2022-table-p08-religion-district", "geoboundaries-bgd-adm2"],
+    "source_urls": ["https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2024/12/9ce5bd160bb14a1ab1eabe886adddb9a.pdf", "https://bbs.gov.bd/", "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BGD/ADM2/geoBoundaries-BGD-ADM2.geojson", "https://www.geoboundaries.org/api/current/gbOpen/BGD/ADM2/"],
     "retrieved_at": "2026-07-10T00:00:00Z",
     "licence": "Census: BBS copyright asserted (ISBN 978-984-475-201-6); no open-reuse licence located, reuse terms unresolved. Boundary: CC BY 3.0 IGO (geoBoundaries; BBS; OCHA ROAP).",
     "citation": "Bangladesh Bureau of Statistics, Population and Housing Census 2022, National Report (Volume I), Table P08; geoBoundaries BGD ADM2.",
@@ -122,8 +106,8 @@
       "uri": "repo:apps/regions/bd/data/area_summary_district_2022.json",
       "storage_provider": "git_repository",
       "format": "json",
-      "bytes": 112678,
-      "sha256": "a153575619989a2ecffc23bfabcf26cdaa052d2ab11f5afb659a029cb5208f18",
+      "bytes": 112692,
+      "sha256": "9bfa7b0559a2a91e238171f3d79f2ff98ca120f8308a722938aae87584b349af",
       "row_count": 64,
       "content": "Bangladesh 2022 district area summary with BBS census religious-affiliation metrics.",
       "privacy": "public",
@@ -155,7 +139,7 @@
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/bd/data/area_summary_district_2022.json",
-      "sha256": "a153575619989a2ecffc23bfabcf26cdaa052d2ab11f5afb659a029cb5208f18",
+      "sha256": "9bfa7b0559a2a91e238171f3d79f2ff98ca120f8308a722938aae87584b349af",
       "built_by": "scripts/build_bd_area_summary.R",
       "notes": "64 districts; denominator is the sum of the five Table P08 religion categories."
     },
@@ -167,6 +151,7 @@
     }
   ],
   "validation": {
+    "status": "passed",
     "checks": [
       "Table P08 parsed to exactly 1 national + 8 division + 64 district rows.",
       "Every Male + Female cell equals its printed Total across all five categories and all rows.",

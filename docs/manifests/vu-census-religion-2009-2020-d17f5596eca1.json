@@ -1,6 +1,6 @@
 {
  "$schema": "../../schemas/data-manifest.schema.json",
- "schema_version": "data-manifest.v1",
+ "schema_version": "data-manifest.v2",
  "manifest_id": "manifest:vu-census-religion:vu:2009-2020:extracted-tables:d17f5596eca1",
  "dataset_id": "vu-census-religion:vu:1999-2020:extracted-tables",
  "dataset_version_id": "vu-census-religion:vu:2009-2020:extracted-tables:d17f5596eca1",
@@ -8,7 +8,7 @@
  "supersedes_manifest_id": null,
  "superseded_by_manifest_id": null,
  "dataset_family": "vu-census-religion",
- "dataset_role": "source_extract",
+ "dataset_role": "raw_source",
  "scope": {
   "level": "country",
   "country_codes": [
@@ -16,7 +16,7 @@
   ],
   "snapshot_date": null,
   "snapshot_anchor": null,
-  "pipeline_stage": "source_extraction"
+  "pipeline_stage": "raw"
  },
  "created_at": "2026-07-04T00:30:00Z",
  "created_by": "scripts/extract_vu_census_religion.py",
@@ -225,6 +225,9 @@
    "rebuild is idempotent on its own output (r partial-matching bug fixed with exact [[ ]] access)",
    "2026-07-06: all raw source masters archived to gs://places-of-worship-private-sync/raw_sources/ and verified by sha256 round-trip (9 files)",
    "2026-07-07: source extracts relocated to gs://pow-research-data/research_datasets/vu_census_extracts/ (public repo keeps only the derived area summaries the map consumes)"
-  ]
- }
+  ],
+  "status": "passed"
+ },
+ "downstream_status": "public",
+ "notes": "Migrated 2026-07-11: dataset_role source_extract renamed raw_source and pipeline_stage source_extraction renamed raw under the data-manifest.v2 vocabulary; meaning unchanged."
 }

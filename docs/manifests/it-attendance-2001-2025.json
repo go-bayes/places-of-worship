@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:it-attendance:it:2001-2025:istat-avq-region",
   "dataset_id": "it-attendance:it:2001-2025:istat-avq-region",
   "dataset_version_id": "it-attendance:it:2001-2025:istat-avq-region:27a795d0a266",
@@ -191,7 +191,8 @@
       "row_count": 480,
       "content": "Italy regional area summary with AVQ self-reported weekly and never attendance metrics.",
       "privacy": "public",
-      "licence_status": "istat_cc_by_4_0"
+      "licence_status": "accepted",
+      "licence_basis": "istat_cc_by_4_0"
     },
     {
       "uri": "repo:apps/regions/it/data/area_summary_region.csv",
@@ -202,7 +203,8 @@
       "row_count": 480,
       "content": "Flattened Italy regional area summary with AVQ self-reported weekly and never attendance metrics.",
       "privacy": "public",
-      "licence_status": "istat_cc_by_4_0"
+      "licence_status": "accepted",
+      "licence_basis": "istat_cc_by_4_0"
     },
     {
       "uri": "repo:apps/regions/it/data/it_region_2026.geojson",
@@ -213,7 +215,8 @@
       "row_count": 20,
       "content": "Simplified ISTAT 2026 generalised region boundary GeoJSON, 20 features.",
       "privacy": "public",
-      "licence_status": "istat_cc_by_4_0"
+      "licence_status": "accepted",
+      "licence_basis": "istat_cc_by_4_0"
     }
   ],
   "derived_outputs": [
@@ -446,7 +449,8 @@
       "simplification_keep_percent": 60,
       "unmatched_boundary_features": [],
       "unmatched_attendance_regions": []
-    }
+    },
+    "status": "passed"
   },
   "construct_notes": [
     "Italy's AVQ measure is a self-reported sample-survey estimate of worship attendance frequency among the resident population aged 6 and over. It is not religious affiliation and not a doorway count. Poland's dominicantes is a count of persons physically present at Mass on one count Sunday, expressed over obliged Catholics. The Italy survey percentages and Poland count percentages must not be placed on one axis or compared directly.",
@@ -456,7 +460,7 @@
     "CC BY 4.0 attribution: Istat."
   ],
   "privacy": "public",
-  "licence_status": "istat_cc_by_4_0",
+  "licence_status": "accepted",
   "downstream_status": "public",
   "source_datasets": [
     {
@@ -494,5 +498,6 @@
       "notes": "The source ZIP contains the WGS84 generalised region shapefile Reg01012026_g_WGS84; the product keeps the 20 region features and transforms them to EPSG:4326 GeoJSON."
     }
   ],
-  "notes": "The committed products contain derived AVQ practice estimates and the simplified ISTAT regional boundary. The Italy region page, hub card and overview are out of scope for this lane."
+  "notes": "The committed products contain derived AVQ practice estimates and the simplified ISTAT regional boundary. The Italy region page, hub card and overview are out of scope for this lane.",
+  "licence_basis": "istat_cc_by_4_0"
 }

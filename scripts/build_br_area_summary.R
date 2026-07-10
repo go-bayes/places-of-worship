@@ -396,7 +396,7 @@ area_summary_document <- function(level_id, boundary_set_id, boundary_dataset_id
 }
 
 # create a manifest durable-file record for one generated output.
-manifest_file_record <- function(path, content, licence_status = "ibge_public_api_terms_not_explicit") {
+manifest_file_record <- function(path, content, licence_status = "needs_review", licence_basis = "ibge_public_api_terms_not_explicit") {
   list(
     uri = paste0("repo:", path),
     storage_provider = "git_repository",
@@ -893,7 +893,7 @@ docs_manifest <- list(
     "The municipality layer is anchored on 2022 municipality boundaries. Pre-2022 municipality rows are not concorded across splits and mergers, and the page omits the religious_change metric."
   ),
   privacy = "public",
-  licence_status = "ibge_public_api_terms_not_explicit",
+  licence_status = "needs_review", licence_basis = "ibge_public_api_terms_not_explicit",
   downstream_status = "public",
   source_datasets = source_datasets_all,
   notes = "Portuguese SIDRA category labels are preserved in the ignored long source extracts with normalised labels alongside. The committed products contain only derived area summaries and simplified boundaries."

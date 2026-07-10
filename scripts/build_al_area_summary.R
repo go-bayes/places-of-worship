@@ -82,7 +82,9 @@ licence_text <- paste(
   "Domain, boundary source geoBoundaries and Wikipedia",
   "(geoboundaries.org/api/current/gbOpen/ALB/ADM1)."
 )
-licence_status <- "instat_census_open_release_attribution_geoboundaries_public_domain"
+licence_status <- "accepted"
+# terms identity preserved separately from the shipping decision (schema v2)
+licence_basis <- "instat_census_open_release_attribution_geoboundaries_public_domain"
 
 # ---- category harmonisation ----
 # named religions counted as religious affiliation in both waves. "believers
@@ -813,6 +815,7 @@ manifest <- list(
   ),
   privacy = "public",
   licence_status = licence_status,
+  licence_basis = licence_basis,
   downstream_status = "public",
   source_datasets = source_datasets(),
   notes = "The committed products contain the derived prefecture area summary and simplified boundary only. On-page attribution cites INSTAT and geoBoundaries (boundary licence Public Domain, source geoBoundaries and Wikipedia)."

@@ -1,6 +1,6 @@
 {
   "schema_version": "0.2.0",
-  "generated_at": "2026-07-10T12:00:12Z",
+  "generated_at": "2026-07-10T22:09:15Z",
   "generated_by": "scripts/build_bd_area_summary.R",
   "country_code": "BD",
   "boundary_set": {
@@ -70,10 +70,10 @@
       "description": "Share of the classified population reporting one of the five census religion categories.",
       "unit": "percent",
       "denominator_indicator_id": "population_total",
-      "method": "100 * (Muslim + Hindu + Christian + Buddhist + Others) / population_total. Every person is classified into a religion category, so this equals 100 for every district.",
+      "method": "100 * (Muslim + Hindu + Christian + Buddhist + Others) / population_total. Every person is classified into a religion category; this therefore equals 100 for every district.",
       "temporal_coverage": "2022",
       "spatial_coverage": "Bangladesh districts (zila), 64 units",
-      "quality_notes": "Bangladesh's census records no no-religion and no not-stated category, so affiliation is 100 percent in every district. The per-district composition (Muslim, Hindu, Christian, Buddhist, Others counts) is carried verbatim in each row's quality_flag."
+      "quality_notes": "Bangladesh's census records no no-religion and no not-stated category; affiliation is therefore 100 percent in every district. The per-district composition (Muslim, Hindu, Christian, Buddhist, Others counts) is carried verbatim in each row's quality_flag."
     },
     {
       "indicator_id": "no_religion_percent",

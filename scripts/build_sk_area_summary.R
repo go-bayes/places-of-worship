@@ -194,7 +194,9 @@ licence_text <- paste(
   "The 2001 Infostat and 2011 SODB archive routes are also attributed to SUSR;",
   "their exact reuse statements were not located during the pinned probe."
 )
-licence_status <- "susr_public_sodb_attribution_required_statement_not_located"
+licence_status <- "needs_review"
+# terms identity preserved separately from the shipping decision (schema v2)
+licence_basis <- "susr_public_sodb_attribution_required_statement_not_located"
 
 # return the local raw path for one 2001 kraj HTML table.
 infostat_2001_kraj_path <- function(source_code) {
@@ -1711,6 +1713,7 @@ manifest <- list(
   ),
   privacy = "public",
   licence_status = licence_status,
+  licence_basis = licence_basis,
   downstream_status = "public",
   source_datasets = source_datasets_kraj(),
   notes = "The committed products contain derived area summaries and simplified boundaries only. On-page attribution cites SUSR, Infostat, SODB 2011, and SODB 2021 source pages."

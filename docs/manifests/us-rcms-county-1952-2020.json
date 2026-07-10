@@ -1,5 +1,5 @@
 {
- "schema_version": "us-rcms-county-manifest.v1",
+ "schema_version": "data-manifest.v2",
  "manifest_id": "manifest:us-rcms-county:us:1952-2020:b5b422a03a7d",
  "dataset_id": "us-rcms-county:us:1952-2020:public",
  "dataset_version_id": "us-rcms-county:us:1952-2020:public:b5b422a03a7d",

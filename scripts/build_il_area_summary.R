@@ -174,7 +174,7 @@ manifest_file_record <- function(path, content) {
     row_count = row_count_file(path),
     content = content,
     privacy = "public",
-    licence_status = "cbs_open_licence_and_official_boundary_terms"
+    licence_status = "accepted", licence_basis = "cbs_open_licence_and_official_boundary_terms"
   )
 }
 

@@ -84,7 +84,9 @@ licence_text <- paste(
   "are geoBoundaries GHA ADM1 (16 post-2019 regions), Creative Commons",
   "Attribution-ShareAlike 2.0, boundary source OpenStreetMap contributors."
 )
-licence_status <- "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0"
+licence_status <- "accepted"
+# terms identity preserved separately from the shipping decision (schema v2)
+licence_basis <- "gss_census_open_report_attribution_geoboundaries_cc_by_sa_2_0"
 
 # the eight religion groups of table 5.7, as the report labels them. the pdf
 # prints "Pentecostal/" with "Charismatic" wrapped to the next line, so the
@@ -1784,6 +1786,7 @@ manifest <- list(
   ),
   privacy = "public",
   licence_status = licence_status,
+  licence_basis = licence_basis,
   downstream_status = "public",
   source_datasets = source_datasets_ten_region(),
   notes = "The committed outputs now include a 2010-2021 current sixteen-region product plus the separate old ten-region 2010-2021 companion product. UI wiring is intentionally unchanged."

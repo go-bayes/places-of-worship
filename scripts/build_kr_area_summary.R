@@ -983,7 +983,7 @@ sido_area_summary_document <- function(rows) {
 }
 
 # create a manifest durable-file record for one generated output.
-manifest_file_record <- function(path, content, licence_status = "kogl_type_1_attribution") {
+manifest_file_record <- function(path, content, licence_status = "accepted", licence_basis = "kogl_type_1_attribution") {
   list(
     uri = paste0("repo:", path),
     storage_provider = "git_repository",
@@ -1557,7 +1557,7 @@ docs_manifest <- list(
     "The harmonised si/gun/gu boundary set dissolves 2018 district geometries to parent cities where KOSIS uses parent-city totals, and aggregates documented 2005 predecessor codes for Sejong, Yeoju, Cheongju, Gyeryong, Dangjin, Changwon, and Jeju."
   ),
   privacy = "public",
-  licence_status = "kogl_type_1_attribution",
+  licence_status = "accepted", licence_basis = "kogl_type_1_attribution",
   downstream_status = "public",
   source_datasets = source_datasets(include_1995 = TRUE),
   notes = "The committed products contain derived area summaries and simplified boundaries only. On-page attribution must cite KOSIS, KoStat, southkorea-maps, and KOGL Type 1 attribution."

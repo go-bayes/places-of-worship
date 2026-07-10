@@ -169,7 +169,7 @@ flatten_rows <- function(rows) {
 }
 
 # create a manifest durable-file record for one generated output.
-manifest_file_record <- function(path, content, licence_status = "open_cc_by_4_0_with_attribution") {
+manifest_file_record <- function(path, content, licence_status = "accepted", licence_basis = "open_cc_by_4_0_with_attribution") {
   list(
     uri = paste0("repo:", path),
     storage_provider = "git_repository",

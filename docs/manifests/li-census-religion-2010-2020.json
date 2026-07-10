@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:li-census-religion:li:2010-2020:table-213.001d",
   "dataset_id": "li-census-religion:li:2010-2020:table-213.001d",
   "dataset_version_id": "li-census-religion:li:2010-2020:table-213.001d:f107846e36cc",
@@ -125,7 +125,8 @@
       "row_count": 33,
       "content": "Liechtenstein municipality census-affiliation area summary for 2010, 2015, and 2020.",
       "privacy": "public",
-      "licence_status": "statistics_li_cc_by_4_0_and_llv_boundary_terms"
+      "licence_status": "accepted",
+      "licence_basis": "statistics_li_cc_by_4_0_and_llv_boundary_terms"
     },
     {
       "uri": "repo:apps/regions/li/data/area_summary_municipality.csv",
@@ -136,7 +137,8 @@
       "row_count": 33,
       "content": "Flattened Liechtenstein municipality census-affiliation area-summary rows.",
       "privacy": "public",
-      "licence_status": "statistics_li_cc_by_4_0_and_llv_boundary_terms"
+      "licence_status": "accepted",
+      "licence_basis": "statistics_li_cc_by_4_0_and_llv_boundary_terms"
     },
     {
       "uri": "repo:apps/regions/li/data/li_municipality_2021.geojson",
@@ -147,7 +149,8 @@
       "row_count": 11,
       "content": "Simplified official 2021 Liechtenstein municipality geometry with 11 features.",
       "privacy": "public",
-      "licence_status": "statistics_li_cc_by_4_0_and_llv_boundary_terms"
+      "licence_status": "accepted",
+      "licence_basis": "statistics_li_cc_by_4_0_and_llv_boundary_terms"
     }
   ],
   "raw_sources": [

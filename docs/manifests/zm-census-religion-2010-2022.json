@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:zm-census-religion:zm:2010-2022:zamstats-series-b-and-provincial-reports",
   "dataset_id": "zm-census-religion:zm:2010-2022:zamstats-series-b-and-provincial-reports",
   "dataset_version_id": "zm-census-religion:zm:2010-2022:zamstats-series-b-and-provincial-reports:e13f4b736195",
@@ -311,7 +311,8 @@
       "row_count": 20,
       "content": "Zambia province area summary with census 2010 (percent-only) and 2022 religious-affiliation and no-religion metrics.",
       "privacy": "public",
-      "licence_status": "zamstats_census_open_report_attribution_geoboundaries_cc_by_4_0"
+      "licence_status": "accepted",
+      "licence_basis": "zamstats_census_open_report_attribution_geoboundaries_cc_by_4_0"
     },
     {
       "uri": "repo:apps/regions/zm/data/area_summary_province.csv",
@@ -322,7 +323,8 @@
       "row_count": 20,
       "content": "Flattened Zambia province area summary with census 2010 (percent-only) and 2022 religious-affiliation and no-religion metrics.",
       "privacy": "public",
-      "licence_status": "zamstats_census_open_report_attribution_geoboundaries_cc_by_4_0"
+      "licence_status": "accepted",
+      "licence_basis": "zamstats_census_open_report_attribution_geoboundaries_cc_by_4_0"
     },
     {
       "uri": "repo:apps/regions/zm/data/zm_province_2011.geojson",
@@ -333,7 +335,8 @@
       "row_count": 10,
       "content": "Simplified Zambia province boundary GeoJSON derived from geoBoundaries ZMB ADM1 (10 post-2011 provinces).",
       "privacy": "public",
-      "licence_status": "geoboundaries_cc_by_4_0"
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_cc_by_4_0"
     }
   ],
   "derived_outputs": [
@@ -421,7 +424,8 @@
       "simplification_tolerance_m": 50,
       "unmatched_boundary_features": [],
       "unmatched_census_areas": []
-    }
+    },
+    "status": "passed"
   },
   "construct_notes": [
     "The public map displays two headline metrics for 2010 and 2022: religious affiliation percent and no religion percent.",
@@ -458,7 +462,7 @@
     }
   ],
   "privacy": "public",
-  "licence_status": "zamstats_census_open_report_attribution_geoboundaries_cc_by_4_0",
+  "licence_status": "accepted",
   "downstream_status": "public",
   "source_datasets": [
     {
@@ -530,5 +534,6 @@
       "notes": "10 ADM1 provinces matching the post-2011 provincial structure both census waves report on; shapeISO carries the ISO 3166-2 ZM-NN codes used as area codes. Source data update 2023-01-19."
     }
   ],
-  "notes": "The committed products contain the derived province area summary and simplified boundary only. On-page attribution cites ZamStats and geoBoundaries (CC BY 4.0, Zambia Data Hub)."
+  "notes": "The committed products contain the derived province area summary and simplified boundary only. On-page attribution cites ZamStats and geoBoundaries (CC BY 4.0, Zambia Data Hub).",
+  "licence_basis": "zamstats_census_open_report_attribution_geoboundaries_cc_by_4_0"
 }

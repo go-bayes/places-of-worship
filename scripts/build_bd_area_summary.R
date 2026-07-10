@@ -622,6 +622,7 @@ manifest <- list(
          built_by = script_id, notes = sprintf("geoBoundaries BGD ADM2 simplified at %d m tolerance to %d bytes.", boundary_info[["simplification_tolerance_m"]], boundary_info[["output_bytes"]]))
   ),
   validation = list(
+    status = "passed",
     checks = list(
       "Table P08 parsed to exactly 1 national + 8 division + 64 district rows.",
       "Every Male + Female cell equals its printed Total across all five categories and all rows.",

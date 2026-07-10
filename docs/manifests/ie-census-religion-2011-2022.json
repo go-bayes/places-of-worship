@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:ie-census-religion:ie:2011-2022:pxstat-f5051",
   "dataset_id": "ie-census-religion:ie:2011-2022:pxstat-f5051",
   "dataset_version_id": "ie-census-religion:ie:2011-2022:pxstat-f5051:658aaa77e869",
@@ -96,7 +96,8 @@
       "row_count": 90,
       "content": "Ireland county-and-city area summary with CSO F5051 stated-response religion metrics.",
       "privacy": "public",
-      "licence_status": "open_cc_by_4_0_with_attribution"
+      "licence_status": "accepted",
+      "licence_basis": "open_cc_by_4_0_with_attribution"
     },
     {
       "uri": "repo:apps/regions/ie/data/area_summary_county_city.csv",
@@ -107,7 +108,8 @@
       "row_count": 90,
       "content": "Flattened Ireland county-and-city area summary with CSO F5051 stated-response religion metrics.",
       "privacy": "public",
-      "licence_status": "open_cc_by_4_0_with_attribution"
+      "licence_status": "accepted",
+      "licence_basis": "open_cc_by_4_0_with_attribution"
     },
     {
       "uri": "repo:apps/regions/ie/data/county_city_2019.geojson",
@@ -118,7 +120,8 @@
       "row_count": 30,
       "content": "Simplified Ireland county-and-city boundary GeoJSON derived from Tailte 2019 administrative areas.",
       "privacy": "public",
-      "licence_status": "open_cc_by_4_0_with_attribution"
+      "licence_status": "accepted",
+      "licence_basis": "open_cc_by_4_0_with_attribution"
     }
   ],
   "derived_outputs": [
@@ -234,7 +237,8 @@
       "unmapped_census_areas": [],
       "simplified_boundary_bytes": 2558090,
       "simplification_tolerance_m": 100
-    }
+    },
+    "status": "passed"
   },
   "deferred_sources": [
     {
@@ -243,5 +247,6 @@
       "local_path": "data/raw/ie_census/cso_census_1926_volume3_table09_counties_1861_1926.pdf",
       "notes": "Next build route for the deep past. The source title is 'Counties 1861-1926. Number of persons of each religion in each county and county borough in Saorstát Éireann at each census year from 1861'. Extraction requires OCR and a historical county/county-borough concordance before publication."
     }
-  ]
+  ],
+  "downstream_status": "public"
 }

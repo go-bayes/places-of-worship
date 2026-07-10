@@ -77,7 +77,9 @@ licence_text <- paste(
   "provinces), Creative Commons Attribution 4.0 International, boundary source",
   "Zambia Data Hub (Zambia NSDI, Ministry of Lands and Natural Resources)."
 )
-licence_status <- "zamstats_census_open_report_attribution_geoboundaries_cc_by_4_0"
+licence_status <- "accepted"
+# terms identity preserved separately from the shipping decision (schema v2)
+licence_basis <- "zamstats_census_open_report_attribution_geoboundaries_cc_by_4_0"
 
 # the ten provinces in table B.1 printed order, with the table's own spelling.
 province_order_2022 <- c(
@@ -1075,6 +1077,7 @@ manifest <- list(
   ),
   privacy = "public",
   licence_status = licence_status,
+  licence_basis = licence_basis,
   downstream_status = "public",
   source_datasets = source_datasets(),
   notes = "The committed products contain the derived province area summary and simplified boundary only. On-page attribution cites ZamStats and geoBoundaries (CC BY 4.0, Zambia Data Hub)."

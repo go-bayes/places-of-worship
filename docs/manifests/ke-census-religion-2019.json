@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:ke-census-religion:ke:2019:knbs-vol4-table-2-30",
   "dataset_id": "ke-census-religion:ke:2019:knbs-vol4-table-2-30",
   "dataset_version_id": "ke-census-religion:ke:2019:knbs-vol4-table-2-30:eff4f71e56d8",
@@ -125,7 +125,8 @@
       "row_count": 47,
       "content": "Kenya county area summary with KNBS census 2019 religious-affiliation and no-religion metrics.",
       "privacy": "public",
-      "licence_status": "knbs_census_open_download_attribution_geoboundaries_public_domain"
+      "licence_status": "accepted",
+      "licence_basis": "knbs_census_open_download_attribution_geoboundaries_public_domain"
     },
     {
       "uri": "repo:apps/regions/ke/data/area_summary_county.csv",
@@ -136,7 +137,8 @@
       "row_count": 47,
       "content": "Flattened Kenya county area summary with KNBS census 2019 religious-affiliation and no-religion metrics.",
       "privacy": "public",
-      "licence_status": "knbs_census_open_download_attribution_geoboundaries_public_domain"
+      "licence_status": "accepted",
+      "licence_basis": "knbs_census_open_download_attribution_geoboundaries_public_domain"
     },
     {
       "uri": "repo:apps/regions/ke/data/ke_county_2020.geojson",
@@ -147,7 +149,8 @@
       "row_count": 47,
       "content": "Simplified Kenya county boundary GeoJSON derived from geoBoundaries KEN ADM1 (2020).",
       "privacy": "public",
-      "licence_status": "geoboundaries_public_domain"
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_public_domain"
     }
   ],
   "derived_outputs": [
@@ -224,7 +227,8 @@
       "simplification_tolerance_m": 50,
       "unmatched_boundary_features": [],
       "unmatched_census_areas": []
-    }
+    },
+    "status": "passed"
   },
   "construct_notes": [
     "The public map displays two headline metrics for 2019: religious affiliation percent and no religion percent.",
@@ -243,7 +247,7 @@
     }
   ],
   "privacy": "public",
-  "licence_status": "knbs_census_open_download_attribution_geoboundaries_public_domain",
+  "licence_status": "accepted",
   "downstream_status": "public",
   "source_datasets": [
     {
@@ -281,5 +285,6 @@
       "notes": "47 ADM1 counties; shapeISO carries the ISO 3166-2 KE-NN codes used as area codes."
     }
   ],
-  "notes": "The committed products contain the derived county area summary and simplified boundary only. On-page attribution cites KNBS and geoBoundaries."
+  "notes": "The committed products contain the derived county area summary and simplified boundary only. On-page attribution cites KNBS and geoBoundaries.",
+  "licence_basis": "knbs_census_open_download_attribution_geoboundaries_public_domain"
 }

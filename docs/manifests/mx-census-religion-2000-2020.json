@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:mx-census-religion:mx:2000-2020:d06f6339e272",
   "dataset_id": "mx-census-religion:mx:2000-2020:inegi-iter",
   "dataset_version_id": "mx-census-religion:mx:2000-2020:inegi-iter:d06f6339e272",
@@ -139,7 +139,8 @@
       "row_count": 7407,
       "content": "Mexico municipality area summary with INEGI ITER religion metrics.",
       "privacy": "public",
-      "licence_status": "inegi_terms_attribution_required"
+      "licence_status": "accepted",
+      "licence_basis": "inegi_terms_attribution_required"
     },
     {
       "uri": "repo:apps/regions/mx/data/area_summary_municipality.csv",
@@ -150,7 +151,8 @@
       "row_count": 7407,
       "content": "Flattened Mexico municipality area summary with INEGI ITER religion metrics.",
       "privacy": "public",
-      "licence_status": "inegi_terms_attribution_required"
+      "licence_status": "accepted",
+      "licence_basis": "inegi_terms_attribution_required"
     },
     {
       "uri": "repo:apps/regions/mx/data/mx_municipality_2020.geojson",
@@ -161,7 +163,8 @@
       "row_count": 2469,
       "content": "Simplified Mexico 2020 municipality boundary GeoJSON derived from INEGI Marco Geoestadistico CPV 2020.",
       "privacy": "public",
-      "licence_status": "inegi_terms_attribution_required"
+      "licence_status": "accepted",
+      "licence_basis": "inegi_terms_attribution_required"
     }
   ],
   "derived_outputs": [
@@ -631,7 +634,8 @@
       "municipality_simplification_tolerance_m": 1000,
       "unmapped_boundary_features": [],
       "extra_source_area_codes_2020": []
-    }
+    },
+    "status": "passed"
   },
   "construct_notes": [
     "The public map displays two headline metrics across 2000, 2010, and 2020: religious affiliation percent and no religion percent.",
@@ -644,7 +648,7 @@
     "Municipality rows use 2020 boundaries without a split/merge concordance for 2010."
   ],
   "privacy": "public",
-  "licence_status": "inegi_terms_attribution_required",
+  "licence_status": "accepted",
   "downstream_status": "public",
   "source_datasets": [
     {
@@ -716,5 +720,6 @@
       "notes": "Municipal boundaries are simplified from the official 2020 integrated municipal layer."
     }
   ],
-  "notes": "The committed products contain derived area summaries and simplified boundaries only. On-page attribution must cite INEGI, INEGI terms, and the Marco Geoestadistico boundary source."
+  "notes": "The committed products contain derived area summaries and simplified boundaries only. On-page attribution must cite INEGI, INEGI terms, and the Marco Geoestadistico boundary source.",
+  "licence_basis": "inegi_terms_attribution_required"
 }

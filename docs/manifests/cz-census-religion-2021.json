@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
-  "schema_version": "data-manifest.v1",
+  "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:cz-census-religion:cz:2021:czso-sld008t02",
   "dataset_id": "cz-census-religion:cz:2021:czso-sld008t02",
   "dataset_version_id": "cz-census-religion:cz:2021:czso-sld008t02:a86743d19b89",
@@ -124,7 +124,8 @@
       "row_count": 14,
       "content": "Czechia kraj area summary with CZSO census 2021 religious-affiliation and no-religion metrics.",
       "privacy": "public",
-      "licence_status": "czso_open_data_attribution_gisco_eurogeographics_attribution"
+      "licence_status": "accepted",
+      "licence_basis": "czso_open_data_attribution_gisco_eurogeographics_attribution"
     },
     {
       "uri": "repo:apps/regions/cz/data/area_summary_kraj.csv",
@@ -135,7 +136,8 @@
       "row_count": 14,
       "content": "Flattened Czechia kraj area summary with CZSO census 2021 religious-affiliation and no-religion metrics.",
       "privacy": "public",
-      "licence_status": "czso_open_data_attribution_gisco_eurogeographics_attribution"
+      "licence_status": "accepted",
+      "licence_basis": "czso_open_data_attribution_gisco_eurogeographics_attribution"
     },
     {
       "uri": "repo:apps/regions/cz/data/cz_kraj_2021.geojson",
@@ -146,7 +148,8 @@
       "row_count": 14,
       "content": "Simplified Czechia kraj boundary GeoJSON derived from GISCO NUTS3 2021.",
       "privacy": "public",
-      "licence_status": "gisco_download_provisions_eurogeographics_attribution"
+      "licence_status": "accepted",
+      "licence_basis": "gisco_download_provisions_eurogeographics_attribution"
     }
   ],
   "derived_outputs": [
@@ -222,7 +225,8 @@
       "simplification_tolerance_m": 50,
       "unmatched_boundary_features": [],
       "unmatched_census_areas": []
-    }
+    },
+    "status": "passed"
   },
   "construct_notes": [
     "The public map displays two headline metrics for 2021: religious affiliation percent and no religion percent.",
@@ -241,7 +245,7 @@
     }
   ],
   "privacy": "public",
-  "licence_status": "czso_open_data_attribution_gisco_eurogeographics_attribution",
+  "licence_status": "accepted",
   "downstream_status": "public",
   "source_datasets": [
     {
@@ -279,5 +283,6 @@
       "notes": "Czech kraje are NUTS3 units; 14 CZ features are filtered from the all-Europe NUTS3 2021 file."
     }
   ],
-  "notes": "The committed products contain the derived kraj area summary and simplified boundary only. On-page attribution cites CZSO and Eurostat GISCO/EuroGeographics."
+  "notes": "The committed products contain the derived kraj area summary and simplified boundary only. On-page attribution cites CZSO and Eurostat GISCO/EuroGeographics.",
+  "licence_basis": "czso_open_data_attribution_gisco_eurogeographics_attribution"
 }
