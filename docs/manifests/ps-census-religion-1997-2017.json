@@ -1,0 +1,647 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:ps-census-religion:ps:1997-2017:pcbs-governorate",
+  "dataset_id": "ps-census-religion:ps:1997-2017:pcbs-governorate",
+  "dataset_version_id": "ps-census-religion:ps:1997-2017:pcbs-governorate:ad8e61ac1125",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "ps-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "PS"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-07-10T11:05:41Z",
+  "created_by": "scripts/build_ps_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_ps_area_summary.R",
+    "git_commit": "7ba9914",
+    "command": "Rscript scripts/build_ps_area_summary.R",
+    "parameters": {
+      "waves": [
+        1997,
+        2007,
+        2017
+      ],
+      "geography": "PCBS governorates as published; 2017 geoBoundaries PSE ADM2 frame",
+      "construct": "census affiliation",
+      "category_frame_english_by_wave": {
+        "1997": [
+          "Total",
+          "Islam",
+          "Christian",
+          "Others",
+          "Not Stated"
+        ],
+        "2007": [
+          "Total",
+          "Islam",
+          "Christian",
+          "Others",
+          "Not Stated"
+        ],
+        "2017": [
+          "Total",
+          "Islam",
+          "Christian",
+          "Other",
+          "Not Stated"
+        ]
+      },
+      "category_display_mapping_by_wave": {
+        "1997": {
+          "Total": {
+            "source_key": "Total",
+            "display_label": "Total"
+          },
+          "Islam": {
+            "source_key": "Islam",
+            "display_label": "Islam"
+          },
+          "Christian": {
+            "source_key": "Christian",
+            "display_label": "Christian"
+          },
+          "Others": {
+            "source_key": "Others",
+            "display_label": "Other"
+          },
+          "Not Stated": {
+            "source_key": "Not Stated",
+            "display_label": "Not Stated"
+          }
+        },
+        "2007": {
+          "Total": {
+            "source_key": "Total",
+            "display_label": "Total"
+          },
+          "Islam": {
+            "source_key": "Islam",
+            "display_label": "Islam"
+          },
+          "Christian": {
+            "source_key": "Christian",
+            "display_label": "Christian"
+          },
+          "Others": {
+            "source_key": "Others",
+            "display_label": "Other"
+          },
+          "Not Stated": {
+            "source_key": "Not Stated",
+            "display_label": "Not Stated"
+          }
+        },
+        "2017": {
+          "Total": {
+            "source_key": "Total",
+            "display_label": "Total"
+          },
+          "Islam": {
+            "source_key": "Islam",
+            "display_label": "Islam"
+          },
+          "Christian": {
+            "source_key": "Christian",
+            "display_label": "Christian"
+          },
+          "Other": {
+            "source_key": "Other",
+            "display_label": "Other"
+          },
+          "Not Stated": {
+            "source_key": "Not Stated",
+            "display_label": "Not Stated"
+          }
+        }
+      },
+      "category_frame_arabic": [
+        "المجموع",
+        "الإسلام",
+        "المسيحية",
+        "أخرى",
+        "غير مبين"
+      ],
+      "denominator_rule": "religious_affiliation_percent = 100 * (Total - Not Stated) / Total; no_religion fields null",
+      "change_rule": "withheld for every wave pair because PCBS coverage and Jerusalem J1 treatment are not comparable across the complete series",
+      "coverage_note": "PCBS 1997 Table 22 excludes Jerusalem J1. The 2007 census used a reduced J1 questionnaire that retained religion. The 2017 preliminary table reports actually counted population with stated characteristics, excludes post-enumeration undercoverage estimates, and records a different undercoverage method for Jerusalem J1. The product therefore withholds every cross-wave change metric. The 2017 governorate geometry depicts the full release polygons, including territory outside the 1997 data basis.",
+      "description_note": "PCBS publishes Islam, Christian, Others in 1997 and 2007 or Other in 2017, and Not Stated. The source publishes no no-religion category, and the product assigns no identity to Other, Others, or Not Stated. Religious affiliation equals Total minus Not Stated; it describes the source's category frame and does not measure belief, practice, attendance, or registered membership.",
+      "boundary_candidate_decision": {
+        "adm1": "rejected: boundaryCanonical=territory, admUnitCount=2",
+        "adm2": "selected: boundaryCanonical=governorate, admUnitCount=16, boundaryYearRepresented=2017"
+      },
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 1247851,
+        "byte_ceiling": 3145728
+      },
+      "national_reconciliation": [
+        {
+          "year": 1997,
+          "values": [
+            {
+              "category": "Total",
+              "governorate_sum": 2597616,
+              "published_national_total": 2597616,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "category": "Islam",
+              "governorate_sum": 2556859,
+              "published_national_total": 2556859,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "category": "Christian",
+              "governorate_sum": 40055,
+              "published_national_total": 40055,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "category": "Others",
+              "governorate_sum": 300,
+              "published_national_total": 300,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "category": "Not Stated",
+              "governorate_sum": 402,
+              "published_national_total": 402,
+              "difference": 0,
+              "status": "matched"
+            }
+          ]
+        },
+        {
+          "year": 2007,
+          "values": [
+            {
+              "category": "Total",
+              "governorate_sum": 3660386,
+              "published_national_total": 3660386,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "category": "Islam",
+              "governorate_sum": 3566457,
+              "published_national_total": 3566457,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "category": "Christian",
+              "governorate_sum": 42565,
+              "published_national_total": 42565,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "category": "Others",
+              "governorate_sum": 978,
+              "published_national_total": 978,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "category": "Not Stated",
+              "governorate_sum": 50386,
+              "published_national_total": 50386,
+              "difference": 0,
+              "status": "matched"
+            }
+          ]
+        },
+        {
+          "year": 2017,
+          "values": [
+            {
+              "category": "Total",
+              "governorate_sum": 4665426,
+              "published_national_total": 4665426,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "category": "Islam",
+              "governorate_sum": 4615683,
+              "published_national_total": 4615683,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "category": "Christian",
+              "governorate_sum": 46850,
+              "published_national_total": 46850,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "category": "Other",
+              "governorate_sum": 1384,
+              "published_national_total": 1384,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "category": "Not Stated",
+              "governorate_sum": 1509,
+              "published_national_total": 1509,
+              "difference": 0,
+              "status": "matched"
+            }
+          ]
+        }
+      ],
+      "geometry_hashes": {
+        "01": "f4a6ee5c39a00dcbdd630f26714ed3839af1a46b789c617bd7d7bfce6e4a054a",
+        "05": "72c39a4e75699169438bd5961660936b2bcccda08af60f0facaa25253165a2b3",
+        "10": "c00bf0f2c94d517a42e0d2815684ef882c61f9b1ad6e0b9d71dce113ad0ffe44",
+        "15": "59339c9ed52322ebc69469a9aa7e31784f31a9d2446a8398dc13696ce8898a17",
+        "20": "eb704e6295e1654106e2bdb1e4a6fbf85472791b8b4a40179dc96a53e74d749b",
+        "25": "47bf26d82ca8e72c754957541251f81c48c869a068cc114cfbc221344b37b629",
+        "30": "a98300e0330a1ddc30c86ec934875f6401148d8415d628cfa66cb73951c1c414",
+        "35": "1d19a1ce4cbdb63bef8349acb0f82eb31beeac507d9b3c133fdd2190268230b2",
+        "40": "99bb6512b2ddd9ae0230fe0ef551dc6dcea24b1038a2d8a1961322c845042e37",
+        "45": "55832f6a57e1c739d29f09908c51e0aac1119bcb488c0bea53bc8683468fcfe4",
+        "50": "2625ca403c4f1ab612893f2e4fe54fba27c96ad27b254cc812ea1c83f1c0307a",
+        "55": "04d30150fefe024f3a66c7903f5ee735c5bf15c450eeb2420725578dbe856509",
+        "60": "c8117322100a9f332b20dd6d41f6459fc788f65aefe3c3b1b603a2585c8cd92c",
+        "65": "5a4129d30466c9e65074abb1c563976966490d886ea6108d8a71bc0d4d47a959",
+        "70": "c802d42a19b83bd30f63e40ff65d8fcc68196f0a43c147fbbf2ba20d4536f567",
+        "75": "ea562ae996d299c08508dedaa617514b51db84f4b0218e86e9ba770b54450d4d"
+      },
+      "raw_sources": [
+        {
+          "local_path": "data/raw/ps_census/geoboundaries_pse_adm1_metadata.json",
+          "url": "https://www.geoboundaries.org/api/current/gbOpen/PSE/ADM1/",
+          "bytes": 1766,
+          "sha256": "5e11b482b0782630e1e6fd97489708266197cb781667825d61bfedaf294f754d"
+        },
+        {
+          "local_path": "data/raw/ps_census/geoboundaries_pse_adm2_metadata.json",
+          "url": "https://www.geoboundaries.org/api/current/gbOpen/PSE/ADM2/",
+          "bytes": 1755,
+          "sha256": "63c3f8f66026b785977524f73f8103e73c2aeefc9038bb55b7c2b43e3d247dd8"
+        },
+        {
+          "local_path": "data/raw/ps_census/geoboundaries_pse_adm2.geojson",
+          "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/PSE/ADM2/geoBoundaries-PSE-ADM2.geojson",
+          "bytes": 2402215,
+          "sha256": "69bf9a3baddaa5c102d9bea6681c586f8cb3a24f1bb78783f8ec68daabc798c0"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_426_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/426-x.zip",
+          "bytes": 1614701,
+          "sha256": "6de8675869acb574cca58cc0815f3e4d79554e996455cf0058108f4882ff259e"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_435_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/435-x.zip",
+          "bytes": 1510671,
+          "sha256": "4aef7c3b24a678695a3139976c44be0af0bfd73ace6089e71f5d1ee6cc99e24e"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_436_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/436-x.zip",
+          "bytes": 1411230,
+          "sha256": "8f699b039279b54a7df9d8e34fb5c56ff7583f5968dd7385ace4ab97c1f3f883"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_437_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/437-x.zip",
+          "bytes": 1347625,
+          "sha256": "babe65a6847a1355ce67df0ef164faefbc46f5ebac7cd5cf735ad5186ccb6097"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_438_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/438-x.zip",
+          "bytes": 1319914,
+          "sha256": "9a2087401c3a9c38d4c5bd22a50ac677382d69bdd50a23899020ee4e3a2986e5"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_443_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/443-x.zip",
+          "bytes": 1372947,
+          "sha256": "40398863961ce87f26fe7c9f4f54067dc38f8b73fb1841162c8100aa86a23a18"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_444_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/444-x.zip",
+          "bytes": 1257168,
+          "sha256": "35dda197a9dc2b2b0ab3b136fbf484e312c053eb96ed88680dcdb33f12df278a"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_445_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/445-x.zip",
+          "bytes": 1323344,
+          "sha256": "461cd713d7070a6b00af901729b7ef37d959c7e775e97dee9564b596dc351e54"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_446_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/446-x.zip",
+          "bytes": 1586108,
+          "sha256": "48744443b5c55433d8850815c6c8d8ccd0b1649e618c992c25a5835c454e0404"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_447_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/447-x.zip",
+          "bytes": 1480062,
+          "sha256": "cbcd2e9efc0f3abd8ee66eb3d29457e13e9f47017e8043ec5097cf3e7d4dc82f"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_448_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/448-x.zip",
+          "bytes": 1239974,
+          "sha256": "2e8a255f57a80bff2513165c05daaba917daf718c8c4019dbd7f5d45530b525d"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_456_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/456-x.zip",
+          "bytes": 1297534,
+          "sha256": "3f0de23b51af97f8fd854a38e4277b59c11583b38100a6a01f78f282a5411c2b"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_457_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/457-x.zip",
+          "bytes": 1244668,
+          "sha256": "2c87b5f181f327dfce20ca2dd7417a04c17701d86e327d38dbcf82a15a498580"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_458_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/458-x.zip",
+          "bytes": 1238458,
+          "sha256": "eea56bc17b162569d7d8aca87274025d0721f4bf0530fd57a623383120b1fdc2"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_470_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/470-x.zip",
+          "bytes": 1299405,
+          "sha256": "dd8765513840bb0b5fc82d1c7ee74e431b50b7de087547c1d1387c7bf6580be9"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_471_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/471-x.zip",
+          "bytes": 1271256,
+          "sha256": "b820289f56b456b6109aa7fbb02a826daf442a21a78a7371a8de06a356c70e83"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_503_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/503-x.zip",
+          "bytes": 1326958,
+          "sha256": "4bc2b031aa38cb1502926ebe1c69baef2b5ce25fe38aefd061e8834bfaa9397f"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_population_final_part1.pdf",
+          "url": "https://www.pcbs.gov.ps/media/dtgbbijp/book426-1997.pdf",
+          "bytes": 9942935,
+          "sha256": "2bb8f227f787e11041e862b139b691e5e22f6a483244902d74ec56865716ee8d"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_1997_population_final_part2.pdf",
+          "url": "https://www.pcbs.gov.ps/media/0uvfev1j/book517-1997.pdf",
+          "bytes": 3117141,
+          "sha256": "fa7eaadd7d13c0d2513185b21819903171145399661195156feeb371f9a1bd87"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_1540_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/1540-x.zip",
+          "bytes": 815459,
+          "sha256": "19e445dc4f36f801a2972ce69990a0bfede9d42365ed379cbde900dc63ffb980"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_1546_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/1546-x.zip",
+          "bytes": 749698,
+          "sha256": "834a10be777390cbb83ac704e491a46f3b4dd8463a263bdfd16488612b6956bc"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_1549_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/1549-x.zip",
+          "bytes": 879442,
+          "sha256": "08a06abd89b23a00271dc3b41d77456cab6bb5bd525c1fc40dae9c716cbad17e"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_1556_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/1556-x.zip",
+          "bytes": 891317,
+          "sha256": "cc5f7b1db59092f407b54ebf4f2036f1245c2a882e30cba656b67f38c6105ecc"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_1558_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/1558-x.zip",
+          "bytes": 813891,
+          "sha256": "74c09c8da90809662bfd8ee66f3608e8ee28441ae9678088d667e27dbdf495a7"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_1562_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/1562-x.zip",
+          "bytes": 791485,
+          "sha256": "ee161ef032695f3a24b74992b7a746dc1a0c6021a5d649ff0a001dd863e1fb4d"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_1564_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/1564-x.zip",
+          "bytes": 817905,
+          "sha256": "0a8cfe844854986e2d190026cc6f896d2d1b085996f2411a77efcb48a3369c19"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_1565_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/1565-x.zip",
+          "bytes": 854236,
+          "sha256": "d2bf5fd9406943ac6a3be344c691654498734db2fff4685e3cbe2041ae7f6b92"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_1574_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/1574-x.zip",
+          "bytes": 864496,
+          "sha256": "93409114ba46bb39ead0604d91adffa314a8d893013745080fa012465ed5e099"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_1581_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/1581-x.zip",
+          "bytes": 809633,
+          "sha256": "ad3e8b5740e305fddb1ebe761a8ee0c0fcba1fa6312c6d56fca68fca175254c8"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_1583_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/1583-x.zip",
+          "bytes": 950657,
+          "sha256": "bad550b8200f5a0cc3b5303f3f634f7f5a6226964d4af96536efda4b5667bf91"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_1853_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/1853-x.zip",
+          "bytes": 1838629,
+          "sha256": "c06a7f28a524d1c2445b1e143a56be9c92f90d651872609e65cfeb18a965e386"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_1867_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/1867-x.zip",
+          "bytes": 1733611,
+          "sha256": "a35f7d84f57a7ff5d512267105d205b969de08180abec4dd782f062c134f59ce"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_1871_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/1871-x.zip",
+          "bytes": 1557883,
+          "sha256": "94cc56c0109aa0214fa771522f5aaefba87e730cc39885114df575e2285e710e"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_1875_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/1875-x.zip",
+          "bytes": 1852587,
+          "sha256": "347caa6488ffcb06b4edbe35abee1df14022085cf57ac62ee8fe33b554511889"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_1879_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/1879-x.zip",
+          "bytes": 1992384,
+          "sha256": "aa555705a5250a91168fec887bdb1245cc4ae87cb5292c8804858e9b83692d54"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_1890_excel.zip",
+          "url": "https://www.pcbs.gov.ps/downloads/zip/1890-x.zip",
+          "bytes": 1699268,
+          "sha256": "19988f26110571cd07999881841a50c3c7b3d85bcf65a9ff54c57476e2e6f293"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_population_final.pdf",
+          "url": "https://www.pcbs.gov.ps/media/1b3ejexf/book1853-2007.pdf",
+          "bytes": 2107985,
+          "sha256": "96b3d41c25d34eca943172b8cb3e6d42c0cdd8d70ff62859d3cb94158c4c0de0"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2007_preliminary_results.pdf",
+          "url": "https://www.pcbs.gov.ps/Downloads/book1437.pdf",
+          "bytes": 2750448,
+          "sha256": "c78ae56e43ecfc04a6bb901c33d107cab1b877ab727405648cceb79cac69d902"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2017_population_final_palestine.pdf",
+          "url": "https://www.pcbs.gov.ps/media/j0ffo50r/book2425-2017.pdf",
+          "bytes": 6256624,
+          "sha256": "0ab9b57187f3924a128069a685a83295a23d80ab7d706dc8e690b8df2e9d0520"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_2017_preliminary_results.pdf",
+          "url": "https://www.pcbs.gov.ps/portals/_pcbs/PressRelease/Press_En_Preliminary_Results_Report-en-with-tables.pdf",
+          "bytes": 2780347,
+          "sha256": "50cf0e02ccd620c9e662f7eca12bcd119177a40e808c5b9700ae2c0327452f48"
+        },
+        {
+          "local_path": "data/raw/ps_census/pcbs_terms.html",
+          "url": "https://www.pcbs.gov.ps/en/reference/terms-of-use/",
+          "bytes": 45746,
+          "sha256": "3f5d4ccc0fd984b7c201034a1e28c94708325752d683002870c880032323e52c"
+        }
+      ],
+      "open_pi_question": "How should PCBS statistical geography relate to the live Israel route on shared surfaces such as the global map, and may overlapping claims appear together?"
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "readxl": "1.5.0",
+      "digest": "0.6.39",
+      "mapshaper": "npx mapshaper through scripts/lib/simplify_boundary.R"
+    }
+  },
+  "source": {
+    "provider": "Palestinian Central Bureau of Statistics (PCBS); geoBoundaries / Open Data Watch",
+    "source_dataset_ids": [
+      "pcbs-phc-1997-governorate-religion",
+      "pcbs-phc-2007-governorate-religion",
+      "pcbs-phc-2017-governorate-religion",
+      "geoboundaries-pse-adm2-2017"
+    ],
+    "source_urls": [
+      "https://www.pcbs.gov.ps/media/dtgbbijp/book426-1997.pdf",
+      "https://www.pcbs.gov.ps/media/1b3ejexf/book1853-2007.pdf",
+      "https://www.pcbs.gov.ps/portals/_pcbs/PressRelease/Press_En_Preliminary_Results_Report-en-with-tables.pdf",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/PSE/ADM2/geoBoundaries-PSE-ADM2.geojson"
+    ],
+    "retrieved_at": "2026-07-10T11:05:41Z",
+    "licence": "Current PCBS website terms state CC BY 4.0 and require attribution. The cached 1997 and 2007 publications print 'All Rights Reserved.' No rights-reservation notice appears in the cached 2017 preliminary report. The geoBoundaries release metadata states CC BY 4.0. PCBS publication reuse requires conductor review.",
+    "citation": "PCBS census religion tables for 1997, 2007, and 2017; geoBoundaries PSE ADM2 2017."
+  },
+  "input_manifests": [],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/ps/data/area_summary_governorate.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 82976,
+      "sha256": "ad8e61ac1125cf78eb1f83560d6a47a6efe5c0ddccdf70531f366726b178b397",
+      "row_count": 48,
+      "content": "Palestine governorate census-affiliation area summary for 1997, 2007, and 2017.",
+      "privacy": "public",
+      "licence_status": "needs_review"
+    },
+    {
+      "uri": "repo:apps/regions/ps/data/area_summary_governorate.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 42536,
+      "sha256": "6b5704f63957451dcce809a874012bbc068edb98d45b6bcee6a597d2daa7a18b",
+      "row_count": 48,
+      "content": "Flattened Palestine governorate census-affiliation rows.",
+      "privacy": "public",
+      "licence_status": "needs_review"
+    },
+    {
+      "uri": "repo:apps/regions/ps/data/ps_governorate_2017.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 1247851,
+      "sha256": "557cfd9ffa2c13d8901874aeefdbcb046bbcd4407605a05944be72a4d3680e45",
+      "row_count": 16,
+      "content": "Simplified geoBoundaries PSE ADM2 2017 governorate geometry.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    }
+  ],
+  "partitions": [],
+  "stats": {
+    "row_count": 48,
+    "governorate_count": 16,
+    "wave_count": 3,
+    "raw_input_count": 44,
+    "boundary_bytes": 1247851
+  },
+  "local_cache_hint": "Every cached object under data/raw/ps_census/ is git-ignored and listed with its URL, size, and SHA-256 in pipeline.parameters.raw_sources.",
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_ps_area_summary.R",
+      "check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/ps/data/area_summary_governorate.json",
+      "check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/ps-census-religion-1997-2017.json"
+    ],
+    "warnings": [
+      "PCBS 1997 Table 22 excludes Jerusalem J1. The 2007 census used a reduced J1 questionnaire that retained religion. The 2017 preliminary table reports actually counted population with stated characteristics, excludes post-enumeration undercoverage estimates, and records a different undercoverage method for Jerusalem J1. The product therefore withholds every cross-wave change metric. The 2017 governorate geometry depicts the full release polygons, including territory outside the 1997 data basis.",
+      "Cross-wave change is withheld.",
+      "The selected geometry is a non-official 2017 boundary release; boundary stability across 1997, 2007, and 2017 is unverified.",
+      "Current PCBS website terms state CC BY 4.0. The cached 1997 and 2007 publications print 'All Rights Reserved.' No rights-reservation notice appears in the cached 2017 preliminary report. Conductor review is required before public release."
+    ],
+    "notes": "Every source row passed exact category arithmetic. The 16 governorate sums match each PCBS national category total in all three waves. Geometry contains 16 valid features with 16 distinct hashes and remains below 3 MB."
+  },
+  "downstream_status": "staged",
+  "privacy": "public",
+  "licence_status": "needs_review",
+  "notes": "PCBS publishes Islam, Christian, Others in 1997 and 2007 or Other in 2017, and Not Stated. The source publishes no no-religion category, and the product assigns no identity to Other, Others, or Not Stated. Religious affiliation equals Total minus Not Stated; it describes the source's category frame and does not measure belief, practice, attendance, or registered membership. PCBS 1997 Table 22 excludes Jerusalem J1. The 2007 census used a reduced J1 questionnaire that retained religion. The 2017 preliminary table reports actually counted population with stated characteristics, excludes post-enumeration undercoverage estimates, and records a different undercoverage method for Jerusalem J1. The product therefore withholds every cross-wave change metric. The 2017 governorate geometry depicts the full release polygons, including territory outside the 1997 data basis. Open PI ruling: how PCBS statistical geography relates to the live Israel route on shared surfaces, and whether overlapping claims may appear together."
+}
