@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Palestine map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Palestine research map; every string traces to
+    // docs/manifests/ps-census-religion-1997-2017.json (source, licence),
+    // research/countries/ps/route-probe.md and README.md (verbatim J1/J2
+    // coverage definitions, denominator rule), the product indicators block,
+    // or the live REGION_CONFIG in apps/regions/ps/index.html. The
+    // coexistence note is the recorded PI ruling of 2026-07-10.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "PS",
+      countryName: "Palestine",
+      mapHref: "./",
+      intro: "Census religious-affiliation overlays for the sixteen PCBS governorates of the West Bank and Gaza Strip, across three censuses 1997, 2007 and 2017, from the Palestinian Central Bureau of Statistics (PCBS). The construct is the share reporting a PCBS religion category, as 100 × (Total − Not Stated) / Total. It does not measure belief, practice, attendance, or registered membership. The three waves are separate snapshots, and the product withholds every cross-wave change metric.",
+      facts: {
+        waves: "Three censuses: 1997, 2007, 2017 (separate snapshots; no cross-wave change)",
+        geographies: "Governorate (16 PCBS governorates of the West Bank and Gaza Strip)",
+        metrics: "Reported a PCBS religion category (%) — no no-religion category and no change metric"
+      },
+      reading: [
+        "Governorates are shaded by the share reporting a PCBS religion category — Islam, Christian, or the wave's verbatim Other or Others category — as 100 × (Total − Not Stated) / Total. Not Stated remains a non-response state inside the full published denominator and is not treated as no religion.",
+        "PCBS publishes no no-religion category in these tables. The no-religion fields are null for every wave, and the map offers no no-religion metric.",
+        "No change metric is offered between any pair of waves. PCBS 1997 Table 22 excludes Jerusalem J1; the 2007 census used a reduced J1 questionnaire that retained religion; the 2017 preliminary table reports the actually counted population with stated characteristics and records a different Jerusalem J1 undercoverage method. These coverage differences prevent a supported like-for-like change claim across the series.",
+        "PCBS states the Jerusalem coverage for each wave in its own words. PCBS 1997 Table 22: “Jerusalem: Does not include those parts of Jerusalem which were annexed by Israel after its occupation of the West Bank in 1967.” PCBS 2007, under “Definitions of Jerusalem J1&amp;J2” (p. 30, PDF p. 316): “The first part (J1) includes that part of Jerusalem, which was annexed forcefully by Israel following its occupation of the West Bank in 1967.” and “The second part Jerusalem (J2) Includes Jerusalem governorate except that part of Jerusalem which was forcefully Annexed by Israel following its occupation of the West Bank in 1967.” PCBS 2017, under “Notice For Users” (PDF p. 223): “Jerusalem (Area J1): includes those parts of Jerusalem which were annexed by Israeli occupation in 1967.”, with Area J2 defined in the same notice by its list of localities.",
+        "Boundaries are the geoBoundaries PSE ADM2 2017 governorate frame, which identifies governorate as its canonical level and carries 16 units. Governorate boundary stability across 1997, 2007 and 2017 was not verified, and the 2017 Jerusalem polygon includes coverage outside the 1997 Table 22 data basis.",
+        "This map renders the Palestinian Central Bureau of Statistics' (PCBS) published statistical coverage. The Israel map renders the Israel Central Bureau of Statistics' (CBS) published coverage. The two sources' statistical geographies overlap, including in Jerusalem. Each map shows its own source of record as published, and the project adjudicates no territorial claim."
+      ],
+      sources: [
+        {
+          name: "PCBS 1997 final population report, Table 22, “Palestinian Population by Governorate, Sex and Religion”",
+          href: "https://www.pcbs.gov.ps/media/dtgbbijp/book426-1997.pdf",
+          construct: "Census affiliation by governorate (Islam, Christian, Others, Not Stated)",
+          years: "1997",
+          licence: "Current PCBS website terms state CC BY 4.0 and require attribution. The cached 1997 publication prints “All Rights Reserved.” PCBS publication reuse requires conductor review."
+        },
+        {
+          name: "PCBS 2007 final population report, Table 13, and the sixteen governorate reports",
+          href: "https://www.pcbs.gov.ps/media/1b3ejexf/book1853-2007.pdf",
+          construct: "Census affiliation by governorate (Islam, Christian, Others, Not Stated)",
+          years: "2007",
+          licence: "Current PCBS website terms state CC BY 4.0 and require attribution. The cached 2007 publication prints “All Rights Reserved.” PCBS publication reuse requires conductor review."
+        },
+        {
+          name: "PCBS 2017 preliminary census results, Table 3, “Palestinian Population in Palestine by Governorate and Religion, 2017”",
+          href: "https://www.pcbs.gov.ps/portals/_pcbs/PressRelease/Press_En_Preliminary_Results_Report-en-with-tables.pdf",
+          construct: "Census affiliation by governorate (Islam, Christian, Other, Not Stated)",
+          years: "2017",
+          licence: "Current PCBS website terms state CC BY 4.0 and require attribution. No rights-reservation notice appears in the cached 2017 preliminary report. PCBS publication reuse requires conductor review."
+        },
+        {
+          name: "geoBoundaries PSE ADM2 governorate boundaries",
+          href: "https://www.geoboundaries.org/",
+          construct: "Boundary geometry (16 governorates)",
+          years: "2017 frame",
+          licence: "geoBoundaries PSE ADM2 release metadata states Creative Commons Attribution 4.0 (CC BY 4.0)"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Palestinian Central Bureau of Statistics (PCBS), <a href=\"https://www.pcbs.gov.ps/en/publications/\" target=\"_blank\" rel=\"noopener\">publications</a>; boundaries from <a href=\"https://www.geoboundaries.org/\" target=\"_blank\" rel=\"noopener\">geoBoundaries</a> PSE ADM2 (2017 governorate frame).",
+        tables: "1997 final Table 22, “Palestinian Population by Governorate, Sex and Religion”; 2007 final Table 13 together with Table 13 in each governorate report; 2017 preliminary Table 3, “Palestinian Population in Palestine by Governorate and Religion, 2017”. The area-summary religious_affiliation field is 100 × (Total − Not Stated) / Total, with Not Stated retained in the denominator. PCBS publishes no no-religion category; the no_religion fields are therefore null. No governed place-of-worship snapshot ships in this release; place counts and derived density fields are therefore null.",
+        licence: "Current PCBS website terms state CC BY 4.0 and require attribution. The cached 1997 and 2007 publications print “All Rights Reserved.” No rights-reservation notice appears in the cached 2017 preliminary report. The geoBoundaries release metadata states CC BY 4.0. PCBS publication reuse requires conductor review.",
+        script: "scripts/build_ps_area_summary.R",
+        manifests: [
+          { label: "ps-census-religion-1997-2017", href: "docs/manifests/ps-census-religion-1997-2017.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Palestine map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

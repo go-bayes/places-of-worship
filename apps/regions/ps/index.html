@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Palestine Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Palestine's product is census affiliation across the sixteen PCBS
+    // governorates of the West Bank and Gaza Strip, three waves 1997, 2007
+    // and 2017, from the Palestinian Central Bureau of Statistics (PCBS).
+    // The share reporting a PCBS religion category is 100 x (Total minus
+    // Not Stated) / Total; Not Stated stays in the denominator and is not
+    // treated as no religion. PCBS publishes no no-religion category in these
+    // tables; no_religion_percent is therefore null throughout and is omitted
+    // from metricsAvailable, leaving a single metric. No change metric is offered:
+    // PCBS 1997 Table 22 excludes Jerusalem J1, the 2007 census used a
+    // reduced J1 questionnaire that retained religion, and the 2017
+    // preliminary table records a different Jerusalem J1 undercoverage
+    // method; the product therefore withholds every cross-wave change metric. The
+    // map renders PCBS statistical coverage as published for each wave;
+    // the coexistence note and the verbatim J1/J2 definitions live in the
+    // overview. No governed place-of-worship snapshot ships in this release,
+    // so the place-density metrics and the place columns are absent.
+    window.REGION_CONFIG = {
+      countryCode: "PS",
+      title: "Places of Worship | Palestine Research Map",
+      center: [34.90, 31.89],
+      initialZoom: 7.8,
+      censusLevels: {
+        governorate: {
+          label: "Governorate",
+          boundaries: "data/ps_governorate_2017.geojson",
+          summary: "data/area_summary_governorate.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "PCBS census religion by governorate, 1997, 2007 and 2017 · Boundaries from geoBoundaries PSE ADM2 (2017 governorate frame), CC BY 4.0"
+        }
+      },
+      defaultLevel: "governorate",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2017,
+      // one metric ships: PCBS publishes no no-religion category in these
+      // tables (no_religion_percent is null throughout), and every
+      // cross-wave change metric is withheld because PCBS's own Jerusalem J1
+      // coverage differs across the three waves
+      metricsAvailable: [
+        "religious_affiliation_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Reported a PCBS religion category (%)",
+          note: "share of the PCBS governorate census population reporting Islam, Christian, or the wave's verbatim Other or Others category, as 100 × (Total − Not Stated) / Total. Not Stated remains a non-response state inside the full published denominator and is not treated as no religion; PCBS publishes no no-religion category in these tables. The figure describes the source's category frame and does not measure belief, practice, attendance, or registered membership."
+        }
+      },
+      popupDenominatorNote: "Percentages use the PCBS published governorate Total for the wave as denominator, including Not Stated; the share is 100 × (Total − Not Stated) / Total. These are census category responses and do not measure belief, practice, attendance, or registered membership. No change metric is offered: PCBS 1997 Table 22 excludes Jerusalem J1, the 2007 census used a reduced J1 questionnaire that retained religion, and the 2017 preliminary table records a different Jerusalem J1 undercoverage method. The 2017 governorate geometry depicts the full release polygons, including territory outside the 1997 data basis.",
+      cityPresets: [
+        { label: "Gaza", coords: [34.4668, 31.5017], zoom: 11 },
+        { label: "Khan Yunis", coords: [34.3061, 31.3462], zoom: 11 },
+        { label: "Hebron", coords: [35.0998, 31.5326], zoom: 11 },
+        { label: "Ramallah", aliases: ["Al-Bireh"], coords: [35.2042, 31.9038], zoom: 11 },
+        { label: "Nablus", coords: [35.2544, 32.2211], zoom: 11 },
+        { label: "Jenin", coords: [35.2953, 32.4597], zoom: 11 },
+        { label: "Bethlehem", coords: [35.2024, 31.7054], zoom: 11 },
+        { label: "Tulkarm", coords: [35.0286, 32.3086], zoom: 11 },
+        { label: "Jericho", coords: [35.4626, 31.8563], zoom: 11 },
+        { label: "Jerusalem", coords: [35.2137, 31.7683], zoom: 11 }
+      ],
+      geocode: { country: "ps", biasLngLat: [34.90, 31.89] },
+      onboarding: {
+        title: "Palestine research map",
+        intro: "Census religious-affiliation overlays for the sixteen PCBS governorates of the West Bank and Gaza Strip, across three census waves 1997, 2007 and 2017, from the Palestinian Central Bureau of Statistics (PCBS). The map shows three separate source snapshots and withholds every cross-wave change metric.",
+        bullets: [
+          "Governorates are shaded by the share reporting a PCBS religion category (Islam, Christian, or the wave's Other or Others category), as 100 × (Total − Not Stated) / Total.",
+          "Not Stated stays in the denominator and is not treated as no religion; PCBS publishes no no-religion category in these tables.",
+          "No change metric is offered: PCBS 1997 Table 22 excludes Jerusalem J1, the 2007 census used a reduced J1 questionnaire that retained religion, and the 2017 preliminary table records a different Jerusalem J1 undercoverage method.",
+          "The map renders PCBS statistical coverage as published for each wave; the 2017 governorate geometry shows the full release polygons, including territory outside the 1997 data basis.",
+          "Boundaries are the 2017 geoBoundaries governorate frame; governorate boundary stability across the three waves was not verified.",
+          "Open <strong>Show Census Data</strong> (top centre) for the year control."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion from the <a href="https://www.pcbs.gov.ps/en/publications/" target="_blank" rel="noopener">Palestinian Central Bureau of Statistics (PCBS)</a>, governorate tables 1997, 2007 and 2017, attribution required &middot; Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> PSE ADM2 (2017 governorate frame), CC BY 4.0'
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710d"></script>
+</body>
+</html>
