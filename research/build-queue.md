@@ -4,14 +4,14 @@
 
 **Maintenance convention:** strike a row when built, never delete it.
 
-**Current campaign (PI directive, 2026-07-11): select a region, then tick countries.** The active region is Central and Eastern Europe — the six machine-readable three-wave census rows at ranks 25-30. Tick each country when its data product commits; strike its queue row when the country page ships. Côte d'Ivoire (rank 16) is the highest-ranked actionable row outside the region and resumes after the campaign.
+**Campaign CLOSED 2026-07-11 — all six shipped end-to-end (data + pages, hub at 42).** The region was Central and Eastern Europe — the six machine-readable three-wave census rows at ranks 25-30. Tick each country when its data product commits; strike its queue row when the country page ships. Côte d'Ivoire (rank 16) is the highest-ranked actionable row outside the region and resumes after the campaign.
 
-- [x] Hungary (HU, rank 25) — data committed 51cc172; page pending
-- [x] Lithuania (LT, rank 26) — data committed 5b3a469; page pending
-- [x] Estonia (EE, rank 27) — data committed; page pending
-- [x] Croatia (HR, rank 28) — data committed d63151e; page pending
-- [x] Serbia (RS, rank 29) — data committed; page pending
-- [x] Bulgaria (BG, rank 30) — data committed; page pending
+- [x] Hungary (HU, rank 25) — shipped
+- [x] Lithuania (LT, rank 26) — shipped
+- [x] Estonia (EE, rank 27) — shipped
+- [x] Croatia (HR, rank 28) — shipped
+- [x] Serbia (RS, rank 29) — shipped
+- [x] Bulgaria (BG, rank 30) — shipped
 
 **Demographic and Health Surveys (DHS) rows (PI ruling, 2026-07-11):** unfrozen — DHS survey data are usable by default with attribution where use is not clearly prohibited and no restricted data can leak. Every DHS row works through [dhs-verification-register.md](dhs-verification-register.md): public final-report tables first, registered microdata estimation as fallback; microdata never enter git; registration itself awaits PI action.
 
@@ -43,12 +43,12 @@ The queue merges every unbuilt A/B global-survey row, every unbuilt expansion ro
 | 22 | Botswana (BW) | 1988-2022 | DHS district/region to verify | census affiliation; respondent religious affiliation in DHS recodes; survey estimates | browser work (restricted microdata) | [survey row](country-survey.md#global-matrix) | secure recodes; estimate with uncertainty |
 | 23 | Egypt (EG) | 1988-2017 | DHS governorate/region to verify | respondent religious affiliation where recodes expose it; survey estimates | browser work (restricted microdata) | [survey row](country-survey.md#global-matrix) | secure recodes; estimate with uncertainty |
 | 24 | Saint Vincent and the Grenadines (VC) | 1980, 1991, 2001, 2012 | census division | census affiliation | browser work | [audit A row](global-coverage-audit.md#a-has-subnational-religion-data) | probe then build |
-| 25 | Hungary (HU) | 2001, 2011, 2022 | settlement | census affiliation | machine-readable | [expansion row](expansion-survey-2026-07.md#hu-hungary) | script the settlement export, then build |
-| 26 | Lithuania (LT) | 2001, 2011, 2021 | municipality | census religious community indicated | machine-readable | [expansion row](expansion-survey-2026-07.md#lt-lithuania) | pin the portal indicator, then build |
-| 27 | Estonia (EE) | 2000, 2011, 2021 | settlement region in 2021 | census affiliation, age 15+ | machine-readable | [expansion row](expansion-survey-2026-07.md#ee-estonia) | needs cross-wave geography concordance |
-| 28 | Croatia (HR) | 2001, 2011, 2021 | town/municipality | census affiliation | machine-readable | [expansion row](expansion-survey-2026-07.md#hr-croatia) | pin files; needs local-government concordance |
-| 29 | Serbia (RS) | 2002-2022 | municipality/city | census religion | machine-readable | [expansion row](expansion-survey-2026-07.md#rs-serbia) | extract, validate, then build |
-| 30 | Bulgaria (BG) | 2001-2021; historical national | district now; municipality route to confirm | census confession/religious affiliation | machine-readable | [expansion row](expansion-survey-2026-07.md#bg-bulgaria) | pin Infostat municipality export, then build |
+| ~~25~~ | ~~Hungary (HU)~~ | ~~2001, 2011, 2022~~ | ~~settlement~~ | ~~census affiliation~~ | ~~machine-readable~~ | ~~[expansion row](expansion-survey-2026-07.md#hu-hungary)~~ | ~~script the settlement export, then build~~ | BUILT 2026-07-11: county census affiliation 2001-2022 with the stated-response comparability warning; page shipped 2648874. |
+| ~~26~~ | ~~Lithuania (LT)~~ | ~~2001, 2011, 2021~~ | ~~municipality~~ | ~~census religious community indicated~~ | ~~machine-readable~~ | ~~[expansion row](expansion-survey-2026-07.md#lt-lithuania)~~ | ~~pin the portal indicator, then build~~ | BUILT 2026-07-11: municipality census affiliation 2001-2021; change withheld across the 2021 instrument break; page shipped 2648874. |
+| ~~27~~ | ~~Estonia (EE)~~ | ~~2000, 2011, 2021~~ | ~~settlement region in 2021~~ | ~~census affiliation, age 15+~~ | ~~machine-readable~~ | ~~[expansion row](expansion-survey-2026-07.md#ee-estonia)~~ | ~~needs cross-wave geography concordance~~ | BUILT 2026-07-11: county census affiliation 2000-2021 on per-vintage boundaries, age-15+ universe; page shipped 2648874. |
+| ~~28~~ | ~~Croatia (HR)~~ | ~~2001, 2011, 2021~~ | ~~town/municipality~~ | ~~census affiliation~~ | ~~machine-readable~~ | ~~[expansion row](expansion-survey-2026-07.md#hr-croatia)~~ | ~~pin files; needs local-government concordance~~ | BUILT 2026-07-11: county census affiliation 2001-2021; page shipped 2648874. |
+| ~~29~~ | ~~Serbia (RS)~~ | ~~2002-2022~~ | ~~municipality/city~~ | ~~census religion~~ | ~~machine-readable~~ | ~~[expansion row](expansion-survey-2026-07.md#rs-serbia)~~ | ~~extract, validate, then build~~ | BUILT 2026-07-11: 25-area census religion 2002-2022 with the territorial-scope note; page shipped 2648874. |
+| ~~30~~ | ~~Bulgaria (BG)~~ | ~~2001-2021; historical national~~ | ~~district now; municipality route to confirm~~ | ~~census confession/religious affiliation~~ | ~~machine-readable~~ | ~~[expansion row](expansion-survey-2026-07.md#bg-bulgaria)~~ | ~~pin Infostat municipality export, then build~~ | BUILT 2026-07-11: district census religion 2001-2021 on per-wave published bases; change withheld; page shipped 2648874. |
 | 31 | Tonga (TO) | 1996-2021 metadata; 2021 direct table | village in 2021; division/district roll-ups | census affiliation | machine-readable | [expansion row](expansion-survey-2026-07.md#to-tonga) | extract, validate, then build |
 | 32 | Samoa (WS) | 2006-2021 | national verified; district/village pending | census affiliation in reports/workbooks, subnational route pending | machine-readable | [expansion row](expansion-survey-2026-07.md#ws-samoa) | probe subnational route; retain national context |
 | 33 | Burkina Faso (BF) | 1996, 2006, 2019 | regions, with lower census geography available for extraction | census affiliation | clean PDF | [audit A row](global-coverage-audit.md#a-has-subnational-religion-data) | PDF extraction per BS precedent |
