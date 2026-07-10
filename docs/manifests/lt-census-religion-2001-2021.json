@@ -1,0 +1,520 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:lt-census-religion:lt:2001-2021:s3r778-gbs010306-1",
+  "dataset_id": "lt-census-religion:lt:2001-2021:s3r778-gbs010306-1",
+  "dataset_version_id": "lt-census-religion:lt:2001-2021:s3r778-gbs010306-1:44028acf05ce",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "lt-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "LT"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-10T08:00:41Z",
+  "created_by": "scripts/build_lt_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_lt_area_summary.R",
+    "git_commit": "2f108ea",
+    "command": "Rscript scripts/build_lt_area_summary.R",
+    "parameters": {
+      "table_id": "S3R778_GBS010306_1",
+      "data_structure_id": "GBS010306",
+      "shared_table_hash": "a19ff692-f3aa-4a3d-90c3-84c7880fa9fa",
+      "waves": [2001, 2011, 2021],
+      "geography": "60 municipalities",
+      "construct": "census affiliation / religious community indicated",
+      "denominator": "published Iš viso pagal religiją; Nenurodyta retained",
+      "affiliation_rule": "Iš viso pagal religiją minus Nė vienai minus Nenurodyta",
+      "instrument_rule": "2001/2011 full-enumeration census; 2021 sample/model-based ethnocultural statistical survey; no cross-instrument change metric",
+      "boundary_source_vintage": "2025-10-21",
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 767015,
+        "source_preparation": "sf st_simplify at 25 metres in EPSG:3346 before the shared mapshaper helper",
+        "byte_ceiling": 800000
+      },
+      "local_cache_hint": "Raw OSP and Registers Centre inputs are cached under data/raw/lt_census/ and remain git-ignored.",
+      "retrieval_routes": [
+        {
+          "purpose": "shared OSP table",
+          "method": "GET",
+          "url": "https://osp.stat.gov.lt/lt/statistiniu-rodikliu-analize?hash=a19ff692-f3aa-4a3d-90c3-84c7880fa9fa",
+          "notes": "Interactive share route for all three waves."
+        },
+        {
+          "purpose": "municipality SDMX export",
+          "method": "GET",
+          "url": "https://osp-rs.stat.gov.lt/rest_json/data/S3R778_GBS010306_1",
+          "notes": "Machine-readable build input."
+        },
+        {
+          "purpose": "expanded national SDMX export",
+          "method": "GET",
+          "url": "https://osp-rs.stat.gov.lt/rest_json/data/S3R778_GBS010502",
+          "notes": "Documents the source's more detailed national presentation."
+        },
+        {
+          "purpose": "municipality geometry",
+          "method": "GET",
+          "url": "https://get.data.gov.lt/datasets/gov/rc/ar/grasavivaldybe/GraSavivaldybe/:format/json",
+          "notes": "Open Data Storage API; the builder uses the equivalent HTTP route because the HTTPS load balancer returned 502 during retrieval."
+        },
+        {
+          "purpose": "boundary licence record",
+          "method": "GET",
+          "url": "https://data.gov.lt/datasets/1345/?resource_version=1125",
+          "notes": "Dataset 1345 states CC BY 4.0."
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "npx mapshaper used through scripts/lib/simplify_boundary.R"
+    }
+  },
+  "source": {
+    "provider": "State Data Agency of Lithuania; State Enterprise Centre of Registers",
+    "source_dataset_ids": [
+      "osp-s3r778-gbs010306-1-religion-municipality-2001-2021",
+      "osp-s3r778-gbs010502-religion-national-2001-2021",
+      "lt-registers-centre-address-register-municipalities-2025",
+      "data-gov-lt-dataset-1345-municipality-boundaries"
+    ],
+    "source_urls": [
+      "https://osp.stat.gov.lt/lt/statistiniu-rodikliu-analize?hash=a19ff692-f3aa-4a3d-90c3-84c7880fa9fa",
+      "https://osp-rs.stat.gov.lt/rest_json/data/S3R778_GBS010306_1",
+      "https://osp-rs.stat.gov.lt/rest_json/data/S3R778_GBS010502",
+      "https://osp.stat.gov.lt/rdb-rest",
+      "https://osp.stat.gov.lt/gyventoju-ir-bustu-surasymai1",
+      "https://osp.stat.gov.lt/en/2021-gyventoju-ir-bustu-surasymo-rezultatai/tautybe-gimtoji-kalba-ir-tikyba",
+      "https://osp.stat.gov.lt/documents/10180/4432752/Etnokult_tyrimo_metodika_2020_189.pdf/2f49c11b-5392-4678-bfb4-28879c1ee001",
+      "https://get.data.gov.lt/datasets/gov/rc/ar/grasavivaldybe/GraSavivaldybe/:format/json",
+      "https://data.gov.lt/datasets/1345/?resource_version=1125"
+    ],
+    "retrieved_at": "2026-07-10T00:00:00Z",
+    "licence": "The OSP requires users to identify the State Data Agency as the data source; no named licence was located for the indicator flow. Lithuania Open Data Portal dataset 1345 states CC BY 4.0 for the Registers Centre boundary data.",
+    "citation": "State Data Agency OSP flow S3R778_GBS010306_1; State Enterprise Centre of Registers Address Register municipality spatial data."
+  },
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/lt/data/area_summary_municipality.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 243517,
+      "sha256": "44028acf05ce0711c690fa51b1267afe60e05f0dca0cd0b52a424834bd5a6b23",
+      "row_count": 180,
+      "content": "Lithuania municipality census-affiliation area summary for 2001, 2011, and 2021.",
+      "privacy": "public",
+      "licence_status": "needs_review"
+    },
+    {
+      "uri": "repo:apps/regions/lt/data/area_summary_municipality.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 121350,
+      "sha256": "72921047bb95d85161217ea5e1ca11e81907938b20987ec47f32ac7f5b9a007e",
+      "row_count": 180,
+      "content": "Flattened Lithuania municipality census-affiliation area-summary rows.",
+      "privacy": "public",
+      "licence_status": "needs_review"
+    },
+    {
+      "uri": "repo:apps/regions/lt/data/lt_municipality_2025.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 767015,
+      "sha256": "2da14ce455455d0d83eebe810b2291a24b459d1b7341623164dafae266ca17e3",
+      "row_count": 60,
+      "content": "Simplified official 2025 Lithuania municipality geometry with 60 features.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    }
+  ],
+  "raw_sources": [
+    {
+      "uri": "data/raw/lt_census/osp_s3r778_gbs010306_1.json",
+      "url": "https://osp-rs.stat.gov.lt/rest_json/data/S3R778_GBS010306_1",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T07:26:02Z",
+      "format": "json",
+      "bytes": 113521,
+      "sha256": "c1bf9f7143cfc2ae89412246c3d78c12a4fe48c5e8872b1546603c3e69331825",
+      "source_dataset_id": "osp-s3r778-gbs010306-1-religion-municipality-2001-2021",
+      "used_in_public_product": true,
+      "notes": "OSP SDMX-JSON flow S3R778_GBS010306_1; all 60 municipalities, 16 published religion categories plus total, and 2001/2011/2021."
+    },
+    {
+      "uri": "data/raw/lt_census/osp_s3r778_gbs010502.json",
+      "url": "https://osp-rs.stat.gov.lt/rest_json/data/S3R778_GBS010502",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T07:26:02Z",
+      "format": "json",
+      "bytes": 5583,
+      "sha256": "8ea4bffd49aef60eb811ff519aa66c6a60a0d009c528203daefbb319f1574690",
+      "source_dataset_id": "osp-s3r778-gbs010502-religion-national-2001-2021",
+      "used_in_public_product": false,
+      "notes": "OSP SDMX-JSON flow S3R778_GBS010502; expanded national presentation with 25 structural categories plus total, used to document municipality grouping."
+    },
+    {
+      "uri": "data/raw/lt_census/registers_centre_municipalities_2025.json",
+      "url": "http://get.data.gov.lt/datasets/gov/rc/ar/grasavivaldybe/GraSavivaldybe/:format/json",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T07:26:02Z",
+      "format": "json",
+      "bytes": 12435563,
+      "sha256": "7a4a0958bbac1176afb6ab6cb9b0e62438b3c034acaffffd6ec6a11fb68c5238",
+      "source_dataset_id": "lt-registers-centre-address-register-municipalities-2025",
+      "used_in_public_product": true,
+      "notes": "Registers Centre Address Register municipality WKT for 60 municipalities, formation date 2025-10-21."
+    },
+    {
+      "uri": "data/raw/lt_census/data_gov_lt_dataset_1345.html",
+      "url": "https://data.gov.lt/datasets/1345/?resource_version=1125",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T07:26:02Z",
+      "format": "html",
+      "bytes": 49443,
+      "sha256": "9d37f3e621b33a5a321a9ce85d3950d720d9a212fe0f182b3c1a08de13c17918",
+      "source_dataset_id": "data-gov-lt-dataset-1345-municipality-boundaries",
+      "used_in_public_product": true,
+      "notes": "Lithuanian Open Data Portal dataset 1345 catalogue record stating public access and CC BY 4.0."
+    }
+  ],
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_lt_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/lt/data/area_summary_municipality.json",
+      "jq empty docs/manifests/lt-census-religion-2001-2021.json"
+    ],
+    "tests": [
+      "All three waves are present for all 60 municipality codes.",
+      "Iš viso pagal religiją, Nė vienai, and Nenurodyta municipality sums match the national row exactly in every wave.",
+      "Each row's named-affiliation residual plus Nė vienai plus Nenurodyta equals its published total exactly.",
+      "No difference or change metric crosses the 2011-2021 instrument break.",
+      "All 60 simplified municipality geometries are valid, non-empty, and have distinct SHA-256 WKB hashes.",
+      "Every raw build input records its URL, retrieval timestamp, byte count, and SHA-256."
+    ],
+    "warnings": [
+      "The 2021 religion values are sample/model-based statistical-survey estimates published with a register-based census; they are not full-enumeration religion responses.",
+      "The municipality flow groups minor religious communities into Kitų. Its 16-category presentation is less detailed than the 25-category national flow.",
+      "Small municipality denomination cells can be confidential or marked as no phenomenon. The public headline uses only unsuppressed total, Nė vienai, and Nenurodyta rows.",
+      "Current 2025 municipality polygons provide the common display frame. The source formation dates identify 55 municipalities as 1998-06-01 and five municipalities as 2000-02-02. Municipality geometry stability from 2001 through the 2025 boundary frame was not verified: formation dates and shared codes do not prove unchanged boundaries.",
+      "No named OSP licence was located. The product records the agency's source-attribution requirement and makes no open-licence claim for the statistical flow."
+    ],
+    "notes": "The public headline fields reconcile exactly for 2001, 2011, and 2021. The 2021 estimates remain available as a separate snapshot, while change metrics are withheld across the incompatible enumeration and survey/model instruments.",
+    "gates": {
+      "all_waves_present": "passed",
+      "exact_headline_reconciliation": "passed",
+      "instrument_break_declared": "passed",
+      "incompatible_change_metrics_withheld": "passed",
+      "geometry_validity": "passed",
+      "distinct_geometry_hashes": "passed",
+      "provenance": "passed",
+      "licence_claims": "passed_no_osp_open_licence_claimed",
+      "nonresponse_labels": "passed_source_labels_retained"
+    },
+    "stats": {
+      "waves": 3,
+      "rows": 180,
+      "municipalities_per_wave": 60,
+      "municipality_categories_per_wave": "2001=16;2011=16;2021=16",
+      "national_structural_categories_per_wave": "2001=25;2011=25;2021=25",
+      "national_numeric_categories_per_wave": "2001=24;2011=25;2021=24",
+      "boundary_features": 60,
+      "boundary_valid_features": 60,
+      "distinct_geometry_hashes": 60,
+      "boundary_bytes": 767015,
+      "summary_json_bytes": 243517,
+      "summary_csv_bytes": 121350
+    },
+    "reconciliation": [
+      {
+        "year": 2001,
+        "municipality_count": 60,
+        "category_count": 16,
+        "headline_categories_exact": true,
+        "max_absolute_headline_difference": 0,
+        "confidential_municipality_category_cells": 0,
+        "no_phenomenon_municipality_category_cells": 0,
+        "reconciliation": [
+          {
+            "source_category_lt": "Iš viso pagal religiją",
+            "source_category_id": "TOT",
+            "municipality_sum": 3483972,
+            "published_national_total": 3483972,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_category_lt": "Nė vienai",
+            "source_category_id": "NO",
+            "municipality_sum": 331326,
+            "published_national_total": 331326,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_category_lt": "Nenurodyta",
+            "source_category_id": "XX",
+            "municipality_sum": 186447,
+            "published_national_total": 186447,
+            "difference": 0,
+            "status": "matched"
+          }
+        ]
+      },
+      {
+        "year": 2011,
+        "municipality_count": 60,
+        "category_count": 16,
+        "headline_categories_exact": true,
+        "max_absolute_headline_difference": 0,
+        "confidential_municipality_category_cells": 0,
+        "no_phenomenon_municipality_category_cells": 0,
+        "reconciliation": [
+          {
+            "source_category_lt": "Iš viso pagal religiją",
+            "source_category_id": "TOT",
+            "municipality_sum": 3043429,
+            "published_national_total": 3043429,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_category_lt": "Nė vienai",
+            "source_category_id": "NO",
+            "municipality_sum": 186670,
+            "published_national_total": 186670,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_category_lt": "Nenurodyta",
+            "source_category_id": "XX",
+            "municipality_sum": 307757,
+            "published_national_total": 307757,
+            "difference": 0,
+            "status": "matched"
+          }
+        ]
+      },
+      {
+        "year": 2021,
+        "municipality_count": 60,
+        "category_count": 16,
+        "headline_categories_exact": true,
+        "max_absolute_headline_difference": 0,
+        "confidential_municipality_category_cells": 281,
+        "no_phenomenon_municipality_category_cells": 133,
+        "reconciliation": [
+          {
+            "source_category_lt": "Iš viso pagal religiją",
+            "source_category_id": "TOT",
+            "municipality_sum": 2810761,
+            "published_national_total": 2810761,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_category_lt": "Nė vienai",
+            "source_category_id": "NO",
+            "municipality_sum": 171810,
+            "published_national_total": 171810,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_category_lt": "Nenurodyta",
+            "source_category_id": "XX",
+            "municipality_sum": 384094,
+            "published_national_total": 384094,
+            "difference": 0,
+            "status": "matched"
+          }
+        ]
+      }
+    ],
+    "national_category_presentation": [
+      {
+        "year": 2001,
+        "structural_category_count": 25,
+        "numeric_category_count": 24,
+        "confidential_category_count": 1,
+        "no_phenomenon_category_count": 0,
+        "published_numeric_display_sum": 3483972,
+        "published_total": 3483972,
+        "difference": 0
+      },
+      {
+        "year": 2011,
+        "structural_category_count": 25,
+        "numeric_category_count": 25,
+        "confidential_category_count": 0,
+        "no_phenomenon_category_count": 0,
+        "published_numeric_display_sum": 3043429,
+        "published_total": 3043429,
+        "difference": 0
+      },
+      {
+        "year": 2021,
+        "structural_category_count": 25,
+        "numeric_category_count": 24,
+        "confidential_category_count": 0,
+        "no_phenomenon_category_count": 1,
+        "published_numeric_display_sum": 2810761,
+        "published_total": 2810761,
+        "difference": 0
+      }
+    ],
+    "boundary_validation": {
+      "source_feature_count": 60,
+      "output_feature_count": 60,
+      "valid_feature_count": 60,
+      "distinct_geometry_hash_count": 60,
+      "geometry_sha256_by_municipality_code": {
+        "11": "f36087611df4fce68ef371b5c2ae53bf306ae56821871a56176fef1b0dfa6a41",
+        "12": "6e71c6c6bdb6f8cf771f7664038d0ae41f2327908b34b70ed9eea82536eb9c12",
+        "13": "11e9c3d626105f873b607fa1921f6b7e6c2257ec4e3afe1ac2a5d898e6642247",
+        "15": "388e210f3de27431a2a07faee7302bb195c746408c1964af31df37dfa31f8a0a",
+        "18": "64a6c7c95e74d5fe9ab077aea6dc0224e26893f17ece19183348892cac81b241",
+        "19": "35e2e4961f0680d13a8953ef4d88fa75f541165924caf650a0081583b09da4eb",
+        "21": "71f46bfa6307a5ca4a9d6647173251053184b6b9cfea9c0574867c5f7be9723a",
+        "23": "6e3b750e5a9725336269f301971b7db00b2ae906dd887bbd23f735561a19f227",
+        "25": "fe8f7edc6c624fe64fec02d11cd944a335c6aee5380c73608289c175071caa61",
+        "27": "bdbf70045959e69fff15d0ab8d1f5231b5796b183b66a68b094bd3c73c97fc8e",
+        "29": "1f7c791f4a23d4b35041bed082f4a3b62f3b27ef373ea7a3c75cbc7b1a52afd3",
+        "30": "860f0c0e074a2659100244c72de6a077143aeb2f5929ff446894c6aa31e449ce",
+        "32": "fc7f4b3737b24a3c03db9d61639e1aa3fbe83d61cb405c5b842dc6377ccc6903",
+        "33": "381ff4933094d6782dfd1cbc8800f75c2ceafe1e47393da12c111b57963f9454",
+        "34": "889057d7b4175cc6af4d7cc0c1eba7350d77639d1b66cae31689bc42aadbb524",
+        "36": "3b038fc74208cd5c050f649b3251204d5f60a461ee10387932023f12adac36f6",
+        "38": "60e9f7f89292b9d3e1db7ff18eb112a1e5ddda7741c60faa07b47d126e001ed3",
+        "39": "b87497d3306df417cc25f6ac75b9374626886050f699d89f22ecbb22b6ac8cbb",
+        "41": "048ce29dd60a618edbf11b9caa6455b54099985aab22531bc343d3e90fa54b65",
+        "42": "7c8b815ca771c50190845feb54baafaa8a6aa1497af814fcd6cd7115f1c2e7c0",
+        "43": "ff4a1283a3f4904b84f3f52e379dc9670fdc82bdf8a82f9ca18ed11759345d39",
+        "45": "160f782c1dea44325dfd4414243c35f06d86ac9d93e6bdee90cf94c677bbd426",
+        "46": "5cae94276a75d49f5e1ecc67f98df7e7057f91bf90518ceed30875542471fd73",
+        "47": "6197b134f65c48dbbb79180acd5fc4dfdcd0c0a027fba429c683ce984f059300",
+        "48": "09f91f412299fe0bb5f59b7325402364749c563c122053a135a3d21314fc705a",
+        "49": "6d0dab8cb560f021ccf047ad41b68305160e96fd52eda7e285761e8fbb691fba",
+        "52": "906193a33040abff5647304de8378a70732d5768b0ab8bf1e9262c4d6c9185e7",
+        "53": "ff332f440d2d370cc8f6d56a8f71697cbcb2c91d90a0ba711dcb789b35c0ea22",
+        "54": "28f3314ec2b44763fe45c33d159e6135afe49cf2895d896140b042f4076a3234",
+        "55": "fdf44e1b660f4365fbfc89ee598c8630590154ba5e8851813ac39492ea9fcc92",
+        "56": "66471315e2d7ce59d60456cfa83db5a4310284d122029688ec503e1aa5938a09",
+        "57": "af83b11a085602811e1b7787a1b929667867e940847eefda0d6cf66a8a3e3a74",
+        "58": "fa3f0e17ffd884326901cf0d02162f1ec1252dccd1d89ede946f89de178ed212",
+        "59": "5608e6fe7ed659affcb8d5dd4a3826626c06be5502ed63d19ad945711ae078cc",
+        "61": "482dbb9cb03b70c7df9da202ea73601028c45dba26c137a2ac4c14ea58959213",
+        "62": "6981b65ea3fb355e12bccea871acd0743e5e1ad20074a98c0e3ac6b87d059892",
+        "63": "0a2d18fe6f5a5e30c5cc539fcfb1657394c0afe3500ff38501f95a3f1d27c182",
+        "65": "02820369276b878675866b21085431cae84f08207b46dc48909fc6a4b2537cc4",
+        "66": "fa5207b852f93066a046533a37262f2dd51cbf6926bd2f2b74647aa5885350da",
+        "67": "f4fc4fde92bee5f4d22721c8e3bef8c9f87be829f816e0b783d7ddb53a0dd84b",
+        "68": "5967d2cddb65843babca292a12be9d69236dbe21215d4535394c74286376911c",
+        "69": "9ee4f974c7c5a72fa284f8221ea843f44690cd457acdd5347501a25515d44af5",
+        "71": "782afcc9c0edf896b3b4b7785d717d11b4a13ea71b1dd1f6054f0a3d36e27899",
+        "72": "1bc94cbe14764f097cde6ce76cbac8d5d3a269a1d6a91ab60b290262dfac5cdf",
+        "73": "c551816ea25937652e0532244a49e43258a42af851bd38c377c04b043a276753",
+        "74": "d38f0db9f9b624f6383c57b94745874992160417bd8e6a684856f875e91219b6",
+        "75": "afb9afe3244619c28e1f53e02778ab90ea39c54b34cf2f75d14b9c07e9955f83",
+        "77": "450772bcfd10413c859f1f748e9472ae2ef55a70360eec43e0065d1978861f99",
+        "78": "5040928fa6c3443c7b300a7b3ccbc7eb44d95cbd4bea3439229b1f31a0de4ae4",
+        "79": "9a820f14fc4fa6a036cf07f671d0f1336f51198ac0989791d49cc9dce781aa13",
+        "81": "5b6b657820cec3ae5431164f10e7ffc0d51eda72f3eae7fbcfc7f59389756a12",
+        "82": "a6a8b5350ae5348a498157ae2fff87cd42dc816958446eea5a8445ed8759aabd",
+        "84": "a4c66f3c2f6b938dfd5b9797fef0e99df708419210ed5933c54b5f7161656dab",
+        "85": "2fb22f4f757c6f689c837025ac9908d092357561dc5558605073d8e1fd86aeb1",
+        "86": "9c4c5e0b04c34ecfd149e52144e67eeecc60e3d5a6fd0de21c5da3cfce61ba49",
+        "87": "db439d1b7a1a20757a555667a31e11569a1d1cf4043390a3a999ff185b35f1a2",
+        "88": "fe7e2a5b0a3e97a19ef9317413a7e4779ba5adad1a3652427aa219c3b53c9d56",
+        "89": "ab3d5c8b5fdf45e44b2bc557f49efd3c5ddb4d3e39fd5a603f0f33d9750bafb9",
+        "91": "fe099dbac8cd2231f636828179a236ff2b9511803ea13200ca6a4f335085683e",
+        "94": "0f091dfb65c1c35a4e5aabeaf50d64a45dd4d01766c5939cd15267091dee3778"
+      },
+      "source_crs_interpretation": "EPSG:3346 with northing/easting serialised in the source WKT; axes swapped before transformation",
+      "output_crs": "EPSG:4326"
+    }
+  },
+  "construct_notes": {
+    "1": "The construct is census affiliation: the source asks which religious community residents identify with. It does not measure belief, practice, attendance, or membership records.",
+    "2": "The 2001 and 2011 religion values came from full-enumeration population censuses.",
+    "3": "The 2021 census population was established from administrative registers. Religion was absent from those registers and came from a separate ethnocultural statistical survey: 56,000 household residents self-completed, interviewers surveyed 115,000 household residents, and mathematical methods produced population estimates.",
+    "4": "The 2021 product denominator is the full 2,810,761 census resident-population total. The religion numerators are sample/model-based estimates joined to the census results; they are not whole-population register observations.",
+    "5": "Nė vienai and Nenurodyta retain the source's Lithuanian names and separate framing in every wave. Nenurodyta remains in the denominator and outside both named affiliation and Nė vienai.",
+    "6": "The municipality table publishes 16 categories plus Iš viso pagal religiją. Kitų is a grouped presentation. The companion national flow publishes 25 structural categories plus the total. Its category allocation must not replace the municipality source rows.",
+    "7": "The product shows three source snapshots. It withholds change metrics across 2011-2021 because full-enumeration census responses and a sample/model-based statistical survey are incompatible instruments.",
+    "8": "The current municipality frame contains 60 codes in every wave. The boundary source records formation date 2000-02-02 for Elektrėnai, Kalvarija, Kazlų Rūda, Pagėgiai, and Rietavas, and 1998-06-01 for the other 55 municipalities. The product does not claim that the 2025 polygons reproduce every historic boundary segment. Municipality geometry stability from 2001 through the 2025 boundary frame was not verified: formation dates and shared codes do not prove unchanged boundaries.",
+    "34": "Category mapping for every municipality wave: 34 | Naujosios apaštalų Bažnyčios => New Apostolic Church [product role: named_religion; harmonisation: as_published].",
+    "49": "Category mapping for every municipality wave: 49 | Septintos dienos adventistų => Seventh-day Adventists [product role: named_religion; harmonisation: as_published].",
+    "RK": "Category mapping for every municipality wave: RK | Romos katalikų => Roman Catholics [product role: named_religion; harmonisation: as_published].",
+    "ST": "Category mapping for every municipality wave: ST | Stačiatikių (ortodoksų) => Orthodox [product role: named_religion; harmonisation: as_published].",
+    "SN": "Category mapping for every municipality wave: SN | Sentikių => Old Believers [product role: named_religion; harmonisation: as_published].",
+    "EL": "Category mapping for every municipality wave: EL | Evangelikų liuteronų => Evangelical Lutherans [product role: named_religion; harmonisation: as_published].",
+    "ER": "Category mapping for every municipality wave: ER | Evangelikų reformatų => Evangelical Reformed [product role: named_religion; harmonisation: as_published].",
+    "MS": "Category mapping for every municipality wave: MS | Musulmonų sunitų => Sunni Muslims [product role: named_religion; harmonisation: as_published].",
+    "BA": "Category mapping for every municipality wave: BA | Baptistų ir „laisvųjų bažnyčių “ => Baptists and free churches [product role: named_religion; harmonisation: as_published].",
+    "JU": "Category mapping for every municipality wave: JU | Judėjų => Jewish [product role: named_religion; harmonisation: as_published].",
+    "GA": "Category mapping for every municipality wave: GA | Graikų apeigų katalikų (unitų) => Greek Rite Catholics (Uniates) [product role: named_religion; harmonisation: as_published].",
+    "KR": "Category mapping for every municipality wave: KR | Karaimų => Karaites [product role: named_religion; harmonisation: as_published].",
+    "OTH": "Category mapping for every municipality wave: OTH | Kitų => Other [product role: grouped_named_religion; harmonisation: as_published].",
+    "NO": "Category mapping for every municipality wave: NO | Nė vienai => None [product role: no_religion; harmonisation: as_published].",
+    "XX": "Category mapping for every municipality wave: XX | Nenurodyta => Not indicated [product role: not_indicated; harmonisation: as_published].",
+    "SE": "Category mapping for every municipality wave: SE | Sekmininkų => Pentecostals [product role: named_religion; harmonisation: as_published]."
+  },
+  "privacy": "public",
+  "licence_status": "needs_review",
+  "downstream_status": "public",
+  "source_datasets": [
+    {
+      "source_dataset_id": "osp-s3r778-gbs010306-1-religion-municipality-2001-2021",
+      "name": "OSP S3R778 / GBS010306 municipality religion flow",
+      "provider": "State Data Agency of Lithuania",
+      "url": "https://osp-rs.stat.gov.lt/rest_json/data/S3R778_GBS010306_1",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/lt_census/osp_s3r778_gbs010306_1.json",
+      "licence": {
+        "name": "No named licence located; source attribution required",
+        "url": "https://osp.stat.gov.lt/gyventoju-ir-bustu-surasymai1",
+        "attribution": "State Data Agency of Lithuania, Official Statistics Portal; extracted and adapted"
+      },
+      "citation": "State Data Agency of Lithuania. S3R778 - Gyventojų skaičius, dimensions GBS010306: municipality and religion, 2001, 2011, and 2021.",
+      "access_limits": null,
+      "redistribution_limits": "The OSP states that users must identify the State Data Agency as the data source; no named licence was located on the table, REST documentation, or census release pages.",
+      "notes": "The 2001 and 2011 waves are full-enumeration census affiliation. The 2021 religion values come from the separate ethnocultural statistical survey."
+    },
+    {
+      "source_dataset_id": "lt-registers-centre-address-register-municipalities-2025",
+      "name": "Address Register municipality spatial data",
+      "provider": "State Enterprise Centre of Registers, Lithuania",
+      "url": "https://get.data.gov.lt/datasets/gov/rc/ar/grasavivaldybe/GraSavivaldybe/:format/json",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/lt_census/registers_centre_municipalities_2025.json",
+      "licence": {
+        "name": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "State Enterprise Centre of Registers; transformed, simplified, and adapted"
+      },
+      "citation": "State Enterprise Centre of Registers. Address Register municipality spatial data, formation date 2025-10-21; dataset 1345 in Lithuania's Open Data Portal.",
+      "access_limits": null,
+      "redistribution_limits": "CC BY 4.0 attribution applies; this product identifies the coordinate-axis correction, transformation, and simplification.",
+      "notes": "The source WKT serialises EPSG:3346 as northing then easting; the builder swaps axes before transforming to EPSG:4326."
+    }
+  ],
+  "notes": "The committed product contains derived municipality summaries and simplified official geometry only. Lithuania UI and hub wiring are outside this build."
+}
