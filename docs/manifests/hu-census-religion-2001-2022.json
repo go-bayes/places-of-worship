@@ -1,0 +1,1231 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:hu-census-religion:hu:2001-2022:wbs008-v67",
+  "dataset_id": "hu-census-religion:hu:2001-2022:wbs008-v67",
+  "dataset_version_id": "hu-census-religion:hu:2001-2022:wbs008-v67:70aeda9065ee",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "hu-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "HU"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-10T07:47:55Z",
+  "created_by": "scripts/build_hu_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_hu_area_summary.R",
+    "git_commit": "43210a0",
+    "command": "Rscript scripts/build_hu_area_summary.R",
+    "parameters": {
+      "dataflow": "WBS008",
+      "api_publication": "V67",
+      "waves": [2001, 2011, 2022],
+      "geography": "20 KSH county rows (NUTS 3 codes)",
+      "settlement_type": "HU Total",
+      "construct": "census affiliation from the voluntary religion question",
+      "denominator": "stated responses: TOTAL minus Nem válaszolt (No answer)",
+      "category_rule": "retain all source rows; aggregate Katolikus once and preserve its Roman Catholic and Greek Catholic detail rows",
+      "boundary_source_vintage": "2021",
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 182619,
+        "byte_ceiling": 1500000
+      },
+      "local_cache_hint": "Raw KSH responses, terms, and GISCO geometry are cached under data/raw/hu_census/ and remain git-ignored.",
+      "retrieval_routes": [
+        {
+          "purpose": "API publication",
+          "method": "GET",
+          "url": "https://nepszamlalas2022.ksh.hu/api/version",
+          "notes": "Pins V67."
+        },
+        {
+          "purpose": "dataflow index",
+          "method": "GET",
+          "url": "https://nepszamlalas2022.ksh.hu/api/index/V67/en",
+          "notes": "Identifies WBS008."
+        },
+        {
+          "purpose": "bilingual structure",
+          "method": "GET",
+          "url": "https://nepszamlalas2022.ksh.hu/api/structure/WBS008/V67",
+          "notes": "Supplies codes and labels."
+        },
+        {
+          "purpose": "county observations",
+          "method": "GET",
+          "url": "https://nepszamlalas2022.ksh.hu/api/dataflows/WBS008/V67/d/TIME_PERIOD,TERUL_GEO3:HU110+HU120+HU211+HU212+HU213+HU221+HU222+HU223+HU231+HU232+HU233+HU311+HU312+HU313+HU321+HU322+HU323+HU331+HU332+HU333,TERUL_TELTIP2:HU,VALLAS_V2",
+          "notes": "All counties, waves, and religion rows."
+        },
+        {
+          "purpose": "national reconciliation",
+          "method": "GET",
+          "url": "https://nepszamlalas2022.ksh.hu/api/dataflows/WBS008/V67/d/TIME_PERIOD,TERUL_GEO3:HU,TERUL_TELTIP2:HU,VALLAS_V2",
+          "notes": "Published national rows."
+        },
+        {
+          "purpose": "boundary",
+          "method": "GET",
+          "url": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2021_4326_LEVL_3.geojson",
+          "notes": "NUTS 3 2021 GeoJSON."
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "npx mapshaper through scripts/lib/simplify_boundary.R"
+    }
+  },
+  "source": {
+    "provider": "Hungarian Central Statistical Office (KSH); Eurostat GISCO",
+    "source_dataset_ids": [
+      "ksh-census-wbs008-religion-county-2001-2022-v67",
+      "eurostat-gisco-nuts3-2021-hu",
+      "ksh-census-2022-terms",
+      "eurostat-gisco-nuts-download-provisions"
+    ],
+    "source_urls": [
+      "https://nepszamlalas2022.ksh.hu/en/database/",
+      "https://nepszamlalas2022.ksh.hu/api/version",
+      "https://nepszamlalas2022.ksh.hu/api/index/V67/en",
+      "https://nepszamlalas2022.ksh.hu/api/structure/WBS008/V67",
+      "https://nepszamlalas2022.ksh.hu/api/dataflows/WBS008/V67/d/TIME_PERIOD,TERUL_GEO3:HU110+HU120+HU211+HU212+HU213+HU221+HU222+HU223+HU231+HU232+HU233+HU311+HU312+HU313+HU321+HU322+HU323+HU331+HU332+HU333,TERUL_TELTIP2:HU,VALLAS_V2",
+      "https://nepszamlalas2022.ksh.hu/api/dataflows/WBS008/V67/d/TIME_PERIOD,TERUL_GEO3:HU,TERUL_TELTIP2:HU,VALLAS_V2",
+      "https://nepszamlalas2022.ksh.hu/felhasznalasi-feltetelek",
+      "https://nepszamlalas2022.ksh.hu/eredmenyek/vizualizaciok/vallas/",
+      "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2021_4326_LEVL_3.geojson",
+      "https://ec.europa.eu/eurostat/web/gisco/geodata/statistical-units/territorial-units-statistics",
+      "https://ec.europa.eu/eurostat/help/copyright-notice"
+    ],
+    "retrieved_at": "2026-07-10T00:00:00Z",
+    "licence": "KSH Census 2022 website content is CC BY 4.0 with mandatory KSH attribution; section 3.3 adds a commercial-use caveat for individually selected internal-database files. GISCO geometry uses its download provisions with Eurostat GISCO and EuroGeographics attribution.",
+    "citation": "KSH Census Database WBS008 V67; Eurostat GISCO NUTS 3 2021."
+  },
+  "input_manifests": [],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/hu/data/area_summary_county.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 85437,
+      "sha256": "70aeda9065eebc4d6cc3d66e465f497f3d68690a546b6412e8d4de87dfbd5592",
+      "row_count": 60,
+      "content": "Hungary county census-affiliation area summary for 2001, 2011, and 2022.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/hu/data/area_summary_county.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 39050,
+      "sha256": "4354d12f86f9dca8c7b34fcddf1bfabb40011050516a44c3bfb3a11eb46d868d",
+      "row_count": 60,
+      "content": "Flattened Hungary county census-affiliation rows.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    },
+    {
+      "uri": "repo:apps/regions/hu/data/hu_county_2021.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 182619,
+      "sha256": "313ac1fbf8395738da7866878b48155cd216fa42195f29cbd8100334cb895ccd",
+      "row_count": 20,
+      "content": "Simplified GISCO NUTS 3 2021 Hungary geometry.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    }
+  ],
+  "raw_sources": [
+    {
+      "uri": "data/raw/hu_census/ksh_api_version.json",
+      "url": "https://nepszamlalas2022.ksh.hu/api/version",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T07:28:33Z",
+      "http_status": 200,
+      "format": "json",
+      "bytes": 17,
+      "sha256": "188244a5ee0e6f908518f71f56d91556febac462b4ae72b77f530dfe8f745d98",
+      "source_dataset_id": "ksh-census-wbs008-religion-county-2001-2022-v67",
+      "used_in_public_product": true,
+      "notes": "KSH API publication pointer; pins V67."
+    },
+    {
+      "uri": "data/raw/hu_census/ksh_index_V67_en.json",
+      "url": "https://nepszamlalas2022.ksh.hu/api/index/V67/en",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T07:28:33Z",
+      "http_status": 200,
+      "format": "json",
+      "bytes": 22856,
+      "sha256": "76a89753b229d000db62b5d6c260cc627d53fc1bc1d0ce9622797ca31ce32969",
+      "source_dataset_id": "ksh-census-wbs008-religion-county-2001-2022-v67",
+      "used_in_public_product": true,
+      "notes": "KSH English API index V67; identifies WBS008 and its dimensions."
+    },
+    {
+      "uri": "data/raw/hu_census/ksh_wbs008_structure_V67.json",
+      "url": "https://nepszamlalas2022.ksh.hu/api/structure/WBS008/V67",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T07:28:33Z",
+      "http_status": 200,
+      "format": "json",
+      "bytes": 76150,
+      "sha256": "3b99f4ba09f810ae79c0d5c50feb1a37058b213846767ab40d5620a84f4f5991",
+      "source_dataset_id": "ksh-census-wbs008-religion-county-2001-2022-v67",
+      "used_in_public_product": true,
+      "notes": "Bilingual WBS008 structure with waves, county codes, and religion labels."
+    },
+    {
+      "uri": "data/raw/hu_census/ksh_wbs008_county_2001_2022_V67.json",
+      "url": "https://nepszamlalas2022.ksh.hu/api/dataflows/WBS008/V67/d/TIME_PERIOD,TERUL_GEO3:HU110+HU120+HU211+HU212+HU213+HU221+HU222+HU223+HU231+HU232+HU233+HU311+HU312+HU313+HU321+HU322+HU323+HU331+HU332+HU333,TERUL_TELTIP2:HU,VALLAS_V2",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T07:28:33Z",
+      "http_status": 200,
+      "format": "json",
+      "bytes": 206194,
+      "sha256": "95686dc20ee7f8a53c46b9a57d339970fd8242dbc8c4bdea356ddf6e6f0f0e4f",
+      "source_dataset_id": "ksh-census-wbs008-religion-county-2001-2022-v67",
+      "used_in_public_product": true,
+      "notes": "County observations for three waves, settlement type Total, and every religion row."
+    },
+    {
+      "uri": "data/raw/hu_census/ksh_wbs008_national_2001_2022_V67.json",
+      "url": "https://nepszamlalas2022.ksh.hu/api/dataflows/WBS008/V67/d/TIME_PERIOD,TERUL_GEO3:HU,TERUL_TELTIP2:HU,VALLAS_V2",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T07:28:33Z",
+      "http_status": 200,
+      "format": "json",
+      "bytes": 10191,
+      "sha256": "df987310d7b8c585092d353a822ea9d3b816fdffb65b369e77ac1f52c53e6cba",
+      "source_dataset_id": "ksh-census-wbs008-religion-county-2001-2022-v67",
+      "used_in_public_product": true,
+      "notes": "National observations used for exact reconciliation."
+    },
+    {
+      "uri": "data/raw/hu_census/ksh_census_2022_terms.html",
+      "url": "https://nepszamlalas2022.ksh.hu/felhasznalasi-feltetelek",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T07:28:33Z",
+      "http_status": 200,
+      "format": "html",
+      "bytes": 14738,
+      "sha256": "fe045d016dad67fc7bb395f4c715dc0d9ee6b9285b9149f9ca7060033e3980ed",
+      "source_dataset_id": "ksh-census-2022-terms",
+      "used_in_public_product": true,
+      "notes": "KSH terms stating CC BY 4.0, attribution, and the database-selection caveat."
+    },
+    {
+      "uri": "data/raw/hu_census/gisco_nuts3_2021_4326.geojson",
+      "url": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2021_4326_LEVL_3.geojson",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T07:28:33Z",
+      "http_status": 200,
+      "format": "geojson",
+      "bytes": 28176705,
+      "sha256": "554336d416056abcd1d6f3239e3d5893560ca180056971557403c6fd8ff66d2c",
+      "source_dataset_id": "eurostat-gisco-nuts3-2021-hu",
+      "used_in_public_product": true,
+      "notes": "All-Europe NUTS 3 2021 GeoJSON filtered to Hungary."
+    },
+    {
+      "uri": "data/raw/hu_census/gisco_nuts_terms.html",
+      "url": "https://ec.europa.eu/eurostat/web/gisco/geodata/statistical-units/territorial-units-statistics",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T07:28:33Z",
+      "http_status": 200,
+      "format": "html",
+      "bytes": 194252,
+      "sha256": "dcd85a4bddeb6755d27e3008c600de9b3432b2b66a68690614d8f94f3ab7f424",
+      "source_dataset_id": "eurostat-gisco-nuts-download-provisions",
+      "used_in_public_product": true,
+      "notes": "Eurostat GISCO NUTS download page."
+    },
+    {
+      "uri": "data/raw/hu_census/eurostat_copyright.html",
+      "url": "https://ec.europa.eu/eurostat/help/copyright-notice",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T07:28:33Z",
+      "http_status": 200,
+      "format": "html",
+      "bytes": 175627,
+      "sha256": "4fc7579a1e4e2c5705675ccd1a2b664c7df4d3257c572eac5ee5e032b88b9050",
+      "source_dataset_id": "eurostat-gisco-nuts-download-provisions",
+      "used_in_public_product": true,
+      "notes": "Eurostat general copyright and statistical-data reuse policy."
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/hu/data/area_summary_county.json",
+      "sha256": "70aeda9065eebc4d6cc3d66e465f497f3d68690a546b6412e8d4de87dfbd5592",
+      "built_by": "scripts/build_hu_area_summary.R",
+      "notes": "60 county-year rows."
+    },
+    {
+      "uri": "repo:apps/regions/hu/data/area_summary_county.csv",
+      "sha256": "4354d12f86f9dca8c7b34fcddf1bfabb40011050516a44c3bfb3a11eb46d868d",
+      "built_by": "scripts/build_hu_area_summary.R",
+      "notes": "CSV companion."
+    },
+    {
+      "uri": "repo:apps/regions/hu/data/hu_county_2021.geojson",
+      "sha256": "313ac1fbf8395738da7866878b48155cd216fa42195f29cbd8100334cb895ccd",
+      "built_by": "scripts/build_hu_area_summary.R",
+      "notes": "20 simplified county features."
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "Rscript scripts/build_hu_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/hu/data/area_summary_county.json",
+      "jq empty docs/manifests/hu-census-religion-2001-2022.json"
+    ],
+    "warnings": [
+      "County is the finest complete three-wave KSH religion geography. The settlement map exposes 2011 and 2022 only and four religion shares.",
+      "KSH publishes one non-response category, Nem válaszolt (No answer). The product does not invent separate refusal or unknown counts.",
+      "Geometric stability of Hungarian county boundaries across 2001, 2011, and 2022 was not verified. The common 2021 boundary join rests on identity of the 20 NUTS 3 codes in KSH WBS008 and GISCO."
+    ],
+    "notes": "Every mutually exclusive category sum equals the county population total. Every published row sums exactly from 20 counties to KSH's national row. All 20 geometries are valid, non-empty, and have distinct SHA-256 WKB hashes.",
+    "stats": {
+      "waves": 3,
+      "rows": 60,
+      "counties_per_wave": 20,
+      "published_category_rows_per_wave": "2001=28;2011=28;2022=29",
+      "mutually_exclusive_categories_per_wave": "2001=25;2011=25;2022=26",
+      "national_2001_no_answer_percent": 10.8286,
+      "national_2011_no_answer_percent": 27.1578,
+      "national_2022_no_answer_count": 3852533,
+      "national_2022_no_answer_percent": 40.1154,
+      "boundary_features": 20,
+      "boundary_valid_features": 20,
+      "distinct_geometry_hashes": 20,
+      "boundary_bytes": 182619,
+      "summary_json_bytes": 85437,
+      "summary_csv_bytes": 39050
+    },
+    "reconciliation": [
+      {
+        "year": 2001,
+        "county_count": 20,
+        "published_category_rows_including_total": 28,
+        "mutually_exclusive_categories_excluding_total": 25,
+        "named_religion_categories": 23,
+        "within_county_category_sums_exact": true,
+        "county_category_sums_exact": true,
+        "max_absolute_difference": 0,
+        "national_total": 10198315,
+        "national_no_answer_count": 1104333,
+        "national_no_answer_percent": 10.8286,
+        "category_reconciliation": [
+          {
+            "source_code": "RE_AD",
+            "source_name_hu": "Adventista",
+            "source_display_en": "Adventist",
+            "county_sum": 5840,
+            "published_national_total": 5840,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_AN",
+            "source_name_hu": "Anglikán",
+            "source_display_en": "Anglican",
+            "county_sum": 403,
+            "published_national_total": 403,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_B",
+            "source_name_hu": "Buddhista",
+            "source_display_en": "Buddhist",
+            "county_sum": 5223,
+            "published_national_total": 5223,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_BA",
+            "source_name_hu": "Baptista",
+            "source_display_en": "Baptist",
+            "county_sum": 17705,
+            "published_national_total": 17705,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_C",
+            "source_name_hu": "Katolikus",
+            "source_display_en": "Catholic",
+            "county_sum": 5558961,
+            "published_national_total": 5558961,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_CA",
+            "source_name_hu": "Református",
+            "source_display_en": "Calvinist",
+            "county_sum": 1622796,
+            "published_national_total": 1622796,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_CO",
+            "source_name_hu": "Más keresztény felekezet",
+            "source_display_en": "Other Christian",
+            "county_sum": 12116,
+            "published_national_total": 12116,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_FC",
+            "source_name_hu": "Hit Gyülekezete",
+            "source_display_en": "Faith Church",
+            "county_sum": 3708,
+            "published_national_total": 3708,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_GC",
+            "source_name_hu": "Katolikuson belül görögkatolikus",
+            "source_display_en": "Greek Catholic among Catholics",
+            "county_sum": 268935,
+            "published_national_total": 268935,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_H",
+            "source_name_hu": "Hindu",
+            "source_display_en": "Hindus",
+            "county_sum": 1767,
+            "published_national_total": 1767,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_J",
+            "source_name_hu": "Izraelita",
+            "source_display_en": "Jewish",
+            "county_sum": 12871,
+            "published_national_total": 12871,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_JW",
+            "source_name_hu": "Jehova tanúi",
+            "source_display_en": "Jehovah's Witnesses",
+            "county_sum": 21688,
+            "published_national_total": 21688,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_LU",
+            "source_name_hu": "Evangélikus",
+            "source_display_en": "Lutheran",
+            "county_sum": 304705,
+            "published_national_total": 304705,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_M",
+            "source_name_hu": "Muszlim",
+            "source_display_en": "Muslim",
+            "county_sum": 3201,
+            "published_national_total": 3201,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_ME",
+            "source_name_hu": "Metodista",
+            "source_display_en": "Methodist",
+            "county_sum": 1484,
+            "published_national_total": 1484,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_NA",
+            "source_name_hu": "Nem válaszolt",
+            "source_display_en": "No answer",
+            "county_sum": 1104333,
+            "published_national_total": 1104333,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_NOT",
+            "source_name_hu": "Nem vallásos",
+            "source_display_en": "Not belong to any church, denomination",
+            "county_sum": 1483369,
+            "published_national_total": 1483369,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_OB",
+            "source_name_hu": "Bolgár ortodox",
+            "source_display_en": "Bulgarian Orthodox",
+            "county_sum": 508,
+            "published_national_total": 508,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_OCD2",
+            "source_name_hu": "Más vallási közösséghez, felekezethez tartozó",
+            "source_display_en": "Other church, denomination",
+            "county_sum": 3376,
+            "published_national_total": 3376,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_OG",
+            "source_name_hu": "Görög ortodox",
+            "source_display_en": "Greek Orthodox",
+            "county_sum": 2534,
+            "published_national_total": 2534,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_OO",
+            "source_name_hu": "Más ortodox",
+            "source_display_en": "Other Orthodox",
+            "county_sum": 464,
+            "published_national_total": 464,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_ORO",
+            "source_name_hu": "Román ortodox",
+            "source_display_en": "Romanian Orthodox",
+            "county_sum": 5598,
+            "published_national_total": 5598,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_ORU",
+            "source_name_hu": "Orosz ortodox",
+            "source_display_en": "Russian Orthodox",
+            "county_sum": 3502,
+            "published_national_total": 3502,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_OS",
+            "source_name_hu": "Szerb ortodox",
+            "source_display_en": "Serbian Orthodox",
+            "county_sum": 1914,
+            "published_national_total": 1914,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_PE",
+            "source_name_hu": "Pünkösdi",
+            "source_display_en": "Pentecostal",
+            "county_sum": 13708,
+            "published_national_total": 13708,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_RC",
+            "source_name_hu": "Katolikuson belül római katolikus",
+            "source_display_en": "Roman Catholic among Catholics",
+            "county_sum": 5289521,
+            "published_national_total": 5289521,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_UN",
+            "source_name_hu": "Unitárius",
+            "source_display_en": "Unitarian",
+            "county_sum": 6541,
+            "published_national_total": 6541,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "TOTAL",
+            "source_name_hu": "Összesen",
+            "source_display_en": "Total",
+            "county_sum": 10198315,
+            "published_national_total": 10198315,
+            "difference": 0,
+            "status": "matched"
+          }
+        ]
+      },
+      {
+        "year": 2011,
+        "county_count": 20,
+        "published_category_rows_including_total": 28,
+        "mutually_exclusive_categories_excluding_total": 25,
+        "named_religion_categories": 23,
+        "within_county_category_sums_exact": true,
+        "county_category_sums_exact": true,
+        "max_absolute_difference": 0,
+        "national_total": 9937628,
+        "national_no_answer_count": 2698844,
+        "national_no_answer_percent": 27.1578,
+        "category_reconciliation": [
+          {
+            "source_code": "RE_AD",
+            "source_name_hu": "Adventista",
+            "source_display_en": "Adventist",
+            "county_sum": 6213,
+            "published_national_total": 6213,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_AN",
+            "source_name_hu": "Anglikán",
+            "source_display_en": "Anglican",
+            "county_sum": 270,
+            "published_national_total": 270,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_B",
+            "source_name_hu": "Buddhista",
+            "source_display_en": "Buddhist",
+            "county_sum": 9758,
+            "published_national_total": 9758,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_BA",
+            "source_name_hu": "Baptista",
+            "source_display_en": "Baptist",
+            "county_sum": 18211,
+            "published_national_total": 18211,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_C",
+            "source_name_hu": "Katolikus",
+            "source_display_en": "Catholic",
+            "county_sum": 3871922,
+            "published_national_total": 3871922,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_CA",
+            "source_name_hu": "Református",
+            "source_display_en": "Calvinist",
+            "county_sum": 1153454,
+            "published_national_total": 1153454,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_CO",
+            "source_name_hu": "Más keresztény felekezet",
+            "source_display_en": "Other Christian",
+            "county_sum": 38175,
+            "published_national_total": 38175,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_FC",
+            "source_name_hu": "Hit Gyülekezete",
+            "source_display_en": "Faith Church",
+            "county_sum": 18220,
+            "published_national_total": 18220,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_GC",
+            "source_name_hu": "Katolikuson belül görögkatolikus",
+            "source_display_en": "Greek Catholic among Catholics",
+            "county_sum": 179176,
+            "published_national_total": 179176,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_H",
+            "source_name_hu": "Hindu",
+            "source_display_en": "Hindus",
+            "county_sum": 2865,
+            "published_national_total": 2865,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_J",
+            "source_name_hu": "Izraelita",
+            "source_display_en": "Jewish",
+            "county_sum": 10965,
+            "published_national_total": 10965,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_JW",
+            "source_name_hu": "Jehova tanúi",
+            "source_display_en": "Jehovah's Witnesses",
+            "county_sum": 31727,
+            "published_national_total": 31727,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_LU",
+            "source_name_hu": "Evangélikus",
+            "source_display_en": "Lutheran",
+            "county_sum": 215093,
+            "published_national_total": 215093,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_M",
+            "source_name_hu": "Muszlim",
+            "source_display_en": "Muslim",
+            "county_sum": 5579,
+            "published_national_total": 5579,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_ME",
+            "source_name_hu": "Metodista",
+            "source_display_en": "Methodist",
+            "county_sum": 2416,
+            "published_national_total": 2416,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_NA",
+            "source_name_hu": "Nem válaszolt",
+            "source_display_en": "No answer",
+            "county_sum": 2698844,
+            "published_national_total": 2698844,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_NOT",
+            "source_name_hu": "Nem vallásos",
+            "source_display_en": "Not belong to any church, denomination",
+            "county_sum": 1806409,
+            "published_national_total": 1806409,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_OB",
+            "source_name_hu": "Bolgár ortodox",
+            "source_display_en": "Bulgarian Orthodox",
+            "county_sum": 486,
+            "published_national_total": 486,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_OCD2",
+            "source_name_hu": "Más vallási közösséghez, felekezethez tartozó",
+            "source_display_en": "Other church, denomination",
+            "county_sum": 17651,
+            "published_national_total": 17651,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_OG",
+            "source_name_hu": "Görög ortodox",
+            "source_display_en": "Greek Orthodox",
+            "county_sum": 1701,
+            "published_national_total": 1701,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_OO",
+            "source_name_hu": "Más ortodox",
+            "source_display_en": "Other Orthodox",
+            "county_sum": 2353,
+            "published_national_total": 2353,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_ORO",
+            "source_name_hu": "Román ortodox",
+            "source_display_en": "Romanian Orthodox",
+            "county_sum": 5102,
+            "published_national_total": 5102,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_ORU",
+            "source_name_hu": "Orosz ortodox",
+            "source_display_en": "Russian Orthodox",
+            "county_sum": 2365,
+            "published_national_total": 2365,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_OS",
+            "source_name_hu": "Szerb ortodox",
+            "source_display_en": "Serbian Orthodox",
+            "county_sum": 1703,
+            "published_national_total": 1703,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_PE",
+            "source_name_hu": "Pünkösdi",
+            "source_display_en": "Pentecostal",
+            "county_sum": 9326,
+            "published_national_total": 9326,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_RC",
+            "source_name_hu": "Katolikuson belül római katolikus",
+            "source_display_en": "Roman Catholic among Catholics",
+            "county_sum": 3691389,
+            "published_national_total": 3691389,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_UN",
+            "source_name_hu": "Unitárius",
+            "source_display_en": "Unitarian",
+            "county_sum": 6820,
+            "published_national_total": 6820,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "TOTAL",
+            "source_name_hu": "Összesen",
+            "source_display_en": "Total",
+            "county_sum": 9937628,
+            "published_national_total": 9937628,
+            "difference": 0,
+            "status": "matched"
+          }
+        ]
+      },
+      {
+        "year": 2022,
+        "county_count": 20,
+        "published_category_rows_including_total": 29,
+        "mutually_exclusive_categories_excluding_total": 26,
+        "named_religion_categories": 24,
+        "within_county_category_sums_exact": true,
+        "county_category_sums_exact": true,
+        "max_absolute_difference": 0,
+        "national_total": 9603634,
+        "national_no_answer_count": 3852533,
+        "national_no_answer_percent": 40.1154,
+        "category_reconciliation": [
+          {
+            "source_code": "RE_AD",
+            "source_name_hu": "Adventista",
+            "source_display_en": "Adventist",
+            "county_sum": 5011,
+            "published_national_total": 5011,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_AN",
+            "source_name_hu": "Anglikán",
+            "source_display_en": "Anglican",
+            "county_sum": 372,
+            "published_national_total": 372,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_B",
+            "source_name_hu": "Buddhista",
+            "source_display_en": "Buddhist",
+            "county_sum": 11042,
+            "published_national_total": 11042,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_BA",
+            "source_name_hu": "Baptista",
+            "source_display_en": "Baptist",
+            "county_sum": 17662,
+            "published_national_total": 17662,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_C",
+            "source_name_hu": "Katolikus",
+            "source_display_en": "Catholic",
+            "county_sum": 2886619,
+            "published_national_total": 2886619,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_CA",
+            "source_name_hu": "Református",
+            "source_display_en": "Calvinist",
+            "county_sum": 943982,
+            "published_national_total": 943982,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_CO",
+            "source_name_hu": "Más keresztény felekezet",
+            "source_display_en": "Other Christian",
+            "county_sum": 54981,
+            "published_national_total": 54981,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_FC",
+            "source_name_hu": "Hit Gyülekezete",
+            "source_display_en": "Faith Church",
+            "county_sum": 22647,
+            "published_national_total": 22647,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_GC",
+            "source_name_hu": "Katolikuson belül görögkatolikus",
+            "source_display_en": "Greek Catholic among Catholics",
+            "county_sum": 165135,
+            "published_national_total": 165135,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_H",
+            "source_name_hu": "Hindu",
+            "source_display_en": "Hindus",
+            "county_sum": 3307,
+            "published_national_total": 3307,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_J",
+            "source_name_hu": "Izraelita",
+            "source_display_en": "Jewish",
+            "county_sum": 7635,
+            "published_national_total": 7635,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_JW",
+            "source_name_hu": "Jehova tanúi",
+            "source_display_en": "Jehovah's Witnesses",
+            "county_sum": 22249,
+            "published_national_total": 22249,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_LU",
+            "source_name_hu": "Evangélikus",
+            "source_display_en": "Lutheran",
+            "county_sum": 176503,
+            "published_national_total": 176503,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_M",
+            "source_name_hu": "Muszlim",
+            "source_display_en": "Muslim",
+            "county_sum": 7983,
+            "published_national_total": 7983,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_ME",
+            "source_name_hu": "Metodista",
+            "source_display_en": "Methodist",
+            "county_sum": 2776,
+            "published_national_total": 2776,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_NA",
+            "source_name_hu": "Nem válaszolt",
+            "source_display_en": "No answer",
+            "county_sum": 3852533,
+            "published_national_total": 3852533,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_NOT",
+            "source_name_hu": "Nem vallásos",
+            "source_display_en": "Not belong to any church, denomination",
+            "county_sum": 1549610,
+            "published_national_total": 1549610,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_OB",
+            "source_name_hu": "Bolgár ortodox",
+            "source_display_en": "Bulgarian Orthodox",
+            "county_sum": 475,
+            "published_national_total": 475,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_OCD2",
+            "source_name_hu": "Más vallási közösséghez, felekezethez tartozó",
+            "source_display_en": "Other church, denomination",
+            "county_sum": 7645,
+            "published_national_total": 7645,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_OG",
+            "source_name_hu": "Görög ortodox",
+            "source_display_en": "Greek Orthodox",
+            "county_sum": 3443,
+            "published_national_total": 3443,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_OO",
+            "source_name_hu": "Más ortodox",
+            "source_display_en": "Other Orthodox",
+            "county_sum": 2466,
+            "published_national_total": 2466,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_ORO",
+            "source_name_hu": "Román ortodox",
+            "source_display_en": "Romanian Orthodox",
+            "county_sum": 3618,
+            "published_national_total": 3618,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_ORU",
+            "source_name_hu": "Orosz ortodox",
+            "source_display_en": "Russian Orthodox",
+            "county_sum": 2462,
+            "published_national_total": 2462,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_OS",
+            "source_name_hu": "Szerb ortodox",
+            "source_display_en": "Serbian Orthodox",
+            "county_sum": 1710,
+            "published_national_total": 1710,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_OU",
+            "source_name_hu": "Ukrán ortodox",
+            "source_display_en": "Ukrainian Orthodox",
+            "county_sum": 1404,
+            "published_national_total": 1404,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_PE",
+            "source_name_hu": "Pünkösdi",
+            "source_display_en": "Pentecostal",
+            "county_sum": 8947,
+            "published_national_total": 8947,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_RC",
+            "source_name_hu": "Katolikuson belül római katolikus",
+            "source_display_en": "Roman Catholic among Catholics",
+            "county_sum": 2643855,
+            "published_national_total": 2643855,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "RE_UN",
+            "source_name_hu": "Unitárius",
+            "source_display_en": "Unitarian",
+            "county_sum": 6552,
+            "published_national_total": 6552,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "TOTAL",
+            "source_name_hu": "Összesen",
+            "source_display_en": "Total",
+            "county_sum": 9603634,
+            "published_national_total": 9603634,
+            "difference": 0,
+            "status": "matched"
+          }
+        ]
+      }
+    ],
+    "boundary_validation": {
+      "output_feature_count": 20,
+      "valid_feature_count": 20,
+      "distinct_geometry_hash_count": 20,
+      "geometry_sha256_by_nuts3_code": {
+        "HU110": "093d20dd7967b8775a187875b63f1dc820c66bf0d5dbb43e7f37bac30e379322",
+        "HU120": "66b8dc1f3f250f3dff618c848a50a2c2d1cc3cc56fda5606b43520da2fd6f874",
+        "HU211": "4b96c1987812e0eec203fb47c9feff87b73733520f3b8cd8cc16971d35196206",
+        "HU212": "1ff3842c7f3234eecddf8b9a0fdda70f0b7c5b6d319e0b579c4cf33ffb312542",
+        "HU213": "65b070414d18c6bb80d77e5f94b311728c951d2ab06fdf0ab9699bf4b66cf8a2",
+        "HU221": "60685686717e410c4fa86be6db0098a81ecda8e99e8f2c336b85ec432e7121d7",
+        "HU222": "395bd45ef836282e53aa2422ffdb617e3bac98ddb88d2de8bd46277ea76a622b",
+        "HU223": "4512400a4d0a219b2a03fc0bfbbba89b0f5b04d197f1a3ab29eabe3579c2dc62",
+        "HU231": "d13b70a716a9b7f0def6f785fdabd32de59eba1c5b9559c3ed9c89251f4fdd7a",
+        "HU232": "419d05d1953e85b55223f92f200c08575691214c5fe5d176b6e02e5fafb75340",
+        "HU233": "2957a8d721ba30c460e27b950b6a174b9f59a4f234758c291596e3d3d32b9ff6",
+        "HU311": "2d5e36531139a674c1de3d2920d841dfcfd5f564b2d364f89bd1575335654bda",
+        "HU312": "864d3d21dfadddf985600af7fac244c0fd37aadf9af82968dd489ff2ec62bafa",
+        "HU313": "d7c677e0c6c074f94786f32ba0185b318d7e14575319714296f1db5a0136fc04",
+        "HU321": "a0c5e145973e1740d25019ad0f07a6233d7905d0128a06352b92d0f625a57380",
+        "HU322": "e35cf8eb930276ae3fd41ff67c2bb25ebb9c7911225e180698601d0a78a0bb36",
+        "HU323": "8bf4661a1fabf276d7d0959f8afacc892a790d0494412b84b4cff949c66ad166",
+        "HU331": "4b5160227c12bff043019d9e346a3ae423af4e86819f67210051c4cb7503b98e",
+        "HU332": "263c457713b3c58920dcd0124fee687d777fdbadaf299a615c578f3a9c139780",
+        "HU333": "1ee84d8c3238a817b8e58f175c3c6510dee85c1ace914d7f9bffe9309fbf2b76"
+      },
+      "source_crs": "EPSG:4326",
+      "area_calculation_crs": "EPSG:3035",
+      "output_crs": "EPSG:4326"
+    }
+  },
+  "construct_notes": [
+    "The construct is census affiliation from KSH's voluntary religion question. It does not measure belief, practice, attendance, or registered membership.",
+    "The headline uses the stated-response denominator because KSH's 2022 religion presentation reports the religious share among respondents. The denominator is TOTAL minus Nem válaszolt (No answer) in every wave.",
+    "The affiliation and no-religion shares are among stated responses. National non-response was 10.8286% in 2001, 27.1578% in 2011, and 40.1154% in 2022. The responding share of the population changed substantially across waves; cross-wave share changes may therefore reflect changing respondent composition as well as changing affiliation. The change metric compares stated-response shares only.",
+    "Nem vallásos remains the no-religion category. Nem válaszolt remains a separate non-response category and is excluded from the stated-response denominator.",
+    "KSH WBS008 does not publish separate refusal and unknown rows. The product preserves the single published Nem válaszolt category and does not split it or fold it into a residual.",
+    "Katolikus is the mutually exclusive Catholic category in the headline sum. Római katolikus and Görögkatolikus are detail rows within Catholic; they remain in validation and mappings and are not summed again.",
+    "County is the primary geography because WBS008 supplies every category for 2001, 2011, and 2022. KSH's settlement map supplies 2011 and 2022 only and four religion shares; the district visualisation supplies 2022 only.",
+    "Geometric stability of Hungarian county boundaries across 2001, 2011, and 2022 was not verified. The common 2021 boundary join rests on identity of the 20 NUTS 3 codes in KSH WBS008 and GISCO.",
+    "National no-answer shares are 2001=10.8286%, 2011=27.1578%, and 2022=40.1154%. The 2022 denominator omits 3,852,533 people, or 40.1154% of the census population.",
+    "Category mapping for 2001: RE_AD Adventista => Adventist [product role: named_religion; harmonisation: as_published]; RE_AN Anglikán => Anglican [product role: named_religion; harmonisation: as_published]; RE_B Buddhista => Buddhist [product role: named_religion; harmonisation: as_published]; RE_BA Baptista => Baptist [product role: named_religion; harmonisation: as_published]; RE_C Katolikus => Catholic [product role: named_religion; harmonisation: as_published]; RE_CA Református => Calvinist [product role: named_religion; harmonisation: as_published]; RE_CO Más keresztény felekezet => Other Christian [product role: named_religion; harmonisation: as_published]; RE_FC Hit Gyülekezete => Faith Church [product role: named_religion; harmonisation: as_published]; RE_GC Katolikuson belül görögkatolikus => Greek Catholic among Catholics [product role: catholic_detail_not_summed; harmonisation: as_published]; RE_H Hindu => Hindus [product role: named_religion; harmonisation: as_published]; RE_J Izraelita => Jewish [product role: named_religion; harmonisation: as_published]; RE_JW Jehova tanúi => Jehovah's Witnesses [product role: named_religion; harmonisation: as_published]; RE_LU Evangélikus => Lutheran [product role: named_religion; harmonisation: as_published]; RE_M Muszlim => Muslim [product role: named_religion; harmonisation: as_published]; RE_ME Metodista => Methodist [product role: named_religion; harmonisation: as_published]; RE_NA Nem válaszolt => No answer [product role: no_answer; harmonisation: as_published]; RE_NOT Nem vallásos => Not belong to any church, denomination [product role: no_religion; harmonisation: as_published]; RE_OB Bolgár ortodox => Bulgarian Orthodox [product role: named_religion; harmonisation: as_published]; RE_OCD2 Más vallási közösséghez, felekezethez tartozó => Other church, denomination [product role: named_religion; harmonisation: as_published]; RE_OG Görög ortodox => Greek Orthodox [product role: named_religion; harmonisation: as_published]; RE_OO Más ortodox => Other Orthodox [product role: named_religion; harmonisation: as_published]; RE_ORO Román ortodox => Romanian Orthodox [product role: named_religion; harmonisation: as_published]; RE_ORU Orosz ortodox => Russian Orthodox [product role: named_religion; harmonisation: as_published]; RE_OS Szerb ortodox => Serbian Orthodox [product role: named_religion; harmonisation: as_published]; RE_PE Pünkösdi => Pentecostal [product role: named_religion; harmonisation: as_published]; RE_RC Katolikuson belül római katolikus => Roman Catholic among Catholics [product role: catholic_detail_not_summed; harmonisation: as_published]; RE_UN Unitárius => Unitarian [product role: named_religion; harmonisation: as_published]; TOTAL Összesen => Total [product role: total; harmonisation: as_published].",
+    "Category mapping for 2011: RE_AD Adventista => Adventist [product role: named_religion; harmonisation: as_published]; RE_AN Anglikán => Anglican [product role: named_religion; harmonisation: as_published]; RE_B Buddhista => Buddhist [product role: named_religion; harmonisation: as_published]; RE_BA Baptista => Baptist [product role: named_religion; harmonisation: as_published]; RE_C Katolikus => Catholic [product role: named_religion; harmonisation: as_published]; RE_CA Református => Calvinist [product role: named_religion; harmonisation: as_published]; RE_CO Más keresztény felekezet => Other Christian [product role: named_religion; harmonisation: as_published]; RE_FC Hit Gyülekezete => Faith Church [product role: named_religion; harmonisation: as_published]; RE_GC Katolikuson belül görögkatolikus => Greek Catholic among Catholics [product role: catholic_detail_not_summed; harmonisation: as_published]; RE_H Hindu => Hindus [product role: named_religion; harmonisation: as_published]; RE_J Izraelita => Jewish [product role: named_religion; harmonisation: as_published]; RE_JW Jehova tanúi => Jehovah's Witnesses [product role: named_religion; harmonisation: as_published]; RE_LU Evangélikus => Lutheran [product role: named_religion; harmonisation: as_published]; RE_M Muszlim => Muslim [product role: named_religion; harmonisation: as_published]; RE_ME Metodista => Methodist [product role: named_religion; harmonisation: as_published]; RE_NA Nem válaszolt => No answer [product role: no_answer; harmonisation: as_published]; RE_NOT Nem vallásos => Not belong to any church, denomination [product role: no_religion; harmonisation: as_published]; RE_OB Bolgár ortodox => Bulgarian Orthodox [product role: named_religion; harmonisation: as_published]; RE_OCD2 Más vallási közösséghez, felekezethez tartozó => Other church, denomination [product role: named_religion; harmonisation: as_published]; RE_OG Görög ortodox => Greek Orthodox [product role: named_religion; harmonisation: as_published]; RE_OO Más ortodox => Other Orthodox [product role: named_religion; harmonisation: as_published]; RE_ORO Román ortodox => Romanian Orthodox [product role: named_religion; harmonisation: as_published]; RE_ORU Orosz ortodox => Russian Orthodox [product role: named_religion; harmonisation: as_published]; RE_OS Szerb ortodox => Serbian Orthodox [product role: named_religion; harmonisation: as_published]; RE_PE Pünkösdi => Pentecostal [product role: named_religion; harmonisation: as_published]; RE_RC Katolikuson belül római katolikus => Roman Catholic among Catholics [product role: catholic_detail_not_summed; harmonisation: as_published]; RE_UN Unitárius => Unitarian [product role: named_religion; harmonisation: as_published]; TOTAL Összesen => Total [product role: total; harmonisation: as_published].",
+    "Category mapping for 2022: RE_AD Adventista => Adventist [product role: named_religion; harmonisation: as_published]; RE_AN Anglikán => Anglican [product role: named_religion; harmonisation: as_published]; RE_B Buddhista => Buddhist [product role: named_religion; harmonisation: as_published]; RE_BA Baptista => Baptist [product role: named_religion; harmonisation: as_published]; RE_C Katolikus => Catholic [product role: named_religion; harmonisation: as_published]; RE_CA Református => Calvinist [product role: named_religion; harmonisation: as_published]; RE_CO Más keresztény felekezet => Other Christian [product role: named_religion; harmonisation: as_published]; RE_FC Hit Gyülekezete => Faith Church [product role: named_religion; harmonisation: as_published]; RE_GC Katolikuson belül görögkatolikus => Greek Catholic among Catholics [product role: catholic_detail_not_summed; harmonisation: as_published]; RE_H Hindu => Hindus [product role: named_religion; harmonisation: as_published]; RE_J Izraelita => Jewish [product role: named_religion; harmonisation: as_published]; RE_JW Jehova tanúi => Jehovah's Witnesses [product role: named_religion; harmonisation: as_published]; RE_LU Evangélikus => Lutheran [product role: named_religion; harmonisation: as_published]; RE_M Muszlim => Muslim [product role: named_religion; harmonisation: as_published]; RE_ME Metodista => Methodist [product role: named_religion; harmonisation: as_published]; RE_NA Nem válaszolt => No answer [product role: no_answer; harmonisation: as_published]; RE_NOT Nem vallásos => Not belong to any church, denomination [product role: no_religion; harmonisation: as_published]; RE_OB Bolgár ortodox => Bulgarian Orthodox [product role: named_religion; harmonisation: as_published]; RE_OCD2 Más vallási közösséghez, felekezethez tartozó => Other church, denomination [product role: named_religion; harmonisation: as_published]; RE_OG Görög ortodox => Greek Orthodox [product role: named_religion; harmonisation: as_published]; RE_OO Más ortodox => Other Orthodox [product role: named_religion; harmonisation: as_published]; RE_ORO Román ortodox => Romanian Orthodox [product role: named_religion; harmonisation: as_published]; RE_ORU Orosz ortodox => Russian Orthodox [product role: named_religion; harmonisation: as_published]; RE_OS Szerb ortodox => Serbian Orthodox [product role: named_religion; harmonisation: as_published]; RE_OU Ukrán ortodox => Ukrainian Orthodox [product role: named_religion; harmonisation: as_published]; RE_PE Pünkösdi => Pentecostal [product role: named_religion; harmonisation: as_published]; RE_RC Katolikuson belül római katolikus => Roman Catholic among Catholics [product role: catholic_detail_not_summed; harmonisation: as_published]; RE_UN Unitárius => Unitarian [product role: named_religion; harmonisation: as_published]; TOTAL Összesen => Total [product role: total; harmonisation: as_published]."
+  ],
+  "deferred_sources": [
+    {
+      "source": "KSH settlement map (map.ksh.hu/nepszamlalas)",
+      "status": "extra_level_not_shipped",
+      "reason": "The map announces settlement religion indicators for 2011 and 2022 only and exposes four shares rather than the full category set."
+    },
+    {
+      "source": "https://nepszamlalas2022.ksh.hu/eredmenyek/vizualizaciok/vallas/",
+      "status": "extra_level_not_shipped",
+      "reason": "The district visualisation is 2022 only; it establishes the respondent denominator but cannot form a three-wave series."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "accepted",
+  "downstream_status": "public",
+  "source_datasets": [
+    {
+      "source_dataset_id": "ksh-census-wbs008-religion-county-2001-2022-v67",
+      "name": "KSH Census Database WBS008: Population by religion, county and type of settlement",
+      "provider": "Hungarian Central Statistical Office (KSH)",
+      "url": "https://nepszamlalas2022.ksh.hu/api/dataflows/WBS008/V67/d/TIME_PERIOD,TERUL_GEO3:HU110+HU120+HU211+HU212+HU213+HU221+HU222+HU223+HU231+HU232+HU233+HU311+HU312+HU313+HU321+HU322+HU323+HU331+HU332+HU333,TERUL_TELTIP2:HU,VALLAS_V2",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/hu_census/ksh_wbs008_county_2001_2022_V67.json",
+      "licence": {
+        "name": "KSH Census 2022 website terms: CC BY 4.0, with section 3.3 database-selection caveat",
+        "url": "https://nepszamlalas2022.ksh.hu/felhasznalasi-feltetelek",
+        "attribution": "Source: Hungarian Central Statistical Office (KSH)"
+      },
+      "citation": "KSH Census Database, WBS008, API publication V67, county totals for 2001, 2011, and 2022.",
+      "access_limits": null,
+      "redistribution_limits": "The terms apply CC BY 4.0 to site content and require KSH attribution. Section 3.3 bars commercial use of individually selected internal-database files but exempts independently copyrightable works made from them.",
+      "notes": "The JSON endpoint supplies 20 counties, settlement type Total, and every published religion row for all three waves."
+    },
+    {
+      "source_dataset_id": "eurostat-gisco-nuts3-2021-hu",
+      "name": "Eurostat GISCO NUTS 3 regions 2021, Hungary",
+      "provider": "Eurostat GISCO",
+      "url": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2021_4326_LEVL_3.geojson",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/hu_census/gisco_nuts3_2021_4326.geojson",
+      "licence": {
+        "name": "Eurostat GISCO download provisions and general reuse policy",
+        "url": "https://ec.europa.eu/eurostat/web/gisco/geodata/statistical-units/territorial-units-statistics",
+        "attribution": "Eurostat GISCO; © EuroGeographics for the administrative boundaries"
+      },
+      "citation": "Eurostat GISCO, NUTS 3 2021, 1:1 million, EPSG:4326; Hungarian NUTS 3 features.",
+      "access_limits": null,
+      "redistribution_limits": "Use under GISCO download provisions with source acknowledgement and EuroGeographics administrative-boundary attribution.",
+      "notes": "The all-Europe GeoJSON is filtered to the 20 Hungarian NUTS 3 codes and simplified."
+    }
+  ],
+  "notes": "The committed product contains derived county summaries and simplified GISCO geometry only. Hungary UI and hub wiring are outside this build."
+}
