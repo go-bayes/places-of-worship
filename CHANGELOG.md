@@ -4,8 +4,21 @@
 
 ### 2026-07-11
 
-- Recorded the approved Israel scope as CBS statistical coverage and documented
-  the multi-group construct blocker that stops the district religion build.
+- Added the Israel Population Register classification product under the
+  approved two-slot ruling. The district product contains 56 rows across the
+  eight CBS table 2.11 reference years (1948, 1961, 1972, 1983, 1995, 2008,
+  2022, and 2024). The legacy affiliation slot carries the share classified as
+  Jewish, Muslim, Christian, or Druze; the legacy no-religion slot carries
+  CBS's category verbatim, Not classified by religion. Every declaration and
+  row basis states that this is Population Register classification. It is not
+  belief, practice, irreligion, or secularity. The 1948 wave is recorded
+  context with null construct fields because three district group
+  distributions are suppressed; its 17.1-thousand national population
+  residual is reported and never distributed. The seven-feature boundary
+  combines six districts dissolved from official sub-district polygons with
+  the separately labelled CBS statistical-area coverage for Judea and Samaria
+  Area. Build: `scripts/build_il_area_summary.R`; manifest:
+  `docs/manifests/il-register-classification-1948-2024.json`.
 
 ### 2026-07-10
 
