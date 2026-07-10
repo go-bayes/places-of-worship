@@ -2,10 +2,12 @@
 
 ## Purpose and status
 
-This probe records the choices that must precede any Israel data product. The
+This probe records the choices that preceded the Israel data product. The
 project lead selected **Option B: CBS statistical coverage as published** on
-2026-07-11. The construct review subsequently stopped the build because the
-current area-summary contract cannot represent all five CBS religion groups.
+2026-07-11. The project lead then approved the two-slot Register construct:
+the first slot sums the recognised CBS religion groups, and the second carries
+CBS's Not classified by religion category under its source name. A generic
+five-group extension remains a future path.
 
 The three options differ in what defines the study area. Option A uses the
 Green Line as a spatial mask. Option B reproduces CBS statistical coverage.
@@ -170,6 +172,15 @@ east of the Green Line.
 | B: CBS statistical coverage | [CBS 2021 locality layer with 2022 Census data](https://www.cbs.gov.il/he/publications/DocLib/2022/%D7%A7%D7%98%D7%9C%D7%95%D7%92/1.%20%D7%99%D7%99%D7%A9%D7%95%D7%91%D7%99%D7%9D%20%D7%95%D7%97%D7%9C%D7%95%D7%A7%D7%95%D7%AA%20%D7%92%D7%90%D7%95%D7%92%D7%A8%D7%A4%D7%99%D7%95%D7%AA/census_2022_setl_all_2021.gdb.zip) and [CBS 2022 statistical-area layer](https://www.cbs.gov.il/he/publications/DocLib/2022/%D7%A7%D7%98%D7%9C%D7%95%D7%92/1.%20%D7%99%D7%99%D7%A9%D7%95%D7%91%D7%99%D7%9D%20%D7%95%D7%97%D7%9C%D7%95%D7%A7%D7%95%D7%AA%20%D7%92%D7%90%D7%95%D7%92%D7%A8%D7%A4%D7%99%D7%95%D7%AA/census_2022_statistical_areas_2022.gdb.zip) | File Geodatabase locality points and statistical-area polygons in the Israel Transverse Mercator grid | CBS open licence and attribution apply. The locality layer is point geometry. CBS states that rural statistical-area extents are not authoritative locality boundaries and that some Judea and Samaria localities without statistical areas are represented by 50-metre circles. The public catalogue located in this probe did not expose a current district/sub-district polygon download. |
 | C: row exclusion within CBS frame | The same CBS locality and statistical-area files as Option B, plus a Green Line reference for classifying and displaying exclusions | Stable CBS identifiers and the CBS frame, with a separate inclusion flag | CBS licence applies to CBS files; the reference-line source carries its own terms. The geometry cannot by itself split the annual Jerusalem locality observation. |
 
+The subsequent product build located the official Ministry of Interior
+sub-district polygons through the [sub-district boundary item linked from the
+CBS ArcGIS organisation](https://www.arcgis.com/home/item.html?id=927cfe72a31e4a05ab130526c1391acf).
+The 15 polygons dissolve into the six CBS districts. The endpoint carries the
+Planning Administration geographic-information terms linked in the CBS item.
+The separately labelled Judea and Samaria Area remains outside that six-
+district layer; the product represents it as CBS statistical-area coverage
+selected through locality district code `7` and labels it accordingly.
+
 The [CBS GIS landing page](https://www.cbs.gov.il/he/cbsNewBrand/Pages/%D7%A9%D7%9B%D7%91%D7%95%D7%AA-%D7%9E%D7%9E%D7%92-%D7%9E%D7%A2%D7%A8%D7%9B%D7%AA-%D7%9E%D7%99%D7%93%D7%A2-%D7%92%D7%90%D7%95%D7%92%D7%A8%D7%A4%D7%99%D7%AA-GIS.aspx)
 links both public geodatabases and their field documentation. The locality
 layer describes its coverage as nationwide. The statistical-area layer uses
@@ -215,6 +226,19 @@ rows, and treatment of disputed lines in the metadata and legend.
 - **Boundary source and displayed disclaimer**: use CBS geography and label
   the extent as CBS statistical coverage. The project records the statistical
   source's definitions without endorsing any boundary position.
+- **Construct**: ship the two-slot Register product. The
+  `religious_affiliation_percent` slot is “Classified in a religion group (%) —
+  Population Register classification, not belief or practice”. The
+  `no_religion_percent` slot is CBS's “Not classified by religion (%)”. This is
+  a Population Register classification for residents without a recognised
+  religious classification, notably many immigrants and their descendants who
+  are not registered in a religion group. It is not a measure of no religion,
+  irreligion, or secularity.
+- **Build**: `scripts/build_il_area_summary.R` ships the eight table 2.11
+  reference years. The 1948 wave is recorded context with null construct
+  fields because three recognised-group district distributions are
+  suppressed. The 17.1-thousand population residual is reported and never
+  distributed.
 - **Sensitivity conditions for any later product**: keep the published data
   unchanged. Record the Option A filter as district code `7`, sub-district code
   `29`, and natural-area codes `291`-`294`, with Jerusalem locality code `3000`

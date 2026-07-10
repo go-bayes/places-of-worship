@@ -1,0 +1,751 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:il-register-classification:il:1948-2024:cbs-table-2-11",
+  "dataset_id": "il-register-classification:il:1948-2024:cbs-table-2-11",
+  "dataset_version_id": "il-register-classification:il:1948-2024:cbs-table-2-11:ec961da0af88",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "il-register-classification",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "IL"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-10T03:03:38Z",
+  "created_by": "scripts/build_il_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_il_area_summary.R",
+    "git_commit": "668cf22",
+    "command": "Rscript scripts/build_il_area_summary.R",
+    "parameters": {
+      "waves": [1948, 1961, 1972, 1983, 1995, 2008, 2022, 2024],
+      "geography": "six CBS districts plus the separately labelled Judea and Samaria Area",
+      "data_noun": "Register",
+      "scope_option": "Option B: CBS statistical coverage as published",
+      "indicators_block_declaration": "Classified in a religion group (%) — Population Register classification, not belief or practice | Not classified by religion (%)",
+      "count_units": "CBS counts in thousands rounded to one decimal; product counts multiply by 1000 and therefore resolve to 100 persons",
+      "residual_rule": "report every national-minus-district residual; never distribute it",
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 25,
+        "bytes": 255690,
+        "byte_ceiling": 800000
+      },
+      "option_a_filter": {
+        "exclude_district_code": "7",
+        "exclude_subdistrict_code": "29",
+        "exclude_natural_area_codes": ["291", "292", "293", "294"],
+        "jerusalem_locality_code": "3000",
+        "jerusalem_rule": "requires a finer spatial split"
+      },
+      "option_c_filter": {
+        "exclude_district_code": "7",
+        "exclude_subdistrict_code": "29",
+        "exclude_natural_area_codes": ["291", "292", "293", "294"],
+        "jerusalem_locality_code": "3000",
+        "jerusalem_rule": "choose retain, exclude, or replace with finer 2022 data"
+      }
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "readxl": "1.5.0",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "mapshaper": "npx mapshaper used through scripts/lib/simplify_boundary.R"
+    }
+  },
+  "source": {
+    "provider": "Israel Central Bureau of Statistics; Ministry of Interior / Planning Administration",
+    "source_dataset_ids": ["cbs-statistical-abstract-table-2-11-2025", "cbs-locality-dictionary-2022", "cbs-statistical-areas-2022", "cbs-arcgis-moin-subdistrict-boundaries"],
+    "source_urls": ["https://www.cbs.gov.il/he/publications/DocLib/2025/2.ShnatonPopulation/st02_11x.xlsx", "https://api.cbs.gov.il/Dictionary/geo/localities?year=2022&expand=false&format=json&download=false&page=1&page_size=250", "https://www.arcgis.com/sharing/rest/content/items/65410312f3ab4c3482f52f8c8a284a3d?f=json", "https://www.arcgis.com/sharing/rest/content/items/927cfe72a31e4a05ab130526c1391acf?f=json", "https://www.cbs.gov.il/en/Pages/Enduser-license.aspx"],
+    "retrieved_at": "2026-07-10T00:00:00Z",
+    "licence": "CBS Open License applies to CBS tables and GIS files; the official sub-district endpoint is subject to the Planning Administration geographic-information terms recorded in its CBS ArcGIS item.",
+    "citation": "Israel Central Bureau of Statistics, Statistical Abstract table 2.11 and 2022 GIS layers; Ministry of Interior / Planning Administration sub-district boundaries linked by CBS GIS."
+  },
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/il/data/area_summary_district.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 114589,
+      "sha256": "ec961da0af88d08942be4b68657d3d6b3c00dc6089f3df331f2731fece3e0939",
+      "row_count": 56,
+      "content": "Israel district Population Register classification area summary, eight reference waves including 1948 recorded context.",
+      "privacy": "public",
+      "licence_status": "cbs_open_licence_and_official_boundary_terms"
+    },
+    {
+      "uri": "repo:apps/regions/il/data/area_summary_district.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 64800,
+      "sha256": "bb89a1d08739ba7648608fc36a6fd4131aee401bdd60d3a098cdce8d3f1a68fe",
+      "row_count": 56,
+      "content": "Flattened Israel district Population Register classification area-summary rows.",
+      "privacy": "public",
+      "licence_status": "cbs_open_licence_and_official_boundary_terms"
+    },
+    {
+      "uri": "repo:apps/regions/il/data/il_district_2022.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 255690,
+      "sha256": "918183194b71e688b3009e2a1b141a4a3ea123bbc0ae5467fe226f974e05a928",
+      "row_count": 7,
+      "content": "Simplified source-aligned Israel district geometry: six official districts plus separately labelled CBS statistical-area coverage for Judea and Samaria Area.",
+      "privacy": "public",
+      "licence_status": "cbs_open_licence_and_official_boundary_terms"
+    }
+  ],
+  "raw_sources": [
+    {
+      "uri": "data/raw/il_register/st02_11x.xlsx",
+      "url": "https://www.cbs.gov.il/he/publications/DocLib/2025/2.ShnatonPopulation/st02_11x.xlsx",
+      "format": "xlsx",
+      "bytes": 45756,
+      "sha256": "12c2680e704e222cfff2dc442868386d662431f0d471d0cc51b8b5e38fd5ba0b",
+      "source_dataset_id": "cbs-statistical-abstract-table-2-11-2025",
+      "used_in_public_product": true,
+      "notes": "CBS Statistical Abstract table 2.11 workbook; both English/Hebrew sheets and source footnotes retained."
+    },
+    {
+      "uri": "data/raw/il_register/cbs_statistical_areas_2022_item.json",
+      "url": "https://www.arcgis.com/sharing/rest/content/items/65410312f3ab4c3482f52f8c8a284a3d?f=json",
+      "format": "json",
+      "bytes": 4828,
+      "sha256": "6c9528e7d693ce05cd32539d7608927cfb78ff347d8d024a5b8ab5a63b6cf395",
+      "source_dataset_id": "cbs-statistical-areas-2022",
+      "used_in_public_product": true,
+      "notes": "CBS ArcGIS item metadata, including CBS ownership and the CBS licence link."
+    },
+    {
+      "uri": "data/raw/il_register/cbs_subdistrict_boundary_item.json",
+      "url": "https://www.arcgis.com/sharing/rest/content/items/927cfe72a31e4a05ab130526c1391acf?f=json",
+      "format": "json",
+      "bytes": 2705,
+      "sha256": "bd22aecdc039bc5f16991d6274f4ea4b31937b16ca508cf007ca5d303cadabbe",
+      "source_dataset_id": "cbs-arcgis-moin-subdistrict-boundaries",
+      "used_in_public_product": true,
+      "notes": "CBS ArcGIS item metadata linking the official Ministry of Interior / Planning Administration sub-district endpoint and its terms."
+    },
+    {
+      "uri": "data/raw/il_register/moin_subdistricts.geojson",
+      "url": "https://ags.iplan.gov.il/arcgisiplan/rest/services/PlanningPublic/gvulot_retzef/MapServer/4/query",
+      "format": "geojson",
+      "bytes": 2968082,
+      "sha256": "e640776fa602157d36fffad1be2bf83a18539976f29b7c5ce5ad8df4527e6790",
+      "source_dataset_id": "cbs-arcgis-moin-subdistrict-boundaries",
+      "used_in_public_product": true,
+      "notes": "Fifteen official sub-district polygons queried in WGS84 and dissolved into six districts."
+    },
+    {
+      "uri": "data/raw/il_register/cbs_statistical_areas_district_7.geojson",
+      "url": "https://services8.arcgis.com/JcXY3lLZni6BK4El/arcgis/rest/services/statistical_areas_2022/FeatureServer/0/query",
+      "format": "geojson",
+      "bytes": 783899,
+      "sha256": "7e6aa0fb8a2a18e560de15246f8113fb4a8b117e7b13a9dadb7ff81907098d4e",
+      "source_dataset_id": "cbs-statistical-areas-2022",
+      "used_in_public_product": true,
+      "notes": "The 193 CBS statistical-area polygons selected through 2022 locality district code 7."
+    },
+    {
+      "uri": "data/raw/il_register/localities_2022_page_1.json",
+      "url": "https://api.cbs.gov.il/Dictionary/geo/localities?year=2022&expand=false&format=json&download=false&page=1&page_size=250",
+      "format": "json",
+      "bytes": 95880,
+      "sha256": "643fd46bfd74d8b1f800b4a9e862131cf26a59e9f8cf75cf985a4e61267db595",
+      "source_dataset_id": "cbs-locality-dictionary-2022",
+      "used_in_public_product": true,
+      "notes": "CBS 2022 locality dictionary response page 1 of 6 at 250 rows per page."
+    },
+    {
+      "uri": "data/raw/il_register/localities_2022_page_2.json",
+      "url": "https://api.cbs.gov.il/Dictionary/geo/localities?year=2022&expand=false&format=json&download=false&page=2&page_size=250",
+      "format": "json",
+      "bytes": 95570,
+      "sha256": "117ab12c11dc5122ca71cc7fd42ed66933861dc249e7dd01212d92b5aa707754",
+      "source_dataset_id": "cbs-locality-dictionary-2022",
+      "used_in_public_product": true,
+      "notes": "CBS 2022 locality dictionary response page 2 of 6 at 250 rows per page."
+    },
+    {
+      "uri": "data/raw/il_register/localities_2022_page_3.json",
+      "url": "https://api.cbs.gov.il/Dictionary/geo/localities?year=2022&expand=false&format=json&download=false&page=3&page_size=250",
+      "format": "json",
+      "bytes": 95793,
+      "sha256": "63c23df960b60e657fd4faa3e3f416efb40538e761c2d8839c9f2f34b63919eb",
+      "source_dataset_id": "cbs-locality-dictionary-2022",
+      "used_in_public_product": true,
+      "notes": "CBS 2022 locality dictionary response page 3 of 6 at 250 rows per page."
+    },
+    {
+      "uri": "data/raw/il_register/localities_2022_page_4.json",
+      "url": "https://api.cbs.gov.il/Dictionary/geo/localities?year=2022&expand=false&format=json&download=false&page=4&page_size=250",
+      "format": "json",
+      "bytes": 95627,
+      "sha256": "c6b1ba986f181a968aec79568eeab4146318b416b7c7717b3e39814824df727c",
+      "source_dataset_id": "cbs-locality-dictionary-2022",
+      "used_in_public_product": true,
+      "notes": "CBS 2022 locality dictionary response page 4 of 6 at 250 rows per page."
+    },
+    {
+      "uri": "data/raw/il_register/localities_2022_page_5.json",
+      "url": "https://api.cbs.gov.il/Dictionary/geo/localities?year=2022&expand=false&format=json&download=false&page=5&page_size=250",
+      "format": "json",
+      "bytes": 96084,
+      "sha256": "6533b1ba6d274c0bc6ba9074cfbffa6de2624c3a63c58ea4a00f2c93820af976",
+      "source_dataset_id": "cbs-locality-dictionary-2022",
+      "used_in_public_product": true,
+      "notes": "CBS 2022 locality dictionary response page 5 of 6 at 250 rows per page."
+    },
+    {
+      "uri": "data/raw/il_register/localities_2022_page_6.json",
+      "url": "https://api.cbs.gov.il/Dictionary/geo/localities?year=2022&expand=false&format=json&download=false&page=6&page_size=250",
+      "format": "json",
+      "bytes": 89918,
+      "sha256": "615fddaf9c32c29be36541b266d6b2c00bb67e03c114953391e8122dbb8b66fa",
+      "source_dataset_id": "cbs-locality-dictionary-2022",
+      "used_in_public_product": true,
+      "notes": "CBS 2022 locality dictionary response page 6 of 6 at 250 rows per page."
+    }
+  ],
+  "stats": {
+    "waves": 8,
+    "rows": 56,
+    "boundary_features": 7,
+    "mapped_construct_waves": 7,
+    "recorded_context_waves": 1,
+    "source_count_precision_persons": 100,
+    "boundary_bytes": 255690,
+    "summary_json_bytes": 114589,
+    "summary_csv_bytes": 64800,
+    "district7_locality_dictionary_rows": 147,
+    "district7_localities_with_statistical_area_polygons": 129,
+    "district7_statistical_area_polygons": 193
+  },
+  "local_cache_hint": "Raw CBS and official boundary responses are cached under data/raw/il_register/ and remain git-ignored.",
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_il_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/il/data/area_summary_district.json",
+      "jq empty docs/manifests/il-register-classification-1948-2024.json"
+    ],
+    "warnings": ["CBS omits a few small district-by-group entries; recognised-group residuals are reported and never distributed.", "The 1948 construct is unavailable at district level and ships as recorded context with null construct fields.", "The 1948 population national-minus-district residual is 17,100 persons and is never distributed.", "The separately labelled Judea and Samaria Area geometry represents CBS statistical-area coverage rather than a territorial boundary."],
+    "notes": "National reconciliation uses national minus district sum. Units are persons converted from CBS's one-decimal thousands. [{\"year\":1948,\"metric\":\"population_total\",\"district_sum\":855600,\"cbs_national_total\":872700,\"national_minus_district_sum\":17100,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"},{\"year\":1961,\"metric\":\"population_total\",\"district_sum\":2179500,\"cbs_national_total\":2179500,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"},{\"year\":1961,\"metric\":\"religious_affiliation_count\",\"district_sum\":2177800,\"cbs_national_total\":2179500,\"national_minus_district_sum\":1700,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"},{\"year\":1972,\"metric\":\"population_total\",\"district_sum\":3147700,\"cbs_national_total\":3147800,\"national_minus_district_sum\":100,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"},{\"year\":1972,\"metric\":\"religious_affiliation_count\",\"district_sum\":3146500,\"cbs_national_total\":3147100,\"national_minus_district_sum\":600,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"},{\"year\":1983,\"metric\":\"population_total\",\"district_sum\":4037500,\"cbs_national_total\":4037400,\"national_minus_district_sum\":-100,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"},{\"year\":1983,\"metric\":\"religious_affiliation_count\",\"district_sum\":4036100,\"cbs_national_total\":4036400,\"national_minus_district_sum\":300,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"},{\"year\":1995,\"metric\":\"population_total\",\"district_sum\":5612400,\"cbs_national_total\":5612300,\"national_minus_district_sum\":-100,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"},{\"year\":1995,\"metric\":\"religious_affiliation_count\",\"district_sum\":5545600,\"cbs_national_total\":5546000,\"national_minus_district_sum\":400,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"},{\"year\":1995,\"metric\":\"no_religion_count\",\"district_sum\":66000,\"cbs_national_total\":66000,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"},{\"year\":2008,\"metric\":\"population_total\",\"district_sum\":7412200,\"cbs_national_total\":7412200,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"},{\"year\":2008,\"metric\":\"religious_affiliation_count\",\"district_sum\":7128000,\"cbs_national_total\":7129200,\"national_minus_district_sum\":1200,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"},{\"year\":2008,\"metric\":\"no_religion_count\",\"district_sum\":281100,\"cbs_national_total\":281100,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"},{\"year\":2022,\"metric\":\"population_total\",\"district_sum\":9389100,\"cbs_national_total\":9389100,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"},{\"year\":2022,\"metric\":\"religious_affiliation_count\",\"district_sum\":8999000,\"cbs_national_total\":9001900,\"national_minus_district_sum\":2900,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"},{\"year\":2022,\"metric\":\"no_religion_count\",\"district_sum\":387200,\"cbs_national_total\":387200,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"},{\"year\":2024,\"metric\":\"population_total\",\"district_sum\":9805100,\"cbs_national_total\":9805100,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"},{\"year\":2024,\"metric\":\"religious_affiliation_count\",\"district_sum\":9360000,\"cbs_national_total\":9363300,\"national_minus_district_sum\":3300,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"},{\"year\":2024,\"metric\":\"no_religion_count\",\"district_sum\":441800,\"cbs_national_total\":441700,\"national_minus_district_sum\":-100,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\",\"residual_treatment\":\"reported, never distributed\"}] Group reconciliation: [{\"year\":1948,\"group\":\"jewish\",\"district_sum\":699600,\"national_total\":716700,\"national_minus_district_sum\":17100,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1948,\"group\":\"muslim\",\"district_sum\":null,\"national_total\":null,\"national_minus_district_sum\":null,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1948,\"group\":\"christian\",\"district_sum\":null,\"national_total\":null,\"national_minus_district_sum\":null,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1948,\"group\":\"druze\",\"district_sum\":null,\"national_total\":null,\"national_minus_district_sum\":null,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1961,\"group\":\"jewish\",\"district_sum\":1932300,\"national_total\":1932300,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1961,\"group\":\"muslim\",\"district_sum\":170900,\"national_total\":170900,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1961,\"group\":\"christian\",\"district_sum\":50500,\"national_total\":50500,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1961,\"group\":\"druze\",\"district_sum\":24100,\"national_total\":25800,\"national_minus_district_sum\":1700,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1972,\"group\":\"jewish\",\"district_sum\":2686100,\"national_total\":2686100,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1972,\"group\":\"muslim\",\"district_sum\":352000,\"national_total\":352000,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1972,\"group\":\"christian\",\"district_sum\":72100,\"national_total\":72100,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1972,\"group\":\"druze\",\"district_sum\":36300,\"national_total\":36900,\"national_minus_district_sum\":600,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1983,\"group\":\"jewish\",\"district_sum\":3349900,\"national_total\":3349800,\"national_minus_district_sum\":-100,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1983,\"group\":\"muslim\",\"district_sum\":526600,\"national_total\":526600,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1983,\"group\":\"christian\",\"district_sum\":94100,\"national_total\":94100,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1983,\"group\":\"druze\",\"district_sum\":65500,\"national_total\":65900,\"national_minus_district_sum\":400,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1995,\"group\":\"jewish\",\"district_sum\":4522300,\"national_total\":4522300,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1995,\"group\":\"muslim\",\"district_sum\":811300,\"national_total\":811200,\"national_minus_district_sum\":-100,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1995,\"group\":\"christian\",\"district_sum\":120400,\"national_total\":120300,\"national_minus_district_sum\":-100,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":1995,\"group\":\"druze\",\"district_sum\":91600,\"national_total\":92200,\"national_minus_district_sum\":600,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":2008,\"group\":\"jewish\",\"district_sum\":5603000,\"national_total\":5603000,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":2008,\"group\":\"muslim\",\"district_sum\":1252900,\"national_total\":1253100,\"national_minus_district_sum\":200,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":2008,\"group\":\"christian\",\"district_sum\":150500,\"national_total\":150700,\"national_minus_district_sum\":200,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":2008,\"group\":\"druze\",\"district_sum\":121600,\"national_total\":122400,\"national_minus_district_sum\":800,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":2022,\"group\":\"jewish\",\"district_sum\":6962000,\"national_total\":6962000,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":2022,\"group\":\"muslim\",\"district_sum\":1712300,\"national_total\":1713100,\"national_minus_district_sum\":800,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":2022,\"group\":\"christian\",\"district_sum\":177500,\"national_total\":178100,\"national_minus_district_sum\":600,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":2022,\"group\":\"druze\",\"district_sum\":147200,\"national_total\":148700,\"national_minus_district_sum\":1500,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":2024,\"group\":\"jewish\",\"district_sum\":7212900,\"national_total\":7212900,\"national_minus_district_sum\":0,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":2024,\"group\":\"muslim\",\"district_sum\":1814800,\"national_total\":1815600,\"national_minus_district_sum\":800,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":2024,\"group\":\"christian\",\"district_sum\":181100,\"national_total\":181800,\"national_minus_district_sum\":700,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"},{\"year\":2024,\"group\":\"druze\",\"district_sum\":151200,\"national_total\":153000,\"national_minus_district_sum\":1800,\"unit\":\"persons, derived from CBS counts rounded to 0.1 thousand\"}]"
+  },
+  "construct_notes": ["The selected coverage includes East Jerusalem within Jerusalem District and Golan Sub-District within Northern District under CBS statistical definitions. It also includes any localities beyond the Green Line present in the CBS files, including the separately labelled Judea and Samaria Area. The project records the statistical source's definitions without endorsing any boundary position.", "Indicator declaration: Classified in a religion group (%) — Population Register classification, not belief or practice.", "Indicator declaration: Not classified by religion (%). This is a Population Register classification for residents without a recognised religious classification (notably many immigrants and their descendants not registered in a religion group); it is not a measure of no religion, irreligion, or secularity.", "The two legacy area-summary slots carry Population Register classification. They never report belief or practice.", "The recognised-group value sums the CBS district entries for Jewish, Muslim, Christian, and Druze. CBS omits a few small district-by-group entries; the national residual is reported and never distributed.", "The 1948 wave is recorded context. CBS publishes total and Jewish district counts but suppresses Muslim, Christian, and Druze district distributions; the two ruled construct fields are therefore null.", "The 1948 national population is 872.7 thousand and the six published district rows sum to 855.6 thousand. The 17.1-thousand outside-district remainder is reported and never distributed.", "Option A recorded filter: exclude district code 7 and Northern District locality rows with sub-district code 29 or natural-area codes 291-294; Jerusalem locality code 3000 requires a finer spatial split.", "Option C recorded filter: exclude district code 7 and sub-district code 29 or natural-area codes 291-294; configuration must choose whether Jerusalem locality code 3000 is retained, excluded, or replaced with finer 2022 data.", "The separately labelled Judea and Samaria Area geometry unions CBS statistical-area polygons selected through locality district code 7. It shows CBS statistical-area coverage and is not a territorial boundary."],
+  "national_reconciliation": [
+    {
+      "year": 1948,
+      "metric": "population_total",
+      "district_sum": 855600,
+      "cbs_national_total": 872700,
+      "national_minus_district_sum": 17100,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    },
+    {
+      "year": 1961,
+      "metric": "population_total",
+      "district_sum": 2179500,
+      "cbs_national_total": 2179500,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    },
+    {
+      "year": 1961,
+      "metric": "religious_affiliation_count",
+      "district_sum": 2177800,
+      "cbs_national_total": 2179500,
+      "national_minus_district_sum": 1700,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    },
+    {
+      "year": 1972,
+      "metric": "population_total",
+      "district_sum": 3147700,
+      "cbs_national_total": 3147800,
+      "national_minus_district_sum": 100,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    },
+    {
+      "year": 1972,
+      "metric": "religious_affiliation_count",
+      "district_sum": 3146500,
+      "cbs_national_total": 3147100,
+      "national_minus_district_sum": 600,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    },
+    {
+      "year": 1983,
+      "metric": "population_total",
+      "district_sum": 4037500,
+      "cbs_national_total": 4037400,
+      "national_minus_district_sum": -100,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    },
+    {
+      "year": 1983,
+      "metric": "religious_affiliation_count",
+      "district_sum": 4036100,
+      "cbs_national_total": 4036400,
+      "national_minus_district_sum": 300,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    },
+    {
+      "year": 1995,
+      "metric": "population_total",
+      "district_sum": 5612400,
+      "cbs_national_total": 5612300,
+      "national_minus_district_sum": -100,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    },
+    {
+      "year": 1995,
+      "metric": "religious_affiliation_count",
+      "district_sum": 5545600,
+      "cbs_national_total": 5546000,
+      "national_minus_district_sum": 400,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    },
+    {
+      "year": 1995,
+      "metric": "no_religion_count",
+      "district_sum": 66000,
+      "cbs_national_total": 66000,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    },
+    {
+      "year": 2008,
+      "metric": "population_total",
+      "district_sum": 7412200,
+      "cbs_national_total": 7412200,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    },
+    {
+      "year": 2008,
+      "metric": "religious_affiliation_count",
+      "district_sum": 7128000,
+      "cbs_national_total": 7129200,
+      "national_minus_district_sum": 1200,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    },
+    {
+      "year": 2008,
+      "metric": "no_religion_count",
+      "district_sum": 281100,
+      "cbs_national_total": 281100,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    },
+    {
+      "year": 2022,
+      "metric": "population_total",
+      "district_sum": 9389100,
+      "cbs_national_total": 9389100,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    },
+    {
+      "year": 2022,
+      "metric": "religious_affiliation_count",
+      "district_sum": 8999000,
+      "cbs_national_total": 9001900,
+      "national_minus_district_sum": 2900,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    },
+    {
+      "year": 2022,
+      "metric": "no_religion_count",
+      "district_sum": 387200,
+      "cbs_national_total": 387200,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    },
+    {
+      "year": 2024,
+      "metric": "population_total",
+      "district_sum": 9805100,
+      "cbs_national_total": 9805100,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    },
+    {
+      "year": 2024,
+      "metric": "religious_affiliation_count",
+      "district_sum": 9360000,
+      "cbs_national_total": 9363300,
+      "national_minus_district_sum": 3300,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    },
+    {
+      "year": 2024,
+      "metric": "no_religion_count",
+      "district_sum": 441800,
+      "cbs_national_total": 441700,
+      "national_minus_district_sum": -100,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand",
+      "residual_treatment": "reported, never distributed"
+    }
+  ],
+  "group_reconciliation": [
+    {
+      "year": 1948,
+      "group": "jewish",
+      "district_sum": 699600,
+      "national_total": 716700,
+      "national_minus_district_sum": 17100,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1948,
+      "group": "muslim",
+      "district_sum": null,
+      "national_total": null,
+      "national_minus_district_sum": null,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1948,
+      "group": "christian",
+      "district_sum": null,
+      "national_total": null,
+      "national_minus_district_sum": null,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1948,
+      "group": "druze",
+      "district_sum": null,
+      "national_total": null,
+      "national_minus_district_sum": null,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1961,
+      "group": "jewish",
+      "district_sum": 1932300,
+      "national_total": 1932300,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1961,
+      "group": "muslim",
+      "district_sum": 170900,
+      "national_total": 170900,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1961,
+      "group": "christian",
+      "district_sum": 50500,
+      "national_total": 50500,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1961,
+      "group": "druze",
+      "district_sum": 24100,
+      "national_total": 25800,
+      "national_minus_district_sum": 1700,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1972,
+      "group": "jewish",
+      "district_sum": 2686100,
+      "national_total": 2686100,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1972,
+      "group": "muslim",
+      "district_sum": 352000,
+      "national_total": 352000,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1972,
+      "group": "christian",
+      "district_sum": 72100,
+      "national_total": 72100,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1972,
+      "group": "druze",
+      "district_sum": 36300,
+      "national_total": 36900,
+      "national_minus_district_sum": 600,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1983,
+      "group": "jewish",
+      "district_sum": 3349900,
+      "national_total": 3349800,
+      "national_minus_district_sum": -100,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1983,
+      "group": "muslim",
+      "district_sum": 526600,
+      "national_total": 526600,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1983,
+      "group": "christian",
+      "district_sum": 94100,
+      "national_total": 94100,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1983,
+      "group": "druze",
+      "district_sum": 65500,
+      "national_total": 65900,
+      "national_minus_district_sum": 400,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1995,
+      "group": "jewish",
+      "district_sum": 4522300,
+      "national_total": 4522300,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1995,
+      "group": "muslim",
+      "district_sum": 811300,
+      "national_total": 811200,
+      "national_minus_district_sum": -100,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1995,
+      "group": "christian",
+      "district_sum": 120400,
+      "national_total": 120300,
+      "national_minus_district_sum": -100,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 1995,
+      "group": "druze",
+      "district_sum": 91600,
+      "national_total": 92200,
+      "national_minus_district_sum": 600,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 2008,
+      "group": "jewish",
+      "district_sum": 5603000,
+      "national_total": 5603000,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 2008,
+      "group": "muslim",
+      "district_sum": 1252900,
+      "national_total": 1253100,
+      "national_minus_district_sum": 200,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 2008,
+      "group": "christian",
+      "district_sum": 150500,
+      "national_total": 150700,
+      "national_minus_district_sum": 200,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 2008,
+      "group": "druze",
+      "district_sum": 121600,
+      "national_total": 122400,
+      "national_minus_district_sum": 800,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 2022,
+      "group": "jewish",
+      "district_sum": 6962000,
+      "national_total": 6962000,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 2022,
+      "group": "muslim",
+      "district_sum": 1712300,
+      "national_total": 1713100,
+      "national_minus_district_sum": 800,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 2022,
+      "group": "christian",
+      "district_sum": 177500,
+      "national_total": 178100,
+      "national_minus_district_sum": 600,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 2022,
+      "group": "druze",
+      "district_sum": 147200,
+      "national_total": 148700,
+      "national_minus_district_sum": 1500,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 2024,
+      "group": "jewish",
+      "district_sum": 7212900,
+      "national_total": 7212900,
+      "national_minus_district_sum": 0,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 2024,
+      "group": "muslim",
+      "district_sum": 1814800,
+      "national_total": 1815600,
+      "national_minus_district_sum": 800,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 2024,
+      "group": "christian",
+      "district_sum": 181100,
+      "national_total": 181800,
+      "national_minus_district_sum": 700,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    },
+    {
+      "year": 2024,
+      "group": "druze",
+      "district_sum": 151200,
+      "national_total": 153000,
+      "national_minus_district_sum": 1800,
+      "unit": "persons, derived from CBS counts rounded to 0.1 thousand"
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "accepted",
+  "downstream_status": "public",
+  "source_datasets": [
+    {
+      "source_dataset_id": "cbs-statistical-abstract-table-2-11-2025",
+      "name": "CBS Statistical Abstract table 2.11: Population of Israelis, by district, sub-district and religion",
+      "provider": "Israel Central Bureau of Statistics (CBS)",
+      "url": "https://www.cbs.gov.il/he/publications/DocLib/2025/2.ShnatonPopulation/st02_11x.xlsx",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/il_register/st02_11x.xlsx",
+      "licence": {
+        "name": "CBS Open License for information on its website",
+        "url": "https://www.cbs.gov.il/en/Pages/Enduser-license.aspx",
+        "attribution": "Israel Central Bureau of Statistics"
+      },
+      "citation": "Israel Central Bureau of Statistics, Statistical Abstract of Israel 2025, table 2.11; published 27 January 2026.",
+      "access_limits": null,
+      "redistribution_limits": "CBS attribution and non-misleading-use conditions apply; the source workbook remains in the git-ignored raw cache.",
+      "notes": "Population Register classification with census-based reference dates. Counts are published in thousands rounded to one decimal."
+    },
+    {
+      "source_dataset_id": "cbs-arcgis-moin-subdistrict-boundaries",
+      "name": "Official Ministry of Interior sub-district polygons linked from the CBS ArcGIS organisation",
+      "provider": "Ministry of Interior / Planning Administration, linked by CBS GIS",
+      "url": "https://ags.iplan.gov.il/arcgisiplan/rest/services/PlanningPublic/gvulot_retzef/MapServer/4/query",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/il_register/moin_subdistricts.geojson",
+      "licence": {
+        "name": "Planning Administration geographic-information terms",
+        "url": "https://www.iplan.gov.il/Pages/Professional%20Tools/GeographicInformation/GeographicInformation/new-geo/gvul-shiput.aspx",
+        "attribution": "Ministry of Interior / Planning Administration; CBS GIS link"
+      },
+      "citation": "Ministry of Interior sub-district boundary layer (15 polygons), linked as 'Sub-district boundary' by the CBS ArcGIS organisation.",
+      "access_limits": "The official endpoint currently presents a certificate chain that curl cannot verify in this environment; the script records this and uses curl -k only for this public endpoint.",
+      "redistribution_limits": "Use is subject to the Planning Administration terms linked in the CBS ArcGIS item.",
+      "notes": "The 15 official sub-district polygons are dissolved into six CBS districts."
+    },
+    {
+      "source_dataset_id": "cbs-statistical-areas-2022",
+      "name": "CBS statistical areas 2022",
+      "provider": "Israel Central Bureau of Statistics (CBS)",
+      "url": "https://services8.arcgis.com/JcXY3lLZni6BK4El/arcgis/rest/services/statistical_areas_2022/FeatureServer/0/query",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/il_register/cbs_statistical_areas_district_7.geojson",
+      "licence": {
+        "name": "CBS Open License for information on its website",
+        "url": "https://www.cbs.gov.il/en/Pages/Enduser-license.aspx",
+        "attribution": "Israel Central Bureau of Statistics"
+      },
+      "citation": "Israel Central Bureau of Statistics, statistical areas prepared for the 2022 Population Census.",
+      "access_limits": null,
+      "redistribution_limits": "CBS attribution and non-misleading-use conditions apply.",
+      "notes": "The separately labelled Judea and Samaria Area geometry is the union of the 193 CBS statistical-area polygons attached to 129 of the 147 locality dictionary rows carrying district code 7. It depicts the CBS statistical-area coverage, not a legal or territorial boundary."
+    },
+    {
+      "source_dataset_id": "cbs-locality-dictionary-2022",
+      "name": "CBS geographic dictionary API: 2022 localities",
+      "provider": "Israel Central Bureau of Statistics (CBS)",
+      "url": "https://api.cbs.gov.il/Dictionary/geo/localities?year=2022&expand=false&format=json&download=false&page=1&page_size=250",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/il_register/localities_2022_page_*.json",
+      "licence": {
+        "name": "CBS Open License for information on its website",
+        "url": "https://www.cbs.gov.il/en/Pages/Enduser-license.aspx",
+        "attribution": "Israel Central Bureau of Statistics"
+      },
+      "citation": "Israel Central Bureau of Statistics geographic dictionary API, locality rows for 2022.",
+      "access_limits": "A User-Agent header is mandatory.",
+      "redistribution_limits": "CBS attribution and non-misleading-use conditions apply.",
+      "notes": "District code 7 selects the localities used to query the separately labelled Judea and Samaria Area statistical-area polygons."
+    }
+  ],
+  "notes": "The committed product contains derived area summaries and simplified source-aligned geometry only. UI and hub wiring are outside this build."
+}
