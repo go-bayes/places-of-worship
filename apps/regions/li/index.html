@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Liechtenstein Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Liechtenstein's product is census affiliation: Statistics Liechtenstein
+    // asks which religious community a resident belongs to, across three
+    // full-enumeration censuses 2010, 2015 and 2020 (table 213.001d), for the
+    // eleven municipalities. It measures self-declared affiliation, never
+    // belief or participation. The two legacy area-summary slots carry the
+    // census verbatim: religious_affiliation sums each wave's published named
+    // religion categories, and no_religion carries the source's Keine
+    // Zugehörigkeit (No affiliation) category. Ohne Angabe (not stated) stays
+    // in the denominator and outside both headline categories. Category labels
+    // keep the source's German names with faithful English display labels; the
+    // 2020 Protestant label (Evangelical (Reformed, Protestant)) replaces the
+    // earlier Evangelical Reformed label and is not harmonised into a
+    // denomination trend. The change metric shows change since the previous
+    // census wave; the waves are five years apart.
+    window.REGION_CONFIG = {
+      countryCode: "LI",
+      title: "Places of Worship | Liechtenstein Research Map",
+      center: [9.55, 47.16],
+      initialZoom: 11,
+      censusLevels: {
+        municipality: {
+          label: "Municipality",
+          boundaries: "data/li_municipality_2021.geojson",
+          summary: "data/area_summary_municipality.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Statistics Liechtenstein population-structure censuses 2010, 2015 and 2020 (table 213.001d), religious affiliation by municipality · Boundaries from Liechtenstein National Administration (LLV) Hoheitsgrenzen municipalities (2021 frame)"
+        }
+      },
+      defaultLevel: "municipality",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2020,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation (%)",
+          note: "share of the permanent population assigned to one of the census's named religion categories (Roman Catholic, Evangelical Reformed/Protestant, Evangelical Lutheran, other Christian and Protestant churches, Christian Orthodox, Islamic, Buddhist, and other religions), summing each wave's published categories over the published municipality total. This is census self-declared affiliation; it does not measure belief or participation. Ohne Angabe (not stated) stays in the denominator. The 2020 Protestant label, Evangelical (Reformed, Protestant), replaces the earlier Evangelical Reformed label and is not harmonised into a denomination trend."
+        },
+        no_religion_percent: {
+          label: "No affiliation (Keine Zugehörigkeit) %",
+          note: "share of the permanent population in the census's Keine Zugehörigkeit (No affiliation) category. The source label and framing are retained; Ohne Angabe (not stated) is a separate category and stays in the denominator."
+        },
+        religious_change: {
+          label: "Change since previous wave (pp)",
+          note: "percentage-point change in the named-religion affiliation share since the previous census wave; the waves are 2010, 2015 and 2020, and a wave-to-wave difference therefore spans five years and is not an annual rate"
+        }
+      },
+      popupDenominatorNote: "Percentages use the census permanent-population total for the wave as denominator; Ohne Angabe (not stated) stays in that denominator and outside both headline categories. These are census self-declared affiliations; they do not measure belief or participation. The 2020 Protestant label, Evangelical (Reformed, Protestant), replaces the earlier Evangelical Reformed label and is not harmonised into a denomination trend.",
+      cityPresets: [
+        { label: "Vaduz", coords: [9.5209, 47.1410], zoom: 12 },
+        { label: "Schaan", coords: [9.5108, 47.1650], zoom: 12 },
+        { label: "Triesen", coords: [9.5280, 47.1060], zoom: 12 },
+        { label: "Balzers", coords: [9.5030, 47.0670], zoom: 12 },
+        { label: "Eschen", coords: [9.5230, 47.2110], zoom: 12 },
+        { label: "Mauren", coords: [9.5430, 47.2180], zoom: 12 },
+        { label: "Triesenberg", coords: [9.5430, 47.1190], zoom: 12 },
+        { label: "Ruggell", coords: [9.5250, 47.2380], zoom: 12 },
+        { label: "Gamprin", coords: [9.5160, 47.2200], zoom: 12 },
+        { label: "Planken", coords: [9.5410, 47.1850], zoom: 12 }
+      ],
+      geocode: { country: "li", biasLngLat: [9.55, 47.14] },
+      onboarding: {
+        title: "Liechtenstein research map",
+        intro: "Census religious affiliation for Liechtenstein's eleven municipalities, across three full-enumeration censuses 2010, 2015 and 2020, from Statistics Liechtenstein. Municipalities are shaded by self-declared affiliation; the source's German category labels carry faithful English display labels.",
+        bullets: [
+          "Municipalities (eleven) are shaded by the share of the permanent population reporting a named religion, or the share reporting no affiliation (Keine Zugehörigkeit).",
+          "Three full-enumeration censuses, 2010, 2015 and 2020; not-stated responses (Ohne Angabe) stay in the denominator and outside both headline categories.",
+          "Category labels keep the source's German names with faithful English display labels; the 2020 Protestant label, Evangelical (Reformed, Protestant), replaces the earlier Evangelical Reformed label and is not harmonised into a denomination trend.",
+          "A change metric reports the percentage-point change since the previous census wave; the waves are five years apart, and a difference is therefore not an annual rate.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religious affiliation from <a href="https://www.statistikportal.li/de/themen/bevoelkerung/bevoelkerungsstruktur" target="_blank" rel="noopener">Statistics Liechtenstein</a>, population-structure censuses 2010, 2015 and 2020 (table 213.001d), CC BY 4.0 &middot; Boundaries from <a href="https://service.geo.llv.li/download/" target="_blank" rel="noopener">Liechtenstein National Administration</a> Hoheitsgrenzen municipalities (2021 frame)',
+      censusFlagNote: "* These are full-enumeration census self-declared affiliations from Statistics Liechtenstein (table 213.001d), 2010, 2015 and 2020. They do not measure belief or participation. The permanent-population census total is the denominator, and not-stated responses (Ohne Angabe) stay in that denominator and outside both headline categories. Category labels keep the source's German names with faithful English display labels; the 2020 Protestant label, Evangelical (Reformed, Protestant), replaces the earlier Evangelical Reformed label and is documented unharmonised. The change metric compares five-year-spaced waves and is not an annual rate."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710b"></script>
+</body>
+</html>

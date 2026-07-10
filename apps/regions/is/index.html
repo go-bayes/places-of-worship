@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Iceland Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Iceland's product is administrative register membership in religious and
+    // life-stance organisations recorded in the National Register of Persons,
+    // from Statistics Iceland PX-Web table MAN10001, 29 annual waves 1998-2026.
+    // This is a register construct: it records neither census self-declaration,
+    // belief, practice, nor attendance. Statistics Iceland publishes the series
+    // as a national total only; the map therefore shades one national polygon rather
+    // than sub-national areas — the first single-feature country in the stack.
+    // The two legacy area-summary slots carry the register verbatim:
+    // religious_affiliation sums all 61 named organisation rows, and
+    // no_religion carries Statistics Iceland's "No religious organisation"
+    // category unchanged, never broadened to an irreligion claim. "Other and
+    // not specified" (persons in an unrecognised organisation or of unknown
+    // status) stays outside both headline fields. The change metric shows the
+    // percentage-point change since the previous annual register year.
+    window.REGION_CONFIG = {
+      countryCode: "IS",
+      title: "Places of Worship | Iceland Research Map",
+      dataNoun: "Register",
+      center: [-18.7, 64.9],
+      initialZoom: 5.6,
+      censusLevels: {
+        national: {
+          label: "National",
+          boundaries: "data/is_adm0_2020.geojson",
+          summary: "data/area_summary_adm0.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Statistics Iceland PX-Web table MAN10001, National Register of Persons membership in religious and life-stance organisations, 1998–2026 · Boundaries from geoBoundaries Iceland ADM0 (2020)"
+        }
+      },
+      defaultLevel: "national",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2026,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Membership in a religious or life-stance organisation (%)",
+          note: "administrative National Register of Persons membership as a share of the population, summing Statistics Iceland's 61 named religious and life-stance organisation rows in table MAN10001. This is register membership, never census self-declaration, belief, practice, or attendance. Other and not specified (persons in an unrecognised organisation or of unknown status) stays outside this field."
+        },
+        no_religion_percent: {
+          label: "No religious organisation (%)",
+          note: "Statistics Iceland's source category No religious organisation, as a share of the population. The label keeps the source name; the project does not frame it as irreligion, belief, or attendance beyond the source statement."
+        },
+        religious_change: {
+          label: "Change since previous year (pp)",
+          note: "percentage-point change in the register-membership share since the previous annual register year; the series runs annually 1998–2026"
+        }
+      },
+      popupDenominatorNote: "Percentages use Statistics Iceland's published population on 1 January (table MAN10001) as denominator. These are administrative National Register of Persons memberships. They do not measure census self-declaration, belief, practice, or attendance. Statistics Iceland revised the population estimation method in March 2024 and updated the series from 2011 onwards. Statistics Iceland publishes this register as a national total; the map therefore shades a single national polygon.",
+      cityPresets: [
+        { label: "Reykjavík", coords: [-21.9426, 64.1466], zoom: 10 },
+        { label: "Kópavogur", coords: [-21.9130, 64.1122], zoom: 10 },
+        { label: "Hafnarfjörður", coords: [-21.9455, 64.0671], zoom: 10 },
+        { label: "Akureyri", coords: [-18.0878, 65.6885], zoom: 10 },
+        { label: "Reykjanesbær", coords: [-22.5619, 64.0009], zoom: 10 },
+        { label: "Garðabær", coords: [-21.9224, 64.0889], zoom: 10 },
+        { label: "Mosfellsbær", coords: [-21.6996, 64.1670], zoom: 10 },
+        { label: "Selfoss", coords: [-20.9975, 63.9336], zoom: 10 },
+        { label: "Akranes", coords: [-22.0762, 64.3211], zoom: 10 },
+        { label: "Vestmannaeyjar", coords: [-20.2673, 63.4427], zoom: 10 }
+      ],
+      geocode: { country: "is", biasLngLat: [-18.7, 64.9] },
+      onboarding: {
+        title: "Iceland research map",
+        intro: "Administrative register membership in religious and life-stance organisations, from Statistics Iceland's National Register of Persons (PX-Web table MAN10001), 29 annual waves 1998–2026. This register construct records neither census self-declaration, belief, practice, nor attendance.",
+        bullets: [
+          "Statistics Iceland publishes this register as a national total; the map therefore shades a single national polygon by the membership share rather than sub-national areas.",
+          "The membership share sums Statistics Iceland's 61 named religious and life-stance organisation rows; Other and not specified (an unrecognised organisation or unknown status) stays outside it.",
+          "No religious organisation is Statistics Iceland's own source category; the label keeps that name and is not framed as irreligion, belief, or attendance.",
+          "A change metric reports the percentage-point change in the membership share since the previous annual register year, across the 1998–2026 series.",
+          "The About page records the register construct, the source categories, and the national-polygon policy.",
+          "Open <strong>Show Register Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Administrative register membership from <a href="https://statice.is/" target="_blank" rel="noopener">Statistics Iceland</a> PX-Web table MAN10001, National Register of Persons membership in religious and life-stance organisations, 1998&ndash;2026, CC BY 4.0 &middot; Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> Iceland ADM0 (2020), CC BY 4.0',
+      censusFlagNote: "* This is administrative National Register of Persons membership in religious and life-stance organisations, from Statistics Iceland table MAN10001, never census self-declaration, belief, practice, or attendance. The membership share sums 61 named organisation rows; Other and not specified stays outside both headline fields, and No religious organisation keeps the source name and is not framed as irreligion. Statistics Iceland publishes the register as a national total; the map therefore shades a single national polygon. The population estimation method was revised in March 2024 and the series updated from 2011 onwards."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710b"></script>
+</body>
+</html>

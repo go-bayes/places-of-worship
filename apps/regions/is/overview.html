@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Iceland map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Iceland research map; every string traces to
+    // docs/manifests/is-membership-1998-2026.json (construct_notes and source),
+    // the product indicators block, or the live REGION_CONFIG in
+    // apps/regions/is/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "IS",
+      countryName: "Iceland",
+      mapHref: "./",
+      intro: "Administrative register membership in religious and life-stance organisations, from Statistics Iceland's National Register of Persons (PX-Web table MAN10001), 29 annual waves 1998–2026. This register construct records neither census self-declaration, belief, practice, nor attendance. Statistics Iceland publishes the register as a national total; the map therefore shades a single national polygon.",
+      facts: {
+        waves: "29 annual register years, 1998–2026",
+        geographies: "National (one polygon; Statistics Iceland publishes the register as a national total)",
+        metrics: "Membership in a religious or life-stance organisation %, no religious organisation %, change since previous year"
+      },
+      reading: [
+        "The map shades a single national polygon by the share of the population registered as a member of a religious or life-stance organisation. Statistics Iceland publishes this register as a national total only. No sub-national geography is available; the national-polygon shading is the whole of the published spatial detail.",
+        "This is administrative membership recorded in the National Register of Persons. It is not a census self-declaration, and it measures neither belief, religious practice, nor attendance.",
+        "The membership share sums Statistics Iceland's 61 named religious and life-stance organisation rows. The category reconciliation keeps the ten largest 2026 organisations and computes Other organisations as the exact annual residual of the remaining named rows; the map metric is the total across all named rows.",
+        "Other and not specified is Statistics Iceland's category for persons in an unrecognised organisation or of unknown status. It stays outside the membership share and outside No religious organisation.",
+        "No religious organisation is Statistics Iceland's own source category. The label keeps that name; the project does not frame it as irreligion, belief, or attendance beyond the source statement.",
+        "The change metric reports the percentage-point change in the membership share since the previous annual register year. Statistics Iceland revised the population estimation method in March 2024 and updated the series from 2011 onwards; cross-year comparisons over that boundary therefore reflect the revised population base. Published zero organisation cells stay zero; no values are imputed."
+      ],
+      sources: [
+        {
+          name: "Statistics Iceland PX-Web table MAN10001, membership in religious and life-stance organisations",
+          href: "https://px.hagstofa.is/pxen/api/v1/en/Samfelag/menning/5_trufelog/trufelog/MAN10001.px",
+          construct: "Administrative National Register of Persons membership in religious and life-stance organisations, national total",
+          years: "1998–2026 (annual)",
+          licence: "Statistics Iceland open data, CC BY 4.0 with attribution"
+        },
+        {
+          name: "geoBoundaries gbOpen Iceland ADM0",
+          href: "https://www.geoboundaries.org/",
+          construct: "Boundary geometry (one national polygon)",
+          years: "2020 vintage",
+          licence: "geoBoundaries open data, CC BY 4.0; source Lýsigagnagátt"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Statistics Iceland, <a href=\"https://statice.is/publications/open-data-access/\" target=\"_blank\" rel=\"noopener\">PX-Web table MAN10001</a>; boundaries from <a href=\"https://www.geoboundaries.org/\" target=\"_blank\" rel=\"noopener\">geoBoundaries</a> Iceland ADM0 (2020).",
+        tables: "Statistics Iceland PX-Web MAN10001, populations by religious and life-stance organisation, 1998–2026. The area-summary religious_affiliation fields sum the 61 named organisation rows and the no_religion fields carry Statistics Iceland's No religious organisation category verbatim; both are administrative register memberships, never belief or practice. Population on 1 January is the denominator.",
+        licence: "Statistics Iceland data are CC BY 4.0 used with attribution; geoBoundaries ADM0 boundaries are CC BY 4.0 with geoBoundaries attribution.",
+        script: "scripts/build_is_area_summary.R",
+        manifests: [
+          { label: "is-membership-1998-2026", href: "docs/manifests/is-membership-1998-2026.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Iceland map is a register-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Liechtenstein map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Liechtenstein research map; every string traces to
+    // docs/manifests/li-census-religion-2010-2020.json (construct_notes and
+    // source), the product indicators block, or the live REGION_CONFIG in
+    // apps/regions/li/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "LI",
+      countryName: "Liechtenstein",
+      mapHref: "./",
+      intro: "Census religious affiliation for Liechtenstein's eleven municipalities, across three full-enumeration censuses 2010, 2015 and 2020, from Statistics Liechtenstein (table 213.001d). The census asks which religious community a resident belongs to; it measures self-declared affiliation and does not measure belief or participation.",
+      facts: {
+        waves: "Three censuses: 2010, 2015, 2020",
+        geographies: "Municipality (eleven Liechtenstein municipalities)",
+        metrics: "Religious affiliation %, no affiliation (Keine Zugehörigkeit) %, change since previous wave"
+      },
+      reading: [
+        "Municipalities are shaded by the share of the permanent population reporting a named religion, or the share reporting no affiliation (Keine Zugehörigkeit). The census permanent-population total is the denominator, and not-stated responses (Ohne Angabe) stay in that denominator and outside both headline categories.",
+        "This is census self-declared affiliation. It does not measure belief or participation in religious practice.",
+        "Category labels keep the source's German names with faithful English display labels; the product retains every published category and does not create a harmonised denomination series. The named-religion headline sums the categories published in each wave.",
+        "The 2020 Protestant label, Evangelical (Reformed, Protestant) (Evangelisch (reformiert, protestantisch)), replaces the 2010 and 2015 label Evangelical Reformed (Evangelisch-reformiert). The change is documented unharmonised: the two labels are not merged into a continuous denomination trend.",
+        "The change metric reports the percentage-point change in the named-religion affiliation share since the previous census wave. The waves are 2010, 2015 and 2020; a wave-to-wave difference therefore spans five years and is not an annual rate.",
+        "A single 2021-frame municipality boundary set joins to every wave; the eleven municipalities are stable across the series, and municipality rows reconcile exactly to the national total."
+      ],
+      sources: [
+        {
+          name: "Statistics Liechtenstein population-structure censuses 2010, 2015, 2020 (table 213.001d), religion by municipality",
+          href: "https://www.statistikportal.li/etab/213.001d",
+          construct: "Full-enumeration census self-declared religious affiliation, by municipality",
+          years: "2010, 2015, 2020",
+          licence: "Statistics Liechtenstein open data, CC BY 4.0 with attribution"
+        },
+        {
+          name: "Liechtenstein National Administration (LLV) Hoheitsgrenzen municipality polygons",
+          href: "https://service.geo.llv.li/download/",
+          construct: "Boundary geometry (eleven municipalities)",
+          years: "2021 frame",
+          licence: "LLV Hoheitsgrenzen geodata reuse terms: use, modification, and same-conditions redistribution with attribution"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Statistics Liechtenstein, <a href=\"https://www.statistikportal.li/etab/213.001d\" target=\"_blank\" rel=\"noopener\">table 213.001d and the 2010/2015/2020 population-structure workbooks</a>; boundaries from the <a href=\"https://service.geo.llv.li/download/\" target=\"_blank\" rel=\"noopener\">Liechtenstein National Administration</a> Hoheitsgrenzen municipality polygons (2021 frame).",
+        tables: "Statistics Liechtenstein table 213.001d and the 2010, 2015 and 2020 population-structure workbooks. The area-summary religious_affiliation fields sum each wave's published named religion categories and the no_religion fields carry the Keine Zugehörigkeit (No affiliation) category; both are census self-declarations. The permanent-population total is the denominator, with Ohne Angabe (not stated) left in it.",
+        licence: "Statistics Liechtenstein data are CC BY 4.0 used with attribution; the LLV Hoheitsgrenzen boundaries carry the LLV geodata reuse terms (use, modification, same-conditions redistribution with attribution).",
+        script: "scripts/build_li_area_summary.R",
+        manifests: [
+          { label: "li-census-religion-2010-2020", href: "docs/manifests/li-census-religion-2010-2020.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Liechtenstein map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
