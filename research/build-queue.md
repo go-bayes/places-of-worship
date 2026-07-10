@@ -4,14 +4,14 @@
 
 **Maintenance convention:** strike a row when built, never delete it.
 
-**PI MORNING QUEUE (conductor, close of 2026-07-10 overnight sitting) — five open rulings, ordered by impact:**
-1. **Saint Lucia ship ruling** — verified source-arithmetic discrepancies, licence clean; one yes ships three waves ([row 35](#)).
-2. **Côte d'Ivoire ship ruling** — same discrepancy class, verified; plus the ANStat all-rights-reserved terms ([row 16](#)).
-3. **Burkina Faso** — derived rounding bound for the 2019 one-decimal percent table (Estonia precedent), and INSD reuse rights; the INSD legal page cites an external Open Data Agreement nobody has captured — worth one email or fetch ([row 33](#)).
-4. **Palestine shared-surface question** — PS data product staged (three waves, exact); how PCBS geography relates to the live Israel route on the global map, and whether overlapping claims may appear together, is recorded OPEN in the PS probe.
-5. **Pacific campaign ratification** — proposal below; Tonga already shipped on rank.
+**PI RULINGS RECEIVED (2026-07-10 23:54 NZST, all five morning-queue items):**
+1. **Saint Lucia: SHIP**, with the source-arithmetic discrepancies briefly noted on the information surfaces (page panel and overview).
+2. **Côte d'Ivoire: SHIP**, same documented-discrepancy treatment; derived summaries publish with attribution under PI approval notwithstanding the ANStat all-rights-reserved footer (RO/SK/CA summaries-not-raw-data stance).
+3. **Burkina Faso: SHIP** under a derived rounding bound for the 2019 one-decimal percent table (Estonia precedent). **PI FOLLOW-UP OPEN: the INSD external Open Data Agreement** — capture it or email INSD; reuse position stays needs_review until then.
+4. **Palestine: SHIP the page.** Overlapping statistical coverages may appear together; each map renders its source of record's own coverage as published, and the information surfaces state that decision plainly (both the PS and IL overviews carry the note).
+5. **Pacific campaign: RATIFIED.** Samoa, Tuvalu, and Fiji proceed in the proposed order, then the Pacific Data Hub probe block.
 
-**PROPOSED campaign (conductor, 2026-07-10 late sitting, awaiting PI ratification): the Pacific.** The region-then-tick directive points next at the Pacific rows. The proposed tick order runs pinned routes first, probes second: Tonga (TO, rank 31, 2021 village workbook pinned — proceeding now under ordinary rank order, campaign or not), Samoa (WS, 32), Tuvalu (TV, 36), Fiji (FJ, 37), then the Pacific Data Hub probe block — Palau (PW, 42), Nauru (NR, 51), Micronesia (FM, 53), Kiribati (KI, 54), Marshall Islands (MH, 55), Cook Islands (CK, 56), Solomon Islands (SB, 58). Papua New Guinea (113) stays out: no public subnational route. Vanuatu is already live, so the campaign would close the region. This block activates only on the PI's ruling; until then only Tonga proceeds.
+**Campaign RATIFIED 2026-07-10 (PI): the Pacific.** The region-then-tick directive points next at the Pacific rows. The proposed tick order runs pinned routes first, probes second: Tonga (TO, rank 31, 2021 village workbook pinned — proceeding now under ordinary rank order, campaign or not), Samoa (WS, 32), Tuvalu (TV, 36), Fiji (FJ, 37), then the Pacific Data Hub probe block — Palau (PW, 42), Nauru (NR, 51), Micronesia (FM, 53), Kiribati (KI, 54), Marshall Islands (MH, 55), Cook Islands (CK, 56), Solomon Islands (SB, 58). Papua New Guinea (113) stays out: no public subnational route. Vanuatu is already live, so the campaign would close the region. This block activates only on the PI's ruling; until then only Tonga proceeds.
 
 **Campaign CLOSED 2026-07-11 — all six shipped end-to-end (data + pages, hub at 42).** The region was Central and Eastern Europe — the six machine-readable three-wave census rows at ranks 25-30. Tick each country when its data product commits; strike its queue row when the country page ships. Côte d'Ivoire (rank 16) is the highest-ranked actionable row outside the region and resumes after the campaign.
 
