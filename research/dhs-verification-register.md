@@ -17,6 +17,7 @@ This register governs the project's use of Demographic and Health Surveys (DHS) 
 ## Prerequisites (open)
 
 - [x] PI registers the project account at dhsprogram.com and requests country datasets. **Status: submitted 2026-07-11 under project title "Places of Faith Map"; approval email pending. No microdata lane starts before approval.** Written DHS consent before sharing data with any RA remains a separate open step.
+- [ ] PI position on public aggregated estimates (2026-07-11): probably acceptable under the terms' plain reading; the PI is following up with the DHS Program for confirmation. Public aggregate products may be prepared but the follow-up outcome is recorded here before any DHS-derived product publishes.
 - [x] Verification 1 below: pin the current conditions-of-use text. **Status: verified 2026-07-10.**
 
 ## Verification log
