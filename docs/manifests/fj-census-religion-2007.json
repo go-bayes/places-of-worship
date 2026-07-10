@@ -1,0 +1,425 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:fj-census-religion:fj:2007:fbos-province",
+  "dataset_id": "fj-census-religion:fj:2007:fbos-province",
+  "dataset_version_id": "fj-census-religion:fj:2007:fbos-province:08df43200bc7",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "fj-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "FJ"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-11T00:00:00Z",
+  "created_by": "scripts/build_fj_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_fj_area_summary.R",
+    "git_commit": "06141696a304ad23dbfd1586079319887f97120a",
+    "command": "Rscript scripts/build_fj_area_summary.R",
+    "parameters": {
+      "construct": "census affiliation",
+      "shipped_wave": 2007,
+      "shipped_geography": "15 provinces",
+      "source_table": "Table P01-3 (all-ethnicity table), RELIGION by Province of Enumeration margin",
+      "ethnicity_handling": "The source crosses religion with ethnicity (Fijians and Indians tables). Only the all-ethnicity religion-by-province margin is extracted; the ethnicity dimension is out of scope.",
+      "denominator": "province Total from Table P01-3; an unprinted not-stated residual remains in the denominator and outside both headline numerators",
+      "not_stated_rule": "not_stated = province Total minus the six printed religion categories; the source prints no not-stated row",
+      "top_categories": [
+        "Christian",
+        "Hindu",
+        "Sikh",
+        "Moslem",
+        "Other religion",
+        "No religion"
+      ],
+      "affiliation_categories": [
+        "Christian",
+        "Hindu",
+        "Sikh",
+        "Moslem",
+        "Other religion"
+      ],
+      "province_aliases": {
+        "Nadroga/Navosa": "Nadroga-Navosa"
+      },
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 778705
+      },
+      "change_rule": "religious_change withheld because only the 2007 province wave ships",
+      "local_cache_hint": "All raw sources are cached under data/raw/fj_census/ and remain git-ignored.",
+      "retrieval_record": [
+        {
+          "uri": "data/raw/fj_census/fj_2007_religion_ethnicity_province.pdf",
+          "url": "https://www.statsfiji.gov.fj/download/117/01_province-of-enumeration/686/03_relationship-ethnicity-and-religion-by_province-of-enumeration_fiji-2007.pdf",
+          "format": "pdf",
+          "bytes": 73672,
+          "sha256": "ad1291930ad0803f4790fc13e669872f5752721848bb9f1de6f87e06ee70023e",
+          "used_in_public_product": true,
+          "periods": "2007",
+          "notes": "Table P01-3; the first, all-ethnicity table supplies the religion-by-province margin and national reconciliation column."
+        },
+        {
+          "uri": "data/raw/fj_census/gb_fji_adm2_meta.json",
+          "url": "https://www.geoboundaries.org/api/current/gbOpen/FJI/ADM2/",
+          "format": "json",
+          "bytes": 1867,
+          "sha256": "35e5eff798967d740490f28420d48a11ce7f764acc8470c4354b11a4e6272564",
+          "used_in_public_product": true,
+          "periods": "2020",
+          "notes": "Release metadata records pacificdata.org as source, 15 province units, and CC BY 4.0."
+        },
+        {
+          "uri": "data/raw/fj_census/geoBoundaries-FJI-ADM2.geojson",
+          "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/FJI/ADM2/geoBoundaries-FJI-ADM2.geojson",
+          "format": "geojson",
+          "bytes": 1357011,
+          "sha256": "a9cd94789cb5eb66cfbcbaf32a21bcbceba16b9a76adacba9ac675b950ca1ccd",
+          "used_in_public_product": true,
+          "periods": "2020",
+          "notes": "Source geometry for 15 provinces."
+        },
+        {
+          "uri": "data/raw/fj_census/gb_fji_adm1_meta.json",
+          "url": "https://www.geoboundaries.org/api/current/gbOpen/FJI/ADM1/",
+          "format": "json",
+          "bytes": 1705,
+          "sha256": "9a285e2e5d0b3d7bf342bc5f510e02a3df46adac7e64fb5e125c5273af491f32",
+          "used_in_public_product": false,
+          "periods": "2006",
+          "notes": "ADM1 = 4 Divisions; recorded as evidence that ADM1 does not match the 15-province census frame."
+        },
+        {
+          "uri": "data/raw/fj_census/gb_fji_adm3_meta.json",
+          "url": "https://www.geoboundaries.org/api/current/gbOpen/FJI/ADM3/",
+          "format": "json",
+          "bytes": 1722,
+          "sha256": "13adac57bc199fa0d1b0660d28d1d492f64dc81ddb9b1e72d6a82db1b8aa13dc",
+          "used_in_public_product": false,
+          "periods": "2017",
+          "notes": "ADM3 = 86 Tikina under ODbL 1.0; the finer geography is not used but recorded for a future tikina route."
+        },
+        {
+          "uri": "data/raw/fj_census/statsfiji_census_page.html",
+          "url": "https://www.statsfiji.gov.fj/census-surveys/census-of-population-and-housing/",
+          "format": "html",
+          "bytes": 388046,
+          "sha256": "ab89676a43e776b9f427ebe5445ee723b6e458f1b429056a48194226c123ba89",
+          "used_in_public_product": false,
+          "periods": "2007",
+          "notes": "Census landing page; links the 2007 report and the 2017 Release 1-3 downloads."
+        },
+        {
+          "uri": "data/raw/fj_census/statsfiji_home.html",
+          "url": "https://www.statsfiji.gov.fj/",
+          "format": "html",
+          "bytes": 388430,
+          "sha256": "d3cd7d61d3225ef22f0e9bf14a189ef0c97b0694742c55d7dff21725d785a272",
+          "used_in_public_product": false,
+          "periods": null,
+          "notes": "FBoS home page; footer asserts all rights reserved. Licence evidence."
+        },
+        {
+          "uri": "data/raw/fj_census/fj_2017_census_release3_general_tables.pdf",
+          "url": "https://www.statsfiji.gov.fj/download/121/phc-2017/729/2017-population-and-housing-census-release-3.pdf",
+          "format": "pdf",
+          "bytes": 19198458,
+          "sha256": "cd06c2298f37a6d2b72bfc89d456f61f7aa4279f1329f603ffabccb7760e54f8",
+          "used_in_public_product": false,
+          "periods": "2017",
+          "notes": "2017 Release 3 General Tables; province-of-enumeration tables cover age/sex, economic activity, education, province of birth and housing only, with no religion table. Evidence for the 2017 deferral."
+        },
+        {
+          "uri": "data/raw/fj_census/pdh_2007_catalog241.html",
+          "url": "https://microdata.pacificdata.org/index.php/catalog/241",
+          "format": "html",
+          "bytes": 52081,
+          "sha256": "ba550e097d50304fb8ebba3e790e6817d19b0a8c8f200ed80baaf23725cff06c",
+          "used_in_public_product": false,
+          "periods": "2007",
+          "notes": "PDH 2007 census catalogue; record-level metadata."
+        },
+        {
+          "uri": "data/raw/fj_census/pdh_1996_catalog237.html",
+          "url": "https://microdata.pacificdata.org/index.php/catalog/237",
+          "format": "html",
+          "bytes": 81223,
+          "sha256": "f12bd3de3368cf54b020ea2a62e7593f363feadabfe4f9589fa91d42d12d96dc",
+          "used_in_public_product": false,
+          "periods": "1996",
+          "notes": "PDH 1996 census catalogue; metadata confirms a religion variable but no official aggregate province religion table was pinned. 1996 deferred route."
+        }
+      ],
+      "validation_details": {
+        "printed_row_reconciliation": {
+          "status": "passed",
+          "christian_subcategory_gate": "18 Christian sub-denominations sum to the Christian total in all 16 columns",
+          "christian_subcategory_count": 18,
+          "top_level_category_count": 6
+        },
+        "local_to_national_reconciliation": {
+          "status": "passed",
+          "province_rows": 15,
+          "exact_fields": [
+            "Total",
+            "Christian",
+            "Hindu",
+            "Sikh",
+            "Moslem",
+            "Other religion",
+            "No religion"
+          ]
+        },
+        "national_2007": {
+          "denominator": 837271,
+          "religious_affiliation_count": 832127,
+          "no_religion_count": 4249,
+          "not_stated_count": 895,
+          "category_totals": {
+            "Christian": 543588,
+            "Hindu": 232103,
+            "Sikh": 2548,
+            "Moslem": 52594,
+            "Other religion": 1294,
+            "No religion": 4249
+          },
+          "not_stated_by_province": {
+            "Ba": 144,
+            "Bua": 3,
+            "Cakaudrove": 39,
+            "Kadavu": 2,
+            "Lau": 55,
+            "Lomaiviti": 5,
+            "Macuata": 75,
+            "Nadroga/Navosa": 13,
+            "Naitasiri": 163,
+            "Namosi": 6,
+            "Ra": 2,
+            "Rewa": 316,
+            "Serua": 14,
+            "Tailevu": 58,
+            "Rotuma": 0
+          }
+        },
+        "join_coverage": {
+          "matched_province_rows": 15,
+          "expected_province_rows": 15,
+          "unmatched_province_rows": [],
+          "unused_boundary_features": []
+        },
+        "boundary_validation": {
+          "source_geometry": {
+            "hashes": {
+              "14151628B98370545668292": "93d97bac36bdbb182ec049554b75853382f5c437d57d0df63fa0f8e4ca75848c",
+              "14151628B59272471160482": "97211d5713ad360302df3fe24dd21050e41b000ed68ec61d4fcefbc215254c0e",
+              "14151628B95966095088914": "05b58bbb545d528e77fb213fe8ff968ec2f650d17497da174f107cc425f15cb9",
+              "14151628B61046117406534": "25c50f86d527beccae1f70e276749b24a3b6afe2fcde444e9f7e3a8d2dc4dfcf",
+              "14151628B80423492752803": "bcc6bcd63eea1e1c004d4c8625a2bbc227e925a6a83c07a844da88adc1349128",
+              "14151628B20319301670654": "15ce83ac6e6b770598809ca9670c2beaf256aeb823a8baa615235a299806d76d",
+              "14151628B42533076410957": "0472cd27d51fdd0867c98107f28e64355d2e27a0e569bd2181c316aa575a2947",
+              "14151628B53702400461405": "15879f43d8583d7803f6c561e6aeb64c5baa2bfa369ee6c38059cc1641299cd7",
+              "14151628B8492423103487": "02fe78739ba12e202803e27d382d89991576127ca7302c1117a3b9304122ff6d",
+              "14151628B28251361437248": "7ec4d031ae501cfed54aa841986d771324ef5b5afc0eb4174d89304a644cf0ca",
+              "14151628B53541640625043": "190a77a2ae9a2e25ee30464dc4f5c22876f1c6e9c5025db17731c628e88d4e22",
+              "14151628B39642918357252": "d16696c8e7c9c30106408ad2069e6af47803801a5458fad32ecbd322049b8f63",
+              "14151628B68154180840071": "d5dca138639fe604cf52716d3c72906f8bdd97875bd252f145c04ef52cc8bf78",
+              "14151628B48978228339800": "cbe88511d192f3ac0b5f6c4c3c179381fa1550d3870e6d56ea7178e625c014cc",
+              "14151628B71764118664060": "4d70747a11172563a7be4d140e47d52e280a57855eb5e29361390177e399688e"
+            },
+            "overlap_sq_m": 0.001125,
+            "interior_gap_count": 0,
+            "source_hydrographic_hole_count": 2,
+            "sliver_threshold_sq_m": 1000000,
+            "sliver_count": 0,
+            "minimum_feature_area_sq_km": 44.2089,
+            "coverage_sq_km": 20896.4516
+          },
+          "simplified_geometry": {
+            "hashes": {
+              "14151628B98370545668292": "a79f6833f83924321a17909cb9282a67b037ebd924fae01ae95bf13f0bf38cae",
+              "14151628B59272471160482": "f75dcc5550856eb5684aa78ac24699dc0e3c52352639d5459ef5ad7c20a853dd",
+              "14151628B95966095088914": "cc248e96385a3f6764e45ba08f0429500295b7d3372f7fbb2ff4df87ce677ac1",
+              "14151628B61046117406534": "bf414042924a62ba730f19949d27e141c7d7f218551d9e1e6e906a99529c6859",
+              "14151628B80423492752803": "d2f31f7351f6732033c530cadb7dc2845de8a4b2bb449bebbe280b320fd2ecf5",
+              "14151628B20319301670654": "b7d65d76aaa8ef125e2cadd34a6d37b08880496996e816f63ea0863d3dced5b0",
+              "14151628B42533076410957": "e31315c4523fb8542c19a6960c46fea08c7e96b60f21734bc5ce8b1b220e61e5",
+              "14151628B53702400461405": "9b18c4017061f305b2deeac94c00cb8a7a6ad6055690afff7450d9da053018bd",
+              "14151628B8492423103487": "b039d9ad2c4b5a524a8a4088361b2d2b7fdde528e2cc90becd44756aefb0903a",
+              "14151628B28251361437248": "e846e5c585f607d9a26fb8b0fe26a08abb84ad59a57dd2b393cd7fb07c4ccde7",
+              "14151628B53541640625043": "c81618193dc58c86739fba726c146e7b7906fd93eb810bdde5cb0074cc450aab",
+              "14151628B39642918357252": "bdab93e66ea449b01d11a853812b0bae1cd1ae2bc9877b29b9b66790e1393a0c",
+              "14151628B68154180840071": "d3bb83330cf83173750b26143443b39c176d217b502a002b2a622eeb98ce948d",
+              "14151628B48978228339800": "3506086c3eba27a3dedcdcf6676ab3e21ddb4317ed93a9b876c8f7c8c6d0f74a",
+              "14151628B71764118664060": "265c29ebf7a31b4a5afc49b016b5215b25241b5972b4df61106a7116076ea4bf"
+            },
+            "overlap_sq_m": 0.000481,
+            "interior_gap_count": 0,
+            "source_hydrographic_hole_count": 2,
+            "sliver_threshold_sq_m": 1000000,
+            "sliver_count": 0,
+            "minimum_feature_area_sq_km": 44.2082,
+            "coverage_sq_km": 20896.4501
+          },
+          "simplified_geometry_contiguous_frame": {
+            "hashes": {
+              "14151628B98370545668292": "7c5398298c159e166246bef9fd242f5f1d57a91b02b23d60d23c123534fbde20",
+              "14151628B59272471160482": "84b238b7eba83e13b299d5b85948014a15274a7e55568d522f3b90c89c4b7c93",
+              "14151628B95966095088914": "14ab4134e6639f82b642da85f678205b4e94937d6ab556e142a36a8a10a854b5",
+              "14151628B61046117406534": "82ebbb3e116a7564ad30b28c9876eea60ec8bff5abee43f9d27d88daea5f657c",
+              "14151628B80423492752803": "afb511086d8dc8b315ea8212dd5fa2a46560bea16d3ba3936ae2c1a6996b8924",
+              "14151628B20319301670654": "cd83ffd5e959d032724ff998573158d8be736ca53bf0daf0628af66aa319db38",
+              "14151628B42533076410957": "766158392ba1a381ebb8a1e4ee0d3569fc32367facfe3028692ec5fd0423ded4",
+              "14151628B53702400461405": "02ad2972c0fb345c56cb0ea09055f76106ff0e7ea199d983c8bb30e7578c4aa4",
+              "14151628B8492423103487": "69b7553c67e1362a5442db199fbdb2d40b159204d64fe4f02c75397a172b7cae",
+              "14151628B28251361437248": "422b3158b46ccac352d864f1a144123e7a6b4faff4af7c16630344cf3d503093",
+              "14151628B53541640625043": "fcf56c7b5cb381b14fedbd696e3f00aeb2f8652f7fe3156f06428ec974441dd7",
+              "14151628B39642918357252": "66ef7000c7bc8365e77ed6a887796c4ad0dbb366bff0294903fab304f1941b00",
+              "14151628B68154180840071": "823229d258a2a0041d8126f9c0ec0032e088fb508e9f7d18bfabcef42b1de8ee",
+              "14151628B48978228339800": "c9b70cffce232f5eab89b462b31e5239c3f4b5dfbe7b6391c8f24b51f6daf1e6",
+              "14151628B71764118664060": "40cab247d93e86f79facd004752168d47ef278a57131dd72ada68fd25cc018da"
+            },
+            "overlap_sq_m": 9.5e-05,
+            "interior_gap_count": 0,
+            "source_hydrographic_hole_count": 2,
+            "sliver_threshold_sq_m": 1000000,
+            "sliver_count": 0,
+            "minimum_feature_area_sq_km": 44.2082,
+            "coverage_sq_km": 20896.4501
+          },
+          "wgs84_frame": {
+            "status": "passed",
+            "crs": "EPSG:4326",
+            "coordinate_range_check": "all coordinates within [-180, 180]",
+            "max_ring_consecutive_lon_jump_deg": 0.1132,
+            "max_feature_dateline_aware_lon_extent_deg": 2.0303
+          },
+          "licence_metadata_status": "passed",
+          "licence": "Creative Commons Attribution 4.0 (CC BY 4.0)",
+          "release_source": "pacificdata.org"
+        },
+        "provenance": {
+          "status": "passed",
+          "cached_input_count": 10,
+          "cached_inputs_with_sha256": 10
+        }
+      },
+      "construct_notes": [
+        "The construct is census affiliation. It does not measure practice, attendance, or registered membership.",
+        "The source publishes religion-by-ethnicity tables; this product ships the all-ethnicity religion-by-province margin only.",
+        "Religious affiliation counts Christian, Hindu, Sikh, Moslem, and Other religion; No religion is the no-religion numerator.",
+        "The source prints no not-stated row. The residual (Total minus the six categories) is carried in the denominator and outside both headline numerators; the two headline shares therefore do not sum to 100%.",
+        "No religious_change field is released because only the 2007 province wave ships."
+      ],
+      "deferred_sources": [
+        {
+          "source_dataset_id": "fbos-census-2017-religion-province",
+          "status": "deferred",
+          "reason": "The 2017 census collected religion (an official FBoS ArcGIS experience maps population by major religious groups at province level), but the 2017 Release 3 General Tables PDF prints no religion table; no official static province religion table was pinned. Recovery route: the FBoS ArcGIS religion layer or a direct FBoS tabulation request."
+        },
+        {
+          "source_dataset_id": "fbos-census-1996-religion-province",
+          "status": "not_pinned",
+          "reason": "PDH catalogue 237 metadata confirms a 1996 religion variable, but no official aggregate province religion table was pinned. Recovery route: an FBoS 1996 tabulation or the licensed 1996 microdata."
+        }
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/fj_census/"
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "pdftotext": "pdftotext version 26.07.0",
+      "mapshaper": "scripts/lib/simplify_boundary.R"
+    }
+  },
+  "source": {
+    "provider": "Fiji Bureau of Statistics; geoBoundaries; pacificdata.org",
+    "source_dataset_ids": [
+      "fbos-census-2007-table-p01-3-religion-province",
+      "geoboundaries-fji-adm2-2020"
+    ],
+    "source_urls": [
+      "https://www.statsfiji.gov.fj/download/117/01_province-of-enumeration/686/03_relationship-ethnicity-and-religion-by_province-of-enumeration_fiji-2007.pdf",
+      "https://www.geoboundaries.org/api/current/gbOpen/FJI/ADM2/",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/FJI/ADM2/geoBoundaries-FJI-ADM2.geojson"
+    ],
+    "retrieved_at": "2026-07-11T00:00:00Z",
+    "licence": "The Fiji Bureau of Statistics asserts all rights reserved with no explicit reuse grant; the derived aggregate is used for research with attribution and claims no open-data licence. geoBoundaries FJI ADM2 is CC BY 4.0, verified in release metadata that identifies pacificdata.org as the source.",
+    "citation": "Fiji Bureau of Statistics, 2007 Census Table P01-3 religion margin; geoBoundaries FJI ADM2."
+  },
+  "input_manifests": [],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/fj/data/area_summary_province.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 27766,
+      "sha256": "08df43200bc74db2667f72f577ddfd5d5a117446b4282bf6dde04b2d7f570241",
+      "content_sha256": null,
+      "row_count": 15,
+      "feature_count": null,
+      "content": "Fiji 2007 province census-affiliation area summary.",
+      "licence_status": "needs_review"
+    },
+    {
+      "uri": "repo:apps/regions/fj/data/area_summary_province.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 11746,
+      "sha256": "4174a50e810b1f08922555f40ee6a3a5fbde706b01aa18662a18665ba9a50bd1",
+      "content_sha256": null,
+      "row_count": 15,
+      "feature_count": null,
+      "content": "Flattened Fiji 2007 province census-affiliation rows.",
+      "licence_status": "needs_review"
+    },
+    {
+      "uri": "repo:apps/regions/fj/data/fj_province_2020.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 778705,
+      "sha256": "c149cb8b0417a83420f63dc47d1943203dab35e4817b4c0a2d1fc08bad241735",
+      "content_sha256": null,
+      "row_count": null,
+      "feature_count": 15,
+      "content": "Simplified geoBoundaries FJI ADM2 province geometry.",
+      "licence_status": "needs_review"
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "Rscript scripts/build_fj_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/fj/data/area_summary_province.json",
+      "jq empty docs/manifests/fj-census-religion-2007.json"
+    ],
+    "notes": "The 18 printed Christian sub-denominations sum exactly to the Christian total in all 16 columns. The 15 provinces sum exactly to the national column for Total and each of the six religion categories. The province-boundary join is 15/15. Source and simplified geometry validity, distinct-hash, overlap, interior-gap, sliver, and provenance gates passed, with the simplified gates run in both the -180..180 output frame and the contiguous 0..360 frame. The WGS84-frame gate passed: every coordinate lies within [-180, 180], no ring crosses the antimeridian, and every feature's dateline-aware longitudinal extent is below 180 degrees.",
+    "warnings": [
+      "Only the 2007 wave ships; no religious-change field is released. An unprinted not-stated residual is retained in the denominator.",
+      "FBoS asserts all rights reserved with no explicit reuse grant; the product is staged with licence_status needs_review until FBoS reuse terms are resolved."
+    ]
+  },
+  "stats": {
+    "province_year_rows": 15,
+    "province_count": 15,
+    "shipped_wave_count": 1,
+    "distinct_geometry_hashes": 15
+  },
+  "privacy": "public",
+  "licence_status": "needs_review",
+  "downstream_status": "staged",
+  "notes": "The derived product uses FBoS census aggregates for a research map with attribution; FBoS asserts all rights reserved with no explicit reuse grant, and the product stays staged with licence_status needs_review until FBoS reuse terms are resolved. Only the all-ethnicity religion margin ships; the ethnicity dimension is out of scope. The map UI is outside this build."
+}
