@@ -1,0 +1,799 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:rs-census-religion:rs:2002-2022:sors-area",
+  "dataset_id": "rs-census-religion:rs:2002-2022:sors-area",
+  "dataset_version_id": "rs-census-religion:rs:2002-2022:sors-area:8b4d2dcee081",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "rs-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "RS"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-10T09:03:29Z",
+  "created_by": "scripts/build_rs_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_rs_area_summary.R",
+    "git_commit": "ddca9eb",
+    "command": "Rscript scripts/build_rs_area_summary.R",
+    "parameters": {
+      "table_2011_id": "3102010402",
+      "table_2022_id": "3104020301",
+      "waves": [2002, 2011, 2022],
+      "geography": "25 SORS statistical areas, comprising the City of Belgrade plus 24 districts (okruzi), on the GISCO NUTS 3 2021 display frame",
+      "construct": "census affiliation",
+      "denominator": "total census population",
+      "category_rule": "preserve source categories; count the Christian parent once in 2011 and 2022; keep non-response and undeclared categories separate",
+      "territorial_scope": "This product follows the territorial coverage published by the Statistical Office of the Republic of Serbia (SORS). In this product, the area level comprises the City of Belgrade plus 24 districts (okruzi). The 2002 publication covers Central Serbia and Vojvodina and states that the census was not conducted in the Autonomous Province of Kosovo and Metohija. The 2011 and 2022 dissemination tables identify their coverage as excluding data for the Autonomous Province of Kosovo and Metohija. Kosovo rows from other publications are outside this Serbia product.",
+      "boundary_source_vintage": "2021",
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 165135,
+        "byte_ceiling": 1500000
+      },
+      "local_cache_hint": "Raw SORS sources, terms, and GISCO geometry are cached under data/raw/rs_census/ and remain git-ignored.",
+      "retrieval_routes": [
+        {
+          "purpose": "2002 religion",
+          "method": "GET",
+          "url": "https://publikacije.stat.gov.rs/G2002/PdfE/G20024003.pdf",
+          "notes": "Official publication G20024003."
+        },
+        {
+          "purpose": "2011 religion",
+          "method": "POST",
+          "url": "https://data.stat.gov.rs/Home/Result/3102010402?languageCode=en-US",
+          "notes": "indicators=1802010402IND01&agg-102=RS,RS110,RS121,RS122,RS123,RS124,RS125,RS126,RS127,RS211,RS212,RS213,RS214,RS215,RS216,RS217,RS218,RS221,RS222,RS223,RS224,RS225,RS226,RS227,RS228,RS229&agg-23=0&agg-116=01,02,03,04,05,06,07,08,09,10,11,12,13,14"
+        },
+        {
+          "purpose": "2022 religion",
+          "method": "POST",
+          "url": "https://data.stat.gov.rs/Home/Result/3104020301?languageCode=en-US",
+          "notes": "indicators=3104020301IND01&agg-2=202200&agg-23=0&agg-102=RS,RS110,RS121,RS122,RS123,RS124,RS125,RS126,RS127,RS211,RS212,RS213,RS214,RS215,RS216,RS217,RS218,RS221,RS222,RS223,RS224,RS225,RS226,RS227,RS228,RS229&agg-116=01,02,03,04,05,06,07,08,09,10,11,12,13,14"
+        },
+        {
+          "purpose": "boundary",
+          "method": "GET",
+          "url": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2021_4326_LEVL_3.geojson",
+          "notes": "NUTS 3 2021 GeoJSON."
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "npx mapshaper through scripts/lib/simplify_boundary.R",
+      "pdftotext": "Poppler pdftotext command-line utility"
+    }
+  },
+  "source": {
+    "provider": "Statistical Office of the Republic of Serbia (SORS); Eurostat GISCO",
+    "source_dataset_ids": [
+      "sors-census-religion-area-2002-2022",
+      "eurostat-gisco-nuts3-2021-rs"
+    ],
+    "source_urls": [
+      "https://publikacije.stat.gov.rs/G2002/PdfE/G20024003.pdf",
+      "https://data.stat.gov.rs/Home/Result/3102010402?languageCode=en-US",
+      "https://data.stat.gov.rs/Home/Result/3104020301?languageCode=en-US",
+      "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2021_4326_LEVL_3.geojson",
+      "https://ec.europa.eu/eurostat/web/gisco/geodata/statistical-units/territorial-units-statistics"
+    ],
+    "retrieved_at": "2026-07-10T00:00:00Z",
+    "licence": "SORS census publications require source quotation; no broader reuse claim is made for the dissemination database. GISCO geometry uses its download provisions with Eurostat GISCO and EuroGeographics attribution.",
+    "citation": "SORS census religion publication G20024003 and dissemination tables 3102010402 and 3104020301; Eurostat GISCO NUTS 3 2021."
+  },
+  "input_manifests": [],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/rs/data/area_summary_area.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 186505,
+      "sha256": "8b4d2dcee081e93222fa67d98f6d4786cd20d5f6ce5973b3eb278ae2350db9d0",
+      "row_count": 75,
+      "content": "Serbia area census-affiliation summary for 2002, 2011, and 2022. In this product, the area level comprises the City of Belgrade plus 24 districts (okruzi).",
+      "privacy": "public",
+      "licence_status": "needs_review"
+    },
+    {
+      "uri": "repo:apps/regions/rs/data/area_summary_area.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 126633,
+      "sha256": "150ee155c58a4ca5b5c25953d08ab53af5a9c9a2a0697025f1d0fa9912045851",
+      "row_count": 75,
+      "content": "Flattened Serbia area census-affiliation rows. In this product, the area level comprises the City of Belgrade plus 24 districts (okruzi).",
+      "privacy": "public",
+      "licence_status": "needs_review"
+    },
+    {
+      "uri": "repo:apps/regions/rs/data/rs_area_2021.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 165135,
+      "sha256": "5375e100f34ca6879cba681057f72d308693dec7b64264b32a0b86c372ad09ac",
+      "row_count": 25,
+      "content": "Simplified GISCO NUTS 3 2021 Serbia statistical-area geometry. In this product, the area level comprises the City of Belgrade plus 24 districts (okruzi).",
+      "privacy": "public",
+      "licence_status": "needs_review"
+    }
+  ],
+  "raw_sources": [
+    {
+      "uri": "data/raw/rs_census/sors_2002_religion_municipalities_en.pdf",
+      "url": "https://publikacije.stat.gov.rs/G2002/PdfE/G20024003.pdf",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T08:26:10Z",
+      "http_status": 200,
+      "format": "pdf",
+      "bytes": 4414439,
+      "sha256": "118324fc247d65152e3f82539477f4c7e64dca84a03c82a6007716d205d34453",
+      "source_dataset_id": "sors-census-religion-area-2002-2022",
+      "used_in_public_product": true,
+      "notes": "Official English 2002 religion publication; the build parses its first population-by-religion table."
+    },
+    {
+      "uri": "data/raw/rs_census/sors_2002_religion_municipalities_en.txt",
+      "url": "https://publikacije.stat.gov.rs/G2002/PdfE/G20024003.pdf",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T08:26:10Z",
+      "http_status": 200,
+      "format": "txt",
+      "bytes": 3492741,
+      "sha256": "8f71fadf8c1c3471374bfee46b793a468fac13e38f652ed9d1d3ec904d007a89",
+      "source_dataset_id": "sors-census-religion-area-2002-2022",
+      "used_in_public_product": true,
+      "notes": "Fixed-layout text derived from the cached official portable document format (PDF)."
+    },
+    {
+      "uri": "data/raw/rs_census/sors_3102010402_area_total_gender.html",
+      "url": "https://data.stat.gov.rs/Home/Result/3102010402?languageCode=en-US",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T08:27:07Z",
+      "http_status": 200,
+      "format": "html",
+      "bytes": 110203,
+      "sha256": "05d7b5c3edfa3d929b6adfd512c796da4381835ac747d92a297500cbd8f0fe21",
+      "source_dataset_id": "sors-census-religion-area-2002-2022",
+      "used_in_public_product": true,
+      "notes": "Selected POST export from dissemination table 3102010402: national and 25 area rows, total gender, all 14 categories. In this product, the area level comprises the City of Belgrade plus 24 districts (okruzi)."
+    },
+    {
+      "uri": "data/raw/rs_census/sors_3104020301_area_total_gender.html",
+      "url": "https://data.stat.gov.rs/Home/Result/3104020301?languageCode=en-US",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T08:27:07Z",
+      "http_status": 200,
+      "format": "html",
+      "bytes": 121945,
+      "sha256": "405ca1a27838b7ebff385e7c4b485d90f69a1b47df88ac6b419190a885caa5f0",
+      "source_dataset_id": "sors-census-religion-area-2002-2022",
+      "used_in_public_product": true,
+      "notes": "Selected POST export from dissemination table 3104020301: national and 25 area rows, total gender, all 14 categories. In this product, the area level comprises the City of Belgrade plus 24 districts (okruzi)."
+    },
+    {
+      "uri": "data/raw/rs_census/sors_open_data_terms.html",
+      "url": "https://opendata.stat.gov.rs/odata/?id=en-us",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T08:27:36Z",
+      "http_status": 200,
+      "format": "html",
+      "bytes": 1384126,
+      "sha256": "07193fff4044e8d109f3ccf70dcd25c73eff0805ef1e0fb80a77b48834bd56fb",
+      "source_dataset_id": "sors-census-religion-area-2002-2022",
+      "used_in_public_product": true,
+      "notes": "SORS open-data portal terms; recorded as context and not asserted to govern every historical census file."
+    },
+    {
+      "uri": "data/raw/rs_census/gisco_nuts3_2021_4326.geojson",
+      "url": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2021_4326_LEVL_3.geojson",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T08:27:36Z",
+      "http_status": 200,
+      "format": "geojson",
+      "bytes": 28176705,
+      "sha256": "554336d416056abcd1d6f3239e3d5893560ca180056971557403c6fd8ff66d2c",
+      "source_dataset_id": "eurostat-gisco-nuts3-2021-rs",
+      "used_in_public_product": true,
+      "notes": "All-Europe NUTS 3 2021 GeoJSON filtered to Serbia."
+    },
+    {
+      "uri": "data/raw/rs_census/gisco_nuts_terms.html",
+      "url": "https://ec.europa.eu/eurostat/web/gisco/geodata/statistical-units/territorial-units-statistics",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T08:27:36Z",
+      "http_status": 200,
+      "format": "html",
+      "bytes": 195907,
+      "sha256": "7a7557cffc5d9298bdff0753a56177bb9c69cde17f3ce40915e466e6170f81cd",
+      "source_dataset_id": "eurostat-gisco-nuts3-2021-rs",
+      "used_in_public_product": true,
+      "notes": "Eurostat GISCO NUTS download page."
+    },
+    {
+      "uri": "data/raw/rs_census/eurostat_copyright.html",
+      "url": "https://ec.europa.eu/eurostat/help/copyright-notice",
+      "retrieval_date": "2026-07-10",
+      "retrieved_at": "2026-07-10T08:28:19Z",
+      "http_status": 200,
+      "format": "html",
+      "bytes": 177112,
+      "sha256": "07f3742965bda8b5456069f810d7966385da85f91934ae7497377426aefb6335",
+      "source_dataset_id": "eurostat-gisco-nuts3-2021-rs",
+      "used_in_public_product": true,
+      "notes": "Eurostat general copyright and statistical-data reuse policy."
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/rs/data/area_summary_area.json",
+      "sha256": "8b4d2dcee081e93222fa67d98f6d4786cd20d5f6ce5973b3eb278ae2350db9d0",
+      "built_by": "scripts/build_rs_area_summary.R",
+      "notes": "75 area-year rows. In this product, the area level comprises the City of Belgrade plus 24 districts (okruzi)."
+    },
+    {
+      "uri": "repo:apps/regions/rs/data/area_summary_area.csv",
+      "sha256": "150ee155c58a4ca5b5c25953d08ab53af5a9c9a2a0697025f1d0fa9912045851",
+      "built_by": "scripts/build_rs_area_summary.R",
+      "notes": "CSV companion."
+    },
+    {
+      "uri": "repo:apps/regions/rs/data/rs_area_2021.geojson",
+      "sha256": "5375e100f34ca6879cba681057f72d308693dec7b64264b32a0b86c372ad09ac",
+      "built_by": "scripts/build_rs_area_summary.R",
+      "notes": "25 simplified area features. In this product, the area level comprises the City of Belgrade plus 24 districts (okruzi)."
+    }
+  ],
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_rs_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/rs/data/area_summary_area.json",
+      "jq empty docs/manifests/rs-census-religion-2002-2022.json"
+    ],
+    "tests": [
+      "All three announced waves contain national and 25 area rows. In this product, the area level comprises the City of Belgrade plus 24 districts (okruzi).",
+      "Every mutually exclusive category sum equals the published area population total. In this product, the area level comprises the City of Belgrade plus 24 districts (okruzi).",
+      "Every category sums exactly from 25 areas to the published national row. In this product, the area level comprises the City of Belgrade plus 24 districts (okruzi).",
+      "All 25 simplified geometries are valid, non-empty, and have distinct SHA-256 well-known binary (WKB) hashes.",
+      "Every raw input and generated output records URL or repository path, retrieval date where applicable, byte size, and SHA-256."
+    ],
+    "warnings": [
+      "The common display frame is the 2021 GISCO NUTS 3 layer. Geometric stability of the 25 published areas across 2002, 2011, and 2022 was not verified. The build joins shared statistical-area codes and makes no claim that every boundary segment was unchanged.",
+      "The SORS publications require source quotation. A broader licence for the historical census and dissemination-database files was not identified; licence status remains needs review.",
+      "The 2002 believer-without-religious-affiliation category remains outside both headline measures."
+    ],
+    "notes": "All numerical and geometry gates passed. This product follows the territorial coverage published by the Statistical Office of the Republic of Serbia (SORS). In this product, the area level comprises the City of Belgrade plus 24 districts (okruzi). The 2002 publication covers Central Serbia and Vojvodina and states that the census was not conducted in the Autonomous Province of Kosovo and Metohija. The 2011 and 2022 dissemination tables identify their coverage as excluding data for the Autonomous Province of Kosovo and Metohija. Kosovo rows from other publications are outside this Serbia product.",
+    "stats": {
+      "waves": 3,
+      "rows": 75,
+      "areas_per_wave": 25,
+      "category_counts": "2002=12;2011=14;2022=14 published rows including total",
+      "boundary_features": 25,
+      "boundary_valid_features": 25,
+      "distinct_geometry_hashes": 25,
+      "boundary_bytes": 165135,
+      "summary_json_bytes": 186505,
+      "summary_csv_bytes": 126633
+    },
+    "reconciliation": [
+      {
+        "year": 2002,
+        "area_count": 25,
+        "published_category_rows_including_total": 12,
+        "mutually_exclusive_categories_excluding_total": 11,
+        "named_affiliation_categories": 7,
+        "within_area_category_sums_exact": true,
+        "area_category_sums_exact": true,
+        "max_absolute_difference": 0,
+        "national_total": 7498001,
+        "national_affiliation_count": 7123138,
+        "national_no_religion_count": 40068,
+        "national_outside_headlines_count": 334795,
+        "category_reconciliation": [
+          {
+            "source_code": "TOTAL",
+            "source_name": "Total",
+            "source_display_en": "Total",
+            "area_sum": 7498001,
+            "published_national_total": 7498001,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "ISLAM",
+            "source_name": "Islam",
+            "source_display_en": "Islam",
+            "area_sum": 239658,
+            "published_national_total": 239658,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "JUDAIC",
+            "source_name": "Judaic",
+            "source_display_en": "Judaism",
+            "area_sum": 785,
+            "published_national_total": 785,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "CATHOLIC",
+            "source_name": "Catholic",
+            "source_display_en": "Catholic",
+            "area_sum": 410976,
+            "published_national_total": 410976,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "ORTHODOX",
+            "source_name": "Orthodox",
+            "source_display_en": "Orthodox",
+            "area_sum": 6371584,
+            "published_national_total": 6371584,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "PROTESTANT",
+            "source_name": "Protestant",
+            "source_display_en": "Protestant",
+            "area_sum": 80837,
+            "published_national_total": 80837,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "PRO_ORIENTAL",
+            "source_name": "Pro-oriental cults",
+            "source_display_en": "Eastern religions",
+            "area_sum": 530,
+            "published_national_total": 530,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "OTHER_RELIGION",
+            "source_name": "Belonging to religion which is not cited",
+            "source_display_en": "Other religion",
+            "area_sum": 18768,
+            "published_national_total": 18768,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "BELIEVER_NO_RELIGION",
+            "source_name": "Believer, but does not belong to any religion",
+            "source_display_en": "Believer without religious affiliation",
+            "area_sum": 473,
+            "published_national_total": 473,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "UNDECLARED",
+            "source_name": "Undeclared",
+            "source_display_en": "Did not declare",
+            "area_sum": 197031,
+            "published_national_total": 197031,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "ATHEIST",
+            "source_name": "Atheist",
+            "source_display_en": "Atheist",
+            "area_sum": 40068,
+            "published_national_total": 40068,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "UNKNOWN",
+            "source_name": "Unknown",
+            "source_display_en": "Unknown",
+            "area_sum": 137291,
+            "published_national_total": 137291,
+            "difference": 0,
+            "status": "matched"
+          }
+        ]
+      },
+      {
+        "year": 2011,
+        "area_count": 25,
+        "published_category_rows_including_total": 14,
+        "mutually_exclusive_categories_excluding_total": 9,
+        "named_affiliation_categories": 5,
+        "within_area_category_sums_exact": true,
+        "area_category_sums_exact": true,
+        "max_absolute_difference": 0,
+        "national_total": 7186862,
+        "national_affiliation_count": 6782350,
+        "national_no_religion_count": 84063,
+        "national_outside_headlines_count": 320449,
+        "category_reconciliation": [
+          {
+            "source_code": "01",
+            "source_name": "Укупно",
+            "source_display_en": "Total",
+            "area_sum": 7186862,
+            "published_national_total": 7186862,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "02",
+            "source_name": "Хришћанска - свега",
+            "source_display_en": "Christians in total",
+            "area_sum": 6555931,
+            "published_national_total": 6555931,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "03",
+            "source_name": "православна",
+            "source_display_en": "Orthodox",
+            "area_sum": 6079396,
+            "published_national_total": 6079396,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "04",
+            "source_name": "католичка",
+            "source_display_en": "Catholic",
+            "area_sum": 356957,
+            "published_national_total": 356957,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "05",
+            "source_name": "протестантска",
+            "source_display_en": "Protestant",
+            "area_sum": 71284,
+            "published_national_total": 71284,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "06",
+            "source_name": "остале хришћанске",
+            "source_display_en": "Other Christian",
+            "area_sum": 3211,
+            "published_national_total": 3211,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "07",
+            "source_name": "Исламска",
+            "source_display_en": "Islamic",
+            "area_sum": 222828,
+            "published_national_total": 222828,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "08",
+            "source_name": "Јудаистичка",
+            "source_display_en": "Judaism",
+            "area_sum": 578,
+            "published_national_total": 578,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "09",
+            "source_name": "Источњачке вероисповести",
+            "source_display_en": "Eastern religions",
+            "area_sum": 1237,
+            "published_national_total": 1237,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "10",
+            "source_name": "Остале вероисповести",
+            "source_display_en": "Other religions",
+            "area_sum": 1776,
+            "published_national_total": 1776,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "11",
+            "source_name": "Агностици",
+            "source_display_en": "Agnostics",
+            "area_sum": 4010,
+            "published_national_total": 4010,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "12",
+            "source_name": "Нису верници (атеисти)",
+            "source_display_en": "Atheists",
+            "area_sum": 80053,
+            "published_national_total": 80053,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "13",
+            "source_name": "Нису се изјаснили",
+            "source_display_en": "Not declared",
+            "area_sum": 220735,
+            "published_national_total": 220735,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "14",
+            "source_name": "Непознато",
+            "source_display_en": "Unknown",
+            "area_sum": 99714,
+            "published_national_total": 99714,
+            "difference": 0,
+            "status": "matched"
+          }
+        ]
+      },
+      {
+        "year": 2022,
+        "area_count": 25,
+        "published_category_rows_including_total": 14,
+        "mutually_exclusive_categories_excluding_total": 9,
+        "named_affiliation_categories": 5,
+        "within_area_category_sums_exact": true,
+        "area_category_sums_exact": true,
+        "max_absolute_difference": 0,
+        "national_total": 6647003,
+        "national_affiliation_count": 6039240,
+        "national_no_religion_count": 82793,
+        "national_outside_headlines_count": 524970,
+        "category_reconciliation": [
+          {
+            "source_code": "01",
+            "source_name": "Укупно",
+            "source_display_en": "Total",
+            "area_sum": 6647003,
+            "published_national_total": 6647003,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "02",
+            "source_name": "Хришћанска - свега",
+            "source_display_en": "Christians in total",
+            "area_sum": 5758719,
+            "published_national_total": 5758719,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "03",
+            "source_name": "православна",
+            "source_display_en": "Orthodox",
+            "area_sum": 5387426,
+            "published_national_total": 5387426,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "04",
+            "source_name": "католичка",
+            "source_display_en": "Catholic",
+            "area_sum": 257269,
+            "published_national_total": 257269,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "05",
+            "source_name": "протестантска",
+            "source_display_en": "Protestant",
+            "area_sum": 54678,
+            "published_national_total": 54678,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "06",
+            "source_name": "остале хришћанске",
+            "source_display_en": "Other Christian",
+            "area_sum": 59346,
+            "published_national_total": 59346,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "07",
+            "source_name": "Исламска",
+            "source_display_en": "Islamic",
+            "area_sum": 278212,
+            "published_national_total": 278212,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "08",
+            "source_name": "Јудаистичка",
+            "source_display_en": "Judaism",
+            "area_sum": 602,
+            "published_national_total": 602,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "09",
+            "source_name": "Источњачке вероисповести",
+            "source_display_en": "Eastern religions",
+            "area_sum": 1207,
+            "published_national_total": 1207,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "10",
+            "source_name": "Остале вероисповести",
+            "source_display_en": "Other religions",
+            "area_sum": 500,
+            "published_national_total": 500,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "11",
+            "source_name": "Агностици",
+            "source_display_en": "Agnostics",
+            "area_sum": 8654,
+            "published_national_total": 8654,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "12",
+            "source_name": "Нису верници (атеисти)",
+            "source_display_en": "Atheists",
+            "area_sum": 74139,
+            "published_national_total": 74139,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "13",
+            "source_name": "Нису се изјаснили",
+            "source_display_en": "Not declared",
+            "area_sum": 169486,
+            "published_national_total": 169486,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "source_code": "14",
+            "source_name": "Непознато",
+            "source_display_en": "Unknown",
+            "area_sum": 355484,
+            "published_national_total": 355484,
+            "difference": 0,
+            "status": "matched"
+          }
+        ]
+      }
+    ],
+    "boundary_validation": {
+      "output_feature_count": 25,
+      "valid_feature_count": 25,
+      "distinct_geometry_hash_count": 25,
+      "geometry_sha256_by_area_code": {
+        "RS110": "4c050962ae472379b5b737fc5f975ecda897fe2b95acbffc386328d7e82e5406",
+        "RS121": "99992e321b68ac3abe650e5036ba9898e883d870008a27948d72f3510dfb9afd",
+        "RS122": "55c21a1c84a4a625113ec78d843a4a1c152641d103c984c5911d9c838334d813",
+        "RS123": "a84637d00535af64510a7f32a06fc54d37c53120ebf67d73a02bcb8ec6628525",
+        "RS124": "9629b4b424d4aae35713bf34b0701f84e4c905de758111f81351bf74a0cd021b",
+        "RS125": "838520af30d8d26d0ad4c2077b308e1022dacc95bfb13a3c3634d1f57f675b39",
+        "RS126": "cdaebf0172b9c1a9cc8e5a300fe1f715fe0006deb3798b4d0349007e00b3f5f0",
+        "RS127": "a842606c899a7c522a70104d657d53277f4e51730421dbe7b3df16b434b538a7",
+        "RS211": "08da4eff155a5cbd4efb8eb3afae2d70704de9fb8876357c361d4615aaa88aba",
+        "RS212": "5f0d5ce487d07c88bc12e5852fbe86044de9860a82e4cd2e0904537e4e4cf42d",
+        "RS213": "d7dff349d9567caf81c3d90e6f0b5880163e11d8444c4f90a56c23cf8008de74",
+        "RS214": "e60305868b84c398eafc635217e59835a71312694318670a2f55b0ff097cbe47",
+        "RS215": "8114fc0d35375ad8ee5c65f235f6c2c8d0234d455da5881c6c598f1c6f9ada92",
+        "RS216": "a0fc122e9b0d3a13b3e47e3e4fdf38f531646d53391029fb468cd678a364adb3",
+        "RS217": "7a5f1a471dd4923cdaa347fc21d764bfb193fd73560ba7b3511e474ad30e0c07",
+        "RS218": "4ccc9e8b9f8f238f6afbbe92d8a8323985d8133e664d6dfe0d65c90b73e737fd",
+        "RS221": "ad4af74f53923d0c3212ed45e84eea06bf9a8d0fd6180096f612ce73d9784a27",
+        "RS222": "5b68f99287d3c150dfa3306b9fb148d49037f3183b9e6f3ecffcd240813be50d",
+        "RS223": "594c95df34b7fc54267ae68c73f6dc3375718cb6c0c701302d3eee29f7260939",
+        "RS224": "71a06985dd5403c2ce64d570150bfc0ecd735851954d300811e68fa72acedb93",
+        "RS225": "46c3dc6e3fa850d312e373e1f1fe57507c998bd8ccdd3f13ff3491b4211483bb",
+        "RS226": "15821ff2b1b29738942d4be1ff901fb24b229ba2e65e775abfe175cfe719b3eb",
+        "RS227": "d562c97ce34f965949c64fe7970228696da53c377c4ab6cc385a52dd5237ab34",
+        "RS228": "ba60c56818bf618320f3fbd2322d6d90f0bfec4bda15e2303c0e8e706dd87092",
+        "RS229": "9deb33044903d5fdc2fbf734d47897b62b52ed54bf17f0b0efd1e40b4d650802"
+      },
+      "source_crs": "EPSG:4326",
+      "area_calculation_crs": "EPSG:3035",
+      "output_crs": "EPSG:4326"
+    }
+  },
+  "construct_notes": [
+    "The construct is census affiliation. It does not measure belief, practice, attendance, or registered membership.",
+    "This product follows the territorial coverage published by the Statistical Office of the Republic of Serbia (SORS). In this product, the area level comprises the City of Belgrade plus 24 districts (okruzi). The 2002 publication covers Central Serbia and Vojvodina and states that the census was not conducted in the Autonomous Province of Kosovo and Metohija. The 2011 and 2022 dissemination tables identify their coverage as excluding data for the Autonomous Province of Kosovo and Metohija. Kosovo rows from other publications are outside this Serbia product.",
+    "The headline percentages use the total census population. Did-not-declare and unknown responses remain in that denominator.",
+    "In 2011 and 2022, Хришћанска - свега / Christians in total is the mutually exclusive Christian parent. Orthodox, Catholic, Protestant, and Other Christian are detail rows and are never summed again.",
+    "In 2002, Believer, but does not belong to any religion is preserved outside the affiliation and no-religion headlines because it reports belief without religious affiliation.",
+    "The 2002 build uses the source labels in the official English publication. The 2011 and 2022 mappings retain the source's Serbian Cyrillic category labels and add the official English dissemination labels.",
+    "Municipality and city units changed between waves, including the appearance of Surčin and city-municipality splits after 2002. The pinned SORS routes provide no religion table rebased to one municipal frame. The build therefore uses the 25 common published areas and creates no unofficial municipal concordance. In this product, the area level comprises the City of Belgrade plus 24 districts (okruzi).",
+    "The common display frame is the 2021 GISCO NUTS 3 layer. Geometric stability of the 25 published areas across 2002, 2011, and 2022 was not verified. The build joins shared statistical-area codes and makes no claim that every boundary segment was unchanged.",
+    "SORS means Statistical Office of the Republic of Serbia. GISCO means Geographic Information System of the Commission. NUTS means Nomenclature of Territorial Units for Statistics.",
+    "Category mapping for 2002: TOTAL Total => Total [product role: total; harmonisation: as_published]; ISLAM Islam => Islam [product role: named_religion; harmonisation: as_published]; JUDAIC Judaic => Judaism [product role: named_religion; harmonisation: as_published]; CATHOLIC Catholic => Catholic [product role: named_religion; harmonisation: as_published]; ORTHODOX Orthodox => Orthodox [product role: named_religion; harmonisation: as_published]; PROTESTANT Protestant => Protestant [product role: named_religion; harmonisation: as_published]; PRO_ORIENTAL Pro-oriental cults => Eastern religions [product role: named_religion; harmonisation: as_published]; OTHER_RELIGION Belonging to religion which is not cited => Other religion [product role: named_religion; harmonisation: as_published]; BELIEVER_NO_RELIGION Believer, but does not belong to any religion => Believer without religious affiliation [product role: belief_without_affiliation; harmonisation: as_published]; UNDECLARED Undeclared => Did not declare [product role: not_declared; harmonisation: as_published]; ATHEIST Atheist => Atheist [product role: no_religion; harmonisation: as_published]; UNKNOWN Unknown => Unknown [product role: unknown; harmonisation: as_published].",
+    "Category mapping for 2011: 01 Укупно => Total [product role: total; harmonisation: as_published]; 02 Хришћанска - свега => Christians in total [product role: christian_parent; harmonisation: as_published]; 03 православна => Orthodox [product role: christian_detail; harmonisation: as_published]; 04 католичка => Catholic [product role: christian_detail; harmonisation: as_published]; 05 протестантска => Protestant [product role: christian_detail; harmonisation: as_published]; 06 остале хришћанске => Other Christian [product role: christian_detail; harmonisation: as_published]; 07 Исламска => Islamic [product role: named_religion; harmonisation: as_published]; 08 Јудаистичка => Judaism [product role: named_religion; harmonisation: as_published]; 09 Источњачке вероисповести => Eastern religions [product role: named_religion; harmonisation: as_published]; 10 Остале вероисповести => Other religions [product role: named_religion; harmonisation: as_published]; 11 Агностици => Agnostics [product role: no_religion; harmonisation: as_published]; 12 Нису верници (атеисти) => Atheists [product role: no_religion; harmonisation: as_published]; 13 Нису се изјаснили => Not declared [product role: not_declared; harmonisation: as_published]; 14 Непознато => Unknown [product role: unknown; harmonisation: as_published].",
+    "Category mapping for 2022: 01 Укупно => Total [product role: total; harmonisation: as_published]; 02 Хришћанска - свега => Christians in total [product role: christian_parent; harmonisation: as_published]; 03 православна => Orthodox [product role: christian_detail; harmonisation: as_published]; 04 католичка => Catholic [product role: christian_detail; harmonisation: as_published]; 05 протестантска => Protestant [product role: christian_detail; harmonisation: as_published]; 06 остале хришћанске => Other Christian [product role: christian_detail; harmonisation: as_published]; 07 Исламска => Islamic [product role: named_religion; harmonisation: as_published]; 08 Јудаистичка => Judaism [product role: named_religion; harmonisation: as_published]; 09 Источњачке вероисповести => Eastern religions [product role: named_religion; harmonisation: as_published]; 10 Остале вероисповести => Other religions [product role: named_religion; harmonisation: as_published]; 11 Агностици => Agnostics [product role: no_religion; harmonisation: as_published]; 12 Нису верници (атеисти) => Atheists [product role: no_religion; harmonisation: as_published]; 13 Нису се изјаснили => Not declared [product role: not_declared; harmonisation: as_published]; 14 Непознато => Unknown [product role: unknown; harmonisation: as_published]."
+  ],
+  "deferred_sources": [
+    {
+      "source": "SORS municipality and city rows in tables 3102010402 and 3104020301 and publication G20024003",
+      "status": "extra_level_not_shipped",
+      "reason": "The source publishes municipality and city rows, but the three-wave municipal geography changed and no official rebasing or complete set of official per-vintage boundary files was pinned."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "needs_review",
+  "downstream_status": "public",
+  "source_datasets": [
+    {
+      "source_dataset_id": "sors-census-religion-area-2002-2022",
+      "name": "SORS census religion by area, 2002, 2011, and 2022",
+      "provider": "Statistical Office of the Republic of Serbia (SORS)",
+      "url": "https://data.stat.gov.rs/Home/Result/3104020301?languageCode=en-US",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/rs_census/sors_3104020301_area_total_gender.html",
+      "licence": {
+        "name": "SORS source quotation required; broader dissemination-database reuse terms not identified",
+        "url": "https://opendata.stat.gov.rs/odata/?id=en-us",
+        "attribution": "Statistical Office of the Republic of Serbia (SORS)"
+      },
+      "citation": "Statistical Office of the Republic of Serbia, 2002 Census publication G20024003 and dissemination tables 3102010402 and 3104020301.",
+      "access_limits": null,
+      "redistribution_limits": "The census publications require source quotation. The build makes no broader licence claim for the dissemination database.",
+      "notes": "All three waves contain national and 25 area rows. This product follows the territorial coverage published by the Statistical Office of the Republic of Serbia (SORS). In this product, the area level comprises the City of Belgrade plus 24 districts (okruzi). The 2002 publication covers Central Serbia and Vojvodina and states that the census was not conducted in the Autonomous Province of Kosovo and Metohija. The 2011 and 2022 dissemination tables identify their coverage as excluding data for the Autonomous Province of Kosovo and Metohija. Kosovo rows from other publications are outside this Serbia product."
+    },
+    {
+      "source_dataset_id": "eurostat-gisco-nuts3-2021-rs",
+      "name": "Eurostat GISCO NUTS 3 regions 2021, Serbia",
+      "provider": "Eurostat GISCO",
+      "url": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2021_4326_LEVL_3.geojson",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/rs_census/gisco_nuts3_2021_4326.geojson",
+      "licence": {
+        "name": "Eurostat GISCO download provisions and general reuse policy",
+        "url": "https://ec.europa.eu/eurostat/web/gisco/geodata/statistical-units/territorial-units-statistics",
+        "attribution": "Eurostat GISCO; © EuroGeographics for the administrative boundaries"
+      },
+      "citation": "Eurostat GISCO, NUTS 3 2021, 1:1 million, EPSG:4326; Serbia statistical-region features.",
+      "access_limits": null,
+      "redistribution_limits": "Use under GISCO download provisions with source acknowledgement and EuroGeographics administrative-boundary attribution.",
+      "notes": "The all-Europe GeoJSON is filtered to the 25 Serbia statistical-region codes and simplified. In this product, the area level comprises the City of Belgrade plus 24 districts (okruzi). The common display frame is the 2021 GISCO NUTS 3 layer. Geometric stability of the 25 published areas across 2002, 2011, and 2022 was not verified. The build joins shared statistical-area codes and makes no claim that every boundary segment was unchanged."
+    }
+  ],
+  "notes": "The committed product contains derived area summaries and simplified GISCO geometry only. Serbia UI and hub wiring are outside this build. This product follows the territorial coverage published by the Statistical Office of the Republic of Serbia (SORS). In this product, the area level comprises the City of Belgrade plus 24 districts (okruzi). The 2002 publication covers Central Serbia and Vojvodina and states that the census was not conducted in the Autonomous Province of Kosovo and Metohija. The 2011 and 2022 dissemination tables identify their coverage as excluding data for the Autonomous Province of Kosovo and Metohija. Kosovo rows from other publications are outside this Serbia product."
+}
