@@ -4,6 +4,15 @@
 
 **Maintenance convention:** strike a row when built, never delete it.
 
+**Current campaign (PI directive, 2026-07-11): select a region, then tick countries.** The active region is Central and Eastern Europe — the six machine-readable three-wave census rows at ranks 25-30. Tick each country when its data product commits; strike its queue row when the country page ships. Côte d'Ivoire (rank 16) is the highest-ranked actionable row outside the region and resumes after the campaign.
+
+- [ ] Hungary (HU, rank 25)
+- [ ] Lithuania (LT, rank 26)
+- [ ] Estonia (EE, rank 27)
+- [ ] Croatia (HR, rank 28)
+- [ ] Serbia (RS, rank 29)
+- [ ] Bulgaria (BG, rank 30)
+
 **Demographic and Health Surveys (DHS) rows (PI ruling, 2026-07-11):** unfrozen — DHS survey data are usable by default with attribution where use is not clearly prohibited and no restricted data can leak. Every DHS row works through [dhs-verification-register.md](dhs-verification-register.md): public final-report tables first, registered microdata estimation as fallback; microdata never enter git; registration itself awaits PI action.
 
 The queue merges every unbuilt A/B global-survey row, every unbuilt expansion row with religion data, and every audit A/B row by country code. Within equal wave depth, machine-readable routes precede clean PDF routes and browser work; richer indicator sets break any remaining tie. A span identifies source endpoints. It implies multiple waves only when the row says “multiple” or “repeated”, and never implies annual observations.
