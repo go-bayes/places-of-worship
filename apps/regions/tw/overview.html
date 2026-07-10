@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Taiwan map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Taiwan research map; every string traces to
+    // research/countries/tw/README.md and route-probe.md, the manifest
+    // docs/manifests/tw-register-2020-2024.json, or the live REGION_CONFIG
+    // in apps/regions/tw/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "TW",
+      countryName: "Taiwan",
+      mapHref: "./",
+      intro: "Administrative register of registered religious organisations from the Ministry of the Interior (MOI), by county and city, five annual years 2020-2024. This register construct counts registered temples (寺廟) and churches (教會堂) and their reported temple followers (信徒人數). It is never census religious affiliation, belief, or attendance. The map shows the reported temple follower count and its year-on-year change; the MOI publishes no county/city affiliation share.",
+      facts: {
+        waves: "5 annual register years, 2020-2024",
+        geographies: "County / city (22 units)",
+        metrics: "Registered temple followers (count), change since previous year (followers)"
+      },
+      reading: [
+        "The 22 counties and cities are shaded by the count of registered temple followers, or by the change in that count since the previous year. A darker unit means more reported followers rather than a higher rate: the MOI publishes no county/city population share for affiliation, and the map offers no share-of-population metric.",
+        "This is an administrative register of registered religious organisations. It counts registered temples and churches and their reported temple followers. It is never census religious affiliation, belief, or attendance, and reported followers are the temples' own registered followers, not census respondents. Registered temples and churches can double-count adherents and can miss unregistered folk practice.",
+        "The follower column has a source-defined break at ROC 103 (2014): before ROC 102 (2013) it included both temple followers and church members; from ROC 103 (2014) it counts registered temple followers only, with church members reported separately. All five shipped years (2020-2024) fall inside the post-2014 window; the shipped follower series is therefore internally consistent but not comparable with pre-2014 followers.",
+        "The counts are mapped on geoBoundaries county/city (ADM1, 22 units), the correct join layer for the MOI county/city statistics, joined by ISO code. The MOI religion statistics are county/city, not the 368 townships of ADM2 named in the original survey row. geoBoundaries names differ for some units (Lienchiang County is labelled Matsu Islands; Penghu and Kinmen drop County; the special municipalities drop City); the MOI published English names are retained as the area name.",
+        "The map opens framed on the main island, Penghu, Kinmen, and the Matsu Islands; Kaohsiung City's small outlying Dongsha (Pratas) area sits outside the opening frame and is reached by panning. The geoBoundaries ADM1 geometry includes coastal extents; land area and place density per square kilometre are therefore left null. For every year the 22 county totals sum exactly to the MOI published national totals for temples, churches, total places, and followers, and the populations sum exactly to the national population."
+      ],
+      sources: [
+        {
+          name: "MOI statis yearbook table 06-01 各宗教教務概況 (General Conditions of Religions)",
+          href: "https://statis.moi.gov.tw/micst/webMain.aspx?k=menuy",
+          construct: "Administrative register of registered temples, churches, and reported temple followers, by county/city",
+          years: "2020-2024 (shipped)",
+          licence: "MOI Open Government Data Declaration (政府網站資料開放宣告), attribution required"
+        },
+        {
+          name: "MOI statis yearbook table 02-01 人口年齡分配 (Population by Age)",
+          href: "https://statis.moi.gov.tw/micst/webMain.aspx?k=menuy",
+          construct: "Year-end household-registration population (national reconciliation context)",
+          years: "2020-2024",
+          licence: "MOI Open Government Data Declaration (政府網站資料開放宣告), attribution required"
+        },
+        {
+          name: "geoBoundaries gbOpen TWN ADM1",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/TWN/ADM1/",
+          construct: "Boundary geometry (22 county/city units)",
+          years: "release 9469f09",
+          licence: "ODbL 1.0"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "MOI Department of Statistics yearbook portal, <a href=\"https://statis.moi.gov.tw/micst/webMain.aspx?k=menuy\" target=\"_blank\" rel=\"noopener\">statis.moi.gov.tw</a>; boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/TWN/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries TWN ADM1</a>.",
+        tables: "Table 06-01 各宗教教務概況 (portal funid 331030) and table 02-01 人口年齡分配 (portal funid 332010). Each is regenerated server-side (kind=7 ODF) and then downloaded from report/&lt;funid&gt;.ods. The area-summary religious_affiliation_count field carries the reported temple follower count (信徒人數); every percentage and land-area field is null because the source publishes no county/city affiliation share and the ADM1 geometry includes coastal extents.",
+        licence: "MOI website content, including these statistical-yearbook tables, is released under the MOI Open Government Data Declaration (政府網站資料開放宣告): free, non-exclusive, sub-licensable, irrevocable, worldwide reuse with attribution (應註明出處). The geoBoundaries boundary is ODbL 1.0.",
+        script: "scripts/build_tw_area_summary.R",
+        manifests: [
+          { label: "tw-register-2020-2024", href: "docs/manifests/tw-register-2020-2024.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Taiwan map is a register-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

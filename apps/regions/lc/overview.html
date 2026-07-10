@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Saint Lucia map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Saint Lucia research map; every string traces to
+    // research/countries/lc/README.md and route-probe.md, the manifest
+    // docs/manifests/lc-census-religion-2001-2022.json, or the live
+    // REGION_CONFIG in apps/regions/lc/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "LC",
+      countryName: "Saint Lucia",
+      mapHref: "./",
+      intro: "Census religious affiliation across Saint Lucia's ten districts, at the 2001, 2010, and 2022 Population and Housing Censuses. The Central Statistical Office (CSO) publishes each wave against a stated-response denominator; the map ships the published values unchanged and discloses the source's own category-versus-total discrepancies. The 2022 figures are Provisional Results, Release 1, and cross-wave change is withheld because the category frames differ across the three waves.",
+      facts: {
+        waves: "Censuses 2001, 2010, 2022",
+        geographies: "District (ten districts)",
+        metrics: "Religious affiliation %, no religion %"
+      },
+      reading: [
+        "The ten districts are shaded by the share reporting a religious affiliation, or the share reporting no religion, against the stated-response denominator for each wave: the printed district total less the source's non-response category (Not stated in 2001 and 2010, Not reported in 2022).",
+        "The source publishes integer category cells that do not always sum to its own printed totals. In nine of the 2022 printed district columns and several 2001 and 2010 printed rows, the category counts differ from the printed totals by one to three people. The map ships the published census values unchanged and does not adjust them; each overrun is disclosed per row and at product level. The 2022 image readback confirmed every discrepancy is the source's own arithmetic, and Micoud alone reconciles exactly.",
+        "The 2022 figures are Provisional Results, Release 1. The CSO publications page lists no superseding final report, and the provisional report itself states that cleaning is ongoing and its figures may approximate the final census statistics. Table D.2 covers the household population of 171,834; 1,114 residents in institutions and 5,859 visiting non-residents lie outside that basis.",
+        "Cross-wave change is withheld. The category frames are not identical across waves, most sharply in the 2022 split of Atheist - Do not believe in God from None - No religion but believe in God; no cross-wave change series ships.",
+        "The 2001 national CSO REDATAM religion total of 156,733 is 98 above the 2001 final report's enumerated resident population of 156,635; the captured sources do not explain the difference, which is disclosed and unresolved.",
+        "The drawn boundaries are the geoBoundaries ten-district frame represented in 2015; the historical 12-part frame aggregates to ten districts by summing the three Castries subdivisions, and the other nine districts join one-to-one."
+      ],
+      sources: [
+        {
+          name: "CSO Population and Housing Census reports and REDATAM databases (2001, 2010)",
+          href: "https://stats.gov.lc/census/census-results/",
+          construct: "Census religious affiliation, by district",
+          years: "2001, 2010",
+          licence: "CSO Open Licence Agreement (value-added acknowledgement required)"
+        },
+        {
+          name: "CSO 2022 Population and Housing Census Provisional Results, Release 1, Table D.2",
+          href: "https://stats.gov.lc/publications/",
+          construct: "Census religion by district (provisional)",
+          years: "2022",
+          licence: "CSO Open Licence Agreement (value-added acknowledgement required)"
+        },
+        {
+          name: "geoBoundaries Saint Lucia ADM1",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/LCA/ADM1/",
+          construct: "Boundary geometry (ten districts, represented 2015)",
+          years: "2015 vintage",
+          licence: "CC0 1.0 Universal (source Wikimedia Commons)"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Central Statistical Office of Saint Lucia, <a href=\"https://stats.gov.lc/census/census-results/\" target=\"_blank\" rel=\"noopener\">census results</a> and <a href=\"https://stats.gov.lc/publications/\" target=\"_blank\" rel=\"noopener\">publications</a>; boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/LCA/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries LCA ADM1</a>.",
+        tables: "2001 and 2010 REDATAM religion outputs on the 12-part district frame; 2022 Population and Housing Census Provisional Results, Release 1, Table D.2 (Population: Religion by District). The area-summary religious_affiliation_percent and no_religion_percent fields carry the shares against each wave's stated-response denominator; the published category cells and printed totals ship unchanged.",
+        licence: "CSO information is licensed under the CSO Open Licence Agreement, which permits derivative and value-added products with its required acknowledgement: This product was adapted from the information of The Central Statistical Office of Saint Lucia, which is licensed under the Open Licence Agreement of The Central Statistical Office of Saint Lucia. The geoBoundaries boundary is CC0 1.0 Universal.",
+        script: "scripts/build_lc_area_summary.R",
+        manifests: [
+          { label: "lc-census-religion-2001-2022", href: "docs/manifests/lc-census-religion-2001-2022.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Saint Lucia map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

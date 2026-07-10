@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Burkina Faso Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Burkina Faso's product is INSD census religious affiliation by 13
+    // regions for 2006 and 2019. The 2006 wave publishes exact counts on the
+    // full resident population; the 2019 wave publishes one-decimal percentage
+    // shares on the collected-person basis, and its counts are null by design
+    // (no count is derived from a percentage). Cross-wave change is withheld
+    // because the two waves use different denominator bases. Publication reuse
+    // rights are unresolved; the product ships under the PI ship ruling of
+    // 2026-07-10 pending the INSD Accord de licence de données ouvertes.
+    window.REGION_CONFIG = {
+      countryCode: "BF",
+      title: "Places of Worship | Burkina Faso Research Map",
+      // burkina faso is landlocked and wide (about 7.9° of longitude across
+      // the 13 regions); centre on the regions and open at a zoom that fits
+      // the full east-west span in a 700px square view
+      center: [-1.6, 12.3],
+      initialZoom: 5.8,
+      censusLevels: {
+        region: {
+          label: "Region",
+          boundaries: "data/bf_region_2017.geojson",
+          summary: "data/area_summary_region.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Institut national de la statistique et de la démographie (INSD); reuse rights unresolved · Boundaries © geoBoundaries (CC BY 4.0, source World Bank)"
+        }
+      },
+      defaultLevel: "region",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2019,
+      // the two census-question shares; place and change metrics are omitted
+      // because no place layer is built and cross-wave change is withheld
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      cityPresets: [
+        { label: "Ouagadougou", shortLabel: "Ouaga", coords: [-1.5197, 12.3714], zoom: 10 },
+        { label: "Bobo-Dioulasso", coords: [-4.2979, 11.1771], zoom: 10 },
+        { label: "Koudougou", coords: [-2.3620, 12.2526], zoom: 11 },
+        { label: "Ouahigouya", coords: [-2.4216, 13.5828], zoom: 11 },
+        { label: "Banfora", coords: [-4.7625, 10.6331], zoom: 11 },
+        { label: "Kaya", coords: [-1.0854, 13.0918], zoom: 11 },
+        { label: "Dori", coords: [-0.0347, 14.0354], zoom: 11 },
+        { label: "Fada N'gourma", coords: [0.3580, 12.0616], zoom: 11 }
+      ],
+      geocode: { country: "bf", biasLngLat: [-1.6, 12.3] },
+      onboarding: {
+        title: "Burkina Faso research map",
+        intro: "Census religious affiliation across Burkina Faso's 13 regions, at the 2006 and 2019 Recensement général de la population et de l'habitation.",
+        bullets: [
+          "The census overlay is on: regions are shaded by the share reporting a religious affiliation, or the share reporting no religion.",
+          "Open <strong>Show Census Data</strong> (top centre) to choose the metric, geography, and census year (2006, 2019).",
+          "2019 values are the source's published one-decimal percentages on the collected-person basis; five regional rows (Cascades, Centre-Est, Centre-Sud, Sahel, Sud-Ouest) sum to 99.9 or 100.1 by the source's own rounding, within the derived bound of 0.30 percentage points.",
+          "The 2019 percentages are shares of the collected-person basis: 18,171,838 people whose data were collected of 20,505,155 full residents, the remaining 2,333,317 represented only through population estimates for incompletely enumerated localities. The 2006 counts use the full resident population.",
+          "Cross-wave change is withheld because the 2006 exact counts on the full resident population and the 2019 rounded shares on the collected-person basis use different bases.",
+          "Tap a region for its per-census detail."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion © <a href="https://www.insd.bf/" target="_blank" rel="noopener">Institut national de la statistique et de la démographie (INSD)</a>; publication reuse rights unresolved, shipped under the PI ship ruling of 2026-07-10 pending the INSD Accord de licence de données ouvertes &middot; Boundaries © <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> (CC BY 4.0, source World Bank)',
+      popupDenominatorNote: "2019 values are the source's published one-decimal percentages on the collected-person basis (18,171,838 people whose data were collected of 20,505,155 full residents); five regional rows sum to 99.9 or 100.1 by the source's own rounding, within the derived bound of 0.30 percentage points, and no count is derived from a percentage. The 2006 values are exact counts on the full resident population. Cross-wave change is withheld because the two waves use different denominator bases. INSD publication reuse rights are unresolved; the product ships under the PI ship ruling of 2026-07-10.",
+      censusFlagNote: "* 2019 values are the source's published one-decimal percentages on the collected-person basis; five regional rows (Cascades, Centre-Est, Centre-Sud, Sahel, Sud-Ouest) sum to 99.9 or 100.1 by the source's own rounding, within the derived bound of 0.30 percentage points. The 2006 values are exact counts on the full resident population. Cross-wave change is withheld because the two waves use different denominator bases."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710d"></script>
+</body>
+</html>

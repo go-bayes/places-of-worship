@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Taiwan Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Taiwan's product is the Ministry of the Interior (MOI) administrative
+    // register of registered religious organisations, by 22 county/city units,
+    // 2020-2024. This is a register construct: it counts registered temples
+    // (寺廟) and churches (教會堂) and their reported temple followers (信徒人數).
+    // It is never census affiliation, belief, or attendance. The source
+    // publishes no county/city affiliation share; the map therefore opts into
+    // runtime's count metrics (religious_affiliation_count and its change) and
+    // relabels them for followers; every percentage field is null by design.
+    // The MOI register place counts are not wired as a metric because the
+    // runtime attributes its place columns to OpenStreetMap, which these
+    // administrative counts are not; they ride the register followers instead.
+    window.REGION_CONFIG = {
+      countryCode: "TW",
+      title: "Places of Worship | Taiwan Research Map",
+      dataNoun: "Register",
+      // taiwan: the main island plus the outlying county/city units (Kinmen
+      // far west, Lienchiang/Matsu to the north, Penghu) near the mainland
+      // coast. Centre and zoom chosen so all 22 county/city bodies fit a
+      // 700px square view (Kinmen 118.21°E and Matsu 26.38°N are the binding
+      // extremes; Kaohsiung's tiny Dongsha/Pratas speck at 116.7°E is left
+      // outside the opening frame and reached by panning)
+      center: [120.1, 24.15],
+      initialZoom: 6.4,
+      censusLevels: {
+        county: {
+          label: "County / city",
+          boundaries: "data/tw_county_2024.geojson",
+          summary: "data/area_summary_county.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Register © Ministry of the Interior, Department of Statistics (Taiwan), MOI Open Government Data Declaration · Boundaries © geoBoundaries (ODbL 1.0)"
+        }
+      },
+      defaultLevel: "county",
+      defaultMetric: "religious_affiliation_count",
+      defaultYear: 2024,
+      // counts only: the MOI source publishes no county/city affiliation
+      // share, and the percentage metrics would render empty; the two count
+      // metrics are the runtime's opt-in pair for counts-only products
+      metricsAvailable: [
+        "religious_affiliation_count",
+        "religious_affiliation_count_change"
+      ],
+      metricLabels: {
+        religious_affiliation_count: {
+          label: "Registered temple followers (count)",
+          note: "reported temple followers (信徒人數) on the Ministry of the Interior register of registered religious organisations (statis yearbook table 06-01), by county and city. From ROC 103 (2014) this column counts registered temple followers only; church members are reported separately. This register records administrative registration; it does not record census affiliation, belief, or attendance."
+        },
+        religious_affiliation_count_change: {
+          label: "Change since previous year (followers)",
+          note: "change in the registered temple follower count since the previous annual register year, as a difference of counts across 2020-2024"
+        }
+      },
+      popupDenominatorNote: "Counts are reported temple followers (信徒人數) on the Ministry of the Interior register of registered religious organisations (statis yearbook table 06-01), by county and city. This register construct is never census affiliation, belief, or attendance; reported followers are the temples' own registered followers, not census respondents. From ROC 103 (2014) the follower column counts registered temple followers only; the shipped 2020-2024 series is therefore internally consistent but not comparable with pre-2014 followers. The counts are mapped on geoBoundaries county/city (ADM1, 22 units), not the 368 townships of ADM2.",
+      cityPresets: [
+        { label: "Taipei", coords: [121.5654, 25.0330], zoom: 11 },
+        { label: "New Taipei", coords: [121.4658, 25.0124], zoom: 10 },
+        { label: "Taoyuan", coords: [121.3010, 24.9936], zoom: 10 },
+        { label: "Taichung", coords: [120.6839, 24.1477], zoom: 10 },
+        { label: "Tainan", coords: [120.2270, 22.9998], zoom: 10 },
+        { label: "Kaohsiung", coords: [120.3014, 22.6273], zoom: 10 },
+        { label: "Hsinchu", coords: [120.9686, 24.8047], zoom: 11 },
+        { label: "Chiayi", coords: [120.4491, 23.4801], zoom: 11 },
+        { label: "Hualien", coords: [121.6015, 23.9871], zoom: 10 },
+        { label: "Penghu (Magong)", aliases: ["Magong"], coords: [119.5665, 23.5655], zoom: 11 },
+        { label: "Kinmen", coords: [118.3186, 24.4321], zoom: 11 }
+      ],
+      geocode: { country: "tw", biasLngLat: [120.9, 23.7] },
+      onboarding: {
+        title: "Taiwan research map",
+        intro: "Administrative register of registered religious organisations from the Ministry of the Interior (MOI), by county and city, five annual years 2020-2024. This register construct counts registered temples (寺廟) and churches (教會堂) and their reported temple followers (信徒人數). It is never census religious affiliation, belief, or attendance.",
+        bullets: [
+          "The 22 counties and cities are shaded by the count of registered temple followers, or by the change in that count since the previous year.",
+          "This is an administrative register of registered religious organisations. It is never census affiliation, belief, or attendance. Reported followers are the temples' own registered followers, not census respondents.",
+          "From ROC 103 (2014) the follower column counts registered temple followers only; church members are reported separately. All shipped years (2020-2024) fall inside that window; the follower series is therefore internally consistent but not comparable with pre-2014 followers.",
+          "The counts are mapped on geoBoundaries county/city (ADM1, 22 units), the correct join layer for the MOI county/city statistics, not the 368 townships of ADM2.",
+          "Open <strong>Show Register Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Registered-religion register © <a href="https://statis.moi.gov.tw/micst/webMain.aspx?k=menuy" target="_blank" rel="noopener">Ministry of the Interior, Department of Statistics (Taiwan)</a>, under the MOI Open Government Data Declaration (政府網站資料開放宣告) with attribution required (應註明出處) &middot; Boundaries © <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> (ODbL 1.0)'
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710d"></script>
+</body>
+</html>

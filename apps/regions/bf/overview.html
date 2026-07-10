@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Burkina Faso map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Burkina Faso research map; every string traces to
+    // research/countries/bf/README.md and route-probe.md, the manifest
+    // docs/manifests/bf-census-religion-2006-2019.json, or the live
+    // REGION_CONFIG in apps/regions/bf/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "BF",
+      countryName: "Burkina Faso",
+      mapHref: "./",
+      intro: "Census religious affiliation across Burkina Faso's 13 regions, at the 2006 and 2019 Recensement général de la population et de l'habitation, from the Institut national de la statistique et de la démographie (INSD). The 2006 wave publishes exact counts on the full resident population; the 2019 wave publishes one-decimal percentage shares on the collected-person basis. Cross-wave change is withheld because the two waves use different denominator bases. Publication reuse rights are unresolved; the product ships under the PI ship ruling of 2026-07-10 pending the INSD open-data agreement.",
+      facts: {
+        waves: "Censuses 2006, 2019",
+        geographies: "Region (13 regions)",
+        metrics: "Religious affiliation %, no religion %"
+      },
+      reading: [
+        "The 13 regions are shaded by the share reporting a religious affiliation, or the share reporting no religion. The six published categories (Animist, Muslim, Catholic, Protestant, Other religion, No religion) are mutually exclusive, with no separate non-response category.",
+        "2019 values are the source's published one-decimal percentages on the collected-person basis. Five regional rows (Cascades, Centre-Est, Centre-Sud, Sahel, Sud-Ouest) sum to 99.9 or 100.1 by the source's own rounding, within the derived bound of 0.30 percentage points (0.05 percentage points per one-decimal cell across six categories). No percentage was altered and no count is derived from a percentage; the 2019 counts are null by design.",
+        "The 2019 percentages are shares of the collected-person basis: 18,171,838 people whose data were collected during enumeration, of a full resident population of 20,505,155. The remaining 2,333,317 residents are represented only through population estimates for localities not fully enumerated because of insecurity, and lie outside the 2019 basis. The 2006 values are exact counts on the full resident population of 14,017,262.",
+        "Cross-wave change is withheld. The 2006 exact counts on the full resident population and the 2019 rounded shares on the collected-person basis use different constructs and denominator bases, and the verified record does not establish identical collection and processing rules; 1996 religion is national only and predates the 13-region frame.",
+        "The drawn boundaries are the geoBoundaries 13-region frame represented in 2017; both waves share this single boundary, and the shapeName values match the census region names exactly."
+      ],
+      sources: [
+        {
+          name: "INSD RGPH 2006 État et structure de la population, Table A5.5",
+          href: "https://www.insd.bf/sites/default/files/2021-12/Theme2-Etat_et_structure_de_la_population.pdf",
+          construct: "Census religious affiliation, exact counts by region",
+          years: "2006",
+          licence: "Publication reuse rights unresolved (needs_review)"
+        },
+        {
+          name: "INSD RGPH 2019 final-results report, Table 10",
+          href: "https://www.insd.bf/sites/default/files/2022-07/Rapport%20resultats%20definitifs%20RGPH%202019.pdf",
+          construct: "Census religion, one-decimal percentage shares by region (collected-person basis)",
+          years: "2019",
+          licence: "Publication reuse rights unresolved (needs_review)"
+        },
+        {
+          name: "geoBoundaries Burkina Faso ADM1",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/BFA/ADM1/",
+          construct: "Boundary geometry (13 regions, represented 2017)",
+          years: "2017 vintage",
+          licence: "CC BY 4.0 (source World Bank)"
+        }
+      ],
+      accessData: {
+        note: "Publication reuse rights for the INSD census tables remain unresolved. The cached INSD legal page carries an all-rights-reserved footer (© 2020 INSD - Tous droits reservés) and subjects published data to a named Accord de licence de données ouvertes, hosted with the Open Data Portal (burkinafaso.opendataforafrica.org), whose text was not captured. The cached 2019 microdata catalogue terms restrict redistribution of the microdata without written INSD agreement. This product is staged under the PI ship ruling of 2026-07-10; the INSD open-data agreement follow-up is open.",
+        sourceOfRecord: "Institut national de la statistique et de la démographie, <a href=\"https://www.insd.bf/\" target=\"_blank\" rel=\"noopener\">INSD</a>; boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/BFA/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries BFA ADM1</a>.",
+        tables: "2006 État et structure de la population, Table A5.5 (13 regional rows and national row, exact counts); 2019 final-results report, Table 10 (one-decimal percentage shares and a collected-person effectif for 13 regions). The area-summary religious_affiliation_percent and no_religion_percent fields carry the shares; the 2019 counts are null because no count is derived from a percentage.",
+        licence: "Publication reuse rights for the census publications are unresolved (needs_review). The geoBoundaries boundary is CC BY 4.0, source World Bank.",
+        script: "scripts/build_bf_area_summary.R",
+        manifests: [
+          { label: "bf-census-religion-2006-2019", href: "docs/manifests/bf-census-religion-2006-2019.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Burkina Faso map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
