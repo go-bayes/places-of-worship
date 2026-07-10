@@ -10,9 +10,10 @@ England and Wales, Scotland, and Northern Ireland.
 - **Manifest**: `docs/manifests/uk-census-religion-2001-2022.json`.
 - **Census levels**: `ew_ltla`, `sco_ca`, and `ni_lgd`.
 - **Live count coverage**: England and Wales local authorities for 2001,
-  2011, and 2021; Northern Ireland Local Government Districts for 2021.
-- **Pending count coverage**: Scotland council areas for 2001, 2011, and
-  2022; Northern Ireland Local Government Districts for 2001 and 2011.
+  2011, and 2021; Scotland council areas for 2001, 2011, and 2022; Northern
+  Ireland Local Government Districts for 2021.
+- **Pending count coverage**: Northern Ireland Local Government Districts for
+  2001 and 2011.
 - **Construct**: census current-religion affiliation everywhere. Religion or
   religion brought up in and community-background tables remain separate.
 - **Default metric**: religious-affiliation percent among people with a stated
@@ -23,7 +24,7 @@ England and Wales, Scotland, and Northern Ireland.
 This project does not redistribute source data; the map shows derived rates with attribution. To obtain the data from the source of record:
 
 - **Source of record**: Office for National Statistics via Nomis, <https://www.nomisweb.co.uk/api/v01/dataset/nm_2049_1.bulk.csv?time=latest&measures=20100&c2021_religion_10=0,1,9&geography=TYPE154>; Northern Ireland Statistics and Research Agency, <https://www.nisra.gov.uk/system/files/statistics/census-2021-ms-b19.xlsx>; other UK source URLs are listed in the manifest.
-- **Exact tables**: Nomis `C2021TS030` / `TS030`, `KS209EW`, and `KS007`; NISRA `MS-B19`; Scotland 2001/2011/2022 and Northern Ireland 2001/2011 extraction routes are pending in the manifest.
+- **Exact tables**: Nomis `C2021TS030` / `TS030`, `KS209EW`, and `KS007`; NRS `UV16` (2001), `KS209SCb` (2011), and `UV205` (2022); NISRA `MS-B19`; Northern Ireland 2001/2011 extraction routes are pending in the manifest.
 - **Licence**: Contains public sector information licensed under the Open Government Licence v3.0.
 - **Our extraction script**: `scripts/build_uk_area_summary.R`.
 - **Retrieval recipe and hashes**: `docs/manifests/uk-census-religion-2001-2022.json`.
@@ -101,11 +102,12 @@ denominational yearbooks, diocesan archives, newspapers, and local directories.
 
 ### Status
 
-- **Tier**: A (buildable now)
-- **Build state**: boundaries built; census table extraction pending
-- **Last verified**: 2026-07-07; verification URLs:
-  <https://www.scotlandscensus.gov.uk/search-the-census> and
-  <https://services1.arcgis.com/etUJqgud3DEym3ls/arcgis/rest/services/OutputAreas2022_MHW/FeatureServer>
+- **Tier**: A (built)
+- **Build state**: council-area map live for 2001, 2011, and 2022 current-religion affiliation
+- **Last verified**: 2026-07-11; verification URLs:
+  <https://statistics.ukdataservice.ac.uk/dataset/scotland-s-census-2022-uv205-religion>,
+  <https://www.scotlandscensus.gov.uk/documents/2011-census-table-data-council-area-2011/>, and
+  <https://www.scotlandscensus.gov.uk/documents/2001-census-table-data-council-area/>
 
 ### Religious data over time
 
@@ -119,8 +121,8 @@ denominational yearbooks, diocesan archives, newspapers, and local directories.
 
 - Initial product: Scotland council-area 2019 boundaries from the Scotland's
   Census ArcGIS FeatureServer.
-- Census rows: the UK page carries council-area placeholder rows for 2001,
-  2011, and 2022 until a stable official table-builder export is pinned.
+- Census rows: the UK page carries live council-area current-religion counts
+  for 2001, 2011, and 2022 from NRS tables UV16, KS209SCb, and UV205.
 - Later refinement: output-area or data-zone geography remains the route for
   a higher resolution Scotland product.
 
@@ -134,15 +136,99 @@ denominational yearbooks, diocesan archives, newspapers, and local directories.
 
 ### First visualisation
 
-The initial UK page includes Scotland council-area boundaries for 2001, 2011,
-and 2022. Religious-affiliation counts remain pending because the official
-table-builder export route was not pinned in this build.
+Religious-affiliation percent by 2019 council area, censuses 2001, 2011, and
+2022, using NRS tables UV16 (2001 current religion), KS209SCb (2011), and UV205
+(2022).
+
+### Extraction record (2026-07-11)
+
+The council-area census tables are now pinned and wired into
+`scripts/build_uk_area_summary.R`. Raw sources are cached under
+`data/raw/uk_census/` (git-ignored) with a `.meta.json` sidecar carrying the
+sha256, the per-wave category frame, denominators, and licence quotes.
+
+**Routes pinned per wave.**
+
+- The first wave, 2022, uses NRS Table UV205 Religion at Council Area 2019
+  (CA2019), distributed as a stable unauthenticated CSV by the UK Data Service
+  CKAN mirror:
+  <https://ukds-ckan.s3.eu-west-1.amazonaws.com/2022/NRS/UV205/census_2022_UV205_religion_Local_authority_CA2019.csv>
+  (catalogue: <https://statistics.ukdataservice.ac.uk/dataset/scotland-s-census-2022-uv205-religion>).
+  The national row is the sibling `..._ctry.csv`. Joined to the boundary by area
+  name (32/32 exact).
+- The second wave, 2011, uses NRS Table KS209SCb Religion (Scottish
+  classification, current religion), read from `KS209SCb.csv` inside the
+  official council-area bulk zip:
+  <https://www.scotlandscensus.gov.uk/media/hjmd0oqr/council-area-blk.zip>
+  (page: <https://www.scotlandscensus.gov.uk/documents/2011-census-table-data-council-area-2011/>).
+  Keyed by council code; the national row is `S92000003`.
+- The third wave, 2001, uses NRS Table UV16 Current Religion (counts), read from
+  `uv16.csv` inside the official council-area bulk zip:
+  <https://www.scotlandscensus.gov.uk/media/evyneqox/council-area.zip>
+  (page: <https://www.scotlandscensus.gov.uk/documents/2001-census-table-data-council-area/>).
+  Keyed by council name; the national row is `SCOTLAND`. UV17 (religion of
+  upbringing) sits in the same zip and is deliberately excluded to hold the
+  current-religion construct across waves.
+
+**Category frames, verbatim per wave.** The frames differ across waves; each
+is recorded as published.
+
+- The 2001 UV16 frame is: `ALL PEOPLE`, `None`, `Church of Scotland`,
+  `Roman Catholic`, `Other Christian`, `Buddhist`, `Hindu`, `Jewish`, `Muslim`,
+  `Sikh`, `Another Religion`, `Not Answered`. The no-religion role is `None` and
+  the not-stated role is `Not Answered`.
+- The 2011 KS209SCb frame is: `All people`, `Church of Scotland`,
+  `Roman Catholic`, `Other Christian`, `Buddhist`, `Hindu`, `Jewish`, `Muslim`,
+  `Sikh`, `Other religion`, `No religion`, `Religion not stated`. The
+  no-religion role is `No religion` and the not-stated role is
+  `Religion not stated`.
+- The 2022 UV205 frame is: `All people`, `Church of Scotland`,
+  `Roman Catholic`, `Other Christian`, `Buddhist`, `Hindu`, `Jewish`, `Muslim`,
+  `Sikh`, `Pagan`, `Other religion`, `No religion`, `Religion not stated`. The
+  no-religion role is `No religion` and the not-stated role is
+  `Religion not stated`. 2022 adds `Pagan` as a distinct category that 2001 and
+  2011 fold into their other-religion cell.
+
+**Denominator.** Every wave follows the England and Wales convention already on
+the UK page: the stated denominator is all people minus the not-stated cell, the
+affiliated count is the stated denominator minus the no-religion cell, and both
+published shares are percentages of the stated denominator. All three waves
+publish all-people counts; the treatment is therefore consistent across the UK page.
+
+**Geography joins.** The 2001 and 2022 tables join to the CA2019 boundary by
+name; five 2001 spelling variants are normalised without a geography change
+(`Argyll & Bute`, `Dumfries & Galloway`, `Edinburgh, City of`, `Eilean Siar`,
+`Perth & Kinross` map to `Argyll and Bute`, `Dumfries and Galloway`,
+`City of Edinburgh`, `Na h-Eileanan Siar`, `Perth and Kinross`). The 2011 table
+uses 2011-vintage council codes; four were reissued in 2018-2019 with a minor
+boundary realignment; the build therefore applies the documented 1:1 succession
+`S12000015 -> S12000047` (Fife), `S12000024 -> S12000048` (Perth and Kinross),
+`S12000044 -> S12000050` (North Lanarkshire), and `S12000046 -> S12000049`
+(Glasgow City), flagging those four rows with
+`council_code_succession_2018_2019_minor_boundary_realignment`. The Fife and
+Perth and Kinross successions are confirmed against ONS area records; all four
+are corroborated by a population fingerprint against the 2022 by-name counts.
+
+**Reconciliation gates run.** Each wave joins 32/32 council areas. Council sums
+against the published national row reconcile exactly for 2001 (UV16 `SCOTLAND`)
+and 2011 (KS209SCb `S92000003`); the 2022 national residual is 1 person on the
+all-people total (stated -2, affiliated -3, no-religion +1), within the NRS
+Statistical Disclosure Control perturbation that UV205 carries. The build fails
+2001 and 2011 on any non-zero residual and 2022 beyond a documented 25-person
+tolerance.
+
+**Licence.** Crown copyright under the Open Government Licence v3.0. The cached
+2022 UV205 CSV carries the byte-string `Crown copyright 2024` in its footer; the
+UK Data Service catalogue labels the dataset `UK Open Government Licence (OGL)`
+v3; and the National Records of Scotland / Scotland's Census site footer states
+`All content is available under the Open Government Licence v3.0, except for
+graphic assets and where otherwise stated`, with `© Crown Copyright` on the
+Scotland's Census metadata pages.
 
 ### Build recipe
 
-1. Extract: pin an unauthenticated Scotland's Census table-builder export for
-   the 2022 religion topic, then reproduce `KS209SCb` for 2011 and the 2001
-   religion table.
+1. Extract: pinned. 2022 UV205 CA2019 CSV from the UK Data Service CKAN
+   mirror; 2011 `KS209SCb` and 2001 `UV16` from the NRS council-area bulk zips.
 2. Governed product: `area_summary` per `schemas/area-summary.schema.json`,
    with a tracked manifest per `docs/data-storage-pipeline.md`.
 3. Boundaries: the initial map joins to council-area 2019 boundaries; add
@@ -155,12 +241,14 @@ table-builder export route was not pinned in this build.
 
 ### Risks and open questions
 
-- The Scotland extraction route should use the official table-builder
-  download path or API session. Page scraping is out of scope.
-- The initial UK page exposes Scotland boundaries but no Scotland census
-  counts.
-- Religion categories differ across 2001, 2011, and 2022; publish raw source
-  labels alongside broad recodes.
+- The Scotland extraction uses official bulk downloads (NRS council-area zips
+  and the UK Data Service CKAN mirror), not page scraping.
+- 2022 UV205 carries NRS Statistical Disclosure Control perturbation, so
+  category cells need not sum exactly to totals and the national residual is a
+  few people; 2001 UV16 and 2011 KS209SCb reconcile exactly.
+- Religion categories differ across 2001, 2011, and 2022; the per-wave source
+  labels are recorded verbatim in the extraction record and the raw
+  `.meta.json` sidecars.
 
 ### Deep-history potential
 

@@ -21,6 +21,8 @@ dir.create(manifest_dir, showWarnings = FALSE, recursive = TRUE)
 
 stamp <- format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
 retrieval_date <- "2026-07-07"
+# the three scotland sources were re-pinned on a later date (sidecar record)
+sco_retrieval_date <- "2026-07-11"
 manifest_out <- file.path(manifest_dir, "uk-census-religion-2001-2022.json")
 git_commit <- tryCatch(
   system2("git", c("rev-parse", "--short", "HEAD"), stdout = TRUE, stderr = FALSE),
@@ -36,7 +38,9 @@ ew_2021_dataset_id <- "nomis-c2021ts030-lad2022-ew"
 ew_2011_dataset_id <- "nomis-c2011ks209ew-lad2011-ew"
 ew_2001_dataset_id <- "nomis-c2001ks007-lad2011-ew"
 sco_boundary_dataset_id <- "scotland-census-council-area-2019"
-sco_pending_dataset_id <- "scotland-census-religion-extraction-pending"
+sco_2022_dataset_id <- "scotland-census-2022-uv205-religion-ca2019"
+sco_2011_dataset_id <- "scotland-census-2011-ks209scb-religion-ca"
+sco_2001_dataset_id <- "scotland-census-2001-uv16-current-religion-ca"
 ni_boundary_dataset_id <- "osni-lgd-2012"
 ni_2021_dataset_id <- "nisra-census-2021-ms-b19-lgd"
 ni_pending_dataset_id <- "nisra-2001-2011-lgd-religion-extraction-pending"
@@ -57,7 +61,11 @@ raw_sources <- data.frame(
     "ons_lad11_lad21_ew_lookup.json",
     "scotland_council_area_2019.geojson",
     "osni_lgd_2012.geojson",
-    "nisra_census_2021_ms_b19.xlsx"
+    "nisra_census_2021_ms_b19.xlsx",
+    "scotland_census_2022_uv205_religion_ca2019.csv",
+    "scotland_census_2022_uv205_religion_scotland.csv",
+    "scotland_census_2011_council_area_blk.zip",
+    "scotland_census_2001_council_area.zip"
   ),
   url = c(
     "https://www.nomisweb.co.uk/api/v01/dataset/nm_2049_1.bulk.csv?time=latest&measures=20100&c2021_religion_10=0,1,9&geography=TYPE154",
@@ -70,7 +78,11 @@ raw_sources <- data.frame(
     "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/LAD11_LAD21_EW_LU/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&f=json",
     "https://services1.arcgis.com/etUJqgud3DEym3ls/ArcGIS/rest/services/CouncilArea2019_MHW/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson",
     "https://services2.arcgis.com/BdBkthNLO9mzGAMO/arcgis/rest/services/OSNI_Open_Data_Largescale_Boundaries__Local_Government_Districts_2012/FeatureServer/1/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson",
-    "https://www.nisra.gov.uk/system/files/statistics/census-2021-ms-b19.xlsx"
+    "https://www.nisra.gov.uk/system/files/statistics/census-2021-ms-b19.xlsx",
+    "https://ukds-ckan.s3.eu-west-1.amazonaws.com/2022/NRS/UV205/census_2022_UV205_religion_Local_authority_CA2019.csv",
+    "https://ukds-ckan.s3.eu-west-1.amazonaws.com/2022/NRS/UV205/census_2022_UV205_religion_ctry.csv",
+    "https://www.scotlandscensus.gov.uk/media/hjmd0oqr/council-area-blk.zip",
+    "https://www.scotlandscensus.gov.uk/media/evyneqox/council-area.zip"
   ),
   publisher = c(
     rep("Office for National Statistics via Nomis", 6),
@@ -78,10 +90,14 @@ raw_sources <- data.frame(
     "Office for National Statistics Open Geography Portal",
     "National Records of Scotland / Scotland's Census",
     "Ordnance Survey of Northern Ireland / OpenDataNI",
-    "Northern Ireland Statistics and Research Agency"
+    "Northern Ireland Statistics and Research Agency",
+    "National Records of Scotland / Scotland's Census via UK Data Service",
+    "National Records of Scotland / Scotland's Census via UK Data Service",
+    "National Records of Scotland / Scotland's Census",
+    "National Records of Scotland / Scotland's Census"
   ),
   licence_text = c(
-    rep("Contains public sector information licensed under the Open Government Licence v3.0.", 11)
+    rep("Contains public sector information licensed under the Open Government Licence v3.0.", 15)
   ),
   stringsAsFactors = FALSE
 )
@@ -124,7 +140,10 @@ row_count_file <- function(path) {
 for (index in seq_len(nrow(raw_sources))) {
   download_raw(raw_sources[["filename"]][index], raw_sources[["url"]][index])
 }
-raw_sources[["retrieval_date"]] <- retrieval_date
+raw_sources[["retrieval_date"]] <- ifelse(
+  grepl("^scotland_census_", raw_sources[["filename"]]),
+  sco_retrieval_date, retrieval_date
+)
 raw_sources[["sha256"]] <- vapply(file.path(raw_dir, raw_sources[["filename"]]), sha256_file, character(1))
 write.csv(raw_sources, file.path(raw_dir, "sources.csv"), row.names = FALSE)
 
@@ -402,6 +421,10 @@ write_summary <- function(summary, json_path, csv_path) {
 ew_boundary_raw <- file.path(raw_dir, "ons_lad_may_2021_uk_bgc.geojson")
 ew_lookup_raw <- file.path(raw_dir, "ons_lad11_lad21_ew_lookup.json")
 sco_boundary_raw <- file.path(raw_dir, "scotland_council_area_2019.geojson")
+sco_2022_ca_raw <- file.path(raw_dir, "scotland_census_2022_uv205_religion_ca2019.csv")
+sco_2022_nat_raw <- file.path(raw_dir, "scotland_census_2022_uv205_religion_scotland.csv")
+sco_2011_raw <- file.path(raw_dir, "scotland_census_2011_council_area_blk.zip")
+sco_2001_raw <- file.path(raw_dir, "scotland_census_2001_council_area.zip")
 ni_boundary_raw <- file.path(raw_dir, "osni_lgd_2012.geojson")
 ni_2021_raw <- file.path(raw_dir, "nisra_census_2021_ms_b19.xlsx")
 
@@ -583,6 +606,90 @@ ew_summary_json <- file.path(uk_dir, "area_summary_ew_ltla.json")
 ew_summary_csv <- file.path(uk_dir, "area_summary_ew_ltla.csv")
 write_summary(ew_summary, ew_summary_json, ew_summary_csv)
 
+# strip thousands separators and treat a bulk "-" suppression marker as zero.
+sco_num <- function(x) as.integer(gsub(",", "", ifelse(trimws(as.character(x)) == "-", "0", as.character(x))))
+
+# parse the Scotland 2022 UV205 SuperWEB2 long-format religion CSV (one row per
+# council area and religion) into total, no-religion, and not-stated counts.
+read_sco_2022_ca <- function(path) {
+  lines <- readLines(path, warn = FALSE)
+  data_lines <- grep('^"Individuals",', lines, value = TRUE)
+  parsed <- read.csv(text = data_lines, header = FALSE, stringsAsFactors = FALSE)
+  names(parsed) <- c("counting", "area_name", "religion", "count")
+  parsed[["count"]] <- as.integer(parsed[["count"]])
+  pick <- function(area, label) {
+    value <- parsed[["count"]][parsed[["area_name"]] == area & parsed[["religion"]] == label]
+    if (length(value) != 1) stop("2022 UV205 missing ", label, " for ", area, call. = FALSE)
+    value
+  }
+  areas <- unique(parsed[["area_name"]])
+  out <- do.call(rbind, lapply(areas, function(area) {
+    total <- pick(area, "All people")
+    no_religion <- pick(area, "No religion")
+    not_stated <- pick(area, "Religion not stated")
+    data.frame(year = 2022L, area_name = area, total = total,
+               no_religion = no_religion, not_stated = not_stated,
+               stringsAsFactors = FALSE)
+  }))
+  out[["stated"]] <- out[["total"]] - out[["not_stated"]]
+  out[["affiliated"]] <- out[["stated"]] - out[["no_religion"]]
+  out
+}
+
+# read the Scotland national religion row from the 2022 UV205 country CSV.
+read_sco_2022_national <- function(path) {
+  lines <- readLines(path, warn = FALSE)
+  data_lines <- grep('^"Individuals",', lines, value = TRUE)
+  parsed <- read.csv(text = data_lines, header = FALSE, stringsAsFactors = FALSE)
+  g <- function(label) as.integer(parsed[[4]][parsed[[3]] == label])
+  total <- g("All people"); not_stated <- g("Religion not stated"); no_religion <- g("No religion")
+  data.frame(total = total, no_religion = no_religion, not_stated = not_stated,
+             stated = total - not_stated, affiliated = total - not_stated - no_religion)
+}
+
+# parse the 2011 KS209SCb (Scottish classification) religion table from the NRS
+# council-area bulk zip; the national row is S92000003 and council rows are S12xxxxxxx.
+read_sco_2011_ks209scb <- function(zippath) {
+  raw <- read.csv(unz(zippath, "KS209SCb.csv"), stringsAsFactors = FALSE, check.names = FALSE)
+  data.frame(area_code = raw[[1]],
+             total = sco_num(raw[["All people"]]),
+             no_religion = sco_num(raw[["No religion"]]),
+             not_stated = sco_num(raw[["Religion not stated"]]),
+             stringsAsFactors = FALSE)
+}
+
+# parse the 2001 UV16 current-religion table (counts, keyed by council name,
+# national row "SCOTLAND") from the NRS council-area bulk zip. UV17 religion of
+# upbringing is deliberately ignored to keep the current-religion construct.
+read_sco_2001_uv16 <- function(zippath) {
+  raw <- read.csv(unz(zippath, "uv16.csv"), stringsAsFactors = FALSE, check.names = FALSE, skip = 5)
+  names(raw)[1] <- "area_name"
+  raw[["area_name"]] <- trimws(raw[["area_name"]])
+  raw <- raw[raw[["area_name"]] != "", ]
+  data.frame(area_name = raw[["area_name"]],
+             total = sco_num(raw[["ALL PEOPLE"]]),
+             no_religion = sco_num(raw[["None"]]),
+             not_stated = sco_num(raw[["Not Answered"]]),
+             stringsAsFactors = FALSE)
+}
+
+# documented 1:1 council-code succession (2018-2019 reissue with a minor boundary
+# realignment) mapping 2011 codes onto the shipped CA2019 boundary codes.
+sco_2011_code_succession <- c(
+  "S12000015" = "S12000047", # Fife
+  "S12000024" = "S12000048", # Perth and Kinross
+  "S12000044" = "S12000050", # North Lanarkshire
+  "S12000046" = "S12000049"  # Glasgow City
+)
+# 2001 name spelling variants normalised to the CA2019 boundary names (same areas).
+sco_2001_name_fixes <- c(
+  "Argyll & Bute" = "Argyll and Bute",
+  "Dumfries & Galloway" = "Dumfries and Galloway",
+  "Edinburgh, City of" = "City of Edinburgh",
+  "Eilean Siar" = "Na h-Eileanan Siar",
+  "Perth & Kinross" = "Perth and Kinross"
+)
+
 sco_boundary <- st_read(sco_boundary_raw, quiet = TRUE)
 sco_boundary[["area_code"]] <- sco_boundary[["CODE"]]
 sco_boundary[["area_name"]] <- sco_boundary[["NAME"]]
@@ -603,21 +710,110 @@ sco_boundary_simplification <- write_boundary_geojson(
 sco_tolerance <- sco_boundary_simplification[["sf_tolerance_m"]]
 sco_mapshaper_keep_percentage <- sco_boundary_simplification[["mapshaper_keep_percentage"]]
 sco_boundary_lookup <- st_drop_geometry(sco_boundary_export)
+
+# 2022 UV205, joined to the CA2019 boundary by area name.
+sco_2022 <- read_sco_2022_ca(sco_2022_ca_raw)
+sco_2022_national <- read_sco_2022_national(sco_2022_nat_raw)
+
+# 2011 KS209SCb, split into national and council rows, then remap the four
+# reissued council codes onto the CA2019 boundary codes before joining.
+sco_2011_raw_rows <- read_sco_2011_ks209scb(sco_2011_raw)
+sco_2011_national <- sco_2011_raw_rows[sco_2011_raw_rows[["area_code"]] == "S92000003", ]
+sco_2011 <- sco_2011_raw_rows[grepl("^S12", sco_2011_raw_rows[["area_code"]]), ]
+sco_2011[["code_succeeded"]] <- sco_2011[["area_code"]] %in% names(sco_2011_code_succession)
+sco_2011[["area_code"]] <- ifelse(sco_2011[["code_succeeded"]],
+                                  sco_2011_code_succession[sco_2011[["area_code"]]],
+                                  sco_2011[["area_code"]])
+sco_2011[["stated"]] <- sco_2011[["total"]] - sco_2011[["not_stated"]]
+sco_2011[["affiliated"]] <- sco_2011[["stated"]] - sco_2011[["no_religion"]]
+
+# 2001 UV16, split into national and council rows, then normalise the five
+# spelling variants onto the CA2019 boundary names before joining by name.
+sco_2001_raw_rows <- read_sco_2001_uv16(sco_2001_raw)
+sco_2001_national <- sco_2001_raw_rows[toupper(sco_2001_raw_rows[["area_name"]]) == "SCOTLAND", ]
+sco_2001 <- sco_2001_raw_rows[toupper(sco_2001_raw_rows[["area_name"]]) != "SCOTLAND", ]
+sco_2001_fix_index <- match(sco_2001[["area_name"]], names(sco_2001_name_fixes))
+sco_2001[["area_name"]] <- ifelse(!is.na(sco_2001_fix_index),
+                                  sco_2001_name_fixes[sco_2001_fix_index],
+                                  sco_2001[["area_name"]])
+sco_2001 <- sco_2001[sco_2001[["area_name"]] %in% sco_boundary_lookup[["area_name"]], ]
+sco_2001[["stated"]] <- sco_2001[["total"]] - sco_2001[["not_stated"]]
+sco_2001[["affiliated"]] <- sco_2001[["stated"]] - sco_2001[["no_religion"]]
+
+sco_2022_by_name <- split(sco_2022, sco_2022[["area_name"]])
+sco_2011_by_code <- split(sco_2011, sco_2011[["area_code"]])
+sco_2001_by_name <- split(sco_2001, sco_2001[["area_name"]])
+
 sco_rows <- unlist(lapply(seq_len(nrow(sco_boundary_lookup)), function(index) {
+  area_code <- sco_boundary_lookup[["area_code"]][[index]]
+  area_name <- sco_boundary_lookup[["area_name"]][[index]]
+  land_area <- sco_boundary_lookup[["land_area_sq_km"]][[index]]
   lapply(c(2001L, 2011L, 2022L), function(year) {
+    if (year == 2001L) {
+      counts <- sco_2001_by_name[[area_name]]
+      source_id <- sco_2001_dataset_id
+      quality <- ""
+    } else if (year == 2011L) {
+      counts <- sco_2011_by_code[[area_code]]
+      source_id <- sco_2011_dataset_id
+      quality <- if (!is.null(counts) && isTRUE(counts[["code_succeeded"]][[1]])) {
+        "council_code_succession_2018_2019_minor_boundary_realignment"
+      } else {
+        ""
+      }
+    } else {
+      counts <- sco_2022_by_name[[area_name]]
+      source_id <- sco_2022_dataset_id
+      quality <- ""
+    }
+    if (is.null(counts) || nrow(counts) != 1) {
+      stop("Scotland council join miss for ", area_code, " ", year, call. = FALSE)
+    }
     build_summary_row(
-      "UK", sco_boundary_set_id, "sco_ca",
-      sco_boundary_lookup[["area_code"]][[index]],
-      sco_boundary_lookup[["area_name"]][[index]],
-      year,
-      NULL,
-      sco_boundary_lookup[["land_area_sq_km"]][[index]],
-      c(sco_boundary_dataset_id, sco_pending_dataset_id),
-      "scotland_census_table_builder_extraction_pending"
+      "UK", sco_boundary_set_id, "sco_ca", area_code, area_name, year,
+      as.list(counts[1, c("total", "no_religion", "not_stated", "stated", "affiliated")]),
+      land_area,
+      c(source_id, sco_boundary_dataset_id),
+      quality
     )
   })
 }), recursive = FALSE)
+
+# assemble council-level counts across waves for national reconciliation.
+sco_counts <- rbind(
+  data.frame(year = 2001L, sco_2001[, c("total", "no_religion", "not_stated", "stated", "affiliated")]),
+  data.frame(year = 2011L, sco_2011[, c("total", "no_religion", "not_stated", "stated", "affiliated")]),
+  data.frame(year = 2022L, sco_2022[, c("total", "no_religion", "not_stated", "stated", "affiliated")])
+)
+
 sco_sources <- list(
+  source_dataset(
+    sco_2022_dataset_id,
+    "Census 2022 UV205 Religion, Council Area 2019",
+    "National Records of Scotland / Scotland's Census via UK Data Service",
+    "https://ukds-ckan.s3.eu-west-1.amazonaws.com/2022/NRS/UV205/census_2022_UV205_religion_Local_authority_CA2019.csv",
+    sco_2022_ca_raw,
+    "National Records of Scotland",
+    "The map uses All people, No religion, and Religion not stated at Council Area 2019 level. Statistical Disclosure Control perturbation is applied by NRS; category cells therefore need not sum exactly to totals."
+  ),
+  source_dataset(
+    sco_2011_dataset_id,
+    "Census 2011 KS209SCb Religion, Council Area",
+    "National Records of Scotland / Scotland's Census",
+    "https://www.scotlandscensus.gov.uk/media/hjmd0oqr/council-area-blk.zip",
+    sco_2011_raw,
+    "National Records of Scotland",
+    "Read from KS209SCb.csv (Scottish classification, current religion) inside the council-area bulk zip. Four reissued council codes are mapped onto the CA2019 boundary codes."
+  ),
+  source_dataset(
+    sco_2001_dataset_id,
+    "Census 2001 UV16 Current Religion, Council Area",
+    "National Records of Scotland / Scotland's Census",
+    "https://www.scotlandscensus.gov.uk/media/evyneqox/council-area.zip",
+    sco_2001_raw,
+    "National Records of Scotland",
+    "Read from uv16.csv (current religion counts) inside the council-area bulk zip. Religion of upbringing (uv17) is deliberately excluded. Five council names are normalised to the CA2019 spellings."
+  ),
   source_dataset(
     sco_boundary_dataset_id,
     "Council Area 2019 boundaries",
@@ -625,16 +821,7 @@ sco_sources <- list(
     "https://services1.arcgis.com/etUJqgud3DEym3ls/ArcGIS/rest/services/CouncilArea2019_MHW/FeatureServer",
     sco_boundary_raw,
     "National Records of Scotland",
-    "Council area boundaries are live; the census table-builder extraction remains pending."
-  ),
-  source_dataset(
-    sco_pending_dataset_id,
-    "Scotland census religion tables, extraction pending",
-    "National Records of Scotland / Scotland's Census",
-    "https://www.scotlandscensus.gov.uk/search-the-census",
-    NULL,
-    "National Records of Scotland",
-    "The table-builder search route was verified, but no stable unauthenticated CSV/XLSX export was pinned in this sitting."
+    "Council Area 2019 geometry carrying the 32 current council-area codes and names."
   )
 )
 sco_summary <- list(
@@ -653,13 +840,13 @@ sco_summary <- list(
     source_dataset_id = NULL,
     snapshot_date = NULL,
     basis = "no Scotland place-of-worship snapshot is included in this country data-map release",
-    notes = "Census religious-affiliation data is pending for Scotland council areas."
+    notes = "The Scotland level exposes census current-religion affiliation for 2001 (UV16), 2011 (KS209SCb), and 2022 (UV205) at council-area level."
   ),
   source_datasets = sco_sources,
   indicators = religion_indicators(
-    "2001, 2011, 2022 pending",
+    "2001, 2011, 2022",
     "Scotland council areas, 2019 boundary set",
-    "The official table-builder extraction remains pending."
+    "Current religion from NRS council-area tables. 2001 UV16 and 2011 KS209SCb reconcile exactly to the national row; 2022 UV205 carries NRS Statistical Disclosure Control perturbation; the verified national residuals are pinned (+1, -2, -3, +1) and the build stops on drift."
   ),
   visual_layers = religion_layers("uk-sco-ca", "Scotland council-area"),
   rows = sco_rows
@@ -864,6 +1051,62 @@ if (ni_validation[["total_difference"]] != 0 ||
   stop("Northern Ireland validation against NISRA country row failed", call. = FALSE)
 }
 
+# compare Scotland council sums with the published national religion row.
+validate_sco_national <- function(area_rows, year, national) {
+  area_year <- area_rows[area_rows[["year"]] == year, ]
+  nat_total <- national[["total"]][[1]]
+  nat_stated <- national[["stated"]][[1]]
+  nat_affiliated <- national[["affiliated"]][[1]]
+  nat_no_religion <- national[["no_religion"]][[1]]
+  list(
+    year = year,
+    area_count = nrow(area_year),
+    country_total = nat_total,
+    area_total_sum = sum(area_year[["total"]]),
+    total_difference = sum(area_year[["total"]]) - nat_total,
+    country_stated = nat_stated,
+    area_stated_sum = sum(area_year[["stated"]]),
+    stated_difference = sum(area_year[["stated"]]) - nat_stated,
+    country_affiliated = nat_affiliated,
+    area_affiliated_sum = sum(area_year[["affiliated"]]),
+    affiliated_difference = sum(area_year[["affiliated"]]) - nat_affiliated,
+    country_no_religion = nat_no_religion,
+    area_no_religion_sum = sum(area_year[["no_religion"]]),
+    no_religion_difference = sum(area_year[["no_religion"]]) - nat_no_religion
+  )
+}
+sco_2011_national[["stated"]] <- sco_2011_national[["total"]] - sco_2011_national[["not_stated"]]
+sco_2011_national[["affiliated"]] <- sco_2011_national[["stated"]] - sco_2011_national[["no_religion"]]
+sco_2001_national[["stated"]] <- sco_2001_national[["total"]] - sco_2001_national[["not_stated"]]
+sco_2001_national[["affiliated"]] <- sco_2001_national[["stated"]] - sco_2001_national[["no_religion"]]
+sco_validation <- list(
+  validate_sco_national(sco_counts, 2001L, sco_2001_national),
+  validate_sco_national(sco_counts, 2011L, sco_2011_national),
+  validate_sco_national(sco_counts, 2022L, sco_2022_national)
+)
+# 2001 UV16 and 2011 KS209SCb reconcile exactly. 2022 UV205 carries NRS
+# Statistical Disclosure Control perturbation; NRS documents the method
+# ("cells might not sum") without publishing a numeric bound, and no bound
+# may be invented (estonia rule). The 2022 gate therefore PINS the verified
+# national residuals (council-area sums minus the published national row,
+# checked against the printed source at review) and stops on any drift —
+# the ci/lc pinned-discrepancy pattern, with per-product disclosure.
+sco_pinned_residuals <- list(
+  `2001` = c(total = 0L, stated = 0L, affiliated = 0L, no_religion = 0L),
+  `2011` = c(total = 0L, stated = 0L, affiliated = 0L, no_religion = 0L),
+  `2022` = c(total = 1L, stated = -2L, affiliated = -3L, no_religion = 1L)
+)
+if (any(vapply(sco_validation, function(result) {
+  pinned <- sco_pinned_residuals[[as.character(result[["year"]])]]
+  result[["area_count"]] != nrow(sco_boundary_lookup) ||
+    result[["total_difference"]] != pinned[["total"]] ||
+    result[["stated_difference"]] != pinned[["stated"]] ||
+    result[["affiliated_difference"]] != pinned[["affiliated"]] ||
+    result[["no_religion_difference"]] != pinned[["no_religion"]]
+}, logical(1)))) {
+  stop("Scotland validation against national religion rows failed", call. = FALSE)
+}
+
 # create a manifest durable-file record for one generated output.
 manifest_file_record <- function(path, content, licence_status = "accepted") {
   list(
@@ -883,8 +1126,8 @@ durable_files <- list(
   manifest_file_record(ew_summary_json, "England and Wales local-authority area summary, 2001-2021."),
   manifest_file_record(ew_summary_csv, "Flattened England and Wales local-authority area summary, 2001-2021."),
   manifest_file_record(ew_boundary_out, "Simplified England and Wales local-authority boundaries, May 2021."),
-  manifest_file_record(sco_summary_json, "Scotland council-area pending area summary, 2001-2022."),
-  manifest_file_record(sco_summary_csv, "Flattened Scotland council-area pending area summary, 2001-2022."),
+  manifest_file_record(sco_summary_json, "Scotland council-area area summary, 2001, 2011, and 2022."),
+  manifest_file_record(sco_summary_csv, "Flattened Scotland council-area area summary, 2001, 2011, and 2022."),
   manifest_file_record(sco_boundary_out, "Simplified Scotland council-area boundaries, 2019."),
   manifest_file_record(ni_summary_json, "Northern Ireland LGD area summary, 2021 live with 2001/2011 placeholders."),
   manifest_file_record(ni_summary_csv, "Flattened Northern Ireland LGD area summary, 2021 live with 2001/2011 placeholders."),
@@ -919,10 +1162,10 @@ manifest <- list(
       census_levels = c("ew_ltla", "sco_ca", "ni_lgd"),
       live_waves = list(
         ew_ltla = c("2001", "2011", "2021"),
+        sco_ca = c("2001", "2011", "2022"),
         ni_lgd = c("2021")
       ),
       pending_waves = list(
-        sco_ca = c("2001", "2011", "2022"),
         ni_lgd = c("2001", "2011")
       ),
       denominator = "all usual residents minus not answered or religion not stated",
@@ -944,13 +1187,13 @@ manifest <- list(
     source_dataset_ids = c(
       ew_2021_dataset_id, ew_2011_dataset_id, ew_2001_dataset_id,
       ew_boundary_dataset_id, ew_lookup_dataset_id,
-      sco_boundary_dataset_id, sco_pending_dataset_id,
+      sco_2022_dataset_id, sco_2011_dataset_id, sco_2001_dataset_id, sco_boundary_dataset_id,
       ni_2021_dataset_id, ni_boundary_dataset_id, ni_pending_dataset_id
     ),
     source_urls = raw_sources[["url"]],
-    retrieved_at = paste0(retrieval_date, "T00:00:00Z"),
+    retrieved_at = paste0(sco_retrieval_date, "T00:00:00Z"),
     licence = "Contains public sector information licensed under the Open Government Licence v3.0.",
-    citation = "Office for National Statistics via Nomis, Census 2001 KS007, Census 2011 KS209EW, and Census 2021 TS030; Office for National Statistics Open Geography Portal; National Records of Scotland / Scotland's Census; Ordnance Survey of Northern Ireland / OpenDataNI; Northern Ireland Statistics and Research Agency, Census 2021 MS-B19."
+    citation = "Office for National Statistics via Nomis, Census 2001 KS007, Census 2011 KS209EW, and Census 2021 TS030; Office for National Statistics Open Geography Portal; National Records of Scotland / Scotland's Census, Census 2001 UV16, Census 2011 KS209SCb, and Census 2022 UV205; Ordnance Survey of Northern Ireland / OpenDataNI; Northern Ireland Statistics and Research Agency, Census 2021 MS-B19."
   ),
   input_manifests = list(),
   durable_files = durable_files,
@@ -962,7 +1205,10 @@ manifest <- list(
     ew_2021_total_difference = ew_validation[[3]][["total_difference"]],
     sco_area_count = nrow(sco_boundary_lookup),
     sco_rows = length(sco_rows),
-    sco_live_rows = 0L,
+    sco_live_rows = nrow(sco_counts),
+    sco_2001_total_difference = sco_validation[[1]][["total_difference"]],
+    sco_2011_total_difference = sco_validation[[2]][["total_difference"]],
+    sco_2022_total_difference = sco_validation[[3]][["total_difference"]],
     ni_area_count = nrow(ni_boundary_lookup),
     ni_rows = length(ni_rows),
     ni_live_rows = nrow(ni_2021),
@@ -976,15 +1222,16 @@ manifest <- list(
     ),
     warnings = c(
       "England and Wales national-total residuals are within the 25-person build tolerance.",
-      "Scotland council-area census counts are pending extraction.",
+      "Scotland 2022 UV205 carries NRS Statistical Disclosure Control perturbation; the verified national residuals are pinned (+1, -2, -3, +1) and the build stops on drift. 2001 UV16 and 2011 KS209SCb reconcile exactly.",
+      "Scotland 2011 rows for Fife, Perth and Kinross, Glasgow City, and North Lanarkshire use a documented 1:1 council-code succession (2018-2019 minor boundary realignment) onto the CA2019 boundary; these rows carry a quality flag.",
       "Northern Ireland 2001 and 2011 LGD census counts are pending extraction."
     ),
-    notes = "England and Wales join coverage is 331/331 for 2001, 2011, and 2021. Scotland has 32 council-area boundary rows for each placeholder year and 0 live census rows. Northern Ireland has 11/11 live 2021 LGD rows and placeholder rows for 2001 and 2011."
+    notes = "England and Wales join coverage is 331/331 for 2001, 2011, and 2021. Scotland join coverage is 32/32 for 2001, 2011, and 2022 live census rows. Northern Ireland has 11/11 live 2021 LGD rows and placeholder rows for 2001 and 2011."
   ),
   privacy = "public",
   licence_status = "accepted",
   downstream_status = "public",
-  notes = "Raw files are downloaded to data/raw/uk_census. Derived summaries and simplified boundaries are committed. The product uses census current-religion affiliation throughout. Religion or religion brought up in/community background is not mixed into the affiliation metric."
+  notes = "Raw files are downloaded to data/raw/uk_census. The England and Wales and Northern Ireland sources were retrieved 2026-07-07; the three Scotland sources were re-pinned 2026-07-11 (per-file dates in the raw cache sources.csv and .meta.json sidecars); retrieved_at carries the latest date. Derived summaries and simplified boundaries are committed. The product uses census current-religion affiliation throughout. Religion or religion brought up in/community background is not mixed into the affiliation metric."
 )
 
 write(toJSON(manifest, auto_unbox = TRUE, pretty = TRUE, null = "null", na = "null"), manifest_out)
