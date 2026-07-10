@@ -47,6 +47,8 @@ The 64 boundary features join the 64 census districts exactly after an anglicise
 
 The 2022 National Report front matter asserts copyright (Bengali "কর্পোইট ©") and carries ISBN 978-984-475-201-6. No named open-reuse licence was located for the BBS census publications. The derived product is therefore held in staging: the governed area summary, simplified boundary, and manifest are written, but the product is marked `downstream_status: staged` and `licence_status: needs_review` and must not ship to production until BBS reuse terms are established or a rights review sets a lawful release basis. The boundary licence (CC BY 3.0 IGO) is independent and clean. Raw PDFs remain in the git-ignored cache.
 
+A conductor follow-up (2026-07-11) examined the Bangladesh Open Data portal (data.gov.bd), whose footer names BBS among the implementers ("Planning and Implementation: PMO, Cabinet, BCC, BBS and SID"). Its [Terms of Use](https://data.gov.bd/terms-of-use) (cached: `datagovbd_terms_of_use.html`, SHA-256 `52528afa99899534ca150f0864ec8e9c0de5b41cb6b6d7e856ec73aaefcf61a1`) grant permission "to print all the information available in the websites without any deletion, addition or modification" and grant nothing further; the terms establish no derivative-product or redistribution basis, and the modification clause cuts against one. The portal route does not resolve the census reuse question.
+
 ## Retrieval record
 
 All inputs were retrieved 2026-07-10. `git check-ignore -v` confirms `.gitignore` line 120 ignores `data/`, including every file under `data/raw/bd_census/`. Each cached input has a sibling `.meta.json`.
