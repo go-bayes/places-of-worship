@@ -1,0 +1,717 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:no-membership:no:2005-2025:a10029fe3f0d",
+  "dataset_id": "no-membership:no:2005-2025:ssb-geonorge",
+  "dataset_version_id": "no-membership:no:2005-2025:ssb-geonorge:a10029fe3f0d",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "no-membership",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "NO"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": "12-31",
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-10T06:30:08Z",
+  "created_by": "scripts/build_no_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_no_area_summary.R",
+    "git_commit": "3a41498",
+    "command": "Rscript scripts/build_no_area_summary.R",
+    "parameters": {
+      "years": [
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "geography": "eleven Church of Norway dioceses",
+      "boundary_vintage": "2025-01-01",
+      "boundary_route": "direct Kartverket Geonorge Soknegrenser Bispedømme surfaces",
+      "concordance": "not applicable because the successful direct-polygon route requires no kommune dissolve",
+      "source_category_code": "Medlemmer",
+      "source_category_label_verbatim": "Members of the Church of NorwayMedlemmer av Dnk Members of the Church of Norway",
+      "construct_notes": [
+        "Counts follow SSB's published diocese assignment for each reference year. The drawn boundaries use the 2025-01-01 vintage. Rindal parish moved from Møre to Nidaros on 1 January 2020. Early-year counts near transferred parishes may therefore not align exactly with the drawn borders. Neither table 06929 metadata nor SSB's About the statistics documentation states whether the historical series is rebased to current dioceses. Sources: https://www.ssb.no/en/statbank1/table/06929; https://www.ssb.no/en/kultur-og-fritid/religion-og-livssyn/statistikk/den-norske-kirke; https://www.kirken.no/nn-NO/bispedommer/more/aktuelt/endringar%20i%20bisped%C3%B8megrenser%20og%20prostigrenser%20fr%C3%A5%202020/.",
+        "SSB's Church of Norway statistics and the mapped polygons both exclude Svalbard. Nord-Hålogaland diocese formally includes Svalbard, while the shipped polygons end at about 71.4° N. Sources: https://www.ssb.no/en/kultur-og-fritid/religion-og-livssyn/statistikk/den-norske-kirke; https://www.kirken.no/nb-NO/bispedommer/nord-haalogaland/biskop%20og%20bisped%C3%B8mme2/.",
+        "Across 2005-2025, SSB's unallocated Unknown diocese category ranges from 0 to 25,923 members, or 0 to 0.6758% of the published national total. SSB table 06929 states verbatim: \"Unknown diocese do not include members living aboard.\" Source: https://www.ssb.no/en/statbank1/table/06929."
+      ],
+      "indicators_block_declaration": "The legacy religious_affiliation_count field carries Church of Norway administrative member-register counts. All percentage, population, no-religion, place, and land-area fields are null.",
+      "ssb_diocese_api_request": {
+        "query": [
+          {
+            "code": "Bispedomme",
+            "selection": {
+              "filter": "all",
+              "values": [
+                "*"
+              ]
+            }
+          },
+          {
+            "code": "ContentsCode",
+            "selection": {
+              "filter": "item",
+              "values": [
+                "Medlemmer"
+              ]
+            }
+          },
+          {
+            "code": "Tid",
+            "selection": {
+              "filter": "all",
+              "values": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "response": {
+          "format": "json-stat2"
+        }
+      },
+      "ssb_national_api_request": {
+        "query": [
+          {
+            "code": "ContentsCode",
+            "selection": {
+              "filter": "item",
+              "values": [
+                "Medlemmer"
+              ]
+            }
+          },
+          {
+            "code": "Tid",
+            "selection": {
+              "filter": "all",
+              "values": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "response": {
+          "format": "json-stat2"
+        }
+      },
+      "geonorge_order_request": {
+        "downloadAsBundle": false,
+        "orderLines": [
+          {
+            "areas": [
+              {
+                "code": "0000",
+                "name": "Hele landet",
+                "type": "landsdekkende"
+              }
+            ],
+            "formats": [
+              {
+                "name": "SOSI"
+              }
+            ],
+            "metadataUuid": "289d459c-0390-4000-84f3-88982f2cdb0c",
+            "projections": [
+              {
+                "code": "25833",
+                "name": "EUREF89 UTM sone 33, 2d",
+                "codespace": "http://www.opengis.net/def/crs/EPSG/0/25833"
+              }
+            ]
+          }
+        ],
+        "usageGroup": "research",
+        "softwareClient": "places-of-worship",
+        "softwareClientVersion": "1"
+      },
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "-clean",
+        "keep_percent": 10,
+        "bytes": 243129,
+        "byte_ceiling": 800000
+      },
+      "hard_gates": {
+        "reconciliation": {
+          "status": "passed",
+          "years": [
+            {
+              "year": 2005,
+              "mapped_diocese_sum": 3938723,
+              "unknown_diocese_count": 0,
+              "all_ssb_diocese_categories_sum": 3938723,
+              "ssb_published_national_total": 3938723,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2006,
+              "mapped_diocese_sum": 3871006,
+              "unknown_diocese_count": 0,
+              "all_ssb_diocese_categories_sum": 3871006,
+              "ssb_published_national_total": 3871006,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2007,
+              "mapped_diocese_sum": 3873847,
+              "unknown_diocese_count": 0,
+              "all_ssb_diocese_categories_sum": 3873847,
+              "ssb_published_national_total": 3873847,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2008,
+              "mapped_diocese_sum": 3874823,
+              "unknown_diocese_count": 0,
+              "all_ssb_diocese_categories_sum": 3874823,
+              "ssb_published_national_total": 3874823,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2009,
+              "mapped_diocese_sum": 3848841,
+              "unknown_diocese_count": 0,
+              "all_ssb_diocese_categories_sum": 3848841,
+              "ssb_published_national_total": 3848841,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2010,
+              "mapped_diocese_sum": 3835477,
+              "unknown_diocese_count": 0,
+              "all_ssb_diocese_categories_sum": 3835477,
+              "ssb_published_national_total": 3835477,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2011,
+              "mapped_diocese_sum": 3832679,
+              "unknown_diocese_count": 18466,
+              "all_ssb_diocese_categories_sum": 3851145,
+              "ssb_published_national_total": 3851145,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2012,
+              "mapped_diocese_sum": 3829300,
+              "unknown_diocese_count": 18995,
+              "all_ssb_diocese_categories_sum": 3848295,
+              "ssb_published_national_total": 3848295,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2013,
+              "mapped_diocese_sum": 3825784,
+              "unknown_diocese_count": 17937,
+              "all_ssb_diocese_categories_sum": 3843721,
+              "ssb_published_national_total": 3843721,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2014,
+              "mapped_diocese_sum": 3810050,
+              "unknown_diocese_count": 25923,
+              "all_ssb_diocese_categories_sum": 3835973,
+              "ssb_published_national_total": 3835973,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2015,
+              "mapped_diocese_sum": 3789371,
+              "unknown_diocese_count": 9995,
+              "all_ssb_diocese_categories_sum": 3799366,
+              "ssb_published_national_total": 3799366,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2016,
+              "mapped_diocese_sum": 3750705,
+              "unknown_diocese_count": 7365,
+              "all_ssb_diocese_categories_sum": 3758070,
+              "ssb_published_national_total": 3758070,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2017,
+              "mapped_diocese_sum": 3735488,
+              "unknown_diocese_count": 5432,
+              "all_ssb_diocese_categories_sum": 3740920,
+              "ssb_published_national_total": 3740920,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2018,
+              "mapped_diocese_sum": 3717182,
+              "unknown_diocese_count": 7675,
+              "all_ssb_diocese_categories_sum": 3724857,
+              "ssb_published_national_total": 3724857,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2019,
+              "mapped_diocese_sum": 3679850,
+              "unknown_diocese_count": 6865,
+              "all_ssb_diocese_categories_sum": 3686715,
+              "ssb_published_national_total": 3686715,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2020,
+              "mapped_diocese_sum": 3649292,
+              "unknown_diocese_count": 6264,
+              "all_ssb_diocese_categories_sum": 3655556,
+              "ssb_published_national_total": 3655556,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2021,
+              "mapped_diocese_sum": 3522558,
+              "unknown_diocese_count": 3575,
+              "all_ssb_diocese_categories_sum": 3526133,
+              "ssb_published_national_total": 3526133,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2022,
+              "mapped_diocese_sum": 3496439,
+              "unknown_diocese_count": 3999,
+              "all_ssb_diocese_categories_sum": 3500438,
+              "ssb_published_national_total": 3500438,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2023,
+              "mapped_diocese_sum": 3472195,
+              "unknown_diocese_count": 4016,
+              "all_ssb_diocese_categories_sum": 3476211,
+              "ssb_published_national_total": 3476211,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2024,
+              "mapped_diocese_sum": 3449013,
+              "unknown_diocese_count": 3666,
+              "all_ssb_diocese_categories_sum": 3452679,
+              "ssb_published_national_total": 3452679,
+              "difference": 0,
+              "exact": true
+            },
+            {
+              "year": 2025,
+              "mapped_diocese_sum": 3427657,
+              "unknown_diocese_count": 3566,
+              "all_ssb_diocese_categories_sum": 3431223,
+              "ssb_published_national_total": 3431223,
+              "difference": 0,
+              "exact": true
+            }
+          ]
+        },
+        "concordance_completeness": {
+          "status": "not_applicable_direct_polygon_route",
+          "coverage_status": "passed",
+          "overlap_tolerance_sq_m": 1,
+          "source": {
+            "hashes": {
+              "01": "81d4dc994ecb1492a0382e4cafebb3303badba1c3ba65c9db63b1d4d9545db0a",
+              "02": "ddd8c8e92b574c23cb3f6c3d67b92126bfcc5636319b1ac7e36c4a53c8c7b911",
+              "03": "bd26445f97fc817430692fbf37573a2cb561e0f3fb786f90d906724af8547dd3",
+              "04": "c7e2592f0c0b6cbcbb949e8aba94523aefcba3873884ad6dcb47d5bec6961fcb",
+              "05": "17ea85a6ee9b0121124bcff3bfc1eb21325ef02469681a75ee0181dd2bc37bb2",
+              "06": "1daccc0158ae8d970182bff7232864f3926a9e589f5055e0d8e51487741af73d",
+              "07": "771c725eece6494f74d85d40b7689d908e49b97ced42d81dcf824f4a8f3edab6",
+              "08": "e4d0689ee0fbce8c9820090f318c40456bedf256d7969bccbf6b9aaba721a07e",
+              "09": "87eac2acb7635ea631b08baec68ba69a1712bd85ba6787222779165acd6d3897",
+              "10": "7d749d4cc6ca3b2ad49f65dcc430347a7681781c2476297a741ec51b3b047487",
+              "11": "ef0580698e68d119910b6fa57095136bc61363d4d000f56c8f92f49e792d4c8c"
+            },
+            "overlap_sq_m": 0.00177,
+            "interior_gap_count": 0,
+            "coverage_sq_km": 470107.2744
+          },
+          "simplified": {
+            "hashes": {
+              "01": "6efadb8b844d44edc7d80141a25b403a4ca8e235693452b18f52a5d4cd127d37",
+              "02": "d9a84d40e170d3327979a1d3f30a0164b91c36f5a5ec5da67d9bdaf99b5c2eac",
+              "03": "bd1a0954047a97c518ee4f1ea6f25e419e88b9c30ac024ec858a8742a294ccb2",
+              "04": "5d13a2a06091f366dfb67ea9ac91b7acc5d357f320b02c1d4e7a10c4084aa012",
+              "05": "9b65379aa582258f38f8708c5843b4889a2d1e682c20a4bfd1d71f67267f007b",
+              "06": "cc3950197100cf859067912c8f74a32787d9979d6643a3117469944e85f471a9",
+              "07": "5a204b88908d3ee64f6b47ee9849114a082bb8067dacd4f309302d42a6ef8ae0",
+              "08": "6071e9fba69a741e05fcdf3288bca5a446de805fa4dfb17808f9d65e1d189aed",
+              "09": "dfb9624f9825d6355a357ca33dae025a8eb7f3b0a35eec1cd84d28aa5997d31e",
+              "10": "682842cd460bb850e37fcc4ac7909c53cf5bd806899112343dcd3570d1faf6eb",
+              "11": "e30501791f94216969b07340e844f5a6be8b299c55b918101369e1f4d005ee13"
+            },
+            "overlap_sq_m": -0.000183,
+            "interior_gap_count": 0,
+            "coverage_sq_km": 470107.393
+          }
+        },
+        "geometry": {
+          "status": "passed",
+          "feature_count": 11,
+          "distinct_geometry_hash_count": 11,
+          "hashes": {
+            "01": "6efadb8b844d44edc7d80141a25b403a4ca8e235693452b18f52a5d4cd127d37",
+            "02": "d9a84d40e170d3327979a1d3f30a0164b91c36f5a5ec5da67d9bdaf99b5c2eac",
+            "03": "bd1a0954047a97c518ee4f1ea6f25e419e88b9c30ac024ec858a8742a294ccb2",
+            "04": "5d13a2a06091f366dfb67ea9ac91b7acc5d357f320b02c1d4e7a10c4084aa012",
+            "05": "9b65379aa582258f38f8708c5843b4889a2d1e682c20a4bfd1d71f67267f007b",
+            "06": "cc3950197100cf859067912c8f74a32787d9979d6643a3117469944e85f471a9",
+            "07": "5a204b88908d3ee64f6b47ee9849114a082bb8067dacd4f309302d42a6ef8ae0",
+            "08": "6071e9fba69a741e05fcdf3288bca5a446de805fa4dfb17808f9d65e1d189aed",
+            "09": "dfb9624f9825d6355a357ca33dae025a8eb7f3b0a35eec1cd84d28aa5997d31e",
+            "10": "682842cd460bb850e37fcc4ac7909c53cf5bd806899112343dcd3570d1faf6eb",
+            "11": "e30501791f94216969b07340e844f5a6be8b299c55b918101369e1f4d005ee13"
+          }
+        },
+        "source_qualifier": {
+          "status": "passed",
+          "unknown_diocese_verbatim": "Unknown diocese do not include members living aboard."
+        },
+        "svalbard_exclusion": {
+          "status": "passed",
+          "mapped_max_latitude": 71.3849
+        },
+        "year_coverage": {
+          "status": "passed",
+          "first_year": 2005,
+          "last_year": 2025,
+          "count": 21
+        },
+        "provenance": {
+          "status": "passed",
+          "raw_sources": [
+            {
+              "uri": "data/raw/no_membership/ssb_06929_metadata_en.json",
+              "url": "https://data.ssb.no/api/v0/en/table/DNKMedlemmer",
+              "method": "GET",
+              "request_body": null,
+              "format": "json",
+              "bytes": 1673,
+              "sha256": "c9ad45fc5a382b4f404c20bb28bb5704d02c09435cc340bae201501d6ecef179",
+              "source_dataset_id": "ssb-06929-church-of-norway-members-diocese-2005-2025",
+              "used_in_public_product": true,
+              "retrieved_at": "2026-07-10T06:08:37Z",
+              "http_status": 200,
+              "licence": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+              "notes": "SSB table 06929 metadata with category codes, labels, and 2005-2025 years."
+            },
+            {
+              "uri": "data/raw/no_membership/ssb_06929_members_by_diocese_2005_2025.json",
+              "url": "https://data.ssb.no/api/v0/en/table/DNKMedlemmer",
+              "method": "POST",
+              "request_body": {
+                "query": [
+                  {
+                    "code": "Bispedomme",
+                    "selection": {
+                      "filter": "all",
+                      "values": [
+                        "*"
+                      ]
+                    }
+                  },
+                  {
+                    "code": "ContentsCode",
+                    "selection": {
+                      "filter": "item",
+                      "values": [
+                        "Medlemmer"
+                      ]
+                    }
+                  },
+                  {
+                    "code": "Tid",
+                    "selection": {
+                      "filter": "all",
+                      "values": [
+                        "*"
+                      ]
+                    }
+                  }
+                ],
+                "response": {
+                  "format": "json-stat2"
+                }
+              },
+              "format": "json-stat2",
+              "bytes": 5203,
+              "sha256": "cf651b2f270a45286b6cb9222dd55cb4b13952ef3d69027e99c1ad769e6b50dc",
+              "source_dataset_id": "ssb-06929-church-of-norway-members-diocese-2005-2025",
+              "used_in_public_product": true,
+              "retrieved_at": "2026-07-10T06:08:37Z",
+              "http_status": 200,
+              "licence": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+              "notes": "Twelve SSB geography categories: eleven mapped dioceses and Unknown diocese."
+            },
+            {
+              "uri": "data/raw/no_membership/ssb_06929_members_national_2005_2025.json",
+              "url": "https://data.ssb.no/api/v0/en/table/DNKMedlemmer",
+              "method": "POST",
+              "request_body": {
+                "query": [
+                  {
+                    "code": "ContentsCode",
+                    "selection": {
+                      "filter": "item",
+                      "values": [
+                        "Medlemmer"
+                      ]
+                    }
+                  },
+                  {
+                    "code": "Tid",
+                    "selection": {
+                      "filter": "all",
+                      "values": [
+                        "*"
+                      ]
+                    }
+                  }
+                ],
+                "response": {
+                  "format": "json-stat2"
+                }
+              },
+              "format": "json-stat2",
+              "bytes": 3038,
+              "sha256": "91212860fd6663b108b72870e13ecc8e87ede580f84d2aba34a2f46401a4fc88",
+              "source_dataset_id": "ssb-06929-church-of-norway-members-diocese-2005-2025",
+              "used_in_public_product": true,
+              "retrieved_at": "2026-07-10T06:08:37Z",
+              "http_status": 200,
+              "licence": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+              "notes": "Published national member series returned by omitting the optional diocese dimension."
+            },
+            {
+              "uri": "data/raw/no_membership/ssb_licence_en.html",
+              "url": "https://www.ssb.no/en/diverse/lisens",
+              "method": "GET",
+              "request_body": null,
+              "format": "html",
+              "bytes": 166663,
+              "sha256": "20ae0a87d00cdaca0864e032767db824697e3c67130193c8e429cfad0ac7f2a7",
+              "source_dataset_id": "ssb-06929-church-of-norway-members-diocese-2005-2025",
+              "used_in_public_product": false,
+              "retrieved_at": "2026-07-10T06:08:37Z",
+              "http_status": 200,
+              "licence": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+              "notes": "SSB licence page confirming CC BY 4.0."
+            },
+            {
+              "uri": "data/raw/no_membership/geonorge_soknegrenser_metadata.json",
+              "url": "https://kartkatalog.geonorge.no/api/getdata/289d459c-0390-4000-84f3-88982f2cdb0c",
+              "method": "GET",
+              "request_body": null,
+              "format": "json",
+              "bytes": 6440,
+              "sha256": "760b3131071ce8fc403e54222456d3607674092998af59e59a2aff743bfaedda",
+              "source_dataset_id": "kartverket-geonorge-soknegrenser-diocese-2025",
+              "used_in_public_product": true,
+              "retrieved_at": "2026-07-10T06:08:37Z",
+              "http_status": 200,
+              "licence": "No conditions apply to access and use",
+              "notes": "Geonorge metadata confirming direct diocese surfaces and the 1 January 2025 effective date."
+            },
+            {
+              "uri": "data/raw/no_membership/geonorge_soknegrenser_capabilities.json",
+              "url": "https://nedlasting.geonorge.no/api/capabilities/289d459c-0390-4000-84f3-88982f2cdb0c",
+              "method": "GET",
+              "request_body": null,
+              "format": "json",
+              "bytes": 999,
+              "sha256": "a421f08cf9714e822e6736900ad9eb17a6b4be4368a8bba5dbc59969c611ccf3",
+              "source_dataset_id": "kartverket-geonorge-soknegrenser-diocese-2025",
+              "used_in_public_product": true,
+              "retrieved_at": "2026-07-10T06:08:37Z",
+              "http_status": 200,
+              "licence": "No conditions apply to access and use",
+              "notes": "Geonorge download capability response pinning nationwide SOSI in EPSG:25833."
+            },
+            {
+              "uri": "data/raw/no_membership/geonorge_soknegrenser_order.json",
+              "url": "https://nedlasting.geonorge.no/api/order",
+              "method": "POST",
+              "request_body": {
+                "downloadAsBundle": false,
+                "orderLines": [
+                  {
+                    "areas": [
+                      {
+                        "code": "0000",
+                        "name": "Hele landet",
+                        "type": "landsdekkende"
+                      }
+                    ],
+                    "formats": [
+                      {
+                        "name": "SOSI"
+                      }
+                    ],
+                    "metadataUuid": "289d459c-0390-4000-84f3-88982f2cdb0c",
+                    "projections": [
+                      {
+                        "code": "25833",
+                        "name": "EUREF89 UTM sone 33, 2d",
+                        "codespace": "http://www.opengis.net/def/crs/EPSG/0/25833"
+                      }
+                    ]
+                  }
+                ],
+                "usageGroup": "research",
+                "softwareClient": "places-of-worship",
+                "softwareClientVersion": "1"
+              },
+              "format": "json",
+              "bytes": 870,
+              "sha256": "75b42f30749a1563a6cc6bb789edd5bbe3c9d3d7720cd43377dc4f1252537dc7",
+              "source_dataset_id": "kartverket-geonorge-soknegrenser-diocese-2025",
+              "used_in_public_product": true,
+              "retrieved_at": "2026-07-10T06:08:37Z",
+              "http_status": 200,
+              "licence": "No conditions apply to access and use",
+              "notes": "Geonorge order receipt with the exact SOSI download URL."
+            },
+            {
+              "uri": "data/raw/no_membership/geonorge_soknegrenser_2025_sosi.zip",
+              "url": "https://nedlasting.geonorge.no/api/download/order/c61109c7-5c39-466b-acbb-9c80a8d8df3a/0425ce7b-565d-45b8-90ae-dba2ed4e37fa",
+              "method": "GET",
+              "request_body": null,
+              "format": "zip-sosi",
+              "bytes": 5524444,
+              "sha256": "6ccd9c50ffa58dc74311fc09270f075722e8db76e957fab09b0a0af6b5404048",
+              "source_dataset_id": "kartverket-geonorge-soknegrenser-diocese-2025",
+              "used_in_public_product": true,
+              "retrieved_at": "2026-07-10T06:08:37Z",
+              "http_status": 200,
+              "licence": "No conditions apply to access and use",
+              "notes": "Kartverket Soknegrenser SOSI package containing eleven direct Bispedømme surfaces."
+            }
+          ]
+        }
+      }
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "mapshaper": "npx mapshaper used through scripts/lib/simplify_boundary.R",
+      "curl": "curl 8.7.1 (x86_64-apple-darwin25.0) libcurl/8.7.1 (SecureTransport) LibreSSL/3.3.6 zlib/1.2.12 nghttp2/1.68.1"
+    }
+  },
+  "source": {
+    "provider": "Statistics Norway (SSB); Kartverket via Geonorge",
+    "source_dataset_ids": ["ssb-06929-church-of-norway-members-diocese-2005-2025", "kartverket-geonorge-soknegrenser-diocese-2025"],
+    "source_urls": ["https://data.ssb.no/api/v0/en/table/DNKMedlemmer", "https://www.ssb.no/en/statbank1/table/06929", "https://www.ssb.no/en/kultur-og-fritid/religion-og-livssyn/statistikk/den-norske-kirke", "https://www.ssb.no/en/diverse/lisens", "https://www.kirken.no/nn-NO/bispedommer/more/aktuelt/endringar%20i%20bisped%C3%B8megrenser%20og%20prostigrenser%20fr%C3%A5%202020/", "https://www.kirken.no/nb-NO/bispedommer/nord-haalogaland/biskop%20og%20bisped%C3%B8mme2/", "https://kartkatalog.geonorge.no/Metadata/uuid/289d459c-0390-4000-84f3-88982f2cdb0c", "https://kartkatalog.geonorge.no/api/getdata/289d459c-0390-4000-84f3-88982f2cdb0c", "http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply"],
+    "retrieved_at": "2026-07-10T06:30:08Z",
+    "licence": "SSB StatBank data and API content: CC BY 4.0 with Statistics Norway attribution. Geonorge Soknegrenser metadata: No conditions apply to access and use, with no public-access limitation.",
+    "citation": "Statistics Norway StatBank table 06929; Kartverket Geonorge Soknegrenser diocese surfaces effective 1 January 2025."
+  },
+  "input_manifests": [],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/no/data/area_summary_diocese.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 316447,
+      "sha256": "2f7909c52456d84e40caafdbecdc29cca37f2d0dd38aea5f304314653bb676d6",
+      "content": "Norway diocese Church of Norway administrative membership area summary, 2005-2025.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "row_count": 231
+    },
+    {
+      "uri": "repo:apps/regions/no/data/area_summary_diocese.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 157278,
+      "sha256": "2b31ac170ff5d698ec030566cfdb3dbd90c498b8677b59b31bed0963eeb6dfd6",
+      "content": "Flattened Norway diocese Church of Norway administrative membership rows.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "row_count": 231
+    },
+    {
+      "uri": "repo:apps/regions/no/data/no_diocese_2025.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 243129,
+      "sha256": "18dd78dde98957782f60836ec4b2f6a0ae255d89e0c8b2042194c63cdb460652",
+      "content": "Simplified direct Kartverket Geonorge 2025 diocese geometry, eleven features.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "feature_count": 11
+    }
+  ],
+  "stats": {
+    "years": 21,
+    "rows": 231,
+    "boundary_features": 11,
+    "unknown_category_rows": 21,
+    "boundary_bytes": 243129,
+    "summary_json_bytes": 316447,
+    "summary_csv_bytes": 157278
+  },
+  "local_cache_hint": "Raw SSB and Geonorge responses are cached under data/raw/no_membership/ and remain git-ignored.",
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_no_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/no/data/area_summary_diocese.json",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/no-membership-2005-2025.json",
+      "jq empty apps/regions/no/data/area_summary_diocese.json docs/manifests/no-membership-2005-2025.json"
+    ],
+    "warnings": ["Unknown diocese remains unallocated; mapped sums plus Unknown diocese reconcile exactly to SSB's national totals. Across 2005-2025, SSB's unallocated Unknown diocese category ranges from 0 to 25,923 members, or 0 to 0.6758% of the published national total. SSB table 06929 states verbatim: \"Unknown diocese do not include members living aboard.\" Source: https://www.ssb.no/en/statbank1/table/06929.", "The SSB member definition changes in 2021, and SSB warns that national totals from 2011 cannot be compared with earlier years because Unknown diocese was then included.", "Counts follow SSB's published diocese assignment for each reference year. The drawn boundaries use the 2025-01-01 vintage. Rindal parish moved from Møre to Nidaros on 1 January 2020. Early-year counts near transferred parishes may therefore not align exactly with the drawn borders. Neither table 06929 metadata nor SSB's About the statistics documentation states whether the historical series is rebased to current dioceses. Sources: https://www.ssb.no/en/statbank1/table/06929; https://www.ssb.no/en/kultur-og-fritid/religion-og-livssyn/statistikk/den-norske-kirke; https://www.kirken.no/nn-NO/bispedommer/more/aktuelt/endringar%20i%20bisped%C3%B8megrenser%20og%20prostigrenser%20fr%C3%A5%202020/.", "SSB's Church of Norway statistics and the mapped polygons both exclude Svalbard. Nord-Hålogaland diocese formally includes Svalbard, while the shipped polygons end at about 71.4° N. Sources: https://www.ssb.no/en/kultur-og-fritid/religion-og-livssyn/statistikk/den-norske-kirke; https://www.kirken.no/nb-NO/bispedommer/nord-haalogaland/biskop%20og%20bisped%C3%B8mme2/.", "The direct Geonorge diocese surfaces extend through coastal waters; land_area_sq_km and density fields are null."],
+    "notes": "All hard gates passed. Eleven named diocese rows ship for every year 2005-2025. For every year, the eleven mapped counts plus SSB's Unknown diocese count equal the published national total exactly. Both source and simplified boundaries contain eleven valid, non-empty, distinct geometries, no interior coverage gaps, and overlap below the fixed 1 square metre tolerance."
+  },
+  "privacy": "public",
+  "licence_status": "accepted",
+  "downstream_status": "public",
+  "notes": "Administrative Church of Norway membership register product. The counts never measure census affiliation, belief, or attendance. SSB table 06339 remains future national context and is excluded from this diocese product."
+}
