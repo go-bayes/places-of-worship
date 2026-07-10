@@ -8,7 +8,7 @@
 
 - [x] Hungary (HU, rank 25) — data committed 51cc172; page pending
 - [x] Lithuania (LT, rank 26) — data committed 5b3a469; page pending
-- [ ] Estonia (EE, rank 27)
+- [x] Estonia (EE, rank 27) — data committed; page pending
 - [ ] Croatia (HR, rank 28)
 - [ ] Serbia (RS, rank 29)
 - [ ] Bulgaria (BG, rank 30)
