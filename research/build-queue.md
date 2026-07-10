@@ -11,7 +11,7 @@
 - [x] Estonia (EE, rank 27) — data committed; page pending
 - [ ] Croatia (HR, rank 28)
 - [ ] Serbia (RS, rank 29)
-- [ ] Bulgaria (BG, rank 30)
+- [x] Bulgaria (BG, rank 30) — data committed; page pending
 
 **Demographic and Health Surveys (DHS) rows (PI ruling, 2026-07-11):** unfrozen — DHS survey data are usable by default with attribution where use is not clearly prohibited and no restricted data can leak. Every DHS row works through [dhs-verification-register.md](dhs-verification-register.md): public final-report tables first, registered microdata estimation as fallback; microdata never enter git; registration itself awaits PI action.
 
