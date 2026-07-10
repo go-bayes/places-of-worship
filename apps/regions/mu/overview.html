@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Mauritius map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Mauritius research map; every string traces to
+    // docs/manifests/mu-census-religion-2000-2022.json, the product indicators
+    // block, or the live REGION_CONFIG in apps/regions/mu/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "MU",
+      countryName: "Mauritius",
+      mapHref: "./",
+      intro: "Census self-reported religion by the nine districts and Rodrigues, from Statistics Mauritius Population Census Table D6, three waves 2000/2011/2022. Religion in this census is self-reported and must never be interpreted as an ethnic proxy: the map records the census religion question only. The categories are religious affiliations; they do not represent ethnic or communal groups.",
+      facts: {
+        waves: "Three census waves: 2000, 2011, 2022",
+        geographies: "District (nine districts and Rodrigues)",
+        metrics: "Named religious affiliation %, no religion % (2022 only), change since previous census"
+      },
+      reading: [
+        "Districts are shaded by the share assigned to the named religious groups published consistently at district level, over the full Statistics Mauritius Table D6 total.",
+        "Religion here is self-reported census information and must never be interpreted as an ethnic proxy. The published categories are religious affiliations, and the map makes no ethnic or communal inference from them.",
+        "The named-affiliation share excludes the residual and uses the full table total as denominator. The residual combines Other and Not stated in 2000 and 2011; an explicit No religion share is therefore shown for 2022 only, when the census reported No religion as its own category. It is not separately recoverable from the earlier combined residual.",
+        "The change metric reports the percentage-point change in the named-affiliation share since the previous census. The censuses are 2000, 2011, and 2022; a change is therefore an 11-year inter-census difference. It is not an annual rate.",
+        "The Table D6 tabulation covers the nine districts and Rodrigues and excludes Agaléga and St. Brandon. District rows reconcile exactly to the national row; a single ADM1 boundary vintage joins to every wave."
+      ],
+      sources: [
+        {
+          name: "Statistics Mauritius Population Census Table D6, religion by district",
+          href: "https://statsmauritius.govmu.org/",
+          construct: "Self-reported census religion, named affiliation groups over the full table total, by district",
+          years: "2000, 2011, 2022",
+          licence: "Statistics Mauritius open data, used with attribution"
+        },
+        {
+          name: "geoBoundaries Mauritius ADM1",
+          href: "https://www.geoboundaries.org/",
+          construct: "Boundary geometry (nine districts and Rodrigues)",
+          years: "2017 vintage",
+          licence: "geoBoundaries open data, CC BY 4.0; attribution: geoBoundaries"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Statistics Mauritius, <a href=\"https://statsmauritius.govmu.org/\" target=\"_blank\" rel=\"noopener\">Population Census Table D6</a>; boundaries from <a href=\"https://www.geoboundaries.org/\" target=\"_blank\" rel=\"noopener\">geoBoundaries</a> Mauritius ADM1.",
+        tables: "Table D6 religion by district, 2000/2011/2022. The area-summary religious_affiliation field carries the named-group share over the full table total, and the no_religion field carries the explicit No religion share (2022 only). The residual (Other and Not stated) is excluded from the named-affiliation numerator and never distributed.",
+        licence: "Statistics Mauritius census data are open data used with attribution; geoBoundaries ADM1 boundaries are CC BY 4.0 with geoBoundaries attribution.",
+        script: "scripts/build_mu_area_summary.R",
+        manifests: [
+          { label: "mu-census-religion-2000-2022", href: "docs/manifests/mu-census-religion-2000-2022.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Mauritius map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

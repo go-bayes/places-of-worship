@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Israel Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Israel's product is a Population Register classification from CBS table
+    // 2.11, by district, eight reference years 1948–2024. This is a register
+    // construct that records neither census self-declaration, belief, nor practice.
+    // The two legacy slots carry CBS's own categories verbatim: "Classified
+    // in a religion group" (Jewish, Muslim, Christian, Druze) and "Not
+    // classified by religion" — the latter is a register status for residents
+    // without a recognised religious classification, NOT a measure of no
+    // religion, irreligion, or secularity. The 1948 wave is recorded context:
+    // CBS publishes the district total and Jewish counts but suppresses the
+    // Muslim/Christian/Druze district distributions; both construct fields
+    // are therefore null and 1948 renders grey on the slider. The neutral coverage
+    // statement (East Jerusalem, Golan, beyond-Green-Line localities recorded
+    // per CBS definitions without endorsing any boundary position) lives in
+    // only in the overview. The change metric shows change since the
+    // previous reference year.
+    window.REGION_CONFIG = {
+      countryCode: "IL",
+      title: "Places of Worship | Israel Research Map",
+      dataNoun: "Register",
+      center: [35.05, 31.5],
+      initialZoom: 7.2,
+      censusLevels: {
+        district: {
+          label: "District",
+          boundaries: "data/il_district_2022.geojson",
+          summary: "data/area_summary_district.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Israel CBS Statistical Abstract table 2.11, Population Register religious classification by district, 1948–2024 · Boundaries from CBS/MOIN districts (2022 frame)"
+        }
+      },
+      defaultLevel: "district",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2024,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Classified in a religion group (%)",
+          note: "share of the CBS table 2.11 district population classified in a recognised religion group (Jewish, Muslim, Christian, or Druze). This Population Register classification measures neither belief nor practice. District values sum the entries CBS publishes; small group totals outside published district entries remain national reconciliation residuals and are never distributed."
+        },
+        no_religion_percent: {
+          label: "Not classified by religion (%)",
+          note: "CBS's category verbatim: Not classified by religion. This is a Population Register classification for residents without a recognised religious classification (notably many immigrants and their descendants not registered in a religion group); it is not a measure of no religion, irreligion, or secularity. CBS publishes this category by district for 1995, 2008, 2022, and 2024; earlier values are null."
+        },
+        religious_change: {
+          label: "Change since previous reference year (pp)",
+          note: "percentage-point change in the classified-in-a-religion-group share since the previous CBS reference year (1948, 1961, 1972, 1983, 1995, 2008, 2022, 2024); 1948 is recorded context with null construct values. The 1961 change is therefore also null, and the earliest computable change is 1972 against 1961"
+        }
+      },
+      popupDenominatorNote: "Percentages use the published CBS table 2.11 district total as denominator; counts are published in thousands rounded to one decimal. These Population Register classifications do not record census self-declarations, belief, or practice. The 1948 wave is recorded context: CBS publishes the district total and Jewish counts but suppresses the Muslim, Christian, and Druze district distributions; both construct fields are therefore null for 1948.",
+      cityPresets: [
+        { label: "Jerusalem", coords: [35.2137, 31.7683], zoom: 11 },
+        { label: "Tel Aviv-Yafo", coords: [34.7818, 32.0853], zoom: 11 },
+        { label: "Haifa", coords: [34.9896, 32.7940], zoom: 11 },
+        { label: "Rishon LeZion", coords: [34.8044, 31.9730], zoom: 11 },
+        { label: "Petah Tikva", coords: [34.8878, 32.0840], zoom: 11 },
+        { label: "Ashdod", coords: [34.6553, 31.8044], zoom: 11 },
+        { label: "Netanya", coords: [34.8532, 32.3215], zoom: 11 },
+        { label: "Beersheba", coords: [34.7913, 31.2518], zoom: 11 },
+        { label: "Nazareth", coords: [35.3035, 32.7021], zoom: 11 },
+        { label: "Eilat", coords: [34.9482, 29.5577], zoom: 11 }
+      ],
+      geocode: { country: "il", biasLngLat: [35.05, 31.5] },
+      onboarding: {
+        title: "Israel research map",
+        intro: "Population Register religious classification by district, from Israel's Central Bureau of Statistics (CBS) Statistical Abstract table 2.11, eight reference years 1948–2024. This register classification does not record census self-declaration, belief, or practice.",
+        bullets: [
+          "Districts are shaded by the share classified in a recognised religion group (Jewish, Muslim, Christian, or Druze), or the share not classified by religion.",
+          "This is a Population Register classification. Not classified by religion is a register status for residents without a recognised religious classification (notably many immigrants and their descendants) and is not a measure of no religion, irreligion, or secularity.",
+          "The 1948 wave is recorded context: CBS publishes the district total and Jewish counts but suppresses the Muslim, Christian, and Druze district distributions; both construct fields are therefore null and 1948 renders grey.",
+          "A change metric reports the percentage-point change in the classified share since the previous reference year; because 1948 is null, the 1961 change is null too and the earliest computable change is 1972 against 1961.",
+          "The About page records how CBS statistical coverage is used and what it includes.",
+          "Open <strong>Show Register Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Population Register religious classification from the <a href="https://www.cbs.gov.il/en/" target="_blank" rel="noopener">Israel Central Bureau of Statistics (CBS)</a>, Statistical Abstract table 2.11, by district, 1948&ndash;2024 &middot; Boundaries from CBS/Ministry of Interior districts (2022 frame)',
+      censusFlagNote: "* This Population Register classification from CBS table 2.11 does not record census self-declaration, belief, or practice. Not classified by religion is a register status for residents without a recognised religious classification (notably many immigrants and their descendants not registered in a religion group); it is not a measure of no religion, irreligion, or secularity, and CBS publishes it by district for 1995, 2008, 2022, and 2024 only. The 1948 wave is recorded context: CBS publishes the district total and Jewish counts but suppresses the Muslim, Christian, and Druze district distributions; both construct fields are therefore null. Counts are published in thousands rounded to one decimal; small group totals outside published district entries remain national residuals and are never distributed."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710b"></script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Switzerland Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Switzerland ships two products for the same religious-affiliation
+    // construct, measured by two different instruments, each its own
+    // geography level on the SAME 26-canton boundary (Denmark two-level
+    // precedent): the full-count federal census, 1970–2000 (decennial), and
+    // the annual structural sample survey, 2010–2024. The level select is
+    // the instrument switch. Page-global metric labels therefore carry the
+    // shared construct (religious affiliation / no religious affiliation)
+    // and each metric note distinguishes the census-count basis from the
+    // survey-estimate basis by level. The change metric is DISABLED: a
+    // single page-global change label cannot describe both a decennial census
+    // and an annual survey. No change metric is offered because one label would
+    // mislead. Some survey rows have
+    // a null affiliation where the source suppresses unknown-affiliation
+    // cells (see the flag note); those cantons render grey for that metric.
+    window.REGION_CONFIG = {
+      countryCode: "CH",
+      title: "Places of Worship | Switzerland Research Map",
+      center: [8.23, 46.8],
+      initialZoom: 6.7,
+      censusLevels: {
+        canton_census: {
+          label: "Canton (census, 1970–2000)",
+          boundaries: "data/ch_canton_2026.geojson",
+          summary: "data/area_summary_canton_census.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Swiss Federal Statistical Office (FSO) federal population census religion, by canton, 1970–2000 · Boundaries from swisstopo swissBOUNDARIES3D cantons (2026)"
+        },
+        canton_survey: {
+          label: "Canton (structural survey, 2010–2024)",
+          boundaries: "data/ch_canton_2026.geojson",
+          summary: "data/area_summary_canton_survey.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Swiss Federal Statistical Office (FSO) structural survey religion, permanent resident population aged 15+, by canton, 2010–2024 · Boundaries from swisstopo swissBOUNDARIES3D cantons (2026)"
+        }
+      },
+      defaultLevel: "canton_census",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2000,
+      // change metric disabled: see the header comment — no honest single
+      // page-global change label spans the decennial census and the annual
+      // survey; only the two level constructs therefore ship
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the population with a stated religious affiliation. On the census level (1970–2000) this is a full-count federal census share, 100 × (total − Keine Zugehörigkeit − Ohne Angabe) / total. On the structural survey level (2010–2024) it is a weighted sample-survey estimate for the permanent resident population aged 15+, with sampling uncertainty; it is null where the source suppresses unknown-affiliation cells for the canton-year."
+        },
+        no_religion_percent: {
+          label: "No religious affiliation %",
+          note: "share with no religious affiliation. On the census level this is the Keine Zugehörigkeit share of the census total; on the structural survey level it is the Ohne Religionszugehörigkeit weighted sample estimate. Census counts and survey estimates are different instruments and form separate time series."
+        }
+      },
+      popupDenominatorNote: "Percentages are shares of the level's own denominator: the full-count federal census population (1970–2000 census level) or the weighted structural-survey estimate of the permanent resident population aged 15+ (2010–2024 survey level). These are two different instruments for the same affiliation construct; the survey publishes category confidence intervals in the source workbook that the legacy row schema cannot carry, and affiliation is null where unknown-affiliation cells are suppressed. Treat the census and survey levels as separate series.",
+      cityPresets: [
+        { label: "Zürich", coords: [8.5417, 47.3769], zoom: 10 },
+        { label: "Geneva", coords: [6.1432, 46.2044], zoom: 10 },
+        { label: "Basel", coords: [7.5886, 47.5596], zoom: 10 },
+        { label: "Bern", coords: [7.4474, 46.9480], zoom: 10 },
+        { label: "Lausanne", coords: [6.6323, 46.5197], zoom: 10 },
+        { label: "Winterthur", coords: [8.7233, 47.4993], zoom: 10 },
+        { label: "Lucerne", coords: [8.3093, 47.0502], zoom: 10 },
+        { label: "St. Gallen", coords: [9.3767, 47.4245], zoom: 10 },
+        { label: "Lugano", coords: [8.9511, 46.0037], zoom: 10 },
+        { label: "Sion", coords: [7.3591, 46.2331], zoom: 10 }
+      ],
+      geocode: { country: "ch", biasLngLat: [8.23, 46.8] },
+      onboarding: {
+        title: "Switzerland research map",
+        intro: "Religious-affiliation overlays for Switzerland's 26 cantons, from two instruments: the full-count federal census (1970–2000) and the annual structural sample survey (2010–2024). Both measure affiliation, but a census count and a survey estimate are different instruments and are not one continuous series.",
+        bullets: [
+          "Cantons are shaded by the share with a stated religious affiliation, or the share with none.",
+          "Use the geography control to switch instrument: Canton (census, 1970–2000) is a full-count federal census; Canton (structural survey, 2010–2024) is a weighted annual sample estimate for the resident population aged 15+.",
+          "The survey estimates carry sampling uncertainty. The source workbook publishes category confidence intervals that the legacy schema cannot carry; affiliation is null where the source suppresses unknown-affiliation cells, and those cantons render grey for that metric.",
+          "No change metric is shown because a single change label cannot describe both a decennial census and an annual survey. Showing change under one label would mislead.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric, instrument and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Religious affiliation from the <a href="https://www.bfs.admin.ch/" target="_blank" rel="noopener">Swiss Federal Statistical Office (FSO)</a>: federal population census, 1970&ndash;2000, and structural survey, 2010&ndash;2024 &middot; Boundaries from <a href="https://www.swisstopo.admin.ch/" target="_blank" rel="noopener">swisstopo swissBOUNDARIES3D</a> cantons (2026)',
+      censusFlagNote: "* Two instruments ship on separate geography levels for the same affiliation construct. The 1970–2000 census level is a full-count federal census; the source reports all years on its current 26-canton frame, and Jura appears in the 1970 row before the 1979 canton creation as a source-provided current-frame roll-up. The 2010–2024 structural survey level is a weighted sample estimate for the permanent resident population aged 15+, with category confidence intervals in the source workbook that the legacy row schema cannot carry; affiliation is null where the source suppresses unknown-affiliation cells for a canton-year. No change metric is shown because no single change label describes both a decennial census and an annual survey. The two levels form separate time series."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710b"></script>
+</body>
+</html>

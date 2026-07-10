@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Mauritius Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Mauritius ships census self-reported religion by the nine districts and
+    // Rodrigues, three waves 2000/2011/2022, from Statistics Mauritius Table
+    // D6. SENSITIVITY: religion here is self-reported and must never be
+    // interpreted as an ethnic proxy; that caveat rides both the flag note
+    // and the overview. The named religious-affiliation share uses the full
+    // Table D6 total as denominator and excludes the residual; the residual
+    // combines Other and Not stated in 2000 and 2011; an explicit
+    // no-religion share therefore exists for 2022 only, when the census reported No
+    // religion as its own category. The change metric reports the
+    // percentage-point change since the previous census (11-year gaps).
+    window.REGION_CONFIG = {
+      countryCode: "MU",
+      title: "Places of Worship | Mauritius Research Map",
+      center: [57.55, -20.25],
+      initialZoom: 9.4,
+      censusLevels: {
+        district: {
+          label: "District",
+          boundaries: "data/mu_adm1_2017.geojson",
+          summary: "data/area_summary_district.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Statistics Mauritius Population Census Table D6, religion by district, 2000–2022 · Boundaries from geoBoundaries Mauritius ADM1 (2017)"
+        }
+      },
+      defaultLevel: "district",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2022,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Named religious affiliation %",
+          note: "share assigned to the named religious groups published consistently at district level, 100 × sum of named religious-group columns / Table D6 total; the residual (Other and Not stated) is excluded from the numerator and the full table total is the denominator. This is self-reported census religion and must never be interpreted as an ethnic proxy."
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share explicitly reporting no religion, 100 × No religion / Table D6 total; available for 2022 only, when the census reported No religion as its own category. It is not separately recoverable from the combined Other-and-Not-stated residual in 2000 or 2011."
+        },
+        religious_change: {
+          label: "Change since previous census (pp)",
+          note: "percentage-point change in the named religious-affiliation share since the previous census; the censuses are 2000, 2011, and 2022. A change is therefore an 11-year inter-census difference. It is not an annual rate"
+        }
+      },
+      popupDenominatorNote: "Percentages use the full Statistics Mauritius Table D6 total as denominator. The named religious-affiliation share excludes the residual; the residual combines Other and Not stated in 2000 and 2011, and No religion is a separate published category only in 2022. Religion is self-reported and must never be interpreted as an ethnic proxy. The table covers the nine districts and Rodrigues, and excludes Agaléga and St. Brandon.",
+      cityPresets: [
+        { label: "Port Louis", coords: [57.5012, -20.1609], zoom: 12 },
+        { label: "Beau Bassin-Rose Hill", coords: [57.4682, -20.2419], zoom: 12 },
+        { label: "Vacoas-Phoenix", coords: [57.4919, -20.2980], zoom: 12 },
+        { label: "Curepipe", coords: [57.5266, -20.3188], zoom: 12 },
+        { label: "Quatre Bornes", coords: [57.4791, -20.2654], zoom: 12 },
+        { label: "Triolet", coords: [57.5462, -20.0546], zoom: 12 },
+        { label: "Goodlands", coords: [57.6420, -20.0367], zoom: 12 },
+        { label: "Centre de Flacq", coords: [57.7130, -20.1897], zoom: 12 },
+        { label: "Mahébourg", coords: [57.7000, -20.4081], zoom: 12 },
+        { label: "Port Mathurin (Rodrigues)", coords: [63.4188, -19.6833], zoom: 12 }
+      ],
+      geocode: { country: "mu", biasLngLat: [57.55, -20.25] },
+      onboarding: {
+        title: "Mauritius research map",
+        intro: "Census self-reported religion by the nine districts and Rodrigues, from Statistics Mauritius Population Census Table D6, three waves 2000/2011/2022. Religion here is self-reported and must never be interpreted as an ethnic proxy.",
+        bullets: [
+          "Districts are shaded by the share assigned to the named religious groups, over the full Table D6 total.",
+          "Religion is self-reported census information and must never be interpreted as an ethnic proxy.",
+          "An explicit No religion share is shown for 2022 only, when the census reported No religion as its own category; in 2000 and 2011 it is not separable from the combined Other-and-Not-stated residual.",
+          "A change metric reports the percentage-point change in named affiliation since the previous census; the censuses are 11 years apart. A change is therefore an inter-census difference. It is not an annual rate.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion by district from <a href="https://statsmauritius.govmu.org/" target="_blank" rel="noopener">Statistics Mauritius</a>, Population Census Table D6, 2000&ndash;2022 &middot; Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> Mauritius ADM1 (2017)',
+      censusFlagNote: "* Religion in this census is self-reported and must never be interpreted as an ethnic proxy. The named religious-affiliation share uses the full Statistics Mauritius Table D6 total as denominator and excludes the residual. That residual combines Other and Not stated in 2000 and 2011; an explicit No religion share is therefore available for 2022 only, when the census reported No religion as its own category. No religion is not separately recoverable from the 2000 or 2011 residual. The table covers the nine districts and Rodrigues and excludes Agaléga and St. Brandon; district rows reconcile exactly to the national row."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710b"></script>
+</body>
+</html>

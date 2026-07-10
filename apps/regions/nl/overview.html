@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Netherlands map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Netherlands research map; every string traces to
+    // docs/manifests/nl-survey-religion-2010-2015.json, the product indicators
+    // blocks, or the live REGION_CONFIG in apps/regions/nl/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "NL",
+      countryName: "Netherlands",
+      mapHref: "./",
+      intro: "Self-reported religious involvement by province, from Statistics Netherlands (CBS) StatLine table 83288NED (Religieuze betrokkenheid), annual 2010–2015. Two distinct survey constructs ship on the same 12 provinces: religious affiliation (share reporting a denomination or worldview group) and religious-service attendance (share attending a religious or worldview gathering). This sample survey of the population aged 15+ is distinct from a census count and is not comparable to the census affiliation maps for other countries.",
+      facts: {
+        waves: "Annual survey, 2010–2015 (6 years); CBS discontinued table 83288NED after 2015",
+        geographies: "Province (12 Netherlands provinces)",
+        metrics: "Religious involvement %, no or minimal religious involvement %, switchable between the affiliation and attendance constructs"
+      },
+      reading: [
+        "Provinces are shaded by a self-reported CBS survey estimate for the population aged 15+, drawn from StatLine table 83288NED (Religieuze betrokkenheid).",
+        "The geography control switches construct. On the Affiliation (survey) level the two poles are the share reporting a religious denomination or worldview group and the share reporting none. On the Attendance (survey) level they are the share attending a religious or worldview gathering once a week or more and the share attending seldom or never.",
+        "This sample survey is distinct from a count. CBS publishes rounded whole percentages with no population count and no machine-readable confidence interval in table 83288NED; the map therefore ships the point estimate with a standing survey-estimate caveat rather than a per-province confidence band. The estimates carry sampling error and the known upward bias of self-reported religion.",
+        "The series runs 2010–2015 only. CBS discontinued (stopgezet) table 83288NED after 2015 and has published no comparable province-level religious-involvement series since; no later waves are therefore available.",
+        "No change-since-previous-year metric is offered. The Affiliation (survey) and Attendance (survey) levels carry different constructs on the same legacy slots; a single page-global change label cannot describe both. Change is therefore withheld because one label would mislead.",
+        "The 12 provinces are stable across the whole 2010–2015 series; a single current PDOK province vintage therefore joins cleanly to every survey year. These figures are self-reported survey estimates and must not be placed on one axis with a census affiliation count or with attendance-count products such as Poland's."
+      ],
+      sources: [
+        {
+          name: "CBS StatLine table 83288NED: Religieuze betrokkenheid; personen 15 jaar of ouder; kerkelijke gezindte en provincie",
+          href: "https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83288NED",
+          construct: "Self-reported religious affiliation and religious-service attendance, population aged 15+, by province",
+          years: "2010–2015 (discontinued after 2015)",
+          licence: "Creative Commons Attribution 4.0 International (CC BY 4.0); attribution: Centraal Bureau voor de Statistiek (CBS)"
+        },
+        {
+          name: "PDOK Bestuurlijke gebieden (Kadaster BRK), current provinces",
+          href: "https://www.pdok.nl/",
+          construct: "Boundary geometry (12 provinces)",
+          years: "Current vintage",
+          licence: "Creative Commons Attribution 4.0 International (CC BY 4.0); attribution: Kadaster"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Centraal Bureau voor de Statistiek (CBS), <a href=\"https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83288NED\" target=\"_blank\" rel=\"noopener\">StatLine</a> table 83288NED; boundaries from <a href=\"https://www.pdok.nl/\" target=\"_blank\" rel=\"noopener\">PDOK Bestuurlijke gebieden (BRK)</a>.",
+        tables: "StatLine 83288NED, columns TotaalKerkelijkeGezindte_2 and GeenKerkelijkeGezindte_1 (affiliation) and EenKeerPerWeekOfVaker_9 and ZeldenOfNooit_13 (attendance), by province, 2010–2015. The area-summary religious_affiliation fields carry the involvement pole and the no_religion fields carry the low-or-no-involvement pole, per level (Italy-precedent slot reuse, declared in each product's indicators block). CBS publishes rounded whole percentages only.",
+        licence: "CBS StatLine data are Creative Commons Attribution 4.0 International (CC BY 4.0); PDOK BRK boundaries are CC BY 4.0 with Kadaster attribution.",
+        script: "scripts/build_nl_area_summary.R",
+        manifests: [
+          { label: "nl-survey-religion-2010-2015", href: "docs/manifests/nl-survey-religion-2010-2015.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Netherlands map is a survey-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

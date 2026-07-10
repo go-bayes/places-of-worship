@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Israel map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Israel research map; every string traces to
+    // docs/manifests/il-register-classification-1948-2024.json (construct_notes),
+    // the product indicators block, or the live REGION_CONFIG in
+    // apps/regions/il/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "IL",
+      countryName: "Israel",
+      mapHref: "./",
+      intro: "Population Register religious classification by district, from Israel's Central Bureau of Statistics (CBS) Statistical Abstract table 2.11, eight reference years 1948–2024. This administrative register classification does not record census self-declaration, belief, or practice. The map records CBS statistical definitions only.",
+      facts: {
+        waves: "Eight reference years: 1948, 1961, 1972, 1983, 1995, 2008, 2022, 2024 (1948 is recorded context, null construct values)",
+        geographies: "District (six CBS districts plus the separately labelled Judea and Samaria Area)",
+        metrics: "Classified in a religion group %, not classified by religion %, change since previous reference year"
+      },
+      reading: [
+        "Districts are shaded by the share classified in a recognised religion group (Jewish, Muslim, Christian, or Druze) over the published district total, or the share not classified by religion.",
+        "This Population Register classification does not record a census self-declaration. Not classified by religion is a register status for residents without a recognised religious classification (notably many immigrants and their descendants not registered in a religion group); it is not a measure of no religion, irreligion, or secularity. CBS publishes that category by district for 1995, 2008, 2022, and 2024 only.",
+        "The 1948 wave is recorded context. CBS publishes the district total and Jewish counts for 1948 but suppresses the Muslim, Christian, and Druze district distributions; both construct fields are therefore null and the wave renders grey. The 1948 district rows also sum 17.1 thousand below the national total; the source remainder is reported and never distributed.",
+        "The change metric reports the percentage-point change in the classified-in-a-religion-group share since the previous reference year. Because 1948 is null, the 1961 change is null too, and the earliest computable change is 1972 against 1961; the reference years are unevenly spaced. A change is therefore not an annual rate.",
+        "Coverage records CBS statistical definitions without endorsing any boundary position. The selected coverage includes East Jerusalem within Jerusalem District and the Golan Sub-District within Northern District under CBS statistical definitions. It also includes any localities beyond the Green Line present in the CBS files, including the separately labelled Judea and Samaria Area, whose geometry unions CBS statistical-area polygons and shows statistical-area coverage rather than a territorial boundary.",
+        "The recognised-group value sums the CBS district entries for Jewish, Muslim, Christian, and Druze; CBS omits a few small district-by-group entries, and the national residual is reported and never distributed. A single 2022-frame district boundary set joins to every wave."
+      ],
+      sources: [
+        {
+          name: "Israel CBS Statistical Abstract table 2.11, Population Register religious classification by district",
+          href: "https://www.cbs.gov.il/en/",
+          construct: "Population Register classification: classified in a religion group, and not classified by religion, by district",
+          years: "1948, 1961, 1972, 1983, 1995, 2008, 2022, 2024",
+          licence: "Israel CBS open data, used with attribution"
+        },
+        {
+          name: "CBS / Ministry of Interior district boundaries (2022 frame)",
+          href: "https://www.cbs.gov.il/en/",
+          construct: "Boundary geometry (six districts plus the separately labelled Judea and Samaria Area)",
+          years: "2022 frame",
+          licence: "Israel CBS open data, used with attribution"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Israel Central Bureau of Statistics (CBS), <a href=\"https://www.cbs.gov.il/en/\" target=\"_blank\" rel=\"noopener\">Statistical Abstract table 2.11</a>; boundaries from CBS / Ministry of Interior districts (2022 frame).",
+        tables: "CBS table 2.11 Population of Israelis by district and religion, 1948–2024. The area-summary religious_affiliation field carries the recognised-group classification (Jewish, Muslim, Christian, Druze) and the no_religion field carries CBS's Not classified by religion category verbatim; both are Population Register classifications and never belief or practice. Counts are published in thousands rounded to one decimal; residuals are reported and never distributed.",
+        licence: "Israel CBS data and district boundaries are open data used with attribution.",
+        script: "scripts/build_il_area_summary.R",
+        manifests: [
+          { label: "il-register-classification-1948-2024", href: "docs/manifests/il-register-classification-1948-2024.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Israel map is a register-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

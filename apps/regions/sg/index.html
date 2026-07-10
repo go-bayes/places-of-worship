@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Singapore Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Singapore's census religion tables sit on two different Master Plan
+    // planning-area vintages: the 2010 table (CT 8628) on Master Plan 2008
+    // areas, and the 2020 table (CT 17592) on Master Plan 2019 areas. There
+    // is no cross-vintage concordance; each wave is therefore its own geography
+    // level pointed at a per-vintage summary file on its own boundary set
+    // (Germany precedent), and no change metric is offered. Each table's
+    // Others row is included in national reconciliation but has no
+    // planning-area polygon; it is therefore excluded from the mapped rows. The
+    // denominator is the resident population aged 15 and over.
+    window.REGION_CONFIG = {
+      countryCode: "SG",
+      title: "Places of Worship | Singapore Research Map",
+      center: [103.82, 1.35],
+      initialZoom: 10.4,
+      censusLevels: {
+        pa_2020: {
+          label: "Planning area (2019 boundaries)",
+          boundaries: "data/sg_pa_2019.geojson",
+          summary: "data/area_summary_pa_2020.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Singapore Census of Population 2020, religion by planning area (SingStat table 17592), 30 planning areas · Boundaries from URA Master Plan 2019 planning areas (data.gov.sg)"
+        },
+        pa_2010: {
+          label: "Planning area (2008 boundaries)",
+          boundaries: "data/sg_pa_2008.geojson",
+          summary: "data/area_summary_pa_2010.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Singapore Census of Population 2010, religion by planning area (SingStat table 8628), 35 planning areas · Boundaries from URA Master Plan 2008 planning areas (data.gov.sg)"
+        }
+      },
+      defaultLevel: "pa_2020",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2020,
+      // no change metric: the 2010 and 2020 tables sit on different Master
+      // Plan planning-area vintages with no area-by-area concordance; a
+      // wave-to-wave change therefore cannot be computed honestly (Germany precedent)
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the resident population aged 15 and over reporting a religious affiliation, from the Singapore Census of Population religion tabulation; the denominator is the planning-area resident population aged 15+"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share of the resident population aged 15 and over reporting no religion, from the Singapore Census of Population religion tabulation; the denominator is the planning-area resident population aged 15+"
+        }
+      },
+      popupDenominatorNote: "Percentages use the planning-area resident population aged 15 and over as denominator, from the Singapore Census of Population religion tabulation. The two waves sit on different Master Plan planning-area vintages (2008 for 2010, 2019 for 2020) and are offered as separate geography levels. Each census table's Others row is included in national reconciliation but has no planning-area polygon; it is therefore not shown on the map. Small whole-person additivity residuals are preserved and not distributed.",
+      cityPresets: [
+        { label: "Downtown Core", coords: [103.8519, 1.2789], zoom: 13 },
+        { label: "Jurong West", coords: [103.7063, 1.3404], zoom: 12 },
+        { label: "Tampines", coords: [103.9568, 1.3496], zoom: 12 },
+        { label: "Woodlands", coords: [103.7860, 1.4382], zoom: 12 },
+        { label: "Ang Mo Kio", coords: [103.8454, 1.3691], zoom: 12 },
+        { label: "Bedok", coords: [103.9273, 1.3236], zoom: 12 },
+        { label: "Bishan", coords: [103.8480, 1.3526], zoom: 13 },
+        { label: "Clementi", coords: [103.7649, 1.3162], zoom: 13 },
+        { label: "Hougang", coords: [103.8863, 1.3612], zoom: 12 },
+        { label: "Yishun", coords: [103.8354, 1.4304], zoom: 12 }
+      ],
+      geocode: { country: "sg", biasLngLat: [103.82, 1.35] },
+      onboarding: {
+        title: "Singapore research map",
+        intro: "Census religious-affiliation overlays for Singapore's planning areas, from the Census of Population religion tabulation, 2010 and 2020. The two waves sit on different Master Plan planning-area vintages; each is therefore its own geography level and no cross-wave change is offered.",
+        bullets: [
+          "Planning areas are shaded by the share of the resident population aged 15 and over reporting a religious affiliation, or the share reporting none.",
+          "2010 (Master Plan 2008, 35 mapped areas) and 2020 (Master Plan 2019, 30 mapped areas) use different planning-area vintages; switch the geography control to move between them.",
+          "No change metric is shown: the two vintages have no area-by-area concordance; a wave-to-wave difference therefore cannot be computed honestly.",
+          "Each census table's Others row is included in national reconciliation but has no planning-area polygon; it is therefore not shown on the map.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric, geography and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion by planning area from the <a href="https://www.singstat.gov.sg/" target="_blank" rel="noopener">Singapore Department of Statistics (SingStat)</a>, Census of Population 2010 (table 8628) and 2020 (table 17592) &middot; Boundaries from <a href="https://data.gov.sg/" target="_blank" rel="noopener">URA Master Plan planning areas</a> (2008 and 2019, data.gov.sg)',
+      censusFlagNote: "* The two waves sit on different Master Plan planning-area vintages (2008 for the 2010 census, 2019 for the 2020 census) with no area-by-area concordance; each is therefore offered as its own geography level and no cross-wave change metric is shown. The denominator is the resident population aged 15 and over. Each census table's Others row is included in national reconciliation but has no planning-area polygon and is therefore excluded from the mapped rows; small whole-person additivity residuals from source rounding are preserved and never distributed (see docs/manifests/sg-census-religion-2010-2020.json)."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710b"></script>
+</body>
+</html>

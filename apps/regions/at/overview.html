@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Austria map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Austria research map; every string traces to
+    // docs/manifests/at-religious-affiliation-1951-2021.json, the product
+    // indicators block, or the live REGION_CONFIG in apps/regions/at/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "AT",
+      countryName: "Austria",
+      mapHref: "./",
+      intro: "Religious-affiliation overlays for Austria's nine Bundesländer, across seven waves 1951–2021. The 1951–2001 waves are full-count population-census self-declarations. The 2021 wave is a mixed estimate: the register-based 2021 census did not collect religion; the 2021 figure therefore combines a voluntary sample survey, imputation for children, and an estimate for the institutional population.",
+      facts: {
+        waves: "Seven waves: 1951, 1961, 1971, 1981, 1991, 2001 (censuses), 2021 (combined estimate)",
+        geographies: "Bundesland (nine Austrian states)",
+        metrics: "Religious affiliation %, no religion %, change since previous wave"
+      },
+      reading: [
+        "Bundesländer are shaded by the share of the source population reporting a religious affiliation, or the share reporting no religion.",
+        "The 1951–2001 waves are full-enumeration population-census self-declarations. The census total population is the denominator, and not-stated responses remain in that denominator and outside both headline categories.",
+        "The 2021 wave is not a census count. Austria's 2021 census was register-based and did not collect religion; the 2021 values therefore combine a voluntary sample survey, imputation for children, and an estimate for the institutional population. They may be non-integer and carry survey uncertainty rather than full-count precision.",
+        "The change metric reports the percentage-point change in the affiliation share since the previous wave. Waves are roughly decennial from 1951 to 2001, then a 20-year gap to 2021; a wave-to-wave difference is therefore not an annual rate. The 2021 comparison also spans the census-to-estimate change in method.",
+        "The nine Bundesländer are stable across the whole series; a single ADM1 boundary vintage therefore joins to every wave. National context: the religiously affiliated share fell across the series as the no-religion share rose, most sharply into the 2021 estimate."
+      ],
+      sources: [
+        {
+          name: "Statistik Austria population censuses (Volkszählung) 1951–2001, religion by Bundesland",
+          href: "https://www.statistik.at/",
+          construct: "Full-count census self-declared religious affiliation, by Bundesland",
+          years: "1951, 1961, 1971, 1981, 1991, 2001",
+          licence: "Statistik Austria open data, used with attribution"
+        },
+        {
+          name: "Statistik Austria 2021 religion estimate (Registerzählung era)",
+          href: "https://www.statistik.at/",
+          construct: "Combined estimate: voluntary sample survey, child imputation, institutional-population estimate; the register census did not collect religion",
+          years: "2021",
+          licence: "Statistik Austria open data, used with attribution"
+        },
+        {
+          name: "geoBoundaries Austria ADM1",
+          href: "https://www.geoboundaries.org/",
+          construct: "Boundary geometry (nine Bundesländer)",
+          years: "2017 vintage",
+          licence: "geoBoundaries open data, CC BY 4.0; attribution: geoBoundaries"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Statistik Austria, <a href=\"https://www.statistik.at/\" target=\"_blank\" rel=\"noopener\">population censuses and 2021 combined estimate</a>; boundaries from <a href=\"https://www.geoboundaries.org/\" target=\"_blank\" rel=\"noopener\">geoBoundaries</a> Austria ADM1.",
+        tables: "Bundesland religious-affiliation counts and totals for 1951–2001 censuses and the 2021 combined estimate. The area-summary population_total field is the source population denominator (census total for 1951–2001; weighted total estimate for 2021), religious_affiliation carries the affiliated count/share, and no_religion carries the no-religion count/share; the ODS underlying values support reconciliation without display-rounded cells.",
+        licence: "Statistik Austria data are open data used with attribution; geoBoundaries ADM1 boundaries are CC BY 4.0 with geoBoundaries attribution.",
+        script: "scripts/build_at_area_summary.R",
+        manifests: [
+          { label: "at-religious-affiliation-1951-2021", href: "docs/manifests/at-religious-affiliation-1951-2021.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Austria map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

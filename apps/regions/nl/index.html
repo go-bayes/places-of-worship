@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Netherlands Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // The Netherlands product is a self-reported survey (CBS StatLine table
+    // 83288NED, "Religieuze betrokkenheid" — religious involvement), by the
+    // 12 provinces, annual 2010–2015. CBS discontinued (stopgezet) the table
+    // after 2015 and republishes no province series since. Two distinct
+    // constructs ship, each as its own geography level pointed at its own
+    // summary file on the SAME province boundary (Italy/Denmark slot reuse):
+    // affiliation (share reporting a denomination) and attendance (share
+    // attending a religious or worldview gathering). The level select is
+    // therefore the CONSTRUCT switch. The runtime's metric labels are
+    // page-global; the two legacy slots therefore carry the source's umbrella term
+    // "religious involvement", and each metric note names the exact CBS
+    // item per level. CBS publishes rounded whole percentages with no
+    // population count and no machine-readable confidence interval; no CI
+    // is therefore shown and population_total is null by design.
+    window.REGION_CONFIG = {
+      countryCode: "NL",
+      title: "Places of Worship | Netherlands Research Map",
+      dataNoun: "Survey",
+      center: [5.3, 52.15],
+      initialZoom: 6.4,
+      censusLevels: {
+        affiliation: {
+          label: "Affiliation (survey)",
+          boundaries: "data/nl_province_2026.geojson",
+          summary: "data/area_summary_affiliation_province.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Self-reported religious affiliation from CBS StatLine table 83288NED (Religieuze betrokkenheid), by province, 2010–2015, CC BY 4.0 · Boundaries from PDOK Bestuurlijke gebieden (BRK) current provinces, CC BY 4.0"
+        },
+        attendance: {
+          label: "Attendance (survey)",
+          boundaries: "data/nl_province_2026.geojson",
+          summary: "data/area_summary_attendance_province.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Self-reported religious-service attendance from CBS StatLine table 83288NED (Religieuze betrokkenheid), by province, 2010–2015, CC BY 4.0 · Boundaries from PDOK Bestuurlijke gebieden (BRK) current provinces, CC BY 4.0"
+        }
+      },
+      defaultLevel: "affiliation",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2015,
+      // no change metric ships: the two legacy slots carry different
+      // constructs across the two levels; a single page-global change
+      // label cannot describe both affiliation and attendance
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious involvement %",
+          note: "self-reported estimate from CBS StatLine table 83288NED (Religieuze betrokkenheid), population aged 15+. On the Affiliation (survey) level this is the share reporting a religious denomination or worldview group; on the Attendance (survey) level it is the share attending a religious or worldview gathering once a week or more. CBS publishes rounded whole percentages with no population count and no confidence interval."
+        },
+        no_religion_percent: {
+          label: "No or minimal religious involvement %",
+          note: "self-reported estimate from CBS StatLine table 83288NED, population aged 15+. On the Affiliation (survey) level this is the share reporting no religious denomination or worldview group; on the Attendance (survey) level it is the share attending seldom or never. CBS publishes rounded whole percentages with no confidence interval."
+        }
+      },
+      popupDenominatorNote: "These are self-reported CBS survey estimates for the population aged 15+, published as rounded whole percentages in StatLine table 83288NED (Religieuze betrokkenheid). The two levels are distinct constructs on the same 12 provinces: Affiliation (survey) reports denomination, Attendance (survey) reports service attendance. CBS publishes no population count and no machine-readable confidence interval; no uncertainty band is therefore shown. The estimates carry sampling error and the known upward bias of self-reported religion.",
+      cityPresets: [
+        { label: "Amsterdam", coords: [4.9041, 52.3676], zoom: 10 },
+        { label: "Rotterdam", coords: [4.4777, 51.9244], zoom: 10 },
+        { label: "The Hague", coords: [4.3007, 52.0705], zoom: 10 },
+        { label: "Utrecht", coords: [5.1214, 52.0907], zoom: 10 },
+        { label: "Eindhoven", coords: [5.4697, 51.4416], zoom: 10 },
+        { label: "Groningen", coords: [6.5665, 53.2194], zoom: 10 },
+        { label: "Tilburg", coords: [5.0913, 51.5555], zoom: 10 },
+        { label: "Almere", coords: [5.2647, 52.3508], zoom: 10 },
+        { label: "Breda", coords: [4.7683, 51.5719], zoom: 10 },
+        { label: "Nijmegen", coords: [5.8520, 51.8426], zoom: 10 }
+      ],
+      geocode: { country: "nl", biasLngLat: [5.3, 52.15] },
+      onboarding: {
+        title: "Netherlands research map",
+        intro: "Self-reported religious involvement by province, from Statistics Netherlands (CBS) StatLine table 83288NED (Religieuze betrokkenheid), annual 2010–2015. Two distinct survey constructs ship on the same 12 provinces: religious affiliation and religious-service attendance. This sample survey is distinct from a census count.",
+        bullets: [
+          "Provinces are shaded by a self-reported CBS survey estimate for the population aged 15+.",
+          "Use the geography control to switch construct: Affiliation (survey) is the share reporting a denomination or worldview group; Attendance (survey) is the share attending a religious or worldview gathering, weekly-or-more against seldom-or-never.",
+          "This sample survey is distinct from a count. CBS publishes rounded whole percentages with no population count and no confidence interval; no uncertainty band is therefore shown. The estimates carry sampling error and the known upward bias of self-reported religion.",
+          "The series runs 2010–2015 only. CBS discontinued (stopgezet) table 83288NED after 2015 and has published no comparable province series since.",
+          "No change-since-previous-year metric is shown: the two levels carry different constructs, and a single change label cannot describe both affiliation and attendance.",
+          "Open <strong>Show Survey Data</strong> (top centre) for the metric, construct and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Self-reported religious involvement from <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83288NED" target="_blank" rel="noopener">CBS StatLine table 83288NED</a> (Religieuze betrokkenheid), by province, 2010&ndash;2015 &middot; Boundaries from <a href="https://www.pdok.nl/" target="_blank" rel="noopener">PDOK Bestuurlijke gebieden (BRK)</a> current provinces &middot; Both Creative Commons Attribution 4.0 International (CC BY 4.0); attribution: CBS, Kadaster',
+      censusFlagNote: "* These self-reported CBS sample-survey estimates from StatLine table 83288NED (Religieuze betrokkenheid) are distinct from census counts. They carry sampling error and the known upward bias of self-reported religion; CBS publishes rounded whole percentages with no population count and no machine-readable confidence interval. No uncertainty band is therefore shown. The series is 2010–2015 only: CBS discontinued (stopgezet) the table after 2015 with no comparable province series since. The Affiliation (survey) and Attendance (survey) levels form separate series on the same 12 provinces."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710b"></script>
+</body>
+</html>
