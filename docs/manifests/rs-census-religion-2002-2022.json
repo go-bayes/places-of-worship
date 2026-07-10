@@ -27,7 +27,11 @@
     "parameters": {
       "table_2011_id": "3102010402",
       "table_2022_id": "3104020301",
-      "waves": [2002, 2011, 2022],
+      "waves": [
+        2002,
+        2011,
+        2022
+      ],
       "geography": "25 SORS statistical areas, comprising the City of Belgrade plus 24 districts (okruzi), on the GISCO NUTS 3 2021 display frame",
       "construct": "census affiliation",
       "denominator": "total census population",
@@ -67,6 +71,9 @@
           "url": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2021_4326_LEVL_3.geojson",
           "notes": "NUTS 3 2021 GeoJSON."
         }
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/rs_census/"
       ]
     },
     "software_versions": {

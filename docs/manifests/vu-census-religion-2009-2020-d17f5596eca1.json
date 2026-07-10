@@ -26,7 +26,11 @@
   "command": "python extract_vu_census_religion.py (pdfplumber, coordinate-based extraction)",
   "parameters": {
    "tables": "2020 Basic Tables Vol 1 T3.5 (pp. 62-65); 2009 Basic Tables Vol 1 T3.5 (pp. 34-35); 2020 Analytical Report Vol 2 T30, T31",
-   "derived": "2020 provinces including urban municipalities (Shefa+Port Vila, Sanma+Luganville)"
+   "derived": "2020 provinces including urban municipalities (Shefa+Port Vila, Sanma+Luganville)",
+   "raw_cache_durable_uris": [
+    "gs://pow-research-data/raw_sources/vu_census/",
+    "gs://pow-research-data/raw_sources/vu_census_guy/"
+   ]
   },
   "software_versions": {
    "python": "3.x",
@@ -58,7 +62,7 @@
    "bytes": 5869,
    "sha256": "c3faf210c42b2a8e8cf77d975496c3bd48140a8f67f99f0db8243a33b4da8085",
    "row_count": 98,
-   "notes": "1999 Main Report Table 2.10 religion by province (+ national), transcribed from the print-volume scan received from Guy Lavender Forsyth 2026-07-06 (scan sha256 9cde4182\u2026, git-ignored at data/raw/vu_census_guy/). Every row sums exactly to its total; provinces sum to the national row; national matches 2020 AR Table 30 (its refuse-to-answer 2,374 = do-not-want-to-say 320 + not-stated 2,054). Island rows in the scan await transcription. Relocated from the public repo to the private research tier 2026-07-07 per the data-access design (attributed-use licence class; JB-ratified). Earlier revisions remain in public git history; noted, not rewritten."
+   "notes": "1999 Main Report Table 2.10 religion by province (+ national), transcribed from the print-volume scan received from Guy Lavender Forsyth 2026-07-06 (scan sha256 9cde4182…, git-ignored at data/raw/vu_census_guy/). Every row sums exactly to its total; provinces sum to the national row; national matches 2020 AR Table 30 (its refuse-to-answer 2,374 = do-not-want-to-say 320 + not-stated 2,054). Island rows in the scan await transcription. Relocated from the public repo to the private research tier 2026-07-07 per the data-access design (attributed-use licence class; JB-ratified). Earlier revisions remain in public git history; noted, not rewritten."
   },
   {
    "uri": "gs://pow-research-data/research_datasets/vu_census_extracts/vu_religion_by_region_2020_basictables_t3_5.csv",

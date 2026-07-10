@@ -11,7 +11,9 @@
   "dataset_role": "public_product",
   "scope": {
     "level": "country",
-    "country_codes": ["PT"],
+    "country_codes": [
+      "PT"
+    ],
     "snapshot_date": null,
     "snapshot_anchor": null,
     "pipeline_stage": "public"
@@ -23,10 +25,16 @@
     "git_commit": null,
     "command": "Rscript scripts/build_pt_area_summary.R",
     "parameters": {
-      "waves": ["2011", "2021"],
+      "waves": [
+        "2011",
+        "2021"
+      ],
       "boundary_set": "pt-municipality-caop2021",
       "boundary_simplification_tolerance_m": 100,
-      "denominator": "2011 Total minus Não resposta; 2021 Total because no Não resposta category is exposed in the 2021 API extract"
+      "denominator": "2011 Total minus Não resposta; 2021 Total because no Não resposta category is exposed in the 2021 API extract",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/pt_census/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -36,8 +44,21 @@
   },
   "source": {
     "provider": "Instituto Nacional de Estatística (INE), Portugal; Direção-Geral do Território (DGT), Portugal",
-    "source_dataset_ids": ["ine-censos-2011-indicator-0006396", "ine-censos-2021-indicator-0011644", "dgt-caop-2021"],
-    "source_urls": ["https://www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_indicadores&indOcorrCod=0006396&contexto=bd&selTab=tab2", "https://www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_indicadores&indOcorrCod=0011644&contexto=bd&selTab=tab2", "https://www.ine.pt/ine/json_indicador/pindica.jsp?op=2&varcd=0006396&DIM1=T&DIM2=lvl@5&lang=PT", "https://www.ine.pt/ine/json_indicador/pindica.jsp?op=2&varcd=0011644&DIM1=T&DIM2=lvl@5&lang=PT", "https://www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_api_v2", "https://www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_cont_inst&INST=3585857", "https://www.dgterritorio.gov.pt/atividades/cartografia/cartografia-tematica/caop", "https://www.dgterritorio.gov.pt/dados-abertos"],
+    "source_dataset_ids": [
+      "ine-censos-2011-indicator-0006396",
+      "ine-censos-2021-indicator-0011644",
+      "dgt-caop-2021"
+    ],
+    "source_urls": [
+      "https://www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_indicadores&indOcorrCod=0006396&contexto=bd&selTab=tab2",
+      "https://www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_indicadores&indOcorrCod=0011644&contexto=bd&selTab=tab2",
+      "https://www.ine.pt/ine/json_indicador/pindica.jsp?op=2&varcd=0006396&DIM1=T&DIM2=lvl@5&lang=PT",
+      "https://www.ine.pt/ine/json_indicador/pindica.jsp?op=2&varcd=0011644&DIM1=T&DIM2=lvl@5&lang=PT",
+      "https://www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_api_v2",
+      "https://www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_cont_inst&INST=3585857",
+      "https://www.dgterritorio.gov.pt/atividades/cartografia/cartografia-tematica/caop",
+      "https://www.dgterritorio.gov.pt/dados-abertos"
+    ],
     "retrieved_at": "2026-07-09T00:00:00Z",
     "licence": "INE states that statistical information on its portal is free and may be used and reused under Creative Commons CC BY Atribuição 4.0 with source identification. DGT states that geographic downloads from its data centre are subject to CC BY 4.0 with attribution to Direção-Geral do Território.",
     "citation": "Instituto Nacional de Estatística (Portugal), indicators 0006396 and 0011644; Direção-Geral do Território, Carta Administrativa Oficial de Portugal 2021.",
@@ -208,7 +229,13 @@
     }
   ],
   "validation": {
-    "checks": ["INE indicator 0006396 and 0011644 API JSON files were downloaded for municipality rows and Portugal national rows.", "For 2011, municipality sums match the INE Portugal row exactly for Total, Não resposta, stated-response denominator, religious affiliation, and Sem religião.", "For 2021, municipality sums match the INE Portugal row exactly for Total, stated-response denominator, religious affiliation, and Sem religião; no Não resposta category is exposed in the 2021 API extract.", "CAOP 2021 source polygons dissolve to 308 municipality features, matching both INE municipality code sets.", "The simplified boundary GeoJSON is at or below 3 MB."],
+    "checks": [
+      "INE indicator 0006396 and 0011644 API JSON files were downloaded for municipality rows and Portugal national rows.",
+      "For 2011, municipality sums match the INE Portugal row exactly for Total, Não resposta, stated-response denominator, religious affiliation, and Sem religião.",
+      "For 2021, municipality sums match the INE Portugal row exactly for Total, stated-response denominator, religious affiliation, and Sem religião; no Não resposta category is exposed in the 2021 API extract.",
+      "CAOP 2021 source polygons dissolve to 308 municipality features, matching both INE municipality code sets.",
+      "The simplified boundary GeoJSON is at or below 3 MB."
+    ],
     "join_coverage": [
       {
         "year": 2011,

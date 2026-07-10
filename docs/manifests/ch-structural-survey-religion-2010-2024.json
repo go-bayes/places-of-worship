@@ -27,7 +27,10 @@
     "parameters": {
       "product": "survey",
       "boundary_set": "ch-canton-2026-swissboundaries3d",
-      "construct_split": "Census full-count affiliation and structural-survey age-15-plus weighted estimates are shipped as separate area-summary products."
+      "construct_split": "Census full-count affiliation and structural-survey age-15-plus weighted estimates are shipped as separate area-summary products.",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/ch_religion/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -39,8 +42,19 @@
   },
   "source": {
     "provider": "Federal Statistical Office (FSO/BFS); swisstopo",
-    "source_dataset_ids": ["bfs-je-d-01080202-structural-survey-religion-canton-2010-2024", "swisstopo-swissboundaries3d-cantons-2026-01"],
-    "source_urls": ["https://opendata.swiss/api/3/action/package_show?id=religionszugehorigkeit-nach-grossregion-und-kanton", "https://dam-api.bfs.admin.ch/hub/api/dam/assets/36347568", "https://dam-api.bfs.admin.ch/hub/api/dam/assets/36347568/master", "https://opendata.swiss/api/3/action/package_show?id=swissboundaries3d", "https://data.geo.admin.ch/api/stac/v0.9/collections/ch.swisstopo.swissboundaries3d/items/swissboundaries3d_2026-01", "https://data.geo.admin.ch/ch.swisstopo.swissboundaries3d/swissboundaries3d_2026-01/swissboundaries3d_2026-01_2056_5728.gpkg.zip", "https://opendata.swiss/en/terms-of-use/"],
+    "source_dataset_ids": [
+      "bfs-je-d-01080202-structural-survey-religion-canton-2010-2024",
+      "swisstopo-swissboundaries3d-cantons-2026-01"
+    ],
+    "source_urls": [
+      "https://opendata.swiss/api/3/action/package_show?id=religionszugehorigkeit-nach-grossregion-und-kanton",
+      "https://dam-api.bfs.admin.ch/hub/api/dam/assets/36347568",
+      "https://dam-api.bfs.admin.ch/hub/api/dam/assets/36347568/master",
+      "https://opendata.swiss/api/3/action/package_show?id=swissboundaries3d",
+      "https://data.geo.admin.ch/api/stac/v0.9/collections/ch.swisstopo.swissboundaries3d/items/swissboundaries3d_2026-01",
+      "https://data.geo.admin.ch/ch.swisstopo.swissboundaries3d/swissboundaries3d_2026-01/swissboundaries3d_2026-01_2056_5728.gpkg.zip",
+      "https://opendata.swiss/en/terms-of-use/"
+    ],
     "retrieved_at": "2026-07-09T23:39:54Z",
     "licence": "opendata.swiss OPEN-BY-ASK / terms_by_ask: non-commercial reuse is allowed with source attribution; commercial reuse requires permission from the data owner. Boundary source: opendata.swiss OPEN-BY / terms_by: free use with source attribution.",
     "citation": "Federal Statistical Office, structural survey, religious affiliation by major region and canton, 2010-2024; swisstopo, swissBOUNDARIES3D 2026-01."
@@ -100,8 +114,17 @@
   "local_cache_hint": "data/raw/ch_religion",
   "validation": {
     "status": "passed_with_warnings",
-    "commands": ["Rscript scripts/build_ch_area_summary.R", "Rscript -e 'jsonlite::validate(readChar(\"apps/regions/ch/data/area_summary_canton_census.json\", file.info(\"apps/regions/ch/data/area_summary_canton_census.json\")$size))'", "Rscript -e 'jsonlite::validate(readChar(\"apps/regions/ch/data/area_summary_canton_survey.json\", file.info(\"apps/regions/ch/data/area_summary_canton_survey.json\")$size))'"],
-    "warnings": ["Structural-survey rows are weighted sample estimates for the resident population aged 15+ and are not census counts.", "The source workbook includes confidence intervals by category, but the legacy area-summary row schema has no CI columns.", "Survey canton total and no-religion estimates are checked against the workbook national row with a 5-person tolerance for weighted-estimate decimal residuals.", "23 canton-year rows have suppressed unknown-affiliation cells, so religious_affiliation_count and religious_affiliation_percent are null for those rows."],
+    "commands": [
+      "Rscript scripts/build_ch_area_summary.R",
+      "Rscript -e 'jsonlite::validate(readChar(\"apps/regions/ch/data/area_summary_canton_census.json\", file.info(\"apps/regions/ch/data/area_summary_canton_census.json\")$size))'",
+      "Rscript -e 'jsonlite::validate(readChar(\"apps/regions/ch/data/area_summary_canton_survey.json\", file.info(\"apps/regions/ch/data/area_summary_canton_survey.json\")$size))'"
+    ],
+    "warnings": [
+      "Structural-survey rows are weighted sample estimates for the resident population aged 15+ and are not census counts.",
+      "The source workbook includes confidence intervals by category, but the legacy area-summary row schema has no CI columns.",
+      "Survey canton total and no-religion estimates are checked against the workbook national row with a 5-person tolerance for weighted-estimate decimal residuals.",
+      "23 canton-year rows have suppressed unknown-affiliation cells, so religious_affiliation_count and religious_affiliation_percent are null for those rows."
+    ],
     "notes": "The survey product is separate from the census product because the denominator, measurement design and uncertainty differ. Canton total and no-religion estimates are compared with the workbook's national row before integer rounding; small decimal residuals reflect weighted estimates, and suppressed unknown-affiliation cells prevent exact canton reconstruction of the affiliation-excluding-unknown numerator in the affected rows."
   },
   "privacy": "public",

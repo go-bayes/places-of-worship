@@ -27,7 +27,11 @@
     "parameters": {
       "dataflow": "WBS008",
       "api_publication": "V67",
-      "waves": [2001, 2011, 2022],
+      "waves": [
+        2001,
+        2011,
+        2022
+      ],
       "geography": "20 KSH county rows (NUTS 3 codes)",
       "settlement_type": "HU Total",
       "construct": "census affiliation from the voluntary religion question",
@@ -79,6 +83,9 @@
           "url": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2021_4326_LEVL_3.geojson",
           "notes": "NUTS 3 2021 GeoJSON."
         }
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/hu_census/"
       ]
     },
     "software_versions": {

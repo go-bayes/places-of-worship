@@ -26,7 +26,11 @@
     "command": "Rscript scripts/build_li_area_summary.R",
     "parameters": {
       "table": "213.001d Ständige Bevölkerung nach Religion, Heimat, Geschlecht und Gemeinde",
-      "waves": [2010, 2015, 2020],
+      "waves": [
+        2010,
+        2015,
+        2020
+      ],
       "geography": "11 municipalities",
       "construct": "full-enumeration census affiliation for the permanent population",
       "denominator": "published permanent-population total; Ohne Angabe retained",
@@ -72,6 +76,9 @@
           "url": "https://service.geo.llv.li/download/getfile.php?theme=hgredxf",
           "notes": "Stable Hoheitsgrenzen ZIP route from the official geodata download page."
         }
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/li_census/"
       ]
     },
     "software_versions": {
@@ -85,8 +92,25 @@
   },
   "source": {
     "provider": "Statistics Liechtenstein; Liechtenstein National Administration",
-    "source_dataset_ids": ["statistik-li-census-2010-population-structure", "statistik-li-census-2015-population-structure", "statistik-li-census-2020-population-structure", "llv-hoheitsgrenzen-municipality-2021", "llv-hoheitsgrenzen-open-data-terms", "geocat-li-hoheitsgrenzen-metadata"],
-    "source_urls": ["https://www.statistikportal.li/statistikportal/publications/151-amt-fuer-statistik/111-volkszaehlung/2010/01/1/111.2010.01_02_vz-2010-bd1-tabellen.xls", "https://www.statistikportal.li/statistikportal/publications/213-bevoelkerungsstruktur/2015/01/1/213.2015.01_02_bevoelkerungsstruktur-2015-tabellen.xlsx", "https://www.statistikportal.li/statistikportal/publications/213-bevoelkerungsstruktur/2020/01/1/213.2020.01.1_02_bevoelkerungsstruktur-2020-tabellen.xlsx", "https://www.statistikportal.li/etab/213.001d", "https://www.statistikportal.li/de/themen/bevoelkerung/bevoelkerungsstruktur", "https://service.geo.llv.li/download/", "https://service.geo.llv.li/download/getfile.php?theme=hgredxf", "https://service.geo.llv.li/download/hgredxf/licence.txt", "https://www.geocat.ch/geonetwork/srv/ger/csw?service=CSW&version=2.0.2&request=GetRecordById&id=7dd0cb7f-43f9-4db4-b83f-66b43a47f943&elementSetName=full&outputSchema=http://www.isotc211.org/2005/gmd"],
+    "source_dataset_ids": [
+      "statistik-li-census-2010-population-structure",
+      "statistik-li-census-2015-population-structure",
+      "statistik-li-census-2020-population-structure",
+      "llv-hoheitsgrenzen-municipality-2021",
+      "llv-hoheitsgrenzen-open-data-terms",
+      "geocat-li-hoheitsgrenzen-metadata"
+    ],
+    "source_urls": [
+      "https://www.statistikportal.li/statistikportal/publications/151-amt-fuer-statistik/111-volkszaehlung/2010/01/1/111.2010.01_02_vz-2010-bd1-tabellen.xls",
+      "https://www.statistikportal.li/statistikportal/publications/213-bevoelkerungsstruktur/2015/01/1/213.2015.01_02_bevoelkerungsstruktur-2015-tabellen.xlsx",
+      "https://www.statistikportal.li/statistikportal/publications/213-bevoelkerungsstruktur/2020/01/1/213.2020.01.1_02_bevoelkerungsstruktur-2020-tabellen.xlsx",
+      "https://www.statistikportal.li/etab/213.001d",
+      "https://www.statistikportal.li/de/themen/bevoelkerung/bevoelkerungsstruktur",
+      "https://service.geo.llv.li/download/",
+      "https://service.geo.llv.li/download/getfile.php?theme=hgredxf",
+      "https://service.geo.llv.li/download/hgredxf/licence.txt",
+      "https://www.geocat.ch/geonetwork/srv/ger/csw?service=CSW&version=2.0.2&request=GetRecordById&id=7dd0cb7f-43f9-4db4-b83f-66b43a47f943&elementSetName=full&outputSchema=http://www.isotc211.org/2005/gmd"
+    ],
     "retrieved_at": "2026-07-10T00:00:00Z",
     "licence": "Statistics Liechtenstein publication metadata states CC BY 4.0. The official Hoheitsgrenzen archive has separate LLV geodata reuse terms that permit use, modification, and same-conditions redistribution with attribution.",
     "citation": "Statistics Liechtenstein table 213.001d and 2010/2015/2020 population-structure workbooks; Liechtenstein National Administration Hoheitsgrenzen municipality polygons."

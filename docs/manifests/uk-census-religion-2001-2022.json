@@ -11,7 +11,9 @@
   "dataset_role": "public_product",
   "scope": {
     "level": "country",
-    "country_codes": ["UK"],
+    "country_codes": [
+      "UK"
+    ],
     "snapshot_date": null,
     "snapshot_anchor": null,
     "pipeline_stage": "public"
@@ -23,21 +25,39 @@
     "git_commit": "f7c8aaa",
     "command": "Rscript scripts/build_uk_area_summary.R",
     "parameters": {
-      "census_levels": ["ew_ltla", "sco_ca", "ni_lgd"],
+      "census_levels": [
+        "ew_ltla",
+        "sco_ca",
+        "ni_lgd"
+      ],
       "live_waves": {
-        "ew_ltla": ["2001", "2011", "2021"],
+        "ew_ltla": [
+          "2001",
+          "2011",
+          "2021"
+        ],
         "ni_lgd": "2021"
       },
       "pending_waves": {
-        "sco_ca": ["2001", "2011", "2022"],
-        "ni_lgd": ["2001", "2011"]
+        "sco_ca": [
+          "2001",
+          "2011",
+          "2022"
+        ],
+        "ni_lgd": [
+          "2001",
+          "2011"
+        ]
       },
       "denominator": "all usual residents minus not answered or religion not stated",
       "ew_boundary_simplification_tolerance_m": 0,
       "ew_boundary_mapshaper_keep_percentage": 8,
       "sco_boundary_simplification_tolerance_m": 0,
       "sco_boundary_mapshaper_keep_percentage": 30,
-      "ni_boundary_simplification_tolerance_m": 25
+      "ni_boundary_simplification_tolerance_m": 25,
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/uk_census/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -48,8 +68,31 @@
   },
   "source": {
     "provider": "Office for National Statistics via Nomis; Office for National Statistics Open Geography Portal; National Records of Scotland; Ordnance Survey of Northern Ireland; Northern Ireland Statistics and Research Agency",
-    "source_dataset_ids": ["nomis-c2021ts030-lad2022-ew", "nomis-c2011ks209ew-lad2011-ew", "nomis-c2001ks007-lad2011-ew", "ons-lad-may-2021-uk-bgc", "ons-lad11-lad21-ew-lookup", "scotland-census-council-area-2019", "scotland-census-religion-extraction-pending", "nisra-census-2021-ms-b19-lgd", "osni-lgd-2012", "nisra-2001-2011-lgd-religion-extraction-pending"],
-    "source_urls": ["https://www.nomisweb.co.uk/api/v01/dataset/nm_2049_1.bulk.csv?time=latest&measures=20100&c2021_religion_10=0,1,9&geography=TYPE154", "https://www.nomisweb.co.uk/api/v01/dataset/nm_2049_1.bulk.csv?time=latest&measures=20100&c2021_religion_10=0,1,9&geography=TYPE499", "https://www.nomisweb.co.uk/api/v01/dataset/nm_616_1.bulk.csv?time=latest&measures=20100&rural_urban=total&cell=0,8,9&geography=TYPE464", "https://www.nomisweb.co.uk/api/v01/dataset/nm_616_1.bulk.csv?time=latest&measures=20100&rural_urban=total&cell=0,8,9&geography=TYPE499", "https://www.nomisweb.co.uk/api/v01/dataset/nm_1607_1.bulk.csv?time=latest&measures=20100&c_relpuk11=0,8,9&geography=TYPE464", "https://www.nomisweb.co.uk/api/v01/dataset/nm_1607_1.bulk.csv?time=latest&measures=20100&c_relpuk11=0,8,9&geography=TYPE499", "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Local_Authority_Districts_May_2021_UK_BGC_2022/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson", "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/LAD11_LAD21_EW_LU/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&f=json", "https://services1.arcgis.com/etUJqgud3DEym3ls/ArcGIS/rest/services/CouncilArea2019_MHW/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson", "https://services2.arcgis.com/BdBkthNLO9mzGAMO/arcgis/rest/services/OSNI_Open_Data_Largescale_Boundaries__Local_Government_Districts_2012/FeatureServer/1/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson", "https://www.nisra.gov.uk/system/files/statistics/census-2021-ms-b19.xlsx"],
+    "source_dataset_ids": [
+      "nomis-c2021ts030-lad2022-ew",
+      "nomis-c2011ks209ew-lad2011-ew",
+      "nomis-c2001ks007-lad2011-ew",
+      "ons-lad-may-2021-uk-bgc",
+      "ons-lad11-lad21-ew-lookup",
+      "scotland-census-council-area-2019",
+      "scotland-census-religion-extraction-pending",
+      "nisra-census-2021-ms-b19-lgd",
+      "osni-lgd-2012",
+      "nisra-2001-2011-lgd-religion-extraction-pending"
+    ],
+    "source_urls": [
+      "https://www.nomisweb.co.uk/api/v01/dataset/nm_2049_1.bulk.csv?time=latest&measures=20100&c2021_religion_10=0,1,9&geography=TYPE154",
+      "https://www.nomisweb.co.uk/api/v01/dataset/nm_2049_1.bulk.csv?time=latest&measures=20100&c2021_religion_10=0,1,9&geography=TYPE499",
+      "https://www.nomisweb.co.uk/api/v01/dataset/nm_616_1.bulk.csv?time=latest&measures=20100&rural_urban=total&cell=0,8,9&geography=TYPE464",
+      "https://www.nomisweb.co.uk/api/v01/dataset/nm_616_1.bulk.csv?time=latest&measures=20100&rural_urban=total&cell=0,8,9&geography=TYPE499",
+      "https://www.nomisweb.co.uk/api/v01/dataset/nm_1607_1.bulk.csv?time=latest&measures=20100&c_relpuk11=0,8,9&geography=TYPE464",
+      "https://www.nomisweb.co.uk/api/v01/dataset/nm_1607_1.bulk.csv?time=latest&measures=20100&c_relpuk11=0,8,9&geography=TYPE499",
+      "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Local_Authority_Districts_May_2021_UK_BGC_2022/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson",
+      "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/LAD11_LAD21_EW_LU/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&f=json",
+      "https://services1.arcgis.com/etUJqgud3DEym3ls/ArcGIS/rest/services/CouncilArea2019_MHW/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson",
+      "https://services2.arcgis.com/BdBkthNLO9mzGAMO/arcgis/rest/services/OSNI_Open_Data_Largescale_Boundaries__Local_Government_Districts_2012/FeatureServer/1/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson",
+      "https://www.nisra.gov.uk/system/files/statistics/census-2021-ms-b19.xlsx"
+    ],
     "retrieved_at": "2026-07-07T00:00:00Z",
     "licence": "Contains public sector information licensed under the Open Government Licence v3.0.",
     "citation": "Office for National Statistics via Nomis, Census 2001 KS007, Census 2011 KS209EW, and Census 2021 TS030; Office for National Statistics Open Geography Portal; National Records of Scotland / Scotland's Census; Ordnance Survey of Northern Ireland / OpenDataNI; Northern Ireland Statistics and Research Agency, Census 2021 MS-B19."
@@ -172,8 +215,15 @@
   },
   "validation": {
     "status": "passed_with_warnings",
-    "commands": ["Rscript scripts/build_uk_area_summary.R", "jq empty apps/regions/uk/data/area_summary_ew_ltla.json apps/regions/uk/data/area_summary_sco_ca.json apps/regions/uk/data/area_summary_ni_lgd.json docs/manifests/uk-census-religion-2001-2022.json"],
-    "warnings": ["England and Wales national-total residuals are within the 25-person build tolerance.", "Scotland council-area census counts are pending extraction.", "Northern Ireland 2001 and 2011 LGD census counts are pending extraction."],
+    "commands": [
+      "Rscript scripts/build_uk_area_summary.R",
+      "jq empty apps/regions/uk/data/area_summary_ew_ltla.json apps/regions/uk/data/area_summary_sco_ca.json apps/regions/uk/data/area_summary_ni_lgd.json docs/manifests/uk-census-religion-2001-2022.json"
+    ],
+    "warnings": [
+      "England and Wales national-total residuals are within the 25-person build tolerance.",
+      "Scotland council-area census counts are pending extraction.",
+      "Northern Ireland 2001 and 2011 LGD census counts are pending extraction."
+    ],
     "notes": "England and Wales join coverage is 331/331 for 2001, 2011, and 2021. Scotland has 32 council-area boundary rows for each placeholder year and 0 live census rows. Northern Ireland has 11/11 live 2021 LGD rows and placeholder rows for 2001 and 2011."
   },
   "privacy": "public",

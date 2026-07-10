@@ -140,8 +140,20 @@
         }
       ],
       "reconciliation_file": "apps/regions/at/data/national_reconciliation.csv",
-      "reconciliation_metrics": ["population_total", "religious_affiliation_count", "no_religion_count", "not_stated_count"],
-      "omitted_metrics": ["religious_change", "places_per_10000_residents", "place_density_per_sq_km"]
+      "reconciliation_metrics": [
+        "population_total",
+        "religious_affiliation_count",
+        "no_religion_count",
+        "not_stated_count"
+      ],
+      "omitted_metrics": [
+        "religious_change",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/at_religion/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -153,8 +165,25 @@
   },
   "source": {
     "provider": "Statistics Austria; geoBoundaries",
-    "source_dataset_ids": ["statistik-austria-census-religion-bundesland-1951-2001", "statistik-austria-religious-affiliation-bundesland-2021", "geoboundaries-gbopen-aut-adm1-2017", "statistik-austria-religious-denomination-page", "statistik-austria-religious-affiliation-2021-standard-documentation", "statistik-austria-website-information"],
-    "source_urls": ["https://www.statistik.at/fileadmin/pages/439/neu__Religion__1_.ods", "https://www.statistik.at/fileadmin/pages/439/neu__Religion_2021_Bundesland.ods", "https://www.statistik.at/en/statistics/population-and-society/population/further-population-statistics/religious-denomination", "https://www.statistik.at/fileadmin/shared/QM/Standarddokumentationen/B_en/engl_std_b_religionzugehoerigkeit.pdf", "https://www.statistik.at/en/about-us/responsibilities-and-principles/legal-basis/website-information", "https://data.statistik.gv.at/web/catalog.jsp", "https://data.statistik.gv.at/web/?page=terms", "https://www.geoboundaries.org/api/current/gbOpen/AUT/ADM1/", "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/AUT/ADM1/geoBoundaries-AUT-ADM1.geojson"],
+    "source_dataset_ids": [
+      "statistik-austria-census-religion-bundesland-1951-2001",
+      "statistik-austria-religious-affiliation-bundesland-2021",
+      "geoboundaries-gbopen-aut-adm1-2017",
+      "statistik-austria-religious-denomination-page",
+      "statistik-austria-religious-affiliation-2021-standard-documentation",
+      "statistik-austria-website-information"
+    ],
+    "source_urls": [
+      "https://www.statistik.at/fileadmin/pages/439/neu__Religion__1_.ods",
+      "https://www.statistik.at/fileadmin/pages/439/neu__Religion_2021_Bundesland.ods",
+      "https://www.statistik.at/en/statistics/population-and-society/population/further-population-statistics/religious-denomination",
+      "https://www.statistik.at/fileadmin/shared/QM/Standarddokumentationen/B_en/engl_std_b_religionzugehoerigkeit.pdf",
+      "https://www.statistik.at/en/about-us/responsibilities-and-principles/legal-basis/website-information",
+      "https://data.statistik.gv.at/web/catalog.jsp",
+      "https://data.statistik.gv.at/web/?page=terms",
+      "https://www.geoboundaries.org/api/current/gbOpen/AUT/ADM1/",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/AUT/ADM1/geoBoundaries-AUT-ADM1.geojson"
+    ],
     "retrieved_at": "2026-07-10T00:00:00Z",
     "licence": "Statistics Austria's pinned website-information page states: ‘If the contained material is accurately reproduced and the source “Statistics Austria” is quoted it is permitted to reproduce, distribute, make publicly available and process the content.’ It also requires a note showing that data were extracted or adapted when published content is partially used, displayed, or otherwise changed. The religion tables are main-site downloads, and the complete open.data catalogue contained no religion dataset on 2026-07-10. The separate open.data CC BY 4.0 licence therefore does not govern these tables. geoBoundaries gbOpen AUT ADM1 metadata records the source licence as Creative Commons Attribution-ShareAlike 2.0 and identifies geoBoundaries and the Austrian Federal Office for Metrology and Survey as sources.",
     "citation": "Statistics Austria, population by religious denomination and Bundesland 1951-2001; Statistics Austria, religious affiliation 2021 by Bundesland; geoBoundaries gbOpen AUT ADM1."
@@ -215,7 +244,10 @@
   },
   "validation": {
     "status": "passed",
-    "commands": ["Rscript scripts/build_at_area_summary.R", "uv run --with jsonschema python -m jsonschema -i docs/manifests/at-religious-affiliation-1951-2021.json schemas/data-manifest.schema.json"],
+    "commands": [
+      "Rscript scripts/build_at_area_summary.R",
+      "uv run --with jsonschema python -m jsonschema -i docs/manifests/at-religious-affiliation-1951-2021.json schemas/data-manifest.schema.json"
+    ],
     "warnings": [],
     "notes": "Seven waves each join nine source rows to nine boundary features. All percentage metrics are within [0, 100]. Population, religious affiliation, no religion, and not stated reconcile to the national source row in every wave. Census differences are zero. The largest 2021 binary floating-point residual is below 4e-9 persons. The simplified boundary contains nine valid non-empty features and is below 800 KB. See apps/regions/at/data/national_reconciliation.csv."
   },

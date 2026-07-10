@@ -25,7 +25,11 @@
     "git_commit": "ddca9eb",
     "command": "Rscript scripts/build_hr_area_summary.R",
     "parameters": {
-      "waves": [2001, 2011, 2021],
+      "waves": [
+        2001,
+        2011,
+        2021
+      ],
       "geography": "21 published county rows: 20 counties and the City of Zagreb",
       "construct": "self-declared census religious affiliation",
       "denominator": "whole census population",
@@ -64,6 +68,9 @@
           "url": "https://geoportal.dgu.hr/services/inspire/au/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=au%3AAU.AdministrativeUnit&cql_filter=national_level%3D%272ndOrder%27&outputFormat=application%2Fjson&srsName=EPSG%3A4326",
           "notes": "Filter national_level=2ndOrder."
         }
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/hr_census/"
       ]
     },
     "software_versions": {

@@ -30,8 +30,16 @@
       "boundary_sets": "de-kreis-2011-bkg-vg250, de-kreis-2022-bkg-vg250",
       "boundary_simplification": "mapshaper -clean -simplify dp <ladder> keep-shapes -o precision=0.00001; max 1.5 MB",
       "denominator": "Zensus compact RELZG2 table total persons (Insgesamt)",
-      "omitted_metrics": ["no_religion_percent", "religious_change", "places_per_10000_residents", "place_density_per_sq_km"],
-      "reconciliation": "published Deutschland rows do not exactly equal Kreis sums because Deutschland totals include persons assignable to no Kreis and the Zensus results database documents subpopulation non-additivity"
+      "omitted_metrics": [
+        "no_religion_percent",
+        "religious_change",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "reconciliation": "published Deutschland rows do not exactly equal Kreis sums because Deutschland totals include persons assignable to no Kreis and the Zensus results database documents subpopulation non-additivity",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/de_census/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -41,8 +49,24 @@
   },
   "source": {
     "provider": "Statistische Ämter des Bundes und der Länder; Bundesamt für Kartographie und Geodäsie (BKG)",
-    "source_dataset_ids": ["zensus-2011-1000x-1014-religion-geolk1", "zensus-2022-1000a-1018-religion-geolk4", "bkg-vg250-krs-2011-01-01", "bkg-vg250-krs-2022-01-01"],
-    "source_urls": ["https://ergebnisse.zensus2022.de/datenbank/online/", "https://ergebnisse.zensus2022.de/proxy/api/rest/tables/1000X-1014/structure", "https://ergebnisse.zensus2022.de/proxy/api/rest/tables/1000X-1014/download/ffcsv/de", "https://ergebnisse.zensus2022.de/proxy/api/rest/tables/1000A-1018/data?GEOLK4=%2A", "https://ergebnisse.zensus2022.de/proxy/api/rest/variables/RELZG2/values", "https://ergebnisse.zensus2022.de/proxy/api/rest/variables/RELZG2/information", "https://daten.gdz.bkg.bund.de/produkte/vg/vg250_ebenen_0101/2011/vg250_01-01.utm32s.shape.ebenen.zip", "https://daten.gdz.bkg.bund.de/produkte/vg/vg250_ebenen_0101/2022/vg250_01-01.utm32s.shape.ebenen.zip", "https://gdz.bkg.bund.de/index.php/default/digitale-geodaten/verwaltungsgebiete/verwaltungsgebiete-1-250-000-stand-01-01-vg250-01-01.html", "https://www.govdata.de/dl-de/by-2-0"],
+    "source_dataset_ids": [
+      "zensus-2011-1000x-1014-religion-geolk1",
+      "zensus-2022-1000a-1018-religion-geolk4",
+      "bkg-vg250-krs-2011-01-01",
+      "bkg-vg250-krs-2022-01-01"
+    ],
+    "source_urls": [
+      "https://ergebnisse.zensus2022.de/datenbank/online/",
+      "https://ergebnisse.zensus2022.de/proxy/api/rest/tables/1000X-1014/structure",
+      "https://ergebnisse.zensus2022.de/proxy/api/rest/tables/1000X-1014/download/ffcsv/de",
+      "https://ergebnisse.zensus2022.de/proxy/api/rest/tables/1000A-1018/data?GEOLK4=%2A",
+      "https://ergebnisse.zensus2022.de/proxy/api/rest/variables/RELZG2/values",
+      "https://ergebnisse.zensus2022.de/proxy/api/rest/variables/RELZG2/information",
+      "https://daten.gdz.bkg.bund.de/produkte/vg/vg250_ebenen_0101/2011/vg250_01-01.utm32s.shape.ebenen.zip",
+      "https://daten.gdz.bkg.bund.de/produkte/vg/vg250_ebenen_0101/2022/vg250_01-01.utm32s.shape.ebenen.zip",
+      "https://gdz.bkg.bund.de/index.php/default/digitale-geodaten/verwaltungsgebiete/verwaltungsgebiete-1-250-000-stand-01-01-vg250-01-01.html",
+      "https://www.govdata.de/dl-de/by-2-0"
+    ],
     "retrieved_at": "2026-07-09T00:00:00Z",
     "licence": "Zensus religion data are from the Zensusdatenbank of the Statistical Offices of the Federation and the Länder, licensed under Data licence Germany - attribution - Version 2.0 (dl-de/by-2-0). BKG VG250 boundaries are used under dl-de/by-2-0 with attribution © GeoBasis-DE / BKG.",
     "citation": "Zensusdatenbank tables 1000X-1014 and 1000A-1018; BKG VG250 annual Kreis boundary archives."
@@ -128,7 +152,10 @@
     "commands": [
       "Rscript scripts/build_de_area_summary.R"
     ],
-    "warnings": ["Hard national reconciliation against the published Deutschland rows fails for both waves because Deutschland totals include persons assignable to no Kreis, including German personnel stationed abroad, and because the Zensus results database documents subpopulation non-additivity.", "The build preserves source counts and does not distribute the national residual across Kreise."],
+    "warnings": [
+      "Hard national reconciliation against the published Deutschland rows fails for both waves because Deutschland totals include persons assignable to no Kreis, including German personnel stationed abroad, and because the Zensus results database documents subpopulation non-additivity.",
+      "The build preserves source counts and does not distribute the national residual across Kreise."
+    ],
     "notes": "Zensus 2011 table 1000X-1014 uses GEOLK1, Landkreise und kreisfreie Städte, on the 9 May 2011 territory; 412 Kreis rows ship.\nZensus 2022 table 1000A-1018 uses GEOLK4, Landkreise u. krsfr. Städte (Stand 15.05.22), on the 15 May 2022 territory; 400 Kreis rows ship.\nThe two waves use separate period boundary sets rather than a cross-vintage concordance. This avoids aggregating or interpolating Mecklenburg-Vorpommern's post-census 2011 reform, Goettingen's 2016 merger, Eisenach's 2021 change, and other Kreis-set differences.\nThe BKG 2011 archive includes an mv_kreisreform folder, but the build uses the main de1101 Kreis layer because the 2011 Zensus table is dated 9 May 2011, before the September 2011 Mecklenburg-Vorpommern reform.\nHard reconciliation against the published Deutschland rows fails because Deutschland totals include persons assignable to no Kreis, including German personnel stationed abroad, and because the Zensus results database documents subpopulation non-additivity. The tested regional rows use content PRS018, and the tested Deutschland rows use content PRS001; Zensus metadata entries label both content codes as Persons.\n2011 GEOLK1 regional sums minus the published Deutschland PRS001 rows: total -9698, protestant +17, catholic -6, residual -9662.\n2022 GEOLK4 regional sums minus the published Deutschland PRS001 rows: total -8258, protestant +4, catholic +10, residual -8258.\nThe Protestant and Catholic regional sums match the Deutschland rows within ±17 persons, which supports category integrity.\nWithin-area category sums also show small source residuals: max absolute total-minus-category difference is 8 persons across 307 2011 Kreis rows and 11 persons across 302 2022 Kreis rows.\nReligious affiliation is REL-EV-OR plus REL-RK-OR. No-religion metrics are null because REL-SONST-X combines other, no public-law membership, and no response.\nThe 2011 simplified Kreis boundary GeoJSON writes to 1381698 bytes after mapshaper -clean -simplify dp 10% keep-shapes -o precision=0.00001.\nThe 2022 simplified Kreis boundary GeoJSON writes to 1236269 bytes after mapshaper -clean -simplify dp 10% keep-shapes -o precision=0.00001. \n2011 national totals: total=80219695; protestant=23369341; catholic=24066605; residual=32783749. \n2022 national totals: total=82719540; protestant=19127360; catholic=20746959; residual=42845220."
   },
   "privacy": "public",

@@ -25,7 +25,11 @@
     "git_commit": "8eb31acd58ef144d99d33408a45d07618f67a03d",
     "command": "Rscript scripts/build_mu_area_summary.R",
     "parameters": {
-      "waves": ["2000", "2011", "2022"],
+      "waves": [
+        "2000",
+        "2011",
+        "2022"
+      ],
       "geography": "nine Mauritius districts plus Rodrigues",
       "pdf_extraction": "poppler pdftotext -layout",
       "denominator": "full Table D6 resident population",
@@ -175,7 +179,10 @@
           "notes": "The public 1990 Volume II is an image-only scan. pdftotext yields no text, and the wave is not machine-extractable under the no-OCR/no-hand-entry rule."
         }
       ],
-      "raw_redistribution": "Raw PDFs and the source GeoJSON are not committed; they remain in gitignored data/raw/mu_census/."
+      "raw_redistribution": "Raw PDFs and the source GeoJSON are not committed; they remain in gitignored data/raw/mu_census/.",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/mu_census/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -186,8 +193,20 @@
   },
   "source": {
     "provider": "Statistics Mauritius; geoBoundaries",
-    "source_dataset_ids": ["statistics-mauritius-census-d6-2000", "statistics-mauritius-census-d6-2011", "statistics-mauritius-census-d6-2022", "geoboundaries-mus-adm1-2017"],
-    "source_urls": ["https://statsmauritius.govmu.org/Documents/Census_and_Surveys/HPC/2000/TR_VOLII-Demographic_Characteristics.pdf", "https://statsmauritius.govmu.org/Documents/Census_and_Surveys/HPC/2011/HPC_TR_Vol2_Demography_Yr11.pdf", "https://statsmauritius.govmu.org/Documents/Census_and_Surveys/Census2022/HPC_TR_Vol2_Demography_Yr22.pdf", "https://www.geoboundaries.org/api/current/gbOpen/MUS/ADM1/", "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MUS/ADM1/geoBoundaries-MUS-ADM1.geojson", "https://www.govmu.org/FR/Pages/Mentions_Legales.aspx"],
+    "source_dataset_ids": [
+      "statistics-mauritius-census-d6-2000",
+      "statistics-mauritius-census-d6-2011",
+      "statistics-mauritius-census-d6-2022",
+      "geoboundaries-mus-adm1-2017"
+    ],
+    "source_urls": [
+      "https://statsmauritius.govmu.org/Documents/Census_and_Surveys/HPC/2000/TR_VOLII-Demographic_Characteristics.pdf",
+      "https://statsmauritius.govmu.org/Documents/Census_and_Surveys/HPC/2011/HPC_TR_Vol2_Demography_Yr11.pdf",
+      "https://statsmauritius.govmu.org/Documents/Census_and_Surveys/Census2022/HPC_TR_Vol2_Demography_Yr22.pdf",
+      "https://www.geoboundaries.org/api/current/gbOpen/MUS/ADM1/",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MUS/ADM1/geoBoundaries-MUS-ADM1.geojson",
+      "https://www.govmu.org/FR/Pages/Mentions_Legales.aspx"
+    ],
     "retrieved_at": "2026-07-10T00:00:00Z",
     "licence": "Government of Mauritius copyright notice permits accurate reproduction and transmission with source URL and Government copyright attribution. The boundary is geoBoundaries MUS ADM1 under ODbL 1.0.",
     "citation": "Statistics Mauritius, Housing and Population Census, Volume II, Table D6 (2000, 2011, 2022); geoBoundaries MUS ADM1 (2017)."
@@ -237,7 +256,11 @@
   },
   "validation": {
     "status": "passed",
-    "commands": ["Rscript scripts/build_mu_area_summary.R", "uvx check-jsonschema --schemafile schemas/area-summary.schema.json apps/regions/mu/data/area_summary_district.json", "uvx check-jsonschema --schemafile schemas/data-manifest.schema.json docs/manifests/mu-census-religion-2000-2022.json"],
+    "commands": [
+      "Rscript scripts/build_mu_area_summary.R",
+      "uvx check-jsonschema --schemafile schemas/area-summary.schema.json apps/regions/mu/data/area_summary_district.json",
+      "uvx check-jsonschema --schemafile schemas/data-manifest.schema.json docs/manifests/mu-census-religion-2000-2022.json"
+    ],
     "warnings": [],
     "notes": "Every shipped PDF has a non-empty text layer and every selected Table D6 row reconciles to its printed total. The ten area rows reconcile exactly to the Republic of Mauritius row for every shipped wave. All ten census reporting units match one geoBoundaries feature. The simplified boundary has ten valid non-empty features and remains below 500 KB."
   },

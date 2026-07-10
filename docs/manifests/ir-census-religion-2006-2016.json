@@ -25,11 +25,31 @@
     "git_commit": "c8a05fc",
     "command": "Rscript scripts/build_ir_area_summary.R",
     "parameters": {
-      "waves": [2006, 2011, 2016],
+      "waves": [
+        2006,
+        2011,
+        2016
+      ],
       "geography": "28 analytical units under the 2006-2016 concordance (Tehran+Alborz; Razavi+South Khorasan+Yazd; North Khorasan separate)",
       "construct": "census affiliation in the SCI recognised categories",
-      "category_frame": ["Total", "Muslim", "Christian", "Zoroastrian", "Jew", "Other", "Not stated"],
-      "category_frame_persian": ["جمع", "مسلمان", "مسیحی", "زرتشتی", "کلیمی", "سایر", "اظهار نشده"],
+      "category_frame": [
+        "Total",
+        "Muslim",
+        "Christian",
+        "Zoroastrian",
+        "Jew",
+        "Other",
+        "Not stated"
+      ],
+      "category_frame_persian": [
+        "جمع",
+        "مسلمان",
+        "مسیحی",
+        "زرتشتی",
+        "کلیمی",
+        "سایر",
+        "اظهار نشده"
+      ],
       "affiliation_rule": "affiliation = Total minus Not stated; no_religion fields null (no source no-religion category)",
       "concordance_aggregations": [
         "Tehran + Alborz",
@@ -87,6 +107,9 @@
           "url": "https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_admin_1_states_provinces.zip",
           "mirror": "Natural Earth (naturalearthdata.com) public-domain download"
         }
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/ir_census/"
       ]
     },
     "software_versions": {
@@ -551,7 +574,11 @@
       "waves": 3,
       "rows": 84,
       "units_per_wave": 28,
-      "source_provinces_per_wave": [30, 31, 31],
+      "source_provinces_per_wave": [
+        30,
+        31,
+        31
+      ],
       "boundary_features": 28,
       "boundary_valid_features": 28,
       "distinct_geometry_hashes": 28,

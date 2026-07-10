@@ -25,7 +25,11 @@
     "git_commit": "c8a05fc",
     "command": "Rscript scripts/build_bg_area_summary.R",
     "parameters": {
-      "waves": [2001, 2011, 2021],
+      "waves": [
+        2001,
+        2011,
+        2021
+      ],
       "geography": "28 NSI districts mapped to GISCO NUTS 3 2021",
       "construct": "census affiliation from the voluntary religion question",
       "denominator": {
@@ -817,6 +821,9 @@
           "source_display_en": "Cannot self-identify",
           "product_role": "cannot_determine"
         }
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/bg_census/"
       ]
     },
     "software_versions": {

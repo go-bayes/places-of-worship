@@ -196,6 +196,9 @@
       "omitted_metrics": [
         "places_per_10000_residents",
         "place_density_per_sq_km"
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/dk_membership/"
       ]
     },
     "software_versions": {

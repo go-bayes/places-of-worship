@@ -25,15 +25,25 @@
     "git_commit": null,
     "command": "Rscript scripts/build_al_area_summary.R",
     "parameters": {
-      "waves": ["2011", "2023"],
+      "waves": [
+        "2011",
+        "2023"
+      ],
       "prefecture_boundary_set": "al-prefecture-2023-geoboundaries-adm1",
       "prefecture_boundary_simplification_tolerance_m": 50,
       "extraction": "2023 Tab. 1.13 SpreadsheetML parsed with xml2 (12 worksheets); 2011 table 1.1.13 parsed from the 12 prefecture booklet PDFs with poppler pdftotext -layout",
       "denominator": "stated responses (named religions plus atheists, excluding prefer-not-to-answer and not-stated/not-available); affiliation = named religions including believers without denomination, no religion = atheists",
       "subnational_geography": "geoBoundaries ALB ADM1 (12 prefectures), joined by name",
-      "omitted_metrics": ["religious_change", "places_per_10000_residents", "place_density_per_sq_km"],
+      "omitted_metrics": [
+        "religious_change",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
       "counts_published": "religion is published as counts; the product ships the two headline shares with the exact prefecture population as denominator",
-      "believers_without_denomination": "counted as religious affiliation per the Czechia precedent; share 5.49% (2011) to 13.82% (2023) of residents nationally"
+      "believers_without_denomination": "counted as religious affiliation per the Czechia precedent; share 5.49% (2011) to 13.82% (2023) of residents nationally",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/al_census/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -45,8 +55,17 @@
   },
   "source": {
     "provider": "Institute of Statistics of Albania (INSTAT); geoBoundaries (William & Mary geoLab)",
-    "source_dataset_ids": ["instat-census2011-prefecture-booklets-tab1113-religion", "instat-census2023-tab113-religion-by-prefecture", "geoboundaries-alb-adm1-2023"],
-    "source_urls": ["https://www.instat.gov.al/en/themes/censuses/census-of-population-and-housing/publications/2011/publications-of-population-and-housing-census-2011/", "https://www.instat.gov.al/media/14411/tab_1_13_popullsia-banuese-sipas-besimit-fetar-dhe-gjinis%C3%AB_qarqe.xls", "https://www.geoboundaries.org/api/current/gbOpen/ALB/ADM1/", "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/ALB/ADM1/geoBoundaries-ALB-ADM1.geojson"],
+    "source_dataset_ids": [
+      "instat-census2011-prefecture-booklets-tab1113-religion",
+      "instat-census2023-tab113-religion-by-prefecture",
+      "geoboundaries-alb-adm1-2023"
+    ],
+    "source_urls": [
+      "https://www.instat.gov.al/en/themes/censuses/census-of-population-and-housing/publications/2011/publications-of-population-and-housing-census-2011/",
+      "https://www.instat.gov.al/media/14411/tab_1_13_popullsia-banuese-sipas-besimit-fetar-dhe-gjinis%C3%AB_qarqe.xls",
+      "https://www.geoboundaries.org/api/current/gbOpen/ALB/ADM1/",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/ALB/ADM1/geoBoundaries-ALB-ADM1.geojson"
+    ],
     "retrieved_at": "2026-07-09T00:00:00Z",
     "licence": "Religion by prefecture is the Albanian Institute of Statistics (INSTAT), Population and Housing Census. The 2023 wave is table Tab. 1.13 (resident population by religion and sex, by prefecture); the 2011 wave is table 1.1.13 (resident population by religious affiliation) in each of the twelve prefecture result booklets. INSTAT publishes its census results for open download and requests attribution; no explicit reuse licence is stated on the results, so the derived product attributes INSTAT and links the source of record. Boundaries are geoBoundaries ALB ADM1 (12 prefectures), boundary licence Public Domain, boundary source geoBoundaries and Wikipedia (geoboundaries.org/api/current/gbOpen/ALB/ADM1).",
     "citation": "INSTAT, Population and Housing Census 2011 (prefecture booklets, table 1.1.13) and 2023 (Tab. 1.13); geoBoundaries ALB ADM1 (gbOpen).",
@@ -285,7 +304,16 @@
     }
   ],
   "validation": {
-    "checks": ["Two census waves ship (2011, 2023). Both the 2011 and the 2023 Albanian censuses asked religious belief and published prefecture-level results on the same twelve-prefecture (qark) geography; every prefecture in every wave joins the geoBoundaries ALB ADM1 features by name.", "The parsed prefecture category counts sum exactly to the printed national counts in both waves (2011 total 2,800,138; 2023 total 2,402,113), and each prefecture total equals the sum of its own religion categories.", "Percentages use the stated-response denominator (named religions plus the atheist category, excluding the non-response categories); religious affiliation and no religion sum to 100 percent of stated responses in every prefecture and wave.", "Believers without denomination (persons who answered 'I don't belong to any religion, but I am a believer') are counted as religious affiliation, per the Czechia believers-without-denomination precedent. Their share grew sharply from 5.49 percent of residents in 2011 to 13.82 percent in 2023, so it is reported explicitly; excluding it would lower the affiliation share.", "Non-response is historically large in Albania's contested religion question: nationally 16.22 percent of residents in 2011 and 15.77 percent in 2023 gave no usable religious answer (prefer-not-to-answer plus not-stated/not-available), and these are excluded from the stated-response denominator.", "All 12 census prefectures join to the 12 geoBoundaries ALB ADM1 features by name (Berat, Diber, Durres, Elbasan, Fier, Gjirokaster, Korce, Kukes, Lezhe, Shkoder, Tirane, Vlore, with diacritics); geoBoundaries shapeName matches the census names exactly, so no name fix is required.", "The simplified prefecture boundary GeoJSON writes to 36587 bytes after 50 m simplification (12 prefecture features).", "The 2001 census did not publish a comparable prefecture religion table in this source sweep (the 2001 question set differs), so 2001 is not shipped; a municipality-level downscaling of either wave is deferred."],
+    "checks": [
+      "Two census waves ship (2011, 2023). Both the 2011 and the 2023 Albanian censuses asked religious belief and published prefecture-level results on the same twelve-prefecture (qark) geography; every prefecture in every wave joins the geoBoundaries ALB ADM1 features by name.",
+      "The parsed prefecture category counts sum exactly to the printed national counts in both waves (2011 total 2,800,138; 2023 total 2,402,113), and each prefecture total equals the sum of its own religion categories.",
+      "Percentages use the stated-response denominator (named religions plus the atheist category, excluding the non-response categories); religious affiliation and no religion sum to 100 percent of stated responses in every prefecture and wave.",
+      "Believers without denomination (persons who answered 'I don't belong to any religion, but I am a believer') are counted as religious affiliation, per the Czechia believers-without-denomination precedent. Their share grew sharply from 5.49 percent of residents in 2011 to 13.82 percent in 2023, so it is reported explicitly; excluding it would lower the affiliation share.",
+      "Non-response is historically large in Albania's contested religion question: nationally 16.22 percent of residents in 2011 and 15.77 percent in 2023 gave no usable religious answer (prefer-not-to-answer plus not-stated/not-available), and these are excluded from the stated-response denominator.",
+      "All 12 census prefectures join to the 12 geoBoundaries ALB ADM1 features by name (Berat, Diber, Durres, Elbasan, Fier, Gjirokaster, Korce, Kukes, Lezhe, Shkoder, Tirane, Vlore, with diacritics); geoBoundaries shapeName matches the census names exactly, so no name fix is required.",
+      "The simplified prefecture boundary GeoJSON writes to 36587 bytes after 50 m simplification (12 prefecture features).",
+      "The 2001 census did not publish a comparable prefecture religion table in this source sweep (the 2001 question set differs), so 2001 is not shipped; a municipality-level downscaling of either wave is deferred."
+    ],
     "join_coverage": {
       "prefecture": [
         {

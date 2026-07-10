@@ -551,7 +551,10 @@
           "sha256": "3f5d4ccc0fd984b7c201034a1e28c94708325752d683002870c880032323e52c"
         }
       ],
-      "open_pi_question": "How should PCBS statistical geography relate to the live Israel route on shared surfaces such as the global map, and may overlapping claims appear together?"
+      "open_pi_question": "How should PCBS statistical geography relate to the live Israel route on shared surfaces such as the global map, and may overlapping claims appear together?",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/ps_census/"
+      ]
     },
     "software_versions": {
       "r": "R version 4.6.1 (2026-06-24)",

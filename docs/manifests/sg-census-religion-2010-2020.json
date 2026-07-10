@@ -31,7 +31,10 @@
       "denominator": "Resident Population Aged 15 Years and Over",
       "category_mapping": "No Religion remains separate; all named religion categories sum to religious affiliation.",
       "omitted_metrics": "cross-wave planning-area change; all place-of-worship count and density metrics",
-      "reconciliation": "planning-area sums include Others and are compared with each table's published national Total row; residuals are reported and never distributed"
+      "reconciliation": "planning-area sums include Others and are compared with each table's published national Total row; residuals are reported and never distributed",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/sg_census/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -41,8 +44,24 @@
   },
   "source": {
     "provider": "Singapore Department of Statistics; Urban Redevelopment Authority, via data.gov.sg",
-    "source_dataset_ids": ["singstat-ct-8628-planning-area-religion-2010", "singstat-ct-17592-planning-area-religion-2020", "singstat-ct-6364-national-religion-2010", "singstat-ct-17459-national-religion-2020", "data-gov-sg-d-773f010a4eaae0ce6d81cbe78d251642", "data-gov-sg-d-4765db0e87b9c86336792efe8a1f7a66"],
-    "source_urls": ["https://tablebuilder.singstat.gov.sg/api/doswebcontent/1/CrossSectionalFileUpload/CrossSectional/8628", "https://tablebuilder.singstat.gov.sg/api/doswebcontent/1/CrossSectionalFileUpload/CrossSectional/17592", "https://tablebuilder.singstat.gov.sg/api/doswebcontent/1/CrossSectionalFileUpload/CrossSectional/6364", "https://tablebuilder.singstat.gov.sg/api/doswebcontent/1/CrossSectionalFileUpload/CrossSectional/17459", "https://data.gov.sg/datasets/d_773f010a4eaae0ce6d81cbe78d251642/view", "https://data.gov.sg/datasets/d_4765db0e87b9c86336792efe8a1f7a66/view", "https://www.singstat.gov.sg/find-data/explore-data-themes/population/religion/latest-news-data", "https://data.gov.sg/open-data-licence"],
+    "source_dataset_ids": [
+      "singstat-ct-8628-planning-area-religion-2010",
+      "singstat-ct-17592-planning-area-religion-2020",
+      "singstat-ct-6364-national-religion-2010",
+      "singstat-ct-17459-national-religion-2020",
+      "data-gov-sg-d-773f010a4eaae0ce6d81cbe78d251642",
+      "data-gov-sg-d-4765db0e87b9c86336792efe8a1f7a66"
+    ],
+    "source_urls": [
+      "https://tablebuilder.singstat.gov.sg/api/doswebcontent/1/CrossSectionalFileUpload/CrossSectional/8628",
+      "https://tablebuilder.singstat.gov.sg/api/doswebcontent/1/CrossSectionalFileUpload/CrossSectional/17592",
+      "https://tablebuilder.singstat.gov.sg/api/doswebcontent/1/CrossSectionalFileUpload/CrossSectional/6364",
+      "https://tablebuilder.singstat.gov.sg/api/doswebcontent/1/CrossSectionalFileUpload/CrossSectional/17459",
+      "https://data.gov.sg/datasets/d_773f010a4eaae0ce6d81cbe78d251642/view",
+      "https://data.gov.sg/datasets/d_4765db0e87b9c86336792efe8a1f7a66/view",
+      "https://www.singstat.gov.sg/find-data/explore-data-themes/population/religion/latest-news-data",
+      "https://data.gov.sg/open-data-licence"
+    ],
     "retrieved_at": "2026-07-10T00:00:00Z",
     "licence": "Singapore Department of Statistics tables and Urban Redevelopment Authority planning-area boundaries are reused under the Singapore Open Data Licence. Source acknowledgement is required and reuse must not suggest endorsement by the Singapore Government.",
     "citation": "SingStat Census of Population tables CT 8628, CT 17592, CT 6364, and CT 17459; URA Master Plan 2008 and 2019 planning-area boundaries."
@@ -167,7 +186,12 @@
       "uv run --with jsonschema python -m jsonschema -i apps/regions/sg/data/area_summary_pa_2020.json schemas/area-summary.schema.json",
       "uv run --with jsonschema python -m jsonschema -i docs/manifests/sg-census-religion-2010-2020.json schemas/data-manifest.schema.json"
     ],
-    "warnings": ["Published planning-area category sums have small additivity residuals against the published national rows.", "No residual is distributed across planning areas.", "The two waves use different planning-area vintages and expose no cross-wave area change metric.", "The Others source row is included in reconciliation and excluded from mapped rows because it has no polygon."],
+    "warnings": [
+      "Published planning-area category sums have small additivity residuals against the published national rows.",
+      "No residual is distributed across planning areas.",
+      "The two waves use different planning-area vintages and expose no cross-wave area change metric.",
+      "The Others source row is included in reconciliation and excluded from mapped rows because it has no polygon."
+    ],
     "notes": "The build takes the two-vintage branch: CT 8628 uses Master Plan 2008 boundaries and CT 17592 uses Master Plan 2019 boundaries.\nThe 2010 table contributes 35 mapped planning-area rows; the 2020 table contributes 30 mapped planning-area rows. Each table's Others row is included in national reconciliation and excluded from map rows because it has no planning-area polygon.\n2010 planning-area sums including Others minus the published national Total row: total +3; religious_affiliation -2; no_religion +4.\n2020 planning-area sums including Others minus the published national Total row: total +1; religious_affiliation +0; no_religion +0.\nAcross the 32 complete 2010 rows, Total minus No Religion minus the sum of named religion categories ranges from -2 to 2 persons; 17 rows are non-zero. Another 4 rows contain source 'na' markers.\nAcross the 30 complete 2020 rows, Total minus No Religion minus the sum of named religion categories ranges from -1 to 2 persons; 16 rows are non-zero. Another 1 row contains a source dash.\nThe small residuals are consistent with whole-person cell rounding. The build preserves every source value and does not distribute residuals.\nThe headline religious-affiliation count is Total minus No Religion. This retains the complete with-religion construct without imputing the 'na' and dash category cells.\nCT 6364 independently reports the 2010 national total as 3105748, matching CT 8628 Total.\nCT 17459 independently reports the 2020 national total as 3459093, matching CT 17592 Total.\nThe 2010 wave uses Master Plan 2008 planning areas and the 2020 wave uses Master Plan 2019 planning areas. Each wave ships as its own geography level. No cross-wave planning-area change metric is calculated.\nThe 2008 boundary writes to 88137 bytes; existing output revalidated.\nThe 2019 boundary writes to 75182 bytes; existing output revalidated."
   },
   "privacy": "public",

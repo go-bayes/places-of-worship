@@ -45,7 +45,14 @@
         "bytes": 780915,
         "byte_ceiling": 800000
       },
-      "omitted_metrics": ["religious_affiliation", "places_per_10000_residents", "place_density_per_sq_km"]
+      "omitted_metrics": [
+        "religious_affiliation",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/it_practice/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -56,8 +63,25 @@
   },
   "source": {
     "provider": "Istat",
-    "source_dataset_ids": ["istat-avq-religious-observances-regions-2001-2025", "istat-sdmx-dataflow-it1-allstubs", "istat-avq-persons-dsd", "istat-avq-persons-codelists", "istat-confini-amministrativi-regioni-2026-generalizzati", "istat-boundary-landing-page", "istat-legal-notice"],
-    "source_urls": ["https://esploradati.istat.it/SDMXWS/rest/dataflow/IT1?detail=allstubs", "https://esploradati.istat.it/SDMXWS/rest/dataflow/IT1/83_63_DF_DCCV_AVQ_PERSONE_136/1.0?references=children", "https://esploradati.istat.it/SDMXWS/rest/codelist/IT1/CL_FREQ+CL_ITTER107+CL_TIPO_DATO_AVQ+CL_MISURA_AVQ+CL_SEXISTAT1+CL_ETA1+CL_TITOLO_STUDIO+CL_CONDIZIONE_DICH+CL_FLAG+CL_UNIT_MEASURE+CL_UNIT_MULT/1.0", "https://esploradati.istat.it/SDMXWS/rest/data/83_63_DF_DCCV_AVQ_PERSONE_136/A.IT+ITC1+ITC2+ITC3+ITC4+ITDA+ITD3+ITD4+ITD5+ITE1+ITE2+ITE3+ITE4+ITF1+ITF2+ITF3+ITF4+ITF5+ITF6+ITG1+ITG2.6_WEEK_RELIG+6_NEVER_RELIG.HSC....?detail=full", "https://www.istat.it/storage/cartografia/confini_amministrativi/generalizzati/2026/Limiti01012026_g.zip", "https://www.istat.it/notizia/confini-delle-unita-amministrative-a-fini-statistici-al-1-gennaio-2018-2/", "https://www.istat.it/en/legal-notice/", "https://creativecommons.org/licenses/by/4.0/"],
+    "source_dataset_ids": [
+      "istat-avq-religious-observances-regions-2001-2025",
+      "istat-sdmx-dataflow-it1-allstubs",
+      "istat-avq-persons-dsd",
+      "istat-avq-persons-codelists",
+      "istat-confini-amministrativi-regioni-2026-generalizzati",
+      "istat-boundary-landing-page",
+      "istat-legal-notice"
+    ],
+    "source_urls": [
+      "https://esploradati.istat.it/SDMXWS/rest/dataflow/IT1?detail=allstubs",
+      "https://esploradati.istat.it/SDMXWS/rest/dataflow/IT1/83_63_DF_DCCV_AVQ_PERSONE_136/1.0?references=children",
+      "https://esploradati.istat.it/SDMXWS/rest/codelist/IT1/CL_FREQ+CL_ITTER107+CL_TIPO_DATO_AVQ+CL_MISURA_AVQ+CL_SEXISTAT1+CL_ETA1+CL_TITOLO_STUDIO+CL_CONDIZIONE_DICH+CL_FLAG+CL_UNIT_MEASURE+CL_UNIT_MULT/1.0",
+      "https://esploradati.istat.it/SDMXWS/rest/data/83_63_DF_DCCV_AVQ_PERSONE_136/A.IT+ITC1+ITC2+ITC3+ITC4+ITDA+ITD3+ITD4+ITD5+ITE1+ITE2+ITE3+ITE4+ITF1+ITF2+ITF3+ITF4+ITF5+ITF6+ITG1+ITG2.6_WEEK_RELIG+6_NEVER_RELIG.HSC....?detail=full",
+      "https://www.istat.it/storage/cartografia/confini_amministrativi/generalizzati/2026/Limiti01012026_g.zip",
+      "https://www.istat.it/notizia/confini-delle-unita-amministrative-a-fini-statistici-al-1-gennaio-2018-2/",
+      "https://www.istat.it/en/legal-notice/",
+      "https://creativecommons.org/licenses/by/4.0/"
+    ],
     "retrieved_at": "2026-07-09T00:00:00Z",
     "licence": "ISTAT AVQ aggregate data and ISTAT boundary/source pages are used under Istat's legal notice: unless otherwise stated, website content is licensed under Creative Commons Attribution 4.0 International. Attribution: Istat. The boundary source is ISTAT Confini delle unità amministrative a fini statistici, 2026, versione generalizzata, WGS84.",
     "citation": "Istat, Aspetti della vita quotidiana (AVQ), religious observances by region and type of municipality; Istat, Confini delle unità amministrative a fini statistici, 2026.",
@@ -207,7 +231,16 @@
     }
   ],
   "validation": {
-    "tests": ["Dataflow-list cache contains 83_63_DF_DCCV_AVQ_PERSONE_136, labelled Religious observances - regions and type of municipality.", "DSD dimension order is FREQ, REF_AREA, DATA_TYPE, MEASURE, SEX, AGE, EDU_LEV_HIGHEST, LABOUR_PROFESS_STATUS_B, TIME_PERIOD.", "One data call retrieved annual HSC percentages for Italy plus the 20 regions, DATA_TYPE 6_WEEK_RELIG and 6_NEVER_RELIG, all available years.", "The product includes source years 2001-2003 and 2005-2025. The source pull does not publish 2004 for this table; no 2004 row is created.", "Every covered source year has all 20 regions for weekly attendance and never attending.", "All attendance percentages are within [0, 100].", "The official ISTAT boundary source has 20 non-empty valid region geometries; the simplified output also has 20 non-empty valid features and is below 800 KB.", "Sampling-error band values were not present in the SDMX machine-readable pull; the quality flag points readers to the annual Nota metodologica."],
+    "tests": [
+      "Dataflow-list cache contains 83_63_DF_DCCV_AVQ_PERSONE_136, labelled Religious observances - regions and type of municipality.",
+      "DSD dimension order is FREQ, REF_AREA, DATA_TYPE, MEASURE, SEX, AGE, EDU_LEV_HIGHEST, LABOUR_PROFESS_STATUS_B, TIME_PERIOD.",
+      "One data call retrieved annual HSC percentages for Italy plus the 20 regions, DATA_TYPE 6_WEEK_RELIG and 6_NEVER_RELIG, all available years.",
+      "The product includes source years 2001-2003 and 2005-2025. The source pull does not publish 2004 for this table; no 2004 row is created.",
+      "Every covered source year has all 20 regions for weekly attendance and never attending.",
+      "All attendance percentages are within [0, 100].",
+      "The official ISTAT boundary source has 20 non-empty valid region geometries; the simplified output also has 20 non-empty valid features and is below 800 KB.",
+      "Sampling-error band values were not present in the SDMX machine-readable pull; the quality flag points readers to the annual Nota metodologica."
+    ],
     "join_coverage": {
       "region": [
         {

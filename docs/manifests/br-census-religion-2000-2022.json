@@ -25,13 +25,24 @@
     "git_commit": null,
     "command": "Rscript scripts/build_br_area_summary.R",
     "parameters": {
-      "waves": ["2000", "2010", "2022"],
+      "waves": [
+        "2000",
+        "2010",
+        "2022"
+      ],
       "municipality_boundary_set": "br-municipality-2022-ibge",
       "uf_boundary_set": "br-uf-2022-ibge",
       "municipality_boundary_simplification_tolerance_m": 2000,
       "uf_boundary_simplification_tolerance_m": 5000,
       "denominator": "Total minus Sem declaração",
-      "omitted_metrics": ["religious_change", "places_per_10000_residents", "place_density_per_sq_km"]
+      "omitted_metrics": [
+        "religious_change",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/br_census/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -41,8 +52,21 @@
   },
   "source": {
     "provider": "Instituto Brasileiro de Geografia e Estatística (IBGE), SIDRA and malhas APIs",
-    "source_dataset_ids": ["ibge-sidra-137-religion-2000-2010", "ibge-sidra-9537-religion-age10plus-2022", "ibge-malhas-municipality-2022", "ibge-malhas-uf-2022", "ibge-localidades-municipios-ufs"],
-    "source_urls": ["https://servicodados.ibge.gov.br/api/v3/agregados/137/metadados", "https://servicodados.ibge.gov.br/api/v3/agregados/9537/metadados", "https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?formato=application/vnd.geo+json&qualidade=minima&intrarregiao=municipio&periodo=2022", "https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?formato=application/vnd.geo+json&qualidade=minima&intrarregiao=UF&periodo=2022", "https://servicodados.ibge.gov.br/api/v1/localidades/municipios?view=nivelado", "https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=id"],
+    "source_dataset_ids": [
+      "ibge-sidra-137-religion-2000-2010",
+      "ibge-sidra-9537-religion-age10plus-2022",
+      "ibge-malhas-municipality-2022",
+      "ibge-malhas-uf-2022",
+      "ibge-localidades-municipios-ufs"
+    ],
+    "source_urls": [
+      "https://servicodados.ibge.gov.br/api/v3/agregados/137/metadados",
+      "https://servicodados.ibge.gov.br/api/v3/agregados/9537/metadados",
+      "https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?formato=application/vnd.geo+json&qualidade=minima&intrarregiao=municipio&periodo=2022",
+      "https://servicodados.ibge.gov.br/api/v3/malhas/paises/BR?formato=application/vnd.geo+json&qualidade=minima&intrarregiao=UF&periodo=2022",
+      "https://servicodados.ibge.gov.br/api/v1/localidades/municipios?view=nivelado",
+      "https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=id"
+    ],
     "retrieved_at": "2026-07-07T00:00:00Z",
     "licence": "IBGE public API data; no explicit machine-readable redistribution licence was found in the SIDRA, malhas, or localities API responses during this build. Derived public products attribute Instituto Brasileiro de Geografia e Estatística (IBGE) and link to the source API URLs.",
     "citation": "Instituto Brasileiro de Geografia e Estatística (IBGE), Censo Demográfico, SIDRA tables 137 and 9537; IBGE malhas API, 2022 municipality and UF geometries.",
@@ -1017,7 +1041,15 @@
     }
   ],
   "validation": {
-    "checks": ["SIDRA aggregate 137 metadata resolved with periods 1991, 2000 and 2010; this build uses 2000 and 2010, variable 93, classification 133.", "SIDRA aggregate 9537 metadata resolved with period 2022; this build uses variable 140, religion classification 133, Sexo=Total (2:6794), and Grupo de idade=Total (58:95253).", "Municipality boundary layer has 5570 IBGE 2022 features and writes to 2676699 bytes after 2,000 m simplification.", "UF boundary layer has 27 IBGE 2022 features and writes to 61147 bytes after 5,000 m simplification.", "SIDRA '-' count cells are preserved in value_raw and interpreted as zero for derived count totals.", "Municipality source sums were compared with SIDRA UF rows for Total, Sem religião, and Sem declaração.", "UF source sums were compared with SIDRA Brazil rows for Total, Sem religião, and Sem declaração."],
+    "checks": [
+      "SIDRA aggregate 137 metadata resolved with periods 1991, 2000 and 2010; this build uses 2000 and 2010, variable 93, classification 133.",
+      "SIDRA aggregate 9537 metadata resolved with period 2022; this build uses variable 140, religion classification 133, Sexo=Total (2:6794), and Grupo de idade=Total (58:95253).",
+      "Municipality boundary layer has 5570 IBGE 2022 features and writes to 2676699 bytes after 2,000 m simplification.",
+      "UF boundary layer has 27 IBGE 2022 features and writes to 61147 bytes after 5,000 m simplification.",
+      "SIDRA '-' count cells are preserved in value_raw and interpreted as zero for derived count totals.",
+      "Municipality source sums were compared with SIDRA UF rows for Total, Sem religião, and Sem declaração.",
+      "UF source sums were compared with SIDRA Brazil rows for Total, Sem religião, and Sem declaração."
+    ],
     "join_coverage": {
       "municipality": [
         {

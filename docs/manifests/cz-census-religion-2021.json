@@ -29,7 +29,14 @@
       "kraj_boundary_set": "cz-kraj-2021-gisco-nuts3",
       "kraj_boundary_simplification_tolerance_m": 50,
       "denominator": "obyvatelstvo celkem minus neuvedeno (not stated)",
-      "omitted_metrics": ["religious_change", "places_per_10000_residents", "place_density_per_sq_km"]
+      "omitted_metrics": [
+        "religious_change",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cz_census/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -39,8 +46,18 @@
   },
   "source": {
     "provider": "Czech Statistical Office (ČSÚ); Eurostat GISCO",
-    "source_dataset_ids": ["czso-sld008t02-religion-by-kraj-2021", "gisco-nuts3-2021-cz"],
-    "source_urls": ["https://scitani.gov.cz/datastat/api/katalog/vybery/SLD008T02?jazyk=cs", "https://scitani.gov.cz/datastat/api/dotaz/data/vybery/SLD008T02?jazyk=cs", "https://scitani.gov.cz/nabozenska-vira", "https://scitani.gov.cz/docs/42301/aa331037-5c05-6d25-d9b9-07218379072e/sldb2021_pv_obyvatelstvo_podle_cirkvi_a_kraju.xlsx", "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2021_4326_LEVL_3.geojson", "https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu"],
+    "source_dataset_ids": [
+      "czso-sld008t02-religion-by-kraj-2021",
+      "gisco-nuts3-2021-cz"
+    ],
+    "source_urls": [
+      "https://scitani.gov.cz/datastat/api/katalog/vybery/SLD008T02?jazyk=cs",
+      "https://scitani.gov.cz/datastat/api/dotaz/data/vybery/SLD008T02?jazyk=cs",
+      "https://scitani.gov.cz/nabozenska-vira",
+      "https://scitani.gov.cz/docs/42301/aa331037-5c05-6d25-d9b9-07218379072e/sldb2021_pv_obyvatelstvo_podle_cirkvi_a_kraju.xlsx",
+      "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2021_4326_LEVL_3.geojson",
+      "https://csu.gov.cz/podminky_pro_vyuzivani_a_dalsi_zverejnovani_statistickych_udaju_csu"
+    ],
     "retrieved_at": "2026-07-09T00:00:00Z",
     "licence": "Czech Statistical Office (CZSO) census 2021 open data, retrieved from the DataStat API. CZSO publishes its statistical outputs under open terms that permit reuse with attribution; see the CZSO conditions for using and further publishing statistical data. Boundaries are Eurostat GISCO NUTS3 2021 (kraje are NUTS3 in Czechia), used under GISCO download provisions with attribution to EuroGeographics for the administrative boundaries.",
     "citation": "Czech Statistical Office, Census 2021 SLD008T02; Eurostat GISCO NUTS3 2021.",
@@ -147,7 +164,14 @@
     }
   ],
   "validation": {
-    "checks": ["The CZSO DataStat SLD008T02 selection returns the 2021 census wave only; 1991, 2001, and 2011 are not retrievable at kraj level through this table.", "The 14 kraj rows sum exactly to the national ČR row for the stated-response denominator, religious affiliation, no religion, and not stated.", "All 14 kraj census rows join to the 14 GISCO NUTS3 2021 CZ features by normalised region name.", "The simplified kraj boundary GeoJSON writes to 203875 bytes after 50 m simplification.", "Percentages use a stated-response denominator: obyvatelstvo celkem minus neuvedeno. Neuvedeno is excluded, not counted as no religion.", "Believers without a church (věřící - nehlásící se k církvi) count as religious affiliation, not as no religion."],
+    "checks": [
+      "The CZSO DataStat SLD008T02 selection returns the 2021 census wave only; 1991, 2001, and 2011 are not retrievable at kraj level through this table.",
+      "The 14 kraj rows sum exactly to the national ČR row for the stated-response denominator, religious affiliation, no religion, and not stated.",
+      "All 14 kraj census rows join to the 14 GISCO NUTS3 2021 CZ features by normalised region name.",
+      "The simplified kraj boundary GeoJSON writes to 203875 bytes after 50 m simplification.",
+      "Percentages use a stated-response denominator: obyvatelstvo celkem minus neuvedeno. Neuvedeno is excluded, not counted as no religion.",
+      "Believers without a church (věřící - nehlásící se k církvi) count as religious affiliation, not as no religion."
+    ],
     "join_coverage": {
       "kraj": [
         {

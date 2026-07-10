@@ -31,7 +31,10 @@
       "boundary_simplification_rule": "area-scaled per-feature pmin(1500, pmax(40, factor * sqrt(st_area_m2))); ring guard minimum 8 outer-ring points; output budget 4 MB per level",
       "denominator_2021": "total responses for religion for the population in private households, 25% sample data, Census Profile 2021",
       "denominator_2011": "total responses for religion for the population in private households, voluntary National Household Survey 2011",
-      "denominator_2001": "total responses for religion, total age groups, 20% sample data, 2001 Census topic-based tabulation 95F0450XCB2001006"
+      "denominator_2001": "total responses for religion, total age groups, 20% sample data, 2001 Census topic-based tabulation 95F0450XCB2001006",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/ca_census/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",

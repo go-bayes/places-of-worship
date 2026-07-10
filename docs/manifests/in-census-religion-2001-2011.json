@@ -25,14 +25,28 @@
     "git_commit": null,
     "command": "Rscript scripts/build_in_area_summary.R",
     "parameters": {
-      "waves": ["2001", "2011"],
-      "boundary_sets": ["in-district-2001-datameet", "in-district-2011-datameet"],
+      "waves": [
+        "2001",
+        "2011"
+      ],
+      "boundary_sets": [
+        "in-district-2001-datameet",
+        "in-district-2011-datameet"
+      ],
       "boundary_simplification_tolerance_m": {
         "district_2001": 500,
         "district_2011": 500
       },
       "denominator": "C-01 Total persons; religious_affiliation_count is Hindu + Muslim + Christian + Sikh + Buddhist + Jain + Other religions and persuasions; Religion not stated is excluded from the numerator and is not treated as no religion",
-      "omitted_metrics": ["no_religion_percent visual layer", "religious_change", "places_per_10000_residents", "place_density_per_sq_km"]
+      "omitted_metrics": [
+        "no_religion_percent visual layer",
+        "religious_change",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/in_census/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -44,8 +58,22 @@
   },
   "source": {
     "provider": "Office of the Registrar General and Census Commissioner, India; DataMeet India community",
-    "source_dataset_ids": ["censusindia-2001-c01-religious-community", "censusindia-2011-c01-religious-community", "datameet-india-districts-census-2001", "datameet-india-districts-census-2011"],
-    "source_urls": ["https://censusindia.gov.in/nada/index.php/api/tables/data/global/census_tables/100/0/?ft_query=C-01%20Population%20by%20religious%20community&series_id=15&census_year=2001", "https://censusindia.gov.in/nada/index.php/api/tables/data/global/census_tables/100/0/?ft_query=C-01%20Population%20by%20religious%20community&series_id=15&census_year=2011", "https://censusindia.gov.in/census.website/data/census-tables", "https://www.data.gov.in/sites/default/files/Gazette_Notification_OGDL.pdf", "https://github.com/datameet/maps/tree/master/Districts/Census_2001", "https://github.com/datameet/maps/tree/master/Districts/Census_2011", "https://github.com/datameet/maps/tree/master/Districts", "https://www.geoboundaries.org/api/current/gbOpen/IND/ADM2/"],
+    "source_dataset_ids": [
+      "censusindia-2001-c01-religious-community",
+      "censusindia-2011-c01-religious-community",
+      "datameet-india-districts-census-2001",
+      "datameet-india-districts-census-2011"
+    ],
+    "source_urls": [
+      "https://censusindia.gov.in/nada/index.php/api/tables/data/global/census_tables/100/0/?ft_query=C-01%20Population%20by%20religious%20community&series_id=15&census_year=2001",
+      "https://censusindia.gov.in/nada/index.php/api/tables/data/global/census_tables/100/0/?ft_query=C-01%20Population%20by%20religious%20community&series_id=15&census_year=2011",
+      "https://censusindia.gov.in/census.website/data/census-tables",
+      "https://www.data.gov.in/sites/default/files/Gazette_Notification_OGDL.pdf",
+      "https://github.com/datameet/maps/tree/master/Districts/Census_2001",
+      "https://github.com/datameet/maps/tree/master/Districts/Census_2011",
+      "https://github.com/datameet/maps/tree/master/Districts",
+      "https://www.geoboundaries.org/api/current/gbOpen/IND/ADM2/"
+    ],
     "retrieved_at": "2026-07-09T00:00:00Z",
     "licence": "Government Open Data License - India attribution basis. The Census of India portal exposes public C-01 XLS downloads; the licence statement recorded here is the Government of India GODL-India gazette, which grants lawful commercial and non-commercial use with provider, source, and licence attribution for shareable non-sensitive government data. DataMeet districts README declares the district dataset under Creative Commons Attribution 2.5 India; the repository README states CC BY 4.0 by default where a dataset does not state otherwise. The district README is the controlling district-boundary licence record used here.",
     "citation": "Census of India 2001 and 2011, C-01: Population by religious community; DataMeet India community, district boundaries for Census 2001 and Census 2011.",
@@ -1106,7 +1134,14 @@
     }
   ],
   "validation": {
-    "checks": ["Area-summary schema allows null no_religion_count and no_religion_percent, so rows carry null values and no_religion_category_absent; the no-religion indicator documents the absence and no no-religion visual layer is exposed.", "2011 C-01 district rows reconcile exactly to 35 state rows and the all-India row for total population, seven affiliation categories, Religion not stated, and religious_affiliation_count.", "2001 C-01 district rows reconcile exactly to 35 state rows and the all-India row for total population, seven affiliation categories, Religion not stated, and religious_affiliation_count.", "2011 boundary source has 641 features; 1 Data Not Available feature removed; output has 640 features and 2956083 bytes after 500 m simplification.", "2001 boundary source has 594 features; 1 Data Not Available feature removed; output has 593 features and 2877049 bytes after 500 m simplification.", "1991 C-9 Religion is pinned and downloaded, but not published because this build does not include a clean 1991 district boundary or a state-split harmonisation for Uttaranchal/Uttarakhand, Jharkhand, and Chhattisgarh."],
+    "checks": [
+      "Area-summary schema allows null no_religion_count and no_religion_percent, so rows carry null values and no_religion_category_absent; the no-religion indicator documents the absence and no no-religion visual layer is exposed.",
+      "2011 C-01 district rows reconcile exactly to 35 state rows and the all-India row for total population, seven affiliation categories, Religion not stated, and religious_affiliation_count.",
+      "2001 C-01 district rows reconcile exactly to 35 state rows and the all-India row for total population, seven affiliation categories, Religion not stated, and religious_affiliation_count.",
+      "2011 boundary source has 641 features; 1 Data Not Available feature removed; output has 640 features and 2956083 bytes after 500 m simplification.",
+      "2001 boundary source has 594 features; 1 Data Not Available feature removed; output has 593 features and 2877049 bytes after 500 m simplification.",
+      "1991 C-9 Religion is pinned and downloaded, but not published because this build does not include a clean 1991 district boundary or a state-split harmonisation for Uttaranchal/Uttarakhand, Jharkhand, and Chhattisgarh."
+    ],
     "no_religion_schema_route": "schema_allows_null_no_religion_fields_indicator_retained_visual_layer_omitted",
     "join_coverage": {
       "district_2001": {

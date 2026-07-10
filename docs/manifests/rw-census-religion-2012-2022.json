@@ -25,14 +25,24 @@
     "git_commit": null,
     "command": "Rscript scripts/build_rw_area_summary.R",
     "parameters": {
-      "waves": ["2012", "2022"],
+      "waves": [
+        "2012",
+        "2022"
+      ],
       "district_boundary_set": "rw-district-2012-geoboundaries-adm2",
       "district_boundary_simplification_tolerance_m": 50,
       "pdf_extraction": "poppler pdftotext -layout; 2012 Table 26 sectors aggregated to districts, 2022 Table D.1 district Total rows read directly",
       "denominator": "stated responses (district population minus not stated); affiliation = named religions, no religion = No Religion category",
       "subnational_geography": "geoBoundaries RWA ADM2 (30 post-2006 districts) both census waves report on",
-      "omitted_metrics": ["religious_change", "places_per_10000_residents", "place_density_per_sq_km"],
-      "counts_published": "religion is published as percentages; the product ships percentages with the exact district population as denominator"
+      "omitted_metrics": [
+        "religious_change",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "counts_published": "religion is published as percentages; the product ships percentages with the exact district population as denominator",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/rw_census/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -43,8 +53,18 @@
   },
   "source": {
     "provider": "National Institute of Statistics of Rwanda (NISR); geoBoundaries (William & Mary geoLab)",
-    "source_dataset_ids": ["nisr-rphc4-2012-socio-cultural-table26-religion-by-sector", "nisr-rphc5-2022-social-cultural-tabled1-religion-by-sector", "geoboundaries-rwa-adm2-2012"],
-    "source_urls": ["https://www.statistics.gov.rw/sites/default/files/documents/2025-07/RPHC4_Socio_cultural_characteristics_population.pdf", "https://www.statistics.gov.rw/sites/default/files/documents/2025-02/Social-cultural%20characteristics.pdf", "https://www.statistics.gov.rw/sites/default/files/documents/2025-02/RPHC5_MainIndicatorsReport_Final.pdf", "https://www.geoboundaries.org/api/current/gbOpen/RWA/ADM2/", "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/RWA/ADM2/geoBoundaries-RWA-ADM2.geojson"],
+    "source_dataset_ids": [
+      "nisr-rphc4-2012-socio-cultural-table26-religion-by-sector",
+      "nisr-rphc5-2022-social-cultural-tabled1-religion-by-sector",
+      "geoboundaries-rwa-adm2-2012"
+    ],
+    "source_urls": [
+      "https://www.statistics.gov.rw/sites/default/files/documents/2025-07/RPHC4_Socio_cultural_characteristics_population.pdf",
+      "https://www.statistics.gov.rw/sites/default/files/documents/2025-02/Social-cultural%20characteristics.pdf",
+      "https://www.statistics.gov.rw/sites/default/files/documents/2025-02/RPHC5_MainIndicatorsReport_Final.pdf",
+      "https://www.geoboundaries.org/api/current/gbOpen/RWA/ADM2/",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/RWA/ADM2/geoBoundaries-RWA-ADM2.geojson"
+    ],
     "retrieved_at": "2026-07-09T00:00:00Z",
     "licence": "NISR RPHC4 (2012) Socio-cultural Characteristics of the Population thematic report, Table 26 (religious affiliation by sector), and NISR RPHC5 (2022) Social-cultural Characteristics of the Population thematic report, Table D.1 (religious affiliation by sector). The National Institute of Statistics of Rwanda publishes the census reports for open download; no explicit reuse licence is stated on the reports, so the derived product attributes NISR and links the source of record. Boundaries are geoBoundaries RWA ADM2 (30 districts, 2012), Creative Commons Attribution 4.0 International, boundary source Open Data Rwanda (NISR geoportal, statistics.gov.rw/terms-use).",
     "citation": "NISR, RPHC4 2012 Socio-cultural Characteristics of the Population, Table 26; NISR, RPHC5 2022 Social-cultural Characteristics of the Population, Table D.1; geoBoundaries RWA ADM2 (gbOpen).",
@@ -151,7 +171,17 @@
     }
   ],
   "validation": {
-    "checks": ["The 2012 wave aggregates the 416 sectors of RPHC4 Table 26 to the 30 districts by summing the exact sector populations and the population-weighted religion shares; the report carries no district subtotal row.", "The 2012 sector populations sum exactly to the printed national total (10515973) and the aggregate reproduces the printed national no-religion (2.47 vs 2.5) and not-stated (1.34 vs 1.3) shares.", "The 2022 wave reads the exact district Total row of RPHC5 Table D.1 for each of the 30 districts (two-decimal shares).", "The 2022 district populations sum exactly to the printed national total (13246394) and the aggregate reproduces the printed national no-religion (3.04 vs 3.04) and not-stated (0.13 vs 0.13) shares.", "The 2022 census did collect religion: RPHC5 asked the religion question with ten modalities (Catholic, Protestant, Adventist, Other Christians, Muslim, Jehovah's Witness, Traditionalist/Animist, Other Religion, No Religion, Not Stated). The premise that 2022 dropped religion is incorrect.", "Percentages use the stated-response denominator (district population minus not stated); religious affiliation (all named religions) and no religion sum to 100 percent of stated responses.", "All 30 census districts join to the 30 geoBoundaries RWA ADM2 features by name for both waves, with no name fixes needed (the Kigali City districts Nyarugenge, Gasabo, Kicukiro and the near-homographs Rulindo, Ruhango, Rutsiro, Rusizi all match exactly).", "The simplified district boundary GeoJSON writes to 288486 bytes after 50 m simplification (30 district features).", "The 2002 census (RPHC3) is deferred: it enumerated religion on the pre-2006 twelve-prefecture geography, which does not join to the 30-district structure; the 1978-2022 national religion trend is recorded in both thematic reports."],
+    "checks": [
+      "The 2012 wave aggregates the 416 sectors of RPHC4 Table 26 to the 30 districts by summing the exact sector populations and the population-weighted religion shares; the report carries no district subtotal row.",
+      "The 2012 sector populations sum exactly to the printed national total (10515973) and the aggregate reproduces the printed national no-religion (2.47 vs 2.5) and not-stated (1.34 vs 1.3) shares.",
+      "The 2022 wave reads the exact district Total row of RPHC5 Table D.1 for each of the 30 districts (two-decimal shares).",
+      "The 2022 district populations sum exactly to the printed national total (13246394) and the aggregate reproduces the printed national no-religion (3.04 vs 3.04) and not-stated (0.13 vs 0.13) shares.",
+      "The 2022 census did collect religion: RPHC5 asked the religion question with ten modalities (Catholic, Protestant, Adventist, Other Christians, Muslim, Jehovah's Witness, Traditionalist/Animist, Other Religion, No Religion, Not Stated). The premise that 2022 dropped religion is incorrect.",
+      "Percentages use the stated-response denominator (district population minus not stated); religious affiliation (all named religions) and no religion sum to 100 percent of stated responses.",
+      "All 30 census districts join to the 30 geoBoundaries RWA ADM2 features by name for both waves, with no name fixes needed (the Kigali City districts Nyarugenge, Gasabo, Kicukiro and the near-homographs Rulindo, Ruhango, Rutsiro, Rusizi all match exactly).",
+      "The simplified district boundary GeoJSON writes to 288486 bytes after 50 m simplification (30 district features).",
+      "The 2002 census (RPHC3) is deferred: it enumerated religion on the pre-2006 twelve-prefecture geography, which does not join to the 30-district structure; the 1978-2022 national religion trend is recorded in both thematic reports."
+    ],
     "join_coverage": {
       "district": [
         {

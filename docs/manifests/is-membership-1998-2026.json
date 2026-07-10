@@ -162,7 +162,10 @@
         "bytes": 199640,
         "byte_ceiling": 250000,
         "helper": "scripts/lib/simplify_boundary.R"
-      }
+      },
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/is_membership/"
+      ]
     },
     "software_versions": {
       "R": "4.6.1",

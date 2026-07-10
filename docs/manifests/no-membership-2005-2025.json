@@ -635,7 +635,10 @@
             }
           ]
         }
-      }
+      },
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/no_membership/"
+      ]
     },
     "software_versions": {
       "r": "R version 4.6.1 (2026-06-24)",
@@ -647,8 +650,21 @@
   },
   "source": {
     "provider": "Statistics Norway (SSB); Kartverket via Geonorge",
-    "source_dataset_ids": ["ssb-06929-church-of-norway-members-diocese-2005-2025", "kartverket-geonorge-soknegrenser-diocese-2025"],
-    "source_urls": ["https://data.ssb.no/api/v0/en/table/DNKMedlemmer", "https://www.ssb.no/en/statbank1/table/06929", "https://www.ssb.no/en/kultur-og-fritid/religion-og-livssyn/statistikk/den-norske-kirke", "https://www.ssb.no/en/diverse/lisens", "https://www.kirken.no/nn-NO/bispedommer/more/aktuelt/endringar%20i%20bisped%C3%B8megrenser%20og%20prostigrenser%20fr%C3%A5%202020/", "https://www.kirken.no/nb-NO/bispedommer/nord-haalogaland/biskop%20og%20bisped%C3%B8mme2/", "https://kartkatalog.geonorge.no/Metadata/uuid/289d459c-0390-4000-84f3-88982f2cdb0c", "https://kartkatalog.geonorge.no/api/getdata/289d459c-0390-4000-84f3-88982f2cdb0c", "http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply"],
+    "source_dataset_ids": [
+      "ssb-06929-church-of-norway-members-diocese-2005-2025",
+      "kartverket-geonorge-soknegrenser-diocese-2025"
+    ],
+    "source_urls": [
+      "https://data.ssb.no/api/v0/en/table/DNKMedlemmer",
+      "https://www.ssb.no/en/statbank1/table/06929",
+      "https://www.ssb.no/en/kultur-og-fritid/religion-og-livssyn/statistikk/den-norske-kirke",
+      "https://www.ssb.no/en/diverse/lisens",
+      "https://www.kirken.no/nn-NO/bispedommer/more/aktuelt/endringar%20i%20bisped%C3%B8megrenser%20og%20prostigrenser%20fr%C3%A5%202020/",
+      "https://www.kirken.no/nb-NO/bispedommer/nord-haalogaland/biskop%20og%20bisped%C3%B8mme2/",
+      "https://kartkatalog.geonorge.no/Metadata/uuid/289d459c-0390-4000-84f3-88982f2cdb0c",
+      "https://kartkatalog.geonorge.no/api/getdata/289d459c-0390-4000-84f3-88982f2cdb0c",
+      "http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply"
+    ],
     "retrieved_at": "2026-07-10T06:30:08Z",
     "licence": "SSB StatBank data and API content: CC BY 4.0 with Statistics Norway attribution. Geonorge Soknegrenser metadata: No conditions apply to access and use, with no public-access limitation.",
     "citation": "Statistics Norway StatBank table 06929; Kartverket Geonorge Soknegrenser diocese surfaces effective 1 January 2025."
@@ -707,7 +723,13 @@
       "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/no-membership-2005-2025.json",
       "jq empty apps/regions/no/data/area_summary_diocese.json docs/manifests/no-membership-2005-2025.json"
     ],
-    "warnings": ["Unknown diocese remains unallocated; mapped sums plus Unknown diocese reconcile exactly to SSB's national totals. Across 2005-2025, SSB's unallocated Unknown diocese category ranges from 0 to 25,923 members, or 0 to 0.6758% of the published national total. SSB table 06929 states verbatim: \"Unknown diocese do not include members living aboard.\" Source: https://www.ssb.no/en/statbank1/table/06929.", "The SSB member definition changes in 2021, and SSB warns that national totals from 2011 cannot be compared with earlier years because Unknown diocese was then included.", "Counts follow SSB's published diocese assignment for each reference year. The drawn boundaries use the 2025-01-01 vintage. Rindal parish moved from Møre to Nidaros on 1 January 2020. Early-year counts near transferred parishes may therefore not align exactly with the drawn borders. Neither table 06929 metadata nor SSB's About the statistics documentation states whether the historical series is rebased to current dioceses. Sources: https://www.ssb.no/en/statbank1/table/06929; https://www.ssb.no/en/kultur-og-fritid/religion-og-livssyn/statistikk/den-norske-kirke; https://www.kirken.no/nn-NO/bispedommer/more/aktuelt/endringar%20i%20bisped%C3%B8megrenser%20og%20prostigrenser%20fr%C3%A5%202020/.", "SSB's Church of Norway statistics and the mapped polygons both exclude Svalbard. Nord-Hålogaland diocese formally includes Svalbard, while the shipped polygons end at about 71.4° N. Sources: https://www.ssb.no/en/kultur-og-fritid/religion-og-livssyn/statistikk/den-norske-kirke; https://www.kirken.no/nb-NO/bispedommer/nord-haalogaland/biskop%20og%20bisped%C3%B8mme2/.", "The direct Geonorge diocese surfaces extend through coastal waters; land_area_sq_km and density fields are null."],
+    "warnings": [
+      "Unknown diocese remains unallocated; mapped sums plus Unknown diocese reconcile exactly to SSB's national totals. Across 2005-2025, SSB's unallocated Unknown diocese category ranges from 0 to 25,923 members, or 0 to 0.6758% of the published national total. SSB table 06929 states verbatim: \"Unknown diocese do not include members living aboard.\" Source: https://www.ssb.no/en/statbank1/table/06929.",
+      "The SSB member definition changes in 2021, and SSB warns that national totals from 2011 cannot be compared with earlier years because Unknown diocese was then included.",
+      "Counts follow SSB's published diocese assignment for each reference year. The drawn boundaries use the 2025-01-01 vintage. Rindal parish moved from Møre to Nidaros on 1 January 2020. Early-year counts near transferred parishes may therefore not align exactly with the drawn borders. Neither table 06929 metadata nor SSB's About the statistics documentation states whether the historical series is rebased to current dioceses. Sources: https://www.ssb.no/en/statbank1/table/06929; https://www.ssb.no/en/kultur-og-fritid/religion-og-livssyn/statistikk/den-norske-kirke; https://www.kirken.no/nn-NO/bispedommer/more/aktuelt/endringar%20i%20bisped%C3%B8megrenser%20og%20prostigrenser%20fr%C3%A5%202020/.",
+      "SSB's Church of Norway statistics and the mapped polygons both exclude Svalbard. Nord-Hålogaland diocese formally includes Svalbard, while the shipped polygons end at about 71.4° N. Sources: https://www.ssb.no/en/kultur-og-fritid/religion-og-livssyn/statistikk/den-norske-kirke; https://www.kirken.no/nb-NO/bispedommer/nord-haalogaland/biskop%20og%20bisped%C3%B8mme2/.",
+      "The direct Geonorge diocese surfaces extend through coastal waters; land_area_sq_km and density fields are null."
+    ],
     "notes": "All hard gates passed. Eleven named diocese rows ship for every year 2005-2025. For every year, the eleven mapped counts plus SSB's Unknown diocese count equal the published national total exactly. Both source and simplified boundaries contain eleven valid, non-empty, distinct geometries, no interior coverage gaps, and overlap below the fixed 1 square metre tolerance."
   },
   "privacy": "public",

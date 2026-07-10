@@ -31,7 +31,10 @@
     "2010",
     "2020"
    ],
-   "boundary_set": "us-county-2020"
+   "boundary_set": "us-county-2020",
+   "raw_cache_durable_uris": [
+    "gs://pow-research-data/raw_sources/us_rcms/"
+   ]
   },
   "software_versions": {
    "r": "4.6.1"

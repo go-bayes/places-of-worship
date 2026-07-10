@@ -36,7 +36,16 @@
         "religious_affiliation_percent": "dominicantes_percent",
         "no_religion_percent": "communicantes_percent"
       },
-      "omitted_metrics": ["population_total", "religious_affiliation_count", "no_religion_count", "places_per_10000_residents", "place_density_per_sq_km"]
+      "omitted_metrics": [
+        "population_total",
+        "religious_affiliation_count",
+        "no_religion_count",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/pl_practice/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -46,8 +55,33 @@
   },
   "source": {
     "provider": "Instytut Statystyki Kościoła Katolickiego; OpenStreetMap contributors; Eurostat/GISCO",
-    "source_dataset_ids": ["iskk-dominicantes-communicantes-diocese-2014-2024", "iskk-annuarium-statisticum-ecclesiae-in-polonia", "pl-diocese-2004-mixed-osm-gisco-gmina", "pl-diocese-name-concordance-draft", "pl-diocese-2004-gmina-digitisation-report"],
-    "source_urls": ["https://iskk.pl/wp-content/uploads/2023/09/AnnuariumStatisticum2015.pdf", "https://iskk.pl/wp-content/uploads/2023/09/AnnuariumStatisticum2016.pdf", "https://iskk.pl/wp-content/uploads/2023/09/Annuarium_Statisticum_2018.pdf", "https://iskk.pl/wp-content/uploads/2023/09/Annuarium_Statisticum_2019.pdf", "https://iskk.pl/wp-content/uploads/2023/09/Annuarium_Statisticum_2020_07.01.pdf", "https://iskk.pl/wp-content/uploads/2023/09/Annuarium_Statisticum_DANE_2019_FINAL_KOREKTA_26012021.pdf", "https://iskk.pl/wp-content/uploads/2023/09/annuarium-statisticum-ecclesiae-in-polonia-dane-za-rok-2020.pdf", "https://iskk.pl/wp-content/uploads/2023/09/ISKK_Annuarium_dane_za_2021_www.pdf", "https://iskk.pl/wp-content/uploads/2023/12/Annuarium_Statisticum_DANE_za-2022_19.12.pdf", "https://iskk.pl/wp-content/uploads/2024/12/Annuarium_Statisticum_2023.pdf", "https://iskk.pl/wp-content/uploads/2025/12/Annuarium_Statisticum_2024.pdf", "https://iskk.pl/publikacje/", "https://iskk.pl/dominicantes/", "https://www.openstreetmap.org/", "https://opendatacommons.org/licenses/odbl/", "https://gisco-services.ec.europa.eu/distribution/v2/lau/download/", "https://gisco-services.ec.europa.eu/distribution/v2/lau/geojson/LAU_RG_01M_2024_4326.geojson", "https://www.gis-expert.pl/mapy-religijnosci-polakow"],
+    "source_dataset_ids": [
+      "iskk-dominicantes-communicantes-diocese-2014-2024",
+      "iskk-annuarium-statisticum-ecclesiae-in-polonia",
+      "pl-diocese-2004-mixed-osm-gisco-gmina",
+      "pl-diocese-name-concordance-draft",
+      "pl-diocese-2004-gmina-digitisation-report"
+    ],
+    "source_urls": [
+      "https://iskk.pl/wp-content/uploads/2023/09/AnnuariumStatisticum2015.pdf",
+      "https://iskk.pl/wp-content/uploads/2023/09/AnnuariumStatisticum2016.pdf",
+      "https://iskk.pl/wp-content/uploads/2023/09/Annuarium_Statisticum_2018.pdf",
+      "https://iskk.pl/wp-content/uploads/2023/09/Annuarium_Statisticum_2019.pdf",
+      "https://iskk.pl/wp-content/uploads/2023/09/Annuarium_Statisticum_2020_07.01.pdf",
+      "https://iskk.pl/wp-content/uploads/2023/09/Annuarium_Statisticum_DANE_2019_FINAL_KOREKTA_26012021.pdf",
+      "https://iskk.pl/wp-content/uploads/2023/09/annuarium-statisticum-ecclesiae-in-polonia-dane-za-rok-2020.pdf",
+      "https://iskk.pl/wp-content/uploads/2023/09/ISKK_Annuarium_dane_za_2021_www.pdf",
+      "https://iskk.pl/wp-content/uploads/2023/12/Annuarium_Statisticum_DANE_za-2022_19.12.pdf",
+      "https://iskk.pl/wp-content/uploads/2024/12/Annuarium_Statisticum_2023.pdf",
+      "https://iskk.pl/wp-content/uploads/2025/12/Annuarium_Statisticum_2024.pdf",
+      "https://iskk.pl/publikacje/",
+      "https://iskk.pl/dominicantes/",
+      "https://www.openstreetmap.org/",
+      "https://opendatacommons.org/licenses/odbl/",
+      "https://gisco-services.ec.europa.eu/distribution/v2/lau/download/",
+      "https://gisco-services.ec.europa.eu/distribution/v2/lau/geojson/LAU_RG_01M_2024_4326.geojson",
+      "https://www.gis-expert.pl/mapy-religijnosci-polakow"
+    ],
     "retrieved_at": "2026-07-09T07:43:54Z",
     "licence": "ISKK rates are published aggregate figures in free public PDFs and are used with attribution. The 41-diocese boundary layer mixes 24 OpenStreetMap religious administration anchor polygons, attributed to © OpenStreetMap contributors under the Open Database Licence (ODbL), with 17 polygons digitised from Eurostat/GISCO Local Administrative Units 2024 gmina geometry. The digitisation method is gmina_digitisation_from_GISCO_LAU_2024 with Wikipedia deanery evidence; authoritative GIS-Expert/KUL polygons remain pending.",
     "citation": "ISKK, Annuarium Statisticum Ecclesiae in Polonia; © OpenStreetMap contributors; Eurostat/GISCO Local Administrative Units 2024.",
@@ -331,7 +365,15 @@
     "commands": [
       "Rscript scripts/build_pl_area_summary.R"
     ],
-    "tests": ["CSV coverage is exactly 420 rows: Ogółem plus 41 Latin-rite territorial dioceses for each of ten counted years.", "Ogółem is retained as national reconciliation context and excluded from the 410 area-summary rows.", "The explicit ISKK-name concordance maps every non-national source row to a boundary area_code.", "Every product year joins 41/41 dioceses; missing and duplicate area codes are hard failures.", "Dominicantes and communicantes values are non-missing percentages within [0, 100].", "Wikipedia cross-check from raw metadata compared 126 retained rows for 2022-2024; discrepancies recorded: 4.", "The boundary layer has 41 features and carries boundary_basis plus confidence into every row quality_flag."],
+    "tests": [
+      "CSV coverage is exactly 420 rows: Ogółem plus 41 Latin-rite territorial dioceses for each of ten counted years.",
+      "Ogółem is retained as national reconciliation context and excluded from the 410 area-summary rows.",
+      "The explicit ISKK-name concordance maps every non-national source row to a boundary area_code.",
+      "Every product year joins 41/41 dioceses; missing and duplicate area codes are hard failures.",
+      "Dominicantes and communicantes values are non-missing percentages within [0, 100].",
+      "Wikipedia cross-check from raw metadata compared 126 retained rows for 2022-2024; discrepancies recorded: 4.",
+      "The boundary layer has 41 features and carries boundary_basis plus confidence into every row quality_flag."
+    ],
     "join_coverage": {
       "diocese": [
         {
@@ -585,9 +627,21 @@
           "feature_count": 10
         }
       ],
-      "low_confidence_area_codes": ["bialystok", "bydgoszcz", "gdansk", "lomza", "lublin", "wloclawek", "zielona_gora_gorzow"]
+      "low_confidence_area_codes": [
+        "bialystok",
+        "bydgoszcz",
+        "gdansk",
+        "lomza",
+        "lublin",
+        "wloclawek",
+        "zielona_gora_gorzow"
+      ]
     },
-    "warnings": ["Seven gmina-digitised boundary features are flagged low confidence.", "The boundary layer remains provisional pending authoritative GIS-Expert/KUL polygons.", "ISKK reuse terms should be confirmed before broad redistribution."],
+    "warnings": [
+      "Seven gmina-digitised boundary features are flagged low confidence.",
+      "The boundary layer remains provisional pending authoritative GIS-Expert/KUL polygons.",
+      "ISKK reuse terms should be confirmed before broad redistribution."
+    ],
     "notes": "Validation passed for source coverage, 41/41 joins per year, JSON syntax, row count, and boundary provenance flags."
   },
   "construct_notes": [

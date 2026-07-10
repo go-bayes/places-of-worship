@@ -51,7 +51,15 @@
       ],
       "boundary_source_vintage": "geoBoundaries BGD ADM2, boundaryYearRepresented 2020",
       "boundary_simplification_tolerance_m": 250,
-      "omitted_metrics": ["no_religion_percent visual layer", "religious_change", "places_per_10000_residents", "place_density_per_sq_km"]
+      "omitted_metrics": [
+        "no_religion_percent visual layer",
+        "religious_change",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/bd_census/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -61,8 +69,16 @@
   },
   "source": {
     "provider": "Bangladesh Bureau of Statistics (BBS); geoBoundaries (W&M geoLab), BBS/OCHA ROAP",
-    "source_dataset_ids": ["bbs-phc-2022-table-p08-religion-district", "geoboundaries-bgd-adm2"],
-    "source_urls": ["https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2024/12/9ce5bd160bb14a1ab1eabe886adddb9a.pdf", "https://bbs.gov.bd/", "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BGD/ADM2/geoBoundaries-BGD-ADM2.geojson", "https://www.geoboundaries.org/api/current/gbOpen/BGD/ADM2/"],
+    "source_dataset_ids": [
+      "bbs-phc-2022-table-p08-religion-district",
+      "geoboundaries-bgd-adm2"
+    ],
+    "source_urls": [
+      "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-bbs/2024/12/9ce5bd160bb14a1ab1eabe886adddb9a.pdf",
+      "https://bbs.gov.bd/",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BGD/ADM2/geoBoundaries-BGD-ADM2.geojson",
+      "https://www.geoboundaries.org/api/current/gbOpen/BGD/ADM2/"
+    ],
     "retrieved_at": "2026-07-10T00:00:00Z",
     "licence": "Census: BBS copyright asserted (ISBN 978-984-475-201-6); no open-reuse licence located, reuse terms unresolved. Boundary: CC BY 3.0 IGO (geoBoundaries; BBS; OCHA ROAP).",
     "citation": "Bangladesh Bureau of Statistics, Population and Housing Census 2022, National Report (Volume I), Table P08; geoBoundaries BGD ADM2.",

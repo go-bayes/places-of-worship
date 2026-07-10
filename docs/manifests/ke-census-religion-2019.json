@@ -30,7 +30,14 @@
       "county_boundary_simplification_tolerance_m": 50,
       "pdf_extraction": "poppler pdftotext -layout, table 2.30 window",
       "denominator": "table 2.30 total minus Don't Know and Not Stated",
-      "omitted_metrics": ["religious_change", "places_per_10000_residents", "place_density_per_sq_km"]
+      "omitted_metrics": [
+        "religious_change",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/ke_census/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -41,8 +48,17 @@
   },
   "source": {
     "provider": "Kenya National Bureau of Statistics (KNBS); geoBoundaries (William & Mary geoLab)",
-    "source_dataset_ids": ["knbs-2019-kphc-vol4-table-2-30-religion-by-county", "geoboundaries-ken-adm1-2020"],
-    "source_urls": ["https://www.knbs.or.ke/wp-content/uploads/2023/09/2019-Kenya-population-and-Housing-Census-Volume-4-Distribution-of-Population-by-Socio-Economic-Characteristics.pdf", "https://www.knbs.or.ke/reports/kenya-census-2019/", "https://www.knbs.or.ke/religious-affiliation/", "https://www.geoboundaries.org/api/current/gbOpen/KEN/ADM1/", "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/KEN/ADM1/geoBoundaries-KEN-ADM1_simplified.geojson"],
+    "source_dataset_ids": [
+      "knbs-2019-kphc-vol4-table-2-30-religion-by-county",
+      "geoboundaries-ken-adm1-2020"
+    ],
+    "source_urls": [
+      "https://www.knbs.or.ke/wp-content/uploads/2023/09/2019-Kenya-population-and-Housing-Census-Volume-4-Distribution-of-Population-by-Socio-Economic-Characteristics.pdf",
+      "https://www.knbs.or.ke/reports/kenya-census-2019/",
+      "https://www.knbs.or.ke/religious-affiliation/",
+      "https://www.geoboundaries.org/api/current/gbOpen/KEN/ADM1/",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/KEN/ADM1/geoBoundaries-KEN-ADM1_simplified.geojson"
+    ],
     "retrieved_at": "2026-07-09T00:00:00Z",
     "licence": "KNBS 2019 Kenya Population and Housing Census, Volume IV (Distribution of Population by Socio-Economic Characteristics), table 2.30. KNBS publishes the census reports for open download; no explicit reuse licence is stated, so the derived product attributes KNBS and links the source of record. Boundaries are geoBoundaries KEN ADM1 (2020 counties), released to the public domain, derived from the RCMRD GeoPortal via the Africa GeoPortal.",
     "citation": "KNBS, 2019 KPHC Volume IV, Table 2.30; geoBoundaries KEN ADM1 (gbOpen) 2020.",
@@ -149,7 +165,15 @@
     }
   ],
   "validation": {
-    "checks": ["Table 2.30 is the 2019 KPHC Volume IV religious-affiliation-by-county table; the KENYA row plus 47 counties are parsed with pdftotext -layout.", "Every parsed row's 13 religion columns sum exactly to its printed total.", "The 47 county rows sum exactly to the KENYA national row for the denominator, religious affiliation, no religion, and the excluded (Don't Know + Not Stated) residual.", "All 47 county census rows join to the 47 geoBoundaries KEN ADM1 features by normalised name (geoBoundaries 'Tharaka' aliased to the census 'Tharaka-Nithi').", "The simplified county boundary GeoJSON writes to 473968 bytes after 50 m simplification.", "Percentages use a stated-response denominator: table 2.30 total minus Don't Know and Not Stated. Those residuals are excluded, not counted as no religion.", "The 2019 census wave is the only wave shipped: the 2009 census (Volume II, Table 12) publishes religion at national level only, with no county or district breakdown."],
+    "checks": [
+      "Table 2.30 is the 2019 KPHC Volume IV religious-affiliation-by-county table; the KENYA row plus 47 counties are parsed with pdftotext -layout.",
+      "Every parsed row's 13 religion columns sum exactly to its printed total.",
+      "The 47 county rows sum exactly to the KENYA national row for the denominator, religious affiliation, no religion, and the excluded (Don't Know + Not Stated) residual.",
+      "All 47 county census rows join to the 47 geoBoundaries KEN ADM1 features by normalised name (geoBoundaries 'Tharaka' aliased to the census 'Tharaka-Nithi').",
+      "The simplified county boundary GeoJSON writes to 473968 bytes after 50 m simplification.",
+      "Percentages use a stated-response denominator: table 2.30 total minus Don't Know and Not Stated. Those residuals are excluded, not counted as no religion.",
+      "The 2019 census wave is the only wave shipped: the 2009 census (Volume II, Table 12) publishes religion at national level only, with no county or district breakdown."
+    ],
     "join_coverage": {
       "county": [
         {

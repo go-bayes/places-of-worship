@@ -44,7 +44,10 @@
         "clean_option": "allow-overlaps",
         "keep_percent": 20,
         "bytes": 508811
-      }
+      },
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/nl_religion/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",

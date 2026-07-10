@@ -28,7 +28,11 @@
       "table_id": "S3R778_GBS010306_1",
       "data_structure_id": "GBS010306",
       "shared_table_hash": "a19ff692-f3aa-4a3d-90c3-84c7880fa9fa",
-      "waves": [2001, 2011, 2021],
+      "waves": [
+        2001,
+        2011,
+        2021
+      ],
       "geography": "60 municipalities",
       "construct": "census affiliation / religious community indicated",
       "denominator": "published Iš viso pagal religiją; Nenurodyta retained",
@@ -75,6 +79,9 @@
           "url": "https://data.gov.lt/datasets/1345/?resource_version=1125",
           "notes": "Dataset 1345 states CC BY 4.0."
         }
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/lt_census/"
       ]
     },
     "software_versions": {

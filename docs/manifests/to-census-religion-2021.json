@@ -272,7 +272,30 @@
           "district_rows": 23,
           "exact_fields": [
             "Total",
-            ["FWC", "RC", "LDS", "FCOT", "COT", "AOG", "TOK", "CCOT", "GOS", "AGC", "SDA", "MF", "TSA", "JW", "OP", "BF", "BUDH", "ISL", "HND", "NO Rel", "REF", "Other"]
+            [
+              "FWC",
+              "RC",
+              "LDS",
+              "FCOT",
+              "COT",
+              "AOG",
+              "TOK",
+              "CCOT",
+              "GOS",
+              "AGC",
+              "SDA",
+              "MF",
+              "TSA",
+              "JW",
+              "OP",
+              "BF",
+              "BUDH",
+              "ISL",
+              "HND",
+              "NO Rel",
+              "REF",
+              "Other"
+            ]
           ]
         },
         "national_2021": {
@@ -338,7 +361,7 @@
               "48082658B65008751810266": "36da66836f608f535f80fb90e302d5c4db8a44bda5d6c734894dd5182d1c5a27",
               "48082658B75580171821310": "b3ab4388149e8958a2377fc44213b721461df416a2c36dd19043ae0ed63e63d7"
             },
-            "overlap_sq_m": -0,
+            "overlap_sq_m": 0,
             "interior_gap_count": 0,
             "source_hydrographic_hole_count": 2,
             "sliver_threshold_sq_m": 1000000,
@@ -418,6 +441,9 @@
           "status": "not_pinned",
           "reason": "PDH metadata confirms a religion variable, but no official aggregate subnational religion table was pinned."
         }
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/to_census/"
       ]
     },
     "software_versions": {

@@ -25,13 +25,22 @@
     "git_commit": null,
     "command": "Rscript scripts/build_ro_area_summary.R",
     "parameters": {
-      "waves": ["2011", "2021"],
-      "boundary_sets": ["ro-lau-2021-gisco", "ro-judet-2021-gisco-nuts3"],
+      "waves": [
+        "2011",
+        "2021"
+      ],
+      "boundary_sets": [
+        "ro-lau-2021-gisco",
+        "ro-judet-2021-gisco-nuts3"
+      ],
       "boundary_simplification_tolerance_m": {
         "lau_2021": 500,
         "judet": 500
       },
-      "denominator": "Total population minus Informatie nedisponibila in each wave"
+      "denominator": "Total population minus Informatie nedisponibila in each wave",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/ro_census/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -43,8 +52,22 @@
   },
   "source": {
     "provider": "Institutul National de Statistica (INS), Recensamant Romania; Eurostat GISCO",
-    "source_dataset_ids": ["ins-rpl-2011-sr-tab-13-uat-religion", "ins-rpl-2021-table-2-04-uat-religion", "gisco-lau-2011-ro", "gisco-lau-2021-ro", "gisco-nuts3-2021-ro"],
-    "source_urls": ["https://www.recensamantromania.ro/istoric/rpl-2011/", "https://www.recensamantromania.ro/wp-content/uploads/2021/11/sR_TAB_13.xls", "https://www.recensamantromania.ro/rezultate-rpl-2021/rezultate-definitive/", "https://www.recensamantromania.ro/wp-content/uploads/2023/06/Tabel-2.04.1-si-Tabel-2.04.2.xlsx", "https://gisco-services.ec.europa.eu/distribution/v2/lau/geojson/LAU_RG_01M_2011_4326.geojson", "https://gisco-services.ec.europa.eu/distribution/v2/lau/geojson/LAU_RG_01M_2021_4326.geojson", "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2021_4326_LEVL_3.geojson"],
+    "source_dataset_ids": [
+      "ins-rpl-2011-sr-tab-13-uat-religion",
+      "ins-rpl-2021-table-2-04-uat-religion",
+      "gisco-lau-2011-ro",
+      "gisco-lau-2021-ro",
+      "gisco-nuts3-2021-ro"
+    ],
+    "source_urls": [
+      "https://www.recensamantromania.ro/istoric/rpl-2011/",
+      "https://www.recensamantromania.ro/wp-content/uploads/2021/11/sR_TAB_13.xls",
+      "https://www.recensamantromania.ro/rezultate-rpl-2021/rezultate-definitive/",
+      "https://www.recensamantromania.ro/wp-content/uploads/2023/06/Tabel-2.04.1-si-Tabel-2.04.2.xlsx",
+      "https://gisco-services.ec.europa.eu/distribution/v2/lau/geojson/LAU_RG_01M_2011_4326.geojson",
+      "https://gisco-services.ec.europa.eu/distribution/v2/lau/geojson/LAU_RG_01M_2021_4326.geojson",
+      "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2021_4326_LEVL_3.geojson"
+    ],
     "retrieved_at": "2026-07-09T00:00:00Z",
     "licence": "INS/recensamantromania workbooks are public downloads from the census portal. A public page with explicit reuse terms was not located during this build; source attribution is retained. GISCO files are used under Eurostat GISCO download provisions with attribution.",
     "citation": "Institutul National de Statistica, RPL 2011 sR_TAB_13 and RPL 2021 final results Tabel 2.04.2; Eurostat GISCO LAU 2011, LAU 2021, and NUTS3 2021.",
@@ -188,7 +211,16 @@
     }
   ],
   "validation": {
-    "checks": ["2011 and 2021 source county rows reconcile exactly to the published national row for source total, undeclared responses, stated-response denominator, religious affiliation, and no religion.", "2021 validation also reconciles Agnostic exactly, because it remains in the denominator and outside the no-religion construct.", "Join coverage is 3,181 of 3,181 LAU areas and 42 of 42 județ areas for both shipped waves.", "The județ product uses the source workbook's own county rows rather than aggregating suppressed LAU rows.", "2011 rows are first matched to GISCO LAU 2011 names, then bridged to the GISCO LAU 2021 output boundary by LAU_ID; no invented concordance is used.", "Rows with source asterisk suppression in headline components are left unavailable rather than imputed.", "The simplified LAU and județ boundaries remain below 3 MB and preserve their output feature counts.", "jsonlite::validate passes for the generated manifest."],
+    "checks": [
+      "2011 and 2021 source county rows reconcile exactly to the published national row for source total, undeclared responses, stated-response denominator, religious affiliation, and no religion.",
+      "2021 validation also reconciles Agnostic exactly, because it remains in the denominator and outside the no-religion construct.",
+      "Join coverage is 3,181 of 3,181 LAU areas and 42 of 42 județ areas for both shipped waves.",
+      "The județ product uses the source workbook's own county rows rather than aggregating suppressed LAU rows.",
+      "2011 rows are first matched to GISCO LAU 2011 names, then bridged to the GISCO LAU 2021 output boundary by LAU_ID; no invented concordance is used.",
+      "Rows with source asterisk suppression in headline components are left unavailable rather than imputed.",
+      "The simplified LAU and județ boundaries remain below 3 MB and preserve their output feature counts.",
+      "jsonlite::validate passes for the generated manifest."
+    ],
     "join_coverage": [
       {
         "boundary_level": "lau_2021",
@@ -406,5 +438,15 @@
       "notes": "1992 public tables appear to expose religion at county and locality-category level rather than UAT level. A separate coarser county product is deferred."
     }
   ],
-  "construct_notes": ["The 2011 denominator is POPULATIA STABILA TOTAL minus Informatie nedisponibila; the national undeclared share is 6.26%.", "The 2021 denominator is POPULATIA REZIDENTA TOTAL minus Informatie nedisponibila; the national undeclared share is 13.95%.", "The no-religion construct is Fara religie plus Atei/Ateu in each wave.", "The 2021 Agnostic category is not included in no religion; it remains in the stated-response denominator and outside religious_affiliation.", "Religious affiliation is the named-religion construct. At UAT level the script computes it as the stated-response denominator minus the no-religion construct and, in 2021, minus Agnostic.", "Cells published as * are treated as unavailable. The script does not impute suppressed headline components.", "The județ product uses the workbook's source county rows and GISCO NUTS3 2021 boundaries. It does not aggregate suppressed LAU rows.", "The 2011 source is matched to GISCO LAU 2011 by county and UAT name, then bridged to GISCO LAU 2021 by LAU_ID. Official source IDs are used; no ad hoc split/merge mapping is invented.", "The 2011 Bucharest municipality row is used for the 2021 Bucharest LAU feature; six sector rows are excluded from the shipped LAU product."]
+  "construct_notes": [
+    "The 2011 denominator is POPULATIA STABILA TOTAL minus Informatie nedisponibila; the national undeclared share is 6.26%.",
+    "The 2021 denominator is POPULATIA REZIDENTA TOTAL minus Informatie nedisponibila; the national undeclared share is 13.95%.",
+    "The no-religion construct is Fara religie plus Atei/Ateu in each wave.",
+    "The 2021 Agnostic category is not included in no religion; it remains in the stated-response denominator and outside religious_affiliation.",
+    "Religious affiliation is the named-religion construct. At UAT level the script computes it as the stated-response denominator minus the no-religion construct and, in 2021, minus Agnostic.",
+    "Cells published as * are treated as unavailable. The script does not impute suppressed headline components.",
+    "The județ product uses the workbook's source county rows and GISCO NUTS3 2021 boundaries. It does not aggregate suppressed LAU rows.",
+    "The 2011 source is matched to GISCO LAU 2011 by county and UAT name, then bridged to GISCO LAU 2021 by LAU_ID. Official source IDs are used; no ad hoc split/merge mapping is invented.",
+    "The 2011 Bucharest municipality row is used for the 2021 Bucharest LAU feature; six sector rows are excluded from the shipped LAU product."
+  ]
 }

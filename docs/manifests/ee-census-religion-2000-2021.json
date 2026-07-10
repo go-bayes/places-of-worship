@@ -208,7 +208,10 @@
       },
       "category_mapping_location": "construct_notes entries with note_type=category_mapping",
       "rounding_rule": "2021 published values must remain multiples of ten; discrepancies must remain within the deterministic source-rounding gate; no residual is distributed",
-      "boundary_simplification": "scripts/lib/simplify_boundary.R; 750000-byte cap per vintage"
+      "boundary_simplification": "scripts/lib/simplify_boundary.R; 750000-byte cap per vintage",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/ee_census/"
+      ]
     },
     "software_versions": {
       "R": "4.6.1",

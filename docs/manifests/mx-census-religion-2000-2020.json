@@ -25,11 +25,22 @@
     "git_commit": null,
     "command": "Rscript scripts/build_mx_area_summary.R",
     "parameters": {
-      "waves": ["2000", "2010", "2020"],
+      "waves": [
+        "2000",
+        "2010",
+        "2020"
+      ],
       "municipality_boundary_set": "mx-municipality-2020-inegi-marco",
       "municipality_boundary_simplification_tolerance_m": 1000,
       "denominator": "2000: p5_catolic plus p5_sinreli for ages 5+; 2010 and 2020: sum of the four retained INEGI ITER constructs",
-      "omitted_metrics": ["religious_change", "places_per_10000_residents", "place_density_per_sq_km"]
+      "omitted_metrics": [
+        "religious_change",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/mx_census/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -41,8 +52,20 @@
   },
   "source": {
     "provider": "Instituto Nacional de Estadistica y Geografia (INEGI)",
-    "source_dataset_ids": ["inegi-cgpv-2000-iter-locality", "inegi-cpv-2010-iter-locality", "inegi-cpv-2020-iter-locality", "inegi-marco-geoestadistico-cpv2020-municipal"],
-    "source_urls": ["https://www.inegi.org.mx/contenidos/programas/ccpv/2000/datosabiertos/cgpv2000_iter_00_csv.zip", "https://www.inegi.org.mx/contenidos/programas/ccpv/2010/datosabiertos/iter_nal_2010_csv.zip", "https://www.inegi.org.mx/contenidos/programas/ccpv/2020/datosabiertos/iter/iter_00_cpv2020_csv.zip", "https://www.inegi.org.mx/contenidos/productos/prod_serv/contenidos/espanol/bvinegi/productos/geografia/marcogeo/889463807469/mg_2020_integrado.zip", "https://www.inegi.org.mx/app/biblioteca/ficha.html?upc=889463807469", "https://www.inegi.org.mx/inegi/terminos.html"],
+    "source_dataset_ids": [
+      "inegi-cgpv-2000-iter-locality",
+      "inegi-cpv-2010-iter-locality",
+      "inegi-cpv-2020-iter-locality",
+      "inegi-marco-geoestadistico-cpv2020-municipal"
+    ],
+    "source_urls": [
+      "https://www.inegi.org.mx/contenidos/programas/ccpv/2000/datosabiertos/cgpv2000_iter_00_csv.zip",
+      "https://www.inegi.org.mx/contenidos/programas/ccpv/2010/datosabiertos/iter_nal_2010_csv.zip",
+      "https://www.inegi.org.mx/contenidos/programas/ccpv/2020/datosabiertos/iter/iter_00_cpv2020_csv.zip",
+      "https://www.inegi.org.mx/contenidos/productos/prod_serv/contenidos/espanol/bvinegi/productos/geografia/marcogeo/889463807469/mg_2020_integrado.zip",
+      "https://www.inegi.org.mx/app/biblioteca/ficha.html?upc=889463807469",
+      "https://www.inegi.org.mx/inegi/terminos.html"
+    ],
     "retrieved_at": "2026-07-07T00:00:00Z",
     "licence": "INEGI open downloads subject to INEGI terms at https://www.inegi.org.mx/inegi/terminos.html and product/source attribution. The Marco Geoestadistico CPV 2020 product page marks SHP downloads with INEGI's data-open standard.",
     "citation": "INEGI, Censos de Poblacion y Vivienda 2000, 2010 and 2020, ITER; INEGI, Marco Geoestadistico, Censo de Poblacion y Vivienda 2020.",
@@ -156,7 +179,15 @@
     }
   ],
   "validation": {
-    "checks": ["All four downloaded INEGI ZIP archives pass unzip integrity tests before this script is run.", "INEGI 2020 municipal boundary layer has 2469 source features and 2469 output features.", "Municipal boundary GeoJSON writes to 2502305 bytes after 1000 m simplification.", "Published counts use official ITER municipality total rows (LOC=0000); locality-sum reconciliation results are recorded because 2020 small-locality suppression prevents exact reconstruction from locality rows alone.", "State and national totals are reconciled from municipality rows for each built wave and retained in validation.state_validation and validation.national_validation.", "The 2000 guard found 0 municipality rows where p5_sinreli is smaller than p5_ncatoli.", "The 2000 source has 1 municipality total row with unavailable public metric values."],
+    "checks": [
+      "All four downloaded INEGI ZIP archives pass unzip integrity tests before this script is run.",
+      "INEGI 2020 municipal boundary layer has 2469 source features and 2469 output features.",
+      "Municipal boundary GeoJSON writes to 2502305 bytes after 1000 m simplification.",
+      "Published counts use official ITER municipality total rows (LOC=0000); locality-sum reconciliation results are recorded because 2020 small-locality suppression prevents exact reconstruction from locality rows alone.",
+      "State and national totals are reconciled from municipality rows for each built wave and retained in validation.state_validation and validation.national_validation.",
+      "The 2000 guard found 0 municipality rows where p5_sinreli is smaller than p5_ncatoli.",
+      "The 2000 source has 1 municipality total row with unavailable public metric values."
+    ],
     "join_coverage": {
       "municipality": [
         {

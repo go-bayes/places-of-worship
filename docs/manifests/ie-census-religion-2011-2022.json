@@ -11,7 +11,9 @@
   "dataset_role": "public_product",
   "scope": {
     "level": "country",
-    "country_codes": ["IE"],
+    "country_codes": [
+      "IE"
+    ],
     "snapshot_date": null,
     "snapshot_anchor": null,
     "pipeline_stage": "public"
@@ -23,10 +25,17 @@
     "git_commit": null,
     "command": "Rscript scripts/build_ie_area_summary.R",
     "parameters": {
-      "waves": ["2011", "2016", "2022"],
+      "waves": [
+        "2011",
+        "2016",
+        "2022"
+      ],
       "boundary_set": "ie-county-city-2019-derived",
       "boundary_simplification_tolerance_m": 100,
-      "denominator": "All religions minus Not stated"
+      "denominator": "All religions minus Not stated",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/ie_census/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -36,8 +45,15 @@
   },
   "source": {
     "provider": "Central Statistics Office (CSO), Ireland; Tailte Éireann",
-    "source_dataset_ids": ["cso-pxstat-f5051-county-city-2011-2022", "tailte-administrative-areas-2019"],
-    "source_urls": ["https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/F5051/CSV/1.0/en", "https://www.arcgis.com/home/item.html?id=d81188d16e804bde81548e982e80c53e", "https://www.cso.ie/en/aboutus/whoweare/copyrightpolicy/"],
+    "source_dataset_ids": [
+      "cso-pxstat-f5051-county-city-2011-2022",
+      "tailte-administrative-areas-2019"
+    ],
+    "source_urls": [
+      "https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/F5051/CSV/1.0/en",
+      "https://www.arcgis.com/home/item.html?id=d81188d16e804bde81548e982e80c53e",
+      "https://www.cso.ie/en/aboutus/whoweare/copyrightpolicy/"
+    ],
     "retrieved_at": "2026-07-07T00:00:00Z",
     "licence": "CSO statistics are Government of Ireland copyright and licensed under Creative Commons Attribution 4.0; reproduction is authorised subject to acknowledgement of the source. Tailte Éireann open data are licensed under Creative Commons Attribution 4.0.",
     "citation": "Central Statistics Office (Ireland), PxStat table F5051; Tailte Éireann, Administrative Areas - National Statutory Boundaries - 2019.",
@@ -120,7 +136,13 @@
     }
   ],
   "validation": {
-    "checks": ["F5051 source URL returned CSV and the downloaded file has 6,975 data rows.", "Tailte administrative-area source returned 31 raw features; derived boundary has 30 features after Cork dissolve.", "For each of 2011, 2016, and 2022, area sums match the CSO State row exactly for All religions, Not stated, stated-response denominator, religious affiliation, and No religion.", "Join coverage is 30/30 county-and-city reporting units for every built wave.", "Census 1926 Volume 3 Table 09 PDF is downloaded and verified as image-only; OCR extraction is deferred."],
+    "checks": [
+      "F5051 source URL returned CSV and the downloaded file has 6,975 data rows.",
+      "Tailte administrative-area source returned 31 raw features; derived boundary has 30 features after Cork dissolve.",
+      "For each of 2011, 2016, and 2022, area sums match the CSO State row exactly for All religions, Not stated, stated-response denominator, religious affiliation, and No religion.",
+      "Join coverage is 30/30 county-and-city reporting units for every built wave.",
+      "Census 1926 Volume 3 Table 09 PDF is downloaded and verified as image-only; OCR extraction is deferred."
+    ],
     "join_coverage": [
       {
         "year": 2011,
@@ -204,7 +226,10 @@
       "source_feature_count": 31,
       "derived_feature_count": 30,
       "expected_feature_count": 30,
-      "cork_source_features_dissolved": ["CORK CITY COUNCIL", "CORK COUNTY COUNCIL"],
+      "cork_source_features_dissolved": [
+        "CORK CITY COUNCIL",
+        "CORK COUNTY COUNCIL"
+      ],
       "unmapped_boundary_features": [],
       "unmapped_census_areas": [],
       "simplified_boundary_bytes": 2558090,

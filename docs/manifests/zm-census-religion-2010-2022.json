@@ -25,13 +25,23 @@
     "git_commit": null,
     "command": "Rscript scripts/build_zm_area_summary.R",
     "parameters": {
-      "waves": ["2010", "2022"],
+      "waves": [
+        "2010",
+        "2022"
+      ],
       "province_boundary_set": "zm-province-2011-geoboundaries-adm1",
       "province_boundary_simplification_tolerance_m": 50,
       "pdf_extraction": "poppler pdftotext -layout for table B.1 and the population comparison table; 2010 figure 4.10 percentages transcribed from the printed chart data labels on the rendered figure pages",
       "denominator": "2022: table B.1 de facto province total (no not-stated category); 2010: percent of province population as printed",
       "category_reconciliation": "B.1 column labels reconciled against 2022 National Analytical Report figures 3.13-3.16; Non-Religious is the 233,260-national column",
-      "omitted_metrics": ["religious_change", "places_per_10000_residents", "place_density_per_sq_km"]
+      "omitted_metrics": [
+        "religious_change",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/zm_census/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -42,8 +52,19 @@
   },
   "source": {
     "provider": "Zambia Statistics Agency (ZamStats); geoBoundaries (William & Mary geoLab)",
-    "source_dataset_ids": ["zamstats-2022-cph-series-b-table-b1-religion-by-province", "zamstats-2010-cph-provincial-analytical-reports-figure-4-10-religion", "zamstats-2022-cph-national-analytical-report", "geoboundaries-zmb-adm1-2011"],
-    "source_urls": ["https://www.zamstats.gov.zm/wp-content/uploads/2026/04/Religion-Descriptive-Tables-Final.pdf", "https://www.zamstats.gov.zm/wp-content/uploads/2025/08/2022-Census-National-Analytical-Report.pdf", "https://www.zamstats.gov.zm/population-census/", "https://www.geoboundaries.org/api/current/gbOpen/ZMB/ADM1/", "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/ZMB/ADM1/geoBoundaries-ZMB-ADM1.geojson"],
+    "source_dataset_ids": [
+      "zamstats-2022-cph-series-b-table-b1-religion-by-province",
+      "zamstats-2010-cph-provincial-analytical-reports-figure-4-10-religion",
+      "zamstats-2022-cph-national-analytical-report",
+      "geoboundaries-zmb-adm1-2011"
+    ],
+    "source_urls": [
+      "https://www.zamstats.gov.zm/wp-content/uploads/2026/04/Religion-Descriptive-Tables-Final.pdf",
+      "https://www.zamstats.gov.zm/wp-content/uploads/2025/08/2022-Census-National-Analytical-Report.pdf",
+      "https://www.zamstats.gov.zm/population-census/",
+      "https://www.geoboundaries.org/api/current/gbOpen/ZMB/ADM1/",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/ZMB/ADM1/geoBoundaries-ZMB-ADM1.geojson"
+    ],
     "retrieved_at": "2026-07-09T00:00:00Z",
     "licence": "ZamStats 2022 Census of Population and Housing Series B Religion Descriptive Tables, table B.1 (population (de facto) by religion affiliation and province), and the ten 2010 Census provincial analytical reports, figure 4.10 (percentage distribution of population by religious affiliation). The Zambia Statistics Agency publishes the census reports for open download; no explicit reuse licence is stated, so the derived product attributes ZamStats and links the source of record. Boundaries are geoBoundaries ZMB ADM1 (10 provinces), Creative Commons Attribution 4.0 International, boundary source Zambia Data Hub (Zambia NSDI, Ministry of Lands and Natural Resources).",
     "citation": "ZamStats, 2022 CPH Series B Religion Descriptive Tables, Table B.1; CSO/ZamStats, 2010 Census Provincial Analytical Reports, Figure 4.10; geoBoundaries ZMB ADM1 (gbOpen).",
@@ -330,7 +351,19 @@
     }
   ],
   "validation": {
-    "checks": ["Table B.1 is the 2022 CPH Series B Religion Descriptive Tables population-by-religion-affiliation-and-province table (de facto); the Zambia row and ten province rows are parsed with pdftotext -layout.", "The printed B.1 column header lists the questionnaire code order, which is inconsistent with the census's own analytical figures: under it African Traditional would be 463 persons against figure 3.13's 0.2 percent and Non-Religious 9,238 against figures 3.13-3.15's 1.3 percent national (1.8/0.8 male/female, 1.5/0.9 rural/urban). The adopted assignment (African Traditional 30,502; Judaism 463; Other Religious Groups 9,238; Non-Religious 233,260) is the unique reading that reproduces figures 3.13-3.16 exactly and is asserted in the build.", "Every B.1 row's ten religion groups sum exactly to its printed total, and every column's ten province values sum exactly to its national value.", "The parsed counts reproduce figure 3.16's per-province Christianity percentages (all ten provinces) and figure 3.13's national percentages (Christianity 98.0, Islam 0.5, African Traditional 0.2, Other 0.1, None 1.3) at one-decimal rounding.", "The ten 2022 province rows sum exactly to the national row for the denominator, religious affiliation, and no religion.", "The 2010 wave is percent-only: each provincial analytical report's figure 4.10 prints five percentage data labels (Protestant, Catholic, Muslim, Other, None); the transcribed values sum to 99.7-100.0 per province and counts are not published at province level.", "The 2010 census population by province (post-2011 ten-province re-tabulation, total 13,092,666) is parsed from the 2022 National Analytical Report section 2.3 comparison table and sums exactly to the printed totals for 2010 and 2022.", "All ten census province rows join to the ten geoBoundaries ZMB ADM1 features by normalised name for both waves (NorthWestern / North Western / North-Western normalise equal).", "The simplified province boundary GeoJSON writes to 731900 bytes after 50 m simplification.", "The B.1 de facto total (18340343) is 1353080 below the de jure 2022 census population (19,693,423); the religion tables are a de facto tabulation and the gap sits outside them.", "District religion for 2022 is deferred: tables B.4/B.5 publish only Christianity against a bundled Other Religious Groups remainder (which includes the non-religious), so neither headline metric can be computed for the 116 districts."],
+    "checks": [
+      "Table B.1 is the 2022 CPH Series B Religion Descriptive Tables population-by-religion-affiliation-and-province table (de facto); the Zambia row and ten province rows are parsed with pdftotext -layout.",
+      "The printed B.1 column header lists the questionnaire code order, which is inconsistent with the census's own analytical figures: under it African Traditional would be 463 persons against figure 3.13's 0.2 percent and Non-Religious 9,238 against figures 3.13-3.15's 1.3 percent national (1.8/0.8 male/female, 1.5/0.9 rural/urban). The adopted assignment (African Traditional 30,502; Judaism 463; Other Religious Groups 9,238; Non-Religious 233,260) is the unique reading that reproduces figures 3.13-3.16 exactly and is asserted in the build.",
+      "Every B.1 row's ten religion groups sum exactly to its printed total, and every column's ten province values sum exactly to its national value.",
+      "The parsed counts reproduce figure 3.16's per-province Christianity percentages (all ten provinces) and figure 3.13's national percentages (Christianity 98.0, Islam 0.5, African Traditional 0.2, Other 0.1, None 1.3) at one-decimal rounding.",
+      "The ten 2022 province rows sum exactly to the national row for the denominator, religious affiliation, and no religion.",
+      "The 2010 wave is percent-only: each provincial analytical report's figure 4.10 prints five percentage data labels (Protestant, Catholic, Muslim, Other, None); the transcribed values sum to 99.7-100.0 per province and counts are not published at province level.",
+      "The 2010 census population by province (post-2011 ten-province re-tabulation, total 13,092,666) is parsed from the 2022 National Analytical Report section 2.3 comparison table and sums exactly to the printed totals for 2010 and 2022.",
+      "All ten census province rows join to the ten geoBoundaries ZMB ADM1 features by normalised name for both waves (NorthWestern / North Western / North-Western normalise equal).",
+      "The simplified province boundary GeoJSON writes to 731900 bytes after 50 m simplification.",
+      "The B.1 de facto total (18340343) is 1353080 below the de jure 2022 census population (19,693,423); the religion tables are a de facto tabulation and the gap sits outside them.",
+      "District religion for 2022 is deferred: tables B.4/B.5 publish only Christianity against a bundled Other Religious Groups remainder (which includes the non-religious), so neither headline metric can be computed for the 116 districts."
+    ],
     "join_coverage": {
       "province": [
         {

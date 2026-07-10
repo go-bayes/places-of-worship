@@ -25,15 +25,26 @@
     "git_commit": null,
     "command": "Rscript scripts/build_za_area_summary.R",
     "parameters": {
-      "waves": ["1996", "2001", "2022"],
+      "waves": [
+        "1996",
+        "2001",
+        "2022"
+      ],
       "province_boundary_set": "za-province-2020-geoboundaries-adm1",
       "province_boundary_simplification_tolerance_m": 200,
       "pdf_extraction": "poppler pdftotext -layout; Cultural Dynamics Table 4.1 religion rows and P0301.4 Table 2.1 population rows parsed and reconciled",
       "denominator": "stated responses (named religions plus no religion, excluding Undetermined); affiliation = named religions, no religion = No religious affiliation/belief",
       "subnational_geography": "geoBoundaries ZAF ADM1 (9 provinces), joined by shapeISO code",
-      "omitted_metrics": ["religious_change", "places_per_10000_residents", "place_density_per_sq_km"],
+      "omitted_metrics": [
+        "religious_change",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
       "counts_published": "religion is published as percentages; the product ships percentages with the exact province population as denominator",
-      "dropped_wave": "2011 census dropped the religion question (present in Table 2.1 population, absent from Table 4.1 religion)"
+      "dropped_wave": "2011 census dropped the religion question (present in Table 2.1 population, absent from Table 4.1 religion)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/za_census/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -44,8 +55,18 @@
   },
   "source": {
     "provider": "Statistics South Africa (Stats SA); geoBoundaries (William & Mary geoLab)",
-    "source_dataset_ids": ["statssa-cultural-dynamics-03-01-84-table41-religion-by-province", "statssa-census2022-p0301-4-table21-population-by-province", "statssa-census2022-p0301-4-table210-religion-by-province", "geoboundaries-zaf-adm1-2020"],
-    "source_urls": ["https://www.statssa.gov.za/publications/03-01-84/03-01-84.pdf", "https://census.statssa.gov.za/assets/documents/2022/P03014_Census_2022_Statistical_Release.pdf", "https://www.geoboundaries.org/api/current/gbOpen/ZAF/ADM1/", "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/ZAF/ADM1/geoBoundaries-ZAF-ADM1.geojson"],
+    "source_dataset_ids": [
+      "statssa-cultural-dynamics-03-01-84-table41-religion-by-province",
+      "statssa-census2022-p0301-4-table21-population-by-province",
+      "statssa-census2022-p0301-4-table210-religion-by-province",
+      "geoboundaries-zaf-adm1-2020"
+    ],
+    "source_urls": [
+      "https://www.statssa.gov.za/publications/03-01-84/03-01-84.pdf",
+      "https://census.statssa.gov.za/assets/documents/2022/P03014_Census_2022_Statistical_Release.pdf",
+      "https://www.geoboundaries.org/api/current/gbOpen/ZAF/ADM1/",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/ZAF/ADM1/geoBoundaries-ZAF-ADM1.geojson"
+    ],
     "retrieved_at": "2026-07-09T00:00:00Z",
     "licence": "Religion by province is Statistics South Africa, Cultural Dynamics in South Africa (Report 03-01-84), Table 4.1 (percentage distribution of population by religious denomination and province, Censuses 1996, 2001 and 2022). Province population denominators are Stats SA, Census 2022 Statistical Release (P0301.4), Table 2.1. Stats SA publishes its census releases for open download and requests attribution; no explicit reuse licence is stated on the releases, so the derived product attributes Stats SA and links the source of record. Boundaries are geoBoundaries ZAF ADM1 (9 provinces, 2020), Creative Commons Attribution 3.0 IGO (CC BY 3.0 IGO), boundary source OCHA ROSEA and the South African Municipal Demarcation Board (licence source data.humdata.org/dataset/south-africa-admin-level-1-boundaries).",
     "citation": "Stats SA, Cultural Dynamics in South Africa (Report 03-01-84), Table 4.1; Stats SA, Census 2022 Statistical Release (P0301.4), Tables 2.1 and 2.10; geoBoundaries ZAF ADM1 (gbOpen).",
@@ -152,7 +173,16 @@
     }
   ],
   "validation": {
-    "checks": ["The three shipped waves (1996, 2001, 2022) are the census years for which Stats SA tabulates religion by province in Cultural Dynamics Table 4.1, on a single harmonised category set (Christianity, Islam, Traditional African Religion, Hinduism, Jewish Faith/Hebrew, Other beliefs, No religious affiliation/belief, and an Undetermined residual).", "The 2011 census dropped the religion question: 2011 is absent from the religion Table 4.1 while it is present in the population Table 2.1. The premise that South Africa asked religion continuously is incorrect; the product records the 2011 gap and does not fabricate a 2011 wave.", "The population-weighted provincial aggregate reproduces the printed national religion row (Figure 4.1) for every wave within 0.08 percentage points (one-decimal provincial precision).", "Province populations sum to the printed national total for each wave up to Stats SA's own 1-person rounding (1996 exact; 2001 and 2022 differ by 1).", "Percentages use the stated-response denominator (named religions plus no religion, excluding Undetermined); religious affiliation and no religion sum to 100 percent of stated responses in every province and wave.", "All 9 census provinces join to the 9 geoBoundaries ZAF ADM1 features by the clean shapeISO code; the feature with ISO code NC carries the misspelled name 'Nothern Cape', corrected to 'Northern Cape' in the product.", "The simplified province boundary GeoJSON writes to 273600 bytes after 200 m simplification (9 province features).", "The 2016 Community Survey reintroduced religion after the 2011 gap but is an intercensal household survey (a separate construct from a census), so it is deferred and not mixed into the census layers. The 1996 wave carries a high Undetermined share (about 9 percent nationally) and codes Traditional African Religion as 0,0 in every province, both features of 1996 census processing; the stated-response denominator absorbs the Undetermined residual, and 1996-to-2022 Traditional African comparisons are treated with care."],
+    "checks": [
+      "The three shipped waves (1996, 2001, 2022) are the census years for which Stats SA tabulates religion by province in Cultural Dynamics Table 4.1, on a single harmonised category set (Christianity, Islam, Traditional African Religion, Hinduism, Jewish Faith/Hebrew, Other beliefs, No religious affiliation/belief, and an Undetermined residual).",
+      "The 2011 census dropped the religion question: 2011 is absent from the religion Table 4.1 while it is present in the population Table 2.1. The premise that South Africa asked religion continuously is incorrect; the product records the 2011 gap and does not fabricate a 2011 wave.",
+      "The population-weighted provincial aggregate reproduces the printed national religion row (Figure 4.1) for every wave within 0.08 percentage points (one-decimal provincial precision).",
+      "Province populations sum to the printed national total for each wave up to Stats SA's own 1-person rounding (1996 exact; 2001 and 2022 differ by 1).",
+      "Percentages use the stated-response denominator (named religions plus no religion, excluding Undetermined); religious affiliation and no religion sum to 100 percent of stated responses in every province and wave.",
+      "All 9 census provinces join to the 9 geoBoundaries ZAF ADM1 features by the clean shapeISO code; the feature with ISO code NC carries the misspelled name 'Nothern Cape', corrected to 'Northern Cape' in the product.",
+      "The simplified province boundary GeoJSON writes to 273600 bytes after 200 m simplification (9 province features).",
+      "The 2016 Community Survey reintroduced religion after the 2011 gap but is an intercensal household survey (a separate construct from a census), so it is deferred and not mixed into the census layers. The 1996 wave carries a high Undetermined share (about 9 percent nationally) and codes Traditional African Religion as 0,0 in every province, both features of 1996 census processing; the stated-response denominator absorbs the Undetermined residual, and 1996-to-2022 Traditional African comparisons are treated with care."
+    ],
     "join_coverage": {
       "province": [
         {

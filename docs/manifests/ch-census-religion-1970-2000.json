@@ -27,7 +27,10 @@
     "parameters": {
       "product": "census",
       "boundary_set": "ch-canton-2026-swissboundaries3d",
-      "construct_split": "Census full-count affiliation and structural-survey age-15-plus weighted estimates are shipped as separate area-summary products."
+      "construct_split": "Census full-count affiliation and structural-survey age-15-plus weighted estimates are shipped as separate area-summary products.",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/ch_religion/"
+      ]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -39,8 +42,18 @@
   },
   "source": {
     "provider": "Federal Statistical Office (FSO/BFS); swisstopo",
-    "source_dataset_ids": ["bfs-px-x-4001000000-122-census-religion-canton-1970-2000", "swisstopo-swissboundaries3d-cantons-2026-01"],
-    "source_urls": ["https://opendata.swiss/api/3/action/package_show?id=wohnbevolkerung-am-wirtschaftlichen-wohnsitz-nach-region-und-religion", "https://www.pxweb.bfs.admin.ch/api/v1/de/px-x-4001000000_122/px-x-4001000000_122.px", "https://opendata.swiss/api/3/action/package_show?id=swissboundaries3d", "https://data.geo.admin.ch/api/stac/v0.9/collections/ch.swisstopo.swissboundaries3d/items/swissboundaries3d_2026-01", "https://data.geo.admin.ch/ch.swisstopo.swissboundaries3d/swissboundaries3d_2026-01/swissboundaries3d_2026-01_2056_5728.gpkg.zip", "https://opendata.swiss/en/terms-of-use/"],
+    "source_dataset_ids": [
+      "bfs-px-x-4001000000-122-census-religion-canton-1970-2000",
+      "swisstopo-swissboundaries3d-cantons-2026-01"
+    ],
+    "source_urls": [
+      "https://opendata.swiss/api/3/action/package_show?id=wohnbevolkerung-am-wirtschaftlichen-wohnsitz-nach-region-und-religion",
+      "https://www.pxweb.bfs.admin.ch/api/v1/de/px-x-4001000000_122/px-x-4001000000_122.px",
+      "https://opendata.swiss/api/3/action/package_show?id=swissboundaries3d",
+      "https://data.geo.admin.ch/api/stac/v0.9/collections/ch.swisstopo.swissboundaries3d/items/swissboundaries3d_2026-01",
+      "https://data.geo.admin.ch/ch.swisstopo.swissboundaries3d/swissboundaries3d_2026-01/swissboundaries3d_2026-01_2056_5728.gpkg.zip",
+      "https://opendata.swiss/en/terms-of-use/"
+    ],
     "retrieved_at": "2026-07-09T23:39:54Z",
     "licence": "opendata.swiss OPEN-BY-ASK / terms_by_ask: non-commercial reuse is allowed with source attribution; commercial reuse requires permission from the data owner. Boundary source: opendata.swiss OPEN-BY / terms_by: free use with source attribution.",
     "citation": "Federal Statistical Office, population at economic residence by institutional divisions and religion, 1970-2000; swisstopo, swissBOUNDARIES3D 2026-01."
@@ -99,7 +112,11 @@
   "local_cache_hint": "data/raw/ch_religion",
   "validation": {
     "status": "passed",
-    "commands": ["Rscript scripts/build_ch_area_summary.R", "Rscript -e 'jsonlite::validate(readChar(\"apps/regions/ch/data/area_summary_canton_census.json\", file.info(\"apps/regions/ch/data/area_summary_canton_census.json\")$size))'", "Rscript -e 'jsonlite::validate(readChar(\"apps/regions/ch/data/area_summary_canton_survey.json\", file.info(\"apps/regions/ch/data/area_summary_canton_survey.json\")$size))'"],
+    "commands": [
+      "Rscript scripts/build_ch_area_summary.R",
+      "Rscript -e 'jsonlite::validate(readChar(\"apps/regions/ch/data/area_summary_canton_census.json\", file.info(\"apps/regions/ch/data/area_summary_canton_census.json\")$size))'",
+      "Rscript -e 'jsonlite::validate(readChar(\"apps/regions/ch/data/area_summary_canton_survey.json\", file.info(\"apps/regions/ch/data/area_summary_canton_survey.json\")$size))'"
+    ],
     "warnings": [],
     "notes": "Census affiliation rows are full-count census counts. The product uses the source's current 26-canton frame; Jura appears in the 1970 row as a source-provided current-frame historical roll-up."
   },
