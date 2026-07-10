@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Côte d'Ivoire Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Côte d'Ivoire's product is census religious affiliation at the local
+    // (sub-prefecture or commune) level, a single 2021 snapshot from the
+    // Institut National de la Statistique / Agence Nationale de la Statistique
+    // (INS/ANStat) RGPH 2021 Base Table 11, on the geoBoundaries CIV ADM3 frame
+    // (510 features: 509 census-backed plus one no-data national-park polygon).
+    // The construct is census affiliation; it does not measure belief,
+    // practice, or attendance. The denominator is each area's ordinary-household
+    // population, the exact sum of the 16 published religion categories; "does
+    // not know" and "not declared" responses stay in the denominator and
+    // outside both headline shares. The source's own printed arithmetic does
+    // not fully reconcile: 31 local rows carry category counts one or two people
+    // above their printed resident totals, verified against the page images and
+    // shipped unchanged with disclosure. Place and density metrics are omitted
+    // because no governed place-of-worship snapshot ships; 2021 is the only
+    // wave, and no change metric is offered. Census figures publish as derived
+    // summaries with INS/ANStat attribution under project approval (2026-07-10),
+    // the source publication reserving all rights ("Tous droits Reservés").
+    // Default fill and overview-dot opacities are unchanged: the 510 continental
+    // features need no archipelago fill-lightening, and the census-only product
+    // carries no OSM place-dot tier (metricsAvailable excludes place metrics).
+    window.REGION_CONFIG = {
+      countryCode: "CI",
+      title: "Places of Worship | Côte d'Ivoire Research Map",
+      // côte d'ivoire is a compact country spanning 4.36 to 10.75 latitude and
+      // -8.58 to -2.49 longitude; centre on the mercator midpoint of the extent
+      // so all 510 features fit one screen (burkina faso neighbour precedent).
+      // at z5.9 the extent spans about 549px vertically and 517px horizontally
+      // in a 700px viewport, roughly 76px top/bottom margins, clear of the top
+      // pills
+      center: [-5.54, 7.55],
+      initialZoom: 5.9,
+      censusLevels: {
+        local: {
+          label: "Sub-prefecture or commune",
+          boundaries: "data/ci_local_2021.geojson",
+          summary: "data/area_summary_local.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion from INS/ANStat RGPH 2021 Base Table 11 · Boundaries © geoBoundaries CIV ADM3 (CC BY 3.0 IGO), sources CNTIG and OCHA ROWCA"
+        }
+      },
+      defaultLevel: "local",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      // only affiliation and no-religion apply: place and density metrics are
+      // null because no governed place-of-worship snapshot ships, and no change
+      // metric is offered because only the 2021 wave ships
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share affiliated with any named religion in RGPH 2021 Base Table 11, as a share of each area's ordinary-household population (the exact sum of the 16 published religion categories), which retains the \"does not know\" and \"not declared\" responses in the denominator"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the source's Sans religion (No religion) category, on the same ordinary-household denominator that retains the \"does not know\" and \"not declared\" responses"
+        }
+      },
+      popupDenominatorNote: "Percentages use each area's ordinary-household population, taken as the exact sum of the 16 published RGPH 2021 religion categories; \"does not know\" and \"not declared\" responses stay in the denominator and outside both headline shares. Collective-household residents and people without housing were not asked the religion question and sit outside this basis. In 31 areas the published category counts exceed the published resident total by one or two people, the source's own printed arithmetic, verified against the page images and shown unchanged. Abidjan displays the census's own printed Total-Ville aggregate; the two Worodougou sub-prefectures Bobi and Diarabana are reported together in one boundary unit; and the Bona National Park boundary unit is not a census reporting unit and carries no data. The construct is census affiliation; it does not measure belief, practice, or attendance.",
+      cityPresets: [
+        { label: "Abidjan", coords: [-4.0083, 5.3599], zoom: 10 },
+        { label: "Yamoussoukro", coords: [-5.2767, 6.8276], zoom: 10 },
+        { label: "Bouaké", coords: [-5.0300, 7.6900], zoom: 11 },
+        { label: "Daloa", coords: [-6.4500, 6.8770], zoom: 11 },
+        { label: "Korhogo", coords: [-5.6296, 9.4580], zoom: 11 },
+        { label: "San-Pédro", aliases: ["San Pedro"], coords: [-6.6363, 4.7485], zoom: 11 },
+        { label: "Man", coords: [-7.5538, 7.4125], zoom: 11 }
+      ],
+      geocode: { country: "ci", biasLngLat: [-5.54, 7.55] },
+      onboarding: {
+        title: "Côte d'Ivoire research map",
+        intro: "Census religious-affiliation overlays for Côte d'Ivoire's sub-prefectures and communes, a single 2021 snapshot from the Institut National de la Statistique / Agence Nationale de la Statistique (INS/ANStat) Recensement général de la population et de l'habitat (RGPH 2021), Base Table 11. The construct is census affiliation; it does not measure belief, practice, or attendance.",
+        bullets: [
+          "Areas are shaded by the share affiliated with any named religion, or by the share reporting no religion (the source's <code>Sans religion</code> category), shown as No religion %.",
+          "Percentages use each area's ordinary-household population, the exact sum of the 16 published religion categories; \"does not know\" and \"not declared\" responses stay in the denominator and outside both headline shares.",
+          "The published table's printed arithmetic does not fully reconcile: in 31 areas the category counts exceed the printed resident total by one or two people. These are the source's own figures, verified against the page images and shown unchanged.",
+          "Abidjan displays the census's own printed Total-Ville aggregate, the two Worodougou sub-prefectures Bobi and Diarabana are reported together in one boundary unit, and the Bona National Park boundary unit is not a census reporting unit and carries no data.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric controls. 2021 is the only mapped wave, and no change metric is offered."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion from the <a href="https://www.anstat.ci/" target="_blank" rel="noopener">Institut National de la Statistique (INS) / Agence Nationale de la Statistique (ANStat)</a> RGPH 2021 (Base Table 11); reproduced as derived category summaries with INS/ANStat attribution under project approval of 2026-07-10, the source publication reserving all rights (&ldquo;Tous droits Reservés&rdquo;) &middot; Boundaries from <a href="https://www.geoboundaries.org/api/current/gbOpen/CIV/ADM3/" target="_blank" rel="noopener">geoBoundaries</a> CIV ADM3 (sources CNTIG and OCHA ROWCA), Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)',
+      censusFlagNote: "* Percentages use each area's ordinary-household population, the exact sum of the 16 published RGPH 2021 religion categories; \"does not know\" and \"not declared\" responses stay in the denominator and outside both headline shares. In 31 areas the category counts exceed the printed resident total by one or two people, the source's own printed arithmetic, verified against the page images and shown unchanged. Abidjan uses the census's printed Total-Ville aggregate; Bobi and Diarabana share one boundary unit; the Bona National Park unit carries no census data. Census figures publish as derived summaries with INS/ANStat attribution under project approval; the source publication reserves all rights (\"Tous droits Reservés\")."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710d"></script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Tuvalu Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Tuvalu's product is census religious affiliation for the two census
+    // regions (Funafuti and the Outer Islands) at the 2012 census and the
+    // 2017 mini-census, from the Central Statistics Division (CSD), on the
+    // geoBoundaries TUV ADM1 (8 island units) frame dissolved to two regions.
+    // No official Tuvalu census publishes religion by island; the finest
+    // religion geography is therefore the two-region split. The construct is
+    // census affiliation; it does not measure belief, practice, attendance, or
+    // registered membership. The denominator is each region's resident
+    // population; the census Refused count stays in the denominator and outside
+    // both headline numerators, and the two shares do not add to 100. Tuvalu is
+    // close to universally affiliated (about 99.7 percent); the two headline
+    // metrics therefore vary little between the regions; the substantive
+    // subnational contrast is denominational, which the shared metric set does
+    // not carry.
+    // 2022 religion is published nationally only and is not mapped. Place and
+    // density metrics are omitted because no governed Tuvalu place-of-worship
+    // snapshot ships; no cross-wave change metric is offered because the 2017
+    // wave is a mini-census, a lighter instrument than the 2012 full census.
+    window.REGION_CONFIG = {
+      countryCode: "TV",
+      title: "Places of Worship | Tuvalu Research Map",
+      // the tuvaluan chain runs north-south from nanumea (-5.64) down to
+      // nukulaelae (-9.44), spanning 176.06 to 179.87 longitude (no
+      // antimeridian crossing); the camera sits on the mercator midpoint of
+      // the region extremes so both regions fit one screen (tonga archipelago
+      // precedent). at z6.4 the extent spans about 496px vertically and 457px
+      // horizontally in a 700px viewport, roughly 100px top/bottom margins,
+      // clear of the top pills
+      center: [177.96, -7.54],
+      initialZoom: 6.4,
+      censusLevels: {
+        region: {
+          label: "Region",
+          boundaries: "data/tv_region_2017.geojson",
+          summary: "data/area_summary_region.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion from Tuvalu Central Statistics Division (CSD), 2012 census and 2017 mini-census reports · Boundaries © geoBoundaries TUV ADM1 (ODbL 1.0), source OpenStreetMap and Wambacher, dissolved to two regions"
+        }
+      },
+      defaultLevel: "region",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2017,
+      // only affiliation and no-religion apply: place and density metrics are
+      // null because no governed place-of-worship snapshot ships, and no change
+      // metric is offered because the 2017 wave is a mini-census
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share affiliated with any named religion or the report's Other category, as a share of each region's resident population, which retains refused responses in the denominator"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the census None category, on the same region resident-population denominator that retains refused responses"
+        }
+      },
+      popupDenominatorNote: "Percentages use each region's resident population from the census religion tabulation. Refused responses remain in the denominator and outside both headline numerators, and the two shares do not add to 100. Tuvalu is close to universally affiliated (about 99.7 percent); the two headline metrics therefore vary little between the two regions; the substantive subnational contrast is denominational, which the headline metrics do not carry. The 2017 wave is a mini-census, a lighter instrument than the 2012 full census. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+      cityPresets: [
+        { label: "Funafuti", aliases: ["Fongafale"], coords: [179.1942, -8.5243], zoom: 11 },
+        { label: "Nanumea", coords: [176.1333, -5.6667], zoom: 11 },
+        { label: "Vaitupu", coords: [178.6753, -7.4769], zoom: 11 },
+        { label: "Nui", coords: [177.1500, -7.2333], zoom: 11 },
+        { label: "Nukulaelae", coords: [179.8500, -9.3811], zoom: 11 }
+      ],
+      geocode: { country: "tv", biasLngLat: [177.96, -7.54] },
+      onboarding: {
+        title: "Tuvalu research map",
+        intro: "Census religious-affiliation overlays for Tuvalu's two census regions, Funafuti and the Outer Islands, at the 2012 census and the 2017 mini-census, from the Central Statistics Division (CSD). The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+        bullets: [
+          "Regions are shaded by the share affiliated with any named religion or the report's Other category, or by the share in the census <code>None</code> category, shown as No religion %.",
+          "Percentages use each region's resident population. Refused responses stay in the denominator and outside both headline numerators, and the two shares do not add to 100.",
+          "Tuvalu is close to universally affiliated (about 99.7 percent); the two headline metrics therefore vary little between the regions, and the substantive subnational contrast is denominational, which this metric set does not carry.",
+          "The 2017 wave is a mini-census, a lighter instrument than the 2012 full census, and no cross-wave change metric is offered; the 2022 census publishes religion nationally only and is not mapped by region.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion from the <a href="https://stats.gov.tv/category/census-and-surveys/population-census/" target="_blank" rel="noopener">Tuvalu Central Statistics Division (CSD)</a>, 2012 census and 2017 mini-census reports (2022 census national context, jointly with the Pacific Community, SPC); partial scientific, educational, or research reproduction authorised with acknowledgement of CSD and the source document, commercial or for-profit reproduction reserved &middot; Boundaries from <a href="https://www.geoboundaries.org/api/current/gbOpen/TUV/ADM1/" target="_blank" rel="noopener">geoBoundaries</a> TUV ADM1 (source OpenStreetMap and Wambacher), Open Data Commons Open Database License 1.0 (ODbL 1.0), dissolved to two regions',
+      censusFlagNote: "* Percentages use each region's resident population from the census religion tabulation. Refused responses remain in the denominator and outside both headline numerators, and the two shares do not add to 100. Tuvalu is close to universally affiliated (about 99.7 percent); the headline metrics therefore vary little between the two regions, and the substantive contrast is denominational, which the headline metric set does not carry. 2022 religion is published nationally only and is not mapped. The CSD (and SPC for 2022) authorises partial reproduction for scientific, educational, or research purposes with acknowledgement and reserves commercial reproduction."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710d"></script>
+</body>
+</html>
