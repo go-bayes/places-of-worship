@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Tonga Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Tonga's product is census affiliation from the Tonga Statistics
+    // Department 2021 census workbook table G 19, 23 districts on the
+    // geoBoundaries TON ADM2 2020 frame, a single 2021 snapshot. It does
+    // not measure religious practice, attendance, or registered membership.
+    // The denominator is each district's printed G 19 Total; refused
+    // responses (REF) remain in the denominator and outside both headline
+    // numerators; the two shares therefore do not add to 100. Place and
+    // density metrics are omitted from metricsAvailable because no governed
+    // Tonga place-of-worship snapshot ships with the product. Only 2021
+    // ships; no change metric is offered.
+    window.REGION_CONFIG = {
+      countryCode: "TO",
+      title: "Places of Worship | Tonga Research Map",
+      // tongan archipelago runs north-south from tongatapu (-21.46) up to
+      // the niuas (-15.57); camera sits on the mercator midpoint of the
+      // district extremes so all 23 districts fit one screen (bahamas
+      // precedent for archipelago cameras). at z5.9 the chain spans 528px,
+      // 86px top/bottom margins in a 700px viewport, clear of the top pills;
+      // z6.4 put the niuas 508px above centre, off-screen
+      center: [-174.69, -18.54],
+      initialZoom: 5.9,
+      censusLevels: {
+        district: {
+          label: "District",
+          boundaries: "data/to_district_2020.geojson",
+          summary: "data/area_summary_district.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion from Tonga Statistics Department 2021 census workbook table G 19 · Boundaries © geoBoundaries TON ADM2 (CC BY 4.0), source Pacific Data Hub"
+        }
+      },
+      defaultLevel: "district",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      // only affiliation and no-religion apply: place and density metrics
+      // are null because no governed place-of-worship snapshot ships, and no
+      // change metric is offered because only the 2021 wave ships
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share affiliated with a named religion or the source's Other category, as a share of each district's printed G 19 Total, which retains refused responses in the denominator"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the source's NO Rel category (No religious affiliation), on the same G 19 Total denominator that retains refused responses"
+        }
+      },
+      popupDenominatorNote: "Percentages use each district's printed Total in workbook table G 19. Refused responses (REF) remain in the denominator and outside both headline numerators, and the two shares do not add to 100 because refused responses stay in the denominator. The source excludes visitors or non-residents, and the report specifies persons occupying institutions among the exclusions. The construct is census affiliation; it does not measure religious practice, attendance, or registered membership.",
+      cityPresets: [
+        { label: "Nuku'alofa", coords: [-175.2018, -21.1394], zoom: 11 },
+        { label: "Neiafu", aliases: ["Vava'u"], coords: [-173.9830, -18.6510], zoom: 11 },
+        { label: "Pangai", aliases: ["Ha'apai"], coords: [-174.3510, -19.8040], zoom: 11 },
+        { label: "'Ohonua", aliases: ["'Eua"], coords: [-174.9480, -21.3360], zoom: 11 }
+      ],
+      geocode: { country: "to", biasLngLat: [-174.69, -18.54] },
+      onboarding: {
+        title: "Tonga research map",
+        intro: "Census religious-affiliation overlays for Tonga's 23 districts, a single 2021 snapshot from the Tonga Statistics Department 2021 census workbook table G 19. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+        bullets: [
+          "Districts are shaded by the share affiliated with a named religion, or the share in the source's <code>NO Rel</code> category, shown as No religion %.",
+          "Percentages use each district's printed G 19 Total. Refused responses remain in the denominator and outside both headline numerators, and the two shares do not add to 100.",
+          "Only the 2021 wave ships; no change metric is offered, and earlier official reports need a separate comparability extraction before they can support change over time.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion from the <a href="https://tongastats.gov.to/census-2/population-census-3/census-report-and-factsheet/" target="_blank" rel="noopener">Tonga Statistics Department</a>, 2021 census workbook table G 19; partial scientific, educational, or research reproduction authorised with acknowledgement, commercial reproduction reserved &middot; Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> TON ADM2 (source Pacific Data Hub), Creative Commons Attribution 4.0 International (CC BY 4.0)',
+      censusFlagNote: "* Percentages use each district's printed Total in workbook table G 19. Refused responses (REF) remain in the denominator and outside both headline numerators, and the two shares do not add to 100. The source excludes visitors or non-residents, and the report specifies persons occupying institutions among the exclusions. The Tonga Statistics Department authorises partial reproduction for scientific, educational, or research purposes with acknowledgement and reserves commercial reproduction."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710d"></script>
+</body>
+</html>
