@@ -1,0 +1,816 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:ir-census-religion:ir:2006-2016:sci-province-religion",
+  "dataset_id": "ir-census-religion:ir:2006-2016:sci-province-religion",
+  "dataset_version_id": "ir-census-religion:ir:2006-2016:sci-province-religion:d169118c1c32",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "ir-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "IR"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-10T08:55:18Z",
+  "created_by": "scripts/build_ir_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_ir_area_summary.R",
+    "git_commit": "c8a05fc",
+    "command": "Rscript scripts/build_ir_area_summary.R",
+    "parameters": {
+      "waves": [2006, 2011, 2016],
+      "geography": "28 analytical units under the 2006-2016 concordance (Tehran+Alborz; Razavi+South Khorasan+Yazd; North Khorasan separate)",
+      "construct": "census affiliation in the SCI recognised categories",
+      "category_frame": ["Total", "Muslim", "Christian", "Zoroastrian", "Jew", "Other", "Not stated"],
+      "category_frame_persian": ["جمع", "مسلمان", "مسیحی", "زرتشتی", "کلیمی", "سایر", "اظهار نشده"],
+      "affiliation_rule": "affiliation = Total minus Not stated; no_religion fields null (no source no-religion category)",
+      "concordance_aggregations": [
+        "Tehran + Alborz",
+        "Razavi Khorasan + South Khorasan + Yazd"
+      ],
+      "boundary_source_vintage": "2006-2016-concordance-28",
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 126146,
+        "byte_ceiling": 1500000
+      },
+      "local_cache_hint": "Raw SCI mirrors and Natural Earth geometry are cached under data/raw/ir_census/ and remain git-ignored.",
+      "retrieval_routes": [
+        {
+          "purpose": "2006 province religion table",
+          "method": "GET",
+          "url": "https://irandataportal.syr.edu/wp-content/uploads/18-population-by-religion-and-ostan-1385-census-2006.xlsx",
+          "mirror": "Iran Data Portal (Syracuse University) institutional mirror"
+        },
+        {
+          "purpose": "2011 province religion table",
+          "method": "GET",
+          "url": "https://istmat.org/files/uploads/44180/iran_statistical_yearbook_2011-2012_1390.pdf",
+          "mirror": "istmat.org institutional mirror of the SCI Statistical Yearbook 1390"
+        },
+        {
+          "purpose": "2011 archived supporting source (no machine comparison)",
+          "method": "GET",
+          "url": "https://unstats.un.org/unsd/demographic-social/census/documents/Iran/Iran-2011-Census-Results.pdf",
+          "mirror": "United Nations Statistics Division mirror of the SCI 2011 results"
+        },
+        {
+          "purpose": "2016 province religion table",
+          "method": "GET",
+          "url": "https://irandataportal.syr.edu/wp-content/uploads/Population-3.pdf",
+          "mirror": "Iran Data Portal (Syracuse University) mirror of the SCI Statistical Yearbook 1395 population chapter, table 3-18"
+        },
+        {
+          "purpose": "2016 national reconciliation",
+          "method": "GET",
+          "url": "https://data.un.org/Data.aspx?d=POP&f=tableCode%3A28%3BcountryCode%3A364",
+          "mirror": "United Nations data (data.un.org) table 28 export of the SCI 2016 national religion counts"
+        },
+        {
+          "purpose": "2016 pinned mirror (unreachable; Cloudflare)",
+          "method": "GET",
+          "url": "https://www.iranopendata.org/res/get/datasets/Sources/iod451.pdf",
+          "mirror": "Iran Open Data (unreachable from this sandbox)"
+        },
+        {
+          "purpose": "boundary",
+          "method": "GET",
+          "url": "https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_admin_1_states_provinces.zip",
+          "mirror": "Natural Earth (naturalearthdata.com) public-domain download"
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "readxl": "1.5.0",
+      "digest": "0.6.39",
+      "stringi": "1.8.7",
+      "poppler_pdftotext": "pdftotext version 26.07.0",
+      "mapshaper": "npx mapshaper through scripts/lib/simplify_boundary.R"
+    }
+  },
+  "source": {
+    "provider": "Statistical Centre of Iran (SCI); United Nations Statistics Division; Natural Earth",
+    "source_dataset_ids": [
+      "sci-census-1385-religion-ostan-2006",
+      "sci-yearbook-1390-table-2-18-religion-ostan-2011",
+      "unsd-iran-2011-census-results-religion-national",
+      "sci-yearbook-1395-table-3-18-religion-ostan-2016",
+      "undata-iran-2016-religion-national-table28",
+      "naturalearth-10m-admin1-iran"
+    ],
+    "source_urls": [
+      "https://irandataportal.syr.edu/wp-content/uploads/18-population-by-religion-and-ostan-1385-census-2006.xlsx",
+      "https://istmat.org/files/uploads/44180/iran_statistical_yearbook_2011-2012_1390.pdf",
+      "https://unstats.un.org/unsd/demographic-social/census/documents/Iran/Iran-2011-Census-Results.pdf",
+      "https://irandataportal.syr.edu/wp-content/uploads/Population-3.pdf",
+      "https://data.un.org/Data.aspx?d=POP&f=tableCode%3A28%3BcountryCode%3A364",
+      "https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_admin_1_states_provinces.zip"
+    ],
+    "retrieved_at": "2026-07-11T00:00:00Z",
+    "licence": "No explicit SCI reuse licence was located. The product publishes derived category counts with attribution to the Statistical Centre of Iran (SCI). Written SCI confirmation of reuse terms is pending. Publication proceeds under project-lead approval 2026-07-11.",
+    "citation": "Statistical Centre of Iran province religion tables for 1385, 1390, and 1395; Natural Earth 10m admin-1 geometry."
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/ir_census/ir_2006_religion_ostan.xlsx",
+      "url": "https://irandataportal.syr.edu/wp-content/uploads/18-population-by-religion-and-ostan-1385-census-2006.xlsx",
+      "mirror": "Iran Data Portal (Syracuse University) institutional mirror",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "xlsx",
+      "bytes": 10275,
+      "sha256": "4170c4990473385f1b86a27706b19198d7de6438f74dd763896a59f62c8a21a8",
+      "source_dataset_id": "sci-census-1385-religion-ostan-2006",
+      "used_in_public_product": true,
+      "notes": "2006 (1385) province religion XLSX; 30 provinces and national total."
+    },
+    {
+      "uri": "data/raw/ir_census/ir_2011_yearbook_1390_istmat.pdf",
+      "url": "https://istmat.org/files/uploads/44180/iran_statistical_yearbook_2011-2012_1390.pdf",
+      "mirror": "istmat.org institutional mirror of the SCI Statistical Yearbook 1390",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "pdf",
+      "bytes": 10405668,
+      "sha256": "497f1fa66e47d3f92dc292b6c8860560d6b04141199d5916cc82a2a00804917b",
+      "source_dataset_id": "sci-yearbook-1390-table-2-18-religion-ostan-2011",
+      "used_in_public_product": true,
+      "notes": "SCI Statistical Yearbook 1390 PDF; table 2.18 supplies the 31 province rows and the national row for 2011."
+    },
+    {
+      "uri": "data/raw/ir_census/ir_2011_un_census_results.pdf",
+      "url": "https://unstats.un.org/unsd/demographic-social/census/documents/Iran/Iran-2011-Census-Results.pdf",
+      "mirror": "United Nations Statistics Division mirror of the SCI 2011 results",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "pdf",
+      "bytes": 2412643,
+      "sha256": "fad37d981f08d9601ea258d4d30e36449bdae7e121f3a4d2a275ed2379bd141a",
+      "source_dataset_id": "unsd-iran-2011-census-results-religion-national",
+      "used_in_public_product": true,
+      "notes": "UN Statistics Division 2011 results archived with SHA-256; no machine comparison performed because the PDF contains no provincial religion-category table."
+    },
+    {
+      "uri": "data/raw/ir_census/ir_2016_sci_yearbook_1395_population_idp.pdf",
+      "url": "https://irandataportal.syr.edu/wp-content/uploads/Population-3.pdf",
+      "mirror": "Iran Data Portal (Syracuse University) mirror of the SCI Statistical Yearbook 1395 population chapter, table 3-18",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "pdf",
+      "bytes": 2228372,
+      "sha256": "454c3be862f145745253afda45442fa36f18453d3c193a76f7726b2a78392e71",
+      "source_dataset_id": "sci-yearbook-1395-table-3-18-religion-ostan-2016",
+      "used_in_public_product": true,
+      "notes": "SCI Statistical Yearbook 1395 population chapter PDF; table 3-18 supplies the 31 province rows for the 1395 (2016) census."
+    },
+    {
+      "uri": "data/raw/ir_census/ir_undata_religion_2016_national.csv",
+      "url": "https://data.un.org/Data.aspx?d=POP&f=tableCode%3A28%3BcountryCode%3A364",
+      "mirror": "United Nations data (data.un.org) table 28 export of the SCI 2016 national religion counts",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "csv",
+      "bytes": 33027,
+      "sha256": "bf41e39556e1b90c97ffbb80ce16719441ca53aba075004091f4dffb830f4220",
+      "source_dataset_id": "undata-iran-2016-religion-national-table28",
+      "used_in_public_product": true,
+      "notes": "UN data table 28 export; seven national category totals machine-compared with the sums of the 31 SCI yearbook province rows after concordance."
+    },
+    {
+      "uri": "data/raw/ir_census/ne_10m_admin_1.zip",
+      "url": "https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_admin_1_states_provinces.zip",
+      "mirror": "Natural Earth (naturalearthdata.com) public-domain download",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "zip",
+      "bytes": 14909524,
+      "sha256": "efc59726337323058f9446210adc96673179cd344e053666ee3d28cb58ba2b05",
+      "source_dataset_id": "naturalearth-10m-admin1-iran",
+      "used_in_public_product": true,
+      "notes": "Natural Earth 10m admin-1; non-official, generalised Iran province geometry dissolved to the 28-unit concordance."
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/ir/data/area_summary_province.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 172126,
+      "sha256": "d169118c1c32cd03f012d8b76bf38c2bbd3632055888a6aa26fb381388307b9b",
+      "row_count": 84,
+      "content": "Iran province census-affiliation area summary for 2006, 2011, and 2016 on the 28-unit concordance.",
+      "privacy": "public",
+      "licence_status": "unknown"
+    },
+    {
+      "uri": "repo:apps/regions/ir/data/area_summary_province.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 104412,
+      "sha256": "dcba053762a5e58f55a24537a869820dde0bc87bd6dc3cfaaa3f6c44ce966f5b",
+      "row_count": 84,
+      "content": "Flattened Iran concordance-unit census-affiliation rows.",
+      "privacy": "public",
+      "licence_status": "unknown"
+    },
+    {
+      "uri": "repo:apps/regions/ir/data/ir_province_concordance28.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 126146,
+      "sha256": "c63876923b105e08288e7543661f98c283e7a20ec84d7f009dfe3b32105bd0de",
+      "row_count": 28,
+      "content": "Simplified 28-unit Iran concordance geometry (Natural Earth admin-1 dissolved).",
+      "privacy": "public",
+      "licence_status": "unknown"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/ir/data/area_summary_province.json",
+      "sha256": "d169118c1c32cd03f012d8b76bf38c2bbd3632055888a6aa26fb381388307b9b",
+      "built_by": "scripts/build_ir_area_summary.R",
+      "notes": "84 unit-year rows."
+    },
+    {
+      "uri": "repo:apps/regions/ir/data/area_summary_province.csv",
+      "sha256": "dcba053762a5e58f55a24537a869820dde0bc87bd6dc3cfaaa3f6c44ce966f5b",
+      "built_by": "scripts/build_ir_area_summary.R",
+      "notes": "CSV companion."
+    },
+    {
+      "uri": "repo:apps/regions/ir/data/ir_province_concordance28.geojson",
+      "sha256": "c63876923b105e08288e7543661f98c283e7a20ec84d7f009dfe3b32105bd0de",
+      "built_by": "scripts/build_ir_area_summary.R",
+      "notes": "28 simplified concordance-unit features."
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "Rscript scripts/build_ir_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/ir/data/area_summary_province.json",
+      "jq empty docs/manifests/ir-census-religion-2006-2016.json"
+    ],
+    "warnings": [
+      "The boundary layer is the Natural Earth 1:10m admin-1 layer for Iran, a public-domain, non-official, generalised layer that depicts the current 31-province structure. It is dissolved to the 28-unit analytical concordance. Geometric stability of these units across the 2006, 2011, and 2016 census nights is not verified; the polygons approximate current provincial extents and are not census-vintage geometry.",
+      "No explicit SCI reuse licence was located; the product carries SCI attribution and written SCI confirmation of reuse terms is pending.",
+      "Unrecognised religious minorities do not appear in the SCI frame; the product renders only the published categories and assigns nothing to Other or Not stated."
+    ],
+    "notes": "Every wave passed exact national reconciliation: each concordance-unit category sum equals the SCI published national total. Every unit total equals its six-category sum, and every source province maps to exactly one of the 28 units.",
+    "gates": {
+      "exact_reconciliation": "passed",
+      "concordance_completeness": "passed",
+      "all_three_waves_present": true,
+      "geometry_valid_28_distinct_hashes": true,
+      "geometry_no_interior_gaps": true,
+      "geometry_overlap_within_tolerance": true,
+      "geometry_no_slivers": true,
+      "provenance_complete": true,
+      "no_invented_licence": true,
+      "description_note_in_product_and_manifest": true,
+      "boundary_stability_marked_unverified": true
+    },
+    "source_comparisons": {
+      "united_nations_2011": {
+        "comparison_performed": false,
+        "outcome": "not_performed",
+        "scope": "none",
+        "archived_sha256": "fad37d981f08d9601ea258d4d30e36449bdae7e121f3a4d2a275ed2379bd141a",
+        "reason": "The archived UN PDF contains a national religion table but no provincial religion-category table; the file is archived with its hash, and no machine comparison against the shipped 2011 province rows was performed."
+      },
+      "united_nations_table_28_2016": {
+        "comparison_performed": true,
+        "outcome": "matched",
+        "scope": "seven national category totals compared with sums of the 31 SCI yearbook province rows after the 28-unit concordance",
+        "values": [
+          {
+            "category": "Total",
+            "category_persian": "جمع",
+            "unit_sum": 79926270,
+            "published_national_total": 79926270,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Muslim",
+            "category_persian": "مسلمان",
+            "unit_sum": 79598054,
+            "published_national_total": 79598054,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Christian",
+            "category_persian": "مسیحی",
+            "unit_sum": 130158,
+            "published_national_total": 130158,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Zoroastrian",
+            "category_persian": "زرتشتی",
+            "unit_sum": 23109,
+            "published_national_total": 23109,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Jew",
+            "category_persian": "کلیمی",
+            "unit_sum": 9826,
+            "published_national_total": 9826,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Other",
+            "category_persian": "سایر",
+            "unit_sum": 40551,
+            "published_national_total": 40551,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Not stated",
+            "category_persian": "اظهار نشده",
+            "unit_sum": 124572,
+            "published_national_total": 124572,
+            "difference": 0,
+            "status": "matched"
+          }
+        ]
+      }
+    },
+    "reconciliation": [
+      {
+        "year": 2006,
+        "source_province_count": 30,
+        "unit_count": 28,
+        "category_reconciliation": [
+          {
+            "category": "Total",
+            "category_persian": "جمع",
+            "unit_sum": 70495782,
+            "published_national_total": 70495782,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Muslim",
+            "category_persian": "مسلمان",
+            "unit_sum": 70097741,
+            "published_national_total": 70097741,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Christian",
+            "category_persian": "مسیحی",
+            "unit_sum": 109415,
+            "published_national_total": 109415,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Zoroastrian",
+            "category_persian": "زرتشتی",
+            "unit_sum": 19823,
+            "published_national_total": 19823,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Jew",
+            "category_persian": "کلیمی",
+            "unit_sum": 9252,
+            "published_national_total": 9252,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Other",
+            "category_persian": "سایر",
+            "unit_sum": 54234,
+            "published_national_total": 54234,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Not stated",
+            "category_persian": "اظهار نشده",
+            "unit_sum": 205317,
+            "published_national_total": 205317,
+            "difference": 0,
+            "status": "matched"
+          }
+        ]
+      },
+      {
+        "year": 2011,
+        "source_province_count": 31,
+        "unit_count": 28,
+        "category_reconciliation": [
+          {
+            "category": "Total",
+            "category_persian": "جمع",
+            "unit_sum": 75149669,
+            "published_national_total": 75149669,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Muslim",
+            "category_persian": "مسلمان",
+            "unit_sum": 74682938,
+            "published_national_total": 74682938,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Christian",
+            "category_persian": "مسیحی",
+            "unit_sum": 117704,
+            "published_national_total": 117704,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Zoroastrian",
+            "category_persian": "زرتشتی",
+            "unit_sum": 25271,
+            "published_national_total": 25271,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Jew",
+            "category_persian": "کلیمی",
+            "unit_sum": 8756,
+            "published_national_total": 8756,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Other",
+            "category_persian": "سایر",
+            "unit_sum": 49101,
+            "published_national_total": 49101,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Not stated",
+            "category_persian": "اظهار نشده",
+            "unit_sum": 265899,
+            "published_national_total": 265899,
+            "difference": 0,
+            "status": "matched"
+          }
+        ]
+      },
+      {
+        "year": 2016,
+        "source_province_count": 31,
+        "unit_count": 28,
+        "category_reconciliation": [
+          {
+            "category": "Total",
+            "category_persian": "جمع",
+            "unit_sum": 79926270,
+            "published_national_total": 79926270,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Muslim",
+            "category_persian": "مسلمان",
+            "unit_sum": 79598054,
+            "published_national_total": 79598054,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Christian",
+            "category_persian": "مسیحی",
+            "unit_sum": 130158,
+            "published_national_total": 130158,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Zoroastrian",
+            "category_persian": "زرتشتی",
+            "unit_sum": 23109,
+            "published_national_total": 23109,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Jew",
+            "category_persian": "کلیمی",
+            "unit_sum": 9826,
+            "published_national_total": 9826,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Other",
+            "category_persian": "سایر",
+            "unit_sum": 40551,
+            "published_national_total": 40551,
+            "difference": 0,
+            "status": "matched"
+          },
+          {
+            "category": "Not stated",
+            "category_persian": "اظهار نشده",
+            "unit_sum": 124572,
+            "published_national_total": 124572,
+            "difference": 0,
+            "status": "matched"
+          }
+        ]
+      }
+    ],
+    "stats": {
+      "waves": 3,
+      "rows": 84,
+      "units_per_wave": 28,
+      "source_provinces_per_wave": [30, 31, 31],
+      "boundary_features": 28,
+      "boundary_valid_features": 28,
+      "distinct_geometry_hashes": 28,
+      "boundary_bytes": 126146,
+      "summary_json_bytes": 172126,
+      "summary_csv_bytes": 104412
+    },
+    "boundary_validation": {
+      "output_feature_count": 28,
+      "overlap_tolerance_sq_m": 1,
+      "sliver_tolerance_sq_m": 1000000,
+      "dissolved_source": {
+        "valid_feature_count": 28,
+        "hashes": {
+          "ardabil": "07a595223dae646f0809f9adbe674672f899af2d00e541e2b5f81683de7266fa",
+          "bushehr": "e4b6b1f1294e3ebedd63d68483004515673a7234cf242be8666199dd51645fff",
+          "chahar_mahaal_bakhtiari": "9574e17d0714a35127fb371104e646797447c2437d65434592a5bce38c682365",
+          "east_azarbaijan": "99cbf456d3ed8933088dc17c9b3634c09542969759a1cc7788a686fa23d6a33a",
+          "esfahan": "fe3e9fcbc7d372b5809fa5e781977a7d43a12fc10ca44773242a77c41ddd337e",
+          "fars": "a73dd06de76325217576edb183978ab3c4be1ad50c82ff82f2d90a4464c6b378",
+          "gilan": "f8a53a2701df507dfedcf92a6ff5bb67bab3eba141c68fe1d3c1f93aee5d1dfe",
+          "golestan": "a1c2251e33f89502cc28d4861eaeaa642d8bef3327b2f4d378933b97bb3d0164",
+          "hamadan": "2b8044365e9bc9f89a7d794ec13ae74c154ff5abd55347ad7012530f4b854b4b",
+          "hormozgan": "0d3631059de7a281ccbf662b69b0e4833c8b476522210a2abd2291f9a0e8264e",
+          "ilam": "2346d25cb32f21a7b84b5fe112248b8260eea819045781e5adbf14b033074ec8",
+          "kerman": "1fc5dc106b7521ca083f994e9b2ad89a268c63cdf1bb30c591c38311d4988ac8",
+          "kermanshah": "f0b337481504eaa57f34dddd4cff39862bdb2fc6f4c1077821548d42ddbea22d",
+          "khorasan_yazd": "8cdf54d43b8b7cbfa1685286ccce9adea334c97dd2e08c35dd8558f10ed02333",
+          "khuzestan": "07dacb6b27f5fb11aaa4a8e6cf6a568398c6a40b27806444d42ad8cab8de2d5a",
+          "kohgiluyeh_boyer_ahmad": "432156eba1554b427de5ad48075f40ea7cb57ff8b0eda041e6516411a1ad4c84",
+          "kordestan": "3a7d6c96eca07037cd7716b4bf903f43f4715f6cb71e68c474900af9a6344e8d",
+          "lorestan": "c5f47707caadc2591f10425d7c3511eedd609c24a33eaf0243702dea85cb202c",
+          "markazi": "d07c0875bf4ed106f638f610567ce38f88744c30a464593ae5c65c0f96c41fb9",
+          "mazandaran": "cb3b3d66ed6d3eabc60dee5803a2ad6695686e363b2806febf2ec4b3cc66ad8e",
+          "north_khorasan": "878264418e7bd5c5f4db7f32cf1a124465cfd6c6771a505bf98eca7b06026df2",
+          "qazvin": "83c5454ec2f3838ae78fbdec1044ea8e6272452e9000f6ccf9f4a0601d6aab40",
+          "qom": "819ca77cf431014c3d78b1d6d3dab1476c302b613d3ccd7455d547eee760df53",
+          "semnan": "8afe80aca8b35547f4d196f1f7f0a4ac95cc8c30b9b38bc259a2ead6a2e0d28c",
+          "sistan_baluchestan": "88b7dd2a84fb6a93e44a2c43d0e855611d0c998a755f6c782443c32b9c1e3b4d",
+          "tehran_alborz": "5a1bd2bada963e4f021554f84d41108447de7010381e072e2025d0a5e97d942e",
+          "west_azarbaijan": "174177d042c43dbb500930c0cb533d6bac5c584bf21a4a0f43abdeb92fda2e7f",
+          "zanjan": "e90dd549794e1a40af42b84adfd32400a1729e358fe3f2ce43db93f28dc5bd4c"
+        },
+        "overlap_sq_m": 0.008301,
+        "interior_gap_count": 0,
+        "sliver_count": 0,
+        "sliver_tolerance_sq_m": 1000000,
+        "polygon_part_count": 39,
+        "minimum_polygon_part_sq_m": 10978296.152,
+        "coverage_sq_km": 1622508.7393
+      },
+      "simplified": {
+        "valid_feature_count": 28,
+        "hashes": {
+          "ardabil": "2e63cf8e3728d21116a782403ec6661b43276c3cca284210c3ccdfbd423a1f84",
+          "bushehr": "f5e9ed57b05af5c5900709ef8e331c95f3d5841081d688ef0490bbe4b41866fa",
+          "chahar_mahaal_bakhtiari": "5dca5af89022271b194da4abb37253d410df8f604b00fffb23ff41599101f021",
+          "east_azarbaijan": "2e59232cdef78ac163a51a578cc1e5b0f4e1d064270747da1caa3de390405d76",
+          "esfahan": "0172bbcd738d74dc1119c1588c51181f478be8280f8f6fea791fcbbe03c17a73",
+          "fars": "cb584af49e18f76e0ff4a0d3e24ddb56b45d7041dbff0fae56a8c422417c38c4",
+          "gilan": "4739b885bdc4f9d64c9a2580afc04b021b6f318d65f9df488d159300267b25b4",
+          "golestan": "3e88d68a69bf8d7ba3f77c6bdb384ee1d015669f05a375f9d0e177acb09770d9",
+          "hamadan": "027aaced47d57b0e53e91af313fe6e0bc187dfd3dd403fa02c8ac57f0d23999f",
+          "hormozgan": "5b9f0e2a4bcb9493d5ae7e128c7debfea0e64cf6e694b5b5499c0b33e7261e40",
+          "ilam": "20a09afca1d117c76be60b7a276bcfd55f376eb918a12e9c3885f002e27c19e4",
+          "kerman": "c943dc4706434b26fde98d3328dccc5edda990c56d08c773a7284d2c9d98ba67",
+          "kermanshah": "162803c7dd79efc80e941e85cd1c4f00576b1042c4da6744f201079f7f5744e8",
+          "khorasan_yazd": "385b5795b47d7e719a5dd4e923b3d1455ea7f8e6d17e710f7f8bc053bab4a517",
+          "khuzestan": "81b002c74c0f6b00c7f9945fa9d5747bc38d6cbc89381d9424232ab5ddfcd597",
+          "kohgiluyeh_boyer_ahmad": "a9ea6d96ff553220d84a62673f5ba07cf1ce0bb066e68758740893d29843f18d",
+          "kordestan": "d621911ffd33fb4f9f8cf6af44e2a631ca1bd9b420cc3787c2a5caf96a42d456",
+          "lorestan": "134099ff14c8b3ea9cb07fe892de540341bd78b1cfe3def04dd2bb83d06067f7",
+          "markazi": "28d210454d0fee2a4207408da26768be4c5cabea3b51ff767b210a2fc0f0971e",
+          "mazandaran": "e430f0a01b92e87247d2639073cbaa49f61d9572d61499a4a0352e2a4113e1d5",
+          "north_khorasan": "a85ad5fe15c25b808fd401f3c188de3a49667411718caf48c68d978848535e4b",
+          "qazvin": "f0a1db2578f1471dfc584e73bf67f1811b55a8fa6afd1f6b5f7864a654e74d97",
+          "qom": "462eedf75c2ea603387bc473a623f31390ba59bc96260fb66aef07be96491ed8",
+          "semnan": "499e12020257a2a8fa6d47741c74613c9eb72e68dcbb33df603d857c0bc50241",
+          "sistan_baluchestan": "f6f26ec6eff5c4edc205a77c94ede9cb9f67f46ea3fecad8b190ac08af4d1d54",
+          "tehran_alborz": "0a273a7b8baa5ebdd0bf6b0efd2530c06bb902ee4afbf6f0c7ddf3e7c5057a8f",
+          "west_azarbaijan": "00739362e210ff4f3d647bce63dc8d52dd70444790d7cb5db8cce3d6913fe808",
+          "zanjan": "0227c82dd39a9dceb92a6e9726f6bee7ef2aa84b1d67a86ac3969f7cec47dee2"
+        },
+        "overlap_sq_m": 0.005127,
+        "interior_gap_count": 0,
+        "sliver_count": 0,
+        "sliver_tolerance_sq_m": 1000000,
+        "polygon_part_count": 39,
+        "minimum_polygon_part_sq_m": 10977849.954,
+        "coverage_sq_km": 1622508.7082
+      },
+      "valid_feature_count": 28,
+      "distinct_geometry_hash_count": 28,
+      "geometry_sha256_by_unit": {
+        "ardabil": "2e63cf8e3728d21116a782403ec6661b43276c3cca284210c3ccdfbd423a1f84",
+        "bushehr": "f5e9ed57b05af5c5900709ef8e331c95f3d5841081d688ef0490bbe4b41866fa",
+        "chahar_mahaal_bakhtiari": "5dca5af89022271b194da4abb37253d410df8f604b00fffb23ff41599101f021",
+        "east_azarbaijan": "2e59232cdef78ac163a51a578cc1e5b0f4e1d064270747da1caa3de390405d76",
+        "esfahan": "0172bbcd738d74dc1119c1588c51181f478be8280f8f6fea791fcbbe03c17a73",
+        "fars": "cb584af49e18f76e0ff4a0d3e24ddb56b45d7041dbff0fae56a8c422417c38c4",
+        "gilan": "4739b885bdc4f9d64c9a2580afc04b021b6f318d65f9df488d159300267b25b4",
+        "golestan": "3e88d68a69bf8d7ba3f77c6bdb384ee1d015669f05a375f9d0e177acb09770d9",
+        "hamadan": "027aaced47d57b0e53e91af313fe6e0bc187dfd3dd403fa02c8ac57f0d23999f",
+        "hormozgan": "5b9f0e2a4bcb9493d5ae7e128c7debfea0e64cf6e694b5b5499c0b33e7261e40",
+        "ilam": "20a09afca1d117c76be60b7a276bcfd55f376eb918a12e9c3885f002e27c19e4",
+        "kerman": "c943dc4706434b26fde98d3328dccc5edda990c56d08c773a7284d2c9d98ba67",
+        "kermanshah": "162803c7dd79efc80e941e85cd1c4f00576b1042c4da6744f201079f7f5744e8",
+        "khorasan_yazd": "385b5795b47d7e719a5dd4e923b3d1455ea7f8e6d17e710f7f8bc053bab4a517",
+        "khuzestan": "81b002c74c0f6b00c7f9945fa9d5747bc38d6cbc89381d9424232ab5ddfcd597",
+        "kohgiluyeh_boyer_ahmad": "a9ea6d96ff553220d84a62673f5ba07cf1ce0bb066e68758740893d29843f18d",
+        "kordestan": "d621911ffd33fb4f9f8cf6af44e2a631ca1bd9b420cc3787c2a5caf96a42d456",
+        "lorestan": "134099ff14c8b3ea9cb07fe892de540341bd78b1cfe3def04dd2bb83d06067f7",
+        "markazi": "28d210454d0fee2a4207408da26768be4c5cabea3b51ff767b210a2fc0f0971e",
+        "mazandaran": "e430f0a01b92e87247d2639073cbaa49f61d9572d61499a4a0352e2a4113e1d5",
+        "north_khorasan": "a85ad5fe15c25b808fd401f3c188de3a49667411718caf48c68d978848535e4b",
+        "qazvin": "f0a1db2578f1471dfc584e73bf67f1811b55a8fa6afd1f6b5f7864a654e74d97",
+        "qom": "462eedf75c2ea603387bc473a623f31390ba59bc96260fb66aef07be96491ed8",
+        "semnan": "499e12020257a2a8fa6d47741c74613c9eb72e68dcbb33df603d857c0bc50241",
+        "sistan_baluchestan": "f6f26ec6eff5c4edc205a77c94ede9cb9f67f46ea3fecad8b190ac08af4d1d54",
+        "tehran_alborz": "0a273a7b8baa5ebdd0bf6b0efd2530c06bb902ee4afbf6f0c7ddf3e7c5057a8f",
+        "west_azarbaijan": "00739362e210ff4f3d647bce63dc8d52dd70444790d7cb5db8cce3d6913fe808",
+        "zanjan": "0227c82dd39a9dceb92a6e9726f6bee7ef2aa84b1d67a86ac3969f7cec47dee2"
+      },
+      "source_crs": "EPSG:4326",
+      "area_calculation_crs": "EPSG:6933",
+      "output_crs": "EPSG:4326"
+    }
+  },
+  "deferred_sources": [
+    {
+      "source": "SCI table 2.17, 1375 (1996) Census, Population by Religion and Ostan",
+      "status": "extra_wave_not_shipped",
+      "reason": "The 1996 table publishes 28 rows including retrospective Qazvin and Golestan rows and a single Khorasan row; its retrospective geography is undocumented, and it is therefore deferred to a future extension."
+    },
+    {
+      "source": "Statistical Centre of Iran portal, https://amar.org.ir",
+      "status": "source_of_record_unreachable",
+      "reason": "The SCI portal was unreachable during the probe; the build uses pinned institutional mirrors and records which mirror served each raw input."
+    }
+  ],
+  "construct_notes": [
+    "This product renders the census record of religious affiliation as the Statistical Centre of Iran (SCI) publishes it. The published categories are Total, Muslim, Christian, Zoroastrian, Jew, Other, and Not stated. Identities outside these recognised categories, including unrecognised religious minorities, do not appear in the official record. The published tables provide no rule for assigning such identities to the Other category or the Not stated category, and this product makes no such assignment.",
+    "The construct is census affiliation in the recognised categories the SCI publishes: Total (جمع), Muslim (مسلمان), Christian (مسیحی), Zoroastrian (زرتشتی), Jew (کلیمی), Other (سایر), and Not stated (اظهار نشده). The categories are the source's own and are neither renamed, regrouped, nor reinterpreted.",
+    "Affiliation is Total minus Not stated (the population reporting a recognised religion). Not stated is a non-response category and is not a measure of no religion; the SCI tables publish no no-religion category, and the no_religion fields are therefore null.",
+    "Small recognised-minority province counts are rendered as the source publishes them; no suppression beyond the source's own is applied.",
+    "The 2006-2016 concordance has 28 analytical units after two aggregations. The first aggregation combines Tehran and Alborz. The second aggregation combines Razavi Khorasan, South Khorasan, and Yazd. North Khorasan remains separate. The two aggregations absorb the Alborz separation of 2010 and the Ferdows and Tabas transfers among the eastern provinces, which province-level counts cannot otherwise reconcile.",
+    "The 1996 (1375) wave stays out of this build; its retrospective province geography is undocumented and it is recorded as a future extension.",
+    "No explicit SCI reuse licence was located. The product publishes derived category counts with attribution to the Statistical Centre of Iran (SCI). Written SCI confirmation of reuse terms is pending.",
+    "The boundary layer is the Natural Earth 1:10m admin-1 layer for Iran, a public-domain, non-official, generalised layer that depicts the current 31-province structure. It is dissolved to the 28-unit analytical concordance. Geometric stability of these units across the 2006, 2011, and 2016 census nights is not verified; the polygons approximate current provincial extents and are not census-vintage geometry.",
+    "Concordance for 2006 (30 source provinces -> 28 units): Ardebil => ardabil [unit ardabil]; Bushehr => bushehr [unit bushehr]; Chaharmahal & Bakhtiyari => chahar_mahaal_bakhtiari [unit chahar_mahaal_bakhtiari]; East Azarbayejan => east_azarbaijan [unit east_azarbaijan]; Esfahan => esfahan [unit esfahan]; Fars => fars [unit fars]; Gilan => gilan [unit gilan]; Golestan => golestan [unit golestan]; Hamedan => hamadan [unit hamadan]; Hormozgan => hormozgan [unit hormozgan]; Ilam => ilam [unit ilam]; Kerman => kerman [unit kerman]; Kermanshah => kermanshah [unit kermanshah]; South Khorasan => south_khorasan [unit khorasan_yazd]; Khorasan-e-Razavi => razavi_khorasan [unit khorasan_yazd]; Yazd => yazd [unit khorasan_yazd]; Khuzestan => khuzestan [unit khuzestan]; Kohgiluyeh & Boyerahmad => kohgiluyeh_boyer_ahmad [unit kohgiluyeh_boyer_ahmad]; Kordestan => kordestan [unit kordestan]; Lorestan => lorestan [unit lorestan]; Markazi => markazi [unit markazi]; Mazandaran => mazandaran [unit mazandaran]; North Khorasan => north_khorasan [unit north_khorasan]; Qazvin => qazvin [unit qazvin]; Qom => qom [unit qom]; Semnan => semnan [unit semnan]; Sistan & Baluchestan => sistan_baluchestan [unit sistan_baluchestan]; Tehran => tehran [unit tehran_alborz]; West Azarbayejan => west_azarbaijan [unit west_azarbaijan]; Zanjan => zanjan [unit zanjan].",
+    "Concordance for 2011 (31 source provinces -> 28 units): Ardebil => ardabil [unit ardabil]; Bushehr => bushehr [unit bushehr]; Chaharmahal & Bakhtiyari => chahar_mahaal_bakhtiari [unit chahar_mahaal_bakhtiari]; East Azarbayejan => east_azarbaijan [unit east_azarbaijan]; Esfahan => esfahan [unit esfahan]; Fars => fars [unit fars]; Gilan => gilan [unit gilan]; Golestan => golestan [unit golestan]; Hamedan => hamadan [unit hamadan]; Hormozgan => hormozgan [unit hormozgan]; Ilam => ilam [unit ilam]; Kerman => kerman [unit kerman]; Kermanshah => kermanshah [unit kermanshah]; South Khorasan => south_khorasan [unit khorasan_yazd]; Khorasan-e-Razavi => razavi_khorasan [unit khorasan_yazd]; Yazd => yazd [unit khorasan_yazd]; Khuzestan => khuzestan [unit khuzestan]; Kohgiluyeh & Boyerahmad => kohgiluyeh_boyer_ahmad [unit kohgiluyeh_boyer_ahmad]; Kordestan => kordestan [unit kordestan]; Lorestan => lorestan [unit lorestan]; Markazi => markazi [unit markazi]; Mazandaran => mazandaran [unit mazandaran]; North Khorasan => north_khorasan [unit north_khorasan]; Qazvin => qazvin [unit qazvin]; Qom => qom [unit qom]; Semnan => semnan [unit semnan]; Sistan & Baluchestan => sistan_baluchestan [unit sistan_baluchestan]; Alborz => alborz [unit tehran_alborz]; Tehran => tehran [unit tehran_alborz]; West Azarbayejan => west_azarbaijan [unit west_azarbaijan]; Zanjan => zanjan [unit zanjan].",
+    "Concordance for 2016 (31 source provinces -> 28 units): ardabil => ardabil [unit ardabil]; bushehr => bushehr [unit bushehr]; chahar_mahaal_bakhtiari => chahar_mahaal_bakhtiari [unit chahar_mahaal_bakhtiari]; east_azarbaijan => east_azarbaijan [unit east_azarbaijan]; esfahan => esfahan [unit esfahan]; fars => fars [unit fars]; gilan => gilan [unit gilan]; golestan => golestan [unit golestan]; hamadan => hamadan [unit hamadan]; hormozgan => hormozgan [unit hormozgan]; ilam => ilam [unit ilam]; kerman => kerman [unit kerman]; kermanshah => kermanshah [unit kermanshah]; south_khorasan => south_khorasan [unit khorasan_yazd]; razavi_khorasan => razavi_khorasan [unit khorasan_yazd]; yazd => yazd [unit khorasan_yazd]; khuzestan => khuzestan [unit khuzestan]; kohgiluyeh_boyer_ahmad => kohgiluyeh_boyer_ahmad [unit kohgiluyeh_boyer_ahmad]; kordestan => kordestan [unit kordestan]; lorestan => lorestan [unit lorestan]; markazi => markazi [unit markazi]; mazandaran => mazandaran [unit mazandaran]; north_khorasan => north_khorasan [unit north_khorasan]; qazvin => qazvin [unit qazvin]; qom => qom [unit qom]; semnan => semnan [unit semnan]; sistan_baluchestan => sistan_baluchestan [unit sistan_baluchestan]; alborz => alborz [unit tehran_alborz]; tehran => tehran [unit tehran_alborz]; west_azarbaijan => west_azarbaijan [unit west_azarbaijan]; zanjan => zanjan [unit zanjan]."
+  ],
+  "privacy": "public",
+  "licence_status": "unknown",
+  "downstream_status": "public",
+  "source_datasets": [
+    {
+      "source_dataset_id": "sci-census-1385-religion-ostan-2006",
+      "name": "SCI table 18: Population by Religion and Ostan, 1385 Census (2006)",
+      "provider": "Statistical Centre of Iran (SCI)",
+      "url": "https://irandataportal.syr.edu/wp-content/uploads/18-population-by-religion-and-ostan-1385-census-2006.xlsx",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/ir_census/ir_2006_religion_ostan.xlsx",
+      "licence": {
+        "name": "No explicit SCI reuse licence located; attribution to the Statistical Centre of Iran",
+        "url": "https://amar.org.ir",
+        "attribution": "Source: Statistical Centre of Iran (SCI)"
+      },
+      "citation": "Statistical Centre of Iran, 1385 (2006) Census, table 18, Population by Religion and Ostan.",
+      "access_limits": "SCI portal amar.org.ir was unreachable during the probe; served by the Iran Data Portal mirror.",
+      "redistribution_limits": "No explicit SCI reuse licence was located. The product publishes derived category counts with attribution to the Statistical Centre of Iran (SCI). Written SCI confirmation of reuse terms is pending.",
+      "notes": "Thirty province rows and a national total; category order Total, Muslim, Zoroastrian, Christian, Jew, Other, Not stated."
+    },
+    {
+      "source_dataset_id": "sci-yearbook-1390-table-2-18-religion-ostan-2011",
+      "name": "SCI Statistical Yearbook 1390, table 2.18: Population by Religion and Ostan, 1390 Census (2011)",
+      "provider": "Statistical Centre of Iran (SCI)",
+      "url": "https://istmat.org/files/uploads/44180/iran_statistical_yearbook_2011-2012_1390.pdf",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/ir_census/ir_2011_yearbook_1390_istmat.pdf",
+      "licence": {
+        "name": "No explicit SCI reuse licence located; attribution to the Statistical Centre of Iran",
+        "url": "https://amar.org.ir",
+        "attribution": "Source: Statistical Centre of Iran (SCI)"
+      },
+      "citation": "Statistical Centre of Iran, Statistical Yearbook 1390, table 2.18.",
+      "access_limits": "Served by the istmat.org mirror; SCI portal unreachable during the probe.",
+      "redistribution_limits": "No explicit SCI reuse licence was located. The product publishes derived category counts with attribution to the Statistical Centre of Iran (SCI). Written SCI confirmation of reuse terms is pending.",
+      "notes": "Thirty-one province rows and the national row. The archived UN Statistics Division PDF contains a national religion table but no provincial religion-category table; no machine comparison against the 2011 province rows was performed."
+    },
+    {
+      "source_dataset_id": "unsd-iran-2011-census-results-religion-national",
+      "name": "United Nations Statistics Division: Iran 2011 Census Results, Population by Religion",
+      "provider": "United Nations Statistics Division, from SCI",
+      "url": "https://unstats.un.org/unsd/demographic-social/census/documents/Iran/Iran-2011-Census-Results.pdf",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/ir_census/ir_2011_un_census_results.pdf",
+      "licence": {
+        "name": "No explicit SCI reuse licence located; attribution to the Statistical Centre of Iran",
+        "url": "https://amar.org.ir",
+        "attribution": "Source: Statistical Centre of Iran (SCI)"
+      },
+      "citation": "United Nations Statistics Division, Iran 2011 Census Results (SCI source), national Population by Religion 2006-2011.",
+      "access_limits": null,
+      "redistribution_limits": "No explicit SCI reuse licence was located. The product publishes derived category counts with attribution to the Statistical Centre of Iran (SCI). Written SCI confirmation of reuse terms is pending.",
+      "notes": "Archived supporting copy with a recorded SHA-256 hash. No machine comparison was performed because the PDF contains no provincial religion-category table; the build reconciles the 2011 province rows to the SCI yearbook national row."
+    },
+    {
+      "source_dataset_id": "sci-yearbook-1395-table-3-18-religion-ostan-2016",
+      "name": "SCI Statistical Yearbook 1395, table 3-18: Population by Religion and Ostan, Aban 1395 Census (2016)",
+      "provider": "Statistical Centre of Iran (SCI)",
+      "url": "https://irandataportal.syr.edu/wp-content/uploads/Population-3.pdf",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/ir_census/ir_2016_sci_yearbook_1395_population_idp.pdf",
+      "licence": {
+        "name": "No explicit SCI reuse licence located; attribution to the Statistical Centre of Iran",
+        "url": "https://amar.org.ir",
+        "attribution": "Source: Statistical Centre of Iran (SCI)"
+      },
+      "citation": "Statistical Centre of Iran, Statistical Yearbook 1395 (2016-2017), population chapter, table 3-18, Population by Religion and Ostan.",
+      "access_limits": "The probe's pinned 2016 mirror (Iran Open Data iod451.pdf, SCI Statistical Yearbook 1399) is behind a Cloudflare bot challenge and was unreachable from this sandbox. The reachable substitute is the SCI Statistical Yearbook 1395 population chapter (same 1395 census, same table), mirrored by the Iran Data Portal. Pinned but unreachable: https://www.iranopendata.org/res/get/datasets/Sources/iod451.pdf.",
+      "redistribution_limits": "No explicit SCI reuse licence was located. The product publishes derived category counts with attribution to the Statistical Centre of Iran (SCI). Written SCI confirmation of reuse terms is pending.",
+      "notes": "Thirty-one province rows in the Persian yearbook; Persian province labels transliterated for mapping and recorded in construct notes."
+    },
+    {
+      "source_dataset_id": "undata-iran-2016-religion-national-table28",
+      "name": "United Nations data, table 28: Iran Population by Religion, 2016 census (national)",
+      "provider": "United Nations Statistics Division, from SCI",
+      "url": "https://data.un.org/Data.aspx?d=POP&f=tableCode%3A28%3BcountryCode%3A364",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/ir_census/ir_undata_religion_2016_national.csv",
+      "licence": {
+        "name": "No explicit SCI reuse licence located; attribution to the Statistical Centre of Iran",
+        "url": "https://amar.org.ir",
+        "attribution": "Source: Statistical Centre of Iran (SCI)"
+      },
+      "citation": "United Nations data (data.un.org), table 28, Iran 2016 census Population by Religion, national totals (SCI source).",
+      "access_limits": null,
+      "redistribution_limits": "No explicit SCI reuse licence was located. The product publishes derived category counts with attribution to the Statistical Centre of Iran (SCI). Written SCI confirmation of reuse terms is pending.",
+      "notes": "The build machine-compares the seven UN table 28 national category totals with the sums of the 31 SCI yearbook province rows after concordance. The 1395 yearbook national row was not in the mirror's text layer; the UN totals supply the 2016 national reconciliation values."
+    },
+    {
+      "source_dataset_id": "naturalearth-10m-admin1-iran",
+      "name": "Natural Earth 1:10m admin-1 states and provinces, Iran",
+      "provider": "Natural Earth",
+      "url": "https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_admin_1_states_provinces.zip",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/ir_census/ne_10m_admin_1.zip",
+      "licence": {
+        "name": "Public domain (Natural Earth terms of use)",
+        "url": "https://www.naturalearthdata.com/about/terms-of-use/",
+        "attribution": "Made with Natural Earth"
+      },
+      "citation": "Natural Earth, 1:10m Admin 1 - States, Provinces, Iran features.",
+      "access_limits": null,
+      "redistribution_limits": "Public domain; no restriction.",
+      "notes": "The boundary layer is the Natural Earth 1:10m admin-1 layer for Iran, a public-domain, non-official, generalised layer that depicts the current 31-province structure. It is dissolved to the 28-unit analytical concordance. Geometric stability of these units across the 2006, 2011, and 2016 census nights is not verified; the polygons approximate current provincial extents and are not census-vintage geometry."
+    }
+  ],
+  "notes": "The committed product contains derived area summaries and simplified concordance geometry only. Iran UI and hub wiring are outside this build."
+}
