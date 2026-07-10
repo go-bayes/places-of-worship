@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Serbia Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Serbia's product is census affiliation from the Statistical Office of
+    // the Republic of Serbia (SORS), 25 areas (the City of Belgrade plus 24
+    // districts, okruzi) across three censuses 2002, 2011 and 2022. It does
+    // not measure belief, practice, attendance, or registered membership.
+    // The product follows the territorial coverage published by SORS: the
+    // 2002 publication covers Central Serbia and Vojvodina and states the
+    // census was not conducted in the Autonomous Province of Kosovo and
+    // Metohija; the 2011 and 2022 dissemination tables identify their
+    // coverage as excluding data for that province. The territorial-scope
+    // wording lives in the overview verbatim from the manifest. The 2002
+    // rows carry a distinguishing flag (believer-without-affiliation
+    // category outside both headlines), so 2002 popup rows are asterisked
+    // and the flag note explains it.
+    window.REGION_CONFIG = {
+      countryCode: "RS",
+      title: "Places of Worship | Serbia Research Map",
+      center: [20.8, 44.0],
+      initialZoom: 6.4,
+      censusLevels: {
+        area: {
+          label: "Area (Belgrade + okruzi)",
+          boundaries: "data/rs_area_2021.geojson",
+          summary: "data/area_summary_area.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Statistical Office of the Republic of Serbia (SORS) census religion, 2002–2022, City of Belgrade plus 24 districts (okruzi) · Boundaries from Eurostat GISCO NUTS 3 (2021 frame)"
+        }
+      },
+      defaultLevel: "area",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2022,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation (%)",
+          note: "share of the total census population declaring a religious affiliation, summing the published mutually exclusive categories. Did-not-declare and unknown responses stay in the denominator; the 2002 category Believer, but does not belong to any religion also stays outside this headline because it reports belief without affiliation"
+        },
+        no_religion_percent: {
+          label: "Not religious (%)",
+          note: "share of the total census population in the source's not-religious category. Did-not-declare and unknown responses are separate categories and stay in the denominator"
+        },
+        religious_change: {
+          label: "Change since previous census (pp)",
+          note: "percentage-point change in the affiliation share since the previous census (2002, 2011, 2022); the spacing is roughly decennial and a wave-to-wave difference is not an annual rate. Boundary stability of the 25 published areas across the series was not verified; the comparison is between published area shares"
+        }
+      },
+      popupDenominatorNote: "Percentages use the total census population as denominator; did-not-declare and unknown responses stay in it. The 2002 category Believer, but does not belong to any religion stays outside both headline categories because it reports belief without religious affiliation. These are census self-declarations; they do not measure belief, practice, attendance, or registered membership. The product follows the territorial coverage published by SORS, whose tables identify their coverage as excluding data for the Autonomous Province of Kosovo and Metohija.",
+      cityPresets: [
+        { label: "Belgrade", coords: [20.4489, 44.7866], zoom: 10 },
+        { label: "Novi Sad", coords: [19.8335, 45.2671], zoom: 10 },
+        { label: "Niš", coords: [21.8958, 43.3209], zoom: 10 },
+        { label: "Kragujevac", coords: [20.9114, 44.0128], zoom: 10 },
+        { label: "Subotica", coords: [19.6651, 46.1005], zoom: 10 },
+        { label: "Zrenjanin", coords: [20.3906, 45.3816], zoom: 10 },
+        { label: "Pančevo", coords: [20.6403, 44.8708], zoom: 10 },
+        { label: "Čačak", coords: [20.3497, 43.8914], zoom: 10 },
+        { label: "Novi Pazar", coords: [20.5122, 43.1367], zoom: 10 },
+        { label: "Leskovac", coords: [21.9461, 42.9981], zoom: 10 }
+      ],
+      geocode: { country: "rs", biasLngLat: [20.8, 44.0] },
+      onboarding: {
+        title: "Serbia research map",
+        intro: "Census religious-affiliation overlays for 25 Serbian areas — the City of Belgrade plus 24 districts (okruzi) — across three censuses 2002, 2011 and 2022, from the Statistical Office of the Republic of Serbia (SORS). The product follows the territorial coverage published by SORS.",
+        bullets: [
+          "Areas are shaded by the share of the total census population declaring a religious affiliation, or the share in the source's not-religious category.",
+          "The total census population is the denominator; did-not-declare and unknown responses stay in it, and the 2002 believer-without-affiliation category stays outside both headline categories.",
+          "The product follows SORS's published territorial coverage: the 2002 publication states the census was not conducted in the Autonomous Province of Kosovo and Metohija, and the 2011 and 2022 tables identify their coverage as excluding data for that province.",
+          "A change metric reports the percentage-point change since the previous census; a roughly decennial difference is not an annual rate.",
+          "The About page records the categories, coverage, and boundary caveats.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion from the <a href="https://www.stat.gov.rs/en-US/" target="_blank" rel="noopener">Statistical Office of the Republic of Serbia (SORS)</a>, censuses 2002&ndash;2022, source quotation required &middot; Boundaries from <a href="https://ec.europa.eu/eurostat/web/gisco" target="_blank" rel="noopener">Eurostat GISCO</a> NUTS 3 (2021 frame), &copy; EuroGeographics for the administrative boundaries',
+      censusFlagNote: "* The 2002 census publishes Believer, but does not belong to any religion as its own category; it reports belief without religious affiliation and stays outside both headline categories, in the denominator. The 2002 publication covers Central Serbia and Vojvodina and states the census was not conducted in the Autonomous Province of Kosovo and Metohija; the 2011 and 2022 tables identify their coverage as excluding data for that province. Boundary stability of the 25 published areas across the series was not verified."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710d"></script>
+</body>
+</html>

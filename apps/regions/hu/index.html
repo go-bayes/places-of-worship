@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Hungary Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Hungary's product is census affiliation from KSH's voluntary religion
+    // question (table WBS008), 20 counties (including Budapest) across three
+    // censuses 2001, 2011 and 2022. It does not measure belief, practice,
+    // attendance, or registered membership. Shares follow KSH's own
+    // presentation: the denominator is stated responses (total minus Nem
+    // válaszolt, the no-answer category). National non-response grew from
+    // 10.8% (2001) to 27.2% (2011) to 40.1% (2022); every metric note and
+    // the flag note carry the respondent-composition comparability warning.
+    // Per-row quality flags carry each county-wave's no-answer share, so
+    // every popup row is asterisked and the flag note explains why.
+    window.REGION_CONFIG = {
+      countryCode: "HU",
+      title: "Places of Worship | Hungary Research Map",
+      center: [19.5, 47.16],
+      initialZoom: 6.5,
+      censusLevels: {
+        county: {
+          label: "County (megye)",
+          boundaries: "data/hu_county_2021.geojson",
+          summary: "data/area_summary_county.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "KSH (Hungarian Central Statistical Office) census table WBS008, religion by county, 2001–2022 · Boundaries from Eurostat GISCO NUTS 3 (2021 frame)"
+        }
+      },
+      defaultLevel: "county",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2022,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation (% of stated responses)",
+          note: "share of stated responses reporting a religious affiliation, following KSH's presentation: the denominator is the census population minus the Nem válaszolt (No answer) category. The religion question is voluntary, and national non-response was 10.8% in 2001, 27.2% in 2011, and 40.1% in 2022; shares describe respondents, and the responding population changed substantially across waves"
+        },
+        no_religion_percent: {
+          label: "No religion (% of stated responses)",
+          note: "share of stated responses in KSH's Nem vallásos (not belonging to any church or denomination) category, over the same stated-response denominator. Nem válaszolt (No answer) is a separate category and stays outside the denominator"
+        },
+        religious_change: {
+          label: "Change since previous census (pp)",
+          note: "percentage-point change in the stated-response affiliation share since the previous census (2001, 2011, 2022). The responding share of the population changed substantially across waves (non-response 10.8%, 27.2%, 40.1%); cross-wave share changes may therefore reflect changing respondent composition as well as changing affiliation, and a decennial difference is not an annual rate"
+        }
+      },
+      popupDenominatorNote: "Percentages follow KSH's stated-response presentation: the denominator is the census population minus Nem válaszolt (No answer). The religion question is voluntary; national non-response was 10.8% in 2001, 27.2% in 2011, and 40.1% in 2022, and it varies by county. Shares describe respondents. These are census self-declarations; they do not measure belief, practice, attendance, or registered membership.",
+      cityPresets: [
+        { label: "Budapest", coords: [19.0402, 47.4979], zoom: 10 },
+        { label: "Debrecen", coords: [21.6273, 47.5316], zoom: 10 },
+        { label: "Szeged", coords: [20.1414, 46.2530], zoom: 10 },
+        { label: "Miskolc", coords: [20.7784, 48.1035], zoom: 10 },
+        { label: "Pécs", coords: [18.2323, 46.0727], zoom: 10 },
+        { label: "Győr", coords: [17.6504, 47.6875], zoom: 10 },
+        { label: "Nyíregyháza", coords: [21.7244, 47.9554], zoom: 10 },
+        { label: "Kecskemét", coords: [19.6897, 46.8964], zoom: 10 },
+        { label: "Székesfehérvár", coords: [18.4221, 47.1860], zoom: 10 },
+        { label: "Szombathely", coords: [16.6218, 47.2307], zoom: 10 }
+      ],
+      geocode: { country: "hu", biasLngLat: [19.5, 47.16] },
+      onboarding: {
+        title: "Hungary research map",
+        intro: "Census religious-affiliation overlays for Hungary's 20 counties (including Budapest), across three censuses 2001, 2011 and 2022, from the Hungarian Central Statistical Office (KSH). The religion question is voluntary; shares follow KSH's stated-response presentation.",
+        bullets: [
+          "Counties are shaded by the share of stated responses reporting a religious affiliation, or the share in KSH's Nem vallásos (no religion) category.",
+          "The denominator is stated responses: the census population minus Nem válaszolt (No answer). National non-response was 10.8% in 2001, 27.2% in 2011, and 40.1% in 2022.",
+          "The responding population changed substantially across waves; cross-wave share changes may therefore reflect changing respondent composition as well as changing affiliation.",
+          "A change metric reports the percentage-point change in the stated-response affiliation share since the previous census; a decennial difference is not an annual rate, and the composition warning applies to it directly.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion from the <a href="https://www.ksh.hu/" target="_blank" rel="noopener">Hungarian Central Statistical Office (KSH)</a>, census table WBS008 by county, 2001&ndash;2022, CC BY 4.0 with KSH attribution &middot; Boundaries from <a href="https://ec.europa.eu/eurostat/web/gisco" target="_blank" rel="noopener">Eurostat GISCO</a> NUTS 3 (2021 frame), &copy; EuroGeographics for the administrative boundaries',
+      censusFlagNote: "* The religion question is voluntary, and shares follow KSH's stated-response presentation: the denominator excludes the Nem válaszolt (No answer) category, whose share varies by county and wave (nationally 10.8% in 2001, 27.2% in 2011, 40.1% in 2022). Shares describe respondents; cross-wave share changes may reflect changing respondent composition as well as changing affiliation. These are census self-declarations; they do not measure belief, practice, attendance, or registered membership."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710d"></script>
+</body>
+</html>

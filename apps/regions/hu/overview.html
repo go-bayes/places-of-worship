@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Hungary map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Hungary research map; every string traces to
+    // docs/manifests/hu-census-religion-2001-2022.json (construct_notes and
+    // source), the product indicators block, or the live REGION_CONFIG in
+    // apps/regions/hu/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "HU",
+      countryName: "Hungary",
+      mapHref: "./",
+      intro: "Census religious-affiliation overlays for Hungary's 20 counties (including Budapest), across three censuses 2001, 2011 and 2022, from the Hungarian Central Statistical Office (KSH) census table WBS008. The religion question is voluntary and the construct is census self-declaration. It does not measure belief, practice, attendance, or registered membership.",
+      facts: {
+        waves: "Three censuses: 2001, 2011, 2022",
+        geographies: "County (megye; 20 units including Budapest)",
+        metrics: "Religious affiliation % of stated responses, no religion % of stated responses, change since previous census"
+      },
+      reading: [
+        "Counties are shaded by the share of stated responses reporting a religious affiliation, or the share in KSH's Nem vallásos (not belonging to any church or denomination) category. Shares follow KSH's own presentation: the denominator is the census population minus the Nem válaszolt (No answer) category.",
+        "The religion question is voluntary, and non-response grew across the series: nationally 10.8% of residents in 2001, 27.2% in 2011, and 40.1% in 2022. In 2022 the stated-response denominator omits 3,852,533 people. Shares therefore describe respondents; the responding share of the population changed substantially across waves, and cross-wave share changes may reflect changing respondent composition as well as changing affiliation.",
+        "The change metric compares stated-response shares only, between censuses roughly a decade apart; a wave-to-wave difference is not an annual rate, and the respondent-composition warning applies to it directly.",
+        "Nem válaszolt (No answer) is KSH's single published non-response category; the product does not split it or fold it into a residual. Nem vallásos remains the no-religion category, and Katolikus is the mutually exclusive Catholic category in the headline sum; Roman Catholic and Greek Catholic are detail rows within it and are never summed again.",
+        "County is the geography because KSH's WBS008 table supplies every category for all three waves; KSH's finer settlement and district presentations cover fewer waves or fewer categories.",
+        "A single 2021-frame NUTS 3 boundary set joins to every wave through the 20 shared county codes. Geometric stability of county boundaries across 2001–2022 was not verified; the join rests on code identity."
+      ],
+      sources: [
+        {
+          name: "Hungarian Central Statistical Office (KSH), census table WBS008, religion by county",
+          href: "https://www.ksh.hu/",
+          construct: "Census self-declared religious affiliation (voluntary question), stated-response presentation, by county",
+          years: "2001, 2011, 2022",
+          licence: "KSH Census 2022 website content, CC BY 4.0 with mandatory KSH attribution"
+        },
+        {
+          name: "Eurostat GISCO NUTS 3 boundaries",
+          href: "https://ec.europa.eu/eurostat/web/gisco",
+          construct: "Boundary geometry (20 counties including Budapest)",
+          years: "2021 frame",
+          licence: "GISCO download provisions, with Eurostat GISCO and EuroGeographics attribution"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Hungarian Central Statistical Office (KSH), <a href=\"https://www.ksh.hu/\" target=\"_blank\" rel=\"noopener\">census table WBS008</a>; boundaries from <a href=\"https://ec.europa.eu/eurostat/web/gisco\" target=\"_blank\" rel=\"noopener\">Eurostat GISCO</a> NUTS 3 (2021 frame).",
+        tables: "KSH WBS008, religion by county, 2001–2022. The area-summary religious_affiliation fields sum the published named-religion categories and the no_religion fields carry Nem vallásos; both use the stated-response denominator (total minus Nem válaszolt), following KSH's presentation. Per-row quality flags carry each county-wave's no-answer share.",
+        licence: "KSH census website content is CC BY 4.0 with mandatory KSH attribution; GISCO geometry follows its download provisions with Eurostat GISCO and EuroGeographics attribution.",
+        script: "scripts/build_hu_area_summary.R",
+        manifests: [
+          { label: "hu-census-religion-2001-2022", href: "docs/manifests/hu-census-religion-2001-2022.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Hungary map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

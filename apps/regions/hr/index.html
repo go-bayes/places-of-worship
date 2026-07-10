@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Croatia Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Croatia's product is self-declared census religious affiliation from
+    // the Croatian Bureau of Statistics (DZS), 21 counties (including the
+    // City of Zagreb) across three censuses 2001, 2011 and 2021. It does not
+    // measure belief, practice, attendance, or registered church membership.
+    // Headline shares use the whole census population; not-declared,
+    // unknown, and agnostic categories stay in the denominator and outside
+    // both headlines. County is the finest geography with complete
+    // three-wave category tables (town/municipality frames are
+    // wave-specific with no rebased series). Quality flags are uniform
+    // across all rows (universal), so no popup asterisk fires and
+    // censusFlagNote is deliberately absent; the caveats ride the
+    // always-shown popupDenominatorNote and the overview.
+    window.REGION_CONFIG = {
+      countryCode: "HR",
+      title: "Places of Worship | Croatia Research Map",
+      center: [16.4, 44.9],
+      initialZoom: 6.4,
+      censusLevels: {
+        county: {
+          label: "County (županija)",
+          boundaries: "data/hr_county_2026.geojson",
+          summary: "data/area_summary_county.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Croatian Bureau of Statistics (DZS) census religion by county, 2001–2021 · Boundaries from the State Geodetic Administration (DGU) Administrative Units (current frame)"
+        }
+      },
+      defaultLevel: "county",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation (%)",
+          note: "share of the whole census population declaring a religious affiliation, summing the published named-religion categories. Not-declared, unknown, and agnostic categories stay in the denominator and outside this headline"
+        },
+        no_religion_percent: {
+          label: "Not religious (%)",
+          note: "share of the whole census population in the source's not-religious category. The 2001 combined Agnostici i neizjašnjeni (Agnostic and uncommitted) category and the separate 2011/2021 agnostic, not-declared, and unknown categories all stay outside this headline and in the denominator"
+        },
+        religious_change: {
+          label: "Change since previous census (pp)",
+          note: "percentage-point change in the affiliation share since the previous census (2001, 2011, 2021); a decennial difference is not an annual rate. The statistical definition of total population changed between 2001 and 2011, and county boundary stability across the series was not verified; the comparison is between published county shares rather than a same-polygon statistic"
+        }
+      },
+      popupDenominatorNote: "Percentages use the whole census population as denominator. Not-declared, unknown, and agnostic categories stay in that denominator and outside both headline categories; the 2001 source combines agnostic responses with non-declaration in one category, while 2011 and 2021 publish them separately. These are census self-declarations; they do not measure belief, practice, attendance, or registered church membership. The statistical definition of total population changed between the 2001 and 2011 censuses.",
+      cityPresets: [
+        { label: "Zagreb", coords: [15.9819, 45.8150], zoom: 10 },
+        { label: "Split", coords: [16.4402, 43.5081], zoom: 10 },
+        { label: "Rijeka", coords: [14.4422, 45.3271], zoom: 10 },
+        { label: "Osijek", coords: [18.6955, 45.5550], zoom: 10 },
+        { label: "Zadar", coords: [15.2314, 44.1194], zoom: 10 },
+        { label: "Slavonski Brod", coords: [18.0158, 45.1603], zoom: 10 },
+        { label: "Pula", coords: [13.8496, 44.8666], zoom: 10 },
+        { label: "Karlovac", coords: [15.5478, 45.4929], zoom: 10 },
+        { label: "Sisak", coords: [16.3731, 45.4661], zoom: 10 },
+        { label: "Varaždin", coords: [16.3366, 46.3057], zoom: 10 }
+      ],
+      geocode: { country: "hr", biasLngLat: [16.4, 44.9] },
+      onboarding: {
+        title: "Croatia research map",
+        intro: "Census religious-affiliation overlays for Croatia's 21 counties (including the City of Zagreb), across three censuses 2001, 2011 and 2021, from the Croatian Bureau of Statistics (DZS). Shares are self-declared affiliations over the whole census population.",
+        bullets: [
+          "Counties are shaded by the share declaring a religious affiliation, or the share in the source's not-religious category.",
+          "The whole census population is the denominator; not-declared, unknown, and agnostic categories stay in it and outside both headline categories.",
+          "County is the finest geography with complete three-wave tables: DZS publishes town and municipality religion in every wave, but on wave-specific frames with no rebased series.",
+          "A change metric reports the percentage-point change since the previous census; a decennial difference is not an annual rate, and the population definition changed between 2001 and 2011.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion from the <a href="https://dzs.gov.hr/" target="_blank" rel="noopener">Croatian Bureau of Statistics (DZS)</a>, censuses 2001&ndash;2021, source naming required &middot; Boundaries from the <a href="https://dgu.gov.hr/" target="_blank" rel="noopener">State Geodetic Administration (DGU)</a> Administrative Units, Croatian Open Licence'
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710d"></script>
+</body>
+</html>

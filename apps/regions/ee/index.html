@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Estonia Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Estonia's product is self-reported census religious affiliation among
+    // the population aged 15 and over, 15 counties across three waves 2000,
+    // 2011 and 2021. Each wave sits on its own official period county
+    // vintage with no cross-wave concordance, so each wave is its own
+    // census level pointed at a filtered per-year summary file
+    // (area_summary_county_2000/2011/2021.json — derived views of the
+    // committed area_summary_county.json, see
+    // scripts/build_ee_level_summaries.py), the Germany precedent. No
+    // change metric is offered across vintages. The 2021 religion
+    // characteristic comes from the census sample survey generalised to
+    // the age-15-plus population, with published counts rounded to tens;
+    // that caveat rides the metric notes and the popup note because each
+    // single-year level has uniform flags (no per-row asterisks).
+    window.REGION_CONFIG = {
+      countryCode: "EE",
+      title: "Places of Worship | Estonia Research Map",
+      center: [25.5, 58.7],
+      initialZoom: 6.9,
+      censusLevels: {
+        county_2021: {
+          label: "County (2021 boundaries)",
+          boundaries: "data/ee_county_2021.geojson",
+          summary: "data/area_summary_county_2021.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Statistics Estonia census 2021, religious affiliation of the population aged 15 and over, CC BY-SA 4.0 · Boundaries from Maa-amet (Estonian Land Board) 2021 period county vintage"
+        },
+        county_2011: {
+          label: "County (2011 boundaries)",
+          boundaries: "data/ee_county_2011.geojson",
+          summary: "data/area_summary_county_2011.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Statistics Estonia census 2011, religious affiliation of the population aged 15 and over, CC BY-SA 4.0 · Boundaries from Maa-amet (Estonian Land Board) 2011 period county vintage"
+        },
+        county_2000: {
+          label: "County (2000 boundaries)",
+          boundaries: "data/ee_county_2000.geojson",
+          summary: "data/area_summary_county_2000.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Statistics Estonia census 2000, religious affiliation of the population aged 15 and over, CC BY-SA 4.0 · Boundaries from Maa-amet (Estonian Land Board) 2000 period county vintage"
+        }
+      },
+      defaultLevel: "county_2021",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      // no change metric: each wave sits on its own period county vintage
+      // with no cross-wave concordance, and no cross-vintage comparison
+      // is offered (the Germany precedent)
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation (% of population aged 15+)",
+          note: "share of the published population aged 15 and over professing a religious affiliation; total population is never the denominator. The 2000 headline is Follower of a particular faith; the 2021 religion characteristic comes from the census sample survey generalised to the age-15-plus population, with published counts rounded to tens"
+        },
+        no_religion_percent: {
+          label: "No religious affiliation (% of population aged 15+)",
+          note: "share of the published population aged 15 and over with no religious affiliation: for 2000, Has no religious affiliation plus Atheist; for 2011 and 2021, Does not feel an affiliation to any religion. Refused, cannot-define, and relationship-unknown categories stay in the denominator and outside both headline categories"
+        }
+      },
+      popupDenominatorNote: "Percentages use the published population aged 15 and over in the same county and wave as denominator; total population is never used. Refused, cannot-define, and relationship-unknown categories stay in that denominator and outside both headline categories. The 2021 religion characteristic comes from the census sample survey generalised to the full age-15-plus population, and its published counts are rounded to tens. Each wave sits on its own period county vintage; switch the geography control to move between waves.",
+      cityPresets: [
+        { label: "Tallinn", coords: [24.7536, 59.4370], zoom: 10 },
+        { label: "Tartu", coords: [26.7290, 58.3776], zoom: 10 },
+        { label: "Narva", coords: [28.1903, 59.3772], zoom: 10 },
+        { label: "Pärnu", coords: [24.4971, 58.3859], zoom: 10 },
+        { label: "Kohtla-Järve", coords: [27.2731, 59.3986], zoom: 10 },
+        { label: "Viljandi", coords: [25.5900, 58.3639], zoom: 10 },
+        { label: "Rakvere", coords: [26.3557, 59.3464], zoom: 10 },
+        { label: "Maardu", coords: [25.0250, 59.4767], zoom: 10 },
+        { label: "Kuressaare", coords: [22.4849, 58.2528], zoom: 10 },
+        { label: "Võru", coords: [26.9906, 57.8339], zoom: 10 }
+      ],
+      geocode: { country: "ee", biasLngLat: [25.5, 58.7] },
+      onboarding: {
+        title: "Estonia research map",
+        intro: "Census religious-affiliation overlays for Estonia's 15 counties, across three waves 2000, 2011 and 2021, from Statistics Estonia. Shares are among the population aged 15 and over, and each wave sits on its own official period county boundary vintage.",
+        bullets: [
+          "Counties are shaded by the share of the population aged 15 and over professing a religious affiliation, or the share with no religious affiliation.",
+          "Every denominator is the published population aged 15 and over in the same county and wave; total population is never used.",
+          "Each wave has its own period county vintage (2000, 2011, 2021) with no cross-wave concordance; each is its own geography level, and no change metric is offered across vintages. Switch the geography control to move between waves.",
+          "The 2021 religion characteristic comes from the census sample survey generalised to the age-15-plus population; its published counts are rounded to tens.",
+          "The 2000 no-religion headline combines Has no religious affiliation with Atheist; 2011 and 2021 use Does not feel an affiliation to any religion.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric, geography and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion from <a href="https://www.stat.ee/en" target="_blank" rel="noopener">Statistics Estonia</a>, religious affiliation of the population aged 15 and over, censuses 2000, 2011 and 2021, CC BY-SA 4.0 with source attribution &middot; Boundaries from <a href="https://geoportaal.maaamet.ee/" target="_blank" rel="noopener">Maa-amet (Estonian Land Board)</a> period county vintages, official open-data licence with source and vintage attribution'
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710d"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Estonia map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Estonia research map; every string traces to
+    // docs/manifests/ee-census-religion-2000-2021.json (construct_notes and
+    // source), the product indicators block, or the live REGION_CONFIG in
+    // apps/regions/ee/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "EE",
+      countryName: "Estonia",
+      mapHref: "./",
+      intro: "Census religious-affiliation overlays for Estonia's 15 counties, across three waves 2000, 2011 and 2021, from Statistics Estonia. The construct is self-reported census religious affiliation among the population aged 15 and over. It does not measure belief, practice, or attendance, and total population is never the denominator.",
+      facts: {
+        waves: "Three censuses: 2000, 2011, 2021 (2021 religion from the census sample survey)",
+        geographies: "County, one geography level per wave (15 counties on the 2000, 2011, and 2021 period boundary vintages)",
+        metrics: "Religious affiliation % of population aged 15+, no religious affiliation % of population aged 15+"
+      },
+      reading: [
+        "Counties are shaded by the share of the population aged 15 and over professing a religious affiliation, or the share with no religious affiliation. Every denominator is the published population aged 15 and over in the same county and wave.",
+        "Refused, cannot-define, and relationship-unknown categories stay in the age-15-plus denominator and outside both headline categories.",
+        "The 2021 religion characteristic comes from the census sample survey and is generalised to the full population aged 15 and over; religion itself is not register-supplemented, and the published 2021 counts are rounded to tens.",
+        "The 2000 no-religion headline combines Has no religious affiliation with Atheist. The 2011 and 2021 headlines use Does not feel an affiliation to any religion.",
+        "Each wave uses the official county geography of its own census: the 2000, 2011 and 2021 period vintages from Maa-amet (the Estonian Land Board). Statistics Estonia does not publish these earlier religion tables rebased to current counties, and the product builds no concordance; each wave is therefore its own geography level, and no change metric is offered across vintages.",
+        "Statistics Estonia open data are CC BY-SA 4.0: reuse of these figures carries the share-alike condition with source attribution."
+      ],
+      sources: [
+        {
+          name: "Statistics Estonia, censuses 2000, 2011 and 2021, religious affiliation of the population aged 15 and over",
+          href: "https://www.stat.ee/en",
+          construct: "Self-reported census religious affiliation among the population aged 15 and over, by county (2021 wave from the census sample survey, counts rounded to tens)",
+          years: "2000, 2011, 2021",
+          licence: "Statistics Estonia open data, CC BY-SA 4.0 with source attribution"
+        },
+        {
+          name: "Maa-amet (Estonian Land Board) period county boundaries",
+          href: "https://geoportaal.maaamet.ee/",
+          construct: "Boundary geometry (15 counties per wave, period vintages)",
+          years: "2000, 2011, 2021 vintages",
+          licence: "Maa-amet official open-data licence, with source and vintage attribution"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Statistics Estonia, <a href=\"https://www.stat.ee/en\" target=\"_blank\" rel=\"noopener\">census religion tables</a>; boundaries from <a href=\"https://geoportaal.maaamet.ee/\" target=\"_blank\" rel=\"noopener\">Maa-amet (Estonian Land Board)</a> period county vintages.",
+        tables: "County religious-affiliation tables for the population aged 15 and over, censuses 2000, 2011 and 2021. The area-summary religious_affiliation fields carry the published affiliation counts and shares, and the no_religion fields carry the wave's no-affiliation category (2000: Has no religious affiliation plus Atheist; 2011 and 2021: Does not feel an affiliation to any religion); the age-15-plus population is the denominator throughout. The map consumes per-wave derived views of the committed summary (scripts/build_ee_level_summaries.py) so each boundary vintage carries only its own year.",
+        licence: "Statistics Estonia data are CC BY-SA 4.0 with source attribution (share-alike applies to reuse); Maa-amet boundaries carry the official open-data licence with source and vintage attribution.",
+        script: "scripts/build_ee_area_summary.R",
+        manifests: [
+          { label: "ee-census-religion-2000-2021", href: "docs/manifests/ee-census-religion-2000-2021.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Estonia map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Croatia map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Croatia research map; every string traces to
+    // docs/manifests/hr-census-religion-2001-2021.json (construct_notes and
+    // source), the product indicators block, or the live REGION_CONFIG in
+    // apps/regions/hr/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "HR",
+      countryName: "Croatia",
+      mapHref: "./",
+      intro: "Census religious-affiliation overlays for Croatia's 21 counties (including the City of Zagreb), across three censuses 2001, 2011 and 2021, from the Croatian Bureau of Statistics (DZS). The construct is self-declared census religious affiliation. It does not measure belief, practice, attendance, or registered church membership.",
+      facts: {
+        waves: "Three censuses: 2001, 2011, 2021",
+        geographies: "County (županija; 21 units including the City of Zagreb)",
+        metrics: "Religious affiliation %, not religious %, change since previous census"
+      },
+      reading: [
+        "Counties are shaded by the share of the whole census population declaring a religious affiliation, or the share in the source's not-religious category. Not-declared, unknown, and agnostic categories stay in the denominator and outside both headline categories.",
+        "The 2001 source combines Agnostici i neizjašnjeni (Agnostic and uncommitted), mixing an agnostic response with non-declaration; 2011 and 2021 instead publish Agnostici i skeptici (Agnostics and sceptics), Ne izjašnjavaju se (Not declared), and Nepoznato (Unknown) separately. All remain distinct source categories outside both headlines.",
+        "The 2021 workbook notes that Ostali kršćani (Other Christians) includes people who answered Christian without naming a denomination — 96.47% of that category did so, and 87.26% of those respondents named the Catholic Church when asked about religious community. The product retains the published category without reassignment; this classification break limits cross-wave interpretation.",
+        "The statistical definition of total population changed between the 2001 and 2011 censuses; population and affiliation shares are therefore not perfectly comparable across that break, and the change metric compares published shares across it.",
+        "County is the finest geography with complete three-wave category tables. DZS publishes religion by town and municipality in every wave, but on wave-specific frames (122–128 towns and 423–429 municipalities) with no three-wave table rebased to one frame; the product builds no unofficial concordance.",
+        "A single current boundary frame from the State Geodetic Administration (DGU) joins to every wave through the 21 shared county codes. Geometric stability of county boundaries across 2001–2021 was not verified; code identity does not prove polygon stability, and the change metric is a comparison of published shares rather than a same-polygon statistic."
+      ],
+      sources: [
+        {
+          name: "Croatian Bureau of Statistics (DZS), censuses 2001, 2011 and 2021, religion by county",
+          href: "https://dzs.gov.hr/",
+          construct: "Self-declared census religious affiliation, whole-population denominator, by county",
+          years: "2001, 2011, 2021",
+          licence: "DZS website terms: name the Croatian Bureau of Statistics as source; no named open licence assigned"
+        },
+        {
+          name: "State Geodetic Administration (DGU) Administrative Units",
+          href: "https://dgu.gov.hr/",
+          construct: "Boundary geometry (21 counties including the City of Zagreb)",
+          years: "Current frame",
+          licence: "Croatian Open Licence; public access without limitations"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Croatian Bureau of Statistics (DZS), <a href=\"https://dzs.gov.hr/\" target=\"_blank\" rel=\"noopener\">census religion tables</a>; boundaries from the <a href=\"https://dgu.gov.hr/\" target=\"_blank\" rel=\"noopener\">State Geodetic Administration (DGU)</a> Administrative Units.",
+        tables: "County religion tables for 2001, 2011 and 2021. The area-summary religious_affiliation fields sum the published named-religion categories and the no_religion fields carry the source's not-religious category; the whole census population is the denominator, with not-declared, unknown, and agnostic categories left in it.",
+        licence: "DZS data require naming the Croatian Bureau of Statistics as source, with no named open licence; DGU Administrative Units follow the Croatian Open Licence.",
+        script: "scripts/build_hr_area_summary.R",
+        manifests: [
+          { label: "hr-census-religion-2001-2021", href: "docs/manifests/hr-census-religion-2001-2021.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Croatia map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

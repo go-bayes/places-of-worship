@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Bulgaria map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Bulgaria research map; every string traces to
+    // docs/manifests/bg-census-religion-2001-2021.json (construct_notes and
+    // source), the product indicators block, or the live REGION_CONFIG in
+    // apps/regions/bg/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "BG",
+      countryName: "Bulgaria",
+      mapHref: "./",
+      intro: "Census religious-affiliation overlays for Bulgaria's 28 districts, across three censuses 2001, 2011 and 2021, from the National Statistical Institute (NSI). The construct is census affiliation from a voluntary question. It does not measure belief, practice, attendance, or registered membership. Each wave's shares sit on a different published NSI basis; the waves are separate snapshots.",
+      facts: {
+        waves: "Three censuses: 2001, 2011, 2021 (each on its own published basis)",
+        geographies: "District (oblast; 28 units)",
+        metrics: "Religious affiliation %, no religion % (2011 and 2021 only)"
+      },
+      reading: [
+        "Districts are shaded by the share declaring a religious affiliation, or the share in NSI's no-religion category, each on NSI's own published basis for the wave.",
+        "The three published bases differ. The first, for 2001, is the full population. The second, for 2011, is the voluntary-question respondent total: 5,758,301 respondents out of 7,364,570 residents. The third, for 2021, is the 5,903,108 people with religion information, after excluding 616,681 administrative additions without it from 6,519,789 residents.",
+        "No change metric is offered between any pair of waves: the bases are incompatible instruments, and the responding share and response categories also changed across waves. The separate snapshots may reflect changing respondent composition as well as changing affiliation.",
+        "The 2001 census offered no no-religion category; the product leaves the no-religion fields null for 2001, and that wave shows no data on the no-religion metric.",
+        "The 2011 district report suppresses some Armenian Apostolic Orthodox and Jewish cells as confidential under Article 25 of the Statistics Act. The product derives the published broader Other religions group exactly, as the respondent total less every unsuppressed mutually exclusive category, and never estimates or exposes a suppressed value.",
+        "District is the geography because all three waves publish complete district category tables; NSI's municipality route covers 2021 only. A single 2021-frame GISCO NUTS 3 boundary set joins to every wave through an explicit concordance between NSI district codes and NUTS 3 codes; geometric stability across 2001–2021 was not verified."
+      ],
+      sources: [
+        {
+          name: "National Statistical Institute (NSI), censuses 2001, 2011 and 2021, religion by district",
+          href: "https://www.nsi.bg/en",
+          construct: "Census self-declared religious affiliation (voluntary question), each wave on its own published basis, by district",
+          years: "2001, 2011, 2021",
+          licence: "NSI Licence v2.0: reproduction, distribution, and use permitted, including commercial use, with attribution; the licence states that derivative and collective works may not be distributed"
+        },
+        {
+          name: "Eurostat GISCO NUTS 3 boundaries",
+          href: "https://ec.europa.eu/eurostat/web/gisco",
+          construct: "Boundary geometry (28 districts)",
+          years: "2021 frame",
+          licence: "Eurostat GISCO material, reusable with source acknowledgement and a modification disclaimer"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "National Statistical Institute (NSI), <a href=\"https://www.nsi.bg/en\" target=\"_blank\" rel=\"noopener\">census dissemination tables</a>; boundaries from <a href=\"https://ec.europa.eu/eurostat/web/gisco\" target=\"_blank\" rel=\"noopener\">Eurostat GISCO</a> NUTS 3 (2021 frame).",
+        tables: "District religion tables for 2001, 2011 and 2021. The area-summary religious_affiliation fields sum the published mutually exclusive categories and the no_religion fields carry NSI's no-religion category (2011 and 2021; null for 2001, which offered no such category); each wave uses NSI's own published basis. Per-row quality flags carry each district-wave's non-response share.",
+        licence: "NSI data follow NSI Licence v2.0 (use with attribution; the licence's derivative-works clause is recorded in the manifest); GISCO geometry is reusable with source acknowledgement and a modification disclaimer.",
+        script: "scripts/build_bg_area_summary.R",
+        manifests: [
+          { label: "bg-census-religion-2001-2021", href: "docs/manifests/bg-census-religion-2001-2021.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Bulgaria map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

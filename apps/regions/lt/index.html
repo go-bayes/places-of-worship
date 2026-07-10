@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Lithuania Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Lithuania's product is census affiliation across 60 municipalities and
+    // three waves 2001, 2011 and 2021. It does not measure belief, practice,
+    // attendance, or membership records. 2001 and 2011 are full-enumeration
+    // censuses; 2021 religion came from a separate ethnocultural statistical
+    // survey (sample and model based) generalised onto the full register-based
+    // census denominator. The instruments are incompatible, and the data flags
+    // withhold change across the break; because the runtime's change metric
+    // covers every consecutive wave pair and cannot be scoped to 2001-2011
+    // alone, religious_change is omitted from metricsAvailable entirely.
+    // The 2021 rows carry distinguishing flags, so 2021 popup rows are
+    // asterisked and the flag note explains the instrument break.
+    window.REGION_CONFIG = {
+      countryCode: "LT",
+      title: "Places of Worship | Lithuania Research Map",
+      center: [23.9, 55.2],
+      initialZoom: 6.8,
+      censusLevels: {
+        municipality: {
+          label: "Municipality (savivaldybė)",
+          boundaries: "data/lt_municipality_2025.geojson",
+          summary: "data/area_summary_municipality.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "State Data Agency (Statistics Lithuania) census religion by municipality, 2001–2021 · Boundaries from the Registers Centre via the Lithuania Open Data Portal (2025 frame), CC BY 4.0"
+        }
+      },
+      defaultLevel: "municipality",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      // no change metric: the 2011-2021 pair crosses an instrument break
+      // (full-enumeration census responses versus a sample/model-based
+      // survey estimate), and the runtime's change metric cannot be
+      // scoped to the 2001-2011 pair alone
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation (%)",
+          note: "share of the census resident population identifying with a named religious community, summing the published municipality categories. Nenurodyta (Not indicated) stays in the denominator and outside both headline categories. The 2021 religion values are sample and model based estimates from the ethnocultural statistical survey, joined to the full register-based census denominator; 2001 and 2011 are full-enumeration census responses"
+        },
+        no_religion_percent: {
+          label: "None (Nė vienai) %",
+          note: "share of the census resident population in the source's Nė vienai (None) category, which keeps its Lithuanian name and separate framing in every wave. Nenurodyta (Not indicated) is a separate category and stays in the denominator"
+        }
+      },
+      popupDenominatorNote: "Percentages use the census resident-population total for the wave as denominator; Nenurodyta (Not indicated) stays in that denominator and outside both headline categories. 2001 and 2011 religion values are full-enumeration census responses; the 2021 values are sample and model based estimates from the ethnocultural statistical survey, generalised onto the full 2021 register-based census denominator. No change metric is offered: the 2011–2021 pair crosses that instrument break. These are census self-declarations; they do not measure belief, practice, attendance, or membership records.",
+      cityPresets: [
+        { label: "Vilnius", coords: [25.2797, 54.6872], zoom: 10 },
+        { label: "Kaunas", coords: [23.9036, 54.8985], zoom: 10 },
+        { label: "Klaipėda", coords: [21.1443, 55.7033], zoom: 10 },
+        { label: "Šiauliai", coords: [23.3168, 55.9349], zoom: 10 },
+        { label: "Panevėžys", coords: [24.3608, 55.7348], zoom: 10 },
+        { label: "Alytus", coords: [24.0414, 54.3961], zoom: 10 },
+        { label: "Marijampolė", coords: [23.3541, 54.5599], zoom: 10 },
+        { label: "Mažeikiai", coords: [22.3364, 56.3117], zoom: 10 },
+        { label: "Jonava", coords: [24.2790, 55.0724], zoom: 10 },
+        { label: "Utena", coords: [25.5980, 55.4977], zoom: 10 }
+      ],
+      geocode: { country: "lt", biasLngLat: [23.9, 55.2] },
+      onboarding: {
+        title: "Lithuania research map",
+        intro: "Census religious-affiliation overlays for Lithuania's 60 municipalities, across three waves 2001, 2011 and 2021, from the State Data Agency (Statistics Lithuania). The map shows three source snapshots; the 2021 religion values are survey-based estimates rather than full-enumeration responses.",
+        bullets: [
+          "Municipalities are shaded by the share identifying with a named religious community, or the share in the source's Nė vienai (None) category.",
+          "2001 and 2011 religion values are full-enumeration census responses. The 2021 census was register-based and religion came from a separate ethnocultural statistical survey; its values are sample and model based estimates on the full census denominator.",
+          "No change metric is offered: full-enumeration responses and survey estimates are incompatible instruments across the 2011–2021 break.",
+          "Nenurodyta (Not indicated) stays in the denominator and outside both headline categories in every wave.",
+          "Boundaries are the current 2025 municipality frame; all 60 codes appear in every wave, and boundary stability from 2001 was not verified.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion from the <a href="https://osp.stat.gov.lt/" target="_blank" rel="noopener">State Data Agency (Statistics Lithuania)</a>, municipality tables 2001&ndash;2021, source identification required &middot; Boundaries from the <a href="https://data.gov.lt/" target="_blank" rel="noopener">Registers Centre via the Lithuania Open Data Portal</a> (2025 municipality frame), CC BY 4.0',
+      censusFlagNote: "* The 2021 census population was established from administrative registers; religion was absent from those registers and came from a separate ethnocultural statistical survey (56,000 self-completed and 115,000 interviewer-surveyed household residents, with mathematical methods producing population estimates). The 2021 religion values are therefore sample and model based estimates on the full census denominator, while 2001 and 2011 are full-enumeration census responses. No change metric is offered across that instrument break."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710d"></script>
+</body>
+</html>

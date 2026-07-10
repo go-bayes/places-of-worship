@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Lithuania map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Lithuania research map; every string traces to
+    // docs/manifests/lt-census-religion-2001-2021.json (construct_notes and
+    // source), the product indicators block, or the live REGION_CONFIG in
+    // apps/regions/lt/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "LT",
+      countryName: "Lithuania",
+      mapHref: "./",
+      intro: "Census religious-affiliation overlays for Lithuania's 60 municipalities, across three waves 2001, 2011 and 2021, from the State Data Agency (Statistics Lithuania). The construct is census affiliation: the source asks which religious community residents identify with. It does not measure belief, practice, attendance, or membership records.",
+      facts: {
+        waves: "Three waves: 2001, 2011 (censuses), 2021 (survey-based estimate)",
+        geographies: "Municipality (savivaldybė; 60 units)",
+        metrics: "Religious affiliation %, None (Nė vienai) %"
+      },
+      reading: [
+        "Municipalities are shaded by the share identifying with a named religious community, or the share in the source's Nė vienai (None) category. The census resident-population total is the denominator, and Nenurodyta (Not indicated) stays in that denominator and outside both headline categories.",
+        "The 2001 and 2011 religion values are full-enumeration population-census responses.",
+        "The 2021 census population was established from administrative registers, and religion was absent from those registers. Religion came from a separate ethnocultural statistical survey: 56,000 household residents self-completed, interviewers surveyed 115,000 household residents, and mathematical methods produced population estimates. The 2021 religion numerators are therefore sample and model based estimates joined to the full 2,810,761 census resident-population denominator; they are not whole-population observations.",
+        "No change metric is offered. Full-enumeration census responses and a sample and model based statistical survey are incompatible instruments across the 2011–2021 break, and the map's change metric covers every consecutive wave pair; it cannot be limited to the 2001–2011 pair alone. The map shows three source snapshots.",
+        "The municipality table publishes 16 categories plus the total; Kitų (Other) is a grouped presentation. Source categories keep their Lithuanian names with English display labels.",
+        "Boundaries are the current 2025 municipality frame from the Registers Centre; all 60 municipality codes appear in every wave. Municipality geometry stability from 2001 through the 2025 frame was not verified: formation dates and shared codes do not prove unchanged boundaries."
+      ],
+      sources: [
+        {
+          name: "State Data Agency (Statistics Lithuania), census religion by municipality; the 2021 ethnocultural release documents the survey-and-estimation methodology",
+          href: "https://osp.stat.gov.lt/en/2021-gyventoju-ir-bustu-surasymo-rezultatai/tautybe-gimtoji-kalba-ir-tikyba",
+          construct: "Census self-declared religious affiliation, by municipality (2021 wave: sample and model based survey estimate on the census denominator)",
+          years: "2001, 2011, 2021",
+          licence: "Source identification as the State Data Agency required; no named licence located for the indicator flow"
+        },
+        {
+          name: "Registers Centre municipality boundaries via the Lithuania Open Data Portal (dataset 1345)",
+          href: "https://data.gov.lt/",
+          construct: "Boundary geometry (60 municipalities)",
+          years: "2025 frame",
+          licence: "CC BY 4.0"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "State Data Agency (Statistics Lithuania), <a href=\"https://osp.stat.gov.lt/\" target=\"_blank\" rel=\"noopener\">official statistics portal</a>; boundaries from the <a href=\"https://data.gov.lt/\" target=\"_blank\" rel=\"noopener\">Registers Centre via the Lithuania Open Data Portal</a> (2025 municipality frame).",
+        tables: "Municipality religion tables for 2001, 2011 and 2021. The area-summary religious_affiliation fields sum the published named-religion categories and the no_religion fields carry Nė vienai (None) verbatim; Nenurodyta (Not indicated) stays in the denominator. The 2021 rows are flagged as sample and model based survey estimates.",
+        licence: "The State Data Agency requires source identification; no named licence was located for the indicator flow. The Registers Centre boundary data are CC BY 4.0.",
+        script: "scripts/build_lt_area_summary.R",
+        manifests: [
+          { label: "lt-census-religion-2001-2021", href: "docs/manifests/lt-census-religion-2001-2021.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Lithuania map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

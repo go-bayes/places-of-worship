@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Serbia map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Serbia research map; every string traces to
+    // docs/manifests/rs-census-religion-2002-2022.json (construct_notes and
+    // source), the product indicators block, or the live REGION_CONFIG in
+    // apps/regions/rs/index.html. the territorial-scope paragraph carries
+    // the manifest wording, no more and no less.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "RS",
+      countryName: "Serbia",
+      mapHref: "./",
+      intro: "Census religious-affiliation overlays for 25 Serbian areas — the City of Belgrade plus 24 districts (okruzi) — across three censuses 2002, 2011 and 2022, from the Statistical Office of the Republic of Serbia (SORS). The construct is census affiliation. It does not measure belief, practice, attendance, or registered membership.",
+      facts: {
+        waves: "Three censuses: 2002, 2011, 2022",
+        geographies: "Area (City of Belgrade plus 24 okruzi; 25 units)",
+        metrics: "Religious affiliation %, not religious %, change since previous census"
+      },
+      reading: [
+        "Areas are shaded by the share of the total census population declaring a religious affiliation, or the share in the source's not-religious category. Did-not-declare and unknown responses stay in the denominator and outside both headline categories.",
+        "This product follows the territorial coverage published by the Statistical Office of the Republic of Serbia (SORS). The 2002 publication covers Central Serbia and Vojvodina and states that the census was not conducted in the Autonomous Province of Kosovo and Metohija. The 2011 and 2022 dissemination tables identify their coverage as excluding data for the Autonomous Province of Kosovo and Metohija. Kosovo rows from other publications are outside this Serbia product.",
+        "In 2011 and 2022, Christians in total is the mutually exclusive Christian parent category; Orthodox, Catholic, Protestant, and Other Christian are detail rows and are never summed again.",
+        "In 2002, Believer, but does not belong to any religion is preserved outside both the affiliation and not-religious headlines because it reports belief without religious affiliation; it stays in the denominator.",
+        "The change metric reports the percentage-point change in the affiliation share since the previous census; the spacing is roughly decennial, and a wave-to-wave difference is not an annual rate.",
+        "Municipality and city units changed between waves, and SORS publishes no religion table rebased to one municipal frame; the product therefore uses the 25 common published areas and builds no unofficial concordance. The display frame is the 2021 GISCO NUTS 3 layer; geometric stability of the 25 areas across the series was not verified, and the join uses shared statistical-area codes."
+      ],
+      sources: [
+        {
+          name: "Statistical Office of the Republic of Serbia (SORS), censuses 2002, 2011 and 2022, religion by area",
+          href: "https://www.stat.gov.rs/en-US/",
+          construct: "Census self-declared religious affiliation, total-population denominator, City of Belgrade plus 24 okruzi",
+          years: "2002, 2011, 2022",
+          licence: "SORS census publications require source quotation; no broader reuse claim is made for the dissemination database"
+        },
+        {
+          name: "Eurostat GISCO NUTS 3 boundaries",
+          href: "https://ec.europa.eu/eurostat/web/gisco",
+          construct: "Boundary geometry (25 areas)",
+          years: "2021 frame",
+          licence: "GISCO download provisions, with Eurostat GISCO and EuroGeographics attribution"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Statistical Office of the Republic of Serbia (SORS), <a href=\"https://www.stat.gov.rs/en-US/\" target=\"_blank\" rel=\"noopener\">census dissemination database</a>; boundaries from <a href=\"https://ec.europa.eu/eurostat/web/gisco\" target=\"_blank\" rel=\"noopener\">Eurostat GISCO</a> NUTS 3 (2021 frame).",
+        tables: "Area religion tables for 2002, 2011 and 2022. The area-summary religious_affiliation fields sum the published mutually exclusive categories and the no_religion fields carry the source's not-religious category; the total census population is the denominator. The 2011 and 2022 mappings retain the source's Serbian Cyrillic labels with the official English dissemination labels.",
+        licence: "SORS census publications require source quotation, with no broader reuse claim made for the dissemination database; GISCO geometry follows its download provisions with Eurostat GISCO and EuroGeographics attribution.",
+        script: "scripts/build_rs_area_summary.R",
+        manifests: [
+          { label: "rs-census-religion-2002-2022", href: "docs/manifests/rs-census-religion-2002-2022.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Serbia map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

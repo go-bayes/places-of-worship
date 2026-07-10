@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Bulgaria Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Bulgaria's product is census affiliation from NSI's voluntary religion
+    // question, 28 districts across three censuses 2001, 2011 and 2021. It
+    // does not measure belief, practice, attendance, or registered
+    // membership. Each wave's shares sit on a different published NSI
+    // basis: 2001 uses the full population, 2011 uses the voluntary-question
+    // respondent total, and 2021 excludes administrative additions with no
+    // religion information. These bases are incompatible instruments;
+    // the data withholds religious_change between every pair of waves, and
+    // the metric is omitted from metricsAvailable (it would render null
+    // everywhere). The 2001 census offered no no-religion category, so
+    // no_religion fields are null for 2001 and that wave renders no-data on
+    // the no-religion metric. Per-row flags carry each district-wave's
+    // non-response share, so popup rows are asterisked and the flag note
+    // explains the bases.
+    window.REGION_CONFIG = {
+      countryCode: "BG",
+      title: "Places of Worship | Bulgaria Research Map",
+      center: [25.3, 42.75],
+      initialZoom: 6.6,
+      censusLevels: {
+        district: {
+          label: "District (oblast)",
+          boundaries: "data/bg_district_2021.geojson",
+          summary: "data/area_summary_district.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "National Statistical Institute (NSI) census religion by district, 2001–2021 · Boundaries from Eurostat GISCO NUTS 3 (2021 frame)"
+        }
+      },
+      defaultLevel: "district",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      // no change metric: each wave's shares sit on a different published
+      // NSI basis (2001 full population; 2011 voluntary-question
+      // respondents; 2021 excluding administrative additions without
+      // religion information) — incompatible instruments, and the data
+      // carries no cross-wave change
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation (%)",
+          note: "share declaring a religious affiliation, on NSI's published basis for the wave: the full population in 2001, the voluntary-question respondent total in 2011, and in 2021 the population with religion information after excluding administrative additions without it. The three bases are incompatible instruments; waves are separate snapshots and no change metric is offered"
+        },
+        no_religion_percent: {
+          label: "No religion (%)",
+          note: "share in NSI's no-religion category, on the same published basis as the wave's affiliation share. The 2001 census offered no no-religion category; 2001 therefore shows no data for this metric"
+        }
+      },
+      popupDenominatorNote: "Each wave's shares use NSI's own published basis: the full population in 2001; the voluntary-question respondent total in 2011 (5,758,301 respondents of 7,364,570 residents); and in 2021 the 5,903,108 people with religion information, after excluding 616,681 administrative additions without it. These bases are incompatible instruments; the waves are separate snapshots, and no change metric is offered. The 2001 census offered no no-religion category. These are census self-declarations from a voluntary question; they do not measure belief, practice, attendance, or registered membership.",
+      cityPresets: [
+        { label: "Sofia", coords: [23.3219, 42.6977], zoom: 10 },
+        { label: "Plovdiv", coords: [24.7453, 42.1354], zoom: 10 },
+        { label: "Varna", coords: [27.9147, 43.2141], zoom: 10 },
+        { label: "Burgas", coords: [27.4626, 42.5048], zoom: 10 },
+        { label: "Ruse", coords: [25.9704, 43.8356], zoom: 10 },
+        { label: "Stara Zagora", coords: [25.6257, 42.4258], zoom: 10 },
+        { label: "Pleven", coords: [24.6067, 43.4170], zoom: 10 },
+        { label: "Sliven", coords: [26.3229, 42.6816], zoom: 10 },
+        { label: "Dobrich", coords: [27.8273, 43.5726], zoom: 10 },
+        { label: "Shumen", coords: [26.9361, 43.2712], zoom: 10 }
+      ],
+      geocode: { country: "bg", biasLngLat: [25.3, 42.75] },
+      onboarding: {
+        title: "Bulgaria research map",
+        intro: "Census religious-affiliation overlays for Bulgaria's 28 districts, across three censuses 2001, 2011 and 2021, from the National Statistical Institute (NSI). The religion question is voluntary, and each wave's shares sit on a different published NSI basis; the waves are separate snapshots.",
+        bullets: [
+          "Districts are shaded by the share declaring a religious affiliation, or the share in NSI's no-religion category.",
+          "Each wave uses NSI's own published basis: the full population in 2001, the voluntary-question respondent total in 2011, and in 2021 the population with religion information after excluding administrative additions without it.",
+          "No change metric is offered: the three bases are incompatible instruments, and the responding share and response categories also changed across waves.",
+          "The 2001 census offered no no-religion category; 2001 shows no data on the no-religion metric.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion from the <a href="https://www.nsi.bg/en" target="_blank" rel="noopener">National Statistical Institute (NSI)</a>, censuses 2001&ndash;2021, NSI Licence v2.0 with attribution &middot; Boundaries from <a href="https://ec.europa.eu/eurostat/web/gisco" target="_blank" rel="noopener">Eurostat GISCO</a> NUTS 3 (2021 frame), &copy; EuroGeographics for the administrative boundaries',
+      censusFlagNote: "* The religion question is voluntary, and each wave's shares sit on NSI's own published basis: the full population in 2001; the voluntary-question respondent total in 2011; and in 2021 the population with religion information, after excluding administrative additions without it. The bases are incompatible instruments, and the responding share and response categories changed across waves; the separate snapshots may reflect changing respondent composition as well as changing affiliation. The 2001 census offered no no-religion category. Some suppressed 2011 confidential cells remain inside the published Other religions group and are never estimated."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260710d"></script>
+</body>
+</html>
