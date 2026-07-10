@@ -1,0 +1,1639 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v1",
+  "manifest_id": "manifest:bg-census-religion:bg:2001-2021:nsi-gisco",
+  "dataset_id": "bg-census-religion:bg:2001-2021:nsi-gisco",
+  "dataset_version_id": "bg-census-religion:bg:2001-2021:nsi-gisco:b65876ac646a",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "bg-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "BG"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-10T08:57:42Z",
+  "created_by": "scripts/build_bg_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_bg_area_summary.R",
+    "git_commit": "c8a05fc",
+    "command": "Rscript scripts/build_bg_area_summary.R",
+    "parameters": {
+      "waves": [2001, 2011, 2021],
+      "geography": "28 NSI districts mapped to GISCO NUTS 3 2021",
+      "construct": "census affiliation from the voluntary religion question",
+      "denominator": {
+        "2001": {
+          "rule": "NSI's published presentation uses the full census population, including Cannot self-identify and Not shown.",
+          "national_denominator": 7928901,
+          "citation": "NSI, Structure of the population by religious denomination (https://www.nsi.bg/Census/StrReligion.htm)."
+        },
+        "2011": {
+          "rule": "NSI's R10 presentation uses the 5,758,301 voluntary-question respondents out of 7,364,570 census residents.",
+          "national_denominator": 5758301,
+          "citation": "NSI, Census 2011 final results and report R10 (https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx)."
+        },
+        "2021": {
+          "rule": "NSI's published presentation uses the 5,903,108 people with religion information, excluding 616,681 administrative additions with no religion information from 6,519,789 residents.",
+          "national_denominator": 5903108,
+          "citation": "NSI, Census 2021 ethno-cultural characteristics, footnote 3 (https://www.nsi.bg/index.php/en/file/24020/Census2021-ethnos_en.pdf)."
+        }
+      },
+      "instrument_rule": "The three published bases differ. religious_change is withheld between every pair of waves; the snapshots retain the respondent-composition warning.",
+      "category_rule": "retain every source leaf label in the manifest; use exact broader groups for the 2011 released product where confidential leaf cells occur",
+      "boundary_source_vintage": "2021",
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 254609,
+        "byte_ceiling": 1500000
+      },
+      "local_cache_hint": "Raw NSI pages, reports, terms, and GISCO geometry are cached under data/raw/bg_census/ and remain git-ignored.",
+      "retrieval_routes": [
+        {
+          "purpose": "2001 district table",
+          "method": "GET",
+          "url": "https://www.nsi.bg/Census/Religion.htm"
+        },
+        {
+          "purpose": "2011 national and district reports",
+          "method": "GET",
+          "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL={NSI_DISTRICT_CODE}"
+        },
+        {
+          "purpose": "2011 full district populations",
+          "method": "GET",
+          "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R15.aspx"
+        },
+        {
+          "purpose": "2021 district table",
+          "method": "POST",
+          "url": "https://www.nsi.bg/infostat/2001",
+          "notes": "Infostat definition 2001; select BG plus all level-4 districts and religion codes 0-8."
+        },
+        {
+          "purpose": "2021 municipality route",
+          "method": "GET/POST",
+          "url": "https://www.nsi.bg/infostat/2024",
+          "notes": "Infostat definition 2024; 2021 only."
+        },
+        {
+          "purpose": "boundary",
+          "method": "GET",
+          "url": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2021_4326_LEVL_3.geojson"
+        }
+      ],
+      "reconciliation": [
+        {
+          "year": 2001,
+          "district_count": 28,
+          "published_category_rows_including_total": 8,
+          "mutually_exclusive_categories_excluding_total": 7,
+          "national_population_total": 7928901,
+          "national_published_denominator": 7928901,
+          "national_published_denominator_percent_of_population": 100,
+          "national_nonresponse_count": 24807,
+          "national_nonresponse_percent": 0.3129,
+          "national_refusal_count": null,
+          "national_cannot_determine_count": 283309,
+          "within_area_category_sums_exact": true,
+          "district_category_sums_exact": true,
+          "max_absolute_difference": 0,
+          "category_reconciliation": [
+            {
+              "source_code": "TOTAL",
+              "source_name_bg": "Общо",
+              "source_display_en": "Total",
+              "district_sum": 7928901,
+              "published_national_total": 7928901,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "ORTHODOX",
+              "source_name_bg": "Източно православно",
+              "source_display_en": "Eastern Orthodox",
+              "district_sum": 6552751,
+              "published_national_total": 6552751,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "CATHOLIC",
+              "source_name_bg": "Католическо",
+              "source_display_en": "Catholic",
+              "district_sum": 43811,
+              "published_national_total": 43811,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "PROTESTANT",
+              "source_name_bg": "Протестантско",
+              "source_display_en": "Protestant",
+              "district_sum": 42308,
+              "published_national_total": 42308,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "MUSLIM",
+              "source_name_bg": "Мюсюлманско",
+              "source_display_en": "Muslim",
+              "district_sum": 966978,
+              "published_national_total": 966978,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "OTHER",
+              "source_name_bg": "Друго",
+              "source_display_en": "Other religion",
+              "district_sum": 14937,
+              "published_national_total": 14937,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "CANNOT_DETERMINE",
+              "source_name_bg": "Не се самоопределя",
+              "source_display_en": "Cannot self-identify",
+              "district_sum": 283309,
+              "published_national_total": 283309,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "NOT_SHOWN",
+              "source_name_bg": "Непоказано",
+              "source_display_en": "Not shown",
+              "district_sum": 24807,
+              "published_national_total": 24807,
+              "difference": 0,
+              "status": "matched"
+            }
+          ]
+        },
+        {
+          "year": 2011,
+          "district_count": 28,
+          "published_category_rows_including_total": 8,
+          "mutually_exclusive_categories_excluding_total": 7,
+          "national_population_total": 7364570,
+          "national_published_denominator": 5758301,
+          "national_published_denominator_percent_of_population": 78.1892,
+          "national_nonresponse_count": 1606269,
+          "national_nonresponse_percent": 21.8108,
+          "national_refusal_count": null,
+          "national_cannot_determine_count": 409898,
+          "within_area_category_sums_exact": true,
+          "district_category_sums_exact": true,
+          "max_absolute_difference": 0,
+          "category_reconciliation": [
+            {
+              "source_code": "TOTAL",
+              "source_name_bg": "Общо",
+              "source_display_en": "Total",
+              "district_sum": 5758301,
+              "published_national_total": 5758301,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "ORTHODOX",
+              "source_name_bg": "Източноправославно",
+              "source_display_en": "Eastern Orthodox",
+              "district_sum": 4374135,
+              "published_national_total": 4374135,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "CATHOLIC",
+              "source_name_bg": "Католическо",
+              "source_display_en": "Catholic",
+              "district_sum": 48945,
+              "published_national_total": 48945,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "PROTESTANT",
+              "source_name_bg": "Протестантско",
+              "source_display_en": "Protestant",
+              "district_sum": 64476,
+              "published_national_total": 64476,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "MUSLIM_ALL",
+              "source_name_bg": "Мюсюлманско - общо",
+              "source_display_en": "Muslim, total",
+              "district_sum": 577139,
+              "published_national_total": 577139,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "OTHER_RELIGIONS",
+              "source_name_bg": "Други вероизповедания",
+              "source_display_en": "Other religions",
+              "district_sum": 11444,
+              "published_national_total": 11444,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "NO_RELIGION",
+              "source_name_bg": "Няма",
+              "source_display_en": "No religion",
+              "district_sum": 272264,
+              "published_national_total": 272264,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "CANNOT_DETERMINE",
+              "source_name_bg": "Не се самоопределя",
+              "source_display_en": "Cannot self-identify",
+              "district_sum": 409898,
+              "published_national_total": 409898,
+              "difference": 0,
+              "status": "matched"
+            }
+          ]
+        },
+        {
+          "year": 2021,
+          "district_count": 28,
+          "published_category_rows_including_total": 9,
+          "mutually_exclusive_categories_excluding_total": 8,
+          "national_population_total": 6519789,
+          "national_published_denominator": 5903108,
+          "national_published_denominator_percent_of_population": 90.5414,
+          "national_nonresponse_count": 616681,
+          "national_nonresponse_percent": 9.4586,
+          "national_refusal_count": 472606,
+          "national_cannot_determine_count": 259235,
+          "within_area_category_sums_exact": true,
+          "district_category_sums_exact": true,
+          "max_absolute_difference": 0,
+          "category_reconciliation": [
+            {
+              "source_code": "TOTAL",
+              "source_name_bg": "Общо",
+              "source_display_en": "Total",
+              "district_sum": 6519789,
+              "published_national_total": 6519789,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "CHRISTIAN",
+              "source_name_bg": "Християнско",
+              "source_display_en": "Christian",
+              "district_sum": 4219270,
+              "published_national_total": 4219270,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "MUSLIM",
+              "source_name_bg": "Мюсюлманско",
+              "source_display_en": "Muslim",
+              "district_sum": 638708,
+              "published_national_total": 638708,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "JEWISH",
+              "source_name_bg": "Юдейско",
+              "source_display_en": "Jewish",
+              "district_sum": 1736,
+              "published_national_total": 1736,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "OTHER",
+              "source_name_bg": "Друго",
+              "source_display_en": "Other religion",
+              "district_sum": 6451,
+              "published_national_total": 6451,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "NO_RELIGION",
+              "source_name_bg": "Нямам",
+              "source_display_en": "No religion",
+              "district_sum": 305102,
+              "published_national_total": 305102,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "CANNOT_DETERMINE",
+              "source_name_bg": "Не мога да определя",
+              "source_display_en": "Cannot determine",
+              "district_sum": 259235,
+              "published_national_total": 259235,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "DECLINED",
+              "source_name_bg": "Не желая да отговоря",
+              "source_display_en": "Do not want to answer",
+              "district_sum": 472606,
+              "published_national_total": 472606,
+              "difference": 0,
+              "status": "matched"
+            },
+            {
+              "source_code": "UNKNOWN",
+              "source_name_bg": "Непоказано",
+              "source_display_en": "Unknown",
+              "district_sum": 616681,
+              "published_national_total": 616681,
+              "difference": 0,
+              "status": "matched"
+            }
+          ]
+        }
+      ],
+      "published_share_reproduction": {
+        "2001": [
+          {
+            "source_code": "ORTHODOX",
+            "count": 6552751,
+            "denominator": 7928901,
+            "computed_percent": 82.6439,
+            "published_percent": 82.6,
+            "published_rounding_digits": 1,
+            "status": "matched"
+          },
+          {
+            "source_code": "MUSLIM",
+            "count": 966978,
+            "denominator": 7928901,
+            "computed_percent": 12.1956,
+            "published_percent": 12.2,
+            "published_rounding_digits": 1,
+            "status": "matched"
+          },
+          {
+            "source_code": "CATHOLIC",
+            "count": 43811,
+            "denominator": 7928901,
+            "computed_percent": 0.5525,
+            "published_percent": 0.6,
+            "published_rounding_digits": 1,
+            "status": "matched"
+          },
+          {
+            "source_code": "PROTESTANT",
+            "count": 42308,
+            "denominator": 7928901,
+            "computed_percent": 0.5336,
+            "published_percent": 0.5,
+            "published_rounding_digits": 1,
+            "status": "matched"
+          }
+        ],
+        "2011": [
+          {
+            "source_code": "ORTHODOX",
+            "count": 4374135,
+            "denominator": 5758301,
+            "computed_percent": 75.9622,
+            "published_percent": 76,
+            "published_rounding_digits": 1,
+            "status": "matched"
+          },
+          {
+            "source_code": "CATHOLIC",
+            "count": 48945,
+            "denominator": 5758301,
+            "computed_percent": 0.85,
+            "published_percent": 0.8,
+            "published_rounding_digits": 1,
+            "status": "matched"
+          },
+          {
+            "source_code": "PROTESTANT",
+            "count": 64476,
+            "denominator": 5758301,
+            "computed_percent": 1.1197,
+            "published_percent": 1.1,
+            "published_rounding_digits": 1,
+            "status": "matched"
+          },
+          {
+            "source_code": "MUSLIM_ALL",
+            "count": 577139,
+            "denominator": 5758301,
+            "computed_percent": 10.0227,
+            "published_percent": 10,
+            "published_rounding_digits": 1,
+            "status": "matched"
+          },
+          {
+            "source_code": "OTHER_RELIGIONS",
+            "count": 11444,
+            "denominator": 5758301,
+            "computed_percent": 0.1987,
+            "published_percent": 0.2,
+            "published_rounding_digits": 1,
+            "status": "matched"
+          },
+          {
+            "source_code": "NO_RELIGION",
+            "count": 272264,
+            "denominator": 5758301,
+            "computed_percent": 4.7282,
+            "published_percent": 4.7,
+            "published_rounding_digits": 1,
+            "status": "matched"
+          },
+          {
+            "source_code": "CANNOT_DETERMINE",
+            "count": 409898,
+            "denominator": 5758301,
+            "computed_percent": 7.1184,
+            "published_percent": 7.1,
+            "published_rounding_digits": 1,
+            "status": "matched"
+          }
+        ],
+        "2021": [
+          {
+            "source_code": "CHRISTIAN",
+            "count": 4219270,
+            "denominator": 5903108,
+            "computed_percent": 71.4754,
+            "published_percent": 71.5,
+            "published_rounding_digits": 1,
+            "status": "matched"
+          },
+          {
+            "source_code": "MUSLIM",
+            "count": 638708,
+            "denominator": 5903108,
+            "computed_percent": 10.8199,
+            "published_percent": 10.8,
+            "published_rounding_digits": 1,
+            "status": "matched"
+          },
+          {
+            "source_code": "NO_RELIGION",
+            "count": 305102,
+            "denominator": 5903108,
+            "computed_percent": 5.1685,
+            "published_percent": 5.2,
+            "published_rounding_digits": 1,
+            "status": "matched"
+          },
+          {
+            "source_code": "CANNOT_DETERMINE",
+            "count": 259235,
+            "denominator": 5903108,
+            "computed_percent": 4.3915,
+            "published_percent": 4.4,
+            "published_rounding_digits": 1,
+            "status": "matched"
+          },
+          {
+            "source_code": "DECLINED",
+            "count": 472606,
+            "denominator": 5903108,
+            "computed_percent": 8.0061,
+            "published_percent": 8,
+            "published_rounding_digits": 1,
+            "status": "matched"
+          }
+        ]
+      },
+      "boundary_validation": {
+        "output_feature_count": 28,
+        "valid_feature_count": 28,
+        "distinct_geometry_hash_count": 28,
+        "geometry_sha256_by_district_code": {
+          "BGS": "7167b62bf2dc1615efbbd636b5af8cf860eb208f95e5af8e3291f19a08d6a8f9",
+          "BLG": "2029a538bb6047316d215d85430760ad6ce2250fbb359342e50ade49742a9b61",
+          "DOB": "4c8609f664ead70bbaa376b3fa8737ac4c4d99444e2dbcff26820dff157f8cb5",
+          "GAB": "6949301eeff7f57416ed9112267216412feda0fce24b2f739b3045cca46fab76",
+          "HKV": "0f262c65af4ab300c5ba4334a0adb188edcc3ddb9f0f726da5a60b5487b92ff3",
+          "JAM": "164a6e73eb9eeb0a0a3fa6afa04b52ecd8894ae2342927c403796fde09336f4c",
+          "KNL": "8aa5fc9e39c08c314ff588ec17d27a2d17879ed45378d60b73ad65592e77648c",
+          "KRZ": "de41d2621bcc3b28fdd24b884b3067d784b84635480807b9328092219efe4cc5",
+          "LOV": "8f067221561cb6a5b3b1a1b36ce2926b039ec5a7d6e8d6ba9ace4bcc5a89308f",
+          "MON": "471332991d91062ea01cd9328f13bac16ab5bce3d1ceb88dc896569873140c9e",
+          "PAZ": "a39be912752e0ba036971bccbb44dfbb3be7719fd040a0baa850b0560113972e",
+          "PDV": "fb5c57eebdb4b4b93bb3a1e2e80c8babab118dc8163266853b698db64bc46e38",
+          "PER": "84233eebad3988bb18633de986a9ad2cc76f3b54e4dbdb273b6de1ad612382f1",
+          "PVN": "158d153aed246df1acff42f6a6f2222ce34dd19e2d32afe41c47f603bd11a060",
+          "RAZ": "0334ef491032e4e942d140185e16b7d57a5638614b02198f0a5e843137a59737",
+          "RSE": "93f251d9a508f5f9ad4cffe741a4835829a30c63ba3fb018266fbacc6f3b5b85",
+          "SFO": "7bb8cd2092bcf3e59b1e03066b0f3269ddf26972603b047146ac0423765b4706",
+          "SHU": "d3a9f84d1683007afd2ac9fd60977d9656a1c4ae4315fe2a3e236442f475e115",
+          "SLS": "535d99168b09633cbf4a0341e08a7670bd61b4dfcf87632a13fa5671216eb763",
+          "SLV": "6699f7f71c6f0fc53c376f8b520c287802ff5af64653bb6d3af182f33b337693",
+          "SML": "56ee3d6f45a14b04294d0843ba0e98a581c4324258dcbc9b50d1dafb2429a229",
+          "SOF": "92cccccaf87e370dc100b9056e0551cf57a7db0d0f05743f411b25ebfdd529ae",
+          "SZR": "232a692bb3ea8c78c688d50ab99fe76aa10ba3ce5ae8bb0f86b123dc7f85e238",
+          "TGV": "b9f2d488ab47791e8f9430ecbddfcca1d6a9ff25dfeb30d5babdd2f52d66c93a",
+          "VAR": "b1237b0e6662aedef243cc535fe0d83a43b2f4f62b67eaa6ff1e1dad5599bbbd",
+          "VID": "c0f86e9b6d928719d4121747b58654692280a3935a983911ec79fc4612a18298",
+          "VRC": "5bf4d8a690b2c642d725b48e0992dc8c53a3c31d3792025968343522502217fe",
+          "VTR": "182c1eaaa7d37a78dd4caf041757de67be6e3a1f8ca9d3c269f48aa65d6225a6"
+        },
+        "source_crs": "EPSG:4326",
+        "area_calculation_crs": "EPSG:3035",
+        "output_crs": "EPSG:4326"
+      },
+      "category_mappings": {
+        "2001": [
+          {
+            "source_code": "TOTAL",
+            "source_name_bg": "Общо",
+            "source_display_en": "Total",
+            "product_role": "total",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "ORTHODOX",
+            "source_name_bg": "Източно православно",
+            "source_display_en": "Eastern Orthodox",
+            "product_role": "named_religion",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "CATHOLIC",
+            "source_name_bg": "Католическо",
+            "source_display_en": "Catholic",
+            "product_role": "named_religion",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "PROTESTANT",
+            "source_name_bg": "Протестантско",
+            "source_display_en": "Protestant",
+            "product_role": "named_religion",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "MUSLIM",
+            "source_name_bg": "Мюсюлманско",
+            "source_display_en": "Muslim",
+            "product_role": "named_religion",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "OTHER",
+            "source_name_bg": "Друго",
+            "source_display_en": "Other religion",
+            "product_role": "named_religion",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "CANNOT_DETERMINE",
+            "source_name_bg": "Не се самоопределя",
+            "source_display_en": "Cannot self-identify",
+            "product_role": "cannot_determine",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "NOT_SHOWN",
+            "source_name_bg": "Непоказано",
+            "source_display_en": "Not shown",
+            "product_role": "nonresponse",
+            "harmonisation": "as_published"
+          }
+        ],
+        "2011": [
+          {
+            "source_code": "TOTAL",
+            "source_name_bg": "Общо",
+            "source_display_en": "Total",
+            "product_role": "total",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "ORTHODOX",
+            "source_name_bg": "Източноправославно",
+            "source_display_en": "Eastern Orthodox",
+            "product_role": "named_religion",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "CATHOLIC",
+            "source_name_bg": "Католическо",
+            "source_display_en": "Catholic",
+            "product_role": "named_religion",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "PROTESTANT",
+            "source_name_bg": "Протестантско",
+            "source_display_en": "Protestant",
+            "product_role": "named_religion",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "MUSLIM_ALL",
+            "source_name_bg": "Мюсюлманско - общо",
+            "source_display_en": "Muslim, total",
+            "product_role": "named_religion",
+            "harmonisation": "exact_group_from_published_leaves"
+          },
+          {
+            "source_code": "OTHER_RELIGIONS",
+            "source_name_bg": "Други вероизповедания",
+            "source_display_en": "Other religions",
+            "product_role": "named_religion",
+            "harmonisation": "exact_group_from_published_leaves"
+          },
+          {
+            "source_code": "NO_RELIGION",
+            "source_name_bg": "Няма",
+            "source_display_en": "No religion",
+            "product_role": "no_religion",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "CANNOT_DETERMINE",
+            "source_name_bg": "Не се самоопределя",
+            "source_display_en": "Cannot self-identify",
+            "product_role": "cannot_determine",
+            "harmonisation": "as_published"
+          }
+        ],
+        "2021": [
+          {
+            "source_code": "TOTAL",
+            "source_name_bg": "Общо",
+            "source_display_en": "Total",
+            "product_role": "total",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "CHRISTIAN",
+            "source_name_bg": "Християнско",
+            "source_display_en": "Christian",
+            "product_role": "named_religion",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "MUSLIM",
+            "source_name_bg": "Мюсюлманско",
+            "source_display_en": "Muslim",
+            "product_role": "named_religion",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "JEWISH",
+            "source_name_bg": "Юдейско",
+            "source_display_en": "Jewish",
+            "product_role": "named_religion",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "OTHER",
+            "source_name_bg": "Друго",
+            "source_display_en": "Other religion",
+            "product_role": "named_religion",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "NO_RELIGION",
+            "source_name_bg": "Нямам",
+            "source_display_en": "No religion",
+            "product_role": "no_religion",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "CANNOT_DETERMINE",
+            "source_name_bg": "Не мога да определя",
+            "source_display_en": "Cannot determine",
+            "product_role": "cannot_determine",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "DECLINED",
+            "source_name_bg": "Не желая да отговоря",
+            "source_display_en": "Do not want to answer",
+            "product_role": "declined",
+            "harmonisation": "as_published"
+          },
+          {
+            "source_code": "UNKNOWN",
+            "source_name_bg": "Непоказано",
+            "source_display_en": "Unknown",
+            "product_role": "nonresponse",
+            "harmonisation": "as_published"
+          }
+        ]
+      },
+      "source_leaf_categories_2011": [
+        {
+          "source_code": "TOTAL",
+          "source_name_bg": "Общо",
+          "source_display_en": "Total",
+          "product_role": "total"
+        },
+        {
+          "source_code": "ORTHODOX",
+          "source_name_bg": "Източноправославно",
+          "source_display_en": "Eastern Orthodox",
+          "product_role": "named_religion"
+        },
+        {
+          "source_code": "CATHOLIC",
+          "source_name_bg": "Католическо",
+          "source_display_en": "Catholic",
+          "product_role": "named_religion"
+        },
+        {
+          "source_code": "PROTESTANT",
+          "source_name_bg": "Протестантско",
+          "source_display_en": "Protestant",
+          "product_role": "named_religion"
+        },
+        {
+          "source_code": "SUNNI",
+          "source_name_bg": "Мюсюлмаснко-сунитско",
+          "source_display_en": "Sunni Muslim",
+          "product_role": "named_religion"
+        },
+        {
+          "source_code": "SHIA",
+          "source_name_bg": "Мюсюлманско-шиитско",
+          "source_display_en": "Shia Muslim",
+          "product_role": "named_religion"
+        },
+        {
+          "source_code": "MUSLIM",
+          "source_name_bg": "Мюсюлманско",
+          "source_display_en": "Muslim, unspecified",
+          "product_role": "named_religion"
+        },
+        {
+          "source_code": "ARMENIAN_APOSTOLIC",
+          "source_name_bg": "Арменско апостолическо православно",
+          "source_display_en": "Armenian Apostolic Orthodox",
+          "product_role": "named_religion"
+        },
+        {
+          "source_code": "JEWISH",
+          "source_name_bg": "Израилтянско/юдаизъм",
+          "source_display_en": "Jewish/Judaism",
+          "product_role": "named_religion"
+        },
+        {
+          "source_code": "OTHER",
+          "source_name_bg": "Друго",
+          "source_display_en": "Other religion",
+          "product_role": "named_religion"
+        },
+        {
+          "source_code": "NO_RELIGION",
+          "source_name_bg": "Няма",
+          "source_display_en": "No religion",
+          "product_role": "no_religion"
+        },
+        {
+          "source_code": "CANNOT_DETERMINE",
+          "source_name_bg": "Не се самоопределя",
+          "source_display_en": "Cannot self-identify",
+          "product_role": "cannot_determine"
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "xml2": "1.6.0",
+      "digest": "0.6.39",
+      "mapshaper": "npx mapshaper through scripts/lib/simplify_boundary.R"
+    }
+  },
+  "source": {
+    "provider": "National Statistical Institute of Bulgaria (NSI); Eurostat Geographic Information System of the Commission (GISCO)",
+    "source_dataset_ids": [
+      "nsi-bg-census-2001-religion-district",
+      "nsi-bg-census-2011-religion-district",
+      "nsi-bg-census-2021-religion-district",
+      "eurostat-gisco-nuts3-2021-bg",
+      "nsi-bg-licence-v2"
+    ],
+    "source_urls": [
+      "https://www.nsi.bg/Census/Religion.htm",
+      "https://www.nsi.bg/Census/StrReligion.htm",
+      "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx",
+      "https://censusresults.nsi.bg/Census/Reports/2/2/R15.aspx",
+      "https://www.nsi.bg/census2011/PDOCS2/Census2011final_en.pdf",
+      "https://www.nsi.bg/infostat/2001",
+      "https://www.nsi.bg/infostat/2024",
+      "https://www.nsi.bg/index.php/en/file/24020/Census2021-ethnos_en.pdf",
+      "https://www.nsi.bg/pages/licenz-za-izpolzvaneto-na-statisticheskata-informaciya-proizvejdana-i-razprostranyavana-ot-nacionalniya-statisticheski-institut-485",
+      "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2021_4326_LEVL_3.geojson",
+      "https://ec.europa.eu/eurostat/web/gisco/geodata/statistical-units/territorial-units-statistics",
+      "https://ec.europa.eu/eurostat/help/copyright-notice"
+    ],
+    "retrieved_at": "2026-07-10T00:00:00Z",
+    "licence": "NSI Licence v2.0 permits reproduction, distribution, and use, including commercial use, with attribution, but states that derivative and collective works may not be distributed; the derived census product therefore requires conductor review before publication. Eurostat GISCO material is reusable with source acknowledgement and a modification disclaimer.",
+    "citation": "National Statistical Institute of Bulgaria censuses 2001, 2011, and 2021; Eurostat GISCO NUTS 3 2021."
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/bg_census/nsi_census_2001_religion_district.html",
+      "url": "https://www.nsi.bg/Census/Religion.htm",
+      "method": "GET",
+      "format": "html",
+      "bytes": 26113,
+      "sha256": "b0f1c068d70a8002717faaa9d48605c9475d0252dd1f36adadad1d733cde1a01",
+      "source_dataset_id": "nsi-bg-census-2001-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2001 country and district religion table."
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2001_religion_method.html",
+      "url": "https://www.nsi.bg/Census/StrReligion.htm",
+      "method": "GET",
+      "format": "html",
+      "bytes": 47385,
+      "sha256": "50ddffaed920aa0657e5f542f28d3645ad1a7f7ff4c8a0161a5ffa9df75a301f",
+      "source_dataset_id": "nsi-bg-census-2001-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2001 definition, voluntary-question statement, and non-response presentation."
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_national.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx",
+      "method": "GET",
+      "format": "html",
+      "bytes": 64100,
+      "sha256": "6ea0dc92700a5300bb81e99e41520daa06fe42bd52b7cd50ab7e78a19c765ffa",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 national respondent table."
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_population_district.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R15.aspx",
+      "method": "GET",
+      "format": "html",
+      "bytes": 50511,
+      "sha256": "6fc289f5c890fb8f2eb7724da487653972f5b035c762cd8f56f812208329cf41",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 full district population table."
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_main_results_en.pdf",
+      "url": "https://www.nsi.bg/census2011/PDOCS2/Census2011final_en.pdf",
+      "method": "GET",
+      "format": "pdf",
+      "bytes": 1192226,
+      "sha256": "c2add1a245c683366ec3955a08b764561320511d1fd725ebd035e5d69171ed8f",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 main results and voluntary-question presentation."
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_infostat_2021_religion_district.html",
+      "url": "https://www.nsi.bg/infostat/2001",
+      "method": "POST",
+      "format": "html",
+      "bytes": 142264,
+      "sha256": "84bdbf65773294638795e2c900e5660d95f36160eada18603c29db31787f26c6",
+      "source_dataset_id": "nsi-bg-census-2021-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": {
+        "filters[ekatte_preb_2011_2021][]": [
+          "BG",
+          "BLG",
+          "BGS",
+          "VAR",
+          "VTR",
+          "VID",
+          "VRC",
+          "GAB",
+          "DOB",
+          "KRZ",
+          "KNL",
+          "LOV",
+          "MON",
+          "PAZ",
+          "PER",
+          "PVN",
+          "PDV",
+          "RAZ",
+          "RSE",
+          "SLS",
+          "SLV",
+          "SML",
+          "SFO",
+          "SOF",
+          "SZR",
+          "TGV",
+          "HKV",
+          "SHU",
+          "JAM"
+        ],
+        "filters[Relig_Denom][]": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "filters[periods][]": "2021",
+        "filter": "1",
+        "filters[filter]": "filter",
+        "filters[post]": "1"
+      },
+      "notes": "Infostat definition 2001 POST response for country and all districts."
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_infostat_2021_religion_municipality_route.html",
+      "url": "https://www.nsi.bg/infostat/2024",
+      "method": "GET",
+      "format": "html",
+      "bytes": 168774,
+      "sha256": "2adc794b67c2b59bd4adaf485e4ba61887558fb90dd677dfc17c87f7914b1d7e",
+      "source_dataset_id": "nsi-bg-census-2021-religion-district",
+      "used_in_public_product": false,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Infostat definition 2024 route proving 2021 municipality availability."
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2021_ethnocultural_en.pdf",
+      "url": "https://www.nsi.bg/index.php/en/file/24020/Census2021-ethnos_en.pdf",
+      "method": "GET",
+      "format": "pdf",
+      "bytes": 1204511,
+      "sha256": "c835e3f8a709c19856c9609176272924780cd16682662a71d33adfd35e63a5e8",
+      "source_dataset_id": "nsi-bg-census-2021-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2021 ethno-cultural results and respondent-based presentation."
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_licence_v2.html",
+      "url": "https://www.nsi.bg/pages/licenz-za-izpolzvaneto-na-statisticheskata-informaciya-proizvejdana-i-razprostranyavana-ot-nacionalniya-statisticheski-institut-485",
+      "method": "GET",
+      "format": "html",
+      "bytes": 68322,
+      "sha256": "890ee567dff0f9f797bf70a5f5321332f5c1835890f9f8d5e9609f1c91c1284c",
+      "source_dataset_id": "nsi-bg-licence-v2",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "NSI Licence v2.0, including attribution and derivative-work clauses."
+    },
+    {
+      "uri": "data/raw/bg_census/gisco_nuts3_2021_4326.geojson",
+      "url": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2021_4326_LEVL_3.geojson",
+      "method": "GET",
+      "format": "geojson",
+      "bytes": 28176705,
+      "sha256": "554336d416056abcd1d6f3239e3d5893560ca180056971557403c6fd8ff66d2c",
+      "source_dataset_id": "eurostat-gisco-nuts3-2021-bg",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "All-Europe NUTS 3 2021 GeoJSON filtered to Bulgaria."
+    },
+    {
+      "uri": "data/raw/bg_census/gisco_nuts_terms.html",
+      "url": "https://ec.europa.eu/eurostat/web/gisco/geodata/statistical-units/territorial-units-statistics",
+      "method": "GET",
+      "format": "html",
+      "bytes": 194737,
+      "sha256": "7a24ec927159532bef01d6545d498254f42db28c6a2503a55ec6097465741b54",
+      "source_dataset_id": "eurostat-gisco-nuts3-2021-bg",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "GISCO NUTS download description."
+    },
+    {
+      "uri": "data/raw/bg_census/eurostat_copyright.html",
+      "url": "https://ec.europa.eu/eurostat/help/copyright-notice",
+      "method": "GET",
+      "format": "html",
+      "bytes": 177596,
+      "sha256": "eb913fd59299fff0df5e06813125734ebbe2622e00def4f49411271a079ba88b",
+      "source_dataset_id": "eurostat-gisco-nuts3-2021-bg",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Eurostat reuse and attribution policy."
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_blg.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=BLG",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63926,
+      "sha256": "191162dc4445aded2f49352fd9cd6e850dd672a7916b27987b106303ebd4cec1",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district BLG"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_bgs.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=BGS",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63947,
+      "sha256": "bc7b26413536778f389392ec816fcc688f81fe0dcce8c0cae54a6bec0f15310d",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district BGS"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_var.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=VAR",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63962,
+      "sha256": "080ad08eba801c0e79d94381cfdf7cdb050252ebd0565cee2bdf99777e4188b0",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district VAR"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_vtr.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=VTR",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63961,
+      "sha256": "99427211536e31da009765c26d5796f7e998664f7bb5e2f9dcf7cd2b6dbcec2d",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district VTR"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_vid.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=VID",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63831,
+      "sha256": "91239fc6b1b3f009a80039841756b1f14aad2495fe4e4849ab04edccd8b35863",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district VID"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_vrc.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=VRC",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63879,
+      "sha256": "c64186f417d7b40dd223a4119c334e85f6b3cc7d329a0a5a983c9a7351e20bd2",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district VRC"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_gab.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=GAB",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63865,
+      "sha256": "200781a802d9af04c22b5bcf90e6a69ebe958c012284c144961a85d27fedd9b8",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district GAB"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_dob.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=DOB",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63920,
+      "sha256": "dc96b6b5c1d41a6ba4369ad44d24ddcca78d9cab7327eb171d46cfc3015a7c4d",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district DOB"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_krz.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=KRZ",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63906,
+      "sha256": "d1a4f65d5e057554bfc6b85c26cbe4969ee0adc4af6a60df32932ce01661f276",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district KRZ"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_knl.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=KNL",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63854,
+      "sha256": "1f8e4ad544d39a0c2c2331a6b5afab84541cca1610700926687d6a1a1f8c3272",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district KNL"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_lov.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=LOV",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63897,
+      "sha256": "a33c53840350b7269fe66dc0411fe982a905db76bf1f69502062841d6691f0da",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district LOV"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_mon.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=MON",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63882,
+      "sha256": "d2f3b9b85570a5b861d5884036d6db3d63d8ba946afb33eada50c5d6bb741f60",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district MON"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_paz.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=PAZ",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63943,
+      "sha256": "81fed9e9b284abbc04c187e908891d02ffc061dc0d58fddc099adc571af0cf8b",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district PAZ"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_per.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=PER",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63852,
+      "sha256": "23d61329088cd4a2d87989bfb7ecb89fa2a147d6d57f210a277b3b941637df00",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district PER"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_pvn.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=PVN",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63929,
+      "sha256": "d7ec90c49a25f404bd3d7724f8e58c2c9f278462ac3e660ef7364464a589e123",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district PVN"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_pdv.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=PDV",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63989,
+      "sha256": "078585a5f5e8569c1d987d16d6c2f27a0a4e6fa7ce43633cedb90545b561df27",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district PDV"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_raz.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=RAZ",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63889,
+      "sha256": "99aafe9bf53acfc5aff2963c2d6c713349fbf4cb79361daeeb720988b4b56dc2",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district RAZ"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_rse.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=RSE",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63935,
+      "sha256": "800c55152056455e4ca985115a9eccd831c32f567b43aba5563c4cfa24cd18c1",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district RSE"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_sls.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=SLS",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63895,
+      "sha256": "7d7c16bc7dc5c02184a2d04bdca1713b163dca6fc5e310f4992a547f32033c8e",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district SLS"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_slv.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=SLV",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63928,
+      "sha256": "c2298023b91d5863b7a2e4133c56eded9550709045ece4b585e63769ea0cd15f",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district SLV"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_sml.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=SML",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63888,
+      "sha256": "5b90f80d14f948dc2579cb910ac3d245718103f7ddfa0d10673a5ef4914c74cd",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district SML"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_sfo.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=SFO",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63893,
+      "sha256": "3e1c7065a7cbc664f2e1811c06658458a78e1f14c9bf8cde9319acd24355722e",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district SFO"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_sof.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=SOF",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63995,
+      "sha256": "e715171a7ca7536690b861dc4f889a5697a4094968918c5f2f06406a2fc8904c",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district SOF"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_szr.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=SZR",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63956,
+      "sha256": "cb12fc2187b1eb945908fd9746e7fbce5625872cb445368e9b70461d15cee27a",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district SZR"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_tgv.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=TGV",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63885,
+      "sha256": "da3789d8c1bb1f119175bb7cbc1c2ab3f6d4cb874a671ba2a82d1b5bc76f00b6",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district TGV"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_hkv.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=HKV",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63933,
+      "sha256": "8a17c8cdf9dec6f87f94e50fcc75e9f7f1841964537da183c46a25f96de4f27d",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district HKV"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_shu.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=SHU",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63912,
+      "sha256": "e048055e0795a06dcc3a967cbe05137c8c5172554a9dda024ba1676596bfaf2e",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district SHU"
+    },
+    {
+      "uri": "data/raw/bg_census/nsi_census_2011_religion_jam.html",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx?OBL=JAM",
+      "method": "GET",
+      "format": "html",
+      "bytes": 63888,
+      "sha256": "9ddc596c444dae2cb4ce8e3e9e7302793d1dbb2820edcedd3542add83a0b2d07",
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "used_in_public_product": true,
+      "retrieved_at": "2026-07-10T08:22:07Z",
+      "http_status": 200,
+      "request_body": null,
+      "notes": "Census 2011 religion report for district JAM"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/bg/data/area_summary_district.json",
+      "sha256": "b65876ac646a3f01e2b553bbb0a07432d0c63696106d375935abfaa8aa8258b7",
+      "built_by": "scripts/build_bg_area_summary.R",
+      "notes": "84 district-year rows."
+    },
+    {
+      "uri": "repo:apps/regions/bg/data/area_summary_district.csv",
+      "sha256": "387d8240e6c9706b7b83422ca9630fc617050c811d8eb757ae7ced3f038e6e7a",
+      "built_by": "scripts/build_bg_area_summary.R",
+      "notes": "CSV companion."
+    },
+    {
+      "uri": "repo:apps/regions/bg/data/bg_district_2021.geojson",
+      "sha256": "593105d7dfc8245cfbfa958fc849215fb057393fc39a39fe0ed52f7f580fa5e6",
+      "built_by": "scripts/build_bg_area_summary.R",
+      "notes": "28 simplified district features."
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/bg/data/area_summary_district.json",
+      "storage_provider": "other",
+      "format": "json",
+      "bytes": 128673,
+      "sha256": "b65876ac646a3f01e2b553bbb0a07432d0c63696106d375935abfaa8aa8258b7",
+      "content_sha256": null,
+      "row_count": 84,
+      "feature_count": null,
+      "content": "Bulgaria district census-affiliation area summary for 2001, 2011, and 2021.",
+      "privacy": "public",
+      "licence_status": "needs_review"
+    },
+    {
+      "uri": "repo:apps/regions/bg/data/area_summary_district.csv",
+      "storage_provider": "other",
+      "format": "csv",
+      "bytes": 62324,
+      "sha256": "387d8240e6c9706b7b83422ca9630fc617050c811d8eb757ae7ced3f038e6e7a",
+      "content_sha256": null,
+      "row_count": 84,
+      "feature_count": null,
+      "content": "Flattened Bulgaria district census-affiliation rows.",
+      "privacy": "public",
+      "licence_status": "needs_review"
+    },
+    {
+      "uri": "repo:apps/regions/bg/data/bg_district_2021.geojson",
+      "storage_provider": "other",
+      "format": "geojson",
+      "bytes": 254609,
+      "sha256": "593105d7dfc8245cfbfa958fc849215fb057393fc39a39fe0ed52f7f580fa5e6",
+      "content_sha256": null,
+      "row_count": null,
+      "feature_count": 28,
+      "content": "Simplified GISCO NUTS 3 2021 Bulgaria geometry.",
+      "privacy": "public",
+      "licence_status": "accepted"
+    }
+  ],
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_bg_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/bg/data/area_summary_district.json"
+    ],
+    "warnings": [
+      "NSI Licence v2.0 includes a clause against distributing derivative and collective works; conductor review is required before publication.",
+      "Geometric stability of Bulgarian district boundaries across 2001, 2011, and 2021 was not verified. The common 2021 geometry uses an explicit concordance between NSI district codes and GISCO NUTS 3 codes."
+    ],
+    "notes": "All released-group count, published-denominator, published-headline-share, wave, geography, and geometry gates passed exactly. religious_change is withheld between every pair of waves because the published bases differ."
+  },
+  "stats": {
+    "district_year_rows": 84,
+    "district_count": 28,
+    "wave_count": 3,
+    "boundary_valid_features": 28,
+    "distinct_geometry_hashes": 28
+  },
+  "construct_notes": [
+    "The construct is census affiliation from the voluntary religion question. It does not measure belief, practice, attendance, or registered membership.",
+    "NSI's published 2001 shares use the full population. NSI's 2011 shares use the R10 voluntary-question respondent total. NSI's 2021 shares exclude administrative additions with no religion information.",
+    "NSI's published basis is the full population in 2001; 5,758,301 voluntary-question respondents out of 7,364,570 residents in 2011; and 5,903,108 people with religion information after excluding 616,681 administrative additions with no religion information from 6,519,789 residents in 2021. These bases are incompatible instruments. The product therefore withholds religious_change between every pair of waves. The responding share and response categories also changed across waves; the separate snapshots may reflect changing respondent composition as well as changing affiliation.",
+    "The 2001 census offered no no-religion category. The product leaves no_religion_count and no_religion_percent null for 2001.",
+    "The 2011 district report suppresses some Armenian Apostolic Orthodox and Jewish all-age cells as confidential under Article 25 of the Statistics Act. The product exactly derives the published broader Други вероизповедания (Other religions) group as the respondent total less every unsuppressed mutually exclusive category; it does not estimate or expose a suppressed leaf value.",
+    "The product preserves Cannot self-identify, Cannot determine, Do not want to answer, and Unknown as distinct source categories where published.",
+    "District is the primary geography because all three waves publish complete district category tables. The pinned municipality route contains 2021 only.",
+    "Geometric stability of Bulgarian district boundaries across 2001, 2011, and 2021 was not verified. The common 2021 geometry uses an explicit concordance between NSI district codes and GISCO NUTS 3 codes."
+  ],
+  "deferred_sources": [
+    {
+      "source": "https://www.nsi.bg/infostat/2024",
+      "status": "extra_level_not_shipped",
+      "reason": "Infostat definition 2024 publishes municipalities for 2021 only; no matching municipal route was pinned for 2001 or 2011."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "needs_review",
+  "downstream_status": "staged",
+  "source_datasets": [
+    {
+      "source_dataset_id": "nsi-bg-census-2001-religion-district",
+      "name": "NSI Census 2001: population by district and religious denomination",
+      "provider": "National Statistical Institute of Bulgaria (NSI)",
+      "url": "https://www.nsi.bg/Census/Religion.htm",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/bg_census/nsi_census_2001_religion_district.html",
+      "licence": {
+        "name": "NSI Licence v2.0; attribution required; derivative-work distribution clause requires review",
+        "url": "https://www.nsi.bg/pages/licenz-za-izpolzvaneto-na-statisticheskata-informaciya-proizvejdana-i-razprostranyavana-ot-nacionalniya-statisticheski-institut-485",
+        "attribution": "National Statistical Institute of Bulgaria"
+      },
+      "citation": "National Statistical Institute of Bulgaria, Census 2001 district table and Structure of the population by religious denomination, https://www.nsi.bg/Census/StrReligion.htm.",
+      "access_limits": "Legacy Windows-1251 HTML table; no bulk API.",
+      "redistribution_limits": "NSI Licence v2.0 states that derivative and collective works may not be distributed; publication requires conductor review.",
+      "notes": "NSI's presentation reports Eastern Orthodox as 6,552,751 people or 82.6% of the full population of 7,928,901; the product uses that full-population basis."
+    },
+    {
+      "source_dataset_id": "nsi-bg-census-2011-religion-district",
+      "name": "NSI Census 2011: population by residence, age, and religious denomination",
+      "provider": "National Statistical Institute of Bulgaria (NSI)",
+      "url": "https://censusresults.nsi.bg/Census/Reports/2/2/R10.aspx",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/bg_census/nsi_census_2011_religion_national.html",
+      "licence": {
+        "name": "NSI Licence v2.0; attribution required; derivative-work distribution clause requires review",
+        "url": "https://www.nsi.bg/pages/licenz-za-izpolzvaneto-na-statisticheskata-informaciya-proizvejdana-i-razprostranyavana-ot-nacionalniya-statisticheski-institut-485",
+        "attribution": "National Statistical Institute of Bulgaria"
+      },
+      "citation": "National Statistical Institute of Bulgaria, Census 2011 final results, report R10 and district population report R15.",
+      "access_limits": "One cached HTML response per district; requests are serialised and reused from cache.",
+      "redistribution_limits": "NSI Licence v2.0 states that derivative and collective works may not be distributed; publication requires conductor review.",
+      "notes": "R10 publishes 5,758,301 voluntary-question respondents and the religion categories; R15 supplies the full census population of 7,364,570 for disclosure."
+    },
+    {
+      "source_dataset_id": "nsi-bg-census-2021-religion-district",
+      "name": "NSI Infostat Census 2021: population by religious denomination, regions, and districts",
+      "provider": "National Statistical Institute of Bulgaria (NSI)",
+      "url": "https://www.nsi.bg/infostat/2001",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/bg_census/nsi_infostat_2021_religion_district.html",
+      "licence": {
+        "name": "NSI Licence v2.0; attribution required; derivative-work distribution clause requires review",
+        "url": "https://www.nsi.bg/pages/licenz-za-izpolzvaneto-na-statisticheskata-informaciya-proizvejdana-i-razprostranyavana-ot-nacionalniya-statisticheski-institut-485",
+        "attribution": "National Statistical Institute of Bulgaria"
+      },
+      "citation": "National Statistical Institute of Bulgaria, Infostat definition 2001, Census 2021 religious denomination by district.",
+      "access_limits": "Form POST route; one cached response contains the country and all 28 districts.",
+      "redistribution_limits": "NSI Licence v2.0 states that derivative and collective works may not be distributed; publication requires conductor review.",
+      "notes": "The Census 2021 release calculates shares among 5,903,108 people with religion information after excluding 616,681 administrative additions with no religion information from 6,519,789 residents. The municipality route is Infostat definition 2024, but only the 2021 wave is available there."
+    },
+    {
+      "source_dataset_id": "eurostat-gisco-nuts3-2021-bg",
+      "name": "Eurostat Geographic Information System of the Commission (GISCO) nomenclature of territorial units for statistics (NUTS) level 3, 2021 Bulgaria boundary",
+      "provider": "Eurostat Geographic Information System of the Commission (GISCO)",
+      "url": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2021_4326_LEVL_3.geojson",
+      "retrieval_date": "2026-07-10",
+      "local_path": "data/raw/bg_census/gisco_nuts3_2021_4326.geojson",
+      "licence": {
+        "name": "European Commission reuse policy; source acknowledgement required",
+        "url": "https://ec.europa.eu/eurostat/help/copyright-notice",
+        "attribution": "Eurostat GISCO"
+      },
+      "citation": "Eurostat GISCO, NUTS 3 2021, 1:1 million, EPSG:4326.",
+      "access_limits": null,
+      "redistribution_limits": "Modified geometry must identify the modification and carry Eurostat attribution and disclaimer.",
+      "notes": "The script filters 28 Bulgarian NUTS 3 features and simplifies them for the map product."
+    }
+  ],
+  "notes": "The generated files are uncommitted. Do not publish the derived NSI summaries until the conductor resolves the Licence v2.0 derivative-work clause."
+}
