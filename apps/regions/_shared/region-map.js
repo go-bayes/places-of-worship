@@ -2661,7 +2661,14 @@ const CENSUS_LEVELS = RC.censusLevels;
 // text per metric via RC.metricLabels, and can hide metrics that make no
 // sense for its construct via RC.metricsAvailable — the metric key, kind,
 // and value formatting never change, so existing countries are unaffected
-// when neither config field is present
+// when neither config field is present.
+// counts-only products (a source that publishes member counts but no area
+// denominator, for example Norway's SSB diocese series) opt in to the two
+// count metrics by listing religious_affiliation_count and, when the series
+// is annual, religious_affiliation_count_change in RC.metricsAvailable —
+// both are optIn, so a page that does not list them is byte-identical to
+// the pre-count runtime; the count change is a difference of counts and is
+// never labelled in percentage points
 const CENSUS_METRICS_BASE = {
   religious_affiliation_percent: {
     label: "Religious affiliation %",
@@ -2720,6 +2727,20 @@ const CENSUS_METRICS_BASE = {
     label: "Seventh-day Adventist %", kind: "seq", optIn: true,
     format: (v) => `${v.toFixed(1)}%`,
     note: "share affiliated with the Seventh-day Adventist Church"
+  },
+  // count metrics (opt-in): for products whose source publishes counts with
+  // no area denominator, so no share metric would be honest. The count is
+  // the row's religious_affiliation_count; the change is a difference of
+  // counts between consecutive years in the series, never percentage points
+  religious_affiliation_count: {
+    label: "Membership (count)", kind: "seq", optIn: true,
+    format: (v) => Math.round(v).toLocaleString("en"),
+    note: "administrative membership count; the source publishes no area population denominator"
+  },
+  religious_affiliation_count_change: {
+    label: "Membership change (count)", kind: "div", optIn: true,
+    format: (v) => `${v > 0 ? "+" : ""}${Math.round(v).toLocaleString("en")}`,
+    note: "change in the membership count since the previous year in the series"
   }
 };
 // when a country sets metricsAvailable, its order also sets the dropdown
@@ -2869,7 +2890,11 @@ function rowNoted(row, universalFlags) {
   return flagTokens(row).some((t) => !(universalFlags && universalFlags.has(t)));
 }
 function metricUsesDenominator(metric) {
-  return metric !== "place_density_per_sq_km";
+  // the count metrics carry no denominator, so denominator-quality washes
+  // do not apply to them (only reachable when a page opts into the counts)
+  return metric !== "place_density_per_sq_km" &&
+    metric !== "religious_affiliation_count" &&
+    metric !== "religious_affiliation_count_change";
 }
 
 // three-stop ramps: sequential blues for levels, orange-to-blue
@@ -2965,6 +2990,19 @@ function storeValue(store, code, year, metric) {
     // guard the operands: JS coerces null to 0, so null - null is 0, not
     // NaN — a suppressed denominator must not read as zero change, and a
     // fully-pending level would otherwise fake an all-zero domain
+    if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+    return a - b;
+  }
+  // count change mirrors religious_change but differences the raw counts;
+  // the same operand guard applies — a missing count must not read as zero
+  if (metric === "religious_affiliation_count_change") {
+    const idx = store.years.indexOf(year);
+    if (idx <= 0) return null;
+    const now = store.byAreaYear.get(`${code}|${year}`);
+    const prev = store.byAreaYear.get(`${code}|${store.years[idx - 1]}`);
+    if (!now || !prev) return null;
+    const a = now.religious_affiliation_count;
+    const b = prev.religious_affiliation_count;
     if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
     return a - b;
   }
@@ -3216,12 +3254,18 @@ function openCensusPopup(feature, lngLat) {
   // for example Italy, carry the latter with population_total null by
   // design), so show the area and its pending status rather than a table
   // of dashes
+  // a counts-only product (a page that opted into the count metric) has
+  // data when the count is populated, even though every percent and the
+  // population total are null by design — this branch is unreachable for
+  // pages that do not list religious_affiliation_count in metricsAvailable
+  const hasCountMetric = "religious_affiliation_count" in CENSUS_METRICS;
   const areaHasData = store.years.some((year) => {
     const row = store.byAreaYear.get(`${code}|${year}`);
     return row && (
       Number.isFinite(row.population_total) ||
       Number.isFinite(row.religious_affiliation_percent) ||
-      Number.isFinite(row.no_religion_percent)
+      Number.isFinite(row.no_religion_percent) ||
+      (hasCountMetric && Number.isFinite(row.religious_affiliation_count))
     );
   });
   if (!areaHasData) {
@@ -3250,10 +3294,17 @@ function openCensusPopup(feature, lngLat) {
   // construct, where absence of reported adherence is not "no religion")
   // drops the column entirely rather than showing dashes
   const hasNoReligion = "no_religion_percent" in CENSUS_METRICS;
+  // the affiliation share column follows the same rule: a counts-only
+  // product omits religious_affiliation_percent from metricsAvailable and
+  // drops the column rather than showing a column of dashes (every
+  // existing page lists the metric, so the column is unchanged for them)
+  const hasAffiliationPercent = "religious_affiliation_percent" in CENSUS_METRICS;
   // popup headers keep the original short words unless a country
   // explicitly overrides the metric labels (byte-identical NZ/VU popups)
   const affiliationLabel = RC.metricLabels?.religious_affiliation_percent?.label || "Religious";
   const noReligionLabel = RC.metricLabels?.no_religion_percent?.label || "No religion";
+  const countLabel = RC.metricLabels?.religious_affiliation_count?.label || "Membership (count)";
+  const countDef = CENSUS_METRICS.religious_affiliation_count;
   // the place columns come from the area summary's OSM-derived counts; a
   // country that hides the place metrics (no extraction pass yet) drops
   // the columns and the OSM credit instead of showing dashes
@@ -3264,7 +3315,7 @@ function openCensusPopup(feature, lngLat) {
   // popup answers the same question the choropleth does — and a 1967 row,
   // whose affiliation column is blank by construction, still reads
   const fixedColumnMetrics = ["religious_affiliation_percent", "no_religion_percent",
-    "places_per_10000_residents", "place_density_per_sq_km"];
+    "places_per_10000_residents", "place_density_per_sq_km", "religious_affiliation_count"];
   const activeDef = CENSUS_METRICS[censusState.metric];
   const showActive = activeDef && activeDef.kind !== "div" &&
     !fixedColumnMetrics.includes(censusState.metric);
@@ -3280,7 +3331,8 @@ function openCensusPopup(feature, lngLat) {
     return `<tr${selected}>
       <td>${year}${flagged ? "*" : ""}</td>
       ${showActive ? `<td>${fmtActive(row[activeMetric])}</td>` : ""}
-      <td>${fmtPercent(row.religious_affiliation_percent)}</td>
+      ${hasCountMetric ? `<td>${Number.isFinite(row.religious_affiliation_count) ? countDef.format(row.religious_affiliation_count) : "–"}</td>` : ""}
+      ${hasAffiliationPercent ? `<td>${fmtPercent(row.religious_affiliation_percent)}</td>` : ""}
       ${hasNoReligion ? `<td>${fmtPercent(row.no_religion_percent)}</td>` : ""}
       ${hasPlaces ? `<td>${fmtCount(row.place_count)}</td><td>${fmtRate(row.places_per_10000_residents)}</td>` : ""}
     </tr>`;
@@ -3291,7 +3343,7 @@ function openCensusPopup(feature, lngLat) {
   const html =
     `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
     `<table class="census-table">` +
-    `<thead><tr><th>${RC.dataNoun || "Census"}</th>${showActive ? `<th>${activeDef.label}</th>` : ""}<th>${affiliationLabel}</th>${hasNoReligion ? `<th>${noReligionLabel}</th>` : ""}${hasPlaces ? "<th>Places</th><th>Per 10k</th>" : ""}</tr></thead>` +
+    `<thead><tr><th>${RC.dataNoun || "Census"}</th>${showActive ? `<th>${activeDef.label}</th>` : ""}${hasCountMetric ? `<th>${countLabel}</th>` : ""}${hasAffiliationPercent ? `<th>${affiliationLabel}</th>` : ""}${hasNoReligion ? `<th>${noReligionLabel}</th>` : ""}${hasPlaces ? "<th>Places</th><th>Per 10k</th>" : ""}</tr></thead>` +
     `<tbody>${rowsHtml}</tbody></table>` +
     flagNote +
     `<div class="place-note">${RC.popupDenominatorNote || "Percentages use the stated religion-response denominator."}` +

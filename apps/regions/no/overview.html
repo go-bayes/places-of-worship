@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Norway map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Norway research map; every string traces to
+    // docs/manifests/no-membership-2005-2025.json (source block and the
+    // product indicator quality notes), the area-summary indicators block,
+    // or the live REGION_CONFIG in apps/regions/no/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "NO",
+      countryName: "Norway",
+      mapHref: "./",
+      intro: "Administrative Church of Norway membership register counts by diocese, from Statistics Norway (SSB) StatBank table 06929, 21 annual waves 2005–2025. This register construct records administrative membership. It does not record census affiliation, attendance, or belief. SSB publishes no diocese population denominator; the map therefore shows counts and count changes only.",
+      facts: {
+        waves: "21 annual register years, 2005–2025",
+        geographies: "Diocese (eleven Church of Norway dioceses)",
+        metrics: "Members of the Church of Norway (count), change since previous year (members)"
+      },
+      reading: [
+        "The eleven Church of Norway dioceses are shaded by the register member count, or by the change in that count since the previous year. SSB publishes member counts by diocese without a diocese population denominator; the map therefore offers no share-of-population metric, and a darker diocese means more members rather than a higher membership rate.",
+        "This is the administrative Church of Norway membership register. It does not record census religious affiliation, attendance, or belief, and it covers Church of Norway membership only rather than membership in all religious bodies.",
+        "The member definition changed in 2021. Up to and including 2020 the count includes members and unbaptised children under 18 of a member; from 2021 it includes members only. The 2021 change value spans that definition change. SSB also includes the Unknown diocese category from 2011 onwards and warns that national totals cannot be compared with earlier years.",
+        "The drawn boundaries are the 2025-01-01 Geonorge diocese vintage applied to the whole series, while counts follow SSB's published diocese assignment for each reference year. Rindal parish moved from Møre to Nidaros on 1 January 2020; early-year counts near transferred parishes may therefore not align exactly with the drawn borders. Neither the table metadata nor SSB's About-the-statistics documentation states whether the historical series is rebased to current dioceses.",
+        "Svalbard is excluded by both the source statistics and the mapped polygons. Nord-Hålogaland diocese formally includes Svalbard, while the shipped polygons end at about 71.4° N.",
+        "A small unallocated share is not on the map. SSB's Unknown diocese category ranges from 0 to 25,923 members across 2005–2025, or up to 0.68% of the published national total; SSB states the category does not cover members living abroad. Diocese rows plus that category reconcile exactly to the published national total."
+      ],
+      sources: [
+        {
+          name: "Statistics Norway (SSB) StatBank table 06929, Church of Norway members by diocese",
+          href: "https://www.ssb.no/en/statbank1/table/06929",
+          construct: "Administrative Church of Norway membership register count, by diocese",
+          years: "2005–2025 (annual)",
+          licence: "SSB StatBank open data, CC BY 4.0 with Statistics Norway attribution"
+        },
+        {
+          name: "Kartverket/Geonorge Soknegrenser diocese surfaces",
+          href: "https://kartkatalog.geonorge.no/Metadata/uuid/289d459c-0390-4000-84f3-88982f2cdb0c",
+          construct: "Boundary geometry (eleven dioceses, effective 1 January 2025)",
+          years: "2025 vintage",
+          licence: "Geonorge Soknegrenser: no conditions apply to access and use"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Statistics Norway (SSB), <a href=\"https://www.ssb.no/en/statbank1/table/06929\" target=\"_blank\" rel=\"noopener\">StatBank table 06929</a>; boundaries from <a href=\"https://kartkatalog.geonorge.no/Metadata/uuid/289d459c-0390-4000-84f3-88982f2cdb0c\" target=\"_blank\" rel=\"noopener\">Kartverket/Geonorge Soknegrenser</a> diocese surfaces (2025 vintage).",
+        tables: "SSB StatBank table 06929, Church of Norway members by diocese, 2005–2025. The area-summary religious_affiliation_count field carries the register member count; every percentage and population-total field is null because SSB publishes no diocese denominator, and this product imports none from another source. Up to and including 2020 the count includes members and unbaptised children under 18 of a member; from 2021 it includes members only.",
+        licence: "SSB StatBank data are CC BY 4.0 used with Statistics Norway attribution; the Geonorge Soknegrenser boundaries carry no conditions on access and use.",
+        script: "scripts/build_no_area_summary.R",
+        manifests: [
+          { label: "no-membership-2005-2025", href: "docs/manifests/no-membership-2005-2025.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Norway map is a register-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
