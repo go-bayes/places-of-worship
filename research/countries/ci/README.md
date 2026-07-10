@@ -2,11 +2,11 @@
 
 ## Status
 
-- **Tier**: B (feasible with a source-verified boundary concordance; every other blocker is now resolved)
-- **Build state**: disclosure, basis-constant, and verification rulings encoded and exercised; the geoBoundaries name-encoding defect is diagnosed and repaired and the Abidjan aggregate join is engineered; ship blocked only at the census-to-ADM3 join, where 22 census units and 21 ADM3 features cannot be matched 1:1 without an invented concordance or self-summing (see route-probe.md, Engineering fix lane 2026-07-11, and `join-residue.csv`)
+- **Tier**: B (shipped to staging; census-to-ADM3 join closed under conductor rulings)
+- **Build state**: SHIPPED-TO-STAGING. The disclosure, basis-constant, and verification rulings are encoded; the geoBoundaries name-encoding defect is repaired; the Abidjan aggregate join is engineered; and the 22-unit join residue is closed under the conductor's four-class ruling (18 spelling variants, the Guézon duplicate-name pair by spatial adjacency, the GAGORE↔Kadéko exhaustion identity, the BOBI+DIARABANA roll-up, and the Parc National de Bona no-data feature — see route-probe.md, Join-closure lane 2026-07-11). The builder writes four staged products; both schemas validate.
 - **Last verified**: 2026-07-11
 
-Two PI rulings (2026-07-10) are encoded in `scripts/build_ci_area_summary.R`: the 31 source-arithmetic overrun rows ship unchanged with a disclosed, never-clamped negative outside-basis count; and derived category summaries publish with INS/ANStat attribution under PI approval, with the ANStat "Tous droits Reservés" footer recorded verbatim and raw PDFs kept git-ignored. Running the reworked builder to completion for the first time surfaced upstream blockers the held probe never validated, so no product was written.
+Two PI rulings (2026-07-10) are encoded in `scripts/build_ci_area_summary.R`: the 31 source-arithmetic overrun rows ship unchanged with a disclosed, never-clamped negative outside-basis count; and derived category summaries publish with INS/ANStat attribution under PI approval, with the ANStat "Tous droits Reservés" footer recorded verbatim and raw PDFs kept git-ignored. The 2026-07-11 conductor rulings then closed the join residue; the products are staged (uncommitted).
 
 The Institut National de la Statistique (INS), now succeeded by the Agence Nationale de la Statistique (ANStat), produced the Recensement général de la population et de l'habitat (RGPH) publications used here.
 
@@ -46,7 +46,7 @@ The Côte d'Ivoire lane has not redistributed the source data or produced a map 
 
 ## First visualisation
 
-Blocked: 2021 census religious-affiliation percent and no-religion percent by sub-prefecture or commune. The proposed denominator is the exact sum of the 16 ordinary-household religion categories. Product construction must wait for an INS or ANStat correction, clarification, or replacement table that resolves the 31 impossible local rows.
+Staged: 2021 census religious-affiliation percent and no-religion percent by ADM3 feature (510 features: 509 census-backed, 1 no-data national-park polygon). The denominator is the exact sum of the 16 ordinary-household religion categories. The 31 source-arithmetic leaf rows ship unchanged with a disclosed, never-clamped outside-basis count; the products are staged pending the map-UI wiring and the ANStat rights review.
 
 ## Build recipe
 
@@ -59,7 +59,7 @@ Blocked: 2021 census religious-affiliation percent and no-religion percent by su
 ## Risks and open questions
 
 - The census yields 519 leaf sub-prefecture-or-commune rows (corrected from the probe's asserted 510). Collapsing the 10 Abidjan city communes to the census's own printed "Total-Ville ABIDJAN" aggregate, which serves the single ADM3 "Abidjan" feature, gives 510 census join units against the 510 ADM3 features; Yamoussoukro needs no collapse. This is engineered in the builder.
-- The remaining and now sole ship blocker is the join residue: after the name-encoding repair, `stringi` transliteration, and the Abidjan collapse, 488 of 510 census join units match a distinct ADM3 feature by name, but 22 census units and 21 ADM3 features cannot be matched 1:1. The residue is spelling variants, a two-leaf-to-one-feature merge (BOBI + DIARABANA → Bobi-Diarabana, with no census-printed aggregate), and an ADM3 national-park polygon (Parc National de Bona) that is not a census unit. Closing it needs a source-verified concordance or a boundary layer that partitions the census units exactly; both are PI-level decisions (route-probe.md, `join-residue.csv`).
+- The join residue is now closed under the conductor's four-class ruling (2026-07-11; route-probe.md, Join-closure lane). After the name-encoding repair, `stringi` transliteration, the Abidjan collapse, and a duplicate-name ADM2-region disambiguation (Lolobo, N'Guessankro, Nafana, Santa), the residue is 18 spelling variants (closed by same-region minimum-edit-distance identification, Bangladesh precedent), the Guézon duplicate-name pair (closed by centroid adjacency to the Facobly/Duékoué department towns), the GAGORE↔Kadéko exhaustion identity (sole leftover in Lôh-Djiboua), the BOBI + DIARABANA roll-up into Bobi-Diarabana (disclosed aggregation), and the Parc National de Bona national-park polygon (shipped no-data). The closure is pinned in the builder and stops on drift.
 - The source does not internally reconcile at any level, all confirmed source arithmetic by 300 dpi image readback: 31 leaf overruns (41 people); 48 of 110 departments differ from the sum of their child sub-prefectures by −3 to +2 (ADIAKE 88,007 vs printed 88,006); and the 519 leaves sum to 6 above the national resident total and 138 below the national religion basis. The builder pins this full set and stops on drift; every printed value ships unchanged (documented-discrepancy ruling).
 - The product's national religion basis is Table 11's own 16-category sum, 29,276,658 (outside-basis 112,492 against the printed resident total 29,389,150). Tome 1 Table 2.2's 29,276,660 differs by two people; that is disclosed as a between-publications discrepancy, not corrected. The builder is now pinned to 29,276,658.
 - The geoBoundaries CIV ADM3 `shapeName` field was doubly UTF-8-encoded (é stored as the four bytes for "Ã©"); the repair reverses one Latin-1→UTF-8 layer, gated on the "Ã"/"Â" signature so clean accents survive. 166 of 510 names are repaired with zero residue.
