@@ -112,3 +112,7 @@ All inputs were retrieved on 2026-07-10. The `rp2021.anstat.ci` and `anstat.ci` 
 - **Product writing**: stopped. No JSON, CSV, GeoJSON, or manifest product was written.
 
 The fail-fast builder is [`scripts/build_ci_area_summary.R`](../../../scripts/build_ci_area_summary.R). It preserves the extraction route and stops on the 31 invalid local rows before any product output.
+
+## Verification outcome (2026-07-10)
+
+An independent image verification settled the gate question. All 31 failing rows were re-read from 300-dots-per-inch page renders, independently of `pdftotext`, and every printed cell matched the extraction; the overruns are the source's own arithmetic ([reconciliation-verification.md](reconciliation-verification.md)). The conductor's recommendation to the PI is to ship with the discrepancy documented on the shipped surface, following the Israel residuals precedent. The build stays held until the PI rules on that recommendation and on the ANStat all-rights-reserved publication terms.
