@@ -62,7 +62,7 @@ The classes describe official religion evidence relevant to population mapping. 
 ### Europe
 
 - **Belarus (BY)** — state register of religious organisations and communities; current register, with a 2024 pre-re-registration total; oblast and Minsk City through registered addresses; **pointer only**: use the Commissioner for Religious and Ethnic Affairs register. The 2024 compulsory re-registration changed the universe, requiring a dated extract and a before/after break.
-- **Liechtenstein (LI)** — census affiliation; 1980–2020, with censuses every five years in the recent series; municipality; **verified route**: Statistics Liechtenstein provides table 213.001d, population by religion and municipality, on its [population-structure page](https://www.statistikportal.li/de/themen/bevoelkerung/bevoelkerungsstruktur).
+- ~~**Liechtenstein (LI)** — census affiliation; 1980–2020, with censuses every five years in the recent series; municipality; **verified route**: Statistics Liechtenstein provides table 213.001d, population by religion and municipality, on its [population-structure page](https://www.statistikportal.li/de/themen/bevoelkerung/bevoelkerungsstruktur).~~ **Built route:** Statistics Liechtenstein table 213.001d and its versioned population-structure workbooks provide exact national and municipality counts for the 2010, 2015, and 2020 census-affiliation waves across all 11 municipalities and all 11 published categories. The [route probe](countries/li/route-probe.md) explains why the archival 1980, 1990, and 2000 `Wohnbevölkerung` tables do not extend this `Ständige Bevölkerung` product.
 
 ## B. Has national-only religion data
 
@@ -117,7 +117,7 @@ The classes describe official religion evidence relevant to population mapping. 
 
 The shortlist repeats A-class entries for prioritisation; it does not add countries to the coverage ledger.
 
-1. **Liechtenstein** — municipality affiliation across a 1980–2020 series, an official interactive table, and a stable eleven-municipality geography.
+1. ~~**Liechtenstein** — municipality affiliation across a 1980–2020 series, an official interactive table, and a stable eleven-municipality geography.~~ **Built:** The product covers the 2010, 2015, and 2020 census-affiliation waves on the stable eleven-municipality geography; the former 1980–2020 municipality-span claim was incorrect.
 2. **Mali** — directly published region tables for 2009 and 2022, with categories that can be harmonised and a national-office route.
 3. **Côte d’Ivoire** — a long census span and directly published 2021 rows down to sub-prefecture or commune, region, and district.
 4. **Burkina Faso** — three census waves through 2019, a direct region table, and strong contrasts among Islam, Christianity, and traditional religion.
