@@ -4,6 +4,19 @@
 
 **Maintenance convention:** strike a row when built, never delete it.
 
+**PRIORITY LANE — PULOTU (PI, 2026-07-11, reserved for a dedicated Fable 5 instance):** bring the Pulotu database of Pacific cultures onto the maps. Pulotu documents Pacific religious cultures with deep temporal layers (traditional/contact/post-contact periods) — the data are rich and multi-layered, deliberately schema-breaking for the current area-summary contract, and in the PI's words "they reveal the minimum boundaries of an edge". The design questions (which variables, what spatial and temporal representation, how culture units relate to the polygon frame) need a dedicated design instance, not a build lane. Source of record: the Pulotu web application serves the latest released version curated at D-PLACE/dplace-dataset-pulotu; releases on Zenodo at DOI 10.5281/zenodo.5669235; distributed under Creative Commons Attribution 4.0 International. The PI is a Pulotu author — design questions go straight to him.
+
+**PI TASK LIST (open items the PI holds):**
+1. Email BBS for reuse confirmation of the 2022 census report (the ship-and-ask ruling below).
+2. INSD follow-up: fetch or request the Accord de licence de données ouvertes (burkinafaso.opendataforafrica.org).
+3. SBS ask (Samoa): reuse confirmation + a constituency/village boundary layer or published concordance.
+4. SVG stats office ask (Saint Vincent): count-valued division religion table + a licensed division vector.
+5. FBoS terms (Fiji): reuse position; the FJ page stays dark until resolved.
+6. Ratify a minority-share metric design for the shared runtime (gates the BD page under the ruling below; Israel two-slot precedent).
+7. Schema-versioning ruling for the 14 area-summary generation failures (schemas/README.md).
+
+**BD RULING (PI, 2026-07-11): MIDDLE PATH RATIFIED** — ship-and-ask. The BBS reuse ask goes out now (task 1); the BD page goes live once the minority-share metric design (task 6) is ratified, so the first public Bangladesh map carries real signal rather than a flat-100% choropleth; if BBS objects, the page comes down (single-commit revert).
+
 **PI RULINGS RECEIVED (2026-07-10 23:54 NZST, all five morning-queue items):**
 1. **Saint Lucia: SHIP**, with the source-arithmetic discrepancies briefly noted on the information surfaces (page panel and overview).
 2. **Côte d'Ivoire: SHIP**, same documented-discrepancy treatment; derived summaries publish with attribution under PI approval notwithstanding the ANStat all-rights-reserved footer (RO/SK/CA summaries-not-raw-data stance).
