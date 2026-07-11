@@ -110,3 +110,43 @@ Every cached input is under `data/raw/ws_census/`, which `git check-ignore -v` c
 ## What would unblock a build
 
 The 2021 table is the strongest Pacific subnational religion source pinned so far: full 26-category coverage to village level, exact reconciliation, and machine-readable. A build needs one of three boundary routes and one licence step. The first boundary route is a licensed polygon set of the 2021 electoral constituencies (51 units) with a name concordance to the census `Table 2` labels. The second boundary route is an official or SPC village polygon layer (339 units) with a clear licence. The third boundary route is a published concordance from the 2021 constituencies to the geoBoundaries ADM2 (2011) districts, which would let the counts aggregate to a licensed 43-unit frame without inference. The licence step is written confirmation from SBS of reuse terms for derived aggregate statistics, because the current copyright grants no explicit reproduction permission. Until at least one boundary route and the licence step are settled, the product stays on hold.
+
+## Build appendix (2026-07-11): STAGED, no-geometry constituency product
+
+The project lead ruled USE FOR NOW (PI task 3, 2026-07-11): proceed with the 2021 data under SBS attribution while the PI sends the SBS ask (reuse confirmation plus a licensed constituency/village boundary layer or a published concordance). The Pakistan no-geometry precedent (`scripts/build_pk_area_summary.R`) was mirrored: data tables plus a manifest that records the boundary as a documented blocker, with `land_area_sq_km` and every place field null. The build is STAGED and uncommitted, left for the conductor's review.
+
+**Deliverables built.** `scripts/build_ws_area_summary.R`; `apps/regions/ws/data/area_summary_constituency.{json,csv}` (51 constituency-district rows, no GeoJSON); `docs/manifests/ws-census-religion-2021.json`. The raw cache `data/raw/ws_census/` (22 objects) was mirrored to `gs://pow-research-data/raw_sources/ws_census/` and the durable URI recorded through the builder.
+
+**Primary level and the hierarchy that shipped.** The product ships the 51 constituency-districts as the primary level. The four statistical regions ride the manifest as recorded roll-up context; the 339-village detail stays in the git-ignored raw cache and is documented as the deeper route. The builder recovers the four nested levels from the flat `Table 2` row list with a running-sum walk (every total is strictly positive, minimum 4, and each parent equals the exact contiguous child block), then hard-checks the parse against the pinned 1 / 4 / 51 / 339 structure.
+
+| Region | Constituencies | Villages | Region total |
+| --- | --- | --- | --- |
+| Apia Urban Area | 4 | 72 | 35,974 |
+| North West Upolu | 12 | 53 | 75,307 |
+| Rest of Upolu | 15 | 112 | 49,101 |
+| Savaii | 20 | 102 | 45,175 |
+| **National (Samoa)** | **51** | **339** | **205,557** |
+
+**Headline-slot case that held: ORDINARY.** The 2021 frame carries a real non-affiliation category (`NO RELIGION`, 132 people nationally), so the ordinary two-slot semantics apply and the minority-share design (`docs/development/minority-share-metric.md`) does not. `religious_affiliation_percent` is the share reporting any of the 25 religious-affiliation categories (national 205,425 = 99.9358%); `no_religion_percent` is the `NO RELIGION` share (national 132 = 0.0642%); the two slots are exact complements in every row. `religious_change` is not emitted (single subnational wave; 2006/2011/2016 publish religion only at national or urban-rural level and are recorded as documented non-routes).
+
+**Gates (fail-fast, stop-don't-tune) — all passed.** Source integrity (workbook and report match their pinned sha256); verbatim 26-category frame read from `Table 2`, 26th category confirmed `NO RELIGION`; hierarchy counts reproduce the pinned 1/4/51/339; row-internal reconciliation for all 395 area rows (26 categories sum to `TOTAL`); hierarchical reconciliation across all 27 columns (villages roll to constituencies, constituencies to regions, regions to national, zero mismatches); metric slots exact complements in every constituency row; construct note present in the shipped product and manifest.
+
+**Licence.** SBS asserts a bare copyright with no reuse grant, quoted verbatim from the cached report bytes: `Copyright ©  Samoa Bureau of Statistics (SBS), Apia, Samoa, 2022.` The build ships derived aggregate rates with SBS attribution under the use-for-now ruling; `licence_status` is `needs_review` and `licence_basis` is `sbs_bare_copyright_derived_aggregates_attribution`, pending the SBS reply.
+
+**Validation invocations and output.**
+
+```
+$ Rscript scripts/build_ws_area_summary.R
+SAMOA 2021 constituency census-religion product (STAGED, NO GEOMETRY)
+hierarchy: 1 national / 4 regions / 51 constituencies / 339 villages
+... headline-slot case: ORDINARY ... gates: ... = passed
+
+$ uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/ws/data/area_summary_constituency.json
+ok -- validation done
+
+$ uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/ws-census-religion-2021.json
+ok -- validation done
+
+$ bash scripts/validate_manifests.sh
+manifest validation: 69/69 pass
+```
