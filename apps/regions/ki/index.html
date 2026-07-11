@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Kiribati Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Kiribati's product is census religious affiliation by island from the
+    // Kiribati National Statistics Office (KINSO), six waves (1990, 1995, 2000,
+    // 2005, 2010, 2015) across 24 islands on the geoBoundaries KIR ADM2 frame,
+    // the deepest island time series in the Pacific stack. The construct is
+    // census affiliation; it records each resident's reported religion,
+    // single-select, and does not measure belief, practice, attendance, or
+    // registered membership. The universe is all persons of all ages in every
+    // wave; there is no universe break, and the island denominators are
+    // therefore directly comparable across the full 1990-to-2015 span.
+    //
+    // Broad affiliation is each island's population minus the No religion / None
+    // category and any not-stated residual; it is comparable across all six
+    // waves. Denomination detail widens over time, from an eight-category frame
+    // in 1990 to a fourteen-category frame in 2015, and that composition lives
+    // in the source religion tables and the build manifest's per-wave category
+    // frames, not in the area-summary rows; the popup shows the affiliation and
+    // no-religion shares by census year only. The dominant Protestant body is
+    // recorded as one category, Kiribati Protestant Church (KPC), through 2015;
+    // the Kiribati Uniting Church (KUC) formed in 2014, and the 2020 national
+    // frame splits KPC (10,016) and KUC (25,322), which combine to 35,338 (the
+    // Atlas KUC-KPC collapse). That split is carried in the manifest for the
+    // 2020 national context only and is never applied to an island wave.
+    //
+    // No religion is a real but very small source category (national 51 in 2015);
+    // both headline shares carry honest signal, and the frame does not sum to 100
+    // by construction. A not-stated or unaccounted residual is retained in each
+    // island's denominator and outside both numerators: the 2000, 2005 and 2010
+    // Not Stated columns (national 25, 22, 212), and the disclosed 1990
+    // nine-person unaccounted residual (South Tarawa 3, Abemama 4, North
+    // Tabiteuea 1, South Tabiteuea 1), which stays in the denominator and is
+    // never repaired. The two headline shares therefore do not add to 100.
+    //
+    // The 1995 wave carries no No religion category; every enumerated island therefore
+    // reads 100 percent affiliation in 1995 and the no-religion layer is null
+    // that wave; the flat 1995 affiliation is a frame fact, not a measured
+    // uniformity. Nine island-waves render as no-data. Betio was enumerated
+    // within South Tarawa through 2010; Betio is therefore null for 1990-2010 (its
+    // residents fall in the South Tarawa count) and enumerated separately in
+    // 2015 (17,330). The 1995 Table 10 enumerated the Line Islands and Phoenix
+    // in one combined column (5,866); Teeraina, Tabuaeran, Kiritimati and
+    // Kanton are therefore null for 1995; the combined total is recorded in the manifest
+    // and never placed on a single feature. Absent units carry explicit
+    // null-metric rows (the Korea 1995 Sejong precedent) and are never imputed.
+    // The 2020 census published religion nationally only (Table G-3, 119,438);
+    // 2020 island religion exists only as Census Atlas pie charts and in the
+    // licensed microdata; 2020 is therefore carried as national context in the
+    // manifest and never shipped as an island wave. Place and density metrics
+    // are null because no governed Kiribati place-of-worship snapshot ships.
+    //
+    // Kiribati straddles the antimeridian: the Gilberts and Banaba sit near
+    // 169.5-176.8 East, Phoenix (Kanton) near 171.7 West, and the Northern Line
+    // Islands (Teeraina, Tabuaeran, Kiritimati) near 157-160 West. In the raw
+    // [-180, 180] frame the national bounding box smears about 348.6 degrees and
+    // its naive midpoint lands in the wrong hemisphere. The boundary was built
+    // in a 0-360 frame (cut at longitude 180), where the national extent is a
+    // compact 169.521 to 202.836 (a 33.3-degree span). The camera longitude is
+    // the 0-360 extent midpoint, (169.521 + 202.836) / 2 = 186.179, mapped back
+    // into [-180, 180] as 186.179 - 360 = -173.82 (never the naive [-180,180]
+    // bbox midpoint). At that centre MapLibre's world-copy wrapping renders the
+    // Gilberts (west of the dateline, drawn near -187) contiguously beside the
+    // Line Islands (east, near -157); zoom 4 fits both clusters beside the
+    // panels. The latitude midpoint is 0.91 (extent -2.87 to 4.70, a 7.57-degree
+    // span). A Gilberts-centred camera that drops the Line and Phoenix islands
+    // is the named failure mode.
+    //
+    // The KINSO census reports (2015 Vol 1) and the historical Excel tables
+    // (1990-2010) carry no stated reuse licence; the SPC/KINSO Census Atlas 2022
+    // carries an explicit partial-reproduction-with-acknowledgement clause,
+    // recorded but not relied on (its island pies are not used). Under the
+    // project-lead ruling of 2026-07-11 the derived island summaries ship with
+    // attribution to the Kiribati National Statistics Office (and SPC) while a
+    // courtesy reuse-confirmation ask is outgoing; the licence stays
+    // needs-review and the page reverts in a single commit if KINSO objects.
+    // Boundaries are geoBoundaries KIR ADM2 (ODbL 1.0), source OpenStreetMap.
+    window.REGION_CONFIG = {
+      countryCode: "KI",
+      title: "Places of Worship | Kiribati Research Map",
+      // dateline-aware 0-360 extent 169.521..202.836 (span 33.3), lat -2.87..4.70.
+      // camera longitude on the 0-360 extent midpoint 186.179, mapped to
+      // [-180,180] as -173.82 (never the naive raw-bbox midpoint); latitude on
+      // the extent midpoint 0.91. zoom 4 fits both the Gilberts and the Line
+      // Islands beside the panels; the 33.3-degree longitude span is binding.
+      center: [-173.82, 0.91],
+      initialZoom: 4,
+      censusLevels: {
+        island: {
+          label: "Island (24 units)",
+          boundaries: "data/ki_island_2017.geojson",
+          summary: "data/area_summary_island.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion by island from the Kiribati National Statistics Office (KINSO), Table 10 Religion by Island (1990-2010) and 2015 Report Vol 1 Table 6, six waves 1990-2015; no reuse licence is stated, derived island summaries used for research with attribution to KINSO · Boundaries © geoBoundaries KIR ADM2 (ODbL 1.0), source OpenStreetMap contributors"
+        }
+      },
+      defaultLevel: "island",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2015,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the island's all-persons population reporting affiliation with a named religion, on the island's own printed census Total. Broad affiliation is population minus the No religion / None category and any not-stated residual, and it is comparable across all six waves. In 1995 there is no No religion category; every enumerated island therefore reads 100 percent; the flat 1995 value is a frame fact, not a measured uniformity"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the census No religion / None category, on the same all-persons Total. The no-religion population is very small (national 51 in 2015). Null in 1995, whose frame carries no No religion category"
+        },
+        religious_change: {
+          label: "Change since previous census (pp)",
+          note: "percentage-point change in the affiliation share since the previous census (1990 to 1995, through 2010 to 2015); the spacing is roughly five-yearly and a wave-to-wave difference is not an annual rate. Null wherever an operand island-wave is a no-data row (Betio through 2010; Teeraina, Tabuaeran, Kiritimati and Kanton in 1995). The substantive cross-wave structure is denominational and widens over time; the broad-affiliation headline does not carry it"
+        }
+      },
+      popupDenominatorNote: "Percentages use each island's printed census Total (Table 10 Religion by Island for 1990-2010; 2015 Report Vol 1 Table 6). Every wave counts all persons of all ages; there is no universe break; the island denominators are therefore directly comparable across 1990-2015. Broad affiliation is the island population minus the No religion / None category and any not-stated residual; a not-stated or unaccounted residual (the 2000, 2005 and 2010 Not Stated columns, and the disclosed 1990 nine-person unaccounted residual) stays in the denominator and outside both headline numerators, and the two shares do not add to 100. The 1995 frame carries no No religion category; every enumerated island therefore reads 100 percent affiliation and the no-religion share is null that wave. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership. The substantive subnational structure is denominational (a Roman Catholic south and a KPC/Protestant north), and the denomination detail widens from eight categories in 1990 to fourteen in 2015; that composition lives in the source religion tables and the build manifest's per-wave category frames, not in these rows, and the popup shows the affiliation and no-religion shares by census year only. Betio was enumerated within South Tarawa through 2010 and separately in 2015 (17,330); the four Line and Phoenix islands were enumerated in one combined column in 1995 (5,866). Absent units render as no-data and are never imputed. 2020 religion was published nationally only and is carried as context, never as an island wave.",
+      cityPresets: [
+        { label: "South Tarawa", aliases: ["Tarawa", "Bairiki"], coords: [173.03, 1.33], zoom: 11 },
+        { label: "Kiritimati", aliases: ["Christmas Island", "London"], coords: [-157.36, 1.87], zoom: 10 },
+        { label: "Banaba", aliases: ["Ocean Island"], coords: [169.54, -0.86], zoom: 11 },
+        { label: "Butaritari", coords: [172.79, 3.07], zoom: 11 },
+        { label: "Abemama", coords: [173.85, 0.40], zoom: 11 },
+        { label: "Tabiteuea", coords: [174.85, -1.35], zoom: 10 }
+      ],
+      geocode: { country: "ki", biasLngLat: [-173.82, 0.91] },
+      onboarding: {
+        title: "Kiribati research map",
+        intro: "Census religious-affiliation overlays for the 24 islands of Kiribati across six censuses, 1990, 1995, 2000, 2005, 2010 and 2015, from the Kiribati National Statistics Office (KINSO). The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+        bullets: [
+          "Islands are shaded by the share reporting affiliation with a named religion, or by the share in the census <code>No religion</code> / <code>None</code> category, shown as No religion %.",
+          "Percentages use each island's printed census Total for its own wave. Every wave counts all persons of all ages and there is no universe break; the island denominators are directly comparable across 1990, 1995, 2000, 2005, 2010 and 2015.",
+          "Broad affiliation is comparable across all six waves. The denomination detail widens from eight categories in 1990 to fourteen in 2015; the Kiribati Protestant Church (KPC) is one category through 2015, the Kiribati Uniting Church (KUC) formed in 2014, and the 2020 national frame splits KPC (10,016) and KUC (25,322), combining to 35,338. That composition lives in the source religion tables and the build manifest's per-wave category frames; the broad-affiliation headline does not carry it.",
+          "No religion is a real but very small category (national 51 in 2015). A not-stated or unaccounted residual (the 2000, 2005 and 2010 Not Stated columns, and the disclosed 1990 nine-person unaccounted residual) stays in the denominator and outside both numerators, and the two shares do not add to 100. The 1995 frame carries no No religion category; every enumerated island therefore reads 100 percent affiliation and the no-religion layer is null that wave.",
+          "Nine island-waves render as no-data and are never imputed. Betio was enumerated within South Tarawa through 2010 (null 1990-2010) and separately in 2015; the Line and Phoenix islands Teeraina, Tabuaeran, Kiritimati and Kanton were enumerated in one combined column in 1995 (null that wave).",
+          "The 2020 census published religion nationally only (119,438); 2020 island religion exists only as Census Atlas pie charts and in the licensed microdata; 2020 is therefore carried as national context and never shipped as an island wave.",
+          "A change metric reports the percentage-point change in the affiliation share since the previous census; the roughly five-yearly spacing means a wave-to-wave difference is not an annual rate.",
+          "Kiribati straddles the antimeridian: the Gilberts sit west of the dateline and the Line Islands far to the east. The camera frames both clusters together.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion by island from the <a href="https://nso.gov.ki" target="_blank" rel="noopener">Kiribati National Statistics Office</a> (KINSO), Table 10 Religion by Island (1990, 1995, 2000, 2005, 2010) and 2015 Population Census Report Volume 1 Table 6, six waves 1990-2015. No reuse licence is stated on the KINSO census reports or the historical Excel tables; the SPC/KINSO Census Atlas 2022 carries an explicit partial-reproduction-with-acknowledgement clause, recorded but not relied on. The derived island summaries are reproduced with attribution to the Kiribati National Statistics Office (and SPC) while a courtesy reuse-confirmation ask is outgoing, and the page reverts in a single commit if KINSO objects (project-lead ruling, 2026-07-11) &middot; Boundaries from <a href="https://www.geoboundaries.org/api/current/gbOpen/KIR/ADM2/" target="_blank" rel="noopener">geoBoundaries</a> KIR ADM2, Open Data Commons Open Database License 1.0 (ODbL 1.0), boundary source OpenStreetMap contributors, Wambacher',
+      censusFlagNote: "* Percentages use each island's printed census Total (Table 10 Religion by Island for 1990-2010; 2015 Report Vol 1 Table 6; all persons of all ages, no universe break across 1990-2015; the island denominators are therefore directly comparable). Broad affiliation is the island population minus the No religion / None category and any not-stated residual; a not-stated or unaccounted residual (the 2000, 2005 and 2010 Not Stated columns, national 25, 22 and 212, and the disclosed 1990 nine-person unaccounted residual: South Tarawa 3, Abemama 4, North Tabiteuea 1, South Tabiteuea 1) stays in the denominator and outside both headline numerators; the two shares therefore do not add to 100; the 1990 residual is disclosed and never repaired. The 1995 frame carries no No religion category; every enumerated island therefore reads 100 percent affiliation and the no-religion share is null that wave. The substantive subnational structure is denominational (a Roman Catholic south and a KPC/Protestant north), documented in the source religion tables and the build manifest's per-wave category frames and not carried by these headline metrics; the denomination detail widens from eight categories in 1990 to fourteen in 2015, and the Kiribati Protestant Church is one category through 2015 while the 2020 national frame splits KPC (10,016) and KUC (25,322), combining to 35,338. Nine island-waves render as no-data and are never imputed: Betio was enumerated within South Tarawa through 2010 (null 1990-2010) and separately in 2015 (17,330), and the Line and Phoenix islands Teeraina, Tabuaeran, Kiritimati and Kanton were enumerated in one combined 1995 column (5,866, null that wave). The 2020 census published religion nationally only (119,438); 2020 island religion exists only as Census Atlas pie charts and in the licensed microdata and is carried as national context, never as an island wave. No reuse licence is stated on the KINSO census reports or the historical Excel tables; the Census Atlas 2022 carries an explicit partial-reproduction-with-acknowledgement clause, recorded but not relied on. The derived island summaries ship with KINSO (and SPC) attribution while a courtesy reuse-confirmation ask is outgoing, and the page reverts in a single commit if KINSO objects. The boundary is geoBoundaries KIR ADM2, ODbL 1.0, source OpenStreetMap contributors."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260711b"></script>
+</body>
+</html>
