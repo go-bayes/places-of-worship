@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Fiji Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Fiji's product is census affiliation from the Fiji Bureau of Statistics
+    // (FBoS) 2007 Census Table P01-3, the all-ethnicity religion-by-province
+    // margin, on the 15 provinces of the geoBoundaries FJI ADM2 frame, a single
+    // 2007 snapshot. It measures each resident's reported religion, not
+    // practice, attendance, or registered membership.
+    //
+    // The source crosses religion with ethnicity (its Fijians and Indians
+    // tables); only the all-ethnicity religion-by-province margin ships, and the
+    // ethnicity dimension is out of scope. No religion is a real, distinct
+    // source category (4,249 persons nationally); both headline metrics
+    // therefore carry honest signal, and the frame does not sum to 100 by
+    // construction.
+    //
+    // The denominator is each province's printed Total in Table P01-3. The
+    // source prints no not-stated row; an unprinted not-stated residual (Total
+    // minus the six printed religion categories, 895 persons nationally) is
+    // retained in the denominator and outside both headline numerators; the two
+    // shares therefore do not add to 100. Only the 2007 wave ships; no change metric
+    // is offered. Place and density metrics are omitted from metricsAvailable
+    // because no governed Fiji place-of-worship snapshot ships with the product.
+    //
+    // Fiji straddles the antimeridian. The boundary was cut at longitude 180
+    // during the build: each straddling province (Lau, Cakaudrove, Macuata) is a
+    // dateline-noded MultiPolygon within [-180, 180], with eastern pieces
+    // carried as negative longitudes near -180 and western pieces near +180. The
+    // dateline-aware extent runs 176.87 East to 1.76 West (a 4.89-degree span)
+    // across latitudes 12.48 to 20.67 South. The camera therefore sits at
+    // longitude 179.315 (the dateline-aware midpoint, never 0) so the Lau group
+    // east of 180 frames beside the main Viti Levu-Vanua Levu cluster; MapLibre's
+    // world-copy wrapping renders the two hemispheres contiguously. A main-cluster
+    // camera centred near 178 that drops the Lau group is the named failure mode.
+    //
+    // FBoS asserts all rights reserved with no explicit reuse grant. Under the
+    // project-lead ruling of 2026-07-11 the derived province summaries ship for
+    // now with attribution to the Fiji Bureau of Statistics while an FBoS reuse
+    // ask is outstanding; the licence stays needs-review pending FBoS terms.
+    // Boundaries are geoBoundaries FJI ADM2 (CC BY 4.0), source pacificdata.org.
+    window.REGION_CONFIG = {
+      countryCode: "FJ",
+      title: "Places of Worship | Fiji Research Map",
+      // dateline-aware extent 176.87E..181.76 (1.76W) by lat 12.48..20.67S.
+      // camera on the dateline-aware longitude midpoint (179.315) and the
+      // mercator-midpoint latitude (16.62S); the latitude span (8.19 degrees)
+      // is the binding dimension; z5.4 therefore fits all 15 provinces including
+      // Rotuma in the north and Kadavu in the south within one screen
+      center: [179.315, -16.62],
+      initialZoom: 5.4,
+      censusLevels: {
+        province: {
+          label: "Province",
+          boundaries: "data/fj_province_2020.geojson",
+          summary: "data/area_summary_province.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion from Fiji Bureau of Statistics 2007 Census Table P01-3 (all-ethnicity religion-by-province margin); FBoS asserts all rights reserved, derived province summaries used for research with attribution · Boundaries © geoBoundaries FJI ADM2 (CC BY 4.0), source pacificdata.org"
+        }
+      },
+      defaultLevel: "province",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2007,
+      // only affiliation and no-religion apply: both are real source categories
+      // and carry honest signal. place and density metrics are null because no
+      // governed place-of-worship snapshot ships, and no change metric is
+      // offered because only the 2007 wave ships
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share affiliated with a named religion (Christian, Hindu, Sikh, Moslem, or Other religion) as a share of each province's printed Total in Table P01-3, which retains an unprinted not-stated residual in the denominator"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the source's No religion category, on the same province Total denominator that retains the unprinted not-stated residual"
+        }
+      },
+      popupDenominatorNote: "Percentages use each province's printed Total in the 2007 Census Table P01-3 religion margin. The source prints no not-stated row; an unprinted not-stated residual (Total minus the six printed religion categories, 895 persons nationally) is retained in the denominator and outside both headline numerators, and the two shares do not add to 100. The source crosses religion with ethnicity; only the all-ethnicity religion-by-province margin ships, and the ethnicity dimension is out of scope. The construct is census affiliation; it does not measure religious practice, attendance, or registered membership.",
+      cityPresets: [
+        { label: "Suva", coords: [178.4419, -18.1416], zoom: 11 },
+        { label: "Nadi", coords: [177.4162, -17.7765], zoom: 11 },
+        { label: "Lautoka", coords: [177.4529, -17.6169], zoom: 11 },
+        { label: "Labasa", aliases: ["Vanua Levu"], coords: [179.3739, -16.4333], zoom: 11 },
+        { label: "Levuka", aliases: ["Ovalau"], coords: [178.8347, -17.7086], zoom: 11 }
+      ],
+      geocode: { country: "fj", biasLngLat: [178.1, -17.8] },
+      onboarding: {
+        title: "Fiji research map",
+        intro: "Census religious-affiliation overlays for Fiji's 15 provinces, a single 2007 snapshot from the Fiji Bureau of Statistics 2007 Census Table P01-3, the all-ethnicity religion-by-province margin. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+        bullets: [
+          "Provinces are shaded by the share affiliated with a named religion (Christian, Hindu, Sikh, Moslem, or Other religion), or by the share in the source's <code>No religion</code> category, shown as No religion %.",
+          "Percentages use each province's printed Total in Table P01-3. An unprinted not-stated residual stays in the denominator and outside both headline numerators, and the two shares do not add to 100.",
+          "The source also publishes religion-by-ethnicity tables; only the all-ethnicity religion-by-province margin ships, and the ethnicity dimension is out of scope.",
+          "Only the 2007 wave ships; no change metric is offered. The 1996 (licensed microdata) and 2017 (collected but unprinted, a dashboard only) province tables are recorded as deferred routes.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      // FBoS asserts all rights reserved with no explicit reuse grant. Under the
+      // project-lead ruling of 2026-07-11 the derived province summaries ship for
+      // now with attribution while an FBoS reuse ask is outstanding; the licence
+      // stays needs-review. geoBoundaries FJI ADM2 is CC BY 4.0, source
+      // pacificdata.org.
+      censusSourceAttribution: 'Census religion from the <a href="https://www.statsfiji.gov.fj/" target="_blank" rel="noopener">Fiji Bureau of Statistics</a>, 2007 Census Table P01-3 (all-ethnicity religion-by-province margin). FBoS asserts all rights reserved with no explicit reuse grant; the derived province summaries are used for a research map with attribution to the Fiji Bureau of Statistics, and no open-data licence is claimed &middot; Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> FJI ADM2 (source pacificdata.org), Creative Commons Attribution 4.0 International (CC BY 4.0)',
+      censusFlagNote: "* Percentages use each province's printed Total in the 2007 Census Table P01-3 religion margin. The source prints no not-stated row; an unprinted not-stated residual (895 persons nationally) is retained in the denominator and outside both headline numerators, and the two shares do not add to 100. The source crosses religion with ethnicity; only the all-ethnicity religion-by-province margin ships, and the ethnicity dimension is out of scope. FBoS asserts all rights reserved with no explicit reuse grant; the derived province summaries are used for research with attribution to the Fiji Bureau of Statistics."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260711a"></script>
+</body>
+</html>

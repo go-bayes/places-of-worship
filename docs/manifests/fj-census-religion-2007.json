@@ -420,6 +420,6 @@
   },
   "privacy": "public",
   "licence_status": "needs_review",
-  "downstream_status": "staged",
-  "notes": "The derived product uses FBoS census aggregates for a research map with attribution; FBoS asserts all rights reserved with no explicit reuse grant, and the product stays staged with licence_status needs_review until FBoS reuse terms are resolved. Only the all-ethnicity religion margin ships; the ethnicity dimension is out of scope. The map UI is outside this build."
+  "downstream_status": "public",
+  "notes": "The derived product uses FBoS census aggregates for a research map with attribution; FBoS asserts all rights reserved with no explicit reuse grant. Per the project-lead ruling of 2026-07-11 (\"USE FOR NOW\"), the province page ships with attribution to the Fiji Bureau of Statistics while the project sends the FBoS reuse ask; downstream_status is therefore public, and licence_status stays needs_review until FBoS reuse terms are resolved. Only the all-ethnicity religion margin ships; the ethnicity dimension is out of scope."
 }
