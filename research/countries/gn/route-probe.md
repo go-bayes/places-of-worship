@@ -151,3 +151,35 @@ The only product the published record supports is a **single-wave (2014), eight-
 - Does the "Accord de licence de données ouvertes" cover transcribed thematic-report percentages, or does the "Droits de propriété" copyright clause govern them? (Iran-style flag; do not decide in this lane.)
 
 If the lead rules the eight-region 2014 product acceptable and the figures open, the build is small and low-risk: transcribe the nine data rows of Table 5.10, join to the eight ADM1 features by name, ship percentages with INS attribution and a clear "2014 only, region level, percentages" note. If either ruling is negative, the country is a documented exclusion (Tier C) on the "no published subnational religion beyond a single coarse wave" and/or licence grounds.
+
+## Build appendix
+
+Built 2026-07-11 by `scripts/build_gn_area_summary.R` (product `gn-census-religion-2014`), STAGED: no page, no hub link, pending the project lead's reaction to the conductor's task-8 view. Both licence questions above were resolved by the conductor on 2026-07-11 (see below); the build encodes those rulings and does not relitigate them.
+
+**Product.** Eight administrative regions, one wave (2014), five categories, one-decimal percentages exactly as printed, no counts. `religious_affiliation_percent` is the sum of the four affiliation categories (Musulmane + Chrétienne + Animiste + Autre religion), rounded to one decimal; `no_religion_percent` is the printed Sans religion share. Sans religion is a real non-affiliation slot, so ordinary slot semantics apply (not a flat-frame product). `population_total` and every count field are null; region resident totals (Table 2.09) are recorded as documented context but never multiplied into the shares (no derived-count layer).
+
+**Deliverables.**
+- `scripts/build_gn_area_summary.R`
+- `apps/regions/gn/data/area_summary_region.json` (8 rows), `.csv`, and `gn_region_2014.geojson` (8 features)
+- `docs/manifests/gn-census-religion-2014.json` (`data-manifest.v2`)
+
+**Gate results (all pass).**
+- Transcription-present: every Table 5.10 row appears verbatim in the `pdftotext -layout` output of the cached PDF.
+- Ensemble reconciliation: the Table 5.10 Ensemble row (Sans religion 2,4; Musulmane 89,1; Chrétienne 6,8; Animiste 1,6; Autres 0,1) equals the independently transcribed Table 5.09 Total column and the Table 5.11 2014 Ensemble row exactly.
+- Row-sum reconciliation under the derived rounding bound: five one-decimal categories give a bound of 0.05 × 5 = 0.25 pp. Observed maximum absolute deviation 0.1 pp.
+- Boundary: 8 valid, non-empty, distinctly hashed geoBoundaries GIN ADM1 features, joined 1:1 to the census regions by an accent-free key (the N'Zérékoré apostrophe washes out); total land area 245,775.67 km² (Guinea ≈ 245,860 km²); simplified output 209,573 bytes, within the 3 MB cap.
+- Licence notices: both required French attribution notices are byte-present in the cached licence capture and carried verbatim in the manifest.
+
+**FINDING — the exact-100.0 premise does not hold.** The task and the queue expected every printed Table 5.10 row's five cells to sum to exactly 100.0. They do not: the **Faranah** row prints 0,8 / 89,1 / 9,7 / 0,1 / 0,2, which sum to **99,9** against the printed Ensemble 100,0 (deviation 0.1 pp). Every other printed row sums to exactly 100.0. This is a genuine source rounding artefact, re-read directly from the RGPH-3 PDF; it was **not tuned away**. Per the stop-don't-tune rule and the BF-2019/Estonia derived-bound precedent (which the task authorises for percent arithmetic), the exact-100.0 gate premise is replaced by the 0.25 pp derived-bound gate, which Faranah passes. The Faranah affiliation (99.1) plus no-religion (0.8) therefore also sum to 99.9, disclosed in the row `quality_flag` and the manifest. No arithmetic hides the artefact.
+
+**Licence (conductor ruling 2026-07-11, encoded).** `licence_status = accepted`, `licence_basis = ins_accord_de_licence_ouverte_cc_by_4_0`. The INS routes reuse of its published *Données* to the Accord de licence de données ouvertes (CC BY 4.0, byte-matched from the rendered `hdemdob` portal page in `data/raw/gn_census/hdemdob_accord_licence_ouverte.txt`), and the INS website terms extend that Accord to website-published *Données*, which includes the thematic-report tables. Both required French attribution notices ride verbatim in the manifest ("Source : INS. Contient des informations sous licence conformément à l'Accord de licence de données ouvertes de l'INS." and the produits-à-valeur-ajoutée notice, doubled "de de" preserved). The boundary is CC BY 3.0 IGO.
+
+**Non-routes recorded (manifest `deferred_sources`).** 1996 is national-only (the Table 5.11 1996 Ensemble row may ride as recorded context, never as a wave); 1983 has no published religion table; no prefecture religion exists for any wave. No cross-wave change is derivable.
+
+**Validation commands (all pass).**
+- `Rscript scripts/build_gn_area_summary.R`
+- `uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/gn/data/area_summary_region.json` → `ok -- validation done`
+- `uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/gn-census-religion-2014.json` → `ok -- validation done`
+- `bash scripts/validate_manifests.sh` → `manifest validation: 66/66 pass`
+
+**Durable mirror.** `data/raw/gn_census/` (7 files, 7.1 MiB) mirrored to `gs://pow-research-data/raw_sources/gn_census/`; `raw_cache_durable_uris` recorded in the manifest.

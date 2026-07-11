@@ -1,0 +1,331 @@
+{
+  "schema_version": "0.2.0",
+  "generated_at": "2026-07-11T04:24:08Z",
+  "generated_by": "scripts/build_gn_area_summary.R",
+  "country_code": "GN",
+  "boundary_set": {
+    "boundary_set_id": "gn-region-2014-geoboundaries-adm1",
+    "country_code": "GN",
+    "level": "region",
+    "vintage": "geoBoundaries ADM1 represented year 2017; the census region frame is stable across 1983/1996/2014",
+    "source_dataset_id": "geoboundaries-gin-adm1-2017"
+  },
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "no governed Guinea place-of-worship snapshot is included in this census-religion release",
+    "notes": "The Guinea lane ships census-religion percentage metrics only."
+  },
+  "source_datasets": [
+    {
+      "source_dataset_id": "ins-rgph3-2014-etat-structure-table-5-10",
+      "name": "INS RGPH-3 2014, État et structure de la population, Table 5.10",
+      "provider": "Institut National de la Statistique (INS), Guinée",
+      "url": "https://www.stat-guinee.org/images/Documents/Publications/INS/rapports_enquetes/RGPH3/RGPH3_etat_structure.pdf",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/gn_census/RGPH3_etat_structure.pdf",
+      "licence": {
+        "name": "Creative Commons Attribution 4.0 International (CC BY 4.0), via the INS Accord de licence de données ouvertes",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "Source : INS. Contient des informations sous licence conformément à l'Accord de licence de données ouvertes de l'INS."
+      },
+      "citation": "INS, Recensement Général de la Population et de l'Habitation 2014 (RGPH-3), État et structure de la population, Table 5.10 (religion by administrative region).",
+      "access_limits": "Open web PDF.",
+      "redistribution_limits": "CC BY 4.0 via the INS Accord de licence de données ouvertes permits redistribution and derivatives with attribution. The INS website terms (data/raw/gn_census/conditions_generales.html) route reuse of \"les Données publiées par l'Institut national de la statistique, y compris les Données mises à disposition sur ce site web et sur https://guinea.opendataforafrica.org\" to this Accord, extending the CC BY 4.0 grant to the website-published Données, which includes the thematic-report tables transcribed here (conductor ruling 2026-07-11).",
+      "notes": "Eight administrative regions, one-decimal percentages, five categories, no counts. The Faranah row's five cells sum to 99.9 by the source's own rounding (within the 0.25 pp derived bound); no percentage was altered."
+    },
+    {
+      "source_dataset_id": "geoboundaries-gin-adm1-2017",
+      "name": "geoBoundaries Guinea ADM1 (8 regions, represented year 2017)",
+      "provider": "geoBoundaries (William & Mary geoLab); underlying source World Food Programme, OCHA ROWCA",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GIN/ADM1/geoBoundaries-GIN-ADM1.geojson",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/gn_census/geoBoundaries-GIN-ADM1.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)",
+        "url": "https://creativecommons.org/licenses/by/3.0/igo/",
+        "attribution": "geoBoundaries (gbOpen) GIN ADM1; boundary ID GIN-ADM1-385441; source WFP/OCHA ROWCA"
+      },
+      "citation": "Runfola, D. et al. (2020) geoBoundaries: A global database of political administrative boundaries. gbOpen GIN ADM1 (pinned commit 9469f09).",
+      "access_limits": null,
+      "redistribution_limits": "CC BY 3.0 IGO permits redistribution and derivatives with attribution.",
+      "notes": "8 ADM1 regions; release metadata states CC BY 3.0 IGO, represented year 2017, admUnitCount 8."
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_id": "religious_affiliation_percent",
+      "label": "Religious affiliation (%)",
+      "description": "Share of the resident population in the four affiliation categories (Musulmane, Chrétienne, Animiste, Autre religion).",
+      "unit": "percent",
+      "denominator_indicator_id": null,
+      "method": "Sum of the four published affiliation-category one-decimal shares from Table 5.10, rounded to one decimal. No count is derived from any percentage.",
+      "temporal_coverage": "2014",
+      "spatial_coverage": "Eight ADM1 regions on the geoBoundaries 2017 boundary; the census region frame is stable across the 1983/1996/2014 vintages, so the region layer needs no concordance.",
+      "quality_notes": "One-decimal published shares. The Faranah row's five categories sum to 99.9 by the source's rounding, so its affiliation (99.1) plus no-religion (0.8) sum to 99.9, within the 0.25 pp derived bound."
+    },
+    {
+      "indicator_id": "no_religion_percent",
+      "label": "No religion (%)",
+      "description": "Sans religion as a share of the resident population.",
+      "unit": "percent",
+      "denominator_indicator_id": null,
+      "method": "The published Sans religion one-decimal share from Table 5.10, carried unchanged.",
+      "temporal_coverage": "2014",
+      "spatial_coverage": "Eight ADM1 regions on the geoBoundaries 2017 boundary; the census region frame is stable across the 1983/1996/2014 vintages, so the region layer needs no concordance.",
+      "quality_notes": "Sans religion is a real non-affiliation category inside the denominator and outside the affiliation numerator."
+    }
+  ],
+  "visual_layers": [
+    {
+      "visual_layer_id": "gn-region-religious-affiliation-share",
+      "label": "Religious affiliation share",
+      "description": "Census religious affiliation share by region, 2014.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "religious_affiliation_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "resident population (published shares)"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "published regional value on the 2017 boundary",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": true,
+      "notes": "N'Zérékoré (46.7% Muslim, 28.1% Christian, 10.4% Animist, 14.2% no religion) is the map-worthy contrast against the near-uniform 89-99% Muslim north."
+    },
+    {
+      "visual_layer_id": "gn-region-no-religion-share",
+      "label": "No religion share",
+      "description": "Sans religion share by region, 2014.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "no_religion_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "resident population (published shares)"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "published regional value on the 2017 boundary",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Single wave; no cross-wave change layer (subnational religion is published for 2014 only)."
+    }
+  ],
+  "rows": [
+    {
+      "country_code": "GN",
+      "boundary_set_id": "gn-region-2014-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gn-region-2014-geoboundaries-adm1:boke",
+      "area_code": "boke",
+      "area_name": "Boké",
+      "year": 2014,
+      "population_total": null,
+      "population_total_basis": "INS RGPH-3 2014, État et structure de la population, Table 5.10: resident population by administrative region. The source publishes one-decimal percentage shares only, with no counts, so population_total and all counts are null; percentages are shipped as printed. Region resident totals exist in Table 2.09 but are not multiplied into the shares (no derived-count layer).",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": 99.7,
+      "no_religion_count": null,
+      "no_religion_percent": 0.3,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 34357.645,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ins-rgph3-2014-etat-structure-table-5-10",
+        "geoboundaries-gin-adm1-2017"
+      ],
+      "quality_flag": "census_affiliation;denominator_resident_population;published_one_decimal_percent_shares;counts_withheld_no_derivation_from_percent;single_wave_2014;religious_change_withheld;affiliation=musulmane+chretienne+animiste+autre_religion;no_religion=sans_religion;boundary_2017_geoboundaries_cc_by_3_0_igo;census_cc_by_4_0_ins_accord"
+    },
+    {
+      "country_code": "GN",
+      "boundary_set_id": "gn-region-2014-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gn-region-2014-geoboundaries-adm1:conakry",
+      "area_code": "conakry",
+      "area_name": "Conakry",
+      "year": 2014,
+      "population_total": null,
+      "population_total_basis": "INS RGPH-3 2014, État et structure de la population, Table 5.10: resident population by administrative region. The source publishes one-decimal percentage shares only, with no counts, so population_total and all counts are null; percentages are shipped as printed. Region resident totals exist in Table 2.09 but are not multiplied into the shares (no derived-count layer).",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": 99.7,
+      "no_religion_count": null,
+      "no_religion_percent": 0.3,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 437.8505,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ins-rgph3-2014-etat-structure-table-5-10",
+        "geoboundaries-gin-adm1-2017"
+      ],
+      "quality_flag": "census_affiliation;denominator_resident_population;published_one_decimal_percent_shares;counts_withheld_no_derivation_from_percent;single_wave_2014;religious_change_withheld;affiliation=musulmane+chretienne+animiste+autre_religion;no_religion=sans_religion;boundary_2017_geoboundaries_cc_by_3_0_igo;census_cc_by_4_0_ins_accord"
+    },
+    {
+      "country_code": "GN",
+      "boundary_set_id": "gn-region-2014-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gn-region-2014-geoboundaries-adm1:faranah",
+      "area_code": "faranah",
+      "area_name": "Faranah",
+      "year": 2014,
+      "population_total": null,
+      "population_total_basis": "INS RGPH-3 2014, État et structure de la population, Table 5.10: resident population by administrative region. The source publishes one-decimal percentage shares only, with no counts, so population_total and all counts are null; percentages are shipped as printed. Region resident totals exist in Table 2.09 but are not multiplied into the shares (no derived-count layer).",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": 99.1,
+      "no_religion_count": null,
+      "no_religion_percent": 0.8,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 35838.6066,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ins-rgph3-2014-etat-structure-table-5-10",
+        "geoboundaries-gin-adm1-2017"
+      ],
+      "quality_flag": "census_affiliation;denominator_resident_population;published_one_decimal_percent_shares;counts_withheld_no_derivation_from_percent;single_wave_2014;religious_change_withheld;affiliation=musulmane+chretienne+animiste+autre_religion;no_religion=sans_religion;boundary_2017_geoboundaries_cc_by_3_0_igo;census_cc_by_4_0_ins_accord;source_row_sums_to_99,9_within_derived_rounding_bound_0.25pp"
+    },
+    {
+      "country_code": "GN",
+      "boundary_set_id": "gn-region-2014-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gn-region-2014-geoboundaries-adm1:kankan",
+      "area_code": "kankan",
+      "area_name": "Kankan",
+      "year": 2014,
+      "population_total": null,
+      "population_total_basis": "INS RGPH-3 2014, État et structure de la population, Table 5.10: resident population by administrative region. The source publishes one-decimal percentage shares only, with no counts, so population_total and all counts are null; percentages are shipped as printed. Region resident totals exist in Table 2.09 but are not multiplied into the shares (no derived-count layer).",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": 99.8,
+      "no_religion_count": null,
+      "no_religion_percent": 0.2,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 72024.859,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ins-rgph3-2014-etat-structure-table-5-10",
+        "geoboundaries-gin-adm1-2017"
+      ],
+      "quality_flag": "census_affiliation;denominator_resident_population;published_one_decimal_percent_shares;counts_withheld_no_derivation_from_percent;single_wave_2014;religious_change_withheld;affiliation=musulmane+chretienne+animiste+autre_religion;no_religion=sans_religion;boundary_2017_geoboundaries_cc_by_3_0_igo;census_cc_by_4_0_ins_accord"
+    },
+    {
+      "country_code": "GN",
+      "boundary_set_id": "gn-region-2014-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gn-region-2014-geoboundaries-adm1:kindia",
+      "area_code": "kindia",
+      "area_name": "Kindia",
+      "year": 2014,
+      "population_total": null,
+      "population_total_basis": "INS RGPH-3 2014, État et structure de la population, Table 5.10: resident population by administrative region. The source publishes one-decimal percentage shares only, with no counts, so population_total and all counts are null; percentages are shipped as printed. Region resident totals exist in Table 2.09 but are not multiplied into the shares (no derived-count layer).",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": 99.5,
+      "no_religion_count": null,
+      "no_religion_percent": 0.5,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 25737.1077,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ins-rgph3-2014-etat-structure-table-5-10",
+        "geoboundaries-gin-adm1-2017"
+      ],
+      "quality_flag": "census_affiliation;denominator_resident_population;published_one_decimal_percent_shares;counts_withheld_no_derivation_from_percent;single_wave_2014;religious_change_withheld;affiliation=musulmane+chretienne+animiste+autre_religion;no_religion=sans_religion;boundary_2017_geoboundaries_cc_by_3_0_igo;census_cc_by_4_0_ins_accord"
+    },
+    {
+      "country_code": "GN",
+      "boundary_set_id": "gn-region-2014-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gn-region-2014-geoboundaries-adm1:labe",
+      "area_code": "labe",
+      "area_name": "Labé",
+      "year": 2014,
+      "population_total": null,
+      "population_total_basis": "INS RGPH-3 2014, État et structure de la population, Table 5.10: resident population by administrative region. The source publishes one-decimal percentage shares only, with no counts, so population_total and all counts are null; percentages are shipped as printed. Region resident totals exist in Table 2.09 but are not multiplied into the shares (no derived-count layer).",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": 99.8,
+      "no_religion_count": null,
+      "no_religion_percent": 0.2,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 22797.2744,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ins-rgph3-2014-etat-structure-table-5-10",
+        "geoboundaries-gin-adm1-2017"
+      ],
+      "quality_flag": "census_affiliation;denominator_resident_population;published_one_decimal_percent_shares;counts_withheld_no_derivation_from_percent;single_wave_2014;religious_change_withheld;affiliation=musulmane+chretienne+animiste+autre_religion;no_religion=sans_religion;boundary_2017_geoboundaries_cc_by_3_0_igo;census_cc_by_4_0_ins_accord"
+    },
+    {
+      "country_code": "GN",
+      "boundary_set_id": "gn-region-2014-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gn-region-2014-geoboundaries-adm1:mamou",
+      "area_code": "mamou",
+      "area_name": "Mamou",
+      "year": 2014,
+      "population_total": null,
+      "population_total_basis": "INS RGPH-3 2014, État et structure de la population, Table 5.10: resident population by administrative region. The source publishes one-decimal percentage shares only, with no counts, so population_total and all counts are null; percentages are shipped as printed. Region resident totals exist in Table 2.09 but are not multiplied into the shares (no derived-count layer).",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": 99.9,
+      "no_religion_count": null,
+      "no_religion_percent": 0.1,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 17852.979,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ins-rgph3-2014-etat-structure-table-5-10",
+        "geoboundaries-gin-adm1-2017"
+      ],
+      "quality_flag": "census_affiliation;denominator_resident_population;published_one_decimal_percent_shares;counts_withheld_no_derivation_from_percent;single_wave_2014;religious_change_withheld;affiliation=musulmane+chretienne+animiste+autre_religion;no_religion=sans_religion;boundary_2017_geoboundaries_cc_by_3_0_igo;census_cc_by_4_0_ins_accord"
+    },
+    {
+      "country_code": "GN",
+      "boundary_set_id": "gn-region-2014-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gn-region-2014-geoboundaries-adm1:nzerekore",
+      "area_code": "nzerekore",
+      "area_name": "N'Zérékoré",
+      "year": 2014,
+      "population_total": null,
+      "population_total_basis": "INS RGPH-3 2014, État et structure de la population, Table 5.10: resident population by administrative region. The source publishes one-decimal percentage shares only, with no counts, so population_total and all counts are null; percentages are shipped as printed. Region resident totals exist in Table 2.09 but are not multiplied into the shares (no derived-count layer).",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": 85.8,
+      "no_religion_count": null,
+      "no_religion_percent": 14.2,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 36729.345,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ins-rgph3-2014-etat-structure-table-5-10",
+        "geoboundaries-gin-adm1-2017"
+      ],
+      "quality_flag": "census_affiliation;denominator_resident_population;published_one_decimal_percent_shares;counts_withheld_no_derivation_from_percent;single_wave_2014;religious_change_withheld;affiliation=musulmane+chretienne+animiste+autre_religion;no_religion=sans_religion;boundary_2017_geoboundaries_cc_by_3_0_igo;census_cc_by_4_0_ins_accord"
+    }
+  ]
+}
