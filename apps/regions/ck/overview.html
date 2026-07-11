@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Cook Islands map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Cook Islands research map; every string traces to
+    // research/countries/ck/route-probe.md (published waves, category frames,
+    // reconciliation gates, boundary and licence positions), the manifest
+    // docs/manifests/ck-census-religion-2006-2021.json (construct notes,
+    // category frames, validation, and licence), or the live REGION_CONFIG in
+    // apps/regions/ck/index.html. authors nothing.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "CK",
+      countryName: "Cook Islands",
+      mapHref: "./",
+      intro: "Census religious-affiliation overlays for the twelve census islands of the Cook Islands across three censuses, 2011, 2016 and 2021, from the Cook Islands Statistics Office (CISO). The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+      facts: {
+        waves: "Three censuses: 2011, 2016, 2021",
+        geographies: "Island (12 units): Rarotonga, five Southern Group islands, six Northern Group islands",
+        metrics: "Religious affiliation %, No religion %, change since previous census"
+      },
+      reading: [
+        "Islands are shaded by the share reporting a named religion, or by the share in the census No religion line (No religion %). Religious affiliation is the sum of the named religion categories (Cook Islands Christian Church, Roman Catholic, Seventh Day Adventist, Church of Latter Day Saints, Assemblies of God, Apostolic Church, Other Religion). Jehovah's Witness is folded into Other Religion in the 2011 and 2016 island tables and printed as a separate column in 2021; folded back into affiliation, the named spine is comparable across the three waves.",
+        "The substantive subnational structure is denominational. The Cook Islands Christian Church share fell from 49.1 percent nationally in 2011 to 48.8 percent in 2016 and 43.1 percent in 2021, the sharpest decline on Rarotonga. This denominational composition lives in the source religion tables and the build manifest's per-wave category frames; the headline affiliation and no-religion metrics do not carry it, and the popup shows the affiliation and no-religion shares by census year only.",
+        "Percentages use each island's printed census Total for its own wave. Every wave counts the resident population of all ages; the island denominators are comparable across 2011, 2016 and 2021, and the national totals fall gently across the span (14,974; 14,802; 14,987). The religion question was not compulsory, and roughly two percent did not respond in each wave.",
+        "The no-religion line differs by frame across the waves, and this seam is declared in the metric note and the popup note. In 2011 the source prints No Religion (national 841) and Objected to the Question or Not Stated (national 323) as two separate columns; the No religion metric carries the No Religion column only, and the separate Objected/Not Stated column stays in each island's denominator and outside both numerators; the affiliation and no-religion shares therefore do not add to 100 that wave. In 2016 and 2021 the source prints one combined No Religion/Not Stated line (national 1,097 and 2,338), rendered as printed and including not-stated; the affiliation and combined no-religion shares together exhaust the population in those waves.",
+        "The national no-religion share reads 5.6 percent in 2011, 7.4 percent in 2016 and 15.6 percent in 2021, and 9.6 percent rising to 19.6 percent on Rarotonga between 2016 and 2021. The 2011-to-2016 rise in the no-religion share partly reflects the line combine (the 2011 measure excludes the separate not-stated column that the later combined line includes), not a pure rise in the no-religion population.",
+        "A change metric reports the percentage-point change in the affiliation share since the previous census (2011 to 2016, and 2016 to 2021); the spacing is roughly five-yearly and a wave-to-wave difference is not an annual rate. The change nulls wherever an operand island-wave is a no-data row (none occur in this three-wave product).",
+        "The 2006 census published religion at island-group level only (Rarotonga / Southern / Northern), recovered from the 2016 report Table 6 (national 15,324); no standalone 2006 island religion table exists. The 2006 wave is therefore carried as recoverable context and never shipped as an island wave, keeping the summary file's implied geography honest. The pre-2006 waves publish no island religion table on the source-of-record site; extending the island series before 2011 is a future-research route.",
+        "The record reconciles at every margin in each wave, fail-fast and verified against the printed control totals: every island row closes to its printed Total, the twelve islands close to each group total and to the national margin (14,974; 14,802; 14,987), and every category column closes to its printed national total. A printed dash is read as a nil, not a suppression; no confidentiality masking appears in the Cook Islands tables. No place-of-worship layer ships for this product; place counts and density metrics are therefore null.",
+        "The display frame is a twelve-feature composite boundary. Seven islands (Rarotonga, Aitutaki, Mangaia, Atiu, Mauke, Mitiaro, Penrhyn) are clustered from the geoBoundaries COK ADM0 Sentinel-2 land-cover parts, with uninhabited Manuae and Takutea dropped as decoys; five northern atolls (Palmerston, Pukapuka, Nassau, Manihiki, Rakahanga) are assembled from OpenStreetMap coastline motu, absent from the geoBoundaries land-cover layer. The mixed licence (CC BY 4.0 for the geoBoundaries islands, ODbL 1.0 for the OSM atolls) is disclosed per feature. All territory sits between roughly 157 and 166 degrees West, far east of the antimeridian, and needs no dateline handling; the camera frames Rarotonga in the south together with the northern atolls beside the panels."
+      ],
+      sources: [
+        {
+          name: "Cook Islands 2011 Census Report, Table 2.4: Resident Population by Religious Affiliation and Usual Residence",
+          href: "https://stats.gov.ck/download/432/census-2011/5911/2011-census-report.pdf",
+          construct: "Census religious affiliation by island, all-ages resident population; twelve island units, national total 14,974. No Religion and Objected/Not Stated print as two separate columns; Jehovah's Witness is folded into Other Religion. Every island row, group total, national margin and category column closes to the printed control totals",
+          years: "2011",
+          licence: "Reproduced with acknowledgement under the report Standards clause: \"Any table or material may be reproduced and published provided acknowledgement is made of the source.\" Attribution: Cook Islands Statistics Office, 2011 Census of Population and Dwellings"
+        },
+        {
+          name: "Cook Islands 2016 Census Report, Table 2.04 and Table 6",
+          href: "https://stats.gov.ck/download/430/census-2016/5895/2016-census-report.pdf",
+          construct: "Census religious affiliation by island (Table 2.04, all-ages resident population, national total 14,802) with the combined No Religion/Not Stated line and Jehovah's Witness folded into Other Religion; Table 6 prints the 2006/2011/2016 group series (national 15,324 in 2006), the source of the held-out 2006 group-level context",
+          years: "2016 (island); 2006 (group context)",
+          licence: "Reproduced with acknowledgement under the report Standards clause. Attribution: Cook Islands Statistics Office, 2016 Census of Population and Dwellings"
+        },
+        {
+          name: "Cook Islands 2021 Census Report, Table 2.04: Resident Population by Religious Affiliation and Usual Residence",
+          href: "https://stats.gov.ck/download/83/census-2021/1497/2021-census-report-with-tables-and-questionnaire.pdf",
+          construct: "Census religious affiliation by island, all-ages resident population; twelve island units, national total 14,987. The combined No Religion/Not Stated line (national 2,338) and Jehovah's Witness as a separate column (national 330). Every island row, group total, national margin and category column closes to the printed control totals",
+          years: "2021",
+          licence: "Reproduced with acknowledgement under the report Standards clause. Attribution: Cook Islands Statistics Office, 2021 Census of Population and Dwellings. The 2021 report front matter reserves commercial and whole-document reproduction and forbids altering the original work without permission, while authorising partial reproduction for scientific, educational or research purposes with acknowledgement; a derived, aggregated, attributed island summary sits inside the operative Standards grant and the research carve-out, and the interaction is recorded for the project lead as a caveat"
+        },
+        {
+          name: "geoBoundaries COK ADM0 (seven islands)",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/COK/ADM0/",
+          construct: "Boundary geometry, boundaryYearRepresented 2021; a single ADM0 MultiPolygon of 86 Sentinel-2 land-cover parts clustered to seven census islands (Rarotonga, Aitutaki, Mangaia, Atiu, Mauke, Mitiaro, Penrhyn) by proximity to known island coordinates, with uninhabited Manuae and Takutea dropped as decoys. The layer has no geometry for the five northern atolls, which come from OpenStreetMap",
+          years: "2021 (represented year)",
+          licence: "Creative Commons Attribution 4.0 International (CC BY 4.0), per the release metadata (pinned commit 9469f09); attribution geoBoundaries (gbOpen), Sentinel-2 10m Land Cover, ESA"
+        },
+        {
+          name: "OpenStreetMap coastline (five northern atolls)",
+          href: "https://www.openstreetmap.org/copyright",
+          construct: "Boundary geometry for Palmerston, Manihiki, Rakahanga, Nassau and Pukapuka, absent from the geoBoundaries land-cover layer; each atoll's land is the union of its closed coastline motu fetched from the Overpass API, area-gated against published land areas",
+          years: "2026 (retrieved)",
+          licence: "Open Data Commons Open Database License 1.0 (ODbL 1.0); attribution © OpenStreetMap contributors"
+        }
+      ],
+      accessData: {
+        note: "The committed products are the derived area summary (religious-affiliation and no-religion shares by island and wave, with all-ages resident-population totals) and a simplified twelve-island composite boundary only; the raw census report PDFs, the geoBoundaries source GeoJSON, and the OSM Overpass responses are not committed. The denominational composition behind the affiliation share is documented in the manifest's per-wave category frames, not in the area-summary rows, and the popup shows the affiliation and no-religion shares by census year only.",
+        sourceOfRecord: "Cook Islands Statistics Office, <a href=\"https://stats.gov.ck\" target=\"_blank\" rel=\"noopener\">source of record</a> for the census Table 2.4 (2011) and Table 2.04 (2016, 2021) religion-by-island tables and the 2016 report Table 6 (2006 group-level context); boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/COK/ADM0/\" target=\"_blank\" rel=\"noopener\">geoBoundaries COK ADM0</a> (seven islands) and OpenStreetMap contributors (five northern atolls).",
+        tables: "Table 2.4 (2011) and Table 2.04 (2016, 2021) are the source of record for the shipped counts. Reconciliation passes at every margin in every wave: each of the twelve island rows closes to its printed Total, the twelve islands close to each group total and to the national margin (14,974; 14,802; 14,987), and every category column closes to its printed national total. The area-summary religious_affiliation_percent field carries the named-affiliation share (over each island's own wave Total) and no_religion_percent carries the census no-religion line; the 2011 no-religion basis is the No Religion column only (the separate Objected/Not Stated column stays in the denominator), while 2016 and 2021 combine No Religion with Not Stated; the two shares therefore need not sum to 100, and the no-religion basis differs across waves by construction. This seam is disclosed per row.",
+        licence: "The census-report tables carry an explicit Standards-clause grant, byte-matched across all three reports: \"Any table or material may be reproduced and published provided acknowledgement is made of the source.\" The derived island summaries are reproduced with attribution to the Cook Islands Statistics Office under that grant. The 2021 report front matter reserves commercial and whole-document reproduction and forbids altering the original work without permission, while authorising partial reproduction for scientific, educational or research purposes with acknowledgement; a derived, aggregated, attributed island summary sits inside the operative Standards grant and the research carve-out, and the front-matter interaction is recorded for the project lead as a caveat. The restricted Pacific Data Hub microdata (a signed confidentiality declaration and prior CISO/SPC approval of outputs are required) are unused and non-binding. The boundary is a mixed-licence composite: seven islands from geoBoundaries COK ADM0 (CC BY 4.0) and five northern atolls from OpenStreetMap contributors (ODbL 1.0), disclosed per feature.",
+        script: "scripts/build_ck_area_summary.R",
+        manifests: [
+          { label: "ck-census-religion-2006-2021", href: "docs/manifests/ck-census-religion-2006-2021.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Cook Islands map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
