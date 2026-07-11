@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Guinea map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Guinea research map; every string traces to
+    // research/countries/gn/route-probe.md, the manifest
+    // docs/manifests/gn-census-religion-2014.json, or the live REGION_CONFIG in
+    // apps/regions/gn/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "GN",
+      countryName: "Guinea",
+      mapHref: "./",
+      intro: "Census religious affiliation across Guinea's eight administrative regions, a single 2014 snapshot from the Institut National de la Statistique (INS), RGPH-3 État et structure de la population, Table 5.10. The source publishes one-decimal percentage shares of each region's resident population, with no counts and no change metric. The construct is census affiliation. It does not measure belief, practice, attendance, or registered membership.",
+      facts: {
+        waves: "One census: 2014",
+        geographies: "Region (8 units)",
+        metrics: "Religious affiliation %, no religion %"
+      },
+      reading: [
+        "The eight regions are shaded by the share reporting a religious affiliation (Musulmane, Chrétienne, Animiste, or Autre religion), or by the share in the source's Sans religion category, shown as No religion %. The five source categories are mutually exclusive and partition the resident population.",
+        "Percentages are the source's published one-decimal shares. The source publishes no counts. Population and every count field are null, and no count is derived from a percentage. Region resident totals exist in the same report (Table 2.09) but are never multiplied into the shares; no derived-count layer is built.",
+        "The five categories sum to 100 within a derived rounding bound of 0.25 percentage points (0.05 percentage points per one-decimal cell across five categories). The Faranah row prints 0,8 / 89,1 / 9,7 / 0,1 / 0,2, which sum to 99,9; it is carried unaltered. Every other printed row sums to exactly 100,0.",
+        "N'Zérékoré is the sharpest published contrast: 85.8% affiliated and 14.2% no religion, against the near-uniform 99% affiliation of the north (Labé and Mamou each 99.8, Kankan 99.8). In the published Table 5.10 its affiliation splits Muslim 46.7, Christian 28.1, and Animist 10.4; that per-category split is source context, recorded in Table 5.10, and is not a shipped map metric.",
+        "Only the 2014 wave ships at region level; no change metric is offered. Subnational religion is published for 2014 alone. The 1996 religion figure survives only as a national urban/rural row in the same 2014 report, and 1983 has no published religion table; both are recorded as deferred non-routes. No published table gives religion by prefecture for any wave.",
+        "The boundary frame is geoBoundaries GIN ADM1, eight regions, represented year 2017. The eight census regions join one-to-one by an accent-free key; the census region frame is stable across the 1983, 1996, and 2014 vintages, and needs no concordance.",
+        "No governed Guinea place-of-worship snapshot ships with this product; place counts and density metrics are null."
+      ],
+      sources: [
+        {
+          name: "INS RGPH-3 2014, État et structure de la population, Table 5.10 (Répartition de la population résidente par région de résidence selon la religion)",
+          href: "https://www.stat-guinee.org/images/Documents/Publications/INS/rapports_enquetes/RGPH3/RGPH3_etat_structure.pdf",
+          construct: "Census religious affiliation by administrative region, one-decimal percentage shares, no counts",
+          years: "2014",
+          licence: "CC BY 4.0 via the INS Accord de licence de données ouvertes, which the INS website terms extend to website-published Données, covering the thematic-report tables (conductor ruling 2026-07-11)"
+        },
+        {
+          name: "geoBoundaries Guinea ADM1 boundaries",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/GIN/ADM1/",
+          construct: "Boundary geometry (8 regions), boundary ID GIN-ADM1-385441, source World Food Programme, OCHA ROWCA",
+          years: "2017 (represented year)",
+          licence: "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO), per the release metadata"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Institut National de la Statistique, <a href=\"https://www.stat-guinee.org/\" target=\"_blank\" rel=\"noopener\">INS</a>: the RGPH-3 2014 État et structure de la population, Table 5.10, religion by administrative region; boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/GIN/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries GIN ADM1</a>.",
+        tables: "Table 5.10 is the source of record for the shipped shares. It prints one-decimal percentages for the five categories across the eight regions plus an Ensemble row. The Table 5.10 Ensemble row (Sans religion 2,4; Musulmane 89,1; Chrétienne 6,8; Animiste 1,6; Autres 0,1) equals the Table 5.09 Total column and the Table 5.11 2014 Ensemble row exactly. The area-summary religious_affiliation_percent field sums Musulmane, Chrétienne, Animiste, and Autre religion; the no_religion_percent field carries the Sans religion share. No count is derived from any percentage.",
+        licence: "Census reuse is accepted under the INS Accord de licence de données ouvertes (CC BY 4.0), byte-matched from the rendered hdemdob portal page. The INS website terms route reuse of the published Données to that Accord, which extends the CC BY 4.0 grant to the website-published Données, including the thematic-report tables transcribed here (conductor ruling 2026-07-11). Both required French attribution notices ride verbatim in the manifest. The geoBoundaries GIN ADM1 boundary is CC BY 3.0 IGO per the release metadata, source WFP/OCHA ROWCA.",
+        script: "scripts/build_gn_area_summary.R",
+        manifests: [
+          { label: "gn-census-religion-2014", href: "docs/manifests/gn-census-religion-2014.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Guinea map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
