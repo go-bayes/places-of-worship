@@ -1,0 +1,480 @@
+{
+  "schema_version": "area-summary.v1",
+  "generated_at": "2026-07-11T00:00:00Z",
+  "generated_by": "scripts/build_fm_area_summary.R",
+  "country_code": "FM",
+  "boundary_set": {
+    "boundary_set_id": "fm-state-2019-geoboundaries-adm1",
+    "country_code": "FM",
+    "level": "state",
+    "vintage": "2019",
+    "source_dataset_id": "geoboundaries-fsm-adm1-2019"
+  },
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "No governed place-of-worship snapshot ships in the FSM census product.",
+    "notes": "Place counts and density metrics remain null."
+  },
+  "source_datasets": [
+    {
+      "source_dataset_id": "fm-census-2000-state-reports-table-b10-religion",
+      "name": "FSM 2000 Census of Population and Housing, state reports, Table B10/B10a-d: Religion by Usual Residence",
+      "provider": "FSM Division of Statistics; Secretariat of the Pacific Community, Statistics for Development Division (SPC SDD)",
+      "url": "https://sdd.spc.int/fm",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/fm_census/fm_2000_kosrae.pdf",
+      "licence": {
+        "name": "No reuse licence is stated on the FSM census religion tables in any wave (2000 state reports, 2010 Basic Tabulation, 2023 Basic Tables). The derived state summaries carry attribution to the FSM Statistics Division (and SPC SDD for the 2000 reports) and ship STAGED pending a PI licence ruling (summaries-not-raw-data stance). The restricted Pacific Data Hub microdata are unused and do not bind.",
+        "url": "https://stats.gov.fm",
+        "attribution": "FSM Division of Statistics and SPC SDD, 2000 FSM Census of Population and Housing"
+      },
+      "citation": "FSM Division of Statistics and SPC SDD, 2000 FSM Census of Population and Housing, state reports (Yap, Chuuk, Pohnpei, Kosrae), Table B10/B10a-d.",
+      "access_limits": null,
+      "redistribution_limits": "Derived state summaries only; no reuse licence is stated. Ships STAGED pending a PI ruling.",
+      "notes": "All persons, all ages; eight-way frame with distinct No Religion and Refused columns. Each state's religion block closes exactly to its printed All-persons total; the four sum to 107,008. Source label variants: Kosrae prints 'None'/'Other religion'; Yap, Chuuk, Pohnpei print 'No Religion'/'Other Religion'; three reports misspell 'Seveth Day Adventist (SDA)'."
+    },
+    {
+      "source_dataset_id": "fm-census-2010-basic-tabulation-table-b09-religion",
+      "name": "FSM Basic Tabulation, 2010 Census of Population and Housing, Table B09: Religion by State of Usual Residence",
+      "provider": "FSM Statistics Division (stats.gov.fm)",
+      "url": "https://stats.gov.fm/download/18/population-statistics/600/fsm-basic-tabulation-2010-census-of-population-and-housing.xlsx",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/fm_census/fm_2010_basic_tabulation.xlsx",
+      "licence": {
+        "name": "No reuse licence is stated on the FSM census religion tables in any wave (2000 state reports, 2010 Basic Tabulation, 2023 Basic Tables). The derived state summaries carry attribution to the FSM Statistics Division (and SPC SDD for the 2000 reports) and ship STAGED pending a PI licence ruling (summaries-not-raw-data stance). The restricted Pacific Data Hub microdata are unused and do not bind.",
+        "url": "https://stats.gov.fm",
+        "attribution": "FSM Statistics Division, 2010 FSM Census of Population and Housing"
+      },
+      "citation": "FSM Statistics Division, Basic Tabulation, 2010 Census of Population and Housing, Table B09.",
+      "access_limits": null,
+      "redistribution_limits": "Derived state summaries only; no reuse licence is stated. Ships STAGED pending a PI ruling.",
+      "notes": "All persons; twelve-way frame. Both margins close exactly: every religion row and every state column sum to the printed national total of 102,843. The Kosrae Apostolic dash is nil (0)."
+    },
+    {
+      "source_dataset_id": "fm-census-2023-basic-tables-table-b6-religion",
+      "name": "FSM Basic Tables, 2023 Population and Housing Census, Table B6: Religion by State",
+      "provider": "FSM Statistics Division (stats.gov.fm)",
+      "url": "https://stats.gov.fm/download/18/population-statistics/2210/fsm-basic-tables-2023-population-housing-census.xlsx",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/fm_census/fm_2023_basic_tables.xlsx",
+      "licence": {
+        "name": "No reuse licence is stated on the FSM census religion tables in any wave (2000 state reports, 2010 Basic Tabulation, 2023 Basic Tables). The derived state summaries carry attribution to the FSM Statistics Division (and SPC SDD for the 2000 reports) and ship STAGED pending a PI licence ruling (summaries-not-raw-data stance). The restricted Pacific Data Hub microdata are unused and do not bind.",
+        "url": "https://stats.gov.fm",
+        "attribution": "FSM Statistics Division, 2023 FSM Population and Housing Census"
+      },
+      "citation": "FSM Statistics Division, Basic Tables, 2023 Population and Housing Census, Table B6.",
+      "access_limits": null,
+      "redistribution_limits": "Derived state summaries only; no reuse licence is stated. Ships STAGED pending a PI ruling.",
+      "notes": "All persons; eleven-way frame with the No religion/Refused line merged. Three documented source discrepancies are disclosed and never repaired: the printed national total (75,817) is one below the sum of the four printed state totals (75,818); the Baptist (913), SDA (511), and Other religion (1,195) row totals are each one above their four-state sum; and small cells (Assembly of God in Chuuk; Apostolic in Yap and Kosrae; Jehovah's Witness in Kosrae; No religion/Refused in Kosrae) are asterisk-suppressed, rendered null."
+    },
+    {
+      "source_dataset_id": "geoboundaries-fsm-adm1-2019",
+      "name": "geoBoundaries FSM ADM1 (4 states)",
+      "provider": "geoBoundaries (William & Mary geoLab); source OCHA ROP, FSM Division of Statistics, SPC SDD",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/FSM/ADM1/geoBoundaries-FSM-ADM1.geojson",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/fm_census/geoBoundaries-FSM-ADM1.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)",
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/FSM/ADM1/",
+        "attribution": "geoBoundaries (gbOpen); boundary source OCHA ROP, FSM Division of Statistics, SPC SDD"
+      },
+      "citation": "geoBoundaries FSM ADM1 (gbOpen, pinned 9469f09), 4 state boundaries.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed with CC BY 3.0 IGO attribution.",
+      "notes": "4 ADM1 states (Yap, Chuuk, Pohnpei, Kosrae), boundaryYearRepresented 2019, joined one-to-one on shapeName with no concordance needed. The extent spans longitude 137.5E (Yap outer islands) to 163.0E (Kosrae) and latitude 1.0N (Pohnpei's Kapingamarangi) to 10.1N."
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_id": "population_total",
+      "label": "Census population total",
+      "description": "State all-persons population represented in the wave's religion table.",
+      "unit": "count",
+      "denominator_indicator_id": null,
+      "method": "Printed state All-persons total: 2000 Table B10, 2010 Table B09, 2023 Table B6.",
+      "temporal_coverage": "2000; 2010; 2023",
+      "spatial_coverage": "FSM states (4)",
+      "quality_notes": "Every wave counts all persons of all ages; there is no universe break, so state denominators are directly comparable across 2000-2023. The population falls from 107,008 to 102,843 to 75,817, driven by Chuuk out-migration; this is a population change, never a religion change."
+    },
+    {
+      "indicator_id": "religious_affiliation_percent",
+      "label": "Religious affiliation %",
+      "description": "Share of the state population with a stated religious affiliation (broad, all bodies).",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "100 * (population - combined no-religion/refused) / population. Comparable across all three waves at the broad-affiliation level; null for Kosrae 2023 (suppressed no-religion cell).",
+      "temporal_coverage": "2000; 2010; 2023",
+      "spatial_coverage": "FSM states (4)",
+      "quality_notes": "Broad affiliation is comparable across all three waves because every wave counts all persons and the denominational split-out of Assembly of God, Apostolic, Pentecostal, and Jehovah's Witness from 2000's Other Religion does not change the has-a-religion total. Denomination-level change is limited to the matched 2010-2023 pair."
+    },
+    {
+      "indicator_id": "no_religion_percent",
+      "label": "No religious affiliation %",
+      "description": "Share reporting no religion or refusing to answer (combined to match the 2023 merged line).",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "100 * (No religion + Refused) / population for 2000 and 2010; 100 * (No religion/Refused) / population for 2023. Null for Kosrae 2023 (suppressed).",
+      "temporal_coverage": "2000; 2010; 2023",
+      "spatial_coverage": "FSM states (4)",
+      "quality_notes": "2000 and 2010 print separate No religion and Refused lines; 2023 merges them. The combined slot mixes persons with no religion and non-response and is used for comparability with the 2023 merged line."
+    }
+  ],
+  "visual_layers": [
+    {
+      "visual_layer_id": "fm-state-religious-affiliation",
+      "label": "Religious affiliation %",
+      "description": "FSM census-affiliation share by state.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "religious_affiliation_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "state all-persons total"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "reported state value",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": true,
+      "notes": "Census affiliation, not practice, attendance, or membership. Comparable across all three waves at the broad-affiliation level. Kosrae 2023 is null (suppressed no-religion cell)."
+    },
+    {
+      "visual_layer_id": "fm-state-no-religion",
+      "label": "No religious affiliation %",
+      "description": "FSM combined no-religion/refused share by state.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "no_religion_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "state all-persons total"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "reported state value",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Combines No religion and Refused to match the 2023 merged line; mixes no-religion with non-response. Kosrae 2023 is null (suppressed)."
+    }
+  ],
+  "rows": [
+    {
+      "country_code": "FM",
+      "boundary_set_id": "fm-state-2019-geoboundaries-adm1",
+      "boundary_level": "state",
+      "area_unit_id": "fm-state-2019-geoboundaries-adm1:FM-YAP",
+      "area_code": "FM-YAP",
+      "area_name": "Yap",
+      "year": 2000,
+      "population_total": 11241,
+      "population_total_basis": "2000 FSM Census state-report Table B10/B10a-d 'Marital Status and Religion by ... Usual Residence', all persons of all ages; the denominator is the printed state All-persons total. Broad affiliation is population minus the combined No Religion and Refused cells.",
+      "religious_affiliation_count": 10592,
+      "religious_affiliation_percent": 94.2265,
+      "no_religion_count": 649,
+      "no_religion_percent": 5.7735,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 106.8068,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "fm-census-2000-state-reports-table-b10-religion",
+        "geoboundaries-fsm-adm1-2019"
+      ],
+      "quality_flag": "frame_2000_eight_way;no_religion_is_no_religion_plus_refused_combined;denominations_assembly_apostolic_pentecostal_jehovah_folded_into_other_religion;census_affiliation;all_persons_all_ages_universe;no_universe_break_2000_to_2023;broad_affiliation_comparable_across_all_three_waves;denomination_detail_confined_to_2010_2023;licence_needs_review_pending_pi_task_15;boundary_ccby30igo"
+    },
+    {
+      "country_code": "FM",
+      "boundary_set_id": "fm-state-2019-geoboundaries-adm1",
+      "boundary_level": "state",
+      "area_unit_id": "fm-state-2019-geoboundaries-adm1:FM-TRK",
+      "area_code": "FM-TRK",
+      "area_name": "Chuuk",
+      "year": 2000,
+      "population_total": 53595,
+      "population_total_basis": "2000 FSM Census state-report Table B10/B10a-d 'Marital Status and Religion by ... Usual Residence', all persons of all ages; the denominator is the printed state All-persons total. Broad affiliation is population minus the combined No Religion and Refused cells.",
+      "religious_affiliation_count": 53569,
+      "religious_affiliation_percent": 99.9515,
+      "no_religion_count": 26,
+      "no_religion_percent": 0.0485,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 107.7708,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "fm-census-2000-state-reports-table-b10-religion",
+        "geoboundaries-fsm-adm1-2019"
+      ],
+      "quality_flag": "frame_2000_eight_way;no_religion_is_no_religion_plus_refused_combined;denominations_assembly_apostolic_pentecostal_jehovah_folded_into_other_religion;census_affiliation;all_persons_all_ages_universe;no_universe_break_2000_to_2023;broad_affiliation_comparable_across_all_three_waves;denomination_detail_confined_to_2010_2023;licence_needs_review_pending_pi_task_15;boundary_ccby30igo"
+    },
+    {
+      "country_code": "FM",
+      "boundary_set_id": "fm-state-2019-geoboundaries-adm1",
+      "boundary_level": "state",
+      "area_unit_id": "fm-state-2019-geoboundaries-adm1:FM-PNI",
+      "area_code": "FM-PNI",
+      "area_name": "Pohnpei",
+      "year": 2000,
+      "population_total": 34486,
+      "population_total_basis": "2000 FSM Census state-report Table B10/B10a-d 'Marital Status and Religion by ... Usual Residence', all persons of all ages; the denominator is the printed state All-persons total. Broad affiliation is population minus the combined No Religion and Refused cells.",
+      "religious_affiliation_count": 34363,
+      "religious_affiliation_percent": 99.6433,
+      "no_religion_count": 123,
+      "no_religion_percent": 0.3567,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 364.4798,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "fm-census-2000-state-reports-table-b10-religion",
+        "geoboundaries-fsm-adm1-2019"
+      ],
+      "quality_flag": "frame_2000_eight_way;no_religion_is_no_religion_plus_refused_combined;denominations_assembly_apostolic_pentecostal_jehovah_folded_into_other_religion;census_affiliation;all_persons_all_ages_universe;no_universe_break_2000_to_2023;broad_affiliation_comparable_across_all_three_waves;denomination_detail_confined_to_2010_2023;licence_needs_review_pending_pi_task_15;boundary_ccby30igo"
+    },
+    {
+      "country_code": "FM",
+      "boundary_set_id": "fm-state-2019-geoboundaries-adm1",
+      "boundary_level": "state",
+      "area_unit_id": "fm-state-2019-geoboundaries-adm1:FM-KSA",
+      "area_code": "FM-KSA",
+      "area_name": "Kosrae",
+      "year": 2000,
+      "population_total": 7686,
+      "population_total_basis": "2000 FSM Census state-report Table B10/B10a-d 'Marital Status and Religion by ... Usual Residence', all persons of all ages; the denominator is the printed state All-persons total. Broad affiliation is population minus the combined No Religion and Refused cells.",
+      "religious_affiliation_count": 7674,
+      "religious_affiliation_percent": 99.8439,
+      "no_religion_count": 12,
+      "no_religion_percent": 0.1561,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 108.904,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "fm-census-2000-state-reports-table-b10-religion",
+        "geoboundaries-fsm-adm1-2019"
+      ],
+      "quality_flag": "frame_2000_eight_way;no_religion_is_no_religion_plus_refused_combined;denominations_assembly_apostolic_pentecostal_jehovah_folded_into_other_religion;census_affiliation;all_persons_all_ages_universe;no_universe_break_2000_to_2023;broad_affiliation_comparable_across_all_three_waves;denomination_detail_confined_to_2010_2023;licence_needs_review_pending_pi_task_15;boundary_ccby30igo"
+    },
+    {
+      "country_code": "FM",
+      "boundary_set_id": "fm-state-2019-geoboundaries-adm1",
+      "boundary_level": "state",
+      "area_unit_id": "fm-state-2019-geoboundaries-adm1:FM-YAP",
+      "area_code": "FM-YAP",
+      "area_name": "Yap",
+      "year": 2010,
+      "population_total": 11377,
+      "population_total_basis": "2010 FSM Census Basic Tabulation Table B09 'Religion by State of Usual Residence', all persons; the denominator is the printed state Total. Broad affiliation is population minus the combined No religion and Refused cells.",
+      "religious_affiliation_count": 11084,
+      "religious_affiliation_percent": 97.4246,
+      "no_religion_count": 293,
+      "no_religion_percent": 2.5754,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 106.8068,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "fm-census-2010-basic-tabulation-table-b09-religion",
+        "geoboundaries-fsm-adm1-2019"
+      ],
+      "quality_flag": "frame_2010_twelve_way;no_religion_is_no_religion_plus_refused_combined;census_affiliation;all_persons_all_ages_universe;no_universe_break_2000_to_2023;broad_affiliation_comparable_across_all_three_waves;denomination_detail_confined_to_2010_2023;licence_needs_review_pending_pi_task_15;boundary_ccby30igo"
+    },
+    {
+      "country_code": "FM",
+      "boundary_set_id": "fm-state-2019-geoboundaries-adm1",
+      "boundary_level": "state",
+      "area_unit_id": "fm-state-2019-geoboundaries-adm1:FM-TRK",
+      "area_code": "FM-TRK",
+      "area_name": "Chuuk",
+      "year": 2010,
+      "population_total": 48654,
+      "population_total_basis": "2010 FSM Census Basic Tabulation Table B09 'Religion by State of Usual Residence', all persons; the denominator is the printed state Total. Broad affiliation is population minus the combined No religion and Refused cells.",
+      "religious_affiliation_count": 48602,
+      "religious_affiliation_percent": 99.8931,
+      "no_religion_count": 52,
+      "no_religion_percent": 0.1069,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 107.7708,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "fm-census-2010-basic-tabulation-table-b09-religion",
+        "geoboundaries-fsm-adm1-2019"
+      ],
+      "quality_flag": "frame_2010_twelve_way;no_religion_is_no_religion_plus_refused_combined;census_affiliation;all_persons_all_ages_universe;no_universe_break_2000_to_2023;broad_affiliation_comparable_across_all_three_waves;denomination_detail_confined_to_2010_2023;licence_needs_review_pending_pi_task_15;boundary_ccby30igo"
+    },
+    {
+      "country_code": "FM",
+      "boundary_set_id": "fm-state-2019-geoboundaries-adm1",
+      "boundary_level": "state",
+      "area_unit_id": "fm-state-2019-geoboundaries-adm1:FM-PNI",
+      "area_code": "FM-PNI",
+      "area_name": "Pohnpei",
+      "year": 2010,
+      "population_total": 36196,
+      "population_total_basis": "2010 FSM Census Basic Tabulation Table B09 'Religion by State of Usual Residence', all persons; the denominator is the printed state Total. Broad affiliation is population minus the combined No religion and Refused cells.",
+      "religious_affiliation_count": 35777,
+      "religious_affiliation_percent": 98.8424,
+      "no_religion_count": 419,
+      "no_religion_percent": 1.1576,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 364.4798,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "fm-census-2010-basic-tabulation-table-b09-religion",
+        "geoboundaries-fsm-adm1-2019"
+      ],
+      "quality_flag": "frame_2010_twelve_way;no_religion_is_no_religion_plus_refused_combined;census_affiliation;all_persons_all_ages_universe;no_universe_break_2000_to_2023;broad_affiliation_comparable_across_all_three_waves;denomination_detail_confined_to_2010_2023;licence_needs_review_pending_pi_task_15;boundary_ccby30igo"
+    },
+    {
+      "country_code": "FM",
+      "boundary_set_id": "fm-state-2019-geoboundaries-adm1",
+      "boundary_level": "state",
+      "area_unit_id": "fm-state-2019-geoboundaries-adm1:FM-KSA",
+      "area_code": "FM-KSA",
+      "area_name": "Kosrae",
+      "year": 2010,
+      "population_total": 6616,
+      "population_total_basis": "2010 FSM Census Basic Tabulation Table B09 'Religion by State of Usual Residence', all persons; the denominator is the printed state Total. Broad affiliation is population minus the combined No religion and Refused cells.",
+      "religious_affiliation_count": 6585,
+      "religious_affiliation_percent": 99.5314,
+      "no_religion_count": 31,
+      "no_religion_percent": 0.4686,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 108.904,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "fm-census-2010-basic-tabulation-table-b09-religion",
+        "geoboundaries-fsm-adm1-2019"
+      ],
+      "quality_flag": "frame_2010_twelve_way;no_religion_is_no_religion_plus_refused_combined;census_affiliation;all_persons_all_ages_universe;no_universe_break_2000_to_2023;broad_affiliation_comparable_across_all_three_waves;denomination_detail_confined_to_2010_2023;licence_needs_review_pending_pi_task_15;boundary_ccby30igo"
+    },
+    {
+      "country_code": "FM",
+      "boundary_set_id": "fm-state-2019-geoboundaries-adm1",
+      "boundary_level": "state",
+      "area_unit_id": "fm-state-2019-geoboundaries-adm1:FM-YAP",
+      "area_code": "FM-YAP",
+      "area_name": "Yap",
+      "year": 2023,
+      "population_total": 10739,
+      "population_total_basis": "2023 FSM Census Basic Tables Table B6 'Religion by State', all persons; the denominator is the printed state Total. Broad affiliation is population minus the merged No religion/Refused cell. The Kosrae No religion/Refused cell is asterisk-suppressed, so both no-religion and affiliation are null for Kosrae 2023 and are never imputed from the national margin.",
+      "religious_affiliation_count": 10351,
+      "religious_affiliation_percent": 96.387,
+      "no_religion_count": 388,
+      "no_religion_percent": 3.613,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 106.8068,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "fm-census-2023-basic-tables-table-b6-religion",
+        "geoboundaries-fsm-adm1-2019"
+      ],
+      "quality_flag": "frame_2023_eleven_way;no_religion_is_no_religion_refused_merged_line;source_national_total_one_below_state_sum_disclosed;source_row_totals_baptist_sda_other_religion_one_above_state_sum_disclosed;small_cells_asterisk_suppressed_rendered_null_never_imputed;census_affiliation;all_persons_all_ages_universe;no_universe_break_2000_to_2023;broad_affiliation_comparable_across_all_three_waves;denomination_detail_confined_to_2010_2023;licence_needs_review_pending_pi_task_15;boundary_ccby30igo"
+    },
+    {
+      "country_code": "FM",
+      "boundary_set_id": "fm-state-2019-geoboundaries-adm1",
+      "boundary_level": "state",
+      "area_unit_id": "fm-state-2019-geoboundaries-adm1:FM-TRK",
+      "area_code": "FM-TRK",
+      "area_name": "Chuuk",
+      "year": 2023,
+      "population_total": 33885,
+      "population_total_basis": "2023 FSM Census Basic Tables Table B6 'Religion by State', all persons; the denominator is the printed state Total. Broad affiliation is population minus the merged No religion/Refused cell. The Kosrae No religion/Refused cell is asterisk-suppressed, so both no-religion and affiliation are null for Kosrae 2023 and are never imputed from the national margin.",
+      "religious_affiliation_count": 33849,
+      "religious_affiliation_percent": 99.8938,
+      "no_religion_count": 36,
+      "no_religion_percent": 0.1062,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 107.7708,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "fm-census-2023-basic-tables-table-b6-religion",
+        "geoboundaries-fsm-adm1-2019"
+      ],
+      "quality_flag": "frame_2023_eleven_way;no_religion_is_no_religion_refused_merged_line;source_national_total_one_below_state_sum_disclosed;source_row_totals_baptist_sda_other_religion_one_above_state_sum_disclosed;small_cells_asterisk_suppressed_rendered_null_never_imputed;census_affiliation;all_persons_all_ages_universe;no_universe_break_2000_to_2023;broad_affiliation_comparable_across_all_three_waves;denomination_detail_confined_to_2010_2023;licence_needs_review_pending_pi_task_15;boundary_ccby30igo"
+    },
+    {
+      "country_code": "FM",
+      "boundary_set_id": "fm-state-2019-geoboundaries-adm1",
+      "boundary_level": "state",
+      "area_unit_id": "fm-state-2019-geoboundaries-adm1:FM-PNI",
+      "area_code": "FM-PNI",
+      "area_name": "Pohnpei",
+      "year": 2023,
+      "population_total": 26102,
+      "population_total_basis": "2023 FSM Census Basic Tables Table B6 'Religion by State', all persons; the denominator is the printed state Total. Broad affiliation is population minus the merged No religion/Refused cell. The Kosrae No religion/Refused cell is asterisk-suppressed, so both no-religion and affiliation are null for Kosrae 2023 and are never imputed from the national margin.",
+      "religious_affiliation_count": 25999,
+      "religious_affiliation_percent": 99.6054,
+      "no_religion_count": 103,
+      "no_religion_percent": 0.3946,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 364.4798,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "fm-census-2023-basic-tables-table-b6-religion",
+        "geoboundaries-fsm-adm1-2019"
+      ],
+      "quality_flag": "frame_2023_eleven_way;no_religion_is_no_religion_refused_merged_line;source_national_total_one_below_state_sum_disclosed;source_row_totals_baptist_sda_other_religion_one_above_state_sum_disclosed;small_cells_asterisk_suppressed_rendered_null_never_imputed;census_affiliation;all_persons_all_ages_universe;no_universe_break_2000_to_2023;broad_affiliation_comparable_across_all_three_waves;denomination_detail_confined_to_2010_2023;licence_needs_review_pending_pi_task_15;boundary_ccby30igo"
+    },
+    {
+      "country_code": "FM",
+      "boundary_set_id": "fm-state-2019-geoboundaries-adm1",
+      "boundary_level": "state",
+      "area_unit_id": "fm-state-2019-geoboundaries-adm1:FM-KSA",
+      "area_code": "FM-KSA",
+      "area_name": "Kosrae",
+      "year": 2023,
+      "population_total": 5092,
+      "population_total_basis": "2023 FSM Census Basic Tables Table B6 'Religion by State', all persons; the denominator is the printed state Total. Broad affiliation is population minus the merged No religion/Refused cell. The Kosrae No religion/Refused cell is asterisk-suppressed, so both no-religion and affiliation are null for Kosrae 2023 and are never imputed from the national margin.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 108.904,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "fm-census-2023-basic-tables-table-b6-religion",
+        "geoboundaries-fsm-adm1-2019"
+      ],
+      "quality_flag": "frame_2023_eleven_way;no_religion_is_no_religion_refused_merged_line;source_national_total_one_below_state_sum_disclosed;source_row_totals_baptist_sda_other_religion_one_above_state_sum_disclosed;small_cells_asterisk_suppressed_rendered_null_never_imputed;census_affiliation;all_persons_all_ages_universe;no_universe_break_2000_to_2023;broad_affiliation_comparable_across_all_three_waves;denomination_detail_confined_to_2010_2023;licence_needs_review_pending_pi_task_15;boundary_ccby30igo;no_religion_cell_suppressed;affiliation_withheld_because_no_religion_suppressed"
+    }
+  ]
+}
