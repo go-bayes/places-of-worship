@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Niue Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Niue's product is Statistics Niue / SPC census religious affiliation for
+    // eight waves 1986-2022, on one national polygon. Niue publishes census
+    // religion at national geography only in every wave, never by village;
+    // under the small-country clause the map therefore shades a single national
+    // polygon rather than sub-national areas. Each wave's counts come from its
+    // contemporaneous report: the 2006 report Appendix Table 2 supplies
+    // 1986-2006, and the 2022 report Table 3.3 supplies 2011/2017/2022. The
+    // 2022 report's republished 1997/2001/2006 columns do not reconcile (row
+    // sums off by +1/-17/+6) and diverge from the 2006 appendix; they are a
+    // documented discrepancy record and are never used as a source. Percentages
+    // use each wave's printed resident-population total (2531/2239/2088/1736/
+    // 1538/1460/1591/1564). The broad-affiliation spine (Ekalesia Niue, Roman
+    // Catholic, Latter Day Saints, Seventh Day Adventist, Jehovah's Witness,
+    // Others, None) carries the same construct across all eight waves. A frame
+    // seam is disclosed: the 1986-2006 waves split None from a separate Not
+    // stated line; the 2011/2017/2022 waves fold refusals into Others and print
+    // only None. Composition detail lives in the manifest, not the popup.
+    window.REGION_CONFIG = {
+      countryCode: "NU",
+      title: "Places of Worship | Niue Research Map",
+      // one ~260 km2 raised-coral island; centre on the numerically-verified
+      // boundary bbox centre (lon -169.949..-169.774, lat -19.155..-18.953) so
+      // the national polygon fills the frame beside the census panels. Niue has
+      // no outlying dependencies; there is no dateline or small-island trap.
+      center: [-169.862, -19.054],
+      initialZoom: 10.3,
+      censusLevels: {
+        national: {
+          label: "National",
+          boundaries: "data/nu_national.geojson",
+          summary: "data/area_summary_national.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Statistics Niue (Niue Statistics Office) and the Pacific Community (SPC), reproduced in part for scientific, educational or research purposes with acknowledgement · Boundaries © geoBoundaries NIU ADM0 (CC BY 4.0, source Sentinel-2 10m Land Cover)"
+        }
+      },
+      defaultLevel: "national",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2022,
+      // the two census-question shares plus the headline change metric; the
+      // broad-affiliation spine and None are comparable across all eight waves,
+      // so the percentage-point change series is honest — the one seam is the
+      // non-response line (separate Not stated 1986-2006, folded into Others
+      // 2011/2017/2022), which no headline metric here exposes
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of each wave's printed resident-population total (2,531 in 1986, 2,239 in 1991, 2,088 in 1997, 1,736 in 2001, 1,538 in 2006, 1,460 in 2011, 1,591 in 2017, 1,564 in 2022) reporting any named religious category — the summed affiliation lines (Ekalesia Niue, Roman Catholic, Latter Day Saints, Seventh Day Adventist, Jehovah's Witness, Others). The broad-affiliation spine is comparable across all eight waves. Not stated is a separate line in 1986-2006 and stays in the denominator and outside this field; the 2011/2017/2022 waves carry no separate Not stated line and fold refusals into Others."
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share of each wave's resident-population total in the source None category (48 in 1986, 68 in 1991, 77 in 1997, 34 in 2001, 43 in 2006, 29 in 2011, 141 in 2017, 112 in 2022). None is a separate line in every wave and is therefore comparable across all eight; Not stated is the disclosed residual in 1986-2006 and is folded into Others in 2011/2017/2022."
+        },
+        religious_change: {
+          label: "Religious affiliation change",
+          note: "percentage-point change in the religious-affiliation share since the previous census (1986 → 1991 → 1997 → 2001 → 2006 → 2011 → 2017 → 2022); the broad-affiliation headline carries the same construct across all eight waves."
+        }
+      },
+      popupDenominatorNote: "Percentages use each wave's printed resident-population total as denominator (2,531 in 1986, 2,239 in 1991, 2,088 in 1997, 1,736 in 2001, 1,538 in 2006, 1,460 in 2011, 1,591 in 2017, 1,564 in 2022). This is the resident-population universe, not the census-night figure (the 2022 census night counted 1,681 persons, of whom 1,564 were usual residents; Table 3.3 uses the resident total). Affiliation is the summed named religious categories; No religion is the source None line. In 1986-2006 Not stated is a separate line that stays in the denominator and outside both headline fields; affiliation, None, and Not stated therefore sum to the universe. In 2011/2017/2022 there is no separate Not stated line and refusals are folded into Others; affiliation and None therefore sum to the universe. Each wave's counts come from its contemporaneous report: the 2006 report Appendix Table 2 for 1986-2006, and the 2022 report Table 3.3 for 2011/2017/2022. The 2022 report's republished 1997/2001/2006 columns do not reconcile and diverge from the 2006 appendix; they are a documented discrepancy record and are never used as a source. Denomination composition lives in the build manifest's per-wave category detail, not in the popup; the popup shows the affiliation and no-religion shares by census year only. Statistics Niue publishes census religion at national geography only in every wave; the 14-village boundary exists but no wave joins to it, and the map shades one national polygon.",
+      cityPresets: [
+        { label: "Alofi", coords: [-169.918, -19.055], zoom: 12 },
+        { label: "Avatele", coords: [-169.916, -19.105], zoom: 13 },
+        { label: "Mutalau", coords: [-169.837, -18.951], zoom: 13 }
+      ],
+      geocode: { country: "nu", biasLngLat: [-169.862, -19.054] },
+      onboarding: {
+        title: "Niue research map",
+        intro: "Census religious affiliation for Niue across eight censuses 1986 to 2022, from Statistics Niue (the Niue Statistics Office) and the Pacific Community (SPC). Niue publishes census religion at national geography only in every wave; the map therefore shades one national polygon across the eight waves.",
+        bullets: [
+          "Statistics Niue publishes Niue's census religion at national geography only, and no wave tabulates religion by village. Under the small-country clause, the map shades a single national polygon rather than sub-national areas.",
+          "Open <strong>Show Census Data</strong> (top centre) to choose the metric and census year (1986, 1991, 1997, 2001, 2006, 2011, 2017, 2022).",
+          "Percentages use each wave's printed resident-population total (2,531 / 2,239 / 2,088 / 1,736 / 1,538 / 1,460 / 1,591 / 1,564); affiliation is the summed named religious categories, and Not stated stays in the denominator.",
+          "The broad-affiliation spine (Ekalesia Niue, Roman Catholic, Latter Day Saints, Seventh Day Adventist, Jehovah's Witness, Others, None) is comparable across all eight waves; a frame seam is disclosed, where 1986-2006 split None from a separate Not stated line and 2011/2017/2022 fold refusals into Others.",
+          "Each wave's counts come from its contemporaneous report; the 2022 report's republished 1997/2001/2006 columns do not reconcile and are a documented discrepancy record, never used as a source."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      // the Statistics Niue / SPC clause authorises partial reproduction for
+      // scientific, educational or research purposes provided Statistics Niue /
+      // SPC and the source document are acknowledged (byte-matched in the 2006
+      // and 2011 reports); the 2022 report carries no reuse clause (documented
+      // vacuum), covered by the census-family clause. These acknowledgements are
+      // a licence obligation, not decoration. geoBoundaries NIU ADM0 is CC BY 4.0.
+      censusSourceAttribution: 'Source: Statistics Niue (Niue Statistics Office) and the Pacific Community (SPC), Niue Census of Population and Housing (2006 report Appendix Table 2 for 1986-2006; 2022 report Table 3.3 for 2011/2017/2022), reproduced in part for scientific, educational or research purposes with acknowledgement of Statistics Niue, SPC and the source document. Census religion © <a href="https://niuestatistics.nu/" target="_blank" rel="noopener">Statistics Niue</a> and the <a href="https://www.spc.int/" target="_blank" rel="noopener">Pacific Community (SPC)</a> &middot; Boundaries © <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> NIU ADM0 (CC BY 4.0, source Sentinel-2 10m Land Cover)',
+      censusFlagNote: "* Statistics Niue publishes Niue's census religion at national geography only in every wave; no wave tabulates religion by village; the map therefore shades a single national polygon. Percentages use each wave's printed resident-population total (2,531 / 2,239 / 2,088 / 1,736 / 1,538 / 1,460 / 1,591 / 1,564). The broad-affiliation spine and None are comparable across all eight waves; a frame seam is disclosed, where 1986-2006 split None from a separate Not stated line and 2011/2017/2022 fold refusals into Others. Each wave's counts come from its contemporaneous report; the 2022 report's republished 1997/2001/2006 columns do not reconcile and are a documented discrepancy record, never used as a source."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260711b"></script>
+</body>
+</html>
