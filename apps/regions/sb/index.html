@@ -7,7 +7,7 @@
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
   <link href="../../shared/map-shell.css" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
-  <link href="../_shared/region-map.css?v=20260712a" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712b" rel="stylesheet">
 </head>
 <body>
   <div id="region-root"></div>
@@ -163,10 +163,18 @@
         { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
         { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
       ],
+      // pulotu cultures opt-in (pi directive 2026-07-12: data source with
+      // its own three-point timeline): the global product filtered to SB
+      // by the runtime — twenty-one cultures, the richest pulotu country,
+      // including the temotu outliers tikopia and anuta and ontong java.
+      // attribution rides the pulotu legend note
+      pulotuCultures: {
+        data: "../_shared/data/pulotu_cultures.geojson?v=20260711c"
+      },
       censusSourceAttribution: 'Census religion by province from the <a href="https://statistics.gov.sb" target="_blank" rel="noopener">Solomon Islands National Statistics Office</a> (SINSO), 2009 Population and Housing Census Report on Basic Tables Vol 2 Table P3.2 and 2019 Population Census Report Basic Tables Vol 2 Table P8.2, two waves 2009-2019. No reuse licence is stated on the SINSO census religion tables in either wave; the SINSO website footer asserts copyright (a copyright assertion, not a reuse grant), and the SPREP re-host of the 2009 file attaches a Creative Commons Public Data License that governs the SPREP mirror, not the SINSO original. The derived province summaries are reproduced with attribution to the Solomon Islands National Statistics Office while a courtesy reuse-confirmation ask is outgoing, and the page reverts in a single commit if SINSO objects (project-lead ruling, 2026-07-11) &middot; Boundaries from <a href="https://www.geoboundaries.org/api/current/gbOpen/SLB/ADM1/" target="_blank" rel="noopener">geoBoundaries</a> SLB ADM1, Public Domain, boundary source Natural Earth',
       censusFlagNote: "* Percentages use each province's printed census Total (2009 Basic Tables Vol 2 Table P3.2; 2019 Basic Tables Vol 2 Table P8.2; all persons of all ages, no universe break across 2009-2019; the province denominators are therefore directly comparable). Broad affiliation is the province population minus the No Religion line (No Religion in 2009, No Religion or Faith/Atheism in 2019) and the Refuse to Answer line; Custom Beliefs (2009) / Custom Beliefs or Animism (2019) counts as a religious affiliation. The Refuse to Answer line stays in the denominator and outside both headline numerators; the two shares therefore do not add to 100. Affiliation is near-universal in every province and wave (99.6 to 100.0 percent) and the no-religion population is very small (national 681 in 2009, 1,227 in 2019); the near-flat headline is a genuine census fact. The substantive subnational structure is denominational (Isabel overwhelmingly Church of Melanesia; Choiseul and Western United Church-led; Guadalcanal Roman Catholic-led; Malaita split between Church of Melanesia and South Sea Evangelical; Rennell-Bellona heavily Seventh Day Adventist and South Sea Evangelical), documented in the source religion tables and carried verbatim on every row of the downloadable area summary (the source_categories_verbatim field), not by these headline metrics. The 2019 seventeen-category frame splits Pentecostal, Assembly of God, Baptist Church and Muslim out of the 2009 thirteen-category Other; the 2009 Other (14,076) and 2019 Other religions (14,953) lines are not comparable, disclosed per row; the broad affiliation-share change is unaffected. The population grows sharply across the pair (515,870 to 720,956, +39.8 percent); shares are read within each province's own wave denominator and the growth is not a religion change. Earlier waves are held: 1999 religion is published nationally only (409,042) with no religion-by-province table, and 1986 predates the current province geography (Choiseul split from Western in 1991, Rennell-Bellona from Central in 1993). No reuse licence is stated on the SINSO census religion tables in either wave; the SPREP re-host of the 2009 file carries a Creative Commons Public Data License governing the mirror, not the SINSO original. The derived province summaries ship with SINSO attribution while a courtesy reuse-confirmation ask is outgoing, and the page reverts in a single commit if SINSO objects. The boundary is geoBoundaries SLB ADM1, Public Domain, boundary source Natural Earth."
     };
   </script>
-  <script src="../_shared/region-map.js?v=20260712a"></script>
+  <script src="../_shared/region-map.js?v=20260712b"></script>
 </body>
 </html>

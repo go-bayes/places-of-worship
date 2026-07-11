@@ -3706,10 +3706,21 @@ async function loadPulotuData() {
   return pulotuLoading;
 }
 async function addPulotuLayer() {
-  if (!RC.pulotuCultures || map.getSource(PULOTU.source)) return;
+  if (!RC.pulotuCultures || map.getLayer(PULOTU.layer)) return;
   const store = await loadPulotuData();
-  if (map.getSource(PULOTU.source)) return;
-  map.addSource(PULOTU.source, { type: "geojson", data: store.data });
+  // a source flip can arrive before the style finishes its first load
+  // (or right after a basemap switch); adding layers then throws, so
+  // wait until the style reports loaded — styledata fires repeatedly
+  // through a style load, so this resolves at the earliest safe moment
+  // rather than waiting for a full tile idle
+  while (!map.isStyleLoaded()) {
+    await new Promise((resolve) => map.once("styledata", resolve));
+  }
+  if (map.getLayer(PULOTU.layer)) return;
+  // a basemap switch drops the layer but can leave the source; reuse it
+  if (!map.getSource(PULOTU.source)) {
+    map.addSource(PULOTU.source, { type: "geojson", data: store.data });
+  }
   // points colour by the selected variable's own codes; the heavier white
   // halo keeps the reconstruction points visually apart from enumeration
   // dots (the measurement-diversity separation guard)
@@ -3908,7 +3919,17 @@ async function setDataSource(src) {
   if (pulotuState.active === wantPulotu) return;
   pulotuState.active = wantPulotu;
   if (censusSourceSelect) censusSourceSelect.value = wantPulotu ? "pulotu" : "census";
-  if (wantPulotu) await addPulotuLayer();
+  if (wantPulotu) {
+    try {
+      await addPulotuLayer();
+    } catch (e) {
+      // a failed load must not strand a half-switched panel: revert to
+      // the census source and let the user retry
+      pulotuState.active = false;
+      if (censusSourceSelect) censusSourceSelect.value = "census";
+      return;
+    }
+  }
   // geography has no meaning for a point layer; the select returns with
   // the census source
   if (censusLevelSelect) censusLevelSelect.hidden = wantPulotu;
@@ -3929,7 +3950,21 @@ async function setDataSource(src) {
   syncPlaceDotEra();
 }
 function syncPulotuCultures() {
-  if (!RC.pulotuCultures || !map.getLayer(PULOTU.layer)) return;
+  if (!RC.pulotuCultures) return;
+  // a basemap switch drops the layer; rebuild it when the pulotu source
+  // is active, then let the rebuilt layer take the current paint and
+  // visibility
+  if (!map.getLayer(PULOTU.layer)) {
+    if (pulotuState.active) {
+      void addPulotuLayer().then(() => {
+        if (!map.getLayer(PULOTU.layer)) return;
+        applyPulotuPaint();
+        map.setLayoutProperty(PULOTU.layer, "visibility",
+          censusState.enabled && pulotuState.active ? "visible" : "none");
+      }).catch(() => { /* the next sync retries */ });
+    }
+    return;
+  }
   const show = censusState.enabled && pulotuState.active;
   map.setLayoutProperty(PULOTU.layer, "visibility", show ? "visible" : "none");
 }
