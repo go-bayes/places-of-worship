@@ -1,0 +1,969 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:ge-census-religion:ge:2002-2024:geostat-region",
+  "dataset_id": "ge-census-religion:ge:2002-2024:geostat-region",
+  "dataset_version_id": "ge-census-religion:ge:2002-2024:geostat-region:f062a455a54f",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "ge-census-religion",
+  "dataset_role": "accepted_export",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "GE"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "accepted"
+  },
+  "created_at": "2026-07-12T00:00:00Z",
+  "created_by": "scripts/build_ge_area_summary.R",
+  "target_years": [
+    2002,
+    2014,
+    2024
+  ],
+  "pipeline": {
+    "script": "scripts/build_ge_area_summary.R",
+    "git_commit": "8bd107d2e159287d47c7d5b84a27bf55ea29331e",
+    "command": "Rscript scripts/build_ge_area_summary.R",
+    "parameters": {
+      "construct": "census affiliation",
+      "shipped_waves": [
+        2002,
+        2014,
+        2024
+      ],
+      "shipped_geography": "12 Georgia regions in 2002 (incl. Abkhazia fraction); 11 regions in 2014 and 2024",
+      "boundary_set": "ge-region-geoboundaries-adm1",
+      "source_tables": {
+        "2002": "Vol I Table #29 (population by religion by region)",
+        "2014": "Population by regions and religion (Total block)",
+        "2024": "Population by regions, self-governed units, sex and religion (Both Sexes; region rows)"
+      },
+      "universes": {
+        "2002": "whole enumerated population, all ages",
+        "2014": "whole population, all ages",
+        "2024": "whole population as of 14 Nov 2024"
+      },
+      "slot_design": "Ordinary two-slot. religious_affiliation_percent: 2014/2024 = (population - None - Refusal - Not stated)/population; 2002 = (Orthodox + Catholic + Armenian-Gregorian + Judaism + Muslim)/population, a recorded lower bound (the 'other religion' residual, which bundles other-religion with no-religion, is excluded). no_religion_percent: None/population for 2014/2024; null for 2002. Refusal and Not-stated are disclosed denominator residuals (2014/2024), so the two shares need not sum to 100.",
+      "category_frames": {
+        "2002": [
+          "Orthodox",
+          "Catholic",
+          "Armenian-Gregorian",
+          "Judaism",
+          "Muslim",
+          "Other religion (residual)"
+        ],
+        "2014": [
+          "Orthodox",
+          "Muslim",
+          "Armenian apostolic",
+          "Catholic",
+          "Jehovah's Witnesses",
+          "Yazidis",
+          "Protestant",
+          "Judaism",
+          "Other",
+          "None",
+          "Refusal",
+          "Not stated"
+        ],
+        "2024": [
+          "Orthodox",
+          "Catholic",
+          "Armenian apostolic",
+          "Judaism",
+          "Jehovah's Witnesses",
+          "Muslim",
+          "Other",
+          "None",
+          "Refusal",
+          "Not stated"
+        ],
+        "frame_break_note": "The three waves do not share one category frame. 2002 prints 6 named categories plus one 'other religion' residual (no separate None/Refusal/Not-stated). 2014 prints 12 categories incl. Yazidis and Protestant as separate lines. 2024 folds Yazidis and Protestant into Other (10 categories). Each wave is transcribed in its own printed order and labelled by wave; no cross-wave category change is claimed (CHANGE-WITHHOLD). The comparable spine is the five great-tradition shares."
+      },
+      "suppression": "2014 only: '…' marks cells of <=10 persons on small affiliation sub-categories (Guria/Mtskheta-Mtianeti Judaism; Racha-Lechkhumi Muslim/Armenian/Protestant/Other; Shida Kartli Yazidis). Carried verbatim as '…' in the per-region breakdown, never repaired. Recorded per-row suppression bound: 0 <= total - sum(known) <= 10 * n_suppressed. The two headline slots stay exact (None/Refusal/Not-stated never suppressed).",
+      "territorial_scope": "Abkhazia and South Ossetia are not enumerated by Geostat. 2002 Table #29 carries a 1,956-person Abkhazia A.R. row (the fraction under Georgian control at the census date), mapped with a per-feature flag that it is not representative of Abkhazia; 2014 and 2024 have no Abkhazia row (occupied territories excluded). Shida Kartli is enumerated only in its Georgian-controlled part in every wave; the polygon spans the full extent (incl. the non-enumerated Tskhinvali/South Ossetia area), disclosed on the Shida Kartli flag. No count is invented for any non-enumerated area.",
+      "boundary_derivation": "geoBoundaries GEO ADM1 (12 units, CC BY 3.0, 2015); regions join one-to-one after normalising self-governing-city/AR prefixes and the en-dash in 'Samtskhe–Javakheti'. One boundary set serves all waves.",
+      "omitted_metrics": [
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 30,
+        "bytes": 54578
+      },
+      "local_cache_hint": "All raw sources are cached under data/raw/ge_census/ and remain git-ignored.",
+      "retrieval_record": [
+        {
+          "uri": "data/raw/ge_census/ge_2002_vol_I-tomi.pdf",
+          "url": "https://geostat.ge/media/44559/I-tomi.pdf",
+          "format": "pdf",
+          "bytes": 3853113,
+          "sha256": "ef80478888abe4e93b625017ebf64f393d2292a0856f9256b57997f73c1e4dcf",
+          "row_count": null,
+          "source_dataset_id": "ge-census-2002-vol1-table29-religion-by-region",
+          "used_in_public_product": true,
+          "periods": "2002",
+          "notes": "2002 census Vol I (text-extractable scanned PDF); Table #29 region x religion. Both margins close to 4,371,535.",
+          "local_cache_hint": "data/raw/ge_census/ge_2002_vol_I-tomi.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/ge_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/ge_census/ge_2014_population_by_regions_and_religion.xls",
+          "url": "https://geostat.ge/media/44724/22_Population-by-regions-and-religion.xls",
+          "format": "xls",
+          "bytes": 33792,
+          "sha256": "174c501ccf4bbe27a1284e908097ce78dad6363c6a593d18a43a170915475be4",
+          "row_count": null,
+          "source_dataset_id": "ge-census-2014-population-by-regions-and-religion",
+          "used_in_public_product": true,
+          "periods": "2014",
+          "notes": "2014 region x religion XLS (Total block). National row closes to 3,713,804; '…'(<=10) suppression on small cells.",
+          "local_cache_hint": "data/raw/ge_census/ge_2014_population_by_regions_and_religion.xls (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/ge_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/ge_census/ge_2024_population_by_regions_selfgov_sex_religion.xlsx",
+          "url": "https://geostat.ge/media/80625/6.-Population-by-regions%2C-self-governed-units%2C-sex-and-religion.xlsx",
+          "format": "xlsx",
+          "bytes": 27534,
+          "sha256": "0093286100a4edea2a21947432f4670b820a4ab385b4539fa4d9025acd04007a",
+          "row_count": null,
+          "source_dataset_id": "ge-census-2024-population-by-regions-selfgov-sex-religion",
+          "used_in_public_product": true,
+          "periods": "2024",
+          "notes": "2024 region+self-gov x religion XLSX (Both Sexes block). Region rows close to 3,929,581. Footnote excludes occupied territories.",
+          "local_cache_hint": "data/raw/ge_census/ge_2024_population_by_regions_selfgov_sex_religion.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/ge_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/ge_census/geoBoundaries-GEO-ADM1.geojson",
+          "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GEO/ADM1/geoBoundaries-GEO-ADM1.geojson",
+          "format": "geojson",
+          "bytes": 396344,
+          "sha256": "d9a34f3b97c39a00bc5eb4f2e5a76c8a2aca6ca679c50d83e4536b188bf254fc",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-geo-adm1-2015",
+          "used_in_public_product": true,
+          "periods": "2015",
+          "notes": "geoBoundaries GEO ADM1 GeoJSON; 12 regions, CC BY 3.0. Pinned commit 9469f09.",
+          "local_cache_hint": "data/raw/ge_census/geoBoundaries-GEO-ADM1.geojson (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/ge_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/ge_census/gb_geo_adm1_meta.json",
+          "url": "https://www.geoboundaries.org/api/current/gbOpen/GEO/ADM1/",
+          "format": "json",
+          "bytes": 1722,
+          "sha256": "8128e773ce31499b36e520c7023856188124d1c7ebb80a69be361ad89fe4f1b3",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-geo-adm1-2015",
+          "used_in_public_product": false,
+          "periods": "2015",
+          "notes": "geoBoundaries GEO ADM1 metadata; records CC BY 3.0, admUnitCount 12, boundaryYearRepresented 2015.",
+          "local_cache_hint": "data/raw/ge_census/gb_geo_adm1_meta.json (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/ge_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/ge_census/geostat_terms_of_use_en.txt",
+          "url": "https://www.geostat.ge/en/page/monacemta-gamoyenebis-pirobebi",
+          "format": "txt",
+          "bytes": 1416,
+          "sha256": "4f8dfb46e7173d9445f9acb636475601a9dbd80276117c913a21884108c63ca9",
+          "row_count": null,
+          "source_dataset_id": "ge-census-2024-population-by-regions-selfgov-sex-religion",
+          "used_in_public_product": false,
+          "periods": "2026",
+          "notes": "Geostat Terms of Use (rendered capture); verbatim open-reuse-with-attribution licence.",
+          "local_cache_hint": "data/raw/ge_census/geostat_terms_of_use_en.txt (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/ge_census/"
+          ]
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "scripts/lib/simplify_boundary.R (npx mapshaper)"
+    }
+  },
+  "source": {
+    "provider": "National Statistics Office of Georgia (Geostat); geoBoundaries (William & Mary geoLab)",
+    "source_dataset_ids": [
+      "ge-census-2002-vol1-table29-religion-by-region",
+      "ge-census-2014-population-by-regions-and-religion",
+      "ge-census-2024-population-by-regions-selfgov-sex-religion",
+      "geoboundaries-geo-adm1-2015"
+    ],
+    "source_urls": [
+      "https://geostat.ge/media/44559/I-tomi.pdf",
+      "https://geostat.ge/media/44724/22_Population-by-regions-and-religion.xls",
+      "https://geostat.ge/media/80625/6.-Population-by-regions%2C-self-governed-units%2C-sex-and-religion.xlsx",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GEO/ADM1/geoBoundaries-GEO-ADM1.geojson",
+      "https://www.geoboundaries.org/api/current/gbOpen/GEO/ADM1/",
+      "https://www.geostat.ge/en/page/monacemta-gamoyenebis-pirobebi"
+    ],
+    "retrieved_at": "2026-07-12T00:00:00Z",
+    "licence": "National Statistics Office of Georgia (Geostat) Terms of Use open reuse grant. The Geostat Terms of Use page (geostat.ge/en/page/monacemta-gamoyenebis-pirobebi, retrieved 2026-07-12) grant 'the right to download, use, adapt, modify, create derivative works of, disseminate, copy, and share to the third parties, for any purpose, including commercial and non-commercial use, without restriction, statistical data, metadata, official publications and other published documents placed on GEOSTAT website without prior permission', with the condition: 'Users should indicate Geostat as a source of information when using data of GEOSTAT.' An open licence conditioned only on source attribution.",
+    "citation": "Georgia 2002 Census Vol I Table #29; 2014 Population by regions and religion; 2024 Population by regions, self-governed units, sex and religion; geoBoundaries GEO ADM1 (CC BY 3.0).",
+    "raw_redistribution": "The census PDF/XLS/XLSX and the boundary source file are not committed; they remain in data/raw/ge_census/.",
+    "local_cache_hint": "data/raw/ge_census/ (git-ignored by .gitignore data/ rule)",
+    "raw_cache_durable_uris": [
+      "gs://pow-research-data/raw_sources/ge_census/"
+    ]
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/ge_census/ge_2002_vol_I-tomi.pdf",
+      "url": "https://geostat.ge/media/44559/I-tomi.pdf",
+      "format": "pdf",
+      "bytes": 3853113,
+      "sha256": "ef80478888abe4e93b625017ebf64f393d2292a0856f9256b57997f73c1e4dcf",
+      "row_count": null,
+      "source_dataset_id": "ge-census-2002-vol1-table29-religion-by-region",
+      "used_in_public_product": true,
+      "periods": "2002",
+      "notes": "2002 census Vol I (text-extractable scanned PDF); Table #29 region x religion. Both margins close to 4,371,535.",
+      "local_cache_hint": "data/raw/ge_census/ge_2002_vol_I-tomi.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/ge_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/ge_census/ge_2014_population_by_regions_and_religion.xls",
+      "url": "https://geostat.ge/media/44724/22_Population-by-regions-and-religion.xls",
+      "format": "xls",
+      "bytes": 33792,
+      "sha256": "174c501ccf4bbe27a1284e908097ce78dad6363c6a593d18a43a170915475be4",
+      "row_count": null,
+      "source_dataset_id": "ge-census-2014-population-by-regions-and-religion",
+      "used_in_public_product": true,
+      "periods": "2014",
+      "notes": "2014 region x religion XLS (Total block). National row closes to 3,713,804; '…'(<=10) suppression on small cells.",
+      "local_cache_hint": "data/raw/ge_census/ge_2014_population_by_regions_and_religion.xls (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/ge_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/ge_census/ge_2024_population_by_regions_selfgov_sex_religion.xlsx",
+      "url": "https://geostat.ge/media/80625/6.-Population-by-regions%2C-self-governed-units%2C-sex-and-religion.xlsx",
+      "format": "xlsx",
+      "bytes": 27534,
+      "sha256": "0093286100a4edea2a21947432f4670b820a4ab385b4539fa4d9025acd04007a",
+      "row_count": null,
+      "source_dataset_id": "ge-census-2024-population-by-regions-selfgov-sex-religion",
+      "used_in_public_product": true,
+      "periods": "2024",
+      "notes": "2024 region+self-gov x religion XLSX (Both Sexes block). Region rows close to 3,929,581. Footnote excludes occupied territories.",
+      "local_cache_hint": "data/raw/ge_census/ge_2024_population_by_regions_selfgov_sex_religion.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/ge_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/ge_census/geoBoundaries-GEO-ADM1.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GEO/ADM1/geoBoundaries-GEO-ADM1.geojson",
+      "format": "geojson",
+      "bytes": 396344,
+      "sha256": "d9a34f3b97c39a00bc5eb4f2e5a76c8a2aca6ca679c50d83e4536b188bf254fc",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-geo-adm1-2015",
+      "used_in_public_product": true,
+      "periods": "2015",
+      "notes": "geoBoundaries GEO ADM1 GeoJSON; 12 regions, CC BY 3.0. Pinned commit 9469f09.",
+      "local_cache_hint": "data/raw/ge_census/geoBoundaries-GEO-ADM1.geojson (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/ge_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/ge_census/gb_geo_adm1_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/GEO/ADM1/",
+      "format": "json",
+      "bytes": 1722,
+      "sha256": "8128e773ce31499b36e520c7023856188124d1c7ebb80a69be361ad89fe4f1b3",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-geo-adm1-2015",
+      "used_in_public_product": false,
+      "periods": "2015",
+      "notes": "geoBoundaries GEO ADM1 metadata; records CC BY 3.0, admUnitCount 12, boundaryYearRepresented 2015.",
+      "local_cache_hint": "data/raw/ge_census/gb_geo_adm1_meta.json (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/ge_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/ge_census/geostat_terms_of_use_en.txt",
+      "url": "https://www.geostat.ge/en/page/monacemta-gamoyenebis-pirobebi",
+      "format": "txt",
+      "bytes": 1416,
+      "sha256": "4f8dfb46e7173d9445f9acb636475601a9dbd80276117c913a21884108c63ca9",
+      "row_count": null,
+      "source_dataset_id": "ge-census-2024-population-by-regions-selfgov-sex-religion",
+      "used_in_public_product": false,
+      "periods": "2026",
+      "notes": "Geostat Terms of Use (rendered capture); verbatim open-reuse-with-attribution licence.",
+      "local_cache_hint": "data/raw/ge_census/geostat_terms_of_use_en.txt (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/ge_census/"
+      ]
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/ge/data/area_summary_region.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 77034,
+      "sha256": "f062a455a54f750a015d566b91ab343e15e24935b122d5cd448508c0c16dba42",
+      "row_count": 34,
+      "feature_count": null,
+      "content": "Georgia region census-affiliation area summary for 2002, 2014, 2024.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "ge_geostat_open_reuse_with_attribution"
+    },
+    {
+      "uri": "repo:apps/regions/ge/data/area_summary_region.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 43612,
+      "sha256": "acbd5af9ce35486134c79652df30a3d6169ae6cf3d37c808ee0480ff98b4a1b9",
+      "row_count": 34,
+      "feature_count": null,
+      "content": "Flattened Georgia region census-affiliation rows for 2002, 2014, 2024.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "ge_geostat_open_reuse_with_attribution"
+    },
+    {
+      "uri": "repo:apps/regions/ge/data/ge_region.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 54578,
+      "sha256": "a88ebd985b5efc903df21026c8b4a2abdb0afc6f6f395a36d782b2c23a7f6789",
+      "row_count": null,
+      "feature_count": 12,
+      "content": "Simplified geoBoundaries GEO ADM1 12-region boundary GeoJSON.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_cc_by_3_0"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/ge/data/area_summary_region.json",
+      "sha256": "f062a455a54f750a015d566b91ab343e15e24935b122d5cd448508c0c16dba42",
+      "built_by": "scripts/build_ge_area_summary.R",
+      "notes": "34 rows: 12 regions (2002) + 11 (2014) + 11 (2024). 2002 no-religion null; 2014 suppression carried verbatim."
+    },
+    {
+      "uri": "repo:apps/regions/ge/data/ge_region.geojson",
+      "sha256": "a88ebd985b5efc903df21026c8b4a2abdb0afc6f6f395a36d782b2c23a7f6789",
+      "built_by": "scripts/build_ge_area_summary.R",
+      "notes": "12 region features from geoBoundaries GEO ADM1, simplified with mapshaper (Abkhazia used for 2002 only)."
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "Rscript scripts/build_ge_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/ge/data/area_summary_region.json",
+      "bash scripts/validate_manifests.sh"
+    ],
+    "gate_2002": {
+      "status": "passed",
+      "both_margins_close_to": 4371535,
+      "region_row_checks": 12,
+      "religion_column_checks": 6,
+      "records": [
+        {
+          "year": 2002,
+          "margin": "region_row",
+          "key": "tbilisi",
+          "computed": 1081679,
+          "printed": 1081679,
+          "difference": 0
+        },
+        {
+          "year": 2002,
+          "margin": "region_row",
+          "key": "abkhazia",
+          "computed": 1956,
+          "printed": 1956,
+          "difference": 0
+        },
+        {
+          "year": 2002,
+          "margin": "region_row",
+          "key": "adjara",
+          "computed": 376016,
+          "printed": 376016,
+          "difference": 0
+        },
+        {
+          "year": 2002,
+          "margin": "region_row",
+          "key": "guria",
+          "computed": 143357,
+          "printed": 143357,
+          "difference": 0
+        },
+        {
+          "year": 2002,
+          "margin": "region_row",
+          "key": "imereti",
+          "computed": 699666,
+          "printed": 699666,
+          "difference": 0
+        },
+        {
+          "year": 2002,
+          "margin": "region_row",
+          "key": "kakheti",
+          "computed": 407182,
+          "printed": 407182,
+          "difference": 0
+        },
+        {
+          "year": 2002,
+          "margin": "region_row",
+          "key": "mtskheta_mtianeti",
+          "computed": 125443,
+          "printed": 125443,
+          "difference": 0
+        },
+        {
+          "year": 2002,
+          "margin": "region_row",
+          "key": "racha_lechkhumi_kvemo_svaneti",
+          "computed": 50969,
+          "printed": 50969,
+          "difference": 0
+        },
+        {
+          "year": 2002,
+          "margin": "region_row",
+          "key": "samegrelo_zemo_svaneti",
+          "computed": 466100,
+          "printed": 466100,
+          "difference": 0
+        },
+        {
+          "year": 2002,
+          "margin": "region_row",
+          "key": "samtskhe_javakheti",
+          "computed": 207598,
+          "printed": 207598,
+          "difference": 0
+        },
+        {
+          "year": 2002,
+          "margin": "region_row",
+          "key": "kvemo_kartli",
+          "computed": 497530,
+          "printed": 497530,
+          "difference": 0
+        },
+        {
+          "year": 2002,
+          "margin": "region_row",
+          "key": "shida_kartli",
+          "computed": 314039,
+          "printed": 314039,
+          "difference": 0
+        },
+        {
+          "year": 2002,
+          "margin": "religion_column",
+          "key": "Orthodox",
+          "computed": 3666233,
+          "printed": 3666233,
+          "difference": 0
+        },
+        {
+          "year": 2002,
+          "margin": "religion_column",
+          "key": "Catholic",
+          "computed": 34727,
+          "printed": 34727,
+          "difference": 0
+        },
+        {
+          "year": 2002,
+          "margin": "religion_column",
+          "key": "Armenian-Gregorian",
+          "computed": 171139,
+          "printed": 171139,
+          "difference": 0
+        },
+        {
+          "year": 2002,
+          "margin": "religion_column",
+          "key": "Judaism",
+          "computed": 3541,
+          "printed": 3541,
+          "difference": 0
+        },
+        {
+          "year": 2002,
+          "margin": "religion_column",
+          "key": "Muslim",
+          "computed": 433784,
+          "printed": 433784,
+          "difference": 0
+        },
+        {
+          "year": 2002,
+          "margin": "religion_column",
+          "key": "Other religion (residual)",
+          "computed": 62111,
+          "printed": 62111,
+          "difference": 0
+        }
+      ]
+    },
+    "gate_2014": {
+      "status": "passed",
+      "national_total": 3713804,
+      "note": "national row exact over 12 categories; per-region suppression bounds hold; None exact at both margins",
+      "records": [
+        {
+          "year": 2014,
+          "margin": "region_row_suppression_bound",
+          "key": "tbilisi",
+          "computed": 1108717,
+          "printed": 1108717,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "region_row_suppression_bound",
+          "key": "adjara",
+          "computed": 333953,
+          "printed": 333953,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "region_row_suppression_bound",
+          "key": "guria",
+          "computed": 113347,
+          "printed": 113350,
+          "difference": 3
+        },
+        {
+          "year": 2014,
+          "margin": "region_row_suppression_bound",
+          "key": "imereti",
+          "computed": 533906,
+          "printed": 533906,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "region_row_suppression_bound",
+          "key": "kakheti",
+          "computed": 318583,
+          "printed": 318583,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "region_row_suppression_bound",
+          "key": "mtskheta_mtianeti",
+          "computed": 94564,
+          "printed": 94573,
+          "difference": 9
+        },
+        {
+          "year": 2014,
+          "margin": "region_row_suppression_bound",
+          "key": "racha_lechkhumi_kvemo_svaneti",
+          "computed": 32080,
+          "printed": 32089,
+          "difference": 9
+        },
+        {
+          "year": 2014,
+          "margin": "region_row_suppression_bound",
+          "key": "samegrelo_zemo_svaneti",
+          "computed": 330761,
+          "printed": 330761,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "region_row_suppression_bound",
+          "key": "samtskhe_javakheti",
+          "computed": 160504,
+          "printed": 160504,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "region_row_suppression_bound",
+          "key": "kvemo_kartli",
+          "computed": 423986,
+          "printed": 423986,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "region_row_suppression_bound",
+          "key": "shida_kartli",
+          "computed": 263381,
+          "printed": 263382,
+          "difference": 1
+        },
+        {
+          "year": 2014,
+          "margin": "headline_column",
+          "key": "None",
+          "computed": 19080,
+          "printed": 19080,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "headline_column",
+          "key": "Refusal",
+          "computed": 9635,
+          "printed": 9635,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "headline_column",
+          "key": "Not stated",
+          "computed": 34251,
+          "printed": 34251,
+          "difference": 0
+        }
+      ]
+    },
+    "gate_2024": {
+      "status": "passed",
+      "both_margins_close_to": 3929581,
+      "region_row_checks": 11,
+      "religion_column_checks": 10,
+      "records": [
+        {
+          "year": 2024,
+          "margin": "region_row",
+          "key": "tbilisi",
+          "computed": 1331485,
+          "printed": 1331485,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "region_row",
+          "key": "adjara",
+          "computed": 402929,
+          "printed": 402929,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "region_row",
+          "key": "guria",
+          "computed": 102408,
+          "printed": 102408,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "region_row",
+          "key": "imereti",
+          "computed": 510741,
+          "printed": 510741,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "region_row",
+          "key": "kakheti",
+          "computed": 303833,
+          "printed": 303833,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "region_row",
+          "key": "mtskheta_mtianeti",
+          "computed": 94039,
+          "printed": 94039,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "region_row",
+          "key": "racha_lechkhumi_kvemo_svaneti",
+          "computed": 29901,
+          "printed": 29901,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "region_row",
+          "key": "samegrelo_zemo_svaneti",
+          "computed": 305597,
+          "printed": 305597,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "region_row",
+          "key": "samtskhe_javakheti",
+          "computed": 155282,
+          "printed": 155282,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "region_row",
+          "key": "kvemo_kartli",
+          "computed": 441630,
+          "printed": 441630,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "region_row",
+          "key": "shida_kartli",
+          "computed": 251736,
+          "printed": 251736,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "religion_column",
+          "key": "Orthodox",
+          "computed": 3223206,
+          "printed": 3223206,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "religion_column",
+          "key": "Catholic",
+          "computed": 19593,
+          "printed": 19593,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "religion_column",
+          "key": "Armenian apostolic",
+          "computed": 101736,
+          "printed": 101736,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "religion_column",
+          "key": "Judaism",
+          "computed": 1013,
+          "printed": 1013,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "religion_column",
+          "key": "Jehovah's Witnesses",
+          "computed": 10787,
+          "printed": 10787,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "religion_column",
+          "key": "Muslim",
+          "computed": 437458,
+          "printed": 437458,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "religion_column",
+          "key": "Other",
+          "computed": 10493,
+          "printed": 10493,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "religion_column",
+          "key": "None",
+          "computed": 19214,
+          "printed": 19214,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "religion_column",
+          "key": "Refusal",
+          "computed": 8912,
+          "printed": 8912,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "religion_column",
+          "key": "Not stated",
+          "computed": 97169,
+          "printed": 97169,
+          "difference": 0
+        }
+      ]
+    },
+    "boundary_validation": {
+      "status": "passed",
+      "feature_count": 12,
+      "distinct_geometry_hashes": 12,
+      "bbox": {
+        "xmin": 40.00746,
+        "ymin": 41.05503,
+        "xmax": 46.73618,
+        "ymax": 43.58716
+      },
+      "output_bytes": 54578,
+      "licence": "Creative Commons Attribution 3.0 License",
+      "adm_unit_count": "12"
+    },
+    "join_coverage": {
+      "matched": 12,
+      "expected": 12
+    },
+    "notes": "2002 (12 regions) and 2024 (11 regions) close exactly at both margins (4,371,535; 3,929,581). 2014 national row closes exactly over 12 categories (3,713,804); the two headline slots are exact per region, and the '…'(<=10) suppressed cells satisfy the recorded per-row bound. Boundary joins 12/12.",
+    "warnings": [
+      "Category frames differ per wave (2002: 6 named + residual; 2014: 12; 2024: 10) — no cross-wave category change; comparable spine is the five great-tradition shares.",
+      "2002 no-religion is null (residual bundles no-religion with other-religion); 2002 affiliation is a recorded lower bound.",
+      "2014 '…'(<=10) suppression carried verbatim on small affiliation sub-categories; headline slots unaffected.",
+      "Territorial scope: Abkhazia/South Ossetia not enumerated; 2002 carries a 1,956-person Abkhazia fraction (flagged); Shida Kartli enumerated in controlled part only (flagged).",
+      "Municipality (2024 self-gov, 64 units) is a documented deeper product deferred on a boundary-vintage mismatch (geoBoundaries ADM2 is a 68-unit 2007 vintage)."
+    ]
+  },
+  "construct_notes": [
+    "The construct is census affiliation: each resident's reported religion (asked of the whole enumerated population, all ages), not practice, attendance, or membership. Religion was first tabulated in the 2002 census and again in 2014 and 2024.",
+    "The public product carries three headline fields per region-wave: population total, religious affiliation percent, and no-religion percent. Place-density metrics are null (no governed place-of-worship snapshot).",
+    "Category frames differ per wave and are preserved verbatim per region on the quality flag: 2002 has 6 named categories plus an 'other religion' residual that bundles other-religion with no-religion; 2014 has 12 categories; 2024 has 10 (Yazidis and Protestant folded into Other). No cross-wave category change is claimed.",
+    "Slot design: 2014/2024 affiliation = population - None - Refusal - Not stated, and no-religion = None. 2002 affiliation = the five great-tradition sum (a recorded lower bound, residual excluded) and no-religion = null. Refusal and Not-stated (2014/2024) are disclosed denominator residuals, so the two shares need not sum to 100.",
+    "Territorial scope (render the record): Geostat does not enumerate Abkhazia or South Ossetia. 2002 carries a 1,956-person Abkhazia A.R. fraction (mapped with a not-representative flag); 2014/2024 exclude the occupied territories entirely. Shida Kartli is enumerated in its Georgian-controlled part only in every wave; the polygon spans the full administrative extent (disclosed). No count is invented for any non-enumerated area.",
+    "Licence: the census data ship under the Geostat Terms of Use open reuse grant (free reuse for any purpose with source attribution, quoted verbatim in source.licence and captured under data/raw/ge_census/). No reuse ask is needed; the product ships with attribution to the National Statistics Office of Georgia."
+  ],
+  "deferred_sources": [
+    {
+      "source_dataset_id": "ge-census-2024-religion-by-self-governed-unit",
+      "status": "deferred",
+      "url": "https://geostat.ge/media/80625/6.-Population-by-regions%2C-self-governed-units%2C-sex-and-religion.xlsx",
+      "local_path": "data/raw/ge_census/ge_2024_population_by_regions_selfgov_sex_religion.xlsx",
+      "notes": "The 2024 table also gives religion by 64 self-governed units (municipalities + self-governing cities), clean and exact. Deferred: geoBoundaries GEO ADM2 is a 68-unit 2007 vintage that predates the self-governing-city reforms and mismatches the 2024 self-gov frame; an official Geostat self-gov layer or a 2024-vintage COD-AB ADM2 is the unblock. No concordance invented."
+    },
+    {
+      "source_dataset_id": "ge-census-religion-urban-rural-sex",
+      "status": "deferred",
+      "url": "https://geostat.ge/media/44724/22_Population-by-regions-and-religion.xls",
+      "local_path": null,
+      "notes": "The 2014 table splits religion by urban/rural, and the 2024 table by sex, within region. Only the whole-population/both-sexes region block is shipped; the urban/rural and sex cuts are a deeper future product."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "accepted",
+  "licence_basis": "ge_geostat_open_reuse_with_attribution",
+  "downstream_status": "accepted",
+  "source_datasets": [
+    {
+      "source_dataset_id": "ge-census-2002-vol1-table29-religion-by-region",
+      "name": "Georgia 2002 General Population Census, Volume I, Table #29: population by religion by region",
+      "provider": "National Statistics Office of Georgia (Geostat; 2002: State Department for Statistics of Georgia)",
+      "url": "https://geostat.ge/media/44559/I-tomi.pdf",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/ge_census/ge_2002_vol_I-tomi.pdf",
+      "licence": {
+        "name": "National Statistics Office of Georgia (Geostat) Terms of Use open reuse grant. The Geostat Terms of Use page (geostat.ge/en/page/monacemta-gamoyenebis-pirobebi, retrieved 2026-07-12) grant 'the right to download, use, adapt, modify, create derivative works of, disseminate, copy, and share to the third parties, for any purpose, including commercial and non-commercial use, without restriction, statistical data, metadata, official publications and other published documents placed on GEOSTAT website without prior permission', with the condition: 'Users should indicate Geostat as a source of information when using data of GEOSTAT.' An open licence conditioned only on source attribution.",
+        "url": "https://www.geostat.ge/en/page/monacemta-gamoyenebis-pirobebi",
+        "attribution": "National Statistics Office of Georgia, 2002 General Population Census"
+      },
+      "citation": "Georgia 2002 General Population Census Results, Volume I, Table #29 (population by religion by region).",
+      "access_limits": null,
+      "redistribution_limits": "Open reuse with source attribution; derived region summaries ship with attribution to Geostat.",
+      "notes": "Whole enumerated population, all ages; 12 regions incl. an Abkhazia A.R. fraction (1,956). Both margins close exactly to 4,371,535. Six named categories plus one 'other religion' residual that bundles other-religion with no-religion (no isolable no-religion cell at region level)."
+    },
+    {
+      "source_dataset_id": "ge-census-2014-population-by-regions-and-religion",
+      "name": "Georgia 2014 General Population Census: Population by regions and religion",
+      "provider": "National Statistics Office of Georgia (Geostat)",
+      "url": "https://geostat.ge/media/44724/22_Population-by-regions-and-religion.xls",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/ge_census/ge_2014_population_by_regions_and_religion.xls",
+      "licence": {
+        "name": "National Statistics Office of Georgia (Geostat) Terms of Use open reuse grant. The Geostat Terms of Use page (geostat.ge/en/page/monacemta-gamoyenebis-pirobebi, retrieved 2026-07-12) grant 'the right to download, use, adapt, modify, create derivative works of, disseminate, copy, and share to the third parties, for any purpose, including commercial and non-commercial use, without restriction, statistical data, metadata, official publications and other published documents placed on GEOSTAT website without prior permission', with the condition: 'Users should indicate Geostat as a source of information when using data of GEOSTAT.' An open licence conditioned only on source attribution.",
+        "url": "https://www.geostat.ge/en/page/monacemta-gamoyenebis-pirobebi",
+        "attribution": "National Statistics Office of Georgia, 2014 General Population Census"
+      },
+      "citation": "Georgia 2014 General Population Census Results, Population by regions and religion.",
+      "access_limits": null,
+      "redistribution_limits": "Open reuse with source attribution; derived region summaries ship with attribution to Geostat.",
+      "notes": "Whole population, all ages; 11 regions, 12 categories incl. separate None/Refusal/Not-stated. National row closes exactly to 3,713,804. '…'(<=10) suppression on small affiliation sub-categories, carried verbatim; the two headline slots stay exact because None/Refusal/Not-stated are never suppressed."
+    },
+    {
+      "source_dataset_id": "ge-census-2024-population-by-regions-selfgov-sex-religion",
+      "name": "Georgia 2024 Population Census: Population by regions, self-governed units, sex and religion",
+      "provider": "National Statistics Office of Georgia (Geostat)",
+      "url": "https://geostat.ge/media/80625/6.-Population-by-regions%2C-self-governed-units%2C-sex-and-religion.xlsx",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/ge_census/ge_2024_population_by_regions_selfgov_sex_religion.xlsx",
+      "licence": {
+        "name": "National Statistics Office of Georgia (Geostat) Terms of Use open reuse grant. The Geostat Terms of Use page (geostat.ge/en/page/monacemta-gamoyenebis-pirobebi, retrieved 2026-07-12) grant 'the right to download, use, adapt, modify, create derivative works of, disseminate, copy, and share to the third parties, for any purpose, including commercial and non-commercial use, without restriction, statistical data, metadata, official publications and other published documents placed on GEOSTAT website without prior permission', with the condition: 'Users should indicate Geostat as a source of information when using data of GEOSTAT.' An open licence conditioned only on source attribution.",
+        "url": "https://www.geostat.ge/en/page/monacemta-gamoyenebis-pirobebi",
+        "attribution": "National Statistics Office of Georgia, 2024 Population Census"
+      },
+      "citation": "Georgia 2024 Population Census Results, Population by regions, self-governed units, sex and religion.",
+      "access_limits": null,
+      "redistribution_limits": "Open reuse with source attribution; derived region summaries ship with attribution to Geostat.",
+      "notes": "Whole population as of 14 Nov 2024; 11 region rows (region product) plus 64 self-governed-unit rows (deferred municipality product). 10 categories. Both margins close exactly to 3,929,581. No suppression. Source footnote: 'Does not include occupied territories of Georgia.'"
+    },
+    {
+      "source_dataset_id": "geoboundaries-geo-adm1-2015",
+      "name": "geoBoundaries GEO ADM1 (12 regions, 2015 vintage)",
+      "provider": "geoBoundaries (William & Mary geoLab); boundary source geoBoundaries, Wikimedia",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GEO/ADM1/geoBoundaries-GEO-ADM1.geojson",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/ge_census/geoBoundaries-GEO-ADM1.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution 3.0 License",
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/GEO/ADM1/",
+        "attribution": "geoBoundaries (gbOpen); boundary source geoBoundaries, Wikimedia (CC BY 3.0)"
+      },
+      "citation": "geoBoundaries GEO ADM1 (gbOpen, pinned 9469f09), 12 region boundaries.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed under CC BY 3.0 with attribution to geoBoundaries/Wikimedia.",
+      "notes": "12 ADM1 regions, boundaryYearRepresented 2015; join the census regions one-to-one (Abkhazia used for 2002 only)."
+    }
+  ],
+  "notes": "Accepted product (open Geostat reuse licence with attribution). The committed products are the derived region area summary (34 rows across 2002, 2014, 2024) and one geoBoundaries GEO ADM1 12-region boundary GeoJSON. On-page attribution, when a page is built, must cite the National Statistics Office of Georgia (Geostat) and geoBoundaries (CC BY 3.0)."
+}
