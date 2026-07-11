@@ -99,3 +99,47 @@ Derived working files also present in the cache (not source objects): `pw_2020.t
 ## Product boundary
 
 A build on this probe would stage 16-state religious-affiliation summaries for 2005 (all-ages), 2015 (18+), and 2020 (18+) on the geoBoundaries PLW ADM1 frame, with per-wave universe and frame notes and a withheld cross-wave change metric. It would not contain a place-of-worship layer, place-density metrics, a 2000 wave, or a denomination time series beyond the matched 2015-2020 pair. The 2000 monograph and an OPS licence confirmation are the recorded routes to deepen the series and open the page.
+
+## Build appendix (2026-07-11)
+
+The build shipped exactly the staged product the probe recommends. `scripts/build_pw_area_summary.R` transcribes all three tables verbatim into the script (2005 from the pdftotext extraction; 2015 and 2020 from the 150 dpi Table 42 image renders), reconciles each wave at both margins with fail-fast gates, joins the 16 census states one-to-one to geoBoundaries PLW ADM1, and writes the area summary, its CSV companion, the simplified boundary, and a `data-manifest.v2` manifest. The product is STAGED: `dataset_role` is `staged_evidence`, `downstream_status` is `staged`, `licence_status` is `needs_review`, and no page or hub link is created. Run with `Rscript scripts/build_pw_area_summary.R`.
+
+### Deliverables
+
+| Output | Bytes | SHA-256 |
+| --- | --- | --- |
+| `apps/regions/pw/data/area_summary_state.json` | 79560 | `fe79f798807fc91198bc7fa4672c62fbef6a2041129f1ef9448171763382c417` |
+| `apps/regions/pw/data/area_summary_state.csv` | 39117 | `d48f644af6cda5c3ed9856f51f9c773ddf5080e11bab5fac90f35a45bc5da023` |
+| `apps/regions/pw/data/pw_state_2017.geojson` | 224012 | `2bd8dbe9616ae912b9ebdc3a65c51bd60fbc9a0f7ab22df057adc5dd861ffa22` |
+| `docs/manifests/pw-census-religion-2005-2020.json` | — | — |
+
+The area summary carries 48 rows (16 states x 3 waves). Place-of-worship and place-density metrics are null; `site_snapshot` records that no governed place snapshot ships.
+
+### Gate results (all passed, zero difference at every margin)
+
+- **2005 Table 10.1**: the 16 state rows each close to their printed state total, the nine category columns each close to their printed national category total, and both the state-total margin and the category-total margin close to the printed national Total of 19,907.
+- **2015 Table 42 (18+)**: each state row's nine categories close to the printed state total, each religion's 16 state columns close to the printed Palau Total column, the nine categories on the Palau Total column sum to 8,376, and the 16 state totals sum to 8,376.
+- **2020 Table 42 (18+)**: each state row's nine categories close to the printed state total, the 16 state columns sum to 9,303, and the overall Total column control (states plus the six overseas legal-residence columns, per religion) closes to the printed 13,576 for every category and in aggregate. The overall Total is a transcription control only and is never used as the state denominator.
+
+Every transcribed image-table cell reconciles at both margins; no cell was allocated, inferred, rounded, or tuned. The 2005 monograph prose claim of "about 1 in 6" with no religion is recorded as a discrepancy in the manifest and refuted by its own table (None or refused is 222 of 19,907, near 1.1 percent); the table governs.
+
+### Product encoding (conductor rulings, encoded)
+
+- **Universes** disclosed per wave in every row basis and quality flag: 2005 all persons, all ages; 2015 and 2020 persons 18 and over. The 2005-to-later level difference is a universe break, never change.
+- **No-religion slot** real for 2005 (the printed None or refused count, with the caveat that it mixes persons with no religion and refusals) and null for 2015 and 2020, whose report folds persons with no religion into Other.
+- **Affiliation flat by construction** for 2015 and 2020: because no-religion is folded into Other, religious affiliation equals the population and is 100 percent for every state; the manifest records this as the PI task 6 gate shared in part.
+- **Change withheld** for 2005 to 2015/2020 (universe and frame breaks) and computable only for the matched 2015-2020 pair, where the flat construction makes any change trivially zero.
+- **Category frames** preserved verbatim per wave in `pipeline.parameters.category_frames`, with the alignment note; the two nine-way frames are not merged.
+- **Boundary** is geoBoundaries PLW ADM1 (16 states, ODbL 1.0), simplified with `scripts/lib/simplify_boundary.R` to 16 valid features with 16 distinct geometry hashes at 100 percent keep (224012 bytes). The two spelling concordances (geoBoundaries Ngeremlengui to census Ngaremlengui; 2005 Ngerchelong to canonical Ngarchelong) are encoded and recorded. A full-extent gate confirms the bounding box spans latitude 2.75 to 8.09 North, including Sonsorol and Hatohobei, rather than a main-cluster box.
+
+### Validation output
+
+- `Rscript scripts/build_pw_area_summary.R` — all gates PASSED; wrote the four outputs.
+- `uvx check-jsonschema --base-uri "file://$PWD/schemas/" --schemafile schemas/area-summary.schema.json apps/regions/pw/data/area_summary_state.json` — `ok -- validation done`.
+- `bash scripts/validate_manifests.sh` — `manifest validation: 60/60 pass` (includes the new Palau manifest).
+
+### Open questions for the conductor
+
+- **Licence**: the one genuine gate. No reuse terms exist anywhere in the source chain, so nothing is quoted; `licence_status` is `needs_review` and the manifest records the PI task 10 dependency. An OPS reuse-confirmation email is the clean unblock.
+- **Page and hub**: withheld by instruction. Opening a page also depends on the PI task 6 ruling, because 2015 and 2020 affiliation is flat by construction.
+- **Series depth**: the 2000 monograph wave and a 2015-2020 denomination series are recorded in `deferred_sources`, not shipped.
