@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Pakistan map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Pakistan research map; every string traces to
+    // docs/manifests/pk-census-religion-2023.json (parameters, construct_notes,
+    // reconciliation, source_datasets), research/countries/pk/route-probe.md and
+    // boundary-probe.md, the data product
+    // apps/regions/pk/data/area_summary_district.json (indicator declarations
+    // and quality flags), or the live REGION_CONFIG in
+    // apps/regions/pk/index.html. the render-the-record and report-the-contest
+    // wording carries the PI ruling text, the minority-share design
+    // declarations, the coverage-scope statement, the Karachi combine, and the
+    // licence position, no more and no less. authors nothing.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "PK",
+      countryName: "Pakistan",
+      mapHref: "./",
+      intro: "District census religion for Pakistan, a single 2023 snapshot from the Pakistan Bureau of Statistics (PBS) Census of Pakistan 2023, Table 9. The construct is census religion over the eight-category official frame, rendered exactly as PBS prints it; the map shades the reference-group (Muslim) share and its exact complement, the minority share. It does not measure belief, practice, or attendance.",
+      facts: {
+        waves: "One census: 2023",
+        geographies: "District (2023 Table 9 frame): 136 district-equivalent units, mapped on 135 boundary features",
+        metrics: "Muslim (%), Minority share (%)"
+      },
+      reading: [
+        "Districts are shaded by the reference-group (Muslim) share, Pakistan's largest published national category, held constant as the reference group across every district, or by the Minority share, the summed share of Christian, Hindu Jati, Qadiani/Ahmadi, Scheduled Castes, Sikh, Parsi and Others outside that reference group. Nationally the Muslim share is 96.3522% in 2023 (231,686,709 of 240,458,089, reproducing the published 96.35% at rounding); the reference-group value is that group's share of the census frame, never a measure of affiliation versus non-affiliation. The two metrics are exact complements and sum to 100 in every district.",
+        "The minority share is arithmetic on the published census categories, the share outside Pakistan's largest published category. It is not a measure of no religion, belief, practice, minority status in law, or self-understood identity. The census religion frame has no no-religion category and no not-stated category; the frame sums to 100 by construction, and the legacy no-religion metric slot carries the minority share and no no-religion meaning. The minority share is highest in Sindh: Umerkot carries Pakistan's highest minority share (Muslim 44.83, minority 55.17), with Tharparkar next (minority 45.78); Torghar in Khyber Pakhtunkhwa is the lowest (minority 0.14).",
+        "The 2023 counts render the PBS record verbatim, and that record is contested by affected communities. Qadiani/Ahmadi is the state's enumeration label for the Ahmadiyya community, applied after the 1974 constitutional amendment (Second Amendment) that declared Ahmadis non-Muslim; the label is regarded by many Ahmadis as pejorative and the classification is contested by the community. Pakistan enumerates Ahmadis separately from Muslims, a separate enumeration the U.S. State Department religious-freedom reporting also records. The label is carried verbatim as the official record and is not the project's description of any community's self-understanding. Hindu Jati and Scheduled Castes are enumerated as separate categories in the printed table, and this product combines nothing: each published category is reported as printed, down to single-digit Sikh and Parsi cells, with no small-cell suppression.",
+        "The record reconciles exactly. Every district's eight category counts sum to its printed Table 9 total, and each province's district totals sum exactly to the published provincial anchor: Khyber Pakhtunkhwa 40,641,120 (including the Malakand Protected Area), Punjab 127,333,305, Sindh 55,638,409, Balochistan 14,562,011, and the Islamabad Capital Territory 2,283,244. The national religion-table total is 240,458,089, the sum of the five provincial anchors, because no 2023 national religion file is cached. Computed national shares match the published secondary shares within 0.05 percentage points: Muslim 96.35%, Hindu Jati plus Scheduled Castes 2.17%, Christian 1.37%, Qadiani/Ahmadi 0.07%. The Table 9 frame yields 136 district-equivalent units (Khyber Pakhtunkhwa 34 districts plus the Malakand Protected Area, Punjab 36, Sindh 30, Balochistan 34, ICT 1); the PBS administrative-district count of 156 differs from this tabulation frame, and the product renders the Table 9 frame and invents no districts.",
+        "The PBS headline 2023 population for the four provinces and the Islamabad Capital Territory is 241,499,431; the Table 9 religion tables enumerate 240,458,089. The difference of 1,041,342 persons is rendered as the record and is not reconciled or explained here. This is a coverage fact carried as published, never a residue distributed across categories.",
+        "The 2023 PBS Table 9 religion tables cover the four provinces (Khyber Pakhtunkhwa, Punjab, Sindh, and Balochistan) and the Islamabad Capital Territory. They exclude Azad Jammu and Kashmir and Gilgit-Baltistan, whose figures are published separately and are not included here. This product renders the coverage of the published tables as printed and makes no territorial claim; the map shades the published coverage and leaves the excluded territories unmapped.",
+        "The display frame is the OCHA COD-AB Pakistan ADM2 district layer (valid 2022-09-09, World Food Programme SDI / HDX), taken via the geoBoundaries gbHumanitarian mirror and filtered to 136 in-scope features, of which 135 join the census units on area_code. The census publishes Karachi West and Keamari as separate districts. The licensed 2022 boundary vintage pre-dates the 21 August 2020 split that carved Keamari out of Karachi West; the single COD West Karachi polygon therefore ships as one combined display feature. The two published census rows stay verbatim in the downloadable data, and a derived combined row sums them for the fused polygon, with no geometry invented or split. The 136th feature is Lehri, a district abolished in January 2018 whose territory the census enumerates within the Sibi and Kachhi rows; the licensed vintage still draws it separately, and it is carried unjoined and renders as no-data because no evidenced partition of its territory between the two census districts exists. Only the 2023 wave is mapped and no change metric is offered: the 2017 census used a different six-category frame (Muslim, Christian, Hindu, Qadiani/Ahmadi, Scheduled Castes, Others) that is not category-comparable, and no 2017 district table is cached. No governed Pakistan place-of-worship snapshot ships with this product; place counts and density metrics are null, and no licensed 2023 district land-area layer supplies a density denominator. The product renders the PBS record exactly and names the published categories neutrally, with no editorial framing."
+      ],
+      sources: [
+        {
+          name: "PBS Census of Pakistan 2023, Table 9: Population by Sex, Religion and Rural/Urban (four provincial district tables and the Islamabad Capital Territory)",
+          href: "https://www.pbs.gov.pk/",
+          construct: "Census religion by person, exact counts in eight verbatim categories (Muslim, Christian, Hindu Jati, Qadiani/Ahmadi, Scheduled Castes, Sikh, Parsi, Others) by district-equivalent unit; the 2023 wave on the four provinces + ICT frame, nothing combined and no small-cell suppression",
+          years: "2023",
+          licence: "PBS disseminates aggregate tabulations free and requires attribution, and asserts no open licence; its terms restrict onward supply of data collected from PBS. The derived district rates ship with PBS attribution while written PBS confirmation is sought, and the page reverts in a single commit if PBS objects (project-lead ruling, 2026-07-11). Raw PBS PDFs stay git-ignored"
+        },
+        {
+          name: "OCHA COD-AB Pakistan ADM2 district boundaries (v01, valid 2022-09-09)",
+          href: "https://data.humdata.org/dataset/cod-ab-pak",
+          construct: "Boundary geometry (160 ADM2 units; the 24 Azad Jammu & Kashmir and Gilgit-Baltistan units outside the Table 9 frame dropped, leaving 136 features of which 135 join the census units on area_code), World Food Programme SDI / HDX lineage via the geoBoundaries gbHumanitarian mirror; Karachi West and Keamari fused into one combined feature on the pre-2020-split vintage, and the abolished Lehri district carried unjoined as a disclosed no-data feature",
+          years: "2022 (valid_on 2022-09-09)",
+          licence: "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO), OCHA Field Information Services / World Food Programme SDI, per the HDX and geoBoundaries release metadata"
+        }
+      ],
+      accessData: {
+        note: "PBS asserts no open licence and requires attribution; its terms restrict onward supply of data collected from PBS. The committed products are the derived area summary and a simplified district boundary only; the raw PBS Table 9 PDFs are not committed. The derived rates ship with PBS attribution while written PBS confirmation is sought, and the page reverts in a single commit if PBS objects.",
+        sourceOfRecord: "Pakistan Bureau of Statistics (PBS), <a href=\"https://www.pbs.gov.pk/\" target=\"_blank\" rel=\"noopener\">Census of Pakistan 2023, Table 9</a> (Population by Sex, Religion and Rural/Urban); boundaries from OCHA COD-AB Pakistan ADM2 (WFP SDI / HDX) via the <a href=\"https://www.geoboundaries.org/\" target=\"_blank\" rel=\"noopener\">geoBoundaries</a> gbHumanitarian mirror.",
+        tables: "Table 9 is the source of record: 136 district-equivalent units across the four provinces and the Islamabad Capital Territory, each printing Muslim, Christian, Hindu Jati, Qadiani/Ahmadi, Scheduled Castes, Sikh, Parsi and Others as exact counts. Every district total equals the sum of its eight categories, and each province's district totals sum exactly to the published provincial anchor (KP 40,641,120; Punjab 127,333,305; Sindh 55,638,409; Balochistan 14,562,011; ICT 2,283,244), for a national religion-table total of 240,458,089. The area-summary religious_affiliation_percent field carries the Muslim reference-group share and no_religion_percent carries its exact complement, the minority share; each row's quality_flag carries the verbatim eight-category composition. The two published Karachi rows (Karachi West, Keamari) ride the download with their own composition, and a derived combined row sums them for the fused 2022-vintage polygon.",
+        licence: "PBS disseminates aggregate tabulations free and requires attribution (verbatim: \"aggregate level data (tabulation) was provided to the users free of charges and this practice will continue\"), and its terms restrict onward supply of data collected from PBS. No open licence governs the census output. The derived category summaries therefore ship with PBS attribution while written PBS confirmation is sought, and the page reverts in a single commit if PBS objects (project-lead ruling, 2026-07-11). The OCHA COD-AB ADM2 boundary geometry is CC BY 3.0 IGO with attribution to OCHA / WFP, mirrored via geoBoundaries.",
+        script: "scripts/build_pk_area_summary.R",
+        manifests: [
+          { label: "pk-census-religion-2023", href: "docs/manifests/pk-census-religion-2023.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Pakistan map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

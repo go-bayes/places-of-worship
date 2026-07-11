@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Pakistan Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Pakistan's product is a single 2023 wave of district census religion from
+    // the Pakistan Bureau of Statistics (PBS) Census of Pakistan 2023, Table 9,
+    // rendered exactly as PBS prints it. The eight published categories (Muslim,
+    // Christian, Hindu Jati, Qadiani/Ahmadi, Scheduled Castes, Sikh, Parsi,
+    // Others) are carried verbatim; nothing is combined and no small-cell count
+    // is suppressed. It does not measure belief, practice, or attendance.
+    //
+    // PI RULING 2026-07-11 (render the record and report the contest): the page
+    // renders the PBS record verbatim and states, neutrally and with sources,
+    // that the classification is contested by affected communities. Qadiani/
+    // Ahmadi is the state's enumeration label for the Ahmadiyya community,
+    // applied after the 1974 constitutional amendment that declared Ahmadis
+    // non-Muslim; the label is regarded by many Ahmadis as pejorative and the
+    // classification is contested by the community. The label is carried
+    // verbatim as the official record and is not the project's description of
+    // any community's self-understanding.
+    //
+    // Minority-share design (minority-share-metric.md, ratified 2026-07-11).
+    // The census religion frame partitions every enumerated person into one of
+    // eight published categories, with no no-religion and no not-stated
+    // category; the frame sums to 100 by construction. The two legacy slots
+    // therefore carry declared constructs: the affiliation slot is the
+    // reference-group (Muslim) share — Muslim is Pakistan's largest published
+    // national category (national share 96.3522%), declared once and held
+    // constant across every district — and the no-religion slot is the exact
+    // complement, the minority share (Christian + Hindu Jati + Qadiani/Ahmadi +
+    // Scheduled Castes + Sikh + Parsi + Others summed). The full eight-category
+    // composition rides each row verbatim (in quality_flag); the popup shows the
+    // two shares. No change metric is offered: only the 2023 wave ships, and the
+    // 2017 census used a different six-category frame that is not category-
+    // comparable.
+    //
+    // COVERAGE SCOPE (Israel/Palestine precedent, stated neutrally): the 2023
+    // Table 9 religion tables cover the four provinces (Khyber Pakhtunkhwa,
+    // Punjab, Sindh, Balochistan) and the Islamabad Capital Territory as
+    // published; Azad Jammu and Kashmir and Gilgit-Baltistan are outside the
+    // published religion tables and are not mapped. The map renders the
+    // published coverage and makes no territorial claim.
+    //
+    // KARACHI COMBINE (PI-ratified): Karachi West and Keamari districts render
+    // as one combined display unit because the licensed COD-AB boundary vintage
+    // (2022) pre-dates the 21 August 2020 split that carved Keamari out of
+    // Karachi West. The two published census rows (sd-karachi-west, sd-keamari)
+    // stay verbatim in the downloadable data and carry their own composition; a
+    // derived combined row (sd-karachi-west-keamari-combined) sums them for the
+    // fused polygon. No geometry is invented or split.
+    window.REGION_CONFIG = {
+      countryCode: "PK",
+      title: "Places of Worship | Pakistan Research Map",
+      // camera fits the four provinces + ICT beside the panels:
+      // lon 60.9..75.4, lat 23.7..36.9; centre on [68.8, 30.2].
+      center: [68.8, 30.2],
+      initialZoom: 4.8,
+      censusLevels: {
+        district: {
+          label: "District (2023 Table 9 frame)",
+          boundaries: "data/pk_district_2022.geojson",
+          summary: "data/area_summary_district.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "District census religion from the Pakistan Bureau of Statistics (PBS), Census of Pakistan 2023, Table 9, on the four provinces + ICT frame · Boundaries OCHA COD-AB PAK ADM2 via the geoBoundaries gbHumanitarian mirror, CC BY 3.0 IGO, World Food Programme SDI lineage"
+        }
+      },
+      defaultLevel: "district",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2023,
+      // minority-share design: the eight-category census frame sums to 100 by
+      // construction; the two legacy slots therefore carry declared constructs.
+      // The affiliation slot is the reference-group (Muslim) share; the
+      // no-religion slot is its exact complement, the minority share. No change
+      // slot is emitted (single 2023 wave).
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Muslim (%)",
+          note: "share of the district's census religion population reporting Muslim, Pakistan's largest published national category, held constant as the reference group across every district. This is the reference group's share of the census frame, not a measure of affiliation versus non-affiliation. The popup shows this share and the minority share; the full eight-category composition (Muslim, Christian, Hindu Jati, Qadiani/Ahmadi, Scheduled Castes, Sikh, Parsi, Others) rides each row of the downloadable area summary verbatim."
+        },
+        no_religion_percent: {
+          label: "Minority share (%)",
+          note: "share outside Pakistan's largest published category, Muslim: the summed share of Christian, Hindu Jati, Qadiani/Ahmadi, Scheduled Castes, Sikh, Parsi and Others, the exact complement of the Muslim share. This is arithmetic on the published census categories; it is not a measure of no religion, belief, practice, or secularity."
+        }
+      },
+      popupDenominatorNote: "Percentages use the district's PBS census religion population (the sum of the eight published categories: Muslim, Christian, Hindu Jati, Qadiani/Ahmadi, Scheduled Castes, Sikh, Parsi, Others) as the denominator. The Muslim (%) metric is the reference-group share; the Minority share (%) metric is its exact complement, the share outside the reference group. The census religion frame has no no-religion and no not-stated category; the frame sums to 100 by construction. Karachi West and Keamari render as one combined display unit because the licensed 2022 boundary vintage pre-dates the 2020 split; the two published census rows stay verbatim in the downloadable data. These are census enumerations rendered exactly as printed; they do not measure belief, practice, or attendance.",
+      cityPresets: [
+        { label: "Karachi", coords: [67.01, 24.86], zoom: 9 },
+        { label: "Lahore", coords: [74.35, 31.55], zoom: 10 },
+        { label: "Islamabad", coords: [73.06, 33.68], zoom: 10 },
+        { label: "Peshawar", coords: [71.55, 34.01], zoom: 10 },
+        { label: "Quetta", coords: [67.00, 30.18], zoom: 10 },
+        { label: "Multan", coords: [71.47, 30.20], zoom: 10 },
+        { label: "Hyderabad", coords: [68.37, 25.38], zoom: 10 },
+        { label: "Umerkot", coords: [69.74, 25.36], zoom: 10 }
+      ],
+      geocode: { country: "pk", biasLngLat: [68.8, 30.2] },
+      onboarding: {
+        title: "Pakistan research map",
+        intro: "District census religion for Pakistan, a single 2023 snapshot from the Pakistan Bureau of Statistics (PBS) Census of Pakistan 2023, Table 9. The construct is census religion over the eight-category official frame, rendered exactly as PBS prints it; the map shades the reference-group (Muslim) share and its exact complement, the minority share. It does not measure belief, practice, or attendance.",
+        bullets: [
+          "Districts carry the census composition in eight categories printed verbatim by PBS: Muslim, Christian, Hindu Jati, Qadiani/Ahmadi, Scheduled Castes, Sikh, Parsi and Others. Nothing is combined; Hindu Jati and Scheduled Castes stay separate as printed, and no small-cell count is suppressed.",
+          "Two metrics are shown: the Muslim (%) share, the reference group and Pakistan's largest published national category, and the Minority share (%), its exact complement. Umerkot carries Pakistan's highest minority share (55.17), with Tharparkar next (45.8); Torghar the lowest (0.14).",
+          "The minority share is arithmetic on the published census categories; it is not a measure of no religion, belief, practice, or secularity. Tap a district for its Muslim share and minority share; the verbatim eight-category counts ride every row of the downloadable area summary (see About this map).",
+          "Qadiani/Ahmadi is the state's enumeration label for the Ahmadiyya community, applied after the 1974 constitutional amendment that declared Ahmadis non-Muslim; the label is regarded by many Ahmadis as pejorative and the classification is contested by the community. The label is carried verbatim as the official record and is not the project's description of any community's self-understanding.",
+          "Religion is highly sensitive in Pakistan for the Ahmadiyya, Hindu, Christian, Sikh, and Scheduled Castes (Dalit) communities. This is a district-level product, chosen to reduce very small cells while rendering the official record. The Table 9 religion tables cover the four provinces (Khyber Pakhtunkhwa, Punjab, Sindh, Balochistan) and the Islamabad Capital Territory; Azad Jammu and Kashmir and Gilgit-Baltistan are outside the published religion tables and are not mapped.",
+          "Karachi West and Keamari render as one combined display unit because the licensed 2022 boundary vintage pre-dates the 2020 split; the two published census rows stay verbatim in the downloadable data. Open <strong>Show Census Data</strong> (top centre) for the geography and metric controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://www.pbs.gov.pk/" target="_blank" rel="noopener">Pakistan Bureau of Statistics</a>, Census of Pakistan 2023, Table 9 (Population by Sex, Religion and Rural/Urban) &middot; Derived rates reproduced with PBS attribution while written confirmation is sought &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a>; OCHA COD-AB PAK ADM2 (WFP SDI / HDX), CC BY 3.0 IGO',
+      censusFlagNote: "* This product renders the religion categories of the 2023 Census of Pakistan exactly as PBS prints them in Table 9: Muslim, Christian, Hindu Jati, Qadiani/Ahmadi, Scheduled Castes, Sikh, Parsi and Others, with no no-religion and no not-stated category; the frame sums to 100 by construction. The map shades the reference-group (Muslim) share and its exact complement, the minority share; the no-religion slot label carries the minority share and no no-religion meaning. Nothing is combined: Hindu Jati and Scheduled Castes stay separate as printed, and every published category count is rendered as printed with no small-cell suppression. Qadiani/Ahmadi is the state's enumeration label for the Ahmadiyya community, applied after the 1974 constitutional amendment that declared Ahmadis non-Muslim; many Ahmadis regard the label as pejorative and the community contests the classification. The label is carried verbatim as the official record and is not the project's description of any community's self-understanding; the U.S. State Department religious-freedom reporting records the separate enumeration. Religion is highly sensitive in Pakistan for the Ahmadiyya, Hindu, Christian, Sikh, and Scheduled Castes (Dalit) communities. The Table 9 religion tables cover the four provinces (Khyber Pakhtunkhwa, Punjab, Sindh, Balochistan) and the Islamabad Capital Territory; Azad Jammu and Kashmir and Gilgit-Baltistan are outside the published religion tables and are not mapped. The PBS headline 2023 population for the four provinces and ICT (241,499,431) exceeds the Table 9 religion enumeration (240,458,089) by 1,041,342 persons; the difference is rendered as the record and not reconciled here. Karachi West and Keamari render as one combined display unit because the licensed COD-AB boundary vintage (2022) pre-dates the 21 August 2020 split; the two published census rows stay verbatim in the downloadable data and a derived combined row sums them for the fused polygon, with no geometry invented or split. PBS disseminates aggregate tabulations free and requires attribution, and asserts no open licence; the derived district rates ship with PBS attribution while written PBS confirmation is sought, and the page reverts in a single commit if PBS objects (project-lead ruling, 2026-07-11). Boundaries are OCHA COD-AB PAK ADM2 via the geoBoundaries gbHumanitarian mirror, CC BY 3.0 IGO, World Food Programme SDI lineage."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260711b"></script>
+</body>
+</html>
