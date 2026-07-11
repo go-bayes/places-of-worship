@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-07-11 (queue-march sitting)
+
+- Fixed two shared-runtime UX flaws flagged during the Scotland investigation, with the runtime tag bumped to `20260711a` on all 50 country pages. The level-switch year clamp now lands on the nearest available year in either direction (an earlier year wins a tie); the old not-after rule skipped nearer forward years: switching from a level at 2021 to one with 2001/2011/2022 froze the map at 2011. The census time strip no longer vanishes silently where a slider cannot animate: a data-pending level keeps its year ticks inert under a note saying the data is coming, and a single-wave level shows its one year with a note saying so. The boundaries-only legend note drops its redundant years line; the ticks now carry the years.
+
 ### 2026-07-11 (rulings-execution sitting)
 
 - Executed all five project-lead rulings of 2026-07-10 23:54. Saint Lucia and Burkina Faso shipped end-to-end (data + pages) under the documented-discrepancy and derived-rounding-bound rulings, with the disclosure notes verbatim on panel and overview; Palestine's page shipped under the coexistence ruling with symmetric notes on the Palestine and Israel overviews; the Pacific campaign ran its full pinned-route phase.

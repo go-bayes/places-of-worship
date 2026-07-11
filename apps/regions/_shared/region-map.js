@@ -3664,14 +3664,13 @@ function updateCensusLegend() {
   // boundaries-only state: areas are mapped but no metric has values yet.
   // show the areas and say so, rather than hiding the panel.
   const hasAnyData = Object.keys(store.domains || {}).length > 0;
+  // (the years themselves render as inert ticks in the time strip below)
   if (!domain && !hasAnyData) {
-    const years = (store.years || []).join(" · ");
     censusLegend.hidden = false;
     scale.innerHTML =
       `<div class="census-legend-title">${censusLevelDef().label} boundaries</div>` +
       `<div class="census-legend-note">${RC.dataNoun || "Census"} religious-affiliation data is pending. ` +
-      `The areas are ready to receive it.</div>` +
-      (years ? `<div class="census-legend-note">${RC.dataNoun || "Census"} years: ${years}</div>` : "");
+      `The areas are ready to receive it.</div>`;
     return;
   }
   // this metric has no values, but others do (religion metrics can be
@@ -3769,11 +3768,21 @@ function syncCensusTimeSlider() {
   if (!timeEl || !store) return;
   const years = censusSliderYears();
   // a slider needs at least two stops, and at least one metric with data
-  // to animate; the boundaries-only scaffold has neither use for it
+  // to animate — but vanishing without a word made a pending level look
+  // broken (the scotland scaffold); the suppressed states now say why:
+  // a pending level keeps its year ticks inert under a data-pending note,
+  // and a single-wave level shows its one year
   const hasAnyData = Object.keys(store.domains || {}).length > 0;
   if (years.length < 2 || !hasAnyData) {
-    timeEl.hidden = true;
-    timeEl.innerHTML = "";
+    const tickYears = hasAnyData ? years : (store.years || []);
+    const note = hasAnyData
+      ? `single ${(RC.dataNoun || "census").toLowerCase()} year mapped so far`
+      : `${RC.dataNoun || "Census"} data for this level is pending — the year control activates when it arrives`;
+    timeEl.hidden = false;
+    timeEl.innerHTML =
+      (tickYears.length ? `<div class="census-ticks">${tickYears.map((y) => `<span data-year="${y}">${y}</span>`).join("")}</div>` : "") +
+      `<div class="census-legend-note">${note}</div>`;
+    markActiveTick();
     return;
   }
   const idx = Math.max(0, years.indexOf(censusState.year));
@@ -3849,14 +3858,19 @@ async function setCensusLevel(level) {
     return;
   }
   // the year slider keeps its index across a level switch, but the new
-  // level's store.years rarely matches the old one's; clamp to the closest
-  // available year rather than leaving censusState.year pointing at a year
-  // this level has no data for (which paints the choropleth grey)
+  // level's store.years rarely matches the old one's; clamp to the nearest
+  // available year in either direction (earlier wins a tie) rather than
+  // leaving censusState.year pointing at a year this level has no data for
+  // (which paints the choropleth grey). the old not-after rule skipped
+  // nearer forward years: 2021 against [2001, 2011, 2022] landed on 2011
   const newStore = censusActive();
   if (newStore && newStore.years.length && !newStore.years.includes(censusState.year)) {
     const current = censusState.year;
-    const notAfter = newStore.years.filter((y) => y <= current);
-    censusState.year = notAfter.length ? Math.max(...notAfter) : Math.min(...newStore.years);
+    censusState.year = newStore.years.reduce((best, y) => {
+      const dy = Math.abs(y - current);
+      const db = Math.abs(best - current);
+      return dy < db || (dy === db && y < best) ? y : best;
+    });
   }
   syncCensusYearSelect();
   syncCensusTimeSlider();
