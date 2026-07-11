@@ -1,0 +1,2228 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:nu-census-religion:nu:1986-2022:nso-national",
+  "dataset_id": "nu-census-religion:nu:1986-2022:nso-national",
+  "dataset_version_id": "nu-census-religion:nu:1986-2022:nso-national:3e36a9bcfc93",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "nu-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "NU"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-11T00:00:00Z",
+  "created_by": "scripts/build_nu_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_nu_area_summary.R",
+    "git_commit": "a6c8015e0826c926b1e1271dcb856b1d1da09aaa",
+    "command": "Rscript scripts/build_nu_area_summary.R",
+    "parameters": {
+      "construct": "census affiliation",
+      "ruling": "Conductor ruling 2026-07-11: small-country clause (Iceland/Dominica/Nauru precedent). National-only eight-wave religion series on one ADM0 polygon is the shippable ceiling; Niue never publishes religion below the national total in any wave. Each wave's counts come from its contemporaneous report; the 2022 report's corrupted republished 1997/2001/ 2006 columns are a documented discrepancy record, never a source.",
+      "waves": [
+        1986,
+        1991,
+        1997,
+        2001,
+        2006,
+        2011,
+        2017,
+        2022
+      ],
+      "shipped_geography": "1 native national ADM0 polygon (geoBoundaries NIU ADM0)",
+      "denominator": "resident-population total per wave: 2531/2239/2088/1736/1538/1460/1591/1564",
+      "headline_fields": "religious_affiliation = summed named religious categories; no_religion = None; Not stated is the disclosed residual (separate line 1986-2006; folded into Others 2011/2017/2022)",
+      "source_of_record_rule": "1986-2006 from the 2006 Appendix Table 2; 2011/2017/2022 from the 2022 Table 3.3. The 2022 republished 1997/2001/2006 columns are corrupted and never used as a source.",
+      "cross_wave_rule": "broad-affiliation spine comparable across all eight waves; pre-2011/2011+ Not stated frame seam disclosed",
+      "frames_preserved": "each wave's source category frame preserved verbatim (2006 appendix nine-line; 2022 Table 3.3 seven-line)",
+      "label_identity_mappings": [
+        {
+          "display_label": "Ekalesia Niue",
+          "frameA_label": "Ekalesia Niue",
+          "frameB_label": "Ekalesia",
+          "note": "London Missionary Society successor church; printed 'Ekalesia Niue' in the 2006 appendix and 'Ekalesia' in the 2022 Table 3.3."
+        },
+        {
+          "display_label": "Roman Catholic",
+          "frameA_label": "Roman Catholic",
+          "frameB_label": "Catholic",
+          "note": "Same body; printed 'Roman Catholic' in the 2006 appendix and 'Catholic' in the 2022 Table 3.3."
+        }
+      ],
+      "licence_clause_2011_verbatim": "Statistics Niue authorises the partial reproduction or translation of this material for scientific, educational or research purposes, provided that Statistics Niue and the source document are properly acknowledged.",
+      "licence_clause_2006_verbatim": "SPC authorises the partial reproduction or translation of this material for scientific, educational or research purposes, provided that SPC and the source document are properly acknowledged.",
+      "licence_copyright_2011": "© Copyright Statistics Niue, Government of Niue 2012",
+      "licence_copyright_2006": "© Copyright Secretariat of the Pacific Community 2008",
+      "licence_capture": {
+        "clause_2006": {
+          "quote": "SPC authorises the partial reproduction or translation of this material for scientific, educational or research purposes, provided that SPC and the source document are properly acknowledged.",
+          "copyright": "© Copyright Secretariat of the Pacific Community 2008",
+          "source": "data/raw/nu_census/nu_2006_census_report.txt",
+          "capture_sha256": "8d98232f231b21a47d7e66e9211842add3ec4c900e571810a2abc44899598a3f"
+        },
+        "clause_2011": {
+          "quote": "Statistics Niue authorises the partial reproduction or translation of this material for scientific, educational or research purposes, provided that Statistics Niue and the source document are properly acknowledged.",
+          "copyright": "© Copyright Statistics Niue, Government of Niue 2012",
+          "source": "data/raw/nu_census/nu_2011_census_report.txt",
+          "capture_sha256": "c967f67a021b5e668e678c7c3ecd3b147a2043d914ab05fb5e065cd2efcfcff2"
+        },
+        "vacuum_2022": {
+          "required_citation": "2022 Niue Census of Population and Household Report, Niue Statistics Office, Alofi",
+          "source": "data/raw/nu_census/nu_2022_census_report.txt",
+          "capture_sha256": "96274ed3cdb8519fd1b8dfbbbbfc397dfb930a0b1ee6595789b46748b72383c6",
+          "note": "2022 report carries no reuse clause (documented vacuum); only a required citation."
+        },
+        "soft_flag_2017": "2017 report front matter carries only the copyright line ('© Statistics Niue, 2019'); the partial-reproduction sentence did not text-extract. Soft flag; the 2006/2011 census-family clause is operative. The 2017 counts are sourced from the 2022 Table 3.3, not the 2017 report."
+      },
+      "licence_vacuum_2022": "2022 report carries no reuse clause; required citation: 2022 Niue Census of Population and Household Report, Niue Statistics Office, Alofi",
+      "licence_obligation": "Source: Statistics Niue and the Pacific Community (SPC), Niue Census of Population and Housing (2006 report Appendix Table 2 for 1986-2006; 2022 report Table 3.3 for 2011/2017/2022).",
+      "licence_basis": "niue_census_partial_reproduction_research_reuse_attribution_geoboundaries_cc_by_4_0",
+      "boundary_join_property": "area_code",
+      "boundary_derivation": "native geoBoundaries NIU ADM0 single polygon re-tagged area_code='niue' and simplified",
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 31900
+      },
+      "local_cache_hint": "All raw sources are cached under data/raw/nu_census/ and remain git-ignored.",
+      "reconciliation_evidence": {
+        "gate_category_sum_equals_total": {
+          "1986": {
+            "category_sum": 2531,
+            "printed_total": 2531,
+            "reconciles": true
+          },
+          "1991": {
+            "category_sum": 2239,
+            "printed_total": 2239,
+            "reconciles": true
+          },
+          "1997": {
+            "category_sum": 2088,
+            "printed_total": 2088,
+            "reconciles": true
+          },
+          "2001": {
+            "category_sum": 1736,
+            "printed_total": 1736,
+            "reconciles": true
+          },
+          "2006": {
+            "category_sum": 1538,
+            "printed_total": 1538,
+            "reconciles": true
+          },
+          "2011": {
+            "category_sum": 1460,
+            "printed_total": 1460,
+            "reconciles": true
+          },
+          "2017": {
+            "category_sum": 1591,
+            "printed_total": 1591,
+            "reconciles": true
+          },
+          "2022": {
+            "category_sum": 1564,
+            "printed_total": 1564,
+            "reconciles": true
+          }
+        },
+        "gate_affiliation_slot_arithmetic": {
+          "method": "affiliation-role sum == resident total - None - Not stated per wave",
+          "affiliation_role_sum": {
+            "1986": 2471,
+            "1991": 2168,
+            "1997": 1842,
+            "2001": 1598,
+            "2006": 1394,
+            "2011": 1431,
+            "2017": 1450,
+            "2022": 1452
+          },
+          "affiliation_residual": {
+            "1986": 2471,
+            "1991": 2168,
+            "1997": 1842,
+            "2001": 1598,
+            "2006": 1394,
+            "2011": 1431,
+            "2017": 1450,
+            "2022": 1452
+          },
+          "none": {
+            "1986": 48,
+            "1991": 68,
+            "1997": 77,
+            "2001": 34,
+            "2006": 43,
+            "2011": 29,
+            "2017": 141,
+            "2022": 112
+          },
+          "not_stated": {
+            "1986": 12,
+            "1991": 3,
+            "1997": 169,
+            "2001": 104,
+            "2006": 101,
+            "2011": 0,
+            "2017": 0,
+            "2022": 0
+          },
+          "reconciles": true
+        },
+        "discrepancy_record_2022_republication": {
+          "rule": "The 2022 report Table 3.3 republished 1997/2001/2006 columns are corrupted and are NEVER used as a source; those waves are taken from the reconciling 2006 Appendix Table 2. Recorded here only as a documented discrepancy (Saint Lucia / Cote d'Ivoire precedent). No cell is redistributed.",
+          "row_sum_offsets": {
+            "1997": 1,
+            "2001": -17,
+            "2006": 6
+          },
+          "per_wave": [
+            {
+              "year": 1997,
+              "republished_row_sum": 2089,
+              "printed_total": 2088,
+              "row_sum_offset": 1,
+              "categories": [
+                {
+                  "category": "Ekalesia",
+                  "republished_2022": 1336,
+                  "appendix_2006": 1330,
+                  "delta": 6
+                },
+                {
+                  "category": "Catholic",
+                  "republished_2022": 125,
+                  "appendix_2006": 133,
+                  "delta": -8
+                },
+                {
+                  "category": "Seventh Day Adventist",
+                  "republished_2022": 42,
+                  "appendix_2006": 51,
+                  "delta": -9
+                },
+                {
+                  "category": "Latter Day Saints",
+                  "republished_2022": 209,
+                  "appendix_2006": 206,
+                  "delta": 3
+                },
+                {
+                  "category": "Jehovah's Witness",
+                  "republished_2022": 42,
+                  "appendix_2006": 46,
+                  "delta": -4
+                },
+                {
+                  "category": "Others",
+                  "republished_2022": 84,
+                  "appendix_2006": 76,
+                  "delta": 8
+                }
+              ],
+              "none_republished": 251,
+              "none_appendix_plus_not_stated": 246,
+              "none_delta": 5
+            },
+            {
+              "year": 2001,
+              "republished_row_sum": 1719,
+              "printed_total": 1736,
+              "row_sum_offset": -17,
+              "categories": [
+                {
+                  "category": "Ekalesia",
+                  "republished_2022": 1094,
+                  "appendix_2006": 1093,
+                  "delta": 1
+                },
+                {
+                  "category": "Catholic",
+                  "republished_2022": 122,
+                  "appendix_2006": 128,
+                  "delta": -6
+                },
+                {
+                  "category": "Seventh Day Adventist",
+                  "republished_2022": 17,
+                  "appendix_2006": 25,
+                  "delta": -8
+                },
+                {
+                  "category": "Latter Day Saints",
+                  "republished_2022": 156,
+                  "appendix_2006": 158,
+                  "delta": -2
+                },
+                {
+                  "category": "Jehovah's Witness",
+                  "republished_2022": 35,
+                  "appendix_2006": 43,
+                  "delta": -8
+                },
+                {
+                  "category": "Others",
+                  "republished_2022": 156,
+                  "appendix_2006": 151,
+                  "delta": 5
+                }
+              ],
+              "none_republished": 139,
+              "none_appendix_plus_not_stated": 138,
+              "none_delta": 1
+            },
+            {
+              "year": 2006,
+              "republished_row_sum": 1544,
+              "printed_total": 1538,
+              "row_sum_offset": 6,
+              "categories": [
+                {
+                  "category": "Ekalesia",
+                  "republished_2022": 954,
+                  "appendix_2006": 956,
+                  "delta": -2
+                },
+                {
+                  "category": "Catholic",
+                  "republished_2022": 138,
+                  "appendix_2006": 138,
+                  "delta": 0
+                },
+                {
+                  "category": "Seventh Day Adventist",
+                  "republished_2022": 6,
+                  "appendix_2006": 6,
+                  "delta": 0
+                },
+                {
+                  "category": "Latter Day Saints",
+                  "republished_2022": 123,
+                  "appendix_2006": 127,
+                  "delta": -4
+                },
+                {
+                  "category": "Jehovah's Witness",
+                  "republished_2022": 31,
+                  "appendix_2006": 28,
+                  "delta": 3
+                },
+                {
+                  "category": "Others",
+                  "republished_2022": 138,
+                  "appendix_2006": 139,
+                  "delta": -1
+                }
+              ],
+              "none_republished": 154,
+              "none_appendix_plus_not_stated": 144,
+              "none_delta": 10
+            }
+          ]
+        },
+        "label_identity_mappings": [
+          {
+            "display_label": "Ekalesia Niue",
+            "frameA_label": "Ekalesia Niue",
+            "frameB_label": "Ekalesia",
+            "note": "London Missionary Society successor church; printed 'Ekalesia Niue' in the 2006 appendix and 'Ekalesia' in the 2022 Table 3.3."
+          },
+          {
+            "display_label": "Roman Catholic",
+            "frameA_label": "Roman Catholic",
+            "frameB_label": "Catholic",
+            "note": "Same body; printed 'Roman Catholic' in the 2006 appendix and 'Catholic' in the 2022 Table 3.3."
+          }
+        ],
+        "frame_seam": "Pre-2011 waves (2006 Appendix Table 2) split 'None' from 'Not stated' (nine-category frame). The 2011/2017/2022 waves (2022 Table 3.3) fold refusals into 'Others' and print only 'None' (seven- category frame). Each wave's native frame is preserved verbatim; no cell is redistributed across the seam.",
+        "broad_affiliation_spine": {
+          "decision": "The broad-affiliation spine (Ekalesia Niue/Ekalesia, Roman Catholic/Catholic, Latter Day Saints, Seventh Day Adventist, Jehovah's Witness, Others, None, and Not stated where present) is comparable across all eight waves. Same-body renamed lines map to a stable display label (Ekalesia Niue == Ekalesia; Roman Catholic == Catholic).",
+          "series": [
+            {
+              "spine_category": "ekalesia_niue",
+              "source_labels": [
+                "Ekalesia Niue",
+                "Ekalesia"
+              ],
+              "counts": {
+                "1986": 1749,
+                "1991": 1588,
+                "1997": 1330,
+                "2001": 1093,
+                "2006": 956,
+                "2011": 978,
+                "2017": 981,
+                "2022": 961
+              }
+            },
+            {
+              "spine_category": "roman_catholic",
+              "source_labels": [
+                "Roman Catholic",
+                "Catholic"
+              ],
+              "counts": {
+                "1986": 170,
+                "1991": 139,
+                "1997": 133,
+                "2001": 128,
+                "2006": 138,
+                "2011": 146,
+                "2017": 134,
+                "2022": 114
+              }
+            },
+            {
+              "spine_category": "latter_day_saints",
+              "source_labels": [
+                "Latter Day Saints"
+              ],
+              "counts": {
+                "1986": 307,
+                "1991": 237,
+                "1997": 206,
+                "2001": 158,
+                "2006": 127,
+                "2011": 146,
+                "2017": 139,
+                "2022": 137
+              }
+            },
+            {
+              "spine_category": "seventh_day_adventist",
+              "source_labels": [
+                "Seventh Day Adventist"
+              ],
+              "counts": {
+                "1986": 77,
+                "1991": 46,
+                "1997": 51,
+                "2001": 25,
+                "2006": 6,
+                "2011": 15,
+                "2017": 23,
+                "2022": 44
+              }
+            },
+            {
+              "spine_category": "jehovahs_witness",
+              "source_labels": [
+                "Jehovah's Witness"
+              ],
+              "counts": {
+                "1986": 33,
+                "1991": 47,
+                "1997": 46,
+                "2001": 43,
+                "2006": 28,
+                "2011": 29,
+                "2017": 43,
+                "2022": 31
+              }
+            },
+            {
+              "spine_category": "others",
+              "source_labels": [
+                "Others"
+              ],
+              "counts": {
+                "1986": 135,
+                "1991": 111,
+                "1997": 76,
+                "2001": 151,
+                "2006": 139,
+                "2011": 117,
+                "2017": 130,
+                "2022": 165
+              }
+            },
+            {
+              "spine_category": "no_religion",
+              "source_labels": [
+                "None"
+              ],
+              "counts": {
+                "1986": 48,
+                "1991": 68,
+                "1997": 77,
+                "2001": 34,
+                "2006": 43,
+                "2011": 29,
+                "2017": 141,
+                "2022": 112
+              }
+            },
+            {
+              "spine_category": "not_stated",
+              "source_labels": [
+                "Not stated"
+              ],
+              "counts": {
+                "1986": 12,
+                "1991": 3,
+                "1997": 169,
+                "2001": 104,
+                "2006": 101,
+                "2011": 0,
+                "2017": 0,
+                "2022": 0
+              }
+            }
+          ]
+        },
+        "universe_note": "Resident-population universe in every wave: 2,531 (1986), 2,239 (1991), 2,088 (1997), 1,736 (2001), 1,538 (2006), 1,460 (2011), 1,591 (2017), 1,564 (2022). Not the census-night figure (2022 census night 1,681, of whom 1,564 were usual residents; Table 3.3 uses the resident total).",
+        "licence_capture": {
+          "clause_2006": {
+            "quote": "SPC authorises the partial reproduction or translation of this material for scientific, educational or research purposes, provided that SPC and the source document are properly acknowledged.",
+            "copyright": "© Copyright Secretariat of the Pacific Community 2008",
+            "source": "data/raw/nu_census/nu_2006_census_report.txt",
+            "capture_sha256": "8d98232f231b21a47d7e66e9211842add3ec4c900e571810a2abc44899598a3f"
+          },
+          "clause_2011": {
+            "quote": "Statistics Niue authorises the partial reproduction or translation of this material for scientific, educational or research purposes, provided that Statistics Niue and the source document are properly acknowledged.",
+            "copyright": "© Copyright Statistics Niue, Government of Niue 2012",
+            "source": "data/raw/nu_census/nu_2011_census_report.txt",
+            "capture_sha256": "c967f67a021b5e668e678c7c3ecd3b147a2043d914ab05fb5e065cd2efcfcff2"
+          },
+          "vacuum_2022": {
+            "required_citation": "2022 Niue Census of Population and Household Report, Niue Statistics Office, Alofi",
+            "source": "data/raw/nu_census/nu_2022_census_report.txt",
+            "capture_sha256": "96274ed3cdb8519fd1b8dfbbbbfc397dfb930a0b1ee6595789b46748b72383c6",
+            "note": "2022 report carries no reuse clause (documented vacuum); only a required citation."
+          },
+          "soft_flag_2017": "2017 report front matter carries only the copyright line ('© Statistics Niue, 2019'); the partial-reproduction sentence did not text-extract. Soft flag; the 2006/2011 census-family clause is operative. The 2017 counts are sourced from the 2022 Table 3.3, not the 2017 report."
+        },
+        "wave_frames": [
+          {
+            "year": 1986,
+            "frame": "A",
+            "source": "2006 report, Appendix Table 2 (1986 column), nine-category frame with separate Not stated.",
+            "source_categories_verbatim": [
+              "Ekalesia Niue",
+              "Latter Day Saints",
+              "Roman Catholic",
+              "Jehovah's Witness",
+              "Seventh Day Adventist",
+              "Others",
+              "None",
+              "Not stated"
+            ],
+            "categories": [
+              {
+                "label": "Ekalesia Niue",
+                "role": "affiliation",
+                "count": 1749
+              },
+              {
+                "label": "Latter Day Saints",
+                "role": "affiliation",
+                "count": 307
+              },
+              {
+                "label": "Roman Catholic",
+                "role": "affiliation",
+                "count": 170
+              },
+              {
+                "label": "Jehovah's Witness",
+                "role": "affiliation",
+                "count": 33
+              },
+              {
+                "label": "Seventh Day Adventist",
+                "role": "affiliation",
+                "count": 77
+              },
+              {
+                "label": "Others",
+                "role": "affiliation",
+                "count": 135
+              },
+              {
+                "label": "None",
+                "role": "no_religion",
+                "count": 48
+              },
+              {
+                "label": "Not stated",
+                "role": "nonresponse",
+                "count": 12
+              }
+            ],
+            "category_sum": 2531,
+            "printed_total": 2531,
+            "reconciles": true
+          },
+          {
+            "year": 1991,
+            "frame": "A",
+            "source": "2006 report, Appendix Table 2 (1991 column), nine-category frame with separate Not stated.",
+            "source_categories_verbatim": [
+              "Ekalesia Niue",
+              "Latter Day Saints",
+              "Roman Catholic",
+              "Jehovah's Witness",
+              "Seventh Day Adventist",
+              "Others",
+              "None",
+              "Not stated"
+            ],
+            "categories": [
+              {
+                "label": "Ekalesia Niue",
+                "role": "affiliation",
+                "count": 1588
+              },
+              {
+                "label": "Latter Day Saints",
+                "role": "affiliation",
+                "count": 237
+              },
+              {
+                "label": "Roman Catholic",
+                "role": "affiliation",
+                "count": 139
+              },
+              {
+                "label": "Jehovah's Witness",
+                "role": "affiliation",
+                "count": 47
+              },
+              {
+                "label": "Seventh Day Adventist",
+                "role": "affiliation",
+                "count": 46
+              },
+              {
+                "label": "Others",
+                "role": "affiliation",
+                "count": 111
+              },
+              {
+                "label": "None",
+                "role": "no_religion",
+                "count": 68
+              },
+              {
+                "label": "Not stated",
+                "role": "nonresponse",
+                "count": 3
+              }
+            ],
+            "category_sum": 2239,
+            "printed_total": 2239,
+            "reconciles": true
+          },
+          {
+            "year": 1997,
+            "frame": "A",
+            "source": "2006 report, Appendix Table 2 (1997 column). The 2022 Table 3.3 republication of 1997 is corrupted and not used.",
+            "source_categories_verbatim": [
+              "Ekalesia Niue",
+              "Latter Day Saints",
+              "Roman Catholic",
+              "Jehovah's Witness",
+              "Seventh Day Adventist",
+              "Others",
+              "None",
+              "Not stated"
+            ],
+            "categories": [
+              {
+                "label": "Ekalesia Niue",
+                "role": "affiliation",
+                "count": 1330
+              },
+              {
+                "label": "Latter Day Saints",
+                "role": "affiliation",
+                "count": 206
+              },
+              {
+                "label": "Roman Catholic",
+                "role": "affiliation",
+                "count": 133
+              },
+              {
+                "label": "Jehovah's Witness",
+                "role": "affiliation",
+                "count": 46
+              },
+              {
+                "label": "Seventh Day Adventist",
+                "role": "affiliation",
+                "count": 51
+              },
+              {
+                "label": "Others",
+                "role": "affiliation",
+                "count": 76
+              },
+              {
+                "label": "None",
+                "role": "no_religion",
+                "count": 77
+              },
+              {
+                "label": "Not stated",
+                "role": "nonresponse",
+                "count": 169
+              }
+            ],
+            "category_sum": 2088,
+            "printed_total": 2088,
+            "reconciles": true
+          },
+          {
+            "year": 2001,
+            "frame": "A",
+            "source": "2006 report, Appendix Table 2 (2001 column). The 2022 Table 3.3 republication of 2001 is corrupted and not used.",
+            "source_categories_verbatim": [
+              "Ekalesia Niue",
+              "Latter Day Saints",
+              "Roman Catholic",
+              "Jehovah's Witness",
+              "Seventh Day Adventist",
+              "Others",
+              "None",
+              "Not stated"
+            ],
+            "categories": [
+              {
+                "label": "Ekalesia Niue",
+                "role": "affiliation",
+                "count": 1093
+              },
+              {
+                "label": "Latter Day Saints",
+                "role": "affiliation",
+                "count": 158
+              },
+              {
+                "label": "Roman Catholic",
+                "role": "affiliation",
+                "count": 128
+              },
+              {
+                "label": "Jehovah's Witness",
+                "role": "affiliation",
+                "count": 43
+              },
+              {
+                "label": "Seventh Day Adventist",
+                "role": "affiliation",
+                "count": 25
+              },
+              {
+                "label": "Others",
+                "role": "affiliation",
+                "count": 151
+              },
+              {
+                "label": "None",
+                "role": "no_religion",
+                "count": 34
+              },
+              {
+                "label": "Not stated",
+                "role": "nonresponse",
+                "count": 104
+              }
+            ],
+            "category_sum": 1736,
+            "printed_total": 1736,
+            "reconciles": true
+          },
+          {
+            "year": 2006,
+            "frame": "A",
+            "source": "2006 report, Appendix Table 2 (2006 column). The 2022 Table 3.3 republication of 2006 is corrupted and not used.",
+            "source_categories_verbatim": [
+              "Ekalesia Niue",
+              "Latter Day Saints",
+              "Roman Catholic",
+              "Jehovah's Witness",
+              "Seventh Day Adventist",
+              "Others",
+              "None",
+              "Not stated"
+            ],
+            "categories": [
+              {
+                "label": "Ekalesia Niue",
+                "role": "affiliation",
+                "count": 956
+              },
+              {
+                "label": "Latter Day Saints",
+                "role": "affiliation",
+                "count": 127
+              },
+              {
+                "label": "Roman Catholic",
+                "role": "affiliation",
+                "count": 138
+              },
+              {
+                "label": "Jehovah's Witness",
+                "role": "affiliation",
+                "count": 28
+              },
+              {
+                "label": "Seventh Day Adventist",
+                "role": "affiliation",
+                "count": 6
+              },
+              {
+                "label": "Others",
+                "role": "affiliation",
+                "count": 139
+              },
+              {
+                "label": "None",
+                "role": "no_religion",
+                "count": 43
+              },
+              {
+                "label": "Not stated",
+                "role": "nonresponse",
+                "count": 101
+              }
+            ],
+            "category_sum": 1538,
+            "printed_total": 1538,
+            "reconciles": true
+          },
+          {
+            "year": 2011,
+            "frame": "B",
+            "source": "2022 report, Table 3.3 (2011 column); no separate Not stated line (refusals folded into Others).",
+            "source_categories_verbatim": [
+              "Ekalesia",
+              "Catholic",
+              "Seventh Day Adventist",
+              "Latter Day Saints",
+              "Jehovah's Witness",
+              "Others",
+              "None"
+            ],
+            "categories": [
+              {
+                "label": "Ekalesia",
+                "role": "affiliation",
+                "count": 978
+              },
+              {
+                "label": "Catholic",
+                "role": "affiliation",
+                "count": 146
+              },
+              {
+                "label": "Seventh Day Adventist",
+                "role": "affiliation",
+                "count": 15
+              },
+              {
+                "label": "Latter Day Saints",
+                "role": "affiliation",
+                "count": 146
+              },
+              {
+                "label": "Jehovah's Witness",
+                "role": "affiliation",
+                "count": 29
+              },
+              {
+                "label": "Others",
+                "role": "affiliation",
+                "count": 117
+              },
+              {
+                "label": "None",
+                "role": "no_religion",
+                "count": 29
+              }
+            ],
+            "category_sum": 1460,
+            "printed_total": 1460,
+            "reconciles": true
+          },
+          {
+            "year": 2017,
+            "frame": "B",
+            "source": "2022 report, Table 3.3 (2017 column); no separate Not stated line (refusals folded into Others).",
+            "source_categories_verbatim": [
+              "Ekalesia",
+              "Catholic",
+              "Seventh Day Adventist",
+              "Latter Day Saints",
+              "Jehovah's Witness",
+              "Others",
+              "None"
+            ],
+            "categories": [
+              {
+                "label": "Ekalesia",
+                "role": "affiliation",
+                "count": 981
+              },
+              {
+                "label": "Catholic",
+                "role": "affiliation",
+                "count": 134
+              },
+              {
+                "label": "Seventh Day Adventist",
+                "role": "affiliation",
+                "count": 23
+              },
+              {
+                "label": "Latter Day Saints",
+                "role": "affiliation",
+                "count": 139
+              },
+              {
+                "label": "Jehovah's Witness",
+                "role": "affiliation",
+                "count": 43
+              },
+              {
+                "label": "Others",
+                "role": "affiliation",
+                "count": 130
+              },
+              {
+                "label": "None",
+                "role": "no_religion",
+                "count": 141
+              }
+            ],
+            "category_sum": 1591,
+            "printed_total": 1591,
+            "reconciles": true
+          },
+          {
+            "year": 2022,
+            "frame": "B",
+            "source": "2022 report, Table 3.3 (2022 column); of 165 'Others', 53 were refusals folded in (source note).",
+            "source_categories_verbatim": [
+              "Ekalesia",
+              "Catholic",
+              "Seventh Day Adventist",
+              "Latter Day Saints",
+              "Jehovah's Witness",
+              "Others",
+              "None"
+            ],
+            "categories": [
+              {
+                "label": "Ekalesia",
+                "role": "affiliation",
+                "count": 961
+              },
+              {
+                "label": "Catholic",
+                "role": "affiliation",
+                "count": 114
+              },
+              {
+                "label": "Seventh Day Adventist",
+                "role": "affiliation",
+                "count": 44
+              },
+              {
+                "label": "Latter Day Saints",
+                "role": "affiliation",
+                "count": 137
+              },
+              {
+                "label": "Jehovah's Witness",
+                "role": "affiliation",
+                "count": 31
+              },
+              {
+                "label": "Others",
+                "role": "affiliation",
+                "count": 165
+              },
+              {
+                "label": "None",
+                "role": "no_religion",
+                "count": 112
+              }
+            ],
+            "category_sum": 1564,
+            "printed_total": 1564,
+            "reconciles": true
+          }
+        ]
+      },
+      "software_versions_note": "see software_versions"
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "scripts/lib/simplify_boundary.R"
+    }
+  },
+  "source": {
+    "provider": "Statistics Niue (Niue Statistics Office); Pacific Community (SPC); geoBoundaries; Sentinel-2 10m Land Cover (ESA)",
+    "source_dataset_ids": [
+      "nso-spc-census-religion-national-1986-2022",
+      "geoboundaries-niu-adm0-9469f09"
+    ],
+    "source_urls": [
+      "https://niuestatistics.nu/download/35/census/474/niu_2006_population_profile.pdf",
+      "https://niuestatistics.nu/download/35/census/2793/2022-niue-census-of-population-and-housing-report.pdf",
+      "https://niuestatistics.nu/download/35/census/2040/niue-2011-cenus-population-profile.pdf",
+      "https://niuestatistics.nu/download/35/census/1460/2019-niue-pophh-census-2-0.pdf",
+      "https://niuestatistics.nu/download/35/census/569/niue-population-and-household-census-2001-2.pdf",
+      "https://www.geoboundaries.org/api/current/gbOpen/NIU/ADM0/",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/NIU/ADM0/geoBoundaries-NIU-ADM0.geojson"
+    ],
+    "retrieved_at": "2026-07-11T00:00:00Z",
+    "licence": "Statistics Niue / SPC authorise partial reproduction for scientific, educational or research purposes with Statistics Niue / SPC / source acknowledgement (byte-matched in the 2011 and 2006 reports). The 2017 reuse clause did not text-extract (soft flag) and the 2022 report carries no reuse clause (documented vacuum); both are covered by the census-family clause and the build-then- ask ruling. geoBoundaries NIU ADM0 is CC BY 4.0.",
+    "raw_redistribution": "Raw Statistics Niue / SPC reports and the boundary remain in the git-ignored cache; not redistributed in-repo.",
+    "local_cache_hint": "All raw sources are cached under data/raw/nu_census/ and remain git-ignored.",
+    "licence_position": "accepted: SPC-family partial-reproduction-with-acknowledgement (census) and CC BY 4.0 (boundary)",
+    "citation": "Niue Census of Population and Housing: 2006 report Appendix Table 2 (1986-2006) and 2022 report Table 3.3 (2011/2017/2022); geoBoundaries NIU ADM0."
+  },
+  "input_manifests": [],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/nu/data/area_summary_national.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 21364,
+      "sha256": "3e36a9bcfc93b954f29e59c86d80d7831cd86bd23e4dad9c01d524cd79453b3d",
+      "content": "Niue national eight-wave census-religion area summary (1986-2022).",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "niue_census_partial_reproduction_research_reuse_attribution_geoboundaries_cc_by_4_0",
+      "row_count": 8
+    },
+    {
+      "uri": "repo:apps/regions/nu/data/area_summary_national.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 7167,
+      "sha256": "f12fdd5516baa369c6aa647afc774ea9b0f33689e55f229cb440c2ba9c87ac2e",
+      "content": "Flattened Niue national census-religion rows for 1986 through 2022.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "niue_census_partial_reproduction_research_reuse_attribution_geoboundaries_cc_by_4_0",
+      "row_count": 8
+    },
+    {
+      "uri": "repo:apps/regions/nu/data/nu_national.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 31900,
+      "sha256": "f1d9b606c76f71435a304d6efaa0f4926bb2644b167e308e50eaa133dcf3507f",
+      "content": "geoBoundaries NIU ADM0 native national polygon (simplified).",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "niue_census_partial_reproduction_research_reuse_attribution_geoboundaries_cc_by_4_0",
+      "feature_count": 1
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/nu/data/area_summary_national.json",
+      "sha256": "3e36a9bcfc93b954f29e59c86d80d7831cd86bd23e4dad9c01d524cd79453b3d",
+      "built_by": "scripts/build_nu_area_summary.R"
+    },
+    {
+      "uri": "repo:apps/regions/nu/data/area_summary_national.csv",
+      "sha256": "f12fdd5516baa369c6aa647afc774ea9b0f33689e55f229cb440c2ba9c87ac2e",
+      "built_by": "scripts/build_nu_area_summary.R"
+    },
+    {
+      "uri": "repo:apps/regions/nu/data/nu_national.geojson",
+      "sha256": "f1d9b606c76f71435a304d6efaa0f4926bb2644b167e308e50eaa133dcf3507f",
+      "built_by": "scripts/build_nu_area_summary.R"
+    }
+  ],
+  "raw_sources": [
+    {
+      "uri": "data/raw/nu_census/nu_2006_census_report.txt",
+      "url": "https://niuestatistics.nu/download/35/census/474/niu_2006_population_profile.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "text",
+      "bytes": 233782,
+      "sha256": "8d98232f231b21a47d7e66e9211842add3ec4c900e571810a2abc44899598a3f",
+      "source_dataset_id": "nso-spc-census-religion-national-1986-2022",
+      "used_in_public_product": true,
+      "periods": "1986;1991;1997;2001;2006",
+      "notes": "2006 report text layer; Appendix Table 2 supplies the 1986-2006 source-of-record columns."
+    },
+    {
+      "uri": "data/raw/nu_census/nu_2006_census_report.pdf",
+      "url": "https://niuestatistics.nu/download/35/census/474/niu_2006_population_profile.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "pdf",
+      "bytes": 3464694,
+      "sha256": "a7827380fe1d869e9902ed6dd67121c7bc79987f178249e7d8a91b046e185d8b",
+      "source_dataset_id": "nso-spc-census-religion-national-1986-2022",
+      "used_in_public_product": true,
+      "periods": "1986;1991;1997;2001;2006",
+      "notes": "2006 report source PDF; carries the byte-matched SPC partial-reproduction clause."
+    },
+    {
+      "uri": "data/raw/nu_census/nu_2022_census_report.txt",
+      "url": "https://niuestatistics.nu/download/35/census/2793/2022-niue-census-of-population-and-housing-report.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "text",
+      "bytes": 268191,
+      "sha256": "96274ed3cdb8519fd1b8dfbbbbfc397dfb930a0b1ee6595789b46748b72383c6",
+      "source_dataset_id": "nso-spc-census-religion-national-1986-2022",
+      "used_in_public_product": true,
+      "periods": "2011;2017;2022",
+      "notes": "2022 report text layer; Table 3.3 supplies the 2011/2017/2022 source-of-record columns and the corrupted 1997/2001/2006 republication (discrepancy record only)."
+    },
+    {
+      "uri": "data/raw/nu_census/nu_2022_census_report.pdf",
+      "url": "https://niuestatistics.nu/download/35/census/2793/2022-niue-census-of-population-and-housing-report.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "pdf",
+      "bytes": 3964086,
+      "sha256": "ea91527065b613e0f09edd85d0c58b97ce7840ced660b7860ff2e97186dffbf6",
+      "source_dataset_id": "nso-spc-census-religion-national-1986-2022",
+      "used_in_public_product": true,
+      "periods": "2011;2017;2022",
+      "notes": "2022 report source PDF; carries no reuse clause (documented licence vacuum), only a required citation."
+    },
+    {
+      "uri": "data/raw/nu_census/nu_2011_census_report.txt",
+      "url": "https://niuestatistics.nu/download/35/census/2040/niue-2011-cenus-population-profile.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "text",
+      "bytes": 525260,
+      "sha256": "c967f67a021b5e668e678c7c3ecd3b147a2043d914ab05fb5e065cd2efcfcff2",
+      "source_dataset_id": "nso-spc-census-religion-national-1986-2022",
+      "used_in_public_product": false,
+      "periods": "2011",
+      "notes": "2011 report text layer; carries the byte-matched Statistics Niue partial-reproduction clause. Counts sourced from the 2022 Table 3.3, not here."
+    },
+    {
+      "uri": "data/raw/nu_census/nu_2011_census_report.pdf",
+      "url": "https://niuestatistics.nu/download/35/census/2040/niue-2011-cenus-population-profile.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "pdf",
+      "bytes": 11752937,
+      "sha256": "91d275e11f216e43fd93e8861650eff0349f844db5e0c310c166e8359f0069b7",
+      "source_dataset_id": "nso-spc-census-religion-national-1986-2022",
+      "used_in_public_product": false,
+      "periods": "2011",
+      "notes": "2011 report source PDF; context and licence corroboration (2011 counts come from the 2022 Table 3.3)."
+    },
+    {
+      "uri": "data/raw/nu_census/nu_2017_census_report.txt",
+      "url": "https://niuestatistics.nu/download/35/census/1460/2019-niue-pophh-census-2-0.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "text",
+      "bytes": 207074,
+      "sha256": "ad5d4aada3f44a86e7f0c3fdb0a07e3ca0ce2b84adda579decfd481558d9f5df",
+      "source_dataset_id": "nso-spc-census-religion-national-1986-2022",
+      "used_in_public_product": false,
+      "periods": "2017",
+      "notes": "2017 report text layer; reuse clause did not text-extract (soft flag). Counts sourced from the 2022 Table 3.3, not here."
+    },
+    {
+      "uri": "data/raw/nu_census/nu_2017_census_report.pdf",
+      "url": "https://niuestatistics.nu/download/35/census/1460/2019-niue-pophh-census-2-0.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "pdf",
+      "bytes": 2909588,
+      "sha256": "cb44d336f670b35ce21da660333bcd69b5972803ad40cadfe2f145013f7bed33",
+      "source_dataset_id": "nso-spc-census-religion-national-1986-2022",
+      "used_in_public_product": false,
+      "periods": "2017",
+      "notes": "2017 report source PDF; context (2017 counts come from the 2022 Table 3.3)."
+    },
+    {
+      "uri": "data/raw/nu_census/nu_2001_census_report.txt",
+      "url": "https://niuestatistics.nu/download/35/census/569/niue-population-and-household-census-2001-2.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "text",
+      "bytes": 167725,
+      "sha256": "86991db3263abd7424cab6a48c2dfeff000abc6269806bf28ee5a2961c2be384",
+      "source_dataset_id": "nso-spc-census-religion-national-1986-2022",
+      "used_in_public_product": false,
+      "periods": "2001",
+      "notes": "2001 report text layer; its religion-by-area appendix (Table 25) is absent from the published PDF. 2001 counts come from the 2006 Appendix Table 2."
+    },
+    {
+      "uri": "data/raw/nu_census/nu_2001_census_report.pdf",
+      "url": "https://niuestatistics.nu/download/35/census/569/niue-population-and-household-census-2001-2.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "pdf",
+      "bytes": 469935,
+      "sha256": "ebe63598727d25c388a968365c9ccbcdaf9ac22b97bba1818bbd2b04ec66afae",
+      "source_dataset_id": "nso-spc-census-religion-national-1986-2022",
+      "used_in_public_product": false,
+      "periods": "2001",
+      "notes": "2001 report source PDF; truncated (appendix absent). Context only."
+    },
+    {
+      "uri": "data/raw/nu_census/gb_niu_ADM0_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/NIU/ADM0/",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "json",
+      "bytes": 1904,
+      "sha256": "689af60f65e66d5b27d8fb8524effae7f67bd69a6d59d51b2c15aaeb114e2247",
+      "source_dataset_id": "geoboundaries-niu-adm0-9469f09",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "geoBoundaries NIU ADM0 release metadata; 1 native national unit, CC BY 4.0."
+    },
+    {
+      "uri": "data/raw/nu_census/geoBoundaries-NIU-ADM0.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/NIU/ADM0/geoBoundaries-NIU-ADM0.geojson",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "geojson",
+      "bytes": 65494,
+      "sha256": "835625ce5617a01fbdecd99fde93f5de587d46e07d0dc52c83d7fb0fbf2fd705",
+      "source_dataset_id": "geoboundaries-niu-adm0-9469f09",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "geoBoundaries NIU ADM0 source geometry (1 native national polygon), simplified to the shipped boundary."
+    }
+  ],
+  "target_years": [
+    1986,
+    1991,
+    1997,
+    2001,
+    2006,
+    2011,
+    2017,
+    2022
+  ],
+  "stats": {
+    "wave_year_rows": 8,
+    "area_count": 1,
+    "shipped_wave_count": 8,
+    "boundary_features": 1,
+    "boundary_bytes": 31900,
+    "resident_total": [
+      2531,
+      2239,
+      2088,
+      1736,
+      1538,
+      1460,
+      1591,
+      1564
+    ]
+  },
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "Rscript scripts/build_nu_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/nu/data/area_summary_national.json",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/nu-census-religion-1986-2022.json"
+    ],
+    "notes": "Every wave's category lines sum to its printed resident total exactly (2531/2239/2088/1736/1538/ 1460/1591/1564). The affiliation-role sum equals resident total - None - Not stated per wave. The 2022 republished 1997/2001/2006 columns do NOT self-reconcile (+1/-17/+6) and diverge from the 2006 appendix; they are recorded as a discrepancy and never used as a source. The single native ADM0 polygon is non-empty and valid.",
+    "warnings": [
+      "Frame seam: the 1986-2006 waves (2006 Appendix Table 2) split 'None' from 'Not stated'; the 2011/2017/2022 waves (2022 Table 3.3) fold refusals into 'Others' and print only 'None'. Each wave's native frame is preserved verbatim; the seam is disclosed per row and no cell is redistributed.",
+      "Source-of-record rule: the 2022 report's republished 1997/2001/2006 columns are corrupted (row sums off by +1/-17/+6 and diverging from the 2006 appendix) and are NEVER used as a source; those waves come from the 2006 Appendix Table 2.",
+      "The 2017 report's reuse clause did not text-extract (soft flag) and the 2022 report carries no reuse clause (documented vacuum). Both are covered by the byte-matched 2006/2011 census-family clause and the build-then-ask ruling; an NSO courtesy confirmation for the 2022 wave is the only tidy-up.",
+      "National geography only: Niue never publishes religion below the national total in any wave. The 14-village geoBoundaries NIU ADM1 layer is clean and build-ready but has no religion data to carry."
+    ],
+    "reconciliation_evidence": {
+      "gate_category_sum_equals_total": {
+        "1986": {
+          "category_sum": 2531,
+          "printed_total": 2531,
+          "reconciles": true
+        },
+        "1991": {
+          "category_sum": 2239,
+          "printed_total": 2239,
+          "reconciles": true
+        },
+        "1997": {
+          "category_sum": 2088,
+          "printed_total": 2088,
+          "reconciles": true
+        },
+        "2001": {
+          "category_sum": 1736,
+          "printed_total": 1736,
+          "reconciles": true
+        },
+        "2006": {
+          "category_sum": 1538,
+          "printed_total": 1538,
+          "reconciles": true
+        },
+        "2011": {
+          "category_sum": 1460,
+          "printed_total": 1460,
+          "reconciles": true
+        },
+        "2017": {
+          "category_sum": 1591,
+          "printed_total": 1591,
+          "reconciles": true
+        },
+        "2022": {
+          "category_sum": 1564,
+          "printed_total": 1564,
+          "reconciles": true
+        }
+      },
+      "gate_affiliation_slot_arithmetic": {
+        "method": "affiliation-role sum == resident total - None - Not stated per wave",
+        "affiliation_role_sum": {
+          "1986": 2471,
+          "1991": 2168,
+          "1997": 1842,
+          "2001": 1598,
+          "2006": 1394,
+          "2011": 1431,
+          "2017": 1450,
+          "2022": 1452
+        },
+        "affiliation_residual": {
+          "1986": 2471,
+          "1991": 2168,
+          "1997": 1842,
+          "2001": 1598,
+          "2006": 1394,
+          "2011": 1431,
+          "2017": 1450,
+          "2022": 1452
+        },
+        "none": {
+          "1986": 48,
+          "1991": 68,
+          "1997": 77,
+          "2001": 34,
+          "2006": 43,
+          "2011": 29,
+          "2017": 141,
+          "2022": 112
+        },
+        "not_stated": {
+          "1986": 12,
+          "1991": 3,
+          "1997": 169,
+          "2001": 104,
+          "2006": 101,
+          "2011": 0,
+          "2017": 0,
+          "2022": 0
+        },
+        "reconciles": true
+      },
+      "discrepancy_record_2022_republication": {
+        "rule": "The 2022 report Table 3.3 republished 1997/2001/2006 columns are corrupted and are NEVER used as a source; those waves are taken from the reconciling 2006 Appendix Table 2. Recorded here only as a documented discrepancy (Saint Lucia / Cote d'Ivoire precedent). No cell is redistributed.",
+        "row_sum_offsets": {
+          "1997": 1,
+          "2001": -17,
+          "2006": 6
+        },
+        "per_wave": [
+          {
+            "year": 1997,
+            "republished_row_sum": 2089,
+            "printed_total": 2088,
+            "row_sum_offset": 1,
+            "categories": [
+              {
+                "category": "Ekalesia",
+                "republished_2022": 1336,
+                "appendix_2006": 1330,
+                "delta": 6
+              },
+              {
+                "category": "Catholic",
+                "republished_2022": 125,
+                "appendix_2006": 133,
+                "delta": -8
+              },
+              {
+                "category": "Seventh Day Adventist",
+                "republished_2022": 42,
+                "appendix_2006": 51,
+                "delta": -9
+              },
+              {
+                "category": "Latter Day Saints",
+                "republished_2022": 209,
+                "appendix_2006": 206,
+                "delta": 3
+              },
+              {
+                "category": "Jehovah's Witness",
+                "republished_2022": 42,
+                "appendix_2006": 46,
+                "delta": -4
+              },
+              {
+                "category": "Others",
+                "republished_2022": 84,
+                "appendix_2006": 76,
+                "delta": 8
+              }
+            ],
+            "none_republished": 251,
+            "none_appendix_plus_not_stated": 246,
+            "none_delta": 5
+          },
+          {
+            "year": 2001,
+            "republished_row_sum": 1719,
+            "printed_total": 1736,
+            "row_sum_offset": -17,
+            "categories": [
+              {
+                "category": "Ekalesia",
+                "republished_2022": 1094,
+                "appendix_2006": 1093,
+                "delta": 1
+              },
+              {
+                "category": "Catholic",
+                "republished_2022": 122,
+                "appendix_2006": 128,
+                "delta": -6
+              },
+              {
+                "category": "Seventh Day Adventist",
+                "republished_2022": 17,
+                "appendix_2006": 25,
+                "delta": -8
+              },
+              {
+                "category": "Latter Day Saints",
+                "republished_2022": 156,
+                "appendix_2006": 158,
+                "delta": -2
+              },
+              {
+                "category": "Jehovah's Witness",
+                "republished_2022": 35,
+                "appendix_2006": 43,
+                "delta": -8
+              },
+              {
+                "category": "Others",
+                "republished_2022": 156,
+                "appendix_2006": 151,
+                "delta": 5
+              }
+            ],
+            "none_republished": 139,
+            "none_appendix_plus_not_stated": 138,
+            "none_delta": 1
+          },
+          {
+            "year": 2006,
+            "republished_row_sum": 1544,
+            "printed_total": 1538,
+            "row_sum_offset": 6,
+            "categories": [
+              {
+                "category": "Ekalesia",
+                "republished_2022": 954,
+                "appendix_2006": 956,
+                "delta": -2
+              },
+              {
+                "category": "Catholic",
+                "republished_2022": 138,
+                "appendix_2006": 138,
+                "delta": 0
+              },
+              {
+                "category": "Seventh Day Adventist",
+                "republished_2022": 6,
+                "appendix_2006": 6,
+                "delta": 0
+              },
+              {
+                "category": "Latter Day Saints",
+                "republished_2022": 123,
+                "appendix_2006": 127,
+                "delta": -4
+              },
+              {
+                "category": "Jehovah's Witness",
+                "republished_2022": 31,
+                "appendix_2006": 28,
+                "delta": 3
+              },
+              {
+                "category": "Others",
+                "republished_2022": 138,
+                "appendix_2006": 139,
+                "delta": -1
+              }
+            ],
+            "none_republished": 154,
+            "none_appendix_plus_not_stated": 144,
+            "none_delta": 10
+          }
+        ]
+      },
+      "label_identity_mappings": [
+        {
+          "display_label": "Ekalesia Niue",
+          "frameA_label": "Ekalesia Niue",
+          "frameB_label": "Ekalesia",
+          "note": "London Missionary Society successor church; printed 'Ekalesia Niue' in the 2006 appendix and 'Ekalesia' in the 2022 Table 3.3."
+        },
+        {
+          "display_label": "Roman Catholic",
+          "frameA_label": "Roman Catholic",
+          "frameB_label": "Catholic",
+          "note": "Same body; printed 'Roman Catholic' in the 2006 appendix and 'Catholic' in the 2022 Table 3.3."
+        }
+      ],
+      "frame_seam": "Pre-2011 waves (2006 Appendix Table 2) split 'None' from 'Not stated' (nine-category frame). The 2011/2017/2022 waves (2022 Table 3.3) fold refusals into 'Others' and print only 'None' (seven- category frame). Each wave's native frame is preserved verbatim; no cell is redistributed across the seam.",
+      "broad_affiliation_spine": {
+        "decision": "The broad-affiliation spine (Ekalesia Niue/Ekalesia, Roman Catholic/Catholic, Latter Day Saints, Seventh Day Adventist, Jehovah's Witness, Others, None, and Not stated where present) is comparable across all eight waves. Same-body renamed lines map to a stable display label (Ekalesia Niue == Ekalesia; Roman Catholic == Catholic).",
+        "series": [
+          {
+            "spine_category": "ekalesia_niue",
+            "source_labels": [
+              "Ekalesia Niue",
+              "Ekalesia"
+            ],
+            "counts": {
+              "1986": 1749,
+              "1991": 1588,
+              "1997": 1330,
+              "2001": 1093,
+              "2006": 956,
+              "2011": 978,
+              "2017": 981,
+              "2022": 961
+            }
+          },
+          {
+            "spine_category": "roman_catholic",
+            "source_labels": [
+              "Roman Catholic",
+              "Catholic"
+            ],
+            "counts": {
+              "1986": 170,
+              "1991": 139,
+              "1997": 133,
+              "2001": 128,
+              "2006": 138,
+              "2011": 146,
+              "2017": 134,
+              "2022": 114
+            }
+          },
+          {
+            "spine_category": "latter_day_saints",
+            "source_labels": [
+              "Latter Day Saints"
+            ],
+            "counts": {
+              "1986": 307,
+              "1991": 237,
+              "1997": 206,
+              "2001": 158,
+              "2006": 127,
+              "2011": 146,
+              "2017": 139,
+              "2022": 137
+            }
+          },
+          {
+            "spine_category": "seventh_day_adventist",
+            "source_labels": [
+              "Seventh Day Adventist"
+            ],
+            "counts": {
+              "1986": 77,
+              "1991": 46,
+              "1997": 51,
+              "2001": 25,
+              "2006": 6,
+              "2011": 15,
+              "2017": 23,
+              "2022": 44
+            }
+          },
+          {
+            "spine_category": "jehovahs_witness",
+            "source_labels": [
+              "Jehovah's Witness"
+            ],
+            "counts": {
+              "1986": 33,
+              "1991": 47,
+              "1997": 46,
+              "2001": 43,
+              "2006": 28,
+              "2011": 29,
+              "2017": 43,
+              "2022": 31
+            }
+          },
+          {
+            "spine_category": "others",
+            "source_labels": [
+              "Others"
+            ],
+            "counts": {
+              "1986": 135,
+              "1991": 111,
+              "1997": 76,
+              "2001": 151,
+              "2006": 139,
+              "2011": 117,
+              "2017": 130,
+              "2022": 165
+            }
+          },
+          {
+            "spine_category": "no_religion",
+            "source_labels": [
+              "None"
+            ],
+            "counts": {
+              "1986": 48,
+              "1991": 68,
+              "1997": 77,
+              "2001": 34,
+              "2006": 43,
+              "2011": 29,
+              "2017": 141,
+              "2022": 112
+            }
+          },
+          {
+            "spine_category": "not_stated",
+            "source_labels": [
+              "Not stated"
+            ],
+            "counts": {
+              "1986": 12,
+              "1991": 3,
+              "1997": 169,
+              "2001": 104,
+              "2006": 101,
+              "2011": 0,
+              "2017": 0,
+              "2022": 0
+            }
+          }
+        ]
+      },
+      "universe_note": "Resident-population universe in every wave: 2,531 (1986), 2,239 (1991), 2,088 (1997), 1,736 (2001), 1,538 (2006), 1,460 (2011), 1,591 (2017), 1,564 (2022). Not the census-night figure (2022 census night 1,681, of whom 1,564 were usual residents; Table 3.3 uses the resident total).",
+      "licence_capture": {
+        "clause_2006": {
+          "quote": "SPC authorises the partial reproduction or translation of this material for scientific, educational or research purposes, provided that SPC and the source document are properly acknowledged.",
+          "copyright": "© Copyright Secretariat of the Pacific Community 2008",
+          "source": "data/raw/nu_census/nu_2006_census_report.txt",
+          "capture_sha256": "8d98232f231b21a47d7e66e9211842add3ec4c900e571810a2abc44899598a3f"
+        },
+        "clause_2011": {
+          "quote": "Statistics Niue authorises the partial reproduction or translation of this material for scientific, educational or research purposes, provided that Statistics Niue and the source document are properly acknowledged.",
+          "copyright": "© Copyright Statistics Niue, Government of Niue 2012",
+          "source": "data/raw/nu_census/nu_2011_census_report.txt",
+          "capture_sha256": "c967f67a021b5e668e678c7c3ecd3b147a2043d914ab05fb5e065cd2efcfcff2"
+        },
+        "vacuum_2022": {
+          "required_citation": "2022 Niue Census of Population and Household Report, Niue Statistics Office, Alofi",
+          "source": "data/raw/nu_census/nu_2022_census_report.txt",
+          "capture_sha256": "96274ed3cdb8519fd1b8dfbbbbfc397dfb930a0b1ee6595789b46748b72383c6",
+          "note": "2022 report carries no reuse clause (documented vacuum); only a required citation."
+        },
+        "soft_flag_2017": "2017 report front matter carries only the copyright line ('© Statistics Niue, 2019'); the partial-reproduction sentence did not text-extract. Soft flag; the 2006/2011 census-family clause is operative. The 2017 counts are sourced from the 2022 Table 3.3, not the 2017 report."
+      },
+      "wave_frames": [
+        {
+          "year": 1986,
+          "frame": "A",
+          "source": "2006 report, Appendix Table 2 (1986 column), nine-category frame with separate Not stated.",
+          "source_categories_verbatim": [
+            "Ekalesia Niue",
+            "Latter Day Saints",
+            "Roman Catholic",
+            "Jehovah's Witness",
+            "Seventh Day Adventist",
+            "Others",
+            "None",
+            "Not stated"
+          ],
+          "categories": [
+            {
+              "label": "Ekalesia Niue",
+              "role": "affiliation",
+              "count": 1749
+            },
+            {
+              "label": "Latter Day Saints",
+              "role": "affiliation",
+              "count": 307
+            },
+            {
+              "label": "Roman Catholic",
+              "role": "affiliation",
+              "count": 170
+            },
+            {
+              "label": "Jehovah's Witness",
+              "role": "affiliation",
+              "count": 33
+            },
+            {
+              "label": "Seventh Day Adventist",
+              "role": "affiliation",
+              "count": 77
+            },
+            {
+              "label": "Others",
+              "role": "affiliation",
+              "count": 135
+            },
+            {
+              "label": "None",
+              "role": "no_religion",
+              "count": 48
+            },
+            {
+              "label": "Not stated",
+              "role": "nonresponse",
+              "count": 12
+            }
+          ],
+          "category_sum": 2531,
+          "printed_total": 2531,
+          "reconciles": true
+        },
+        {
+          "year": 1991,
+          "frame": "A",
+          "source": "2006 report, Appendix Table 2 (1991 column), nine-category frame with separate Not stated.",
+          "source_categories_verbatim": [
+            "Ekalesia Niue",
+            "Latter Day Saints",
+            "Roman Catholic",
+            "Jehovah's Witness",
+            "Seventh Day Adventist",
+            "Others",
+            "None",
+            "Not stated"
+          ],
+          "categories": [
+            {
+              "label": "Ekalesia Niue",
+              "role": "affiliation",
+              "count": 1588
+            },
+            {
+              "label": "Latter Day Saints",
+              "role": "affiliation",
+              "count": 237
+            },
+            {
+              "label": "Roman Catholic",
+              "role": "affiliation",
+              "count": 139
+            },
+            {
+              "label": "Jehovah's Witness",
+              "role": "affiliation",
+              "count": 47
+            },
+            {
+              "label": "Seventh Day Adventist",
+              "role": "affiliation",
+              "count": 46
+            },
+            {
+              "label": "Others",
+              "role": "affiliation",
+              "count": 111
+            },
+            {
+              "label": "None",
+              "role": "no_religion",
+              "count": 68
+            },
+            {
+              "label": "Not stated",
+              "role": "nonresponse",
+              "count": 3
+            }
+          ],
+          "category_sum": 2239,
+          "printed_total": 2239,
+          "reconciles": true
+        },
+        {
+          "year": 1997,
+          "frame": "A",
+          "source": "2006 report, Appendix Table 2 (1997 column). The 2022 Table 3.3 republication of 1997 is corrupted and not used.",
+          "source_categories_verbatim": [
+            "Ekalesia Niue",
+            "Latter Day Saints",
+            "Roman Catholic",
+            "Jehovah's Witness",
+            "Seventh Day Adventist",
+            "Others",
+            "None",
+            "Not stated"
+          ],
+          "categories": [
+            {
+              "label": "Ekalesia Niue",
+              "role": "affiliation",
+              "count": 1330
+            },
+            {
+              "label": "Latter Day Saints",
+              "role": "affiliation",
+              "count": 206
+            },
+            {
+              "label": "Roman Catholic",
+              "role": "affiliation",
+              "count": 133
+            },
+            {
+              "label": "Jehovah's Witness",
+              "role": "affiliation",
+              "count": 46
+            },
+            {
+              "label": "Seventh Day Adventist",
+              "role": "affiliation",
+              "count": 51
+            },
+            {
+              "label": "Others",
+              "role": "affiliation",
+              "count": 76
+            },
+            {
+              "label": "None",
+              "role": "no_religion",
+              "count": 77
+            },
+            {
+              "label": "Not stated",
+              "role": "nonresponse",
+              "count": 169
+            }
+          ],
+          "category_sum": 2088,
+          "printed_total": 2088,
+          "reconciles": true
+        },
+        {
+          "year": 2001,
+          "frame": "A",
+          "source": "2006 report, Appendix Table 2 (2001 column). The 2022 Table 3.3 republication of 2001 is corrupted and not used.",
+          "source_categories_verbatim": [
+            "Ekalesia Niue",
+            "Latter Day Saints",
+            "Roman Catholic",
+            "Jehovah's Witness",
+            "Seventh Day Adventist",
+            "Others",
+            "None",
+            "Not stated"
+          ],
+          "categories": [
+            {
+              "label": "Ekalesia Niue",
+              "role": "affiliation",
+              "count": 1093
+            },
+            {
+              "label": "Latter Day Saints",
+              "role": "affiliation",
+              "count": 158
+            },
+            {
+              "label": "Roman Catholic",
+              "role": "affiliation",
+              "count": 128
+            },
+            {
+              "label": "Jehovah's Witness",
+              "role": "affiliation",
+              "count": 43
+            },
+            {
+              "label": "Seventh Day Adventist",
+              "role": "affiliation",
+              "count": 25
+            },
+            {
+              "label": "Others",
+              "role": "affiliation",
+              "count": 151
+            },
+            {
+              "label": "None",
+              "role": "no_religion",
+              "count": 34
+            },
+            {
+              "label": "Not stated",
+              "role": "nonresponse",
+              "count": 104
+            }
+          ],
+          "category_sum": 1736,
+          "printed_total": 1736,
+          "reconciles": true
+        },
+        {
+          "year": 2006,
+          "frame": "A",
+          "source": "2006 report, Appendix Table 2 (2006 column). The 2022 Table 3.3 republication of 2006 is corrupted and not used.",
+          "source_categories_verbatim": [
+            "Ekalesia Niue",
+            "Latter Day Saints",
+            "Roman Catholic",
+            "Jehovah's Witness",
+            "Seventh Day Adventist",
+            "Others",
+            "None",
+            "Not stated"
+          ],
+          "categories": [
+            {
+              "label": "Ekalesia Niue",
+              "role": "affiliation",
+              "count": 956
+            },
+            {
+              "label": "Latter Day Saints",
+              "role": "affiliation",
+              "count": 127
+            },
+            {
+              "label": "Roman Catholic",
+              "role": "affiliation",
+              "count": 138
+            },
+            {
+              "label": "Jehovah's Witness",
+              "role": "affiliation",
+              "count": 28
+            },
+            {
+              "label": "Seventh Day Adventist",
+              "role": "affiliation",
+              "count": 6
+            },
+            {
+              "label": "Others",
+              "role": "affiliation",
+              "count": 139
+            },
+            {
+              "label": "None",
+              "role": "no_religion",
+              "count": 43
+            },
+            {
+              "label": "Not stated",
+              "role": "nonresponse",
+              "count": 101
+            }
+          ],
+          "category_sum": 1538,
+          "printed_total": 1538,
+          "reconciles": true
+        },
+        {
+          "year": 2011,
+          "frame": "B",
+          "source": "2022 report, Table 3.3 (2011 column); no separate Not stated line (refusals folded into Others).",
+          "source_categories_verbatim": [
+            "Ekalesia",
+            "Catholic",
+            "Seventh Day Adventist",
+            "Latter Day Saints",
+            "Jehovah's Witness",
+            "Others",
+            "None"
+          ],
+          "categories": [
+            {
+              "label": "Ekalesia",
+              "role": "affiliation",
+              "count": 978
+            },
+            {
+              "label": "Catholic",
+              "role": "affiliation",
+              "count": 146
+            },
+            {
+              "label": "Seventh Day Adventist",
+              "role": "affiliation",
+              "count": 15
+            },
+            {
+              "label": "Latter Day Saints",
+              "role": "affiliation",
+              "count": 146
+            },
+            {
+              "label": "Jehovah's Witness",
+              "role": "affiliation",
+              "count": 29
+            },
+            {
+              "label": "Others",
+              "role": "affiliation",
+              "count": 117
+            },
+            {
+              "label": "None",
+              "role": "no_religion",
+              "count": 29
+            }
+          ],
+          "category_sum": 1460,
+          "printed_total": 1460,
+          "reconciles": true
+        },
+        {
+          "year": 2017,
+          "frame": "B",
+          "source": "2022 report, Table 3.3 (2017 column); no separate Not stated line (refusals folded into Others).",
+          "source_categories_verbatim": [
+            "Ekalesia",
+            "Catholic",
+            "Seventh Day Adventist",
+            "Latter Day Saints",
+            "Jehovah's Witness",
+            "Others",
+            "None"
+          ],
+          "categories": [
+            {
+              "label": "Ekalesia",
+              "role": "affiliation",
+              "count": 981
+            },
+            {
+              "label": "Catholic",
+              "role": "affiliation",
+              "count": 134
+            },
+            {
+              "label": "Seventh Day Adventist",
+              "role": "affiliation",
+              "count": 23
+            },
+            {
+              "label": "Latter Day Saints",
+              "role": "affiliation",
+              "count": 139
+            },
+            {
+              "label": "Jehovah's Witness",
+              "role": "affiliation",
+              "count": 43
+            },
+            {
+              "label": "Others",
+              "role": "affiliation",
+              "count": 130
+            },
+            {
+              "label": "None",
+              "role": "no_religion",
+              "count": 141
+            }
+          ],
+          "category_sum": 1591,
+          "printed_total": 1591,
+          "reconciles": true
+        },
+        {
+          "year": 2022,
+          "frame": "B",
+          "source": "2022 report, Table 3.3 (2022 column); of 165 'Others', 53 were refusals folded in (source note).",
+          "source_categories_verbatim": [
+            "Ekalesia",
+            "Catholic",
+            "Seventh Day Adventist",
+            "Latter Day Saints",
+            "Jehovah's Witness",
+            "Others",
+            "None"
+          ],
+          "categories": [
+            {
+              "label": "Ekalesia",
+              "role": "affiliation",
+              "count": 961
+            },
+            {
+              "label": "Catholic",
+              "role": "affiliation",
+              "count": 114
+            },
+            {
+              "label": "Seventh Day Adventist",
+              "role": "affiliation",
+              "count": 44
+            },
+            {
+              "label": "Latter Day Saints",
+              "role": "affiliation",
+              "count": 137
+            },
+            {
+              "label": "Jehovah's Witness",
+              "role": "affiliation",
+              "count": 31
+            },
+            {
+              "label": "Others",
+              "role": "affiliation",
+              "count": 165
+            },
+            {
+              "label": "None",
+              "role": "no_religion",
+              "count": 112
+            }
+          ],
+          "category_sum": 1564,
+          "printed_total": 1564,
+          "reconciles": true
+        }
+      ]
+    },
+    "boundary_validation": {
+      "source_feature_count": 1,
+      "simplified_feature_count": 1,
+      "all_valid": true,
+      "all_non_empty": true,
+      "source_geometry_sha256": "c664d20c1c65507f399511ec52f1c1df4197068fd152fe4c1fba5906560dc9f6",
+      "simplified_geometry_sha256": "626f9e1b4284831455aee395054f7547ac4ba2d89c65e63781934258fd793734",
+      "simplified_bytes": 31900,
+      "byte_cap": 250000,
+      "simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 31900
+      },
+      "licence_metadata_status": "passed",
+      "licence": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+      "licence_finding": "geoBoundaries NIU ADM0 release metadata records CC BY 4.0 (boundaryYearRepresented 2021, admUnitCount 1, source Sentinel-2 10m Land Cover raster-to-polygon). One native national polygon; no dissolve needed.",
+      "boundary_derivation": "The cache holds a native ADM0 single polygon; the shipped boundary is that polygon re-tagged with area_code = 'niue' and simplified. The outline area is 261.40 sq km, consistent with Niue's ~260 sq km land area.",
+      "release_source": "geoBoundaries / Sentinel-2 10m Land Cover (ESA)"
+    }
+  },
+  "construct_notes": [
+    "The construct is census religious affiliation (reported denomination), not practice, attendance, or registered membership.",
+    "Source category spellings are retained verbatim per wave (2006 appendix nine-line frame; 2022 Table 3.3 seven-line frame).",
+    "population_total is each wave's printed resident-population total. Affiliation is the summed named religious categories; no_religion is 'None'; 'Not stated' is the disclosed residual where a separate line exists (1986-2006).",
+    "Same-body renamed lines map to a stable display label only where the probe documents the identity: Ekalesia Niue == Ekalesia; Roman Catholic == Catholic.",
+    "Source-of-record rule (non-negotiable): 1986-2006 from the 2006 Appendix Table 2; 2011/2017/2022 from the 2022 Table 3.3. The 2022 report's republished 1997/2001/2006 columns are corrupted and are never a source.",
+    "Frame seam: the 2011/2017/2022 Table 3.3 folds refusals into 'Others' (no separate Not stated line), so 'Others' carries a non-response component disclosed per row; the pre-2011 waves keep 'None' and 'Not stated' separate.",
+    "A single national polygon is intentional under the small-country clause (Iceland/Dominica/Nauru precedent): Niue publishes census religion at national geography only.",
+    "The shipped ADM0 polygon is the native geoBoundaries NIU ADM0 single polygon; no dissolve or district concordance is needed.",
+    "No Niue place-of-worship count or density metric ships in this release."
+  ],
+  "deferred_sources": [
+    {
+      "source": "Religion by village / area (any wave)",
+      "status": "unavailable_no_public_table",
+      "reason": "No Niue census wave publishes religion below the national total. The many 'by village' tables cover population, households, dwellings, water, waste, and internet, never religion. The 2001 report's ToC lists a 'Religion, Gender and Area' appendix (Table 25), but the published PDF is truncated and that appendix is absent; even if recovered, 'Area' there is the two-area/large- village split, not a 14-village frame, and a single-wave fragment. The 14-village geoBoundaries NIU ADM1 layer is clean and build-ready but has no religion data to carry.",
+      "recovery_route": "An NSO village religion tabulation, or the MOU-gated 2011/2022 microdata, would unlock a village layer."
+    },
+    {
+      "source": "2022 report Table 3.3 republished 1997/2001/2006 columns",
+      "status": "documented_discrepancy_not_used_as_source",
+      "reason": "The 2022 Table 3.3 reprints 1997/2001/2006 but the columns are corrupted: row sums are off by +1 / -17 / +6 and diverge from the contemporaneous 2006 appendix (e.g. 2006 Ekalesia 954 vs 956, LDS 123 vs 127, JW 31 vs 28; the 2022 single None 154 vs the appendix None 43 + Not stated 101 = 144). The build sources these waves from the reconciling 2006 Appendix Table 2 instead and carries the republication only as a discrepancy record (Saint Lucia / Cote d'Ivoire precedent). No cell is redistributed.",
+      "recovery_route": "None needed; the contemporaneous 2006 appendix is the correct source and reconciles exactly."
+    },
+    {
+      "source": "Pre-1986 censuses",
+      "status": "unverified_upstream",
+      "reason": "The 2006 Appendix Table 2 series begins at 1986; earlier national religion tables are unverified.",
+      "recovery_route": "Verify whether pre-1986 Niue census reports print a national religion table before extending the series backward."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "accepted",
+  "licence_basis": "niue_census_partial_reproduction_research_reuse_attribution_geoboundaries_cc_by_4_0",
+  "downstream_status": "public",
+  "source_datasets": [
+    {
+      "source_dataset_id": "nso-spc-census-religion-national-1986-2022",
+      "name": "Statistics Niue / SPC national census religion 1986-2022 (2006 report Appendix Table 2 for 1986-2006; 2022 report Table 3.3 for 2011/2017/2022)",
+      "provider": "Statistics Niue (Niue Statistics Office) and the Pacific Community (SPC)",
+      "url": "https://niuestatistics.nu/download/35/census/2793/2022-niue-census-of-population-and-housing-report.pdf",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/nu_census/nu_2022_census_report.txt",
+      "licence": {
+        "name": "Niue census SPC-family partial-reproduction-with-acknowledgement clause: partial reproduction or translation authorised for scientific, educational or research purposes provided Statistics Niue / SPC and the source document are acknowledged (2011 and 2006 reports, byte-matched). The 2022 report carries no reuse clause (documented vacuum); covered by the census-family clause and the build-then-ask ruling. geoBoundaries NIU ADM0 boundary is CC BY 4.0.",
+        "url": "https://niuestatistics.nu/download/35/census/2793/2022-niue-census-of-population-and-housing-report.pdf",
+        "attribution": "Source: Statistics Niue and the Pacific Community (SPC), Niue Census of Population and Housing (2006 report Appendix Table 2 for 1986-2006; 2022 report Table 3.3 for 2011/2017/2022)."
+      },
+      "citation": "Niue Statistics Office and Pacific Community, Niue Census of Population and Housing: 2006 report Appendix Table 2 (Religion, 1986-2006) for the 1986/1991/1997/2001/2006 columns; 2022 report Table 3.3 (Resident population by religious affiliation, 1997 to 2022) for the 2011/2017/2022 columns. Required citation: 2022 Niue Census of Population and Household Report, Niue Statistics Office, Alofi.",
+      "access_limits": "Public PDF reports on the niuestatistics.nu portal. No machine-readable religion tabulation was located. The 2011/2022 census microdata (Pacific Data Hub / SDD / ILO) are MOU-gated and are not used; they carry no public village religion table.",
+      "redistribution_limits": "Derived national summaries ship under the SPC-family partial-reproduction-with-acknowledgement clause with Statistics Niue / SPC attribution. Source: Statistics Niue and the Pacific Community (SPC), Niue Census of Population and Housing (2006 report Appendix Table 2 for 1986-2006; 2022 report Table 3.3 for 2011/2017/2022).",
+      "notes": "National geography only in every wave; Niue never publishes religion below the national total. Source-of-record rule: the 2022 report's republished 1997/2001/2006 columns are corrupted (row sums off by +1/-17/+6 and diverging from the 2006 appendix) and are NEVER used as a source; the 2006 Appendix Table 2 supplies 1986-2006, and the 2022 Table 3.3 supplies its own 2011/2017/2022. Frame seam: pre-2011 splits 'None' from 'Not stated'; 2011/2017/2022 fold refusals into 'Others' and print only 'None'. Same-body renamed lines are mapped to a stable display label (Ekalesia Niue == Ekalesia; Roman Catholic == Catholic). The 2017 reuse clause did not text-extract (soft flag) and the 2022 report carries no reuse clause (documented vacuum)."
+    },
+    {
+      "source_dataset_id": "geoboundaries-niu-adm0-9469f09",
+      "name": "geoBoundaries gbOpen NIU ADM0 (1 native national polygon)",
+      "provider": "geoBoundaries; source Sentinel-2 10m Land Cover (ESA)",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/NIU/ADM0/geoBoundaries-NIU-ADM0.geojson",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/nu_census/geoBoundaries-NIU-ADM0.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "geoBoundaries; Sentinel-2 10m Land Cover (ESA)"
+      },
+      "citation": "geoBoundaries gbOpen NIU ADM0, boundary ID NIU-ADM0-98221342, release commit 9469f09; source Sentinel-2 10m Land Cover raster-to-polygon (2021).",
+      "access_limits": null,
+      "redistribution_limits": "The simplified national polygon is redistributed under CC BY 4.0 with geoBoundaries / Sentinel-2 attribution.",
+      "notes": "Native ADM0 single polygon (admUnitCount 1); no dissolve is needed. The join property is area_code = 'niue'. Simplified with scripts/lib/simplify_boundary.R. Niue is a single raised-coral island with no outlying dependencies, so there is no dateline or small-island bbox trap."
+    }
+  ],
+  "notes": "Niue national eight-wave census-religion product under the small-country clause. Census summaries ship under the SPC-family partial-reproduction-with-acknowledgement clause with Statistics Niue / SPC attribution; the boundary is CC BY 4.0. The 2022 report's corrupted republished history is a documented discrepancy, never a source. The map UI (index.html, hub) is outside this build."
+}

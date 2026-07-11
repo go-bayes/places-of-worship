@@ -1,0 +1,342 @@
+{
+  "schema_version": "area-summary.v1",
+  "generated_at": "2026-07-11T00:00:00Z",
+  "generated_by": "scripts/build_nu_area_summary.R",
+  "country_code": "NU",
+  "boundary_set": {
+    "boundary_set_id": "nu-adm0-2021-geoboundaries",
+    "country_code": "NU",
+    "level": "adm0",
+    "vintage": "2021",
+    "source_dataset_id": "geoboundaries-niu-adm0-9469f09"
+  },
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "No governed place-of-worship snapshot ships in the Niue national census-religion product.",
+    "notes": "Place counts and density metrics remain null."
+  },
+  "source_datasets": [
+    {
+      "source_dataset_id": "nso-spc-census-religion-national-1986-2022",
+      "name": "Statistics Niue / SPC national census religion 1986-2022 (2006 report Appendix Table 2 for 1986-2006; 2022 report Table 3.3 for 2011/2017/2022)",
+      "provider": "Statistics Niue (Niue Statistics Office) and the Pacific Community (SPC)",
+      "url": "https://niuestatistics.nu/download/35/census/2793/2022-niue-census-of-population-and-housing-report.pdf",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/nu_census/nu_2022_census_report.txt",
+      "licence": {
+        "name": "Niue census SPC-family partial-reproduction-with-acknowledgement clause: partial reproduction or translation authorised for scientific, educational or research purposes provided Statistics Niue / SPC and the source document are acknowledged (2011 and 2006 reports, byte-matched). The 2022 report carries no reuse clause (documented vacuum); covered by the census-family clause and the build-then-ask ruling. geoBoundaries NIU ADM0 boundary is CC BY 4.0.",
+        "url": "https://niuestatistics.nu/download/35/census/2793/2022-niue-census-of-population-and-housing-report.pdf",
+        "attribution": "Source: Statistics Niue and the Pacific Community (SPC), Niue Census of Population and Housing (2006 report Appendix Table 2 for 1986-2006; 2022 report Table 3.3 for 2011/2017/2022)."
+      },
+      "citation": "Niue Statistics Office and Pacific Community, Niue Census of Population and Housing: 2006 report Appendix Table 2 (Religion, 1986-2006) for the 1986/1991/1997/2001/2006 columns; 2022 report Table 3.3 (Resident population by religious affiliation, 1997 to 2022) for the 2011/2017/2022 columns. Required citation: 2022 Niue Census of Population and Household Report, Niue Statistics Office, Alofi.",
+      "access_limits": "Public PDF reports on the niuestatistics.nu portal. No machine-readable religion tabulation was located. The 2011/2022 census microdata (Pacific Data Hub / SDD / ILO) are MOU-gated and are not used; they carry no public village religion table.",
+      "redistribution_limits": "Derived national summaries ship under the SPC-family partial-reproduction-with-acknowledgement clause with Statistics Niue / SPC attribution. Source: Statistics Niue and the Pacific Community (SPC), Niue Census of Population and Housing (2006 report Appendix Table 2 for 1986-2006; 2022 report Table 3.3 for 2011/2017/2022).",
+      "notes": "National geography only in every wave; Niue never publishes religion below the national total. Source-of-record rule: the 2022 report's republished 1997/2001/2006 columns are corrupted (row sums off by +1/-17/+6 and diverging from the 2006 appendix) and are NEVER used as a source; the 2006 Appendix Table 2 supplies 1986-2006, and the 2022 Table 3.3 supplies its own 2011/2017/2022. Frame seam: pre-2011 splits 'None' from 'Not stated'; 2011/2017/2022 fold refusals into 'Others' and print only 'None'. Same-body renamed lines are mapped to a stable display label (Ekalesia Niue == Ekalesia; Roman Catholic == Catholic). The 2017 reuse clause did not text-extract (soft flag) and the 2022 report carries no reuse clause (documented vacuum)."
+    },
+    {
+      "source_dataset_id": "geoboundaries-niu-adm0-9469f09",
+      "name": "geoBoundaries gbOpen NIU ADM0 (1 native national polygon)",
+      "provider": "geoBoundaries; source Sentinel-2 10m Land Cover (ESA)",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/NIU/ADM0/geoBoundaries-NIU-ADM0.geojson",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/nu_census/geoBoundaries-NIU-ADM0.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "geoBoundaries; Sentinel-2 10m Land Cover (ESA)"
+      },
+      "citation": "geoBoundaries gbOpen NIU ADM0, boundary ID NIU-ADM0-98221342, release commit 9469f09; source Sentinel-2 10m Land Cover raster-to-polygon (2021).",
+      "access_limits": null,
+      "redistribution_limits": "The simplified national polygon is redistributed under CC BY 4.0 with geoBoundaries / Sentinel-2 attribution.",
+      "notes": "Native ADM0 single polygon (admUnitCount 1); no dissolve is needed. The join property is area_code = 'niue'. Simplified with scripts/lib/simplify_boundary.R. Niue is a single raised-coral island with no outlying dependencies, so there is no dateline or small-island bbox trap."
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_id": "population_total",
+      "label": "Census resident population",
+      "description": "Printed national resident-population total by religious affiliation per wave (1986-2022).",
+      "unit": "count",
+      "denominator_indicator_id": null,
+      "method": "Printed resident Total per wave: 2006 Appendix Table 2 (1986-2006) and 2022 Table 3.3 (2011/2017/2022).",
+      "temporal_coverage": "1986, 1991, 1997, 2001, 2006, 2011, 2017, 2022",
+      "spatial_coverage": "Niue national total on one ADM0 polygon",
+      "quality_notes": "Resident-population universe in every wave (2,531 -> 1,564). Not the census-night figure."
+    },
+    {
+      "indicator_id": "religious_affiliation_percent",
+      "label": "Religious affiliation %",
+      "description": "Share reporting any named religious category (the summed affiliation lines).",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "100 * (summed named religious categories) / resident-population total per wave.",
+      "temporal_coverage": "1986, 1991, 1997, 2001, 2006, 2011, 2017, 2022",
+      "spatial_coverage": "Niue national",
+      "quality_notes": "Percentages use each wave's printed resident-population total. Affiliation is the summed named religious categories (Ekalesia/Ekalesia Niue, Roman Catholic/Catholic, Latter Day Saints, Seventh Day Adventist, Jehovah's Witness, Others); no-religion is the 'None' line; 'Not stated' (a separate line in the 1986-2006 waves) stays in the denominator and in neither slot, so affiliation + None + Not stated equals the universe. In 2011/2017/2022 there is no separate Not stated line (refusals folded into Others), so affiliation + None equals the universe. Comparable across waves on the broad-affiliation spine; the pre-2011 / 2011+ frame seam (Not stated split vs folded into Others) is disclosed per row."
+    },
+    {
+      "indicator_id": "no_religion_percent",
+      "label": "No religion %",
+      "description": "Share in the source 'None' category.",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "100 * None / resident-population total per wave.",
+      "temporal_coverage": "1986, 1991, 1997, 2001, 2006, 2011, 2017, 2022",
+      "spatial_coverage": "Niue national",
+      "quality_notes": "'None' is a separate line in every wave, so no-religion is comparable across all eight waves."
+    }
+  ],
+  "visual_layers": [
+    {
+      "visual_layer_id": "nu-adm0-religious-affiliation",
+      "label": "Religious affiliation %",
+      "description": "Niue national census-affiliation share for 1986 through 2022 (eight waves).",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "religious_affiliation_percent"
+      ],
+      "geometry_unit_type": "country",
+      "legend": {
+        "unit": "percent",
+        "denominator": "resident-population total per wave"
+      },
+      "colour_scale": null,
+      "time_control": "year_selector",
+      "aggregation_rule": null,
+      "uncertainty_display": "quality_flag",
+      "default_visibility": true,
+      "notes": "A single national polygon is intentional under the small-country clause: Niue publishes census religion at national geography only. The broad-affiliation spine (Ekalesia Niue, Roman Catholic, Latter Day Saints, Seventh Day Adventist, Jehovah's Witness, Others, None) is comparable across all eight waves; the pre-2011 / 2011+ 'Not stated' frame seam is disclosed."
+    },
+    {
+      "visual_layer_id": "nu-adm0-no-religion",
+      "label": "No religion %",
+      "description": "Niue national census no-religion share for 1986 through 2022 (eight waves).",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "no_religion_percent"
+      ],
+      "geometry_unit_type": "country",
+      "legend": {
+        "unit": "percent",
+        "denominator": "resident-population total per wave"
+      },
+      "colour_scale": null,
+      "time_control": "year_selector",
+      "aggregation_rule": null,
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "'None' is a separate line in every wave; in 1986-2006 'Not stated' is separate and disclosed, and in 2011/2017/2022 refusals are folded into 'Others'."
+    }
+  ],
+  "rows": [
+    {
+      "country_code": "NU",
+      "boundary_set_id": "nu-adm0-2021-geoboundaries",
+      "boundary_level": "adm0",
+      "area_unit_id": "nu-adm0-2021-geoboundaries:niue",
+      "area_code": "niue",
+      "area_name": "Niue",
+      "year": 1986,
+      "population_total": 2531,
+      "population_total_basis": "Resident population by religious affiliation, 1986 = 2531, from 2006 report, Appendix Table 2 (1986 column), nine-category frame with separate Not stated. Not stated = 12 stays in the denominator and in neither slot (disclosed).",
+      "religious_affiliation_count": 2471,
+      "religious_affiliation_percent": 97.6294,
+      "no_religion_count": 48,
+      "no_religion_percent": 1.8965,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 261.3992,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "nso-spc-census-religion-national-1986-2022",
+        "geoboundaries-niu-adm0-9469f09"
+      ],
+      "quality_flag": "census_affiliation;national_only_adm0;resident_population_universe;two_slot_affiliation_none;verbatim_source_categories_preserved;documented_2022_republication_discrepancy_not_used_as_source;not_stated_separate_line_in_denominator_disclosed;source_2006_appendix_table2;niue_census_partial_reproduction_research_reuse_attribution_geoboundaries_cc_by_4_0;boundary_cc_by_4_0"
+    },
+    {
+      "country_code": "NU",
+      "boundary_set_id": "nu-adm0-2021-geoboundaries",
+      "boundary_level": "adm0",
+      "area_unit_id": "nu-adm0-2021-geoboundaries:niue",
+      "area_code": "niue",
+      "area_name": "Niue",
+      "year": 1991,
+      "population_total": 2239,
+      "population_total_basis": "Resident population by religious affiliation, 1991 = 2239, from 2006 report, Appendix Table 2 (1991 column), nine-category frame with separate Not stated. Not stated = 3 stays in the denominator and in neither slot (disclosed).",
+      "religious_affiliation_count": 2168,
+      "religious_affiliation_percent": 96.8289,
+      "no_religion_count": 68,
+      "no_religion_percent": 3.0371,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 261.3992,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "nso-spc-census-religion-national-1986-2022",
+        "geoboundaries-niu-adm0-9469f09"
+      ],
+      "quality_flag": "census_affiliation;national_only_adm0;resident_population_universe;two_slot_affiliation_none;verbatim_source_categories_preserved;documented_2022_republication_discrepancy_not_used_as_source;not_stated_separate_line_in_denominator_disclosed;source_2006_appendix_table2;niue_census_partial_reproduction_research_reuse_attribution_geoboundaries_cc_by_4_0;boundary_cc_by_4_0"
+    },
+    {
+      "country_code": "NU",
+      "boundary_set_id": "nu-adm0-2021-geoboundaries",
+      "boundary_level": "adm0",
+      "area_unit_id": "nu-adm0-2021-geoboundaries:niue",
+      "area_code": "niue",
+      "area_name": "Niue",
+      "year": 1997,
+      "population_total": 2088,
+      "population_total_basis": "Resident population by religious affiliation, 1997 = 2088, from 2006 report, Appendix Table 2 (1997 column). The 2022 Table 3.3 republication of 1997 is corrupted and not used. Not stated = 169 stays in the denominator and in neither slot (disclosed).",
+      "religious_affiliation_count": 1842,
+      "religious_affiliation_percent": 88.2184,
+      "no_religion_count": 77,
+      "no_religion_percent": 3.6877,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 261.3992,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "nso-spc-census-religion-national-1986-2022",
+        "geoboundaries-niu-adm0-9469f09"
+      ],
+      "quality_flag": "census_affiliation;national_only_adm0;resident_population_universe;two_slot_affiliation_none;verbatim_source_categories_preserved;documented_2022_republication_discrepancy_not_used_as_source;not_stated_separate_line_in_denominator_disclosed;source_2006_appendix_table2;niue_census_partial_reproduction_research_reuse_attribution_geoboundaries_cc_by_4_0;boundary_cc_by_4_0"
+    },
+    {
+      "country_code": "NU",
+      "boundary_set_id": "nu-adm0-2021-geoboundaries",
+      "boundary_level": "adm0",
+      "area_unit_id": "nu-adm0-2021-geoboundaries:niue",
+      "area_code": "niue",
+      "area_name": "Niue",
+      "year": 2001,
+      "population_total": 1736,
+      "population_total_basis": "Resident population by religious affiliation, 2001 = 1736, from 2006 report, Appendix Table 2 (2001 column). The 2022 Table 3.3 republication of 2001 is corrupted and not used. Not stated = 104 stays in the denominator and in neither slot (disclosed).",
+      "religious_affiliation_count": 1598,
+      "religious_affiliation_percent": 92.0507,
+      "no_religion_count": 34,
+      "no_religion_percent": 1.9585,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 261.3992,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "nso-spc-census-religion-national-1986-2022",
+        "geoboundaries-niu-adm0-9469f09"
+      ],
+      "quality_flag": "census_affiliation;national_only_adm0;resident_population_universe;two_slot_affiliation_none;verbatim_source_categories_preserved;documented_2022_republication_discrepancy_not_used_as_source;not_stated_separate_line_in_denominator_disclosed;source_2006_appendix_table2;niue_census_partial_reproduction_research_reuse_attribution_geoboundaries_cc_by_4_0;boundary_cc_by_4_0"
+    },
+    {
+      "country_code": "NU",
+      "boundary_set_id": "nu-adm0-2021-geoboundaries",
+      "boundary_level": "adm0",
+      "area_unit_id": "nu-adm0-2021-geoboundaries:niue",
+      "area_code": "niue",
+      "area_name": "Niue",
+      "year": 2006,
+      "population_total": 1538,
+      "population_total_basis": "Resident population by religious affiliation, 2006 = 1538, from 2006 report, Appendix Table 2 (2006 column). The 2022 Table 3.3 republication of 2006 is corrupted and not used. Not stated = 101 stays in the denominator and in neither slot (disclosed).",
+      "religious_affiliation_count": 1394,
+      "religious_affiliation_percent": 90.6372,
+      "no_religion_count": 43,
+      "no_religion_percent": 2.7958,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 261.3992,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "nso-spc-census-religion-national-1986-2022",
+        "geoboundaries-niu-adm0-9469f09"
+      ],
+      "quality_flag": "census_affiliation;national_only_adm0;resident_population_universe;two_slot_affiliation_none;verbatim_source_categories_preserved;documented_2022_republication_discrepancy_not_used_as_source;not_stated_separate_line_in_denominator_disclosed;source_2006_appendix_table2;niue_census_partial_reproduction_research_reuse_attribution_geoboundaries_cc_by_4_0;boundary_cc_by_4_0"
+    },
+    {
+      "country_code": "NU",
+      "boundary_set_id": "nu-adm0-2021-geoboundaries",
+      "boundary_level": "adm0",
+      "area_unit_id": "nu-adm0-2021-geoboundaries:niue",
+      "area_code": "niue",
+      "area_name": "Niue",
+      "year": 2011,
+      "population_total": 1460,
+      "population_total_basis": "Resident population by religious affiliation, 2011 = 1460, from 2022 report, Table 3.3 (2011 column); no separate Not stated line (refusals folded into Others). No separate Not stated line in the 2022 Table 3.3 frame; refusals are folded into 'Others' and thus counted in affiliation (disclosed).",
+      "religious_affiliation_count": 1431,
+      "religious_affiliation_percent": 98.0137,
+      "no_religion_count": 29,
+      "no_religion_percent": 1.9863,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 261.3992,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "nso-spc-census-religion-national-1986-2022",
+        "geoboundaries-niu-adm0-9469f09"
+      ],
+      "quality_flag": "census_affiliation;national_only_adm0;resident_population_universe;two_slot_affiliation_none;verbatim_source_categories_preserved;documented_2022_republication_discrepancy_not_used_as_source;not_stated_folded_into_others_disclosed;source_2022_table3_3;niue_census_partial_reproduction_research_reuse_attribution_geoboundaries_cc_by_4_0;boundary_cc_by_4_0"
+    },
+    {
+      "country_code": "NU",
+      "boundary_set_id": "nu-adm0-2021-geoboundaries",
+      "boundary_level": "adm0",
+      "area_unit_id": "nu-adm0-2021-geoboundaries:niue",
+      "area_code": "niue",
+      "area_name": "Niue",
+      "year": 2017,
+      "population_total": 1591,
+      "population_total_basis": "Resident population by religious affiliation, 2017 = 1591, from 2022 report, Table 3.3 (2017 column); no separate Not stated line (refusals folded into Others). No separate Not stated line in the 2022 Table 3.3 frame; refusals are folded into 'Others' and thus counted in affiliation (disclosed).",
+      "religious_affiliation_count": 1450,
+      "religious_affiliation_percent": 91.1376,
+      "no_religion_count": 141,
+      "no_religion_percent": 8.8624,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 261.3992,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "nso-spc-census-religion-national-1986-2022",
+        "geoboundaries-niu-adm0-9469f09"
+      ],
+      "quality_flag": "census_affiliation;national_only_adm0;resident_population_universe;two_slot_affiliation_none;verbatim_source_categories_preserved;documented_2022_republication_discrepancy_not_used_as_source;not_stated_folded_into_others_disclosed;source_2022_table3_3;niue_census_partial_reproduction_research_reuse_attribution_geoboundaries_cc_by_4_0;boundary_cc_by_4_0"
+    },
+    {
+      "country_code": "NU",
+      "boundary_set_id": "nu-adm0-2021-geoboundaries",
+      "boundary_level": "adm0",
+      "area_unit_id": "nu-adm0-2021-geoboundaries:niue",
+      "area_code": "niue",
+      "area_name": "Niue",
+      "year": 2022,
+      "population_total": 1564,
+      "population_total_basis": "Resident population by religious affiliation, 2022 = 1564, from 2022 report, Table 3.3 (2022 column); of 165 'Others', 53 were refusals folded in (source note). No separate Not stated line in the 2022 Table 3.3 frame; refusals are folded into 'Others' and thus counted in affiliation (disclosed).",
+      "religious_affiliation_count": 1452,
+      "religious_affiliation_percent": 92.8389,
+      "no_religion_count": 112,
+      "no_religion_percent": 7.1611,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 261.3992,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "nso-spc-census-religion-national-1986-2022",
+        "geoboundaries-niu-adm0-9469f09"
+      ],
+      "quality_flag": "census_affiliation;national_only_adm0;resident_population_universe;two_slot_affiliation_none;verbatim_source_categories_preserved;documented_2022_republication_discrepancy_not_used_as_source;not_stated_folded_into_others_disclosed;source_2022_table3_3;niue_census_partial_reproduction_research_reuse_attribution_geoboundaries_cc_by_4_0;boundary_cc_by_4_0"
+    }
+  ]
+}
