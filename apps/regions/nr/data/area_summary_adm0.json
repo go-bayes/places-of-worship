@@ -1,0 +1,212 @@
+{
+  "schema_version": "area-summary.v1",
+  "generated_at": "2026-07-11T00:00:00Z",
+  "generated_by": "scripts/build_nr_area_summary.R",
+  "country_code": "NR",
+  "boundary_set": {
+    "boundary_set_id": "nr-adm0-2005-geoboundaries-dissolved-adm1",
+    "country_code": "NR",
+    "level": "adm0",
+    "vintage": "2005",
+    "source_dataset_id": "geoboundaries-nru-adm1-9469f09"
+  },
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "No governed place-of-worship snapshot ships in the Nauru national census-religion product.",
+    "notes": "Place counts and density metrics remain null."
+  },
+  "source_datasets": [
+    {
+      "source_dataset_id": "nbs-spc-census-religion-national-2002-2021",
+      "name": "NBS/SPC national census religion 2002, 2011, 2021 (2011 Report Table 23; 2021 Analytical Report Table 25; 2021 Tables Vol.1 G-7)",
+      "provider": "Pacific Community (SPC) and Nauru Bureau of Statistics (NBS)",
+      "url": "https://stats.gov.nr/download/49/2021/359/nauru-2021-population-and-housing-census-analytical-report.pdf",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/nr_census/nr_2021_analytical_report.txt",
+      "licence": {
+        "name": "SPC/Nauru partial-reproduction-with-acknowledgement clause: partial reproduction or translation authorised for scientific, educational or research purposes provided SPC, Nauru and the source document are acknowledged (2021 Analytical Report, ISBN 978-982-00-1510-4). geoBoundaries NRU boundary is Public Domain.",
+        "url": "https://stats.gov.nr/download/49/2021/359/nauru-2021-population-and-housing-census-analytical-report.pdf",
+        "attribution": "Source: Pacific Community (SPC) and Nauru Bureau of Statistics (NBS), 2021 Nauru Population and Housing Census; 2011 Nauru National Census Report."
+      },
+      "citation": "Nauru Bureau of Statistics and Pacific Community, 2021 Nauru Population and Housing Census Analytical Report, Table 25 (Population by religious affiliation, Nauru: 2011 and 2021), ISBN 978-982-00-1510-4; 2021 Tables Vol.1 sheet G-7; NBS/SPC 2011 Nauru National Census Report, Table 23 (Population by religious affiliation, Nauru: 2002 and 2011).",
+      "access_limits": "Public PDF reports and an xlsx tabulation. The MOU-gated Pacific Data Hub microdata (2002/2011/2021) are not used; the district religion cross-tabs live only there.",
+      "redistribution_limits": "Derived national summaries ship under the SPC/Nauru partial-reproduction-with- acknowledgement clause with SPC/NBS attribution. Source: Pacific Community (SPC) and Nauru Bureau of Statistics (NBS), 2021 Nauru Population and Housing Census; 2011 Nauru National Census Report.",
+      "notes": "National geography only for the total-population series. The 2021 Nauruan citizen/dual district table (Table 19, total 11,215 of 11,680) is a documented deferred supplement, never merged with this all-persons national series. The 2002 'Other' (1,417) folds AOG, Seventh Day Adventist, Baptist and Jehovah's Witness, which were split out only from 2011; cross-wave denomination change is confined to 2011->2021. The 2011 report's licence page did not text-extract (soft flag); identical SPC/NBS attribution is applied."
+    },
+    {
+      "source_dataset_id": "geoboundaries-nru-adm1-9469f09",
+      "name": "geoBoundaries gbOpen NRU ADM1 (14 districts), dissolved to one national polygon",
+      "provider": "geoBoundaries; source FreeMapViewer",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/NRU/ADM1/geoBoundaries-NRU-ADM1.geojson",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/nr_census/geoBoundaries-NRU-ADM1.geojson",
+      "licence": {
+        "name": "Public Domain",
+        "url": "creativecommons.org/share-your-work/public-domain/",
+        "attribution": "geoBoundaries; FreeMapViewer"
+      },
+      "citation": "geoBoundaries gbOpen NRU ADM1, boundary ID NRU-ADM1-42797286, release commit 9469f09; source FreeMapViewer. Dissolved to the national outline.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified national polygon is redistributed as Public Domain.",
+      "notes": "Release metadata records Public Domain. The cache holds the ADM1 14-district layer only; the shipped ADM0 polygon is the dissolve (st_union) of those 14 districts. The join property is area_code = 'NR'. One national polygon simplified with scripts/lib/simplify_boundary.R."
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_id": "population_total",
+      "label": "Census population (all persons)",
+      "description": "Printed national all-persons total by religious affiliation per wave (2002: 10,065; 2011: 9,945; 2021: 11,680).",
+      "unit": "count",
+      "denominator_indicator_id": null,
+      "method": "Printed national Total per wave: Table 23 (2002, 2011) and Table 25 / G-7 (2021).",
+      "temporal_coverage": "2002, 2011, 2021",
+      "spatial_coverage": "Nauru national total on one ADM0 polygon",
+      "quality_notes": "All-persons universe in every wave; the 2021 Nauruan-only district table (11,215) is a separate sub-universe."
+    },
+    {
+      "indicator_id": "religious_affiliation_percent",
+      "label": "Religious affiliation %",
+      "description": "Share reporting any religious affiliation (universe less No Religion and Not stated).",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "100 * (universe - No Religion - Not stated) / all-persons national total.",
+      "temporal_coverage": "2002, 2011, 2021",
+      "spatial_coverage": "Nauru national",
+      "quality_notes": "Percentages use each wave's printed all-persons national total. Affiliation is the universe less No Religion and Not stated; no-religion is the No Religion line; Not stated is the disclosed residual so affiliation + No Religion + Not stated equals the universe. Comparable across waves on the broad-affiliation spine; finer denomination detail is not comparable back to 2002."
+    },
+    {
+      "indicator_id": "no_religion_percent",
+      "label": "No religion %",
+      "description": "Share in the source No Religion category.",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "100 * No Religion / all-persons national total.",
+      "temporal_coverage": "2002, 2011, 2021",
+      "spatial_coverage": "Nauru national",
+      "quality_notes": "No Religion and Not stated are separate lines in every wave, so no-religion is comparable across all three waves (456 -> 178 -> 157)."
+    }
+  ],
+  "visual_layers": [
+    {
+      "visual_layer_id": "nr-adm0-religious-affiliation",
+      "label": "Religious affiliation %",
+      "description": "Nauru national census-affiliation share for 2002, 2011, and 2021.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "religious_affiliation_percent"
+      ],
+      "geometry_unit_type": "country",
+      "legend": {
+        "unit": "percent",
+        "denominator": "all-persons national total per wave"
+      },
+      "colour_scale": null,
+      "time_control": "year_selector",
+      "aggregation_rule": null,
+      "uncertainty_display": "quality_flag",
+      "default_visibility": true,
+      "notes": "A single national polygon is intentional under the small-country clause: total-population census religion is published at national geography only. The broad-affiliation spine (Nauruan Congregational, Roman Catholic, Nauru Independent, No religion, Not stated) is comparable across all three waves; denomination detail below it is per-wave."
+    },
+    {
+      "visual_layer_id": "nr-adm0-no-religion",
+      "label": "No religion %",
+      "description": "Nauru national census no-religion share for 2002, 2011, and 2021.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "no_religion_percent"
+      ],
+      "geometry_unit_type": "country",
+      "legend": {
+        "unit": "percent",
+        "denominator": "all-persons national total per wave"
+      },
+      "colour_scale": null,
+      "time_control": "year_selector",
+      "aggregation_rule": null,
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "No Religion and Not stated are consistently separate lines across all three waves; Not stated is the disclosed residual."
+    }
+  ],
+  "rows": [
+    {
+      "country_code": "NR",
+      "boundary_set_id": "nr-adm0-2005-geoboundaries-dissolved-adm1",
+      "boundary_level": "adm0",
+      "area_unit_id": "nr-adm0-2005-geoboundaries-dissolved-adm1:NR",
+      "area_code": "NR",
+      "area_name": "Nauru",
+      "year": 2002,
+      "population_total": 10065,
+      "population_total_basis": "Printed national all-persons total by religious affiliation per wave: 2002 Table 23 (10,065); 2011 Table 23 / Table 25 (9,945); 2021 Table 25 / G-7 (11,680). The universe is all persons in every wave (the probe verified the 2002 religion column is all-persons, not the Nauruan-only tribe universe). The 2021 Nauruan citizen/dual district table (Table 19, total 11,215) is a separate sub-universe, not this series.",
+      "religious_affiliation_count": 9371,
+      "religious_affiliation_percent": 93.1048,
+      "no_religion_count": 456,
+      "no_religion_percent": 4.5306,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 21.5483,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "nbs-spc-census-religion-national-2002-2021",
+        "geoboundaries-nru-adm1-9469f09"
+      ],
+      "quality_flag": "census_affiliation;national_only_adm0;all_persons_universe;not_stated_residual_disclosed;broad_affiliation_spine_comparable_all_waves;subdenomination_change_confined_2011_2021;frames_preserved_verbatim_per_wave;nauru_census_partial_research_reuse_attribution_geoboundaries_public_domain;boundary_public_domain"
+    },
+    {
+      "country_code": "NR",
+      "boundary_set_id": "nr-adm0-2005-geoboundaries-dissolved-adm1",
+      "boundary_level": "adm0",
+      "area_unit_id": "nr-adm0-2005-geoboundaries-dissolved-adm1:NR",
+      "area_code": "NR",
+      "area_name": "Nauru",
+      "year": 2011,
+      "population_total": 9945,
+      "population_total_basis": "Printed national all-persons total by religious affiliation per wave: 2002 Table 23 (10,065); 2011 Table 23 / Table 25 (9,945); 2021 Table 25 / G-7 (11,680). The universe is all persons in every wave (the probe verified the 2002 religion column is all-persons, not the Nauruan-only tribe universe). The 2021 Nauruan citizen/dual district table (Table 19, total 11,215) is a separate sub-universe, not this series.",
+      "religious_affiliation_count": 9658,
+      "religious_affiliation_percent": 97.1141,
+      "no_religion_count": 178,
+      "no_religion_percent": 1.7898,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 21.5483,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "nbs-spc-census-religion-national-2002-2021",
+        "geoboundaries-nru-adm1-9469f09"
+      ],
+      "quality_flag": "census_affiliation;national_only_adm0;all_persons_universe;not_stated_residual_disclosed;broad_affiliation_spine_comparable_all_waves;subdenomination_change_confined_2011_2021;frames_preserved_verbatim_per_wave;nauru_census_partial_research_reuse_attribution_geoboundaries_public_domain;boundary_public_domain"
+    },
+    {
+      "country_code": "NR",
+      "boundary_set_id": "nr-adm0-2005-geoboundaries-dissolved-adm1",
+      "boundary_level": "adm0",
+      "area_unit_id": "nr-adm0-2005-geoboundaries-dissolved-adm1:NR",
+      "area_code": "NR",
+      "area_name": "Nauru",
+      "year": 2021,
+      "population_total": 11680,
+      "population_total_basis": "Printed national all-persons total by religious affiliation per wave: 2002 Table 23 (10,065); 2011 Table 23 / Table 25 (9,945); 2021 Table 25 / G-7 (11,680). The universe is all persons in every wave (the probe verified the 2002 religion column is all-persons, not the Nauruan-only tribe universe). The 2021 Nauruan citizen/dual district table (Table 19, total 11,215) is a separate sub-universe, not this series.",
+      "religious_affiliation_count": 11466,
+      "religious_affiliation_percent": 98.1678,
+      "no_religion_count": 157,
+      "no_religion_percent": 1.3442,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 21.5483,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "nbs-spc-census-religion-national-2002-2021",
+        "geoboundaries-nru-adm1-9469f09"
+      ],
+      "quality_flag": "census_affiliation;national_only_adm0;all_persons_universe;not_stated_residual_disclosed;broad_affiliation_spine_comparable_all_waves;subdenomination_change_confined_2011_2021;frames_preserved_verbatim_per_wave;nauru_census_partial_research_reuse_attribution_geoboundaries_public_domain;boundary_public_domain"
+    }
+  ]
+}

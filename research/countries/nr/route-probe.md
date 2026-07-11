@@ -117,3 +117,32 @@ The 2021 analytical report is also mirrored on the [FAO WCA library](https://www
 ## Product boundary
 
 A build on this probe would stage a **national** religious-affiliation series for 2002, 2011, and 2021 (all persons) on the geoBoundaries NRU ADM0 frame, with the broad-affiliation spine comparable across all three waves and a finer 2021 denomination view available from G-7. The optional 2021 **district** layer (15 census areas folded to 14 geoBoundaries districts via Location→Denigomodu and Baitsi→Baiti) would ship, if at all, as a clearly labelled single-wave, Nauruan-citizen/dual-only supplement — never as a district time series or as total-population coverage. It would not contain a place-of-worship layer, place-density metrics, or a pre-2002 wave (the 1977/1983/1992 censuses are unverified for public religion tables). The small-country clause is the basis for shipping: Nauru's national multi-wave religion series with an explicit reuse licence is a legitimate national-context product, matching the Dominica and Iceland precedents; the district data are a bonus supplement, not the spine.
+
+## Build appendix (2026-07-11, full ship)
+
+The product `nr-census-religion-2002-2021` shipped as a national three-wave all-persons series on one ADM0 polygon. Builder `scripts/build_nr_area_summary.R`; outputs `apps/regions/nr/data/{area_summary_adm0.json,area_summary_adm0.csv,nr_adm0_2005.geojson}` and `docs/manifests/nr-census-religion-2002-2021.json`. The cache under `data/raw/nr_census/` was mirrored (source objects only) to `gs://pow-research-data/raw_sources/nr_census/` ahead of the build.
+
+**Reconciliation (all gates passed, stop-don't-tune):**
+
+- Category-sum-equals-printed-total, per wave: 2002 = 10,065; 2011 = 9,945; 2021 = 11,680 (Table 25 folded frame). All close exactly.
+- G-7 → Table 25 fold (2021): the xlsx sheet G-7 (read live) carries 19 category lines summing to 11,680; its "Other religion" (98) plus the five split-out churches — Shalosh Pentecostal 186, Fishers of Men 57, FOM Pentecostal 81, Christ Embassy 48, Fundamental Christian 15 (sum 387) — equals Table 25's "Other religion" (485). Every overlapping category (13 lines, incl. Catholic→Roman Catholic, Do not wish to answer→Not stated) agrees with the shipped Table 25 count.
+- 2011 cross-source: the 2011 column is printed independently by the 2011 Report Table 23 and the 2021 Report Table 25; both byte-matched in the cached text, identical counts.
+- Affiliation residual = affiliation-role category sum, per wave: 2002 = 9,371; 2011 = 9,658; 2021 = 11,466.
+- Headline series: affiliation % 93.1 → 97.1 → 98.2; no-religion % 4.5 → 1.8 → 1.3 (No Religion counts 456 → 178 → 157); Not stated 238 → 109 → 57.
+- Boundary: the cache holds only the geoBoundaries NRU **ADM1** 14-district layer, so the ADM0 polygon is the `st_union` dissolve of those districts — 1 valid non-empty feature, 21.55 km² (consistent with Nauru's ~21 km²), 8,464 bytes at 100 % keep, join property `area_code = "NR"`. Release metadata licence: **Public Domain**.
+- Licence: the 2021 analytical report's SPC/Nauru partial-reproduction clause and ISBN 978-982-00-1510-4 byte-match the cached text; `licence_status = accepted`. The 2011 report's front-matter licence page did not text-extract — recorded as a soft flag, identical SPC/NBS attribution applied.
+
+**Named validation invocations and output:**
+
+```
+$ uvx check-jsonschema --base-uri "file://$PWD/schemas/" --schemafile schemas/area-summary.schema.json apps/regions/nr/data/area_summary_adm0.json
+ok -- validation done
+
+$ uvx check-jsonschema --base-uri "file://$PWD/schemas/" --schemafile schemas/data-manifest.schema.json docs/manifests/nr-census-religion-2002-2021.json
+ok -- validation done
+
+$ bash scripts/validate_manifests.sh
+manifest validation: 63/63 pass
+```
+
+The tree is left uncommitted for the conductor's review.
