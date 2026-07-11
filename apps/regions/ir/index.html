@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Iran Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Iran's product is census affiliation from the Statistical Centre of
+    // Iran (SCI), 28 analytical units under the 2006-2016 concordance across
+    // three censuses 2006, 2011 and 2016. It renders the census record in the
+    // SCI recognised categories (Total, Muslim, Christian, Zoroastrian, Jew,
+    // Other, Not stated); identities outside those categories, including
+    // unrecognised religious minorities, do not appear in the official record,
+    // and this product assigns nothing to Other or Not stated. Affiliation is
+    // Total minus Not stated; the SCI publishes no no-religion category and
+    // the no_religion fields are null, hence that metric is omitted. Every
+    // row carries the recognised-frame flag: popup rows are asterisked and
+    // the flag note explains the frame and the boundary caveat. The recognised-
+    // categories note rides the popup denominator surface and the overview
+    // verbatim from the manifest.
+    window.REGION_CONFIG = {
+      countryCode: "IR",
+      title: "Places of Worship | Iran Research Map",
+      center: [53.67, 32.7],
+      initialZoom: 4.7,
+      censusLevels: {
+        province: {
+          label: "Province concordance (28 units)",
+          boundaries: "data/ir_province_concordance28.geojson",
+          summary: "data/area_summary_province.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Statistical Centre of Iran (SCI) census religion by province, 2006–2016, 28-unit concordance · Boundaries from Natural Earth 1:10m admin-1 (public domain, non-official, generalised), dissolved to the concordance"
+        }
+      },
+      defaultLevel: "province",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2016,
+      // no no-religion metric: the SCI publishes no no-religion category;
+      // affiliation is Total minus Not stated and no_religion is null in
+      // every row, which would render no-data everywhere. religious_change
+      // is withheld: affiliation is the complement of the not-stated share,
+      // and a change metric would track non-response movement under a
+      // religious-change label (bulgaria treatment)
+      metricsAvailable: [
+        "religious_affiliation_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation (%)",
+          note: "share of the census population reporting a recognised religion, computed as the census Total (جمع) minus Not stated (اظهار نشده) over the census Total. The SCI publishes no no-religion category; Not stated is a non-response category and is not a measure of no religion; the affiliation share is therefore the complement of the Not stated share for the unit and wave"
+        }
+      },
+      popupDenominatorNote: "This product renders the census record of religious affiliation as the Statistical Centre of Iran (SCI) publishes it. The published categories are Total, Muslim, Christian, Zoroastrian, Jew, Other, and Not stated. Identities outside these recognised categories, including unrecognised religious minorities, do not appear in the official record. The published tables provide no rule for assigning such identities to the Other category or the Not stated category, and this product makes no such assignment. Percentages use the census Total (جمع) as denominator; affiliation is Total minus Not stated (اظهار نشده), a non-response category that is not a measure of no religion. These are census records of religious affiliation; they do not measure belief, practice, or attendance.",
+      cityPresets: [
+        { label: "Tehran", coords: [51.3890, 35.6892], zoom: 10 },
+        { label: "Mashhad", coords: [59.6062, 36.2605], zoom: 10 },
+        { label: "Esfahan", shortLabel: "Esfahan", aliases: ["Isfahan"], coords: [51.6680, 32.6539], zoom: 10 },
+        { label: "Karaj", coords: [50.9915, 35.8400], zoom: 10 },
+        { label: "Shiraz", coords: [52.5836, 29.5918], zoom: 10 },
+        { label: "Tabriz", coords: [46.2919, 38.0800], zoom: 10 },
+        { label: "Qom", coords: [50.8764, 34.6416], zoom: 10 },
+        { label: "Ahvaz", coords: [48.6842, 31.3183], zoom: 10 },
+        { label: "Kermanshah", coords: [47.0650, 34.3142], zoom: 10 },
+        { label: "Urmia", coords: [45.0759, 37.5527], zoom: 10 }
+      ],
+      geocode: { country: "ir", biasLngLat: [53.67, 32.7] },
+      onboarding: {
+        title: "Iran research map",
+        intro: "Census religious-affiliation overlays for 28 analytical units under the 2006–2016 concordance, across three censuses 2006, 2011 and 2016, from the Statistical Centre of Iran (SCI). The product renders the census record in the SCI recognised categories; it does not measure belief, practice, or attendance.",
+        bullets: [
+          "Units are shaded by the share of the census population reporting a recognised religion, computed as the census Total minus Not stated over the census Total.",
+          "The published categories are Total, Muslim, Christian, Zoroastrian, Jew, Other, and Not stated; identities outside these recognised categories, including unrecognised religious minorities, do not appear in the official record, and this product assigns nothing to Other or Not stated.",
+          "The SCI publishes no no-religion category; Not stated is a non-response category and is not a measure of no religion.",
+          "The 28 units come from two aggregations (Tehran with Alborz; Razavi Khorasan, South Khorasan and Yazd) that absorb the 2010 Alborz separation and the Ferdows and Tabas transfers; boundary stability across the census nights is not verified.",
+          "The About page records the categories, the licence position, and the boundary caveats.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion from the <a href="https://amar.org.ir" target="_blank" rel="noopener">Statistical Centre of Iran (SCI)</a>, censuses 2006&ndash;2016; no explicit SCI reuse licence located, published with attribution under project-lead approval &middot; Boundaries from <a href="https://www.naturalearthdata.com/downloads/10m-cultural-vectors/" target="_blank" rel="noopener">Natural Earth</a> 1:10m admin-1 (public domain, non-official, generalised), dissolved to the 28-unit concordance',
+      censusFlagNote: "* This product renders the SCI recognised-category frame: affiliation is the census Total minus Not stated, the SCI publishes no no-religion category, and identities outside the recognised categories do not appear in the record. The 28 analytical units come from two concordance aggregations (Tehran with Alborz; Razavi Khorasan, South Khorasan and Yazd). The boundary is the Natural Earth 1:10m admin-1 layer, a public-domain, non-official, generalised layer dissolved to the concordance; geometric stability of the units across the 2006, 2011 and 2016 census nights is not verified."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260711a"></script>
+</body>
+</html>

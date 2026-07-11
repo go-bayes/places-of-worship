@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Iran map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Iran research map; every string traces to
+    // docs/manifests/ir-census-religion-2006-2016.json (construct_notes,
+    // source, validation), the country card research/countries/ir/README.md,
+    // or the live REGION_CONFIG in apps/regions/ir/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "IR",
+      countryName: "Iran",
+      mapHref: "./",
+      intro: "Census religious-affiliation overlays for 28 analytical units under the 2006–2016 concordance, across three censuses 2006, 2011 and 2016, from the Statistical Centre of Iran (SCI). The construct is census affiliation in the SCI recognised categories. It does not measure belief, practice, or attendance.",
+      facts: {
+        waves: "Three censuses: 2006, 2011, 2016",
+        geographies: "Province concordance (28 analytical units)",
+        metrics: "Religious affiliation %"
+      },
+      reading: [
+        "This product renders the census record of religious affiliation as the Statistical Centre of Iran (SCI) publishes it. The published categories are Total, Muslim, Christian, Zoroastrian, Jew, Other, and Not stated. Identities outside these recognised categories, including unrecognised religious minorities, do not appear in the official record. The published tables provide no rule for assigning such identities to the Other category or the Not stated category, and this product makes no such assignment.",
+        "Units are shaded by the share of the census population reporting a recognised religion, computed as the census Total (جمع) minus Not stated (اظهار نشده) over the census Total. The SCI publishes no no-religion category; Not stated is a non-response category and is not a measure of no religion; the affiliation share is therefore the complement of the Not stated share.",
+        "The map reports no change metric. Affiliation is the complement of the Not stated share, and a wave-to-wave difference would track movement in non-response rather than religious composition; the three censuses are shown as separate snapshots.",
+        "The 2006–2016 concordance has 28 analytical units after two aggregations: Tehran with Alborz, and Razavi Khorasan with South Khorasan and Yazd; North Khorasan remains separate. The two aggregations absorb the 2010 Alborz separation and the Ferdows and Tabas transfers, which province-level counts cannot otherwise reconcile.",
+        "The boundary is the Natural Earth 1:10m admin-1 layer, a public-domain, non-official, generalised layer depicting the current 31-province structure, dissolved to the 28 concordance units. Geometric stability of the units across the 2006, 2011 and 2016 census nights is not verified; the polygons approximate current provincial extents and are not census-vintage geometry.",
+        "Every wave reconciles exactly: each concordance-unit category sum equals the SCI published national total, every unit total equals its six-category sum, and every source province maps to exactly one of the 28 units."
+      ],
+      sources: [
+        {
+          name: "Statistical Centre of Iran (SCI), province religion tables for 1385 (2006), 1390 (2011) and 1395 (2016)",
+          href: "https://amar.org.ir",
+          construct: "Census religious affiliation in the SCI recognised categories (Total, Muslim, Christian, Zoroastrian, Jew, Other, Not stated), by province",
+          years: "2006, 2011, 2016",
+          licence: "No explicit SCI reuse licence was located. The product publishes derived category counts with attribution to the Statistical Centre of Iran (SCI). Written SCI confirmation of reuse terms is pending. Publication proceeds under project-lead approval 2026-07-11."
+        },
+        {
+          name: "United Nations data, table 28, Iran 2016 religion (national)",
+          href: "https://data.un.org/Data.aspx?d=POP&f=tableCode%3A28%3BcountryCode%3A364",
+          construct: "Seven national category totals used to reconcile the 2016 concordance sums (SCI source)",
+          years: "2016",
+          licence: "United Nations Statistics Division secondary tabulation of the SCI counts; attribution to the Statistical Centre of Iran"
+        },
+        {
+          name: "Natural Earth 1:10m admin-1 states and provinces",
+          href: "https://www.naturalearthdata.com/downloads/10m-cultural-vectors/",
+          construct: "Boundary geometry (31 Iran provinces dissolved to the 28 concordance units)",
+          years: "Current provincial structure (non-official, generalised)",
+          licence: "Public domain (Natural Earth terms of use); attribution “Made with Natural Earth”"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Statistical Centre of Iran (SCI), <a href=\"https://amar.org.ir\" target=\"_blank\" rel=\"noopener\">amar.org.ir</a> (unreachable from the build sandbox; raw inputs served by pinned institutional mirrors); boundaries from <a href=\"https://www.naturalearthdata.com/downloads/10m-cultural-vectors/\" target=\"_blank\" rel=\"noopener\">Natural Earth</a> 1:10m admin-1.",
+        tables: "SCI table 18 for 2006, Statistical Yearbook 1390 table 2.18 for 2011, and Statistical Yearbook 1395 population chapter table 3-18 for 2016. The area-summary religious_affiliation fields carry the census Total minus Not stated; the no_religion fields are null because the SCI publishes no no-religion category. Every concordance-unit category sum reconciles exactly to the SCI published national total for each wave.",
+        licence: "No explicit SCI reuse licence was located; the product carries SCI attribution and written SCI confirmation of reuse terms is pending. Natural Earth geometry is public domain.",
+        script: "scripts/build_ir_area_summary.R",
+        manifests: [
+          { label: "ir-census-religion-2006-2016", href: "docs/manifests/ir-census-religion-2006-2016.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Iran map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
