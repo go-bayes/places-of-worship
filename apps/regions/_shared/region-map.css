@@ -224,3 +224,26 @@
   font-size: 11px;
   color: #94a3b8;
 }
+
+/* pulotu data-source legend: categorical swatch rows (codes the country's
+   cultures actually carry, with counts), and a violet slider accent so the
+   pulotu timeline never reads as the census one (measurement-diversity
+   separation) */
+.pulotu-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 4px;
+  color: #e2e8f0;
+}
+.pulotu-swatch {
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+}
+.pulotu-legend-label { flex: 1; }
+.pulotu-legend-count { color: #94a3b8; font-size: 11px; }
+#census-panel.pulotu-mode .census-slider { accent-color: #6d28d9; }
+.pulotu-ticks span { letter-spacing: 0.01em; }

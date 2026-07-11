@@ -108,6 +108,7 @@ document.title = RC.title;
     </div>
     <div id="census-panel">
       <div id="census-options">
+        <select id="censusSource" aria-label="Data source" hidden></select>
         <select id="censusMetric" aria-label="${RC.dataNoun || "Census"} metric"></select>
         <select id="censusLevel" aria-label="${RC.dataNoun || "Census"} geography"></select>
       </div>
@@ -2890,6 +2891,7 @@ const censusToggle = document.getElementById("census-toggle");
 const censusPanel = document.getElementById("census-panel");
 const censusLevelSelect = document.getElementById("censusLevel");
 const censusMetricSelect = document.getElementById("censusMetric");
+const censusSourceSelect = document.getElementById("censusSource");
 const censusYearSelect = document.getElementById("censusYear");
 const censusLegend = document.getElementById("census-legend");
 
@@ -3293,6 +3295,9 @@ function addCensusLayers() {
     paint: { "line-color": "#0f172a", "line-width": 2.2 }
   }, beforeId);
   attachCensusHandlers();
+  // a level switch rebuilds these layers; the active source still rules
+  // whether the fill shows
+  setCensusFillForSource();
 }
 
 function removeCensusLayers() {
@@ -3611,14 +3616,53 @@ function syncDatedPlaces(showAlive, showFuture) {
 }
 
 // ── pulotu cultures layer ──────────────────────────────────────────
-// the ratified cultures layer (docs/development/pulotu-cultures-layer.md):
-// documented cultural reconstructions from the pulotu database rendered as
-// their own points mode, never blended with place dots or census metrics
-// (the never-merge rule). the product is one global geojson; each page
-// filters to its own country tag. slider-independent by ruling: each
-// culture declares its own two calendar anchors and ignores the year.
+// the ratified cultures layer (docs/development/pulotu-cultures-layer.md,
+// amended by pi directive 2026-07-12): documented cultural reconstructions
+// from the pulotu database, selected as a DATA SOURCE beside the census,
+// never blended with place dots or census metrics (the never-merge rule).
+// the product is one global geojson; each page filters to its own country
+// tag. the census year slider never touches the cultures: selecting the
+// pulotu source swaps the whole temporal frame to the dataset's own three
+// time points (traditional / post-contact / current), and each culture's
+// own calendar anchors stay declared in its popup.
 const PULOTU = { source: "pow-pulotu", layer: "pow-pulotu-points" };
 let pulotuHandlersAttached = false;
+// which source drives the panel: the census (default) or pulotu. time and
+// metric are pulotu's own; they survive source flips within a session
+const pulotuState = { active: false, time: "traditional", metric: "belief_in_gods" };
+// the dataset's temporal model is three time layers carried on the
+// variables (68 traditional, 16 post-contact, 4 current); the timeline
+// renders exactly those three points — nothing between them exists
+const PULOTU_TIME_POINTS = [
+  { id: "traditional", label: "Traditional", metrics: ["belief_in_gods", "belief_in_ancestral_spirits", "supernatural_punishment_for_impiety"],
+    note: "reconstructed to each culture's own traditional anchor year (range 1521–1983) — the popup declares it" },
+  { id: "postcontact", label: "Post-contact", metrics: ["adoption_world_religion"],
+    note: "processes spanning the interval between each culture's traditional and contemporary anchors" },
+  { id: "current", label: "Current", metrics: ["dominant_world_religion"],
+    note: "each culture at its own contemporary anchor year (mostly 2014–2020) — the popup declares it" }
+];
+// the curated set with the record's own code frame: [code, legend label,
+// colour]. ordinal scales ride a violet ramp and the nominal dominant-
+// world-religion variable carries distinct hues, all outside the census
+// blue/orange palettes (the measurement-diversity separation guard).
+// legend labels shorten the record's code descriptions; the popup keeps
+// the full text
+const PULOTU_METRICS = {
+  belief_in_gods: { label: "Belief in god(s)", codes: [
+    [0, "Absent", "#ede9fe"], [1, "Present, minor focus", "#c4b5fd"],
+    [2, "Present, major focus", "#8b5cf6"], [3, "Present, principal focus", "#4c1d95"]] },
+  belief_in_ancestral_spirits: { label: "Belief in ancestral spirits", codes: [
+    [0, "Absent", "#ede9fe"], [1, "Present, minor focus", "#c4b5fd"],
+    [2, "Present, major focus", "#8b5cf6"], [3, "Present, principal focus", "#4c1d95"]] },
+  supernatural_punishment_for_impiety: { label: "Supernatural punishment for impiety", codes: [
+    [0, "Absent", "#ede9fe"], [1, "Present", "#4c1d95"]] },
+  adoption_world_religion: { label: "Adoption of a world religion", codes: [
+    [0, "Absent or minimal", "#ede9fe"], [1, "Present but minor", "#c4b5fd"],
+    [2, "Present and major", "#8b5cf6"], [3, "Present and predominant", "#4c1d95"]] },
+  dominant_world_religion: { label: "Dominant world religion", codes: [
+    [1, "Christianity", "#6d28d9"], [2, "Islam", "#0f766e"], [3, "Hinduism / Buddhism", "#b45309"]] }
+};
+const PULOTU_MISSING_COLOUR = "rgba(148, 163, 184, 0.55)";
 // heading order and membership follow the dataset's own organisation;
 // each key carries the record's variable name so a missing value still
 // names its variable (a null entry has no name of its own to read)
@@ -3634,14 +3678,41 @@ const PULOTU_GROUPS = [
 function pulotuEscape(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
-function addPulotuLayer() {
+// the geojson loads once per session; each feature's curated codes are
+// flattened onto top-level properties (code_<metric>, -1 = not documented)
+// so paint expressions can match on them — maplibre expressions cannot
+// reach into the nested values object
+let pulotuStore = null;
+let pulotuLoading = null;
+async function loadPulotuData() {
+  if (pulotuStore) return pulotuStore;
+  if (pulotuLoading) return pulotuLoading;
+  pulotuLoading = (async () => {
+    const res = await fetch(RC.pulotuCultures.data);
+    const gj = await res.json();
+    for (const f of gj.features) {
+      const values = f.properties.values || {};
+      for (const key of Object.keys(PULOTU_METRICS)) {
+        const v = values[key];
+        f.properties[`code_${key}`] = v && v.code !== null && v.code !== undefined ? v.code : -1;
+      }
+    }
+    pulotuStore = {
+      data: gj,
+      countryFeatures: gj.features.filter((f) => f.properties.country_iso2 === RC.countryCode)
+    };
+    return pulotuStore;
+  })();
+  return pulotuLoading;
+}
+async function addPulotuLayer() {
   if (!RC.pulotuCultures || map.getSource(PULOTU.source)) return;
-  map.addSource(PULOTU.source, { type: "geojson", data: RC.pulotuCultures.data });
-  // one colour for every culture: a category ramp would imply a coding the
-  // points do not carry — the values live in the popup with their sources.
-  // violet sits outside the religion palette and the amber dated ring, and
-  // the heavier white halo keeps the reconstruction points visually apart
-  // from enumeration dots (the measurement-diversity separation guard)
+  const store = await loadPulotuData();
+  if (map.getSource(PULOTU.source)) return;
+  map.addSource(PULOTU.source, { type: "geojson", data: store.data });
+  // points colour by the selected variable's own codes; the heavier white
+  // halo keeps the reconstruction points visually apart from enumeration
+  // dots (the measurement-diversity separation guard)
   map.addLayer({
     id: PULOTU.layer,
     type: "circle",
@@ -3650,7 +3721,7 @@ function addPulotuLayer() {
     filter: ["==", ["get", "country_iso2"], RC.countryCode],
     paint: {
       "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 5.0, 9, 8.0, 16, 11.0],
-      "circle-color": "#6d28d9",
+      "circle-color": pulotuColourExpression(),
       "circle-opacity": 0.92,
       "circle-stroke-width": 2.5,
       "circle-stroke-color": "#ffffff"
@@ -3709,10 +3780,157 @@ function addPulotuLayer() {
     map.on("mouseleave", PULOTU.layer, () => { map.getCanvas().style.cursor = ""; });
   }
 }
-function syncPulotuCultures(show) {
-  if (!RC.pulotuCultures) return;
-  addPulotuLayer();
+function pulotuTimePoint() {
+  return PULOTU_TIME_POINTS.find((t) => t.id === pulotuState.time) || PULOTU_TIME_POINTS[0];
+}
+// points match on the flattened code properties; an undocumented value
+// (code -1 falls through to the default) greys out rather than implying
+// an observation the record does not carry
+function pulotuColourExpression() {
+  const def = PULOTU_METRICS[pulotuState.metric];
+  const expr = ["match", ["get", `code_${pulotuState.metric}`]];
+  for (const [code, , colour] of def.codes) expr.push(code, colour);
+  expr.push(PULOTU_MISSING_COLOUR);
+  return expr;
+}
+function applyPulotuPaint() {
   if (!map.getLayer(PULOTU.layer)) return;
+  map.setPaintProperty(PULOTU.layer, "circle-color", pulotuColourExpression());
+}
+// the pulotu legend is categorical: one swatch per code the country's
+// cultures actually carry, with counts, plus the regime declaration the
+// measurement-diversity principle requires
+function renderPulotuLegend() {
+  if (!censusLegend) return;
+  const scale = document.getElementById("census-legend-scale");
+  if (!scale) return;
+  censusLegend.hidden = false;
+  const tp = pulotuTimePoint();
+  const def = PULOTU_METRICS[pulotuState.metric];
+  const feats = (pulotuStore && pulotuStore.countryFeatures) || [];
+  const counts = new Map();
+  let missing = 0;
+  for (const f of feats) {
+    const code = f.properties[`code_${pulotuState.metric}`];
+    if (code === -1) missing += 1;
+    else counts.set(code, (counts.get(code) || 0) + 1);
+  }
+  const legendRow = (colour, label, n) =>
+    `<div class="pulotu-legend-row"><span class="pulotu-swatch" style="background:${colour}"></span><span class="pulotu-legend-label">${pulotuEscape(label)}</span><span class="pulotu-legend-count">${n}</span></div>`;
+  const rows = def.codes
+    .filter(([code]) => counts.has(code))
+    .map(([code, label, colour]) => legendRow(colour, label, counts.get(code)))
+    .join("");
+  const missingRow = missing ? legendRow(PULOTU_MISSING_COLOUR, "not documented", missing) : "";
+  scale.innerHTML =
+    `<div class="census-legend-title">Pulotu cultures: ${pulotuEscape(def.label)} (${tp.label})</div>` +
+    rows + missingRow +
+    `<div class="census-legend-note">${tp.note}</div>` +
+    `<div class="census-legend-note">Pulotu cultures are documented cultural reconstructions, not counts — the timeline steps through Pulotu's own three time points, never ${(RC.dataNoun || "census").toLowerCase()} years. © Pulotu (D-PLACE CLDF v1.3.1, CC BY 4.0)</div>`;
+}
+// the pulotu timeline replaces the census year slider wholesale: three
+// stops, worded not numbered, because the dataset's temporal model has
+// exactly three points and nothing between them
+function syncPulotuTimeStrip() {
+  const timeEl = document.getElementById("census-time");
+  if (!timeEl) return;
+  const idx = Math.max(0, PULOTU_TIME_POINTS.findIndex((t) => t.id === pulotuState.time));
+  const panel = document.getElementById("census-panel");
+  if (panel) panel.classList.remove("census-long");
+  timeEl.hidden = false;
+  timeEl.innerHTML =
+    `<div class="census-time-row">` +
+      `<input id="census-slider" class="census-slider" type="range" min="0" max="${PULOTU_TIME_POINTS.length - 1}" step="1" value="${idx}" aria-label="Pulotu time point">` +
+    `</div>` +
+    `<div class="census-ticks pulotu-ticks">${PULOTU_TIME_POINTS.map((t) => `<span data-time="${t.id}">${t.label}</span>`).join("")}</div>`;
+  const slider = document.getElementById("census-slider");
+  if (slider) {
+    slider.addEventListener("input", () => {
+      const tp = PULOTU_TIME_POINTS[Number(slider.value)];
+      if (tp) setPulotuTime(tp.id);
+    });
+  }
+  markPulotuTick();
+}
+function markPulotuTick() {
+  document.querySelectorAll("#census-time .census-ticks span[data-time]").forEach((span) => {
+    span.classList.toggle("census-tick-active", span.dataset.time === pulotuState.time);
+  });
+}
+function setPulotuTime(id) {
+  const tp = PULOTU_TIME_POINTS.find((t) => t.id === id);
+  if (!tp || pulotuState.time === id) return;
+  pulotuState.time = id;
+  // a metric belongs to exactly one time layer; crossing layers swaps to
+  // the new layer's lead metric
+  if (!tp.metrics.includes(pulotuState.metric)) pulotuState.metric = tp.metrics[0];
+  populateMetricOptions();
+  applyPulotuPaint();
+  updateCensusLegend();
+  markPulotuTick();
+}
+// one metric select serves both sources; its options swap with the source
+// (and, under pulotu, with the active time point)
+function populateMetricOptions() {
+  if (!censusMetricSelect) return;
+  censusMetricSelect.innerHTML = "";
+  if (pulotuState.active) {
+    for (const id of pulotuTimePoint().metrics) {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent = PULOTU_METRICS[id].label;
+      censusMetricSelect.appendChild(option);
+    }
+    censusMetricSelect.value = pulotuState.metric;
+  } else {
+    for (const [id, def] of Object.entries(CENSUS_METRICS)) {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent = def.label;
+      censusMetricSelect.appendChild(option);
+    }
+    censusMetricSelect.value = censusState.metric;
+  }
+}
+// under the pulotu source the census fill and hover hide (never-merge,
+// enforced at source level); the boundary line stays for orientation
+function setCensusFillForSource() {
+  const vis = pulotuState.active ? "none" : "visible";
+  for (const id of [CENSUS.fill, CENSUS.hover]) {
+    if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", vis);
+  }
+}
+// the source switch: the panel's metric select, timeline, legend, and
+// layers all follow. pow place dots stay under the points control's own
+// modes in either source (the pi's "retain the pows optionally")
+async function setDataSource(src) {
+  const wantPulotu = src === "pulotu" && !!RC.pulotuCultures;
+  if (pulotuState.active === wantPulotu) return;
+  pulotuState.active = wantPulotu;
+  if (censusSourceSelect) censusSourceSelect.value = wantPulotu ? "pulotu" : "census";
+  if (wantPulotu) await addPulotuLayer();
+  // geography has no meaning for a point layer; the select returns with
+  // the census source
+  if (censusLevelSelect) censusLevelSelect.hidden = wantPulotu;
+  const panel = document.getElementById("census-panel");
+  if (panel) panel.classList.toggle("pulotu-mode", wantPulotu);
+  populateMetricOptions();
+  setCensusFillForSource();
+  syncPulotuCultures();
+  if (wantPulotu) {
+    applyPulotuPaint();
+    syncPulotuTimeStrip();
+    updateCensusLegend();
+  } else {
+    syncCensusTimeSlider();
+    if (censusState.enabled && censusActive()) applyCensusPaint();
+    else updateCensusLegend();
+  }
+  syncPlaceDotEra();
+}
+function syncPulotuCultures() {
+  if (!RC.pulotuCultures || !map.getLayer(PULOTU.layer)) return;
+  const show = censusState.enabled && pulotuState.active;
   map.setLayoutProperty(PULOTU.layer, "visibility", show ? "visible" : "none");
 }
 
@@ -3726,7 +3944,7 @@ function syncPlaceDotEra() {
     (mode === "period" || (mode === "all" && stale));
   const showFuture = censusState.enabled && mode === "period" && placesDotState.future;
   try { syncDatedPlaces(showAlive, showFuture); } catch (e) { /* dated layer is optional */ }
-  try { syncPulotuCultures(censusState.enabled && mode === "cultures"); } catch (e) { /* cultures layer is optional */ }
+  try { syncPulotuCultures(); } catch (e) { /* cultures layer is optional */ }
   // the undated snapshot tiers hide entirely (not fade) in period and
   // off modes; hidden layers also drop out of click hit-testing
   const hideSnapshot = censusState.enabled && mode !== "all";
@@ -3774,6 +3992,16 @@ function applyCensusPaint() {
 
 function updateCensusLegend() {
   if (!censusLegend) return;
+  // the pulotu source carries its own categorical legend; the census
+  // legend machinery below never speaks for it
+  if (pulotuState.active) {
+    if (!censusState.enabled) {
+      censusLegend.hidden = true;
+      return;
+    }
+    renderPulotuLegend();
+    return;
+  }
   const scale = document.getElementById("census-legend-scale");
   const store = censusActive();
   const domain = store && store.domains[censusState.metric];
@@ -3845,9 +4073,7 @@ function updateCensusLegend() {
   const futureCount = placesDotState.future && Array.isArray(datedStartYears)
     ? datedStartYears.filter((y) => y > censusState.year).length
     : null;
-  const dotEraNote = pointsMode === "cultures" && RC.pulotuCultures
-    ? `<div class="census-legend-note">Pulotu cultures are documented cultural reconstructions, not counts — each culture declares its own time anchors and the year control does not apply to these points. © Pulotu (D-PLACE CLDF v1.3.1, CC BY 4.0)</div>`
-    : pointsMode === "period"
+  const dotEraNote = pointsMode === "period"
     ? `<div class="census-legend-note">showing only places whose OpenStreetMap date tags say they existed in ${censusState.year} — today's undated snapshot is hidden${placesDotState.future ? `; hollow rings mark places founded after ${censusState.year}${futureCount !== null ? ` (${futureCount} in this dataset)` : ""}` : ""}</div>`
     : pointsMode === "all" && placeSnapshotStale()
       ? `<div class="census-legend-note">place dots show today's OpenStreetMap places, not ${censusState.year} places${RC.datedPlaces ? ` — amber-ringed dots carry OpenStreetMap date tags saying they existed in ${censusState.year}` : " — historical place layers are being assembled from evidence"}</div>`
@@ -3885,6 +4111,11 @@ function setCensusYear(year) {
 // rebuild the slider structure for the timeline (or the active level's
 // year set when no timeline is configured)
 function syncCensusTimeSlider() {
+  // under the pulotu source the time strip is pulotu's three points
+  if (pulotuState.active) {
+    syncPulotuTimeStrip();
+    return;
+  }
   const timeEl = document.getElementById("census-time");
   const store = censusActive();
   if (!timeEl || !store) return;
@@ -4020,16 +4251,32 @@ if (censusLevelSelect) {
   });
 }
 if (censusMetricSelect) {
-  for (const [id, def] of Object.entries(CENSUS_METRICS)) {
-    const option = document.createElement("option");
-    option.value = id;
-    option.textContent = def.label;
-    censusMetricSelect.appendChild(option);
-  }
-  censusMetricSelect.value = censusState.metric;
+  populateMetricOptions();
   censusMetricSelect.addEventListener("change", () => {
+    if (pulotuState.active) {
+      pulotuState.metric = censusMetricSelect.value;
+      applyPulotuPaint();
+      updateCensusLegend();
+      return;
+    }
     censusState.metric = censusMetricSelect.value;
     applyCensusPaint();
+  });
+}
+// the data-source select exists only where a page opts into the pulotu
+// layer; everywhere else the census is the sole source and the select
+// stays hidden
+if (censusSourceSelect && RC.pulotuCultures) {
+  for (const [value, label] of [["census", RC.dataNoun || "Census"], ["pulotu", "Pulotu cultures"]]) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    censusSourceSelect.appendChild(option);
+  }
+  censusSourceSelect.value = "census";
+  censusSourceSelect.hidden = false;
+  censusSourceSelect.addEventListener("change", () => {
+    void setDataSource(censusSourceSelect.value);
   });
 }
 {
@@ -4040,9 +4287,9 @@ if (censusMetricSelect) {
     const modes = RC.datedPlaces
       ? [["period", "Points: period"], ["all", "Points: all"], ["off", "Points: off"]]
       : [["all", "Points: all"], ["off", "Points: off"]];
-    // the cultures mode exists only where the page opts into the pulotu
-    // layer; the ruled public label is "Pulotu cultures"
-    if (RC.pulotuCultures) modes.push(["cultures", "Points: Pulotu cultures"]);
+    // pulotu is a data source, not a points mode (pi directive
+    // 2026-07-12): the points control speaks only for the pow dots,
+    // which stay optionally on the map under either source
     for (const [value, label] of modes) {
       const option = document.createElement("option");
       option.value = value;
