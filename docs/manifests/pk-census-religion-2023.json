@@ -72,7 +72,7 @@
       "manifest_naming_note": "Named to the shipped span (pk-census-religion-2023.json) per the shipped-wave rule; the pk-census-religion family manifest widens to 2017-2023 only when a 2017 district wave is actually built.",
       "local_cache_hint": "Raw PBS Table 9 PDFs and boundary metadata are cached under data/raw/pk_census/ and remain git-ignored.",
       "raw_cache_durable_uris": [
-        "gs://pow-research-data/raw_sources/pk_census/ (12 objects mirrored 2026-07-11)"
+        "gs://pow-research-data/raw_sources/pk_census/ (16 objects mirrored 2026-07-11; all 9 manifest raw_sources verified by sha256 before upload)"
       ],
       "pbs_terms_verbatim": {
         "dissemination_policy": "The previous policy adopted by PBS for data supply was that aggregate level data (tabulation) was provided to the users free of charges and this practice will continue.",
