@@ -72,10 +72,30 @@ no governed place-of-worship snapshot: `site_snapshot.source_dataset_id`,
 block itself is required — every product states its place-layer position
 explicitly, with the reason in `basis`.
 
-A full validation of the 37 shipped country products against
-`area-summary.schema.json` passes 23. The 14 failures are structural
-generation differences, not data defects, and need a schema-versioning
-ruling before they are reconciled:
+**RULING (project lead, 2026-07-11, second sitting): area-summary.v2 plus
+declared-version validation, per the data-manifest.v2 playbook above.**
+Three parts. First, `area-summary.v2` extends the contract with ONE
+structured, optional per-row `composition` field — an array of
+`{label_verbatim, count or percent, optional taxonomy_code}` — the
+canonical home for denominational composition: it legitimises the Vanuatu
+rows after a small regeneration, replaces flag-string carriage, and puts
+`denomination-taxonomy.json` to work. Free-form per-denomination row
+fields stay forbidden; the NZ `service_url` is admitted as optional.
+Second, products declare their `schema_version` and the validator
+validates each file against the version it declares — the legacy
+generations (Canada v1, US/Romania 0.2.0) validate against their declared
+versions and upgrade to v2 opportunistically when their builders are next
+touched, leaving the frozen US pipeline untouched under the IPUMS hold.
+Third, the guard: a `validate_area_summaries.sh` twin of
+`validate_manifests.sh`, declared-version-resolving, wired into the same
+commit gates. Popup rendering of the composition field is a separate
+runtime change with its own tag bump and commit. Implementation is the
+next structural lane; until it lands, the failure list below stands as
+the work order.
+
+The pre-ruling record: a full validation of the 37 shipped country
+products against `area-summary.schema.json` passes 23. The 14 failures
+are structural generation differences, not data defects:
 
 - Canada (3 files): `area-summary.v1` row-array shape without the
   `boundary_set`/`source_datasets`/`indicators`/`visual_layers` blocks.
