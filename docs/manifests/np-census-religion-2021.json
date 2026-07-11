@@ -1,0 +1,1039 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:np-census-religion:np:2021:nso-district",
+  "dataset_id": "np-census-religion:np:2021:nso-district",
+  "dataset_version_id": "np-census-religion:np:2021:nso-district:cf016ca3c89d",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "np-census-religion",
+  "dataset_role": "staged_evidence",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "NP"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-07-12T00:00:00Z",
+  "created_by": "scripts/build_np_area_summary.R",
+  "target_years": [
+    2021
+  ],
+  "pipeline": {
+    "script": "scripts/build_np_area_summary.R",
+    "git_commit": "0026dace6690976ec23caedc19d995341b2bfe1e",
+    "command": "Rscript scripts/build_np_area_summary.R",
+    "parameters": {
+      "construct": "census affiliation",
+      "shipped_waves": [
+        2021
+      ],
+      "shipped_geography": "77 Nepal districts (OCHA COD-AB admin2, 2021 frame)",
+      "boundary_set": "np-district-2021-ocha-codab-adm2",
+      "source_table": "2021 census Table -5 Population by Religion and Sex (Religion_NPHC_2021.xlsx, Prov_District_local level sheet), integer full-count, ten religions",
+      "universe": "all persons of all ages (29,164,578)",
+      "category_frame": [
+        "Hindu",
+        "Bouddha",
+        "Islam",
+        "Kirat",
+        "Christian",
+        "Prakriti",
+        "Bon",
+        "Jain",
+        "Bahai",
+        "Sikha"
+      ],
+      "national_religion_totals": {
+        "Hindu": 23677744,
+        "Bouddha": 2393549,
+        "Islam": 1483066,
+        "Kirat": 924204,
+        "Christian": 512313,
+        "Prakriti": 102048,
+        "Bon": 67223,
+        "Jain": 2398,
+        "Bahai": 537,
+        "Sikha": 1496
+      },
+      "slot_design": "Flat-100 (Sri Lanka / Bangladesh precedent). Every one of the ten categories is a named religion and the ten exhaust the population, so religious_affiliation_percent is 100 by construction and religious_affiliation_count is the district population. no_religion_count and no_religion_percent are null because the Nepal 2021 frame has no no-religion / atheist / not-stated category (the slot is absent, not zero). The ten-way composition is carried verbatim on the quality flag (source_categories_verbatim) for the PI task-6 minority-share metric.",
+      "no_religion_treatment": "null; the 2021 ten-religion frame has no no-religion category",
+      "change_rule": "Single wave (2021); no cross-wave change is asserted. The 2015 district split (75->77) and the 2011 'Undefined' residual (absent in 2021) are frame/universe breaks under the CHANGE-WITHHOLD ruling; the 2011 district wave is HELD (see held_and_deferred). On recovery, 2011 builds on its own per-vintage 75-district frame, never a concordance.",
+      "flat_100_gate": "The public page is gated on PI task 6 (minority-share metric); affiliation is 100% by construction, so the two-slot view carries no signal and the ten-way composition is the map-worthy content.",
+      "frame_note": "The 2021 ten-religion frame (Hindu, Bouddha, Islam, Kirat, Christian, Prakriti, Bon, Jain, Bahai, Sikha) is rendered verbatim, never merged or backcast. The 2011 frame adds an 'Undefined' residual (61,581 nationally) that 2021 drops; category spellings also differ (Buddhism/Christianity/Jainism/Sikhism in 2011).",
+      "held_and_deferred": "2011 district religion is HELD: the all-75-district Table 22 'Population by religion' is not in a reachable open product (Vol 01 prints only Nepal + development-region/eco-belt aggregates + a few sample districts; Vol 02 is the VDC volume with no religion table; the 2011 Social Characteristics Vol 05 returns the census-site SPA 404). Unblock: recover the 2011 Vol 05 district religion tables (likely a browser session on censusnepal.cbs.gov.np); the boundary is ready (geoBoundaries NPL ADM2, 75 units, Public Domain, 2006). A 7-province 2021 product on OCHA COD-AB admin1 or geoBoundaries NPL ADM1 (CC BY 3.0 IGO) is a documented coarser alternative, superseded by this district product.",
+      "territorial_note": "The build renders the official Nepal administrative extent and census record as published.",
+      "omitted_metrics": [
+        "no_religion_count",
+        "no_religion_percent",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 15,
+        "bytes": 1283569
+      },
+      "local_cache_hint": "All raw sources are cached under data/raw/np_census/ and remain git-ignored.",
+      "retrieval_record": [
+        {
+          "uri": "data/raw/np_census/Religion_NPHC_2021.xlsx",
+          "url": "https://censusresults.nsonepal.gov.np/files/caste/Religion_NPHC_2021.xlsx",
+          "format": "xlsx",
+          "bytes": 269517,
+          "sha256": "3c794dbb6d34bc934f716b42c7589a4191a6232134f449eff3c9fadb814959e1",
+          "row_count": null,
+          "source_dataset_id": "np-census-2021-religion-by-district-nphc",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 census religion-by-district table (Religion_NPHC_2021.xlsx, Prov_District_local level). 77 districts, ten religions, integer full-count. Both margins close exactly to 29,164,578.",
+          "local_cache_hint": "data/raw/np_census/Religion_NPHC_2021.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/np_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/np_census/npl_admin2_codab.geojson",
+          "url": "https://data.humdata.org/dataset/07db728a-4f0f-4e98-8eb0-8fa9df61f01c/resource/191e22eb-f21e-48f0-9180-872eeda0b8b6/download/npl_admin_boundaries.geojson.zip",
+          "format": "geojson",
+          "bytes": 17882595,
+          "sha256": "412454fc8b05f67cc2e6f2a8563635149c3f93703b5e0c8e32efb4df51a43d1d",
+          "row_count": null,
+          "source_dataset_id": "ocha-codab-npl-adm2-2021",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "OCHA COD-AB Nepal admin2 (77 districts), CC BY-IGO. Extracted from npl_admin_boundaries.geojson.zip; cod_version V_02, valid_on 2024-03-14.",
+          "local_cache_hint": "data/raw/np_census/npl_admin2_codab.geojson (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/np_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/np_census/npl_codab.geojson.zip",
+          "url": "https://data.humdata.org/dataset/07db728a-4f0f-4e98-8eb0-8fa9df61f01c/resource/191e22eb-f21e-48f0-9180-872eeda0b8b6/download/npl_admin_boundaries.geojson.zip",
+          "format": "zip",
+          "bytes": 61905786,
+          "sha256": "3f660a5ded63733b6aa9cc6bce736131f516d4b8e63fc8817f9d95c14fa214bc",
+          "row_count": null,
+          "source_dataset_id": "ocha-codab-npl-adm2-2021",
+          "used_in_public_product": false,
+          "periods": "2021",
+          "notes": "OCHA COD-AB Nepal full boundary bundle (HDX); admin2 layer is the used input.",
+          "local_cache_hint": "data/raw/np_census/npl_codab.geojson.zip (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/np_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/np_census/hdx_codab_npl.json",
+          "url": "https://data.humdata.org/api/3/action/package_show?id=cod-ab-npl",
+          "format": "json",
+          "bytes": 45385,
+          "sha256": "d4b4a7294450da4b37fb975e131b406ceb19552a6cf61d1dd07609101eca435e",
+          "row_count": null,
+          "source_dataset_id": "ocha-codab-npl-adm2-2021",
+          "used_in_public_product": false,
+          "periods": "2021",
+          "notes": "HDX package metadata for cod-ab-npl; records CC BY-IGO, Survey Department of Nepal / OCHA FISS.",
+          "local_cache_hint": "data/raw/np_census/hdx_codab_npl.json (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/np_census/"
+          ]
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "readxl": "1.5.0",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "scripts/lib/simplify_boundary.R (npx mapshaper)"
+    }
+  },
+  "source": {
+    "provider": "National Statistics Office of Nepal (NSO); OCHA COD-AB (Survey Department of Nepal / OCHA FISS)",
+    "source_dataset_ids": [
+      "np-census-2021-religion-by-district-nphc",
+      "ocha-codab-npl-adm2-2021"
+    ],
+    "source_urls": [
+      "https://censusresults.nsonepal.gov.np/files/caste/Religion_NPHC_2021.xlsx",
+      "https://data.humdata.org/dataset/07db728a-4f0f-4e98-8eb0-8fa9df61f01c/resource/191e22eb-f21e-48f0-9180-872eeda0b8b6/download/npl_admin_boundaries.geojson.zip",
+      "https://data.humdata.org/api/3/action/package_show?id=cod-ab-npl"
+    ],
+    "retrieved_at": "2026-07-12T00:00:00Z",
+    "licence": "No open-data licence is stated on the NSO census tables. The National Statistics Office census-results portal (censusresults.nsonepal.gov.np) footer asserts 'Copyright (c) National Statistics Office 2023. All rights reserved' (retrieved 2026-07-12); the linked Copyright Policy and Terms of Use pages are client-rendered by the single-page application and expose no reuse grant. The derived district summaries carry attribution to the National Statistics Office and ship STAGED under the BUILD-THEN-ASK ruling (summaries-with-attribution stance, RO/SK/CI/LK line); an NSO reuse-confirmation email is the clean courtesy unblock. The boundary is CC BY-IGO (Creative Commons Attribution 3.0 IGO).",
+    "citation": "NSO National Population and Housing Census 2021, Table 5 Population by Religion and Sex (district); OCHA COD-AB Nepal admin2 (CC BY-IGO).",
+    "raw_redistribution": "The census Excel workbook and the COD-AB boundary bundle are not committed; they remain in data/raw/np_census/.",
+    "local_cache_hint": "data/raw/np_census/ (git-ignored by .gitignore data/ rule)",
+    "raw_cache_durable_uris": [
+      "gs://pow-research-data/raw_sources/np_census/"
+    ]
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/np_census/Religion_NPHC_2021.xlsx",
+      "url": "https://censusresults.nsonepal.gov.np/files/caste/Religion_NPHC_2021.xlsx",
+      "format": "xlsx",
+      "bytes": 269517,
+      "sha256": "3c794dbb6d34bc934f716b42c7589a4191a6232134f449eff3c9fadb814959e1",
+      "row_count": null,
+      "source_dataset_id": "np-census-2021-religion-by-district-nphc",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 census religion-by-district table (Religion_NPHC_2021.xlsx, Prov_District_local level). 77 districts, ten religions, integer full-count. Both margins close exactly to 29,164,578.",
+      "local_cache_hint": "data/raw/np_census/Religion_NPHC_2021.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/np_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/np_census/npl_admin2_codab.geojson",
+      "url": "https://data.humdata.org/dataset/07db728a-4f0f-4e98-8eb0-8fa9df61f01c/resource/191e22eb-f21e-48f0-9180-872eeda0b8b6/download/npl_admin_boundaries.geojson.zip",
+      "format": "geojson",
+      "bytes": 17882595,
+      "sha256": "412454fc8b05f67cc2e6f2a8563635149c3f93703b5e0c8e32efb4df51a43d1d",
+      "row_count": null,
+      "source_dataset_id": "ocha-codab-npl-adm2-2021",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "OCHA COD-AB Nepal admin2 (77 districts), CC BY-IGO. Extracted from npl_admin_boundaries.geojson.zip; cod_version V_02, valid_on 2024-03-14.",
+      "local_cache_hint": "data/raw/np_census/npl_admin2_codab.geojson (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/np_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/np_census/npl_codab.geojson.zip",
+      "url": "https://data.humdata.org/dataset/07db728a-4f0f-4e98-8eb0-8fa9df61f01c/resource/191e22eb-f21e-48f0-9180-872eeda0b8b6/download/npl_admin_boundaries.geojson.zip",
+      "format": "zip",
+      "bytes": 61905786,
+      "sha256": "3f660a5ded63733b6aa9cc6bce736131f516d4b8e63fc8817f9d95c14fa214bc",
+      "row_count": null,
+      "source_dataset_id": "ocha-codab-npl-adm2-2021",
+      "used_in_public_product": false,
+      "periods": "2021",
+      "notes": "OCHA COD-AB Nepal full boundary bundle (HDX); admin2 layer is the used input.",
+      "local_cache_hint": "data/raw/np_census/npl_codab.geojson.zip (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/np_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/np_census/hdx_codab_npl.json",
+      "url": "https://data.humdata.org/api/3/action/package_show?id=cod-ab-npl",
+      "format": "json",
+      "bytes": 45385,
+      "sha256": "d4b4a7294450da4b37fb975e131b406ceb19552a6cf61d1dd07609101eca435e",
+      "row_count": null,
+      "source_dataset_id": "ocha-codab-npl-adm2-2021",
+      "used_in_public_product": false,
+      "periods": "2021",
+      "notes": "HDX package metadata for cod-ab-npl; records CC BY-IGO, Survey Department of Nepal / OCHA FISS.",
+      "local_cache_hint": "data/raw/np_census/hdx_codab_npl.json (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/np_census/"
+      ]
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/np/data/area_summary_district.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 144677,
+      "sha256": "cf016ca3c89d9ccd0ba93cbaa1088eb723d7d31f647667a084336daf89b78ba9",
+      "row_count": 77,
+      "feature_count": null,
+      "content": "Nepal 77-district census-religion area summary for 2021 (ten-religion composition; flat-100 affiliation).",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "nso_all_rights_reserved_attribution_build_then_ask"
+    },
+    {
+      "uri": "repo:apps/regions/np/data/area_summary_district.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 88099,
+      "sha256": "2b92379b70c92e3566e6fcaffd9e1a06d1ff2c8ae31881cc8b79a31c72776f74",
+      "row_count": 77,
+      "feature_count": null,
+      "content": "Flattened Nepal 77-district census-religion rows for 2021.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "nso_all_rights_reserved_attribution_build_then_ask"
+    },
+    {
+      "uri": "repo:apps/regions/np/data/np_district_2021.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 1283569,
+      "sha256": "9b3d3f98824f7955021001876291d4b861b9d6a42e8701c46c0ab7b669c2d3ab",
+      "row_count": null,
+      "feature_count": 77,
+      "content": "Simplified OCHA COD-AB Nepal admin2 77-district boundary GeoJSON.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "ocha_codab_cc_by_igo"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/np/data/area_summary_district.json",
+      "sha256": "cf016ca3c89d9ccd0ba93cbaa1088eb723d7d31f647667a084336daf89b78ba9",
+      "built_by": "scripts/build_np_area_summary.R",
+      "notes": "77 districts x 1 wave = 77 rows; all-persons-all-ages universe; ten-religion composition on the quality flag; affiliation 100% by construction."
+    },
+    {
+      "uri": "repo:apps/regions/np/data/np_district_2021.geojson",
+      "sha256": "9b3d3f98824f7955021001876291d4b861b9d6a42e8701c46c0ab7b669c2d3ab",
+      "built_by": "scripts/build_np_area_summary.R",
+      "notes": "77 district features from OCHA COD-AB admin2, simplified with mapshaper weighted keep-shapes."
+    }
+  ],
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_np_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/np/data/area_summary_district.json",
+      "bash scripts/validate_manifests.sh"
+    ],
+    "gate_2021": {
+      "status": "passed",
+      "both_margins_close_to": 29164578,
+      "district_row_checks": 77,
+      "religion_column_checks": 10,
+      "records": [
+        {
+          "margin": "district_row",
+          "key": "Taplejung",
+          "computed": 120590,
+          "printed": 120590,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Sankhuwasabha",
+          "computed": 158041,
+          "printed": 158041,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Solukhumbu",
+          "computed": 104851,
+          "printed": 104851,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Okhaldhunga",
+          "computed": 139552,
+          "printed": 139552,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Khotang",
+          "computed": 175298,
+          "printed": 175298,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Bhojpur",
+          "computed": 157923,
+          "printed": 157923,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Dhankuta",
+          "computed": 150599,
+          "printed": 150599,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Terhathum",
+          "computed": 88731,
+          "printed": 88731,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Panchthar",
+          "computed": 172400,
+          "printed": 172400,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Ilam",
+          "computed": 279534,
+          "printed": 279534,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Jhapa",
+          "computed": 998054,
+          "printed": 998054,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Morang",
+          "computed": 1148156,
+          "printed": 1148156,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Sunsari",
+          "computed": 926962,
+          "printed": 926962,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Udayapur",
+          "computed": 340721,
+          "printed": 340721,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Saptari",
+          "computed": 706255,
+          "printed": 706255,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Siraha",
+          "computed": 739953,
+          "printed": 739953,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Dhanusa",
+          "computed": 867747,
+          "printed": 867747,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Mahottari",
+          "computed": 706994,
+          "printed": 706994,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Sarlahi",
+          "computed": 862470,
+          "printed": 862470,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Rautahat",
+          "computed": 813573,
+          "printed": 813573,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Bara",
+          "computed": 763137,
+          "printed": 763137,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Parsa",
+          "computed": 654471,
+          "printed": 654471,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Dolakha",
+          "computed": 172767,
+          "printed": 172767,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Sindhupalchok",
+          "computed": 262624,
+          "printed": 262624,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Rasuwa",
+          "computed": 46689,
+          "printed": 46689,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Dhading",
+          "computed": 325710,
+          "printed": 325710,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Nuwakot",
+          "computed": 263391,
+          "printed": 263391,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Kathmandu",
+          "computed": 2041587,
+          "printed": 2041587,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Bhaktapur",
+          "computed": 432132,
+          "printed": 432132,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Lalitpur",
+          "computed": 551667,
+          "printed": 551667,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Kavrepalanchok",
+          "computed": 364039,
+          "printed": 364039,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Ramechhap",
+          "computed": 170302,
+          "printed": 170302,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Sindhuli",
+          "computed": 300026,
+          "printed": 300026,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Makwanpur",
+          "computed": 466073,
+          "printed": 466073,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Chitawan",
+          "computed": 719859,
+          "printed": 719859,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Gorkha",
+          "computed": 251027,
+          "printed": 251027,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Manang",
+          "computed": 5658,
+          "printed": 5658,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Mustang",
+          "computed": 14452,
+          "printed": 14452,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Myagdi",
+          "computed": 107033,
+          "printed": 107033,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Kaski",
+          "computed": 600051,
+          "printed": 600051,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Lamjung",
+          "computed": 155852,
+          "printed": 155852,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Tanahu",
+          "computed": 321153,
+          "printed": 321153,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Nawalparasi (East)",
+          "computed": 378079,
+          "printed": 378079,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Syangja",
+          "computed": 253024,
+          "printed": 253024,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Parbat",
+          "computed": 130887,
+          "printed": 130887,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Baglung",
+          "computed": 249211,
+          "printed": 249211,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Rukum (East)",
+          "computed": 56786,
+          "printed": 56786,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Rolpa",
+          "computed": 234793,
+          "printed": 234793,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Pyuthan",
+          "computed": 232019,
+          "printed": 232019,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Gulmi",
+          "computed": 246494,
+          "printed": 246494,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Arghakhanchi",
+          "computed": 177086,
+          "printed": 177086,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Palpa",
+          "computed": 245027,
+          "printed": 245027,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Nawalparasi (West)",
+          "computed": 386868,
+          "printed": 386868,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Rupandehi",
+          "computed": 1121957,
+          "printed": 1121957,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Kapilbastu",
+          "computed": 682961,
+          "printed": 682961,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Dang",
+          "computed": 674993,
+          "printed": 674993,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Banke",
+          "computed": 603194,
+          "printed": 603194,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Bardiya",
+          "computed": 459900,
+          "printed": 459900,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Dolpa",
+          "computed": 42774,
+          "printed": 42774,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Mugu",
+          "computed": 64549,
+          "printed": 64549,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Humla",
+          "computed": 55394,
+          "printed": 55394,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Jumla",
+          "computed": 118349,
+          "printed": 118349,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Kalikot",
+          "computed": 145292,
+          "printed": 145292,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Dailekh",
+          "computed": 252313,
+          "printed": 252313,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Jajarkot",
+          "computed": 189360,
+          "printed": 189360,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Rukum (West)",
+          "computed": 166740,
+          "printed": 166740,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Salyan",
+          "computed": 238515,
+          "printed": 238515,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Surkhet",
+          "computed": 415126,
+          "printed": 415126,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Bajura",
+          "computed": 138523,
+          "printed": 138523,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Bajhang",
+          "computed": 189085,
+          "printed": 189085,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Darchula",
+          "computed": 133310,
+          "printed": 133310,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Baitadi",
+          "computed": 242157,
+          "printed": 242157,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Dadeldhura",
+          "computed": 139602,
+          "printed": 139602,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Doti",
+          "computed": 204831,
+          "printed": 204831,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Achham",
+          "computed": 228852,
+          "printed": 228852,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Kailali",
+          "computed": 904666,
+          "printed": 904666,
+          "difference": 0
+        },
+        {
+          "margin": "district_row",
+          "key": "Kanchanpur",
+          "computed": 513757,
+          "printed": 513757,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Hindu",
+          "computed": 23677744,
+          "printed": 23677744,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Bouddha",
+          "computed": 2393549,
+          "printed": 2393549,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Islam",
+          "computed": 1483066,
+          "printed": 1483066,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Kirat",
+          "computed": 924204,
+          "printed": 924204,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Christian",
+          "computed": 512313,
+          "printed": 512313,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Prakriti",
+          "computed": 102048,
+          "printed": 102048,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Bon",
+          "computed": 67223,
+          "printed": 67223,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Jain",
+          "computed": 2398,
+          "printed": 2398,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Bahai",
+          "computed": 537,
+          "printed": 537,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Sikha",
+          "computed": 1496,
+          "printed": 1496,
+          "difference": 0
+        }
+      ]
+    },
+    "boundary_validation": {
+      "status": "passed",
+      "feature_count": 77,
+      "distinct_geometry_hashes": 77,
+      "bbox": {
+        "xmin": 80.0584671,
+        "ymin": 26.347762,
+        "xmax": 88.20155,
+        "ymax": 30.4471985
+      },
+      "dateline_note": "extent lon 80.06-88.20E, lat 26.35-30.45N; far from the antimeridian, no dateline handling needed",
+      "output_bytes": 1283569,
+      "simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 15,
+        "bytes": 1283569
+      },
+      "licence": "Creative Commons Attribution for Intergovernmental Organisations (CC BY-IGO)",
+      "adm_unit_count": "77"
+    },
+    "join_coverage": {
+      "matched_districts": 77,
+      "expected_districts": 77,
+      "unmatched_districts": [],
+      "unused_boundary_features": [],
+      "concordance": "four parenthesis labels normalised (Nawalparasi/Rukum East/West); 73 trimmed-exact matches"
+    },
+    "notes": "2021 Table 5 closes integer-exact at both margins (national 29,164,578): every district's ten religion cells sum to its Total Population and the 77 district totals sum to the national. Boundary joins 77/77 to OCHA COD-AB admin2 with 77 distinct geometry hashes.",
+    "warnings": [
+      "STAGED product: no page, no hub link. Licence needs review; ships under BUILD-THEN-ASK with attribution to the NSO (no open-data licence stated).",
+      "Flat-100 by construction: the 2021 ten-religion frame has no no-religion / not-stated category, so religious_affiliation_percent is 100 for every district and the no-religion slot is null. The page is gated on PI task 6 (minority-share metric); the ten-way composition on the quality flag is the map-worthy signal.",
+      "Single wave (2021). The 2011 district wave is HELD (Vol 05 Social Characteristics unreachable); the 75->77 district split and the 2011 'Undefined' residual bar cross-wave change.",
+      "Boundary CC BY-IGO (Creative Commons Attribution 3.0 IGO); the 77-district COD-AB frame is the correct per-vintage 2021 boundary."
+    ]
+  },
+  "construct_notes": [
+    "The construct is census affiliation: each resident's reported religion, asked of the whole resident population of all ages, not practice, attendance, or membership.",
+    "The public product carries the district population total and a flat-100 affiliation share per district; the map-worthy signal is the ten-religion composition carried verbatim on the quality flag (source_categories_verbatim), surfaced by the PI task-6 minority-share metric.",
+    "The 2021 ten-religion frame (Hindu, Bouddha, Islam, Kirat, Christian, Prakriti, Bon, Jain, Bahai, Sikha) has no no-religion / atheist / not-stated category, so every enumerated person is assigned a named religion and affiliation is 100% by construction (Sri Lanka / Bangladesh precedent). The no-religion slot is null because the category is absent, not zero.",
+    "Single wave (2021). The 2011 district religion wave is HELD: the full 75-district Table 22 is not in a reachable open product. On recovery it builds on its own per-vintage 75-district frame (geoBoundaries NPL ADM2, Public Domain), with change withheld across the 2015 district split (75->77) and the 2011 'Undefined' residual break.",
+    "Boundary: OCHA COD-AB Nepal admin2, 77 districts, CC BY-IGO (Creative Commons Attribution 3.0 IGO). The 77 districts join one-to-one after normalising four parenthesis labels (Nawalparasi/Rukum East/West). Nepal is far from the antimeridian; no dateline handling is needed."
+  ],
+  "deferred_sources": [
+    {
+      "source_dataset_id": "np-census-2011-religion-by-district",
+      "status": "held",
+      "url": "https://unstats.un.org/unsd/demographic-social/census/documents/Nepal/Nepal-Census-2011-Vol1.pdf",
+      "local_path": "data/raw/np_census/np_2011_vol1.pdf",
+      "notes": "2011 district religion (Table 22 'Population by religion', eleven categories incl. Undefined) is not in a reachable open product; Vol 01 prints only Nepal + development-region/eco-belt aggregates + a few sample districts, and the 2011 Social Characteristics Vol 05 returns the census-site SPA 404. Unblock: recover Vol 05."
+    },
+    {
+      "source_dataset_id": "geoboundaries-npl-adm2-2006-75-district",
+      "status": "not_used",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/NPL/ADM2/",
+      "local_path": "data/raw/np_census/gb_npl_adm2_meta.json",
+      "notes": "geoBoundaries NPL ADM2: the old 75-district (2006) frame, Public Domain; the ready per-vintage boundary for a future 2011 district product, not the 2021 frame."
+    },
+    {
+      "source_dataset_id": "np-census-2021-province-alternative",
+      "status": "not_shipped",
+      "url": "https://censusresults.nsonepal.gov.np/files/caste/Religion_NPHC_2021.xlsx",
+      "local_path": "data/raw/np_census/Religion_NPHC_2021.xlsx",
+      "notes": "A 7-province 2021 product on OCHA COD-AB admin1 or geoBoundaries NPL ADM1 (CC BY 3.0 IGO) is a clean coarser alternative from the same Excel, superseded by the 77-district product."
+    },
+    {
+      "source_dataset_id": "nso-licence-confirmation",
+      "status": "not_pinned",
+      "url": "https://censusresults.nsonepal.gov.np/",
+      "local_path": null,
+      "notes": "An NSO reuse-confirmation email is the clean courtesy unblock under BUILD-THEN-ASK; none is held."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "needs_review",
+  "licence_basis": "nso_all_rights_reserved_attribution_build_then_ask",
+  "downstream_status": "staged",
+  "source_datasets": [
+    {
+      "source_dataset_id": "np-census-2021-religion-by-district-nphc",
+      "name": "Nepal 2021 Census, Table -5: Population by Religion and Sex (Religion_NPHC_2021.xlsx), Prov_District_local level sheet",
+      "provider": "National Statistics Office of Nepal (NSO)",
+      "url": "https://censusresults.nsonepal.gov.np/files/caste/Religion_NPHC_2021.xlsx",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/np_census/Religion_NPHC_2021.xlsx",
+      "licence": {
+        "name": "No open-data licence is stated on the NSO census tables. The National Statistics Office census-results portal (censusresults.nsonepal.gov.np) footer asserts 'Copyright (c) National Statistics Office 2023. All rights reserved' (retrieved 2026-07-12); the linked Copyright Policy and Terms of Use pages are client-rendered by the single-page application and expose no reuse grant. The derived district summaries carry attribution to the National Statistics Office and ship STAGED under the BUILD-THEN-ASK ruling (summaries-with-attribution stance, RO/SK/CI/LK line); an NSO reuse-confirmation email is the clean courtesy unblock. The boundary is CC BY-IGO (Creative Commons Attribution 3.0 IGO).",
+        "url": "https://censusresults.nsonepal.gov.np/",
+        "attribution": "National Statistics Office, National Population and Housing Census 2021"
+      },
+      "citation": "National Statistics Office, National Population and Housing Census 2021, Table 5: Population by Religion and Sex (district table).",
+      "access_limits": null,
+      "redistribution_limits": "Derived district summaries only; no open-data licence is stated on the NSO source. Ships STAGED under BUILD-THEN-ASK with attribution.",
+      "notes": "Integer full-count; ten-religion frame (Hindu, Bouddha, Islam, Kirat, Christian, Prakriti, Bon, Jain, Bahai, Sikha); 77 districts; all persons of all ages. Every district's ten cells sum exactly to its Total Population and the 77 district totals sum exactly to the national 29,164,578. There is no no-religion / not-stated category, so affiliation is 100% by construction (page gated on PI task 6)."
+    },
+    {
+      "source_dataset_id": "ocha-codab-npl-adm2-2021",
+      "name": "OCHA COD-AB Nepal admin2 (77 districts)",
+      "provider": "OCHA Field Information Services Section (FISS); source Survey Department of Nepal / UN RCO Nepal",
+      "url": "https://data.humdata.org/dataset/07db728a-4f0f-4e98-8eb0-8fa9df61f01c/resource/191e22eb-f21e-48f0-9180-872eeda0b8b6/download/npl_admin_boundaries.geojson.zip",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/np_census/npl_admin2_codab.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution for Intergovernmental Organisations (CC BY-IGO)",
+        "url": "http://creativecommons.org/licenses/by/3.0/igo/legalcode",
+        "attribution": "OCHA / Survey Department of Nepal (COD-AB), CC BY-IGO"
+      },
+      "citation": "OCHA COD-AB Nepal, Subnational Administrative Boundaries, admin2 (77 districts), cod_version V_02.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed under CC BY-IGO (attribution to OCHA / Survey Department of Nepal).",
+      "notes": "77 districts, cod_version V_02, valid_on 2024-03-14; the 77-district 2021 census frame. Joined one-to-one to the census after normalising four parenthesis labels (Nawalparasi/Rukum East/West). Nepal spans lon 80.06-88.20E and lat 26.35-30.45N, far from the antimeridian."
+    }
+  ],
+  "notes": "STAGED product (no page, no hub link). The committed products are the derived 77-district area summary (77 rows for 2021) and the simplified OCHA COD-AB Nepal admin2 boundary. Ships under BUILD-THEN-ASK with attribution to the National Statistics Office of Nepal (NSO) and OCHA COD-AB (CC BY-IGO). The public page is additionally gated on PI task 6 (flat-100 affiliation)."
+}
