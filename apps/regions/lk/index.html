@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Sri Lanka Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Sri Lanka's product is district census religion from the Department of
+    // Census and Statistics (DCS), 25 modern districts across four census
+    // waves (1981, 2001, 2012, 2024), as exact counts. The pre-2024 waves come
+    // from Statistical Abstract 2023 Table 2.14 (1981, 2012) and the standalone
+    // 2001 district table p9p9Religion.pdf; the 2024 wave comes from the Census
+    // 2024 Preliminary Report Table A3. It does not measure belief, practice,
+    // or attendance.
+    //
+    // Minority-share design (minority-share-metric.md, ratified 2026-07-11).
+    // The DCS religion question partitions every enumerated person into one of
+    // six categories (Buddhist, Hindu, Islam, Roman Catholic, Other Christian,
+    // Other in the census-table convention), with no no-religion and no
+    // not-stated category; the frame sums to 100 by construction, and a
+    // full-affiliation headline would be a flat 100 everywhere. The two legacy
+    // slots therefore carry declared constructs: the affiliation slot is the
+    // reference-group (Buddhist) share — Buddhist is Sri Lanka's largest
+    // published national category in the most recent wave (2024: 15,199,093 of
+    // 21,781,800), declared once and held constant across every wave and area —
+    // and the no-religion slot is the exact complement, the minority share
+    // (Hindu + Islam + Roman Catholic + Other Christian + Other summed). The two
+    // slots partition the frame and sum to 100 in every enumerated row. The full
+    // per-district six-category composition rides each data row verbatim (in
+    // quality_flag); the popup shows the two shares by census year.
+    //
+    // Two verbatim DCS label conventions coexist for the same six categories:
+    // the Abstract 2023 convention (Buddhist, Hindus, Muslims, Catholics,
+    // Christians, Others) and the census-table convention (Buddhist, Hindu,
+    // Islam, Roman Catholic, Other Christian, Other). The correspondence is
+    // exact; page copy uses the census-table convention and the overview notes
+    // the equivalence once.
+    //
+    // COVERAGE GAP (2001, render-the-record): the 2001 census enumerated
+    // religion for only 18 of 25 districts. The seven northern and eastern
+    // districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa,
+    // Trincomalee) carry the DCS estimated total population and null religion,
+    // with the DCS footnote quoted verbatim. 1981 Kilinochchi is null: the
+    // district did not exist in 1981 (carved from Jaffna in 1984), and the 1981
+    // Jaffna row covers present-day Jaffna plus Kilinochchi. No split is
+    // invented. The change metric differences adjacent waves and nulls any pair
+    // with a missing operand; change therefore renders no-data at 2001 and 2012
+    // in the seven districts and at 2001 in Kilinochchi, which is correct
+    // rendering of the record.
+    window.REGION_CONFIG = {
+      countryCode: "LK",
+      title: "Places of Worship | Sri Lanka Research Map",
+      // boundary bbox verified numerically from the 25-feature layer:
+      // lon 79.519..81.877, lat 5.918..9.836; centre on [80.70, 7.88].
+      // the ~2.4 deg lon / ~3.9 deg lat extent fits all 25 districts at z7.
+      center: [80.70, 7.88],
+      initialZoom: 7,
+      censusLevels: {
+        district: {
+          label: "District (25 units)",
+          boundaries: "data/lk_district_geoboundaries_adm3_dissolved.geojson",
+          summary: "data/area_summary_district.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "District census religion from the Department of Census and Statistics (DCS), censuses 1981, 2001, 2012 and 2024, 25 modern districts · Boundaries from geoBoundaries LKA ADM3 (CC BY 3.0 IGO, OCHA ROAP / Survey Department of Sri Lanka lineage), dissolved to the 25 districts"
+        }
+      },
+      defaultLevel: "district",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2024,
+      // minority-share design: the six-category DCS frame sums to 100 by
+      // construction; the two legacy slots therefore carry declared constructs.
+      // The affiliation slot is the reference-group (Buddhist) share; the
+      // no-religion slot is its exact complement, the minority share. The change
+      // slot differences the Buddhist share across adjacent censuses and renders
+      // no-data wherever an operand wave is null (2001 seven-district gap; 1981
+      // Kilinochchi).
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Buddhist (%)",
+          note: "share of the district's census religion population reporting Buddhist, Sri Lanka's largest published national category, held constant as the reference group across every district and wave. This is the reference group's share of the census frame, not a measure of affiliation versus non-affiliation. The popup shows this share and the minority share by census year; the full six-category composition (Buddhist, Hindu, Islam, Roman Catholic, Other Christian, Other) rides each row of the downloadable area summary verbatim."
+        },
+        no_religion_percent: {
+          label: "Minority share (%)",
+          note: "share outside Sri Lanka's largest published category, Buddhist: the summed share of Hindu, Islam, Roman Catholic, Other Christian and Other, the exact complement of the Buddhist share. This is arithmetic on the published affiliation categories; it is not a measure of no religion, belief, practice, or secularity."
+        },
+        religious_change: {
+          label: "Change in the Buddhist share",
+          note: "percentage-point change in the Buddhist (reference-group) share between adjacent censuses (1981 to 2001, 2001 to 2012, 2012 to 2024). The intervals are unequal (20, 11 and 12 years); a wave-to-wave difference is not an annual rate. Change renders no-data where an operand wave is null: the seven northern and eastern districts unenumerated for religion in 2001, and Kilinochchi in 1981."
+        }
+      },
+      popupDenominatorNote: "Percentages use the district's DCS census religion population (the sum of the six categories: Buddhist, Hindu, Islam, Roman Catholic, Other Christian, Other) as the denominator. The Buddhist (%) metric is the reference-group share; the Minority share (%) metric is its exact complement, the share outside the reference group (Hindu + Islam + Roman Catholic + Other Christian + Other). There is no no-religion and no not-stated category; the frame sums to 100 by construction. The 2001 census enumerated religion for only 18 of 25 districts; the seven northern and eastern districts carry the DCS estimated total and null religion. These are census self-declarations; they do not measure belief, practice, or attendance.",
+      cityPresets: [
+        { label: "Colombo", coords: [79.8612, 6.9271], zoom: 10 },
+        { label: "Kandy", coords: [80.6337, 7.2906], zoom: 10 },
+        { label: "Jaffna", coords: [80.0074, 9.6615], zoom: 10 },
+        { label: "Galle", coords: [80.2170, 6.0535], zoom: 10 },
+        { label: "Trincomalee", coords: [81.2335, 8.5874], zoom: 10 },
+        { label: "Batticaloa", coords: [81.6924, 7.7102], zoom: 10 },
+        { label: "Negombo", coords: [79.8358, 7.2008], zoom: 10 },
+        { label: "Anuradhapura", coords: [80.4037, 8.3114], zoom: 10 }
+      ],
+      geocode: { country: "lk", biasLngLat: [80.70, 7.88] },
+      onboarding: {
+        title: "Sri Lanka research map",
+        intro: "District census religion for Sri Lanka's 25 modern districts across four censuses, 1981, 2001, 2012 and 2024, from the Department of Census and Statistics (DCS). The construct is census religion composition over a stable six-category frame. It does not measure belief, practice, or attendance.",
+        bullets: [
+          "Districts carry the census composition in six categories: Buddhist, Hindu, Islam, Roman Catholic, Other Christian and Other, summing to 100 by construction (there is no no-religion and no not-stated category).",
+          "Two headline metrics are shown: the Buddhist (%) share, the reference group and Sri Lanka's largest published national category, and the Minority share (%), its exact complement (Hindu + Islam + Roman Catholic + Other Christian + Other). The minority share is highest in the Northern and Eastern Provinces, such as Jaffna.",
+          "The minority share is arithmetic on the published affiliation categories; it is not a measure of no religion, belief, practice, or secularity. Tap a district for its Buddhist share and minority share by census year; the verbatim six-category counts ride every row of the downloadable area summary (see About this map).",
+          "The 2001 census enumerated religion for only 18 of 25 districts. The seven northern and eastern districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa, Trincomalee) carry the DCS estimated total and render as no-data on the religion views; the DCS footnote reads \"Data are given only for 18 districts where the Census of Population and Housing 2001 was carried out completely.\" Kilinochchi did not exist in 1981 (carved from Jaffna in 1984) and renders as no-data in 1981.",
+          "A change metric reports the percentage-point change in the Buddhist share between adjacent censuses. The intervals are unequal (20, 11 and 12 years) and a wave-to-wave difference is not an annual rate; the map renders no-data wherever an operand wave is null.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://www.statistics.gov.lk/" target="_blank" rel="noopener">Department of Census and Statistics (DCS)</a>, Sri Lanka, censuses of population and housing 1981, 2001, 2012 and 2024 (Statistical Abstract 2023 Table 2.14 and Census 2024 Preliminary Report Table A3), derived summaries reproduced with attribution while a reuse ask is outgoing &middot; Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> LKA ADM3 (CC BY 3.0 IGO, OCHA ROAP / Survey Department of Sri Lanka lineage), dissolved to the 25 districts',
+      censusFlagNote: "* The DCS census religion frame is Buddhist, Hindu, Islam, Roman Catholic, Other Christian and Other (census-table convention; equivalently Buddhist, Hindus, Muslims, Catholics, Christians, Others in the Statistical Abstract convention), with no no-religion and no not-stated category; the frame sums to 100 by construction. The map shades the reference-group (Buddhist) share and its exact complement, the minority share; the no-religion slot label carries the minority share and no no-religion meaning. The 2001 census enumerated religion for only 18 of 25 districts; the seven northern and eastern districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa, Trincomalee) carry the DCS estimated total and render as no-data, per the DCS footnote. Kilinochchi did not exist in 1981 (carved from Jaffna in 1984) and renders as no-data in 1981; no split is invented. The change metric differences adjacent censuses over unequal intervals (20, 11, 12 years) and is not an annual rate. DCS asserts all rights reserved; the derived category summaries are reproduced with DCS attribution while a reuse ask is outgoing, and the page reverts in a single commit if DCS objects (project-lead ruling, 2026-07-11). Boundaries are geoBoundaries LKA ADM3, CC BY 3.0 IGO, dissolved to the 25 districts."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260711b"></script>
+</body>
+</html>

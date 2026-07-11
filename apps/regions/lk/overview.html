@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Sri Lanka map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Sri Lanka research map; every string traces to
+    // research/countries/lk/route-probe.md (probe and build appendix), the
+    // data product apps/regions/lk/data/area_summary_district.json (indicator
+    // declarations, quality flags, and source), or the live REGION_CONFIG in
+    // apps/regions/lk/index.html. the minority-share design declarations, the
+    // coverage-gap wording, and the licence position carry the record text,
+    // no more and no less. authors nothing.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "LK",
+      countryName: "Sri Lanka",
+      mapHref: "./",
+      intro: "District census religion for Sri Lanka's 25 modern districts across four censuses, 1981, 2001, 2012 and 2024, from the Department of Census and Statistics (DCS). The construct is census religion composition over a stable six-category frame; the map shades the reference-group (Buddhist) share and its exact complement, the minority share. It does not measure belief, practice, or attendance.",
+      facts: {
+        waves: "Four censuses: 1981, 2001, 2012, 2024",
+        geographies: "District (ADM2): 25 modern districts on the 2012/2024 frame",
+        metrics: "Buddhist (%), Minority share (%), change in the Buddhist share"
+      },
+      reading: [
+        "Districts are shaded by the reference-group (Buddhist) share, Sri Lanka's largest published national category, held constant as the reference group across every district and wave, or by the Minority share, the summed share of Hindu, Islam, Roman Catholic, Other Christian and Other outside that reference group. Nationally the Buddhist share is 69.78% in 2024 (15,199,093 of 21,781,800, reproducing the published figure at two-decimal rounding), and 69.30% in 1981, 76.71% in 2001 (the 18 enumerated districts), and 70.10% in 2012; the reference-group value is that group's share of the census frame, never a measure of affiliation versus non-affiliation. The two metrics are exact complements and sum to 100 in every enumerated district.",
+        "The minority share is arithmetic on the published affiliation categories, the share outside Sri Lanka's largest published category. It is not a measure of no religion, belief, practice, minority status in law, or self-understood identity. The DCS census religion frame is Buddhist, Hindu, Islam, Roman Catholic, Other Christian and Other, with no no-religion category and no not-stated category; the frame sums to 100 by construction, and the legacy no-religion metric slot carries the minority share and no no-religion meaning. The minority share is highest in the Northern and Eastern Provinces (2024: Jaffna Buddhist 0.47, minority 99.53), the signal the flat headline hides.",
+        "Two verbatim DCS label conventions coexist for the same six categories. The Statistical Abstract 2023 convention (Tables 2.14 and 2.15) prints Buddhist, Hindus, Muslims, Catholics, Christians, Others; the census-table convention (2001 district table, 2012 A4, 2024 Table A3) prints Buddhist, Hindu, Islam, Roman Catholic, Other Christian, Other. The correspondence is exact: Hindus is Hindu, Muslims is Islam, Catholics is Roman Catholic, Christians is Other Christian, Others is Other. The page copy uses the census-table convention. Percentages use each district's DCS census religion population as the denominator; tap a district for its Buddhist share and minority share by census year, and see Access the data below for the verbatim six-category counts carried in every row of the area summary.",
+        "The record reconciles exactly. Every district total equals the sum of its six religion categories, and every district category column sums to the published national anchor for its wave: 1981 total 14,846,750 (24 districts, no Kilinochchi); 2001 total 16,929,689 (the 18 enumerated districts); 2012 total 20,359,439 (25 districts); 2024 total 21,781,800 (25 districts). The 2001 detail is taken from the standalone DCS district table (p9p9Religion.pdf), whose 18-district counts reconcile exactly to its printed total; no percentage or count is altered and no small-cell suppression is applied, because DCS publishes no suppression rule and prints exact small counts.",
+        "The 2001 census enumerated religion for only 18 of 25 districts. The seven northern and eastern districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa, Trincomalee) carry the DCS estimated total population and null religion; the DCS footnote reads, verbatim, \"Data are given only for 18 districts where the Census of Population and Housing 2001 was carried out completely.\" The religion fields for those districts are never estimated and never distributed. This is a coverage fact rendered as published, not a data defect patched.",
+        "A change metric reports the percentage-point change in the Buddhist share between adjacent censuses (1981 to 2001, 2001 to 2012, 2012 to 2024). The intervals are unequal (20, 11 and 12 years) and a wave-to-wave difference is not an annual rate. The metric renders no-data wherever an operand wave is null: change is no-data at 2001 and 2012 for the seven districts unenumerated in 2001, and no-data at 2001 for Kilinochchi, which did not exist in 1981. Kilinochchi was carved from Jaffna in 1984; its 1981 row is null and the 1981 Jaffna row covers present-day Jaffna plus Kilinochchi, with no split invented. The 2001-to-2012 change in the north and east partly reflects displacement and return, not only affiliation change.",
+        "The display frame is the geoBoundaries LKA ADM3 layer (Divisional Secretariat, 330 features, boundary ID LKA-ADM3-8540358, represented year 2020, CC BY 3.0 IGO, OCHA ROAP / Survey Department of Sri Lanka lineage), dissolved to the 25 districts: each Divisional Secretariat is assigned to the district whose geoBoundaries ADM2 polygon it most overlaps, then unioned per district, yielding exactly 25 distinct features joined on area_code. No governed Sri Lanka place-of-worship snapshot ships with this product; place counts and density metrics are null, and OSM coverage of temples, kovils, mosques and churches was not assessed in this build. Religion in Sri Lanka is closely tied to ethnicity and to the 1983-2009 civil war; a religion map reads as an ethnic map in the north and east. The product renders the DCS record exactly and names the published categories neutrally, with no editorial framing."
+      ],
+      sources: [
+        {
+          name: "DCS Statistical Abstract 2023, Table 2.14: Population by religion and district, Census 1981, 2001, 2012 (exact counts), and DCS 2001 district religion table (p9p9Religion.pdf) as the source of record for 2001",
+          href: "https://www.statistics.gov.lk/abstract2023/CHAP2/2.14.pdf",
+          construct: "Census religion by person, exact counts in six categories (Buddhist, Hindu/Hindus, Islam/Muslims, Roman Catholic/Catholics, Other Christian/Christians, Other/Others) by district; the harmonised pre-2024 waves in one table, with the 2001 northern and eastern coverage gap marked on the page",
+          years: "1981, 2001, 2012",
+          licence: "DCS asserts all rights reserved (website footer, quoted verbatim in the probe); no open-data licence located. The project lead confirmed on 2026-07-11 that the derived-summaries-with-attribution stance extends to DCS; the derived category summaries ship with DCS attribution while a reuse ask is outgoing, and the page reverts in a single commit if DCS objects. The raw census PDFs stay git-ignored"
+        },
+        {
+          name: "DCS Census of Population and Housing 2024, Preliminary Report, Table A3 (district counts and percentages) and Table 8 (national)",
+          href: "https://www.statistics.gov.lk/Resource/en/Population/CPH_2024/Population_Preliminary_Report.pdf",
+          construct: "Census religion by person, exact counts in the six-category census-table frame (Buddhist, Hindu, Islam, Roman Catholic, Other Christian, Other) by district; the 2024 wave, full island (25 districts), with the national row (total 21,781,800; Buddhist 15,199,093) as the reconciliation anchor",
+          years: "2024",
+          licence: "DCS asserts all rights reserved; no open-data licence located. Derived summaries ship with DCS attribution while a reuse ask is outgoing (project-lead ruling, 2026-07-11); raw report PDF stays git-ignored"
+        },
+        {
+          name: "geoBoundaries LKA ADM3 (Divisional Secretariat) boundaries, dissolved to the 25 districts",
+          href: "https://www.geoboundaries.org/",
+          construct: "Boundary geometry (330 Divisional Secretariat features, boundary ID LKA-ADM3-8540358), OCHA ROAP / Survey Department of Sri Lanka lineage; each Divisional Secretariat assigned to the district of largest ADM2 overlap and unioned per district into 25 distinct features",
+          years: "2020 (represented year)",
+          licence: "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO), per the release metadata"
+        }
+      ],
+      accessData: {
+        note: "DCS asserts all rights reserved with no open-data licence located; the project lead confirmed on 2026-07-11 that the derived-summaries-with-attribution stance extends to DCS and a reuse ask is outgoing. The committed products are the derived area summary and a simplified district boundary only; the raw census PDFs and the boundary GeoJSON are not committed.",
+        sourceOfRecord: "Department of Census and Statistics (DCS), Sri Lanka: <a href=\"https://www.statistics.gov.lk/abstract2023/CHAP2/2.14.pdf\" target=\"_blank\" rel=\"noopener\">Statistical Abstract 2023 Table 2.14</a> (1981, 2012 district counts) with the standalone 2001 district table (p9p9Religion.pdf) for 2001, and the <a href=\"https://www.statistics.gov.lk/Resource/en/Population/CPH_2024/Population_Preliminary_Report.pdf\" target=\"_blank\" rel=\"noopener\">Census 2024 Preliminary Report Table A3</a> for 2024; boundaries from <a href=\"https://www.geoboundaries.org/\" target=\"_blank\" rel=\"noopener\">geoBoundaries LKA ADM3</a>, dissolved to the 25 districts.",
+        tables: "The district religion tables are the source of record: 25 modern districts by four waves, each printing Buddhist, Hindu, Islam, Roman Catholic, Other Christian and Other as exact counts. Every district total equals the sum of its six categories, and every district category column sums exactly to the published national anchor per wave (1981 14,846,750 on 24 districts; 2001 16,929,689 on the 18 enumerated districts; 2012 20,359,439; 2024 21,781,800). The area-summary religious_affiliation_percent field carries the Buddhist reference-group share and no_religion_percent carries its exact complement, the minority share; each row's quality_flag carries the verbatim six-category composition. The seven 2001 unenumerated districts carry the DCS estimated total and null religion; 1981 Kilinochchi is null.",
+        licence: "DCS asserts all rights reserved (\"@ All Rights Reserved\", website footer) with no open-data licence located. The project lead confirmed on 2026-07-11 that the derived-summaries-with-attribution stance extends to DCS; the derived category summaries therefore ship with DCS attribution while a reuse ask is outgoing, and the page reverts in a single commit if DCS objects. The geoBoundaries LKA ADM3 geometry is CC BY 3.0 IGO with attribution, OCHA ROAP / Survey Department of Sri Lanka lineage.",
+        script: "scripts/build_lk_area_summary.R",
+        manifests: [
+          { label: "lk-census-religion-1981-2024", href: "docs/manifests/lk-census-religion-1981-2024.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Sri Lanka map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
