@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-07-11 (pulotu sitting)
+
+- Added the Pulotu cultures data product, the ratified cultures-layer design's first artefact (`docs/development/pulotu-cultures-layer.md`, all six project-lead rulings recorded 2026-07-11). One global `apps/regions/_shared/data/pulotu_cultures.geojson` built by `scripts/build_pulotu_cultures.R` from the cached CC BY 4.0 D-PLACE CLDF release v1.3.1: 137 culture points carrying the five ruled curated values with code labels and per-value source references, both calendar anchors, a computed modern-country tag (point-in-polygon against Natural Earth 10m admin-0, with the documented Tokelau NZ-to-TK territorial correction), and the full-record link. The Vanuatu assignment yields exactly the nine documented pilot cultures. Manifest: `docs/manifests/pulotu-cultures-1.3.1.json` (manifest validation 76/76). No runtime change; the never-merge rule verified — no census artefact touched. The UI (the third points mode, piloting on Vanuatu) follows separately.
+
 ### 2026-07-11 (queue-march sitting)
 
 - Added the Pakistan country page and overview; hub at 69 — the stack's most sensitive launch, shipped under the project-lead ruling to render the official record and report the contest. The eight Table 9 categories ride verbatim with nothing combined and no suppression; every surface states the contest neutrally in the record's own words (the Qadiani/Ahmadi label's 1974 constitutional context and the community's contestation of the classification, the 1,041,342-person headline-versus-Table-9 gap rendered not reconciled, the sensitivity and AJK/GB scope statements); the minority-share slots carry the signal (Umerkot 55.17, Torghar 0.14). The PI-ratified Karachi West and Keamari combine is live on the fused 2022-vintage polygon with its disclosure, and the conductor gate ruled the abolished Lehri district onto the map as a disclosed unjoined no-data feature rather than a hole (no evidenced partition of its territory exists). Derived rates ship with PBS attribution while written confirmation is sought. Page: `apps/regions/pk/index.html`; boundary commit fc7238e.
