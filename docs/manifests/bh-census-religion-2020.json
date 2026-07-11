@@ -1,0 +1,479 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:bh-census-religion:bh:2020:iga-national",
+  "dataset_id": "bh-census-religion:bh:2020:iga-national",
+  "dataset_version_id": "bh-census-religion:bh:2020:iga-national:b763eea41873",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "bh-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "BH"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-11T00:00:00Z",
+  "created_by": "scripts/build_bh_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_bh_area_summary.R",
+    "git_commit": "0001d5e9420a77dc4d02eb8927646b9a6ed26aae",
+    "command": "Rscript scripts/build_bh_area_summary.R",
+    "parameters": {
+      "construct": "census affiliation (minority-share two-slot design)",
+      "ruling": "Conductor ruling 2026-07-11: small-country clause (national-only ceiling) plus the minority-share two-slot design (BD/KH/LK precedent). Bahrain publishes census religion nationally only, in a single machine-readable open-licensed wave (2020) on data.gov.bh, in a flat two-line Muslim/Others frame summing to the total by construction. The product is one national ADM0 polygon carrying a single-wave 2020 all-persons Muslim/Others series; religious_affiliation_percent is the reference-group (Muslim) share and no_religion_percent its exact complement, the minority share (the Others line). 2010 is HELD (dead portal, absent from the open-data portal): no 2010 rows and no change metric.",
+      "waves": [
+        2020
+      ],
+      "shipped_geography": "1 native national ADM0 polygon (geoBoundaries BHR ADM0)",
+      "universe": "all persons (Total 1,501,635; Bahraini 712,362; Non-Bahraini 789,273)",
+      "denominator": "all-persons 2020 census total (1,501,635)",
+      "metric_design": "minority-share (project-lead ruling 2026-07-11, task 6; BD/KH/LK precedent)",
+      "reference_group": "Muslim",
+      "reference_group_basis": "largest published national category in the single published wave (2020), held constant for the national row",
+      "reference_group_national_share": "Muslim: 1,111,533 / 1,501,635 = 74.0215%",
+      "minority_share_definition": "the Others line (390,102 / 1,501,635 = 25.9785%), the exact complement of the Muslim share",
+      "affiliation_rule": "religious_affiliation_percent = 100 * Muslim / total (reference-group share); no_religion_percent = 100 * Others / total (minority share, exact complement); the two slots sum to 100",
+      "source_categories_verbatim": "Muslim (مسلم) = 1,111,533; Others (أخرى) = 390,102",
+      "frame_note": "two lines only (Muslim / Others); no Sunni/Shia split, no not-stated line, no no-religion line",
+      "source_of_record_rule": "the religion x nationality x sex cut (8 rows) supplies the national row; the sex x age-group x religion x nationality cut (112 rows) is independent published detail reconciling to the identical margins",
+      "detail_cuts_recorded": "both published cuts recorded as detail with reconciliation stated; neither becomes a data row",
+      "held_2010": "2010 census religion national total HELD (dead portal, absent from data.gov.bh); no 2010 rows, no change metric, single_wave_2020 token, no change_withheld token",
+      "boundary_source_vintage": "geoBoundaries BHR ADM0, boundaryYearRepresented 2017",
+      "boundary_derivation": "native geoBoundaries BHR ADM0 single MultiPolygon re-tagged area_code='bahrain' and simplified",
+      "boundary_join_property": "area_code",
+      "licence_basis": "bahrain_open_government_data_license_v1_0_attribution_geoboundaries_odbl_1_0",
+      "licence_capture": {
+        "name": "Bahrain Open Government Data License, Version 1.0 (20 May 2025)",
+        "url": "https://www.nea.gov.bh/Documents/OpenDataLicense.pdf",
+        "scope_1": "This license applies to all datasets officially published by the Government of Bahrain through its open data portal (www.data.gov.bh) or any other government website that published government open data.",
+        "grant_3_1": "This license allows you royalty-free, non-exclusive use of the datasets for the following purposes: (a) sharing, copying, distributing or transmitting the datasets. (b) adapting the datasets to suit your needs. (c) using the datasets for applications that you develop or integrate with. (d) commercializing the applications that you develop using the datasets.",
+        "attribution_3_3a": "Include attribution by clearly stating in your applications, research, articles, or websites containing the datasets, the source of the datasets and the date the datasets were extracted.",
+        "self_analysis_disclaimer_3_3b": "Clearly indicate that any analysis or transformation of data is made by you and shall not be attributed to the Information and eGovernment Authority (iGA) or the concerned government entity.",
+        "required_statement_3_3c": "Datasets provided by the Information & eGovernment Authority via www.data.gov.bh are governed by the Bahrain Open Government Data License available at www.nea.gov.bh/Documents/OpenDataLicense.pdf. To the fullest extent permitted by law, the government is not liable for any damage or loss of any kind caused directly or indirectly by the use or availability of the datasets or any derived analyses or applications.",
+        "capture_source": "data/raw/bh_census/bh_open_data_license.txt",
+        "capture_sha256": "21ed2c8987fe9d9a9254dc32bb6928989fb8584f6927c1751165d8aa2dc54eb5",
+        "pdf_sha256": "6af153b116ea1eb9abca76d9f6f5893d44ac64033e04a03f075bcbd7a66d6908",
+        "per_dataset_licence_field": "null (metas.default.license); the portal terms (§1) bind all data.gov.bh datasets to OGDL v1.0",
+        "publisher": "Information & eGovernment Authority"
+      },
+      "reconciliation_evidence": {
+        "gate_both_cuts_reconcile": {
+          "expected": {
+            "muslim": 1111533,
+            "others": 390102,
+            "total": 1501635
+          },
+          "cut_religion_nationality_sex": {
+            "rows": 8,
+            "muslim": 1111533,
+            "others": 390102,
+            "total": 1501635,
+            "reconciles": true
+          },
+          "cut_age_group": {
+            "rows": 112,
+            "muslim": 1111533,
+            "others": 390102,
+            "total": 1501635,
+            "reconciles": true
+          },
+          "note": "Two independently published 2020 census religion cuts close to the identical margins."
+        },
+        "gate_minority_share_complement": {
+          "reference_group": "Muslim",
+          "reference_share_pct": 74.0215,
+          "minority_share_pct": 25.9785,
+          "sum": 100,
+          "reconciles": true
+        },
+        "nationality_structure": {
+          "bahraini_total": 712362,
+          "non_bahraini_total": 789273,
+          "bahraini_muslim": 710067,
+          "bahraini_others": 2295,
+          "bahraini_muslim_pct": 99.68,
+          "non_bahraini_others": 387807,
+          "non_bahraini_share_of_minority_pct": 99.41,
+          "note": "The citizen/non-citizen cut is the informative one: Bahraini nationals are ~99.7% Muslim (2,295 Others of 712,362); the minority is almost entirely Non-Bahraini expatriates (387,807 of 390,102, 99.4%). Manifest context, not a data row."
+        },
+        "published_detail_cuts": [
+          {
+            "cut": "population-by-religion-nationality-and-sex-census-2020",
+            "dimension": "religion x nationality x sex",
+            "rows": 8,
+            "role": "source of record for the shipped national row"
+          },
+          {
+            "cut": "population-by-sex-age-groups-and-religion-census-2020",
+            "dimension": "sex x age-group x religion x nationality",
+            "rows": 112,
+            "role": "independent published detail; reconciles to the identical margins; not shipped as data rows"
+          }
+        ],
+        "source_categories_verbatim": [
+          {
+            "en": "Muslim",
+            "ar": "مسلم",
+            "role": "reference_group",
+            "count": 1111533
+          },
+          {
+            "en": "Others",
+            "ar": "أخرى",
+            "role": "minority_share",
+            "count": 390102
+          }
+        ]
+      },
+      "omitted_metrics": [
+        "religious_change (single wave; 2010 held)",
+        "places_per_10000_residents",
+        "place_density_per_sq_km",
+        "subnational religion (no governorate-by-religion table in any wave)"
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "scripts/lib/simplify_boundary.R"
+    }
+  },
+  "source": {
+    "provider": "Information & eGovernment Authority (iGA), Kingdom of Bahrain; geoBoundaries; OpenStreetMap contributors",
+    "source_dataset_ids": [
+      "iga-bh-census-2020-religion-national",
+      "geoboundaries-bhr-adm0-9469f09"
+    ],
+    "source_urls": [
+      "https://www.data.gov.bh/explore/dataset/population-by-religion-nationality-and-sex-census-2020/",
+      "https://www.data.gov.bh/api/explore/v2.1/catalog/datasets/population-by-religion-nationality-and-sex-census-2020/exports/csv",
+      "https://www.data.gov.bh/api/explore/v2.1/catalog/datasets/population-by-sex-age-groups-and-religion-census-2020/exports/csv",
+      "https://www.data.gov.bh/api/explore/v2.1/catalog/datasets/population-by-religion-nationality-and-sex-census-2020/",
+      "https://nea.gov.bh/Documents/OpenDataLicense.pdf",
+      "https://www.geoboundaries.org/api/current/gbOpen/BHR/ADM0/",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BHR/ADM0/geoBoundaries-BHR-ADM0.geojson"
+    ],
+    "retrieved_at": "2026-07-11T00:00:00Z",
+    "licence": "Census: Bahrain Open Government Data License v1.0 (20 May 2025) — royalty-free rights to share, adapt and commercialize with attribution (§3.1); required §3.3c attribution statement and §3.3b self-analysis disclaimer quoted verbatim from the cached licence PDF. Boundary: Open Data Commons Open Database License 1.0 (geoBoundaries; OpenStreetMap contributors).",
+    "raw_redistribution": "Raw iGA CSV/JSON cuts, the licence PDF, and the boundary remain in the git-ignored cache; not redistributed in-repo.",
+    "local_cache_hint": "All raw sources are cached under data/raw/bh_census/ and remain git-ignored.",
+    "licence_position": "accepted: explicit open licence (Bahrain OGDL v1.0 for the census; ODbL 1.0 for the boundary)",
+    "citation": "Bahrain 2020 Census: Population by Religion, Nationality and Sex (iGA, data.gov.bh); geoBoundaries BHR ADM0."
+  },
+  "input_manifests": [],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/bh/data/area_summary_national.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 11615,
+      "sha256": "b763eea418738c8597201fb01ba2bc71fee3ba7658398ff972cb626535479e2c",
+      "content": "Bahrain 2020 national census-religion area summary (minority-share two-slot design).",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "bahrain_open_government_data_license_v1_0_attribution_geoboundaries_odbl_1_0",
+      "row_count": 1
+    },
+    {
+      "uri": "repo:apps/regions/bh/data/area_summary_national.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 1798,
+      "sha256": "8fa798de265735fee8ed5443901e878c94b7f3fde9d20cd06d507b009b6aeab5",
+      "content": "Flattened Bahrain 2020 national census-religion row.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "bahrain_open_government_data_license_v1_0_attribution_geoboundaries_odbl_1_0",
+      "row_count": 1
+    },
+    {
+      "uri": "repo:apps/regions/bh/data/bh_national.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 209397,
+      "sha256": "fd80493cbe03d647914df78545a235835a35ff9527be67aa06090c16eeec7f4d",
+      "content": "geoBoundaries BHR ADM0 native national polygon (simplified).",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "bahrain_open_government_data_license_v1_0_attribution_geoboundaries_odbl_1_0",
+      "feature_count": 1
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/bh/data/area_summary_national.json",
+      "sha256": "b763eea418738c8597201fb01ba2bc71fee3ba7658398ff972cb626535479e2c",
+      "built_by": "scripts/build_bh_area_summary.R"
+    },
+    {
+      "uri": "repo:apps/regions/bh/data/area_summary_national.csv",
+      "sha256": "8fa798de265735fee8ed5443901e878c94b7f3fde9d20cd06d507b009b6aeab5",
+      "built_by": "scripts/build_bh_area_summary.R"
+    },
+    {
+      "uri": "repo:apps/regions/bh/data/bh_national.geojson",
+      "sha256": "fd80493cbe03d647914df78545a235835a35ff9527be67aa06090c16eeec7f4d",
+      "built_by": "scripts/build_bh_area_summary.R"
+    }
+  ],
+  "raw_sources": [
+    {
+      "uri": "data/raw/bh_census/bh_2020_religion.csv",
+      "url": "https://www.data.gov.bh/api/explore/v2.1/catalog/datasets/population-by-religion-nationality-and-sex-census-2020/exports/csv",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "csv",
+      "bytes": 574,
+      "sha256": "f4c580528c1b704d9e27b7600c2db988e29d7e4c8617093a8900c93d942ba2c1",
+      "source_dataset_id": "iga-bh-census-2020-religion-national",
+      "used_in_public_product": true,
+      "notes": "Cut 1: religion x nationality x sex (8 rows). Source of record for the shipped row; reconciles to Muslim 1,111,533 / Others 390,102 / total 1,501,635."
+    },
+    {
+      "uri": "data/raw/bh_census/bh_2020_religion_agegroups.csv",
+      "url": "https://www.data.gov.bh/api/explore/v2.1/catalog/datasets/population-by-sex-age-groups-and-religion-census-2020/exports/csv",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "csv",
+      "bytes": 9099,
+      "sha256": "462dec28276312f196f55e5e90b057567957f98c66900f95c822b38be8bb6747",
+      "source_dataset_id": "iga-bh-census-2020-religion-national",
+      "used_in_public_product": true,
+      "notes": "Cut 2: sex x age-group x religion x nationality (112 rows). Independent published detail; reconciles to the identical margins. Recorded as detail, not shipped as data rows."
+    },
+    {
+      "uri": "data/raw/bh_census/bh_2020_religion_api.json",
+      "url": "https://www.data.gov.bh/api/explore/v2.1/catalog/datasets/population-by-religion-nationality-and-sex-census-2020/records?limit=100",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "json",
+      "bytes": 1773,
+      "sha256": "54c9dd1fb2c209e26acfa29b938fde7ec33402d04327689b36f96690748abddc",
+      "source_dataset_id": "iga-bh-census-2020-religion-national",
+      "used_in_public_product": false,
+      "notes": "Cut 1 via the Opendatasoft records API (8 records); corroborates the CSV export."
+    },
+    {
+      "uri": "data/raw/bh_census/bh_2020_meta.json",
+      "url": "https://www.data.gov.bh/api/explore/v2.1/catalog/datasets/population-by-religion-nationality-and-sex-census-2020/",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "json",
+      "bytes": 4422,
+      "sha256": "8f9ecd8e43b16fdd9a7ac80e569dec76b89f3d18b157fb51de2a97e91d9eadda",
+      "source_dataset_id": "iga-bh-census-2020-religion-national",
+      "used_in_public_product": true,
+      "notes": "Dataset metadata: publisher Information & eGovernment Authority, attributions, per-dataset licence field null (portal terms bind OGDL v1.0)."
+    },
+    {
+      "uri": "data/raw/bh_census/bh_open_data_license.pdf",
+      "url": "https://nea.gov.bh/Documents/OpenDataLicense.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "pdf",
+      "bytes": 336106,
+      "sha256": "6af153b116ea1eb9abca76d9f6f5893d44ac64033e04a03f075bcbd7a66d6908",
+      "source_dataset_id": "iga-bh-census-2020-religion-national",
+      "used_in_public_product": true,
+      "notes": "Bahrain Open Government Data License v1.0 (20 May 2025) source PDF; the byte-matched §3.1 grant, §3.3b disclaimer, and §3.3c attribution statement."
+    },
+    {
+      "uri": "data/raw/bh_census/bh_open_data_license.txt",
+      "url": "https://nea.gov.bh/Documents/OpenDataLicense.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "text",
+      "bytes": 19185,
+      "sha256": "21ed2c8987fe9d9a9254dc32bb6928989fb8584f6927c1751165d8aa2dc54eb5",
+      "source_dataset_id": "iga-bh-census-2020-religion-national",
+      "used_in_public_product": true,
+      "notes": "pdftotext extraction of the OGDL v1.0 licence; the licence clauses are byte-matched in this text layer at build time."
+    },
+    {
+      "uri": "data/raw/bh_census/gb_bhr_adm0_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/BHR/ADM0/",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "json",
+      "bytes": 1738,
+      "sha256": "3705338f4f9090e744463d398a1a06bffa3fc8ec972da5c409a9d9168a6ab979",
+      "source_dataset_id": "geoboundaries-bhr-adm0-9469f09",
+      "used_in_public_product": true,
+      "notes": "geoBoundaries BHR ADM0 release metadata; 1 native national unit, ODbL 1.0, boundaryYearRepresented 2017."
+    },
+    {
+      "uri": "data/raw/bh_census/geoBoundaries-BHR-ADM0.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BHR/ADM0/geoBoundaries-BHR-ADM0.geojson",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "geojson",
+      "bytes": 410873,
+      "sha256": "cc75e86fb0075be1635a7e46b502ce055b023a9c05fb71715704e5a8ec123d28",
+      "source_dataset_id": "geoboundaries-bhr-adm0-9469f09",
+      "used_in_public_product": true,
+      "notes": "geoBoundaries BHR ADM0 source geometry (1 native national MultiPolygon), simplified to the shipped boundary."
+    }
+  ],
+  "deferred_sources": [
+    {
+      "source": "2010 census religion national total",
+      "status": "held_no_machine_readable_open_table",
+      "reason": "The 2010 census published a national Muslim/non-Muslim count (total 1,234,571; Muslim 866,888; non-Muslim 367,683), but its primary portal (census2010.gov.bh) is offline (DNS gone) and the figure is absent from data.gov.bh. It survives only in secondary and government-description sources; the Ministry of Information page (mia.gov.bh) that cites the CIO 2010 census blocks curl/WebFetch (HTTP 405) and the in-app browser reaches only a human-verification interstitial the project does not complete. No 2010 rows and no 2010->2020 change metric are shipped.",
+      "recovery_route": "A person-at-the-keyboard capture of the mia.gov.bh page, or a machine-readable 2010 census religion table on an open portal, would unlock a caveated historical annotation (never a portal-equal wave)."
+    },
+    {
+      "source": "Religion by governorate (any wave)",
+      "status": "unavailable_no_public_table",
+      "reason": "No Bahrain census wave publishes religion by governorate. The 2020 catalogue carries many governorate-dimensioned tables (population, education, marital status, labour, buildings, households) but none crosses religion. A subnational religion layer is out of reach.",
+      "recovery_route": "An iGA governorate-by-religion tabulation would unlock a subnational layer; none is published."
+    },
+    {
+      "source": "Sunni/Shia split; non-Muslim denomination split",
+      "status": "not_published",
+      "reason": "The census religion table groups all Muslims into one line (no Sunni/Shia) and does not split the Others residual (Christian/Hindu/etc.). The sibling iGA births dataset uses a finer Christian/Jewish/Muslim/Others frame, but that is vital registration, not the census, and is not conflated with the census religion frame.",
+      "recovery_route": "None; the census is deliberately grouped as Muslim/Others."
+    }
+  ],
+  "target_years": [
+    2020
+  ],
+  "construct_notes": [
+    "The Bahrain 2020 census religion frame is two lines only: Muslim / Others (مسلم / أخرى). There is no no-religion category and no not-stated category; the frame sums to the total by construction. The census does not split Muslim into Sunni/Shia and does not divide the Others residual.",
+    "Minority-share design (project-lead ruling 2026-07-11, task 6; BD/KH/LK precedent): because the frame is flat, the two legacy metric slots carry declared constructs. religious_affiliation_percent is the reference-group share (Muslim); no_religion_percent is its exact complement, the minority share (the Others line). The two slots sum to 100.",
+    "The reference group is Muslim, Bahrain's largest published national category in the single published wave (2020), held constant. The reference-group value is that group's share of the census frame, never a measure of affiliation versus non-affiliation. National evidence: 1,111,533 / 1,501,635 = 74.0215%.",
+    "The minority share is arithmetic on the published Muslim/Others frame, the share outside the reference group. It is not a measure of no religion, belief, practice, minority status in law, or self-understood identity. The no_religion slot key is the legacy runtime field name and carries no no-religion semantics here.",
+    "The verbatim two-line frame with counts (Muslim (مسلم) = 1,111,533; Others (أخرى) = 390,102) is carried in the row's quality_flag.",
+    "The citizen/non-citizen structure is manifest context: Bahraini nationals are ~99.7% Muslim (2,295 Others of 712,362); the minority is almost entirely Non-Bahraini expatriates (387,807 of 390,102).",
+    "2010 is HELD: the 2010 census religion national total survives only in secondary and blocked-government-page sources (primary portal offline, absent from data.gov.bh). No 2010 rows and no change metric ship."
+  ],
+  "stats": {
+    "wave_year_rows": 1,
+    "area_count": 1,
+    "shipped_wave_count": 1,
+    "boundary_features": 1,
+    "boundary_bytes": 209397,
+    "all_persons_total": 1501635,
+    "muslim": 1111533,
+    "others": 390102,
+    "muslim_pct": 74.0215,
+    "minority_pct": 25.9785
+  },
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "Rscript scripts/build_bh_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/bh/data/area_summary_national.json",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/bh-census-religion-2020.json",
+      "bash scripts/validate_manifests.sh"
+    ],
+    "notes": "Both published 2020 census religion cuts reconcile independently to Muslim 1,111,533 / Others 390,102 / total 1,501,635 (cut 1: religion x nationality x sex, 8 rows; cut 2: sex x age-group x religion x nationality, 112 rows). The two metric slots are exact complements (74.0215% + 25.9785% = 100). The Bahrain OGDL v1.0 grant, §3.3b disclaimer and §3.3c attribution statement are byte-matched in the cached licence text. The single native ADM0 polygon is non-empty and valid.",
+    "warnings": [
+      "Minority-share design: religious_affiliation_percent carries the reference-group (Muslim) share and no_religion_percent its exact complement, the minority share (the Others line); the no_religion slot carries no no-religion semantics. The frame has no no-religion and no not-stated category.",
+      "Single wave (2020): 2010 census religion is HELD (dead portal, absent from data.gov.bh; the mia.gov.bh government citation blocks command-line fetch and the in-app browser reaches only a human-verification interstitial). No 2010 rows and no change metric; a person-at-the-keyboard capture is the only recovery route.",
+      "National geography only: no Bahrain census wave publishes religion by governorate, so no subnational religion layer is possible.",
+      "The census does not split Muslim into Sunni/Shia and does not divide the Others residual; the sibling iGA births dataset uses a finer Christian/Jewish/Muslim/Others frame but is vital registration, not the census."
+    ],
+    "reconciliation_evidence": {
+      "gate_both_cuts_reconcile": {
+        "expected": {
+          "muslim": 1111533,
+          "others": 390102,
+          "total": 1501635
+        },
+        "cut_religion_nationality_sex": {
+          "rows": 8,
+          "muslim": 1111533,
+          "others": 390102,
+          "total": 1501635,
+          "reconciles": true
+        },
+        "cut_age_group": {
+          "rows": 112,
+          "muslim": 1111533,
+          "others": 390102,
+          "total": 1501635,
+          "reconciles": true
+        },
+        "note": "Two independently published 2020 census religion cuts close to the identical margins."
+      },
+      "gate_minority_share_complement": {
+        "reference_group": "Muslim",
+        "reference_share_pct": 74.0215,
+        "minority_share_pct": 25.9785,
+        "sum": 100,
+        "reconciles": true
+      },
+      "nationality_structure": {
+        "bahraini_total": 712362,
+        "non_bahraini_total": 789273,
+        "bahraini_muslim": 710067,
+        "bahraini_others": 2295,
+        "bahraini_muslim_pct": 99.68,
+        "non_bahraini_others": 387807,
+        "non_bahraini_share_of_minority_pct": 99.41,
+        "note": "The citizen/non-citizen cut is the informative one: Bahraini nationals are ~99.7% Muslim (2,295 Others of 712,362); the minority is almost entirely Non-Bahraini expatriates (387,807 of 390,102, 99.4%). Manifest context, not a data row."
+      },
+      "published_detail_cuts": [
+        {
+          "cut": "population-by-religion-nationality-and-sex-census-2020",
+          "dimension": "religion x nationality x sex",
+          "rows": 8,
+          "role": "source of record for the shipped national row"
+        },
+        {
+          "cut": "population-by-sex-age-groups-and-religion-census-2020",
+          "dimension": "sex x age-group x religion x nationality",
+          "rows": 112,
+          "role": "independent published detail; reconciles to the identical margins; not shipped as data rows"
+        }
+      ],
+      "source_categories_verbatim": [
+        {
+          "en": "Muslim",
+          "ar": "مسلم",
+          "role": "reference_group",
+          "count": 1111533
+        },
+        {
+          "en": "Others",
+          "ar": "أخرى",
+          "role": "minority_share",
+          "count": 390102
+        }
+      ]
+    },
+    "boundary_validation": {
+      "source_feature_count": 1,
+      "simplified_feature_count": 1,
+      "all_valid": true,
+      "all_non_empty": true,
+      "source_geometry_sha256": "c47277aae337225a4c9858b57a3614b00e07b2fe55db8e341bac9609a9700e63",
+      "simplified_geometry_sha256": "20ad477334a8163a7879a4d2666c89629ff374a7591febc4e19475536ebf60e0",
+      "simplified_bytes": 209397,
+      "byte_cap": 250000,
+      "simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 209397
+      },
+      "licence_metadata_status": "passed",
+      "licence": "Open Data Commons Open Database License 1.0",
+      "licence_finding": "geoBoundaries BHR ADM0 release metadata records Open Data Commons Open Database License 1.0 (ODbL 1.0), boundaryYearRepresented 2017, admUnitCount 1, source OpenStreetMap / Wambacher. One native national polygon; no dissolve needed.",
+      "boundary_derivation": "The cache holds a native ADM0 single MultiPolygon; the shipped boundary is that polygon re-tagged with area_code = 'bahrain' and simplified. The outline area is 762.87 sq km, consistent with Bahrain's ~765 sq km land area.",
+      "release_source": "geoBoundaries / OpenStreetMap contributors, Wambacher"
+    }
+  },
+  "privacy": "public",
+  "licence_status": "accepted",
+  "downstream_status": "public",
+  "notes": "Public product under an explicit open licence. One national ADM0 polygon carrying a single-wave 2020 all-persons Muslim/Others series under the minority-share two-slot design. On-page attribution cites the Information & eGovernment Authority via www.data.gov.bh under the Bahrain Open Government Data License v1.0 (with the §3.3b self-analysis disclaimer), and geoBoundaries / OpenStreetMap contributors under ODbL 1.0 for the boundary."
+}
