@@ -1,0 +1,1140 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:dm-census-religion:dm:1991-2011:cso-national",
+  "dataset_id": "dm-census-religion:dm:1991-2011:cso-national",
+  "dataset_version_id": "dm-census-religion:dm:1991-2011:cso-national:3ed77630f47d",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "dm-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "DM"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-11T00:00:00Z",
+  "created_by": "scripts/build_dm_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_dm_area_summary.R",
+    "git_commit": "bee9f4c982a5d9e65e9e70172247ba5b6a04a72e",
+    "command": "Rscript scripts/build_dm_area_summary.R",
+    "parameters": {
+      "construct": "census affiliation",
+      "ruling": "Conductor ruling 2026-07-11: small-country clause (Iceland precedent). National-only three-wave religion series is the shippable ceiling; the parish product is a CSO ask, recorded as a deferred route.",
+      "waves": [
+        1991,
+        2001,
+        2011
+      ],
+      "shipped_geography": "1 national ADM0 polygon",
+      "denominator": "religion universe per wave (Table 6.1 national total): 69,466 / 69,775 / 69,325",
+      "headline_fields": "religious_affiliation = universe - None - Not Stated; no_religion = None; Not Stated is the disclosed residual",
+      "cross_wave_rule": "sub-denomination change withheld; headline affiliation and no-religion comparable across waves",
+      "frames_preserved": "each wave's Table 6.1 category frame preserved verbatim, including source '...' cells",
+      "licence_obligation": "Source: Central Statistics Office of Dominica. Contains information licenced under the Central Statistical Office’s Open Licence Agreement. This product was adapted from the Central Statistics Office's information, which is licenced under the Central Statistical Office’s Open Licence Agreement.",
+      "licence_grant_verbatim": "worldwide, royalty-free non-exclusive licence to freely use the data, copy, modify, translate, publish, adapt, distribute, create derivative works and value- added products for commercial and non-commercial purposes subject to the terms of this licence.",
+      "licence_basis": "cso_open_licence_agreement_value_added_acknowledgement_required",
+      "boundary_join_property": "area_code",
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 20818
+      },
+      "local_cache_hint": "All raw sources are cached under data/raw/dm_census/ and remain git-ignored.",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/dm_census/"
+      ],
+      "reconciliation_evidence": {
+        "gate_category_sum_equals_total": {
+          "1991": {
+            "category_sum": 69466,
+            "printed_total": 69466,
+            "reconciles": true
+          },
+          "2001": {
+            "category_sum": 69775,
+            "printed_total": 69775,
+            "reconciles": true
+          },
+          "2011": {
+            "category_sum": 69325,
+            "printed_total": 69325,
+            "reconciles": true
+          }
+        },
+        "gate_evangelicals_children_sum_to_parent": {
+          "parent": [
+            4925,
+            11735,
+            13151
+          ],
+          "children_sum": [
+            4925,
+            11735,
+            13151
+          ],
+          "reconciles": true
+        },
+        "gate_1991_ocr_reconciliation": {
+          "method": "The 1991 Table II (scanned/OCR) national total row corroborates Table 6.1's 1991 column. Shipped figures are Table 6.1's (clean text layer, byte-matched to the CSO web series); Table II is corroboration only.",
+          "grand_total_match": true,
+          "cell_matches": {
+            "grand_total": 69466,
+            "Anglican": 501,
+            "Jehovah_Witness": 623,
+            "Methodist": 2895,
+            "Pentecostal": 3013,
+            "Roman_Catholic": 48690,
+            "Seventh_Day_Adventist": 3209,
+            "None": 2022,
+            "Not_Stated": 637
+          },
+          "ocr_artefacts": {
+            "baptist": "Table II OCR reads 1,911; Table 6.1 prints 1,912 (single-digit OCR error).",
+            "other": "Table II OCR reads '552>' for Table 6.1's 5,528 (garbled trailing digits).",
+            "church_of_god": "Table II value 436 fell into a whitespace gap in the OCR total row; present as a column, corroborated by Table 6.1."
+          }
+        },
+        "headline_comparability_decision": "Headline affiliation and no-religion are comparable across all three waves: None and Not Stated are consistently named and separately tabulated in every wave's Table 6.1 column, so affiliation (universe less None and Not Stated) and no-religion (None) carry the same construct across 1991, 2001, and 2011. Cross-wave comparability is withheld only below the headline: the Evangelical sub-denominations were tabulated separately only from 2011 (Baptist and Pentecostal from 1991, Other Evangelical from 2001), and Rastafarian was folded into Other in 1991. Each wave's frame is preserved verbatim.",
+        "universe_discipline": {
+          "religion_universe": 69325,
+          "table6_grand_total": 69324,
+          "non_institutional_population": 70739,
+          "total_enumerated_population": 71293
+        },
+        "wave_frames": [
+          {
+            "year": 1991,
+            "top_level_categories": [
+              {
+                "label": "Anglican",
+                "role": "affiliation",
+                "count": 501,
+                "withheld": false
+              },
+              {
+                "label": "Evangelicals",
+                "role": "affiliation",
+                "count": 4925,
+                "withheld": false
+              },
+              {
+                "label": "Methodist",
+                "role": "affiliation",
+                "count": 2895,
+                "withheld": false
+              },
+              {
+                "label": "Church of God",
+                "role": "affiliation",
+                "count": 436,
+                "withheld": false
+              },
+              {
+                "label": "Jehovah Witness",
+                "role": "affiliation",
+                "count": 623,
+                "withheld": false
+              },
+              {
+                "label": "Rastafarian",
+                "role": "affiliation",
+                "count": null,
+                "withheld": true
+              },
+              {
+                "label": "Roman Catholic",
+                "role": "affiliation",
+                "count": 48690,
+                "withheld": false
+              },
+              {
+                "label": "Seventh Day Adventist",
+                "role": "affiliation",
+                "count": 3209,
+                "withheld": false
+              },
+              {
+                "label": "Other",
+                "role": "affiliation",
+                "count": 5528,
+                "withheld": false
+              },
+              {
+                "label": "None",
+                "role": "no_religion",
+                "count": 2022,
+                "withheld": false
+              },
+              {
+                "label": "Not Stated",
+                "role": "nonresponse",
+                "count": 637,
+                "withheld": false
+              }
+            ],
+            "evangelical_subdenominations": [
+              {
+                "label": "Baptist",
+                "parent": "Evangelicals",
+                "count": 1912,
+                "withheld": false
+              },
+              {
+                "label": "Brethren",
+                "parent": "Evangelicals",
+                "count": null,
+                "withheld": true
+              },
+              {
+                "label": "Christian Union Church",
+                "parent": "Evangelicals",
+                "count": null,
+                "withheld": true
+              },
+              {
+                "label": "Pentecostal",
+                "parent": "Evangelicals",
+                "count": 3013,
+                "withheld": false
+              },
+              {
+                "label": "Gospel Mission",
+                "parent": "Evangelicals",
+                "count": null,
+                "withheld": true
+              },
+              {
+                "label": "Other Evangelical",
+                "parent": "Evangelicals",
+                "count": null,
+                "withheld": true
+              }
+            ],
+            "category_sum": 69466,
+            "printed_total": 69466,
+            "reconciles": true
+          },
+          {
+            "year": 2001,
+            "top_level_categories": [
+              {
+                "label": "Anglican",
+                "role": "affiliation",
+                "count": 430,
+                "withheld": false
+              },
+              {
+                "label": "Evangelicals",
+                "role": "affiliation",
+                "count": 11735,
+                "withheld": false
+              },
+              {
+                "label": "Methodist",
+                "role": "affiliation",
+                "count": 2615,
+                "withheld": false
+              },
+              {
+                "label": "Church of God",
+                "role": "affiliation",
+                "count": 833,
+                "withheld": false
+              },
+              {
+                "label": "Jehovah Witness",
+                "role": "affiliation",
+                "count": 818,
+                "withheld": false
+              },
+              {
+                "label": "Rastafarian",
+                "role": "affiliation",
+                "count": 893,
+                "withheld": false
+              },
+              {
+                "label": "Roman Catholic",
+                "role": "affiliation",
+                "count": 42875,
+                "withheld": false
+              },
+              {
+                "label": "Seventh Day Adventist",
+                "role": "affiliation",
+                "count": 4213,
+                "withheld": false
+              },
+              {
+                "label": "Other",
+                "role": "affiliation",
+                "count": 397,
+                "withheld": false
+              },
+              {
+                "label": "None",
+                "role": "no_religion",
+                "count": 4234,
+                "withheld": false
+              },
+              {
+                "label": "Not Stated",
+                "role": "nonresponse",
+                "count": 732,
+                "withheld": false
+              }
+            ],
+            "evangelical_subdenominations": [
+              {
+                "label": "Baptist",
+                "parent": "Evangelicals",
+                "count": 2845,
+                "withheld": false
+              },
+              {
+                "label": "Brethren",
+                "parent": "Evangelicals",
+                "count": null,
+                "withheld": true
+              },
+              {
+                "label": "Christian Union Church",
+                "parent": "Evangelicals",
+                "count": null,
+                "withheld": true
+              },
+              {
+                "label": "Pentecostal",
+                "parent": "Evangelicals",
+                "count": 3927,
+                "withheld": false
+              },
+              {
+                "label": "Gospel Mission",
+                "parent": "Evangelicals",
+                "count": null,
+                "withheld": true
+              },
+              {
+                "label": "Other Evangelical",
+                "parent": "Evangelicals",
+                "count": 4963,
+                "withheld": false
+              }
+            ],
+            "category_sum": 69775,
+            "printed_total": 69775,
+            "reconciles": true
+          },
+          {
+            "year": 2011,
+            "top_level_categories": [
+              {
+                "label": "Anglican",
+                "role": "affiliation",
+                "count": 373,
+                "withheld": false
+              },
+              {
+                "label": "Evangelicals",
+                "role": "affiliation",
+                "count": 13151,
+                "withheld": false
+              },
+              {
+                "label": "Methodist",
+                "role": "affiliation",
+                "count": 1788,
+                "withheld": false
+              },
+              {
+                "label": "Church of God",
+                "role": "affiliation",
+                "count": 637,
+                "withheld": false
+              },
+              {
+                "label": "Jehovah Witness",
+                "role": "affiliation",
+                "count": 918,
+                "withheld": false
+              },
+              {
+                "label": "Rastafarian",
+                "role": "affiliation",
+                "count": 755,
+                "withheld": false
+              },
+              {
+                "label": "Roman Catholic",
+                "role": "affiliation",
+                "count": 36563,
+                "withheld": false
+              },
+              {
+                "label": "Seventh Day Adventist",
+                "role": "affiliation",
+                "count": 4659,
+                "withheld": false
+              },
+              {
+                "label": "Other",
+                "role": "affiliation",
+                "count": 2968,
+                "withheld": false
+              },
+              {
+                "label": "None",
+                "role": "no_religion",
+                "count": 6538,
+                "withheld": false
+              },
+              {
+                "label": "Not Stated",
+                "role": "nonresponse",
+                "count": 975,
+                "withheld": false
+              }
+            ],
+            "evangelical_subdenominations": [
+              {
+                "label": "Baptist",
+                "parent": "Evangelicals",
+                "count": 3581,
+                "withheld": false
+              },
+              {
+                "label": "Brethren",
+                "parent": "Evangelicals",
+                "count": 168,
+                "withheld": false
+              },
+              {
+                "label": "Christian Union Church",
+                "parent": "Evangelicals",
+                "count": 2724,
+                "withheld": false
+              },
+              {
+                "label": "Pentecostal",
+                "parent": "Evangelicals",
+                "count": 4215,
+                "withheld": false
+              },
+              {
+                "label": "Gospel Mission",
+                "parent": "Evangelicals",
+                "count": 1454,
+                "withheld": false
+              },
+              {
+                "label": "Other Evangelical",
+                "parent": "Evangelicals",
+                "count": 1009,
+                "withheld": false
+              }
+            ],
+            "category_sum": 69325,
+            "printed_total": 69325,
+            "reconciles": true
+          }
+        ]
+      },
+      "software_versions_note": "see software_versions"
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "scripts/lib/simplify_boundary.R"
+    }
+  },
+  "source": {
+    "provider": "Central Statistics Office of Dominica; geoBoundaries; Wikimedia Commons",
+    "source_dataset_ids": [
+      "cso-census-religion-national-1991-2011",
+      "geoboundaries-dma-adm0-9469f09"
+    ],
+    "source_urls": [
+      "https://stats.gov.dm/wp-content/uploads/2020/04/2011-Population-and-Housing-Census.pdf",
+      "https://stats.gov.dm/wp-content/uploads/2019/06/Population_and_Housing_Census_1991.pdf",
+      "https://stats.gov.dm/subjects/demographic-statistics/population-by-religion-1991-2001-and-2011/",
+      "https://stats.gov.dm/open-licence-agreement/",
+      "https://www.geoboundaries.org/api/current/gbOpen/DMA/ADM0/",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/DMA/ADM0/geoBoundaries-DMA-ADM0.geojson"
+    ],
+    "retrieved_at": "2026-07-11T00:00:00Z",
+    "licence": "CSO census tables are licensed under the CSO Open Licence Agreement (worldwide, royalty-free, non-exclusive; derivative and value-added products permitted) with the required notices: Source: Central Statistics Office of Dominica. Contains information licenced under the Central Statistical Office’s Open Licence Agreement. This product was adapted from the Central Statistics Office's information, which is licenced under the Central Statistical Office’s Open Licence Agreement. geoBoundaries DMA ADM0 records CC BY 2.5 Generic in its release metadata.",
+    "raw_redistribution": "Raw CSO reports and the boundary remain in the git-ignored cache and the durable GCS mirror; not redistributed in-repo.",
+    "local_cache_hint": "All raw sources are cached under data/raw/dm_census/ and remain git-ignored.",
+    "raw_cache_durable_uris": [
+      "gs://pow-research-data/raw_sources/dm_census/"
+    ],
+    "licence_position": "accepted: CSO Open Licence Agreement (census) and CC BY 2.5 Generic (boundary), both open with attribution",
+    "citation": "Central Statistics Office of Dominica, 1991/2001/2011 census religion (Table 6.1, Table II, CSO web series); geoBoundaries DMA ADM0."
+  },
+  "input_manifests": [],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/dm/data/area_summary_adm0.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 12616,
+      "sha256": "3ed77630f47d8cd251428d605449fdd457681e107619ed4c379268d952565181",
+      "content": "Dominica national three-wave census-religion area summary (1991, 2001, 2011).",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "cso_open_licence_agreement_value_added_acknowledgement_required",
+      "row_count": 3
+    },
+    {
+      "uri": "repo:apps/regions/dm/data/area_summary_adm0.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 3666,
+      "sha256": "0cb4a57f6a75ba30c84f9d29465c50af0e987773e85fe23725431b8320b2fd7d",
+      "content": "Flattened Dominica national census-religion rows for 1991, 2001, and 2011.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "cso_open_licence_agreement_value_added_acknowledgement_required",
+      "row_count": 3
+    },
+    {
+      "uri": "repo:apps/regions/dm/data/dm_adm0_2005.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 20818,
+      "sha256": "9df15e850ce5b81e11f2b681b214607bcc1c9e4a0a6b2aff955931d616adb8f0",
+      "content": "Simplified geoBoundaries DMA ADM0 one national polygon.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "cso_open_licence_agreement_value_added_acknowledgement_required",
+      "feature_count": 1
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/dm/data/area_summary_adm0.json",
+      "sha256": "3ed77630f47d8cd251428d605449fdd457681e107619ed4c379268d952565181",
+      "built_by": "scripts/build_dm_area_summary.R"
+    },
+    {
+      "uri": "repo:apps/regions/dm/data/area_summary_adm0.csv",
+      "sha256": "0cb4a57f6a75ba30c84f9d29465c50af0e987773e85fe23725431b8320b2fd7d",
+      "built_by": "scripts/build_dm_area_summary.R"
+    },
+    {
+      "uri": "repo:apps/regions/dm/data/dm_adm0_2005.geojson",
+      "sha256": "9df15e850ce5b81e11f2b681b214607bcc1c9e4a0a6b2aff955931d616adb8f0",
+      "built_by": "scripts/build_dm_area_summary.R"
+    }
+  ],
+  "raw_sources": [
+    {
+      "uri": "data/raw/dm_census/dm_2011_census_alt.txt",
+      "url": "https://stats.gov.dm/wp-content/uploads/2020/04/2011-Population-and-Housing-Census.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "text",
+      "bytes": 351021,
+      "sha256": "b599ff56636b6940df7149c24ae8ea823af29e8e064cb88fef323f1c140fb772",
+      "source_dataset_id": "cso-census-religion-national-1991-2011",
+      "used_in_public_product": true,
+      "periods": "1991;2001;2011",
+      "notes": "2011 full report text layer; Table 6.1 (three-wave series) and Table 6 (age/sex)."
+    },
+    {
+      "uri": "data/raw/dm_census/dm_1991_census_report.txt",
+      "url": "https://stats.gov.dm/wp-content/uploads/2019/06/Population_and_Housing_Census_1991.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "text",
+      "bytes": 361452,
+      "sha256": "6bf9357993940fc077e08d54ca34176a65551e933e881da49a4adc87be81eb06",
+      "source_dataset_id": "cso-census-religion-national-1991-2011",
+      "used_in_public_product": true,
+      "periods": "1991",
+      "notes": "1991 report OCR text; Table II national religion column corroborates Table 6.1's 1991 column."
+    },
+    {
+      "uri": "data/raw/dm_census/dm_religion_page.html",
+      "url": "https://stats.gov.dm/subjects/demographic-statistics/population-by-religion-1991-2001-and-2011/",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "html",
+      "bytes": 144316,
+      "sha256": "04f35e0a43f2da0d807e92a295bdba430a4813d1f3f3b0f408504d6d9510c04b",
+      "source_dataset_id": "cso-census-religion-national-1991-2011",
+      "used_in_public_product": true,
+      "periods": "1991;2001;2011",
+      "notes": "CSO 'Population by Religion' national web series; byte-matches Table 6.1 headline counts."
+    },
+    {
+      "uri": "data/raw/dm_census/dm_open_licence.html",
+      "url": "https://stats.gov.dm/open-licence-agreement/",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "html",
+      "bytes": 120197,
+      "sha256": "0f1ae8afd30f1b0ba17a51d72357e199806be6e10d96470108a3a2ef70f5c7c4",
+      "source_dataset_id": "cso-census-religion-national-1991-2011",
+      "used_in_public_product": true,
+      "periods": "n/a",
+      "notes": "CSO Open Licence Agreement; attribution and value-added notices quoted verbatim."
+    },
+    {
+      "uri": "data/raw/dm_census/gb_dma_adm0_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/DMA/ADM0/",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "json",
+      "bytes": 1750,
+      "sha256": "4f068a298aa96d85516927bf151776e4cc156df0e73e2928bdc18c76196312b0",
+      "source_dataset_id": "geoboundaries-dma-adm0-9469f09",
+      "used_in_public_product": true,
+      "periods": "2005",
+      "notes": "geoBoundaries DMA ADM0 release metadata; one unit, CC BY 2.5 Generic."
+    },
+    {
+      "uri": "data/raw/dm_census/gb_dma_adm0.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/DMA/ADM0/geoBoundaries-DMA-ADM0.geojson",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "geojson",
+      "bytes": 44911,
+      "sha256": "3816b95a8cc9b1587a6317e091884654051a2d9c38d222037005dcd3b3d1e5ae",
+      "source_dataset_id": "geoboundaries-dma-adm0-9469f09",
+      "used_in_public_product": true,
+      "periods": "2005",
+      "notes": "geoBoundaries DMA ADM0 source geometry, one national polygon."
+    }
+  ],
+  "target_years": [
+    1991,
+    2001,
+    2011
+  ],
+  "stats": {
+    "wave_year_rows": 3,
+    "area_count": 1,
+    "shipped_wave_count": 3,
+    "boundary_features": 1,
+    "boundary_bytes": 20818,
+    "religion_universe": [
+      69466,
+      69775,
+      69325
+    ]
+  },
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "Rscript scripts/build_dm_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/dm/data/area_summary_adm0.json",
+      "bash scripts/validate_manifests.sh"
+    ],
+    "notes": "Every wave's Table 6.1 categories sum to its printed national total exactly (69,466 / 69,775 / 69,325). The Evangelical sub-denominations sum to their parent per wave. The 1991 Table II OCR national total row reconciles against Table 6.1's 1991 column (grand total and eight legible cells match; two OCR artefacts documented). The single ADM0 polygon is non-empty and valid. Cross-wave sub-denomination change is withheld.",
+    "warnings": [
+      "Sub-denomination detail is not comparable across waves: Evangelical sub-groups were tabulated separately only from 2011 (Baptist/Pentecostal from 1991, Other Evangelical from 2001); Rastafarian was inside Other in 1991.",
+      "Table 6 (age/sex) prints a grand total 69,324, one below Table 6.1's 69,325, from the report's printed one/two-person anonymity rule; the shipped universe is Table 6.1's 69,325.",
+      "The 1991 Table II source is scanned/OCR; national column totals are legible and reconcile, but Baptist reads 1,911 vs 1,912 and Other reads '552>' for 5,528. Shipped figures are Table 6.1's.",
+      "Parish geography is unavailable: no CSO parish religion table exists at any wave. A parish product is a deferred CSO ask."
+    ],
+    "reconciliation_evidence": {
+      "gate_category_sum_equals_total": {
+        "1991": {
+          "category_sum": 69466,
+          "printed_total": 69466,
+          "reconciles": true
+        },
+        "2001": {
+          "category_sum": 69775,
+          "printed_total": 69775,
+          "reconciles": true
+        },
+        "2011": {
+          "category_sum": 69325,
+          "printed_total": 69325,
+          "reconciles": true
+        }
+      },
+      "gate_evangelicals_children_sum_to_parent": {
+        "parent": [
+          4925,
+          11735,
+          13151
+        ],
+        "children_sum": [
+          4925,
+          11735,
+          13151
+        ],
+        "reconciles": true
+      },
+      "gate_1991_ocr_reconciliation": {
+        "method": "The 1991 Table II (scanned/OCR) national total row corroborates Table 6.1's 1991 column. Shipped figures are Table 6.1's (clean text layer, byte-matched to the CSO web series); Table II is corroboration only.",
+        "grand_total_match": true,
+        "cell_matches": {
+          "grand_total": 69466,
+          "Anglican": 501,
+          "Jehovah_Witness": 623,
+          "Methodist": 2895,
+          "Pentecostal": 3013,
+          "Roman_Catholic": 48690,
+          "Seventh_Day_Adventist": 3209,
+          "None": 2022,
+          "Not_Stated": 637
+        },
+        "ocr_artefacts": {
+          "baptist": "Table II OCR reads 1,911; Table 6.1 prints 1,912 (single-digit OCR error).",
+          "other": "Table II OCR reads '552>' for Table 6.1's 5,528 (garbled trailing digits).",
+          "church_of_god": "Table II value 436 fell into a whitespace gap in the OCR total row; present as a column, corroborated by Table 6.1."
+        }
+      },
+      "headline_comparability_decision": "Headline affiliation and no-religion are comparable across all three waves: None and Not Stated are consistently named and separately tabulated in every wave's Table 6.1 column, so affiliation (universe less None and Not Stated) and no-religion (None) carry the same construct across 1991, 2001, and 2011. Cross-wave comparability is withheld only below the headline: the Evangelical sub-denominations were tabulated separately only from 2011 (Baptist and Pentecostal from 1991, Other Evangelical from 2001), and Rastafarian was folded into Other in 1991. Each wave's frame is preserved verbatim.",
+      "universe_discipline": {
+        "religion_universe": 69325,
+        "table6_grand_total": 69324,
+        "non_institutional_population": 70739,
+        "total_enumerated_population": 71293
+      },
+      "wave_frames": [
+        {
+          "year": 1991,
+          "top_level_categories": [
+            {
+              "label": "Anglican",
+              "role": "affiliation",
+              "count": 501,
+              "withheld": false
+            },
+            {
+              "label": "Evangelicals",
+              "role": "affiliation",
+              "count": 4925,
+              "withheld": false
+            },
+            {
+              "label": "Methodist",
+              "role": "affiliation",
+              "count": 2895,
+              "withheld": false
+            },
+            {
+              "label": "Church of God",
+              "role": "affiliation",
+              "count": 436,
+              "withheld": false
+            },
+            {
+              "label": "Jehovah Witness",
+              "role": "affiliation",
+              "count": 623,
+              "withheld": false
+            },
+            {
+              "label": "Rastafarian",
+              "role": "affiliation",
+              "count": null,
+              "withheld": true
+            },
+            {
+              "label": "Roman Catholic",
+              "role": "affiliation",
+              "count": 48690,
+              "withheld": false
+            },
+            {
+              "label": "Seventh Day Adventist",
+              "role": "affiliation",
+              "count": 3209,
+              "withheld": false
+            },
+            {
+              "label": "Other",
+              "role": "affiliation",
+              "count": 5528,
+              "withheld": false
+            },
+            {
+              "label": "None",
+              "role": "no_religion",
+              "count": 2022,
+              "withheld": false
+            },
+            {
+              "label": "Not Stated",
+              "role": "nonresponse",
+              "count": 637,
+              "withheld": false
+            }
+          ],
+          "evangelical_subdenominations": [
+            {
+              "label": "Baptist",
+              "parent": "Evangelicals",
+              "count": 1912,
+              "withheld": false
+            },
+            {
+              "label": "Brethren",
+              "parent": "Evangelicals",
+              "count": null,
+              "withheld": true
+            },
+            {
+              "label": "Christian Union Church",
+              "parent": "Evangelicals",
+              "count": null,
+              "withheld": true
+            },
+            {
+              "label": "Pentecostal",
+              "parent": "Evangelicals",
+              "count": 3013,
+              "withheld": false
+            },
+            {
+              "label": "Gospel Mission",
+              "parent": "Evangelicals",
+              "count": null,
+              "withheld": true
+            },
+            {
+              "label": "Other Evangelical",
+              "parent": "Evangelicals",
+              "count": null,
+              "withheld": true
+            }
+          ],
+          "category_sum": 69466,
+          "printed_total": 69466,
+          "reconciles": true
+        },
+        {
+          "year": 2001,
+          "top_level_categories": [
+            {
+              "label": "Anglican",
+              "role": "affiliation",
+              "count": 430,
+              "withheld": false
+            },
+            {
+              "label": "Evangelicals",
+              "role": "affiliation",
+              "count": 11735,
+              "withheld": false
+            },
+            {
+              "label": "Methodist",
+              "role": "affiliation",
+              "count": 2615,
+              "withheld": false
+            },
+            {
+              "label": "Church of God",
+              "role": "affiliation",
+              "count": 833,
+              "withheld": false
+            },
+            {
+              "label": "Jehovah Witness",
+              "role": "affiliation",
+              "count": 818,
+              "withheld": false
+            },
+            {
+              "label": "Rastafarian",
+              "role": "affiliation",
+              "count": 893,
+              "withheld": false
+            },
+            {
+              "label": "Roman Catholic",
+              "role": "affiliation",
+              "count": 42875,
+              "withheld": false
+            },
+            {
+              "label": "Seventh Day Adventist",
+              "role": "affiliation",
+              "count": 4213,
+              "withheld": false
+            },
+            {
+              "label": "Other",
+              "role": "affiliation",
+              "count": 397,
+              "withheld": false
+            },
+            {
+              "label": "None",
+              "role": "no_religion",
+              "count": 4234,
+              "withheld": false
+            },
+            {
+              "label": "Not Stated",
+              "role": "nonresponse",
+              "count": 732,
+              "withheld": false
+            }
+          ],
+          "evangelical_subdenominations": [
+            {
+              "label": "Baptist",
+              "parent": "Evangelicals",
+              "count": 2845,
+              "withheld": false
+            },
+            {
+              "label": "Brethren",
+              "parent": "Evangelicals",
+              "count": null,
+              "withheld": true
+            },
+            {
+              "label": "Christian Union Church",
+              "parent": "Evangelicals",
+              "count": null,
+              "withheld": true
+            },
+            {
+              "label": "Pentecostal",
+              "parent": "Evangelicals",
+              "count": 3927,
+              "withheld": false
+            },
+            {
+              "label": "Gospel Mission",
+              "parent": "Evangelicals",
+              "count": null,
+              "withheld": true
+            },
+            {
+              "label": "Other Evangelical",
+              "parent": "Evangelicals",
+              "count": 4963,
+              "withheld": false
+            }
+          ],
+          "category_sum": 69775,
+          "printed_total": 69775,
+          "reconciles": true
+        },
+        {
+          "year": 2011,
+          "top_level_categories": [
+            {
+              "label": "Anglican",
+              "role": "affiliation",
+              "count": 373,
+              "withheld": false
+            },
+            {
+              "label": "Evangelicals",
+              "role": "affiliation",
+              "count": 13151,
+              "withheld": false
+            },
+            {
+              "label": "Methodist",
+              "role": "affiliation",
+              "count": 1788,
+              "withheld": false
+            },
+            {
+              "label": "Church of God",
+              "role": "affiliation",
+              "count": 637,
+              "withheld": false
+            },
+            {
+              "label": "Jehovah Witness",
+              "role": "affiliation",
+              "count": 918,
+              "withheld": false
+            },
+            {
+              "label": "Rastafarian",
+              "role": "affiliation",
+              "count": 755,
+              "withheld": false
+            },
+            {
+              "label": "Roman Catholic",
+              "role": "affiliation",
+              "count": 36563,
+              "withheld": false
+            },
+            {
+              "label": "Seventh Day Adventist",
+              "role": "affiliation",
+              "count": 4659,
+              "withheld": false
+            },
+            {
+              "label": "Other",
+              "role": "affiliation",
+              "count": 2968,
+              "withheld": false
+            },
+            {
+              "label": "None",
+              "role": "no_religion",
+              "count": 6538,
+              "withheld": false
+            },
+            {
+              "label": "Not Stated",
+              "role": "nonresponse",
+              "count": 975,
+              "withheld": false
+            }
+          ],
+          "evangelical_subdenominations": [
+            {
+              "label": "Baptist",
+              "parent": "Evangelicals",
+              "count": 3581,
+              "withheld": false
+            },
+            {
+              "label": "Brethren",
+              "parent": "Evangelicals",
+              "count": 168,
+              "withheld": false
+            },
+            {
+              "label": "Christian Union Church",
+              "parent": "Evangelicals",
+              "count": 2724,
+              "withheld": false
+            },
+            {
+              "label": "Pentecostal",
+              "parent": "Evangelicals",
+              "count": 4215,
+              "withheld": false
+            },
+            {
+              "label": "Gospel Mission",
+              "parent": "Evangelicals",
+              "count": 1454,
+              "withheld": false
+            },
+            {
+              "label": "Other Evangelical",
+              "parent": "Evangelicals",
+              "count": 1009,
+              "withheld": false
+            }
+          ],
+          "category_sum": 69325,
+          "printed_total": 69325,
+          "reconciles": true
+        }
+      ]
+    },
+    "boundary_validation": {
+      "source_feature_count": 1,
+      "simplified_feature_count": 1,
+      "all_valid": true,
+      "all_non_empty": true,
+      "source_geometry_sha256": "b3194dc4dd50e84e83469827d7840079260276af75b985e330e47de30b5b9953",
+      "simplified_geometry_sha256": "b5af40ac2dc2fd86c4c7c4bd9d3da9117605001ba48ae107428b7b054004dea9",
+      "simplified_bytes": 20818,
+      "byte_cap": 250000,
+      "simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 20818
+      },
+      "licence_metadata_status": "passed",
+      "licence": "Creative Commons Attribution 2.5 Generic",
+      "licence_finding": "geoBoundaries DMA ADM0 release metadata records 'Creative Commons Attribution 2.5 Generic' with licenseDetail 'nan' and a bare Wikimedia Commons licenseSource. This is an accepted open attribution licence, contradicting the route probe's 'null licence' reading (the cached ADM1 metadata likewise records CC BY 2.5 Generic). No OSM/ODbL or Natural Earth fallback is required.",
+      "release_source": "Wikimedia Commons"
+    }
+  },
+  "construct_notes": [
+    "The construct is census religious affiliation, not practice, attendance, or registered membership.",
+    "Source category spellings and the Evangelicals parent/child structure are retained verbatim per wave.",
+    "population_total is each wave's religion universe (Table 6.1 national total). Affiliation is the universe less None and Not Stated; no_religion is None; Not Stated is the disclosed residual.",
+    "Headline affiliation and no-religion are comparable across the three waves because None and Not Stated are consistently defined and separately tabulated in every wave.",
+    "Cross-wave sub-denomination change is withheld because the Evangelical sub-denominations were tabulated separately only from 2011 and Rastafarian only from 2001.",
+    "The religion universe (69,325 in 2011) differs from the total enumerated population (71,293) and non-institutional population (70,739); every figure states its universe.",
+    "A single national polygon is intentional under the small-country clause (Iceland precedent): the CSO publishes census religion only at national geography.",
+    "No Dominica place-of-worship count or density metric ships in this release."
+  ],
+  "deferred_sources": [
+    {
+      "source": "CSO parish-level religion cross-tabulation (PI task 13)",
+      "status": "deferred_cso_ask",
+      "reason": "No parish religion table exists in any public CSO product at any wave; the 2001 report carries no religion table at all, and no REDATAM/CELADE instance exists for Dominica. A genuine ten-parish product requires a CSO ask for a parish-level religion cross-tabulation and, ideally, an official parish boundary layer. Recorded as a deferred route under the small-country clause.",
+      "recovery_route": "Email the CSO for parish-level religion for 1991/2001/2011 (or the 2022 round) and Open Licence confirmation."
+    },
+    {
+      "source": "2022 Population and Housing Census (Census Day 25 June 2022)",
+      "status": "unpublished_upstream",
+      "reason": "No 2022 results are published on the CSO site; the newest religion figures remain 2011.",
+      "recovery_route": "Revisit when the CSO publishes 2022 religion tables."
+    },
+    {
+      "source": "geoBoundaries DMA ADM1 ten-parish boundary",
+      "status": "not_needed_for_national_product",
+      "reason": "The ADM1 release exists (ten parishes matching the census frame) but is moot without a parish religion table."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "accepted",
+  "licence_basis": "cso_open_licence_agreement_value_added_acknowledgement_required",
+  "downstream_status": "public",
+  "source_datasets": [
+    {
+      "source_dataset_id": "cso-census-religion-national-1991-2011",
+      "name": "CSO national census religion time series 1991, 2001, 2011 (Table 6.1; CSO web series; 1991 Table II)",
+      "provider": "Central Statistics Office of Dominica (CSO)",
+      "url": "https://stats.gov.dm/wp-content/uploads/2020/04/2011-Population-and-Housing-Census.pdf",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/dm_census/dm_2011_census_alt.txt",
+      "licence": {
+        "name": "CSO Open Licence Agreement: worldwide, royalty-free, non-exclusive licence to use, copy, modify, publish, distribute, and create derivative or value-added products from CSO information, subject to the required attribution and value-added notices.",
+        "url": "https://stats.gov.dm/open-licence-agreement/",
+        "attribution": "Source: Central Statistics Office of Dominica. Contains information licenced under the Central Statistical Office’s Open Licence Agreement."
+      },
+      "citation": "Central Statistics Office of Dominica, 2011 Population and Housing Census, Table 6.1 (Percentage Population by Religion 1991, 2001 and 2011); 1991 Population and Housing Census, Table II; CSO 'Population by Religion 1991 2001 and 2011' web series.",
+      "access_limits": "Published PDF reports and an HTML web table; no query tool or REDATAM instance exists for Dominica.",
+      "redistribution_limits": "Derived national statistics ship under the CSO Open Licence Agreement. This product was adapted from the Central Statistics Office's information, which is licenced under the Central Statistical Office’s Open Licence Agreement.",
+      "notes": "National geography only; religion is never tabulated by parish in any public CSO product. The 2001 report carries no religion table; its national column survives via Table 6.1 and the web series. The 1991 Table II is a scanned/OCR source; national column totals are legible and reconcile against Table 6.1."
+    },
+    {
+      "source_dataset_id": "geoboundaries-dma-adm0-9469f09",
+      "name": "geoBoundaries gbOpen DMA ADM0 (one national polygon)",
+      "provider": "geoBoundaries; source Wikimedia Commons",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/DMA/ADM0/geoBoundaries-DMA-ADM0.geojson",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/dm_census/gb_dma_adm0.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution 2.5 Generic",
+        "url": "commons.wikimedia.org/wiki/File",
+        "attribution": "geoBoundaries; Wikimedia Commons"
+      },
+      "citation": "geoBoundaries gbOpen DMA ADM0, boundary ID DMA-ADM0-26965486, release commit 9469f09; source Wikimedia Commons.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified national polygon is redistributed under CC BY 2.5 Generic with attribution.",
+      "notes": "Release metadata records CC BY 2.5 Generic (an accepted open attribution licence), not a null licence. One national polygon simplified with scripts/lib/simplify_boundary.R; the join property is area_code."
+    }
+  ],
+  "notes": "Dominica national three-wave census-religion product under the small-country clause. Census data ship under the CSO Open Licence Agreement with its required attribution and value-added notices; the boundary is CC BY 2.5 Generic. The parish product is a deferred CSO ask. The map UI (index.html, hub) is outside this build."
+}

@@ -1,0 +1,212 @@
+{
+  "schema_version": "area-summary.v1",
+  "generated_at": "2026-07-11T00:00:00Z",
+  "generated_by": "scripts/build_dm_area_summary.R",
+  "country_code": "DM",
+  "boundary_set": {
+    "boundary_set_id": "dm-adm0-2005-geoboundaries-adm0",
+    "country_code": "DM",
+    "level": "adm0",
+    "vintage": "2005",
+    "source_dataset_id": "geoboundaries-dma-adm0-9469f09"
+  },
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "No governed place-of-worship snapshot ships in the Dominica national census-religion product.",
+    "notes": "Place counts and density metrics remain null."
+  },
+  "source_datasets": [
+    {
+      "source_dataset_id": "cso-census-religion-national-1991-2011",
+      "name": "CSO national census religion time series 1991, 2001, 2011 (Table 6.1; CSO web series; 1991 Table II)",
+      "provider": "Central Statistics Office of Dominica (CSO)",
+      "url": "https://stats.gov.dm/wp-content/uploads/2020/04/2011-Population-and-Housing-Census.pdf",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/dm_census/dm_2011_census_alt.txt",
+      "licence": {
+        "name": "CSO Open Licence Agreement: worldwide, royalty-free, non-exclusive licence to use, copy, modify, publish, distribute, and create derivative or value-added products from CSO information, subject to the required attribution and value-added notices.",
+        "url": "https://stats.gov.dm/open-licence-agreement/",
+        "attribution": "Source: Central Statistics Office of Dominica. Contains information licenced under the Central Statistical Office’s Open Licence Agreement."
+      },
+      "citation": "Central Statistics Office of Dominica, 2011 Population and Housing Census, Table 6.1 (Percentage Population by Religion 1991, 2001 and 2011); 1991 Population and Housing Census, Table II; CSO 'Population by Religion 1991 2001 and 2011' web series.",
+      "access_limits": "Published PDF reports and an HTML web table; no query tool or REDATAM instance exists for Dominica.",
+      "redistribution_limits": "Derived national statistics ship under the CSO Open Licence Agreement. This product was adapted from the Central Statistics Office's information, which is licenced under the Central Statistical Office’s Open Licence Agreement.",
+      "notes": "National geography only; religion is never tabulated by parish in any public CSO product. The 2001 report carries no religion table; its national column survives via Table 6.1 and the web series. The 1991 Table II is a scanned/OCR source; national column totals are legible and reconcile against Table 6.1."
+    },
+    {
+      "source_dataset_id": "geoboundaries-dma-adm0-9469f09",
+      "name": "geoBoundaries gbOpen DMA ADM0 (one national polygon)",
+      "provider": "geoBoundaries; source Wikimedia Commons",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/DMA/ADM0/geoBoundaries-DMA-ADM0.geojson",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/dm_census/gb_dma_adm0.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution 2.5 Generic",
+        "url": "commons.wikimedia.org/wiki/File",
+        "attribution": "geoBoundaries; Wikimedia Commons"
+      },
+      "citation": "geoBoundaries gbOpen DMA ADM0, boundary ID DMA-ADM0-26965486, release commit 9469f09; source Wikimedia Commons.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified national polygon is redistributed under CC BY 2.5 Generic with attribution.",
+      "notes": "Release metadata records CC BY 2.5 Generic (an accepted open attribution licence), not a null licence. One national polygon simplified with scripts/lib/simplify_boundary.R; the join property is area_code."
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_id": "population_total",
+      "label": "Religion universe",
+      "description": "Table 6.1 national religion total per wave (1991: 69,466; 2001: 69,775; 2011: 69,325).",
+      "unit": "count",
+      "denominator_indicator_id": null,
+      "method": "Printed Table 6.1 national Total per wave; byte-matched to the CSO web series.",
+      "temporal_coverage": "1991, 2001, 2011",
+      "spatial_coverage": "Dominica national total on one ADM0 polygon",
+      "quality_notes": "The religion universe differs from the total enumerated (71,293) and non-institutional (70,739) populations."
+    },
+    {
+      "indicator_id": "religious_affiliation_percent",
+      "label": "Religious affiliation %",
+      "description": "Share reporting any religious affiliation (universe less None and Not Stated).",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "100 * (universe - None - Not Stated) / religion universe.",
+      "temporal_coverage": "1991, 2001, 2011",
+      "spatial_coverage": "Dominica national",
+      "quality_notes": "Percentages use each wave's religion universe (the Table 6.1 national total). Affiliation is the universe less None and Not Stated; no-religion is None; Not Stated is the disclosed residual so affiliation + None + Not Stated equals the universe. Comparable across waves; sub-denomination detail is not."
+    },
+    {
+      "indicator_id": "no_religion_percent",
+      "label": "No religion %",
+      "description": "Share in the source None category.",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "100 * None / religion universe.",
+      "temporal_coverage": "1991, 2001, 2011",
+      "spatial_coverage": "Dominica national",
+      "quality_notes": "None is consistently named and separately tabulated in all three waves, so it is comparable across waves."
+    }
+  ],
+  "visual_layers": [
+    {
+      "visual_layer_id": "dm-adm0-religious-affiliation",
+      "label": "Religious affiliation %",
+      "description": "Dominica national census-affiliation share for 1991, 2001, and 2011.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "religious_affiliation_percent"
+      ],
+      "geometry_unit_type": "country",
+      "legend": {
+        "unit": "percent",
+        "denominator": "religion universe (Table 6.1 national total per wave)"
+      },
+      "colour_scale": null,
+      "time_control": "year_selector",
+      "aggregation_rule": null,
+      "uncertainty_display": "quality_flag",
+      "default_visibility": true,
+      "notes": "A single national polygon is intentional under the small-country clause: the CSO publishes census religion only at national geography. Cross-wave sub-denomination change is withheld because the Evangelical sub-denominations were tabulated only from 2011."
+    },
+    {
+      "visual_layer_id": "dm-adm0-no-religion",
+      "label": "No religion %",
+      "description": "Dominica national census no-religion (None) share for 1991, 2001, and 2011.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "no_religion_percent"
+      ],
+      "geometry_unit_type": "country",
+      "legend": {
+        "unit": "percent",
+        "denominator": "religion universe (Table 6.1 national total per wave)"
+      },
+      "colour_scale": null,
+      "time_control": "year_selector",
+      "aggregation_rule": null,
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "None and Not Stated are consistently defined across all three waves; Not Stated is the disclosed residual."
+    }
+  ],
+  "rows": [
+    {
+      "country_code": "DM",
+      "boundary_set_id": "dm-adm0-2005-geoboundaries-adm0",
+      "boundary_level": "adm0",
+      "area_unit_id": "dm-adm0-2005-geoboundaries-adm0:DM",
+      "area_code": "DM",
+      "area_name": "Dominica",
+      "year": 1991,
+      "population_total": 69466,
+      "population_total_basis": "Religion universe: the 2011 Population and Housing Census Table 6.1 national religion total per wave (1991: 69,466; 2001: 69,775; 2011: 69,325), byte-matched to the CSO 'Population by Religion' web series. This religion universe differs from the 2011 report's total enumerated population (71,293) and non-institutional population (70,739); the 1991 tabulations rest on the 1991 non-institutional population 69,466. Table 6 (age/sex) prints a grand total 69,324, one below Table 6.1's 69,325, from the report's printed one/two-person anonymity rule; the shipped universe is Table 6.1's 69,325.",
+      "religious_affiliation_count": 66807,
+      "religious_affiliation_percent": 96.1722,
+      "no_religion_count": 2022,
+      "no_religion_percent": 2.9108,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 754.9337,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "cso-census-religion-national-1991-2011",
+        "geoboundaries-dma-adm0-9469f09"
+      ],
+      "quality_flag": "census_affiliation;national_only_adm0;religion_universe_denominator;not_stated_residual_disclosed;cross_wave_subdenomination_change_withheld;frames_preserved_verbatim_per_wave;cso_open_licence_agreement_value_added_acknowledgement_required;boundary_cc_by_2_5_generic"
+    },
+    {
+      "country_code": "DM",
+      "boundary_set_id": "dm-adm0-2005-geoboundaries-adm0",
+      "boundary_level": "adm0",
+      "area_unit_id": "dm-adm0-2005-geoboundaries-adm0:DM",
+      "area_code": "DM",
+      "area_name": "Dominica",
+      "year": 2001,
+      "population_total": 69775,
+      "population_total_basis": "Religion universe: the 2011 Population and Housing Census Table 6.1 national religion total per wave (1991: 69,466; 2001: 69,775; 2011: 69,325), byte-matched to the CSO 'Population by Religion' web series. This religion universe differs from the 2011 report's total enumerated population (71,293) and non-institutional population (70,739); the 1991 tabulations rest on the 1991 non-institutional population 69,466. Table 6 (age/sex) prints a grand total 69,324, one below Table 6.1's 69,325, from the report's printed one/two-person anonymity rule; the shipped universe is Table 6.1's 69,325.",
+      "religious_affiliation_count": 64809,
+      "religious_affiliation_percent": 92.8828,
+      "no_religion_count": 4234,
+      "no_religion_percent": 6.0681,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 754.9337,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "cso-census-religion-national-1991-2011",
+        "geoboundaries-dma-adm0-9469f09"
+      ],
+      "quality_flag": "census_affiliation;national_only_adm0;religion_universe_denominator;not_stated_residual_disclosed;cross_wave_subdenomination_change_withheld;frames_preserved_verbatim_per_wave;cso_open_licence_agreement_value_added_acknowledgement_required;boundary_cc_by_2_5_generic"
+    },
+    {
+      "country_code": "DM",
+      "boundary_set_id": "dm-adm0-2005-geoboundaries-adm0",
+      "boundary_level": "adm0",
+      "area_unit_id": "dm-adm0-2005-geoboundaries-adm0:DM",
+      "area_code": "DM",
+      "area_name": "Dominica",
+      "year": 2011,
+      "population_total": 69325,
+      "population_total_basis": "Religion universe: the 2011 Population and Housing Census Table 6.1 national religion total per wave (1991: 69,466; 2001: 69,775; 2011: 69,325), byte-matched to the CSO 'Population by Religion' web series. This religion universe differs from the 2011 report's total enumerated population (71,293) and non-institutional population (70,739); the 1991 tabulations rest on the 1991 non-institutional population 69,466. Table 6 (age/sex) prints a grand total 69,324, one below Table 6.1's 69,325, from the report's printed one/two-person anonymity rule; the shipped universe is Table 6.1's 69,325.",
+      "religious_affiliation_count": 61812,
+      "religious_affiliation_percent": 89.1626,
+      "no_religion_count": 6538,
+      "no_religion_percent": 9.4309,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 754.9337,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "cso-census-religion-national-1991-2011",
+        "geoboundaries-dma-adm0-9469f09"
+      ],
+      "quality_flag": "census_affiliation;national_only_adm0;religion_universe_denominator;not_stated_residual_disclosed;cross_wave_subdenomination_change_withheld;frames_preserved_verbatim_per_wave;cso_open_licence_agreement_value_added_acknowledgement_required;boundary_cc_by_2_5_generic"
+    }
+  ]
+}
