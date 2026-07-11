@@ -7,6 +7,13 @@
 
 ## Where To Look
 
+- CONDUCTOR HANDOVER (read first when conducting a work sitting):
+  `~/.claude/projects/-Users-joseph-GIT/memory/pow-conductor-handover.md`
+  carries the routing rulings, the project lead's blocking list, the
+  next-work order, and the trap list; the war log sits beside it as
+  `pow-next-arc-global-databases.md`. Sessions started from `~/GIT`
+  load these automatically; sessions started elsewhere read them from
+  the paths above.
 - `ROADMAP.md`: high-level phases, non-goals, and long-horizon direction.
 - `docs/system-map.md`: compact module map. Use it to place work inside the
   right part of the system before changing planning or task lists.
