@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Marshall Islands Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // The Marshall Islands product is census religious affiliation by atoll from
+    // the RMI Economic Policy, Planning and Statistics Office (EPPSO) and the
+    // Pacific Community (SPC), a single wave, 2021, from the 2021 Census Report
+    // Volume 1, Table 9 (Population by Urban/Rural and atoll by religion). The
+    // construct is census affiliation; it records each resident's reported
+    // religion (questionnaire item P6, asked of all persons; for a young child,
+    // the religion of the parents), not practice, attendance, or membership. The
+    // universe is all persons of all ages, 41,575, and the table reconciles at
+    // every margin (each atoll's sixteen category cells sum to its atoll Total,
+    // the twenty-five atoll rows sum column-wise to the sixteen national
+    // category totals, and Rural 8,963 + Urban 32,612 = Total 41,575).
+    //
+    // Single wave: the atoll religion table exists for 2021 alone; the product
+    // is therefore a snapshot, not a change series, and no atoll-level change
+    // metric is offered. The 2011 census collected religion but never tabulated
+    // it publicly, and the 1999 religion table is a three-sector urban/rural
+    // split with an image-only body; both are held.
+    //
+    // Slot honesty follows the sixteen-category frame. Religious affiliation is
+    // the atoll Total minus the single None line; every other category, including
+    // Other (specify), stays in the affiliation denominator as a religious body.
+    // No religion is the printed None line exactly (444 nationally of 41,575);
+    // the frame carries no separate refused or not-stated line. The verbatim
+    // sixteen-category composition (United Church of Christ the largest body
+    // nationally at 19,920, then Assembly of God 5,864, Roman Catholic 3,863,
+    // Mormon 2,363, Full Gospel 2,086, and Marshall-Islands-founded bodies such
+    // as Bukot Nan Jesus 1,246) lives in the source Table 9 and the build
+    // manifest's category frame, not in the area-summary rows; the popup shows
+    // the two shares only. The denominational contrast is the reason to map the
+    // Marshall Islands on one wave: Assembly of God leads on some outer atolls
+    // such as Likiep, and Jehovah's Witness shares concentrate on Arno.
+    //
+    // Two zero-population atolls carry null shares (resettlement history). Bikini
+    // (census population 0) has no geoBoundaries ADM1 polygon: its row is kept in
+    // the data with a disclosure flag and the map joins the other twenty-four
+    // atolls. Rongelap (also population 0) has a polygon and renders as no-data.
+    //
+    // The extent spans longitude 160.9 East (Enewetak) to 172.2 East (Mili) and
+    // latitude 4.6 North (Ebon) to 14.6 North (northern atolls); wholly
+    // east-positive; no antimeridian handling is needed. Both island chains,
+    // Ralik (west) and Ratak (east), fall inside the frame.
+    //
+    // The 2021 Census Volume 1 carries an explicit EPPSO/SPC
+    // partial-reproduction-with-acknowledgement clause. Under the build-then-ask
+    // ruling of 2026-07-11 the derived atoll summaries ship with attribution to
+    // the RMI EPPSO and the Pacific Community (SPC) while a courtesy
+    // reuse-confirmation ask is outgoing; the licence stays needs-review and the
+    // page reverts in a single commit if EPPSO objects. Boundaries are
+    // geoBoundaries MHL ADM1 (ODbL 1.0), source OpenStreetMap contributors and
+    // Wambacher. Place and density metrics are null because no governed Marshall
+    // Islands place-of-worship snapshot ships with the product.
+    window.REGION_CONFIG = {
+      countryCode: "MH",
+      title: "Places of Worship | Marshall Islands Research Map",
+      // extent lon 160.9..172.2E (Enewetak to Mili), lat 4.6..14.6N (Ebon to the
+      // northern atolls); wholly east-positive, no dateline handling. camera on
+      // the extent midpoint to frame both the Ralik and Ratak chains beside the
+      // census panels; a single-chain camera that drops the far atolls is the
+      // named failure mode.
+      center: [166.6, 9.5],
+      initialZoom: 5.5,
+      censusLevels: {
+        atoll: {
+          label: "Atoll",
+          boundaries: "data/mh_atoll_2017.geojson",
+          summary: "data/area_summary_atoll.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion by atoll from the Marshall Islands EPPSO and the Pacific Community (SPC), 2021 Census Report Volume 1 Table 9, single wave 2021; the source carries an explicit EPPSO/SPC partial-reproduction-with-acknowledgement clause, derived atoll summaries ship with attribution while a courtesy reuse-confirmation ask is outgoing · Boundaries © geoBoundaries MHL ADM1 (Open Data Commons Open Database License 1.0), source OpenStreetMap contributors, Wambacher"
+        }
+      },
+      defaultLevel: "atoll",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      // only affiliation and no-religion apply: place and density metrics are
+      // null because no governed place-of-worship snapshot ships, and no change
+      // metric is offered because the atoll religion table exists for 2021 alone
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the atoll's all-persons population reporting a religious affiliation, against the printed atoll Total. Affiliation is the atoll Total minus the single None line; every other category, including Other (specify), stays in the affiliation denominator as a religious body. Null for the zero-population atolls Bikini and Rongelap"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the printed None line, against the same all-persons atoll Total (444 nationally of 41,575). The frame carries a single None line and no separate refused or not-stated line. Null for the zero-population atolls Bikini and Rongelap"
+        }
+      },
+      popupDenominatorNote: "Percentages use each atoll's printed census Total from the 2021 Census Report Volume 1 Table 9 (Population by Urban/Rural and atoll by religion; all persons of all ages, 41,575). The construct is census affiliation: each resident's reported religion (questionnaire item P6, asked of all persons; for a young child, the religion of the parents), not practice, attendance, or membership. Religious affiliation is the atoll Total minus the single None line, and every other category, including Other (specify), stays in the affiliation denominator as a religious body; no religion is the printed None line exactly (444 nationally), the frame carrying no separate refused or not-stated line. This is a single wave (2021); no atoll-level change metric exists. The substantive subnational structure is denominational (United Church of Christ the largest body nationally at 19,920, then Assembly of God 5,864, Roman Catholic 3,863, Mormon 2,363, Full Gospel 2,086, and Marshall-Islands-founded bodies such as Bukot Nan Jesus 1,246; Assembly of God leads on some outer atolls such as Likiep, and Jehovah's Witness shares concentrate on Arno); that composition lives in the source Table 9 and the build manifest's category frame, not in these rows, and the popup shows the affiliation and no-religion shares only. Bikini (population 0) has no boundary polygon and is excluded from the map join; Rongelap (also population 0) has a polygon and renders as no-data; both carry null shares. The 2021 Census Volume 1 carries an explicit EPPSO/SPC partial-reproduction-with-acknowledgement clause; the derived atoll summaries ship with attribution to the RMI EPPSO and the Pacific Community (SPC) while a courtesy reuse-confirmation ask is outgoing. The boundary is geoBoundaries MHL ADM1 (ODbL 1.0).",
+      cityPresets: [
+        { label: "Majuro", aliases: ["Delap", "Capital"], coords: [171.38, 7.09], zoom: 11 },
+        { label: "Ebeye", aliases: ["Kwajalein"], coords: [167.74, 8.78], zoom: 11 },
+        { label: "Jaluit", coords: [169.44, 5.92], zoom: 10 },
+        { label: "Wotje", coords: [170.24, 9.46], zoom: 10 },
+        { label: "Likiep", coords: [169.31, 9.82], zoom: 10 },
+        { label: "Arno", coords: [171.70, 7.08], zoom: 10 }
+      ],
+      geocode: { country: "mh", biasLngLat: [166.6, 9.5] },
+      onboarding: {
+        title: "Marshall Islands research map",
+        intro: "Census religious affiliation for the Marshall Islands' atolls, a single 2021 snapshot from the Economic Policy, Planning and Statistics Office (EPPSO) and the Pacific Community (SPC), from the 2021 Census Report Volume 1, Table 9. The construct is census affiliation; it does not measure belief, practice, attendance, or membership. The universe is all persons of all ages (41,575).",
+        bullets: [
+          "Atolls are shaded by the share reporting a religious affiliation, or by the share in the census <code>None</code> line, shown as No religion %.",
+          "This is one census wave, 2021, at atoll level. Every percentage uses the atoll's own printed census Total (all persons of all ages). No change metric is offered: the atoll religion table exists for 2021 alone.",
+          "Religious affiliation is the atoll Total minus the single None line; every other category, including Other (specify), stays in the affiliation denominator as a religious body. No religion is the printed None line exactly (444 nationally); the frame carries no separate refused or not-stated line.",
+          "The substantive contrast is denominational. United Church of Christ is the largest body nationally (19,920 of 41,575), then Assembly of God (5,864), Roman Catholic (3,863), Mormon (2,363), Full Gospel (2,086), and Marshall-Islands-founded bodies such as Bukot Nan Jesus (1,246); Assembly of God leads on some outer atolls such as Likiep, and Jehovah's Witness shares concentrate on Arno. That composition lives in the source Table 9 and the build manifest's category frame; the headline shares do not carry it.",
+          "Two atolls are zero-population from resettlement history and carry null shares. Bikini has no boundary polygon and is excluded from the map join; Rongelap has a polygon and renders as no-data.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      // the 2021 Census Volume 1 carries an explicit EPPSO/SPC
+      // partial-reproduction-with-acknowledgement clause; derived atoll summaries
+      // ship with attribution to the RMI EPPSO and SPC under the build-then-ask
+      // ruling while a courtesy reuse-confirmation ask is outgoing. geoBoundaries
+      // MHL ADM1 is ODbL 1.0, source OpenStreetMap contributors and Wambacher.
+      censusSourceAttribution: 'Census religion by atoll from the <a href="https://sdd.spc.int/digital_library/republic-marshall-islands-2021-census-report-volume-1-basic-tables-and" target="_blank" rel="noopener">Marshall Islands EPPSO and the Pacific Community (SPC)</a>, 2021 Census Report Volume 1 Table 9 (Population by Urban/Rural and atoll by religion), single wave 2021. The source carries an explicit EPPSO/SPC partial-reproduction-with-acknowledgement clause; the derived atoll summaries are reproduced with attribution to the RMI EPPSO and the Pacific Community (SPC) while a courtesy reuse-confirmation ask is outgoing, and the page reverts in a single commit if EPPSO objects (build-then-ask ruling, 2026-07-11) &middot; Boundaries from <a href="https://www.geoboundaries.org/api/current/gbOpen/MHL/ADM1/" target="_blank" rel="noopener">geoBoundaries</a> MHL ADM1, Open Data Commons Open Database License 1.0 (ODbL 1.0), boundary source OpenStreetMap contributors, Wambacher',
+      censusFlagNote: "* Percentages use each atoll's printed census Total from the 2021 Census Report Volume 1 Table 9 (all persons of all ages, 41,575). The construct is census affiliation; it does not measure belief, practice, attendance, or membership. Religious affiliation is the atoll Total minus the single None line, and every other category, including Other (specify), stays in the affiliation denominator as a religious body; no religion is the printed None line exactly (444 nationally), the frame carrying no separate refused or not-stated line. Single wave (2021); no atoll-level change metric exists. The substantive subnational structure is denominational (United Church of Christ the largest body nationally at 19,920, then Assembly of God 5,864, Roman Catholic 3,863, Mormon 2,363, Full Gospel 2,086, and Marshall-Islands-founded bodies such as Bukot Nan Jesus 1,246); that composition lives in the source Table 9 and the build manifest's category frame, not in these headline metrics. Two atolls are zero-population from resettlement history and carry null shares: Bikini (no boundary polygon, excluded from the map join) and Rongelap (has a polygon, renders as no-data). The 2021 Census Volume 1 carries an explicit EPPSO/SPC partial-reproduction-with-acknowledgement clause; the derived atoll summaries ship with attribution to the RMI EPPSO and SPC while a courtesy reuse-confirmation ask is outgoing, and the page reverts in a single commit if EPPSO objects. The boundary is geoBoundaries MHL ADM1, ODbL 1.0, source OpenStreetMap contributors, Wambacher."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260711b"></script>
+</body>
+</html>
