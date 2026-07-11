@@ -1,0 +1,941 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:pe-census-religion:pe:2007-2017:inei-department",
+  "dataset_id": "pe-census-religion:pe:2007-2017:inei-department",
+  "dataset_version_id": "pe-census-religion:pe:2007-2017:inei-department:ec633023ff55",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "pe-census-religion",
+  "dataset_role": "staged_evidence",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "PE"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-07-12T00:00:00Z",
+  "created_by": "scripts/build_pe_area_summary.R",
+  "target_years": [
+    2007,
+    2017
+  ],
+  "pipeline": {
+    "script": "scripts/build_pe_area_summary.R",
+    "git_commit": "0e496f1ca304cd4ce26a05cf94d076a9d5d38c09",
+    "command": "Rscript scripts/build_pe_area_summary.R",
+    "parameters": {
+      "construct": "census affiliation (religion professed, population aged 12 and over)",
+      "shipped_waves": [
+        2007,
+        2017
+      ],
+      "shipped_geography": "25 Peru departments (24 departments plus Provincia Constitucional del Callao; Lima is the whole department)",
+      "boundary_set": "pe-department-2008-geoboundaries-adm1",
+      "source_tables": {
+        "2007": "Perfil Sociodemografico CUADRO Nº 2.46 (Total exact + one-decimal category percentages)",
+        "2017": "Resultados Definitivos CUADRO Nº 1 (exact counts, four categories)"
+      },
+      "universes": {
+        "2007": "population aged 12 and over",
+        "2017": "population aged 12 and over"
+      },
+      "category_frame": [
+        "Católica",
+        "Evangélica",
+        "Otra",
+        "Ninguna"
+      ],
+      "slot_design": "Ordinary two-slot. religious_affiliation_percent = Catolica + Evangelica + Otra share; no_religion_percent = Ninguna share. The four INEI categories partition the answering population aged 12+, so the two shares sum to 100 by construction (no separate non-response line). The Catolica/Evangelica/Otra composition rides verbatim on each row's quality flag.",
+      "wave_precision": {
+        "2017": "Exact published counts; department and category margins close exactly to 23,196,391.",
+        "2007": "Exact published department Totals (sum exactly to 20,850,502); category counts DERIVED from published one-decimal percentages under a per-category rounding bound of ceiling(Total*0.0005); no_religion_percent is the published Ninguna percentage verbatim."
+      },
+      "change_rule": "Affiliation and no-religion change is readable across 2007-2017 (same universe, same frame, no break). The Catolica/Evangelica/Otra detail is comparable at one-decimal precision (2007 published percentages vs 2017 exact). Population growth (20.85M to 23.20M) is never treated as a religion change.",
+      "lima_frame_note": "The 2017 table splits Lima into Provincia de Lima and Region Lima (a 26-unit frame that matches the geoBoundaries ADM1 split exactly); this product aggregates them to DEPARTAMENTO LIMA to share the 2007 25-unit frame. The 26-unit split is a documented deeper option for 2017 alone.",
+      "held_1993_wave": "1993 religion is comparable at the NATIONAL level only (INEI Perfil 2007 CUADRO Nº 2.44 re-tabulates 1993 for population 12+ and the four categories: Total 15,483,790; Catolica 13,786,001; Evangelica 1,042,888; Otra 432,760; Ninguna 222,141). No department-level 1993 table at the 12+/four-category universe was reachable (the 2007 tabulados host censos.inei.gob.pe and the microdata ANDA host webinei.inei.gob.pe were both unreachable from the build environment). The contemporaneous 1993 profile publishes an ALL-AGES three-category table (Catolica/Otra/Ninguna, Evangelica folded into Otra) on a different universe and frame; it is not backcast or merged. 1993 is HELD for the department product.",
+      "finer_geography_note": "Province (ADM2, 196 units, geoBoundaries CC BY 3.0 IGO) and district (ADM3, ~1874 units) religion counts exist via INEI REDATAM (censos2017.inei.gob.pe/redatam) and the census microdata, but REDATAM is session-bound and the microdata/ANDA host was unreachable. District via REDATAM/microdata is the documented deeper route.",
+      "omitted_metrics": [
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 60,
+        "bytes": 109914
+      },
+      "local_cache_hint": "All raw sources are cached under data/raw/pe_census/ and remain git-ignored.",
+      "retrieval_record": [
+        {
+          "uri": "data/raw/pe_census/pe_2017_resultados_definitivos_tomo03.pdf",
+          "url": "https://www.inei.gob.pe/media/MenuRecursivo/publicaciones_digitales/Est/Lib1544/00TOMO_03.pdf",
+          "format": "pdf",
+          "bytes": 12787682,
+          "sha256": "cf96a5472752d8794eea1bfd540f6ae5f29f5eb6f808661970863c75fccdc2dc",
+          "row_count": null,
+          "source_dataset_id": "pe-census-2017-resultados-definitivos-cuadro1-religion-by-department",
+          "used_in_public_product": true,
+          "periods": "2017",
+          "notes": "2017 Resultados Definitivos TOMO 03; CUADRO Nº 1 religion by department (exact counts). Margins close to 23,196,391.",
+          "local_cache_hint": "data/raw/pe_census/pe_2017_resultados_definitivos_tomo03.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/pe_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/pe_census/pe_2007_perfil_sociodemografico.pdf",
+          "url": "https://www.inei.gob.pe/media/MenuRecursivo/publicaciones_digitales/Est/Lib1136/libro.pdf",
+          "format": "pdf",
+          "bytes": 4155943,
+          "sha256": "18e3347e2dd59be60d2f5648446caa1170b930859a6654ed7f148f58a4bfb117",
+          "row_count": null,
+          "source_dataset_id": "pe-census-2007-perfil-cuadro-2-46-religion-by-department",
+          "used_in_public_product": true,
+          "periods": "2007",
+          "notes": "2007 Perfil Sociodemografico; CUADRO Nº 2.46 religion by department (exact Total plus one-decimal percentages). Totals sum to 20,850,502.",
+          "local_cache_hint": "data/raw/pe_census/pe_2007_perfil_sociodemografico.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/pe_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/pe_census/inei_terminos_condiciones_odisea.pdf",
+          "url": "https://www.inei.gob.pe/media/odisea/Terminos_y_Condiciones_ODISEA.pdf",
+          "format": "pdf",
+          "bytes": 342524,
+          "sha256": "331d89862d8d7f8a77fbc5c2f1cb44201f2813cfa6658d2a6a20e5d7df8d3459",
+          "row_count": null,
+          "source_dataset_id": "pe-census-2017-resultados-definitivos-cuadro1-religion-by-department",
+          "used_in_public_product": false,
+          "periods": null,
+          "notes": "INEI Terminos y Condiciones (ODISEA); interactive-services terms, not a data-reuse grant. Quoted in the route probe.",
+          "local_cache_hint": "data/raw/pe_census/inei_terminos_condiciones_odisea.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/pe_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/pe_census/geoBoundaries-PER-ADM1.geojson",
+          "url": "https://github.com/wmgeolab/geoBoundaries/raw/90a1d52/releaseData/gbOpen/PER/ADM1/geoBoundaries-PER-ADM1.geojson",
+          "format": "geojson",
+          "bytes": 366110,
+          "sha256": "9e4d6e0b802b5edf367206b5510f98b25e05935eef5785f08f7109eec34871fd",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-per-adm1-2008",
+          "used_in_public_product": true,
+          "periods": "2008",
+          "notes": "geoBoundaries PER ADM1 GeoJSON; 26 features, Public Domain (Wikimedia Commons). Pinned commit 90a1d52. Dissolved to 25 departments.",
+          "local_cache_hint": "data/raw/pe_census/geoBoundaries-PER-ADM1.geojson (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/pe_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/pe_census/gb_per_adm1_meta.json",
+          "url": "https://www.geoboundaries.org/api/current/gbOpen/PER/ADM1/",
+          "format": "json",
+          "bytes": 1706,
+          "sha256": "e29cf9ba1a73aad66ba2948af7223603a9070443c2ae62040b291a5998cf4784",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-per-adm1-2008",
+          "used_in_public_product": false,
+          "periods": "2008",
+          "notes": "geoBoundaries PER ADM1 metadata; Public Domain, boundaryYearRepresented 2008, admUnitCount 26.",
+          "local_cache_hint": "data/raw/pe_census/gb_per_adm1_meta.json (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/pe_census/"
+          ]
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "scripts/lib/simplify_boundary.R (npx mapshaper)"
+    }
+  },
+  "source": {
+    "provider": "Instituto Nacional de Estadistica e Informatica (INEI); geoBoundaries (William & Mary geoLab)",
+    "source_dataset_ids": [
+      "pe-census-2007-perfil-cuadro-2-46-religion-by-department",
+      "pe-census-2017-resultados-definitivos-cuadro1-religion-by-department",
+      "geoboundaries-per-adm1-2008"
+    ],
+    "source_urls": [
+      "https://www.inei.gob.pe/media/MenuRecursivo/publicaciones_digitales/Est/Lib1136/libro.pdf",
+      "https://www.inei.gob.pe/media/MenuRecursivo/publicaciones_digitales/Est/Lib1544/00TOMO_03.pdf",
+      "https://www.inei.gob.pe/media/odisea/Terminos_y_Condiciones_ODISEA.pdf",
+      "https://github.com/wmgeolab/geoBoundaries/raw/90a1d52/releaseData/gbOpen/PER/ADM1/geoBoundaries-PER-ADM1.geojson",
+      "https://www.geoboundaries.org/api/current/gbOpen/PER/ADM1/"
+    ],
+    "retrieved_at": "2026-07-12T00:00:00Z",
+    "licence": "INEI publishes the 2007 and 2017 census results openly on its institutional portal (www.inei.gob.pe). No Creative Commons or explicit data-reuse licence is stated on the published results tables. The reachable INEI 'Terminos y Condiciones' (ODISEA) govern the interactive participation services of the portal, not reuse of the statistical tables. The INEI microdata access policy (ANDA, webinei.inei.gob.pe) was unreachable from the build environment and could not be quoted. Under the build-then-ask ruling the derived department summaries ship with attribution to INEI and licence status needs_review; an INEI reuse-confirmation ask is recorded for the PI. The boundary is Public Domain (geoBoundaries PER ADM1, Wikimedia Commons source).",
+    "citation": "INEI Censos Nacionales 2007 (Perfil CUADRO 2.46) and 2017 (Resultados Definitivos CUADRO 1); geoBoundaries PER ADM1 (gbOpen).",
+    "raw_redistribution": "The census PDFs and the geoBoundaries source GeoJSON are not committed; they remain in data/raw/pe_census/.",
+    "local_cache_hint": "data/raw/pe_census/ (git-ignored by .gitignore data/ rule)",
+    "raw_cache_durable_uris": [
+      "gs://pow-research-data/raw_sources/pe_census/"
+    ]
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/pe_census/pe_2017_resultados_definitivos_tomo03.pdf",
+      "url": "https://www.inei.gob.pe/media/MenuRecursivo/publicaciones_digitales/Est/Lib1544/00TOMO_03.pdf",
+      "format": "pdf",
+      "bytes": 12787682,
+      "sha256": "cf96a5472752d8794eea1bfd540f6ae5f29f5eb6f808661970863c75fccdc2dc",
+      "row_count": null,
+      "source_dataset_id": "pe-census-2017-resultados-definitivos-cuadro1-religion-by-department",
+      "used_in_public_product": true,
+      "periods": "2017",
+      "notes": "2017 Resultados Definitivos TOMO 03; CUADRO Nº 1 religion by department (exact counts). Margins close to 23,196,391.",
+      "local_cache_hint": "data/raw/pe_census/pe_2017_resultados_definitivos_tomo03.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/pe_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/pe_census/pe_2007_perfil_sociodemografico.pdf",
+      "url": "https://www.inei.gob.pe/media/MenuRecursivo/publicaciones_digitales/Est/Lib1136/libro.pdf",
+      "format": "pdf",
+      "bytes": 4155943,
+      "sha256": "18e3347e2dd59be60d2f5648446caa1170b930859a6654ed7f148f58a4bfb117",
+      "row_count": null,
+      "source_dataset_id": "pe-census-2007-perfil-cuadro-2-46-religion-by-department",
+      "used_in_public_product": true,
+      "periods": "2007",
+      "notes": "2007 Perfil Sociodemografico; CUADRO Nº 2.46 religion by department (exact Total plus one-decimal percentages). Totals sum to 20,850,502.",
+      "local_cache_hint": "data/raw/pe_census/pe_2007_perfil_sociodemografico.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/pe_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/pe_census/inei_terminos_condiciones_odisea.pdf",
+      "url": "https://www.inei.gob.pe/media/odisea/Terminos_y_Condiciones_ODISEA.pdf",
+      "format": "pdf",
+      "bytes": 342524,
+      "sha256": "331d89862d8d7f8a77fbc5c2f1cb44201f2813cfa6658d2a6a20e5d7df8d3459",
+      "row_count": null,
+      "source_dataset_id": "pe-census-2017-resultados-definitivos-cuadro1-religion-by-department",
+      "used_in_public_product": false,
+      "periods": null,
+      "notes": "INEI Terminos y Condiciones (ODISEA); interactive-services terms, not a data-reuse grant. Quoted in the route probe.",
+      "local_cache_hint": "data/raw/pe_census/inei_terminos_condiciones_odisea.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/pe_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/pe_census/geoBoundaries-PER-ADM1.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/90a1d52/releaseData/gbOpen/PER/ADM1/geoBoundaries-PER-ADM1.geojson",
+      "format": "geojson",
+      "bytes": 366110,
+      "sha256": "9e4d6e0b802b5edf367206b5510f98b25e05935eef5785f08f7109eec34871fd",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-per-adm1-2008",
+      "used_in_public_product": true,
+      "periods": "2008",
+      "notes": "geoBoundaries PER ADM1 GeoJSON; 26 features, Public Domain (Wikimedia Commons). Pinned commit 90a1d52. Dissolved to 25 departments.",
+      "local_cache_hint": "data/raw/pe_census/geoBoundaries-PER-ADM1.geojson (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/pe_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/pe_census/gb_per_adm1_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/PER/ADM1/",
+      "format": "json",
+      "bytes": 1706,
+      "sha256": "e29cf9ba1a73aad66ba2948af7223603a9070443c2ae62040b291a5998cf4784",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-per-adm1-2008",
+      "used_in_public_product": false,
+      "periods": "2008",
+      "notes": "geoBoundaries PER ADM1 metadata; Public Domain, boundaryYearRepresented 2008, admUnitCount 26.",
+      "local_cache_hint": "data/raw/pe_census/gb_per_adm1_meta.json (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/pe_census/"
+      ]
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/pe/data/area_summary_department.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 90925,
+      "sha256": "ec633023ff55cda5827c16513b64dba9dd4d7085808af5b56c30138fa0791ed3",
+      "row_count": 50,
+      "feature_count": null,
+      "content": "Peru 25-department census-affiliation area summary for 2007 and 2017.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "inei_no_explicit_reuse_grant_build_then_ask"
+    },
+    {
+      "uri": "repo:apps/regions/pe/data/area_summary_department.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 48154,
+      "sha256": "cfa9703e646072630a20897410facda8592e6e9b72d35049eaa0c20b8c0eb4bc",
+      "row_count": 50,
+      "feature_count": null,
+      "content": "Flattened Peru 25-department census-affiliation rows for 2007 and 2017.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "inei_no_explicit_reuse_grant_build_then_ask"
+    },
+    {
+      "uri": "repo:apps/regions/pe/data/pe_department_2008.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 109914,
+      "sha256": "c795285749dc9ea234688e04e9c09cf94580a04378620ee6a5cce9d8f132a2af",
+      "row_count": null,
+      "feature_count": 25,
+      "content": "Simplified geoBoundaries PER ADM1 boundary dissolved to 25 departments.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_public_domain"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/pe/data/area_summary_department.json",
+      "sha256": "ec633023ff55cda5827c16513b64dba9dd4d7085808af5b56c30138fa0791ed3",
+      "built_by": "scripts/build_pe_area_summary.R",
+      "notes": "25 departments x 2 waves = 50 rows; population 12+ universe in both waves."
+    },
+    {
+      "uri": "repo:apps/regions/pe/data/pe_department_2008.geojson",
+      "sha256": "c795285749dc9ea234688e04e9c09cf94580a04378620ee6a5cce9d8f132a2af",
+      "built_by": "scripts/build_pe_area_summary.R",
+      "notes": "25 department features from geoBoundaries PER ADM1 (Lima dissolved), simplified with mapshaper."
+    }
+  ],
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_pe_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/pe/data/area_summary_department.json",
+      "bash scripts/validate_manifests.sh"
+    ],
+    "gate_2017": {
+      "status": "passed",
+      "national_total": 23196391,
+      "department_checks": 25,
+      "category_checks": 4,
+      "records": [
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Amazonas",
+          "computed": 281605,
+          "printed": 281605,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Áncash",
+          "computed": 850507,
+          "printed": 850507,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Apurímac",
+          "computed": 315006,
+          "printed": 315006,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Arequipa",
+          "computed": 1118223,
+          "printed": 1118223,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Ayacucho",
+          "computed": 479120,
+          "printed": 479120,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Cajamarca",
+          "computed": 1026734,
+          "printed": 1026734,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Callao",
+          "computed": 799608,
+          "printed": 799608,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Cusco",
+          "computed": 950323,
+          "printed": 950323,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Huancavelica",
+          "computed": 266825,
+          "printed": 266825,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Huánuco",
+          "computed": 551601,
+          "printed": 551601,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Ica",
+          "computed": 662444,
+          "printed": 662444,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Junín",
+          "computed": 969059,
+          "printed": 969059,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "La Libertad",
+          "computed": 1379613,
+          "printed": 1379613,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Lambayeque",
+          "computed": 935564,
+          "printed": 935564,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Lima",
+          "computed": 7782282,
+          "printed": 7782282,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Loreto",
+          "computed": 623029,
+          "printed": 623029,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Madre de Dios",
+          "computed": 105503,
+          "printed": 105503,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Moquegua",
+          "computed": 142211,
+          "printed": 142211,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Pasco",
+          "computed": 196780,
+          "printed": 196780,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Piura",
+          "computed": 1410686,
+          "printed": 1410686,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Puno",
+          "computed": 944083,
+          "printed": 944083,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "San Martín",
+          "computed": 608404,
+          "printed": 608404,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Tacna",
+          "computed": 269027,
+          "printed": 269027,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Tumbes",
+          "computed": 171351,
+          "printed": 171351,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "department_total",
+          "key": "Ucayali",
+          "computed": 356803,
+          "printed": 356803,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "religion_row",
+          "key": "Catolica",
+          "computed": 17635339,
+          "printed": 17635339,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "religion_row",
+          "key": "Evangelica",
+          "computed": 3264819,
+          "printed": 3264819,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "religion_row",
+          "key": "Otra",
+          "computed": 1115872,
+          "printed": 1115872,
+          "difference": 0
+        },
+        {
+          "year": 2017,
+          "margin": "religion_row",
+          "key": "Ninguna",
+          "computed": 1180361,
+          "printed": 1180361,
+          "difference": 0
+        }
+      ]
+    },
+    "gate_2007": {
+      "status": "passed",
+      "national_total": 20850502,
+      "department_total_exact": true,
+      "percentage_band": 0.15,
+      "records": [
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Amazonas",
+          "computed": 99.9,
+          "printed": 100,
+          "difference": -0.1
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Áncash",
+          "computed": 100.1,
+          "printed": 100,
+          "difference": 0.1
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Apurímac",
+          "computed": 100,
+          "printed": 100,
+          "difference": -0
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Arequipa",
+          "computed": 100,
+          "printed": 100,
+          "difference": 0
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Ayacucho",
+          "computed": 100,
+          "printed": 100,
+          "difference": -0
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Cajamarca",
+          "computed": 100,
+          "printed": 100,
+          "difference": 0
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Callao",
+          "computed": 100.1,
+          "printed": 100,
+          "difference": 0.1
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Cusco",
+          "computed": 100,
+          "printed": 100,
+          "difference": 0
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Huancavelica",
+          "computed": 100,
+          "printed": 100,
+          "difference": -0
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Huánuco",
+          "computed": 100,
+          "printed": 100,
+          "difference": 0
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Ica",
+          "computed": 100,
+          "printed": 100,
+          "difference": 0
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Junín",
+          "computed": 100.1,
+          "printed": 100,
+          "difference": 0.1
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "La Libertad",
+          "computed": 100.1,
+          "printed": 100,
+          "difference": 0.1
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Lambayeque",
+          "computed": 99.9,
+          "printed": 100,
+          "difference": -0.1
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Lima",
+          "computed": 100,
+          "printed": 100,
+          "difference": -0
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Loreto",
+          "computed": 99.9,
+          "printed": 100,
+          "difference": -0.1
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Madre de Dios",
+          "computed": 100.1,
+          "printed": 100,
+          "difference": 0.1
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Moquegua",
+          "computed": 99.9,
+          "printed": 100,
+          "difference": -0.1
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Pasco",
+          "computed": 99.9,
+          "printed": 100,
+          "difference": -0.1
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Piura",
+          "computed": 100.1,
+          "printed": 100,
+          "difference": 0.1
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Puno",
+          "computed": 100,
+          "printed": 100,
+          "difference": 0
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "San Martín",
+          "computed": 100,
+          "printed": 100,
+          "difference": 0
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Tacna",
+          "computed": 100,
+          "printed": 100,
+          "difference": -0
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Tumbes",
+          "computed": 99.9,
+          "printed": 100,
+          "difference": -0.1
+        },
+        {
+          "year": 2007,
+          "margin": "published_percentage_sum",
+          "key": "Ucayali",
+          "computed": 99.9,
+          "printed": 100,
+          "difference": -0.1
+        },
+        {
+          "year": 2007,
+          "margin": "department_total",
+          "key": "PERU",
+          "computed": 20850502,
+          "printed": 20850502,
+          "difference": 0
+        }
+      ]
+    },
+    "boundary_validation": {
+      "status": "passed",
+      "feature_count": 25,
+      "distinct_geometry_hashes": 25,
+      "geometry_hashes": [
+        "a5db78788acfe426fdfcb7462ed42aeb0dc3c5e88b8e2a74fb8d6ff3a9246cde",
+        "a9aacc2c2c5b1962dd2df84d544c358032d005b5cf05191d058a06df52137b82",
+        "d6a5a5461a9fb7c1f127596f5dc523ad86305930a538f295fd4874587471ecf9",
+        "3494392f5cd3e1cfd9191d5dede859d17c83913abf114bb30f4293f182d7a30a",
+        "663592557c521ea0238f4e7dbe99e1273ec1ca92193ad3118d2fdb4ab9d6846e",
+        "6ccfe60af4c7c8d259954e3425b114d858e7b80068c2d2913a9d42ff8fe57376",
+        "79ddbaf5b2ed5e4e3830d81114a0c182c37f6b94401977e404ca115e30fbcba1",
+        "e3410cb27cdd864a3c74abf587da0e5b22d9921aa5cc010f0bd14178092dfa44",
+        "bc4d97ab7a4dd741b745cc18f2ca928e26e842a0ce73c9f7a2914b1d5374a295",
+        "f1fa46ea43cd27ac4bf23bef79c1be5b61babcd935ae79c0f2931b7146c793e0",
+        "50f764e7a8d1ac77ddd2c051aa7a7d432b2f43a98e52e337250909a64f2b7b8b",
+        "989d256d14d5c852cb89b38eeffb653a8ca4e6c58c4fb26356f61f9de9d4ee9b",
+        "d200d5da24c83ee887df33c426418bbf31aadf8066aca5916eae2299d2624288",
+        "23cddd7711429ba949a0e2b46b3b5ff7331556bc18a7e5e3471633cc1dad6c2a",
+        "f88faaf7277c29352b914f45dc7f43e01494159d01cac7b9f7c6c0d7c282e71a",
+        "0ae7970b1460a3865f091ab09e4809a3ff30f05dc177633ee721507f397e0fdc",
+        "8697621a2b9d3f88cf9032241d3e4a3eab0db5e09f8672adf2d7b3f1d58cdae4",
+        "e3dfaeab4b5ff8e3fe520d81bafd410e2887044ed870ea24eee32fb660a8c203",
+        "6631850fd0ea5639f703aa291809c96a0ecf3333560d3bf8f254dbdb9623b220",
+        "f02459b3b98f488970c24e95fc2764e4287d92f0d596f434e55d2bb4c647bcc7",
+        "96c5db792222e4ac91f2a15117b11c502ef1ac43946aae04a777829e692227f4",
+        "2812bb109279cee94183a12ec86593d9aa4379eef991bc11a0a061f3ebe0610d",
+        "760a65175e076426397e536dcfadeb1d916cb6a574c8fad6eb6739f9f97cd1db",
+        "c018656beacc84375a91ed2c0e7cef9f2c67b5b46bc0e956d22b40df827da8fa",
+        "8200451265fba0361667b9d65d2337e2288d10c5cc4e3b3c479c78c96394565c"
+      ],
+      "bbox": {
+        "xmin": -81.3276985,
+        "ymin": -18.3594396,
+        "xmax": -68.6428179,
+        "ymax": -0.0140901
+      },
+      "dateline_note": "Peru is wholly in the western hemisphere; no antimeridian handling needed.",
+      "output_bytes": 109914,
+      "simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 60,
+        "bytes": 109914
+      },
+      "licence": "Public Domain",
+      "adm_unit_count": "26"
+    },
+    "join_coverage": {
+      "matched_departments": 25,
+      "expected_departments": 25,
+      "unmatched": [],
+      "unused_boundary_features": []
+    },
+    "notes": "2017 CUADRO 1 closes exactly at every margin (23,196,391). 2007 CUADRO 2.46 department Totals sum exactly to 20,850,502; category counts are derived from published one-decimal percentages under a recorded rounding bound. Boundary dissolves 26 geoBoundaries features to 25 departments with distinct geometry hashes.",
+    "warnings": [
+      "STAGED product: no page, no hub link. Licence needs_review; INEI states no explicit reuse grant on its census results (ODISEA terms are interactive-services terms; the ANDA microdata licence host was unreachable). Ships with INEI attribution under build-then-ask; an INEI reuse-confirmation ask is recorded for the PI.",
+      "2007 category counts are DERIVED from published one-decimal percentages (BF-2019 derived-bound precedent); the department Total and the no-religion percentage are exact-published. Per-category rounding bound recorded per row.",
+      "The four INEI categories partition the answering population, so religious_affiliation_percent and no_religion_percent sum to 100 by construction (relevant to the PI minority-share/task-6 page design; a page is out of scope here).",
+      "1993 is comparable at the national level only (Perfil CUADRO 2.44, 12+/four-category); no department 1993 table at that universe was reachable. HELD, not backcast.",
+      "Finer geography (province ADM2, district ADM3) exists via INEI REDATAM and microdata but REDATAM is session-bound and the microdata/ANDA host was unreachable; district via REDATAM/microdata is the documented deeper route."
+    ]
+  },
+  "construct_notes": [
+    "The construct is census affiliation: each resident's professed religion (INEI question, population aged 12 and over), not practice, attendance, or membership.",
+    "The public product carries three headline fields per department-wave: population 12+ total, religious affiliation percent, and no-religion percent. Place-density metrics are null (no governed place-of-worship snapshot).",
+    "Both waves count the population aged 12 and over with the same four verbatim INEI categories (Catolica, Evangelica, Otra, Ninguna), so there is no universe or frame break and the department series is comparable across 2007-2017.",
+    "Slot design (ordinary two-slot): religious_affiliation_percent = Catolica + Evangelica + Otra share; no_religion_percent = Ninguna share. The frame partitions the answering population, so the two shares sum to 100 by construction; the Catolica/Evangelica/Otra composition (the richer signal) rides verbatim on each row's quality flag.",
+    "2017 ships exact published counts. 2007 ships the exact published department Total and the published Ninguna percentage; the Catolica/Evangelica/Otra counts are DERIVED from the published one-decimal percentages under a recorded per-category rounding bound (BF-2019 precedent).",
+    "1993 is HELD for the department product: it is comparable only at the national level (Perfil CUADRO 2.44, 12+/four-category), and no department-level 1993 table at that universe was reachable. The contemporaneous 1993 all-ages three-category table is a different universe and frame and is neither backcast nor merged.",
+    "Boundary: geoBoundaries PER ADM1, Public Domain (Wikimedia Commons). 26 features dissolve to the 25 census departments: 'Lima' and 'Municipalidad Metropolitana de Lima' union into DEPARTAMENTO LIMA; 'El Callao' maps to the Provincia Constitucional del Callao. Peru is western-hemisphere; no dateline handling."
+  ],
+  "deferred_sources": [
+    {
+      "source_dataset_id": "pe-census-district-redatam",
+      "status": "deferred",
+      "url": "https://censos2017.inei.gob.pe/redatam/",
+      "local_path": null,
+      "notes": "District (ADM3, ~1874) and province (ADM2, 196) religion counts exist via INEI REDATAM and the census microdata. REDATAM is session-bound (browser work) and the microdata/ANDA host (webinei.inei.gob.pe) was unreachable from the build environment. The district product also needs a licensed ADM3 boundary (geoBoundaries offers no PER ADM3; INEI/IGN or datosabiertos.gob.pe would supply it). A documented deeper route."
+    },
+    {
+      "source_dataset_id": "pe-census-1993-religion-by-department",
+      "status": "deferred",
+      "url": "https://www.inei.gob.pe/media/MenuRecursivo/publicaciones_digitales/Est/Lib1136/libro.pdf",
+      "local_path": null,
+      "notes": "1993 is comparable at the national level (Perfil 2007 CUADRO 2.44, population 12+, four categories). A department-level 1993 table at the 12+/four-category universe needs the 1993 tabulados (censos.inei.gob.pe, unreachable) or the 1993 microdata reprocessed. HELD."
+    },
+    {
+      "source_dataset_id": "inei-licence-confirmation",
+      "status": "not_pinned",
+      "url": "https://www.inei.gob.pe",
+      "local_path": null,
+      "notes": "INEI states no explicit reuse licence on its census results, and the ANDA microdata access policy was unreachable. An INEI reuse-confirmation ask is the clean unblock (PI action); none is held."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "needs_review",
+  "licence_basis": "inei_no_explicit_reuse_grant_build_then_ask",
+  "downstream_status": "staged",
+  "source_datasets": [
+    {
+      "source_dataset_id": "pe-census-2007-perfil-cuadro-2-46-religion-by-department",
+      "name": "Peru 2007 Census (XI de Poblacion, VI de Vivienda), Perfil Sociodemografico del Peru, CUADRO Nº 2.46: population aged 12+ by religion, by department",
+      "provider": "Instituto Nacional de Estadistica e Informatica (INEI)",
+      "url": "https://www.inei.gob.pe/media/MenuRecursivo/publicaciones_digitales/Est/Lib1136/libro.pdf",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/pe_census/pe_2007_perfil_sociodemografico.pdf",
+      "licence": {
+        "name": "INEI publishes the 2007 and 2017 census results openly on its institutional portal (www.inei.gob.pe). No Creative Commons or explicit data-reuse licence is stated on the published results tables. The reachable INEI 'Terminos y Condiciones' (ODISEA) govern the interactive participation services of the portal, not reuse of the statistical tables. The INEI microdata access policy (ANDA, webinei.inei.gob.pe) was unreachable from the build environment and could not be quoted. Under the build-then-ask ruling the derived department summaries ship with attribution to INEI and licence status needs_review; an INEI reuse-confirmation ask is recorded for the PI. The boundary is Public Domain (geoBoundaries PER ADM1, Wikimedia Commons source).",
+        "url": "https://www.inei.gob.pe/media/odisea/Terminos_y_Condiciones_ODISEA.pdf",
+        "attribution": "Instituto Nacional de Estadistica e Informatica (INEI), Censos Nacionales 2007: XI de Poblacion y VI de Vivienda"
+      },
+      "citation": "INEI, Censos Nacionales 2007: XI de Poblacion y VI de Vivienda, Perfil Sociodemografico del Peru, CUADRO Nº 2.46.",
+      "access_limits": null,
+      "redistribution_limits": "Derived department summaries only; no explicit reuse licence stated on the INEI source. Ships STAGED, needs_review, under build-then-ask with INEI attribution.",
+      "notes": "Universe: population aged 12 and over. The table prints the exact department Total (count) plus one-decimal category percentages (Catolica, Evangelica, Otra, Ninguna). Department Totals sum exactly to the national 20,850,502; category counts are DERIVED from the published percentages under a recorded per-category rounding bound. Frame is 25 units: Lima is the whole department (Lima province plus Region Lima)."
+    },
+    {
+      "source_dataset_id": "pe-census-2017-resultados-definitivos-cuadro1-religion-by-department",
+      "name": "Peru 2017 Census (XII de Poblacion, VII de Vivienda), Resultados Definitivos, CUADRO Nº 1: population aged 12+ by department, area, sex, and religion",
+      "provider": "Instituto Nacional de Estadistica e Informatica (INEI)",
+      "url": "https://www.inei.gob.pe/media/MenuRecursivo/publicaciones_digitales/Est/Lib1544/00TOMO_03.pdf",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/pe_census/pe_2017_resultados_definitivos_tomo03.pdf",
+      "licence": {
+        "name": "INEI publishes the 2007 and 2017 census results openly on its institutional portal (www.inei.gob.pe). No Creative Commons or explicit data-reuse licence is stated on the published results tables. The reachable INEI 'Terminos y Condiciones' (ODISEA) govern the interactive participation services of the portal, not reuse of the statistical tables. The INEI microdata access policy (ANDA, webinei.inei.gob.pe) was unreachable from the build environment and could not be quoted. Under the build-then-ask ruling the derived department summaries ship with attribution to INEI and licence status needs_review; an INEI reuse-confirmation ask is recorded for the PI. The boundary is Public Domain (geoBoundaries PER ADM1, Wikimedia Commons source).",
+        "url": "https://www.inei.gob.pe/media/odisea/Terminos_y_Condiciones_ODISEA.pdf",
+        "attribution": "Instituto Nacional de Estadistica e Informatica (INEI), Censos Nacionales 2017: XII de Poblacion, VII de Vivienda y III de Comunidades Indigenas"
+      },
+      "citation": "INEI, Censos Nacionales 2017: XII de Poblacion, VII de Vivienda y III de Comunidades Indigenas, Resultados Definitivos, CUADRO Nº 1.",
+      "access_limits": null,
+      "redistribution_limits": "Derived department summaries only; no explicit reuse licence stated on the INEI source. Ships STAGED, needs_review, under build-then-ask with INEI attribution.",
+      "notes": "Universe: population aged 12 and over. Exact published counts, four categories (Catolica, Evangelica, Otra, Ninguna). Every department's categories sum to its printed Total and every category sums across departments to the printed national margin; the grand total is 23,196,391. The 2017 table splits Lima into Provincia de Lima and Region Lima (a 26-unit frame); this product aggregates them to DEPARTAMENTO LIMA to match the 2007 25-unit frame."
+    },
+    {
+      "source_dataset_id": "geoboundaries-per-adm1-2008",
+      "name": "geoBoundaries PER ADM1 (26 features; 25 departments after dissolving Lima)",
+      "provider": "geoBoundaries (William & Mary geoLab); boundary source Wikimedia Commons",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/90a1d52/releaseData/gbOpen/PER/ADM1/geoBoundaries-PER-ADM1.geojson",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/pe_census/geoBoundaries-PER-ADM1.geojson",
+      "licence": {
+        "name": "Public Domain",
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/PER/ADM1/",
+        "attribution": "geoBoundaries (gbOpen); boundary source Wikimedia Commons"
+      },
+      "citation": "geoBoundaries PER ADM1 (gbOpen, pinned 90a1d52), 26 features dissolved to 25 departments.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed under Public Domain; no attribution obligation on the geometry.",
+      "notes": "boundaryLicense 'Public Domain', licenseSource commons.wikimedia.org/wiki/File, boundaryYearRepresented 2008, admUnitCount 26. The 26 features dissolve to the 25 census departments: 'Lima' (Region Lima) and 'Municipalidad Metropolitana de Lima' (Lima province) union into DEPARTAMENTO LIMA; 'El Callao' maps to the Provincia Constitucional del Callao; the other 23 map one-to-one. Western hemisphere, no antimeridian handling."
+    }
+  ],
+  "notes": "STAGED product (no page, no hub link) pending a PI licence ruling. The committed products are the derived 25-department area summary (50 rows across 2007 and 2017) and the simplified geoBoundaries PER ADM1 boundary dissolved to 25 departments. On-page attribution, when a page is built, must cite the Instituto Nacional de Estadistica e Informatica (INEI) and geoBoundaries (Public Domain, Wikimedia Commons)."
+}
