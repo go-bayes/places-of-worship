@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-07-12 (pulotu sitting)
+
+- Launched the Pulotu cultures layer on the Vanuatu pilot page. The runtime gains a config-gated fourth points mode, "Points: Pulotu cultures", rendering the nine Vanuatu cultures as violet points visually separate from place dots (one colour, heavier halo — the measurement-diversity separation guard). Each popup organises the five curated values under the dataset's three headings with code labels, per-value sources, both calendar anchors (null anchors omitted, missing values named and marked "not documented"), and the full-record link; the cultures-mode legend declares the regime in one line with the CC BY 4.0 attribution. The layer is slider-independent per ruling 4 (verified: year changes leave the points untouched) and never merges with census artefacts. Culture points win the click over the census fill exactly as place dots do. Runtime tag bumped fleet-wide to 20260711c on all 69 pages; non-opted pages carry no cultures option (Fiji regression-checked). Config: `apps/regions/vu/index.html`; runtime: `apps/regions/_shared/region-map.js`.
+
 ### 2026-07-11 (pulotu sitting)
 
 - Added the Pulotu cultures data product, the ratified cultures-layer design's first artefact (`docs/development/pulotu-cultures-layer.md`, all six project-lead rulings recorded 2026-07-11). One global `apps/regions/_shared/data/pulotu_cultures.geojson` built by `scripts/build_pulotu_cultures.R` from the cached CC BY 4.0 D-PLACE CLDF release v1.3.1: 137 culture points carrying the five ruled curated values with code labels and per-value source references, both calendar anchors, a computed modern-country tag (point-in-polygon against Natural Earth 10m admin-0, with the documented Tokelau NZ-to-TK territorial correction), and the full-record link. The Vanuatu assignment yields exactly the nine documented pilot cultures. Manifest: `docs/manifests/pulotu-cultures-1.3.1.json` (manifest validation 76/76). No runtime change; the never-merge rule verified — no census artefact touched. The UI (the third points mode, piloting on Vanuatu) follows separately.

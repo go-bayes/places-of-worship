@@ -203,3 +203,24 @@
 @media (max-width: 640px) {
   #census-panel.census-long { width: min(360px, 92vw); }
 }
+
+/* pulotu cultures popup: the dataset's three headings structure the
+   curated values; sources ride muted after each value, and an absent
+   value says so rather than hiding the row (render the record) */
+.maplibregl-popup-content .pulotu-group-title {
+  margin: 8px 0 2px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+.maplibregl-popup-content .pulotu-val { color: #e2e8f0; }
+.maplibregl-popup-content .pulotu-val-missing {
+  color: #94a3b8;
+  font-style: italic;
+}
+.maplibregl-popup-content .pulotu-src {
+  font-size: 11px;
+  color: #94a3b8;
+}

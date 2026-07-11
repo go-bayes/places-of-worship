@@ -3303,7 +3303,9 @@ function removeCensusLayers() {
 }
 
 function placeUnderCursor(point) {
-  const placeLayers = [LAYERS.places, LAYERS.overview].filter((id) => map.getLayer(id));
+  // pulotu culture points win the cursor over the census fill, exactly
+  // as place dots do — without this the area popup swallows the click
+  const placeLayers = [LAYERS.places, LAYERS.overview, PULOTU.layer].filter((id) => map.getLayer(id));
   return placeLayers.length > 0 &&
     map.queryRenderedFeatures(point, { layers: placeLayers }).length > 0;
 }
@@ -3608,6 +3610,112 @@ function syncDatedPlaces(showAlive, showFuture) {
   }
 }
 
+// ── pulotu cultures layer ──────────────────────────────────────────
+// the ratified cultures layer (docs/development/pulotu-cultures-layer.md):
+// documented cultural reconstructions from the pulotu database rendered as
+// their own points mode, never blended with place dots or census metrics
+// (the never-merge rule). the product is one global geojson; each page
+// filters to its own country tag. slider-independent by ruling: each
+// culture declares its own two calendar anchors and ignores the year.
+const PULOTU = { source: "pow-pulotu", layer: "pow-pulotu-points" };
+let pulotuHandlersAttached = false;
+// heading order and membership follow the dataset's own organisation;
+// each key carries the record's variable name so a missing value still
+// names its variable (a null entry has no name of its own to read)
+const PULOTU_GROUPS = [
+  ["Traditional Culture", [
+    ["belief_in_gods", "Belief in god(s)"],
+    ["belief_in_ancestral_spirits", "Belief in ancestral spirits"],
+    ["supernatural_punishment_for_impiety", "Belief in supernatural punishment for impiety"]
+  ]],
+  ["Post-Contact History", [["adoption_world_religion", "Adoption of a world religion"]]],
+  ["Current Culture", [["dominant_world_religion", "Dominant world religion"]]]
+];
+function pulotuEscape(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function addPulotuLayer() {
+  if (!RC.pulotuCultures || map.getSource(PULOTU.source)) return;
+  map.addSource(PULOTU.source, { type: "geojson", data: RC.pulotuCultures.data });
+  // one colour for every culture: a category ramp would imply a coding the
+  // points do not carry — the values live in the popup with their sources.
+  // violet sits outside the religion palette and the amber dated ring, and
+  // the heavier white halo keeps the reconstruction points visually apart
+  // from enumeration dots (the measurement-diversity separation guard)
+  map.addLayer({
+    id: PULOTU.layer,
+    type: "circle",
+    source: PULOTU.source,
+    layout: { visibility: "none" },
+    filter: ["==", ["get", "country_iso2"], RC.countryCode],
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 5.0, 9, 8.0, 16, 11.0],
+      "circle-color": "#6d28d9",
+      "circle-opacity": 0.92,
+      "circle-stroke-width": 2.5,
+      "circle-stroke-color": "#ffffff"
+    }
+  });
+  if (!pulotuHandlersAttached) {
+    pulotuHandlersAttached = true;
+    map.on("click", PULOTU.layer, (e) => {
+      const f = e.features && e.features[0];
+      if (!f) return;
+      const pr = f.properties || {};
+      // maplibre stringifies nested feature properties
+      let values = {}, timeFocus = {};
+      try { values = typeof pr.values === "string" ? JSON.parse(pr.values) : (pr.values || {}); } catch (err) { /* row renders as not documented */ }
+      try { timeFocus = typeof pr.time_focus === "string" ? JSON.parse(pr.time_focus) : (pr.time_focus || {}); } catch (err) { /* anchors omitted */ }
+      const anchorRow = (key, node) => node && Number.isFinite(node.year)
+        ? `<div class="place-attr"><span class="place-attr-key">${key}</span><span class="place-attr-val">${node.year}</span></div>`
+        : "";
+      // each value renders its label head; the full code definition rides
+      // the title attribute, and every documented value cites its sources
+      const valueRow = (v) => {
+        if (!v || v.code === null || v.code === undefined) {
+          return `<span class="pulotu-val pulotu-val-missing">not documented</span>`;
+        }
+        const full = pulotuEscape(v.label || "");
+        const head = pulotuEscape(String(v.label || "").split(" (")[0]);
+        const src = (v.sources || []).length
+          ? ` <span class="pulotu-src">${pulotuEscape(v.sources.join(", "))}</span>`
+          : "";
+        return `<span class="pulotu-val" title="${full}">${head}</span>${src}`;
+      };
+      const groups = PULOTU_GROUPS.map(([heading, keys]) => {
+        const rows = keys.map(([k, fallbackName]) => {
+          const v = values[k];
+          const name = pulotuEscape(v && v.variable ? v.variable : fallbackName);
+          return `<div class="place-attr"><span class="place-attr-key">${name}</span><span class="place-attr-val">${valueRow(v)}</span></div>`;
+        }).join("");
+        return `<div class="pulotu-group-title">${heading}</div><div class="place-attrs">${rows}</div>`;
+      }).join("");
+      const popup = new maplibregl.Popup({ maxWidth: "360px" })
+        .setLngLat(f.geometry.coordinates)
+        .setHTML(
+          `<div class="popup-header"><span class="popup-title">${pulotuEscape(pr.name || pr.culture_id)}</span></div>` +
+          `<div class="place-attrs">` +
+          anchorRow("Traditional state time focus", timeFocus.traditional_state) +
+          anchorRow("Contemporary time focus", timeFocus.contemporary) +
+          `</div>` +
+          groups +
+          `<div class="place-note">A documented cultural reconstruction from the Pulotu database — values cite the database's sources; the full record carries all 88 variables.</div>` +
+          (pr.record_url ? `<div class="popup-actions"><a href="${pulotuEscape(pr.record_url)}" target="_blank" rel="noopener">Full Pulotu record</a></div>` : "")
+        )
+        .addTo(map);
+      trackPlacePopup(popup);
+    });
+    map.on("mouseenter", PULOTU.layer, () => { map.getCanvas().style.cursor = "pointer"; });
+    map.on("mouseleave", PULOTU.layer, () => { map.getCanvas().style.cursor = ""; });
+  }
+}
+function syncPulotuCultures(show) {
+  if (!RC.pulotuCultures) return;
+  addPulotuLayer();
+  if (!map.getLayer(PULOTU.layer)) return;
+  map.setLayoutProperty(PULOTU.layer, "visibility", show ? "visible" : "none");
+}
+
 function syncPlaceDotEra() {
   const stale = placeSnapshotStale();
   const mode = censusState.enabled ? effectivePointsMode() : "all";
@@ -3618,6 +3726,7 @@ function syncPlaceDotEra() {
     (mode === "period" || (mode === "all" && stale));
   const showFuture = censusState.enabled && mode === "period" && placesDotState.future;
   try { syncDatedPlaces(showAlive, showFuture); } catch (e) { /* dated layer is optional */ }
+  try { syncPulotuCultures(censusState.enabled && mode === "cultures"); } catch (e) { /* cultures layer is optional */ }
   // the undated snapshot tiers hide entirely (not fade) in period and
   // off modes; hidden layers also drop out of click hit-testing
   const hideSnapshot = censusState.enabled && mode !== "all";
@@ -3736,7 +3845,9 @@ function updateCensusLegend() {
   const futureCount = placesDotState.future && Array.isArray(datedStartYears)
     ? datedStartYears.filter((y) => y > censusState.year).length
     : null;
-  const dotEraNote = pointsMode === "period"
+  const dotEraNote = pointsMode === "cultures" && RC.pulotuCultures
+    ? `<div class="census-legend-note">Pulotu cultures are documented cultural reconstructions, not counts — each culture declares its own time anchors and the year control does not apply to these points. © Pulotu (D-PLACE CLDF v1.3.1, CC BY 4.0)</div>`
+    : pointsMode === "period"
     ? `<div class="census-legend-note">showing only places whose OpenStreetMap date tags say they existed in ${censusState.year} — today's undated snapshot is hidden${placesDotState.future ? `; hollow rings mark places founded after ${censusState.year}${futureCount !== null ? ` (${futureCount} in this dataset)` : ""}` : ""}</div>`
     : pointsMode === "all" && placeSnapshotStale()
       ? `<div class="census-legend-note">place dots show today's OpenStreetMap places, not ${censusState.year} places${RC.datedPlaces ? ` — amber-ringed dots carry OpenStreetMap date tags saying they existed in ${censusState.year}` : " — historical place layers are being assembled from evidence"}</div>`
@@ -3929,6 +4040,9 @@ if (censusMetricSelect) {
     const modes = RC.datedPlaces
       ? [["period", "Points: period"], ["all", "Points: all"], ["off", "Points: off"]]
       : [["all", "Points: all"], ["off", "Points: off"]];
+    // the cultures mode exists only where the page opts into the pulotu
+    // layer; the ruled public label is "Pulotu cultures"
+    if (RC.pulotuCultures) modes.push(["cultures", "Points: Pulotu cultures"]);
     for (const [value, label] of modes) {
       const option = document.createElement("option");
       option.value = value;
