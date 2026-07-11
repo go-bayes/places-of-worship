@@ -1,6 +1,6 @@
 # Pulotu on the maps: the cultures-layer design
 
-Status: DESIGN AWAITING RATIFICATION (the project lead is a Pulotu author; every recommendation below is his to accept, amend, or reject). Prepared by the conductor 2026-07-11 from the two exploration profiles, `research/pulotu/data-profile.md` and `research/pulotu/geography-notes.md`, which carry the facts this design rests on.
+Status: RATIFIED 2026-07-11 — all six reserved rulings landed (see "The rulings as given" at the end of this document); the build is authorised. Prepared by the conductor 2026-07-11 from the two exploration profiles, `research/pulotu/data-profile.md` and `research/pulotu/geography-notes.md`, which carry the facts this design rests on.
 
 ## What the dataset is, in the terms the design needs
 
@@ -56,3 +56,12 @@ The project lead asked for further thought on this design before the next arc. T
 **For question 6, the addendum proposes "Pulotu cultures".** The bare "Cultures" placeholder under-attributes. Carrying the dataset's name in the label puts the attribution CC BY asks for onto every surface, names the record being rendered, and distinguishes this layer from any future ethnographic layer. "Ancestral cultures" asserts a pastness the Current Culture variables contradict; "Documented cultures" says nothing a reader can use.
 
 Two implementation notes for the build brief, when the rulings land. First, the traps this sitting confirmed apply here: the global geojson must be dateline-safe (Kiribati's cultures sit on both sides of 180 — cut and gate both frames per the Fiji and Kiribati precedents); and the build lane must verify that every culture point lands within its computed modern-country extent before acceptance (a transposed coordinate sign would silently drop a point into the wrong hemisphere). Second, one cheap forward hook: the Dominant world religion values can carry optional denomination-taxonomy codes in the geojson properties (the same taxonomy hook the ruled area-summary.v2 composition field carries), at near-zero cost now, for cross-layer queries later. The pilot gate, ready to run when ruled: nine points on the nine documented area councils; the curated popup with source counts and the full-record link; census artefacts byte-identical before and after (the never-merge rule verified, never assumed); the third points mode legible beside period, all, and off on the pilot page.
+
+## The rulings as given (project lead, 2026-07-11)
+
+1. **Point layer ratified.** Cultures render as points, the dataset's own geometry.
+2. **Language Atlas option declined.** The lead agreed with the addendum's split-licence consideration: the CC BY-NC 4.0 polygons are not exercised, the layer ships points only, and every release stays clean CC BY.
+3. **Curated variable set approved** as proposed: the religious-change pair, the three Traditional Culture belief scales, and the two time-focus anchors, with the full-record link carrying the rest.
+4. **Slider-independent temporal treatment confirmed.** The cultures layer never participates in the census year slider; each popup declares its own two calendar anchors.
+5. **Vanuatu pilot ratified.** The lead queried whether Vanuatu is in Pulotu; the conductor verified against the cached release (`data/raw/pulotu/pulotu_societies.csv`) and the geography profile: nine genuinely Vanuatu cultures (`tanna`, `aneityum`, `erromango`, `futuna-west`, `Seniang`, `small_islands`, `nguna`, `south_pentecost`, `mota`), each mapping to a distinct area council. Solomon Islands follows as an ordinary opt-in per the addendum's sequencing; the cultures-first question is retired.
+6. **Public label ruled: "Pulotu cultures".**
