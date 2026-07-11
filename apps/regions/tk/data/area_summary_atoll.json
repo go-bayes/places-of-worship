@@ -1,0 +1,385 @@
+{
+  "schema_version": "area-summary.v1",
+  "generated_at": "2026-07-11T00:00:00Z",
+  "generated_by": "scripts/build_tk_area_summary.R",
+  "country_code": "TK",
+  "boundary_set": {
+    "boundary_set_id": "tk-atoll-2022-geoboundaries-adm0-split",
+    "country_code": "TK",
+    "level": "atoll",
+    "vintage": "2022",
+    "source_dataset_id": "geoboundaries-tkl-adm0-2022-atoll-split"
+  },
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "No governed place-of-worship snapshot ships in the Tokelau census product.",
+    "notes": "Place counts and density metrics remain null (the 2026-07-07 OSM sweep returned 2 tagged places, too sparse)."
+  },
+  "source_datasets": [
+    {
+      "source_dataset_id": "tnso-statsnz-census-2006-table-2-5-religion-by-atoll",
+      "name": "Tokelau 2006 Census of Population and Dwellings, Table 2.5: Religion by Atoll of Usual Residence",
+      "provider": "Tokelau National Statistics Office and Stats NZ",
+      "url": "https://www.tokelau.org.nz/site/tokelau/files/2006%20Tokelau%20Census%20-%20Tables.xls",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/tk_census/tk_2006_tables.xls",
+      "licence": {
+        "name": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+        "url": "https://www.stats.govt.nz/about-us/copyright/",
+        "attribution": "This work is based on/includes Stats NZ's data which are licensed by Stats NZ for reuse under the Creative Commons Attribution 4.0 International licence. Derived atoll religion summaries acknowledge the Tokelau National Statistics Office and Stats NZ."
+      },
+      "citation": "Tokelau National Statistics Office and Stats NZ, 2006 Tokelau Census of Population and Dwellings, Table 2.5.",
+      "access_limits": null,
+      "redistribution_limits": "Derived atoll summaries under CC BY 4.0 with the adapted-content attribution statement.",
+      "notes": "Bilingual Tokelauan/English table; present usual residents (1,074). Nukunonu Presbyterian and Not Stated print as `~` confidentiality suppressions, forced to zero by the printed atoll (287) and national margins; rendered as suppressed nulls, never estimated."
+    },
+    {
+      "source_dataset_id": "tnso-statsnz-census-2016-table-5-8-religion-by-atoll-2011-2016",
+      "name": "Tokelau 2016 Census of Population and Dwellings, Tables about social profile, Table 5.8: Religious affiliation by atoll of usual residence, 2011 and 2016",
+      "provider": "Tokelau National Statistics Office and Stats NZ",
+      "url": "https://www.tokelau.org.nz/site/tokelau/files/TokelauNSO/2016Census/2016%20Tokelau%20Census%20of%20Population%20and%20Dwellings%20-%20Tables%20about%20social%20profile.xlsx",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/tk_census/tk_2016_social_profile_tables.xlsx",
+      "licence": {
+        "name": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+        "url": "https://www.stats.govt.nz/about-us/copyright/",
+        "attribution": "This work is based on/includes Stats NZ's data which are licensed by Stats NZ for reuse under the Creative Commons Attribution 4.0 International licence. Derived atoll religion summaries acknowledge the Tokelau National Statistics Office and Stats NZ."
+      },
+      "citation": "Tokelau National Statistics Office and Stats NZ, 2016 Tokelau Census of Population and Dwellings, Tables about social profile, Table 5.8.",
+      "access_limits": null,
+      "redistribution_limits": "Derived atoll summaries under CC BY 4.0 with the adapted-content attribution statement.",
+      "notes": "Table 5.8 prints 2011 and 2016 as adjacent column blocks; present usual residents (1,143 in 2011, 1,197 in 2016). The 2011 wave is recovered from this 2016 workbook because the retired Stats NZ 2011 pages 404."
+    },
+    {
+      "source_dataset_id": "geoboundaries-tkl-adm0-2022-atoll-split",
+      "name": "geoBoundaries TKL ADM0 land-cover layer, longitude-clustered to three atoll footprints",
+      "provider": "geoBoundaries (William & Mary geoLab); source Sentinel-2 10m Land Cover",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/TKL/ADM0/geoBoundaries-TKL-ADM0.geojson",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/tk_census/geoBoundaries-TKL-ADM0.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/TKL/ADM0/",
+        "attribution": "geoBoundaries (gbOpen); Sentinel-2 10m Land Cover"
+      },
+      "citation": "geoBoundaries TKL ADM0 (gbOpen, pinned 9469f09), boundary ID TKL-ADM0-11190911; atoll split derived by longitude clustering.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived atoll boundary is committed with geoBoundaries CC BY 4.0 attribution.",
+      "notes": "Single ADM0 MultiPolygon of 206 land-cover parts; exploded and assigned to Atafu, Nukunonu, Fakaofo by centroid longitude, then dissolved to three footprints. Every part is assigned; no part sits south of 10S (no Swains Island contamination); the three footprint longitude ranges do not overlap."
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_id": "population_total",
+      "label": "Census population total",
+      "description": "Present usual residents represented in the atoll religion table.",
+      "unit": "count",
+      "denominator_indicator_id": null,
+      "method": "Printed atoll total: 2006 Table 2.5; 2011 and 2016 Table 5.8.",
+      "temporal_coverage": "2006; 2011; 2016",
+      "spatial_coverage": "Tokelau atolls (3)",
+      "quality_notes": "Present-resident universe (present in Tokelau on census night), not the absentee-inclusive usual-resident total."
+    },
+    {
+      "indicator_id": "religious_affiliation_percent",
+      "label": "Religious affiliation %",
+      "description": "Share of the atoll population with a stated religious affiliation.",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "100 * (Total - No religion - Not stated) / Total; affiliation includes every named denomination and Spiritualism and New Age religions.",
+      "temporal_coverage": "2006; 2011; 2016",
+      "spatial_coverage": "Tokelau atolls (3)",
+      "quality_notes": "Percentages use each atoll's printed present-usual-resident total. Religious affiliation is every named denomination plus Spiritualism and New Age religions; No religion and Not stated are excluded from the affiliation numerator. 2006 prints no No religion line and its analytical report records that every respondent gave a Christian denomination, so no religion is zero across the three 2006 atolls."
+    },
+    {
+      "indicator_id": "no_religion_percent",
+      "label": "No religious affiliation %",
+      "description": "Share in the source No religion category (zero for 2006, which prints no such line).",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "100 * No religion / Total. 2006: zero (no No religion line; every respondent gave a Christian denomination).",
+      "temporal_coverage": "2006; 2011; 2016",
+      "spatial_coverage": "Tokelau atolls (3)",
+      "quality_notes": "Tokelau is effectively universally Christian: the national no-religion count is 0, 0, and 1 across 2006, 2011, and 2016."
+    }
+  ],
+  "visual_layers": [
+    {
+      "visual_layer_id": "tk-atoll-religious-affiliation",
+      "label": "Religious affiliation %",
+      "description": "Tokelau census-affiliation share by atoll.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "religious_affiliation_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "present usual residents in the atoll religion table"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "reported atoll value",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": true,
+      "notes": "Census affiliation, not practice, attendance, or membership. Near 100 percent in every wave (universally Christian)."
+    },
+    {
+      "visual_layer_id": "tk-atoll-no-religion",
+      "label": "No religious affiliation %",
+      "description": "Tokelau census no-religion share by atoll.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "no_religion_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "present usual residents in the atoll religion table"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "reported atoll value",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Source No religion category; zero for 2006 (no printed line), zero in 2011, and one nationally in 2016."
+    }
+  ],
+  "rows": [
+    {
+      "country_code": "TK",
+      "boundary_set_id": "tk-atoll-2022-geoboundaries-adm0-split",
+      "boundary_level": "atoll",
+      "area_unit_id": "tk-atoll-2022-geoboundaries-adm0-split:TK-ATA",
+      "area_code": "TK-ATA",
+      "area_name": "Atafu",
+      "year": 2006,
+      "population_total": 417,
+      "population_total_basis": "Usually resident population present in Tokelau on census night, printed atoll total: 2006 Table 2.5; 2011 and 2016 Table 5.8. This present-resident universe is internally consistent across all three waves and is not the absentee-inclusive usual-resident total.",
+      "religious_affiliation_count": 416,
+      "religious_affiliation_percent": 99.7602,
+      "no_religion_count": 0,
+      "no_religion_percent": 0,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 3.1042,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "tnso-statsnz-census-2006-table-2-5-religion-by-atoll",
+        "geoboundaries-tkl-adm0-2022-atoll-split"
+      ],
+      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0;no_religion_absent_from_2006_frame_zero_by_source_narrative"
+    },
+    {
+      "country_code": "TK",
+      "boundary_set_id": "tk-atoll-2022-geoboundaries-adm0-split",
+      "boundary_level": "atoll",
+      "area_unit_id": "tk-atoll-2022-geoboundaries-adm0-split:TK-ATA",
+      "area_code": "TK-ATA",
+      "area_name": "Atafu",
+      "year": 2011,
+      "population_total": 385,
+      "population_total_basis": "Usually resident population present in Tokelau on census night, printed atoll total: 2006 Table 2.5; 2011 and 2016 Table 5.8. This present-resident universe is internally consistent across all three waves and is not the absentee-inclusive usual-resident total.",
+      "religious_affiliation_count": 384,
+      "religious_affiliation_percent": 99.7403,
+      "no_religion_count": 0,
+      "no_religion_percent": 0,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 3.1042,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "tnso-statsnz-census-2016-table-5-8-religion-by-atoll-2011-2016",
+        "geoboundaries-tkl-adm0-2022-atoll-split"
+      ],
+      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0"
+    },
+    {
+      "country_code": "TK",
+      "boundary_set_id": "tk-atoll-2022-geoboundaries-adm0-split",
+      "boundary_level": "atoll",
+      "area_unit_id": "tk-atoll-2022-geoboundaries-adm0-split:TK-ATA",
+      "area_code": "TK-ATA",
+      "area_name": "Atafu",
+      "year": 2016,
+      "population_total": 413,
+      "population_total_basis": "Usually resident population present in Tokelau on census night, printed atoll total: 2006 Table 2.5; 2011 and 2016 Table 5.8. This present-resident universe is internally consistent across all three waves and is not the absentee-inclusive usual-resident total.",
+      "religious_affiliation_count": 405,
+      "religious_affiliation_percent": 98.063,
+      "no_religion_count": 1,
+      "no_religion_percent": 0.2421,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 3.1042,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "tnso-statsnz-census-2016-table-5-8-religion-by-atoll-2011-2016",
+        "geoboundaries-tkl-adm0-2022-atoll-split"
+      ],
+      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0"
+    },
+    {
+      "country_code": "TK",
+      "boundary_set_id": "tk-atoll-2022-geoboundaries-adm0-split",
+      "boundary_level": "atoll",
+      "area_unit_id": "tk-atoll-2022-geoboundaries-adm0-split:TK-NUK",
+      "area_code": "TK-NUK",
+      "area_name": "Nukunonu",
+      "year": 2006,
+      "population_total": 287,
+      "population_total_basis": "Usually resident population present in Tokelau on census night, printed atoll total: 2006 Table 2.5; 2011 and 2016 Table 5.8. This present-resident universe is internally consistent across all three waves and is not the absentee-inclusive usual-resident total.",
+      "religious_affiliation_count": 287,
+      "religious_affiliation_percent": 100,
+      "no_religion_count": 0,
+      "no_religion_percent": 0,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 3.6001,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "tnso-statsnz-census-2006-table-2-5-religion-by-atoll",
+        "geoboundaries-tkl-adm0-2022-atoll-split"
+      ],
+      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0;no_religion_absent_from_2006_frame_zero_by_source_narrative;confidentiality_suppression_2006_presbyterian_and_not_stated_tilde_rendered_null_forced_zero_by_printed_margins"
+    },
+    {
+      "country_code": "TK",
+      "boundary_set_id": "tk-atoll-2022-geoboundaries-adm0-split",
+      "boundary_level": "atoll",
+      "area_unit_id": "tk-atoll-2022-geoboundaries-adm0-split:TK-NUK",
+      "area_code": "TK-NUK",
+      "area_name": "Nukunonu",
+      "year": 2011,
+      "population_total": 309,
+      "population_total_basis": "Usually resident population present in Tokelau on census night, printed atoll total: 2006 Table 2.5; 2011 and 2016 Table 5.8. This present-resident universe is internally consistent across all three waves and is not the absentee-inclusive usual-resident total.",
+      "religious_affiliation_count": 309,
+      "religious_affiliation_percent": 100,
+      "no_religion_count": 0,
+      "no_religion_percent": 0,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 3.6001,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "tnso-statsnz-census-2016-table-5-8-religion-by-atoll-2011-2016",
+        "geoboundaries-tkl-adm0-2022-atoll-split"
+      ],
+      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0"
+    },
+    {
+      "country_code": "TK",
+      "boundary_set_id": "tk-atoll-2022-geoboundaries-adm0-split",
+      "boundary_level": "atoll",
+      "area_unit_id": "tk-atoll-2022-geoboundaries-adm0-split:TK-NUK",
+      "area_code": "TK-NUK",
+      "area_name": "Nukunonu",
+      "year": 2016,
+      "population_total": 385,
+      "population_total_basis": "Usually resident population present in Tokelau on census night, printed atoll total: 2006 Table 2.5; 2011 and 2016 Table 5.8. This present-resident universe is internally consistent across all three waves and is not the absentee-inclusive usual-resident total.",
+      "religious_affiliation_count": 383,
+      "religious_affiliation_percent": 99.4805,
+      "no_religion_count": 0,
+      "no_religion_percent": 0,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 3.6001,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "tnso-statsnz-census-2016-table-5-8-religion-by-atoll-2011-2016",
+        "geoboundaries-tkl-adm0-2022-atoll-split"
+      ],
+      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0"
+    },
+    {
+      "country_code": "TK",
+      "boundary_set_id": "tk-atoll-2022-geoboundaries-adm0-split",
+      "boundary_level": "atoll",
+      "area_unit_id": "tk-atoll-2022-geoboundaries-adm0-split:TK-FAK",
+      "area_code": "TK-FAK",
+      "area_name": "Fakaofo",
+      "year": 2006,
+      "population_total": 370,
+      "population_total_basis": "Usually resident population present in Tokelau on census night, printed atoll total: 2006 Table 2.5; 2011 and 2016 Table 5.8. This present-resident universe is internally consistent across all three waves and is not the absentee-inclusive usual-resident total.",
+      "religious_affiliation_count": 369,
+      "religious_affiliation_percent": 99.7297,
+      "no_religion_count": 0,
+      "no_religion_percent": 0,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 3.1057,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "tnso-statsnz-census-2006-table-2-5-religion-by-atoll",
+        "geoboundaries-tkl-adm0-2022-atoll-split"
+      ],
+      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0;no_religion_absent_from_2006_frame_zero_by_source_narrative"
+    },
+    {
+      "country_code": "TK",
+      "boundary_set_id": "tk-atoll-2022-geoboundaries-adm0-split",
+      "boundary_level": "atoll",
+      "area_unit_id": "tk-atoll-2022-geoboundaries-adm0-split:TK-FAK",
+      "area_code": "TK-FAK",
+      "area_name": "Fakaofo",
+      "year": 2011,
+      "population_total": 449,
+      "population_total_basis": "Usually resident population present in Tokelau on census night, printed atoll total: 2006 Table 2.5; 2011 and 2016 Table 5.8. This present-resident universe is internally consistent across all three waves and is not the absentee-inclusive usual-resident total.",
+      "religious_affiliation_count": 444,
+      "religious_affiliation_percent": 98.8864,
+      "no_religion_count": 0,
+      "no_religion_percent": 0,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 3.1057,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "tnso-statsnz-census-2016-table-5-8-religion-by-atoll-2011-2016",
+        "geoboundaries-tkl-adm0-2022-atoll-split"
+      ],
+      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0"
+    },
+    {
+      "country_code": "TK",
+      "boundary_set_id": "tk-atoll-2022-geoboundaries-adm0-split",
+      "boundary_level": "atoll",
+      "area_unit_id": "tk-atoll-2022-geoboundaries-adm0-split:TK-FAK",
+      "area_code": "TK-FAK",
+      "area_name": "Fakaofo",
+      "year": 2016,
+      "population_total": 399,
+      "population_total_basis": "Usually resident population present in Tokelau on census night, printed atoll total: 2006 Table 2.5; 2011 and 2016 Table 5.8. This present-resident universe is internally consistent across all three waves and is not the absentee-inclusive usual-resident total.",
+      "religious_affiliation_count": 399,
+      "religious_affiliation_percent": 100,
+      "no_religion_count": 0,
+      "no_religion_percent": 0,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 3.1057,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "tnso-statsnz-census-2016-table-5-8-religion-by-atoll-2011-2016",
+        "geoboundaries-tkl-adm0-2022-atoll-split"
+      ],
+      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0"
+    }
+  ]
+}

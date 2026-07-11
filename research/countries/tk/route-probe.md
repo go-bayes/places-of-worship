@@ -143,3 +143,62 @@ Derived/context files also present in the cache (not source objects): `tk_2016_p
 ## Product boundary
 
 A build on this probe stages a **three-wave, atoll-level** religious-affiliation series (2006, 2011, 2016) for Atafu, Fakaofo, and Nukunonu, on three atoll footprints derived from the geoBoundaries TKL ADM0 land-cover layer (CC BY 4.0) by longitude clustering. It uses the present-usual-resident universe, the stable Congregational / Presbyterian / Roman Catholic / Other Christian / (No religion) / Not stated frame, and the byte-matched counts above. It would **not** include a 2022 wave (licensed microdata only), a pre-2006 wave (no public atoll table), a places-of-worship layer (OSM returned 2 tagged places on the 2026-07-07 sweep — too sparse), or place-density metrics. The small-country clause does not need to be invoked as a fallback: Tokelau publishes the atoll religion detail the queue was chasing, three waves deep, open and reconciling — this is a first-class atoll product, not a national-only compromise.
+
+## Build appendix (2026-07-11)
+
+The build shipped as a FULL product under CC BY 4.0 (byte-matched). Builder: `scripts/build_tk_area_summary.R`. Outputs: `apps/regions/tk/data/tk_atoll_2022.geojson` (273,598 bytes, 3 features), `apps/regions/tk/data/area_summary_atoll.{json,csv}` (9 rows = 3 atolls x 3 waves), `docs/manifests/tk-census-religion-2006-2016.json`. Raw cache mirrored to `gs://pow-research-data/raw_sources/tk_census/` (19 objects) and recorded in `raw_cache_durable_uris`.
+
+### Reconciliation gates (all passed, zero difference)
+
+Each wave closes at both margins — every atoll column's category sum equals its printed atoll total, and every category row's three-atoll sum equals its printed national total — and the atoll-total and national-total sums share one grand total.
+
+| Wave | Atafu | Nukunonu | Fakaofo | Grand total | Source table |
+| --- | --- | --- | --- | --- | --- |
+| 2006 | 417 | 287 | 370 | 1,074 | Table 2.5 (2006 Census Tables workbook) |
+| 2011 | 385 | 309 | 449 | 1,143 | Table 5.8, 2011 block (2016 social-profile workbook) |
+| 2016 | 413 | 385 | 399 | 1,197 | Table 5.8, 2016 block (2016 social-profile workbook) |
+
+The counts read from the two workbooks match this probe's byte-matched tables exactly (workbook sha256s reverified: `tk_2006_tables.xls` e8af0913…, `tk_2016_social_profile_tables.xlsx` 2e09afee…).
+
+National headline per wave (affiliation = Total − No religion − Not stated; affiliation counts every named denomination plus Spiritualism and New Age religions):
+
+| Wave | Population | Affiliation | No religion | Not stated |
+| --- | --- | --- | --- | --- |
+| 2006 | 1,074 | 1,072 | 0 | 2 |
+| 2011 | 1,143 | 1,137 | 0 | 6 |
+| 2016 | 1,197 | 1,187 | 1 | 9 |
+
+**2006 Nukunonu suppression.** The two `~` confidentiality cells (Presbyterian, Not Stated) render as suppressed nulls in the manifest category detail and are never estimated (MONSTAT z precedent). The printed Nukunonu atoll total (287) equals the sum of the three visible cells (Congregational 6 + Roman Catholic 278 + Other Christian 3 = 287), and the national Presbyterian (11) and Not Stated (2) totals are reached by Atafu and Fakaofo alone, so both suppressed cells are forced to zero. Nukunonu 2006 headline affiliation is therefore exact: 287 affiliated, 100.0 percent.
+
+### Boundary gates (all passed)
+
+The single geoBoundaries TKL ADM0 land-cover MultiPolygon explodes into 206 motu parts, every one assigned to an atoll by centroid longitude (thresholds −172.0 and −171.5, sitting in the ~0.6 degree inter-atoll gaps), then dissolved to three footprints.
+
+- **Part assignment (0 orphans):** Atafu 58, Nukunonu 72, Fakaofo 76 (sum 206). The counts match this probe's part-index ranges (Fakaofo 76, Nukunonu 72, Atafu 58).
+- **Part longitude ranges (non-overlapping):** Atafu [−172.5203, −172.4648], Nukunonu [−171.8680, −171.7659], Fakaofo [−171.2706, −171.1819]. Gaps of ~0.60 and ~0.50 degrees separate the clusters.
+- **Dissolved footprint longitude ranges (non-overlapping):** Atafu [−172.5204, −172.4648] < Nukunonu [−171.8680, −171.7659] < Fakaofo [−171.2706, −171.1819].
+- **Three valid features, three distinct geometry hashes.**
+- **Swains contamination guard:** full-layer bbox ymin = −9.4435 (≥ −10); no part sits south of 10°S. Swains Island (near 11.05°S, US-administered) is outside the layer and the census.
+- **Land area:** Atafu 3.104 km², Nukunonu 3.600 km², Fakaofo 3.106 km² (total 9.81 km², matching the release metadata meanAreaSqKM 9.803).
+- **Simplification:** mapshaper weighted keep-shapes at 100% keep, 273,598 bytes (under the 1,500,000-byte cap).
+
+### Licence
+
+CC BY 4.0, byte-matched. The builder reverifies the operative clause verbatim in the cached Stats NZ copyright capture (`data/raw/tk_census/statsnz_copyright_page.txt`, sha256 `2f5053903b59f5fddf0441a4c742ecb8ad1d1ee6b2f312a62d4ad48413477aaa`): "Unless otherwise specified, content we produce is licensed under the Creative Commons Attribution 4.0 International licence." Product `licence_status` is `accepted`; `licence_basis` is `statsnz_tnso_cc_by_4_0_byte_matched_attribution`; the boundary basis is `geoboundaries_cc_by_4_0`. Attribution uses the adapted-content statement plus a Tokelau National Statistics Office acknowledgement.
+
+### Deferred routes
+
+2022 (licensed microdata only, PDH catalog/834) and the pre-2006 waves (no public atoll religion table) are recorded in the manifest `deferred_sources`; neither widens the shipped span.
+
+### Schema validation (exact invocations and output)
+
+```
+$ uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/tk/data/area_summary_atoll.json
+ok -- validation done
+
+$ uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/tk-census-religion-2006-2016.json
+ok -- validation done
+
+$ bash scripts/validate_manifests.sh
+manifest validation: 65/65 pass
+```
