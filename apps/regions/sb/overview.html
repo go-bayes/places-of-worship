@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Solomon Islands map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Solomon Islands research map; every string traces
+    // to research/countries/sb/route-probe.md, the manifest
+    // docs/manifests/sb-census-religion-2009-2019.json (construct notes,
+    // category frames, validation, and licence), or the live REGION_CONFIG in
+    // apps/regions/sb/index.html. authors nothing.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "SB",
+      countryName: "Solomon Islands",
+      mapHref: "./",
+      intro: "Census religious-affiliation overlays for the ten provinces of Solomon Islands across two censuses, 2009 and 2019, from the Solomon Islands National Statistics Office (SINSO). The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+      facts: {
+        waves: "Two censuses: 2009, 2019",
+        geographies: "Province (10 units) on the geoBoundaries SLB ADM1 frame",
+        metrics: "Religious affiliation %, No religion %, change since previous census"
+      },
+      reading: [
+        "Provinces are shaded by the share reporting affiliation with a named religion or belief tradition, or by the share in the census No Religion line (No religion %). Broad affiliation is each province's population minus the No Religion line and the Refuse to Answer line, and it is comparable across both waves because every wave counts all persons of all ages with no universe break. Custom Beliefs (2009) / Custom Beliefs or Animism (2019) counts as a religious affiliation.",
+        "Affiliation is near-universal in every province and wave (99.6 to 100.0 percent) and the no-religion population is very small (national 681 in 2009, 1,227 in 2019); the near-flat headline is a genuine census fact. The substantive subnational structure is denominational, and it rides every row of the downloadable area summary verbatim: Isabel is overwhelmingly Church of Melanesia (2019: 27,991 of 31,420, about 89 percent), Choiseul and Western are United Church-led (Choiseul 2019: 16,478 of 30,775, about 54 percent; United Church is the largest single body in Western), Guadalcanal is Roman Catholic-led with Church of Melanesia and South Sea Evangelical the next-largest bodies, Malaita divides between Church of Melanesia and South Sea Evangelical nearly level with Roman Catholic close behind, and Rennell-Bellona is heavily Seventh Day Adventist and South Sea Evangelical (2019: 1,958 and 1,530 of 4,100). This denominational composition lives in the source religion tables and the build manifest's per-wave category frames; the headline affiliation and no-religion metrics do not carry it, and the popup shows the affiliation and no-religion shares by census year only.",
+        "Percentages use each province's printed census Total for its own wave. The Refuse to Answer line stays in the denominator and outside both headline numerators; the two shares therefore do not add to 100. The no-religion slot is the single No Religion line: No Religion in 2009, widening its label to No Religion or Faith/Atheism in 2019; the construct is the same no-religion slot.",
+        "Broad affiliation is comparable across both waves. The 2019 frame widens from thirteen categories to seventeen: Pentecostal, Assembly of God, Baptist Church and Muslim print as separate lines in 2019, folded inside the 2009 Other. The 2009 Other (14,076) and 2019 Other religions (14,953) lines are therefore not comparable, disclosed per row. Those split-out bodies count as religious affiliation in both waves; the has-a-religion total is therefore unaffected, and the change metric differences the affiliation share honestly, with no withholds.",
+        "A change metric reports the percentage-point change in the affiliation share between 2009 and 2019; the two waves are roughly a decade apart and a wave-to-wave difference is not an annual rate. The changes are small everywhere because affiliation is near-universal in both waves. The population grows sharply across the pair (515,870 to 720,956, +39.8 percent); shares are read within each province's own wave denominator and the growth is never treated as a religion change.",
+        "Earlier waves are held and never backcast. 1999 religion is published nationally only (409,042) with no religion-by-province table located; 1986 predates the current province geography (Choiseul separated from Western in 1991, Rennell-Bellona from Central in 1993). Religion is published by ward in both waves (P3.1 in 2009, P8.3 in 2019, about 180 wards), a richer geography than the province, but geoBoundaries offers only ADM1 (10 provinces) and ADM2 (50 constituencies, not the census wards); a ward-level product needs a ward boundary layer located and licensed first. No place-of-worship layer ships for this product; place counts and density metrics are therefore null.",
+        "The record reconciles at both margins in every wave, fail-fast and verified against the printed control totals: 2009 closes to 515,870 and 2019 to 720,956, with every province column and every religion row summing to the printed national total. The national totals reconcile independently with the 2019 National Report Table 8.3.1 (Church of Melanesia 232,041; national 720,956).",
+        "The display frame is the geoBoundaries SLB ADM1 layer, ten provinces joined one-to-one on area_code after a three-name concordance (Makira-Ulawa maps to geoBoundaries Makira, Rennell-Bellona to Rennell and Bellona, Honiara to Capital Territory (Honiara)). The extent spans lon 155.5 to 168.8 East and lat 12.3 to 6.6 South, wholly east of and far from the antimeridian; no dateline handling is needed, and a naive national bounding box is safe here, unlike the Kiribati and Fiji Pacific siblings."
+      ],
+      sources: [
+        {
+          name: "Solomon Islands 2009 Census Report on Basic Tables Vol 2, Table P3.2: Total population by province and religious denomination",
+          href: "https://solomonislands-data.sprep.org/system/files/2009_Census_Report-on-Basic-Tables-Vol2.pdf",
+          construct: "Census religious affiliation by province, all persons of all ages; thirteen-category frame. Both margins close exactly: every province column and every religion row sum to the printed national total of 515,870. Dashes read as nil; no cell suppression. The 2009 table misspells the province Guadalcanal as Guadacanal; the display name uses Guadalcanal",
+          years: "2009",
+          licence: "No reuse licence is stated on the SINSO census religion tables; the SINSO website footer asserts copyright (a copyright assertion, not a reuse grant). The SPREP re-host of the 2009 file attaches a Creative Commons Public Data License, which governs the SPREP mirror, not the SINSO original. The derived province summaries ship with attribution to the Solomon Islands National Statistics Office while a courtesy reuse-confirmation ask is outgoing, and the page reverts in a single commit if SINSO objects (project-lead ruling, 2026-07-11)"
+        },
+        {
+          name: "Solomon Islands 2019 Population Census Report Basic Tables & Operations Vol 2, Table P8.2: Total population by province and religious denominations",
+          href: "https://solomons.gov.sb/wp-content/uploads/2023/09/Solomon-Islands-2019-Population-Census-Report_Basic-Tables_Operations_Vol2.pdf",
+          construct: "Census religious affiliation by province, all persons of all ages; seventeen-category frame. Both margins close exactly to the printed national total of 720,956. Pentecostal, Assembly of God, Baptist Church and Muslim split out of the 2009 Other; three lines widen their label (Christian OutReach Church, Bahai Faith, Custom Beliefs or Animism, No Religion or Faith/Atheism). The national totals reconcile with the 2019 National Report Table 8.3.1 (Church of Melanesia 232,041; national 720,956)",
+          years: "2019",
+          licence: "No reuse licence is stated on the SINSO census religion tables. The derived province summaries ship with attribution to the Solomon Islands National Statistics Office while a courtesy reuse-confirmation ask is outgoing, and the page reverts in a single commit if SINSO objects (project-lead ruling, 2026-07-11)"
+        },
+        {
+          name: "geoBoundaries SLB ADM1 (10 provinces)",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/SLB/ADM1/",
+          construct: "Boundary geometry (10 ADM1 provinces), boundaryYearRepresented 2021, source Natural Earth; joined one-to-one on area_code after a three-name concordance (Makira-Ulawa/Makira, Rennell-Bellona/Rennell and Bellona, Honiara/Capital Territory (Honiara)), simplified with mapshaper weighted keep-shapes. The extent is wholly east of and far from the antimeridian; no dateline handling is needed. ADM2 (50 constituencies) is not the census ward frame and was not used",
+          years: "2021 (represented year)",
+          licence: "Public Domain, per the release metadata (pinned commit 9469f09); attribution geoBoundaries (gbOpen), boundary source Natural Earth. This is the cleanest boundary-rights position in the Pacific tranche: no attribution obligation on the geometry"
+        }
+      ],
+      accessData: {
+        note: "The committed products are the derived area summary (broad religious-affiliation and no-religion shares by province and wave, with all-persons population totals) and a simplified ten-province boundary only; the raw census reports and the ADM1 source GeoJSON are not committed. The denominational composition behind the affiliation share rides every row of the area summary verbatim (the source_categories_verbatim field) and is documented in the manifest's per-wave category frames; the popup shows the affiliation and no-religion shares by census year only.",
+        sourceOfRecord: "Solomon Islands National Statistics Office, <a href=\"https://statistics.gov.sb\" target=\"_blank\" rel=\"noopener\">source of record</a> for the 2009 Basic Tables Vol 2 Table P3.2 and the 2019 Basic Tables Vol 2 Table P8.2; boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/SLB/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries SLB ADM1</a>.",
+        tables: "The 2009 Table P3.2 and the 2019 Table P8.2 are the source of record for the shipped counts. Reconciliation passes at both margins in both waves (national closures 515,870 in 2009 and 720,956 in 2019); every province column and every religion row sums to the printed national total, and the national totals reconcile independently with the 2019 National Report Table 8.3.1. The area-summary religious_affiliation_percent field carries broad affiliation (population minus the No Religion line and the Refuse to Answer line, over each province's own wave Total) and no_religion_percent carries the No Religion share; the Refuse to Answer line stays in the denominator and outside both numerators; the two shares therefore do not add to 100. Custom Beliefs (2009) / Custom Beliefs or Animism (2019) counts as a religious affiliation.",
+        licence: "No reuse licence is stated on the SINSO census religion tables in either wave (2009 Basic Tables Vol 2, 2019 Basic Tables Vol 2): the SINSO website footer asserts copyright, a copyright assertion rather than a reuse grant. The SPREP re-host of the 2009 file attaches a Creative Commons Public Data License, which governs the SPREP mirror, not the SINSO original. Under the project-lead ruling of 2026-07-11 the derived province summaries ship with attribution to the Solomon Islands National Statistics Office while a courtesy reuse-confirmation ask is outgoing; the licence is recorded as needs-review, and the page reverts in a single commit if SINSO objects. The geoBoundaries SLB ADM1 boundary is Public Domain (Natural Earth) per its release metadata, with no attribution obligation on the geometry.",
+        script: "scripts/build_sb_area_summary.R",
+        manifests: [
+          { label: "sb-census-religion-2009-2019", href: "docs/manifests/sb-census-religion-2009-2019.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Solomon Islands map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
