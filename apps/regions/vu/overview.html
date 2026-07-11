@@ -16,7 +16,7 @@
       countryCode: "VU",
       countryName: "Vanuatu",
       mapHref: "./",
-      intro: "Places of worship across Vanuatu, with census denomination overlays back to the 1967 first census, at province level (1967-2020) and area-council level (2020).",
+      intro: "Places of worship across Vanuatu, with census denomination overlays back to the 1967 first census, at province level (1967-2020) and area-council level (2020). The map also carries the Pulotu cultures source: nine documented cultural reconstructions, shown at Pulotu's own three time points — Traditional, Post-contact, Current.",
       facts: {
         waves: "Censuses 1967, 1999, 2009, 2020",
         geographies: "Province; area council (2020)",
@@ -27,7 +27,8 @@
         "Percentages use the stated religion-response denominator.",
         "Provinces (and 2020 area councils) are shaded by denominational share. Affiliation is 94-100% in every province and year, so the informative signal is denominational; the map opens on customary (kastom) beliefs, which fell sharply after 1967.",
         "1967 is the first census (McArthur & Yaxley Table A), tabulating adherents of religious groups aged 15+ with no no-religion category, aggregated from islands to the modern provinces — so affiliation and no-religion are blank for 1967 and only the denomination shares are comparable across years.",
-        "2020 province rows include the urban municipalities by derivation so all years share one basis; 2009 area-council religion is published by island, so area-council rows carry island-level values. Published cells carry small (±1-2) internal inconsistencies consistent with confidentiality perturbation — treat close percentages as equal."
+        "2020 province rows include the urban municipalities by derivation so all years share one basis; 2009 area-council religion is published by island, so area-council rows carry island-level values. Published cells carry small (±1-2) internal inconsistencies consistent with confidentiality perturbation — treat close percentages as equal.",
+        "The Pulotu cultures source renders nine documented cultural reconstructions as points, never blended with census data. Its timeline steps through Pulotu's own three time points (Traditional, Post-contact, Current), never census years; each culture declares its own anchor years in its popup, and every value cites Pulotu's sources."
       ],
       sources: [
         {
@@ -50,6 +51,13 @@
           construct: "Boundary geometry",
           years: "2020",
           licence: "ODbL (ADM1); CC BY 3.0 IGO (ADM2)"
+        },
+        {
+          name: "Pulotu: Database of Austronesian Supernatural Beliefs and Practices (D-PLACE CLDF v1.3.1)",
+          href: "https://pulotu.com/",
+          construct: "Documented cultural reconstructions (Pulotu cultures source)",
+          years: "Per-culture anchors: traditional 1521-1983, contemporary 2014-2020",
+          licence: "CC BY 4.0 (DOI 10.5281/zenodo.5669235); cite Watts, Sheehan, Greenhill, Gomes-Ng, Atkinson, Bulbulia & Gray (2015), PLoS ONE 10(9)"
         }
       ],
       accessData: {

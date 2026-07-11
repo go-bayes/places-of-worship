@@ -19,7 +19,7 @@
       countryCode: "SB",
       countryName: "Solomon Islands",
       mapHref: "./",
-      intro: "Census religious-affiliation overlays for the ten provinces of Solomon Islands across two censuses, 2009 and 2019, from the Solomon Islands National Statistics Office (SINSO). The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+      intro: "Census religious-affiliation overlays for the ten provinces of Solomon Islands across two censuses, 2009 and 2019, from the Solomon Islands National Statistics Office (SINSO). The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership. The map also carries the Pulotu cultures source: twenty-two documented cultural reconstructions — the richest Pulotu country — shown at Pulotu's own three time points (Traditional, Post-contact, Current).",
       facts: {
         waves: "Two censuses: 2009, 2019",
         geographies: "Province (10 units) on the geoBoundaries SLB ADM1 frame",
@@ -33,7 +33,8 @@
         "A change metric reports the percentage-point change in the affiliation share between 2009 and 2019; the two waves are roughly a decade apart and a wave-to-wave difference is not an annual rate. The changes are small everywhere because affiliation is near-universal in both waves. The population grows sharply across the pair (515,870 to 720,956, +39.8 percent); shares are read within each province's own wave denominator and the growth is never treated as a religion change.",
         "Earlier waves are held and never backcast. 1999 religion is published nationally only (409,042) with no religion-by-province table located; 1986 predates the current province geography (Choiseul separated from Western in 1991, Rennell-Bellona from Central in 1993). Religion is published by ward in both waves (P3.1 in 2009, P8.3 in 2019, about 180 wards), a richer geography than the province, but geoBoundaries offers only ADM1 (10 provinces) and ADM2 (50 constituencies, not the census wards); a ward-level product needs a ward boundary layer located and licensed first. No place-of-worship layer ships for this product; place counts and density metrics are therefore null.",
         "The record reconciles at both margins in every wave, fail-fast and verified against the printed control totals: 2009 closes to 515,870 and 2019 to 720,956, with every province column and every religion row summing to the printed national total. The national totals reconcile independently with the 2019 National Report Table 8.3.1 (Church of Melanesia 232,041; national 720,956).",
-        "The display frame is the geoBoundaries SLB ADM1 layer, ten provinces joined one-to-one on area_code after a three-name concordance (Makira-Ulawa maps to geoBoundaries Makira, Rennell-Bellona to Rennell and Bellona, Honiara to Capital Territory (Honiara)). The extent spans lon 155.5 to 168.8 East and lat 12.3 to 6.6 South, wholly east of and far from the antimeridian; no dateline handling is needed, and a naive national bounding box is safe here, unlike the Kiribati and Fiji Pacific siblings."
+        "The display frame is the geoBoundaries SLB ADM1 layer, ten provinces joined one-to-one on area_code after a three-name concordance (Makira-Ulawa maps to geoBoundaries Makira, Rennell-Bellona to Rennell and Bellona, Honiara to Capital Territory (Honiara)). The extent spans lon 155.5 to 168.8 East and lat 12.3 to 6.6 South, wholly east of and far from the antimeridian; no dateline handling is needed, and a naive national bounding box is safe here, unlike the Kiribati and Fiji Pacific siblings.",
+        "The Pulotu cultures source renders twenty-two documented cultural reconstructions as points, never blended with census data: the twenty-one Pulotu cultures of Solomon Islands including the Temotu outliers Tikopia and Anuta, plus Varisi, whose point sits on the Solomon Islands side of the border with Papua New Guinea (a documented point-in-polygon border case). Its timeline steps through Pulotu's own three time points (Traditional, Post-contact, Current), never census years; each culture declares its own anchor years in its popup, and every value cites Pulotu's sources."
       ],
       sources: [
         {
@@ -56,6 +57,13 @@
           construct: "Boundary geometry (10 ADM1 provinces), boundaryYearRepresented 2021, source Natural Earth; joined one-to-one on area_code after a three-name concordance (Makira-Ulawa/Makira, Rennell-Bellona/Rennell and Bellona, Honiara/Capital Territory (Honiara)), simplified with mapshaper weighted keep-shapes. The extent is wholly east of and far from the antimeridian; no dateline handling is needed. ADM2 (50 constituencies) is not the census ward frame and was not used",
           years: "2021 (represented year)",
           licence: "Public Domain, per the release metadata (pinned commit 9469f09); attribution geoBoundaries (gbOpen), boundary source Natural Earth. This is the cleanest boundary-rights position in the Pacific tranche: no attribution obligation on the geometry"
+        },
+        {
+          name: "Pulotu: Database of Austronesian Supernatural Beliefs and Practices (D-PLACE CLDF v1.3.1)",
+          href: "https://pulotu.com/",
+          construct: "Documented cultural reconstructions (Pulotu cultures source); 22 cultures on the Solomon Islands frame, including Tikopia and Anuta (Temotu) and the Varisi border case",
+          years: "Per-culture anchors: traditional 1521-1983, contemporary 2014-2020",
+          licence: "CC BY 4.0 (DOI 10.5281/zenodo.5669235); cite Watts, Sheehan, Greenhill, Gomes-Ng, Atkinson, Bulbulia & Gray (2015), PLoS ONE 10(9)"
         }
       ],
       accessData: {
