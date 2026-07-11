@@ -138,3 +138,47 @@ Ship-ready as a single-wave 2023 product on the census data; hold on the two-wav
 2. Held pending project-lead ruling: (a) the `QADIANI/AHMADI` display treatment and constitutional-context note; (b) the `HINDU JATI` vs `HINDU JATI + SCHEDULED CASTES` definition and cell-suppression rule; (c) the AJK/GB territorial-scope decision and its on-surface statement; (d) the licence position under the PBS onward-supply clause (derived-rates-with-attribution recommended; written PBS confirmation the clean path).
 3. Change series (2017→2023): HOLD until a category concordance (six vs eight categories) and a district/tehsil boundary concordance across the 2018 FATA-into-KP merger are built; the province-level five/six-unit series is the robust fallback if time depth is wanted sooner.
 4. 1998 and earlier: deferred — national anchor only; subnational religion needs a printed District Census Report extraction not located online in this probe.
+
+## Build appendix (2026-07-11, STAGED — task 12 ruling encoded)
+
+A STAGED build ran under the project-lead task 12 ruling (render-the-record, "same principle"). One wave ships. Deliverables: `scripts/build_pk_area_summary.R`, `apps/regions/pk/data/area_summary_district.{json,csv}` (136 rows, no geometry), `docs/manifests/pk-census-religion-2023.json`. No page, no hub link, nothing committed — the tree is left for the conductor's line-by-line review of the encoded treatment.
+
+### What shipped, and the two hard scope corrections the cache forced
+
+The build ships the 2023 wave ONLY, at district level, and defers 2017. The probe's route table optimistically read 2017 as tehsil-reaching, but the actually-cached 2017 files are province/division summaries: `table09n_2017_national.pdf` prints province rows (PAKISTAN, KP, Punjab, Sindh, Balochistan, FATA); `table09_2017_kp.pdf` reaches only KP's six divisions; `table09_2017_fata.pdf` reaches only FATA and DIVISION-1. No 2017 district table is cached for any province, so a 2017 district product cannot be built without inventing coverage. The 2017 wave is recorded in `deferred_sources`; the unblock is downloading the 2017 district/tehsil provincial files (Kpk full, Punjab, Sindh, Balochistan, ICT) from PBS. Because only one wave ships, the manifest is named to the shipped span, `pk-census-religion-2023.json`, per the shipped-wave rule (single-wave precedents `fj-census-religion-2007.json`, `ph-census-religion-2020.json`); the `pk-census-religion` family widens to `2017-2023` only when a 2017 district wave is actually built.
+
+The 2023 Table 9 frame as published yields 136 district-equivalent tabulation units, not the 156 administrative-district count the probe cited: KP 34 districts + the Malakand Protected Area (a top-level KP tabulation unit not suffixed DISTRICT, population 825,377), Punjab 36, Sindh 30, Balochistan 34, ICT 1. The product renders the Table 9 frame and invents no districts; the 156-vs-136 gap is an administrative-vs-tabulation distinction recorded in the manifest.
+
+### Boundary decision: lane HELD (no geometry), with evidence
+
+No district geometry ships. The cache holds only geoBoundaries metadata pointers, not geometry. The ADM3 (tehsil, PAK-ADM3-9618217, year 2017, 554 units) layer carries an explicit ODbL licence but is vintage-misaligned to the 2023 district roster (which post-dates it), and no evidenced ADM3-to-2023-district mapping is available here. The ADM2 (district, PAK-ADM2-60131773, year 2019, 126 units) layer's licence is unresolved (public-domain pointer, no explicit string) and under-counts the frame; it is NOT used. Per the ruled fallback, the data tables and manifest ship with the boundary recorded as a documented blocker; `land_area_sq_km` and all place-density fields are null. The open item is an official or licensed 2023 district boundary layer.
+
+### Reconciliation (exact)
+
+Every district row's eight category counts sum to its printed total (136/136). Each province's district totals sum EXACTLY to the published Table 9 provincial anchor: KP 40,641,120 (incl. Malakand PA); Punjab 127,333,305; Sindh 55,638,409; Balochistan 14,562,011; ICT 2,283,244. National religion-table total = 240,458,089 (sum of the five provincial anchors; no 2023 national religion file is cached). Computed national shares match the probe's published secondary shares to <0.005pp: Muslim 96.3522% (~96.35), Hindu Jati + Scheduled Castes 2.1697% (~2.17), Christian 1.3727% (~1.37), Qadiani/Ahmadi 0.0677% (~0.07). Note for the record (not reconciled or explained): the PBS headline 2023 four-provinces+ICT population 241,499,431 exceeds the Table 9 religion enumeration 240,458,089 by 1,041,342.
+
+### Encoded treatment (for the conductor's word-by-word review)
+
+Verbatim eight-category 2023 frame (MUSLIM, CHRISTIAN, HINDU JATI, QADIANI/AHMADI, SCHEDULED CASTES, SIKH, PARSI, OTHERS), exact printed district counts, nothing combined, no small-cell suppression (all eight counts, down to single-digit Parsi/Sikh cells, ride each row's `quality_flag`). Headline slots carry the ratified minority-share two-slot design: `religious_affiliation_percent` := the Muslim (reference-group) share, `no_religion_percent` := the minority share (exact non-Muslim complement, 100 in every row); `religious_change` is not emitted (single wave). The signal is real and correct — Umerkot 55.17% minority share (Pakistan's most-Hindu district), Torghar 0.14%. Licence: `licence_status = needs_review`, `licence_basis = pbs_free_tabulation_attribution_derived_rates`; PBS dissemination and onward-supply terms quoted verbatim in the manifest; derived rates ship with attribution under the task 12 approval, written PBS confirmation pending. Raw cache mirrored to `gs://pow-research-data/raw_sources/pk_census/` (12 objects, 2026-07-11).
+
+The description note as shipped (manifest + product), for review:
+
+> This product renders the religion categories of the 2023 Census of Pakistan exactly as the Pakistan Bureau of Statistics (PBS) prints them in Table 9. The published 2023 categories are Muslim, Christian, Hindu Jati, Qadiani/Ahmadi, Scheduled Castes, Sikh, Parsi, and Others. Qadiani/Ahmadi is the state's enumeration label for the Ahmadiyya community, applied after the 1974 constitutional amendment that declared Ahmadis non-Muslim; the label is carried verbatim as the official record, and is not the project's description of any community's self-understanding. Hindu Jati and Scheduled Castes are enumerated as separate categories in the printed table, and this product combines nothing: each published category is reported as printed. The 2017 census used a different, six-category frame (Muslim, Christian, Hindu, Qadiani/Ahmadi, Scheduled Castes, Others); the frames differ across waves and are not category-comparable, and no cross-wave comparison is made.
+
+The territorial-scope statement as shipped:
+
+> The 2023 PBS Table 9 religion tables cover the four provinces (Khyber Pakhtunkhwa, Punjab, Sindh, and Balochistan) and the Islamabad Capital Territory. They exclude Azad Jammu and Kashmir and Gilgit-Baltistan, whose figures are published separately and are not included here. This product renders the coverage of the published tables as printed and makes no territorial claim.
+
+### Validation output
+
+- `Rscript scripts/build_pk_area_summary.R` — all gates passed (source-integrity sha256, row-category-sum, province-exact-reconciliation, national-sum, metric-complement, description-note).
+- `uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/pk/data/area_summary_district.json` — `ok -- validation done`.
+- `uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/pk-census-religion-2023.json` — `ok -- validation done`.
+- `bash scripts/validate_manifests.sh` — `manifest validation: 68/68 pass`.
+
+### Open questions for the conductor
+
+1. Manifest naming: I named it `pk-census-religion-2023.json` (shipped-wave rule) rather than the requested `pk-census-religion-2017-2023.json`, because no 2017 district wave is buildable from the cache and the 2017-2023 name would over-promise. Confirm, or reserve the family name deliberately.
+2. `licence_status`: I set `needs_review` (honoring the probe's stated position and the pending written PBS confirmation under the explicit onward-supply clause). The Sri Lanka/DCS parallel used `accepted` after the PI confirmed. If task 12 is read as a full licence confirmation, this should flip to `accepted`.
+3. District count: rendered 136 Table 9 units (incl. Malakand Protected Area), not 156. Confirm the render-the-record reading of "as published".
+4. 2017 second wave and district geometry remain the two blockers; both need PBS downloads (2017 district files; an official 2023 district boundary layer).

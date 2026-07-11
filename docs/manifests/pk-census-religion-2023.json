@@ -1,0 +1,487 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:pk-census-religion:pk:2023:pbs-district",
+  "dataset_id": "pk-census-religion:pk:2023:pbs-district",
+  "dataset_version_id": "pk-census-religion:pk:2023:pbs-district:0f7b7c450627",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "pk-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "PK"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-07-11T04:32:10Z",
+  "created_by": "scripts/build_pk_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_pk_area_summary.R",
+    "git_commit": "c603f8d",
+    "command": "Rscript scripts/build_pk_area_summary.R",
+    "parameters": {
+      "waves": [
+        2023
+      ],
+      "geography": "136 district-equivalent tabulation units (four provinces + ICT) as printed in PBS 2023 Table 9; the KP frame includes 34 districts plus the Malakand Protected Area (a top-level tabulation unit)",
+      "district_count_note": "Table 9 as published yields 136 district-equivalent units (KP 34 districts + Malakand Protected Area; Punjab 36; Sindh 30; Balochistan 34; ICT 1). The PBS administrative-district count of 156 differs from the Table 9 tabulation frame; this product renders the Table 9 frame and invents no districts.",
+      "construct": "census religion (eight-category official self-identification, no no-religion or not-stated option)",
+      "denominator": "district total population",
+      "category_rule": "eight verbatim 2023 categories rendered exactly as printed; nothing combined; no small-cell suppression; the two metric slots carry the minority-share two-slot design (see minority_share_design)",
+      "category_frame_verbatim": [
+        "MUSLIM",
+        "CHRISTIAN",
+        "HINDU JATI",
+        "QADIANI/AHMADI",
+        "SCHEDULED CASTES",
+        "SIKH",
+        "PARSI",
+        "OTHERS"
+      ],
+      "minority_share_design": {
+        "design": "docs/development/minority-share-metric.md",
+        "ratified": "2026-07-11",
+        "reference_group": "muslim",
+        "reference_group_label": "Muslim",
+        "reference_group_basis": "largest published national religion category in 2023; declared once and held constant across every area",
+        "minority_group_categories": [
+          "christian",
+          "hindu_jati",
+          "qadiani_ahmadi",
+          "scheduled_castes",
+          "sikh",
+          "parsi",
+          "others"
+        ],
+        "slot_religious_affiliation_percent": "Muslim (reference-group) share of the district total population",
+        "slot_no_religion_percent": "minority share: exact complement of the Muslim share (the seven non-reference categories summed); not a measure of no religion, belief, practice, or secularity",
+        "religious_change": "not emitted (single wave; the 2017 frame is not category-comparable and no 2017 district table is cached)",
+        "national_muslim_share_2023": 96.3522
+      },
+      "description_note": "This product renders the religion categories of the 2023 Census of Pakistan exactly as the Pakistan Bureau of Statistics (PBS) prints them in Table 9. The published 2023 categories are Muslim, Christian, Hindu Jati, Qadiani/Ahmadi, Scheduled Castes, Sikh, Parsi, and Others. Qadiani/Ahmadi is the state's enumeration label for the Ahmadiyya community, applied after the 1974 constitutional amendment that declared Ahmadis non-Muslim; the label is carried verbatim as the official record, and is not the project's description of any community's self-understanding. Hindu Jati and Scheduled Castes are enumerated as separate categories in the printed table, and this product combines nothing: each published category is reported as printed. The 2017 census used a different, six-category frame (Muslim, Christian, Hindu, Qadiani/Ahmadi, Scheduled Castes, Others); the frames differ across waves and are not category-comparable, and no cross-wave comparison is made.",
+      "territorial_scope": "The 2023 PBS Table 9 religion tables cover the four provinces (Khyber Pakhtunkhwa, Punjab, Sindh, and Balochistan) and the Islamabad Capital Territory. They exclude Azad Jammu and Kashmir and Gilgit-Baltistan, whose figures are published separately and are not included here. This product renders the coverage of the published tables as printed and makes no territorial claim.",
+      "sensitivity": "Religion is highly sensitive in Pakistan for the Ahmadiyya, Hindu, Christian, Sikh, and Dalit (Scheduled Castes) communities. This is a district-level product (a coarser frame than the tehsil tables the PBS also publishes), chosen to reduce very small cells while rendering the official record. District counts are printed exactly with no PBS suppression rule, and this product applies no small-cell treatment: every published category count is rendered as printed.",
+      "small_cell_treatment": "none; district exact counts rendered as published (no PBS suppression rule)",
+      "boundary_status": "No district geometry ships with this product; the boundary lane is HELD as a documented blocker. The geoBoundaries PAK ADM3 (tehsil, boundary ID PAK-ADM3-9618217, represented year 2017, 554 units) layer carries an explicit ODbL licence but is vintage-misaligned to the 2023 district roster, which post-dates it; no evidenced ADM3-to-2023-district mapping is available in this build. The geoBoundaries PAK ADM2 (district, boundary ID PAK-ADM2-60131773, represented year 2019, 126 units) layer's licence is unresolved (the release asserts public domain but carries no explicit licence string) and under-counts the census district frame; it is not used. Consequently land_area_sq_km and all place-density fields are null, and an official or licensed 2023 district boundary layer is the open item before a map can render.",
+      "wave_coverage": "ONE wave ships (2023). The 2017 wave is deferred: no 2017 district table is cached (province/division only). See deferred_sources.",
+      "manifest_naming_note": "Named to the shipped span (pk-census-religion-2023.json) per the shipped-wave rule; the pk-census-religion family manifest widens to 2017-2023 only when a 2017 district wave is actually built.",
+      "local_cache_hint": "Raw PBS Table 9 PDFs and boundary metadata are cached under data/raw/pk_census/ and remain git-ignored.",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/pk_census/ (12 objects mirrored 2026-07-11)"
+      ],
+      "pbs_terms_verbatim": {
+        "dissemination_policy": "The previous policy adopted by PBS for data supply was that aggregate level data (tabulation) was provided to the users free of charges and this practice will continue.",
+        "terms_and_conditions": "a. The user shall provide an undertaking that the data collected from PBS will not be supplied to any other person/organization either free of cost or on payment. b. The user shall acknowledge the source of data and supply copies of the research work/articles (published/unpublished) to PBS."
+      },
+      "retrieval_routes": [
+        {
+          "purpose": "2023 KP district religion table",
+          "method": "GET",
+          "url": "https://www.pbs.gov.pk/wp-content/uploads/census_tables/tables/table_9_kp_districts.pdf"
+        },
+        {
+          "purpose": "2023 Punjab district religion table",
+          "method": "GET",
+          "url": "https://www.pbs.gov.pk/wp-content/uploads/census_tables/tables/table_9_punjab_districts.pdf"
+        },
+        {
+          "purpose": "2023 Sindh district religion table",
+          "method": "GET",
+          "url": "https://www.pbs.gov.pk/wp-content/uploads/census_tables/tables/table_9_sindh_districts.pdf"
+        },
+        {
+          "purpose": "2023 Balochistan district religion table",
+          "method": "GET",
+          "url": "https://www.pbs.gov.pk/wp-content/uploads/census_tables/tables/table_9_balochistan_districts.pdf"
+        },
+        {
+          "purpose": "2023 ICT religion table",
+          "method": "GET",
+          "url": "https://www.pbs.gov.pk/wp-content/uploads/census_tables/tables/table_9_islamabad.pdf"
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "pdftotext": "pdftotext version 26.07.0"
+    }
+  },
+  "source": {
+    "provider": "Pakistan Bureau of Statistics (PBS)",
+    "source_dataset_ids": [
+      "pbs-census-2023-table9-religion-district",
+      "pk-district-2023-boundary-pending"
+    ],
+    "source_urls": [
+      "https://www.pbs.gov.pk/wp-content/uploads/census_tables/tables/table_9_kp_districts.pdf",
+      "https://www.pbs.gov.pk/wp-content/uploads/census_tables/tables/table_9_punjab_districts.pdf",
+      "https://www.pbs.gov.pk/wp-content/uploads/census_tables/tables/table_9_sindh_districts.pdf",
+      "https://www.pbs.gov.pk/wp-content/uploads/census_tables/tables/table_9_balochistan_districts.pdf",
+      "https://www.pbs.gov.pk/wp-content/uploads/census_tables/tables/table_9_islamabad.pdf"
+    ],
+    "retrieved_at": "2026-07-11T00:00:00Z",
+    "licence": "PBS disseminates aggregate tabulations free with attribution (verbatim: \"The previous policy adopted by PBS for data supply was that aggregate level data (tabulation) was provided to the users free of charges and this practice will continue.\") and restricts onward supply (verbatim: \"a. The user shall provide an undertaking that the data collected from PBS will not be supplied to any other person/organization either free of cost or on payment. b. The user shall acknowledge the source of data and supply copies of the research work/articles (published/unpublished) to PBS.\"). This build ships derived rates with PBS attribution; the project lead approved the derived-rates-with-attribution position on 2026-07-11 (task 12); written PBS confirmation is pending, so licence_status is needs_review.",
+    "citation": "Pakistan Bureau of Statistics, Census 2023, Table 9: Population by Sex, Religion and Rural/Urban.",
+    "raw_redistribution": "Raw PBS PDFs stay git-ignored; only derived summaries are published. Cached under data/raw/pk_census/, mirrored to gs://pow-research-data/raw_sources/pk_census/.",
+    "licence_position": "needs_review"
+  },
+  "input_manifests": [],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/pk/data/area_summary_district.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 284915,
+      "sha256": "0f7b7c45062733180111fe8be5457c9d0529c8000a166a3511f8b96f7a865e3f",
+      "row_count": 136,
+      "content": "Pakistan district census-religion summary for 2023 (136 district-equivalent units; four provinces + ICT); no geometry (boundary lane held).",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "pbs_free_tabulation_attribution_derived_rates"
+    },
+    {
+      "uri": "repo:apps/regions/pk/data/area_summary_district.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 175945,
+      "sha256": "9938aca7f3c3de3e091be1d0257f7584642a12bd6167bf2560b4618465be26cc",
+      "row_count": 136,
+      "content": "Flattened Pakistan district census-religion rows, 2023.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "pbs_free_tabulation_attribution_derived_rates"
+    }
+  ],
+  "raw_sources": [
+    {
+      "uri": "data/raw/pk_census/table_9_kp_districts.pdf",
+      "url": "https://www.pbs.gov.pk/wp-content/uploads/census_tables/tables/table_9_kp_districts.pdf",
+      "durable_uri": "gs://pow-research-data/raw_sources/pk_census/table_9_kp_districts.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "pdf",
+      "bytes": 2255958,
+      "sha256": "c8d1c596a244ec743ef838be15bf6876e891cf4332b7e21d824145af5aecd030",
+      "source_dataset_id": "pbs-census-2023-table9-religion-district",
+      "used_in_public_product": true,
+      "notes": "2023 KP district+tehsil Table 9; includes former FATA districts and the Malakand Protected Area."
+    },
+    {
+      "uri": "data/raw/pk_census/table_9_punjab_districts.pdf",
+      "url": "https://www.pbs.gov.pk/wp-content/uploads/census_tables/tables/table_9_punjab_districts.pdf",
+      "durable_uri": "gs://pow-research-data/raw_sources/pk_census/table_9_punjab_districts.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "pdf",
+      "bytes": 2522892,
+      "sha256": "4319a9be3f5c30fd938bdeeef4f6efa65819a9d717f30608990b998e1cb66f35",
+      "source_dataset_id": "pbs-census-2023-table9-religion-district",
+      "used_in_public_product": true,
+      "notes": "2023 Punjab district+tehsil Table 9; provincial total 127,333,305."
+    },
+    {
+      "uri": "data/raw/pk_census/table_9_sindh_districts.pdf",
+      "url": "https://www.pbs.gov.pk/wp-content/uploads/census_tables/tables/table_9_sindh_districts.pdf",
+      "durable_uri": "gs://pow-research-data/raw_sources/pk_census/table_9_sindh_districts.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "pdf",
+      "bytes": 2399774,
+      "sha256": "330eed69974d9f02f62151ef603c6a0a039b50195ff0ac70b01b97ae49ab8c4c",
+      "source_dataset_id": "pbs-census-2023-table9-religion-district",
+      "used_in_public_product": true,
+      "notes": "2023 Sindh district+tehsil Table 9."
+    },
+    {
+      "uri": "data/raw/pk_census/table_9_balochistan_districts.pdf",
+      "url": "https://www.pbs.gov.pk/wp-content/uploads/census_tables/tables/table_9_balochistan_districts.pdf",
+      "durable_uri": "gs://pow-research-data/raw_sources/pk_census/table_9_balochistan_districts.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "pdf",
+      "bytes": 2698658,
+      "sha256": "7eebf9fc405f4b31f54cc72f3912edd97133f07b2233cb05a7133ad63ac19793",
+      "source_dataset_id": "pbs-census-2023-table9-religion-district",
+      "used_in_public_product": true,
+      "notes": "2023 Balochistan district+tehsil Table 9."
+    },
+    {
+      "uri": "data/raw/pk_census/table_9_islamabad.pdf",
+      "url": "https://www.pbs.gov.pk/wp-content/uploads/census_tables/tables/table_9_islamabad.pdf",
+      "durable_uri": "gs://pow-research-data/raw_sources/pk_census/table_9_islamabad.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "pdf",
+      "bytes": 36012,
+      "sha256": "254e1bfe0b03bffc72431af31594fff204d2a4068ff1319ea46a55b5708ae1df",
+      "source_dataset_id": "pbs-census-2023-table9-religion-district",
+      "used_in_public_product": true,
+      "notes": "2023 ICT Table 9; single Islamabad District, total 2,283,244."
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/pk/data/area_summary_district.json",
+      "sha256": "0f7b7c45062733180111fe8be5457c9d0529c8000a166a3511f8b96f7a865e3f",
+      "built_by": "scripts/build_pk_area_summary.R",
+      "notes": "136 district-year rows (2023)."
+    },
+    {
+      "uri": "repo:apps/regions/pk/data/area_summary_district.csv",
+      "sha256": "9938aca7f3c3de3e091be1d0257f7584642a12bd6167bf2560b4618465be26cc",
+      "built_by": "scripts/build_pk_area_summary.R",
+      "notes": "CSV companion."
+    }
+  ],
+  "target_years": [
+    2023
+  ],
+  "deferred_sources": [
+    {
+      "source": "PBS 2017 census Table 9, district-level provincial tables (Punjab, Sindh, Balochistan, ICT full district files)",
+      "status": "wave_not_shipped_input_not_cached",
+      "reason": "A 2017 district-level product cannot be built from the cache. The cached 2017 files reach only province/division level: table09n_2017_national.pdf carries province rows (PAKISTAN, KP, Punjab, Sindh, Balochistan, FATA); table09_2017_kp.pdf reaches only KP's six divisions; table09_2017_fata.pdf reaches only FATA and DIVISION-1. The full 2017 district/tehsil provincial files were not cached. Downloading them from PBS is the unblock for the second wave; the 2017 frame is a separate six-category per-vintage frame (FATA a separate pre-merger unit) and would ship on its own district frame with no cross-vintage concordance and change withheld across the 2018 FATA-into-KP merger."
+    },
+    {
+      "source": "1998 and earlier census religion, subnational",
+      "status": "deferred",
+      "reason": "National anchor only; subnational 1998 religion is a printed District Census Report route not recovered online in the probe."
+    },
+    {
+      "source": "District boundary geometry (2023 vintage)",
+      "status": "boundary_lane_held",
+      "reason": "No district geometry ships with this product; the boundary lane is HELD as a documented blocker. The geoBoundaries PAK ADM3 (tehsil, boundary ID PAK-ADM3-9618217, represented year 2017, 554 units) layer carries an explicit ODbL licence but is vintage-misaligned to the 2023 district roster, which post-dates it; no evidenced ADM3-to-2023-district mapping is available in this build. The geoBoundaries PAK ADM2 (district, boundary ID PAK-ADM2-60131773, represented year 2019, 126 units) layer's licence is unresolved (the release asserts public domain but carries no explicit licence string) and under-counts the census district frame; it is not used. Consequently land_area_sq_km and all place-density fields are null, and an official or licensed 2023 district boundary layer is the open item before a map can render."
+    }
+  ],
+  "construct_notes": [
+    "This product renders the religion categories of the 2023 Census of Pakistan exactly as the Pakistan Bureau of Statistics (PBS) prints them in Table 9. The published 2023 categories are Muslim, Christian, Hindu Jati, Qadiani/Ahmadi, Scheduled Castes, Sikh, Parsi, and Others. Qadiani/Ahmadi is the state's enumeration label for the Ahmadiyya community, applied after the 1974 constitutional amendment that declared Ahmadis non-Muslim; the label is carried verbatim as the official record, and is not the project's description of any community's self-understanding. Hindu Jati and Scheduled Castes are enumerated as separate categories in the printed table, and this product combines nothing: each published category is reported as printed. The 2017 census used a different, six-category frame (Muslim, Christian, Hindu, Qadiani/Ahmadi, Scheduled Castes, Others); the frames differ across waves and are not category-comparable, and no cross-wave comparison is made.",
+    "The 2023 PBS Table 9 religion tables cover the four provinces (Khyber Pakhtunkhwa, Punjab, Sindh, and Balochistan) and the Islamabad Capital Territory. They exclude Azad Jammu and Kashmir and Gilgit-Baltistan, whose figures are published separately and are not included here. This product renders the coverage of the published tables as printed and makes no territorial claim.",
+    "Religion is highly sensitive in Pakistan for the Ahmadiyya, Hindu, Christian, Sikh, and Dalit (Scheduled Castes) communities. This is a district-level product (a coarser frame than the tehsil tables the PBS also publishes), chosen to reduce very small cells while rendering the official record. District counts are printed exactly with no PBS suppression rule, and this product applies no small-cell treatment: every published category count is rendered as printed.",
+    "No district geometry ships with this product; the boundary lane is HELD as a documented blocker. The geoBoundaries PAK ADM3 (tehsil, boundary ID PAK-ADM3-9618217, represented year 2017, 554 units) layer carries an explicit ODbL licence but is vintage-misaligned to the 2023 district roster, which post-dates it; no evidenced ADM3-to-2023-district mapping is available in this build. The geoBoundaries PAK ADM2 (district, boundary ID PAK-ADM2-60131773, represented year 2019, 126 units) layer's licence is unresolved (the release asserts public domain but carries no explicit licence string) and under-counts the census district frame; it is not used. Consequently land_area_sq_km and all place-density fields are null, and an official or licensed 2023 district boundary layer is the open item before a map can render.",
+    "Minority-share two-slot design (docs/development/minority-share-metric.md, ratified 2026-07-11). The reference group is Muslim, Pakistan's largest published religion category nationally in 2023 (national share 96.3522%). It is declared once and held constant across every area. religious_affiliation_percent := the Muslim share; no_religion_percent := the minority share, the exact complement (every published category outside the reference group summed). This is arithmetic on the published official categories and is not a measure of no religion, belief, practice, or secularity."
+  ],
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "Rscript scripts/build_pk_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/pk/data/area_summary_district.json",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/pk-census-religion-2023.json",
+      "bash scripts/validate_manifests.sh"
+    ],
+    "tests": [
+      "Source integrity: every 2023 input matches its route-probe sha256.",
+      "Every district row's eight category counts sum to its printed total (all 136 units).",
+      "Each province's district totals sum exactly to the published provincial anchor (KP incl. the Malakand Protected Area; Punjab; Sindh; Balochistan; ICT).",
+      "The national religion-table total equals its eight-category sum.",
+      "The two metric slots are exact complements in every row (percent to 100; count to total).",
+      "Computed national shares cross-check the published secondary shares within 0.05pp.",
+      "The description note is present in the shipped product and this manifest."
+    ],
+    "gates": {
+      "source_integrity_sha256": "passed",
+      "row_category_sum_equals_total": "passed",
+      "province_exact_reconciliation": "passed",
+      "national_total_equals_category_sum": true,
+      "metric_slots_exact_complement": "passed",
+      "single_wave_no_frame_mixing": "passed (only 2023 ships; 2017 documented in deferred_sources, never mixed)",
+      "boundary_lane_held": "passed (no geometry; land_area and place fields null; boundary recorded as documented blocker)",
+      "no_invented_concordance": "passed (no cross-vintage district concordance; no ADM3-to-district mapping invented)",
+      "description_note_in_product_and_manifest": true
+    },
+    "province_reconciliation": {
+      "kp": {
+        "province_code": "kp",
+        "province_name": "Khyber Pakhtunkhwa",
+        "unit_count": 35,
+        "district_sum_total": 40641120,
+        "provincial_anchor_total": 40641120,
+        "match": true,
+        "category_sums": {
+          "total": 40641120,
+          "muslim": 40486153,
+          "christian": 134884,
+          "hindu_jati": 5473,
+          "qadiani_ahmadi": 951,
+          "scheduled_castes": 629,
+          "sikh": 4050,
+          "parsi": 36,
+          "others": 8944
+        }
+      },
+      "pb": {
+        "province_code": "pb",
+        "province_name": "Punjab",
+        "unit_count": 36,
+        "district_sum_total": 127333305,
+        "provincial_anchor_total": 127333305,
+        "match": true,
+        "category_sums": {
+          "total": 127333305,
+          "muslim": 124462897,
+          "christian": 2458924,
+          "hindu_jati": 228559,
+          "qadiani_ahmadi": 140512,
+          "scheduled_castes": 21157,
+          "sikh": 5649,
+          "parsi": 358,
+          "others": 15249
+        }
+      },
+      "sd": {
+        "province_code": "sd",
+        "province_name": "Sindh",
+        "unit_count": 30,
+        "district_sum_total": 55638409,
+        "provincial_anchor_total": 55638409,
+        "match": true,
+        "category_sums": {
+          "total": 55638409,
+          "muslim": 50126428,
+          "christian": 546968,
+          "hindu_jati": 3575848,
+          "qadiani_ahmadi": 18266,
+          "scheduled_castes": 1325559,
+          "sikh": 5182,
+          "parsi": 1763,
+          "others": 38395
+        }
+      },
+      "bl": {
+        "province_code": "bl",
+        "province_name": "Balochistan",
+        "unit_count": 34,
+        "district_sum_total": 14562011,
+        "provincial_anchor_total": 14562011,
+        "match": true,
+        "category_sums": {
+          "total": 14562011,
+          "muslim": 14429568,
+          "christian": 62731,
+          "hindu_jati": 57010,
+          "qadiani_ahmadi": 557,
+          "scheduled_castes": 2097,
+          "sikh": 1057,
+          "parsi": 181,
+          "others": 8810
+        }
+      },
+      "ict": {
+        "province_code": "ict",
+        "province_name": "Islamabad Capital Territory",
+        "unit_count": 1,
+        "district_sum_total": 2283244,
+        "provincial_anchor_total": 2283244,
+        "match": true,
+        "category_sums": {
+          "total": 2283244,
+          "muslim": 2181663,
+          "christian": 97281,
+          "hindu_jati": 839,
+          "qadiani_ahmadi": 2398,
+          "scheduled_castes": 45,
+          "sikh": 60,
+          "parsi": 10,
+          "others": 948
+        }
+      }
+    },
+    "national_reconciliation": {
+      "units": 136,
+      "national_total": 240458089,
+      "category_totals": {
+        "muslim": 231686709,
+        "christian": 3300788,
+        "hindu_jati": 3867729,
+        "qadiani_ahmadi": 162684,
+        "scheduled_castes": 1349487,
+        "sikh": 15998,
+        "parsi": 2348,
+        "others": 72346
+      },
+      "national_total_source": "sum of the five published provincial Table 9 header totals (no 2023 national religion file is cached; each provincial sum reconciles exactly to its Table 9 header)",
+      "published_headline_total_note": "The PBS headline 2023 population for four provinces + ICT is 241,499,431; the Table 9 religion tables enumerate 240,458,089. The difference (1,041,342) is rendered as the record, not reconciled or explained here.",
+      "share_crosscheck": {
+        "muslim": {
+          "computed": 96.3522,
+          "published": 96.35,
+          "within_0_05pp": true
+        },
+        "hindu_incl_scheduled": {
+          "computed": 2.1697,
+          "published": 2.17,
+          "within_0_05pp": true
+        },
+        "christian": {
+          "computed": 1.3727,
+          "published": 1.37,
+          "within_0_05pp": true
+        },
+        "qadiani_ahmadi": {
+          "computed": 0.0677,
+          "published": 0.07,
+          "within_0_05pp": true
+        }
+      }
+    },
+    "stats": {
+      "wave": 2023,
+      "units": 136,
+      "units_by_province": {
+        "kp": 35,
+        "pb": 36,
+        "sd": 30,
+        "bl": 34,
+        "ict": 1
+      },
+      "rows": 136,
+      "summary_json_bytes": 284915,
+      "summary_csv_bytes": 175945
+    }
+  },
+  "privacy": "public",
+  "licence_status": "needs_review",
+  "licence_basis": "pbs_free_tabulation_attribution_derived_rates",
+  "downstream_status": "staged",
+  "source_datasets": [
+    {
+      "source_dataset_id": "pbs-census-2023-table9-religion-district",
+      "name": "PBS Census of Pakistan 2023, Table 9: Population by Sex, Religion and Rural/Urban (four provincial district PDFs + ICT)",
+      "provider": "Pakistan Bureau of Statistics (PBS)",
+      "url": "https://www.pbs.gov.pk/wp-content/uploads/census_tables/tables/table_9_kp_districts.pdf",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/pk_census/table_9_kp_districts.pdf",
+      "licence": {
+        "name": "PBS disseminates aggregate tabulations free and requires attribution; its terms restrict onward supply (verbatim: \"a. The user shall provide an undertaking that the data collected from PBS will not be supplied to any other person/organization either free of cost or on payment. b. The user shall acknowledge the source of data and supply copies of the research work/articles (published/unpublished) to PBS.\"). No open licence.",
+        "url": "https://www.pbs.gov.pk/",
+        "attribution": "Source: Pakistan Bureau of Statistics (PBS), Census of Pakistan 2023, Table 9"
+      },
+      "citation": "Pakistan Bureau of Statistics, Census 2023, Table 9: Population by Sex, Religion and Rural/Urban (provincial district tables and Islamabad Capital Territory).",
+      "access_limits": "The PBS host serves a soft-200 WordPress HTML fallback for missing objects; each cached PDF was verified as a real PDF and its sha256 is a build gate.",
+      "redistribution_limits": "PBS terms restrict onward supply of data collected from PBS. This build publishes DERIVED rates with PBS attribution and holds raw PDFs git-ignored; the project lead approved the derived-rates-with-attribution position on 2026-07-11 (task 12), and written PBS confirmation is the clean path and remains pending (licence_status needs_review).",
+      "notes": "This product renders the religion categories of the 2023 Census of Pakistan exactly as the Pakistan Bureau of Statistics (PBS) prints them in Table 9. The published 2023 categories are Muslim, Christian, Hindu Jati, Qadiani/Ahmadi, Scheduled Castes, Sikh, Parsi, and Others. Qadiani/Ahmadi is the state's enumeration label for the Ahmadiyya community, applied after the 1974 constitutional amendment that declared Ahmadis non-Muslim; the label is carried verbatim as the official record, and is not the project's description of any community's self-understanding. Hindu Jati and Scheduled Castes are enumerated as separate categories in the printed table, and this product combines nothing: each published category is reported as printed. The 2017 census used a different, six-category frame (Muslim, Christian, Hindu, Qadiani/Ahmadi, Scheduled Castes, Others); the frames differ across waves and are not category-comparable, and no cross-wave comparison is made. The 2023 PBS Table 9 religion tables cover the four provinces (Khyber Pakhtunkhwa, Punjab, Sindh, and Balochistan) and the Islamabad Capital Territory. They exclude Azad Jammu and Kashmir and Gilgit-Baltistan, whose figures are published separately and are not included here. This product renders the coverage of the published tables as printed and makes no territorial claim."
+    },
+    {
+      "source_dataset_id": "pk-district-2023-boundary-pending",
+      "name": "Pakistan 2023 district boundary - PENDING (no geometry ships)",
+      "provider": "geoBoundaries (ADM2/ADM3 candidates); PBS digital census (official layer to be requested)",
+      "url": "https://www.geoboundaries.org/",
+      "licence": {
+        "name": "Boundary lane held: geoBoundaries PAK ADM3 (tehsil, ODbL) is vintage-misaligned with no evidenced 2023-district mapping; geoBoundaries PAK ADM2 (district) licence is unresolved and not used.",
+        "url": "https://www.geoboundaries.org/",
+        "attribution": "Boundary source pending"
+      },
+      "citation": "No boundary geometry is shipped; see boundary_note.",
+      "access_limits": "No district geometry is cached in this build.",
+      "redistribution_limits": "Not applicable (no geometry ships).",
+      "notes": "No district geometry ships with this product; the boundary lane is HELD as a documented blocker. The geoBoundaries PAK ADM3 (tehsil, boundary ID PAK-ADM3-9618217, represented year 2017, 554 units) layer carries an explicit ODbL licence but is vintage-misaligned to the 2023 district roster, which post-dates it; no evidenced ADM3-to-2023-district mapping is available in this build. The geoBoundaries PAK ADM2 (district, boundary ID PAK-ADM2-60131773, represented year 2019, 126 units) layer's licence is unresolved (the release asserts public domain but carries no explicit licence string) and under-counts the census district frame; it is not used. Consequently land_area_sq_km and all place-density fields are null, and an official or licensed 2023 district boundary layer is the open item before a map can render."
+    }
+  ],
+  "notes": "STAGED build: derived district area summaries only, no geometry, no page, no hub link. The page waits for the project lead's review of the encoded treatment. Iran/Israel-Palestine render-the-record precedent."
+}
