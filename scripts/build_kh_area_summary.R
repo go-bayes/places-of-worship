@@ -32,17 +32,22 @@
 # 15,552,211 exactly. any gate failure stops the build before a product is
 # written.
 #
-# the product ships to STAGING. licence_status is needs_review: NIS asserts bare
-# all-rights-reserved copyright with no permissive licence (the Cote d'Ivoire /
-# Iran situation), and shipping the derived summaries with NIS attribution awaits
-# the PI extending that ruling to Cambodia (PI task 9). the page is separately
-# gated on PI task 6: the four-category frame is re-based to 100, so the shared
-# religious_affiliation_percent metric is a flat 100 (the Bangladesh flat-share
-# situation) and the informative content is the per-category composition carried
-# verbatim in each row's quality_flag. change across 2008-2019 is computable on
-# the shared frame for 23 provinces but withheld for Mondul Kiri and Ratanak Kiri,
-# whose large "Other" (highland indigenous) share shifts the report attributes to
-# reclassification.
+# metric slots follow the ratified two-slot minority-share design
+# (docs/development/minority-share-metric.md, PI task 6, 2026-07-11). the
+# four-category frame is re-based to 100 and carries no non-affiliation category,
+# so the two legacy slots carry declared constructs: religious_affiliation_percent
+# is the Buddhist (reference-group) share -- Buddhist is the largest published
+# category nationally in 2019 at 97.1 percent, declared once and held constant --
+# and no_religion_percent is the minority share, the exact complement (the summed
+# Muslims/Christians/Other share), not a measure of no religion. the two slots sum
+# to 100.0 in every row. religious_change now differences the Buddhist share across
+# 2008-2019, computable on the shared frame for 23 provinces but withheld for
+# Mondul Kiri and Ratanak Kiri, whose large "Other" (highland indigenous) share
+# shifts the report attributes to reclassification. licence_status is accepted:
+# NIS asserts bare all-rights-reserved copyright (the Cote d'Ivoire / Iran
+# situation), and the project lead confirmed on 2026-07-11 (PI task 9) that the
+# derived-summaries-with-attribution ruling extends to Cambodia, so the derived
+# summaries ship with NIS attribution and the raw PDF/workbook stay git-ignored.
 
 suppressMessages({
   library(jsonlite)
@@ -106,6 +111,19 @@ a4_total <- 15552211L
 # the national row printed in Table 2.5.1 (2019), the re-basing target.
 national_2019_printed <- c(bud = 97.1, mus = 2.0, chr = 0.3, oth = 0.5)
 
+# reference group for the two-slot minority-share design (minority-share-metric.md,
+# ratified 2026-07-11 / PI task 6). Buddhist is the product's largest published
+# category at the national level in the most recent wave (2019: 97.1 percent),
+# declared once and held constant across every wave and area.
+# religious_affiliation_percent carries the Buddhist share; no_religion_percent
+# carries the minority share (the exact complement, the summed Muslims/Christians/
+# Other share). the reference share is never a measure of affiliation versus
+# non-affiliation, and the minority share is arithmetic on published categories,
+# never a measure of no religion, belief, practice, or secularity.
+reference_group_key <- "bud"
+reference_group_label <- "Buddhist"
+reference_group_national_2019_share <- unname(national_2019_printed[["bud"]])
+
 # provinces whose 2008-2019 change is withheld: the report attributes their large
 # "Other" (highland indigenous) share shifts to reclassification.
 change_withheld_provinces <- c("Mondul Kiri", "Ratanak Kiri")
@@ -122,15 +140,18 @@ nis_position <- paste(
   "Iran situation: under the ratified precedent (PI, 2026-07-10/11) derived",
   "category summaries, not the raw source tables, may publish with NIS / Ministry",
   "of Planning attribution under PI approval, with the raw PDF and workbook staying",
-  "git-ignored. Shipping awaits the PI extending that ruling to Cambodia (PI task 9)."
+  "git-ignored. The project lead confirmed that ruling for Cambodia on 2026-07-11",
+  "(PI task 9); the derived summaries ship with NIS / Ministry of Planning attribution."
 )
 page_gate_position <- paste(
-  "The four Table 2.5.1 categories are re-based to 100 percent (the count table's",
-  "“Not Stated” column is excluded), so the shared religious_affiliation_percent",
-  "metric is a flat 100 in every province (the Bangladesh flat-share situation).",
-  "The informative content is the per-category composition carried verbatim in each",
-  "row's quality_flag. Page publication is gated on PI task 6 resolving how the",
-  "flat-share frame is presented."
+  "Under the ratified two-slot minority-share design (minority-share-metric.md, PI",
+  "task 6, 2026-07-11) the shared religious_affiliation_percent slot carries the",
+  "Buddhist (reference-group) share and no_religion_percent carries the minority",
+  "share (the exact complement, the summed Muslims/Christians/Other share). Each page",
+  "relabels the two slots verbatim via metricLabels: the affiliation slot as",
+  "“Buddhist (%)” and the no-religion slot as “Minority share (%)”, with the note",
+  "“share outside Cambodia's largest published category, Buddhist”. The flat-100",
+  "presentation gate is resolved; both slots now carry declared constructs."
 )
 
 # stop when a required cached source is absent.
@@ -392,7 +413,7 @@ flatten_rows <- function(rows) {
       religious_affiliation_count = NA_integer_,
       religious_affiliation_percent = row$religious_affiliation_percent,
       no_religion_count = NA_integer_,
-      no_religion_percent = NA_real_,
+      no_religion_percent = row$no_religion_percent,
       place_count = NA_integer_,
       places_per_10000_residents = NA_real_,
       place_density_per_sq_km = NA_real_,
@@ -442,11 +463,13 @@ land_area_by_code <- boundary_result[["land_area_by_code"]]
 population_total_basis <- paste(
   "No source publishes religion counts or a total population by province for either",
   "wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total,",
-  "the per-category counts, and religious_affiliation_count are therefore null and no",
-  "count is derived from any percentage. The four categories are re-based to 100",
-  "percent (the count table's “Not Stated” column is excluded), so affiliation is",
-  "100 percent for every classified person; the per-category shares are carried",
-  "verbatim in quality_flag."
+  "the per-category counts, religious_affiliation_count and no_religion_count are",
+  "therefore null and no count is derived from any percentage. The four categories",
+  "are re-based to 100 percent (the count table's “Not Stated” column is excluded).",
+  "Under the two-slot minority-share design religious_affiliation_percent carries the",
+  "Buddhist (reference-group) share and no_religion_percent carries the minority share",
+  "(the exact complement, the summed Muslims/Christians/Other share); the per-category",
+  "composition is carried verbatim in quality_flag."
 )
 
 # assemble one schema-shaped row for a province and wave.
@@ -460,6 +483,12 @@ build_row <- function(province, wave) {
     sprintf("%s=%.1f", labels[category_keys], values), collapse = "|"
   )
   row_sum <- round(sum(values), 1)
+  # two-slot minority-share re-emit. the reference share is the printed Buddhist
+  # cell; the minority share is its exact one-decimal complement (100 minus the
+  # Buddhist share), equal at the source's rounding to the summed Muslims/
+  # Christians/Other share. the two partition the re-based frame and sum to 100.0.
+  reference_share <- values[match(reference_group_key, category_keys)]
+  minority_share <- round(100 - reference_share, 1)
   change_token <- if (province %in% change_withheld_provinces) {
     "change_withheld_reclassification_highland_other_share"
   } else {
@@ -468,10 +497,14 @@ build_row <- function(province, wave) {
   flags <- paste(
     "census_religion_distribution",
     "frame_rebased_to_100_four_categories",
-    "affiliation_100_all_classified",
-    "no_religion_category_absent",
+    "reference_group_buddhist_largest_published_category",
+    "religious_affiliation_percent_is_buddhist_reference_share",
+    "no_religion_percent_is_minority_share_exact_complement",
+    "minority_share_arithmetic_on_published_categories_not_no_religion",
     "not_stated_excluded_from_rebased_frame",
     paste0("composition_", wave, ":", composition),
+    paste0("buddhist_share=", sprintf("%.1f", reference_share)),
+    paste0("minority_share=", sprintf("%.1f", minority_share)),
     paste0("printed_row_sum=", sprintf("%.1f", row_sum)),
     "row_sum_within_derived_bound_0.20pp",
     "boundary_2017_geoboundaries_odbl",
@@ -489,9 +522,9 @@ build_row <- function(province, wave) {
     population_total = NULL,
     population_total_basis = population_total_basis,
     religious_affiliation_count = NULL,
-    religious_affiliation_percent = 100,
+    religious_affiliation_percent = reference_share,
     no_religion_count = NULL,
-    no_religion_percent = NULL,
+    no_religion_percent = minority_share,
     place_count = NULL,
     places_per_10000_residents = NULL,
     place_density_per_sq_km = NULL,
@@ -511,6 +544,30 @@ all_rows <- unlist(
 )
 if (length(all_rows) != 50L) stop("expected 50 province-wave rows (25 x 2)", call. = FALSE)
 
+# ---- two-slot minority-share gates -----------------------------------------
+
+# exact-complement gate: the two re-emitted slots partition the re-based frame, so
+# religious_affiliation_percent (Buddhist share) + no_religion_percent (minority
+# share) must equal 100.0 exactly in every row.
+complement_deviations <- vapply(all_rows, function(r) {
+  round((r[["religious_affiliation_percent"]] + r[["no_religion_percent"]]) - 100, 6)
+}, numeric(1))
+complement_max_deviation <- max(abs(complement_deviations))
+if (complement_max_deviation > 1e-9) {
+  stop("two-slot exact-complement gate failed: Buddhist share + minority share != 100.0 in ",
+       sum(abs(complement_deviations) > 1e-9), " rows; product writing stopped.", call. = FALSE)
+}
+
+# national reference-share gate: the reference group is the largest published
+# category nationally in the most recent wave, and its share must reproduce 97.1 at
+# the printed rounding (Table A4 counts re-based, matching the Table 2.5.1 national
+# row). anchors the declared reference group to the source evidence.
+if (!isTRUE(all.equal(reference_group_national_2019_share, 97.1)) ||
+    !isTRUE(all.equal(national_anchor[["rebased_percent_1dp"]][[reference_group_key]], 97.1))) {
+  stop("national 2019 Buddhist reference share does not reproduce 97.1; product writing stopped.",
+       call. = FALSE)
+}
+
 # ---- source datasets, indicators, visual layers ----------------------------
 
 source_datasets <- list(
@@ -522,7 +579,7 @@ source_datasets <- list(
     retrieval_date = retrieval_date,
     local_path = pdf_2019,
     licence = list(
-      name = "NIS all-rights-reserved; no permissive licence (needs_review)",
+      name = "NIS all-rights-reserved; derived summaries ship with attribution (PI task 9, 2026-07-11)",
       url = url_nis,
       attribution = "National Institute of Statistics, Ministry of Planning, Cambodia"
     ),
@@ -546,7 +603,7 @@ source_datasets <- list(
     retrieval_date = retrieval_date,
     local_path = workbook_2019,
     licence = list(
-      name = "NIS all-rights-reserved; no permissive licence (needs_review)",
+      name = "NIS all-rights-reserved; derived summaries ship with attribution (PI task 9, 2026-07-11)",
       url = url_nis,
       attribution = "National Institute of Statistics, Ministry of Planning, Cambodia"
     ),
@@ -583,77 +640,127 @@ source_datasets <- list(
 )
 
 spatial_note <- "Twenty-five ADM1 provinces on the geoBoundaries 2017 boundary, shared by both census waves (2008 retabulated onto the same 25-province frame)."
+# declared reference group and its evidence, carried on the indicators block per
+# the two-slot minority-share design.
+reference_declaration <- paste(
+  "Two-slot minority-share design (minority-share-metric.md, ratified 2026-07-11, PI",
+  "task 6). The reference group is Buddhist, the product's largest published category",
+  "at the national level in the most recent wave (2019: 97.1 percent, from the Table",
+  "A4 counts re-based to exclude Not Stated, reproducing the Table 2.5.1 national",
+  "row), declared once and held constant across every wave and area."
+)
 indicators <- list(
   list(
     indicator_id = "religious_affiliation_percent",
-    label = "Religious affiliation %",
-    description = "Share of the classified population reporting one of the four census religion categories (Buddhist, Muslims, Christian(s), Other).",
+    label = "Buddhist (%)",
+    description = paste(
+      "The Buddhist (reference-group) share: the share of the re-based four-category",
+      "frame reporting Buddhist, relabelled verbatim on the page as “Buddhist (%)”. This",
+      "slot names the reference group and carries its share of the frame; it is never a",
+      "measure of affiliation versus non-affiliation."
+    ),
     unit = "percent",
     denominator_indicator_id = NULL,
     method = paste(
-      "The four Table 2.5.1 categories are re-based to 100 percent (the count",
-      "table's Not Stated column is excluded); every classified person is in a",
-      "religion category, so affiliation equals 100 in every province and wave. The",
-      "per-category composition is carried verbatim in each row's quality_flag."
+      reference_declaration,
+      "This slot carries that reference group's share of the frame in each province and",
+      "wave (the printed Table 2.5.1 Buddhist cell). National 2019 reference share: 97.1."
     ),
     temporal_coverage = "2008, 2019",
     spatial_coverage = spatial_note,
     quality_notes = paste(
-      "Flat 100 by construction (the Bangladesh flat-share situation). Printed",
-      "one-decimal cells sum to 99.9-100.1 by rounding, within the derived 0.20 pp",
-      "bound; no percentage is altered. The informative content is the per-category",
-      "composition in quality_flag."
+      "Printed one-decimal cells; the four categories sum to 99.9-100.1 by rounding,",
+      "within the derived 0.20 pp bound, and no percentage is altered. The Buddhist share",
+      "is the exact complement of the minority share carried in no_religion_percent; the",
+      "two sum to 100.0 in every row."
     )
   ),
   list(
     indicator_id = "no_religion_percent",
-    label = "No religion %",
-    description = "Unavailable: the re-based Table 2.5.1 frame has no no-religion category.",
+    label = "Minority share (%)",
+    description = paste(
+      "The minority share: the summed share of every published category outside the",
+      "reference group (Muslims, Christians, Other). Relabelled verbatim on the page as",
+      "“Minority share (%)”, with the note “share outside Cambodia's largest published",
+      "category, Buddhist”. It reuses the no_religion_percent slot and is not a measure",
+      "of no religion."
+    ),
     unit = "percent",
     denominator_indicator_id = NULL,
-    method = "Not calculated. The four categories are Buddhist, Muslims, Christian(s), Other; there is no no-religion category and Not Stated is excluded by the re-basing.",
-    temporal_coverage = "2008, 2019",
-    spatial_coverage = spatial_note,
-    quality_notes = "Rows carry null no_religion_count and no_religion_percent and no_religion_category_absent."
-  ),
-  list(
-    indicator_id = "religious_change",
-    label = "Change in religious composition, 2008-2019",
-    description = "Cross-wave change in the per-category shares on the shared 25-province frame.",
-    unit = "percent_point",
-    denominator_indicator_id = NULL,
     method = paste(
-      "Computable for 23 provinces by differencing the 2008 and 2019 per-category",
-      "shares carried in quality_flag on the shared re-based frame. Withheld for",
-      "Mondul Kiri and Ratanak Kiri, whose large Other (highland indigenous) share",
-      "shifts the report attributes to reclassification; those rows carry",
-      "change_withheld_reclassification_highland_other_share."
+      "Arithmetic on published affiliation categories: the exact complement of the",
+      "Buddhist reference share (100 minus the Buddhist share), equal at the source's",
+      "one-decimal rounding to the summed Muslims/Christians/Other share. It is not a",
+      "measure of no religion, belief, practice, or secularity."
     ),
     temporal_coverage = "2008, 2019",
     spatial_coverage = spatial_note,
-    quality_notes = "The headline affiliation share is flat 100 in both waves, so headline change is zero everywhere; the substantive change is per-category and is withheld for the two highland provinces."
+    quality_notes = paste(
+      "Reuses the no_religion_percent slot for the minority-share construct (the Israel",
+      "two-slot precedent); the re-based frame has no no-religion category. Highest where",
+      "the map is most informative (2019: Mondul Kiri 29.6, Ratanak Kiri 26.6, Tbong Khmum 11.9)."
+    )
+  ),
+  list(
+    indicator_id = "religious_change",
+    label = "Change in the Buddhist share, 2008-2019",
+    description = "Cross-wave change in the Buddhist (reference-group) share on the shared 25-province frame.",
+    unit = "percent_point",
+    denominator_indicator_id = NULL,
+    method = paste(
+      "Difference of the 2008 and 2019 Buddhist reference share (carried in",
+      "religious_affiliation_percent and in each row's quality_flag composition) on the",
+      "shared re-based frame. Withheld for Mondul Kiri and Ratanak Kiri, whose large",
+      "Other (highland indigenous) share shifts the 2019 report attributes to",
+      "reclassification; those rows carry change_withheld_reclassification_highland_other_share."
+    ),
+    temporal_coverage = "2008, 2019",
+    spatial_coverage = spatial_note,
+    quality_notes = "The reference share varies across waves, so headline change is a real quantity (the change in the largest group's share), differenced for 23 provinces and withheld for the two highland provinces."
   )
 )
 
-visual_layers <- list(list(
-  visual_layer_id = "kh-province-religion-composition",
-  label = "Religious composition by province",
-  description = "NIS 2019 census religion distribution (four categories) by province for 2008 and 2019.",
-  layer_type = "choropleth",
-  indicator_ids = list("religious_affiliation_percent"),
-  geometry_unit_type = "area_unit",
-  legend = NULL,
-  colour_scale = "shared sequential",
-  time_control = "year_selector",
-  aggregation_rule = "published province value on the shared 2017 boundary",
-  uncertainty_display = "quality_flag",
-  default_visibility = TRUE,
-  notes = paste(
-    "Affiliation is 100 percent everywhere (re-based four-category frame); the",
-    "informative detail is the per-category composition in each row's quality_flag.",
-    "Page presentation of the flat-share frame is gated on PI task 6."
+visual_layers <- list(
+  list(
+    visual_layer_id = "kh-province-buddhist-share",
+    label = "Buddhist (%)",
+    description = "Buddhist (reference-group) share by province, 2008 and 2019 (NIS 2019 census Table 2.5.1).",
+    layer_type = "choropleth",
+    indicator_ids = list("religious_affiliation_percent"),
+    geometry_unit_type = "area_unit",
+    legend = NULL,
+    colour_scale = "shared sequential",
+    time_control = "year_selector",
+    aggregation_rule = "published province value on the shared 2017 boundary",
+    uncertainty_display = "quality_flag",
+    default_visibility = TRUE,
+    notes = paste(
+      "The religious_affiliation_percent slot carries the Buddhist reference-group share",
+      "(minority-share design); the page relabels it verbatim as “Buddhist (%)”. It is the",
+      "exact complement of the minority-share layer."
+    )
+  ),
+  list(
+    visual_layer_id = "kh-province-minority-share",
+    label = "Minority share (%)",
+    description = "Minority share by province (share outside Cambodia's largest published category, Buddhist), 2008 and 2019.",
+    layer_type = "choropleth",
+    indicator_ids = list("no_religion_percent"),
+    geometry_unit_type = "area_unit",
+    legend = NULL,
+    colour_scale = "shared sequential",
+    time_control = "year_selector",
+    aggregation_rule = "published province value on the shared 2017 boundary",
+    uncertainty_display = "quality_flag",
+    default_visibility = FALSE,
+    notes = paste(
+      "The no_religion_percent slot carries the minority share (the summed Muslims/",
+      "Christians/Other share, the exact complement of the Buddhist share); the page",
+      "relabels it verbatim as “Minority share (%)”. It is not a measure of no religion.",
+      "Highest where the map is most informative (2019: Mondul Kiri 29.6, Ratanak Kiri 26.6, Tbong Khmum 11.9)."
+    )
   )
-))
+)
 
 area_summary <- list(
   schema_version = "0.2.0",
@@ -777,8 +884,8 @@ derived_bound_derivation <- paste(
   "Faso precedent)."
 )
 
-licence_basis_product <- "nis_all_rights_reserved_pending_pi_derived_summary_attribution_geoboundaries_odbl_1_0"
-licence_basis_census <- "nis_all_rights_reserved_pending_pi_derived_summary_attribution"
+licence_basis_product <- "nis_all_rights_reserved_derived_summary_attribution_geoboundaries_odbl_1_0"
+licence_basis_census <- "nis_all_rights_reserved_derived_summary_attribution"
 licence_basis_boundary <- "geoboundaries_odbl_1_0"
 
 manifest <- list(
@@ -844,13 +951,31 @@ manifest <- list(
         derivation = derived_bound_derivation
       ),
       national_anchor = national_anchor,
+      reference_group = list(
+        design = "two-slot minority-share design (docs/development/minority-share-metric.md, ratified 2026-07-11, PI task 6)",
+        reference_group = reference_group_label,
+        reference_group_key = reference_group_key,
+        basis = "the product's largest published category at the national level in the most recent wave (2019), declared once and held constant across every wave and area",
+        national_2019_reference_share = reference_group_national_2019_share,
+        national_2019_reference_share_evidence = paste(
+          "Table A4 counts re-based to exclude Not Stated give Buddhist",
+          paste0(national_anchor[["rebased_percent"]][[reference_group_key]], ","),
+          "rounding to 97.1 and reproducing the Table 2.5.1 national (Total) row."
+        ),
+        religious_affiliation_percent = "Buddhist (reference-group) share of the re-based four-category frame",
+        no_religion_percent = "minority share: the exact complement (100 minus the Buddhist share), equal at the source's rounding to the summed Muslims/Christians/Other share; not a measure of no religion",
+        exact_complement_gate = "religious_affiliation_percent + no_religion_percent = 100.0 in every row",
+        exact_complement_observed_max_deviation_pp = complement_max_deviation,
+        page_relabelling = "metricLabels relabels the affiliation slot as “Buddhist (%)” and the no-religion slot as “Minority share (%)”, note “share outside Cambodia's largest published category, Buddhist”"
+      ),
       change_metric = list(
         status = "computable_generally_withheld_two_provinces",
         computable = paste(
           "Change across 2008-2019 is computable for 23 provinces: same four-category",
-          "re-based frame, same 25-unit geography, per-category shares carried in",
-          "quality_flag. The headline affiliation share is flat 100 in both waves, so",
-          "the substantive change is per-category."
+          "re-based frame, same 25-unit geography. religious_change differences the",
+          "Buddhist (reference-group) share carried in religious_affiliation_percent (and",
+          "in the quality_flag composition), a real quantity now that the headline slot",
+          "varies across waves."
         ),
         withheld_provinces = as.list(change_withheld_provinces),
         withheld_rationale = paste(
@@ -877,11 +1002,11 @@ manifest <- list(
         written_geometry_sha256 = boundary_result[["written_geometry_sha256"]]
       ),
       licence_position = list(
-        status = "needs_review",
+        status = "accepted",
         nis_footer_verbatim_khmer = nis_footer_khmer,
         nis_footer_verbatim_english = nis_footer_en,
         summary = nis_position,
-        open_pi_task = "PI task 9: extend the Cote d'Ivoire / Iran derived-summaries-with-attribution ruling to Cambodia (NIS all-rights-reserved)."
+        pi_task_9_ruling = "PI task 9 (2026-07-11): the project lead confirmed that the Cote d'Ivoire / Iran derived-summaries-with-attribution ruling extends to Cambodia (NIS all-rights-reserved). The derived category summaries ship with NIS / Ministry of Planning attribution; the raw PDF and workbook stay git-ignored."
       ),
       raw_sources = raw_sources,
       local_cache_hint = "data/raw/kh_census/ (git-ignored; every cached source listed with URL, bytes, and SHA-256 in pipeline.parameters.raw_sources).",
@@ -910,11 +1035,11 @@ manifest <- list(
   raw_sources = raw_sources,
   durable_files = list(
     durable_file_record(summary_output,
-      "Cambodia two-wave province area-summary JSON (2008, 2019) with NIS census religion-distribution metrics.",
-      "needs_review", licence_basis_census, row_count = length(all_rows)),
+      "Cambodia two-wave province area-summary JSON (2008, 2019) with NIS census religion-distribution metrics under the two-slot minority-share design.",
+      "accepted", licence_basis_census, row_count = length(all_rows)),
     durable_file_record(summary_csv_output,
       "Flattened Cambodia two-wave province area-summary CSV (2008, 2019).",
-      "needs_review", licence_basis_census, row_count = length(all_rows)),
+      "accepted", licence_basis_census, row_count = length(all_rows)),
     durable_file_record(boundary_output,
       "Simplified Cambodia province boundary GeoJSON derived from geoBoundaries KHM ADM1 (25 provinces).",
       "accepted", licence_basis_boundary, feature_count = 25L)
@@ -968,19 +1093,21 @@ manifest <- list(
     warnings = list(
       paste(
         "Licence: NIS asserts bare all-rights-reserved copyright with no permissive",
-        "licence. The product is staged (needs_review) pending the PI extending the",
-        "Cote d'Ivoire / Iran derived-summaries-with-attribution ruling to Cambodia",
-        "(PI task 9)."
+        "licence. The project lead confirmed on 2026-07-11 (PI task 9) that the Cote",
+        "d'Ivoire / Iran derived-summaries-with-attribution ruling extends to Cambodia,",
+        "so the derived summaries ship with NIS attribution (licence_status accepted)."
       ),
       paste(
-        "Page gate: the four categories are re-based to 100, so the shared",
-        "religious_affiliation_percent metric is flat 100 in every province (the",
-        "Bangladesh flat-share situation). Page publication is gated on PI task 6."
+        "Metric slots: under the ratified two-slot minority-share design (PI task 6,",
+        "2026-07-11) religious_affiliation_percent carries the Buddhist (reference-group)",
+        "share and no_religion_percent carries the minority share (the exact complement,",
+        "the summed Muslims/Christians/Other share). The two slots sum to 100.0 in every",
+        "row; the flat-100 presentation gate is resolved."
       ),
       paste(
         "Change withheld for Mondul Kiri and Ratanak Kiri: the report attributes",
-        "their large Other-share shifts to reclassification. Change is computable for",
-        "the other 23 provinces on the shared frame."
+        "their large Other-share shifts to reclassification. religious_change (the",
+        "difference in the Buddhist share) is computable for the other 23 provinces."
       ),
       paste(
         "Rows carry one-decimal percentages that sum to 99.9-100.1 by the source's",
@@ -1014,9 +1141,9 @@ manifest <- list(
   ),
   construct_notes = list(
     "Table 2.5.1 publishes one-decimal percentage shares for four religion categories by province for 2008 and 2019 on the current 25-province frame; no source publishes religion counts or a total population by province, so counts and population totals are null and none is derived from a percentage.",
-    "The four categories are re-based to 100 percent (the count table's Not Stated column is excluded), so religious_affiliation_percent is a flat 100 in every province (the Bangladesh flat-share situation). The informative content is the per-category composition carried verbatim in each row's quality_flag.",
+    "The four categories are re-based to 100 percent (the count table's Not Stated column is excluded) with no non-affiliation category, so the two legacy slots carry declared constructs under the ratified minority-share design: religious_affiliation_percent is the Buddhist (reference-group) share and no_religion_percent is the minority share, the exact complement (the summed Muslims/Christians/Other share). The two slots sum to 100.0 in every row, and the per-category composition is carried verbatim in each row's quality_flag.",
     "The verbatim category labels differ by wave: 2008 heads are Buddhist, Muslims, Christians, Other; 2019 heads are Buddhist, Muslims, Christian, Other. Both label sets are recorded as printed and never merged. The Table A4 count-anchor frame (Buddhism, Islam, Christianity, Other, Not Stated) is recorded separately and not applied to the Table 2.5.1 source fields.",
-    "Change across 2008-2019 is computable for 23 provinces on the shared frame but withheld for Mondul Kiri and Ratanak Kiri, whose large Other (highland indigenous) share shifts the 2019 report attributes to reclassification.",
+    "religious_change differences the Buddhist (reference-group) share across 2008-2019 on the shared frame, computable for 23 provinces but withheld for Mondul Kiri and Ratanak Kiri, whose large Other (highland indigenous) share shifts the 2019 report attributes to reclassification.",
     "Boundaries are geoBoundaries KHM ADM1 (25 provinces, ODbL 1.0, OpenStreetMap/Wambacher); the derived boundary carries attribution and share-alike (Ghana / Malaysia OSM-ODbL precedent). Both waves join to the one 25-province geometry (2008 already retabulated onto the current frame), so no cross-wave concordance is needed."
   ),
   deferred_sources = list(
@@ -1040,16 +1167,17 @@ manifest <- list(
     )
   ),
   privacy = "public",
-  licence_status = "needs_review",
+  licence_status = "accepted",
   licence_basis = licence_basis_product,
   downstream_status = "staged",
   source_datasets = source_datasets,
   notes = paste(
-    "Staged, not public: NIS asserts all-rights-reserved and the derived-summaries",
-    "ruling awaits the PI for Cambodia (PI task 9); page publication is separately",
-    "gated on the flat-share frame (PI task 6). The committed products contain the",
-    "derived province area summary and a simplified boundary only. On-page",
-    "attribution cites NIS / Ministry of Planning and geoBoundaries (ODbL 1.0,",
+    "Staged for conductor review. The NIS all-rights-reserved derived-summaries-with-",
+    "attribution ruling was confirmed for Cambodia by the project lead on 2026-07-11",
+    "(PI task 9), so licence_status is accepted; the flat-share presentation gate (PI",
+    "task 6) is resolved by the ratified two-slot minority-share re-emit. The committed",
+    "products contain the derived province area summary and a simplified boundary only.",
+    "On-page attribution cites NIS / Ministry of Planning and geoBoundaries (ODbL 1.0,",
     "OpenStreetMap/Wambacher)."
   )
 )
@@ -1063,10 +1191,12 @@ validate_json_schema("schemas/data-manifest.schema.json", manifest_output)
 
 message(
   "built Cambodia province census-religion product: ", length(all_rows),
-  " rows across 2008 and 2019; boundary ", boundary_result[["output_bytes"]],
-  " bytes, ", boundary_result[["distinct_written_hash_count"]], " distinct geometries; derived bound ",
-  reconciliation[["2019"]][["derived_bound"]], " pp, observed max deviation ",
+  " rows across 2008 and 2019; two-slot minority-share re-emit (Buddhist share / minority",
+  " share), exact-complement max deviation ", complement_max_deviation, " pp; boundary ",
+  boundary_result[["output_bytes"]], " bytes, ", boundary_result[["distinct_written_hash_count"]],
+  " distinct geometries; derived bound ", reconciliation[["2019"]][["derived_bound"]],
+  " pp, observed max deviation ",
   max(reconciliation[["2008"]][["max_absolute_deviation"]],
       reconciliation[["2019"]][["max_absolute_deviation"]]),
-  " pp; staged (needs_review)."
+  " pp; licence accepted (PI task 9)."
 )

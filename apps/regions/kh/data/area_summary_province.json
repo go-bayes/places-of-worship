@@ -1,6 +1,6 @@
 {
   "schema_version": "0.2.0",
-  "generated_at": "2026-07-11T02:57:13Z",
+  "generated_at": "2026-07-11T04:26:49Z",
   "generated_by": "scripts/build_kh_area_summary.R",
   "country_code": "KH",
   "boundary_set": {
@@ -25,13 +25,13 @@
       "retrieval_date": "2026-07-11",
       "local_path": "data/raw/kh_census/gpc2019_final_en.pdf",
       "licence": {
-        "name": "NIS all-rights-reserved; no permissive licence (needs_review)",
+        "name": "NIS all-rights-reserved; derived summaries ship with attribution (PI task 9, 2026-07-11)",
         "url": "https://nis.gov.kh/",
         "attribution": "National Institute of Statistics, Ministry of Planning, Cambodia"
       },
       "citation": "National Institute of Statistics, Ministry of Planning, General Population Census of Cambodia 2019: Final Report, Table 2.5.1.",
       "access_limits": "Open web PDF hosted by NIS.",
-      "redistribution_limits": "NIS asserts bare all-rights-reserved copyright with no permissive licence. The NIS website footer (https://nis.gov.kh/) states, verbatim, “© 2025 វិទ្យាស្ថានជាតិស្ថិតិ ក្រសួងផែនការ នៃរាជរដ្ឋាភិបាលកម្ពុជា។ រក្សាសិទ្ធគ្រប់យ៉ាង។” (“(c) 2025 National Institute of Statistics, Ministry of Planning of the Royal Government of Cambodia. All rights reserved.”); the closing phrase is “all rights reserved”. This is the Cote d'Ivoire / Iran situation: under the ratified precedent (PI, 2026-07-10/11) derived category summaries, not the raw source tables, may publish with NIS / Ministry of Planning attribution under PI approval, with the raw PDF and workbook staying git-ignored. Shipping awaits the PI extending that ruling to Cambodia (PI task 9).",
+      "redistribution_limits": "NIS asserts bare all-rights-reserved copyright with no permissive licence. The NIS website footer (https://nis.gov.kh/) states, verbatim, “© 2025 វិទ្យាស្ថានជាតិស្ថិតិ ក្រសួងផែនការ នៃរាជរដ្ឋាភិបាលកម្ពុជា។ រក្សាសិទ្ធគ្រប់យ៉ាង។” (“(c) 2025 National Institute of Statistics, Ministry of Planning of the Royal Government of Cambodia. All rights reserved.”); the closing phrase is “all rights reserved”. This is the Cote d'Ivoire / Iran situation: under the ratified precedent (PI, 2026-07-10/11) derived category summaries, not the raw source tables, may publish with NIS / Ministry of Planning attribution under PI approval, with the raw PDF and workbook staying git-ignored. The project lead confirmed that ruling for Cambodia on 2026-07-11 (PI task 9); the derived summaries ship with NIS / Ministry of Planning attribution.",
       "notes": "Table 2.5.1 prints one-decimal percentages for four religion categories (2008 heads: Buddhist, Muslims, Christians, Other; 2019 heads: Buddhist, Muslims, Christian, Other) by province for 2008 and 2019 on the current 25-province frame. The 2008 block is NIS's own retabulation onto the current frame, with Tbong Khmum (created 2013) shown separately. No source publishes religion counts by province; percentages only are extracted."
     },
     {
@@ -42,13 +42,13 @@
       "retrieval_date": "2026-07-11",
       "local_path": "data/raw/kh_census/priority_tables_A-H.xlsx",
       "licence": {
-        "name": "NIS all-rights-reserved; no permissive licence (needs_review)",
+        "name": "NIS all-rights-reserved; derived summaries ship with attribution (PI task 9, 2026-07-11)",
         "url": "https://nis.gov.kh/",
         "attribution": "National Institute of Statistics, Ministry of Planning, Cambodia"
       },
       "citation": "National Institute of Statistics, Ministry of Planning, General Population Census of Cambodia 2019: Final Priority Tables A-H, Table A4.",
       "access_limits": "Open web XLSX hosted by NIS.",
-      "redistribution_limits": "NIS asserts bare all-rights-reserved copyright with no permissive licence. The NIS website footer (https://nis.gov.kh/) states, verbatim, “© 2025 វិទ្យាស្ថានជាតិស្ថិតិ ក្រសួងផែនការ នៃរាជរដ្ឋាភិបាលកម្ពុជា។ រក្សាសិទ្ធគ្រប់យ៉ាង។” (“(c) 2025 National Institute of Statistics, Ministry of Planning of the Royal Government of Cambodia. All rights reserved.”); the closing phrase is “all rights reserved”. This is the Cote d'Ivoire / Iran situation: under the ratified precedent (PI, 2026-07-10/11) derived category summaries, not the raw source tables, may publish with NIS / Ministry of Planning attribution under PI approval, with the raw PDF and workbook staying git-ignored. Shipping awaits the PI extending that ruling to Cambodia (PI task 9).",
+      "redistribution_limits": "NIS asserts bare all-rights-reserved copyright with no permissive licence. The NIS website footer (https://nis.gov.kh/) states, verbatim, “© 2025 វិទ្យាស្ថានជាតិស្ថិតិ ក្រសួងផែនការ នៃរាជរដ្ឋាភិបាលកម្ពុជា។ រក្សាសិទ្ធគ្រប់យ៉ាង។” (“(c) 2025 National Institute of Statistics, Ministry of Planning of the Royal Government of Cambodia. All rights reserved.”); the closing phrase is “all rights reserved”. This is the Cote d'Ivoire / Iran situation: under the ratified precedent (PI, 2026-07-10/11) derived category summaries, not the raw source tables, may publish with NIS / Ministry of Planning attribution under PI approval, with the raw PDF and workbook staying git-ignored. The project lead confirmed that ruling for Cambodia on 2026-07-11 (PI task 9); the derived summaries ship with NIS / Ministry of Planning attribution.",
       "notes": "Table A4 national counts (Buddhism 15,096,757; Islam 317,649; Christianity 49,160; Other 85,443; Not Stated 3,202) sum to 15,552,211 exactly. Re-based to exclude Not Stated (basis 15,549,009), the four categories round to 97.1/2.0/0.3/0.5, matching the Table 2.5.1 national row. Used as the national count anchor; its five-category label set (Buddhism, Islam, Christianity, Other, Not Stated) is the count-anchor frame and is not applied to the Table 2.5.1 source fields."
     },
     {
@@ -72,43 +72,43 @@
   "indicators": [
     {
       "indicator_id": "religious_affiliation_percent",
-      "label": "Religious affiliation %",
-      "description": "Share of the classified population reporting one of the four census religion categories (Buddhist, Muslims, Christian(s), Other).",
+      "label": "Buddhist (%)",
+      "description": "The Buddhist (reference-group) share: the share of the re-based four-category frame reporting Buddhist, relabelled verbatim on the page as “Buddhist (%)”. This slot names the reference group and carries its share of the frame; it is never a measure of affiliation versus non-affiliation.",
       "unit": "percent",
       "denominator_indicator_id": null,
-      "method": "The four Table 2.5.1 categories are re-based to 100 percent (the count table's Not Stated column is excluded); every classified person is in a religion category, so affiliation equals 100 in every province and wave. The per-category composition is carried verbatim in each row's quality_flag.",
+      "method": "Two-slot minority-share design (minority-share-metric.md, ratified 2026-07-11, PI task 6). The reference group is Buddhist, the product's largest published category at the national level in the most recent wave (2019: 97.1 percent, from the Table A4 counts re-based to exclude Not Stated, reproducing the Table 2.5.1 national row), declared once and held constant across every wave and area. This slot carries that reference group's share of the frame in each province and wave (the printed Table 2.5.1 Buddhist cell). National 2019 reference share: 97.1.",
       "temporal_coverage": "2008, 2019",
       "spatial_coverage": "Twenty-five ADM1 provinces on the geoBoundaries 2017 boundary, shared by both census waves (2008 retabulated onto the same 25-province frame).",
-      "quality_notes": "Flat 100 by construction (the Bangladesh flat-share situation). Printed one-decimal cells sum to 99.9-100.1 by rounding, within the derived 0.20 pp bound; no percentage is altered. The informative content is the per-category composition in quality_flag."
+      "quality_notes": "Printed one-decimal cells; the four categories sum to 99.9-100.1 by rounding, within the derived 0.20 pp bound, and no percentage is altered. The Buddhist share is the exact complement of the minority share carried in no_religion_percent; the two sum to 100.0 in every row."
     },
     {
       "indicator_id": "no_religion_percent",
-      "label": "No religion %",
-      "description": "Unavailable: the re-based Table 2.5.1 frame has no no-religion category.",
+      "label": "Minority share (%)",
+      "description": "The minority share: the summed share of every published category outside the reference group (Muslims, Christians, Other). Relabelled verbatim on the page as “Minority share (%)”, with the note “share outside Cambodia's largest published category, Buddhist”. It reuses the no_religion_percent slot and is not a measure of no religion.",
       "unit": "percent",
       "denominator_indicator_id": null,
-      "method": "Not calculated. The four categories are Buddhist, Muslims, Christian(s), Other; there is no no-religion category and Not Stated is excluded by the re-basing.",
+      "method": "Arithmetic on published affiliation categories: the exact complement of the Buddhist reference share (100 minus the Buddhist share), equal at the source's one-decimal rounding to the summed Muslims/Christians/Other share. It is not a measure of no religion, belief, practice, or secularity.",
       "temporal_coverage": "2008, 2019",
       "spatial_coverage": "Twenty-five ADM1 provinces on the geoBoundaries 2017 boundary, shared by both census waves (2008 retabulated onto the same 25-province frame).",
-      "quality_notes": "Rows carry null no_religion_count and no_religion_percent and no_religion_category_absent."
+      "quality_notes": "Reuses the no_religion_percent slot for the minority-share construct (the Israel two-slot precedent); the re-based frame has no no-religion category. Highest where the map is most informative (2019: Mondul Kiri 29.6, Ratanak Kiri 26.6, Tbong Khmum 11.9)."
     },
     {
       "indicator_id": "religious_change",
-      "label": "Change in religious composition, 2008-2019",
-      "description": "Cross-wave change in the per-category shares on the shared 25-province frame.",
+      "label": "Change in the Buddhist share, 2008-2019",
+      "description": "Cross-wave change in the Buddhist (reference-group) share on the shared 25-province frame.",
       "unit": "percent_point",
       "denominator_indicator_id": null,
-      "method": "Computable for 23 provinces by differencing the 2008 and 2019 per-category shares carried in quality_flag on the shared re-based frame. Withheld for Mondul Kiri and Ratanak Kiri, whose large Other (highland indigenous) share shifts the report attributes to reclassification; those rows carry change_withheld_reclassification_highland_other_share.",
+      "method": "Difference of the 2008 and 2019 Buddhist reference share (carried in religious_affiliation_percent and in each row's quality_flag composition) on the shared re-based frame. Withheld for Mondul Kiri and Ratanak Kiri, whose large Other (highland indigenous) share shifts the 2019 report attributes to reclassification; those rows carry change_withheld_reclassification_highland_other_share.",
       "temporal_coverage": "2008, 2019",
       "spatial_coverage": "Twenty-five ADM1 provinces on the geoBoundaries 2017 boundary, shared by both census waves (2008 retabulated onto the same 25-province frame).",
-      "quality_notes": "The headline affiliation share is flat 100 in both waves, so headline change is zero everywhere; the substantive change is per-category and is withheld for the two highland provinces."
+      "quality_notes": "The reference share varies across waves, so headline change is a real quantity (the change in the largest group's share), differenced for 23 provinces and withheld for the two highland provinces."
     }
   ],
   "visual_layers": [
     {
-      "visual_layer_id": "kh-province-religion-composition",
-      "label": "Religious composition by province",
-      "description": "NIS 2019 census religion distribution (four categories) by province for 2008 and 2019.",
+      "visual_layer_id": "kh-province-buddhist-share",
+      "label": "Buddhist (%)",
+      "description": "Buddhist (reference-group) share by province, 2008 and 2019 (NIS 2019 census Table 2.5.1).",
       "layer_type": "choropleth",
       "indicator_ids": [
         "religious_affiliation_percent"
@@ -120,7 +120,24 @@
       "aggregation_rule": "published province value on the shared 2017 boundary",
       "uncertainty_display": "quality_flag",
       "default_visibility": true,
-      "notes": "Affiliation is 100 percent everywhere (re-based four-category frame); the informative detail is the per-category composition in each row's quality_flag. Page presentation of the flat-share frame is gated on PI task 6."
+      "notes": "The religious_affiliation_percent slot carries the Buddhist reference-group share (minority-share design); the page relabels it verbatim as “Buddhist (%)”. It is the exact complement of the minority-share layer."
+    },
+    {
+      "visual_layer_id": "kh-province-minority-share",
+      "label": "Minority share (%)",
+      "description": "Minority share by province (share outside Cambodia's largest published category, Buddhist), 2008 and 2019.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "no_religion_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": null,
+      "colour_scale": "shared sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "published province value on the shared 2017 boundary",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "The no_religion_percent slot carries the minority share (the summed Muslims/ Christians/Other share, the exact complement of the Buddhist share); the page relabels it verbatim as “Minority share (%)”. It is not a measure of no religion. Highest where the map is most informative (2019: Mondul Kiri 29.6, Ratanak Kiri 26.6, Tbong Khmum 11.9)."
     }
   ],
   "rows": [
@@ -133,11 +150,11 @@
       "area_name": "Banteay Meanchey",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 99.2,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 0.8,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -149,7 +166,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.2|Muslims=0.5|Christians=0.3|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.2|Muslims=0.5|Christians=0.3|Other=0.0;buddhist_share=99.2;minority_share=0.8;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -160,11 +177,11 @@
       "area_name": "Banteay Meanchey",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 99.3,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 0.7,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -176,7 +193,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=99.3|Muslims=0.4|Christian=0.2|Other=0.0;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=99.3|Muslims=0.4|Christian=0.2|Other=0.0;buddhist_share=99.3;minority_share=0.7;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -187,11 +204,11 @@
       "area_name": "Battambang",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 98.3,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 1.7,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -203,7 +220,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=98.3|Muslims=1.3|Christians=0.3|Other=0.0;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=98.3|Muslims=1.3|Christians=0.3|Other=0.0;buddhist_share=98.3;minority_share=1.7;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -214,11 +231,11 @@
       "area_name": "Battambang",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 98.3,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 1.7,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -230,7 +247,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=98.3|Muslims=1.4|Christian=0.3|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=98.3|Muslims=1.4|Christian=0.3|Other=0.0;buddhist_share=98.3;minority_share=1.7;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -241,11 +258,11 @@
       "area_name": "Kampong Cham",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 97.6,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 2.4,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -257,7 +274,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=97.6|Muslims=2.3|Christians=0.1|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=97.6|Muslims=2.3|Christians=0.1|Other=0.0;buddhist_share=97.6;minority_share=2.4;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -268,11 +285,11 @@
       "area_name": "Kampong Cham",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 97.6,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 2.4,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -284,7 +301,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=97.6|Muslims=2.3|Christian=0.1|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=97.6|Muslims=2.3|Christian=0.1|Other=0.0;buddhist_share=97.6;minority_share=2.4;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -295,11 +312,11 @@
       "area_name": "Kampong Chhnang",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 94.7,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 5.3,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -311,7 +328,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=94.7|Muslims=4.2|Christians=0.4|Other=0.7;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=94.7|Muslims=4.2|Christians=0.4|Other=0.7;buddhist_share=94.7;minority_share=5.3;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -322,11 +339,11 @@
       "area_name": "Kampong Chhnang",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 93.1,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 6.9,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -338,7 +355,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=93.1|Muslims=5.8|Christian=0.3|Other=0.9;printed_row_sum=100.1;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=93.1|Muslims=5.8|Christian=0.3|Other=0.9;buddhist_share=93.1;minority_share=6.9;printed_row_sum=100.1;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -349,11 +366,11 @@
       "area_name": "Kampong Speu",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 99.7,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 0.3,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -365,7 +382,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.7|Muslims=0.1|Christians=0.2|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.7|Muslims=0.1|Christians=0.2|Other=0.0;buddhist_share=99.7;minority_share=0.3;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -376,11 +393,11 @@
       "area_name": "Kampong Speu",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 99.8,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 0.2,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -392,7 +409,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=99.8|Muslims=0.1|Christian=0.1|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=99.8|Muslims=0.1|Christian=0.1|Other=0.0;buddhist_share=99.8;minority_share=0.2;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -403,11 +420,11 @@
       "area_name": "Kampong Thom",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 99,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 1,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -419,7 +436,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.0|Muslims=0.6|Christians=0.4|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.0|Muslims=0.6|Christians=0.4|Other=0.0;buddhist_share=99.0;minority_share=1.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -430,11 +447,11 @@
       "area_name": "Kampong Thom",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 98.6,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 1.4,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -446,7 +463,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=98.6|Muslims=1.0|Christian=0.3|Other=0.0;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=98.6|Muslims=1.0|Christian=0.3|Other=0.0;buddhist_share=98.6;minority_share=1.4;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -457,11 +474,11 @@
       "area_name": "Kampot",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 97.1,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 2.9,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -473,7 +490,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=97.1|Muslims=2.7|Christians=0.2|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=97.1|Muslims=2.7|Christians=0.2|Other=0.0;buddhist_share=97.1;minority_share=2.9;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -484,11 +501,11 @@
       "area_name": "Kampot",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 96.9,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 3.1,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -500,7 +517,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=96.9|Muslims=2.8|Christian=0.2|Other=0.0;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=96.9|Muslims=2.8|Christian=0.2|Other=0.0;buddhist_share=96.9;minority_share=3.1;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -511,11 +528,11 @@
       "area_name": "Kandal",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 98,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 2,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -527,7 +544,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=98.0|Muslims=1.2|Christians=0.7|Other=0.1;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=98.0|Muslims=1.2|Christians=0.7|Other=0.1;buddhist_share=98.0;minority_share=2.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -538,11 +555,11 @@
       "area_name": "Kandal",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 98.3,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 1.7,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -554,7 +571,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=98.3|Muslims=1.2|Christian=0.4|Other=0.1;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=98.3|Muslims=1.2|Christian=0.4|Other=0.1;buddhist_share=98.3;minority_share=1.7;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -565,11 +582,11 @@
       "area_name": "Kep",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 98.7,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 1.3,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -581,7 +598,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=98.7|Muslims=1.2|Christians=0.0|Other=0.0;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=98.7|Muslims=1.2|Christians=0.0|Other=0.0;buddhist_share=98.7;minority_share=1.3;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -592,11 +609,11 @@
       "area_name": "Kep",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 97.5,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 2.5,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -608,7 +625,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=97.5|Muslims=1.7|Christian=0.7|Other=0.1;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=97.5|Muslims=1.7|Christian=0.7|Other=0.1;buddhist_share=97.5;minority_share=2.5;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -619,11 +636,11 @@
       "area_name": "Koh Kong",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 95.2,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 4.8,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -635,7 +652,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=95.2|Muslims=4.6|Christians=0.2|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=95.2|Muslims=4.6|Christians=0.2|Other=0.0;buddhist_share=95.2;minority_share=4.8;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -646,11 +663,11 @@
       "area_name": "Koh Kong",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 95.1,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 4.9,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -662,7 +679,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=95.1|Muslims=4.6|Christian=0.2|Other=0.0;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=95.1|Muslims=4.6|Christian=0.2|Other=0.0;buddhist_share=95.1;minority_share=4.9;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -673,11 +690,11 @@
       "area_name": "Kratie",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 94,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 6,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -689,7 +706,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=94.0|Muslims=5.6|Christians=0.4|Other=0.1;printed_row_sum=100.1;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=94.0|Muslims=5.6|Christians=0.4|Other=0.1;buddhist_share=94.0;minority_share=6.0;printed_row_sum=100.1;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -700,11 +717,11 @@
       "area_name": "Kratie",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 93.1,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 6.9,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -716,7 +733,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=93.1|Muslims=6.6|Christian=0.2|Other=0.1;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=93.1|Muslims=6.6|Christian=0.2|Other=0.1;buddhist_share=93.1;minority_share=6.9;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -727,11 +744,11 @@
       "area_name": "Mondul Kiri",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 54.7,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 45.3,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -743,7 +760,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=54.7|Muslims=5.5|Christians=4.4|Other=35.5;printed_row_sum=100.1;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_withheld_reclassification_highland_other_share"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=54.7|Muslims=5.5|Christians=4.4|Other=35.5;buddhist_share=54.7;minority_share=45.3;printed_row_sum=100.1;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_withheld_reclassification_highland_other_share"
     },
     {
       "country_code": "KH",
@@ -754,11 +771,11 @@
       "area_name": "Mondul Kiri",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 70.4,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 29.6,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -770,7 +787,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=70.4|Muslims=4.4|Christian=4.0|Other=21.2;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_withheld_reclassification_highland_other_share"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=70.4|Muslims=4.4|Christian=4.0|Other=21.2;buddhist_share=70.4;minority_share=29.6;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_withheld_reclassification_highland_other_share"
     },
     {
       "country_code": "KH",
@@ -781,11 +798,11 @@
       "area_name": "Otdar Meanchey",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 99.8,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 0.2,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -797,7 +814,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.8|Muslims=0.1|Christians=0.1|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.8|Muslims=0.1|Christians=0.1|Other=0.0;buddhist_share=99.8;minority_share=0.2;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -808,11 +825,11 @@
       "area_name": "Otdar Meanchey",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 99.5,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 0.5,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -824,7 +841,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=99.5|Muslims=0.2|Christian=0.3|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=99.5|Muslims=0.2|Christian=0.3|Other=0.0;buddhist_share=99.5;minority_share=0.5;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -835,11 +852,11 @@
       "area_name": "Pailin",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 99.1,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 0.9,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -851,7 +868,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.1|Muslims=0.7|Christians=0.2|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.1|Muslims=0.7|Christians=0.2|Other=0.0;buddhist_share=99.1;minority_share=0.9;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -862,11 +879,11 @@
       "area_name": "Pailin",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 98.3,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 1.7,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -878,7 +895,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=98.3|Muslims=1.0|Christian=0.7|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=98.3|Muslims=1.0|Christian=0.7|Other=0.0;buddhist_share=98.3;minority_share=1.7;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -889,11 +906,11 @@
       "area_name": "Phnom Penh",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 97.5,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 2.5,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -905,7 +922,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=97.5|Muslims=1.5|Christians=0.8|Other=0.1;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=97.5|Muslims=1.5|Christians=0.8|Other=0.1;buddhist_share=97.5;minority_share=2.5;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -916,11 +933,11 @@
       "area_name": "Phnom Penh",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 97.8,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 2.2,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -932,7 +949,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=97.8|Muslims=1.6|Christian=0.5|Other=0.1;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=97.8|Muslims=1.6|Christian=0.5|Other=0.1;buddhist_share=97.8;minority_share=2.2;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -943,11 +960,11 @@
       "area_name": "Preah Sihanouk",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 94.5,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 5.5,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -959,7 +976,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=94.5|Muslims=4.7|Christians=0.7|Other=0.1;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=94.5|Muslims=4.7|Christians=0.7|Other=0.1;buddhist_share=94.5;minority_share=5.5;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -970,11 +987,11 @@
       "area_name": "Preah Sihanouk",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 96.2,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 3.8,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -986,7 +1003,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=96.2|Muslims=3.6|Christian=0.2|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=96.2|Muslims=3.6|Christian=0.2|Other=0.0;buddhist_share=96.2;minority_share=3.8;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -997,11 +1014,11 @@
       "area_name": "Preah Vihear",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 99.4,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 0.6,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1013,7 +1030,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.4|Muslims=0.3|Christians=0.3|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.4|Muslims=0.3|Christians=0.3|Other=0.0;buddhist_share=99.4;minority_share=0.6;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -1024,11 +1041,11 @@
       "area_name": "Preah Vihear",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 99.1,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 0.9,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1040,7 +1057,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=99.1|Muslims=0.5|Christian=0.3|Other=0.0;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=99.1|Muslims=0.5|Christian=0.3|Other=0.0;buddhist_share=99.1;minority_share=0.9;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -1051,11 +1068,11 @@
       "area_name": "Prey Veng",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 99.5,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 0.5,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1067,7 +1084,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.5|Muslims=0.1|Christians=0.2|Other=0.1;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.5|Muslims=0.1|Christians=0.2|Other=0.1;buddhist_share=99.5;minority_share=0.5;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -1078,11 +1095,11 @@
       "area_name": "Prey Veng",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 99.5,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 0.5,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1094,7 +1111,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=99.5|Muslims=0.2|Christian=0.3|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=99.5|Muslims=0.2|Christian=0.3|Other=0.0;buddhist_share=99.5;minority_share=0.5;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -1105,11 +1122,11 @@
       "area_name": "Pursat",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 97.4,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 2.6,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1121,7 +1138,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=97.4|Muslims=2.4|Christians=0.2|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=97.4|Muslims=2.4|Christians=0.2|Other=0.0;buddhist_share=97.4;minority_share=2.6;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -1132,11 +1149,11 @@
       "area_name": "Pursat",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 96.9,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 3.1,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1148,7 +1165,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=96.9|Muslims=3.0|Christian=0.1|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=96.9|Muslims=3.0|Christian=0.1|Other=0.0;buddhist_share=96.9;minority_share=3.1;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -1159,11 +1176,11 @@
       "area_name": "Ratanak Kiri",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 49.3,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 50.7,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1175,7 +1192,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=49.3|Muslims=1.3|Christians=2.3|Other=47.2;printed_row_sum=100.1;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_withheld_reclassification_highland_other_share"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=49.3|Muslims=1.3|Christians=2.3|Other=47.2;buddhist_share=49.3;minority_share=50.7;printed_row_sum=100.1;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_withheld_reclassification_highland_other_share"
     },
     {
       "country_code": "KH",
@@ -1186,11 +1203,11 @@
       "area_name": "Ratanak Kiri",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 73.4,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 26.6,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1202,7 +1219,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=73.4|Muslims=1.3|Christian=2.1|Other=23.2;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_withheld_reclassification_highland_other_share"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=73.4|Muslims=1.3|Christian=2.1|Other=23.2;buddhist_share=73.4;minority_share=26.6;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_withheld_reclassification_highland_other_share"
     },
     {
       "country_code": "KH",
@@ -1213,11 +1230,11 @@
       "area_name": "Siem Reap",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 99.7,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 0.3,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1229,7 +1246,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.7|Muslims=0.2|Christians=0.1|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.7|Muslims=0.2|Christians=0.1|Other=0.0;buddhist_share=99.7;minority_share=0.3;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -1240,11 +1257,11 @@
       "area_name": "Siem Reap",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 99.3,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 0.7,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1256,7 +1273,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=99.3|Muslims=0.2|Christian=0.4|Other=0.1;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=99.3|Muslims=0.2|Christian=0.4|Other=0.1;buddhist_share=99.3;minority_share=0.7;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -1267,11 +1284,11 @@
       "area_name": "Stung Treng",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 96.1,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 3.9,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1283,7 +1300,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=96.1|Muslims=1.3|Christians=0.4|Other=2.2;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=96.1|Muslims=1.3|Christians=0.4|Other=2.2;buddhist_share=96.1;minority_share=3.9;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -1294,11 +1311,11 @@
       "area_name": "Stung Treng",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 93.6,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 6.4,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1310,7 +1327,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=93.6|Muslims=4.7|Christian=0.4|Other=1.3;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=93.6|Muslims=4.7|Christian=0.4|Other=1.3;buddhist_share=93.6;minority_share=6.4;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -1321,11 +1338,11 @@
       "area_name": "Svay Rieng",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 99.7,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 0.3,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1337,7 +1354,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.7|Muslims=0.1|Christians=0.2|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.7|Muslims=0.1|Christians=0.2|Other=0.0;buddhist_share=99.7;minority_share=0.3;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -1348,11 +1365,11 @@
       "area_name": "Svay Rieng",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 99.8,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 0.2,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1364,7 +1381,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=99.8|Muslims=0.1|Christian=0.1|Other=0.1;printed_row_sum=100.1;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=99.8|Muslims=0.1|Christian=0.1|Other=0.1;buddhist_share=99.8;minority_share=0.2;printed_row_sum=100.1;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -1375,11 +1392,11 @@
       "area_name": "Takeo",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 99.1,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 0.9,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1391,7 +1408,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.1|Muslims=0.7|Christians=0.2|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=99.1|Muslims=0.7|Christians=0.2|Other=0.0;buddhist_share=99.1;minority_share=0.9;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -1402,11 +1419,11 @@
       "area_name": "Takeo",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 99.2,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 0.8,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1418,7 +1435,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=99.2|Muslims=0.6|Christian=0.1|Other=0.0;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=99.2|Muslims=0.6|Christian=0.1|Other=0.0;buddhist_share=99.2;minority_share=0.8;printed_row_sum=99.9;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -1429,11 +1446,11 @@
       "area_name": "Tbong Khmum",
       "year": 2008,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 88.9,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 11.1,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1445,7 +1462,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=88.9|Muslims=11.0|Christians=0.1|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2008:Buddhist=88.9|Muslims=11.0|Christians=0.1|Other=0.0;buddhist_share=88.9;minority_share=11.1;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     },
     {
       "country_code": "KH",
@@ -1456,11 +1473,11 @@
       "area_name": "Tbong Khmum",
       "year": 2019,
       "population_total": null,
-      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, and religious_affiliation_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded), so affiliation is 100 percent for every classified person; the per-category shares are carried verbatim in quality_flag.",
+      "population_total_basis": "No source publishes religion counts or a total population by province for either wave; Table 2.5.1 publishes one-decimal percentage shares only. population_total, the per-category counts, religious_affiliation_count and no_religion_count are therefore null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's “Not Stated” column is excluded). Under the two-slot minority-share design religious_affiliation_percent carries the Buddhist (reference-group) share and no_religion_percent carries the minority share (the exact complement, the summed Muslims/Christians/Other share); the per-category composition is carried verbatim in quality_flag.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 100,
+      "religious_affiliation_percent": 88.1,
       "no_religion_count": null,
-      "no_religion_percent": null,
+      "no_religion_percent": 11.9,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1472,7 +1489,7 @@
         "nis-gpc-2019-priority-table-a4-religion-national",
         "geoboundaries-khm-adm1-2017"
       ],
-      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;affiliation_100_all_classified;no_religion_category_absent;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=88.1|Muslims=11.8|Christian=0.1|Other=0.0;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
+      "quality_flag": "census_religion_distribution;frame_rebased_to_100_four_categories;reference_group_buddhist_largest_published_category;religious_affiliation_percent_is_buddhist_reference_share;no_religion_percent_is_minority_share_exact_complement;minority_share_arithmetic_on_published_categories_not_no_religion;not_stated_excluded_from_rebased_frame;composition_2019:Buddhist=88.1|Muslims=11.8|Christian=0.1|Other=0.0;buddhist_share=88.1;minority_share=11.9;printed_row_sum=100.0;row_sum_within_derived_bound_0.20pp;boundary_2017_geoboundaries_odbl;change_computable_2008_2019"
     }
   ]
 }
