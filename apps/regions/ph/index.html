@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Philippines Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // The Philippines product is census religious affiliation at the province
+    // and highly-urbanised-city (ADM2) level, a single 2020 snapshot from the
+    // Philippine Statistics Authority (PSA) 2020 Census of Population and
+    // Housing, Table A, on the geoBoundaries gbOpen PHL ADM2 frame (86 mapped
+    // units after merging the Cotabato City polygon into Maguindanao). The
+    // construct is census affiliation; it does not measure belief, practice, or
+    // attendance. The denominator is each area's household population, the
+    // universe of the PSA religion table (108,667,043 nationally), which differs
+    // from total population. Religious affiliation is the household population
+    // minus the verbatim None (no religion) category minus Not reported
+    // (non-response, not counted as no religion). Highly urbanised cities are
+    // folded into their census host province and the 16 NCR cities plus Pateros
+    // into the four NCR legislative-district units (34 city mappings); Cotabato
+    // City is tabulated inside Maguindanao and the City of Isabela is a separate
+    // unit, keeping the census's verbatim parenthetical names. The BARMM Special
+    // Geographic Area (215,348 persons) has no boundary and is reconciled in the
+    // national roll-up only, never shown on the map. Areas carry the ten largest
+    // national affiliations plus an exact Other categories residual, None, and
+    // Not reported; the full 129-category source frame is in the data download.
+    // Place and density metrics are omitted because no governed place-of-worship
+    // snapshot ships; 2020 is the only wave, and no change metric is offered.
+    window.REGION_CONFIG = {
+      countryCode: "PH",
+      title: "Places of Worship | Philippines Research Map",
+      // the philippine archipelago is a tall extent (latitude 4.62 to 21.12,
+      // longitude 114.28 to 126.61); centre on the mercator midpoint of the
+      // boundary bbox so batanes in the far north and tawi-tawi in the far
+      // southwest both fit one screen. at z4.6 the extent spans about 586px
+      // vertically and 425px horizontally, clear of the top pills (nz 4.5 and
+      // india 4.7 precedents for a spread-out extent).
+      center: [120.44, 13.01],
+      initialZoom: 4.6,
+      censusLevels: {
+        adm2: {
+          label: "Province or district (ADM2)",
+          boundaries: "data/ph_adm2_2020.geojson",
+          summary: "data/area_summary_adm2.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion from PSA 2020 CPH Table A (Open Data, CC BY) · Boundaries © geoBoundaries PHL ADM2 (CC BY 3.0 IGO), sources NAMRIA, PSA, OCHA Philippines"
+        }
+      },
+      defaultLevel: "adm2",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2020,
+      // only affiliation and no-religion apply: place and density metrics are
+      // null because no governed place-of-worship snapshot ships, and no change
+      // metric is offered because only the 2020 wave ships
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the household population that reported any religious affiliation in the PSA 2020 census (household population minus the verbatim None category minus Not reported), on the household-population denominator (108,667,043 nationally), which differs from total population"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the census's verbatim None (no religious affiliation) category, on the same household-population denominator; Not reported is non-response, kept separate and not counted as no religion"
+        }
+      },
+      popupDenominatorNote: "Percentages use each area's household population, the universe of the PSA 2020 census religion table (108,667,043 nationally); this differs from total population. Religious affiliation is the household population minus the verbatim None (no religion) category minus Not reported (non-response, not counted as no religion). Highly urbanised cities are folded into their census host province and the 16 NCR cities plus Pateros into the four NCR legislative-district units (34 city mappings): Cotabato City is tabulated inside Maguindanao (including the City of Cotabato) and the City of Isabela is a separate unit outside Basilan (excluding the City of Isabela), keeping the census's verbatim parenthetical names. The BARMM Special Geographic Area (Interim Province 1, 215,348 persons) has no boundary and is reconciled in the national roll-up only, never shown on the map. Areas carry the ten largest national affiliations plus an exact Other categories residual, None, and Not reported; the full 129-category source frame is in the data download. The construct is census affiliation; it does not measure belief, practice, or attendance.",
+      cityPresets: [
+        { label: "Manila", coords: [120.9842, 14.5995], zoom: 11 },
+        { label: "Quezon City", coords: [121.0437, 14.6760], zoom: 11 },
+        { label: "Cebu City", coords: [123.8854, 10.3157], zoom: 11 },
+        { label: "Davao City", coords: [125.4553, 7.1907], zoom: 10 },
+        { label: "Zamboanga City", coords: [122.0790, 6.9214], zoom: 10 },
+        { label: "Cagayan de Oro", coords: [124.6319, 8.4542], zoom: 11 },
+        { label: "Iloilo City", coords: [122.5621, 10.7202], zoom: 11 },
+        { label: "Baguio", coords: [120.5960, 16.4023], zoom: 11 }
+      ],
+      geocode: { country: "ph", biasLngLat: [120.44, 13.01] },
+      onboarding: {
+        title: "Philippines research map",
+        intro: "Census religious-affiliation overlays for the Philippines' provinces and highly urbanised cities, a single 2020 snapshot from the Philippine Statistics Authority (PSA) 2020 Census of Population and Housing, Table A. The construct is census affiliation; it does not measure belief, practice, or attendance.",
+        bullets: [
+          "Areas are shaded by the share affiliated with any named religion, or by the share in the census's verbatim <code>None</code> (no religious affiliation) category, shown as No religion %.",
+          "Percentages use each area's household population (108,667,043 nationally), the universe of the PSA religion table; this differs from total population. Not reported is non-response, kept out of the no-religion share.",
+          "Highly urbanised cities are folded into their census host province and the 16 NCR cities plus Pateros into the four NCR legislative districts; Cotabato City is inside Maguindanao and the City of Isabela is a separate unit, keeping the census's verbatim parenthetical names.",
+          "The BARMM Special Geographic Area (Interim Province 1, 215,348 persons) has no boundary; it is reconciled in the national roll-up only and never shown on the map.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric controls. 2020 is the only mapped wave, and no change metric is offered."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion from the <a href="https://psa.gov.ph/content/religious-affiliation-philippines-2020-census-population-and-housing" target="_blank" rel="noopener">Philippine Statistics Authority (PSA)</a> 2020 Census of Population and Housing, Table A, Open Data under Creative Commons Attribution (CC BY) &middot; Boundaries from <a href="https://www.geoboundaries.org/api/current/gbOpen/PHL/ADM2/" target="_blank" rel="noopener">geoBoundaries</a> PHL ADM2 (sources NAMRIA, PSA, OCHA Philippines), Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)',
+      censusFlagNote: "* Percentages use each area's household population (108,667,043 nationally), the universe of the PSA 2020 census religion table; this differs from total population. Religious affiliation is the household population minus the verbatim None category minus Not reported (non-response, not no religion). Highly urbanised cities are folded into their host province and NCR cities into the four NCR legislative districts; Cotabato City is inside Maguindanao and the City of Isabela is a separate unit. The BARMM Special Geographic Area (215,348 persons) has no boundary and is reconciled nationally only. Areas carry the ten largest national affiliations plus an exact Other categories residual, None, and Not reported; the full 129-category source frame is in the data download."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260711a"></script>
+</body>
+</html>

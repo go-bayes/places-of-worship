@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Philippines map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Philippines research map; every string traces to
+    // research/countries/ph/route-probe.md, the manifest
+    // docs/manifests/ph-census-religion-2020.json, or the live REGION_CONFIG in
+    // apps/regions/ph/index.html. authors nothing.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "PH",
+      countryName: "Philippines",
+      mapHref: "./",
+      intro: "Census religious-affiliation overlays for the Philippines' provinces and highly urbanised cities, a single 2020 snapshot from the Philippine Statistics Authority (PSA) 2020 Census of Population and Housing, Table A. The construct is census affiliation. It does not measure belief, practice, or attendance.",
+      facts: {
+        waves: "One census: 2020",
+        geographies: "Province or district (ADM2): 86 mapped units (81 provinces with highly urbanised cities folded in, four NCR legislative districts, and the City of Isabela)",
+        metrics: "Religious affiliation %, no religion %"
+      },
+      reading: [
+        "Areas are shaded by the share affiliated with any named religion, or by the share in the census's verbatim None (no religious affiliation) category, shown as No religion %. Not reported is non-response; it is kept in neither headline share and is not treated as no religion.",
+        "Percentages use each area's household population, the universe of the PSA 2020 religion table (108,667,043 nationally), which differs from total population. Religious affiliation is the household population minus None minus Not reported.",
+        "Each area carries the ten largest national affiliations (Roman Catholic excluding Catholic Charismatics, Islam, Iglesia ni Cristo, Seventh Day Adventist, Aglipay, Iglesia Filipina Independiente, Bible Baptist Church, United Church of Christ in the Philippines, Jehovah's Witness, and Church of Christ), an exact Other categories residual, None, and Not reported, reproducing PSA press-release Table 1. Roman Catholic uses the excluding-Catholic-Charismatics column, matching the PSA headline. The full 129-category source frame is available in the data download.",
+        "The 86 mapped units fold each highly urbanised city into its census host province and the 16 NCR cities plus Pateros into the four NCR legislative districts (34 city mappings). Cotabato City is tabulated inside Maguindanao (including the City of Cotabato) with its polygon merged, and the City of Isabela ships as a separate unit outside Basilan (excluding the City of Isabela); both keep the census's verbatim parenthetical names.",
+        "The BARMM Special Geographic Area (Interim Province 1, 215,348 persons) has no ADM2 boundary. It is reconciled in the national roll-up only and never distributed to a mapped unit.",
+        "Only the 2020 wave is mapped, and no change metric is offered. The 2010 Census of Population and Housing and the 2015 Census of Population collected religion at province level, but their consolidated tables are not yet pinned, and the 2015 universe (total population) differs from 2020 (household population). A 2010/2015 wave-extension is future research; change over time is withheld until the frames and denominators are reconciled.",
+        "No governed Philippines place-of-worship snapshot ships with this product; place counts and density metrics are null.",
+        "The boundary frame is geoBoundaries gbOpen PHL ADM2 (87 source features, represented year 2020), simplified to 86 mapped units after merging the Cotabato City polygon into Maguindanao. Maguindanao split into del Norte and del Sur in 2022, after the census; the 2020 undivided province matches the year-2020 boundary vintage."
+      ],
+      sources: [
+        {
+          name: "PSA 2020 CPH Table A, \"Household Population by Religious Affiliation, Region, Province, and Highly Urbanized City\"",
+          href: "https://psa.gov.ph/content/religious-affiliation-philippines-2020-census-population-and-housing",
+          construct: "Census religious affiliation, exact household-population counts by region, province, and highly urbanised city; household-population denominator",
+          years: "2020",
+          licence: "Open Data under Creative Commons Attribution (CC BY) per the PSA terms-of-use page, with a public-domain site footer. Attribution to the Philippine Statistics Authority, 2020 Census of Population and Housing"
+        },
+        {
+          name: "PSA 2020 CPH Religious Affiliation press release and technical notes",
+          href: "https://psa.gov.ph/content/religious-affiliation-philippines-2020-census-population-and-housing",
+          construct: "Headline national figures (Roman Catholic 78.8%, Islam 6.4%, Iglesia ni Cristo 2.6%) and the household-population universe definition",
+          years: "2020",
+          licence: "As above; Open Data under Creative Commons Attribution (CC BY)"
+        },
+        {
+          name: "geoBoundaries gbOpen PHL ADM2 (provinces) boundaries",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/PHL/ADM2/",
+          construct: "Boundary geometry (87 source features; Cotabato City merged into Maguindanao for 86 mapped units), sources NAMRIA, PSA, OCHA Philippines",
+          years: "2020 (represented year)",
+          licence: "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO), per the release metadata"
+        }
+      ],
+      accessData: {
+        note: "PSA statistical tables are Open Data under Creative Commons Attribution (CC BY), the cleanest licence position in this collection. This product ships the derived ADM2 area summary and a simplified boundary only; the raw PSA workbook, press release, and technical notes remain in the git-ignored cache.",
+        sourceOfRecord: "Philippine Statistics Authority (PSA) <a href=\"https://psa.gov.ph/content/religious-affiliation-philippines-2020-census-population-and-housing\" target=\"_blank\" rel=\"noopener\">2020 Census of Population and Housing, Table A</a>; boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/PHL/ADM2/\" target=\"_blank\" rel=\"noopener\">geoBoundaries PHL ADM2</a>.",
+        tables: "Table A (Household Population by Religious Affiliation, Region, Province, and Highly Urbanized City) is the source of record: 17 regions, 83 province-level rows, and about 33 highly urbanised city rows, plus national. The 129 national category cells sum to the household population (108,667,043, residual 0); the ten named affiliations plus an exact Other categories residual, None (43,931), and Not reported (15,186) reconcile to every area total; and the 86 mapped units plus the BARMM Special Geographic Area residue (215,348) equal the national frame per category. Headline categories match the press release to the person: Roman Catholic excluding Catholic Charismatics 85,645,362, Islam 6,981,710, and Iglesia ni Cristo 2,806,524.",
+        licence: "PSA statistical tables are Open Data under Creative Commons Attribution (CC BY); derived summaries attribute the PSA and link to its terms-of-use page. Boundary geometry is CC BY 3.0 IGO per the geoBoundaries release metadata.",
+        script: "scripts/build_ph_area_summary.R",
+        manifests: [
+          { label: "ph-census-religion-2020", href: "docs/manifests/ph-census-religion-2020.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Philippines map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
