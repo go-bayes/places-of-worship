@@ -35,7 +35,8 @@
     // the exact complement, the minority share (100 − Buddhist share), equal
     // at the source's one-decimal rounding to the summed Muslims/Christians/
     // Other share. The two slots partition the frame and sum to 100.0 in every
-    // row. The full per-province composition rides each popup row verbatim.
+    // row. The full per-province composition rides each data row verbatim (in
+    // quality_flag); the popup shows the two shares by census year.
     //
     // 2008 is NIS's own retabulation onto the current 25-province frame
     // (Tbong Khmum, split from Kampong Cham in 2013, appears as its own 2008
@@ -87,7 +88,7 @@
       metricLabels: {
         religious_affiliation_percent: {
           label: "Buddhist (%)",
-          note: "share of the province's re-based four-category census frame reporting Buddhist, Cambodia's largest published category, held constant as the reference group across every province and wave. This is the reference group's share of the frame, not a measure of affiliation versus non-affiliation. The full composition (Buddhist, Muslims, Christians, Other) is in the popup."
+          note: "share of the province's re-based four-category census frame reporting Buddhist, Cambodia's largest published category, held constant as the reference group across every province and wave. This is the reference group's share of the frame, not a measure of affiliation versus non-affiliation. The popup shows this share and the minority share by census year; the full composition (Buddhist, Muslims, Christians, Other) rides each row of the downloadable area summary verbatim."
         },
         no_religion_percent: {
           label: "Minority share (%)",
@@ -116,7 +117,7 @@
         bullets: [
           "Provinces carry the census composition in four re-based categories: Buddhist, Muslims, Christians and Other, summing to 100 percent by construction (the count table's Not Stated column is excluded).",
           "Two headline metrics are shown: the Buddhist (%) share, the reference group and Cambodia's largest published category, and the Minority share (%), its exact complement (Muslims + Christians + Other). The minority share is highest in the highland provinces such as Mondul Kiri and Ratanak Kiri.",
-          "The minority share is arithmetic on the published affiliation categories; it is not a measure of no religion, belief, practice, or secularity. Tap a province for its Buddhist, Muslims, Christians and Other shares, carried verbatim in every row.",
+          "The minority share is arithmetic on the published affiliation categories; it is not a measure of no religion, belief, practice, or secularity. Tap a province for its Buddhist share and minority share by census year; the verbatim four-category shares ride every row of the downloadable area summary (see About this map).",
           "2008 is NIS's own retabulation onto the current 25-province frame; both waves join to one geometry. The printed one-decimal cells reconcile to 100 within the derived 0.20 pp rounding bound, and no percentage is altered.",
           "A change metric reports the percentage-point change in the Buddhist share since 2008. It is withheld for Mondul Kiri and Ratanak Kiri — the map renders those two provinces as no-data on the change view — because the report attributes their large shifts in the Other (highland indigenous) share to reclassification.",
           "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
