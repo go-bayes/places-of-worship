@@ -1,9 +1,9 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
   "schema_version": "data-manifest.v1",
-  "manifest_id": "manifest:bd-census-religion:bd:2022:9bfa7b0559a2",
+  "manifest_id": "manifest:bd-census-religion:bd:2022:c6e1b341c20b",
   "dataset_id": "bd-census-religion:bd:2022:bbs-phc2022-district",
-  "dataset_version_id": "bd-census-religion:bd:2022:bbs-phc2022-district:9bfa7b0559a2",
+  "dataset_version_id": "bd-census-religion:bd:2022:bbs-phc2022-district:c6e1b341c20b",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -18,7 +18,7 @@
     "snapshot_anchor": null,
     "pipeline_stage": "staged"
   },
-  "created_at": "2026-07-10T22:09:15Z",
+  "created_at": "2026-07-11T04:20:36Z",
   "created_by": "scripts/build_bd_area_summary.R",
   "pipeline": {
     "script": "scripts/build_bd_area_summary.R",
@@ -27,7 +27,7 @@
     "parameters": {
       "waves": "2022",
       "geography": "64 districts (zila) in 8 divisions",
-      "construct": "census religious affiliation in the BBS recognised categories",
+      "construct": "minority-share design over the BBS census religion frame: reference-group (Muslim) share and its exact complement, the minority share",
       "category_frame": [
         "Muslim",
         "Hindu",
@@ -36,7 +36,11 @@
         "Others"
       ],
       "source_table": "Table P08: Population by Religion, Sex and District, 2022",
-      "affiliation_rule": "affiliation = 100 percent; every person is classified into one of Muslim, Hindu, Christian, Buddhist, Others; no no-religion or not-stated category; no_religion fields null",
+      "metric_design": "minority-share (project-lead ruling 2026-07-11, task 6)",
+      "reference_group": "Muslim",
+      "reference_group_basis": "largest published national category in the most recent wave (2022), held constant across every district and wave",
+      "reference_group_national_share": "Muslim: 150,415,066 / 165,150,492 = 91.0776% on the Table P08 sex-classified basis, reproducing the published national figure 91.08% (Table 3.2.15) at printed two-decimal rounding",
+      "affiliation_rule": "religious_affiliation_percent = 100 * Muslim / population_total (reference-group share); no_religion_percent = 100 * (Hindu + Christian + Buddhist + Others) / population_total (minority share, exact complement); the two slots sum to 100 in every row",
       "denominator": "sum of the five religion Total columns (male + female classified population); excludes 8,124 hijra classified only at division level",
       "name_concordance": [
         "Barishal -> Barisal",
@@ -51,7 +55,7 @@
       ],
       "boundary_source_vintage": "geoBoundaries BGD ADM2, boundaryYearRepresented 2020",
       "boundary_simplification_tolerance_m": 250,
-      "omitted_metrics": ["no_religion_percent visual layer", "religious_change", "places_per_10000_residents", "place_density_per_sq_km"]
+      "omitted_metrics": ["religious_change (single wave)", "places_per_10000_residents", "place_density_per_sq_km"]
     },
     "software_versions": {
       "r": "4.6.1",
@@ -106,10 +110,10 @@
       "uri": "repo:apps/regions/bd/data/area_summary_district_2022.json",
       "storage_provider": "git_repository",
       "format": "json",
-      "bytes": 112692,
-      "sha256": "9bfa7b0559a2a91e238171f3d79f2ff98ca120f8308a722938aae87584b349af",
+      "bytes": 123677,
+      "sha256": "c6e1b341c20bbb9f23ca1b5222e7c92e72497bb66784558e1f6304029b3dcf55",
       "row_count": 64,
-      "content": "Bangladesh 2022 district area summary with BBS census religious-affiliation metrics.",
+      "content": "Bangladesh 2022 district area summary with BBS census minority-share metrics (reference-group Muslim share and its minority-share complement).",
       "privacy": "public",
       "licence_status": "needs_review"
     },
@@ -117,8 +121,8 @@
       "uri": "repo:apps/regions/bd/data/area_summary_district_2022.csv",
       "storage_provider": "git_repository",
       "format": "csv",
-      "bytes": 66531,
-      "sha256": "711c027bc1032cd5569187c2e0c5be6ab67e737fd0dafbbd898ef5a0cae0ca0f",
+      "bytes": 76062,
+      "sha256": "57249a3c5409bd0c14ce6e2b12f7c98f301a0b8a59cc82c1b0d7f1128220b011",
       "row_count": 64,
       "content": "Flattened Bangladesh 2022 district area summary.",
       "privacy": "public",
@@ -139,7 +143,7 @@
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/bd/data/area_summary_district_2022.json",
-      "sha256": "9bfa7b0559a2a91e238171f3d79f2ff98ca120f8308a722938aae87584b349af",
+      "sha256": "c6e1b341c20bbb9f23ca1b5222e7c92e72497bb66784558e1f6304029b3dcf55",
       "built_by": "scripts/build_bd_area_summary.R",
       "notes": "64 districts; denominator is the sum of the five Table P08 religion categories."
     },
@@ -159,7 +163,8 @@
       "National category totals match the verified anchor: Muslim 150,415,066; Hindu 13,143,749; Christian 488,555; Buddhist 1,001,927; Others 101,195.",
       "The census-boundary district join is exactly 64:64 after the anglicised-spelling concordance.",
       "The simplified boundary has 64 features and 569648 bytes after 250 m simplification.",
-      "The area-summary schema allows null no_religion values; rows carry null no-religion and no_religion_category_absent.",
+      "Minority-share design: religious_affiliation_percent carries the reference-group (Muslim) share and no_religion_percent its exact complement, the minority share; the two slots sum to 100 in every district.",
+      "National reference-group anchor: the Muslim share on the Table P08 basis is 91.0776%, reproducing the published national figure 91.08% at printed two-decimal rounding.",
       "Census publication reuse rights are unresolved: BBS asserts copyright and no open-reuse licence was located. The product is held in staging."
     ],
     "join_coverage": {
@@ -189,9 +194,11 @@
     }
   ],
   "construct_notes": [
-    "The BBS census religion frame is Muslim, Hindu, Christian, Buddhist and Others. There is no no-religion category and no not-stated category.",
-    "religious_affiliation_percent is 100 in every district because every enumerated person is classified into a religion. The informative detail is the per-category composition, carried verbatim in each row's quality_flag.",
-    "no_religion_count and no_religion_percent are null for every row and every row carries no_religion_category_absent.",
+    "The BBS census religion frame is Muslim, Hindu, Christian, Buddhist and Others. There is no no-religion category and no not-stated category; the frame sums to 100 percent by construction.",
+    "Minority-share design (project-lead ruling 2026-07-11, task 6): because the frame is flat, the two legacy metric slots carry declared constructs. religious_affiliation_percent is the reference-group share (Muslim); no_religion_percent is its exact complement, the minority share (Hindu + Christian + Buddhist + Others). The two slots sum to 100 in every district.",
+    "The reference group is Muslim, Bangladesh's largest published national category in the most recent wave (2022), declared once and held constant across every district. The reference-group value is that group's share of the census frame, never a measure of affiliation versus non-affiliation. National evidence: 150,415,066 / 165,150,492 = 91.0776%, reproducing the published 91.08% (Table 3.2.15) at printed two-decimal rounding.",
+    "The minority share is arithmetic on the published affiliation categories, the share outside the reference group. It is not a measure of no religion, belief, practice, minority status in law, or self-understood identity. The no_religion slot key is the legacy runtime field name and carries no no-religion semantics here.",
+    "The per-district composition (the five category counts) is carried verbatim in each row's quality_flag.",
     "The district table (Table P08) is the sex-classified basis and excludes the 8,124 hijra (third gender) persons nationally, who are religion-classified only in the division-level Table 3.2.15.",
     "Religion figures in Bangladesh are politically salient for minority populations; the product renders the BBS record exactly and names the recognised categories neutrally, with no editorial framing."
   ],

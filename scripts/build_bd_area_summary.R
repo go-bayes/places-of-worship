@@ -65,6 +65,23 @@ national_expected <- c(
   Buddhist = 1001927L, Others = 101195L
 )
 
+# minority-share design (project-lead ruling 2026-07-11, task 6). the BBS frame
+# sums to 100 percent by construction, so a share-of-affiliation choropleth
+# carries no signal. under the ratified design the two legacy metric slots carry
+# declared constructs: religious_affiliation_percent is the reference-group
+# share and no_religion_percent is its exact complement, the minority share.
+reference_group <- "Muslim" # largest published national category, held constant across every area and wave
+# reference-group categories that make up the minority (complement) share.
+minority_categories <- setdiff(categories, reference_group)
+# published national reference-group share, most recent wave (2022). BBS Table
+# 3.2.15 reports 91.08% Muslim on the full-population basis; on the Table P08
+# sex-classified basis the share is 150,415,066 / 165,150,492 = 91.0776%, which
+# reproduces the published figure at printed (two-decimal) rounding.
+reference_national_share_published <- 91.08
+# metric rounding: four decimals stored; the national anchor is checked at the
+# published figure's two-decimal printed rounding.
+metric_round_digits <- 4L
+
 # census district spelling -> geoBoundaries ADM2 shapeName. the two sources name
 # the same 64 districts; this maps only anglicised-spelling differences and
 # invents no geography. every other district name matches verbatim.
@@ -265,58 +282,86 @@ indicators <- function() {
     ),
     list(
       indicator_id = "religious_affiliation_percent",
-      label = "Religious affiliation %",
-      description = "Share of the classified population reporting one of the five census religion categories.",
+      label = "Muslim (%)",
+      description = "Reference-group share: the share of the district's classified population reporting the reference group, Muslim. Declared construct under the minority-share design (project-lead ruling 2026-07-11): the reference group is Bangladesh's largest published category at the national level in the most recent wave (2022), held constant across every district. The value is that group's share of the census frame, never a measure of affiliation versus non-affiliation.",
       unit = "percent",
       denominator_indicator_id = "population_total",
-      method = "100 * (Muslim + Hindu + Christian + Buddhist + Others) / population_total. Every person is classified into a religion category; this therefore equals 100 for every district.",
+      method = "100 * Muslim / population_total, where population_total is the sum of the five Table P08 religion categories.",
       temporal_coverage = "2022",
       spatial_coverage = "Bangladesh districts (zila), 64 units",
-      quality_notes = "Bangladesh's census records no no-religion and no not-stated category; affiliation is therefore 100 percent in every district. The per-district composition (Muslim, Hindu, Christian, Buddhist, Others counts) is carried verbatim in each row's quality_flag."
+      quality_notes = "Reference group Muslim, declared once and held constant. National most-recent-wave evidence: 150,415,066 / 165,150,492 = 91.0776%, which reproduces the published BBS national figure of 91.08% (Table 3.2.15) at printed two-decimal rounding. The per-district composition (Muslim, Hindu, Christian, Buddhist, Others counts) is carried verbatim in each row's quality_flag. Every enumerated person is classified into a religion; the frame has no no-religion and no not-stated category."
     ),
     list(
       indicator_id = "no_religion_percent",
-      label = "No religion %",
-      description = "Unavailable: the BBS census religion frame has no no-religion category.",
+      label = "Minority share (%)",
+      description = "Minority share: the exact complement of the reference-group share, the summed share of every published category outside the reference group (Hindu + Christian + Buddhist + Others). This is arithmetic on the published affiliation categories, the share outside Bangladesh's largest published category. It is not a measure of no religion, belief, practice, or secularity.",
       unit = "percent",
       denominator_indicator_id = "population_total",
-      method = "Not calculated. The frame is Muslim, Hindu, Christian, Buddhist, Others, with no no-religion or not-stated category.",
+      method = "100 * (Hindu + Christian + Buddhist + Others) / population_total; equivalently 100 minus religious_affiliation_percent (the Muslim share). The two slots are exact complements in every row.",
       temporal_coverage = "2022",
       spatial_coverage = "Bangladesh districts (zila), 64 units",
-      quality_notes = "Rows carry no_religion_category_absent and null no_religion_count/no_religion_percent."
+      quality_notes = "The no_religion slot carries the minority share under the minority-share design; the field name is the legacy slot key and carries no no-religion semantics. The BBS frame has no no-religion and no not-stated category."
     )
   )
 }
 
-# build the single choropleth visual layer exposed for the product.
+# build the two choropleth visual layers exposed for the product: the
+# reference-group (Muslim) share and its exact complement, the minority share.
 visual_layers <- function() {
-  list(list(
-    visual_layer_id = "bd-district-2022-religious-affiliation",
-    label = "Religious affiliation %",
-    description = "Population and Housing Census 2022 religious-affiliation share by district.",
-    layer_type = "choropleth",
-    indicator_ids = list("religious_affiliation_percent"),
-    geometry_unit_type = "area_unit",
-    legend = NULL,
-    colour_scale = "shared sequential blue",
-    time_control = "year_selector",
-    aggregation_rule = "reported district value",
-    uncertainty_display = "quality_flag",
-    default_visibility = TRUE,
-    notes = "No no-religion layer is exposed because the census frame has no no-religion category. Affiliation is 100 percent everywhere; the informative detail is the per-category composition in each row's quality_flag."
-  ))
+  list(
+    list(
+      visual_layer_id = "bd-district-2022-muslim-share",
+      label = "Muslim (%)",
+      description = "Population and Housing Census 2022 reference-group (Muslim) share by district.",
+      layer_type = "choropleth",
+      indicator_ids = list("religious_affiliation_percent"),
+      geometry_unit_type = "area_unit",
+      legend = NULL,
+      colour_scale = "shared sequential blue",
+      time_control = "year_selector",
+      aggregation_rule = "reported district value",
+      uncertainty_display = "quality_flag",
+      default_visibility = TRUE,
+      notes = "Reference-group share under the minority-share design: the share reporting Muslim, Bangladesh's largest published category. The per-category composition is carried in each row's quality_flag."
+    ),
+    list(
+      visual_layer_id = "bd-district-2022-minority-share",
+      label = "Minority share (%)",
+      description = "Population and Housing Census 2022 minority share by district: the exact complement of the Muslim share (Hindu + Christian + Buddhist + Others).",
+      layer_type = "choropleth",
+      indicator_ids = list("no_religion_percent"),
+      geometry_unit_type = "area_unit",
+      legend = NULL,
+      colour_scale = "shared sequential blue",
+      time_control = "year_selector",
+      aggregation_rule = "reported district value",
+      uncertainty_display = "quality_flag",
+      default_visibility = FALSE,
+      notes = "Minority share: arithmetic on the published affiliation categories, the share outside the reference group. Not a measure of no religion, belief, practice, or secularity. Highest where the map is most informative (for example Rangamati)."
+    )
+  )
 }
 
-# assemble one schema-shaped area-summary row for a district.
+# assemble one schema-shaped area-summary row for a district. under the
+# minority-share design the two metric slots carry declared constructs: the
+# reference-group (Muslim) share and its exact complement, the minority share.
 build_row <- function(area_code, area_name, land_area_sq_km, counts) {
   total <- sum(counts[paste0(categories, "_T")])
+  reference_count <- as.integer(counts[paste0(reference_group, "_T")])
+  # minority count is the exact complement: the sum of the non-reference
+  # categories, equivalently total minus the reference-group count.
+  minority_count <- as.integer(total - reference_count)
+  reference_pct <- round(100 * reference_count / total, metric_round_digits)
+  minority_pct <- round(100 * minority_count / total, metric_round_digits)
   composition <- paste(
     sprintf("%s=%d", categories, as.integer(counts[paste0(categories, "_T")])),
     collapse = ";"
   )
   flags <- paste0(
-    "census_affiliation_recognised_frame;",
-    "affiliation=100_all_persons_classified;",
+    "census_flat_frame_minority_share_design;",
+    sprintf("reference_group=%s;", reference_group),
+    sprintf("reference_share_pct=%s;minority_share_pct=%s;", reference_pct, minority_pct),
+    "minority_share=Hindu+Christian+Buddhist+Others;",
     composition, ";",
     "source_categories_verbatim=Muslim|Hindu|Christian|Buddhist|Others;",
     "no_religion_category_absent;not_stated_category_absent;",
@@ -332,11 +377,11 @@ build_row <- function(area_code, area_name, land_area_sq_km, counts) {
     area_name = area_name,
     year = census_year,
     population_total = as.integer(total),
-    population_total_basis = "Sum of the five Table P08 religion categories (Muslim, Hindu, Christian, Buddhist, Others), the male + female classified population; excludes hijra (third gender), who are religion-classified only at division level in Table 3.2.15. This product renders the BBS census record of religious affiliation as the source publishes it; the recognised categories are Muslim, Hindu, Christian, Buddhist and Others, with no no-religion and no not-stated category.",
-    religious_affiliation_count = as.integer(total),
-    religious_affiliation_percent = 100,
-    no_religion_count = NULL,
-    no_religion_percent = NULL,
+    population_total_basis = "Sum of the five Table P08 religion categories (Muslim, Hindu, Christian, Buddhist, Others), the male + female classified population; excludes hijra (third gender), who are religion-classified only at division level in Table 3.2.15. Under the minority-share design the two metric slots carry the reference-group (Muslim) share and its exact complement, the minority share; the recognised categories are Muslim, Hindu, Christian, Buddhist and Others, with no no-religion and no not-stated category.",
+    religious_affiliation_count = reference_count,
+    religious_affiliation_percent = reference_pct,
+    no_religion_count = minority_count,
+    no_religion_percent = minority_pct,
     place_count = NULL,
     places_per_10000_residents = NULL,
     place_density_per_sq_km = NULL,
@@ -363,8 +408,8 @@ flatten_rows <- function(rows) {
       population_total_basis = row$population_total_basis,
       religious_affiliation_count = row$religious_affiliation_count,
       religious_affiliation_percent = row$religious_affiliation_percent,
-      no_religion_count = NA_integer_,
-      no_religion_percent = NA_real_,
+      no_religion_count = row$no_religion_count,
+      no_religion_percent = row$no_religion_percent,
       place_count = NA_integer_,
       places_per_10000_residents = NA_real_,
       place_density_per_sq_km = NA_real_,
@@ -485,6 +530,26 @@ if (!identical(census_codes, boundary_codes)) {
   stop("area-code join coverage failed between census and boundary", call. = FALSE)
 }
 
+# minority-share gate: the two metric slots must be exact complements in every
+# row (reference-group share plus minority share equals 100 exactly).
+complement_diff <- vapply(rows, function(r) {
+  r[["religious_affiliation_percent"]] + r[["no_religion_percent"]] - 100
+}, numeric(1))
+if (any(abs(complement_diff) > 0)) {
+  bad <- vapply(rows, `[[`, character(1), "area_name")[abs(complement_diff) > 0]
+  stop("minority-share complement gate failed for rows: ",
+       paste(bad, collapse = ", "), call. = FALSE)
+}
+
+# national anchor: the reference-group (Muslim) share on the Table P08 basis must
+# reproduce the published national figure at printed (two-decimal) rounding.
+national_total <- sum(national_expected)
+national_reference_pct <- 100 * national_expected[[reference_group]] / national_total
+if (round(national_reference_pct, 2) != reference_national_share_published) {
+  stop(sprintf("national reference-group share %.4f does not reproduce the published %.2f at printed rounding",
+               national_reference_pct, reference_national_share_published), call. = FALSE)
+}
+
 area_summary <- list(
   schema_version = "0.2.0",
   generated_at = stamp,
@@ -501,7 +566,7 @@ area_summary <- list(
     source_dataset_id = NULL,
     snapshot_date = NULL,
     basis = "no governed Bangladesh OpenStreetMap place-of-worship snapshot is included in this country data-map release",
-    notes = "The Bangladesh page exposes the census religious-affiliation share only; place-density metrics are hidden until a governed Bangladesh place layer is built."
+    notes = "The Bangladesh page exposes the census minority-share metrics only (the reference-group Muslim share and its minority-share complement); place-density metrics are hidden until a governed Bangladesh place layer is built."
   ),
   source_datasets = source_datasets(),
   indicators = indicators(),
@@ -572,15 +637,19 @@ manifest <- list(
     parameters = list(
       waves = "2022",
       geography = "64 districts (zila) in 8 divisions",
-      construct = "census religious affiliation in the BBS recognised categories",
+      construct = "minority-share design over the BBS census religion frame: reference-group (Muslim) share and its exact complement, the minority share",
       category_frame = as.list(categories),
       source_table = "Table P08: Population by Religion, Sex and District, 2022",
-      affiliation_rule = "affiliation = 100 percent; every person is classified into one of Muslim, Hindu, Christian, Buddhist, Others; no no-religion or not-stated category; no_religion fields null",
+      metric_design = "minority-share (project-lead ruling 2026-07-11, task 6)",
+      reference_group = reference_group,
+      reference_group_basis = "largest published national category in the most recent wave (2022), held constant across every district and wave",
+      reference_group_national_share = sprintf("%s: 150,415,066 / 165,150,492 = 91.0776%% on the Table P08 sex-classified basis, reproducing the published national figure 91.08%% (Table 3.2.15) at printed two-decimal rounding", reference_group),
+      affiliation_rule = "religious_affiliation_percent = 100 * Muslim / population_total (reference-group share); no_religion_percent = 100 * (Hindu + Christian + Buddhist + Others) / population_total (minority share, exact complement); the two slots sum to 100 in every row",
       denominator = "sum of the five religion Total columns (male + female classified population); excludes 8,124 hijra classified only at division level",
       name_concordance = as.list(paste(names(name_concordance), name_concordance, sep = " -> ")),
       boundary_source_vintage = "geoBoundaries BGD ADM2, boundaryYearRepresented 2020",
       boundary_simplification_tolerance_m = boundary_info[["simplification_tolerance_m"]],
-      omitted_metrics = c("no_religion_percent visual layer", "religious_change",
+      omitted_metrics = c("religious_change (single wave)",
                           "places_per_10000_residents", "place_density_per_sq_km")
     ),
     software_versions = list(
@@ -611,7 +680,7 @@ manifest <- list(
       boundary_dataset_id)
   ),
   durable_files = list(
-    manifest_file_record(summary_json_out, "Bangladesh 2022 district area summary with BBS census religious-affiliation metrics.", "needs_review"),
+    manifest_file_record(summary_json_out, "Bangladesh 2022 district area summary with BBS census minority-share metrics (reference-group Muslim share and its minority-share complement).", "needs_review"),
     manifest_file_record(summary_csv_out, "Flattened Bangladesh 2022 district area summary.", "needs_review"),
     manifest_file_record(boundary_out, "Simplified Bangladesh district boundary GeoJSON derived from geoBoundaries BGD ADM2.", "accepted")
   ),
@@ -631,7 +700,9 @@ manifest <- list(
       "The census-boundary district join is exactly 64:64 after the anglicised-spelling concordance.",
       sprintf("The simplified boundary has %d features and %d bytes after %d m simplification.",
               boundary_info[["output_feature_count"]], boundary_info[["output_bytes"]], boundary_info[["simplification_tolerance_m"]]),
-      "The area-summary schema allows null no_religion values; rows carry null no-religion and no_religion_category_absent.",
+      "Minority-share design: religious_affiliation_percent carries the reference-group (Muslim) share and no_religion_percent its exact complement, the minority share; the two slots sum to 100 in every district.",
+      sprintf("National reference-group anchor: the Muslim share on the Table P08 basis is %.4f%%, reproducing the published national figure %.2f%% at printed two-decimal rounding.",
+              national_reference_pct, reference_national_share_published),
       "Census publication reuse rights are unresolved: BBS asserts copyright and no open-reuse licence was located. The product is held in staging."
     ),
     join_coverage = list(
@@ -661,9 +732,11 @@ manifest <- list(
     )
   ),
   construct_notes = list(
-    "The BBS census religion frame is Muslim, Hindu, Christian, Buddhist and Others. There is no no-religion category and no not-stated category.",
-    "religious_affiliation_percent is 100 in every district because every enumerated person is classified into a religion. The informative detail is the per-category composition, carried verbatim in each row's quality_flag.",
-    "no_religion_count and no_religion_percent are null for every row and every row carries no_religion_category_absent.",
+    "The BBS census religion frame is Muslim, Hindu, Christian, Buddhist and Others. There is no no-religion category and no not-stated category; the frame sums to 100 percent by construction.",
+    "Minority-share design (project-lead ruling 2026-07-11, task 6): because the frame is flat, the two legacy metric slots carry declared constructs. religious_affiliation_percent is the reference-group share (Muslim); no_religion_percent is its exact complement, the minority share (Hindu + Christian + Buddhist + Others). The two slots sum to 100 in every district.",
+    "The reference group is Muslim, Bangladesh's largest published national category in the most recent wave (2022), declared once and held constant across every district. The reference-group value is that group's share of the census frame, never a measure of affiliation versus non-affiliation. National evidence: 150,415,066 / 165,150,492 = 91.0776%, reproducing the published 91.08% (Table 3.2.15) at printed two-decimal rounding.",
+    "The minority share is arithmetic on the published affiliation categories, the share outside the reference group. It is not a measure of no religion, belief, practice, minority status in law, or self-understood identity. The no_religion slot key is the legacy runtime field name and carries no no-religion semantics here.",
+    "The per-district composition (the five category counts) is carried verbatim in each row's quality_flag.",
     "The district table (Table P08) is the sex-classified basis and excludes the 8,124 hijra (third gender) persons nationally, who are religion-classified only in the division-level Table 3.2.15.",
     "Religion figures in Bangladesh are politically salient for minority populations; the product renders the BBS record exactly and names the recognised categories neutrally, with no editorial framing."
   ),
