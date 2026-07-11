@@ -3080,6 +3080,14 @@ function computeCensusDomains(store) {
   store.clamped = clamped;
 }
 
+// a change_withheld_* flag on either wave nulls the change metrics for
+// that area: the product asserts the two waves are not comparable there
+// (reclassification, instrument breaks), hence the map must not
+// difference them — the area renders as no-data, never as zero change
+function changeWithheld(now, prev) {
+  return [now, prev].some((row) => row && flagTokens(row).some((t) => t.includes("change_withheld")));
+}
+
 // value lookup against an explicit store, usable before the store is
 // installed as the active level
 function storeValue(store, code, year, metric) {
@@ -3089,6 +3097,7 @@ function storeValue(store, code, year, metric) {
     const now = store.byAreaYear.get(`${code}|${year}`);
     const prev = store.byAreaYear.get(`${code}|${store.years[idx - 1]}`);
     if (!now || !prev) return null;
+    if (changeWithheld(now, prev)) return null;
     const a = now.religious_affiliation_percent;
     const b = prev.religious_affiliation_percent;
     // guard the operands: JS coerces null to 0, so null - null is 0, not
@@ -3098,13 +3107,15 @@ function storeValue(store, code, year, metric) {
     return a - b;
   }
   // count change mirrors religious_change but differences the raw counts;
-  // the same operand guard applies — a missing count must not read as zero
+  // the same operand and withhold guards apply — a missing count must not
+  // read as zero and a withheld comparison must not paint
   if (metric === "religious_affiliation_count_change") {
     const idx = store.years.indexOf(year);
     if (idx <= 0) return null;
     const now = store.byAreaYear.get(`${code}|${year}`);
     const prev = store.byAreaYear.get(`${code}|${store.years[idx - 1]}`);
     if (!now || !prev) return null;
+    if (changeWithheld(now, prev)) return null;
     const a = now.religious_affiliation_count;
     const b = prev.religious_affiliation_count;
     if (!Number.isFinite(a) || !Number.isFinite(b)) return null;

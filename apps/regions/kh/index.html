@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Cambodia Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Cambodia's product is census religion distribution from the National
+    // Institute of Statistics (NIS), 25 provinces across two census waves
+    // (2008, 2019), from the 2019 final report Table 2.5.1. It does not
+    // measure belief, practice, or attendance.
+    //
+    // Minority-share design (minority-share-metric.md, PI task 6, 2026-07-11).
+    // Table 2.5.1 publishes a four-category frame (Buddhist, Muslims,
+    // Christians/Christian, Other) re-based to 100 percent, excluding the
+    // count table's "Not Stated" column; the frame therefore sums to 100 by
+    // construction, and the legacy affiliation headline would be flat 100
+    // everywhere. The two legacy slots therefore carry declared constructs:
+    // the affiliation slot is the reference-group (Buddhist) share — Buddhist
+    // is Cambodia's largest published category nationally in the most recent
+    // wave (2019: 97.1 percent from the Table A4 counts re-based to exclude
+    // Not Stated, reproducing the Table 2.5.1 national row), declared once and
+    // held constant across every wave and area — and the no-religion slot is
+    // the exact complement, the minority share (100 − Buddhist share), equal
+    // at the source's one-decimal rounding to the summed Muslims/Christians/
+    // Other share. The two slots partition the frame and sum to 100.0 in every
+    // row. The full per-province composition rides each popup row verbatim.
+    //
+    // 2008 is NIS's own retabulation onto the current 25-province frame
+    // (Tbong Khmum, split from Kampong Cham in 2013, appears as its own 2008
+    // row); both waves therefore join to one 25-province geometry. The cells
+    // are one-decimal percentages; the four categories sum to 99.9–100.1 by
+    // rounding, within the derived 0.20 pp bound (0.05 pp per cell × 4), and
+    // no percentage is altered. No source publishes religion counts or a
+    // province population total; all count and density fields are therefore null.
+    //
+    // WITHHELD CHANGE (reclassification): the 2019 report attributes the large
+    // 2008→2019 shifts in the "Other" (highland indigenous) share of Mondul
+    // Kiri and Ratanak Kiri to reclassification, and the change metric is
+    // withheld for those two provinces in the data (per-row flag
+    // change_withheld_reclassification_highland_other_share). See the report
+    // note for the runtime caveat.
+    window.REGION_CONFIG = {
+      countryCode: "KH",
+      title: "Places of Worship | Cambodia Research Map",
+      // boundary bbox verified numerically from the 25-feature layer:
+      // lon 102.3338..107.6277, lat 9.9134..14.6902; centroid ≈ [104.98, 12.30].
+      // centre on that centroid; the ~5.3 deg lon / ~4.8 deg lat extent fits
+      // all 25 provinces at z6.4.
+      center: [104.98, 12.30],
+      initialZoom: 6.4,
+      censusLevels: {
+        province: {
+          label: "Province (25 units)",
+          boundaries: "data/kh_province_2017.geojson",
+          summary: "data/area_summary_province.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion from the National Institute of Statistics (NIS), 2019 census Table 2.5.1, 25 provinces, 2008–2019 · Boundaries from geoBoundaries KHM ADM1 (ODbL, © OpenStreetMap contributors), represented year 2017"
+        }
+      },
+      defaultLevel: "province",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2019,
+      // minority-share design: the flat four-category re-based frame sums to
+      // 100 by construction; the two legacy slots therefore carry declared
+      // constructs. The affiliation slot is the reference-group (Buddhist)
+      // share; the no-religion slot is its exact complement, the minority
+      // share. The change slot differences the Buddhist share across waves and
+      // is withheld for the two reclassification provinces and renders no-data.
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Buddhist (%)",
+          note: "share of the province's re-based four-category census frame reporting Buddhist, Cambodia's largest published category, held constant as the reference group across every province and wave. This is the reference group's share of the frame, not a measure of affiliation versus non-affiliation. The full composition (Buddhist, Muslims, Christians, Other) is in the popup."
+        },
+        no_religion_percent: {
+          label: "Minority share (%)",
+          note: "share outside Cambodia's largest published category, Buddhist: the summed share of Muslims, Christians and Other, the exact complement of the Buddhist share. This is arithmetic on the published affiliation categories; it is not a measure of no religion, belief, practice, or secularity."
+        },
+        religious_change: {
+          label: "Change in the Buddhist share, 2008–2019",
+          note: "percentage-point change in the Buddhist (reference-group) share between the 2008 and 2019 censuses; the two waves are roughly a decade apart and a wave-to-wave difference is not an annual rate. Withheld in the data for Mondul Kiri and Ratanak Kiri, whose large 2008→2019 shifts in the Other (highland indigenous) share the 2019 report attributes to reclassification."
+        }
+      },
+      popupDenominatorNote: "Percentages use the re-based four-category NIS census religion frame (Buddhist, Muslims, Christians, Other) as the denominator; the count table's Not Stated column is excluded and the four categories sum to 100 percent by construction. The Buddhist (%) metric is the reference-group share; the Minority share (%) metric is its exact complement, the share outside the reference group (Muslims + Christians + Other). The printed cells are one-decimal percentages; the four categories sum to 99.9–100.1 by rounding, within the derived 0.20 pp bound, and no percentage is altered. No source publishes religion counts or a province population total; counts and densities are therefore null. These are census self-declarations; they do not measure belief, practice, or attendance.",
+      cityPresets: [
+        { label: "Phnom Penh", coords: [104.9160, 11.5564], zoom: 10 },
+        { label: "Siem Reap", coords: [103.8555, 13.3622], zoom: 10 },
+        { label: "Battambang", coords: [103.1968, 13.0957], zoom: 10 },
+        { label: "Sihanoukville", aliases: ["Preah Sihanouk"], coords: [103.5223, 10.6270], zoom: 10 },
+        { label: "Kampong Cham", coords: [105.4636, 11.9934], zoom: 10 },
+        { label: "Kampot", coords: [104.1817, 10.6104], zoom: 10 },
+        { label: "Ban Lung", aliases: ["Ratanak Kiri"], coords: [106.9873, 13.7394], zoom: 10 },
+        { label: "Sen Monorom", aliases: ["Mondul Kiri"], coords: [107.1877, 12.4491], zoom: 10 }
+      ],
+      geocode: { country: "kh", biasLngLat: [104.98, 12.30] },
+      onboarding: {
+        title: "Cambodia research map",
+        intro: "Census religion distribution for Cambodia's 25 provinces across two censuses, 2008 and 2019, from the National Institute of Statistics (NIS) 2019 census final report, Table 2.5.1. The construct is census religion composition over a re-based four-category frame. It does not measure belief, practice, or attendance.",
+        bullets: [
+          "Provinces carry the census composition in four re-based categories: Buddhist, Muslims, Christians and Other, summing to 100 percent by construction (the count table's Not Stated column is excluded).",
+          "Two headline metrics are shown: the Buddhist (%) share, the reference group and Cambodia's largest published category, and the Minority share (%), its exact complement (Muslims + Christians + Other). The minority share is highest in the highland provinces such as Mondul Kiri and Ratanak Kiri.",
+          "The minority share is arithmetic on the published affiliation categories; it is not a measure of no religion, belief, practice, or secularity. Tap a province for its Buddhist, Muslims, Christians and Other shares, carried verbatim in every row.",
+          "2008 is NIS's own retabulation onto the current 25-province frame; both waves join to one geometry. The printed one-decimal cells reconcile to 100 within the derived 0.20 pp rounding bound, and no percentage is altered.",
+          "A change metric reports the percentage-point change in the Buddhist share since 2008. It is withheld for Mondul Kiri and Ratanak Kiri — the map renders those two provinces as no-data on the change view — because the report attributes their large shifts in the Other (highland indigenous) share to reclassification.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://nis.gov.kh/" target="_blank" rel="noopener">National Institute of Statistics (NIS)</a>, Ministry of Planning, General Population Census of Cambodia 2019, final report Table 2.5.1, derived summaries reproduced with attribution &middot; Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> KHM ADM1 (ODbL, &copy; OpenStreetMap contributors), represented year 2017',
+      censusFlagNote: "* NIS Table 2.5.1 publishes a four-category religion frame (Buddhist, Muslims, Christians, Other) re-based to 100 percent, excluding the count table's Not Stated column; the frame sums to 100 percent by construction. The map shades the reference-group (Buddhist) share and its exact complement, the minority share; the no-religion slot label carries the minority share and no no-religion meaning. The printed one-decimal cells reconcile to 100 within the derived 0.20 pp rounding bound (deviations of ±0.1 pp recorded per row), and no percentage is altered. 2008 is NIS's retabulation onto the current 25-province frame; both waves share one geometry. The change metric is withheld for Mondul Kiri and Ratanak Kiri, which render as no-data on the change view; the report attributes their large 2008→2019 shifts in the Other (highland indigenous) share to reclassification. NIS asserts all rights reserved; the derived category summaries are reproduced with NIS attribution under the project-lead ruling of 2026-07-11 (PI task 9). Boundaries are geoBoundaries KHM ADM1, ODbL with attribution and share-alike."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260711b"></script>
+</body>
+</html>
