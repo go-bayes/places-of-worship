@@ -1,0 +1,1101 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:bz-census-religion:bz:2000-2022:sib-district",
+  "dataset_id": "bz-census-religion:bz:2000-2022:sib-district",
+  "dataset_version_id": "bz-census-religion:bz:2000-2022:sib-district:f364869e2024",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "bz-census-religion",
+  "dataset_role": "staged_evidence",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "BZ"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-07-12T00:00:00Z",
+  "created_by": "scripts/build_bz_area_summary.R",
+  "target_years": [
+    2000,
+    2010,
+    2022
+  ],
+  "pipeline": {
+    "script": "scripts/build_bz_area_summary.R",
+    "git_commit": "3487a0549435aa4e0a2700ba57c7136051a20ee5",
+    "command": "Rscript scripts/build_bz_area_summary.R",
+    "parameters": {
+      "construct": "census affiliation",
+      "shipped_waves": [
+        2000,
+        2010,
+        2022
+      ],
+      "shipped_geography": "6 Belize districts (Corozal, Orange Walk, Belize, Cayo, Stann Creek, Toledo)",
+      "boundary_set": "bz-district-2006-geoboundaries-adm1",
+      "source_tables": {
+        "2000": "2000 Census Report Table B2 Population by Religion and Sex for Major Divisions (integer full-count, 17 categories)",
+        "2010": "2010 General Characteristics Tables sheet Religion_by_District Table 9 (weighted, 12 categories)",
+        "2022": "2022 General Characteristics Tables sheet Religion_by_District Table 9 = Key Findings Report Table A.2 (weighted, 12 categories)"
+      },
+      "universes": {
+        "2000": "tabulated population, all persons (232,111)",
+        "2010": "weighted census population, all persons (322,423.82)",
+        "2022": "weighted census population, all persons (397,483.46)"
+      },
+      "method_note": "The 2022 census applied census weighting and non-response adjustment through the assignment of weights (2022 Key Findings Report sections 1.3.1 and 1.3.4); the 2010 General Characteristics religion table was re-tabulated on the same weighted basis. Both waves' district religion cells are therefore non-integer weighted counts, rendered verbatim and reconciled float-exact. The 2000 Table B2 cells are integer full-counts. Count fields are rounded to integer for the schema; percentages use the unrounded as-published values.",
+      "denominators": {
+        "2000": "printed district Total; affiliation = population - None - DK/NS",
+        "2010": "printed district Total; affiliation = population - None - Don't Know/Not Stated",
+        "2022": "printed district Total; affiliation = population - None - Don't Know/Not Stated"
+      },
+      "slot_design": "Ordinary two-slot (SB/FM/KI precedent). religious_affiliation_percent is the share of the district population reporting a named religion (population minus None minus the non-response line); no_religion_percent is the single None line. The non-response line (2000 DK/NS; 2010/2022 Don't Know/Not Stated) stays in the denominator and in neither slot, so the two shares need not sum to 100 (the FJ/SB unallocated-residual precedent).",
+      "category_frames": {
+        "2000": [
+          "Anglican",
+          "Bahai Faith",
+          "Baptist",
+          "Hindu",
+          "Jehovah Witness",
+          "Mennonite",
+          "Methodist",
+          "Mormon",
+          "Muslim",
+          "Nazarene",
+          "Pentecostal",
+          "Roman Catholic",
+          "Seventh Day Adventist",
+          "Salvation Army",
+          "Other",
+          "None",
+          "DK/NS"
+        ],
+        "2010": [
+          "Anglican",
+          "Baptist",
+          "Jehovah's Witness",
+          "Mennonite",
+          "Methodist",
+          "Nazarene",
+          "Pentecostal",
+          "Roman Catholic",
+          "Seventh Day Adventist",
+          "None",
+          "Other",
+          "Don't Know/Not Stated"
+        ],
+        "2022": [
+          "Roman Catholic",
+          "Pentecostal",
+          "Seventh Day Adventist",
+          "Anglican",
+          "Mennonite",
+          "Baptist",
+          "Methodist",
+          "Nazarene",
+          "Jehovah's Witness",
+          "Other",
+          "None",
+          "Don't Know/Not Stated"
+        ],
+        "alignment_note": "The headline no-religion and affiliation shares are comparable across all three waves (construct: share reporting a named religion / None, of the whole resident population). Two breaks limit fine-denomination comparison. First, category collapse: the 2000 frame names Bahai Faith, Hindu, Mormon, Muslim, and Salvation Army as separate lines, while 2010/2022 fold them into 'Other', so the 'Other' lines and those small-body lines are not comparable across the 2000 break. Second, method: 2000 is integer full-count while 2010/2022 are weighted (non-integer) counts. Frames are preserved verbatim per wave and never merged."
+      },
+      "change_rule": "Headline change (no-religion share, affiliation share) is readable across all three waves. Fine-denomination change is withheld across the 2000 frame break and the integer-to-weighted method change. National no-religion share rose 9.4% (2000) -> 15.5% (2010) -> 31.0% (2022); shares are read within each district's own wave denominator and population growth (232k -> 322k -> 397k) is never treated as a religion change.",
+      "no_religion_treatment": {
+        "2000": "single None line; DK/NS is a separate non-response residual, excluded from this slot",
+        "2010": "single None line; Don't Know/Not Stated is a separate non-response residual, excluded from this slot",
+        "2022": "single None line; Don't Know/Not Stated is a separate non-response residual, excluded from this slot"
+      },
+      "held_and_deferred": "1991 (2000 report Table B2 1991 column) is HELD: it folds None into a combined None/Not-Stated line, so the no-religion slot cannot be isolated. The 2010 Census Report Table R1.1 (integer full-count, 20 categories, ** suppression on cells of ten or fewer persons, country total 322,453) is a richer-frame alternative 2010 source, deferred in favour of the 2010/2022 same-frame Excel pair.",
+      "territorial_note": "Belize's border with Guatemala is subject to a long-standing Guatemalan territorial claim before the ICJ. The build renders the official Belizean administrative extent and census record as published and takes no position on the dispute.",
+      "omitted_metrics": [
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 33611
+      },
+      "local_cache_hint": "All raw sources are cached under data/raw/bz_census/ and remain git-ignored.",
+      "retrieval_record": [
+        {
+          "uri": "data/raw/bz_census/bz_2000_Census_Report.pdf",
+          "url": "https://sib.org.bz/wp-content/uploads/2000_Census_Report.pdf",
+          "format": "pdf",
+          "bytes": 1135543,
+          "sha256": "dfd0069eb1f4c4010fd7c23ee04f31f487d3a81b528e4b2567450827560f358d",
+          "row_count": null,
+          "source_dataset_id": "bz-census-2000-report-table-b2-religion-by-district",
+          "used_in_public_product": true,
+          "periods": "2000",
+          "notes": "2000 Census Report; Table B2 Religion by district (integer full-count). Both margins close to 232,111.",
+          "local_cache_hint": "data/raw/bz_census/bz_2000_Census_Report.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/bz_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/bz_census/bz_Census2010_GeneralCharacteristics.xlsx",
+          "url": "https://sib.org.bz/wp-content/uploads/Census2010_GeneralCharacteristics.xlsx",
+          "format": "xlsx",
+          "bytes": 71680,
+          "sha256": "17cce2129571548df5b4c76447db856a11f9271d393ca046f6afce48a18c9db5",
+          "row_count": null,
+          "source_dataset_id": "bz-census-2010-general-characteristics-religion-by-district",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 General Characteristics Tables; sheet Religion_by_District (Table 9), weighted. Both margins close to 322,423.82.",
+          "local_cache_hint": "data/raw/bz_census/bz_Census2010_GeneralCharacteristics.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/bz_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/bz_census/bz_Census2022_GeneralCharacteristics.xlsx",
+          "url": "https://sib.org.bz/wp-content/uploads/Census2022_GeneralCharacteristics.xlsx",
+          "format": "xlsx",
+          "bytes": 69401,
+          "sha256": "8d649118178f8cc01f9188c049489a9e02817439cdaf78dfe704cd254bf3cdfc",
+          "row_count": null,
+          "source_dataset_id": "bz-census-2022-general-characteristics-religion-by-district",
+          "used_in_public_product": true,
+          "periods": "2022",
+          "notes": "2022 General Characteristics Tables; sheet Religion_by_District (Table 9), weighted. Both margins close to 397,483.46.",
+          "local_cache_hint": "data/raw/bz_census/bz_Census2022_GeneralCharacteristics.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/bz_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/bz_census/bz_CensusKeyFindingsReport_2022.pdf",
+          "url": "https://sib.org.bz/wp-content/uploads/CensusKeyFindingsReport_2022.pdf",
+          "format": "pdf",
+          "bytes": 2701217,
+          "sha256": "e6abc6265b8268c82f7ef638f0f2f78ff011fc2cdc85ec1eddd2e38ef3cafef0",
+          "row_count": null,
+          "source_dataset_id": "bz-census-2022-general-characteristics-religion-by-district",
+          "used_in_public_product": false,
+          "periods": "2022",
+          "notes": "2022 Key Findings Report; cross-source anchor (Table A.2 district religion; Table 3.5 national rounded counts match the Excel).",
+          "local_cache_hint": "data/raw/bz_census/bz_CensusKeyFindingsReport_2022.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/bz_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/bz_census/bz_2010_Census_Report.pdf",
+          "url": "https://sib.org.bz/wp-content/uploads/2010_Census_Report.pdf",
+          "format": "pdf",
+          "bytes": 14729172,
+          "sha256": "5d4ac18dd131509e9b1bb7a6fe85418000ce178c70a4b1b3e52357a0ca8e7e28",
+          "row_count": null,
+          "source_dataset_id": "bz-census-2010-general-characteristics-religion-by-district",
+          "used_in_public_product": false,
+          "periods": "2010",
+          "notes": "2010 Census Report; carries the verbatim SIB copyright/reuse clause and the alternative integer Table R1.1 (20-category, deferred).",
+          "local_cache_hint": "data/raw/bz_census/bz_2010_Census_Report.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/bz_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/bz_census/geoBoundaries-BLZ-ADM1.geojson",
+          "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BLZ/ADM1/geoBoundaries-BLZ-ADM1.geojson",
+          "format": "geojson",
+          "bytes": 69037,
+          "sha256": "c75826394c11129d493cc4a250005fae1bfd26d60921edc1ed9471609866083b",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-blz-adm1-2006",
+          "used_in_public_product": true,
+          "periods": "2006",
+          "notes": "geoBoundaries BLZ ADM1 GeoJSON; 6 districts, CC BY 2.5 Generic. Pinned commit 9469f09.",
+          "local_cache_hint": "data/raw/bz_census/geoBoundaries-BLZ-ADM1.geojson (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/bz_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/bz_census/gb_blz_adm1_meta.json",
+          "url": "https://www.geoboundaries.org/api/current/gbOpen/BLZ/ADM1/",
+          "format": "json",
+          "bytes": 1735,
+          "sha256": "79fe5a14a552b8c2a29989fcbeb128401545948906510ba414b7809cd3c0e7e9",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-blz-adm1-2006",
+          "used_in_public_product": false,
+          "periods": "2006",
+          "notes": "geoBoundaries BLZ ADM1 metadata; records CC BY 2.5 Generic, boundaryYearRepresented 2006, admUnitCount 6.",
+          "local_cache_hint": "data/raw/bz_census/gb_blz_adm1_meta.json (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/bz_census/"
+          ]
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "scripts/lib/simplify_boundary.R (npx mapshaper)"
+    }
+  },
+  "source": {
+    "provider": "Statistical Institute of Belize (SIB); geoBoundaries (William & Mary geoLab)",
+    "source_dataset_ids": [
+      "bz-census-2000-report-table-b2-religion-by-district",
+      "bz-census-2010-general-characteristics-religion-by-district",
+      "bz-census-2022-general-characteristics-religion-by-district",
+      "geoboundaries-blz-adm1-2006"
+    ],
+    "source_urls": [
+      "https://sib.org.bz/wp-content/uploads/2000_Census_Report.pdf",
+      "https://sib.org.bz/wp-content/uploads/Census2010_GeneralCharacteristics.xlsx",
+      "https://sib.org.bz/wp-content/uploads/Census2022_GeneralCharacteristics.xlsx",
+      "https://sib.org.bz/wp-content/uploads/CensusKeyFindingsReport_2022.pdf",
+      "https://sib.org.bz/wp-content/uploads/2010_Census_Report.pdf",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BLZ/ADM1/geoBoundaries-BLZ-ADM1.geojson",
+      "https://www.geoboundaries.org/api/current/gbOpen/BLZ/ADM1/"
+    ],
+    "retrieved_at": "2026-07-12T00:00:00Z",
+    "licence": "No open-data licence is stated on any SIB census product. The 2010 Census Report front matter reads: 'Copyright (c) 2013, The Statistical Institute of Belize. Short sections of this publication may be copied for individual use without permission, provided the source is fully acknowledged. Otherwise, no part of this publication may be reproduced or transmitted in any form or by any means ... without permission in writing from the Statistical Institute of Belize.' The SIB website footer asserts 'Statistical Institute of Belize. Copyright (c) 2026. All Rights Reserved.' The derived district summaries carry attribution to the Statistical Institute of Belize and ship STAGED under the BUILD-THEN-ASK ruling (summaries-with-attribution stance, RO/SK/CI/MONSTAT line); a SIB reuse-confirmation email is the clean courtesy unblock. The boundary is Creative Commons Attribution 2.5 Generic.",
+    "citation": "SIB 2000 Census Report Table B2; SIB 2010 & 2022 General Characteristics Tables Religion_by_District (Table 9); geoBoundaries BLZ ADM1 (gbOpen).",
+    "raw_redistribution": "The census PDFs, the Excel workbooks, and the geoBoundaries source GeoJSON are not committed; they remain in data/raw/bz_census/.",
+    "local_cache_hint": "data/raw/bz_census/ (git-ignored by .gitignore data/ rule)",
+    "raw_cache_durable_uris": [
+      "gs://pow-research-data/raw_sources/bz_census/"
+    ]
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/bz_census/bz_2000_Census_Report.pdf",
+      "url": "https://sib.org.bz/wp-content/uploads/2000_Census_Report.pdf",
+      "format": "pdf",
+      "bytes": 1135543,
+      "sha256": "dfd0069eb1f4c4010fd7c23ee04f31f487d3a81b528e4b2567450827560f358d",
+      "row_count": null,
+      "source_dataset_id": "bz-census-2000-report-table-b2-religion-by-district",
+      "used_in_public_product": true,
+      "periods": "2000",
+      "notes": "2000 Census Report; Table B2 Religion by district (integer full-count). Both margins close to 232,111.",
+      "local_cache_hint": "data/raw/bz_census/bz_2000_Census_Report.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/bz_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/bz_census/bz_Census2010_GeneralCharacteristics.xlsx",
+      "url": "https://sib.org.bz/wp-content/uploads/Census2010_GeneralCharacteristics.xlsx",
+      "format": "xlsx",
+      "bytes": 71680,
+      "sha256": "17cce2129571548df5b4c76447db856a11f9271d393ca046f6afce48a18c9db5",
+      "row_count": null,
+      "source_dataset_id": "bz-census-2010-general-characteristics-religion-by-district",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 General Characteristics Tables; sheet Religion_by_District (Table 9), weighted. Both margins close to 322,423.82.",
+      "local_cache_hint": "data/raw/bz_census/bz_Census2010_GeneralCharacteristics.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/bz_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/bz_census/bz_Census2022_GeneralCharacteristics.xlsx",
+      "url": "https://sib.org.bz/wp-content/uploads/Census2022_GeneralCharacteristics.xlsx",
+      "format": "xlsx",
+      "bytes": 69401,
+      "sha256": "8d649118178f8cc01f9188c049489a9e02817439cdaf78dfe704cd254bf3cdfc",
+      "row_count": null,
+      "source_dataset_id": "bz-census-2022-general-characteristics-religion-by-district",
+      "used_in_public_product": true,
+      "periods": "2022",
+      "notes": "2022 General Characteristics Tables; sheet Religion_by_District (Table 9), weighted. Both margins close to 397,483.46.",
+      "local_cache_hint": "data/raw/bz_census/bz_Census2022_GeneralCharacteristics.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/bz_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/bz_census/bz_CensusKeyFindingsReport_2022.pdf",
+      "url": "https://sib.org.bz/wp-content/uploads/CensusKeyFindingsReport_2022.pdf",
+      "format": "pdf",
+      "bytes": 2701217,
+      "sha256": "e6abc6265b8268c82f7ef638f0f2f78ff011fc2cdc85ec1eddd2e38ef3cafef0",
+      "row_count": null,
+      "source_dataset_id": "bz-census-2022-general-characteristics-religion-by-district",
+      "used_in_public_product": false,
+      "periods": "2022",
+      "notes": "2022 Key Findings Report; cross-source anchor (Table A.2 district religion; Table 3.5 national rounded counts match the Excel).",
+      "local_cache_hint": "data/raw/bz_census/bz_CensusKeyFindingsReport_2022.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/bz_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/bz_census/bz_2010_Census_Report.pdf",
+      "url": "https://sib.org.bz/wp-content/uploads/2010_Census_Report.pdf",
+      "format": "pdf",
+      "bytes": 14729172,
+      "sha256": "5d4ac18dd131509e9b1bb7a6fe85418000ce178c70a4b1b3e52357a0ca8e7e28",
+      "row_count": null,
+      "source_dataset_id": "bz-census-2010-general-characteristics-religion-by-district",
+      "used_in_public_product": false,
+      "periods": "2010",
+      "notes": "2010 Census Report; carries the verbatim SIB copyright/reuse clause and the alternative integer Table R1.1 (20-category, deferred).",
+      "local_cache_hint": "data/raw/bz_census/bz_2010_Census_Report.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/bz_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/bz_census/geoBoundaries-BLZ-ADM1.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BLZ/ADM1/geoBoundaries-BLZ-ADM1.geojson",
+      "format": "geojson",
+      "bytes": 69037,
+      "sha256": "c75826394c11129d493cc4a250005fae1bfd26d60921edc1ed9471609866083b",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-blz-adm1-2006",
+      "used_in_public_product": true,
+      "periods": "2006",
+      "notes": "geoBoundaries BLZ ADM1 GeoJSON; 6 districts, CC BY 2.5 Generic. Pinned commit 9469f09.",
+      "local_cache_hint": "data/raw/bz_census/geoBoundaries-BLZ-ADM1.geojson (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/bz_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/bz_census/gb_blz_adm1_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/BLZ/ADM1/",
+      "format": "json",
+      "bytes": 1735,
+      "sha256": "79fe5a14a552b8c2a29989fcbeb128401545948906510ba414b7809cd3c0e7e9",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-blz-adm1-2006",
+      "used_in_public_product": false,
+      "periods": "2006",
+      "notes": "geoBoundaries BLZ ADM1 metadata; records CC BY 2.5 Generic, boundaryYearRepresented 2006, admUnitCount 6.",
+      "local_cache_hint": "data/raw/bz_census/gb_blz_adm1_meta.json (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/bz_census/"
+      ]
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/bz/data/area_summary_district.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 51923,
+      "sha256": "f364869e202481b10d8c24f786f44bfc855df7f50500dc35a38ae20f4dd0fce4",
+      "row_count": 18,
+      "feature_count": null,
+      "content": "Belize 6-district census-affiliation area summary for 2000, 2010, and 2022.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "sib_all_rights_reserved_attribution_build_then_ask"
+    },
+    {
+      "uri": "repo:apps/regions/bz/data/area_summary_district.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 27693,
+      "sha256": "ba13461e7d8417e5b1a8801fe03cf1baeede86cb174c705c034210b4e2c4bebb",
+      "row_count": 18,
+      "feature_count": null,
+      "content": "Flattened Belize 6-district census-affiliation rows for 2000, 2010, and 2022.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "sib_all_rights_reserved_attribution_build_then_ask"
+    },
+    {
+      "uri": "repo:apps/regions/bz/data/bz_district_2006.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 33611,
+      "sha256": "7b3bcb532b05ebfa1710c704625a980d01eaebd45ad36495e2d599ee87a08bf3",
+      "row_count": null,
+      "feature_count": 6,
+      "content": "Simplified geoBoundaries BLZ ADM1 6-district boundary GeoJSON.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_cc_by_2_5_generic"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/bz/data/area_summary_district.json",
+      "sha256": "f364869e202481b10d8c24f786f44bfc855df7f50500dc35a38ae20f4dd0fce4",
+      "built_by": "scripts/build_bz_area_summary.R",
+      "notes": "6 districts x 3 waves = 18 rows; all-persons universe in every wave; no suppressed cells in the headline slots."
+    },
+    {
+      "uri": "repo:apps/regions/bz/data/bz_district_2006.geojson",
+      "sha256": "7b3bcb532b05ebfa1710c704625a980d01eaebd45ad36495e2d599ee87a08bf3",
+      "built_by": "scripts/build_bz_area_summary.R",
+      "notes": "6 district features from geoBoundaries BLZ ADM1, simplified with mapshaper weighted keep-shapes."
+    }
+  ],
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_bz_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/bz/data/area_summary_district.json",
+      "bash scripts/validate_manifests.sh"
+    ],
+    "gate_2000": {
+      "status": "passed",
+      "both_margins_close_to": 232111,
+      "district_column_checks": 6,
+      "religion_row_checks": 17,
+      "records": [
+        {
+          "year": 2000,
+          "margin": "district_column",
+          "key": "Corozal",
+          "computed": 32209,
+          "printed": 32209,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "district_column",
+          "key": "Orange Walk",
+          "computed": 38060,
+          "printed": 38060,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "district_column",
+          "key": "Belize",
+          "computed": 63061,
+          "printed": 63061,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "district_column",
+          "key": "Cayo",
+          "computed": 51221,
+          "printed": 51221,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "district_column",
+          "key": "Stann Creek",
+          "computed": 24443,
+          "printed": 24443,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "district_column",
+          "key": "Toledo",
+          "computed": 23117,
+          "printed": 23117,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "religion_row",
+          "key": "Anglican",
+          "computed": 12386,
+          "printed": 12386,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "religion_row",
+          "key": "Bahai Faith",
+          "computed": 205,
+          "printed": 205,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "religion_row",
+          "key": "Baptist",
+          "computed": 8077,
+          "printed": 8077,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "religion_row",
+          "key": "Hindu",
+          "computed": 367,
+          "printed": 367,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "religion_row",
+          "key": "Jehovah Witness",
+          "computed": 3366,
+          "printed": 3366,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "religion_row",
+          "key": "Mennonite",
+          "computed": 9497,
+          "printed": 9497,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "religion_row",
+          "key": "Methodist",
+          "computed": 8024,
+          "printed": 8024,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "religion_row",
+          "key": "Mormon",
+          "computed": 928,
+          "printed": 928,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "religion_row",
+          "key": "Muslim",
+          "computed": 243,
+          "printed": 243,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "religion_row",
+          "key": "Nazarene",
+          "computed": 6117,
+          "printed": 6117,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "religion_row",
+          "key": "Pentecostal",
+          "computed": 17189,
+          "printed": 17189,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "religion_row",
+          "key": "Roman Catholic",
+          "computed": 115035,
+          "printed": 115035,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "religion_row",
+          "key": "Seventh Day Adventist",
+          "computed": 12160,
+          "printed": 12160,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "religion_row",
+          "key": "Salvation Army",
+          "computed": 371,
+          "printed": 371,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "religion_row",
+          "key": "Other",
+          "computed": 14984,
+          "printed": 14984,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "religion_row",
+          "key": "None",
+          "computed": 21795,
+          "printed": 21795,
+          "difference": 0
+        },
+        {
+          "year": 2000,
+          "margin": "religion_row",
+          "key": "DK/NS",
+          "computed": 1367,
+          "printed": 1367,
+          "difference": 0
+        }
+      ]
+    },
+    "gate_2010": {
+      "status": "passed",
+      "both_margins_close_to": 322423.819595282,
+      "district_column_checks": 6,
+      "religion_row_checks": 12,
+      "records": [
+        {
+          "year": 2010,
+          "margin": "district_column",
+          "key": "Corozal",
+          "computed": 41060.4161775815,
+          "printed": 41060.4161775767,
+          "difference": 4.80213202536106e-09
+        },
+        {
+          "year": 2010,
+          "margin": "district_column",
+          "key": "Orange Walk",
+          "computed": 45935.9717098069,
+          "printed": 45935.9717098009,
+          "difference": 6.00266503170133e-09
+        },
+        {
+          "year": 2010,
+          "margin": "district_column",
+          "key": "Belize",
+          "computed": 95286.5640934144,
+          "printed": 95286.5640934099,
+          "difference": 4.48198989033699e-09
+        },
+        {
+          "year": 2010,
+          "margin": "district_column",
+          "key": "Cayo",
+          "computed": 75034.3798974835,
+          "printed": 75034.3798974648,
+          "difference": 1.86992110684514e-08
+        },
+        {
+          "year": 2010,
+          "margin": "district_column",
+          "key": "Stann Creek",
+          "computed": 34323.6293465105,
+          "printed": 34323.629346513,
+          "difference": -2.5029294192791e-09
+        },
+        {
+          "year": 2010,
+          "margin": "district_column",
+          "key": "Toledo",
+          "computed": 30782.8583703732,
+          "printed": 30782.8583703751,
+          "difference": -1.89902493730187e-09
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Anglican",
+          "computed": 15064.7936788171,
+          "printed": 15064.7936788173,
+          "difference": -1.98269844986498e-10
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Baptist",
+          "computed": 11620.5958821722,
+          "printed": 11620.5958821725,
+          "difference": -2.9831426218152e-10
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Jehovah's Witness",
+          "computed": 5385.0941110656,
+          "printed": 5385.0941110655,
+          "difference": 9.91349224932492e-11
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Mennonite",
+          "computed": 12053.1676219664,
+          "printed": 12053.1676219673,
+          "difference": -9.00399754755199e-10
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Methodist",
+          "computed": 9457.0028309333,
+          "printed": 9457.0028309333,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Nazarene",
+          "computed": 9145.3799797507,
+          "printed": 9145.3799797505,
+          "difference": 2.00088834390044e-10
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Pentecostal",
+          "computed": 27119.6570492393,
+          "printed": 27119.6570492399,
+          "difference": -6.00266503170133e-10
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Roman Catholic",
+          "computed": 129438.153876993,
+          "printed": 129438.153876989,
+          "difference": 4.90399543195963e-09
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Seventh Day Adventist",
+          "computed": 17556.529110897,
+          "printed": 17556.5291108972,
+          "difference": -2.03726813197136e-10
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "None",
+          "computed": 49972.0805907116,
+          "printed": 49972.0805907079,
+          "difference": 3.70346242561936e-09
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Other",
+          "computed": 33583.2974695982,
+          "printed": 33583.2974695976,
+          "difference": 5.96628524363041e-10
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Don't Know/Not Stated",
+          "computed": 2028.0673930251,
+          "printed": 2028.0673930251,
+          "difference": -2.27373675443232e-13
+        }
+      ]
+    },
+    "gate_2022": {
+      "status": "passed",
+      "both_margins_close_to": 397483.456238867,
+      "district_column_checks": 6,
+      "religion_row_checks": 12,
+      "records": [
+        {
+          "year": 2022,
+          "margin": "district_column",
+          "key": "Corozal",
+          "computed": 45310.2171604524,
+          "printed": 45310.2171604495,
+          "difference": 2.895831130445e-09
+        },
+        {
+          "year": 2022,
+          "margin": "district_column",
+          "key": "Orange Walk",
+          "computed": 54152.1520827107,
+          "printed": 54152.1520827875,
+          "difference": -7.68050085753202e-08
+        },
+        {
+          "year": 2022,
+          "margin": "district_column",
+          "key": "Belize",
+          "computed": 113630.217191935,
+          "printed": 113630.217191894,
+          "difference": 4.0105078369379e-08
+        },
+        {
+          "year": 2022,
+          "margin": "district_column",
+          "key": "Cayo",
+          "computed": 99104.8887218637,
+          "printed": 99104.8887218751,
+          "difference": -1.14087015390396e-08
+        },
+        {
+          "year": 2022,
+          "margin": "district_column",
+          "key": "Stann Creek",
+          "computed": 48162.0864836065,
+          "printed": 48162.0864835958,
+          "difference": 1.07029336504638e-08
+        },
+        {
+          "year": 2022,
+          "margin": "district_column",
+          "key": "Toledo",
+          "computed": 37123.8945975581,
+          "printed": 37123.894597566,
+          "difference": -7.9016899690032e-09
+        },
+        {
+          "year": 2022,
+          "margin": "religion_row",
+          "key": "Roman Catholic",
+          "computed": 126596.389875134,
+          "printed": 126596.389875247,
+          "difference": -1.13301211968064e-07
+        },
+        {
+          "year": 2022,
+          "margin": "religion_row",
+          "key": "Pentecostal",
+          "computed": 36459.9199896959,
+          "printed": 36459.9199896941,
+          "difference": 1.79716153070331e-09
+        },
+        {
+          "year": 2022,
+          "margin": "religion_row",
+          "key": "Seventh Day Adventist",
+          "computed": 18641.5686288617,
+          "printed": 18641.5686288654,
+          "difference": -3.69982444681227e-09
+        },
+        {
+          "year": 2022,
+          "margin": "religion_row",
+          "key": "Anglican",
+          "computed": 15943.0809329325,
+          "printed": 15943.0809329334,
+          "difference": -9.02218744158745e-10
+        },
+        {
+          "year": 2022,
+          "margin": "religion_row",
+          "key": "Mennonite",
+          "computed": 15440.4850618352,
+          "printed": 15440.4850618364,
+          "difference": -1.20053300634027e-09
+        },
+        {
+          "year": 2022,
+          "margin": "religion_row",
+          "key": "Baptist",
+          "computed": 14108.6611134535,
+          "printed": 14108.6611134543,
+          "difference": -8.00355337560177e-10
+        },
+        {
+          "year": 2022,
+          "margin": "religion_row",
+          "key": "Methodist",
+          "computed": 6623.331770417,
+          "printed": 6623.3317704167,
+          "difference": 3.00133251585066e-10
+        },
+        {
+          "year": 2022,
+          "margin": "religion_row",
+          "key": "Nazarene",
+          "computed": 6568.0628697181,
+          "printed": 6568.0628697175,
+          "difference": 6.00266503170133e-10
+        },
+        {
+          "year": 2022,
+          "margin": "religion_row",
+          "key": "Jehovah's Witness",
+          "computed": 4477.580881385,
+          "printed": 4477.5808813849,
+          "difference": 1.00044417195022e-10
+        },
+        {
+          "year": 2022,
+          "margin": "religion_row",
+          "key": "Other",
+          "computed": 25116.9462866721,
+          "printed": 25116.9462866742,
+          "difference": -2.09911377169192e-09
+        },
+        {
+          "year": 2022,
+          "margin": "religion_row",
+          "key": "None",
+          "computed": 123372.668757316,
+          "printed": 123372.668757338,
+          "difference": -2.17987690120935e-08
+        },
+        {
+          "year": 2022,
+          "margin": "religion_row",
+          "key": "Don't Know/Not Stated",
+          "computed": 4134.7600707046,
+          "printed": 4134.7600707046,
+          "difference": 0
+        }
+      ]
+    },
+    "boundary_validation": {
+      "status": "passed",
+      "feature_count": 6,
+      "distinct_geometry_hashes": 6,
+      "geometry_hashes": [
+        "3a49e9e54c7524d88535614d217557f8eb43b7940f3f17922715e7427adaaeea",
+        "d3c724b0b93e340c854c786954edc14062a03ec9e0d220c372c90a81f0ffdf11",
+        "ce57a222821fda6fa63b862d3fd4297fb6019d54da2557e7f61ce133ab214593",
+        "33ed302064211c7be1cea3851a9d5e221d8c0b98ff49cadf2a41f79f2ed16e1b",
+        "4744e7e76838b9e868f66dfa14404168496ef0434e4ef0356bd292acccce750e",
+        "ed552db1104995372fea5676ddecfd65d3563e5a8be5d76625b5ea635b722e96"
+      ],
+      "bbox": {
+        "xmin": -89.2271537,
+        "ymin": 15.8854055,
+        "xmax": -87.7598813,
+        "ymax": 18.4944428
+      },
+      "dateline_note": "extent lon -89.2 to -87.8E, lat 15.9 to 18.5N; far from the antimeridian, no dateline handling needed",
+      "output_bytes": 33611,
+      "simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 33611
+      },
+      "licence": "Creative Commons Attribution 2.5 Generic",
+      "adm_unit_count": "6"
+    },
+    "join_coverage": {
+      "matched_districts": 6,
+      "expected_districts": 6,
+      "unmatched_districts": [],
+      "unused_boundary_features": []
+    },
+    "notes": "2000 Table B2 closes integer-exact at both margins (country total 232,111); 2010 and 2022 General Characteristics Table 9 close float-exact at both margins (322,423.82; 397,483.46). Boundary joins 6/6 to geoBoundaries BLZ ADM1 with 6 distinct geometry hashes.",
+    "warnings": [
+      "STAGED product: no page, no hub link. Licence needs review; ships under BUILD-THEN-ASK with attribution to SIB (no open-data licence stated).",
+      "The 2010 and 2022 district religion cells are weighted (non-integer) counts from the SIB non-response-adjustment methodology; rendered verbatim, rounded to integer for the schema's count fields, reconciled on the as-published values.",
+      "The 2000 17-category frame collapses to the 2010/2022 12-category frame (Bahai Faith, Hindu, Mormon, Muslim, Salvation Army fold into 'Other'); fine-denomination change is withheld across the break; headline shares are comparable.",
+      "1991 is HELD (combined None/Not-Stated line); the 2010 Table R1.1 integer 20-category table is a deferred richer-frame alternative.",
+      "Belize's border with Guatemala is subject to an ICJ territorial claim; the official Belizean record is rendered as published, neutrally."
+    ]
+  },
+  "construct_notes": [
+    "The construct is census affiliation: each resident's reported religion, asked of the whole resident population, not practice, attendance, or membership.",
+    "The public product carries three headline fields per district-wave: population total, religious affiliation percent, and no-religion percent. Place-density metrics are null (no governed place-of-worship snapshot).",
+    "The headline no-religion and affiliation shares are comparable across all three waves; the national no-religion share rose 9.4% (2000) to 15.5% (2010) to 31.0% (2022).",
+    "The 2022 census applied census weighting and non-response adjustment through the assignment of weights (Key Findings Report 1.3.1, 1.3.4); the 2010 General Characteristics religion table shares that weighted basis. Both waves' cells are non-integer weighted counts, rendered verbatim and reconciled float-exact; the 2000 Table B2 cells are integer full-counts.",
+    "Slot design (ordinary two-slot, SB/FM/KI precedent): religious_affiliation_percent is the share reporting a named religion (population minus None minus the non-response line); no_religion_percent is the single None line. The non-response line stays in the denominator and in neither slot, so the two shares need not sum to 100.",
+    "Two frame breaks limit fine-denomination comparison: category collapse (2000 names Bahai Faith, Hindu, Mormon, Muslim, Salvation Army separately; 2010/2022 fold them into 'Other') and method (2000 integer full-count vs 2010/2022 weighted). Change is withheld on the fine denominations; frames are preserved verbatim per wave.",
+    "Earlier and alternative waves are HELD/deferred: 1991 folds None into a combined None/Not-Stated line (no-religion slot cannot be isolated); the 2010 Census Report Table R1.1 is a richer 20-category integer full-count with ** suppression, deferred in favour of the 2010/2022 same-frame pair.",
+    "Boundary: geoBoundaries BLZ ADM1, 6 districts, Creative Commons Attribution 2.5 Generic. The six districts join one-to-one by name with no concordance. Belize's border with Guatemala is subject to an ICJ territorial claim; the official Belizean extent and census record are rendered as published, neutrally."
+  ],
+  "deferred_sources": [
+    {
+      "source_dataset_id": "bz-census-2010-report-table-r1-1-integer-20-category",
+      "status": "deferred",
+      "url": "https://sib.org.bz/wp-content/uploads/2010_Census_Report.pdf",
+      "local_path": "data/raw/bz_census/bz_2010_Census_Report.pdf",
+      "notes": "2010 Census Report Table R1.1: integer full-count district religion, 20 categories, ** suppression on cells of ten or fewer persons, country total 322,453. A richer-frame alternative 2010 source, deferred in favour of the 2010/2022 same-frame weighted Excel pair."
+    },
+    {
+      "source_dataset_id": "bz-census-1991-religion-by-district",
+      "status": "deferred",
+      "url": "https://sib.org.bz/wp-content/uploads/2000_Census_Report.pdf",
+      "local_path": "data/raw/bz_census/bz_2000_Census_Report.pdf",
+      "notes": "1991 district religion is in the 2000 report Table B2 (1991 column) but folds None into a combined None/Not-Stated line, so the no-religion slot cannot be isolated; a deeper-history wave, not shipped."
+    },
+    {
+      "source_dataset_id": "sib-licence-confirmation",
+      "status": "not_pinned",
+      "url": "https://sib.org.bz",
+      "local_path": null,
+      "notes": "A SIB reuse-confirmation email is the clean courtesy unblock under BUILD-THEN-ASK; none is held."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "needs_review",
+  "licence_basis": "sib_all_rights_reserved_attribution_build_then_ask",
+  "downstream_status": "staged",
+  "source_datasets": [
+    {
+      "source_dataset_id": "bz-census-2000-report-table-b2-religion-by-district",
+      "name": "Belize 2000 Census Report, Table B2: Population by Religion and Sex for Major Divisions",
+      "provider": "Statistical Institute of Belize (SIB)",
+      "url": "https://sib.org.bz/wp-content/uploads/2000_Census_Report.pdf",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/bz_census/bz_2000_Census_Report.pdf",
+      "licence": {
+        "name": "No open-data licence is stated on any SIB census product. The 2010 Census Report front matter reads: 'Copyright (c) 2013, The Statistical Institute of Belize. Short sections of this publication may be copied for individual use without permission, provided the source is fully acknowledged. Otherwise, no part of this publication may be reproduced or transmitted in any form or by any means ... without permission in writing from the Statistical Institute of Belize.' The SIB website footer asserts 'Statistical Institute of Belize. Copyright (c) 2026. All Rights Reserved.' The derived district summaries carry attribution to the Statistical Institute of Belize and ship STAGED under the BUILD-THEN-ASK ruling (summaries-with-attribution stance, RO/SK/CI/MONSTAT line); a SIB reuse-confirmation email is the clean courtesy unblock. The boundary is Creative Commons Attribution 2.5 Generic.",
+        "url": "https://sib.org.bz",
+        "attribution": "Statistical Institute of Belize, 2000 Population and Housing Census"
+      },
+      "citation": "Statistical Institute of Belize, 2000 Population and Housing Census, Report, Table B2.",
+      "access_limits": null,
+      "redistribution_limits": "Derived district summaries only; no open-data licence is stated on the SIB source. Ships STAGED under BUILD-THEN-ASK with attribution.",
+      "notes": "Integer full-count; 17-category frame. Both margins close exactly: every district column and every religion row sum to the printed country total of 232,111. No cell suppression in the count columns. The denominator is the tabulated population (232,111)."
+    },
+    {
+      "source_dataset_id": "bz-census-2010-general-characteristics-religion-by-district",
+      "name": "Belize 2010 General Characteristics Tables, sheet Religion_by_District (Table 9): Population by Religion, District and Sex",
+      "provider": "Statistical Institute of Belize (SIB)",
+      "url": "https://sib.org.bz/wp-content/uploads/Census2010_GeneralCharacteristics.xlsx",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/bz_census/bz_Census2010_GeneralCharacteristics.xlsx",
+      "licence": {
+        "name": "No open-data licence is stated on any SIB census product. The 2010 Census Report front matter reads: 'Copyright (c) 2013, The Statistical Institute of Belize. Short sections of this publication may be copied for individual use without permission, provided the source is fully acknowledged. Otherwise, no part of this publication may be reproduced or transmitted in any form or by any means ... without permission in writing from the Statistical Institute of Belize.' The SIB website footer asserts 'Statistical Institute of Belize. Copyright (c) 2026. All Rights Reserved.' The derived district summaries carry attribution to the Statistical Institute of Belize and ship STAGED under the BUILD-THEN-ASK ruling (summaries-with-attribution stance, RO/SK/CI/MONSTAT line); a SIB reuse-confirmation email is the clean courtesy unblock. The boundary is Creative Commons Attribution 2.5 Generic.",
+        "url": "https://sib.org.bz",
+        "attribution": "Statistical Institute of Belize, 2010 Population and Housing Census"
+      },
+      "citation": "Statistical Institute of Belize, 2010 Population and Housing Census, General Characteristics Tables, Religion_by_District (Table 9).",
+      "access_limits": null,
+      "redistribution_limits": "Derived district summaries only; no open-data licence is stated on the SIB source. Ships STAGED under BUILD-THEN-ASK with attribution.",
+      "notes": "Weighted (non-integer) counts from the SIB non-response-adjustment methodology; 12-category frame. Both margins close float-exact to the national 322,423.82. None 49,972.08; Don't Know/Not Stated 2,028.07. The 2010 Census Report Table R1.1 (integer full-count, 20 categories, ** suppression, country total 322,453) is the richer-frame alternative 2010 source, deferred in favour of the 2010/2022 same-frame pair."
+    },
+    {
+      "source_dataset_id": "bz-census-2022-general-characteristics-religion-by-district",
+      "name": "Belize 2022 General Characteristics Tables, sheet Religion_by_District (Table 9): Population by Religion, District and Sex",
+      "provider": "Statistical Institute of Belize (SIB)",
+      "url": "https://sib.org.bz/wp-content/uploads/Census2022_GeneralCharacteristics.xlsx",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/bz_census/bz_Census2022_GeneralCharacteristics.xlsx",
+      "licence": {
+        "name": "No open-data licence is stated on any SIB census product. The 2010 Census Report front matter reads: 'Copyright (c) 2013, The Statistical Institute of Belize. Short sections of this publication may be copied for individual use without permission, provided the source is fully acknowledged. Otherwise, no part of this publication may be reproduced or transmitted in any form or by any means ... without permission in writing from the Statistical Institute of Belize.' The SIB website footer asserts 'Statistical Institute of Belize. Copyright (c) 2026. All Rights Reserved.' The derived district summaries carry attribution to the Statistical Institute of Belize and ship STAGED under the BUILD-THEN-ASK ruling (summaries-with-attribution stance, RO/SK/CI/MONSTAT line); a SIB reuse-confirmation email is the clean courtesy unblock. The boundary is Creative Commons Attribution 2.5 Generic.",
+        "url": "https://sib.org.bz",
+        "attribution": "Statistical Institute of Belize, 2022 Population and Housing Census"
+      },
+      "citation": "Statistical Institute of Belize, 2022 Population and Housing Census, General Characteristics Tables, Religion_by_District (Table 9) / Key Findings Report Table A.2.",
+      "access_limits": null,
+      "redistribution_limits": "Derived district summaries only; no open-data licence is stated on the SIB source. Ships STAGED under BUILD-THEN-ASK with attribution.",
+      "notes": "Weighted (non-integer) counts from the SIB non-response-adjustment methodology; 12-category frame. Both margins close float-exact to the national 397,483.46. None 123,372.67; Don't Know/Not Stated 4,134.76. The rounded national counts match the Key Findings Report Table 3.5 published integers exactly (Roman Catholic 126,596; None 123,373; total 397,483)."
+    },
+    {
+      "source_dataset_id": "geoboundaries-blz-adm1-2006",
+      "name": "geoBoundaries BLZ ADM1 (6 districts)",
+      "provider": "geoBoundaries (William & Mary geoLab); boundary source Wikimedia Commons",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BLZ/ADM1/geoBoundaries-BLZ-ADM1.geojson",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/bz_census/geoBoundaries-BLZ-ADM1.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution 2.5 Generic",
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/BLZ/ADM1/",
+        "attribution": "geoBoundaries (gbOpen); boundary source Wikimedia Commons"
+      },
+      "citation": "geoBoundaries BLZ ADM1 (gbOpen, pinned 9469f09), 6 district boundaries.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed under Creative Commons Attribution 2.5 Generic (attribution to geoBoundaries / Wikimedia Commons).",
+      "notes": "6 ADM1 districts, boundaryYearRepresented 2006, joined one-to-one to the census districts with no name concordance. The extent spans lon -89.2 to -87.8E and lat 15.9 to 18.5N, far from the antimeridian. Belize's border with Guatemala is subject to a territorial claim before the ICJ; the layer renders the official Belizean administrative extent that the SIB census enumerates."
+    }
+  ],
+  "notes": "STAGED product (no page, no hub link). The committed products are the derived 6-district area summary (18 rows across 2000, 2010, and 2022) and the simplified geoBoundaries BLZ ADM1 boundary. Ships under BUILD-THEN-ASK with attribution to the Statistical Institute of Belize (SIB) and geoBoundaries (CC BY 2.5 Generic)."
+}
