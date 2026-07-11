@@ -138,3 +138,39 @@ The 1998 census used 24 provinces (Kampong Cham combined). Tboung Khmum split fr
 ## Build/hold recommendation
 
 **BUILD**, as a two-wave (2008, 2019) province-level religious-share product on the 25-province geoBoundaries ADM1 (ODbL) frame, four categories (Buddhist/Muslim/Christian/Other), one-decimal percentages from Table 2.5.1, with the 2019 national counts (Table A4) as the reconciliation anchor and CamStat national percentages (1998/2008/2019) as a cross-check. The build is small and clean: 25 units, a one-to-one single-frame join with five name normalisations, no cross-wave concordance, and an exact national reconciliation at the aggregate. It sits squarely under three already-ratified rulings — the Burkina Faso derived-bound treatment for percentage-only tables, the Côte d'Ivoire / Iran derived-summaries-with-attribution treatment for an all-rights-reserved source, and the Ghana / Malaysia OSM-ODbL boundary precedent. The only conductor decision needed before a build lane opens is to confirm those three precedents apply to Cambodia; if so, proceed. Hold only the 1998 wave (national-only) and any Mondul Kiri / Ratanak Kiri change layer (reclassification).
+
+## Build appendix (2026-07-11)
+
+Built the STAGED product `kh-census-religion-2008-2019` from the cache with `Rscript scripts/build_kh_area_summary.R`. Deliverables: `scripts/build_kh_area_summary.R`; `apps/regions/kh/data/kh_province_2017.geojson`, `apps/regions/kh/data/area_summary_province.json`, `apps/regions/kh/data/area_summary_province.csv`; `docs/manifests/kh-census-religion-2008-2019.json`. No page, no hub link, no commit — the tree is left for conductor review.
+
+Product shape. Fifty rows: 25 provinces × two waves (2008, 2019) on the one geoBoundaries KHM ADM1 frame. Table 2.5.1 publishes one-decimal percentages only; no source publishes religion counts or a total population by province, so `population_total`, `religious_affiliation_count`, and the per-category counts are null and no count is derived from any percentage. The four categories are re-based to 100 percent (the count table's "Not Stated" column excluded), so `religious_affiliation_percent` is a flat 100 in every province — the Bangladesh flat-share situation — and the informative content is the per-category composition carried verbatim in each row's `quality_flag` (`composition_2008:Buddhist=..|Muslims=..|Christians=..|Other=..`, and `composition_2019:...|Christian=..` with the 2019 verbatim head). `no_religion_percent` is null with `no_religion_category_absent`. This follows the Bangladesh flat-share precedent (`build_bd_area_summary.R`) for the row shape and the Burkina Faso builder (`build_bf_area_summary.R`) for the percentage-only derived-bound gate.
+
+Gates run (fail-fast, stop-don't-tune).
+
+- Transcription presence: every Total/Urban/Rural and province row (28 rows × 8 cells) was matched verbatim in the `pdftotext -layout` output of `gpc2019_final_en.pdf`.
+- Row reconciliation within the derived bound: each row's four printed cells sum to 100.0 within the bound derived from the source's own one-decimal rounding — 0.05 pp per cell × 4 categories = 0.20 pp. The footnote asserts the true (unrounded) four-category shares sum to 100 percent; the printed cells carry rounding. Observed maximum absolute deviation is 0.1 pp (99.9 / 100.0 / 100.1), within the 0.20 pp bound; no percentage was altered. Province rows deviating by ±0.1 pp: 2008 — Battambang, Kratie, Mondul Kiri, Phnom Penh, Prey Veng, Ratanak Kiri, Kep; 2019 — Banteay Meanchey, Kampong Chhnang, Kampong Thom, Kampot, Koh Kong, Preah Vihear, Svay Rieng, Takeo. Context rows deviating: 2019 Total and Urban (−0.1). Every per-row deviation is recorded in the manifest under `pipeline.parameters.derived_rounding_bound`.
+- National anchor: Table A4's five categories (Buddhism 15,096,757; Islam 317,649; Christianity 49,160; Other 85,443; Not Stated 3,202) sum to 15,552,211 exactly. Re-based to exclude "Not Stated" (basis 15,549,009), the four categories round to 97.1 / 2.0 / 0.3 / 0.5, reproducing the Table 2.5.1 national (Total) row at the printed rounding.
+- Boundary: geoBoundaries KHM ADM1 pinned release `KHM-ADM1-37992800` (ODbL, OSM/Wambacher). Source has 25 valid, non-empty, distinctly hashed features; the census→shapeName join is exactly 25:25 with four spelling normalisations (`Banteay Meanchey→Bantey Meanchey`, `Mondul Kiri→Mondulkiri`, `Otdar Meanchey→Oddar Meanchey`, `Ratanak Kiri→Ratanakiri Province`; the report's `Tbong Khmum` matches the shapeName verbatim, so only four of the probe's five listed spellings differ in the geometry). Simplified via `scripts/lib/simplify_boundary.R` (mapshaper weighted keep-shapes, `allow-overlaps`) at 100 % keep to 1,677,599 bytes, under the 3 MB cap; 25 valid, non-empty, distinct written geometries. Total geodesic land area 182,398 km² (official ≈181,035 km²), within the sanity band.
+- Change metric: computable across 2008–2019 for 23 provinces on the shared re-based frame (per-category shares in `quality_flag`); withheld for Mondul Kiri (Other 35.5→21.2) and Ratanak Kiri (Other 47.2→23.2), whose rows carry `change_withheld_reclassification_highland_other_share`, because the report attributes those large "Other" (highland indigenous) share shifts to reclassification. The headline affiliation share is flat 100 in both waves, so headline change is zero everywhere.
+
+Validation output.
+
+```
+$ Rscript scripts/build_kh_area_summary.R
+ok -- validation done            # area-summary schema
+ok -- validation done            # data-manifest schema
+built Cambodia province census-religion product: 50 rows across 2008 and 2019; boundary 1677599 bytes, 25 distinct geometries; derived bound 0.2 pp, observed max deviation 0.1 pp; staged (needs_review).
+
+$ uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/kh/data/area_summary_province.json
+ok -- validation done
+
+$ uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/kh-census-religion-2008-2019.json
+ok -- validation done
+
+$ bash scripts/validate_manifests.sh
+manifest validation: 59/59 pass
+```
+
+Manifest. `data-manifest.v2`, `dataset_role: staged_evidence`, `downstream_status: staged`, `licence_status: needs_review`. Two gates recorded in the notes and warnings: (1) NIS asserts bare all-rights-reserved copyright — the footer is quoted verbatim (Khmer and English) — so shipping the derived summaries with NIS attribution awaits the PI extending the Côte d'Ivoire / Iran ruling to Cambodia (PI task 9), captured in `licence_basis` (`nis_all_rights_reserved_pending_pi_derived_summary_attribution_geoboundaries_odbl_1_0`); (2) the four-category frame re-bases to 100, so the page's flat-share presentation is gated on PI task 6. The boundary durable file ships `licence_status: accepted`, `licence_basis: geoboundaries_odbl_1_0` (ODbL share-alike recorded, Ghana/Malaysia precedent); the two census-derived summaries ship `needs_review`. The verbatim per-wave category labels (2008 `Christians`, 2019 `Christian`) and the A4 count-anchor frame are both recorded under `pipeline.parameters.category_frame`; the English display mapping is documented there and never applied to source fields.
+
+Raw-cache mirror. `data/raw/kh_census/` mirrored to `gs://pow-research-data/raw_sources/kh_census/` via `gsutil -m rsync`; the manifest records the durable URI on every raw-source record.
