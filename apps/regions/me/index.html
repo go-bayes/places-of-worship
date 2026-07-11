@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Montenegro Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Montenegro's product is census affiliation from the Statistical Office of
+    // Montenegro (MONSTAT), 21 municipalities across three censuses (2003, 2011,
+    // 2023). It does not measure belief, practice, attendance, or registered
+    // membership. The product follows the territorial coverage published by
+    // MONSTAT. The stable frame is the 21-municipality administrative division
+    // in force for the 2003 and 2011 censuses; the 2023 census reports 25
+    // municipalities, aggregated here to their historical parents as complete
+    // partitions (Petnjica into Berane, Gusinje into Plav, and Tuzi and Zeta
+    // into Podgorica). Municipality population totals are published in full and
+    // reconcile exactly for every wave, hence the population-denominator surface is
+    // exact everywhere. For 2023, MONSTAT masks small category cells with
+    // statistical-confidentiality suppression (marked "z"): 17 of the 21
+    // municipalities carry at least one suppressed religion cell (247 persons
+    // nationally); 2023 affiliation and no-religion shares are published-cell
+    // lower bounds where suppression applies, disclosed and never redistributed.
+    // Because the population denominator is exact, these lower-bound rows are
+    // surfaced through the popup asterisk and the flag note rather than washing
+    // the choropleth. In 2003 Montenegro was a constituent republic of the State
+    // Union of Serbia and Montenegro; the source reports it as Republika Crna Gora.
+    window.REGION_CONFIG = {
+      countryCode: "ME",
+      title: "Places of Worship | Montenegro Research Map",
+      // boundary bbox verified numerically from the dissolved 21-feature layer:
+      // lon 18.4334..20.3540, lat 41.8464..43.5585; centroid [19.394, 42.702].
+      // centre on that centroid and zoom to the ~1.9 deg extent.
+      center: [19.394, 42.702],
+      initialZoom: 7.3,
+      censusLevels: {
+        municipality: {
+          label: "Municipality (21 units)",
+          boundaries: "data/me_municipality_2003_2011_frame.geojson",
+          summary: "data/area_summary_municipality.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Statistical Office of Montenegro (MONSTAT) census religion, 2003–2023, 21 municipalities on the stable 2003–2011 frame · Boundaries from geoBoundaries MNE ADM1 (ODbL, OpenStreetMap), dissolved to 21 municipalities"
+        }
+      },
+      defaultLevel: "municipality",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2023,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation (%)",
+          note: "share of the total census population in the published named-religion categories, summing the source's mutually exclusive religion categories per wave. Non-response (undeclared and unknown) stays in the denominator and outside this headline. For 2023 the numerator is a published-cell lower bound where MONSTAT confidentiality suppression applies; the population total is published in full for every wave"
+        },
+        no_religion_percent: {
+          label: "Not religious (%)",
+          note: "share of the total census population in the source's no-religion categories — not-a-believer in 2003, agnostic plus atheist in 2011 and 2023. Non-response stays in the denominator. For 2023 this is a published-cell lower bound where confidentiality suppression applies"
+        },
+        religious_change: {
+          label: "Change since previous census (pp)",
+          note: "percentage-point change in the affiliation share since the previous census (2003, 2011, 2023); the spacing is roughly decennial and a wave-to-wave difference is not an annual rate. The 2011→2023 change uses the 2023 published-cell lower-bound affiliation share where suppression applies and can therefore slightly understate; the suppressed mass is 247 persons nationally (at most about one percentage point in the smallest municipality, far less elsewhere). Boundary stability of the 21 municipalities across the series was not independently verified; the comparison is between published municipality shares on the 2003–2011 frame"
+        }
+      },
+      popupDenominatorNote: "Percentages use the total census population as denominator; non-response (undeclared and unknown) stays in it and outside both headline categories. Named-religion categories are summed for the affiliation headline; the wave-specific no-religion categories are the not-religious headline. These are census self-declarations; they do not measure belief, practice, attendance, or registered membership. The product follows the territorial coverage published by MONSTAT on the stable 21-municipality 2003–2011 frame; the 2023 census reports 25 municipalities, aggregated here to their historical parents (Petnjica into Berane, Gusinje into Plav, Tuzi and Zeta into Podgorica) as complete partitions. Municipality population totals are published in full and reconcile exactly for every wave; for 2023 the affiliation and no-religion shares are published-cell lower bounds where MONSTAT confidentiality suppression applies.",
+      cityPresets: [
+        { label: "Podgorica", coords: [19.2594, 42.4304], zoom: 10 },
+        { label: "Nikšić", coords: [18.9447, 42.7731], zoom: 10 },
+        { label: "Herceg Novi", coords: [18.5375, 42.4531], zoom: 10 },
+        { label: "Bar", coords: [19.0994, 42.0931], zoom: 10 },
+        { label: "Bijelo Polje", coords: [19.7475, 43.0389], zoom: 10 },
+        { label: "Pljevlja", coords: [19.3583, 43.3567], zoom: 10 },
+        { label: "Cetinje", coords: [18.9116, 42.3907], zoom: 10 },
+        { label: "Berane", coords: [19.8686, 42.8428], zoom: 10 },
+        { label: "Budva", coords: [18.8400, 42.2864], zoom: 10 },
+        { label: "Ulcinj", coords: [19.2247, 41.9294], zoom: 10 }
+      ],
+      geocode: { country: "me", biasLngLat: [19.394, 42.702] },
+      onboarding: {
+        title: "Montenegro research map",
+        intro: "Census religious-affiliation overlays for 21 Montenegrin municipalities across three censuses 2003, 2011 and 2023, from the Statistical Office of Montenegro (MONSTAT). The construct is census affiliation. It does not measure belief, practice, attendance, or registered membership.",
+        bullets: [
+          "Municipalities are shaded by the share of the total census population in the published named-religion categories, or the share in the source's no-religion categories.",
+          "The total census population is the denominator; non-response (undeclared and unknown) stays in it and outside both headline categories.",
+          "The product uses the stable 21-municipality 2003–2011 frame. The 2023 census reports 25 municipalities; the four units created after 2011 are summed back into their historical parents as complete partitions (Petnjica into Berane, Gusinje into Plav, and Tuzi and Zeta into Podgorica).",
+          "Municipality population totals are published in full and reconcile exactly for every wave. For 2023, MONSTAT masks small category cells (marked \"z\"): affiliation and no-religion shares are published-cell lower bounds where suppression applies, disclosed and never redistributed.",
+          "A change metric reports the percentage-point change since the previous census; a roughly decennial difference is not an annual rate.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion from the <a href="https://www.monstat.org/eng/" target="_blank" rel="noopener">Statistical Office of Montenegro (MONSTAT)</a>, censuses 2003&ndash;2023, derived summaries reproduced with attribution &middot; Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> MNE ADM1 (ODbL, &copy; OpenStreetMap contributors), dissolved to 21 municipalities',
+      censusFlagNote: "* Each wave carries its own reconciliation note. In 2003 and 2011 the religion category cells reconcile exactly within each municipality and to the national total. In 2023 the census reports 25 municipalities, aggregated here to the 21-municipality 2003–2011 frame by complete-unit sums (Petnjica into Berane, Gusinje into Plav, and Tuzi and Zeta into Podgorica); MONSTAT applies statistical-confidentiality suppression (marked \"z\") to small 2023 category cells; the 2023 affiliation and no-religion shares are therefore published-cell lower bounds where suppression applies (247 persons across 17 of the 21 municipalities), disclosed and never redistributed or estimated. Municipality population totals are published in full and reconcile exactly for every wave; the population-denominator surface is exact everywhere."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260711a"></script>
+</body>
+</html>

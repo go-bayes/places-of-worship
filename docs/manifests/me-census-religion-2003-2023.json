@@ -97,10 +97,10 @@
       "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MNE/ADM1/geoBoundaries-MNE-ADM1.geojson"
     ],
     "retrieved_at": "2026-07-11T00:00:00Z",
-    "licence": "MONSTAT census: site footer reserves all rights (verbatim: \"Copyrights © 2025 All Rights Reserved by MONSTAT.\"); no open licence located; derived summaries ship with attribution, reuse ruling deferred. Boundary: geoBoundaries ADM1 under ODbL.",
+    "licence": "MONSTAT census: site footer reserves all rights (verbatim: \"Copyrights © 2025 All Rights Reserved by MONSTAT.\"); no open licence located; the project lead confirmed the derived-summaries-with-attribution stance for MONSTAT on 2026-07-11 (PI task 11), so derived summaries ship with attribution and licence_status is accepted. Boundary: geoBoundaries ADM1 under ODbL.",
     "citation": "MONSTAT census religion by municipality 2003 (Book 3), 2011 (Table O19), 2023 (Release II); geoBoundaries MNE ADM1.",
     "raw_redistribution": "Raw MONSTAT files stay git-ignored; only derived summaries are published.",
-    "licence_position": "needs_review"
+    "licence_position": "accepted"
   },
   "input_manifests": [],
   "durable_files": [
@@ -113,7 +113,7 @@
       "row_count": 63,
       "content": "Montenegro municipality census-religion summary for 2003, 2011, and 2023 on the 21-municipality frame.",
       "privacy": "public",
-      "licence_status": "needs_review",
+      "licence_status": "accepted",
       "licence_basis": "monstat_all_rights_reserved_attribution"
     },
     {
@@ -125,7 +125,7 @@
       "row_count": 63,
       "content": "Flattened Montenegro municipality census-religion rows.",
       "privacy": "public",
-      "licence_status": "needs_review",
+      "licence_status": "accepted",
       "licence_basis": "monstat_all_rights_reserved_attribution"
     },
     {
@@ -137,7 +137,7 @@
       "row_count": 21,
       "content": "geoBoundaries MNE ADM1 dissolved to the 21 pre-2013 municipalities, simplified.",
       "privacy": "public",
-      "licence_status": "needs_review",
+      "licence_status": "accepted",
       "licence_basis": "monstat_all_rights_reserved_attribution"
     }
   ],
@@ -272,7 +272,7 @@
     ],
     "warnings": [
       "The 2023 MONSTAT municipal religion table applies statistical-confidentiality suppression, marked \"z\", to small category cells; 18 of the 25 published municipalities carry at least one suppressed religion cell. Municipality population totals are published in full and reconcile exactly to the national total for every wave. For 2023 the religious-affiliation and no-religion counts are computed from the published (unsuppressed) category cells and are therefore lower bounds where suppression applies; the suppressed mass per municipality is recorded and never redistributed or estimated.",
-      "MONSTAT reserves all rights (verbatim: \"Copyrights © 2025 All Rights Reserved by MONSTAT.\"). No open-data licence located; licence status is needs_review pending a conductor/PI reuse ruling.",
+      "MONSTAT reserves all rights (verbatim: \"Copyrights © 2025 All Rights Reserved by MONSTAT.\"). No open-data licence located; the project lead confirmed the derived-summaries-with-attribution stance for MONSTAT on 2026-07-11 (PI task 11), so licence_status is accepted and the derived summaries ship with MONSTAT attribution.",
       "Display geometry is the geoBoundaries Montenegro ADM1 layer (23 features, boundary ID MNE-ADM1-59799669, represented year 2017), dissolved to 21 features by merging Petnjica into Berane and Gusinje into Plav; Tuzi and Zeta are already inside the Podgorica feature at that vintage. The dissolve reproduces the external and internal boundaries of the 21-municipality 2003-2011 division. Geometric stability of every boundary segment across the census waves was not independently verified."
     ],
     "notes": "Population-denominator and 2003/2011 category gates passed exactly; 2023 category suppression is disclosed. This product follows the territorial coverage published by the Statistical Office of Montenegro (MONSTAT). The stable frame is the 21-municipality administrative division in force for the 2003 and 2011 censuses. The 2023 census reports 25 municipalities; the four units created after 2011 are summed back into their historical parents as complete partitions: Petnjica into Berane (created 2013), Gusinje into Plav (2014), and Tuzi (2018) and Zeta (2024) into Podgorica. In 2003 Montenegro was a constituent republic of the State Union of Serbia and Montenegro; the source reports it as Republika Crna Gora.",
@@ -391,7 +391,7 @@
     }
   ],
   "privacy": "public",
-  "licence_status": "needs_review",
+  "licence_status": "accepted",
   "licence_basis": "monstat_all_rights_reserved_attribution",
   "downstream_status": "staged",
   "source_datasets": [
@@ -409,7 +409,7 @@
       },
       "citation": "MONSTAT, Census of Population, Households and Dwellings 2003 (Book 3), 2011 (Table O19), and 2023 (Release II).",
       "access_limits": null,
-      "redistribution_limits": "Site footer reserves all rights. The build ships derived summaries with MONSTAT attribution and holds raw sources git-ignored; a reuse ruling is deferred to the conductor/PI.",
+      "redistribution_limits": "Site footer reserves all rights. The build ships derived summaries with MONSTAT attribution and holds raw sources git-ignored; the project lead confirmed the derived-summaries-with-attribution stance for MONSTAT on 2026-07-11 (PI task 11).",
       "notes": "2003 and 2011 report 21 municipalities; 2023 reports 25 aggregated to the 21-municipality frame. The 2023 MONSTAT municipal religion table applies statistical-confidentiality suppression, marked \"z\", to small category cells; 18 of the 25 published municipalities carry at least one suppressed religion cell. Municipality population totals are published in full and reconcile exactly to the national total for every wave. For 2023 the religious-affiliation and no-religion counts are computed from the published (unsuppressed) category cells and are therefore lower bounds where suppression applies; the suppressed mass per municipality is recorded and never redistributed or estimated."
     },
     {
