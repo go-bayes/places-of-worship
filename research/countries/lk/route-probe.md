@@ -128,3 +128,51 @@ All inputs retrieved 2026-07-11 into `data/raw/lk_census/` (git-ignored). Every 
 2. **On-surface statements (render-the-record)**: the 2001 coverage gap ("religion published for 18 of 25 districts; the seven northern/eastern districts carry estimated totals only") and the label harmonisation (Muslims≡Islam, Catholics≡Roman Catholic, Christians≡Other Christian).
 3. **Held pending project-lead ruling**: (a) the licence position — derived-summaries-with-attribution under the DCS all-rights-reserved footer (Iran/CI precedent recommended; DCS email the clean alternative); (b) small-cell treatment if a DSD-level product is pursued.
 4. **Finer geography (optional, later)**: DSD-level 2012 (25 A4 PDFs) and 2024 (Table A7) products, gated on the small-cell ruling and a per-wave DSD concordance.
+
+## Build appendix (2026-07-11) — lk-census-religion-1981-2024, STAGED
+
+Built by `scripts/build_lk_area_summary.R` from the cached DCS sources; product left staged for conductor review (no page, no hub link, not committed). licence_status `needs_review` pending PI task 14 (DCS "@ All Rights Reserved").
+
+**Deliverables.** `scripts/build_lk_area_summary.R`; `apps/regions/lk/data/area_summary_district.json` (100 rows), `.../area_summary_district.csv`, `.../lk_district_geoboundaries_adm3_dissolved.geojson` (25 features); `docs/manifests/lk-census-religion-1981-2024.json`.
+
+**Frame.** 25 modern districts x 4 waves = 100 district-year rows. Six stable religion categories. Two verbatim DCS label conventions preserved per wave's actual source table and recorded 1:1 in the manifest (`buddhist`=Buddhist; `hindu`=Hindus/Hindu; `islam`=Muslims/Islam; `roman_catholic`=Catholics/Roman Catholic; `other_christian`=Christians/Other Christian; `other`=Others/Other). 1981 and 2012 use the Statistical Abstract Table 2.14 (abstract) convention; 2001 (p9p9Religion.pdf) and 2024 (Table A3) use the census-table convention.
+
+**Reconciliation gates — all exact (stop-don't-tune; none tuned).** Every printed district total equals the sum of its six categories, and every district category column sums exactly to the printed national anchor, verified against the sources:
+
+| Wave | Published districts | National total | Within-row total==Σcategories | District Σ == national anchor |
+| --- | --- | --- | --- | --- |
+| 1981 | 24 (no Kilinochchi) | 14,846,750 | exact | exact (all 7 columns) |
+| 2001 | 18 enumerated | 16,929,689 | exact | exact (all 7 columns) |
+| 2012 | 25 | 20,359,439 | exact | exact (all 7 columns) |
+| 2024 | 25 | 21,781,800 | exact | exact (all 7 columns) |
+
+The 2001 detail was taken from the standalone `p9p9Religion.pdf`, whose 18-district counts reconcile exactly to its printed 16,929,689 total; Table 2.14's 2001 column prints only estimated totals with `..` religion for the seven unenumerated districts (and differs from p9p9 by a few persons in Colombo/Polonnaruwa, so p9p9 is the source of record for 2001). Label-convention correspondence gate: exact 1:1, no duplicate labels.
+
+**Coverage decisions (render-the-record; encoded per row).**
+- 2001 seven northern/eastern districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa, Trincomalee): `population_total` = DCS printed estimated total (Jaffna 490,621; Mannar 151,577; Vavuniya 149,835; Mullaitivu 121,667; Kilinochchi 127,263; Batticaloa 486,447; Trincomalee 340,158), religion fields null, flag quotes the footnote verbatim ("Data are given only for 18 districts where the Census of Population and Housing 2001 was carried out completely."). Never estimated, never distributed.
+- **1981 Kilinochchi treatment chosen: null.** Kilinochchi did not exist in 1981 (carved from Jaffna in 1984); Table 2.14 prints 24 districts for 1981 with no Kilinochchi row and no Jaffna sub-split. The record does not support an exact Jaffna→Jaffna+Kilinochchi split, so no split is invented: the 1981 Kilinochchi row carries null total and null religion, and Jaffna's printed 1981 row (830,552) is shipped as-is with a per-row disclosure that it covers present-day Jaffna plus Kilinochchi. Evidence: Table 2.14 1981 column (24 rows, Jaffna 830,552, Kilinochchi absent) versus the 2001/2012/2024 columns (Kilinochchi present).
+
+**Affiliation semantics.** The DCS census religion question partitions every enumerated person into one of six religions (no no-religion or not-stated category), so `religious_affiliation_percent` = 100 wherever religion was enumerated, and null for the 8 non-enumerated rows (7 in 2001 + Kilinochchi 1981). `no_religion_*` fields are null (`no_religion_category_absent`). Per-district six-category counts ride each row's `quality_flag` for downstream composition metrics. No district-level small-cell treatment applied (no official DCS suppression rule; exact counts rendered).
+
+**Boundary (the BS trap — passed).** geoBoundaries LKA ADM3 (Divisional Secretariat, 330 features, LKA-ADM3-8540358, year 2020, CC BY 3.0 IGO, OCHA ROAP / Survey Department lineage) dissolved to 25 districts. ADM3 carries no district parent field, so each of the 330 Divisional Secretariats was assigned to the district of largest ADM2-overlap (all 330 assigned, 0 NA), then unioned per district. Dissolve verified: exactly 25 valid, non-empty features with 25 distinct SHA-256 WKB geometry hashes; join property `area_code`. DSDs per district range 4 (Vavuniya, Kilinochchi) to 30 (Kurunegala); national land area (EPSG:6933 equal-area) 66,019 km² (official ~65,610). Simplified to 1,612,039 bytes.
+
+**Raw cache.** `data/raw/lk_census/` git-ignored; mirrored to `gs://pow-research-data/raw_sources/lk_census/` (13 objects, 2026-07-11); recorded in the manifest as `raw_cache_durable_uris`.
+
+**Source-integrity gates.** The transcription anchors were asserted present in the cached PDFs at build time: Table 2.14 ("Population by religion and district, Census 1981, 2001, 2012", the 2001 footnote, 14,846,750, 20,359,439); p9p9 ("Total (18 districts)", 16,929,689); 2024 report ("Population by religion according to districts, 2024", 21,781,800).
+
+**Validation output (exact invocations).**
+
+```
+$ uvx check-jsonschema --base-uri "file://$PWD/schemas/" --schemafile schemas/area-summary.schema.json apps/regions/lk/data/area_summary_district.json
+ok -- validation done
+$ uvx check-jsonschema --base-uri "file://$PWD/schemas/" --schemafile schemas/data-manifest.schema.json docs/manifests/lk-census-religion-1981-2024.json
+ok -- validation done
+$ bash scripts/validate_manifests.sh
+manifest validation: 64/64 pass
+```
+
+**Open questions for the conductor / PI.**
+1. Licence (PI task 14): confirm the derived-summaries-with-attribution line extends to DCS "@ All Rights Reserved" (Iran/CI/Romania/Slovakia/Canada precedent), or obtain a DCS reuse-confirmation email, before any public page.
+2. Display metric: `religious_affiliation_percent` is a flat 100 across enumerated districts (the census has no irreligion category), so the affiliation choropleth is uniform. The informative view is religious composition (per-category share), which the shared runtime does not currently expose as a metric. A page lane will need either a composition metric or a popup-driven surface; the six-category counts are already in each row's `quality_flag`.
+3. Boundary lineage: the district polygons are ADM3 (Survey Department) DSDs dissolved via ADM2 (OSM/ODbL) assignment; district outer boundaries therefore follow the Survey Department DSD lineage, not the ADM2 district lineage. Confirm this is the intended geometry, or substitute an official Survey Department district layer if obtainable.
+4. Sensitivity flag stays ON (ethnic-religious overlay in the north and east); the future page's surrounding copy should stay factual and avoid inference beyond the published categories.

@@ -1,0 +1,684 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:lk-census-religion:lk:1981-2024:dcs-district",
+  "dataset_id": "lk-census-religion:lk:1981-2024:dcs-district",
+  "dataset_version_id": "lk-census-religion:lk:1981-2024:dcs-district:9a94f1434ea6",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "lk-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "LK"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-07-11T03:51:59Z",
+  "created_by": "scripts/build_lk_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_lk_area_summary.R",
+    "git_commit": "1bfab40",
+    "command": "Rscript scripts/build_lk_area_summary.R",
+    "parameters": {
+      "waves": [1981, 2001, 2012, 2024],
+      "geography": "25 districts on the modern (2012/2024) frame; ADM3 Divisional Secretariats dissolved to districts via largest-ADM2-overlap assignment",
+      "construct": "census religion (six-category self-identification, no no-religion or not-stated option)",
+      "denominator": "district total religion population",
+      "category_rule": "six stable categories rendered exactly as published; affiliation is the full six-category total where religion was enumerated",
+      "category_label_conventions": {
+        "abstract": {
+          "buddhist": "Buddhist",
+          "hindu": "Hindus",
+          "islam": "Muslims",
+          "roman_catholic": "Catholics",
+          "other_christian": "Christians",
+          "other": "Others"
+        },
+        "census_table": {
+          "buddhist": "Buddhist",
+          "hindu": "Hindu",
+          "islam": "Islam",
+          "roman_catholic": "Roman Catholic",
+          "other_christian": "Other Christian",
+          "other": "Other"
+        },
+        "correspondence": {
+          "buddhist": {
+            "stable_code": "buddhist",
+            "abstract_label": "Buddhist",
+            "census_table_label": "Buddhist"
+          },
+          "hindu": {
+            "stable_code": "hindu",
+            "abstract_label": "Hindus",
+            "census_table_label": "Hindu"
+          },
+          "islam": {
+            "stable_code": "islam",
+            "abstract_label": "Muslims",
+            "census_table_label": "Islam"
+          },
+          "roman_catholic": {
+            "stable_code": "roman_catholic",
+            "abstract_label": "Catholics",
+            "census_table_label": "Roman Catholic"
+          },
+          "other_christian": {
+            "stable_code": "other_christian",
+            "abstract_label": "Christians",
+            "census_table_label": "Other Christian"
+          },
+          "other": {
+            "stable_code": "other",
+            "abstract_label": "Others",
+            "census_table_label": "Other"
+          }
+        },
+        "by_wave": {
+          "1981": {
+            "year": 1981,
+            "source_table": "Statistical Abstract 2023 Table 2.14",
+            "label_convention": "abstract",
+            "categories": {
+              "buddhist": "Buddhist",
+              "hindu": "Hindus",
+              "islam": "Muslims",
+              "roman_catholic": "Catholics",
+              "other_christian": "Christians",
+              "other": "Others"
+            }
+          },
+          "2001": {
+            "year": 2001,
+            "source_table": "Census 2001 p9p9Religion.pdf (18-district religion table)",
+            "label_convention": "census_table",
+            "categories": {
+              "buddhist": "Buddhist",
+              "hindu": "Hindu",
+              "islam": "Islam",
+              "roman_catholic": "Roman Catholic",
+              "other_christian": "Other Christian",
+              "other": "Other"
+            }
+          },
+          "2012": {
+            "year": 2012,
+            "source_table": "Statistical Abstract 2023 Table 2.14",
+            "label_convention": "abstract",
+            "categories": {
+              "buddhist": "Buddhist",
+              "hindu": "Hindus",
+              "islam": "Muslims",
+              "roman_catholic": "Catholics",
+              "other_christian": "Christians",
+              "other": "Others"
+            }
+          },
+          "2024": {
+            "year": 2024,
+            "source_table": "Census 2024 Preliminary Report Table A3",
+            "label_convention": "census_table",
+            "categories": {
+              "buddhist": "Buddhist",
+              "hindu": "Hindu",
+              "islam": "Islam",
+              "roman_catholic": "Roman Catholic",
+              "other_christian": "Other Christian",
+              "other": "Other"
+            }
+          }
+        }
+      },
+      "coverage_2001": "Religion enumerated for 18 of 25 districts; seven districts carry the DCS estimated total and null religion. Data are given only for 18 districts where the Census of Population and Housing 2001 was carried out completely.",
+      "kilinochchi_1981_treatment": "Kilinochchi did not exist in 1981 (carved from Jaffna 1984); its 1981 row is null with population and religion null, and Jaffna's printed 1981 row (830,552) covers present-day Jaffna plus Kilinochchi. No split invented; boundary mismatch disclosed per row.",
+      "sensitivity": "Religion in Sri Lanka is closely tied to ethnicity and to the 1983-2009 civil war; a religion map reads as an ethnic map in the north and east. The DCS district tables print exact small counts with no official suppression rule; this product renders those counts as published and applies no district-level small-cell treatment. The 2001-to-2012 change in northern and eastern districts partly reflects displacement and return, not only affiliation change; the 2001 coverage gap already precludes any 2001-based change there.",
+      "small_cell_treatment": "none at district level; district exact counts rendered as published (no official DCS suppression rule).",
+      "territorial_scope": "This product renders the Department of Census and Statistics (DCS) published district religion counts exactly, on the stable 25-district frame in force for the 2012 and 2024 censuses. The 2001 census enumerated religion for only 18 of 25 districts; the seven northern and eastern districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa, Trincomalee) carry the DCS estimated total population and null religion, with the DCS footnote quoted verbatim. Kilinochchi did not exist in 1981 (it was carved from Jaffna in 1984); its 1981 row is null and Jaffna's printed 1981 row covers present-day Jaffna plus Kilinochchi. No 1981 split is invented.",
+      "boundary_source": "Display geometry is the geoBoundaries LKA ADM3 layer (Divisional Secretariat, 330 features, boundary ID LKA-ADM3-8540358, represented year 2020, CC BY 3.0 IGO, OCHA ROAP / Survey Department of Sri Lanka lineage), dissolved to the 25 districts. Each ADM3 Divisional Secretariat is assigned to the district whose geoBoundaries LKA ADM2 polygon it most overlaps (largest-intersection-area assignment), then the Divisional Secretariats are unioned per district. The dissolve is verified to yield exactly 25 districts with valid, non-empty, distinct geometries. Geometric stability of district boundaries across the census waves was not independently verified.",
+      "dsd_per_district": {
+        "colombo": 13,
+        "gampaha": 13,
+        "kalutara": 14,
+        "kandy": 20,
+        "matale": 11,
+        "nuwara_eliya": 5,
+        "galle": 19,
+        "matara": 16,
+        "hambantota": 12,
+        "jaffna": 15,
+        "mannar": 5,
+        "vavuniya": 4,
+        "mullaitivu": 6,
+        "kilinochchi": 4,
+        "batticaloa": 14,
+        "ampara": 19,
+        "trincomalee": 11,
+        "kurunegala": 30,
+        "puttalam": 16,
+        "anuradhapura": 22,
+        "polonnaruwa": 7,
+        "badulla": 15,
+        "moneragala": 11,
+        "ratnapura": 17,
+        "kegalle": 11
+      },
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 15,
+        "bytes": 1612039,
+        "byte_ceiling": 1800000
+      },
+      "local_cache_hint": "Raw DCS sources, terms, and geoBoundaries geometry are cached under data/raw/lk_census/ and remain git-ignored.",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/lk_census/ (13 objects mirrored 2026-07-11)"
+      ],
+      "retrieval_routes": [
+        {
+          "purpose": "1981/2001/2012 district religion counts",
+          "method": "GET",
+          "url": "https://www.statistics.gov.lk/abstract2023/CHAP2/2.14.pdf",
+          "notes": "Statistical Abstract 2023 Table 2.14."
+        },
+        {
+          "purpose": "2001 18-district religion detail",
+          "method": "GET",
+          "url": "https://www.statistics.gov.lk/Resource/en/Population/PopHouStat/PDF/Population/p9p9Religion.pdf",
+          "notes": "Standalone 2001 religion table."
+        },
+        {
+          "purpose": "2024 district religion counts",
+          "method": "GET",
+          "url": "https://www.statistics.gov.lk/Resource/en/Population/CPH_2024/Population_Preliminary_Report.pdf",
+          "notes": "Preliminary Report Table A3."
+        },
+        {
+          "purpose": "boundary (ADM3)",
+          "method": "GET",
+          "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/LKA/ADM3/geoBoundaries-LKA-ADM3.geojson",
+          "notes": "geoBoundaries LKA ADM3 GeoJSON."
+        },
+        {
+          "purpose": "district-assignment key (ADM2)",
+          "method": "GET",
+          "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/LKA/ADM2/geoBoundaries-LKA-ADM2.geojson",
+          "notes": "geoBoundaries LKA ADM2 GeoJSON."
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "npx mapshaper through scripts/lib/simplify_boundary.R",
+      "pdftotext": "Poppler pdftotext command-line utility"
+    }
+  },
+  "source": {
+    "provider": "Department of Census and Statistics, Sri Lanka (DCS); geoBoundaries (OCHA ROAP / Survey Department of Sri Lanka)",
+    "source_dataset_ids": [
+      "dcs-census-religion-district-1981-2024",
+      "geoboundaries-lka-adm3-dissolved-25"
+    ],
+    "source_urls": [
+      "https://www.statistics.gov.lk/abstract2023/CHAP2/2.14.pdf",
+      "https://www.statistics.gov.lk/Resource/en/Population/PopHouStat/PDF/Population/p9p9Religion.pdf",
+      "https://www.statistics.gov.lk/Resource/en/Population/CPH_2024/Population_Preliminary_Report.pdf",
+      "https://www.statistics.gov.lk/",
+      "https://www.geoboundaries.org/api/current/gbOpen/LKA/ADM3/",
+      "https://www.geoboundaries.org/api/current/gbOpen/LKA/ADM2/",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/LKA/ADM3/geoBoundaries-LKA-ADM3.geojson",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/LKA/ADM2/geoBoundaries-LKA-ADM2.geojson"
+    ],
+    "retrieved_at": "2026-07-11T00:00:00Z",
+    "licence": "DCS census: site footer asserts all rights reserved (verbatim: \"@ All Rights Reserved\"); no open licence located; derived summaries ship with attribution, reuse ruling deferred to the PI (task 14). Boundary: geoBoundaries ADM3 under CC BY 3.0 IGO (Survey Department lineage).",
+    "citation": "DCS census religion by district 1981/2001/2012 (Statistical Abstract 2023 Table 2.14; 2001 detail p9p9Religion.pdf), 2024 (Preliminary Report Table A3); geoBoundaries LKA ADM3 dissolved to 25 districts.",
+    "raw_redistribution": "Raw DCS files stay git-ignored; only derived summaries are published. Cached under data/raw/lk_census/, mirrored to gs://pow-research-data/raw_sources/lk_census/.",
+    "licence_position": "needs_review"
+  },
+  "input_manifests": [],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/lk/data/area_summary_district.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 219831,
+      "sha256": "9a94f1434ea6b771e70c791b38940897f5441ea72e35d81332fa90fda9664118",
+      "row_count": 100,
+      "content": "Sri Lanka district census-religion summary for 1981, 2001, 2012, and 2024 on the 25-district frame.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "dcs_all_rights_reserved_attribution"
+    },
+    {
+      "uri": "repo:apps/regions/lk/data/area_summary_district.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 140603,
+      "sha256": "b9906ba3e3f20482ca40a628f7e2996ac83eeade70b84845f33a25bda422d965",
+      "row_count": 100,
+      "content": "Flattened Sri Lanka district census-religion rows.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "dcs_all_rights_reserved_attribution"
+    },
+    {
+      "uri": "repo:apps/regions/lk/data/lk_district_geoboundaries_adm3_dissolved.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 1612039,
+      "sha256": "9bec90b1906b376ce65b196db640346be22a4e56ec3ed531b94f9ee07721dba7",
+      "row_count": 25,
+      "content": "geoBoundaries LKA ADM3 dissolved to the 25 districts, simplified.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "cc_by_3_0_igo_attribution"
+    }
+  ],
+  "raw_sources": [
+    {
+      "uri": "data/raw/lk_census/abstract2023_2.14.pdf",
+      "url": "https://www.statistics.gov.lk/abstract2023/CHAP2/2.14.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "http_status": null,
+      "format": "pdf",
+      "bytes": 352052,
+      "sha256": "36e3fbf9f464c60512d8b2921be4f4e8ad7e3b109675745670f9234a99e18d65",
+      "source_dataset_id": "dcs-census-religion-district-1981-2024",
+      "used_in_public_product": true,
+      "notes": "Statistical Abstract 2023 Table 2.14: district religion counts for 1981, 2001, 2012 with the 2001 coverage footnote."
+    },
+    {
+      "uri": "data/raw/lk_census/p9p9Religion.pdf",
+      "url": "https://www.statistics.gov.lk/Resource/en/Population/PopHouStat/PDF/Population/p9p9Religion.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "http_status": null,
+      "format": "pdf",
+      "bytes": 11350,
+      "sha256": "c756f5d983f283bb0eede69d7a5570a858deeb448c233baa24b209232b2f9357",
+      "source_dataset_id": "dcs-census-religion-district-1981-2024",
+      "used_in_public_product": true,
+      "notes": "Census 2001 standalone religion table: 18-district counts and percentages; used for the 2001 wave detail."
+    },
+    {
+      "uri": "data/raw/lk_census/cph2024_preliminary.pdf",
+      "url": "https://www.statistics.gov.lk/Resource/en/Population/CPH_2024/Population_Preliminary_Report.pdf",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "http_status": null,
+      "format": "pdf",
+      "bytes": 7780515,
+      "sha256": "1ee768d1ce23b55497f8ee343c825b6d96363aa85e1f7ab3f3f94c086f11f093",
+      "source_dataset_id": "dcs-census-religion-district-1981-2024",
+      "used_in_public_product": true,
+      "notes": "Census 2024 Population Preliminary Report; Table A3 gives district religion counts."
+    },
+    {
+      "uri": "data/raw/lk_census/dcs_home.html",
+      "url": "https://www.statistics.gov.lk/",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "http_status": null,
+      "format": "html",
+      "bytes": 188675,
+      "sha256": "725448751dbbb2c9cb84809e035617347d5436bdd3d2a46d72da7bc607f1972b",
+      "source_dataset_id": "dcs-census-religion-district-1981-2024",
+      "used_in_public_product": true,
+      "notes": "DCS homepage; footer carries the verbatim all-rights-reserved copyright."
+    },
+    {
+      "uri": "data/raw/lk_census/gb_lka_adm3_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/LKA/ADM3/",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "http_status": null,
+      "format": "json",
+      "bytes": 1846,
+      "sha256": "6a794718c383cd621232ef14be0c628e209abed95d2fadaf069026f892ba3fae",
+      "source_dataset_id": "geoboundaries-lka-adm3-dissolved-25",
+      "used_in_public_product": true,
+      "notes": "geoBoundaries LKA ADM3 release metadata (CC BY 3.0 IGO, 330 Divisional Secretariats, year 2020)."
+    },
+    {
+      "uri": "data/raw/lk_census/gb_lka_adm2_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/LKA/ADM2/",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "http_status": null,
+      "format": "json",
+      "bytes": 1741,
+      "sha256": "d5e4ea2abd3071d18d0cf0c8fc8cd9b32feaaa3477432eb63ecde7d76188eb9d",
+      "source_dataset_id": "geoboundaries-lka-adm3-dissolved-25",
+      "used_in_public_product": true,
+      "notes": "geoBoundaries LKA ADM2 release metadata (ODbL, 25 districts); used only for the district-assignment key."
+    },
+    {
+      "uri": "data/raw/lk_census/geoboundaries_lka_adm3.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/LKA/ADM3/geoBoundaries-LKA-ADM3.geojson",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T03:47:12Z",
+      "http_status": 200,
+      "format": "geojson",
+      "bytes": 54200731,
+      "sha256": "86944e6d35674bc3de4e01fedf72c1d1c6a9c2e6a0594773e1b0599481381872",
+      "source_dataset_id": "geoboundaries-lka-adm3-dissolved-25",
+      "used_in_public_product": true,
+      "notes": "geoBoundaries LKA ADM3 GeoJSON dissolved to 25 districts in the build."
+    },
+    {
+      "uri": "data/raw/lk_census/geoboundaries_lka_adm2.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/LKA/ADM2/geoBoundaries-LKA-ADM2.geojson",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T03:47:12Z",
+      "http_status": 200,
+      "format": "geojson",
+      "bytes": 1327104,
+      "sha256": "47b5ae26225e62052686b6a7ab1dadcaab96d7b968f618b752151f4dc8943a4d",
+      "source_dataset_id": "geoboundaries-lka-adm3-dissolved-25",
+      "used_in_public_product": true,
+      "notes": "geoBoundaries LKA ADM2 GeoJSON; supplies the 25-district assignment key for the ADM3 dissolve."
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/lk/data/area_summary_district.json",
+      "sha256": "9a94f1434ea6b771e70c791b38940897f5441ea72e35d81332fa90fda9664118",
+      "built_by": "scripts/build_lk_area_summary.R",
+      "notes": "100 district-year rows (25 districts x 4 waves)."
+    },
+    {
+      "uri": "repo:apps/regions/lk/data/area_summary_district.csv",
+      "sha256": "b9906ba3e3f20482ca40a628f7e2996ac83eeade70b84845f33a25bda422d965",
+      "built_by": "scripts/build_lk_area_summary.R",
+      "notes": "CSV companion."
+    },
+    {
+      "uri": "repo:apps/regions/lk/data/lk_district_geoboundaries_adm3_dissolved.geojson",
+      "sha256": "9bec90b1906b376ce65b196db640346be22a4e56ec3ed531b94f9ee07721dba7",
+      "built_by": "scripts/build_lk_area_summary.R",
+      "notes": "25 simplified district features."
+    }
+  ],
+  "target_years": [1981, 2001, 2012, 2024],
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_lk_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/lk/data/area_summary_district.json",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/lk-census-religion-1981-2024.json",
+      "bash scripts/validate_manifests.sh"
+    ],
+    "tests": [
+      "Every printed district's total equals the sum of the six religion categories, for all four waves.",
+      "District category columns sum exactly to the printed national anchor: 1981 over 24 districts, 2001 over 18 enumerated districts, 2012 and 2024 over 25 districts.",
+      "The two DCS label conventions map 1:1 onto the six stable category codes with no duplicate labels.",
+      "The seven 2001 unenumerated districts carry the DCS estimated total and null religion with the coverage footnote quoted verbatim.",
+      "Kilinochchi 1981 carries null total and null religion; Jaffna 1981 discloses that its row covers present-day Jaffna plus Kilinochchi.",
+      "The ADM3 dissolve yields exactly 25 valid, non-empty districts with 25 distinct SHA-256 WKB geometry hashes.",
+      "Every raw input and generated output records URL or repository path, retrieval date, byte size, and SHA-256."
+    ],
+    "warnings": [
+      "DCS asserts all rights reserved (verbatim: \"@ All Rights Reserved\"). No open-data licence located; licence_status is needs_review pending PI task 14.",
+      "This product renders the Department of Census and Statistics (DCS) published district religion counts exactly, on the stable 25-district frame in force for the 2012 and 2024 censuses. The 2001 census enumerated religion for only 18 of 25 districts; the seven northern and eastern districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa, Trincomalee) carry the DCS estimated total population and null religion, with the DCS footnote quoted verbatim. Kilinochchi did not exist in 1981 (it was carved from Jaffna in 1984); its 1981 row is null and Jaffna's printed 1981 row covers present-day Jaffna plus Kilinochchi. No 1981 split is invented.",
+      "Religion in Sri Lanka is closely tied to ethnicity and to the 1983-2009 civil war; a religion map reads as an ethnic map in the north and east. The DCS district tables print exact small counts with no official suppression rule; this product renders those counts as published and applies no district-level small-cell treatment. The 2001-to-2012 change in northern and eastern districts partly reflects displacement and return, not only affiliation change; the 2001 coverage gap already precludes any 2001-based change there.",
+      "Display geometry is the geoBoundaries LKA ADM3 layer (Divisional Secretariat, 330 features, boundary ID LKA-ADM3-8540358, represented year 2020, CC BY 3.0 IGO, OCHA ROAP / Survey Department of Sri Lanka lineage), dissolved to the 25 districts. Each ADM3 Divisional Secretariat is assigned to the district whose geoBoundaries LKA ADM2 polygon it most overlaps (largest-intersection-area assignment), then the Divisional Secretariats are unioned per district. The dissolve is verified to yield exactly 25 districts with valid, non-empty, distinct geometries. Geometric stability of district boundaries across the census waves was not independently verified."
+    ],
+    "notes": "All four wave reconciliation gates and the label-correspondence gate passed exactly. This product renders the Department of Census and Statistics (DCS) published district religion counts exactly, on the stable 25-district frame in force for the 2012 and 2024 censuses. The 2001 census enumerated religion for only 18 of 25 districts; the seven northern and eastern districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa, Trincomalee) carry the DCS estimated total population and null religion, with the DCS footnote quoted verbatim. Kilinochchi did not exist in 1981 (it was carved from Jaffna in 1984); its 1981 row is null and Jaffna's printed 1981 row covers present-day Jaffna plus Kilinochchi. No 1981 split is invented.",
+    "stats": {
+      "waves": 4,
+      "rows": 100,
+      "districts_per_wave": 25,
+      "enumerated_districts": {
+        "1981": 24,
+        "2001": 18,
+        "2012": 25,
+        "2024": 25
+      },
+      "category_count": 6,
+      "boundary_features": 25,
+      "boundary_valid_features": 25,
+      "distinct_geometry_hashes": 25,
+      "adm3_divisional_secretariats": 330,
+      "boundary_bytes": 1612039,
+      "summary_json_bytes": 219831,
+      "summary_csv_bytes": 140603
+    },
+    "reconciliation": {
+      "1981": {
+        "year": 1981,
+        "published_districts": 24,
+        "within_row_total_reconciliation": "exact",
+        "national_reconciliation": "exact",
+        "national_total": 14846750,
+        "national_by_category": {
+          "buddhist": 10288328,
+          "hindu": 2297806,
+          "islam": 1121715,
+          "roman_catholic": 1023713,
+          "other_christian": 106854,
+          "other": 8334
+        },
+        "reconciliation_residual": {
+          "total": 0,
+          "buddhist": 0,
+          "hindu": 0,
+          "islam": 0,
+          "roman_catholic": 0,
+          "other_christian": 0,
+          "other": 0
+        }
+      },
+      "2001": {
+        "year": 2001,
+        "published_districts": 18,
+        "within_row_total_reconciliation": "exact",
+        "national_reconciliation": "exact",
+        "national_total": 16929689,
+        "national_by_category": {
+          "buddhist": 12986548,
+          "hindu": 1312970,
+          "islam": 1435896,
+          "roman_catholic": 1035740,
+          "other_christian": 150182,
+          "other": 8353
+        },
+        "reconciliation_residual": {
+          "total": 0,
+          "buddhist": 0,
+          "hindu": 0,
+          "islam": 0,
+          "roman_catholic": 0,
+          "other_christian": 0,
+          "other": 0
+        }
+      },
+      "2012": {
+        "year": 2012,
+        "published_districts": 25,
+        "within_row_total_reconciliation": "exact",
+        "national_reconciliation": "exact",
+        "national_total": 20359439,
+        "national_by_category": {
+          "buddhist": 14272056,
+          "hindu": 2561299,
+          "islam": 1967523,
+          "roman_catholic": 1261194,
+          "other_christian": 290967,
+          "other": 6400
+        },
+        "reconciliation_residual": {
+          "total": 0,
+          "buddhist": 0,
+          "hindu": 0,
+          "islam": 0,
+          "roman_catholic": 0,
+          "other_christian": 0,
+          "other": 0
+        }
+      },
+      "2024": {
+        "year": 2024,
+        "published_districts": 25,
+        "within_row_total_reconciliation": "exact",
+        "national_reconciliation": "exact",
+        "national_total": 21781800,
+        "national_by_category": {
+          "buddhist": 15199093,
+          "hindu": 2734839,
+          "islam": 2337379,
+          "roman_catholic": 1224348,
+          "other_christian": 282185,
+          "other": 3956
+        },
+        "reconciliation_residual": {
+          "total": 0,
+          "buddhist": 0,
+          "hindu": 0,
+          "islam": 0,
+          "roman_catholic": 0,
+          "other_christian": 0,
+          "other": 0
+        }
+      }
+    },
+    "boundary_validation": {
+      "output_feature_count": 25,
+      "valid_feature_count": 25,
+      "distinct_geometry_hash_count": 25,
+      "geometry_sha256_by_code": {
+        "ampara": "bb806baf7d708b28c53a81772abd1b6a68e91f95d89905e1e1a0d51f55ad3e7a",
+        "anuradhapura": "3ce39fad0114ade3eac4dd6dc093b7dc200ce9035c59fe90d8df2d53fccec917",
+        "badulla": "87da10bdf42815d10419167799e3e5a75d3a9a77d588b3070201f502a99893f6",
+        "batticaloa": "30e9e2f240122a6e158cd33808fdfbd131b71f28324b9c20aa8f0c429732eec7",
+        "colombo": "99c4d7f1cad95863df96f571491b99f8153f617e1b6a4e02c1eaaf4af2fc1a0a",
+        "galle": "c4c7e2423fea669081d0c76666261ab77b6209a6d6ceb9f6e45de8adeffaeebe",
+        "gampaha": "c4aa6033cf283e7f6a43e1c0e799d1829d6db0f5965618732a14f5bbf7541849",
+        "hambantota": "f57b84d694485d8bdf2e0e8772f6001b8b2c32d4328d16c3c6abee9319c9ba99",
+        "jaffna": "8c2103661ba254245ef683a685dc3f226ee5cffb35d62a0dbc53e173146ab46e",
+        "kalutara": "29954f037c910ed20f87eff84f80becfbfa6d1a318674a1b10aefdd27b0b1ea3",
+        "kandy": "9498366c6d090c00273ef39a10feb6cf790c04108018b28dbf61636f12cd70b6",
+        "kegalle": "cec968373ab87fc62a3abacab64c2ce7564fbdfd6703821da971fc78ae94d888",
+        "kilinochchi": "b0c3d1581c4fb1a68c18efe2338a1781b7f2ced5bd739f707cb782853a3db39d",
+        "kurunegala": "27ff7ae4c57c602a8cf0d9c626ce18e0913d7ad1d537a2595cbcb859a9c2bf85",
+        "mannar": "b81000c712e45e8e9c023a75f861ef2cb124c11cd3402360cfa02dae7680fc34",
+        "matale": "3c82f406d6907ee4683ea887f0f62faacbac535d7ba729a4404fcb3c505f3215",
+        "matara": "5b5bfe393f6785af14c283c64b9b5994a7131ecffa3eff515a73048f9adf8df3",
+        "moneragala": "2719f3420b9715e3f40d5d9cc0cab60a066e63450aeecbaccfda824aacf1fe46",
+        "mullaitivu": "7f558dcf256bc9f98a67767d466e470138dde0b6c7169d6c624b4e1d0800e39d",
+        "nuwara_eliya": "2f9959a75db0a84e3727af35a903b04f60aac08b64d22c83d26ce91f184a7575",
+        "polonnaruwa": "c48e5901451c9fec38a2372939a1b905eea25609fef5baceeabcc4e601c8205e",
+        "puttalam": "0ab050c7226c56705f53d42bac3286982ad619c2b6685774d5530201c0fc0cc9",
+        "ratnapura": "2031ed54d55270b9743a8bdc09306fdefc60185e1fb6d65b322b4a48595f402f",
+        "trincomalee": "83c9d9ba2f9bd3a313ed21956382de7053ab874fadfbbde861245cc03d6b0fb6",
+        "vavuniya": "599d8d4e3c60356b752967bbf5e60d9dfa557433ce9b09e44b39b35bc55f055e"
+      },
+      "dsd_source_count": 330,
+      "dsd_per_district": {
+        "colombo": 13,
+        "gampaha": 13,
+        "kalutara": 14,
+        "kandy": 20,
+        "matale": 11,
+        "nuwara_eliya": 5,
+        "galle": 19,
+        "matara": 16,
+        "hambantota": 12,
+        "jaffna": 15,
+        "mannar": 5,
+        "vavuniya": 4,
+        "mullaitivu": 6,
+        "kilinochchi": 4,
+        "batticaloa": 14,
+        "ampara": 19,
+        "trincomalee": 11,
+        "kurunegala": 30,
+        "puttalam": 16,
+        "anuradhapura": 22,
+        "polonnaruwa": 7,
+        "badulla": 15,
+        "moneragala": 11,
+        "ratnapura": 17,
+        "kegalle": 11
+      },
+      "source_crs": "EPSG:4326",
+      "area_calculation_crs": "EPSG:6933",
+      "output_crs": "EPSG:4326"
+    }
+  },
+  "construct_notes": [
+    "The construct is census religion. It does not measure belief, practice, attendance, or registered membership.",
+    "The DCS census religion question uses six categories and assigns every enumerated person to one of them; there is no no-religion or not-stated category, so religious_affiliation_percent equals 100 wherever religion was enumerated.",
+    "This product renders the Department of Census and Statistics (DCS) published district religion counts exactly, on the stable 25-district frame in force for the 2012 and 2024 censuses. The 2001 census enumerated religion for only 18 of 25 districts; the seven northern and eastern districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa, Trincomalee) carry the DCS estimated total population and null religion, with the DCS footnote quoted verbatim. Kilinochchi did not exist in 1981 (it was carved from Jaffna in 1984); its 1981 row is null and Jaffna's printed 1981 row covers present-day Jaffna plus Kilinochchi. No 1981 split is invented.",
+    "The six religion categories are stable across all four waves. Two verbatim DCS label conventions coexist for the same six categories, in an exact 1:1 correspondence. The abstract convention (Statistical Abstract 2023 Table 2.14, used here for 1981 and 2012) prints: Buddhist, Hindus, Muslims, Catholics, Christians, Others. The census-table convention (2001 p9p9Religion.pdf and 2024 Table A3) prints: Buddhist, Hindu, Islam, Roman Catholic, Other Christian, Other. Correspondence: Buddhist=Buddhist; Hindus=Hindu; Muslims=Islam; Catholics=Roman Catholic; Christians=Other Christian; Others=Other. Each wave preserves the label convention of its actual source table.",
+    "Religion in Sri Lanka is closely tied to ethnicity and to the 1983-2009 civil war; a religion map reads as an ethnic map in the north and east. The DCS district tables print exact small counts with no official suppression rule; this product renders those counts as published and applies no district-level small-cell treatment. The 2001-to-2012 change in northern and eastern districts partly reflects displacement and return, not only affiliation change; the 2001 coverage gap already precludes any 2001-based change there.",
+    "Display geometry is the geoBoundaries LKA ADM3 layer (Divisional Secretariat, 330 features, boundary ID LKA-ADM3-8540358, represented year 2020, CC BY 3.0 IGO, OCHA ROAP / Survey Department of Sri Lanka lineage), dissolved to the 25 districts. Each ADM3 Divisional Secretariat is assigned to the district whose geoBoundaries LKA ADM2 polygon it most overlaps (largest-intersection-area assignment), then the Divisional Secretariats are unioned per district. The dissolve is verified to yield exactly 25 districts with valid, non-empty, distinct geometries. Geometric stability of district boundaries across the census waves was not independently verified.",
+    "Data are given only for 18 districts where the Census of Population and Housing 2001 was carried out completely.",
+    "The 2001 wave detail uses the standalone p9p9Religion.pdf table, whose 18-district counts reconcile exactly to its printed 16,929,689 national total; Statistical Abstract Table 2.14 prints only estimated totals with '..' religion for the seven unenumerated districts.",
+    "DCS means the Department of Census and Statistics, Sri Lanka. DSD means Divisional Secretariat Division (geoBoundaries ADM3). District means the ADM2/modern administrative district.",
+    "Category labels for 1981 (Statistical Abstract 2023 Table 2.14, abstract convention): buddhist=Buddhist; hindu=Hindus; islam=Muslims; roman_catholic=Catholics; other_christian=Christians; other=Others.",
+    "Category labels for 2001 (Census 2001 p9p9Religion.pdf (18-district religion table), census_table convention): buddhist=Buddhist; hindu=Hindu; islam=Islam; roman_catholic=Roman Catholic; other_christian=Other Christian; other=Other.",
+    "Category labels for 2012 (Statistical Abstract 2023 Table 2.14, abstract convention): buddhist=Buddhist; hindu=Hindus; islam=Muslims; roman_catholic=Catholics; other_christian=Christians; other=Others.",
+    "Category labels for 2024 (Census 2024 Preliminary Report Table A3, census_table convention): buddhist=Buddhist; hindu=Hindu; islam=Islam; roman_catholic=Roman Catholic; other_christian=Other Christian; other=Other."
+  ],
+  "deferred_sources": [
+    {
+      "source": "DCS 2012 and 2024 Divisional Secretariat (DSD) religion tables",
+      "status": "finer_level_not_shipped",
+      "reason": "DSD-level religion exists for 2012 (25 per-district A4 PDFs) and 2024 (Table A7). A DSD-level product is deferred pending a small-cell ruling and a per-wave DSD concordance; district is the shipped level."
+    },
+    {
+      "source": "DCS 2024 percentage twin (Table 9) and abstract percentage table 2.15",
+      "status": "not_shipped_derivable",
+      "reason": "Percentages are recomputed from the shipped counts; the published percentage tables are not separately shipped."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "needs_review",
+  "licence_basis": "dcs_all_rights_reserved_attribution",
+  "downstream_status": "staged",
+  "source_datasets": [
+    {
+      "source_dataset_id": "dcs-census-religion-district-1981-2024",
+      "name": "DCS census religion by district, 1981, 2001, 2012 (Statistical Abstract 2023 Table 2.14; 2001 detail from p9p9Religion.pdf) and 2024 (Preliminary Report Table A3)",
+      "provider": "Department of Census and Statistics, Sri Lanka (DCS)",
+      "url": "https://www.statistics.gov.lk/abstract2023/CHAP2/2.14.pdf",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/lk_census/abstract2023_2.14.pdf",
+      "licence": {
+        "name": "DCS asserts all rights reserved (verbatim site footer: \"@ All Rights Reserved\"); no open-data licence located.",
+        "url": "https://www.statistics.gov.lk/",
+        "attribution": "Source: Department of Census and Statistics, Sri Lanka"
+      },
+      "citation": "DCS, Census of Population and Housing 1981, 2001, 2012 (Statistical Abstract 2023, Tables 2.13-2.15) and 2024 (Population Preliminary Report).",
+      "access_limits": null,
+      "redistribution_limits": "DCS reserves all rights. The build ships derived summaries with DCS attribution and holds raw sources git-ignored; a reuse ruling is deferred to the PI (task 14).",
+      "notes": "This product renders the Department of Census and Statistics (DCS) published district religion counts exactly, on the stable 25-district frame in force for the 2012 and 2024 censuses. The 2001 census enumerated religion for only 18 of 25 districts; the seven northern and eastern districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa, Trincomalee) carry the DCS estimated total population and null religion, with the DCS footnote quoted verbatim. Kilinochchi did not exist in 1981 (it was carved from Jaffna in 1984); its 1981 row is null and Jaffna's printed 1981 row covers present-day Jaffna plus Kilinochchi. No 1981 split is invented. The six religion categories are stable across all four waves. Two verbatim DCS label conventions coexist for the same six categories, in an exact 1:1 correspondence. The abstract convention (Statistical Abstract 2023 Table 2.14, used here for 1981 and 2012) prints: Buddhist, Hindus, Muslims, Catholics, Christians, Others. The census-table convention (2001 p9p9Religion.pdf and 2024 Table A3) prints: Buddhist, Hindu, Islam, Roman Catholic, Other Christian, Other. Correspondence: Buddhist=Buddhist; Hindus=Hindu; Muslims=Islam; Catholics=Roman Catholic; Christians=Other Christian; Others=Other. Each wave preserves the label convention of its actual source table."
+    },
+    {
+      "source_dataset_id": "geoboundaries-lka-adm3-dissolved-25",
+      "name": "geoBoundaries LKA ADM3 (Divisional Secretariat) dissolved to 25 districts",
+      "provider": "geoBoundaries; OCHA ROAP / Survey Department of Sri Lanka",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/LKA/ADM3/geoBoundaries-LKA-ADM3.geojson",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/lk_census/geoboundaries_lka_adm3.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)",
+        "url": "https://www.geoboundaries.org/",
+        "attribution": "Boundary source: OCHA ROAP / Survey Department of Sri Lanka, via geoBoundaries; CC BY 3.0 IGO"
+      },
+      "citation": "geoBoundaries gbOpen LKA ADM3, boundary ID LKA-ADM3-8540358, represented year 2020.",
+      "access_limits": null,
+      "redistribution_limits": "CC BY 3.0 IGO; attribution required.",
+      "notes": "Display geometry is the geoBoundaries LKA ADM3 layer (Divisional Secretariat, 330 features, boundary ID LKA-ADM3-8540358, represented year 2020, CC BY 3.0 IGO, OCHA ROAP / Survey Department of Sri Lanka lineage), dissolved to the 25 districts. Each ADM3 Divisional Secretariat is assigned to the district whose geoBoundaries LKA ADM2 polygon it most overlaps (largest-intersection-area assignment), then the Divisional Secretariats are unioned per district. The dissolve is verified to yield exactly 25 districts with valid, non-empty, distinct geometries. Geometric stability of district boundaries across the census waves was not independently verified."
+    }
+  ],
+  "notes": "STAGED for conductor review: no page and no hub link are built by this lane. licence_status is needs_review pending PI task 14 (DCS asserts all rights reserved). The committed product contains derived district summaries and simplified geoBoundaries geometry only. This product renders the Department of Census and Statistics (DCS) published district religion counts exactly, on the stable 25-district frame in force for the 2012 and 2024 censuses. The 2001 census enumerated religion for only 18 of 25 districts; the seven northern and eastern districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa, Trincomalee) carry the DCS estimated total population and null religion, with the DCS footnote quoted verbatim. Kilinochchi did not exist in 1981 (it was carved from Jaffna in 1984); its 1981 row is null and Jaffna's printed 1981 row covers present-day Jaffna plus Kilinochchi. No 1981 split is invented."
+}
