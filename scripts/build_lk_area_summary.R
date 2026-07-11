@@ -17,8 +17,17 @@
 #         (b) Kilinochchi did not exist in 1981 (carved from Jaffna in 1984), so its 1981 row
 #         is null and Jaffna's printed 1981 row covers present-day Jaffna plus Kilinochchi.
 # licence: DCS asserts "@ All Rights Reserved" (no open licence). This build ships derived
-#         summaries with DCS attribution; raw sources stay git-ignored. licence_status is
-#         needs_review pending PI task 14; the gate is recorded in the manifest notes.
+#         summaries with DCS attribution; raw sources stay git-ignored. The project lead
+#         CONFIRMED the derived-summaries-with-attribution stance for DCS on 2026-07-11
+#         (PI task 14), so licence_status is accepted (licence_basis dcs_all_rights_reserved_attribution).
+# metric slots: the two legacy metric slots carry the ratified minority-share two-slot design
+#         (docs/development/minority-share-metric.md, ratified 2026-07-11). The reference group is
+#         Buddhist, Sri Lanka's largest published national category in the most recent wave (2024,
+#         national share 69.7789%), declared once and held constant across every wave and area.
+#         religious_affiliation_percent := the Buddhist (reference-group) share; no_religion_percent :=
+#         the minority share, the exact complement (Hindu + Islam + Roman Catholic + Other Christian +
+#         Other summed). religious_change (runtime-derived) then differences the Buddhist share across
+#         consecutive waves; the eight null-coverage rows break the chain where the data dictate.
 
 suppressMessages({
   library(digest)
@@ -195,6 +204,31 @@ wave_source <- c(`1981` = "Statistical Abstract 2023 Table 2.14",
 # return the verbatim source labels (named by stable code) for one wave.
 labels_for_wave <- function(year) {
   if (wave_label_convention[[as.character(year)]] == "abstract") labels_abstract else labels_census_table
+}
+
+# --- minority-share two-slot design ----------------------------------------
+# docs/development/minority-share-metric.md (ratified 2026-07-11). The two legacy metric slots
+# carry declared constructs: religious_affiliation_percent := the reference-group (Buddhist) share,
+# no_religion_percent := the minority share (exact complement). The reference group is the product's
+# largest published national category in the most recent wave (2024): Buddhist. It is declared once
+# and held constant across every wave and area, so a single construct stays on the map.
+reference_group_code <- "buddhist"
+reference_group_label <- "Buddhist"
+# the five published categories outside the reference group; their summed share is the minority share.
+minority_group_codes <- setdiff(category_codes, reference_group_code)
+design_doc <- "docs/development/minority-share-metric.md"
+licence_ruling_date <- "2026-07-11"  # PI task 14: DCS derived-summaries-with-attribution CONFIRMED
+
+# national reference-group (Buddhist) share per wave at printed rounding, from the DCS national anchor
+# (2001 uses the 18-district published total, the only 2001 national figure DCS prints). Evidence for
+# the reference-group declaration; the 2024 value (69.7789) is the most-recent-wave national share.
+# defined as a function because national_anchor is declared further down; evaluated after it exists.
+national_reference_share <- function() {
+  ref_col <- which(c("total", category_codes) == reference_group_code)  # buddhist is column 2
+  setNames(lapply(as.character(years), function(y) {
+    a <- national_anchor[[y]]
+    round(100 * a[[ref_col]] / a[[1]], 4)
+  }), as.character(years))
 }
 
 # --- wave data (transcribed from the cached DCS tables; every array is in the stable
@@ -379,6 +413,27 @@ validate_label_correspondence <- function() {
 reconciliation <- setNames(lapply(years, validate_wave), as.character(years))
 label_correspondence <- validate_label_correspondence()
 
+# reference-group (Buddhist) national share per wave, and the gate that the district-summed Buddhist
+# share reproduces the published national percentage at printed rounding. District columns already
+# reconcile to the anchor exactly (validate_wave), so the summed-share equals the anchor-derived share.
+reference_share_by_wave <- national_reference_share()
+validate_reference_share <- function() {
+  ref_col <- which(c("total", category_codes) == reference_group_code)
+  for (y in as.character(years)) {
+    mat <- wave_data[[y]]
+    colnames(mat) <- c("total", category_codes)
+    summed <- round(100 * sum(mat[, reference_group_code]) / sum(mat[, "total"]), 4)
+    anchored <- reference_share_by_wave[[y]]
+    if (!isTRUE(all.equal(summed, anchored)) || round(summed, 4) != round(anchored, 4)) {
+      stop("national reference-group share gate failed for ", y,
+           ": district-summed ", summed, " != anchor ", anchored, call. = FALSE)
+    }
+    if (anchored <= 0 || anchored > 100) stop("reference-group share out of range for ", y, call. = FALSE)
+  }
+  invisible(TRUE)
+}
+validate_reference_share()
+
 # --- boundary: dissolve geoBoundaries ADM3 (330 DSD) -> 25 districts ---------
 
 # calculate one geometry hash without serialisation metadata.
@@ -499,37 +554,50 @@ build_row <- function(year, code, boundary) {
   is_2001_estimate <- year == 2001L && code %in% names(estimate_2001_total)
   is_1981_kilinochchi <- year == 1981L && code == "kilinochchi"
 
-  # category-breakdown record for the quality flag, using the wave's verbatim label convention.
+  # minority-share two-slot assignment (design: docs/development/minority-share-metric.md).
+  # religious_affiliation_percent := reference-group (Buddhist) share; no_religion_percent := minority
+  # share, the exact complement (the five non-reference categories summed). Both null on non-enumerated
+  # rows. The verbatim six-category breakdown rides the quality flag for downstream composition metrics.
   if (enumerated) {
     counts <- mat[code, category_codes]
     total <- as.integer(mat[code, "total"])
     breakdown <- paste(vapply(category_codes, function(cc) {
       paste0(labels[[cc]], "=", counts[[cc]])
     }, character(1)), collapse = ";")
-    affiliation_count <- as.integer(sum(counts))  # the six categories partition the total
-    affiliation_percent <- round(100 * affiliation_count / total, 4)
+    affiliation_count <- as.integer(counts[[reference_group_code]])  # Buddhist count := affiliation slot numerator
+    minority_count <- as.integer(total - affiliation_count)          # exact complement: the five non-reference categories
+    affiliation_percent <- round(100 * affiliation_count / total, 4) # Buddhist (reference-group) share
+    minority_percent <- round(100 * minority_count / total, 4)       # minority share (complement of the Buddhist share)
     flag <- paste0(
       "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;",
-      "affiliation=total_all_six_named_categories;label_convention=", wave_label_convention[[as.character(year)]],
+      "minority_share_two_slot_design;reference_group=", reference_group_code,
+      ";religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;",
+      "minority_share=", paste(minority_group_codes, collapse = "+"),
+      ";label_convention=", wave_label_convention[[as.character(year)]],
       ";source_categories_verbatim=", breakdown, ";exact_within_row_and_national_reconciliation;",
       "district_counts_rendered_as_published_no_small_cell_treatment"
     )
   } else if (is_2001_estimate) {
     total <- as.integer(estimate_2001_total[[code]])
     affiliation_count <- NA_integer_
+    minority_count <- NA_integer_
     affiliation_percent <- NA_real_
+    minority_percent <- NA_real_
     flag <- paste0(
       "religion_not_enumerated_2001;dcs_estimated_total_population_only;coverage_gap_render_the_record;",
       "footnote_verbatim=", coverage_2001_footnote_verbatim,
-      ";religion_null_never_estimated_never_distributed;change_metrics_break_at_2001_for_this_district"
+      ";religion_null_never_estimated_never_distributed;both_metric_slots_null;",
+      "change_metrics_break_at_2001_for_this_district"
     )
   } else if (is_1981_kilinochchi) {
     total <- NA_integer_
     affiliation_count <- NA_integer_
+    minority_count <- NA_integer_
     affiliation_percent <- NA_real_
+    minority_percent <- NA_real_
     flag <- paste0(
       "district_did_not_exist_1981;carved_from_jaffna_1984;territory_included_in_jaffna_1981_row;",
-      "boundary_mismatch_disclosed;religion_and_total_null_no_split_invented"
+      "boundary_mismatch_disclosed;religion_and_total_null_no_split_invented;both_metric_slots_null"
     )
   } else {
     stop("unexpected non-enumerated case for ", year, " ", code, call. = FALSE)
@@ -550,10 +618,10 @@ build_row <- function(year, code, boundary) {
     year = year,
     population_total = if (is.na(total)) NULL else as.integer(total),
     population_total_basis = population_basis(year, code),
-    religious_affiliation_count = if (is.na(affiliation_count)) NULL else affiliation_count,
+    religious_affiliation_count = if (is.na(affiliation_count)) NULL else as.integer(affiliation_count),
     religious_affiliation_percent = if (is.na(affiliation_percent)) NULL else affiliation_percent,
-    no_religion_count = NULL,
-    no_religion_percent = NULL,
+    no_religion_count = if (is.na(minority_count)) NULL else as.integer(minority_count),
+    no_religion_percent = if (is.na(minority_percent)) NULL else minority_percent,
     place_count = NULL,
     places_per_10000_residents = NULL,
     place_density_per_sq_km = NULL,
@@ -581,8 +649,8 @@ flatten_rows <- function(rows) {
     population_total_basis = vapply(rows, `[[`, character(1), "population_total_basis"),
     religious_affiliation_count = vapply(rows, function(r) na_int(r[["religious_affiliation_count"]]), integer(1)),
     religious_affiliation_percent = vapply(rows, function(r) na_num(r[["religious_affiliation_percent"]]), numeric(1)),
-    no_religion_count = NA_integer_,
-    no_religion_percent = NA_real_,
+    no_religion_count = vapply(rows, function(r) na_int(r[["no_religion_count"]]), integer(1)),
+    no_religion_percent = vapply(rows, function(r) na_num(r[["no_religion_percent"]]), numeric(1)),
     place_count = NA_integer_,
     places_per_10000_residents = NA_real_,
     place_density_per_sq_km = NA_real_,
@@ -611,6 +679,19 @@ spatial_cov <- paste("Twenty-five districts on the modern (2012/2024) frame.", s
 quality_cov <- paste("Census religion is a self-identification question with a six-category frame and no no-religion or not-stated option.",
                      sensitivity_note, boundary_note)
 
+# reference-group declaration and national-share evidence, embedded verbatim in the indicator block.
+reference_group_declaration <- function() {
+  s <- reference_share_by_wave
+  paste0(
+    "Minority-share two-slot design (", design_doc, ", ratified ", licence_ruling_date, "). ",
+    "The reference group is ", reference_group_label, ", Sri Lanka's largest published religion category ",
+    "nationally in the most recent wave (2024). It is declared once and held constant across every wave and area. ",
+    "National ", reference_group_label, " share as evidence (share of the DCS published national religion population; ",
+    "2001 uses the 18-district published total): 1981 ", s[["1981"]], "%, 2001 ", s[["2001"]], "%, 2012 ",
+    s[["2012"]], "%, 2024 ", s[["2024"]], "% (2024 is the most-recent-wave national share fixing the reference group)."
+  )
+}
+
 indicators <- function() {
   list(
     list(indicator_id = "population_total", label = "Census religion-table population",
@@ -618,30 +699,56 @@ indicators <- function() {
          unit = "count", denominator_indicator_id = NULL,
          method = "Direct DCS table value; for enumerated districts the total equals the sum of the six religion categories.",
          temporal_coverage = temporal_cov, spatial_coverage = spatial_cov, quality_notes = quality_cov),
-    list(indicator_id = "religious_affiliation_percent", label = "Religious affiliation %",
-         description = paste("Share of the district population counted in the six DCS religion categories.",
-                             "The DCS census assigns every enumerated person to one of the six religions; there is no no-religion or not-stated category, so this share is the full enumerated population where religion was counted."),
+    list(indicator_id = "religious_affiliation_percent", label = paste0(reference_group_label, " (%)"),
+         description = paste(
+           paste0("Share of the district's enumerated religion population reporting ", reference_group_label,
+                  ", the declared reference group. This is the reference-group share of the six-category DCS frame, ",
+                  "not a measure of affiliation versus non-affiliation; the DCS frame carries no no-religion category, ",
+                  "so a full-affiliation share would be a flat 100 everywhere and carry no signal."),
+           reference_group_declaration()),
          unit = "percent", denominator_indicator_id = "population_total",
-         method = "100 times the sum of the six religion categories divided by the district total; null where religion was not enumerated (the seven 2001 districts) or the district did not exist (Kilinochchi 1981).",
+         method = paste0("100 times the district ", reference_group_label, " count divided by the district total religion population; ",
+                         "null where religion was not enumerated (the seven 2001 northern and eastern districts) or the district did not exist ",
+                         "(Kilinochchi 1981). religious_change (runtime-derived) differences this reference-group share across consecutive waves; ",
+                         "the eight null-coverage rows break the chain where the data dictate."),
          temporal_coverage = temporal_cov, spatial_coverage = spatial_cov, quality_notes = quality_cov),
-    list(indicator_id = "no_religion_percent", label = "No religion %",
-         description = "The DCS census religion frame has no no-religion category; this indicator is documented as absent and rows carry null no-religion values.",
+    list(indicator_id = "no_religion_percent", label = "Minority share (%)",
+         description = paste0(
+           "Exact complement of the ", reference_group_label, " share: the summed share of every published religion category ",
+           "outside the reference group (", paste(vapply(minority_group_codes, function(cc) unname(labels_census_table[cc]), character(1)), collapse = ", "),
+           "). This is arithmetic on published affiliation categories — the share outside Sri Lanka's largest published category — ",
+           "and is not a measure of no religion, belief, practice, or secularity. The slot reuses the legacy no_religion_percent field ",
+           "under the two-slot design (", design_doc, "); pages relabel it verbatim to \"Minority share (%)\"."),
          unit = "percent", denominator_indicator_id = "population_total",
-         method = "Not applicable; no_religion_category_absent.",
-         temporal_coverage = temporal_cov, spatial_coverage = spatial_cov, quality_notes = "Rows carry no_religion_category_absent and null no_religion_count/no_religion_percent.")
+         method = paste0("100 times the sum of the five non-reference religion categories divided by the district total, ",
+                         "equivalently 100 minus the ", reference_group_label, " share; the two slots are exact complements in every enumerated row. ",
+                         "Null on the same eight non-enumerated rows as the reference-group share."),
+         temporal_coverage = temporal_cov, spatial_coverage = spatial_cov, quality_notes = quality_cov)
   )
 }
 
 visual_layers <- function() {
   list(
-    list(visual_layer_id = "lk-district-religious-affiliation",
-         label = "Religious affiliation %",
-         description = "Share of the district population in the six DCS religion categories, for 1981, 2001 (18 enumerated districts), 2012, and 2024.",
+    list(visual_layer_id = "lk-district-buddhist-share",
+         label = paste0(reference_group_label, " (%)"),
+         description = paste0("Reference-group (", reference_group_label, ") share of the district enumerated religion population, ",
+                              "for 1981, 2001 (18 enumerated districts), 2012, and 2024. The reference group is fixed nationally to ",
+                              reference_group_label, ", Sri Lanka's largest published category in 2024."),
          layer_type = "choropleth", indicator_ids = list("religious_affiliation_percent"),
          geometry_unit_type = "area_unit", legend = list(unit = "percent", denominator = "district total religion population"),
          colour_scale = "sequential", time_control = "year_selector",
          aggregation_rule = "district counts rendered as published; no allocation; the seven 2001 districts and Kilinochchi 1981 carry null religion",
-         uncertainty_display = "quality_flag", default_visibility = TRUE, notes = paste(scope_note, sensitivity_note))
+         uncertainty_display = "quality_flag", default_visibility = TRUE, notes = paste(scope_note, sensitivity_note)),
+    list(visual_layer_id = "lk-district-minority-share",
+         label = "Minority share (%)",
+         description = paste0("Minority share: the exact complement of the ", reference_group_label, " share, the summed share of every ",
+                              "published religion category outside the reference group. Highest exactly where the map is most informative ",
+                              "(the Northern and Eastern Provinces). Arithmetic on published categories, not a measure of no religion or secularity."),
+         layer_type = "choropleth", indicator_ids = list("no_religion_percent"),
+         geometry_unit_type = "area_unit", legend = list(unit = "percent", denominator = "district total religion population"),
+         colour_scale = "sequential", time_control = "year_selector",
+         aggregation_rule = "district counts rendered as published; no allocation; the seven 2001 districts and Kilinochchi 1981 carry null religion",
+         uncertainty_display = "quality_flag", default_visibility = FALSE, notes = paste(scope_note, sensitivity_note))
   )
 }
 
@@ -655,7 +762,8 @@ source_datasets <- function() {
                         url = url_terms, attribution = "Source: Department of Census and Statistics, Sri Lanka"),
          citation = "DCS, Census of Population and Housing 1981, 2001, 2012 (Statistical Abstract 2023, Tables 2.13-2.15) and 2024 (Population Preliminary Report).",
          access_limits = NULL,
-         redistribution_limits = "DCS reserves all rights. The build ships derived summaries with DCS attribution and holds raw sources git-ignored; a reuse ruling is deferred to the PI (task 14).",
+         redistribution_limits = paste0("DCS reserves all rights. The build ships derived summaries with DCS attribution and holds raw sources git-ignored; ",
+                                        "the project lead CONFIRMED the derived-summaries-with-attribution stance for DCS on ", licence_ruling_date, " (PI task 14)."),
          notes = paste(scope_note, label_note)),
     list(source_dataset_id = boundary_dataset_id,
          name = "geoBoundaries LKA ADM3 (Divisional Secretariat) dissolved to 25 districts",
@@ -672,10 +780,12 @@ source_datasets <- function() {
 }
 
 # describe one tracked public output in the manifest.
+# licence_status is accepted following the PI task 14 confirmation (2026-07-11) that the
+# derived-summaries-with-attribution stance covers DCS; the boundary is CC BY 3.0 IGO (already open).
 manifest_file_record <- function(path, content, licence_basis) {
   list(uri = paste0("repo:", path), storage_provider = "git_repository", format = tools::file_ext(path),
        bytes = file_bytes(path), sha256 = sha256_file(path), row_count = row_count_file(path),
-       content = content, privacy = "public", licence_status = "needs_review", licence_basis = licence_basis)
+       content = content, privacy = "public", licence_status = "accepted", licence_basis = licence_basis)
 }
 
 # describe one raw cached source with URL, retrieval time, and digest.
@@ -712,6 +822,27 @@ rows <- unlist(lapply(years, function(y) {
   lapply(district_codes, function(cd) build_row(y, cd, written_boundary))
 }), recursive = FALSE)
 if (length(rows) != 100L) stop("expected 100 district-year rows", call. = FALSE)
+
+# two-slot gate: the two metric slots are exact complements in every enumerated row (percentages sum
+# to 100 at printed rounding; counts sum to the district total), and both slots are null in the eight
+# null-coverage rows (the seven 2001 northern/eastern districts + Kilinochchi 1981). Stop, do not tune.
+validate_two_slot <- function(rows) {
+  enumerated_ok <- 0L; null_ok <- 0L
+  for (r in rows) {
+    a <- r[["religious_affiliation_percent"]]; m <- r[["no_religion_percent"]]
+    ac <- r[["religious_affiliation_count"]]; mc <- r[["no_religion_count"]]; tot <- r[["population_total"]]
+    tag <- paste(r[["area_code"]], r[["year"]])
+    if (is.null(a) && is.null(m) && is.null(ac) && is.null(mc)) { null_ok <- null_ok + 1L; next }
+    if (is.null(a) || is.null(m) || is.null(ac) || is.null(mc)) stop("partial null metric slot for ", tag, call. = FALSE)
+    if (round(a + m, 4) != 100) stop("metric slots are not exact complements (percent) for ", tag, ": ", a, " + ", m, call. = FALSE)
+    if (as.integer(ac) + as.integer(mc) != as.integer(tot)) stop("metric slots are not exact complements (count) for ", tag, call. = FALSE)
+    enumerated_ok <- enumerated_ok + 1L
+  }
+  if (null_ok != 8L) stop("expected 8 null-coverage rows (7 in 2001 + Kilinochchi 1981), got ", null_ok, call. = FALSE)
+  if (enumerated_ok != 92L) stop("expected 92 enumerated complement rows, got ", enumerated_ok, call. = FALSE)
+  list(enumerated_complement_rows = enumerated_ok, null_coverage_rows = null_ok)
+}
+two_slot_validation <- validate_two_slot(rows)
 
 area_summary <- list(
   schema_version = "0.2.0",
@@ -772,7 +903,20 @@ manifest <- list(
       geography = "25 districts on the modern (2012/2024) frame; ADM3 Divisional Secretariats dissolved to districts via largest-ADM2-overlap assignment",
       construct = "census religion (six-category self-identification, no no-religion or not-stated option)",
       denominator = "district total religion population",
-      category_rule = "six stable categories rendered exactly as published; affiliation is the full six-category total where religion was enumerated",
+      category_rule = "six stable categories rendered exactly as published; the two metric slots carry the minority-share two-slot design (see minority_share_design)",
+      minority_share_design = list(
+        design = design_doc,
+        ratified = licence_ruling_date,
+        reference_group = reference_group_code,
+        reference_group_label = reference_group_label,
+        reference_group_basis = "largest published national religion category in the most recent wave (2024); declared once and held constant across every wave and area",
+        minority_group_categories = as.list(minority_group_codes),
+        slot_religious_affiliation_percent = "reference-group (Buddhist) share of the district total religion population",
+        slot_no_religion_percent = "minority share: exact complement of the Buddhist share (the five non-reference categories summed); not a measure of no religion, belief, practice, or secularity",
+        religious_change = "runtime-derived: differences the reference-group (Buddhist) share across consecutive waves; the eight null-coverage rows break the chain where the data dictate (no new withholding logic)",
+        national_reference_share_by_wave = reference_share_by_wave,
+        national_reference_share_2024 = reference_share_by_wave[["2024"]],
+        national_reference_share_note = "share of the DCS published national religion population; 2001 uses the 18-district published total (the only 2001 national figure DCS prints)"),
       category_label_conventions = list(
         abstract = as.list(labels_abstract), census_table = as.list(labels_census_table),
         correspondence = label_correspondence, by_wave = category_mapping_by_wave),
@@ -805,10 +949,10 @@ manifest <- list(
     source_dataset_ids = list(census_dataset_id, boundary_dataset_id),
     source_urls = list(url_214, url_p9p9, url_2024, url_terms, url_adm3_meta, url_adm2_meta, url_adm3, url_adm2),
     retrieved_at = paste0(retrieval_date, "T00:00:00Z"),
-    licence = paste0("DCS census: site footer asserts all rights reserved (verbatim: \"", dcs_copyright_verbatim, "\"); no open licence located; derived summaries ship with attribution, reuse ruling deferred to the PI (task 14). Boundary: geoBoundaries ADM3 under CC BY 3.0 IGO (Survey Department lineage)."),
+    licence = paste0("DCS census: site footer asserts all rights reserved (verbatim: \"", dcs_copyright_verbatim, "\"); no open licence located; the project lead CONFIRMED the derived-summaries-with-attribution stance for DCS on ", licence_ruling_date, " (PI task 14), so derived summaries ship with attribution and licence_status is accepted. Boundary: geoBoundaries ADM3 under CC BY 3.0 IGO (Survey Department lineage)."),
     citation = "DCS census religion by district 1981/2001/2012 (Statistical Abstract 2023 Table 2.14; 2001 detail p9p9Religion.pdf), 2024 (Preliminary Report Table A3); geoBoundaries LKA ADM3 dissolved to 25 districts.",
     raw_redistribution = "Raw DCS files stay git-ignored; only derived summaries are published. Cached under data/raw/lk_census/, mirrored to gs://pow-research-data/raw_sources/lk_census/.",
-    licence_position = "needs_review"
+    licence_position = "accepted"
   ),
   input_manifests = list(),
   durable_files = list(
@@ -835,20 +979,27 @@ manifest <- list(
       "Every printed district's total equals the sum of the six religion categories, for all four waves.",
       "District category columns sum exactly to the printed national anchor: 1981 over 24 districts, 2001 over 18 enumerated districts, 2012 and 2024 over 25 districts.",
       "The two DCS label conventions map 1:1 onto the six stable category codes with no duplicate labels.",
+      "The two metric slots are exact complements in every enumerated row: religious_affiliation_percent (Buddhist share) + no_religion_percent (minority share) = 100 at printed rounding, and their counts sum to the district total.",
+      "Both metric slots are null in the eight null-coverage rows (the seven 2001 northern and eastern districts + Kilinochchi 1981).",
+      "The national reference-group (Buddhist) share per wave, from the district-summed columns, reproduces the published national percentage at printed rounding (1981 69.2968, 2001 76.7087 over 18 districts, 2012 70.1004, 2024 69.7789).",
       "The seven 2001 unenumerated districts carry the DCS estimated total and null religion with the coverage footnote quoted verbatim.",
       "Kilinochchi 1981 carries null total and null religion; Jaffna 1981 discloses that its row covers present-day Jaffna plus Kilinochchi.",
       "The ADM3 dissolve yields exactly 25 valid, non-empty districts with 25 distinct SHA-256 WKB geometry hashes.",
       "Every raw input and generated output records URL or repository path, retrieval date, byte size, and SHA-256."
     ),
     warnings = list(
-      paste0("DCS asserts all rights reserved (verbatim: \"", dcs_copyright_verbatim, "\"). No open-data licence located; licence_status is needs_review pending PI task 14."),
+      paste0("DCS asserts all rights reserved (verbatim: \"", dcs_copyright_verbatim, "\"). No open-data licence located; the project lead CONFIRMED the derived-summaries-with-attribution stance for DCS on ", licence_ruling_date, " (PI task 14), so licence_status is accepted."),
       scope_note, sensitivity_note, boundary_note
     ),
-    notes = paste("All four wave reconciliation gates and the label-correspondence gate passed exactly.", scope_note),
+    notes = paste("All four wave reconciliation gates, the label-correspondence gate, the two-slot complement gate, and the national reference-group share gate passed exactly.", scope_note),
     stats = list(
       waves = 4L, rows = 100L, districts_per_wave = 25L,
       enumerated_districts = list(`1981` = 24L, `2001` = 18L, `2012` = 25L, `2024` = 25L),
       category_count = 6L,
+      metric_slot_design = "minority_share_two_slot", reference_group = reference_group_code,
+      national_reference_share_2024 = reference_share_by_wave[["2024"]],
+      enumerated_complement_rows = two_slot_validation[["enumerated_complement_rows"]],
+      null_coverage_rows = two_slot_validation[["null_coverage_rows"]],
       boundary_features = 25L, boundary_valid_features = boundary_result[["valid_feature_count"]],
       distinct_geometry_hashes = length(unique(unlist(boundary_result[["geometry_hashes"]]))),
       adm3_divisional_secretariats = 330L,
@@ -865,7 +1016,10 @@ manifest <- list(
   ),
   construct_notes = c(list(
     "The construct is census religion. It does not measure belief, practice, attendance, or registered membership.",
-    "The DCS census religion question uses six categories and assigns every enumerated person to one of them; there is no no-religion or not-stated category, so religious_affiliation_percent equals 100 wherever religion was enumerated.",
+    "The DCS census religion question uses six categories and assigns every enumerated person to one of them; there is no no-religion or not-stated category, so a full-affiliation share would be a flat 100 everywhere. The two metric slots therefore carry the ratified minority-share two-slot design (docs/development/minority-share-metric.md, ratified 2026-07-11), which keeps a real construct on the map.",
+    paste0("religious_affiliation_percent := the reference-group (", reference_group_label, ") share of the district total religion population. The reference group is ", reference_group_label, ", Sri Lanka's largest published national category in the most recent wave (2024, national share ", reference_share_by_wave[["2024"]], "%), declared once and held constant across every wave and area. National ", reference_group_label, " share as evidence: 1981 ", reference_share_by_wave[["1981"]], "%, 2001 ", reference_share_by_wave[["2001"]], "% (18-district), 2012 ", reference_share_by_wave[["2012"]], "%, 2024 ", reference_share_by_wave[["2024"]], "%."),
+    paste0("no_religion_percent := the minority share, the exact complement of the ", reference_group_label, " share: the summed share of the five published categories outside the reference group (Hindu + Islam + Roman Catholic + Other Christian + Other). The two slots are exact complements in every enumerated row and both null in the eight null-coverage rows. This is arithmetic on published affiliation categories and is not a measure of no religion, belief, practice, or secularity; it reuses the legacy no_religion_percent field under the two-slot design and pages relabel it verbatim to \"Minority share (%)\"."),
+    "religious_change (runtime-derived) differences the reference-group (Buddhist) share across consecutive waves where both publish; the 2001 nulls for the seven northern and eastern districts and the 1981 Kilinochchi null break the chain exactly as the data dictate, with no new withholding logic beyond what the nulls already produce.",
     scope_note, label_note, sensitivity_note, boundary_note,
     coverage_2001_footnote_verbatim,
     "The 2001 wave detail uses the standalone p9p9Religion.pdf table, whose 18-district counts reconcile exactly to its printed 16,929,689 national total; Statistical Abstract Table 2.14 prints only estimated totals with '..' religion for the seven unenumerated districts.",
@@ -884,12 +1038,13 @@ manifest <- list(
          reason = "Percentages are recomputed from the shipped counts; the published percentage tables are not separately shipped.")
   ),
   privacy = "public",
-  licence_status = "needs_review",
+  licence_status = "accepted",
   licence_basis = "dcs_all_rights_reserved_attribution",
   downstream_status = "staged",
   source_datasets = source_datasets(),
   notes = paste("STAGED for conductor review: no page and no hub link are built by this lane.",
-                "licence_status is needs_review pending PI task 14 (DCS asserts all rights reserved).",
+                paste0("licence_status is accepted: the project lead CONFIRMED the derived-summaries-with-attribution stance for DCS on ", licence_ruling_date, " (PI task 14, DCS asserts all rights reserved)."),
+                "The two metric slots carry the ratified minority-share two-slot design (docs/development/minority-share-metric.md): religious_affiliation_percent is the Buddhist reference-group share and no_religion_percent is the minority share (exact complement).",
                 "The committed product contains derived district summaries and simplified geoBoundaries geometry only.",
                 scope_note)
 )
@@ -903,10 +1058,16 @@ for (y in as.character(years)) {
       y, r[["published_districts"]], r[["national_total"]], r[["within_row_total_reconciliation"]], r[["national_reconciliation"]]))
 }
 cat("  label-convention correspondence: exact 1:1 across abstract and census-table conventions\n")
+cat(sprintf("  metric slots (minority-share two-slot): religious_affiliation_percent=Buddhist share, no_religion_percent=minority share (complement); reference group=%s, 2024 national share=%s%%\n",
+    reference_group_code, reference_share_by_wave[["2024"]]))
+cat(sprintf("  two-slot gate: %d enumerated complement rows (percent sum=100, counts sum=total), %d null-coverage rows (both slots null)\n",
+    two_slot_validation[["enumerated_complement_rows"]], two_slot_validation[["null_coverage_rows"]]))
+cat(sprintf("  national reference-group (Buddhist) share per wave: 1981=%s 2001=%s(18-district) 2012=%s 2024=%s\n",
+    reference_share_by_wave[["1981"]], reference_share_by_wave[["2001"]], reference_share_by_wave[["2012"]], reference_share_by_wave[["2024"]]))
 cat("  2001 coverage: 18 enumerated + 7 estimated-total-only (null religion, footnote rendered)\n")
 cat("  1981 Kilinochchi: null (did not exist; folded in Jaffna's printed 1981 row)\n")
 cat(sprintf("  boundary: 25 valid features, %d distinct hashes, %d bytes\n",
     length(unique(unlist(boundary_result[["geometry_hashes"]]))), file_bytes(boundary_out)))
-cat(sprintf("  licence: DCS all rights reserved (needs_review, PI task 14); boundary CC BY 3.0 IGO\n"))
+cat(sprintf("  licence: DCS all rights reserved, derived-summaries-with-attribution CONFIRMED (accepted, PI task 14, %s); boundary CC BY 3.0 IGO\n", licence_ruling_date))
 cat(sprintf("  wrote %s (%d rows), %s (%d rows), %s, %s\n",
     summary_json_out, row_count_file(summary_json_out), summary_csv_out, row_count_file(summary_csv_out), boundary_out, manifest_out))

@@ -3,7 +3,7 @@
   "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:lk-census-religion:lk:1981-2024:dcs-district",
   "dataset_id": "lk-census-religion:lk:1981-2024:dcs-district",
-  "dataset_version_id": "lk-census-religion:lk:1981-2024:dcs-district:9a94f1434ea6",
+  "dataset_version_id": "lk-census-religion:lk:1981-2024:dcs-district:112c386c1b53",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -18,18 +18,43 @@
     "snapshot_anchor": null,
     "pipeline_stage": "staged"
   },
-  "created_at": "2026-07-11T03:51:59Z",
+  "created_at": "2026-07-11T04:24:31Z",
   "created_by": "scripts/build_lk_area_summary.R",
   "pipeline": {
     "script": "scripts/build_lk_area_summary.R",
-    "git_commit": "1bfab40",
+    "git_commit": "2e710b7",
     "command": "Rscript scripts/build_lk_area_summary.R",
     "parameters": {
       "waves": [1981, 2001, 2012, 2024],
       "geography": "25 districts on the modern (2012/2024) frame; ADM3 Divisional Secretariats dissolved to districts via largest-ADM2-overlap assignment",
       "construct": "census religion (six-category self-identification, no no-religion or not-stated option)",
       "denominator": "district total religion population",
-      "category_rule": "six stable categories rendered exactly as published; affiliation is the full six-category total where religion was enumerated",
+      "category_rule": "six stable categories rendered exactly as published; the two metric slots carry the minority-share two-slot design (see minority_share_design)",
+      "minority_share_design": {
+        "design": "docs/development/minority-share-metric.md",
+        "ratified": "2026-07-11",
+        "reference_group": "buddhist",
+        "reference_group_label": "Buddhist",
+        "reference_group_basis": "largest published national religion category in the most recent wave (2024); declared once and held constant across every wave and area",
+        "minority_group_categories": [
+          "hindu",
+          "islam",
+          "roman_catholic",
+          "other_christian",
+          "other"
+        ],
+        "slot_religious_affiliation_percent": "reference-group (Buddhist) share of the district total religion population",
+        "slot_no_religion_percent": "minority share: exact complement of the Buddhist share (the five non-reference categories summed); not a measure of no religion, belief, practice, or secularity",
+        "religious_change": "runtime-derived: differences the reference-group (Buddhist) share across consecutive waves; the eight null-coverage rows break the chain where the data dictate (no new withholding logic)",
+        "national_reference_share_by_wave": {
+          "1981": 69.2968,
+          "2001": 76.7087,
+          "2012": 70.1004,
+          "2024": 69.7789
+        },
+        "national_reference_share_2024": 69.7789,
+        "national_reference_share_note": "share of the DCS published national religion population; 2001 uses the 18-district published total (the only 2001 national figure DCS prints)"
+      },
       "category_label_conventions": {
         "abstract": {
           "buddhist": "Buddhist",
@@ -237,10 +262,10 @@
       "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/LKA/ADM2/geoBoundaries-LKA-ADM2.geojson"
     ],
     "retrieved_at": "2026-07-11T00:00:00Z",
-    "licence": "DCS census: site footer asserts all rights reserved (verbatim: \"@ All Rights Reserved\"); no open licence located; derived summaries ship with attribution, reuse ruling deferred to the PI (task 14). Boundary: geoBoundaries ADM3 under CC BY 3.0 IGO (Survey Department lineage).",
+    "licence": "DCS census: site footer asserts all rights reserved (verbatim: \"@ All Rights Reserved\"); no open licence located; the project lead CONFIRMED the derived-summaries-with-attribution stance for DCS on 2026-07-11 (PI task 14), so derived summaries ship with attribution and licence_status is accepted. Boundary: geoBoundaries ADM3 under CC BY 3.0 IGO (Survey Department lineage).",
     "citation": "DCS census religion by district 1981/2001/2012 (Statistical Abstract 2023 Table 2.14; 2001 detail p9p9Religion.pdf), 2024 (Preliminary Report Table A3); geoBoundaries LKA ADM3 dissolved to 25 districts.",
     "raw_redistribution": "Raw DCS files stay git-ignored; only derived summaries are published. Cached under data/raw/lk_census/, mirrored to gs://pow-research-data/raw_sources/lk_census/.",
-    "licence_position": "needs_review"
+    "licence_position": "accepted"
   },
   "input_manifests": [],
   "durable_files": [
@@ -248,24 +273,24 @@
       "uri": "repo:apps/regions/lk/data/area_summary_district.json",
       "storage_provider": "git_repository",
       "format": "json",
-      "bytes": 219831,
-      "sha256": "9a94f1434ea6b771e70c791b38940897f5441ea72e35d81332fa90fda9664118",
+      "bytes": 243223,
+      "sha256": "112c386c1b53a1fa35d7740fabff4dd220c0e2382538cc1467fb31af28ea04df",
       "row_count": 100,
       "content": "Sri Lanka district census-religion summary for 1981, 2001, 2012, and 2024 on the 25-district frame.",
       "privacy": "public",
-      "licence_status": "needs_review",
+      "licence_status": "accepted",
       "licence_basis": "dcs_all_rights_reserved_attribution"
     },
     {
       "uri": "repo:apps/regions/lk/data/area_summary_district.csv",
       "storage_provider": "git_repository",
       "format": "csv",
-      "bytes": 140603,
-      "sha256": "b9906ba3e3f20482ca40a628f7e2996ac83eeade70b84845f33a25bda422d965",
+      "bytes": 159710,
+      "sha256": "7254dec8cd883871b1a0fb206652f96690aa58367a44f3e9279350e8431e2dc0",
       "row_count": 100,
       "content": "Flattened Sri Lanka district census-religion rows.",
       "privacy": "public",
-      "licence_status": "needs_review",
+      "licence_status": "accepted",
       "licence_basis": "dcs_all_rights_reserved_attribution"
     },
     {
@@ -277,7 +302,7 @@
       "row_count": 25,
       "content": "geoBoundaries LKA ADM3 dissolved to the 25 districts, simplified.",
       "privacy": "public",
-      "licence_status": "needs_review",
+      "licence_status": "accepted",
       "licence_basis": "cc_by_3_0_igo_attribution"
     }
   ],
@@ -390,13 +415,13 @@
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/lk/data/area_summary_district.json",
-      "sha256": "9a94f1434ea6b771e70c791b38940897f5441ea72e35d81332fa90fda9664118",
+      "sha256": "112c386c1b53a1fa35d7740fabff4dd220c0e2382538cc1467fb31af28ea04df",
       "built_by": "scripts/build_lk_area_summary.R",
       "notes": "100 district-year rows (25 districts x 4 waves)."
     },
     {
       "uri": "repo:apps/regions/lk/data/area_summary_district.csv",
-      "sha256": "b9906ba3e3f20482ca40a628f7e2996ac83eeade70b84845f33a25bda422d965",
+      "sha256": "7254dec8cd883871b1a0fb206652f96690aa58367a44f3e9279350e8431e2dc0",
       "built_by": "scripts/build_lk_area_summary.R",
       "notes": "CSV companion."
     },
@@ -420,18 +445,21 @@
       "Every printed district's total equals the sum of the six religion categories, for all four waves.",
       "District category columns sum exactly to the printed national anchor: 1981 over 24 districts, 2001 over 18 enumerated districts, 2012 and 2024 over 25 districts.",
       "The two DCS label conventions map 1:1 onto the six stable category codes with no duplicate labels.",
+      "The two metric slots are exact complements in every enumerated row: religious_affiliation_percent (Buddhist share) + no_religion_percent (minority share) = 100 at printed rounding, and their counts sum to the district total.",
+      "Both metric slots are null in the eight null-coverage rows (the seven 2001 northern and eastern districts + Kilinochchi 1981).",
+      "The national reference-group (Buddhist) share per wave, from the district-summed columns, reproduces the published national percentage at printed rounding (1981 69.2968, 2001 76.7087 over 18 districts, 2012 70.1004, 2024 69.7789).",
       "The seven 2001 unenumerated districts carry the DCS estimated total and null religion with the coverage footnote quoted verbatim.",
       "Kilinochchi 1981 carries null total and null religion; Jaffna 1981 discloses that its row covers present-day Jaffna plus Kilinochchi.",
       "The ADM3 dissolve yields exactly 25 valid, non-empty districts with 25 distinct SHA-256 WKB geometry hashes.",
       "Every raw input and generated output records URL or repository path, retrieval date, byte size, and SHA-256."
     ],
     "warnings": [
-      "DCS asserts all rights reserved (verbatim: \"@ All Rights Reserved\"). No open-data licence located; licence_status is needs_review pending PI task 14.",
+      "DCS asserts all rights reserved (verbatim: \"@ All Rights Reserved\"). No open-data licence located; the project lead CONFIRMED the derived-summaries-with-attribution stance for DCS on 2026-07-11 (PI task 14), so licence_status is accepted.",
       "This product renders the Department of Census and Statistics (DCS) published district religion counts exactly, on the stable 25-district frame in force for the 2012 and 2024 censuses. The 2001 census enumerated religion for only 18 of 25 districts; the seven northern and eastern districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa, Trincomalee) carry the DCS estimated total population and null religion, with the DCS footnote quoted verbatim. Kilinochchi did not exist in 1981 (it was carved from Jaffna in 1984); its 1981 row is null and Jaffna's printed 1981 row covers present-day Jaffna plus Kilinochchi. No 1981 split is invented.",
       "Religion in Sri Lanka is closely tied to ethnicity and to the 1983-2009 civil war; a religion map reads as an ethnic map in the north and east. The DCS district tables print exact small counts with no official suppression rule; this product renders those counts as published and applies no district-level small-cell treatment. The 2001-to-2012 change in northern and eastern districts partly reflects displacement and return, not only affiliation change; the 2001 coverage gap already precludes any 2001-based change there.",
       "Display geometry is the geoBoundaries LKA ADM3 layer (Divisional Secretariat, 330 features, boundary ID LKA-ADM3-8540358, represented year 2020, CC BY 3.0 IGO, OCHA ROAP / Survey Department of Sri Lanka lineage), dissolved to the 25 districts. Each ADM3 Divisional Secretariat is assigned to the district whose geoBoundaries LKA ADM2 polygon it most overlaps (largest-intersection-area assignment), then the Divisional Secretariats are unioned per district. The dissolve is verified to yield exactly 25 districts with valid, non-empty, distinct geometries. Geometric stability of district boundaries across the census waves was not independently verified."
     ],
-    "notes": "All four wave reconciliation gates and the label-correspondence gate passed exactly. This product renders the Department of Census and Statistics (DCS) published district religion counts exactly, on the stable 25-district frame in force for the 2012 and 2024 censuses. The 2001 census enumerated religion for only 18 of 25 districts; the seven northern and eastern districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa, Trincomalee) carry the DCS estimated total population and null religion, with the DCS footnote quoted verbatim. Kilinochchi did not exist in 1981 (it was carved from Jaffna in 1984); its 1981 row is null and Jaffna's printed 1981 row covers present-day Jaffna plus Kilinochchi. No 1981 split is invented.",
+    "notes": "All four wave reconciliation gates, the label-correspondence gate, the two-slot complement gate, and the national reference-group share gate passed exactly. This product renders the Department of Census and Statistics (DCS) published district religion counts exactly, on the stable 25-district frame in force for the 2012 and 2024 censuses. The 2001 census enumerated religion for only 18 of 25 districts; the seven northern and eastern districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa, Trincomalee) carry the DCS estimated total population and null religion, with the DCS footnote quoted verbatim. Kilinochchi did not exist in 1981 (it was carved from Jaffna in 1984); its 1981 row is null and Jaffna's printed 1981 row covers present-day Jaffna plus Kilinochchi. No 1981 split is invented.",
     "stats": {
       "waves": 4,
       "rows": 100,
@@ -443,13 +471,18 @@
         "2024": 25
       },
       "category_count": 6,
+      "metric_slot_design": "minority_share_two_slot",
+      "reference_group": "buddhist",
+      "national_reference_share_2024": 69.7789,
+      "enumerated_complement_rows": 92,
+      "null_coverage_rows": 8,
       "boundary_features": 25,
       "boundary_valid_features": 25,
       "distinct_geometry_hashes": 25,
       "adm3_divisional_secretariats": 330,
       "boundary_bytes": 1612039,
-      "summary_json_bytes": 219831,
-      "summary_csv_bytes": 140603
+      "summary_json_bytes": 243223,
+      "summary_csv_bytes": 159710
     },
     "reconciliation": {
       "1981": {
@@ -615,7 +648,10 @@
   },
   "construct_notes": [
     "The construct is census religion. It does not measure belief, practice, attendance, or registered membership.",
-    "The DCS census religion question uses six categories and assigns every enumerated person to one of them; there is no no-religion or not-stated category, so religious_affiliation_percent equals 100 wherever religion was enumerated.",
+    "The DCS census religion question uses six categories and assigns every enumerated person to one of them; there is no no-religion or not-stated category, so a full-affiliation share would be a flat 100 everywhere. The two metric slots therefore carry the ratified minority-share two-slot design (docs/development/minority-share-metric.md, ratified 2026-07-11), which keeps a real construct on the map.",
+    "religious_affiliation_percent := the reference-group (Buddhist) share of the district total religion population. The reference group is Buddhist, Sri Lanka's largest published national category in the most recent wave (2024, national share 69.7789%), declared once and held constant across every wave and area. National Buddhist share as evidence: 1981 69.2968%, 2001 76.7087% (18-district), 2012 70.1004%, 2024 69.7789%.",
+    "no_religion_percent := the minority share, the exact complement of the Buddhist share: the summed share of the five published categories outside the reference group (Hindu + Islam + Roman Catholic + Other Christian + Other). The two slots are exact complements in every enumerated row and both null in the eight null-coverage rows. This is arithmetic on published affiliation categories and is not a measure of no religion, belief, practice, or secularity; it reuses the legacy no_religion_percent field under the two-slot design and pages relabel it verbatim to \"Minority share (%)\".",
+    "religious_change (runtime-derived) differences the reference-group (Buddhist) share across consecutive waves where both publish; the 2001 nulls for the seven northern and eastern districts and the 1981 Kilinochchi null break the chain exactly as the data dictate, with no new withholding logic beyond what the nulls already produce.",
     "This product renders the Department of Census and Statistics (DCS) published district religion counts exactly, on the stable 25-district frame in force for the 2012 and 2024 censuses. The 2001 census enumerated religion for only 18 of 25 districts; the seven northern and eastern districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa, Trincomalee) carry the DCS estimated total population and null religion, with the DCS footnote quoted verbatim. Kilinochchi did not exist in 1981 (it was carved from Jaffna in 1984); its 1981 row is null and Jaffna's printed 1981 row covers present-day Jaffna plus Kilinochchi. No 1981 split is invented.",
     "The six religion categories are stable across all four waves. Two verbatim DCS label conventions coexist for the same six categories, in an exact 1:1 correspondence. The abstract convention (Statistical Abstract 2023 Table 2.14, used here for 1981 and 2012) prints: Buddhist, Hindus, Muslims, Catholics, Christians, Others. The census-table convention (2001 p9p9Religion.pdf and 2024 Table A3) prints: Buddhist, Hindu, Islam, Roman Catholic, Other Christian, Other. Correspondence: Buddhist=Buddhist; Hindus=Hindu; Muslims=Islam; Catholics=Roman Catholic; Christians=Other Christian; Others=Other. Each wave preserves the label convention of its actual source table.",
     "Religion in Sri Lanka is closely tied to ethnicity and to the 1983-2009 civil war; a religion map reads as an ethnic map in the north and east. The DCS district tables print exact small counts with no official suppression rule; this product renders those counts as published and applies no district-level small-cell treatment. The 2001-to-2012 change in northern and eastern districts partly reflects displacement and return, not only affiliation change; the 2001 coverage gap already precludes any 2001-based change there.",
@@ -641,7 +677,7 @@
     }
   ],
   "privacy": "public",
-  "licence_status": "needs_review",
+  "licence_status": "accepted",
   "licence_basis": "dcs_all_rights_reserved_attribution",
   "downstream_status": "staged",
   "source_datasets": [
@@ -659,7 +695,7 @@
       },
       "citation": "DCS, Census of Population and Housing 1981, 2001, 2012 (Statistical Abstract 2023, Tables 2.13-2.15) and 2024 (Population Preliminary Report).",
       "access_limits": null,
-      "redistribution_limits": "DCS reserves all rights. The build ships derived summaries with DCS attribution and holds raw sources git-ignored; a reuse ruling is deferred to the PI (task 14).",
+      "redistribution_limits": "DCS reserves all rights. The build ships derived summaries with DCS attribution and holds raw sources git-ignored; the project lead CONFIRMED the derived-summaries-with-attribution stance for DCS on 2026-07-11 (PI task 14).",
       "notes": "This product renders the Department of Census and Statistics (DCS) published district religion counts exactly, on the stable 25-district frame in force for the 2012 and 2024 censuses. The 2001 census enumerated religion for only 18 of 25 districts; the seven northern and eastern districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa, Trincomalee) carry the DCS estimated total population and null religion, with the DCS footnote quoted verbatim. Kilinochchi did not exist in 1981 (it was carved from Jaffna in 1984); its 1981 row is null and Jaffna's printed 1981 row covers present-day Jaffna plus Kilinochchi. No 1981 split is invented. The six religion categories are stable across all four waves. Two verbatim DCS label conventions coexist for the same six categories, in an exact 1:1 correspondence. The abstract convention (Statistical Abstract 2023 Table 2.14, used here for 1981 and 2012) prints: Buddhist, Hindus, Muslims, Catholics, Christians, Others. The census-table convention (2001 p9p9Religion.pdf and 2024 Table A3) prints: Buddhist, Hindu, Islam, Roman Catholic, Other Christian, Other. Correspondence: Buddhist=Buddhist; Hindus=Hindu; Muslims=Islam; Catholics=Roman Catholic; Christians=Other Christian; Others=Other. Each wave preserves the label convention of its actual source table."
     },
     {
@@ -680,5 +716,5 @@
       "notes": "Display geometry is the geoBoundaries LKA ADM3 layer (Divisional Secretariat, 330 features, boundary ID LKA-ADM3-8540358, represented year 2020, CC BY 3.0 IGO, OCHA ROAP / Survey Department of Sri Lanka lineage), dissolved to the 25 districts. Each ADM3 Divisional Secretariat is assigned to the district whose geoBoundaries LKA ADM2 polygon it most overlaps (largest-intersection-area assignment), then the Divisional Secretariats are unioned per district. The dissolve is verified to yield exactly 25 districts with valid, non-empty, distinct geometries. Geometric stability of district boundaries across the census waves was not independently verified."
     }
   ],
-  "notes": "STAGED for conductor review: no page and no hub link are built by this lane. licence_status is needs_review pending PI task 14 (DCS asserts all rights reserved). The committed product contains derived district summaries and simplified geoBoundaries geometry only. This product renders the Department of Census and Statistics (DCS) published district religion counts exactly, on the stable 25-district frame in force for the 2012 and 2024 censuses. The 2001 census enumerated religion for only 18 of 25 districts; the seven northern and eastern districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa, Trincomalee) carry the DCS estimated total population and null religion, with the DCS footnote quoted verbatim. Kilinochchi did not exist in 1981 (it was carved from Jaffna in 1984); its 1981 row is null and Jaffna's printed 1981 row covers present-day Jaffna plus Kilinochchi. No 1981 split is invented."
+  "notes": "STAGED for conductor review: no page and no hub link are built by this lane. licence_status is accepted: the project lead CONFIRMED the derived-summaries-with-attribution stance for DCS on 2026-07-11 (PI task 14, DCS asserts all rights reserved). The two metric slots carry the ratified minority-share two-slot design (docs/development/minority-share-metric.md): religious_affiliation_percent is the Buddhist reference-group share and no_religion_percent is the minority share (exact complement). The committed product contains derived district summaries and simplified geoBoundaries geometry only. This product renders the Department of Census and Statistics (DCS) published district religion counts exactly, on the stable 25-district frame in force for the 2012 and 2024 censuses. The 2001 census enumerated religion for only 18 of 25 districts; the seven northern and eastern districts (Jaffna, Mannar, Vavuniya, Mullaitivu, Kilinochchi, Batticaloa, Trincomalee) carry the DCS estimated total population and null religion, with the DCS footnote quoted verbatim. Kilinochchi did not exist in 1981 (it was carved from Jaffna in 1984); its 1981 row is null and Jaffna's printed 1981 row covers present-day Jaffna plus Kilinochchi. No 1981 split is invented."
 }
