@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Federated States of Micronesia Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // The Federated States of Micronesia product is census religious
+    // affiliation by state from the FSM Statistics Division, three waves
+    // (2000, 2010, 2023) across the four states Yap, Chuuk, Pohnpei and
+    // Kosrae. The construct is census affiliation; it does not measure
+    // belief, practice, attendance, or registered membership. The universe
+    // is all persons of all ages in every wave, and there is no universe
+    // break; the state denominators are therefore directly comparable across the
+    // full 2000-to-2023 span. Broad affiliation is each state's population
+    // minus the combined no-religion-and-refused slot; it is comparable
+    // across all three waves. The no-religion slot combines the source's No
+    // Religion and Refused lines: 2000 and 2010 print those two lines
+    // separately, 2023 merges them into one No religion/Refused line, and
+    // the combined slot therefore mixes persons reporting no religion with
+    // non-response. The substantive subnational structure is denominational:
+    // Kosrae is overwhelmingly Congregational (2010: 5,762 of 6,616, about
+    // 87 percent, Roman Catholic just 153), Yap and Chuuk are heavily Roman
+    // Catholic (Yap 2010 about 82 percent, Chuuk 2010 about 55 percent), and
+    // Pohnpei splits between Roman Catholic and Congregation/Protestant. That
+    // composition lives in the source religion tables and the build
+    // manifest's category frames, not in the area-summary rows, and the
+    // headline affiliation metric does not carry it. The 2000 eight-line
+    // frame folds Assembly of God, Apostolic, Pentecostal and Jehovah's
+    // Witness into Other Religion; denomination-level detail is therefore confined
+    // to the matched 2010-2023 pair; the broad-affiliation spine is
+    // comparable across all three waves. Kosrae's 2023 No religion/Refused
+    // cell is asterisk-suppressed; both no-religion and affiliation are therefore
+    // null for Kosrae 2023 and the change metric at 2023 also nulls for
+    // Kosrae through the missing operand; suppressed values are never
+    // imputed. The 2023 wave carries three documented source discrepancies,
+    // disclosed and never repaired: the printed national total 75,817 is one
+    // below the sum of the four printed state totals (75,818); the Baptist,
+    // SDA and Other religion row totals each print one above their four-state
+    // sum; and small cells are asterisk-suppressed and rendered null. The
+    // population falls across the span (107,008 to 102,843 to 75,817, driven
+    // by Chuuk out-migration); shares are read within each state's own wave
+    // denominator and the decline is never treated as a religion change.
+    // Place and density metrics are null because no governed FSM
+    // place-of-worship snapshot ships.
+    window.REGION_CONFIG = {
+      countryCode: "FM",
+      title: "Places of Worship | Federated States of Micronesia Research Map",
+      // boundary bbox lon 137.49..163.04, lat 1.03..10.09; the four states
+      // scatter across a 25.6-degree west-to-east chain (Yap's western outer
+      // islands to Kosrae), well east of the antimeridian; no dateline
+      // handling. centre on the chain and zoom so all four states sit beside
+      // the panels.
+      center: [150.3, 5.6],
+      initialZoom: 4.5,
+      censusLevels: {
+        state: {
+          label: "State (4 units)",
+          boundaries: "data/fm_state_2019.geojson",
+          summary: "data/area_summary_state.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion by state from the FSM Statistics Division (and SPC SDD for the 2000 state reports), 2000, 2010 and 2023 · Boundaries © geoBoundaries FSM ADM1 (CC BY 3.0 IGO)"
+        }
+      },
+      defaultLevel: "state",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2023,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the state's all-persons population with a stated religious affiliation, on the state's own wave denominator. Broad affiliation is population minus the combined no-religion-and-refused slot and is comparable across all three waves. Null for Kosrae 2023, where the suppressed No religion/Refused cell withholds the numerator"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the combined no-religion-and-refused slot, on the same all-persons denominator. This slot combines the source's No Religion and Refused lines (separate in 2000 and 2010, merged into one No religion/Refused line in 2023); it therefore mixes persons reporting no religion with non-response. Null for Kosrae 2023 (suppressed)"
+        },
+        religious_change: {
+          label: "Change since previous census (pp)",
+          note: "percentage-point change in the affiliation share since the previous census, 2000 to 2010 and 2010 to 2023; the spacing is roughly decennial and a wave-to-wave difference is not an annual rate. Null for Kosrae 2023, where the suppressed 2023 affiliation share removes the operand. The substantive cross-wave structure is denominational (Kosrae overwhelmingly Congregational against Catholic-majority Yap and Chuuk), which the broad-affiliation headline does not carry"
+        }
+      },
+      popupDenominatorNote: "Percentages use each state's all-persons total from the census religion table (all persons of all ages; there is no universe break across 2000, 2010 and 2023). Broad affiliation is the state population minus the combined no-religion-and-refused slot; that slot combines the source's No Religion and Refused lines (separate in 2000 and 2010, merged into one No religion/Refused line in 2023) and mixes persons reporting no religion with non-response; the two headline shares therefore do not add to 100. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership. The substantive subnational structure is denominational: Kosrae is overwhelmingly Congregational, Yap and Chuuk are heavily Roman Catholic, and Pohnpei splits between the two; that composition lives in the source religion tables and the build manifest, not in these rows, and the popup shows the affiliation and no-religion shares by census year only. Kosrae's 2023 No religion/Refused cell is asterisk-suppressed; both Kosrae 2023 shares and the Kosrae 2023 change are therefore null and never imputed. The population falls across the span (107,008 to 102,843 to 75,817, driven by Chuuk out-migration); shares are read within each state's own wave denominator and the decline is not a religion change.",
+      cityPresets: [
+        { label: "Colonia (Yap)", coords: [138.12, 9.51], zoom: 10 },
+        { label: "Weno (Chuuk)", coords: [151.85, 7.45], zoom: 10 },
+        { label: "Palikir (Pohnpei)", coords: [158.16, 6.92], zoom: 10 },
+        { label: "Tofol (Kosrae)", coords: [163.01, 5.32], zoom: 10 }
+      ],
+      geocode: { country: "fm", biasLngLat: [150.3, 5.6] },
+      onboarding: {
+        title: "Federated States of Micronesia research map",
+        intro: "Census religious-affiliation overlays for the four FSM states, Yap, Chuuk, Pohnpei and Kosrae, across three censuses 2000, 2010 and 2023, from the FSM Statistics Division (and SPC SDD for the 2000 state reports). The construct is census affiliation. It does not measure belief, practice, attendance, or registered membership.",
+        bullets: [
+          "States are shaded by the share with a stated religious affiliation, or by the share in the combined no-religion-and-refused slot, shown as No religion %.",
+          "Percentages use each state's all-persons total for its own wave. Every wave counts all persons of all ages and there is no universe break; the state denominators are therefore directly comparable across 2000, 2010 and 2023.",
+          "The no-religion slot combines the source's No Religion and Refused lines. 2000 and 2010 print those two lines separately; 2023 merges them into one No religion/Refused line. The slot therefore mixes persons reporting no religion with non-response, and the two headline shares do not add to 100.",
+          "The substantive subnational structure is denominational. Kosrae is overwhelmingly Congregational (2010: 5,762 of 6,616, about 87 percent, Roman Catholic just 153), Yap and Chuuk are heavily Roman Catholic, and Pohnpei splits between Roman Catholic and Congregation/Protestant. That composition lives in the source religion tables and the build manifest's category frames; the broad-affiliation headline does not carry it. The 2000 frame folds Assembly of God, Apostolic, Pentecostal and Jehovah's Witness into Other Religion; denomination detail is therefore confined to the matched 2010-2023 pair.",
+          "Kosrae's 2023 No religion/Refused cell is asterisk-suppressed; both Kosrae 2023 shares and the Kosrae 2023 change therefore render as no-data and are never imputed. Kosrae paints in 2000 and 2010.",
+          "The 2023 wave carries three documented source discrepancies, disclosed and never repaired: the printed national total (75,817) is one below the four state totals summed (75,818); the Baptist, SDA and Other religion row totals each print one above their four-state sum; and small cells are asterisk-suppressed.",
+          "A change metric reports the percentage-point change in the affiliation share since the previous census (2000 to 2010, 2010 to 2023); a roughly decennial difference is not an annual rate.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion by state from the <a href="https://stats.gov.fm" target="_blank" rel="noopener">FSM Statistics Division</a> (and SPC SDD for the 2000 state reports), 2000, 2010 and 2023. No reuse licence is stated on the FSM census religion tables in any wave; the derived state summaries are reproduced with attribution to the FSM Statistics Division while a courtesy reuse-confirmation ask is outgoing, and the page reverts in a single commit if the FSM Statistics Division objects (project-lead ruling, 2026-07-11) &middot; Boundaries from <a href="https://www.geoboundaries.org/api/current/gbOpen/FSM/ADM1/" target="_blank" rel="noopener">geoBoundaries</a> FSM ADM1 (CC BY 3.0 IGO), boundary source OCHA ROP, FSM Division of Statistics, SPC SDD',
+      censusFlagNote: "* Percentages use each state's all-persons total from the census religion table (all persons of all ages; no universe break across 2000, 2010 and 2023; the state denominators are therefore directly comparable). Broad affiliation is the state population minus the combined no-religion-and-refused slot, which combines the source's No Religion and Refused lines (separate in 2000 and 2010, merged into one No religion/Refused line in 2023) and mixes no-religion with non-response; the two headline shares do not add to 100. The substantive subnational structure is denominational (Kosrae overwhelmingly Congregational; Yap and Chuuk heavily Roman Catholic; Pohnpei split), documented in the source religion tables and the build manifest's category frames and not carried by these headline metrics. The 2000 eight-line frame folds Assembly of God, Apostolic, Pentecostal and Jehovah's Witness into Other Religion; denomination detail is therefore confined to the matched 2010-2023 pair. Kosrae's 2023 No religion/Refused cell is asterisk-suppressed; both Kosrae 2023 shares and the Kosrae 2023 change are therefore null and never imputed. The 2023 Table B6 carries three documented source discrepancies, disclosed and never repaired: the printed national total (75,817) is one below the four printed state totals summed (75,818); the Baptist (913), SDA (511) and Other religion (1,195) row totals each print one above their four-state sum; and small cells (Assembly of God in Chuuk, Apostolic in Yap and Kosrae, Jehovah's Witness in Kosrae, No religion/Refused in Kosrae) are asterisk-suppressed and rendered null. The population falls across the span (107,008 to 102,843 to 75,817, driven by Chuuk out-migration); shares are read within each state's own wave denominator and the decline is not a religion change. No reuse licence is stated on the FSM census religion tables in any wave; the derived state summaries ship with FSM Statistics Division attribution (and SPC SDD for the 2000 reports) while a courtesy reuse-confirmation ask is outgoing, and the page reverts in a single commit if the FSM Statistics Division objects. The boundary is geoBoundaries FSM ADM1, CC BY 3.0 IGO."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260711b"></script>
+</body>
+</html>

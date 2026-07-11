@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Federated States of Micronesia map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Federated States of Micronesia research map;
+    // every string traces to research/countries/fm/route-probe.md (build and
+    // reconciliation appendices), the manifest
+    // docs/manifests/fm-census-religion-2000-2023.json (construct notes,
+    // category frames, validation, and licence), or the live REGION_CONFIG in
+    // apps/regions/fm/index.html. authors nothing.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "FM",
+      countryName: "Federated States of Micronesia",
+      mapHref: "./",
+      intro: "Census religious-affiliation overlays for the four FSM states, Yap, Chuuk, Pohnpei and Kosrae, across three censuses 2000, 2010 and 2023, from the FSM Statistics Division (and SPC SDD for the 2000 state reports). The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+      facts: {
+        waves: "Three censuses: 2000, 2010, 2023",
+        geographies: "State (4 units): Yap, Chuuk, Pohnpei, Kosrae",
+        metrics: "Religious affiliation %, No religion %, change since previous census"
+      },
+      reading: [
+        "States are shaded by the share with a stated religious affiliation, or by the share in the combined no-religion-and-refused slot (No religion %). Broad affiliation is each state's population minus that combined slot, and it is comparable across all three waves because every wave counts all persons of all ages with no universe break.",
+        "The no-religion slot combines the source's No Religion and Refused lines. 2000 and 2010 print those two lines separately; 2023 merges them into one No religion/Refused line. The combined slot therefore mixes persons reporting no religion with non-response, and the two headline shares do not add to 100.",
+        "The substantive subnational structure is denominational. Kosrae is overwhelmingly Congregational (2010: 5,762 of 6,616, about 87 percent, with Roman Catholic just 153), Yap and Chuuk are heavily Roman Catholic (Yap 2010 about 82 percent, Chuuk 2010 about 55 percent), and Pohnpei splits between Roman Catholic and Congregation/Protestant. This denominational composition lives in the source religion tables and the build manifest's per-wave category frames; the headline affiliation and no-religion metrics do not carry it, and the popup shows the affiliation and no-religion shares by census year only. The 2000 eight-line frame folds Assembly of God, Apostolic, Pentecostal and Jehovah's Witness into Other Religion; denomination-level change is therefore confined to the matched 2010-2023 pair; the broad-affiliation spine (Roman Catholic, Congregation/Protestant, and the always-separate SDA, Baptist, Mormon) is comparable across all three waves.",
+        "Percentages use each state's all-persons total for its own wave as the denominator. Every wave counts all persons of all ages; there is therefore no universe break and the state denominators are directly comparable across 2000, 2010 and 2023. The population falls sharply across the span (107,008 in 2000, 102,843 in 2010, 75,817 in 2023, driven by Chuuk out-migration); shares are read within each state's own wave denominator and the decline is never treated as a religion change.",
+        "A change metric reports the percentage-point change in the affiliation share since the previous census (2000 to 2010, 2010 to 2023); the spacing is roughly decennial and a wave-to-wave difference is not an annual rate. Kosrae's 2023 affiliation share is null; the Kosrae 2023 change is therefore null through the missing operand.",
+        "The record reconciles. The 2000 wave closes exactly: the eight religion rows of each state-report Table B10/B10a-d sum to the printed all-persons total (Yap 11,241; Chuuk 53,595; Pohnpei 34,486; Kosrae 7,686), and the four states sum to the national 107,008. The 2010 wave closes at both margins: every religion row and every state column sums to the printed national total of 102,843 (the Kosrae Apostolic dash is read as nil). The 2023 wave carries three documented source discrepancies, disclosed and never repaired: the printed national total (75,817) is one below the four printed state totals summed (75,818); the Baptist (913), SDA (511) and Other religion (1,195) row totals each print one above their four-state sum; and small cells (Assembly of God in Chuuk, Apostolic in Yap and Kosrae, Jehovah's Witness in Kosrae, No religion/Refused in Kosrae) are asterisk-suppressed and rendered null. No suppressed value is imputed, even where the national margin would recover it; because Kosrae's No religion/Refused cell is suppressed, both the no-religion and the affiliation metrics for Kosrae 2023 are null.",
+        "No source publishes a place-of-worship layer for this product; place counts and density metrics are null. The restricted Pacific Data Hub microdata (2000, 2010, 2022/2023) require a confidentiality declaration under FSM Public Law 5-77 and are not touched; the published report and workbook tables carry the state-by-religion aggregates the build needs. Religion was asked in the 1994 and 1973 censuses and the 2000 state reports print a 1973/1994/2000 comparison in percentages, but extending the series before 2000 needs the older count tables located and their frames reconciled and is a recorded future-research route.",
+        "The display frame is the geoBoundaries gbOpen FSM ADM1 layer, four states joined one-to-one on shapeName with no concordance; area_code is the ISO 3166-2 code (FM-YAP, FM-TRK, FM-PNI, FM-KSA). The four states scatter across a 25.6-degree chain: the bounding box spans longitude 137.49 East (Yap's Ulithi and Ngulu western outer islands) to 163.04 East (Kosrae) and latitude 1.03 North (Pohnpei's far-southern Kapingamarangi and Nukuoro atolls) to 10.09 North. FSM lies wholly east of the antimeridian, and no dateline handling is needed. A box around the four main high islands would drop the outer atolls; the geoBoundaries layer carries them."
+      ],
+      sources: [
+        {
+          name: "FSM 2000 Census of Population and Housing, state reports (Yap, Chuuk, Pohnpei, Kosrae), Table B10/B10a-d: Marital Status and Religion by Municipality of Usual Residence",
+          href: "https://sdd.spc.int/fm",
+          construct: "Census religious affiliation by state, all persons of all ages; eight-way frame with distinct No Religion and Refused lines. Each state's religion block closes exactly to its printed all-persons total, and the four sum to 107,008. Assembly of God, Apostolic, Pentecostal and Jehovah's Witness sit inside Other Religion in this wave",
+          years: "2000",
+          licence: "No reuse licence is stated on the 2000 state reports; the front matter carries an acknowledgement page but no copyright or Creative Commons statement. The derived state summaries ship with attribution to the FSM Division of Statistics and SPC SDD while a courtesy reuse-confirmation ask is outgoing, and the page reverts in a single commit if the FSM Statistics Division objects (project-lead ruling, 2026-07-11)"
+        },
+        {
+          name: "FSM Basic Tabulation, 2010 Census of Population and Housing, Table B09: Religion by State of Usual Residence",
+          href: "https://stats.gov.fm/download/18/population-statistics/600/fsm-basic-tabulation-2010-census-of-population-and-housing.xlsx",
+          construct: "Census religious affiliation by state, all persons; twelve-way frame. Both margins close exactly: every religion row and every state column sums to the printed national total of 102,843 (the Kosrae Apostolic dash is read as nil)",
+          years: "2010",
+          licence: "No reuse licence is stated on the 2010 Basic Tabulation workbook; stats.gov.fm publishes no per-file licence and a terms-of-use page returns 404. The derived state summaries ship with FSM Statistics Division attribution while a courtesy reuse-confirmation ask is outgoing, and the page reverts in a single commit if the FSM Statistics Division objects (project-lead ruling, 2026-07-11)"
+        },
+        {
+          name: "FSM Basic Tables, 2023 Population and Housing Census, Table B6: Religion by State",
+          href: "https://stats.gov.fm/download/18/population-statistics/2210/fsm-basic-tables-2023-population-housing-census.xlsx",
+          construct: "Census religious affiliation by state, all persons; eleven-way frame with the No religion and Refused lines merged. Three documented source discrepancies are disclosed and never repaired: the printed national total (75,817) is one below the four printed state totals summed (75,818); the Baptist, SDA and Other religion row totals each print one above their four-state sum; and small cells are asterisk-suppressed and rendered null. Kosrae's No religion/Refused cell is suppressed; both Kosrae 2023 metrics are therefore null and never imputed",
+          years: "2023",
+          licence: "No reuse licence is stated on the 2023 Basic Tables workbook. The derived state summaries ship with FSM Statistics Division attribution while a courtesy reuse-confirmation ask is outgoing, and the page reverts in a single commit if the FSM Statistics Division objects (project-lead ruling, 2026-07-11)"
+        },
+        {
+          name: "geoBoundaries FSM ADM1 (4 states)",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/FSM/ADM1/",
+          construct: "Boundary geometry (four ADM1 states: Yap, Chuuk, Pohnpei, Kosrae), boundaryYearRepresented 2019, source OCHA ROP, FSM Division of Statistics, SPC SDD; joined one-to-one on shapeName with no concordance, simplified",
+          years: "2019 (represented year)",
+          licence: "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO), per the release metadata (release 9469f09); attribution geoBoundaries (gbOpen), boundary source OCHA ROP, FSM Division of Statistics, SPC SDD"
+        }
+      ],
+      accessData: {
+        note: "The committed products are the derived area summary (broad religious-affiliation and combined no-religion-and-refused shares by state and wave, with all-persons population totals) and a simplified four-state boundary only; the raw census reports and workbooks and the ADM1 boundary GeoJSON are not committed. The denominational composition behind the affiliation share is documented in the manifest's per-wave category frames, not in the area-summary rows, and the popup shows the affiliation and no-religion shares by census year only.",
+        sourceOfRecord: "FSM Statistics Division, <a href=\"https://stats.gov.fm\" target=\"_blank\" rel=\"noopener\">source of record</a> for 2010 (Table B09) and 2023 (Table B6); the SPC Statistics for Development Division digital library (<a href=\"https://sdd.spc.int/fm\" target=\"_blank\" rel=\"noopener\">sdd.spc.int/fm</a>) is the source of record for the 2000 state reports (Table B10/B10a-d); boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/FSM/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries FSM ADM1</a>.",
+        tables: "Table B10/B10a-d (2000), Table B09 (2010) and Table B6 (2023) are the source of record for the shipped counts. Reconciliation passes for 2000 (each state's eight rows sum to its printed all-persons total; the four sum to 107,008) and at both margins for 2010 (every row and column sums to 102,843). The 2023 Table B6 carries three documented source discrepancies (one-person national total gap; Baptist, SDA and Other religion row totals one above their four-state sum; asterisk cell-suppression), all disclosed and never repaired. The area-summary religious_affiliation_percent field carries broad affiliation (population minus the combined no-religion-and-refused slot, over each state's own wave all-persons total) and no_religion_percent carries the combined no-religion-and-refused share; Kosrae 2023 is null because its No religion/Refused cell is suppressed.",
+        licence: "No reuse licence is stated on the FSM census religion tables in any wave (the 2000 state reports, the 2010 Basic Tabulation, and the 2023 Basic Tables): the 2000 reports carry an acknowledgement page but no copyright or Creative Commons statement, and stats.gov.fm publishes no per-file licence with a terms-of-use page that returns 404. Under the project-lead ruling of 2026-07-11 the derived state summaries ship with attribution to the FSM Statistics Division (and SPC SDD for the 2000 reports) while a courtesy reuse-confirmation ask is outgoing; the licence is recorded as needs-review, and the page reverts in a single commit if the FSM Statistics Division objects. The restricted Pacific Data Hub microdata (confidentiality declaration required under FSM Public Law 5-77) are unused and non-binding. The geoBoundaries FSM ADM1 boundary is CC BY 3.0 IGO per its release metadata.",
+        script: "scripts/build_fm_area_summary.R",
+        manifests: [
+          { label: "fm-census-religion-2000-2023", href: "docs/manifests/fm-census-religion-2000-2023.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Federated States of Micronesia map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
