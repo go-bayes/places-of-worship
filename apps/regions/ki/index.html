@@ -92,6 +92,12 @@
     // Boundaries are geoBoundaries KIR ADM2 (ODbL 1.0), source OpenStreetMap.
     window.REGION_CONFIG = {
       countryCode: "KI",
+      // pulotu cultures opt-in (pi directive 2026-07-12: data source with
+      // its own three-point timeline): the global product filtered to KI
+      // by the runtime — 1 culture. attribution rides the pulotu legend
+      pulotuCultures: {
+        data: "../_shared/data/pulotu_cultures.geojson?v=20260711c"
+      },
       title: "Places of Worship | Kiribati Research Map",
       // dateline-aware 0-360 extent 169.521..202.836 (span 33.3), lat -2.87..4.70.
       // camera longitude on the 0-360 extent midpoint 186.179, mapped to

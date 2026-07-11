@@ -40,6 +40,12 @@
     // ceiling is 2006 to 2016.
     window.REGION_CONFIG = {
       countryCode: "TK",
+      // pulotu cultures opt-in (pi directive 2026-07-12: data source with
+      // its own three-point timeline): the global product filtered to TK
+      // by the runtime — 1 culture. attribution rides the pulotu legend
+      pulotuCultures: {
+        data: "../_shared/data/pulotu_cultures.geojson?v=20260711c"
+      },
       title: "Places of Worship | Tokelau Research Map",
       // boundary bbox lon -172.52..-171.18, lat -9.443..-8.533; the three
       // atolls sit about 90-100 km apart across a contiguous west-longitude

@@ -55,6 +55,12 @@
     // Boundaries are geoBoundaries FJI ADM2 (CC BY 4.0), source pacificdata.org.
     window.REGION_CONFIG = {
       countryCode: "FJ",
+      // pulotu cultures opt-in (pi directive 2026-07-12: data source with
+      // its own three-point timeline): the global product filtered to FJ
+      // by the runtime — 2 cultures. attribution rides the pulotu legend
+      pulotuCultures: {
+        data: "../_shared/data/pulotu_cultures.geojson?v=20260711c"
+      },
       title: "Places of Worship | Fiji Research Map",
       // dateline-aware extent 176.87E..181.76 (1.76W) by lat 12.48..20.67S.
       // camera on the dateline-aware longitude midpoint (179.315) and the

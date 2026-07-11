@@ -51,6 +51,12 @@
     // governed Palau place-of-worship snapshot ships with the product.
     window.REGION_CONFIG = {
       countryCode: "PW",
+      // pulotu cultures opt-in (pi directive 2026-07-12: data source with
+      // its own three-point timeline): the global product filtered to PW
+      // by the runtime — 1 culture. attribution rides the pulotu legend
+      pulotuCultures: {
+        data: "../_shared/data/pulotu_cultures.geojson?v=20260711c"
+      },
       title: "Places of Worship | Palau Research Map",
       // the 16 states span latitude 2.75 to 8.09 North: the far-southwest
       // outlying states Sonsorol and Hatohobei sit near 3 North and 131-132

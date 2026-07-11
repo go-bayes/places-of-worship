@@ -39,6 +39,12 @@
     // snapshot ships; 2020 is the only wave, and no change metric is offered.
     window.REGION_CONFIG = {
       countryCode: "PH",
+      // pulotu cultures opt-in (pi directive 2026-07-12: data source with
+      // its own three-point timeline): the global product filtered to PH
+      // by the runtime — 14 cultures. attribution rides the pulotu legend
+      pulotuCultures: {
+        data: "../_shared/data/pulotu_cultures.geojson?v=20260711c"
+      },
       title: "Places of Worship | Philippines Research Map",
       // the philippine archipelago is a tall extent (latitude 4.62 to 21.12,
       // longitude 114.28 to 126.61); centre on the mercator midpoint of the

@@ -28,6 +28,12 @@
     // ships; no change metric is offered.
     window.REGION_CONFIG = {
       countryCode: "TO",
+      // pulotu cultures opt-in (pi directive 2026-07-12: data source with
+      // its own three-point timeline): the global product filtered to TO
+      // by the runtime — 1 culture. attribution rides the pulotu legend
+      pulotuCultures: {
+        data: "../_shared/data/pulotu_cultures.geojson?v=20260711c"
+      },
       title: "Places of Worship | Tonga Research Map",
       // tongan archipelago runs north-south from tongatapu (-21.46) up to
       // the niuas (-15.57); camera sits on the mercator midpoint of the

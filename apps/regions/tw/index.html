@@ -29,6 +29,12 @@
     // administrative counts are not; they ride the register followers instead.
     window.REGION_CONFIG = {
       countryCode: "TW",
+      // pulotu cultures opt-in (pi directive 2026-07-12: data source with
+      // its own three-point timeline): the global product filtered to TW
+      // by the runtime — 8 cultures. attribution rides the pulotu legend
+      pulotuCultures: {
+        data: "../_shared/data/pulotu_cultures.geojson?v=20260711c"
+      },
       title: "Places of Worship | Taiwan Research Map",
       dataNoun: "Register",
       // taiwan: the main island plus the outlying county/city units (Kinmen

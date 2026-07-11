@@ -56,6 +56,12 @@
     // place-of-worship snapshot ships.
     window.REGION_CONFIG = {
       countryCode: "FM",
+      // pulotu cultures opt-in (pi directive 2026-07-12: data source with
+      // its own three-point timeline): the global product filtered to FM
+      // by the runtime — 8 cultures. attribution rides the pulotu legend
+      pulotuCultures: {
+        data: "../_shared/data/pulotu_cultures.geojson?v=20260711c"
+      },
       title: "Places of Worship | Federated States of Micronesia Research Map",
       // boundary bbox lon 137.49..163.04, lat 1.03..10.09; the four states
       // scatter across a 25.6-degree west-to-east chain (Yap's western outer
