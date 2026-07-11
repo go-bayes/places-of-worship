@@ -1,0 +1,434 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:me-census-religion:me:2003-2023:monstat-municipality",
+  "dataset_id": "me-census-religion:me:2003-2023:monstat-municipality",
+  "dataset_version_id": "me-census-religion:me:2003-2023:monstat-municipality:7ba1acbb25f4",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "me-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "ME"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-07-11T02:51:31Z",
+  "created_by": "scripts/build_me_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_me_area_summary.R",
+    "git_commit": "791a2b1",
+    "command": "Rscript scripts/build_me_area_summary.R",
+    "parameters": {
+      "waves": [2003, 2011, 2023],
+      "geography": "21 municipalities on the stable 2003-2011 administrative frame; 2023's 25 municipalities aggregated to their historical parents",
+      "construct": "census affiliation",
+      "denominator": "total census population",
+      "category_rule": "preserve source categories per wave; sum named religions for the affiliation headline; keep non-response outside both headlines",
+      "aggregation_2023": "Petnjica->Berane; Gusinje->Plav; Tuzi->Podgorica; Zeta->Podgorica (complete-unit partitions)",
+      "suppression_2023": "The 2023 MONSTAT municipal religion table applies statistical-confidentiality suppression, marked \"z\", to small category cells; 18 of the 25 published municipalities carry at least one suppressed religion cell. Municipality population totals are published in full and reconcile exactly to the national total for every wave. For 2023 the religious-affiliation and no-religion counts are computed from the published (unsuppressed) category cells and are therefore lower bounds where suppression applies; the suppressed mass per municipality is recorded and never redistributed or estimated.",
+      "territorial_scope": "This product follows the territorial coverage published by the Statistical Office of Montenegro (MONSTAT). The stable frame is the 21-municipality administrative division in force for the 2003 and 2011 censuses. The 2023 census reports 25 municipalities; the four units created after 2011 are summed back into their historical parents as complete partitions: Petnjica into Berane (created 2013), Gusinje into Plav (2014), and Tuzi (2018) and Zeta (2024) into Podgorica. In 2003 Montenegro was a constituent republic of the State Union of Serbia and Montenegro; the source reports it as Republika Crna Gora.",
+      "boundary_source": "Display geometry is the geoBoundaries Montenegro ADM1 layer (23 features, boundary ID MNE-ADM1-59799669, represented year 2017), dissolved to 21 features by merging Petnjica into Berane and Gusinje into Plav; Tuzi and Zeta are already inside the Podgorica feature at that vintage. The dissolve reproduces the external and internal boundaries of the 21-municipality 2003-2011 division. Geometric stability of every boundary segment across the census waves was not independently verified.",
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 432896,
+        "byte_ceiling": 1500000
+      },
+      "local_cache_hint": "Raw MONSTAT sources, terms, and geoBoundaries geometry are cached under data/raw/me_census/ and remain git-ignored.",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/me_census/ (8 objects mirrored 2026-07-11)"
+      ],
+      "retrieval_routes": [
+        {
+          "purpose": "2003 religion",
+          "method": "GET",
+          "url": "http://www.monstat.org/userfiles/file/popis03/Popis03.zip",
+          "notes": "Book 3 zip; knjiga3SVE.pdf section 1."
+        },
+        {
+          "purpose": "2011 religion",
+          "method": "GET",
+          "url": "https://www.monstat.org/userfiles/file/popis2011/PODACI%20OPSTINE/nove/tabela%20O19.xls",
+          "notes": "Table O19 xls."
+        },
+        {
+          "purpose": "2023 religion",
+          "method": "GET",
+          "url": "https://www.monstat.org/uploads/files/popis%202021/saopstenja/TABELA_Popis%20stanovnistva%202023%20II_ENG.xlsx",
+          "notes": "Release II ENG xlsx, Table 2."
+        },
+        {
+          "purpose": "boundary",
+          "method": "GET",
+          "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MNE/ADM1/geoBoundaries-MNE-ADM1.geojson",
+          "notes": "geoBoundaries MNE ADM1 GeoJSON."
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "readxl": "1.5.0",
+      "digest": "0.6.39",
+      "mapshaper": "npx mapshaper through scripts/lib/simplify_boundary.R",
+      "pdftotext": "Poppler pdftotext command-line utility"
+    }
+  },
+  "source": {
+    "provider": "Statistical Office of Montenegro (MONSTAT); geoBoundaries (OpenStreetMap)",
+    "source_dataset_ids": [
+      "monstat-census-religion-municipality-2003-2023",
+      "geoboundaries-mne-adm1-dissolved-21"
+    ],
+    "source_urls": [
+      "http://www.monstat.org/userfiles/file/popis03/Popis03.zip",
+      "https://www.monstat.org/userfiles/file/popis2011/PODACI%20OPSTINE/nove/tabela%20O19.xls",
+      "https://www.monstat.org/uploads/files/popis%202021/saopstenja/TABELA_Popis%20stanovnistva%202023%20II_ENG.xlsx",
+      "https://www.monstat.org/eng/",
+      "https://www.geoboundaries.org/api/current/gbOpen/MNE/ADM1/",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MNE/ADM1/geoBoundaries-MNE-ADM1.geojson"
+    ],
+    "retrieved_at": "2026-07-11T00:00:00Z",
+    "licence": "MONSTAT census: site footer reserves all rights (verbatim: \"Copyrights © 2025 All Rights Reserved by MONSTAT.\"); no open licence located; derived summaries ship with attribution, reuse ruling deferred. Boundary: geoBoundaries ADM1 under ODbL.",
+    "citation": "MONSTAT census religion by municipality 2003 (Book 3), 2011 (Table O19), 2023 (Release II); geoBoundaries MNE ADM1.",
+    "raw_redistribution": "Raw MONSTAT files stay git-ignored; only derived summaries are published.",
+    "licence_position": "needs_review"
+  },
+  "input_manifests": [],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/me/data/area_summary_municipality.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 166131,
+      "sha256": "7ba1acbb25f48141ee9f891153fb9b92d1639eadb195930ff5237b134563d041",
+      "row_count": 63,
+      "content": "Montenegro municipality census-religion summary for 2003, 2011, and 2023 on the 21-municipality frame.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "monstat_all_rights_reserved_attribution"
+    },
+    {
+      "uri": "repo:apps/regions/me/data/area_summary_municipality.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 110639,
+      "sha256": "78cf0c57056cbe6c183f99c9f025f421a4ad43597f915868b2958856a9ecf4cf",
+      "row_count": 63,
+      "content": "Flattened Montenegro municipality census-religion rows.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "monstat_all_rights_reserved_attribution"
+    },
+    {
+      "uri": "repo:apps/regions/me/data/me_municipality_2003_2011_frame.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 432896,
+      "sha256": "97a163185177e6114132548de9345d4eb72238f1738d3d773e92468c5fe25547",
+      "row_count": 21,
+      "content": "geoBoundaries MNE ADM1 dissolved to the 21 pre-2013 municipalities, simplified.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "monstat_all_rights_reserved_attribution"
+    }
+  ],
+  "raw_sources": [
+    {
+      "uri": "data/raw/me_census/me_2003_book3_religion.zip",
+      "url": "http://www.monstat.org/userfiles/file/popis03/Popis03.zip",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "http_status": null,
+      "format": "zip",
+      "bytes": 700963,
+      "sha256": "9444879335f72565e53e36de974a69acf68d4467b089225d0283fb3b3a876f8c",
+      "source_dataset_id": "monstat-census-religion-municipality-2003-2023",
+      "used_in_public_product": true,
+      "notes": "2003 census Book 3 (Vjeroispovijest, maternji jezik i nacionalna pripadnost po opstinama); contains knjiga3SVE.pdf."
+    },
+    {
+      "uri": "data/raw/me_census/knjiga3SVE.txt",
+      "url": "http://www.monstat.org/userfiles/file/popis03/Popis03.zip",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "http_status": null,
+      "format": "txt",
+      "bytes": 424472,
+      "sha256": "1065316fd50621205f14f08b0a2bc4d8325cb22b5625f40a4ebc563e5da8ac8a",
+      "source_dataset_id": "monstat-census-religion-municipality-2003-2023",
+      "used_in_public_product": true,
+      "notes": "Fixed-layout Cyrillic text extracted from the 2003 Book 3 PDF; section 1 is population by religion by municipality."
+    },
+    {
+      "uri": "data/raw/me_census/me_2011_O19_religion_by_municipality.xls",
+      "url": "https://www.monstat.org/userfiles/file/popis2011/PODACI%20OPSTINE/nove/tabela%20O19.xls",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "http_status": null,
+      "format": "xls",
+      "bytes": 23040,
+      "sha256": "e2a6002ddbdbdb478304d73a76a836c9cb2d4f3055c85a8da124aff5b3f4405f",
+      "source_dataset_id": "monstat-census-religion-municipality-2003-2023",
+      "used_in_public_product": true,
+      "notes": "2011 census Table O19, population by religion per municipality (bilingual)."
+    },
+    {
+      "uri": "data/raw/me_census/me_2023_II_ethnicity_religion_language_ENG.xlsx",
+      "url": "https://www.monstat.org/uploads/files/popis%202021/saopstenja/TABELA_Popis%20stanovnistva%202023%20II_ENG.xlsx",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "http_status": null,
+      "format": "xlsx",
+      "bytes": 49792,
+      "sha256": "7fca1d35f8fc5577d4672f6323da18541b6ccbcc7ff7137f9f647274949642cd",
+      "source_dataset_id": "monstat-census-religion-municipality-2003-2023",
+      "used_in_public_product": true,
+      "notes": "2023 census Release II (ENG); Table 2 is population by religion by municipality with confidentiality suppression."
+    },
+    {
+      "uri": "data/raw/me_census/monstat_home_eng.html",
+      "url": "https://www.monstat.org/eng/",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "http_status": null,
+      "format": "html",
+      "bytes": 68190,
+      "sha256": "4de83112319593ceabe587cfe098526599e0a89ae0eb78792cca868b783729fb",
+      "source_dataset_id": "monstat-census-religion-municipality-2003-2023",
+      "used_in_public_product": true,
+      "notes": "MONSTAT English homepage; footer carries the verbatim all-rights-reserved copyright."
+    },
+    {
+      "uri": "data/raw/me_census/geoboundaries_mne_adm1_metadata.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/MNE/ADM1/",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "http_status": null,
+      "format": "json",
+      "bytes": 1748,
+      "sha256": "1dea6ff792e2885513a2d688b29b076bec4c94ff983a102bfd540120879a6244",
+      "source_dataset_id": "geoboundaries-mne-adm1-dissolved-21",
+      "used_in_public_product": true,
+      "notes": "geoBoundaries MNE ADM1 release metadata (ODbL, 23 features, year 2017)."
+    },
+    {
+      "uri": "data/raw/me_census/geoboundaries_mne_adm1.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MNE/ADM1/geoBoundaries-MNE-ADM1.geojson",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "http_status": null,
+      "format": "geojson",
+      "bytes": 610015,
+      "sha256": "9674292fbc0a50c68c6584a2ae23fae768e76cc796bdb7e3e009c0197aec6ae3",
+      "source_dataset_id": "geoboundaries-mne-adm1-dissolved-21",
+      "used_in_public_product": true,
+      "notes": "geoBoundaries MNE ADM1 GeoJSON dissolved to 21 municipalities in the build."
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/me/data/area_summary_municipality.json",
+      "sha256": "7ba1acbb25f48141ee9f891153fb9b92d1639eadb195930ff5237b134563d041",
+      "built_by": "scripts/build_me_area_summary.R",
+      "notes": "63 municipality-year rows."
+    },
+    {
+      "uri": "repo:apps/regions/me/data/area_summary_municipality.csv",
+      "sha256": "78cf0c57056cbe6c183f99c9f025f421a4ad43597f915868b2958856a9ecf4cf",
+      "built_by": "scripts/build_me_area_summary.R",
+      "notes": "CSV companion."
+    },
+    {
+      "uri": "repo:apps/regions/me/data/me_municipality_2003_2011_frame.geojson",
+      "sha256": "97a163185177e6114132548de9345d4eb72238f1738d3d773e92468c5fe25547",
+      "built_by": "scripts/build_me_area_summary.R",
+      "notes": "21 simplified municipality features."
+    }
+  ],
+  "target_years": [2003, 2011, 2023],
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_me_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/me/data/area_summary_municipality.json",
+      "bash scripts/validate_manifests.sh"
+    ],
+    "tests": [
+      "All three announced waves contain national and 21 municipality rows.",
+      "Municipality population totals sum exactly to the published national total for every wave.",
+      "2003 and 2011 category counts reconcile exactly within municipality and from municipality to national.",
+      "2023 category detail is confidentiality-suppressed (z) for small cells; affiliation and no-religion are published-cell lower bounds, disclosed and never tuned.",
+      "All 21 simplified geometries are valid, non-empty, and have distinct SHA-256 WKB hashes.",
+      "Every raw input and generated output records URL or repository path, retrieval date, byte size, and SHA-256."
+    ],
+    "warnings": [
+      "The 2023 MONSTAT municipal religion table applies statistical-confidentiality suppression, marked \"z\", to small category cells; 18 of the 25 published municipalities carry at least one suppressed religion cell. Municipality population totals are published in full and reconcile exactly to the national total for every wave. For 2023 the religious-affiliation and no-religion counts are computed from the published (unsuppressed) category cells and are therefore lower bounds where suppression applies; the suppressed mass per municipality is recorded and never redistributed or estimated.",
+      "MONSTAT reserves all rights (verbatim: \"Copyrights © 2025 All Rights Reserved by MONSTAT.\"). No open-data licence located; licence status is needs_review pending a conductor/PI reuse ruling.",
+      "Display geometry is the geoBoundaries Montenegro ADM1 layer (23 features, boundary ID MNE-ADM1-59799669, represented year 2017), dissolved to 21 features by merging Petnjica into Berane and Gusinje into Plav; Tuzi and Zeta are already inside the Podgorica feature at that vintage. The dissolve reproduces the external and internal boundaries of the 21-municipality 2003-2011 division. Geometric stability of every boundary segment across the census waves was not independently verified."
+    ],
+    "notes": "Population-denominator and 2003/2011 category gates passed exactly; 2023 category suppression is disclosed. This product follows the territorial coverage published by the Statistical Office of Montenegro (MONSTAT). The stable frame is the 21-municipality administrative division in force for the 2003 and 2011 censuses. The 2023 census reports 25 municipalities; the four units created after 2011 are summed back into their historical parents as complete partitions: Petnjica into Berane (created 2013), Gusinje into Plav (2014), and Tuzi (2018) and Zeta (2024) into Podgorica. In 2003 Montenegro was a constituent republic of the State Union of Serbia and Montenegro; the source reports it as Republika Crna Gora.",
+    "stats": {
+      "waves": 3,
+      "rows": 63,
+      "municipalities_per_wave": 21,
+      "category_counts": "2003=11; 2011=13; 2023=13 published columns including total",
+      "boundary_features": 21,
+      "boundary_valid_features": 21,
+      "distinct_geometry_hashes": 21,
+      "boundary_bytes": 432896,
+      "summary_json_bytes": 166131,
+      "summary_csv_bytes": 110639
+    },
+    "reconciliation": {
+      "2003": {
+        "year": 2003,
+        "municipality_count": 21,
+        "published_category_rows_including_total": 11,
+        "population_total_reconciliation": "exact",
+        "within_municipality_category_reconciliation": "exact",
+        "national_total": 620145,
+        "national_affiliation_count": 595266,
+        "national_no_religion_count": 6003,
+        "national_outside_headlines_count": 18876,
+        "suppressed_municipalities": 0,
+        "suppressed_category_cells": 0,
+        "suppressed_mass_persons": 0
+      },
+      "2011": {
+        "year": 2011,
+        "municipality_count": 21,
+        "published_category_rows_including_total": 13,
+        "population_total_reconciliation": "exact",
+        "within_municipality_category_reconciliation": "exact",
+        "national_total": 620029,
+        "national_affiliation_count": 595731,
+        "national_no_religion_count": 8118,
+        "national_outside_headlines_count": 16180,
+        "suppressed_municipalities": 0,
+        "suppressed_category_cells": 0,
+        "suppressed_mass_persons": 0
+      },
+      "2023": {
+        "year": 2023,
+        "municipality_count": 21,
+        "published_category_rows_including_total": 13,
+        "population_total_reconciliation": "exact",
+        "within_municipality_category_reconciliation": "population_exact_categories_confidentiality_suppressed",
+        "national_total": 623633,
+        "national_affiliation_count": 592767,
+        "national_no_religion_count": 16784,
+        "national_outside_headlines_count": 14082,
+        "suppressed_municipalities": 17,
+        "suppressed_category_cells": 64,
+        "suppressed_mass_persons": 247
+      }
+    },
+    "boundary_validation": {
+      "output_feature_count": 21,
+      "valid_feature_count": 21,
+      "distinct_geometry_hash_count": 21,
+      "geometry_sha256_by_code": {
+        "andrijevica": "ed15261e4830bcccfa2fcaddbd8aaf12ea2bc902262aace198aa2d759ec58bdc",
+        "bar": "97a3347912c7e81ff5660a87f5823c7622c1e0aa571a686db77d316ec6b15819",
+        "berane": "5d2d2fc9754298298fa0bce141e637a0ccd05b6f90edad988d3661d24e01c613",
+        "bijelo_polje": "3390094f421ffadab90a4fe650b0dc474e9b7ae06f624b3e101977efe71f3c63",
+        "budva": "c1401f25f2aa9901eb9ae7c7c175412954706d56a4d3f61f3487aa9916f79cd2",
+        "cetinje": "2e7faf14721effbdd5e61f4f4175fcfa8bd3b81a9eb26189b3c2c3e8304bec1c",
+        "danilovgrad": "a8bb7947be0d2840621aec79fddd5c0989909d2e2f37d0b71d5f618d88e5c944",
+        "herceg_novi": "10959de868321db5199ae7b71791926076819400155fcdfb88d2f8eac32f752e",
+        "kolasin": "37b4a8fbe8b9bedbc9d47ed90d2fae513393864496c69c98dc6eb461eb06ebeb",
+        "kotor": "e3326474856195adf381237af7c0b146b42565fe970af9688e8938b20e9f25af",
+        "mojkovac": "9bdc13159d5fb5305426795139402ce7b443c746b55e195641af9bede32ab0d9",
+        "niksic": "8860522faf4bf622ee6987609598cd199cc4f72deea60714e7a7c3684dfd808d",
+        "plav": "1def808902ad6173964e4efc6d8de161ada82d6867a66a6405838d41c7937d9d",
+        "pljevlja": "c977afb40bad2c5691c1c39a047062d4df6f5cd5e201d1d41ca1dabc8004be44",
+        "pluzine": "74d53d63e5c9be9b00b9a6a94d8cc500250f624f47ecf23356c50bc0eca98ed5",
+        "podgorica": "8825d2508535345957caee8b0490403f0c064cf666fad46f3e12566c1a44aa04",
+        "rozaje": "ad5b69b729cf38195bbf9747529607fcabd351e0c85985ea7eb49919426a9f95",
+        "savnik": "7815e8f02dbc90e3ebbd7012190d4b1e35d21195ce9d55a9700c26dd9e50d6d3",
+        "tivat": "f5129b50df1e6973e8afb9848f84922000810d741ec50f7b0236a16c632031fa",
+        "ulcinj": "6c03d329ecae6d58fd0013d1e54b0454dfe44846bae2d9de452d702a0120f376",
+        "zabljak": "2e9f11d6495cdab74752b13d3e3d93abef3efb92794987a201e99df23cc0829a"
+      },
+      "source_crs": "EPSG:4326",
+      "area_calculation_crs": "EPSG:3035",
+      "output_crs": "EPSG:4326"
+    }
+  },
+  "construct_notes": [
+    "The construct is census affiliation. It does not measure belief, practice, attendance, or registered membership.",
+    "This product follows the territorial coverage published by the Statistical Office of Montenegro (MONSTAT). The stable frame is the 21-municipality administrative division in force for the 2003 and 2011 censuses. The 2023 census reports 25 municipalities; the four units created after 2011 are summed back into their historical parents as complete partitions: Petnjica into Berane (created 2013), Gusinje into Plav (2014), and Tuzi (2018) and Zeta (2024) into Podgorica. In 2003 Montenegro was a constituent republic of the State Union of Serbia and Montenegro; the source reports it as Republika Crna Gora.",
+    "The headline percentages use the total census population. Non-response categories remain in that denominator and outside both headlines.",
+    "In 2003 the no-religion headline is Nije vjernik (not a believer); Neizjasnjen and Nepoznato are non-response held in the denominator.",
+    "In 2011 and 2023 the no-religion headline is agnostics plus atheists; the 2023 residual Other category is held outside both headlines in the denominator.",
+    "The 2023 MONSTAT municipal religion table applies statistical-confidentiality suppression, marked \"z\", to small category cells; 18 of the 25 published municipalities carry at least one suppressed religion cell. Municipality population totals are published in full and reconcile exactly to the national total for every wave. For 2023 the religious-affiliation and no-religion counts are computed from the published (unsuppressed) category cells and are therefore lower bounds where suppression applies; the suppressed mass per municipality is recorded and never redistributed or estimated.",
+    "Display geometry is the geoBoundaries Montenegro ADM1 layer (23 features, boundary ID MNE-ADM1-59799669, represented year 2017), dissolved to 21 features by merging Petnjica into Berane and Gusinje into Plav; Tuzi and Zeta are already inside the Podgorica feature at that vintage. The dissolve reproduces the external and internal boundaries of the 21-municipality 2003-2011 division. Geometric stability of every boundary segment across the census waves was not independently verified.",
+    "Source category labels are preserved verbatim: 2003 in Montenegrin Cyrillic, 2011 bilingual (Montenegrin Latin / English), 2023 in MONSTAT English (spelling 'Ortodox' kept as published). English display labels are added, not substituted.",
+    "MONSTAT means the Statistical Office of Montenegro. ADM1 means first-level administrative division in the geoBoundaries scheme.",
+    "Category mapping for 2003: total Укупно => Total [product role: total; harmonisation: as_published]; islamska Исламска => Islamic [product role: named_religion; harmonisation: as_published]; judaisticka Јудаистичка => Judaic [product role: named_religion; harmonisation: as_published]; katolicka Католичка => Catholic [product role: named_religion; harmonisation: as_published]; pravoslavna Православна => Orthodox [product role: named_religion; harmonisation: as_published]; protestantska Протестантска => Protestant [product role: named_religion; harmonisation: as_published]; proorijentalni Прооријенталних култова => Pro-oriental cults [product role: named_religion; harmonisation: as_published]; druge Друге вјероисповијести => Other religions [product role: named_religion; harmonisation: as_published]; neizjasnjen Неизјашњен => Undeclared [product role: not_declared; harmonisation: as_published]; nije_vjernik Није вјерник => Not a believer [product role: no_religion; harmonisation: as_published]; nepoznato Непознато => Unknown [product role: unknown; harmonisation: as_published].",
+    "Category mapping for 2011: total Ukupno/ Total => Total [product role: total; harmonisation: as_published]; pravoslavna Pravoslavna/ Orthodox => Orthodox [product role: named_religion; harmonisation: as_published]; katolicka Katolička/ Catholics => Catholics [product role: named_religion; harmonisation: as_published]; islamska Islamska/ Islam => Islam [product role: named_religion; harmonisation: as_published]; adventist Adventist/ Adventist => Adventist [product role: named_religion; harmonisation: as_published]; agnostik Agnostik/ Agnostic => Agnostic [product role: no_religion; harmonisation: as_published]; ateista Ateista/ Atheist => Atheist [product role: no_religion; harmonisation: as_published]; budisti Budisti/ Buddhist => Buddhist [product role: named_religion; harmonisation: as_published]; hriscani Hrišćani/ Christians => Christians [product role: named_religion; harmonisation: as_published]; jehovini Jehovini svjedoci / Jehovah witness => Jehovah witness [product role: named_religion; harmonisation: as_published]; protestant Protestant/ Protestants => Protestants [product role: named_religion; harmonisation: as_published]; ostale Ostale vjeroispovijesti/ Other religions => Other religions [product role: named_religion; harmonisation: as_published]; ne_zeli Ne želi da se izjasni/ Does not want to declare => Does not want to declare [product role: not_declared; harmonisation: as_published].",
+    "Category mapping for 2023: total Total => Total [product role: total; harmonisation: as_published]; ortodox Ortodox => Orthodox [product role: named_religion; harmonisation: as_published]; catholics Catholics => Catholics [product role: named_religion; harmonisation: as_published]; protestant Protestant => Protestant [product role: named_religion; harmonisation: as_published]; jehovah Jehovah witness => Jehovah witness [product role: named_religion; harmonisation: as_published]; other_christian Other christian => Other Christian [product role: named_religion; harmonisation: as_published]; islam Islam => Islam [product role: named_religion; harmonisation: as_published]; buddhist Buddhist => Buddhist [product role: named_religion; harmonisation: as_published]; other_religion Other religion => Other religion [product role: named_religion; harmonisation: as_published]; atheist Atheist => Atheist [product role: no_religion; harmonisation: as_published]; agnostic Agnostic => Agnostic [product role: no_religion; harmonisation: as_published]; does_not_declare Does not want to declare => Does not want to declare [product role: not_declared; harmonisation: as_published]; other Other => Other [product role: other; harmonisation: as_published]."
+  ],
+  "deferred_sources": [
+    {
+      "source": "MONSTAT 2023 Release II Table 2 at the full 25-municipality level",
+      "status": "extra_level_not_shipped",
+      "reason": "The current-division 25-municipality 2023 detail (Petnjica, Gusinje, Tuzi, Zeta separate) is not shipped as a second level; a licensed 25-municipality boundary and a current-frame companion design are future work. The 2023 data are shipped aggregated to the 21-municipality change frame."
+    },
+    {
+      "source": "MONSTAT 2003/2011 settlement-level religion tables",
+      "status": "finer_level_not_shipped",
+      "reason": "Settlement-level religion exists for 2003 and 2011 but not for the harmonised change frame; municipality is the shipped level."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "needs_review",
+  "licence_basis": "monstat_all_rights_reserved_attribution",
+  "downstream_status": "staged",
+  "source_datasets": [
+    {
+      "source_dataset_id": "monstat-census-religion-municipality-2003-2023",
+      "name": "MONSTAT census religion by municipality, 2003, 2011, and 2023",
+      "provider": "Statistical Office of Montenegro (MONSTAT)",
+      "url": "https://www.monstat.org/uploads/files/popis%202021/saopstenja/TABELA_Popis%20stanovnistva%202023%20II_ENG.xlsx",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/me_census/me_2023_II_ethnicity_religion_language_ENG.xlsx",
+      "licence": {
+        "name": "MONSTAT reserves all rights (verbatim site footer: \"Copyrights © 2025 All Rights Reserved by MONSTAT.\"); no open-data licence or reproduction clause located.",
+        "url": "https://www.monstat.org/eng/",
+        "attribution": "Statistical Office of Montenegro (MONSTAT)"
+      },
+      "citation": "MONSTAT, Census of Population, Households and Dwellings 2003 (Book 3), 2011 (Table O19), and 2023 (Release II).",
+      "access_limits": null,
+      "redistribution_limits": "Site footer reserves all rights. The build ships derived summaries with MONSTAT attribution and holds raw sources git-ignored; a reuse ruling is deferred to the conductor/PI.",
+      "notes": "2003 and 2011 report 21 municipalities; 2023 reports 25 aggregated to the 21-municipality frame. The 2023 MONSTAT municipal religion table applies statistical-confidentiality suppression, marked \"z\", to small category cells; 18 of the 25 published municipalities carry at least one suppressed religion cell. Municipality population totals are published in full and reconcile exactly to the national total for every wave. For 2023 the religious-affiliation and no-religion counts are computed from the published (unsuppressed) category cells and are therefore lower bounds where suppression applies; the suppressed mass per municipality is recorded and never redistributed or estimated."
+    },
+    {
+      "source_dataset_id": "geoboundaries-mne-adm1-dissolved-21",
+      "name": "geoBoundaries Montenegro ADM1 (dissolved to 21 municipalities)",
+      "provider": "geoBoundaries (OpenStreetMap-derived)",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MNE/ADM1/geoBoundaries-MNE-ADM1.geojson",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/me_census/geoboundaries_mne_adm1.geojson",
+      "licence": {
+        "name": "Open Data Commons Open Database License 1.0 (ODbL)",
+        "url": "https://www.openstreetmap.org/copyright",
+        "attribution": "geoBoundaries; © OpenStreetMap contributors, ODbL"
+      },
+      "citation": "geoBoundaries gbOpen Montenegro ADM1, boundary ID MNE-ADM1-59799669, represented year 2017.",
+      "access_limits": null,
+      "redistribution_limits": "ODbL share-alike; derived database and attribution required.",
+      "notes": "Display geometry is the geoBoundaries Montenegro ADM1 layer (23 features, boundary ID MNE-ADM1-59799669, represented year 2017), dissolved to 21 features by merging Petnjica into Berane and Gusinje into Plav; Tuzi and Zeta are already inside the Podgorica feature at that vintage. The dissolve reproduces the external and internal boundaries of the 21-municipality 2003-2011 division. Geometric stability of every boundary segment across the census waves was not independently verified."
+    }
+  ],
+  "notes": "The committed product contains derived municipality summaries and simplified geoBoundaries geometry only. Montenegro UI and hub wiring are outside this build. This product follows the territorial coverage published by the Statistical Office of Montenegro (MONSTAT). The stable frame is the 21-municipality administrative division in force for the 2003 and 2011 censuses. The 2023 census reports 25 municipalities; the four units created after 2011 are summed back into their historical parents as complete partitions: Petnjica into Berane (created 2013), Gusinje into Plav (2014), and Tuzi (2018) and Zeta (2024) into Podgorica. In 2003 Montenegro was a constituent republic of the State Union of Serbia and Montenegro; the source reports it as Republika Crna Gora."
+}
