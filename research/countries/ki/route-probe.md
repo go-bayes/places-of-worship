@@ -106,3 +106,38 @@ Derived working files also present (not source objects): `ki_2020_general_report
 ## Product boundary
 
 A build on this probe would stage 24-island religious-affiliation summaries for 1990, 1995, 2000, 2005, 2010, and 2015 (all all-ages) on the geoBoundaries KIR ADM2 frame, with per-wave verbatim category frames, the KPC/KUC harmonisation note, an antimeridian-safe (0-360) geometry pipeline with a 24-island completeness gate, and fail-fast reconciliation at both margins. It would carry the 2020 national frame as published and hold the 2020 island layer pending a KINSO/SPC custom tabulation or the microdata. It would not contain a place-of-worship layer, place-density metrics, or the pre-1990 deeper-history workbooks (1968, 1973, 1985), which are recorded as future-research routes. A KINSO licence confirmation and the 2020 island tabulation are the two recorded routes to complete and open the page.
+
+## Build appendix (2026-07-11, STAGED)
+
+The build ran per this route. `scripts/build_ki_area_summary.R` parses the five KINSO Excel "Table 10. Religion by Island" workbooks (1990-2010) at build time and transcribes the 2015 Report Vol 1 Table 6 island population and No religion column from the rendered table images (pdftotext `-layout` drifts on the trailing-dash cells). It writes `apps/regions/ki/data/ki_island_2017.geojson`, `apps/regions/ki/data/area_summary_island.{json,csv}` (24 islands x 6 waves = 144 rows), and `docs/manifests/ki-census-religion-1990-2015.json`. The product is STAGED: no page, no hub link, `licence_status` `needs_review` pending PI task 15. The `data/raw/ki_census/` cache was mirrored to `gs://pow-research-data/raw_sources/ki_census/` (29 objects, 45.6 MiB).
+
+**Reconciliation gates (fail-fast; every wave verified against printed control totals).**
+
+| Wave | National | Island-column closure | Category-row closure | Notes |
+| --- | --- | --- | --- | --- |
+| 1990 | 72,334 | short by 9 across 4 islands (disclosed) | closes exactly | nine-person unaccounted residual: South Tarawa 3, Abemama 4, North Tabiteuea 1, South Tabiteuea 1; kept in denominator, never repaired |
+| 1995 | 76,844 | closes exactly | closes exactly | six-category frame, no No religion column; Line Islands + Phoenix in one combined column (5,866) |
+| 2000 | 84,491 | closes exactly | closes exactly | Not Stated column (Ns, 25) retained in denominator |
+| 2005 | 92,533 | closes exactly | closes exactly | Not Stated column (Ns, 22) retained in denominator |
+| 2010 | 103,058 | closes exactly | closes exactly | Not Stated column (212) retained in denominator |
+| 2015 | 110,136 | populations sum to 110,136 | No religion sums to 51; 14 printed categories sum to 110,136 nationally | Betio enumerated separately (17,330) |
+| 2020 (national context) | 119,438 | n/a (national only) | 17 categories sum to 119,438 | KPC 10,016 + KUC 25,322 = 35,338 (Atlas KUC-KPC collapse); carried in the manifest, never as an island wave |
+
+**Island roster per wave.** 1990/2000/2005/2010 enumerate 23 islands (Betio within South Tarawa); 1995 enumerates 19 individual islands plus one combined Phoenix/Line column; 2015 enumerates all 24 (Betio separate). The 24-feature boundary is fixed; absent units get explicit null-metric rows (the Korea 1995 Sejong precedent): Betio is null for 1990-2010 (its residents fall in the South Tarawa count), and Teeraina/Tabuaeran/Kiritimati/Kanton are null for 1995 (the combined Phoenix/Line total is recorded in the manifest, never placed on a feature). Nine null rows in total.
+
+**Antimeridian — both-frame gate (passed).** The raw WGS84 national bbox smears 348.6 degrees. The geometry pipeline shifts to a contiguous 0-360 frame, simplifies with the shared mapshaper helper (allow-overlaps clean, 100% keep, 509,687 bytes), cuts at lon 180, and shifts the eastern pieces (Phoenix, Line) back to negative longitudes. Gate (1) 0-360 national extent = 169.521-202.836 (span 33.3, the expected compact span). Gate (2) WGS84 [-180,180]: max single-feature bbox longitude span = 0.399 degrees (well under the 5-degree smear threshold), max consecutive-vertex ring longitude jump = 0.013 degrees (no ring crosses the antimeridian), all coordinates within [-180,180]. Gate (3) dateline-aware extent recorded in the manifest, not the raw bbox. 24 valid features, 24 distinct geometry hashes; join on `area_code` (geoBoundaries `shapeID`); name concordance North/South Tarawa, North/South Tabiteuea, Teeraina applied.
+
+**Category/no-religion treatment.** `religious_affiliation_count` is the sum of the named-religion categories per island; `no_religion_count` is the None / No religion cell (null in 1995, which has no such category, so its affiliation share is 100% and its no-religion share is null); a not-stated or unaccounted residual (the 2000/2005/2010 Not Stated column, and the 1990 nine-person shortfall) stays in the denominator and outside both numerators, so the two shares need not sum to 100%.
+
+**Named validation invocations (all pass).**
+
+```
+$ uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/ki/data/area_summary_island.json
+ok -- validation done
+$ uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/ki-census-religion-1990-2015.json
+ok -- validation done
+$ bash scripts/validate_manifests.sh
+manifest validation: 70/70 pass
+```
+
+**Open questions for the conductor.** (1) Licence: PI task 15 must rule on the summaries-not-raw-data stance for the KINSO reports and historical tables (no stated terms); the Atlas SPC partial-reproduction clause is recorded but not relied on. (2) The 1990 nine-person unaccounted residual is disclosed and never repaired — confirm this matches the standing discrepancy-disclosure ruling. (3) The South Tarawa count includes Betio through 2010 (Betio null those waves); confirm this is preferred over dissolving Betio into South Tarawa geometry for the combined waves. (4) 1995 no-religion is null (category absent); confirm null over an asserted 0. (5) 2020 island religion remains the one gap in the series (Atlas pies / licensed microdata), held as a future route.
