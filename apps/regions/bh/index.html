@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Bahrain Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Bahrain's product is Information & eGovernment Authority (iGA) census
+    // religious affiliation for a single wave (2020), on one national polygon.
+    // Bahrain publishes census religion at national geography only, never by
+    // governorate; under the small-country clause the map therefore shades a
+    // single national polygon rather than sub-national areas. The 2020 census
+    // religion frame is two lines only (Muslim, مسلم; Others, أخرى), summing to
+    // the total by construction with no no-religion and no not-stated line.
+    // Under the minority-share two-slot design the two legacy metric slots carry
+    // declared constructs: the affiliation slot is the reference-group (Muslim)
+    // share; the no-religion slot is its exact complement, the minority share
+    // (the Others line). The 2010 census religion national total is held (dead
+    // portal, absent from data.gov.bh); no 2010 rows and no change metric ship.
+    window.REGION_CONFIG = {
+      countryCode: "BH",
+      title: "Places of Worship | Bahrain Research Map",
+      // one archipelago of about 763 km2; centre on the boundary bbox centre
+      // (lon 50.373..50.823, lat 25.572..26.331) so the national polygon fills
+      // the frame beside the census panels. The Hawar Islands in the south-east
+      // are part of the ADM0 outline; there is no dateline trap.
+      center: [50.598, 25.952],
+      initialZoom: 9.5,
+      censusLevels: {
+        national: {
+          label: "National",
+          boundaries: "data/bh_national.geojson",
+          summary: "data/area_summary_national.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Information & eGovernment Authority (iGA), Kingdom of Bahrain, Population by Religion, Nationality and Sex – Census 2020, via www.data.gov.bh, under the Bahrain Open Government Data License v1.0 · Boundaries © geoBoundaries BHR ADM0 (ODbL 1.0, OpenStreetMap contributors)"
+        }
+      },
+      defaultLevel: "national",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2020,
+      // minority-share design: the flat two-line frame (Muslim / Others) sums to
+      // 100 by construction; the two legacy slots therefore carry declared
+      // constructs. The affiliation slot is the reference-group (Muslim) share;
+      // the no-religion slot is its exact complement, the minority share (the
+      // Others line). Single wave (2020); no change metric (2010 is held).
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Muslim (%)",
+          note: "share of Bahrain's 2020 census population reporting Muslim (مسلم), Bahrain's largest published census category, held constant as the reference group. This is the reference group's share of the census frame, not a measure of affiliation versus non-affiliation. The census religion frame is two lines only (Muslim, مسلم; Others, أخرى) and sums to the total by construction. The popup shows this share and the minority share; the verbatim two-line frame with counts rides every row of the downloadable area summary."
+        },
+        no_religion_percent: {
+          label: "Minority share (%)",
+          note: "share outside Bahrain's largest published category, Muslim: the Others line (أخرى) of the 2020 census frame, all residents classified outside Muslim, the exact complement of the Muslim share. This is arithmetic on the published two-line frame; it is not a measure of no religion, belief, practice, or secularity."
+        }
+      },
+      popupDenominatorNote: "Percentages use the 2020 census all-persons total (1,501,635) as the denominator. The census religion frame is two lines only, Muslim (مسلم) and Others (أخرى), summing to the total by construction. The Muslim (%) metric is the reference-group share; the Minority share (%) metric is its exact complement, the Others line. There is no no-religion category and no not-stated category, and the census does not split Muslim into Sunni or Shia. The verbatim two-line frame with counts (Muslim 1,111,533; Others 390,102) rides every row of the downloadable area summary. The citizen structure is the informative cut: Bahraini nationals are about 99.7 percent Muslim, and the minority is almost entirely non-Bahraini residents (387,807 of 390,102); that cut is documented in the overview, not shaded on the map.",
+      cityPresets: [
+        { label: "Manama", coords: [50.586, 26.228], zoom: 12 },
+        { label: "Muharraq", coords: [50.618, 26.257], zoom: 12 },
+        { label: "Riffa", coords: [50.555, 26.115], zoom: 12 }
+      ],
+      geocode: { country: "bh", biasLngLat: [50.598, 25.952] },
+      onboarding: {
+        title: "Bahrain research map",
+        intro: "Population by Religion, Nationality and Sex, Census 2020, a single national overlay from the Information & eGovernment Authority (iGA) open data portal, data.gov.bh. Bahrain publishes census religion at national geography only; the map therefore shades one national polygon.",
+        bullets: [
+          "Bahrain publishes census religion at national geography only, and no wave tabulates religion by governorate. Under the small-country clause, the map shades a single national polygon rather than sub-national areas.",
+          "The 2020 census religion frame is two lines only: Muslim (مسلم) and Others (أخرى). Two metrics are shown: the Muslim (%) share, the reference group and Bahrain's largest published category (74.02%), and the Minority share (%), its exact complement, the Others line (25.98%).",
+          "The minority share is arithmetic on the published two-line frame; it is not a measure of no religion, belief, practice, or secularity. The frame has no no-religion category and no not-stated category, and the census does not split Muslim into Sunni or Shia. Tap the island for its Muslim share and minority share; the verbatim two-line counts ride every row of the downloadable area summary (see About this map).",
+          "Only the 2020 wave is mapped, and no change metric is offered. The 2010 census religion national total survives only in a dead portal and secondary sources; it is held and never shipped.",
+          "Open <strong>Show Census Data</strong> (top centre) for the geography and metric controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      // the Bahrain Open Government Data License v1.0 grants royalty-free reuse
+      // with attribution; §3.3c requires the byte-matched "Datasets provided by
+      // the Information & eGovernment Authority ..." statement, carried verbatim
+      // below. geoBoundaries BHR ADM0 is ODbL 1.0 (OpenStreetMap contributors).
+      censusSourceAttribution: 'Census religion &copy; <a href="https://www.data.gov.bh/explore/dataset/population-by-religion-nationality-and-sex-census-2020/" target="_blank" rel="noopener">Information &amp; eGovernment Authority</a> (iGA), Kingdom of Bahrain, Population by Religion, Nationality and Sex &ndash; Census 2020, via www.data.gov.bh, extracted 2026-07-11 &middot; Datasets provided by the Information &amp; eGovernment Authority via www.data.gov.bh are governed by the Bahrain Open Government Data License available at www.nea.gov.bh/Documents/OpenDataLicense.pdf. To the fullest extent permitted by law, the government is not liable for any damage or loss of any kind caused directly or indirectly by the use or availability of the datasets or any derived analyses or applications. &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> BHR ADM0 (ODbL 1.0, OpenStreetMap contributors)',
+      censusFlagNote: "* Bahrain publishes census religion at national geography only in the single published wave (2020); no wave tabulates religion by governorate; the map therefore shades a single national polygon. Percentages use the 2020 census all-persons total (1,501,635). The census religion frame is two lines only, Muslim (مسلم) and Others (أخرى); the map shades the reference-group (Muslim) share and its exact complement, the minority share; the no-religion slot label carries the minority share and no no-religion meaning. The frame has no no-religion category and no not-stated category, and the census does not split Muslim into Sunni or Shia. The 2010 census religion national total is held (dead portal, absent from data.gov.bh), and no change metric ships."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260711b"></script>
+</body>
+</html>
