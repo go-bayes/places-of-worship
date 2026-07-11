@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Palau map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Palau research map; every string traces to
+    // research/countries/pw/route-probe.md (build appendix), the manifest
+    // docs/manifests/pw-census-religion-2005-2020.json, or the live
+    // REGION_CONFIG in apps/regions/pw/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "PW",
+      countryName: "Palau",
+      mapHref: "./",
+      intro: "Census religious affiliation for Palau's 16 states at the 2005, 2015, and 2020 censuses, from the Office of Planning and Statistics (OPS/PALARIS). The construct is census affiliation; it does not measure belief, practice, attendance, or membership. The universe differs by wave and is stated per year: 2005 counts all persons of all ages, and 2015 and 2020 count adults 18 and over.",
+      facts: {
+        waves: "Censuses 2005, 2015, 2020",
+        geographies: "State (16 units)",
+        metrics: "Religious affiliation %, no religion % (2005 only)"
+      },
+      reading: [
+        "States are shaded by the share reporting a religious affiliation, or by the 2005 None or refused share, shown as No religion %. The affiliation choropleth carries signal only in 2005: the 2015 and 2020 report folds persons with no religion into the Other category, which makes religious affiliation 100 percent for every state by construction; those two waves are therefore flat population surfaces rather than a distinguishing measure. The map opens on 2005 for that reason.",
+        "The universe differs by wave and must never be read as change across it. The 2005 Census Monograph Table 10.1 counts all persons of all ages against each state's printed Total (the 16 states close to the national Total of 19,907). The 2015 and 2020 Census Basic Tables Table 42 restrict to adults 18 and over: the 2015 Palau Total column is 8,376 and equals the 16-state sum, and the 2020 table prints no subtotal; the 16 state columns sum to 9,303, and the overall Total of 13,576 (which includes overseas legal-residence columns for persons whose legal residence is abroad) is never the state denominator.",
+        "The no-religion slot is real for 2005 and null for 2015 and 2020. The 2005 table prints a distinct None or refused column (222 persons nationally, near 1.1 percent), which mixes persons with no religion and refusals to answer. The 2015 and 2020 report classifies persons with no religion into Other; no separable no-religion count exists in those waves, and the metric is null for them.",
+        "No change metric is offered. The 2005 nine-way frame separates Jehovah's Witnesses, Other Protestants, and a distinct None or refused and has no Muslim, Assembly of God, or Baptist column; the 2015 and 2020 nine-way frame splits those three and folds no-religion into Other. The 2005-to-later difference therefore crosses both a universe break (all ages against 18 and over) and a category-frame break, and any positive reading there is an artefact of the frame change rather than real change; the 2015-to-2020 difference is trivially zero because affiliation is flat at 100 by construction. Each source frame is preserved verbatim per wave and not merged. Modekngei, the indigenous Palauan religion, is a first-class named category in every wave.",
+        "The boundary frame is geoBoundaries PLW ADM1, 16 states, represented year 2017. All 16 census states join one-to-one; two spelling concordances preserve both labels (geoBoundaries Ngeremlengui maps to census Ngaremlengui, and the 2005 monograph spelling Ngerchelong maps to canonical Ngarchelong). The extent spans latitude 2.75 to 8.09 North and includes the far-southwest outlying states Sonsorol and Hatohobei alongside the main Babeldaob-Koror cluster; the map therefore frames the whole country rather than the main cluster.",
+        "No governed Palau place-of-worship snapshot ships with this product; place counts and density metrics are null, and OSM coverage has not been verified in this build. One documented source discrepancy: the 2005 monograph prose says about one in six people reported no religion or refused, which its own table refutes (None or refused is 222 of 19,907, near 1.1 percent); the table governs and the prose sentence is recorded, not used."
+      ],
+      sources: [
+        {
+          name: "Palau Office of Planning and Statistics (OPS), 2005 Census of Population and Housing, Volume II Monograph, Table 10.1: Religion by State",
+          href: "https://www.palaugov.pw/wp-content/uploads/2016/03/2005-Census-Monograph-Report.pdf",
+          construct: "Census religious affiliation by state, all persons of all ages, with a distinct None or refused category",
+          years: "2005",
+          licence: "No reuse licence is stated in any OPS report or on the Pacific Data Hub; derived state summaries ship with attribution to the Office of Planning and Statistics under the summaries-with-attribution stance, pending a project-lead licence ruling"
+        },
+        {
+          name: "Palau OPS, 2015 Census of Population, Housing and Agriculture, Volume I Basic Tables, Table 42: Ethnicity and Religion by Legal Residence",
+          href: "https://www.palaugov.pw/wp-content/uploads/2017/02/2015-Census-of-Population-Housing-Agriculture-.pdf",
+          construct: "Census religious affiliation by state, adults 18 and over, no-religion folded into Other",
+          years: "2015",
+          licence: "No stated reuse licence; summaries-with-attribution stance as above"
+        },
+        {
+          name: "Palau OPS, 2020 Census of Population and Housing, Volume I Basic Tables, Table 42: Ethnicity and Religion by Legal Residence",
+          href: "https://www.palaugov.pw/wp-content/uploads/2022/09/2020-Census-of-Population-and-Housing.pdf",
+          construct: "Census religious affiliation by state, adults 18 and over, no-religion folded into Other",
+          years: "2020",
+          licence: "No stated reuse licence; summaries-with-attribution stance as above"
+        },
+        {
+          name: "geoBoundaries gbOpen PLW ADM1 (16 states)",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/PLW/ADM1/",
+          construct: "Boundary geometry (16 states), source OpenStreetMap and Wambacher",
+          years: "2017 (represented year)",
+          licence: "Open Data Commons Open Database License 1.0, per the release metadata"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Palau Office of Planning and Statistics, <a href=\"https://www.palaugov.pw/executive-branch/ministries/finance/budgetandplanning/census-of-population-and-housing/\" target=\"_blank\" rel=\"noopener\">census hub</a>: the 2005 Census Monograph (Table 10.1) and the 2015 and 2020 Census Basic Tables (Table 42); boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/PLW/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries PLW ADM1</a>.",
+        tables: "The 2005 Monograph Table 10.1 (text-extractable) and the 2015 and 2020 Basic Tables Table 42 (image tables transcribed at 150 dpi) are the source of record for the shipped counts; every transcribed cell reconciles at both margins with zero difference. The area-summary religious_affiliation_percent field carries the share reporting an affiliation against each state's printed total (the population less None or refused in 2005; 100 percent by construction in 2015 and 2020, where no-religion is folded into Other); the no_religion_percent field carries the 2005 None or refused share and is null for 2015 and 2020.",
+        licence: "No reuse licence is stated in any OPS report or on the Pacific Data Hub, which records the 2020 dataset as License not specified. The derived state summaries ship with attribution to the Palau Office of Planning and Statistics under the project's summaries-with-attribution stance, and the licence is recorded as needs-review pending a project-lead ruling; an OPS reuse-confirmation email is the clean unblock. The geoBoundaries PLW ADM1 boundary is Open Data Commons Open Database License 1.0, source OpenStreetMap and Wambacher.",
+        script: "scripts/build_pw_area_summary.R",
+        manifests: [
+          { label: "pw-census-religion-2005-2020", href: "docs/manifests/pw-census-religion-2005-2020.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Palau map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
