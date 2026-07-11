@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Nauru Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Nauru's product is NBS/SPC census religious affiliation for 2002, 2011,
+    // and 2021, on one national polygon. Total-population religion is published
+    // at national geography in every wave — district religion is public for
+    // 2021 only, and only for the Nauruan citizen/dual sub-universe (Table 19,
+    // 11,215 of 11,680) — and under the small-country clause the map shades a
+    // single national polygon rather than sub-national areas. Percentages use
+    // each wave's printed all-persons national total (10,065 / 9,945 / 11,680).
+    // The broad-affiliation spine (Nauruan Congregational, Roman Catholic,
+    // Nauru Independent, No religion, Not stated) carries the same construct
+    // across all three waves and a percentage-point change metric is honest;
+    // finer denomination detail is preserved verbatim per wave and change below
+    // the headline is confined to 2011->2021, because the 2002 "Other" folds
+    // Assemblies of God, Seventh Day Adventist, Baptist and Jehovah's Witness,
+    // which were split out only from 2011. The 2021 Nauruan-only district table
+    // is a documented deferred supplement, never merged with this series.
+    window.REGION_CONFIG = {
+      countryCode: "NR",
+      title: "Places of Worship | Nauru Research Map",
+      // one ~21 km2 island; centre on the numerically-verified boundary bbox
+      // centre (lon 166.909..166.959, lat -0.555..-0.503) so the national
+      // polygon sits clear of the top-centre census control. The island fills a
+      // tiny extent (~0.05 deg both axes); the zoom is therefore higher than at
+      // the larger small-island siblings while keeping ocean context around it.
+      center: [166.934, -0.529],
+      initialZoom: 12.4,
+      censusLevels: {
+        national: {
+          label: "National",
+          boundaries: "data/nr_adm0_2005.geojson",
+          summary: "data/area_summary_adm0.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Nauru Bureau of Statistics (NBS) and the Pacific Community (SPC), reproduced in part for research purposes with acknowledgement · Boundaries © geoBoundaries NRU ADM1 (Public Domain, source FreeMapViewer), dissolved to one national polygon"
+        }
+      },
+      defaultLevel: "national",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      // the two census-question shares plus the headline change metric; the
+      // broad-affiliation spine and No religion are comparable across all three
+      // waves; the percentage-point change series is therefore honest — the
+      // comparability is only below the headline (finer denominations split out
+      // from 2011), which no metric here exposes
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of each wave's printed all-persons national total (10,065 in 2002, 9,945 in 2011, 11,680 in 2021) reporting any religious affiliation — the universe less No Religion and Not stated. The broad-affiliation spine (Nauruan Congregational, Roman Catholic, Nauru Independent, No religion, Not stated) is comparable across all three waves; finer denomination detail is preserved verbatim per wave and is not comparable back to 2002, where Assemblies of God, Seventh Day Adventist, Baptist and Jehovah's Witness were folded into Other."
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share of each wave's all-persons national total in the source No Religion category (456 in 2002, 178 in 2011, 157 in 2021). No Religion and Not stated are separate lines in every wave; No Religion is therefore comparable across all three waves, and Not stated is the disclosed residual."
+        },
+        religious_change: {
+          label: "Religious affiliation change",
+          note: "percentage-point change in the religious-affiliation share since the previous census (2002 → 2011 → 2021); the broad-affiliation headline carries the same construct across all three waves."
+        }
+      },
+      popupDenominatorNote: "Percentages use each wave's printed all-persons national total as denominator (10,065 in 2002, 9,945 in 2011, 11,680 in 2021). Affiliation is the universe less No Religion and Not stated; No religion is the source No Religion category; Not stated is the disclosed residual; affiliation, No Religion, and Not stated therefore sum to the universe. The broad-affiliation spine (Nauruan Congregational, Roman Catholic, Nauru Independent, No religion, Not stated) is comparable across all three waves; each wave's finer denomination frame is preserved verbatim, and denomination change is confined to 2011→2021, because the 2002 Other (1,417) folds Assemblies of God, Seventh Day Adventist, Baptist and Jehovah's Witness, which were split out only from 2011. NBS and SPC publish total-population census religion only at national geography — district religion is public for 2021 alone, and only for the Nauruan citizen/dual sub-universe (Table 19, 11,215 of 11,680) — and the map shades one national polygon and the 2021 Nauruan-only district table is held as a documented deferred supplement, never merged with this all-persons series. The boundary is a documented dissolve of the public-domain geoBoundaries NRU ADM1 layer into one national outline.",
+      cityPresets: [
+        { label: "Yaren", coords: [166.9209, -0.5477], zoom: 14 },
+        { label: "Denigomodu", coords: [166.9159, -0.5225], zoom: 14 },
+        { label: "Aiwo", coords: [166.9124, -0.5333], zoom: 14 },
+        { label: "Boe", coords: [166.9207, -0.5427], zoom: 14 },
+        { label: "Meneng", coords: [166.9382, -0.5527], zoom: 14 },
+        { label: "Anibare", coords: [166.9527, -0.5215], zoom: 14 },
+        { label: "Anabar", coords: [166.9440, -0.5055], zoom: 14 }
+      ],
+      geocode: { country: "nr", biasLngLat: [166.934, -0.529] },
+      onboarding: {
+        title: "Nauru research map",
+        intro: "Census religious affiliation for Nauru at the 2002, 2011, and 2021 Population and Housing Censuses, from the Nauru Bureau of Statistics (NBS) and the Pacific Community (SPC). Total-population census religion is published at national geography in every wave; the map therefore shades one national polygon across the three waves.",
+        bullets: [
+          "NBS and SPC publish Nauru's total-population census religion at national geography — district religion is public for 2021 only, and only for the Nauruan citizen/dual sub-universe; under the small-country clause the map therefore shades a single national polygon rather than sub-national areas.",
+          "Open <strong>Show Census Data</strong> (top centre) to choose the metric and census year (2002, 2011, 2021).",
+          "Percentages use each wave's printed all-persons national total (10,065 / 9,945 / 11,680); affiliation is the universe less No Religion and Not stated, and Not stated is the disclosed residual.",
+          "The broad-affiliation spine and No religion are comparable across all three waves; each wave's finer denomination frame is preserved verbatim, and denomination change is confined to 2011→2021.",
+          "The 2021 Nauruan-only district table (Table 19, 11,215 of 11,680 residents) is a documented deferred supplement, never merged with this all-persons national series."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      // the SPC/Nauru clause authorises partial reproduction for research
+      // purposes provided SPC, Nauru and the source document are acknowledged;
+      // these acknowledgements are a licence obligation, not decoration, and are
+      // byte-matched to the manifest attribution strings. geoBoundaries NRU is
+      // Public Domain.
+      censusSourceAttribution: 'Source: Pacific Community (SPC) and Nauru Bureau of Statistics (NBS), 2021 Nauru Population and Housing Census and 2011 Nauru National Census Report, reproduced in part for scientific, educational or research purposes with acknowledgement of SPC, Nauru and the source document. Census religion © <a href="https://stats.gov.nr/" target="_blank" rel="noopener">Nauru Bureau of Statistics</a> and the <a href="https://www.spc.int/" target="_blank" rel="noopener">Pacific Community (SPC)</a> &middot; Boundaries © <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> NRU ADM1 (Public Domain, source FreeMapViewer), dissolved to one national polygon',
+      censusFlagNote: "* NBS and SPC publish Nauru's total-population census religion only at national geography; district religion is public for 2021 alone, and only for the Nauruan citizen/dual sub-universe; the map therefore shades a single national polygon. Percentages use each wave's printed all-persons national total (10,065 / 9,945 / 11,680). The broad-affiliation spine and No religion are comparable across 2002, 2011, and 2021; each wave's finer denomination frame is preserved verbatim, and denomination change is confined to 2011→2021. The 2021 Nauruan-only district table is a documented deferred supplement, never merged with this all-persons series."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260711a"></script>
+</body>
+</html>

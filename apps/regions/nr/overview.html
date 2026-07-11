@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Nauru map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Nauru research map; every string traces to
+    // research/countries/nr/route-probe.md (build appendix), the manifest
+    // docs/manifests/nr-census-religion-2002-2021.json, or the live
+    // REGION_CONFIG in apps/regions/nr/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "NR",
+      countryName: "Nauru",
+      mapHref: "./",
+      intro: "Census religious affiliation for Nauru at the 2002, 2011, and 2021 Population and Housing Censuses, from the Nauru Bureau of Statistics (NBS) and the Pacific Community (SPC). Total-population census religion is published at national geography in every wave — district religion is public for 2021 only, and only for the Nauruan citizen/dual sub-universe; under the small-country clause the map therefore shades a single national polygon across the three waves. Percentages use each wave's printed all-persons national total.",
+      facts: {
+        waves: "Censuses 2002, 2011, 2021",
+        geographies: "National (one polygon; total-population census religion is published at national geography only)",
+        metrics: "Religious affiliation %, no religion %, religious affiliation change"
+      },
+      reading: [
+        "The map shades a single national polygon by the share reporting a religious affiliation, or the share reporting no religion, against each wave's printed all-persons national total. NBS and SPC publish total-population census religion at national geography only: district religion appears in a public report for 2021 alone, and only for the Nauruan citizen/dual sub-universe; the national-polygon shading is therefore the whole of the published total-population spatial detail. This is the small-country clause, the same policy the Dominica and Iceland national series follow.",
+        "Percentages use each wave's printed all-persons national total as denominator: 10,065 in 2002, 9,945 in 2011, 11,680 in 2021. Affiliation is the universe less No Religion and Not stated, No religion is the source No Religion category, and Not stated is the disclosed residual; affiliation, No Religion, and Not stated therefore sum to the universe. The all-persons universe holds in every wave — the probe verified the 2002 religion column is all-persons, not the Nauruan-only tribe universe.",
+        "The broad-affiliation spine — Nauruan Congregational, Roman Catholic, Nauru Independent, No religion, and Not stated — carries the same construct across all three waves, and the percentage-point change metric is therefore honest for the headline. The Nauruan indigenous denominations, the Nauruan Congregational Church and the Nauru Independent Church, are first-class named categories in every wave and keep their own labels.",
+        "Finer denomination detail is not comparable back to 2002: the 2002 six-line frame folds Assemblies of God, Seventh Day Adventist, Baptist and Jehovah's Witness into Other (1,417), and these were split out only from 2011; treating the 2002 Other as comparable to the 2011 Other (282) would therefore misread the split-out, not a real decline. Each wave's source category frame is preserved verbatim — 2002 six lines, 2011 ten lines, 2021 folded fifteen lines — and denomination change is confined to 2011→2021. No Religion and Not stated stay separate lines in all three waves; the no-religion series is therefore comparable across them (456 → 178 → 157).",
+        "District religion is published for 2021 only, in the person tabulations (Table 19), and only for the Nauruan citizen/dual population (11,215 of 11,680 residents, 96.0%); the 465-person gap is non-Nauruan residents for whom no religion-by-district cross-tab is published. That table cannot be summed to the total-population national figure; it is therefore held as a documented single-wave, sub-universe deferred supplement, never merged with this all-persons national series and never presented as a district time series. The 2002 and 2011 district religion tables exist only inside MOU-gated Pacific Data Hub microdata, which this build does not touch."
+      ],
+      sources: [
+        {
+          name: "NBS/SPC 2021 Nauru Population and Housing Census Analytical Report, Table 25 (Population by religious affiliation, Nauru: 2011 and 2021), and 2021 Tables Vol.1 sheet G-7",
+          href: "https://stats.gov.nr/download/49/2021/359/nauru-2021-population-and-housing-census-analytical-report.pdf",
+          construct: "Census religious affiliation, national all-persons series",
+          years: "2011, 2021",
+          licence: "SPC/Nauru partial-reproduction-with-acknowledgement clause (ISBN 978-982-00-1510-4)"
+        },
+        {
+          name: "NBS/SPC 2011 Nauru National Census Report, Table 23 (Population by religious affiliation, Nauru: 2002 and 2011)",
+          href: "https://nauru-data.sprep.org/system/files/Nauru_2011_Census_Report_FINAL%20(3).pdf",
+          construct: "2002 and 2011 national religion columns (all persons)",
+          years: "2002, 2011",
+          licence: "SPC/NBS joint census output; open hosting (SPREP Nauru data portal, SDD digital library); 2021 clause applied by extension"
+        },
+        {
+          name: "geoBoundaries gbOpen NRU ADM1 (14 districts), dissolved to one national polygon",
+          href: "https://www.geoboundaries.org/",
+          construct: "Boundary geometry (one national polygon)",
+          years: "2005 vintage",
+          licence: "Public Domain (source FreeMapViewer)"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Nauru Bureau of Statistics, <a href=\"https://stats.gov.nr/download/49/2021/359/nauru-2021-population-and-housing-census-analytical-report.pdf\" target=\"_blank\" rel=\"noopener\">2021 Population and Housing Census Analytical Report</a> (Table 25) and 2021 Tables Vol.1 sheet G-7, with the <a href=\"https://nauru-data.sprep.org/system/files/Nauru_2011_Census_Report_FINAL%20(3).pdf\" target=\"_blank\" rel=\"noopener\">2011 National Census Report</a> (Table 23) for the 2002 and 2011 columns; boundaries from <a href=\"https://www.geoboundaries.org/\" target=\"_blank\" rel=\"noopener\">geoBoundaries</a> NRU ADM1 (2005), dissolved to one national polygon.",
+        tables: "2021 Analytical Report Table 25 and 2021 Tables Vol.1 sheet G-7 (national all-persons religion, folded frame), with the 2011 National Report Table 23 supplying the 2002 and 2011 columns; the 2011 column is printed independently by both reports and byte-matches. The area-summary religious_affiliation_percent and no_religion_percent fields carry the shares against each wave's all-persons national total; affiliation is the universe less No Religion and Not stated, No religion is the source No Religion category, and Not stated is the disclosed residual.",
+        licence: "SPC and Nauru authorise partial reproduction or translation of the census material for scientific, educational or research purposes, provided that SPC, Nauru and the source document are properly acknowledged (2021 Analytical Report, ISBN 978-982-00-1510-4). Derived national summaries ship under that clause with SPC/NBS attribution. The 2011 report's front-matter licence page did not text-extract (recorded as a soft flag); identical SPC/NBS attribution is applied. The geoBoundaries NRU ADM1 boundary is Public Domain, source FreeMapViewer.",
+        script: "scripts/build_nr_area_summary.R",
+        manifests: [
+          { label: "nr-census-religion-2002-2021", href: "docs/manifests/nr-census-religion-2002-2021.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Nauru map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
