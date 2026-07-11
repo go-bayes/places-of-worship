@@ -1,0 +1,710 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:id-census-religion:id:2010:bps-province",
+  "dataset_id": "id-census-religion:id:2010:bps-province",
+  "dataset_version_id": "id-census-religion:id:2010:bps-province:85b387049073",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "id-census-religion",
+  "dataset_role": "staged_evidence",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "ID"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-07-12T00:00:00Z",
+  "created_by": "scripts/build_id_area_summary.R",
+  "target_years": [
+    2010
+  ],
+  "pipeline": {
+    "script": "scripts/build_id_area_summary.R",
+    "git_commit": "b65dc4fd574d7d5a94fb8b2f399bcaf3fbd96e72",
+    "command": "Rscript scripts/build_id_area_summary.R",
+    "parameters": {
+      "construct": "census affiliation",
+      "shipped_waves": [
+        2010
+      ],
+      "shipped_geography": "33 Indonesia provinces (2010 census frame)",
+      "boundary_set": "id-province-2019-cod-adm1",
+      "source_tables": {
+        "2010": "SP2010 'Penduduk Menurut Wilayah dan Agama yang Dianut' (religion by province), integer full-count, ten-column frame"
+      },
+      "universe": "all persons of all ages; the Total includes Tidak Terjawab (not answered) and Tidak Ditanyakan (not asked)",
+      "premise_corrections": "The queue row implied a 2010-2024 multi-wave kabupaten/kota product. The record refutes both the span and the grain for a clean census build. First, SP2020 dropped the religion question (pandemic short form), so census affiliation has a single modern wave with a published subnational religion table: SP2010. Second, 2020+ subnational religion figures come from Dukcapil (Ministry of Home Affairs civil registration) - administrative registration, a DIFFERENT construct, kept out of this census product and never merged. Third, the kabupaten/kota grain is data- available in SP2010 but boundary-blocked: the open licensed ADM2 layers are the 2020 (519-unit) frame, while SP2010 used the ~497-unit 2010 frame, and mapping across the 2010-2020 kabupaten splits would require an invented concordance (forbidden). The province product ships; kabupaten is the documented deeper route.",
+      "slot_design": "The Indonesian official frame has NO no-religion category: all seven lines (Islam, Kristen, Katolik, Hindu, Budha, Khong Hu Chu, Lainnya) are religions and Lainnya is other religions/beliefs. religious_affiliation_percent is the seven-religion share of the published Total; no_religion is null (rendered, not invented). The two non-response columns (Tidak Terjawab, Tidak Ditanyakan) stay in the denominator and in neither slot, so the affiliation share sits just below 100 (the FJ/SB/BZ unallocated-residual precedent). The seven-religion composition - the real signal - rides verbatim on each row's quality flag.",
+      "category_frame": [
+        "Islam",
+        "Kristen",
+        "Katolik",
+        "Hindu",
+        "Budha",
+        "Khong Hu Chu",
+        "Lainnya",
+        "Tidak Terjawab",
+        "Tidak Ditanyakan"
+      ],
+      "category_frame_note": "Verbatim BPS spelling preserved: 'Budha' (not Buddha), 'Khong Hu Chu' (not Khong Hu Cu), 'Lainnya' (Other), 'Tidak Terjawab' (not answered), 'Tidak Ditanyakan' (not asked). No category is merged, redistributed, or backcast.",
+      "no_religion_treatment": "null in every row: the official Indonesian religion frame has no no-religion / atheist category. Not invented.",
+      "residual_treatment": "Tidak Terjawab (not answered; national 139,582) and Tidak Ditanyakan (not asked; national 757,118) are kept as published, in each province's Total denominator, and excluded from the affiliation numerator - disclosed, never repaired.",
+      "change_rule": "Single wave (SP2010); no cross-wave change. SP2020 religion is absent; Dukcapil 2020+ is a separate construct, not a comparison wave.",
+      "dukcapil_note": "The Ditjen Dukcapil (Kemendagri) civil-registration data publishes religion by province and kabupaten/kota semi-annually from ~2020 (e.g., semester I 2024). It is administrative registration, not census self-report - a separate construct recorded as a future separate-construct option, never merged into this census product.",
+      "held_and_deferred": "Kabupaten/kota SP2010 religion (the 33 province drill-downs, ~497 units) is data-available via the same BPS route but boundary-blocked (no open licensed 2010-vintage ADM2 layer; the 2020 519-unit frame needs an invented split concordance). SP2000 and earlier census waves (province religion appears in provincial BPS tables, e.g., Bali 1971/2000/2010) are a deeper-history route needing province-by-province national assembly across changing province frames. Both HELD, no backcast.",
+      "omitted_metrics": [
+        "no_religion_percent",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 2,
+        "bytes": 1247894
+      },
+      "local_cache_hint": "All raw sources are cached under data/raw/id_census/ and remain git-ignored.",
+      "retrieval_record": [
+        {
+          "uri": "data/raw/id_census/sp2010_religion_province_national.html",
+          "url": "https://sensus.bps.go.id/topik/tabular/sp2010/12/0/0",
+          "format": "html",
+          "bytes": 378514,
+          "sha256": "128523b66613fd5166fb89b0f1c31aebc542ede7855789686d55febda9029101",
+          "row_count": null,
+          "source_dataset_id": "id-sp2010-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "SP2010 religion-by-province table (server-rendered HTML). Ten-column verbatim frame; both margins close to 237,641,326.",
+          "local_cache_hint": "data/raw/id_census/sp2010_religion_province_national.html (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/id_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/id_census/geoBoundaries-IDN-ADM1-gbHum.geojson",
+          "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbHumanitarian/IDN/ADM1/geoBoundaries-IDN-ADM1.geojson",
+          "format": "geojson",
+          "bytes": 110857632,
+          "sha256": "88eb119bf5eaa57060e53616313a02ef69ceb8d4a91cb9a282cf9d0e7c84b828",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-idn-adm1-gbhum-2019",
+          "used_in_public_product": true,
+          "periods": "2019",
+          "notes": "geoBoundaries IDN ADM1 (gbHumanitarian) GeoJSON; 34 provinces, CC BY 3.0 IGO (OCHA COD-AB lineage). Pinned commit 9469f09.",
+          "local_cache_hint": "data/raw/id_census/geoBoundaries-IDN-ADM1-gbHum.geojson (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/id_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/id_census/gb_idn_adm1_gbhum_meta.json",
+          "url": "https://www.geoboundaries.org/api/current/gbHumanitarian/IDN/ADM1/",
+          "format": "json",
+          "bytes": 1842,
+          "sha256": "38a7b843f5959e5cba3a0868d31f31a788b922f13330b7a55577fe665deda482",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-idn-adm1-gbhum-2019",
+          "used_in_public_product": false,
+          "periods": "2019",
+          "notes": "geoBoundaries IDN ADM1 (gbHumanitarian) metadata; records CC BY 3.0 IGO, boundaryYearRepresented 2019, admUnitCount 34.",
+          "local_cache_hint": "data/raw/id_census/gb_idn_adm1_gbhum_meta.json (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/id_census/"
+          ]
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "scripts/lib/simplify_boundary.R (npx mapshaper)"
+    }
+  },
+  "source": {
+    "provider": "Badan Pusat Statistik (BPS - Statistics Indonesia); geoBoundaries (William & Mary geoLab) / OCHA COD-AB",
+    "source_dataset_ids": [
+      "id-sp2010-religion-by-province",
+      "geoboundaries-idn-adm1-gbhum-2019"
+    ],
+    "source_urls": [
+      "https://sensus.bps.go.id/topik/tabular/sp2010/12/0/0",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbHumanitarian/IDN/ADM1/geoBoundaries-IDN-ADM1.geojson",
+      "https://www.geoboundaries.org/api/current/gbHumanitarian/IDN/ADM1/"
+    ],
+    "retrieved_at": "2026-07-12T00:00:00Z",
+    "licence": "No open-data licence is stated on the BPS Sensus Penduduk 2010 source. The sensus.bps.go.id page footer asserts 'Copyright (c) 2026 - Badan Pusat Statistik | Sensus Penduduk 2010' (retrieved 2026-07-12, byte-matched in the cached HTML), a copyright assertion with no reuse grant. The main bps.go.id term-of-use page sits behind a Cloudflare human-verification challenge that this lane does not complete (recorded gap). The derived province summaries carry attribution to Badan Pusat Statistik (BPS) and ship STAGED under the BUILD-THEN-ASK ruling (summaries-with- attribution stance, RO/SK/CI/MONSTAT line); a BPS reuse-confirmation ask is the clean courtesy unblock. The boundary is CC BY 3.0 IGO.",
+    "citation": "BPS Sensus Penduduk 2010, Penduduk Menurut Wilayah dan Agama yang Dianut; geoBoundaries IDN ADM1 (gbHumanitarian, OCHA COD-AB).",
+    "raw_redistribution": "The SP2010 source HTML and the geoBoundaries source GeoJSON are not committed; they remain in data/raw/id_census/.",
+    "local_cache_hint": "data/raw/id_census/ (git-ignored by .gitignore data/ rule)",
+    "raw_cache_durable_uris": [
+      "gs://pow-research-data/raw_sources/id_census/"
+    ]
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/id_census/sp2010_religion_province_national.html",
+      "url": "https://sensus.bps.go.id/topik/tabular/sp2010/12/0/0",
+      "format": "html",
+      "bytes": 378514,
+      "sha256": "128523b66613fd5166fb89b0f1c31aebc542ede7855789686d55febda9029101",
+      "row_count": null,
+      "source_dataset_id": "id-sp2010-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "SP2010 religion-by-province table (server-rendered HTML). Ten-column verbatim frame; both margins close to 237,641,326.",
+      "local_cache_hint": "data/raw/id_census/sp2010_religion_province_national.html (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/id_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/id_census/geoBoundaries-IDN-ADM1-gbHum.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbHumanitarian/IDN/ADM1/geoBoundaries-IDN-ADM1.geojson",
+      "format": "geojson",
+      "bytes": 110857632,
+      "sha256": "88eb119bf5eaa57060e53616313a02ef69ceb8d4a91cb9a282cf9d0e7c84b828",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-idn-adm1-gbhum-2019",
+      "used_in_public_product": true,
+      "periods": "2019",
+      "notes": "geoBoundaries IDN ADM1 (gbHumanitarian) GeoJSON; 34 provinces, CC BY 3.0 IGO (OCHA COD-AB lineage). Pinned commit 9469f09.",
+      "local_cache_hint": "data/raw/id_census/geoBoundaries-IDN-ADM1-gbHum.geojson (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/id_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/id_census/gb_idn_adm1_gbhum_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbHumanitarian/IDN/ADM1/",
+      "format": "json",
+      "bytes": 1842,
+      "sha256": "38a7b843f5959e5cba3a0868d31f31a788b922f13330b7a55577fe665deda482",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-idn-adm1-gbhum-2019",
+      "used_in_public_product": false,
+      "periods": "2019",
+      "notes": "geoBoundaries IDN ADM1 (gbHumanitarian) metadata; records CC BY 3.0 IGO, boundaryYearRepresented 2019, admUnitCount 34.",
+      "local_cache_hint": "data/raw/id_census/gb_idn_adm1_gbhum_meta.json (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/id_census/"
+      ]
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/id/data/area_summary_province.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 68897,
+      "sha256": "85b387049073ec2a7e955c64e44ab715f24e32e3166714569330ac42df21334c",
+      "row_count": 33,
+      "feature_count": null,
+      "content": "Indonesia 33-province SP2010 census-affiliation area summary (single wave, 2010).",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "bps_copyright_attribution_build_then_ask"
+    },
+    {
+      "uri": "repo:apps/regions/id/data/area_summary_province.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 40924,
+      "sha256": "1fde4b39f1fd13025e4b87defb2a90dc3b21cbe06c9fbf43c3bdc23290c39666",
+      "row_count": 33,
+      "feature_count": null,
+      "content": "Flattened Indonesia 33-province SP2010 census-affiliation rows (2010).",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "bps_copyright_attribution_build_then_ask"
+    },
+    {
+      "uri": "repo:apps/regions/id/data/id_province_2019.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 1247894,
+      "sha256": "a83346e74f82979a6ab97f2c5c2607960da10fe9fa5d6ba13ff077eb26e02794",
+      "row_count": null,
+      "feature_count": 33,
+      "content": "Simplified geoBoundaries IDN ADM1 boundary dissolved to the 33-province 2010 frame.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_cc_by_3_0_igo"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/id/data/area_summary_province.json",
+      "sha256": "85b387049073ec2a7e955c64e44ab715f24e32e3166714569330ac42df21334c",
+      "built_by": "scripts/build_id_area_summary.R",
+      "notes": "33 provinces x 1 wave = 33 rows; all-persons universe; no no-religion category in the official frame (null); non-response residual disclosed in the denominator."
+    },
+    {
+      "uri": "repo:apps/regions/id/data/id_province_2019.geojson",
+      "sha256": "a83346e74f82979a6ab97f2c5c2607960da10fe9fa5d6ba13ff077eb26e02794",
+      "built_by": "scripts/build_id_area_summary.R",
+      "notes": "33 province features from geoBoundaries IDN ADM1 (gbHumanitarian), Kalimantan Utara dissolved into Kalimantan Timur, simplified with mapshaper weighted keep-shapes."
+    }
+  ],
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_id_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/id/data/area_summary_province.json",
+      "bash scripts/validate_manifests.sh"
+    ],
+    "gate_sp2010": {
+      "status": "passed",
+      "both_margins_close_to": 237641326,
+      "province_row_checks": 33,
+      "religion_column_checks": 9,
+      "records": [
+        {
+          "margin": "province_row",
+          "key": "NANGGROE ACEH DARUSSALAM",
+          "computed": 4494410,
+          "printed": 4494410,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "SUMATERA UTARA",
+          "computed": 12982204,
+          "printed": 12982204,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "SUMATERA BARAT",
+          "computed": 4846909,
+          "printed": 4846909,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "RIAU",
+          "computed": 5538367,
+          "printed": 5538367,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "JAMBI",
+          "computed": 3092265,
+          "printed": 3092265,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "SUMATERA SELATAN",
+          "computed": 7450394,
+          "printed": 7450394,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "BENGKULU",
+          "computed": 1715518,
+          "printed": 1715518,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "LAMPUNG",
+          "computed": 7608405,
+          "printed": 7608405,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "KEPULAUAN BANGKA BELITUNG",
+          "computed": 1223296,
+          "printed": 1223296,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "KEPULAUAN RIAU",
+          "computed": 1679163,
+          "printed": 1679163,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "DKI JAKARTA",
+          "computed": 9607787,
+          "printed": 9607787,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "JAWA BARAT",
+          "computed": 43053732,
+          "printed": 43053732,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "JAWA TENGAH",
+          "computed": 32382657,
+          "printed": 32382657,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "DI YOGYAKARTA",
+          "computed": 3457491,
+          "printed": 3457491,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "JAWA TIMUR",
+          "computed": 37476757,
+          "printed": 37476757,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "BANTEN",
+          "computed": 10632166,
+          "printed": 10632166,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "BALI",
+          "computed": 3890757,
+          "printed": 3890757,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "NUSA TENGGARA BARAT",
+          "computed": 4500212,
+          "printed": 4500212,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "NUSA TENGGARA TIMUR",
+          "computed": 4683827,
+          "printed": 4683827,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "KALIMANTAN BARAT",
+          "computed": 4395983,
+          "printed": 4395983,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "KALIMANTAN TENGAH",
+          "computed": 2212089,
+          "printed": 2212089,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "KALIMANTAN SELATAN",
+          "computed": 3626616,
+          "printed": 3626616,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "KALIMANTAN TIMUR",
+          "computed": 3553143,
+          "printed": 3553143,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "SULAWESI UTARA",
+          "computed": 2270596,
+          "printed": 2270596,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "SULAWESI TENGAH",
+          "computed": 2635009,
+          "printed": 2635009,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "SULAWESI SELATAN",
+          "computed": 8034776,
+          "printed": 8034776,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "SULAWESI TENGGARA",
+          "computed": 2232586,
+          "printed": 2232586,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "GORONTALO",
+          "computed": 1040164,
+          "printed": 1040164,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "SULAWESI BARAT",
+          "computed": 1158651,
+          "printed": 1158651,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "MALUKU",
+          "computed": 1533506,
+          "printed": 1533506,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "MALUKU UTARA",
+          "computed": 1038087,
+          "printed": 1038087,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "PAPUA BARAT",
+          "computed": 760422,
+          "printed": 760422,
+          "difference": 0
+        },
+        {
+          "margin": "province_row",
+          "key": "PAPUA",
+          "computed": 2833381,
+          "printed": 2833381,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Islam",
+          "computed": 207176162,
+          "printed": 207176162,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Kristen",
+          "computed": 16528513,
+          "printed": 16528513,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Katolik",
+          "computed": 6907873,
+          "printed": 6907873,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Hindu",
+          "computed": 4012116,
+          "printed": 4012116,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Budha",
+          "computed": 1703254,
+          "printed": 1703254,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Khong Hu Chu",
+          "computed": 117091,
+          "printed": 117091,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Lainnya",
+          "computed": 299617,
+          "printed": 299617,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Tidak Terjawab",
+          "computed": 139582,
+          "printed": 139582,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Tidak Ditanyakan",
+          "computed": 757118,
+          "printed": 757118,
+          "difference": 0
+        }
+      ]
+    },
+    "boundary_validation": {
+      "status": "passed",
+      "feature_count": 33,
+      "distinct_geometry_hashes": 33,
+      "geometry_hashes": [
+        "865c2941bc5c89ad4d8323b1095225089aa1ef13e55599bec2ff0dd339109845",
+        "253a380387581883310740fdc6caa6cfd6414323c6f60ca301ab5f58ef263064",
+        "1d3eed8fcea19589af2204411b904c1f8f1d2995b495d05d062805e76fbba628",
+        "afaab3209af928425d70a72526c220855124cd87b3021ec03582584420f1ef33",
+        "bcf2bddfc8bce7de55b11bf3372c226647f0e9aca7d9bc2941eabfbab1be9483",
+        "44cd85e753791c6079ede6bbaf93c8acaa2bc5794f93d05c0b0239696d6d2e0c",
+        "5ac884641a2e4bf213dcd1938a67d412b86c4082f9238e244fd0907f5266a4db",
+        "43780eef456944290755a034e2bbc5d2345d5f42b9ca0dd2b33f3e8098040fa1",
+        "001e710119b84c8f264dfea7e07ca30863e31fd75003c869c7456f7bdcbf17e1",
+        "11cd005b55363102fac80978c2e4aac47dcdcaa11df2181cb8ace257837b98e0",
+        "1bc14fd7a5337384eb8074061b3bded4928db0c0f6b611c9d4e8f7599ccbb2d1",
+        "3f09ae459ff8c455030a527e1acae21fb9efba164f272add4849f78ca2810968",
+        "868c285adcce6d7193ca97c6523d93b5de6227b4634960dfdb1abcfa6da738be",
+        "5c77d9b1b81d07587f795d0d7bc7203f248ff1a4c7460503bec05bd7c3d63c7a",
+        "576bd65f394047bc0721fac92d0a1f0322c4f53e2e82bf68f336b34ecdaf577f",
+        "79be2b7de1f25227e8879d3d9e0bb3682700d4c291727cff7735057522e087ef",
+        "2f562b00363ec29ad2f52cae2cb3d18b544466378dad15184963a078b9b94cae",
+        "10d54f4d4cd37f5cc90cf6b4513bc06ab8f4740c056ab9c9a709b713ae094c33",
+        "a2a5703584eae49aeb0f5bf4e05b37371a90685468737dfab6dfe87fd6f05e25",
+        "871730eb0ae04ad919afcadc6f5d020b9d020ea50ce45efa55f651d9d080a355",
+        "98ae710ef4da7b6e944b04b256871712fac393ae387590667ece1bb144e4c09e",
+        "3f96b2bb70645407b8d43d5f7f1ea817631b7227b9d4ff5b7d9a48ea22eda299",
+        "8d4c6ca5f8b33835ccac2ba0952860c911881eeb7e08f8543b27b03124bcadd6",
+        "4af1b10a98f90703ae72090126597e8215dee60c45360d36ba2f5ee7abf81f25",
+        "e4bc22f3967eeefc655b8411cf7d62ef8beca79ae499980c0e9eb7cfcb86ea1c",
+        "d3ae52ba59042290f43a8a91b9b749b0a1b5abcf8ac83cb4ae67788c69e77ef6",
+        "b53d75492c74830f4781df2d46e7296da702a74926cab93940b4aa28fb3696e8",
+        "3d57214f2f431e3573b261d9d06f95837b4a2616b81fca84fd25043afc1ecfe3",
+        "a1111f52b2725ce8a67bf6767582cea0c6607b9e108a33a93b47f1c5a8ef5c79",
+        "3e0c9a96087364fee8d5151827aa0e317e3d6af29b6a0c1beccbd4fdd8924bf2",
+        "6017c91ae1990863e88d669dc30d8a2031f28537d3e1e1f0a31d374a116d9fb7",
+        "24e3956890ae782ee4c97f2793de1b354f96a053f2cf1dc3dbf53a28d296fdcb",
+        "f08b861e3cd6d117a873e73d25f5832736101049f6bc81e2b7d1f3c900fb7664"
+      ],
+      "bbox": {
+        "xmin": 95.0107864,
+        "ymin": -11.0076151,
+        "xmax": 141.0194,
+        "ymax": 6.07693
+      },
+      "dateline_note": "extent lon ~95-141E, lat ~6N-11S; far from the antimeridian, no dateline handling needed",
+      "output_bytes": 1247894,
+      "simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 2,
+        "bytes": 1247894
+      },
+      "licence": "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)",
+      "adm_unit_count": "34",
+      "dissolve_note": "34 boundary provinces dissolved to 33 census provinces: Kalimantan Utara (created 2012) united into Kalimantan Timur to reconstruct the 2010 province."
+    },
+    "join_coverage": {
+      "matched_provinces": 33,
+      "expected_provinces": 33,
+      "unmatched_provinces": [],
+      "unused_boundary_features": []
+    },
+    "notes": "SP2010 religion-by-province closes integer-exact at both margins (national 237,641,326): every province row sums over the nine category columns to its printed Total, and every category column sums over the 33 provinces to its printed national control. Boundary joins 34->33 to geoBoundaries IDN ADM1 (gbHumanitarian) with 33 distinct geometry hashes.",
+    "warnings": [
+      "STAGED product: no page, no hub link. Licence needs review; ships under BUILD-THEN-ASK with attribution to BPS (copyright-only source; bps.go.id term-of-use behind an uncompleted Cloudflare challenge).",
+      "Single wave (SP2010). The queue's 2010-2024 multi-wave premise is refuted: SP2020 dropped the religion question, and 2020+ subnational religion is Dukcapil administrative registration (a separate construct, not merged).",
+      "The official Indonesian religion frame has no no-religion category, so no_religion is null (rendered, not invented) and the affiliation share is high-and-flat; the seven-religion composition is the signal, carried verbatim on the quality flag.",
+      "The two non-response columns (Tidak Terjawab, Tidak Ditanyakan) are kept as published in the Total denominator, disclosed, never repaired.",
+      "Kabupaten/kota SP2010 religion is data-available but boundary-blocked (no open licensed 2010-vintage ADM2 layer); HELD as the documented deeper route."
+    ]
+  },
+  "construct_notes": [
+    "The construct is census affiliation: each resident's reported religion in the SP2010 census, asked of the whole resident population, not practice, attendance, or membership.",
+    "The public product carries two headline fields per province: population total and religious affiliation percent. No-religion is null (the official Indonesian frame has no no-religion category); place-density metrics are null (no governed place-of-worship snapshot).",
+    "Single wave: SP2020 dropped the religion question, so there is no comparable 2020 census religion table. 2020+ subnational religion is Dukcapil (civil-registration) administrative data - a separate construct recorded as a future option, never merged.",
+    "The seven official religions (Islam, Kristen, Katolik, Hindu, Budha, Khong Hu Chu, Lainnya) partition the affiliation numerator; the composition across provinces (Islam-dominant west; Protestant/Catholic Nusa Tenggara Timur, Papua, Papua Barat, Sulawesi Utara, Maluku; Hindu Bali) is the map-worthy signal and rides verbatim on each row's quality flag.",
+    "The two non-response columns (Tidak Terjawab = not answered, national 139,582; Tidak Ditanyakan = not asked, national 757,118) are kept as published in each province's Total denominator, in neither slot, so the affiliation share sits just below 100. Disclosed, never repaired.",
+    "Boundary: geoBoundaries IDN ADM1 (gbHumanitarian), 34 provinces, CC BY 3.0 IGO (OCHA COD-AB, BPS lineage). Kalimantan Utara (created 2012) is dissolved into Kalimantan Timur to reconstruct the single 2010 province; the remaining provinces join by name after a three-name crosswalk. This is a complete-unit aggregation, never an invented concordance."
+  ],
+  "deferred_sources": [
+    {
+      "source_dataset_id": "id-sp2010-religion-by-kabupaten",
+      "status": "deferred",
+      "url": "https://sensus.bps.go.id/topik/tabular/sp2010/12",
+      "local_path": null,
+      "notes": "SP2010 religion by kabupaten/kota (~497 units) is data-available via the 33 province drill-downs but boundary-blocked: the open licensed ADM2 layers are the 2020 519-unit frame, and mapping across the 2010-2020 kabupaten splits needs an invented concordance (forbidden). Deeper route pending a licensed 2010-vintage ADM2 layer."
+    },
+    {
+      "source_dataset_id": "id-dukcapil-religion-administrative",
+      "status": "separate_construct",
+      "url": "https://gis.dukcapil.kemendagri.go.id/peta/",
+      "local_path": null,
+      "notes": "Ditjen Dukcapil (Kemendagri) civil-registration religion by province and kabupaten/kota, semi-annual from ~2020. Administrative registration, NOT census self-report - a separate construct recorded as a future option, never merged into this census product."
+    },
+    {
+      "source_dataset_id": "bps-licence-confirmation",
+      "status": "not_pinned",
+      "url": "https://sensus.bps.go.id",
+      "local_path": null,
+      "notes": "A BPS reuse-confirmation ask is the clean courtesy unblock under BUILD-THEN-ASK; none is held. The bps.go.id term-of-use page is behind an uncompleted Cloudflare human-verification challenge (recorded gap)."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "needs_review",
+  "licence_basis": "bps_copyright_attribution_build_then_ask",
+  "downstream_status": "staged",
+  "source_datasets": [
+    {
+      "source_dataset_id": "id-sp2010-religion-by-province",
+      "name": "Indonesia SP2010 (Sensus Penduduk 2010): Penduduk Menurut Wilayah dan Agama yang Dianut (population by region and religion)",
+      "provider": "Badan Pusat Statistik (BPS - Statistics Indonesia)",
+      "url": "https://sensus.bps.go.id/topik/tabular/sp2010/12/0/0",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/id_census/sp2010_religion_province_national.html",
+      "licence": {
+        "name": "No open-data licence is stated on the BPS Sensus Penduduk 2010 source. The sensus.bps.go.id page footer asserts 'Copyright (c) 2026 - Badan Pusat Statistik | Sensus Penduduk 2010' (retrieved 2026-07-12, byte-matched in the cached HTML), a copyright assertion with no reuse grant. The main bps.go.id term-of-use page sits behind a Cloudflare human-verification challenge that this lane does not complete (recorded gap). The derived province summaries carry attribution to Badan Pusat Statistik (BPS) and ship STAGED under the BUILD-THEN-ASK ruling (summaries-with- attribution stance, RO/SK/CI/MONSTAT line); a BPS reuse-confirmation ask is the clean courtesy unblock. The boundary is CC BY 3.0 IGO.",
+        "url": "https://sensus.bps.go.id",
+        "attribution": "Badan Pusat Statistik (BPS), Sensus Penduduk 2010"
+      },
+      "citation": "Badan Pusat Statistik, Sensus Penduduk 2010, Penduduk Menurut Wilayah dan Agama yang Dianut.",
+      "access_limits": null,
+      "redistribution_limits": "Derived province summaries only; no open-data licence is stated on the BPS source. Ships STAGED under BUILD-THEN-ASK with attribution.",
+      "notes": "Integer full-count census table; verbatim ten-column frame (Islam, Kristen, Katolik, Hindu, Budha, Khong Hu Chu, Lainnya, Tidak Terjawab, Tidak Ditanyakan, Total). Both margins close exactly: every province row sums over the nine category columns to its printed Total, and every category column sums over the 33 provinces to its printed national control; national Total 237,641,326."
+    },
+    {
+      "source_dataset_id": "geoboundaries-idn-adm1-gbhum-2019",
+      "name": "geoBoundaries IDN ADM1 (gbHumanitarian): 34 provinces",
+      "provider": "geoBoundaries (William & Mary geoLab); boundary source OCHA ROAP / HDX (COD-AB, BPS lineage)",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbHumanitarian/IDN/ADM1/geoBoundaries-IDN-ADM1.geojson",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/id_census/geoBoundaries-IDN-ADM1-gbHum.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)",
+        "url": "https://www.geoboundaries.org/api/current/gbHumanitarian/IDN/ADM1/",
+        "attribution": "geoBoundaries gbHumanitarian; boundary source OCHA Regional Office for Asia and the Pacific (COD-AB)"
+      },
+      "citation": "geoBoundaries IDN ADM1 (gbHumanitarian, pinned 9469f09), 34 province boundaries, dissolved to the 33-unit 2010 census frame.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed under CC BY 3.0 IGO (attribution to geoBoundaries / OCHA COD-AB).",
+      "notes": "34 ADM1 provinces, boundaryYearRepresented 2019. Kalimantan Utara (created 2012) is dissolved into Kalimantan Timur to reconstruct the single 2010 province, giving 33 units that join the SP2010 frame one-to-one after a three-name crosswalk (Aceh, DKI Jakarta, Daerah Istimewa Yogyakarta). The extent spans lon ~95-141E, lat ~6N-11S, far from the antimeridian; no dateline handling needed."
+    }
+  ],
+  "notes": "STAGED product (no page, no hub link). The committed products are the derived 33-province area summary (33 rows, SP2010) and the simplified geoBoundaries IDN ADM1 (gbHumanitarian) boundary dissolved to the 2010 frame. Ships under BUILD-THEN-ASK with attribution to Badan Pusat Statistik (BPS) and geoBoundaries / OCHA COD-AB (CC BY 3.0 IGO)."
+}
