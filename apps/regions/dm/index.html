@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Dominica Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Dominica's product is Central Statistics Office (CSO) census religious
+    // affiliation for 1991, 2001, and 2011, on one national polygon. The CSO
+    // publishes census religion only at national geography — religion is
+    // cross-tabulated with age and sex and shown as a national time series,
+    // but never by parish — so under the small-country clause the map shades
+    // a single national polygon rather than sub-national areas. Percentages
+    // use each wave's religion universe (the 2011 report's Table 6.1 national
+    // total: 69,466 / 69,775 / 69,325), which differs from the total
+    // enumerated (71,293 in 2011) and non-institutional (70,739 in 2011)
+    // populations. Headline affiliation and None carry the same construct
+    // across all three waves and a percentage-point change metric is honest;
+    // sub-denomination detail unfolds only from 2011, and change below the
+    // headline is withheld. Dominica's 2022 census is in the field with no
+    // religion results yet published.
+    window.REGION_CONFIG = {
+      countryCode: "DM",
+      title: "Places of Worship | Dominica Research Map",
+      // one small island; centre on the numerically-verified boundary bbox
+      // centre (lon -61.48..-61.24, lat 15.21..15.64) so the national polygon
+      // sits clear of the top-centre census control
+      center: [-61.36, 15.42],
+      initialZoom: 9.6,
+      censusLevels: {
+        national: {
+          label: "National",
+          boundaries: "data/dm_adm0_2005.geojson",
+          summary: "data/area_summary_adm0.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Central Statistics Office of Dominica, adapted under the CSO Open Licence Agreement · Boundaries © geoBoundaries DMA ADM0 (CC BY 2.5 Generic, source Wikimedia Commons)"
+        }
+      },
+      defaultLevel: "national",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2011,
+      // the two census-question shares plus the headline change metric;
+      // headline affiliation and None are comparable across all three waves,
+      // so the percentage-point change series is honest — the withheld
+      // comparability is only below the headline (Evangelical sub-denominations
+      // tabulated from 2011), which no metric here exposes
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of each wave's religion universe (the 2011 census Table 6.1 national total: 69,466 in 1991, 69,775 in 2001, 69,325 in 2011) reporting any religious affiliation — the universe less None and Not Stated. This religion universe differs from the total enumerated (71,293 in 2011) and non-institutional (70,739 in 2011) populations. Headline affiliation is comparable across all three waves; the sub-denomination detail below it is not, because the Evangelical sub-denominations were tabulated only from 2011."
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share of each wave's religion universe in the source None category. None is consistently named and separately tabulated in all three waves and is therefore comparable across them; Not Stated is the disclosed residual."
+        },
+        religious_change: {
+          label: "Religious affiliation change",
+          note: "percentage-point change in the religious-affiliation share since the previous census (1991 → 2001 → 2011); headline affiliation carries the same construct across all three waves."
+        }
+      },
+      popupDenominatorNote: "Percentages use each wave's religion universe as denominator: the 2011 census Table 6.1 national religion total (69,466 in 1991, 69,775 in 2001, 69,325 in 2011). This religion universe is below the 2011 report's total enumerated population (71,293) and non-institutional population (70,739); every figure states which universe it uses. Affiliation is the universe less None and Not Stated; No religion is the source None category; Not Stated is the disclosed residual; affiliation, None, and Not Stated therefore sum to the universe. The 2011 age/sex table prints a grand total one person below the religion total under the report's one/two-person anonymity rule; the shipped universe is the religion total. Sub-denomination detail is tabulated only from 2011 (the Evangelical sub-denominations unfold that wave); cross-wave change below the headline is therefore withheld. The Central Statistics Office publishes census religion only at national geography — no parish religion table exists — and the map shades one national polygon. Dominica's 2022 census is in the field with no religion results yet published.",
+      cityPresets: [
+        { label: "Roseau", coords: [-61.3870, 15.3010], zoom: 12 },
+        { label: "Portsmouth", coords: [-61.4589, 15.5847], zoom: 12 },
+        { label: "Marigot", coords: [-61.2861, 15.5333], zoom: 12 },
+        { label: "Grand Bay", coords: [-61.3306, 15.2333], zoom: 12 },
+        { label: "Mahaut", coords: [-61.3939, 15.3803], zoom: 12 },
+        { label: "Castle Bruce", coords: [-61.2603, 15.4453], zoom: 12 },
+        { label: "Salisbury", coords: [-61.4108, 15.4342], zoom: 12 },
+        { label: "Wesley", coords: [-61.3167, 15.5667], zoom: 12 }
+      ],
+      geocode: { country: "dm", biasLngLat: [-61.36, 15.42] },
+      onboarding: {
+        title: "Dominica research map",
+        intro: "Census religious affiliation for Dominica at the 1991, 2001, and 2011 Population and Housing Censuses, from the Central Statistics Office (CSO). The CSO publishes census religion only at national geography; the map therefore shades one national polygon across the three waves.",
+        bullets: [
+          "The Central Statistics Office publishes Dominica's census religion only at national geography — religion is never tabulated by parish in any public product — so, under the small-country clause, the map shades a single national polygon rather than sub-national areas.",
+          "Open <strong>Show Census Data</strong> (top centre) to choose the metric and census year (1991, 2001, 2011).",
+          "Percentages use each wave's religion universe (the Table 6.1 national total: 69,466 / 69,775 / 69,325), which differs from the 2011 total enumerated (71,293) and non-institutional (70,739) populations; every figure states its universe.",
+          "Headline affiliation and No religion are comparable across all three waves; sub-denomination detail is tabulated only from 2011, and change below the headline is withheld.",
+          "Dominica's 2022 census is in the field with no religion results yet published; the newest figures remain 2011."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      // the CSO Open Licence Agreement requires these acknowledgements verbatim
+      // for value-added products; they are a licence obligation, not decoration.
+      // Both notices are byte-matched to the manifest attribution strings.
+      censusSourceAttribution: 'Source: Central Statistics Office of Dominica. Contains information licenced under the Central Statistical Office’s Open Licence Agreement. This product was adapted from the Central Statistics Office\'s information, which is licenced under the Central Statistical Office’s Open Licence Agreement. Census religion © <a href="https://stats.gov.dm/" target="_blank" rel="noopener">Central Statistics Office of Dominica</a> &middot; Boundaries © <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> DMA ADM0 (CC BY 2.5 Generic, source Wikimedia Commons)',
+      censusFlagNote: "* The Central Statistics Office publishes Dominica's census religion only at national geography; no parish religion table exists; the map therefore shades a single national polygon. Percentages use each wave's religion universe (the Table 6.1 national total), which differs from the total enumerated and non-institutional populations. Headline affiliation and None are comparable across 1991, 2001, and 2011; sub-denomination detail is tabulated only from 2011, and change below the headline is withheld. The 2022 census is in the field with no religion results yet."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260711a"></script>
+</body>
+</html>
