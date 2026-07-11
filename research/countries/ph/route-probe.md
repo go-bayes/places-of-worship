@@ -102,3 +102,47 @@ All 2020 files retrieved 2026-07-11 through an authenticated browser session (Cl
 **BUILD the 2020 province product now.** It is machine-readable, count-valued, exhaustive, reconciles to zero residual, and is covered by an explicit CC BY 4.0 Terms of Use plus a public-domain footer — the cleanest licence position in the queue. Ship at the province level on geoBoundaries PHL ADM2 (year 2020, CC BY 3.0 IGO), aggregating the 33 HUC rows into their host provinces and documenting the BARMM Special Geographic Area residue. Map a coarse religion frame (Roman Catholic excl. charismatics / Islam / Iglesia ni Cristo / other Christian / other / none / not reported) collapsed from the 129 columns, and record the Roman-Catholic-excluding-charismatics convention on the information surface.
 
 **Then extend to a series (follow-up probe).** A focused pass to pin the 2010 CPH and 2015 POPCEN province religion tables would upgrade the Philippines to a 2010/2015/2020 three-wave province series — the waves-over-districts ideal. Hold change-over-time until those tables are located and the category frame and denominator are reconciled across waves. No PI licence ruling is required to ship 2020 (CC BY is unambiguous); the only PI-worthy design question is the coarse-frame category mapping, which follows existing precedent.
+
+## Build appendix (2026-07-11)
+
+The 2020 province product was built by `scripts/build_ph_area_summary.R` from the cached PSA table and geoBoundaries gbOpen PHL ADM2 (simplified sibling, pinned commit 41af8f1). Deliverables: `apps/regions/ph/data/area_summary_adm2.{json,csv}`, `apps/regions/ph/data/ph_adm2_2020.geojson`, and `docs/manifests/ph-census-religion-2020.json`. The tree is left uncommitted for the conductor's review.
+
+**None-category finding.** The 129-category frame contains a verbatim `None` column (no religious affiliation), 43,931 nationally (0.0%), separate from `Not reported` (15,186). The no-religion slot is wired to `None` verbatim; the affiliation share therefore varies across areas and is not flat by construction. The Philippines does **not** share the BD/KH/PW flat-affiliation gate. `religious_affiliation_count` is household population minus `None` minus `Not reported`; `no_religion_count` is `None`.
+
+**Geography and HUC folding.** geoBoundaries PHL ADM2 has 87 features: 81 provinces, four NCR legislative-district polygons, and standalone `City of Isabela` and `Cotabato City` polygons. The build ships **86 mapped units**: 81 provinces (with 17 HUC census rows folded into their host provinces), the four NCR districts (16 NCR cities plus the Municipality of Pateros aggregated by legislative district), and `City of Isabela` (a separate ADM2 unit tabulated under Region IX, kept standalone). The `Cotabato City` polygon is merged into `Maguindanao` because the census tabulates Cotabato City inside `Maguindanao (including the City of Cotabato)` with no separate row. HUC→unit mapping records: **34** (17 HUC-to-host-province plus 17 NCR-city-to-district), all listed in the manifest `pipeline.parameters.huc_folding.mappings`.
+
+**Name normalisations (all documented in the manifest).** `Davao de Oro (Compostela Valley)` → geoBoundaries `Compostela Valley` (2019 rename); `Cotabato (North Cotabato)` → `Cotabato`; `Samar (Western Samar)` → `Samar`; `Maguindanao (including the City of Cotabato)` → `Maguindanao` (plus Cotabato City polygon merge); `Basilan (excluding the City of Isabela)` → `Basilan` (Isabela City ships separately). The join after folding is one-to-one across all 86 units (no missing or extra names).
+
+**Gate results (all exact, fail-fast).**
+- 129 national category cells sum to 108,667,043 (residual 0).
+- 17 regions sum to national per category; every region equals its printed component sum (total and per-category).
+- Headline: Roman Catholic (excl. charismatics) 85,645,362; Islam 6,981,710; Iglesia ni Cristo 2,806,524 — match the press release to the person.
+- Named-ten-plus-`Other categories`-plus-`None`-plus-`Not reported` decomposition sums to every area total. The named ten reproduce PSA press-release Table 1 (cut = the ten largest specific affiliations, excluding the source's five aggregate `Other …` grouping columns; equivalently every specific affiliation with national count ≥ 429,921, Church of Christ). `Other categories` residual = 8,954,291 nationally.
+- 86 mapped units + SGA residue (215,348) = 108,667,043 per category. The BARMM Special Geographic Area (Interim Province 1) has no polygon; it is reconciled in the national roll-up only and never distributed (Norway Unknown-diocese precedent).
+- Boundary: 86 valid, non-empty features with distinct geometry hashes; simplified via `scripts/lib/simplify_boundary.R` at 60% keep to 1,013,624 bytes (ceiling 1,900,000).
+
+**Universe.** Household population (108,667,043), the universe of the religion table; disclosed in every row's `population_total_basis`, indicators, and construct notes. It differs from total population; change over time is withheld until the 2010 and 2015 waves are pinned.
+
+**Validation commands and outputs (run from repo root).**
+```
+$ uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/ph/data/area_summary_adm2.json
+ok -- validation done
+$ uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/ph-census-religion-2020.json
+ok -- validation done
+$ bash scripts/validate_manifests.sh
+manifest validation: 61/61 pass
+```
+
+**Committed output sha256.**
+```
+b0bada46f634584257de03bf87e9e90117c1aaf5eaf482a392da833120f65b6c  apps/regions/ph/data/area_summary_adm2.json
+e439d99185a570b3d682c3ab125f051d195ddaec0fa82df8515c78508b8e5189  apps/regions/ph/data/area_summary_adm2.csv
+8f6280eb0d160d1c2e4bd95305df6491ed9ff5cfc714e5c3110362932fe674e2  apps/regions/ph/data/ph_adm2_2020.geojson
+```
+
+**Cache and GCS mirror.** `data/raw/ph_census/` (git-ignored) holds the PSA workbook, press release, technical notes (all with sha256 above), plus the geoBoundaries ADM2 metadata and simplified GeoJSON (fetched from GitHub, not Cloudflare-gated). GCS mirror of `data/raw/ph_census/` is **pending** (recorded in the manifest `source.raw_redistribution`).
+
+**Open questions for the conductor.**
+1. Page not built (out of scope): `apps/regions/ph/index.html` and hub wiring remain. The area-summary carries `metricsAvailable`-ready indicators (`religious_affiliation_percent`, `no_religion_percent`); place-density metrics are hidden (no governed PH place layer). geojson join keys: `codeProp = "area_code"` (geoBoundaries shapeID), `nameProp = "area_name"`.
+2. Display names keep the census verbatim parentheticals where accurate (`Maguindanao (including the City of Cotabato)`, `Basilan (excluding the City of Isabela)`) since the mapped unit genuinely includes/excludes those cities after folding. Confirm this is the preferred surface wording, or switch to bare province names.
+3. Two-wave extension (2010 CPH, 2015 POPCEN) stays deferred: province tables not pinned, and the 2015 universe (total population) differs from 2020 (household population). Recorded in the manifest `deferred_sources`.
