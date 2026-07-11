@@ -67,7 +67,7 @@
       "territorial_scope": "The 2023 PBS Table 9 religion tables cover the four provinces (Khyber Pakhtunkhwa, Punjab, Sindh, and Balochistan) and the Islamabad Capital Territory. They exclude Azad Jammu and Kashmir and Gilgit-Baltistan, whose figures are published separately and are not included here. This product renders the coverage of the published tables as printed and makes no territorial claim.",
       "sensitivity": "Religion is highly sensitive in Pakistan for the Ahmadiyya, Hindu, Christian, Sikh, and Dalit (Scheduled Castes) communities. This is a district-level product (a coarser frame than the tehsil tables the PBS also publishes), chosen to reduce very small cells while rendering the official record. District counts are printed exactly with no PBS suppression rule, and this product applies no small-cell treatment: every published category count is rendered as printed.",
       "small_cell_treatment": "none; district exact counts rendered as published (no PBS suppression rule)",
-      "boundary_status": "No district geometry ships with this product; the boundary lane is HELD as a documented blocker. The geoBoundaries PAK ADM3 (tehsil, boundary ID PAK-ADM3-9618217, represented year 2017, 554 units) layer carries an explicit ODbL licence but is vintage-misaligned to the 2023 district roster, which post-dates it; no evidenced ADM3-to-2023-district mapping is available in this build. The geoBoundaries PAK ADM2 (district, boundary ID PAK-ADM2-60131773, represented year 2019, 126 units) layer's licence is unresolved (the release asserts public domain but carries no explicit licence string) and under-counts the census district frame; it is not used. Consequently land_area_sq_km and all place-density fields are null, and an official or licensed 2023 district boundary layer is the open item before a map can render.",
+      "boundary_status": "resolved_cod_ab_adm2_cc_by_igo_2022_vintage_135_features",
       "wave_coverage": "ONE wave ships (2023). The 2017 wave is deferred: no 2017 district table is cached (province/division only). See deferred_sources.",
       "manifest_naming_note": "Named to the shipped span (pk-census-religion-2023.json) per the shipped-wave rule; the pk-census-religion family manifest widens to 2017-2023 only when a 2017 district wave is actually built.",
       "local_cache_hint": "Raw PBS Table 9 PDFs and boundary metadata are cached under data/raw/pk_census/ and remain git-ignored.",
@@ -117,7 +117,7 @@
     "provider": "Pakistan Bureau of Statistics (PBS)",
     "source_dataset_ids": [
       "pbs-census-2023-table9-religion-district",
-      "pk-district-2023-boundary-pending"
+      "cod-ab-pak-2022-adm2-district-boundary"
     ],
     "source_urls": [
       "https://www.pbs.gov.pk/wp-content/uploads/census_tables/tables/table_9_kp_districts.pdf",
@@ -139,9 +139,9 @@
       "storage_provider": "git_repository",
       "format": "json",
       "bytes": 284915,
-      "sha256": "0f7b7c45062733180111fe8be5457c9d0529c8000a166a3511f8b96f7a865e3f",
+      "sha256": "f6705c636f723cbb28eb2a8762754310876a98db5886fc32fa0a8fd0c1a21cbd",
       "row_count": 136,
-      "content": "Pakistan district census-religion summary for 2023 (136 district-equivalent units; four provinces + ICT); no geometry (boundary lane held).",
+      "content": "Pakistan district census-religion summary for 2023 (136 district-equivalent units; four provinces + ICT); plus one derived combined display row; licensed district boundary ships separately (pk_district_2022.geojson).",
       "privacy": "public",
       "licence_status": "needs_review",
       "licence_basis": "pbs_free_tabulation_attribution_derived_rates"
@@ -151,7 +151,7 @@
       "storage_provider": "git_repository",
       "format": "csv",
       "bytes": 175945,
-      "sha256": "9938aca7f3c3de3e091be1d0257f7584642a12bd6167bf2560b4618465be26cc",
+      "sha256": "386a086e25cf6bdafdb8c81c3fe3323a371fbc786dbb1d329ef157b633677558",
       "row_count": 136,
       "content": "Flattened Pakistan district census-religion rows, 2023.",
       "privacy": "public",
@@ -224,18 +224,70 @@
       "source_dataset_id": "pbs-census-2023-table9-religion-district",
       "used_in_public_product": true,
       "notes": "2023 ICT Table 9; single Islamabad District, total 2,283,244."
+    },
+    {
+      "uri": "data/raw/pk_census/geoBoundaries-PAK-ADM2.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbHumanitarian/PAK/ADM2/geoBoundaries-PAK-ADM2.geojson",
+      "durable_uri": "gs://pow-research-data/raw_sources/pk_census/geoBoundaries-PAK-ADM2.geojson",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "geojson",
+      "bytes": 8330223,
+      "sha256": "c8a021a68f73f8b1f499c842ab8fa32d6599b34115bb3260d6f7afee9ceb2e3a",
+      "source_dataset_id": "cod-ab-pak-2022-adm2-district-boundary",
+      "used_in_public_product": true,
+      "notes": "geoBoundaries gbHumanitarian PAK ADM2 GeoJSON (mirror of OCHA COD-AB PAK ADM2 v01, WFP SDI/HDX), 160 units, CC BY 3.0 IGO, pinned commit 9469f09. shapeName set is identical to the COD adm2_name set (160 unique, no duplicates). Geometry source for the district boundary product; filtered to the 136 in-scope units, Lehri phantom dropped, West Karachi relabelled as the Keamari combine, yielding 135 features."
+    },
+    {
+      "uri": "data/raw/pk_census/cod_ab_pak_admin_boundaries.xlsx",
+      "url": "https://data.humdata.org/dataset/a64d1ff2-7158-48c7-887d-6af69ce21906/resource/f0b98d07-efd4-4020-ae47-2779b817c01d/download/pak_admin_boundaries.xlsx",
+      "durable_uri": "gs://pow-research-data/raw_sources/pk_census/cod_ab_pak_admin_boundaries.xlsx",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "xlsx",
+      "bytes": 222204,
+      "sha256": "a8449748db5122051fc3d23b7dc6f43af8783c8c64e9b20422220a0a7c764caf",
+      "source_dataset_id": "cod-ab-pak-2022-adm2-district-boundary",
+      "used_in_public_product": true,
+      "notes": "OCHA COD-AB PAK attribute table (sheet pak_admin2: adm2_name, adm2_pcode, adm1_name; cod_version V_01, valid_on 2022-09-09). Supplies the P-code and province for the in-scope filter, the Lehri drop (PK218), the West Karachi identifier (PK729), and the name crosswalk. sha256 matches the boundary-probe retrieval record."
+    },
+    {
+      "uri": "data/raw/pk_census/gb_pak_adm2_humanitarian_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbHumanitarian/PAK/ADM2/",
+      "durable_uri": "gs://pow-research-data/raw_sources/pk_census/gb_pak_adm2_humanitarian_meta.json",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "json",
+      "bytes": 1786,
+      "sha256": "eec8518af067cd326f3eae05176314f6ce9c2c6025bbe7e5da84ccf92a15d263",
+      "source_dataset_id": "cod-ab-pak-2022-adm2-district-boundary",
+      "used_in_public_product": false,
+      "notes": "geoBoundaries gbHumanitarian PAK ADM2 release metadata; records boundaryLicense 'Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)', boundarySource 'World Food Programme SDI, HDX', admUnitCount 160, boundaryType ADM2. Licence corroboration; the build gates on these values. sha256 matches the boundary-probe retrieval record."
+    },
+    {
+      "uri": "data/raw/pk_census/hdx_cod_ab_pak_package_show.json",
+      "url": "https://data.humdata.org/api/3/action/package_show?id=cod-ab-pak",
+      "durable_uri": "gs://pow-research-data/raw_sources/pk_census/hdx_cod_ab_pak_package_show.json",
+      "retrieval_date": "2026-07-11",
+      "retrieved_at": "2026-07-11T00:00:00Z",
+      "format": "json",
+      "bytes": 43348,
+      "sha256": "16bd275fee253b29591414bd5bc01c0a330f9bb11ab60fa1f41785d944f93520",
+      "source_dataset_id": "cod-ab-pak-2022-adm2-district-boundary",
+      "used_in_public_product": false,
+      "notes": "HDX CKAN package_show for cod-ab-pak; the licence provenance for the boundary product (license_id 'cc-by-igo', dataset_source 'World Food Programme SDI', organization 'OCHA FISS'). Not geometry. sha256 matches the boundary-probe retrieval record."
     }
   ],
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/pk/data/area_summary_district.json",
-      "sha256": "0f7b7c45062733180111fe8be5457c9d0529c8000a166a3511f8b96f7a865e3f",
+      "sha256": "f6705c636f723cbb28eb2a8762754310876a98db5886fc32fa0a8fd0c1a21cbd",
       "built_by": "scripts/build_pk_area_summary.R",
-      "notes": "136 district-year rows (2023)."
+      "notes": "137 district-year rows (2023): 136 as published plus one PI-ratified derived display-combine row (sd-karachi-west-keamari-combined)."
     },
     {
       "uri": "repo:apps/regions/pk/data/area_summary_district.csv",
-      "sha256": "9938aca7f3c3de3e091be1d0257f7584642a12bd6167bf2560b4618465be26cc",
+      "sha256": "386a086e25cf6bdafdb8c81c3fe3323a371fbc786dbb1d329ef157b633677558",
       "built_by": "scripts/build_pk_area_summary.R",
       "notes": "CSV companion."
     }
@@ -468,20 +520,20 @@
       "notes": "This product renders the religion categories of the 2023 Census of Pakistan exactly as the Pakistan Bureau of Statistics (PBS) prints them in Table 9. The published 2023 categories are Muslim, Christian, Hindu Jati, Qadiani/Ahmadi, Scheduled Castes, Sikh, Parsi, and Others. Qadiani/Ahmadi is the state's enumeration label for the Ahmadiyya community, applied after the 1974 constitutional amendment that declared Ahmadis non-Muslim; the label is carried verbatim as the official record, and is not the project's description of any community's self-understanding. Hindu Jati and Scheduled Castes are enumerated as separate categories in the printed table, and this product combines nothing: each published category is reported as printed. The 2017 census used a different, six-category frame (Muslim, Christian, Hindu, Qadiani/Ahmadi, Scheduled Castes, Others); the frames differ across waves and are not category-comparable, and no cross-wave comparison is made. The 2023 PBS Table 9 religion tables cover the four provinces (Khyber Pakhtunkhwa, Punjab, Sindh, and Balochistan) and the Islamabad Capital Territory. They exclude Azad Jammu and Kashmir and Gilgit-Baltistan, whose figures are published separately and are not included here. This product renders the coverage of the published tables as printed and makes no territorial claim."
     },
     {
-      "source_dataset_id": "pk-district-2023-boundary-pending",
-      "name": "Pakistan 2023 district boundary - PENDING (no geometry ships)",
-      "provider": "geoBoundaries (ADM2/ADM3 candidates); PBS digital census (official layer to be requested)",
-      "url": "https://www.geoboundaries.org/",
+      "source_dataset_id": "cod-ab-pak-2022-adm2-district-boundary",
+      "name": "OCHA COD-AB Pakistan ADM2 district boundaries (v01, valid 2022-09-09)",
+      "provider": "OCHA Field Information Services Section (FISS); source World Food Programme SDI / HDX; geometry via the geoBoundaries gbHumanitarian mirror (William & Mary geoLab)",
+      "url": "https://data.humdata.org/dataset/cod-ab-pak",
       "licence": {
-        "name": "Boundary lane held: geoBoundaries PAK ADM3 (tehsil, ODbL) is vintage-misaligned with no evidenced 2023-district mapping; geoBoundaries PAK ADM2 (district) licence is unresolved and not used.",
-        "url": "https://www.geoboundaries.org/",
-        "attribution": "Boundary source pending"
+        "name": "Creative Commons Attribution 3.0 IGO (CC BY 3.0 IGO). Verbatim from the HDX CKAN API for cod-ab-pak: license_id 'cc-by-igo', license_title 'Creative Commons Attribution for Intergovernmental Organisations (CC BY-IGO)', dataset_source 'World Food Programme SDI', organization 'OCHA Field Information Services Section (FISS)'. The geoBoundaries gbHumanitarian mirror PAK-ADM2-19695364 corroborates the same CC BY 3.0 IGO statement from a second source.",
+        "url": "http://creativecommons.org/licenses/by/3.0/igo/legalcode",
+        "attribution": "Boundaries: OCHA COD-AB Pakistan ADM2 (WFP SDI / HDX), CC BY 3.0 IGO; mirrored via geoBoundaries gbHumanitarian"
       },
-      "citation": "No boundary geometry is shipped; see boundary_note.",
-      "access_limits": "No district geometry is cached in this build.",
-      "redistribution_limits": "Not applicable (no geometry ships).",
-      "notes": "No district geometry ships with this product; the boundary lane is HELD as a documented blocker. The geoBoundaries PAK ADM3 (tehsil, boundary ID PAK-ADM3-9618217, represented year 2017, 554 units) layer carries an explicit ODbL licence but is vintage-misaligned to the 2023 district roster, which post-dates it; no evidenced ADM3-to-2023-district mapping is available in this build. The geoBoundaries PAK ADM2 (district, boundary ID PAK-ADM2-60131773, represented year 2019, 126 units) layer's licence is unresolved (the release asserts public domain but carries no explicit licence string) and under-counts the census district frame; it is not used. Consequently land_area_sq_km and all place-density fields are null, and an official or licensed 2023 district boundary layer is the open item before a map can render."
+      "citation": "OCHA Field Information Services, Common Operational Dataset - Administrative Boundaries, Pakistan (cod-ab-pak) ADM2 v01, valid 2022-09-09; geoBoundaries gbHumanitarian PAK-ADM2-19695364 (pinned commit 9469f09).",
+      "access_limits": "Public HDX / geoBoundaries download; no gate. Raw ADM2 geometry (geoBoundaries-PAK-ADM2.geojson) and the COD attribute table are cached git-ignored under data/raw/pk_census/ with sha256s recorded in raw_sources.",
+      "redistribution_limits": "The simplified derived district boundary is redistributable under CC BY 3.0 IGO with attribution to OCHA/WFP (and geoBoundaries as the mirror).",
+      "notes": "Built by scripts/build_pk_boundary.R into apps/regions/pk/data/pk_district_2022.geojson (135 features; sha256 446707c7586c599db58bff3108f6914ff220d817632be570e23f38472ba40cbe; 2,367,894 bytes at 50 percent mapshaper keep, web weight under 3 MB). Scope: the COD ADM2 layer carries 160 units; the 24 Azad Jammu & Kashmir (10) and Gilgit-Baltistan (14) units are out of the census Table 9 frame and dropped, and the abolished Lehri phantom (PK218, dissolved back into Sibi and Kachhi in 2018 but retained in COD v01) is dropped, leaving 135 district polygons. Crosswalk from COD adm2_name to census area_codes is pinned; every non-identity mapping: Chitral Lower->kp-lower-chitral, Chitral Upper->kp-upper-chitral, D. I. Khan->kp-dera-ismail-khan, Kohistan Lower->kp-lower-kohistan, Kohistan Upper->kp-upper-kohistan, Tor Ghar->kp-torghar, Malakand->kp-malakand (census area_name 'Malakand Protected Area'; same footprint), Leiah->pb-layyah, Central Karachi->sd-karachi-central, East Karachi->sd-karachi-east, South Karachi->sd-karachi-south, Korangi Karachi->sd-korangi, Malir Karachi->sd-malir, Shaheed Benazir Abad->sd-shaheed-benazirabad, Shaheed Sikandarabad->bl-surab; all other in-scope units map by identity slug. KEAMARI TREATMENT: the census publishes Karachi West and Keamari as separate districts, but the licensed COD v01 vintage pre-dates the 21 August 2020 split that carved Keamari out of Karachi West, so the single COD West Karachi polygon (PK729) ships as ONE combined display feature carrying area_code 'sd-karachi-west-keamari-combined' and a documented-combine declaration in its geojson properties (KI KPC/KUC precedent); no geometry is invented or split. Consequently 134 census area_codes map one-to-one to a feature and sd-karachi-west + sd-keamari are jointly represented by the one combined feature. The area_summary census rows are UNCHANGED. For a page to render the combined polygon, a companion runtime-joinable summary row keyed on 'sd-karachi-west-keamari-combined' (summing the sd-karachi-west and sd-keamari counts) must be emitted as a derived view, not a modification of the two published census rows; this is flagged for the project lead at the page gate."
     }
   ],
-  "notes": "STAGED build: derived district area summaries only, no geometry, no page, no hub link. PI RULING 2026-07-11 (second sitting): the encoded treatment is ratified — use the official record and report the contest; page copy must state, neutrally and with sources, that the 2023 counts are contested by affected communities while the data render the PBS record verbatim. The remaining blocker is the boundary only (see source_datasets[1].notes; boundary probe opened 2026-07-11). Iran/Israel-Palestine render-the-record precedent."
+  "notes": "Derived district area summaries plus the licensed district boundary (pk_district_2022.geojson, COD-AB ADM2 CC BY 3.0 IGO). PI RULING 2026-07-11 (second sitting): treatment ratified — use the official record and report the contest; page copy must state, neutrally and with sources, that the 2023 counts are contested by affected communities while the data render the PBS record verbatim. Keamari display combine PI-RATIFIED: the two published census rows stay verbatim and a derived combined row (sd-karachi-west-keamari-combined) sums them for the fused 2022-vintage polygon, disclosure riding the row flag and the boundary feature. Page lane is the remaining step. Iran/Israel-Palestine render-the-record precedent."
 }
