@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Tokelau Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260709e" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Tokelau's product is census religious affiliation by atoll from the
+    // Tokelau National Statistics Office (TNSO) and Stats NZ, three waves
+    // (2006, 2011, 2016) across the three atolls Atafu, Fakaofo and Nukunonu.
+    // The construct is census affiliation; it does not measure belief,
+    // practice, attendance, or registered membership. The universe is the
+    // usually resident population present in Tokelau on census night (1,074 in
+    // 2006, 1,143 in 2011, 1,197 in 2016); the religion tables use this present
+    // universe, which is not the absentee-inclusive usual-resident total the
+    // profiles publish elsewhere. Tokelau is effectively universally Christian:
+    // affiliation is near 100 percent in every atoll and wave, and the source
+    // no-religion count is 0, 0 and 1 person across the three waves. The
+    // near-flat affiliation headline is genuine. The substantive subnational
+    // structure is denominational (Congregational Christian dominates Atafu and
+    // Fakaofo, Roman Catholic dominates Nukunonu, with Congregational decline on
+    // Atafu and Fakaofo across the waves); that composition lives in the source
+    // census tables (Table 2.5 and Table 5.8) and the build manifest, and the
+    // headline metric set does not carry it. Place and density metrics are null
+    // because no governed Tokelau place-of-worship snapshot ships (the OSM sweep
+    // returned two tagged places, too sparse). The 2022 census exists only as
+    // licensed microdata with no open religion-by-atoll table; the pre-2006
+    // waves publish no atoll religion table; both are held, and the series
+    // ceiling is 2006 to 2016.
+    window.REGION_CONFIG = {
+      countryCode: "TK",
+      title: "Places of Worship | Tokelau Research Map",
+      // boundary bbox lon -172.52..-171.18, lat -9.443..-8.533; the three
+      // atolls sit about 90-100 km apart across a contiguous west-longitude
+      // frame (no antimeridian handling). centre on the boundary centroid and
+      // zoom so all three atolls fit beside the panels.
+      center: [-171.85, -8.99],
+      initialZoom: 8,
+      censusLevels: {
+        atoll: {
+          label: "Atoll (3 units)",
+          boundaries: "data/tk_atoll_2022.geojson",
+          summary: "data/area_summary_atoll.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion by atoll from the Tokelau National Statistics Office (TNSO) and Stats NZ, 2006, 2011 and 2016 · Boundaries © geoBoundaries TKL ADM0 (CC BY 4.0), Sentinel-2 10m land cover, longitude-clustered to three atoll footprints"
+        }
+      },
+      defaultLevel: "atoll",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2016,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the atoll's present usual residents with a stated religious affiliation, summing every named denomination plus Spiritualism and New Age religions, on each atoll's present-usual-resident total. No religion and Not stated stay in the denominator and outside this headline. Affiliation is near 100 percent in every atoll and wave"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the source No religion category, on the same present-usual-resident denominator. The national no-religion count is 0, 0 and 1 person across 2006, 2011 and 2016; Tokelau is effectively universally Christian"
+        },
+        religious_change: {
+          label: "Change since previous census (pp)",
+          note: "percentage-point change in the affiliation share since the previous census, 2006 to 2011 and 2011 to 2016. Affiliation is near-universal; this change therefore moves very little, and the substantive cross-wave movement is denominational (Congregational decline on Atafu and Fakaofo), which the affiliation headline does not carry"
+        }
+      },
+      popupDenominatorNote: "Percentages use each atoll's present usual residents from the census religion table (the population present in Tokelau on census night, not the absentee-inclusive usual-resident total). Religious affiliation sums every named denomination plus Spiritualism and New Age religions; No religion and Not stated stay in the denominator and outside both headline numerators, and the two shares do not add to 100. Affiliation is near 100 percent in every atoll and wave (Tokelau is effectively universally Christian: the national no-religion count is 0, 0 and 1 across the three waves); the affiliation and change headlines therefore move very little. The substantive subnational structure is denominational (Congregational Christian dominates Atafu and Fakaofo, Roman Catholic dominates Nukunonu), documented in the source census tables and the build manifest and not carried by these headline metrics. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+      cityPresets: [
+        { label: "Atafu", coords: [-172.50, -8.55], zoom: 11 },
+        { label: "Nukunonu", coords: [-171.85, -9.17], zoom: 11 },
+        { label: "Fakaofo", coords: [-171.22, -9.38], zoom: 11 }
+      ],
+      geocode: { country: "tk", biasLngLat: [-171.85, -8.99] },
+      onboarding: {
+        title: "Tokelau research map",
+        intro: "Census religious-affiliation overlays for Tokelau's three atolls, Atafu, Fakaofo and Nukunonu, across three censuses 2006, 2011 and 2016, from the Tokelau National Statistics Office (TNSO) and Stats NZ. The construct is census affiliation. It does not measure belief, practice, attendance, or registered membership.",
+        bullets: [
+          "Atolls are shaded by the share with a stated religious affiliation, summing every named denomination plus Spiritualism and New Age religions, or by the share in the source <code>No religion</code> category, shown as No religion %.",
+          "Percentages use each atoll's present usual residents (the population present in Tokelau on census night, not the absentee-inclusive usual-resident total). No religion and Not stated stay in the denominator and outside both headline numerators, and the two shares do not add to 100.",
+          "Tokelau is effectively universally Christian: affiliation is near 100 percent in every atoll and wave, and the national no-religion count is 0, 0 and 1 person across 2006, 2011 and 2016. The near-flat affiliation headline is genuine.",
+          "The substantive subnational structure is denominational. Congregational Christian dominates Atafu and Fakaofo, Roman Catholic dominates Nukunonu, and Congregational shares fall on Atafu and Fakaofo across the waves. That composition lives in the source census tables (Table 2.5 and Table 5.8) and the build manifest; the headline affiliation metric does not carry it.",
+          "A change metric reports the percentage-point change in the affiliation share since the previous census (2006 to 2011, 2011 to 2016); because affiliation is near-universal, this change moves very little.",
+          "The 2022 census exists only as licensed microdata with no open religion-by-atoll table, and pre-2006 waves publish no atoll religion table; the series ceiling is 2006 to 2016.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion by atoll from the <a href="https://www.tokelau.org.nz/Tokelau+Government/Statistics.html" target="_blank" rel="noopener">Tokelau National Statistics Office (TNSO)</a> and Stats NZ, 2006, 2011 and 2016 &middot; This work is based on/includes Stats NZ\'s data which are licensed by Stats NZ for reuse under the Creative Commons Attribution 4.0 International licence; derived atoll summaries acknowledge TNSO and Stats NZ &middot; Boundaries from <a href="https://www.geoboundaries.org/api/current/gbOpen/TKL/ADM0/" target="_blank" rel="noopener">geoBoundaries</a> TKL ADM0 (CC BY 4.0), Sentinel-2 10m land cover, longitude-clustered to three atoll footprints',
+      censusFlagNote: "* Percentages use each atoll's present usual residents from the census religion table (present in Tokelau on census night, not the absentee-inclusive usual-resident total). Religious affiliation sums every named denomination plus Spiritualism and New Age religions; No religion and Not stated stay in the denominator and outside both headline numerators, and the two shares do not add to 100. Affiliation is near 100 percent in every atoll and wave (the national no-religion count is 0, 0 and 1 across 2006, 2011 and 2016), and the near-flat headline is genuine. The substantive subnational structure is denominational (Congregational Christian dominates Atafu and Fakaofo, Roman Catholic dominates Nukunonu), documented in the source census tables and the build manifest and not carried by these headline metrics. In 2006 Nukunonu the Presbyterian and Not Stated cells print as `~` confidentiality suppressions, forced to zero by the printed atoll and national margins and never estimated. Census content is licensed under CC BY 4.0 (Stats NZ and TNSO); the boundary is geoBoundaries TKL ADM0 under CC BY 4.0."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260711b"></script>
+</body>
+</html>

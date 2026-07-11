@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Tokelau map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Tokelau research map; every string traces to
+    // research/countries/tk/route-probe.md (build and reconciliation
+    // appendices), the manifest docs/manifests/tk-census-religion-2006-2016.json
+    // (construct notes, category detail, validation, and licence), or the live
+    // REGION_CONFIG in apps/regions/tk/index.html. authors nothing.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "TK",
+      countryName: "Tokelau",
+      mapHref: "./",
+      intro: "Census religious-affiliation overlays for Tokelau's three atolls, Atafu, Fakaofo and Nukunonu, across three censuses 2006, 2011 and 2016, from the Tokelau National Statistics Office (TNSO) and Stats NZ. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership. Tokelau is a non-self-governing territory of New Zealand, and the census is Tokelau's own, co-run with Stats NZ.",
+      facts: {
+        waves: "Three censuses: 2006, 2011, 2016",
+        geographies: "Atoll (3 units): Atafu, Fakaofo, Nukunonu",
+        metrics: "Religious affiliation %, No religion %, change since previous census"
+      },
+      reading: [
+        "Atolls are shaded by the share with a stated religious affiliation, summing every named denomination plus Spiritualism and New Age religions, or by the share in the source No religion category (No religion %). Affiliation is near 100 percent in every atoll and wave: Tokelau is effectively universally Christian, and the national no-religion count is 0, 0 and 1 person across 2006, 2011 and 2016. The near-flat affiliation headline is genuine, not an artefact.",
+        "The substantive subnational structure is denominational. Congregational Christian dominates Atafu and Fakaofo, Roman Catholic dominates Nukunonu, and Congregational shares fall on Atafu and Fakaofo across the three waves while the Roman Catholic share rises on Fakaofo. This denominational composition lives in the source census tables (Table 2.5 for 2006, Table 5.8 for 2011 and 2016) and in the build manifest's per-wave category detail; the headline affiliation and no-religion metrics do not carry it, and the popup shows the affiliation and no-religion shares by census year only.",
+        "Percentages use each atoll's present usual residents as the denominator: the usually resident population present in Tokelau on census night (1,074 in 2006, 1,143 in 2011, 1,197 in 2016). This present universe is internally consistent across all three waves; it is not the absentee-inclusive usual-resident total the profiles publish elsewhere, and the two are not mixed. No religion and Not stated stay in the denominator and outside both headline numerators, and the two headline shares do not add to 100.",
+        "A change metric reports the percentage-point change in the affiliation share since the previous census (2006 to 2011, 2011 to 2016). Because affiliation is near-universal in every atoll, this change moves very little; the substantive cross-wave movement is denominational, which the affiliation headline does not carry.",
+        "The record reconciles exactly. Each wave closes at both margins: every atoll column's category sum equals its printed atoll total, and every category row's three-atoll sum equals its printed national total (2006 total 1,074; 2011 total 1,143; 2016 total 1,197). In 2006 Nukunonu the Presbyterian and Not Stated cells print as `~` confidentiality suppressions; they are forced to zero by the printed atoll total (287) and the national margins, rendered as suppressed nulls, and never estimated. No value is allocated, inferred, rounded, or tuned.",
+        "No source publishes a place-of-worship layer for this product: the 2026-07-07 OpenStreetMap sweep returned two tagged places, too sparse to map; place counts and density metrics are therefore null. The 2022 census exists only as licensed microdata (Pacific Data Hub, Other (Not Open), confidentiality declaration required) with no open religion-by-atoll table, and the pre-2006 waves (1986, 1991, 1996, 2001) publish no atoll religion table; both are held, and the series ceiling is 2006 to 2016 unless TNSO or SPC releases an open 2022 aggregate.",
+        "The display frame is the geoBoundaries gbOpen TKL ADM0 land-cover layer (boundary ID TKL-ADM0-11190911, represented year 2022, Sentinel-2 10m land cover), the only Tokelau layer geoBoundaries carries. Its single MultiPolygon of 206 motu parts clusters cleanly by longitude into the three atolls (the atolls lie about 90 to 100 km apart) and is dissolved to three atoll footprints labelled Atafu, Fakaofo and Nukunonu. Swains Island (Olohega), geographically part of the Tokelau chain but administered by the United States, is outside the census and outside this boundary by construction: every part sits between 8.5 and 9.4 degrees South, whereas Swains lies near 11.05 degrees South."
+      ],
+      sources: [
+        {
+          name: "Tokelau 2006 Census of Population and Dwellings, Table 2.5: Religion by Atoll of Usual Residence",
+          href: "https://www.tokelau.org.nz/site/tokelau/files/2006%20Tokelau%20Census%20-%20Tables.xls",
+          construct: "Census religious affiliation by atoll, full counts (bilingual Tokelauan/English); present usual residents (1,074). Nukunonu Presbyterian and Not Stated print as `~` confidentiality suppressions, forced to zero by the printed margins",
+          years: "2006",
+          licence: "Crown copyright, co-published by TNSO and Stats NZ, deferring reuse to the Stats NZ Copyright and terms of use page. That page is byte-matched: content Stats NZ produces is licensed under the Creative Commons Attribution 4.0 International licence. The derived atoll summaries ship under CC BY 4.0 with the adapted-content attribution statement and a TNSO and Stats NZ acknowledgement"
+        },
+        {
+          name: "Tokelau 2016 Census of Population and Dwellings, Tables about social profile, Table 5.8: Religious affiliation by atoll of usual residence, 2011 and 2016",
+          href: "https://www.tokelau.org.nz/site/tokelau/files/TokelauNSO/2016Census/2016%20Tokelau%20Census%20of%20Population%20and%20Dwellings%20-%20Tables%20about%20social%20profile.xlsx",
+          construct: "Census religious affiliation by atoll, full counts, with 2011 and 2016 printed as adjacent column blocks; present usual residents (1,143 in 2011, 1,197 in 2016). The 2011 wave is recovered from this 2016 workbook because the retired Stats NZ 2011 pages 404",
+          years: "2011, 2016",
+          licence: "Crown copyright, co-published by TNSO and Stats NZ, under the same byte-matched CC BY 4.0 position as the 2006 tables; derived atoll summaries ship under CC BY 4.0 with the adapted-content attribution statement and a TNSO and Stats NZ acknowledgement"
+        },
+        {
+          name: "geoBoundaries gbOpen TKL ADM0 boundary",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/TKL/ADM0/",
+          construct: "Boundary geometry (single ADM0 land-cover MultiPolygon, 206 motu parts), Sentinel-2 10m land cover; exploded and longitude-clustered to three atoll footprints (Atafu, Fakaofo, Nukunonu), dissolved and simplified",
+          years: "2022 (represented year)",
+          licence: "Creative Commons Attribution 4.0 International (CC BY 4.0), per the release metadata (boundary ID TKL-ADM0-11190911); attribution geoBoundaries (gbOpen), Sentinel-2 10m Land Cover"
+        }
+      ],
+      accessData: {
+        note: "The committed products are the derived area summary (religious affiliation and no-religion shares by atoll and wave, with population totals) and a simplified three-atoll boundary only; the raw census workbooks and the ADM0 boundary GeoJSON are not committed. The denominational composition behind the affiliation share is documented in the manifest's per-wave category detail, not in the area-summary rows.",
+        sourceOfRecord: "Tokelau National Statistics Office and Stats NZ, <a href=\"https://www.tokelau.org.nz/Tokelau+Government/Statistics.html\" target=\"_blank\" rel=\"noopener\">source of record</a>: the 2006 Census Tables (Table 2.5) and the 2016 Census Tables about social profile (Table 5.8, which prints 2011 and 2016 together); boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/TKL/ADM0/\" target=\"_blank\" rel=\"noopener\">geoBoundaries TKL ADM0</a>.",
+        tables: "Table 2.5 (2006) and Table 5.8 (2011 and 2016) are the source of record for the shipped counts. Reconciliation passes at every margin: each atoll column's category sum equals its printed atoll total, and each category row's three-atoll sum equals its printed national total (1,074 in 2006, 1,143 in 2011, 1,197 in 2016). The area-summary religious_affiliation_percent field carries the affiliation share (every named denomination plus Spiritualism and New Age religions, over each atoll's present-usual-resident total) and no_religion_percent carries the source No religion share; No religion and Not stated stay in the denominator and outside both. In 2006 Nukunonu the Presbyterian and Not Stated cells print as `~` confidentiality suppressions, forced to zero by the printed margins and rendered as suppressed nulls.",
+        licence: "Census content is Crown copyright, co-published by TNSO and Stats NZ, deferring reuse to the Stats NZ Copyright and terms of use page. That page is byte-matched (captured 2026-07-11): content Stats NZ produces is licensed under the Creative Commons Attribution 4.0 International licence. The derived atoll summaries therefore ship under CC BY 4.0 with the adapted-content statement, \"This work is based on/includes Stats NZ's data which are licensed by Stats NZ for reuse under the Creative Commons Attribution 4.0 International licence,\" and a Tokelau National Statistics Office and Stats NZ acknowledgement. The 2022 microdata (Pacific Data Hub) is Other (Not Open) and is not touched. The geoBoundaries TKL ADM0 boundary is CC BY 4.0 per its release metadata.",
+        script: "scripts/build_tk_area_summary.R",
+        manifests: [
+          { label: "tk-census-religion-2006-2016", href: "docs/manifests/tk-census-religion-2006-2016.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Tokelau map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
