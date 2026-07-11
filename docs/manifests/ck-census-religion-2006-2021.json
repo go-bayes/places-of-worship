@@ -1,0 +1,1407 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:ck-census-religion:ck:2011-2021:ciso-island-composite",
+  "dataset_id": "ck-census-religion:ck:2011-2021:ciso-island-composite",
+  "dataset_version_id": "ck-census-religion:ck:2011-2021:ciso-island-composite:0d8a6c54e77e",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "ck-census-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "CK"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-07-11T00:00:00Z",
+  "created_by": "scripts/build_ck_area_summary.R",
+  "target_years": [
+    2011,
+    2016,
+    2021
+  ],
+  "pipeline": {
+    "script": "scripts/build_ck_area_summary.R",
+    "git_commit": "64f1b852b72cd4a9571d0ed4cff681ff246a28c5",
+    "command": "Rscript scripts/build_ck_area_summary.R",
+    "parameters": {
+      "construct": "census affiliation",
+      "shipped_waves": [
+        2011,
+        2016,
+        2021
+      ],
+      "shipped_geography": "12 Cook Islands census islands (composite geoBoundaries COK ADM0 + OSM northern atolls)",
+      "boundary_set": "ck-island-2021-composite-geoboundaries-adm0-osm",
+      "source_tables": {
+        "2011": "Table 2.4 Religion by Usual Residence (Both Sex)",
+        "2016": "Table 2.04 Religion by Usual Residence (Both Sex)",
+        "2021": "Table 2.04 Religion by Usual Residence (Both Sex)"
+      },
+      "universe": "resident population, all ages, in every wave; the religion question was not compulsory",
+      "category_frames": {
+        "2011": [
+          "No Religion",
+          "Cook Islands Christian Church",
+          "Roman Catholic",
+          "Seventh Day Adventist",
+          "Church of Latter days Saints",
+          "Assemblies of God",
+          "Apostolic Church",
+          "Other Religion",
+          "Objected to the Question or Not Stated"
+        ],
+        "2016": [
+          "Cook Islands Christian Church",
+          "Roman Catholic",
+          "Seventh Day Adventist",
+          "Church of Latter Days Saint",
+          "Assemblies of God",
+          "Apostolic Church",
+          "Other Religion",
+          "No Religion/Not Stated"
+        ],
+        "2021": [
+          "Cook Islands Christian Church",
+          "Roman Catholic",
+          "Seventh Day Adventist",
+          "Church of Latter Days Saint",
+          "Assemblies of God",
+          "Apostolic Church",
+          "Jehova Witness",
+          "Other Religion",
+          "No Religion/Not Stated"
+        ],
+        "alignment_note": "Categories are preserved verbatim per wave. Jehovah's Witness is folded into Other Religion in the 2011 and 2016 island tables and printed as a separate column in 2021; the named-affiliation spine is comparable across waves once JW is folded back into affiliation. The no-religion line differs by frame: 2011 prints No Religion and Objected/Not Stated as two separate columns (no_religion carries No Religion only, 841 nationally; the Objected/Not Stated column, 323, stays in the denominator); 2016 and 2021 print one combined No Religion/Not Stated line (1,097 and 2,338 nationally), so the no-religion share for those waves includes not-stated. This difference is disclosed per row and is inherent to the source frames, never tuned."
+      },
+      "no_religion_treatment": {
+        "2011": "No Religion column only (national 841); the separate Objected/Not Stated column (323) is retained in the denominator, outside both numerators",
+        "2016": "combined No Religion/Not Stated line (national 1,097); includes not-stated",
+        "2021": "combined No Religion/Not Stated line (national 2,338); includes not-stated"
+      },
+      "jehovahs_witness_treatment": "Folded into Other Religion in the 2011 and 2016 island tables (Table 2.4 / 2.04); printed as a separate column in the 2021 island table (national 330). Table 6 splits JW for every wave, confirming the fold (2016 Other 839 + JW 357 = 1,196, the island-table Other Religion column).",
+      "held_out_2006": {
+        "table": "Table 6 Resident population by religious affiliation (2006/2011/2016 by group)",
+        "national_total": 15324,
+        "categories": {
+          "Cook Islands Christian Church": 8065,
+          "Roman Catholic": 2599,
+          "Seventh Day Adventist": 1154,
+          "Church of Latter Days Saint": 565,
+          "Assemblies of God": 558,
+          "Apostolic Church": 310,
+          "Jehovas Witness": 325,
+          "Other Religion": 786,
+          "No Religion/Not Stated": 962
+        },
+        "groups": {
+          "Rarotonga": 10226,
+          "Southern Islands": 3729,
+          "Northern Islands": 1369
+        },
+        "note": "Recorded group-level context, HELD OUT of the island product. The 2006 wave is published only at island-group level (Rarotonga / Southern / Northern) in the 2016 report Table 6; no 2006 island religion table exists. The runtime derives years per summary file, so a 2006 wave on the island level would wrongly imply island detail. Held out (the KI 2020 / BS 2022 national-context precedent)."
+      },
+      "tapere_note": "Rarotonga is additionally split into tapere within each wave, but the tapere partition is not stable across waves (2011 splits Kiikii-Ooa-Pue / Tupapa-Maraerenga; 2016 merges them; 2021 relabels), so the product holds at the island level. The tapere rows sum to the Rarotonga island total within each wave.",
+      "boundary_assembly": {
+        "geoboundaries": {
+          "layer": "COK ADM0 (Sentinel-2 10m land cover, single MultiPolygon of 86 parts)",
+          "islands": [
+            "Rarotonga",
+            "Aitutaki",
+            "Mangaia",
+            "Atiu",
+            "Mauke",
+            "Mitiaro",
+            "Penrhyn"
+          ],
+          "method": "cluster the 86 land parts to the seven census islands by nearest known island coordinate; drop parts nearest the uninhabited decoys Manuae, Takutea, Suwarrow",
+          "parts_total": 86,
+          "parts_dropped_as_decoy": 12,
+          "clusters": {
+            "Rarotonga": {
+              "clustered_land_sq_km": 67.596,
+              "centroid_lon_lat": [-159.7777, -21.2347]
+            },
+            "Aitutaki": {
+              "clustered_land_sq_km": 17.279,
+              "centroid_lon_lat": [-159.7791, -18.8645]
+            },
+            "Mangaia": {
+              "clustered_land_sq_km": 48.101,
+              "centroid_lon_lat": [-157.9194, -21.9283]
+            },
+            "Atiu": {
+              "clustered_land_sq_km": 28.216,
+              "centroid_lon_lat": [-158.1146, -19.9952]
+            },
+            "Mauke": {
+              "clustered_land_sq_km": 18.871,
+              "centroid_lon_lat": [-157.3415, -20.1609]
+            },
+            "Mitiaro": {
+              "clustered_land_sq_km": 22.669,
+              "centroid_lon_lat": [-157.702, -19.8672]
+            },
+            "Penrhyn": {
+              "clustered_land_sq_km": 8.206,
+              "centroid_lon_lat": [-157.9758, -8.989]
+            }
+          },
+          "licence": "CC BY 4.0"
+        },
+        "osm": {
+          "islands": [
+            "Palmerston",
+            "Manihiki",
+            "Rakahanga",
+            "Nassau",
+            "Pukapuka"
+          ],
+          "method": "assemble each atoll's land as the union of its closed natural=coastline / place=island motu, fetched from the Overpass API; area-gate against published land areas",
+          "area_gate": {
+            "Palmerston": {
+              "motu": 34,
+              "assembled_land_sq_km": 2.901,
+              "centroid_lon_lat": [-163.1538, -18.0461]
+            },
+            "Manihiki": {
+              "motu": 93,
+              "assembled_land_sq_km": 5.249,
+              "centroid_lon_lat": [-160.9993, -10.419]
+            },
+            "Rakahanga": {
+              "motu": 13,
+              "assembled_land_sq_km": 3.902,
+              "centroid_lon_lat": [-161.0915, -10.0186]
+            },
+            "Nassau": {
+              "motu": 1,
+              "assembled_land_sq_km": 1.246,
+              "centroid_lon_lat": [-165.4146, -11.5603]
+            },
+            "Pukapuka": {
+              "motu": 23,
+              "assembled_land_sq_km": 4.375,
+              "centroid_lon_lat": [-165.8458, -10.8855]
+            }
+          },
+          "licence": "ODbL 1.0",
+          "note": "All five atolls assembled cleanly (every coastline way closed; no super-relation assembly needed). Pukapuka's assembled land (4.4 sq km, all reef motu) exceeds the commonly quoted 1.3 sq km for the three main islets but stays inside the 0.3-10 sq km gate; disclosed."
+        },
+        "licence_composite": "Mixed per feature: seven geoBoundaries features carry CC BY 4.0; five OSM features carry ODbL 1.0. Disclosed per feature (boundary_source, boundary_licence) and here.",
+        "dateline": "None. All Cook Islands territory is 155-166 W, far east of the antimeridian; verified from the assembled coordinates."
+      },
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 254656
+      },
+      "omitted_metrics": [
+        "place_count",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "local_cache_hint": "All raw sources are cached under data/raw/ck_census/ and remain git-ignored.",
+      "retrieval_record": [
+        {
+          "uri": "data/raw/ck_census/ck_2011_census_report.pdf",
+          "url": "https://stats.gov.ck/download/432/census-2011/5911/2011-census-report.pdf",
+          "format": "pdf",
+          "bytes": 4019633,
+          "sha256": "5735f089e75f4a990dfd2cdbc94857b13cf41d7ce4c531c1a7ecf1039d8e378c",
+          "row_count": null,
+          "source_dataset_id": "ciso-census-2011-table2-4-religion-by-island",
+          "used_in_public_product": true,
+          "periods": "2011",
+          "notes": "2011 Census Report Table 2.4; twelve island units. Every island row closes to its printed Total; islands close to the national total 14,974 and every category column closes. No Religion and Objected/Not Stated are separate columns; JW folded into Other Religion.",
+          "local_cache_hint": "data/raw/ck_census/ck_2011_census_report.pdf (git-ignored by .gitignore data/ rule)"
+        },
+        {
+          "uri": "data/raw/ck_census/ck_2016_census_report.pdf",
+          "url": "https://stats.gov.ck/download/430/census-2016/5895/2016-census-report.pdf",
+          "format": "pdf",
+          "bytes": 4871882,
+          "sha256": "6c0fa1d1ea832ed7a99d9fd11ca5949293382df253806b3250e986c821cf8100",
+          "row_count": null,
+          "source_dataset_id": "ciso-census-2016-table2-04-religion-by-island",
+          "used_in_public_product": true,
+          "periods": "2016; 2006",
+          "notes": "2016 Census Report Table 2.04 (island religion; national 14,802) and Table 6 (2006/2011/2016 group series; source of the held-out 2006 group wave). Combined No Religion/Not Stated line; JW folded into Other Religion.",
+          "local_cache_hint": "data/raw/ck_census/ck_2016_census_report.pdf (git-ignored by .gitignore data/ rule)"
+        },
+        {
+          "uri": "data/raw/ck_census/ck_2021_census_report.pdf",
+          "url": "https://stats.gov.ck/download/83/census-2021/1497/2021-census-report-with-tables-and-questionnaire.pdf",
+          "format": "pdf",
+          "bytes": 4135457,
+          "sha256": "3cc3c9795e030ca6185b2b7f06f4eaeb3e1b12fa8f9ce5e48c9239ff6f074cc8",
+          "row_count": null,
+          "source_dataset_id": "ciso-census-2021-table2-04-religion-by-island",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Census Report Table 2.04; twelve island units. Every island row closes to its printed Total; islands close to the national total 14,987 and every category column closes. Combined No Religion/Not Stated line; JW printed separately.",
+          "local_cache_hint": "data/raw/ck_census/ck_2021_census_report.pdf (git-ignored by .gitignore data/ rule)"
+        },
+        {
+          "uri": "data/raw/ck_census/geoBoundaries-COK-ADM0.geojson",
+          "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/COK/ADM0/geoBoundaries-COK-ADM0.geojson",
+          "format": "geojson",
+          "bytes": 283806,
+          "sha256": "213972fbb83bec6c5678a7671823983633166ae032439de8903fb59b8896d05e",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-cok-adm0-2021",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "geoBoundaries COK ADM0 GeoJSON; single MultiPolygon of 86 Sentinel-2 land parts, clustered to seven census islands. CC BY 4.0. Pinned commit 9469f09.",
+          "local_cache_hint": "data/raw/ck_census/geoBoundaries-COK-ADM0.geojson (git-ignored by .gitignore data/ rule)"
+        },
+        {
+          "uri": "data/raw/ck_census/gb_cok_adm0_meta.json",
+          "url": "https://www.geoboundaries.org/api/current/gbOpen/COK/ADM0/",
+          "format": "json",
+          "bytes": 1923,
+          "sha256": "2d367b533b68fbf7bc7af38fbe43f9a40f153e861d23fa49564f32b1bce9de42",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-cok-adm0-2021",
+          "used_in_public_product": false,
+          "periods": "2021",
+          "notes": "geoBoundaries COK ADM0 metadata; records CC BY 4.0 and boundaryYearRepresented 2021.",
+          "local_cache_hint": "data/raw/ck_census/gb_cok_adm0_meta.json (git-ignored by .gitignore data/ rule)"
+        },
+        {
+          "uri": "data/raw/ck_census/osm_palmerston_coastline.json",
+          "url": "https://overpass-api.de/api/interpreter",
+          "format": "json",
+          "bytes": 55700,
+          "sha256": "b7f649d1e7d6296619634087eaab4ca3c768c84136d78960952a085b0d15a5e3",
+          "row_count": null,
+          "source_dataset_id": "osm-cook-islands-northern-atolls-coastline",
+          "used_in_public_product": true,
+          "periods": "2026",
+          "notes": "OSM Overpass coastline for Palmerston (34 motu, 2.901 sq km land).",
+          "local_cache_hint": "data/raw/ck_census/osm_palmerston_coastline.json (git-ignored by .gitignore data/ rule)"
+        },
+        {
+          "uri": "data/raw/ck_census/osm_manihiki_coastline.json",
+          "url": "https://overpass-api.de/api/interpreter",
+          "format": "json",
+          "bytes": 241119,
+          "sha256": "00132efbe6fed062d578d256991e46f97ea86cf3e296de727d9f0250f7eab033",
+          "row_count": null,
+          "source_dataset_id": "osm-cook-islands-northern-atolls-coastline",
+          "used_in_public_product": true,
+          "periods": "2026",
+          "notes": "OSM Overpass coastline for Manihiki (93 motu, 5.249 sq km land).",
+          "local_cache_hint": "data/raw/ck_census/osm_manihiki_coastline.json (git-ignored by .gitignore data/ rule)"
+        },
+        {
+          "uri": "data/raw/ck_census/osm_rakahanga_coastline.json",
+          "url": "https://overpass-api.de/api/interpreter",
+          "format": "json",
+          "bytes": 45555,
+          "sha256": "c8f59b07332052717c32767dcdeb44b9e0d33733c3bb77b39eb6598fc8427b57",
+          "row_count": null,
+          "source_dataset_id": "osm-cook-islands-northern-atolls-coastline",
+          "used_in_public_product": true,
+          "periods": "2026",
+          "notes": "OSM Overpass coastline for Rakahanga (13 motu, 3.902 sq km land).",
+          "local_cache_hint": "data/raw/ck_census/osm_rakahanga_coastline.json (git-ignored by .gitignore data/ rule)"
+        },
+        {
+          "uri": "data/raw/ck_census/osm_nassau_coastline.json",
+          "url": "https://overpass-api.de/api/interpreter",
+          "format": "json",
+          "bytes": 4472,
+          "sha256": "d6caa097e4697f64ebf5deed849cadd1e33a556ce8dcb7e2650aae7cc3a23ced",
+          "row_count": null,
+          "source_dataset_id": "osm-cook-islands-northern-atolls-coastline",
+          "used_in_public_product": true,
+          "periods": "2026",
+          "notes": "OSM Overpass coastline for Nassau (1 motu, 1.246 sq km land).",
+          "local_cache_hint": "data/raw/ck_census/osm_nassau_coastline.json (git-ignored by .gitignore data/ rule)"
+        },
+        {
+          "uri": "data/raw/ck_census/osm_pukapuka_coastline.json",
+          "url": "https://overpass-api.de/api/interpreter",
+          "format": "json",
+          "bytes": 65328,
+          "sha256": "3a5760e82a435376076c2aef7e0d6d53bc82b5076dbe0b8092cdf608720d161a",
+          "row_count": null,
+          "source_dataset_id": "osm-cook-islands-northern-atolls-coastline",
+          "used_in_public_product": true,
+          "periods": "2026",
+          "notes": "OSM Overpass coastline for Pukapuka (23 motu, 4.375 sq km land).",
+          "local_cache_hint": "data/raw/ck_census/osm_pukapuka_coastline.json (git-ignored by .gitignore data/ rule)"
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "scripts/lib/simplify_boundary.R (npx mapshaper)"
+    }
+  },
+  "source": {
+    "provider": "Cook Islands Statistics Office (CISO); geoBoundaries (William & Mary geoLab); OpenStreetMap contributors",
+    "source_dataset_ids": ["ciso-census-2011-table2-4-religion-by-island", "ciso-census-2016-table2-04-religion-by-island", "ciso-census-2021-table2-04-religion-by-island", "ciso-census-2016-table6-religion-by-group-2006", "geoboundaries-cok-adm0-2021", "osm-cook-islands-northern-atolls-coastline"],
+    "source_urls": [
+      "https://stats.gov.ck/download/432/census-2011/5911/2011-census-report.pdf",
+      "https://stats.gov.ck/download/430/census-2016/5895/2016-census-report.pdf",
+      "https://stats.gov.ck/download/83/census-2021/1497/2021-census-report-with-tables-and-questionnaire.pdf",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/COK/ADM0/geoBoundaries-COK-ADM0.geojson",
+      "https://www.geoboundaries.org/api/current/gbOpen/COK/ADM0/",
+      "https://overpass-api.de/api/interpreter"
+    ],
+    "retrieved_at": "2026-07-11T00:00:00Z",
+    "licence": "CISO Standards clause (all three reports, verbatim): \"Any table or material may be reproduced and published provided acknowledgement is made of the source.\" The 2021 report front matter reserves commercial and whole-document reproduction and forbids altering the original work without permission, while authorizing partial reproduction for scientific, educational or research purposes with acknowledgement. A derived, aggregated, attributed island summary sits inside the operative Standards grant and the front-matter research carve-out; the interaction is flagged for the PI as a caveat, not a blocker. Boundary: geoBoundaries CC BY 4.0 (seven islands) and OpenStreetMap ODbL 1.0 (five northern atolls), attributed per feature.",
+    "citation": "Cook Islands Statistics Office, 2011/2016/2021 Census Reports, Table 2.4 / 2.04; geoBoundaries COK ADM0 (gbOpen); OpenStreetMap contributors.",
+    "raw_redistribution": "The census report PDFs, the geoBoundaries source GeoJSON, and the OSM Overpass responses are not committed; they remain in data/raw/ck_census/.",
+    "local_cache_hint": "data/raw/ck_census/ (git-ignored by .gitignore data/ rule)"
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/ck_census/ck_2011_census_report.pdf",
+      "url": "https://stats.gov.ck/download/432/census-2011/5911/2011-census-report.pdf",
+      "format": "pdf",
+      "bytes": 4019633,
+      "sha256": "5735f089e75f4a990dfd2cdbc94857b13cf41d7ce4c531c1a7ecf1039d8e378c",
+      "row_count": null,
+      "source_dataset_id": "ciso-census-2011-table2-4-religion-by-island",
+      "used_in_public_product": true,
+      "periods": "2011",
+      "notes": "2011 Census Report Table 2.4; twelve island units. Every island row closes to its printed Total; islands close to the national total 14,974 and every category column closes. No Religion and Objected/Not Stated are separate columns; JW folded into Other Religion.",
+      "local_cache_hint": "data/raw/ck_census/ck_2011_census_report.pdf (git-ignored by .gitignore data/ rule)"
+    },
+    {
+      "uri": "data/raw/ck_census/ck_2016_census_report.pdf",
+      "url": "https://stats.gov.ck/download/430/census-2016/5895/2016-census-report.pdf",
+      "format": "pdf",
+      "bytes": 4871882,
+      "sha256": "6c0fa1d1ea832ed7a99d9fd11ca5949293382df253806b3250e986c821cf8100",
+      "row_count": null,
+      "source_dataset_id": "ciso-census-2016-table2-04-religion-by-island",
+      "used_in_public_product": true,
+      "periods": "2016; 2006",
+      "notes": "2016 Census Report Table 2.04 (island religion; national 14,802) and Table 6 (2006/2011/2016 group series; source of the held-out 2006 group wave). Combined No Religion/Not Stated line; JW folded into Other Religion.",
+      "local_cache_hint": "data/raw/ck_census/ck_2016_census_report.pdf (git-ignored by .gitignore data/ rule)"
+    },
+    {
+      "uri": "data/raw/ck_census/ck_2021_census_report.pdf",
+      "url": "https://stats.gov.ck/download/83/census-2021/1497/2021-census-report-with-tables-and-questionnaire.pdf",
+      "format": "pdf",
+      "bytes": 4135457,
+      "sha256": "3cc3c9795e030ca6185b2b7f06f4eaeb3e1b12fa8f9ce5e48c9239ff6f074cc8",
+      "row_count": null,
+      "source_dataset_id": "ciso-census-2021-table2-04-religion-by-island",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Census Report Table 2.04; twelve island units. Every island row closes to its printed Total; islands close to the national total 14,987 and every category column closes. Combined No Religion/Not Stated line; JW printed separately.",
+      "local_cache_hint": "data/raw/ck_census/ck_2021_census_report.pdf (git-ignored by .gitignore data/ rule)"
+    },
+    {
+      "uri": "data/raw/ck_census/geoBoundaries-COK-ADM0.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/COK/ADM0/geoBoundaries-COK-ADM0.geojson",
+      "format": "geojson",
+      "bytes": 283806,
+      "sha256": "213972fbb83bec6c5678a7671823983633166ae032439de8903fb59b8896d05e",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-cok-adm0-2021",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "geoBoundaries COK ADM0 GeoJSON; single MultiPolygon of 86 Sentinel-2 land parts, clustered to seven census islands. CC BY 4.0. Pinned commit 9469f09.",
+      "local_cache_hint": "data/raw/ck_census/geoBoundaries-COK-ADM0.geojson (git-ignored by .gitignore data/ rule)"
+    },
+    {
+      "uri": "data/raw/ck_census/gb_cok_adm0_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/COK/ADM0/",
+      "format": "json",
+      "bytes": 1923,
+      "sha256": "2d367b533b68fbf7bc7af38fbe43f9a40f153e861d23fa49564f32b1bce9de42",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-cok-adm0-2021",
+      "used_in_public_product": false,
+      "periods": "2021",
+      "notes": "geoBoundaries COK ADM0 metadata; records CC BY 4.0 and boundaryYearRepresented 2021.",
+      "local_cache_hint": "data/raw/ck_census/gb_cok_adm0_meta.json (git-ignored by .gitignore data/ rule)"
+    },
+    {
+      "uri": "data/raw/ck_census/osm_palmerston_coastline.json",
+      "url": "https://overpass-api.de/api/interpreter",
+      "format": "json",
+      "bytes": 55700,
+      "sha256": "b7f649d1e7d6296619634087eaab4ca3c768c84136d78960952a085b0d15a5e3",
+      "row_count": null,
+      "source_dataset_id": "osm-cook-islands-northern-atolls-coastline",
+      "used_in_public_product": true,
+      "periods": "2026",
+      "notes": "OSM Overpass coastline for Palmerston (34 motu, 2.901 sq km land).",
+      "local_cache_hint": "data/raw/ck_census/osm_palmerston_coastline.json (git-ignored by .gitignore data/ rule)"
+    },
+    {
+      "uri": "data/raw/ck_census/osm_manihiki_coastline.json",
+      "url": "https://overpass-api.de/api/interpreter",
+      "format": "json",
+      "bytes": 241119,
+      "sha256": "00132efbe6fed062d578d256991e46f97ea86cf3e296de727d9f0250f7eab033",
+      "row_count": null,
+      "source_dataset_id": "osm-cook-islands-northern-atolls-coastline",
+      "used_in_public_product": true,
+      "periods": "2026",
+      "notes": "OSM Overpass coastline for Manihiki (93 motu, 5.249 sq km land).",
+      "local_cache_hint": "data/raw/ck_census/osm_manihiki_coastline.json (git-ignored by .gitignore data/ rule)"
+    },
+    {
+      "uri": "data/raw/ck_census/osm_rakahanga_coastline.json",
+      "url": "https://overpass-api.de/api/interpreter",
+      "format": "json",
+      "bytes": 45555,
+      "sha256": "c8f59b07332052717c32767dcdeb44b9e0d33733c3bb77b39eb6598fc8427b57",
+      "row_count": null,
+      "source_dataset_id": "osm-cook-islands-northern-atolls-coastline",
+      "used_in_public_product": true,
+      "periods": "2026",
+      "notes": "OSM Overpass coastline for Rakahanga (13 motu, 3.902 sq km land).",
+      "local_cache_hint": "data/raw/ck_census/osm_rakahanga_coastline.json (git-ignored by .gitignore data/ rule)"
+    },
+    {
+      "uri": "data/raw/ck_census/osm_nassau_coastline.json",
+      "url": "https://overpass-api.de/api/interpreter",
+      "format": "json",
+      "bytes": 4472,
+      "sha256": "d6caa097e4697f64ebf5deed849cadd1e33a556ce8dcb7e2650aae7cc3a23ced",
+      "row_count": null,
+      "source_dataset_id": "osm-cook-islands-northern-atolls-coastline",
+      "used_in_public_product": true,
+      "periods": "2026",
+      "notes": "OSM Overpass coastline for Nassau (1 motu, 1.246 sq km land).",
+      "local_cache_hint": "data/raw/ck_census/osm_nassau_coastline.json (git-ignored by .gitignore data/ rule)"
+    },
+    {
+      "uri": "data/raw/ck_census/osm_pukapuka_coastline.json",
+      "url": "https://overpass-api.de/api/interpreter",
+      "format": "json",
+      "bytes": 65328,
+      "sha256": "3a5760e82a435376076c2aef7e0d6d53bc82b5076dbe0b8092cdf608720d161a",
+      "row_count": null,
+      "source_dataset_id": "osm-cook-islands-northern-atolls-coastline",
+      "used_in_public_product": true,
+      "periods": "2026",
+      "notes": "OSM Overpass coastline for Pukapuka (23 motu, 4.375 sq km land).",
+      "local_cache_hint": "data/raw/ck_census/osm_pukapuka_coastline.json (git-ignored by .gitignore data/ rule)"
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/ck/data/area_summary_island.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 86771,
+      "sha256": "0d8a6c54e77e1bdf2dc09c3a3b55fb675e27359d250f1121ae380df0b2e7baee",
+      "row_count": 36,
+      "feature_count": null,
+      "content": "Cook Islands 12-island census-affiliation area summary for 2011, 2016, 2021 (36 rows).",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "ciso_census_standards_clause_reproduce_with_acknowledgement"
+    },
+    {
+      "uri": "repo:apps/regions/ck/data/area_summary_island.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 50980,
+      "sha256": "68dba9e7acbefcb8273aefb3230a4170644b89961d7975b82f839eb1a5f09dae",
+      "row_count": 36,
+      "feature_count": null,
+      "content": "Flattened Cook Islands 12-island census-affiliation rows for 2011, 2016, 2021.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "ciso_census_standards_clause_reproduce_with_acknowledgement"
+    },
+    {
+      "uri": "repo:apps/regions/ck/data/ck_island_2021.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 254656,
+      "sha256": "4d0e320dbf4c771bc65617c0255dffcced301c42b2e630c146c1c8ec815717d0",
+      "row_count": null,
+      "feature_count": 12,
+      "content": "Simplified composite Cook Islands 12-island boundary GeoJSON (geoBoundaries CC BY 4.0 + OSM ODbL 1.0, per-feature provenance).",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_cc_by_4_0_and_osm_odbl_1_0_composite"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/ck/data/area_summary_island.json",
+      "sha256": "0d8a6c54e77e1bdf2dc09c3a3b55fb675e27359d250f1121ae380df0b2e7baee",
+      "built_by": "scripts/build_ck_area_summary.R",
+      "notes": "12 islands x 3 waves = 36 rows; all-ages resident-population universe; every wave reconciled to its printed island, group, national, and category margins."
+    },
+    {
+      "uri": "repo:apps/regions/ck/data/ck_island_2021.geojson",
+      "sha256": "4d0e320dbf4c771bc65617c0255dffcced301c42b2e630c146c1c8ec815717d0",
+      "built_by": "scripts/build_ck_area_summary.R",
+      "notes": "12 island features: 7 from geoBoundaries COK ADM0 (CC BY 4.0) clustered from land-cover parts, 5 northern atolls from OSM coastline (ODbL 1.0). Per-feature boundary_source / boundary_licence."
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "Rscript scripts/build_ck_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/ck/data/area_summary_island.json",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/ck-census-religion-2006-2021.json",
+      "bash scripts/validate_manifests.sh"
+    ],
+    "reconciliation": {
+      "2011": [
+        {
+          "year": 2011,
+          "margin": "island_row",
+          "key": "Rarotonga",
+          "computed": 10572,
+          "printed": 10572,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "island_row",
+          "key": "Aitutaki",
+          "computed": 1771,
+          "printed": 1771,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "island_row",
+          "key": "Mangaia",
+          "computed": 562,
+          "printed": 562,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "island_row",
+          "key": "Atiu",
+          "computed": 468,
+          "printed": 468,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "island_row",
+          "key": "Mauke",
+          "computed": 300,
+          "printed": 300,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "island_row",
+          "key": "Mitiaro",
+          "computed": 189,
+          "printed": 189,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "island_row",
+          "key": "Palmerston",
+          "computed": 60,
+          "printed": 60,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "island_row",
+          "key": "Pukapuka",
+          "computed": 451,
+          "printed": 451,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "island_row",
+          "key": "Nassau",
+          "computed": 73,
+          "printed": 73,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "island_row",
+          "key": "Manihiki",
+          "computed": 238,
+          "printed": 238,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "island_row",
+          "key": "Rakahanga",
+          "computed": 77,
+          "printed": 77,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "island_row",
+          "key": "Penrhyn",
+          "computed": 213,
+          "printed": 213,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "island_group",
+          "key": "RAROTONGA",
+          "computed": 10572,
+          "printed": 10572,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "island_group",
+          "key": "SOUTHERN",
+          "computed": 3290,
+          "printed": 3290,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "island_group",
+          "key": "NORTHERN",
+          "computed": 1112,
+          "printed": 1112,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "national_total",
+          "key": "COOK ISLANDS",
+          "computed": 14974,
+          "printed": 14974,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "category_column",
+          "key": "No Religion",
+          "computed": 841,
+          "printed": 841,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "category_column",
+          "key": "Cook Islands Christian Church",
+          "computed": 7356,
+          "printed": 7356,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "category_column",
+          "key": "Roman Catholic",
+          "computed": 2540,
+          "printed": 2540,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "category_column",
+          "key": "Seventh Day Adventist",
+          "computed": 1190,
+          "printed": 1190,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "category_column",
+          "key": "Church of Latter days Saints",
+          "computed": 656,
+          "printed": 656,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "category_column",
+          "key": "Assemblies of God",
+          "computed": 557,
+          "printed": 557,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "category_column",
+          "key": "Apostolic Church",
+          "computed": 310,
+          "printed": 310,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "category_column",
+          "key": "Other Religion",
+          "computed": 1201,
+          "printed": 1201,
+          "difference": 0
+        },
+        {
+          "year": 2011,
+          "margin": "category_column",
+          "key": "Objected to the Question or Not Stated",
+          "computed": 323,
+          "printed": 323,
+          "difference": 0
+        }
+      ],
+      "2016": [
+        {
+          "year": 2016,
+          "margin": "island_row",
+          "key": "Rarotonga",
+          "computed": 10649,
+          "printed": 10649,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "island_row",
+          "key": "Aitutaki",
+          "computed": 1712,
+          "printed": 1712,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "island_row",
+          "key": "Mangaia",
+          "computed": 493,
+          "printed": 493,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "island_row",
+          "key": "Atiu",
+          "computed": 423,
+          "printed": 423,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "island_row",
+          "key": "Mauke",
+          "computed": 289,
+          "printed": 289,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "island_row",
+          "key": "Mitiaro",
+          "computed": 155,
+          "printed": 155,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "island_row",
+          "key": "Palmerston",
+          "computed": 57,
+          "printed": 57,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "island_row",
+          "key": "Pukapuka",
+          "computed": 425,
+          "printed": 425,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "island_row",
+          "key": "Nassau",
+          "computed": 78,
+          "printed": 78,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "island_row",
+          "key": "Manihiki",
+          "computed": 212,
+          "printed": 212,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "island_row",
+          "key": "Rakahanga",
+          "computed": 83,
+          "printed": 83,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "island_row",
+          "key": "Penrhyn",
+          "computed": 226,
+          "printed": 226,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "island_group",
+          "key": "RAROTONGA",
+          "computed": 10649,
+          "printed": 10649,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "island_group",
+          "key": "SOUTHERN",
+          "computed": 3072,
+          "printed": 3072,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "island_group",
+          "key": "NORTHERN",
+          "computed": 1081,
+          "printed": 1081,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "national_total",
+          "key": "COOK ISLANDS",
+          "computed": 14802,
+          "printed": 14802,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "category_column",
+          "key": "Cook Islands Christian Church",
+          "computed": 7225,
+          "printed": 7225,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "category_column",
+          "key": "Roman Catholic",
+          "computed": 2574,
+          "printed": 2574,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "category_column",
+          "key": "Seventh Day Adventist",
+          "computed": 1249,
+          "printed": 1249,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "category_column",
+          "key": "Church of Latter Days Saint",
+          "computed": 609,
+          "printed": 609,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "category_column",
+          "key": "Assemblies of God",
+          "computed": 569,
+          "printed": 569,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "category_column",
+          "key": "Apostolic Church",
+          "computed": 283,
+          "printed": 283,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "category_column",
+          "key": "Other Religion",
+          "computed": 1196,
+          "printed": 1196,
+          "difference": 0
+        },
+        {
+          "year": 2016,
+          "margin": "category_column",
+          "key": "No Religion/Not Stated",
+          "computed": 1097,
+          "printed": 1097,
+          "difference": 0
+        }
+      ],
+      "2021": [
+        {
+          "year": 2021,
+          "margin": "island_row",
+          "key": "Rarotonga",
+          "computed": 10863,
+          "printed": 10863,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "island_row",
+          "key": "Aitutaki",
+          "computed": 1776,
+          "printed": 1776,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "island_row",
+          "key": "Mangaia",
+          "computed": 471,
+          "printed": 471,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "island_row",
+          "key": "Atiu",
+          "computed": 382,
+          "printed": 382,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "island_row",
+          "key": "Mauke",
+          "computed": 249,
+          "printed": 249,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "island_row",
+          "key": "Mitiaro",
+          "computed": 155,
+          "printed": 155,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "island_row",
+          "key": "Palmerston",
+          "computed": 25,
+          "printed": 25,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "island_row",
+          "key": "Pukapuka",
+          "computed": 457,
+          "printed": 457,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "island_row",
+          "key": "Nassau",
+          "computed": 92,
+          "printed": 92,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "island_row",
+          "key": "Manihiki",
+          "computed": 206,
+          "printed": 206,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "island_row",
+          "key": "Rakahanga",
+          "computed": 81,
+          "printed": 81,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "island_row",
+          "key": "Penrhyn",
+          "computed": 230,
+          "printed": 230,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "island_group",
+          "key": "RAROTONGA",
+          "computed": 10863,
+          "printed": 10863,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "island_group",
+          "key": "SOUTHERN",
+          "computed": 3033,
+          "printed": 3033,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "island_group",
+          "key": "NORTHERN",
+          "computed": 1091,
+          "printed": 1091,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "national_total",
+          "key": "COOK ISLANDS",
+          "computed": 14987,
+          "printed": 14987,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "category_column",
+          "key": "Cook Islands Christian Church",
+          "computed": 6461,
+          "printed": 6461,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "category_column",
+          "key": "Roman Catholic",
+          "computed": 2500,
+          "printed": 2500,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "category_column",
+          "key": "Seventh Day Adventist",
+          "computed": 1241,
+          "printed": 1241,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "category_column",
+          "key": "Church of Latter Days Saint",
+          "computed": 591,
+          "printed": 591,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "category_column",
+          "key": "Assemblies of God",
+          "computed": 535,
+          "printed": 535,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "category_column",
+          "key": "Apostolic Church",
+          "computed": 322,
+          "printed": 322,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "category_column",
+          "key": "Jehova Witness",
+          "computed": 330,
+          "printed": 330,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "category_column",
+          "key": "Other Religion",
+          "computed": 669,
+          "printed": 669,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "category_column",
+          "key": "No Religion/Not Stated",
+          "computed": 2338,
+          "printed": 2338,
+          "difference": 0
+        }
+      ]
+    },
+    "boundary_validation": {
+      "status": "passed",
+      "feature_count": 12,
+      "distinct_source_geometry_hashes": 12,
+      "distinct_output_geometry_hashes": 12,
+      "geometry_hashes": {
+        "rarotonga": "04aa66d45b5fd5d78cbfcaf6f27f9f48e6f5b6ef285b0316294ffb18710b273b",
+        "aitutaki": "7140fa19fbf54a2c0cee0b3201968c6c9514a78885573f36b4ba1450244f645f",
+        "mangaia": "392f62bdd31f50fef020ce96780ba749622d27e542364ed1f70e8d0b2c4ce720",
+        "atiu": "9087b3e4ee93b1d7d6e89d5a078de5ef9369f53da74e0e965538057a92592126",
+        "mauke": "7e2c477320d727cbd1a3feef04de0509f304878252c9bf78b125c4baa0f27f15",
+        "mitiaro": "0e97ee5756137b04a530ab5f1a5ee10a3bb2598d318646c41f8c19c0f0913934",
+        "palmerston": "5f04763983a4d8e30abcfab69b7eb0f4cbc67a20529377645b56a97e05affa1f",
+        "pukapuka": "c1fca6e7bd3ed0ad2fde19f17c447e80270a31f4244767e91fb50e13c112ab6d",
+        "nassau": "d1559f68b19edad86e6cc413b00ca4d84099870e7efdf2fcb398e4c135c30072",
+        "manihiki": "0ed31149688a5868999f85c574f9011f4e740f80c8feb281500dfa8e9586cfea",
+        "rakahanga": "05dd705d2d530c2de86311442b6800b180e5991b97095f56be005c39a3c2a70d",
+        "penrhyn": "cc14de910a40d0ebc9b28025e08f6427bf40ccb9e7ce06d20214f089884fe1c8"
+      },
+      "geoboundaries_clusters": {
+        "Rarotonga": {
+          "clustered_land_sq_km": 67.596,
+          "centroid_lon_lat": [-159.7777, -21.2347]
+        },
+        "Aitutaki": {
+          "clustered_land_sq_km": 17.279,
+          "centroid_lon_lat": [-159.7791, -18.8645]
+        },
+        "Mangaia": {
+          "clustered_land_sq_km": 48.101,
+          "centroid_lon_lat": [-157.9194, -21.9283]
+        },
+        "Atiu": {
+          "clustered_land_sq_km": 28.216,
+          "centroid_lon_lat": [-158.1146, -19.9952]
+        },
+        "Mauke": {
+          "clustered_land_sq_km": 18.871,
+          "centroid_lon_lat": [-157.3415, -20.1609]
+        },
+        "Mitiaro": {
+          "clustered_land_sq_km": 22.669,
+          "centroid_lon_lat": [-157.702, -19.8672]
+        },
+        "Penrhyn": {
+          "clustered_land_sq_km": 8.206,
+          "centroid_lon_lat": [-157.9758, -8.989]
+        }
+      },
+      "geoboundaries_parts_total": 86,
+      "geoboundaries_parts_dropped_decoy": 12,
+      "osm_area_gate": {
+        "Palmerston": {
+          "motu": 34,
+          "assembled_land_sq_km": 2.901,
+          "centroid_lon_lat": [-163.1538, -18.0461]
+        },
+        "Manihiki": {
+          "motu": 93,
+          "assembled_land_sq_km": 5.249,
+          "centroid_lon_lat": [-160.9993, -10.419]
+        },
+        "Rakahanga": {
+          "motu": 13,
+          "assembled_land_sq_km": 3.902,
+          "centroid_lon_lat": [-161.0915, -10.0186]
+        },
+        "Nassau": {
+          "motu": 1,
+          "assembled_land_sq_km": 1.246,
+          "centroid_lon_lat": [-165.4146, -11.5603]
+        },
+        "Pukapuka": {
+          "motu": 23,
+          "assembled_land_sq_km": 4.375,
+          "centroid_lon_lat": [-165.8458, -10.8855]
+        }
+      },
+      "no_dateline": "verified: all coordinates within 155-167 W",
+      "output_bytes": 254656,
+      "simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 254656
+      }
+    },
+    "join_coverage": {
+      "matched_islands": 12,
+      "expected_islands": 12,
+      "islands_with_geometry": 12,
+      "named_gaps": []
+    },
+    "notes": "Every island wave reconciles exactly: each of the twelve island rows closes to its printed Total, the twelve islands close to each group total and to the national margin (14,974 / 14,802 / 14,987), and every category column closes to its printed national total. The composite boundary joins 12/12 with 12 distinct geometry hashes: seven islands clustered from geoBoundaries COK ADM0 land-cover parts (Manuae/Takutea dropped as decoys) and five northern atolls assembled from OSM coastline motu, all within the atoll-land area gate. No dateline handling is needed (155-166 W).",
+    "warnings": [
+      "Mixed boundary licence: seven geoBoundaries features are CC BY 4.0 and five OSM features are ODbL 1.0; disclosed per feature and in the manifest, both attributions carried.",
+      "The 2006 wave is held out of the island product (group-level only, from the 2016 report Table 6) and recorded as recoverable context; the runtime derives years per file, so a 2006 island wave would misrepresent the source.",
+      "No-religion basis differs across waves: 2011 is No Religion only (national 841); 2016 and 2021 combine No Religion with Not Stated (national 1,097 and 2,338). Disclosed per row; the two shares need not sum to 100 percent.",
+      "Licence caveat for the PI: the CISO Standards clause grants table reproduction-and-publication with acknowledgement, while the front-matter clause forbids altering the original work without permission. A derived, aggregated, attributed summary sits inside the Standards grant and the research carve-out; flagged, not blocking.",
+      "Pukapuka's assembled OSM land (4.4 sq km, all reef motu) exceeds the commonly quoted 1.3 sq km for its three main islets; within the 0.3-10 sq km gate and disclosed."
+    ]
+  },
+  "construct_notes": [
+    "The construct is census affiliation: each resident's reported religious denomination (the census religion question, not compulsory), asked of all ages; not practice, attendance, or membership.",
+    "Every wave counts the resident population, all ages, so island denominators are comparable across 2011-2016-2021. The national totals fall gently across the span (14,974; 14,802; 14,987).",
+    "Categories are preserved verbatim per wave. Religious affiliation is the sum of the named religion categories; no religion is the published no-religion line. Jehovah's Witness is folded into Other Religion in the 2011 and 2016 island tables and printed separately in 2021.",
+    "The no-religion line differs by frame: 2011 prints No Religion (841) and Objected/Not Stated (323) as separate columns, so no_religion carries the No Religion column only and the Objected/Not Stated column stays in the denominator; 2016 and 2021 print a single combined No Religion/Not Stated line, so their no-religion share includes not-stated. Disclosed per row.",
+    "The 2006 wave is group-level only (Rarotonga / Southern / Northern, from the 2016 report Table 6) and is held out of the island product and recorded as recoverable context, keeping the summary file's implied geography honest.",
+    "Boundary: a twelve-feature composite. Seven islands (Rarotonga, Aitutaki, Mangaia, Atiu, Mauke, Mitiaro, Penrhyn) are clustered from the geoBoundaries COK ADM0 Sentinel-2 land-cover parts (CC BY 4.0), with uninhabited Manuae/Takutea dropped as decoys; five northern atolls (Palmerston, Manihiki, Rakahanga, Nassau, Pukapuka) are assembled from OpenStreetMap coastline motu (ODbL 1.0). The mixed licence is disclosed per feature. No dateline handling is needed (all territory 155-166 W)."
+  ],
+  "deferred_sources": [
+    {
+      "source_dataset_id": "ciso-census-pre-2011-religion-by-island",
+      "status": "deferred",
+      "url": "https://sdd.spc.int/ck",
+      "local_path": null,
+      "notes": "No standalone 2006/2001/1996 island religion table located on stats.gov.ck (its national-census index lists only 2011/2016/2021). The SPC SDD digital library is the likely home of the older reports but returned HTTP 403 in the probe; a future-research route to extend the island series before 2011."
+    },
+    {
+      "source_dataset_id": "pdh-cook-islands-census-microdata",
+      "status": "hold",
+      "url": "https://microdata.pacificdata.org/index.php/catalog/883",
+      "local_path": null,
+      "notes": "Pacific Data Hub microdata (catalog 883/275/7) are licensed files requiring a signed confidentiality declaration and CISO/SPC prior approval of outputs; a documented HOLD, never a route. The published-report tables carry the island aggregates the build needs."
+    },
+    {
+      "source_dataset_id": "ck-2006-island-religion",
+      "status": "recoverable_context",
+      "url": "https://stats.gov.ck/download/430/census-2016/5895/2016-census-report.pdf",
+      "local_path": "data/raw/ck_census/ck_2016_census_report.pdf",
+      "notes": "2006 religion exists at island-group level only (2016 report Table 6). Recorded in pipeline.parameters.held_out_2006; a full 2006 island wave needs a 2006 island religion table, not located."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "accepted",
+  "licence_basis": "ciso_census_standards_clause_reproduce_with_acknowledgement",
+  "downstream_status": "public",
+  "source_datasets": [
+    {
+      "source_dataset_id": "ciso-census-2011-table2-4-religion-by-island",
+      "name": "Cook Islands 2011 Census Report, Table 2.4: Resident Population by Religious Affiliation and Usual Residence (Both Sex)",
+      "provider": "Cook Islands Statistics Office (CISO)",
+      "url": "https://stats.gov.ck/download/432/census-2011/5911/2011-census-report.pdf",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/ck_census/ck_2011_census_report.pdf",
+      "licence": {
+        "name": "CISO Standards clause: \"Any table or material may be reproduced and published provided acknowledgement is made of the source.\"",
+        "url": "https://stats.gov.ck",
+        "attribution": "Cook Islands Statistics Office, 2011 Census of Population and Dwellings"
+      },
+      "citation": "Cook Islands Statistics Office, 2011 Census Report, Table 2.4.",
+      "access_limits": null,
+      "redistribution_limits": "Derived island summaries reproduced with CISO acknowledgement under the report Standards clause; the report PDFs are not committed.",
+      "notes": "All ages, resident population, twelve island units. Reconciled in-script against the printed island, group, national, and category margins (national total 14974)."
+    },
+    {
+      "source_dataset_id": "ciso-census-2016-table2-04-religion-by-island",
+      "name": "Cook Islands 2016 Census Report, Table 2.04: Resident Population by Religious Affiliation and Usual Residence (Both Sex)",
+      "provider": "Cook Islands Statistics Office (CISO)",
+      "url": "https://stats.gov.ck/download/430/census-2016/5895/2016-census-report.pdf",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/ck_census/ck_2016_census_report.pdf",
+      "licence": {
+        "name": "CISO Standards clause: \"Any table or material may be reproduced and published provided acknowledgement is made of the source.\"",
+        "url": "https://stats.gov.ck",
+        "attribution": "Cook Islands Statistics Office, 2016 Census of Population and Dwellings"
+      },
+      "citation": "Cook Islands Statistics Office, 2016 Census Report, Table 2.04.",
+      "access_limits": null,
+      "redistribution_limits": "Derived island summaries reproduced with CISO acknowledgement under the report Standards clause; the report PDFs are not committed.",
+      "notes": "All ages, resident population, twelve island units. Reconciled in-script against the printed island, group, national, and category margins (national total 14802)."
+    },
+    {
+      "source_dataset_id": "ciso-census-2021-table2-04-religion-by-island",
+      "name": "Cook Islands 2021 Census Report, Table 2.04: Resident Population by Religious Affiliation and Usual Residence (Both Sex)",
+      "provider": "Cook Islands Statistics Office (CISO)",
+      "url": "https://stats.gov.ck/download/83/census-2021/1497/2021-census-report-with-tables-and-questionnaire.pdf",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/ck_census/ck_2021_census_report.pdf",
+      "licence": {
+        "name": "CISO Standards clause: \"Any table or material may be reproduced and published provided acknowledgement is made of the source.\"",
+        "url": "https://stats.gov.ck",
+        "attribution": "Cook Islands Statistics Office, 2021 Census of Population and Dwellings"
+      },
+      "citation": "Cook Islands Statistics Office, 2021 Census Report, Table 2.04.",
+      "access_limits": null,
+      "redistribution_limits": "Derived island summaries reproduced with CISO acknowledgement under the report Standards clause; the report PDFs are not committed.",
+      "notes": "All ages, resident population, twelve island units. Reconciled in-script against the printed island, group, national, and category margins (national total 14987)."
+    },
+    {
+      "source_dataset_id": "ciso-census-2016-table6-religion-by-group-2006",
+      "name": "Cook Islands 2016 Census Report, Table 6: Resident population by religious affiliation (2006/2011/2016 by island group)",
+      "provider": "Cook Islands Statistics Office (CISO)",
+      "url": "https://stats.gov.ck/download/430/census-2016/5895/2016-census-report.pdf",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/ck_census/ck_2016_census_report.pdf",
+      "licence": {
+        "name": "CISO Standards clause: \"Any table or material may be reproduced and published provided acknowledgement is made of the source.\"",
+        "url": "https://stats.gov.ck",
+        "attribution": "Cook Islands Statistics Office, 2016 Census of Population and Dwellings"
+      },
+      "citation": "Cook Islands Statistics Office, 2016 Census Report, Table 6.",
+      "access_limits": null,
+      "redistribution_limits": "Group-level context only; not shipped as an island wave.",
+      "notes": "2006 group-level religion (Rarotonga / Southern / Northern), recovered from the 2016 report Table 6. Held out of the island product; recorded as recoverable context."
+    },
+    {
+      "source_dataset_id": "geoboundaries-cok-adm0-2021",
+      "name": "geoBoundaries COK ADM0 (Sentinel-2 10m land cover)",
+      "provider": "geoBoundaries (William & Mary geoLab); source Sentinel-2 / ESA",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/COK/ADM0/geoBoundaries-COK-ADM0.geojson",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/ck_census/geoBoundaries-COK-ADM0.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/COK/ADM0/",
+        "attribution": "geoBoundaries (gbOpen); Sentinel-2 10m Land Cover, ESA"
+      },
+      "citation": "geoBoundaries COK ADM0 (gbOpen, pinned 9469f09), Sentinel-2 land cover.",
+      "access_limits": null,
+      "redistribution_limits": "Seven island polygons clustered from the ADM0 land-cover parts; simplified derived boundary committed with CC BY 4.0 attribution.",
+      "notes": "Single ADM0 MultiPolygon of 86 land parts; clustered to Rarotonga, Aitutaki, Mangaia, Atiu, Mauke, Mitiaro, and Penrhyn by proximity to known island coordinates, with uninhabited Manuae/Takutea parts dropped as decoys. Missing the five northern atolls, which come from OSM."
+    },
+    {
+      "source_dataset_id": "osm-cook-islands-northern-atolls-coastline",
+      "name": "OpenStreetMap coastline polygons for the five northern Cook Islands atolls",
+      "provider": "OpenStreetMap contributors (via Overpass API)",
+      "url": "https://overpass-api.de/api/interpreter",
+      "retrieval_date": "2026-07-11",
+      "local_path": "data/raw/ck_census/osm_pukapuka_coastline.json",
+      "licence": {
+        "name": "Open Data Commons Open Database License 1.0 (ODbL)",
+        "url": "https://www.openstreetmap.org/copyright",
+        "attribution": "© OpenStreetMap contributors, ODbL"
+      },
+      "citation": "OpenStreetMap contributors, natural=coastline / place=island polygons for Palmerston, Manihiki, Rakahanga, Nassau, and Pukapuka (Overpass, retrieved 2026-07-11).",
+      "access_limits": null,
+      "redistribution_limits": "Assembled atoll land polygons committed under ODbL 1.0 with OpenStreetMap attribution; the mixed-licence composite discloses provenance per feature.",
+      "notes": "The five inhabited northern atolls absent from geoBoundaries. Each atoll's land is the union of its closed coastline motu; land areas gate against published figures (Palmerston ~2.9, Manihiki ~5.4, Rakahanga ~3.9, Nassau ~1.2, Pukapuka ~4.4 sq km)."
+    }
+  ],
+  "notes": "The committed products are the derived 12-island area summary (36 rows across 2011, 2016, 2021) and the simplified composite boundary. On-page attribution, when a page is built, must cite the Cook Islands Statistics Office (report Standards clause: reproduce with acknowledgement), geoBoundaries (CC BY 4.0, Sentinel-2 / ESA) for seven islands, and OpenStreetMap contributors (ODbL 1.0) for the five northern atolls. The front-matter alter-without-permission clause is a PI caveat, not a blocker."
+}
