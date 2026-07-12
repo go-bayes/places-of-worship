@@ -12,10 +12,22 @@
   <script>
     // public record for the Palestine research map; every string traces to
     // docs/manifests/ps-census-religion-1997-2017.json (source, licence),
-    // research/countries/ps/route-probe.md and README.md (verbatim J1/J2
-    // coverage definitions, denominator rule), the product indicators block,
-    // or the live REGION_CONFIG in apps/regions/ps/index.html. The
-    // coexistence note is the recorded PI ruling of 2026-07-10.
+    // research/countries/ps/route-probe.md and research/countries/ps/README.md
+    // (verbatim J1/J2 coverage definitions per wave: 1997 route-probe, 2007
+    // README.md p.30/PDF p.316, 2017 route-probe PDF p.223), the product
+    // indicators block, or the live REGION_CONFIG in
+    // apps/regions/ps/index.html.
+    //
+    // COEXISTENCE NOTE (PI-ruled). The final reading item is a verbatim
+    // symmetric mirror of the live Israel overview (apps/regions/il/
+    // overview.html); the two overlapping pages name each other's source of
+    // record and adjudicate no territorial claim. The route-probe and
+    // manifest, both dated 2026-07-10, record the PS-vs-IL shared-surface
+    // relationship as an open PI question; the later PI ruling (research/
+    // build-queue.md: "Palestine: SHIP the page. Overlapping statistical
+    // coverages may appear together; each map renders its source of record's
+    // own coverage as published ... both the PS and IL overviews carry the
+    // note") resolves it and directs both overviews to carry this note.
     window.OVERVIEW_CONFIG = {
       countryCode: "PS",
       countryName: "Palestine",
@@ -40,21 +52,21 @@
           href: "https://www.pcbs.gov.ps/media/dtgbbijp/book426-1997.pdf",
           construct: "Census affiliation by governorate (Islam, Christian, Others, Not Stated)",
           years: "1997",
-          licence: "Current PCBS website terms state CC BY 4.0 and require attribution. The cached 1997 publication prints “All Rights Reserved.” PCBS publication reuse requires conductor review."
+          licence: "Current PCBS website terms state CC BY 4.0 and require attribution. The cached 1997 publication prints “All Rights Reserved.” PCBS publication reuse is under project licence review."
         },
         {
           name: "PCBS 2007 final population report, Table 13, and the sixteen governorate reports",
           href: "https://www.pcbs.gov.ps/media/1b3ejexf/book1853-2007.pdf",
           construct: "Census affiliation by governorate (Islam, Christian, Others, Not Stated)",
           years: "2007",
-          licence: "Current PCBS website terms state CC BY 4.0 and require attribution. The cached 2007 publication prints “All Rights Reserved.” PCBS publication reuse requires conductor review."
+          licence: "Current PCBS website terms state CC BY 4.0 and require attribution. The cached 2007 publication prints “All Rights Reserved.” PCBS publication reuse is under project licence review."
         },
         {
           name: "PCBS 2017 preliminary census results, Table 3, “Palestinian Population in Palestine by Governorate and Religion, 2017”",
           href: "https://www.pcbs.gov.ps/portals/_pcbs/PressRelease/Press_En_Preliminary_Results_Report-en-with-tables.pdf",
           construct: "Census affiliation by governorate (Islam, Christian, Other, Not Stated)",
           years: "2017",
-          licence: "Current PCBS website terms state CC BY 4.0 and require attribution. No rights-reservation notice appears in the cached 2017 preliminary report. PCBS publication reuse requires conductor review."
+          licence: "Current PCBS website terms state CC BY 4.0 and require attribution. No rights-reservation notice appears in the cached 2017 preliminary report. PCBS publication reuse is under project licence review."
         },
         {
           name: "geoBoundaries PSE ADM2 governorate boundaries",
@@ -67,7 +79,8 @@
       accessData: {
         sourceOfRecord: "Palestinian Central Bureau of Statistics (PCBS), <a href=\"https://www.pcbs.gov.ps/en/publications/\" target=\"_blank\" rel=\"noopener\">publications</a>; boundaries from <a href=\"https://www.geoboundaries.org/\" target=\"_blank\" rel=\"noopener\">geoBoundaries</a> PSE ADM2 (2017 governorate frame).",
         tables: "1997 final Table 22, “Palestinian Population by Governorate, Sex and Religion”; 2007 final Table 13 together with Table 13 in each governorate report; 2017 preliminary Table 3, “Palestinian Population in Palestine by Governorate and Religion, 2017”. The area-summary religious_affiliation field is 100 × (Total − Not Stated) / Total, with Not Stated retained in the denominator. PCBS publishes no no-religion category; the no_religion fields are therefore null. No governed place-of-worship snapshot ships in this release; place counts and derived density fields are therefore null.",
-        licence: "Current PCBS website terms state CC BY 4.0 and require attribution. The cached 1997 and 2007 publications print “All Rights Reserved.” No rights-reservation notice appears in the cached 2017 preliminary report. The geoBoundaries release metadata states CC BY 4.0. PCBS publication reuse requires conductor review.",
+        licence: "Current PCBS website terms state CC BY 4.0 and require attribution to PCBS as the source of data. The cached 1997 and 2007 publications print “All Rights Reserved.” No rights-reservation notice appears in the cached 2017 preliminary report. Under a build-then-ask posture the derived governorate summaries ship with attribution to PCBS while the mixed licence position is reviewed; PCBS publication reuse is under project licence review, and the product is held in staging and reverts in a single commit if PCBS objects. The geoBoundaries PSE ADM2 release metadata states CC BY 4.0, boundary source Open Data Watch.",
+        note: "This product ships STAGED with licence status needs_review under a build-then-ask posture: current PCBS website terms state CC BY 4.0, the cached 1997 and 2007 publications print “All Rights Reserved”, and no rights-reservation notice appears in the cached 2017 preliminary report; PCBS publication reuse is therefore under project licence review, and the page reverts in a single commit if PCBS objects. The committed products are the derived 16-governorate area summary (48 rows across 1997, 2007 and 2017) and the simplified geoBoundaries PSE ADM2 boundary; the raw census sources and the source GeoJSON are git-ignored and are not committed.",
         script: "scripts/build_ps_area_summary.R",
         manifests: [
           { label: "ps-census-religion-1997-2017", href: "docs/manifests/ps-census-religion-1997-2017.json" }
