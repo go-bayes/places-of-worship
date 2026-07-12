@@ -1,0 +1,701 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:se-church-membership:se:1972-2025:6e36a1775dc3",
+  "dataset_id": "se-church-membership:se:1972-2025:national",
+  "dataset_version_id": "se-church-membership:se:1972-2025:national:6e36a1775dc3",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "se-church-membership",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "SE"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": "12-31",
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-07-12T12:39:38Z",
+  "created_by": "scripts/build_se_area_summary.R",
+  "target_years": [
+    1972,
+    1973,
+    1974,
+    1975,
+    1976,
+    1977,
+    1978,
+    1979,
+    1980,
+    1981,
+    1982,
+    1983,
+    1984,
+    1985,
+    1986,
+    1987,
+    1988,
+    1989,
+    1990,
+    1991,
+    1992,
+    1993,
+    1994,
+    1995,
+    1996,
+    1997,
+    1998,
+    1999,
+    2000,
+    2001,
+    2002,
+    2003,
+    2004,
+    2005,
+    2006,
+    2007,
+    2008,
+    2009,
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "pipeline": {
+    "script": "scripts/build_se_area_summary.R",
+    "git_commit": "9deec8a",
+    "command": "Rscript scripts/build_se_area_summary.R",
+    "parameters": {
+      "construct": "single-denomination Church of Sweden administrative membership register",
+      "slot_design": "religious_affiliation carries Church of Sweden membership; no_religion remains null because non-membership supports no no-religion claim",
+      "population_rule": "population_total remains null because the source prints no population base; never derive a denominator from the printed percentage",
+      "composition_rule": "composition omitted because the single printed membership line partitions nothing",
+      "source_note_1981": "År 1981 upprättades ingen personförteckning av Riksskatteverket, varför inga befolkningdata kunde erhållas",
+      "printed_frame": [
+        {
+          "year": 1972,
+          "member_count_printed": "7 754 784",
+          "percent_printed": "95,2",
+          "change_printed": null,
+          "member_count": 7754784,
+          "percent": 95.2
+        },
+        {
+          "year": 1973,
+          "member_count_printed": "7 755 295",
+          "percent_printed": "95,2",
+          "change_printed": "0",
+          "member_count": 7755295,
+          "percent": 95.2
+        },
+        {
+          "year": 1974,
+          "member_count_printed": "7 752 279",
+          "percent_printed": "94,9",
+          "change_printed": "-0,3",
+          "member_count": 7752279,
+          "percent": 94.9
+        },
+        {
+          "year": 1975,
+          "member_count_printed": "7 770 881",
+          "percent_printed": "94,7",
+          "change_printed": "-0,2",
+          "member_count": 7770881,
+          "percent": 94.7
+        },
+        {
+          "year": 1976,
+          "member_count_printed": "7 779 940",
+          "percent_printed": "94,4",
+          "change_printed": "-0,3",
+          "member_count": 7779940,
+          "percent": 94.4
+        },
+        {
+          "year": 1977,
+          "member_count_printed": "7 763 768",
+          "percent_printed": "94",
+          "change_printed": "-0,4",
+          "member_count": 7763768,
+          "percent": 94
+        },
+        {
+          "year": 1978,
+          "member_count_printed": "7 742 678",
+          "percent_printed": "93,5",
+          "change_printed": "-0,5",
+          "member_count": 7742678,
+          "percent": 93.5
+        },
+        {
+          "year": 1979,
+          "member_count_printed": "7 728 939",
+          "percent_printed": "93,1",
+          "change_printed": "-0,4",
+          "member_count": 7728939,
+          "percent": 93.1
+        },
+        {
+          "year": 1980,
+          "member_count_printed": "7 690 636",
+          "percent_printed": "92,9",
+          "change_printed": "-0,2",
+          "member_count": 7690636,
+          "percent": 92.9
+        },
+        {
+          "year": 1981,
+          "member_count_printed": "-",
+          "percent_printed": "-",
+          "change_printed": "*",
+          "member_count": null,
+          "percent": null
+        },
+        {
+          "year": 1982,
+          "member_count_printed": "7 691 967",
+          "percent_printed": "92,3",
+          "change_printed": "-0,6",
+          "member_count": 7691967,
+          "percent": 92.3
+        },
+        {
+          "year": 1983,
+          "member_count_printed": "7 687 152",
+          "percent_printed": "92",
+          "change_printed": "-0,3",
+          "member_count": 7687152,
+          "percent": 92
+        },
+        {
+          "year": 1984,
+          "member_count_printed": "7 679 893",
+          "percent_printed": "91,7",
+          "change_printed": "-0,3",
+          "member_count": 7679893,
+          "percent": 91.7
+        },
+        {
+          "year": 1985,
+          "member_count_printed": "7 629 763",
+          "percent_printed": "91,5",
+          "change_printed": "-0,2",
+          "member_count": 7629763,
+          "percent": 91.5
+        },
+        {
+          "year": 1986,
+          "member_count_printed": "7 602 193",
+          "percent_printed": "91,2",
+          "change_printed": "-0,3",
+          "member_count": 7602193,
+          "percent": 91.2
+        },
+        {
+          "year": 1987,
+          "member_count_printed": "7 662 027",
+          "percent_printed": "90,7",
+          "change_printed": "-0,5",
+          "member_count": 7662027,
+          "percent": 90.7
+        },
+        {
+          "year": 1988,
+          "member_count_printed": "7 577 450",
+          "percent_printed": "90,2",
+          "change_printed": "-0,5",
+          "member_count": 7577450,
+          "percent": 90.2
+        },
+        {
+          "year": 1989,
+          "member_count_printed": "7 628 914",
+          "percent_printed": "89,7",
+          "change_printed": "-0,5",
+          "member_count": 7628914,
+          "percent": 89.7
+        },
+        {
+          "year": 1990,
+          "member_count_printed": "7 630 350",
+          "percent_printed": "89",
+          "change_printed": "-0,7",
+          "member_count": 7630350,
+          "percent": 89
+        },
+        {
+          "year": 1991,
+          "member_count_printed": "7 627 159",
+          "percent_printed": "88,2",
+          "change_printed": "-0,8",
+          "member_count": 7627159,
+          "percent": 88.2
+        },
+        {
+          "year": 1992,
+          "member_count_printed": "7 639 577",
+          "percent_printed": "87,9",
+          "change_printed": "-0,3",
+          "member_count": 7639577,
+          "percent": 87.9
+        },
+        {
+          "year": 1993,
+          "member_count_printed": "7 630 981",
+          "percent_printed": "87,3",
+          "change_printed": "-0,6",
+          "member_count": 7630981,
+          "percent": 87.3
+        },
+        {
+          "year": 1994,
+          "member_count_printed": "7 623 073",
+          "percent_printed": "86,5",
+          "change_printed": "-0,8",
+          "member_count": 7623073,
+          "percent": 86.5
+        },
+        {
+          "year": 1995,
+          "member_count_printed": "7 601 194",
+          "percent_printed": "86",
+          "change_printed": "-0,5",
+          "member_count": 7601194,
+          "percent": 86
+        },
+        {
+          "year": 1996,
+          "member_count_printed": "7 546 757",
+          "percent_printed": "85,3",
+          "change_printed": "-0,7",
+          "member_count": 7546757,
+          "percent": 85.3
+        },
+        {
+          "year": 1997,
+          "member_count_printed": "7 505 930",
+          "percent_printed": "84,8",
+          "change_printed": "-0,5",
+          "member_count": 7505930,
+          "percent": 84.8
+        },
+        {
+          "year": 1998,
+          "member_count_printed": "7 464 990",
+          "percent_printed": "84,3",
+          "change_printed": "-0,5",
+          "member_count": 7464990,
+          "percent": 84.3
+        },
+        {
+          "year": 1999,
+          "member_count_printed": "7 399 915",
+          "percent_printed": "83,5",
+          "change_printed": "-0,8",
+          "member_count": 7399915,
+          "percent": 83.5
+        },
+        {
+          "year": 2000,
+          "member_count_printed": "7 360 825",
+          "percent_printed": "82,9",
+          "change_printed": "-0,6",
+          "member_count": 7360825,
+          "percent": 82.9
+        },
+        {
+          "year": 2001,
+          "member_count_printed": "7 285 101",
+          "percent_printed": "81,9",
+          "change_printed": "-1",
+          "member_count": 7285101,
+          "percent": 81.9
+        },
+        {
+          "year": 2002,
+          "member_count_printed": "7 220 694",
+          "percent_printed": "80,9",
+          "change_printed": "-1",
+          "member_count": 7220694,
+          "percent": 80.9
+        },
+        {
+          "year": 2003,
+          "member_count_printed": "7 143 292",
+          "percent_printed": "79,6",
+          "change_printed": "-1,3",
+          "member_count": 7143292,
+          "percent": 79.6
+        },
+        {
+          "year": 2004,
+          "member_count_printed": "7 052 886",
+          "percent_printed": "78,3",
+          "change_printed": "-1,3",
+          "member_count": 7052886,
+          "percent": 78.3
+        },
+        {
+          "year": 2005,
+          "member_count_printed": "6 967 498",
+          "percent_printed": "77",
+          "change_printed": "-1,3",
+          "member_count": 6967498,
+          "percent": 77
+        },
+        {
+          "year": 2006,
+          "member_count_printed": "6 893 901",
+          "percent_printed": "75,6",
+          "change_printed": "-1,4",
+          "member_count": 6893901,
+          "percent": 75.6
+        },
+        {
+          "year": 2007,
+          "member_count_printed": "6 820 161",
+          "percent_printed": "74,3",
+          "change_printed": "-1,3",
+          "member_count": 6820161,
+          "percent": 74.3
+        },
+        {
+          "year": 2008,
+          "member_count_printed": "6 751 952",
+          "percent_printed": "72,9",
+          "change_printed": "-1,4",
+          "member_count": 6751952,
+          "percent": 72.9
+        },
+        {
+          "year": 2009,
+          "member_count_printed": "6 664 064",
+          "percent_printed": "71,3",
+          "change_printed": "-1,6",
+          "member_count": 6664064,
+          "percent": 71.3
+        },
+        {
+          "year": 2010,
+          "member_count_printed": "6 589 769",
+          "percent_printed": "70",
+          "change_printed": "-1,3",
+          "member_count": 6589769,
+          "percent": 70
+        },
+        {
+          "year": 2011,
+          "member_count_printed": "6 519 889",
+          "percent_printed": "68,8",
+          "change_printed": "-1,2",
+          "member_count": 6519889,
+          "percent": 68.8
+        },
+        {
+          "year": 2012,
+          "member_count_printed": "6 446 729",
+          "percent_printed": "67,5",
+          "change_printed": "-1,3",
+          "member_count": 6446729,
+          "percent": 67.5
+        },
+        {
+          "year": 2013,
+          "member_count_printed": "6 357 508",
+          "percent_printed": "65,9",
+          "change_printed": "-1,6",
+          "member_count": 6357508,
+          "percent": 65.9
+        },
+        {
+          "year": 2014,
+          "member_count_printed": "6 292 264",
+          "percent_printed": "64,6",
+          "change_printed": "-1,3",
+          "member_count": 6292264,
+          "percent": 64.6
+        },
+        {
+          "year": 2015,
+          "member_count_printed": "6 225 091",
+          "percent_printed": "63,2",
+          "change_printed": "-1,4",
+          "member_count": 6225091,
+          "percent": 63.2
+        },
+        {
+          "year": 2016,
+          "member_count_printed": "6 109 546",
+          "percent_printed": "61,2",
+          "change_printed": "-2",
+          "member_count": 6109546,
+          "percent": 61.2
+        },
+        {
+          "year": 2017,
+          "member_count_printed": "5 993 368",
+          "percent_printed": "59,3",
+          "change_printed": "-1,9",
+          "member_count": 5993368,
+          "percent": 59.3
+        },
+        {
+          "year": 2018,
+          "member_count_printed": "5 899 242",
+          "percent_printed": "57,7",
+          "change_printed": "-1,6",
+          "member_count": 5899242,
+          "percent": 57.7
+        },
+        {
+          "year": 2019,
+          "member_count_printed": "5 817 634",
+          "percent_printed": "56,4",
+          "change_printed": "-1,3",
+          "member_count": 5817634,
+          "percent": 56.4
+        },
+        {
+          "year": 2020,
+          "member_count_printed": "5 728 748",
+          "percent_printed": "55,2",
+          "change_printed": "-1,2",
+          "member_count": 5728748,
+          "percent": 55.2
+        },
+        {
+          "year": 2021,
+          "member_count_printed": "5 628 067",
+          "percent_printed": "53,9",
+          "change_printed": "-1,3",
+          "member_count": 5628067,
+          "percent": 53.9
+        },
+        {
+          "year": 2022,
+          "member_count_printed": "5 555 385",
+          "percent_printed": "52,9",
+          "change_printed": "-1,3",
+          "member_count": 5555385,
+          "percent": 52.9
+        },
+        {
+          "year": 2023,
+          "member_count_printed": "5 484 992",
+          "percent_printed": "52,1",
+          "change_printed": "-1,3",
+          "member_count": 5484992,
+          "percent": 52.1
+        },
+        {
+          "year": 2024,
+          "member_count_printed": "5 426 053",
+          "percent_printed": "51,4",
+          "change_printed": "-1,1",
+          "member_count": 5426053,
+          "percent": 51.4
+        },
+        {
+          "year": 2025,
+          "member_count_printed": "5 365 542",
+          "percent_printed": "50,7",
+          "change_printed": "-1,1",
+          "member_count": 5365542,
+          "percent": 50.7
+        }
+      ],
+      "boundary_source_record": {
+        "boundary_id": "SWE-ADM0-32631220",
+        "vintage": "2019",
+        "licence": "Open Government Licence v3.0",
+        "licence_source": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+        "raw_sha256": "62bfd3141269c7e1feb204aae29eca9ed6e0ec3e6c7dbcf0e8c6a735533b7464",
+        "shipped_geojson_sha256": "f2d991b785af4b7d063b19bd588f3747b1ac8c0f651f732aeb65b710b7f4c2d9"
+      }
+    }
+  },
+  "source": {
+    "provider": "Church of Sweden (Svenska kyrkan)",
+    "source_dataset_ids": [
+      "church-of-sweden-membership-1972-2025",
+      "geoboundaries-gbopen-swe-adm0-32631220"
+    ],
+    "source_urls": [
+      "https://www.svenskakyrkan.se/filer/1374643/Medlemmar%20i%20Svenska%20kyrkan%201972-2025.pdf?id=3016165",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/SWE/ADM0/geoBoundaries-SWE-ADM0.geojson"
+    ],
+    "retrieved_at": "2026-07-13T00:00:00Z",
+    "licence": "No reuse licence stated for the Church of Sweden statistics series; geoBoundaries SWE ADM0 is Open Government Licence v3.0.",
+    "citation": "Source: Church of Sweden (Svenska kyrkan), svenskakyrkan.se/statistik, 'Medlemmar i Svenska kyrkan 1972-2025', retrieved 2026-07-13. No reuse licence stated; used with attribution under the project's build-then-ask posture pending confirmation.",
+    "raw_redistribution": "The Church of Sweden PDF is not redistributed; the builder retrieves it and verifies its pinned checksum.",
+    "local_cache_hint": "No repository cache is created; sources are downloaded to temporary files.",
+    "licence_position": "needs_review",
+    "licence_position_verbatim_from_playbook": "build-then-ask",
+    "licence_todo": "Courtesy permission request is recorded separately and is outside this build lane.",
+    "short_citation": "Church of Sweden, Medlemmar i Svenska kyrkan 1972-2025."
+  },
+  "raw_sources": [
+    {
+      "url": "https://www.svenskakyrkan.se/filer/1374643/Medlemmar%20i%20Svenska%20kyrkan%201972-2025.pdf?id=3016165",
+      "method": "GET",
+      "retrieval_date": "2026-07-13",
+      "format": "pdf",
+      "bytes": 149219,
+      "sha256": "ab32a05bafbddddf9581cd6ecde5fe5fd6ee98213896a16d5a77dd8efd7ed6f8",
+      "notes": "Three-page PDF with intact text layer; source of record for all printed values."
+    },
+    {
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/SWE/ADM0/geoBoundaries-SWE-ADM0.geojson",
+      "method": "GET",
+      "retrieval_date": "2026-07-13",
+      "format": "geojson",
+      "bytes": 34070,
+      "sha256": "62bfd3141269c7e1feb204aae29eca9ed6e0ec3e6c7dbcf0e8c6a735533b7464",
+      "notes": "Pinned geoBoundaries SWE ADM0 source geometry."
+    }
+  ],
+  "source_datasets": [
+    {
+      "source_dataset_id": "church-of-sweden-membership-1972-2025",
+      "name": "Medlemmar i Svenska kyrkan 1972-2025",
+      "provider": "Church of Sweden (Svenska kyrkan)",
+      "url": "https://www.svenskakyrkan.se/filer/1374643/Medlemmar%20i%20Svenska%20kyrkan%201972-2025.pdf?id=3016165",
+      "retrieval_date": "2026-07-13",
+      "local_path": null,
+      "licence": {
+        "name": "No stated reuse licence; needs review under build-then-ask posture",
+        "url": null,
+        "attribution": "Source: Church of Sweden (Svenska kyrkan), svenskakyrkan.se/statistik, 'Medlemmar i Svenska kyrkan 1972-2025', retrieved 2026-07-13. No reuse licence stated; used with attribution under the project's build-then-ask posture pending confirmation."
+      },
+      "citation": "Church of Sweden, Medlemmar i Svenska kyrkan 1972-2025.",
+      "access_limits": null,
+      "redistribution_limits": "No reuse licence is stated; licence review remains open.",
+      "notes": "Administrative Church of Sweden membership register. The source is not a census measure of affiliation, belief, practice, or attendance. A non-member does not support a no-religion claim."
+    },
+    {
+      "source_dataset_id": "geoboundaries-gbopen-swe-adm0-32631220",
+      "name": "geoBoundaries SWE ADM0",
+      "provider": "geoBoundaries",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/SWE/ADM0/geoBoundaries-SWE-ADM0.geojson",
+      "retrieval_date": "2026-07-13",
+      "local_path": null,
+      "licence": {
+        "name": "Open Government Licence v3.0",
+        "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+        "attribution": "geoBoundaries"
+      },
+      "citation": "geoBoundaries gbOpen SWE ADM0, boundary SWE-ADM0-32631220, 2019.",
+      "access_limits": null,
+      "redistribution_limits": "Open Government Licence v3.0 applies.",
+      "notes": "One national feature. The shipped GeoJSON sha256 is recorded in the manifest."
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/se/data/area_summary_national.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 75532,
+      "sha256": "2e6855eadcbaa267f72ab57d02b24a1cae041bb94a8614ae9d837759a9dcfebf",
+      "content": "area-summary.v2 national annual rows",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "no_stated_terms_build_then_ask",
+      "row_count": 54
+    },
+    {
+      "uri": "repo:apps/regions/se/data/area_summary_national.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 35954,
+      "sha256": "672e8ed099b4a8886cd800698075c06d76db224ee61ea2f4a64e7a9996818ad5",
+      "content": "CSV companion to the national annual rows",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "no_stated_terms_build_then_ask",
+      "row_count": 54
+    },
+    {
+      "uri": "repo:apps/regions/se/data/se_national.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 34013,
+      "sha256": "f2d991b785af4b7d063b19bd588f3747b1ac8c0f651f732aeb65b710b7f4c2d9",
+      "content": "single-feature Sweden ADM0 boundary",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "open_government_licence_v3_0",
+      "feature_count": 1
+    }
+  ],
+  "stats": {
+    "row_count": 54,
+    "feature_count": 1,
+    "year_min": 1972,
+    "year_max": 2025,
+    "null_metrics_rows": 1
+  },
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "uvx check-jsonschema --base-uri file://$(pwd)/schemas/ --schemafile schemas/area-summary.v2.schema.json apps/regions/se/data/area_summary_national.json",
+      "uvx check-jsonschema --base-uri file://$(pwd)/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/se-church-membership-1972-2025.json"
+    ],
+    "warnings": [
+      "Church of Sweden source licence needs review under the build-then-ask posture."
+    ],
+    "notes": "PDF checksum, complete-year extraction, anchor rows, sole 1981 null row, and geometry gates passed.",
+    "pdf_sha256": "ab32a05bafbddddf9581cd6ecde5fe5fd6ee98213896a16d5a77dd8efd7ed6f8",
+    "boundary_geojson_sha256": "f2d991b785af4b7d063b19bd588f3747b1ac8c0f651f732aeb65b710b7f4c2d9",
+    "anchor_1972": {
+      "member_count": 7754784,
+      "percent": 95.2
+    },
+    "anchor_2025": {
+      "member_count": 5365542,
+      "percent": 50.7
+    }
+  },
+  "privacy": "public",
+  "licence_status": "needs_review",
+  "licence_basis": "no_stated_terms_build_then_ask",
+  "downstream_status": "staged",
+  "notes": "The MUCF/SST served-population series remains national context only and is excluded from rows because it measures a different construct. SCB CC0 and Lantmäteriet alternatives remain a deferred boundary swap. The current geoBoundaries SWE ADM0 metadata identifies Open Government Licence v3.0; the build records that source licence rather than importing Finland's ODbL boundary licence.",
+  "construct_notes": [
+    "The product measures Church of Sweden administrative membership. It does not measure census affiliation, belief, practice, or attendance.",
+    "A non-member does not support a no-religion claim. Both no_religion fields remain null.",
+    "The printed percentage is carried verbatim. The build never recomputes or re-rounds it.",
+    "The 1981 source note is preserved verbatim: År 1981 upprättades ingen personförteckning av Riksskatteverket, varför inga befolkningdata kunde erhållas",
+    "The manifest preserves the source's full three-column printed frame, including the year-on-year change column."
+  ],
+  "deferred_sources": [
+    {
+      "source": "SCB CC0 or Lantmäteriet national boundary",
+      "status": "deferred_boundary_swap",
+      "reason": "The current product follows the geoBoundaries ADM0 fleet precedent.",
+      "recovery_route": "Replace the national outline with an SCB CC0 or Lantmäteriet alternative after a fleet-level boundary decision."
+    },
+    {
+      "source": "MUCF/SST served-population series",
+      "status": "national_context_only",
+      "reason": "The series measures served populations across other faith communities, a different construct from Church of Sweden membership.",
+      "recovery_route": "Retain as contextual documentation and never merge it into these rows."
+    }
+  ]
+}
