@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-07-12 (fourth sitting)
+
+- Recorded the PI's ratification of the small-cell rule (task 19): the two display thresholds in `docs/development/small-cell-rule.md` §3 are now in force — metric denominators under 100 persons wash the choropleth pale with the share confined to the popup, and numerator cells under 10 persons carry an explicit "fewer than ten people" marker wherever the derived share appears. No published value is altered, redistributed, or hidden; source-specific protection regimes supersede. Implementation proceeds as designed (one shared-runtime change plus per-product `small_denominator_under_100` / `small_cell_under_10` token emission) and unblocks the covered list, headed by Sri Lanka's deferred DSD-level product.
+
 ### 2026-07-12 (pulotu sitting)
 
 - Added the Guinea-Bissau region census-religion product, staged (Opus lane, conductor-reviewed): single-wave 2009 on the nine-unit frame (eight regions plus the Sector Autónomo de Bissau) from the INE RGPH-2009 sociocultural report's Quadro 4 column percentages on the Guinean-nationality universe (1,442,227) — percentages-only under the GN precedent (counts null, no count derived), national counts reconciling exactly, three columns within the 0,30 pp derived rounding bound (observed max 0,1), and two source prose-vs-table discrepancies disclosed with the table trusted. Boundary geoBoundaries GNB ADM1 (ODbL) matches the census frame one-to-one with Bissau its own feature. Licence needs_review (INE all-rights-reserved footer) under build-then-ask; the INE ask is recorded for the PI. The conductor fixed ten ", so" joins across the lane's prose and regenerated. Build: `scripts/build_gw_area_summary.R`.

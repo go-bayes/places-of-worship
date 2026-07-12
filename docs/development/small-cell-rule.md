@@ -1,6 +1,6 @@
 # The small-cell rule: display and derivation for small counts
 
-Status: PROPOSED 2026-07-12, designed by the conductor at the PI's direction ("let's develop a small cell rule", 2026-07-12 sitting). The principles in §2 restate standing practice and are already in force; the thresholds in §3 are the conductor's recommendation and await the PI's ratification before implementation. Sri Lanka's DSD-level product is the motivating case and heads the covered list (§5).
+Status: RATIFIED 2026-07-12 by the PI ("I've read and agree with the small cell decision in docs", fourth sitting), having been PROPOSED earlier the same day by the conductor at the PI's direction ("let's develop a small cell rule"). The principles in §2 restate standing practice; the thresholds in §3 are now in force; implementation proceeds as §4 describes and unblocks the covered list in §5. Sri Lanka's DSD-level product is the motivating case and heads the covered list.
 
 ## 1. The problem the rule solves
 
