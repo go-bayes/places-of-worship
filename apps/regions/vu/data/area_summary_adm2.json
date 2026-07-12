@@ -14,13 +14,24 @@
       "area_code": "77236927B63418931336998",
       "area_name": "Aneityum",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 160.5,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -49,7 +60,33 @@
       "anglican_percent": 0.13,
       "catholic_percent": 15.24,
       "seventh_day_adventist_percent": 33.85,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 43.22,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.13,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 15.24,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 33.85,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -59,13 +96,24 @@
       "area_code": "77236927B97444346691075",
       "area_name": "Aniwa",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 10,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 1.2312,
       "land_area_sq_km": 8.12,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -94,7 +142,33 @@
       "anglican_percent": 0,
       "catholic_percent": 0.22,
       "seventh_day_adventist_percent": 4.09,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 16.13
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 16.77,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.22,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 4.09,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -104,13 +178,24 @@
       "area_code": "77236927B64905396997634",
       "area_name": "Canal - Fanafo",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 6,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0166,
       "land_area_sq_km": 361.17,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -139,7 +224,33 @@
       "anglican_percent": 9.55,
       "catholic_percent": 13.13,
       "seventh_day_adventist_percent": 14.34,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 1.08
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 18.46,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 9.55,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 13.13,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 14.34,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -149,13 +260,24 @@
       "area_code": "77236927B27410418950848",
       "area_name": "Central Malekula",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 372.03,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -184,7 +306,33 @@
       "anglican_percent": 0.74,
       "catholic_percent": 10.02,
       "seventh_day_adventist_percent": 14.19,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 49.7,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.74,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 10.02,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 14.19,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -194,13 +342,24 @@
       "area_code": "77236927B11071622458470",
       "area_name": "Central Pentecost 1",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 67.59,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -229,7 +388,33 @@
       "anglican_percent": 34.14,
       "catholic_percent": 19.45,
       "seventh_day_adventist_percent": 5.26,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 0.47,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 34.14,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 19.45,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 5.26,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -239,13 +424,24 @@
       "area_code": "77236927B86415153324425",
       "area_name": "Central Pentecost 2",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 1,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.007,
       "land_area_sq_km": 143.13,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -274,7 +470,33 @@
       "anglican_percent": 23.72,
       "catholic_percent": 73.14,
       "seventh_day_adventist_percent": 0.29,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.31
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 0.58,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 23.72,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 73.14,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 0.29,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -284,13 +506,24 @@
       "area_code": "77236927B82748520253825",
       "area_name": "East Ambae",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 2,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0455,
       "land_area_sq_km": 43.95,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -319,7 +552,33 @@
       "anglican_percent": 71.06,
       "catholic_percent": 1.12,
       "seventh_day_adventist_percent": 5.85,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 0.9,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 71.06,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 1.12,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 5.85,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -329,13 +588,24 @@
       "area_code": "77236927B67571127096265",
       "area_name": "East Malo",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 135.35,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -364,7 +634,33 @@
       "anglican_percent": 0.69,
       "catholic_percent": 4.66,
       "seventh_day_adventist_percent": 42.46,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.05
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 9.67,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.69,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 4.66,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 42.46,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -374,13 +670,24 @@
       "area_code": "77236927B80852571944001",
       "area_name": "East Santo",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 9,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0148,
       "land_area_sq_km": 608.77,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -409,7 +716,33 @@
       "anglican_percent": 7.31,
       "catholic_percent": 31.01,
       "seventh_day_adventist_percent": 4.47,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 33.12,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 7.31,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 31.01,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 4.47,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -419,13 +752,24 @@
       "area_code": "77236927B40148322010729",
       "area_name": "Emau",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 5,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.6643,
       "land_area_sq_km": 7.53,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -454,7 +798,33 @@
       "anglican_percent": 0.27,
       "catholic_percent": 0.14,
       "seventh_day_adventist_percent": 2.71,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 73.95,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.27,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.14,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 2.71,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -464,13 +834,24 @@
       "area_code": "77236927B27814537301823",
       "area_name": "Erakor",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 3,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0278,
       "land_area_sq_km": 108.04,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -499,7 +880,33 @@
       "anglican_percent": 3.96,
       "catholic_percent": 10.97,
       "seventh_day_adventist_percent": 19.07,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.36
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 30.53,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 3.96,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 10.97,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 19.07,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -509,13 +916,24 @@
       "area_code": "77236927B93199120734028",
       "area_name": "Eratap",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 4,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0547,
       "land_area_sq_km": 73.19,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -544,7 +962,33 @@
       "anglican_percent": 6.6,
       "catholic_percent": 9.71,
       "seventh_day_adventist_percent": 19.27,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.51
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 27.6,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 6.6,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 9.71,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 19.27,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -554,13 +998,24 @@
       "area_code": "77236927B17135940935596",
       "area_name": "Eton",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 1,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0031,
       "land_area_sq_km": 322.62,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -589,7 +1044,33 @@
       "anglican_percent": 1.82,
       "catholic_percent": 2.78,
       "seventh_day_adventist_percent": 25.57,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.03
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 28.73,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 1.82,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 2.78,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 25.57,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -599,13 +1080,24 @@
       "area_code": "77236927B67175476765241",
       "area_name": "Futuna",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 10.49,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -634,7 +1126,33 @@
       "anglican_percent": 1.63,
       "catholic_percent": 0.54,
       "seventh_day_adventist_percent": 6.33,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 67.63,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 1.63,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.54,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 6.33,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -644,13 +1162,24 @@
       "area_code": "77236927B45015777626882",
       "area_name": "Gaua",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 310.61,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -679,7 +1208,33 @@
       "anglican_percent": 70.79,
       "catholic_percent": 0.26,
       "seventh_day_adventist_percent": 7,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 0.41,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 70.79,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.26,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 7,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -689,13 +1244,24 @@
       "area_code": "77236927B32680405740537",
       "area_name": "Ifira",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 0.9,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -724,7 +1290,33 @@
       "anglican_percent": 0.16,
       "catholic_percent": 0.94,
       "seventh_day_adventist_percent": 5.03,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 49.88,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.16,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.94,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 5.03,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -734,13 +1326,24 @@
       "area_code": "77236927B85216783558225",
       "area_name": "Luganville",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 6,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.24,
       "land_area_sq_km": 25,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -769,7 +1372,33 @@
       "anglican_percent": 14.17,
       "catholic_percent": 14.3,
       "seventh_day_adventist_percent": 22.97,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.07
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 16.16,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 14.17,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 14.3,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 22.97,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -779,13 +1408,24 @@
       "area_code": "77236927B14255204108964",
       "area_name": "Makimae",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 36.18,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -814,7 +1454,33 @@
       "anglican_percent": 0,
       "catholic_percent": 0.73,
       "seventh_day_adventist_percent": 12.1,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 53.9,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.73,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 12.1,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -824,13 +1490,24 @@
       "area_code": "77236927B16755152791685",
       "area_name": "Malorua",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 3,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0124,
       "land_area_sq_km": 241.83,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -859,7 +1536,33 @@
       "anglican_percent": 2.32,
       "catholic_percent": 2.26,
       "seventh_day_adventist_percent": 13.34,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.73
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 47.78,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 2.32,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 2.26,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 13.34,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -869,13 +1572,24 @@
       "area_code": "77236927B59461179812420",
       "area_name": "Mele",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 5,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0726,
       "land_area_sq_km": 68.87,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -904,7 +1618,33 @@
       "anglican_percent": 2.35,
       "catholic_percent": 4.82,
       "seventh_day_adventist_percent": 9.77,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.42
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 46.69,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 2.35,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 4.82,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 9.77,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -914,13 +1654,24 @@
       "area_code": "77236927B6151956983543",
       "area_name": "Merelava",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 18.56,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -949,7 +1700,33 @@
       "anglican_percent": 81.14,
       "catholic_percent": 0,
       "seventh_day_adventist_percent": 0,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 0,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 81.14,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 0,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -959,13 +1736,24 @@
       "area_code": "77236927B24909731902413",
       "area_name": "Middle Bush Tanna",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 76.58,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -994,7 +1782,33 @@
       "anglican_percent": 0.31,
       "catholic_percent": 10.14,
       "seventh_day_adventist_percent": 11.64,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 25.35
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 18.61,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.31,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 10.14,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 11.64,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1004,13 +1818,24 @@
       "area_code": "77236927B83033077011178",
       "area_name": "Mota",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 9.72,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1039,7 +1864,33 @@
       "anglican_percent": 95.98,
       "catholic_percent": 0,
       "seventh_day_adventist_percent": 0.5,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 0.17,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 95.98,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 0.5,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1049,13 +1900,24 @@
       "area_code": "77236927B68296465422624",
       "area_name": "Motalava",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 35.02,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1084,7 +1946,33 @@
       "anglican_percent": 54.98,
       "catholic_percent": 0.12,
       "seventh_day_adventist_percent": 10.79,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.06
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 0.12,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 54.98,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.12,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 10.79,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1094,13 +1982,24 @@
       "area_code": "77236927B53678457839449",
       "area_name": "Nguna",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 13,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.407,
       "land_area_sq_km": 31.94,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1129,7 +2028,33 @@
       "anglican_percent": 0.45,
       "catholic_percent": 0.67,
       "seventh_day_adventist_percent": 10.61,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.06
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 66.37,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.45,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.67,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 10.61,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1139,13 +2064,24 @@
       "area_code": "77236927B69269343415786",
       "area_name": "North Ambae",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 3,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0299,
       "land_area_sq_km": 100.38,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1174,7 +2110,33 @@
       "anglican_percent": 43.52,
       "catholic_percent": 19.72,
       "seventh_day_adventist_percent": 16.43,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 1.2,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 43.52,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 19.72,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 16.43,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1184,13 +2146,24 @@
       "area_code": "77236927B87914906430322",
       "area_name": "North Ambrym",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 2,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0103,
       "land_area_sq_km": 193.88,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1219,7 +2192,33 @@
       "anglican_percent": 0.45,
       "catholic_percent": 22.51,
       "seventh_day_adventist_percent": 25.15,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 34.62,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.45,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 22.51,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 25.15,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1229,13 +2228,24 @@
       "area_code": "77236927B6539808470139",
       "area_name": "North East Malekula",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 6,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0346,
       "land_area_sq_km": 173.2,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1264,7 +2274,33 @@
       "anglican_percent": 0.27,
       "catholic_percent": 46.24,
       "seventh_day_adventist_percent": 18.91,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 18.94,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.27,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 46.24,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 18.91,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1274,13 +2310,24 @@
       "area_code": "77236927B73770222811595",
       "area_name": "North Efate",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 5,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0589,
       "land_area_sq_km": 84.91,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1309,7 +2356,33 @@
       "anglican_percent": 0.92,
       "catholic_percent": 0.73,
       "seventh_day_adventist_percent": 11.4,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 47.42,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.92,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.73,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 11.4,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1319,13 +2392,24 @@
       "area_code": "77236927B15473640252363",
       "area_name": "North Erromango",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 6,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.011,
       "land_area_sq_km": 545.42,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1354,7 +2438,33 @@
       "anglican_percent": 0.7,
       "catholic_percent": 0.88,
       "seventh_day_adventist_percent": 44.57,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.06
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 32.3,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.7,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.88,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 44.57,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1364,13 +2474,24 @@
       "area_code": "77236927B797015037992",
       "area_name": "North Maewo",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 4,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0297,
       "land_area_sq_km": 134.59,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1399,7 +2520,33 @@
       "anglican_percent": 87.16,
       "catholic_percent": 0.26,
       "seventh_day_adventist_percent": 0.26,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.04
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 0.29,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 87.16,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.26,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 0.26,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1409,13 +2556,24 @@
       "area_code": "77236927B73444068942664",
       "area_name": "North Pentecost",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 90.79,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1444,7 +2602,33 @@
       "anglican_percent": 84.43,
       "catholic_percent": 5.49,
       "seventh_day_adventist_percent": 1.46,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.33
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 0.34,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 84.43,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 5.49,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 1.46,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1454,13 +2638,24 @@
       "area_code": "77236927B16584952276885",
       "area_name": "North Santo",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 1028.07,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1489,7 +2684,33 @@
       "anglican_percent": 18,
       "catholic_percent": 20.75,
       "seventh_day_adventist_percent": 18.57,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.08
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 22.72,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 18,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 20.75,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 18.57,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1499,13 +2720,24 @@
       "area_code": "77236927B7031422019545",
       "area_name": "North Tanna",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 1,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0101,
       "land_area_sq_km": 98.94,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1534,7 +2766,33 @@
       "anglican_percent": 0.02,
       "catholic_percent": 3.7,
       "seventh_day_adventist_percent": 10.43,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 19.08
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 21.78,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.02,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 3.7,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 10.43,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1544,13 +2802,24 @@
       "area_code": "77236927B34158198253981",
       "area_name": "North Tongoa",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 4,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.1396,
       "land_area_sq_km": 28.66,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1579,7 +2848,33 @@
       "anglican_percent": 0.25,
       "catholic_percent": 3.15,
       "seventh_day_adventist_percent": 12.1,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 56.21,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.25,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 3.15,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 12.1,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1589,13 +2884,24 @@
       "area_code": "77236927B23242879306276",
       "area_name": "North West Malekula",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 1,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0029,
       "land_area_sq_km": 341.87,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1624,7 +2930,33 @@
       "anglican_percent": 0.3,
       "catholic_percent": 18.42,
       "seventh_day_adventist_percent": 33.56,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.02
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 17.75,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.3,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 18.42,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 33.56,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1634,13 +2966,24 @@
       "area_code": "77236927B11778048532769",
       "area_name": "North West Santo",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 459.43,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1669,7 +3012,33 @@
       "anglican_percent": 0.69,
       "catholic_percent": 0.5,
       "seventh_day_adventist_percent": 9.38,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 73.99,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.69,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.5,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 9.38,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1679,13 +3048,24 @@
       "area_code": "77236927B20475273490027",
       "area_name": "Paama",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 20,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.3204,
       "land_area_sq_km": 62.42,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1714,7 +3094,33 @@
       "anglican_percent": 0.66,
       "catholic_percent": 0.33,
       "seventh_day_adventist_percent": 27.4,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 55.98,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.66,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.33,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 27.4,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1724,13 +3130,24 @@
       "area_code": "77236927B36499931511312",
       "area_name": "Pango",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 5,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.8451,
       "land_area_sq_km": 5.92,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1759,7 +3176,33 @@
       "anglican_percent": 2.51,
       "catholic_percent": 4.45,
       "seventh_day_adventist_percent": 14.85,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.04
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 27.4,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 2.51,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 4.45,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 14.85,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1769,13 +3212,24 @@
       "area_code": "77236927B39670792397739",
       "area_name": "Port Vila",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 36,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 1.5227,
       "land_area_sq_km": 23.64,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1804,7 +3258,33 @@
       "anglican_percent": 7.89,
       "catholic_percent": 12.38,
       "seventh_day_adventist_percent": 18.48,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.07
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 29.48,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 7.89,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 12.38,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 18.48,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1814,13 +3294,24 @@
       "area_code": "77236927B86395134968187",
       "area_name": "South Ambae",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 1,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0074,
       "land_area_sq_km": 134.87,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1849,7 +3340,33 @@
       "anglican_percent": 51.45,
       "catholic_percent": 0.17,
       "seventh_day_adventist_percent": 30.39,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 0.5,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 51.45,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.17,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 30.39,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1859,13 +3376,24 @@
       "area_code": "77236927B97442931027551",
       "area_name": "South East Ambrym",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 2,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0096,
       "land_area_sq_km": 209.2,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1894,7 +3422,33 @@
       "anglican_percent": 0.1,
       "catholic_percent": 5.34,
       "seventh_day_adventist_percent": 6.94,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 83.42,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.1,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 5.34,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 6.94,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1904,13 +3458,24 @@
       "area_code": "77236927B5490091431503",
       "area_name": "South East Malekula",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 277.83,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1939,7 +3504,33 @@
       "anglican_percent": 0.33,
       "catholic_percent": 0.48,
       "seventh_day_adventist_percent": 11.7,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 66.21,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.33,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.48,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 11.7,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1949,13 +3540,24 @@
       "area_code": "77236927B70121045858985",
       "area_name": "South East Santo",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 7,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0272,
       "land_area_sq_km": 257.82,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -1984,7 +3586,33 @@
       "anglican_percent": 16.77,
       "catholic_percent": 7.85,
       "seventh_day_adventist_percent": 16.98,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.15
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 13.69,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 16.77,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 7.85,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 16.98,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -1994,13 +3622,24 @@
       "area_code": "77236927B82266009819224",
       "area_name": "South Epi",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 105.43,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2029,7 +3668,33 @@
       "anglican_percent": 0,
       "catholic_percent": 0.06,
       "seventh_day_adventist_percent": 44.32,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 10.85,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.06,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 44.32,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2039,13 +3704,24 @@
       "area_code": "77236927B89058038610930",
       "area_name": "South Erromango",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 349.37,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2074,7 +3750,33 @@
       "anglican_percent": 0,
       "catholic_percent": 0.15,
       "seventh_day_adventist_percent": 53.27,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 26.18,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.15,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 53.27,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2084,13 +3786,24 @@
       "area_code": "77236927B86135291775280",
       "area_name": "South Maewo",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 1,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0058,
       "land_area_sq_km": 171.47,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2119,7 +3832,33 @@
       "anglican_percent": 54.2,
       "catholic_percent": 0.64,
       "seventh_day_adventist_percent": 18.26,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 0.27,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 54.2,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.64,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 18.26,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2129,13 +3868,24 @@
       "area_code": "77236927B78933945874407",
       "area_name": "South Malekula",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 1,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0043,
       "land_area_sq_km": 232.65,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2164,7 +3914,33 @@
       "anglican_percent": 0.67,
       "catholic_percent": 28.37,
       "seventh_day_adventist_percent": 4.72,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.02
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 58.3,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.67,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 28.37,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 4.72,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2174,13 +3950,24 @@
       "area_code": "77236927B26807877785061",
       "area_name": "South Pentecost",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 189.41,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2209,7 +3996,33 @@
       "anglican_percent": 7.52,
       "catholic_percent": 38.9,
       "seventh_day_adventist_percent": 1.64,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 14.04
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 1.01,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 7.52,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 38.9,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 1.64,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2219,13 +4032,24 @@
       "area_code": "77236927B84597259035429",
       "area_name": "South Santo",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 2,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0047,
       "land_area_sq_km": 424.36,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2254,7 +4078,33 @@
       "anglican_percent": 0.62,
       "catholic_percent": 7.58,
       "seventh_day_adventist_percent": 8.53,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 2.09
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 39.99,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.62,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 7.58,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 8.53,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2264,13 +4114,24 @@
       "area_code": "77236927B47218530990891",
       "area_name": "South Tanna",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 1,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0394,
       "land_area_sq_km": 25.37,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2299,7 +4160,33 @@
       "anglican_percent": 0.12,
       "catholic_percent": 45.41,
       "seventh_day_adventist_percent": 20.61,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 3.56
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 11.18,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.12,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 45.41,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 20.61,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2309,13 +4196,24 @@
       "area_code": "77236927B2761964185252",
       "area_name": "South West Malekula",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 3,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0045,
       "land_area_sq_km": 670.65,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2344,7 +4242,33 @@
       "anglican_percent": 0.28,
       "catholic_percent": 6.27,
       "seventh_day_adventist_percent": 5.94,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.17
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 59.56,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.28,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 6.27,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 5.94,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2354,13 +4278,24 @@
       "area_code": "77236927B40431360126678",
       "area_name": "South West Tanna",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 136.62,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2389,7 +4324,33 @@
       "anglican_percent": 0.08,
       "catholic_percent": 9.59,
       "seventh_day_adventist_percent": 14.78,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 30.37
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 8.68,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.08,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 9.59,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 14.78,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2399,13 +4360,24 @@
       "area_code": "77236927B69606331838756",
       "area_name": "Tongariki",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 1,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.053,
       "land_area_sq_km": 18.88,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2434,7 +4406,33 @@
       "anglican_percent": 0,
       "catholic_percent": 0.29,
       "seventh_day_adventist_percent": 15.95,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 48.83,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.29,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 15.95,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2444,13 +4442,24 @@
       "area_code": "77236927B65524271778963",
       "area_name": "Ureparapara",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 41.66,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2479,7 +4488,33 @@
       "anglican_percent": 93.78,
       "catholic_percent": 0.21,
       "seventh_day_adventist_percent": 3,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 0.21,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 93.78,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.21,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 3,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2489,13 +4524,24 @@
       "area_code": "77236927B4251587034950",
       "area_name": "Vanua Lava",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 1,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0029,
       "land_area_sq_km": 340.84,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2524,7 +4570,33 @@
       "anglican_percent": 82.58,
       "catholic_percent": 1.21,
       "seventh_day_adventist_percent": 5.82,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.19
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 0.8,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 82.58,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 1.21,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 5.82,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2534,13 +4606,24 @@
       "area_code": "77236927B71259350499613",
       "area_name": "Varisu",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 3,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0282,
       "land_area_sq_km": 106.44,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2569,7 +4652,33 @@
       "anglican_percent": 0.45,
       "catholic_percent": 0.4,
       "seventh_day_adventist_percent": 28.85,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 60.99,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.45,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.4,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 28.85,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2579,13 +4688,24 @@
       "area_code": "77236927B83961897513760",
       "area_name": "Vermali",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 3,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0501,
       "land_area_sq_km": 59.87,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2614,7 +4734,33 @@
       "anglican_percent": 0.35,
       "catholic_percent": 0.26,
       "seventh_day_adventist_percent": 9.92,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0.04
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 71.25,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.35,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.26,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 9.92,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2624,13 +4770,24 @@
       "area_code": "77236927B21234024058134",
       "area_name": "Vermaul",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 0,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0,
       "land_area_sq_km": 176.27,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2659,7 +4816,33 @@
       "anglican_percent": 0.17,
       "catholic_percent": 3.06,
       "seventh_day_adventist_percent": 14.51,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 54.99,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.17,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 3.06,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 14.51,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2669,13 +4852,24 @@
       "area_code": "77236927B38715927177991",
       "area_name": "West Ambae",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 13,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.1032,
       "land_area_sq_km": 126.01,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2704,7 +4898,33 @@
       "anglican_percent": 16.21,
       "catholic_percent": 1.13,
       "seventh_day_adventist_percent": 10.77,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 0.16,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 16.21,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 1.13,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 10.77,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2714,13 +4934,24 @@
       "area_code": "77236927B87876939805141",
       "area_name": "West Ambrym",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 2,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0072,
       "land_area_sq_km": 276.31,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2749,7 +4980,33 @@
       "anglican_percent": 0.26,
       "catholic_percent": 27.11,
       "seventh_day_adventist_percent": 24.25,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 33.65,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.26,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 27.11,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 24.25,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2759,13 +5016,24 @@
       "area_code": "77236927B10986826820410",
       "area_name": "West Malo",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 3,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0626,
       "land_area_sq_km": 47.89,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2794,7 +5062,33 @@
       "anglican_percent": 2.67,
       "catholic_percent": 0.38,
       "seventh_day_adventist_percent": 12.2,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 45.22,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 2.67,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.38,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 12.2,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2804,13 +5098,24 @@
       "area_code": "77236927B51416444743643",
       "area_name": "West Santo",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 2,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0023,
       "land_area_sq_km": 888.32,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2839,7 +5144,33 @@
       "anglican_percent": 4.19,
       "catholic_percent": 0.23,
       "seventh_day_adventist_percent": 2.24,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 1.2
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 46.19,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 4.19,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 0.23,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 2.24,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2849,13 +5180,24 @@
       "area_code": "77236927B19394632379581",
       "area_name": "West Tanna",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 4,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.0408,
       "land_area_sq_km": 98.02,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2884,7 +5226,33 @@
       "anglican_percent": 0.12,
       "catholic_percent": 6.5,
       "seventh_day_adventist_percent": 10.44,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 16.76
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 21.09,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.12,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 6.5,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 10.44,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     },
     {
       "country_code": "VU",
@@ -2894,13 +5262,24 @@
       "area_code": "77236927B67758893467366",
       "area_name": "Whitesands",
       "year": 2009,
+      "population_total": null,
       "population_total_basis": "stated religious-affiliation response (pending)",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
       "place_count": 3,
+      "places_per_10000_residents": null,
       "place_density_per_sq_km": 0.024,
       "land_area_sq_km": 125.08,
       "site_snapshot_date": "2026-06-13T05:19:31Z",
       "place_count_basis": "current OSM amenity=place_of_worship snapshot",
       "quality_flag": "current_place_counts_repeated_across_census_years;religion_published_by_island_not_area_council_2009",
+      "customary_beliefs_percent": null,
+      "presbyterian_percent": null,
+      "anglican_percent": null,
+      "catholic_percent": null,
+      "seventh_day_adventist_percent": null,
       "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship"]
     },
     {
@@ -2929,7 +5308,33 @@
       "anglican_percent": 0.3,
       "catholic_percent": 9.35,
       "seventh_day_adventist_percent": 9.29,
-      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"]
+      "source_dataset_ids": ["vu-adm2-geoboundaries", "osm-vu-place-of-worship", "vbos-2020-census-basic-tables-t3-5"],
+      "composition": [
+        {
+          "label_verbatim": "Customary beliefs",
+          "percent": 11.62
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 30.9,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Anglican",
+          "percent": 0.3,
+          "taxonomy_code": "christian.anglican"
+        },
+        {
+          "label_verbatim": "Catholic",
+          "percent": 9.35,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist (SDA)",
+          "percent": 9.29,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        }
+      ]
     }
   ],
   "source_datasets": [
@@ -3088,9 +5493,9 @@
   ],
   "data_status": "census_religion_live",
   "data_status_note": "Census religious affiliation and denomination shares are live for area councils and urban municipalities in 2020. 2009 sub-provincial religion was published by island, not area council, so 2009 stays pending at this level. The Torres area council is absent from the geoBoundaries ADM2 layer, so its 2020 counts are not mapped at this level.",
-  "generated_at": "2026-07-09T07:28:12Z",
+  "generated_at": "2026-07-12T03:27:52Z",
   "generated_by": "scripts/build_vu_area_summary.R",
-  "schema_version": "0.2.0",
+  "schema_version": "area-summary.v2",
   "country_code": "VU",
   "boundary_set": {
     "boundary_set_id": "vu-adm2-geoboundaries",

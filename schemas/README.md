@@ -3,7 +3,10 @@
 JSON Schemas that define the core data structures used across the project.
 
 - organisation.schema.json: organisation-level metadata.
-- area-summary.schema.json: area-level portal/download product.
+- area-summary.schema.json: area-level portal/download product (legacy
+  generations validate against this base schema).
+- area-summary.v2.schema.json: the area-summary.v2 contract — structured
+  per-row composition and optional service_url, declared-version validated.
 - change-event.schema.json: append-only staged or accepted revision event,
   including worship-function state changes needed for `pow diff`.
 - data-manifest.schema.json: checksummed data artefact manifest for local cache,
@@ -92,6 +95,27 @@ commit gates. Popup rendering of the composition field is a separate
 runtime change with its own tag bump and commit. Implementation is the
 next structural lane; until it lands, the failure list below stands as
 the work order.
+
+**STATUS (implemented 2026-07-12, structural lane):** `schemas/area-summary.v2.schema.json`
+and `scripts/validate_area_summaries.sh` (declared-version-resolving) are in
+place. The guard gates `area-summary.v2` products and reports legacy
+generations as non-gating advisory against the base schema. Vanuatu was
+regenerated under `area-summary.v2` (`scripts/build_vu_area_summary.R`): the
+five denomination shares moved into the structured `composition` field with
+source-verbatim labels and `denomination-taxonomy.json` codes (customary
+beliefs has no code), and the previously-dropped required-but-nullable row
+fields now emit as null. Both VU products pass; no data value changed. Per the
+data-manifest.v2 playbook, v2 also legitimises the Vanuatu builder dialect the
+strict schema forbade — optional top-level `data_status`/`data_status_note`,
+date-time accepted for the row `site_snapshot_date` and source-dataset
+`retrieval_date`, and (conductor ruling at the 2026-07-12 gate) the legacy
+flat per-denomination `*_percent` row fields the shared runtime's metric
+select currently reads — the gate caught the first regeneration dropping them,
+which broke the live Vanuatu denomination metrics; they stay legitimate until
+the runtime reads `composition` directly, then retire. These dialect
+legitimisations extend the ruling's named additions under its "per the
+data-manifest.v2 playbook" clause and stand open to the project lead's veto. Legacy products (Canada, US, Romania, and others) stay on
+their declared versions and upgrade opportunistically.
 
 The pre-ruling record: a full validation of the 37 shipped country
 products against `area-summary.schema.json` passes 23. The 14 failures

@@ -28,6 +28,17 @@ stamp <- format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
 DENOM_LABELS <- c("customary_beliefs", "presbyterian", "anglican",
                   "catholic", "seventh_day_adventist")
 
+# denomination-taxonomy.json code for each tracked denomination; customary
+# beliefs has no denomination code in the vocabulary, so its composition item
+# ships without a taxonomy_code (the field is optional under area-summary.v2)
+DENOM_TAXONOMY <- c(
+  customary_beliefs = NA_character_,
+  presbyterian = "christian.presbyterian",
+  anglican = "christian.anglican",
+  catholic = "christian.catholic",
+  seventh_day_adventist = "christian.seventh_day_adventist"
+)
+
 # read one extracted census csv into per-geography religion aggregates.
 # returns geography, denominator (stated responses), affiliated count,
 # no-religion count, and a stated-denominator count for each DENOM_LABELS
@@ -57,6 +68,10 @@ aggregate_census <- function(path, level_filter = NULL, geo_col = "geography") {
     # tabulate that category); percents are derived in fill_rows
     for (d in DENOM_LABELS) {
       row[[paste0(d, "_count")]] <- sum(g$count[lbl == d], na.rm = TRUE)
+      # keep the source's own verbatim label for this denomination and year so
+      # the area-summary.v2 composition field can carry it as label_verbatim
+      lab <- g$religion_label_source[lbl == d]
+      row[[paste0(d, "_label")]] <- if (length(lab) > 0) lab[1] else NA_character_
     }
     row
   }))
@@ -82,10 +97,12 @@ fill_rows <- function(rows, agg, year, extra_flag, source_ids_added,
     rows$population_total[i] <- pop
     rows$population_total_basis[i] <- if (!is.null(pop_basis)) pop_basis else
       "total people with a stated religious-affiliation response (census total in private households minus refusals and not-stated)"
-    # denomination shares over the stated denominator (present in every year)
+    # denomination shares over the stated denominator (present in every year);
+    # carry the source-verbatim label alongside for the v2 composition field
     for (d in DENOM_LABELS) {
       cnt <- agg[[paste0(d, "_count")]][j]
       rows[[paste0(d, "_percent")]][i] <- round(100 * cnt / pop, 2)
+      rows[[paste0(d, "_label")]][i] <- agg[[paste0(d, "_label")]][j]
     }
     if (mode == "full") {
       aff <- agg$religious_affiliation_count[j]
@@ -184,9 +201,9 @@ census_source_datasets <- list(
 # geoBoundaries provenance for each admin level; the same values the
 # boundaries-only scaffold shipped before the loop-variable bug (see
 # denom_lbl comment below) wiped them from the regenerated product.
-# schema_version follows the "0.2.0" convention used by the other
-# country builders (e.g. scripts/build_in_area_summary.R), superseding
-# the scaffold-era "0.1.0"
+# schema_version is "area-summary.v2": the product carries the structured
+# per-row composition field and the previously-dropped required-but-nullable
+# fields, and validates against schemas/area-summary.v2.schema.json
 GEOBOUNDARIES <- list(
   adm1 = list(
     boundary_set_id = "vu-adm1-geoboundaries",
@@ -267,6 +284,9 @@ build_level <- function(summary_path, level) {
   # parsed scaffold and surfacing the orphaned string as a top-level "1"
   # key when jsonlite serialised the unnamed first element
   for (denom_lbl in DENOM_LABELS) rows[[paste0(denom_lbl, "_percent")]] <- NA_real_
+  # parallel per-denomination source-label columns feed composition; they are
+  # stripped before the flat CSV export and never emitted as row fields
+  for (denom_lbl in DENOM_LABELS) rows[[paste0(denom_lbl, "_label")]] <- NA_character_
 
   if (level == "adm1") {
     # provinces gain earlier waves by cloning the 2009 rows as a blank
@@ -286,6 +306,7 @@ build_level <- function(summary_path, level) {
       seed$no_religion_percent <- NA
       seed$places_per_10000_residents <- NA
       for (d in DENOM_LABELS) seed[[paste0(d, "_percent")]] <- NA_real_
+      for (d in DENOM_LABELS) seed[[paste0(d, "_label")]] <- NA_character_
       # the clone carries 2009's census source id; a seeded year owns only the
       # boundary and OSM base until its own census fill adds the right id
       seed$source_dataset_ids <- I(lapply(seed$source_dataset_ids, function(ids)
@@ -320,10 +341,34 @@ build_level <- function(summary_path, level) {
   unmatched <- unique(rows$area_name[is.na(rows$population_total) & rows$year == 2020])
   if (length(unmatched) > 0) cat("  2020 rows without census match:", paste(unmatched, collapse = ", "), "\n")
 
+  # emit rows under area-summary.v2: keep the schema fields (with NA serialised
+  # to null so the required-but-nullable fields stay present rather than being
+  # dropped), KEEP the flat per-denomination _percent fields the shared
+  # runtime's metric select reads (legitimised by the v2 patternProperties
+  # during the transition; conductor ruling 2026-07-12 — dropping them broke
+  # the live VU denomination metrics), and additionally carry the structured
+  # composition array, the canonical v2 home. only the _label working columns
+  # are stripped.
+  label_cols <- paste0(DENOM_LABELS, "_label")
+  schema_cols <- setdiff(names(rows), c("source_dataset_ids", label_cols))
   d$rows <- lapply(seq_len(nrow(rows)), function(i) {
-    r <- as.list(rows[i, setdiff(names(rows), "source_dataset_ids")])
+    r <- as.list(rows[i, schema_cols])
     r[["source_dataset_ids"]] <- rows$source_dataset_ids[[i]]
-    for (k in names(r)) if (length(r[[k]]) == 1 && is.na(r[[k]])) r[[k]] <- NULL
+    # one composition item per denomination the census actually tabulated for
+    # this row; label_verbatim is the source's own wording, percent is the
+    # existing share, taxonomy_code links to denomination-taxonomy.json where a
+    # code exists (customary beliefs has none)
+    comp <- list()
+    for (d_lbl in DENOM_LABELS) {
+      pct <- rows[[paste0(d_lbl, "_percent")]][i]
+      lab <- rows[[paste0(d_lbl, "_label")]][i]
+      if (is.na(pct) || is.na(lab)) next
+      item <- list(label_verbatim = lab, percent = pct)
+      tax <- DENOM_TAXONOMY[[d_lbl]]
+      if (!is.na(tax)) item[["taxonomy_code"]] <- tax
+      comp[[length(comp) + 1]] <- item
+    }
+    if (length(comp) > 0) r[["composition"]] <- comp
     r
   })
 
@@ -438,7 +483,7 @@ build_level <- function(summary_path, level) {
   # drop them on a prior regeneration); values match sibling products
   # (schemas/area-summary.schema.json, e.g. apps/regions/bs/data/area_summary_island.json)
   geo <- GEOBOUNDARIES[[level]]
-  d$schema_version <- "0.2.0"
+  d$schema_version <- "area-summary.v2"
   d$country_code <- "VU"
   d$boundary_set <- list(
     boundary_set_id = geo$boundary_set_id,
@@ -456,7 +501,9 @@ build_level <- function(summary_path, level) {
   write_json(d, summary_path, auto_unbox = TRUE, pretty = TRUE, null = "null", na = "null", digits = NA)
 
   csv_path <- sub("\\.json$", ".csv", summary_path)
-  flat <- rows
+  # the flat CSV keeps its existing columns: strip the working _label columns
+  # (the denomination _percent columns stay, as before)
+  flat <- rows[, setdiff(names(rows), grep("_label$", names(rows), value = TRUE)), drop = FALSE]
   flat$source_dataset_ids <- vapply(rows$source_dataset_ids, function(x) paste(x, collapse = "|"), "")
   write.csv(flat, csv_path, row.names = FALSE, na = "")
   invisible(d)

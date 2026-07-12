@@ -1,0 +1,338 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://go-bayes.github.io/places-of-worship/schemas/area-summary.v2.schema.json",
+  "title": "Area Summary Product (area-summary.v2)",
+  "description": "A country area-summary product for map layers, downloads, and portal views. v2 (2026-07-11), per the data-manifest.v2 playbook: it extends the contract with one structured optional per-row composition field (the canonical home for denominational composition, replacing flag-string carriage and putting denomination-taxonomy.json to work), admits the optional per-row service_url, and legitimises the information-bearing builder dialect the strict schema forbade (optional top-level data_status/data_status_note, and date-time accepted where a bare date was required for site_snapshot_date and source-dataset retrieval_date). Legacy flat per-denomination *_percent row fields stay legitimised during the transition (the shared runtime reads them); composition is the canonical carrier and the flat fields retire when the runtime reads composition directly.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "country_code",
+    "boundary_set",
+    "site_snapshot",
+    "source_datasets",
+    "indicators",
+    "visual_layers",
+    "rows"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "area-summary.v2"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "generated_by": {
+      "type": "string"
+    },
+    "country_code": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$"
+    },
+    "data_status": {
+      "type": "string",
+      "description": "Optional builder-dialect status label (e.g. census_religion_live); legitimised by v2, per the data-manifest.v2 playbook."
+    },
+    "data_status_note": {
+      "type": "string",
+      "description": "Optional builder-dialect free-form note accompanying data_status; legitimised by v2, per the data-manifest.v2 playbook."
+    },
+    "boundary_set": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "boundary_set_id",
+        "country_code",
+        "level",
+        "vintage",
+        "source_dataset_id"
+      ],
+      "properties": {
+        "boundary_set_id": {
+          "type": "string"
+        },
+        "country_code": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "level": {
+          "type": "string"
+        },
+        "vintage": {
+          "type": "string"
+        },
+        "source_dataset_id": {
+          "type": "string"
+        }
+      }
+    },
+    "site_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_dataset_id",
+        "snapshot_date",
+        "basis"
+      ],
+      "properties": {
+        "source_dataset_id": {
+          "type": ["string", "null"],
+          "description": "Null is legitimate and means the release ships no governed place-of-worship snapshot; the basis string must say so. A string names the governed snapshot dataset the place metrics derive from."
+        },
+        "snapshot_date": {
+          "type": ["string", "null"],
+          "format": "date"
+        },
+        "basis": {
+          "type": "string"
+        },
+        "notes": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "source_datasets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/SourceDataset"
+      }
+    },
+    "indicators": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "indicator.schema.json"
+      }
+    },
+    "visual_layers": {
+      "type": "array",
+      "items": {
+        "$ref": "visual-layer.schema.json"
+      }
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/AreaSummaryRow"
+      }
+    }
+  },
+  "$defs": {
+    "SourceDataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Local relaxation of source-dataset.schema.json: retrieval_date accepts a date or a date-time, legitimising the builder dialect without touching the shared source-dataset schema.",
+      "required": [
+        "source_dataset_id",
+        "name",
+        "provider",
+        "licence",
+        "citation"
+      ],
+      "properties": {
+        "source_dataset_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+        },
+        "name": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "url": {
+          "type": ["string", "null"],
+          "format": "uri"
+        },
+        "retrieval_date": {
+          "type": ["string", "null"],
+          "anyOf": [
+            { "format": "date" },
+            { "format": "date-time" }
+          ]
+        },
+        "local_path": {
+          "type": ["string", "null"]
+        },
+        "licence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name"],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "url": {
+              "type": ["string", "null"],
+              "format": "uri"
+            },
+            "attribution": {
+              "type": ["string", "null"]
+            }
+          }
+        },
+        "citation": {
+          "type": "string"
+        },
+        "access_limits": {
+          "type": ["string", "null"]
+        },
+        "redistribution_limits": {
+          "type": ["string", "null"]
+        },
+        "notes": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "CompositionItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One structured composition entry: a source-verbatim category label with either a count or a percent, optionally linked to a denomination-taxonomy.json code.",
+      "required": ["label_verbatim"],
+      "properties": {
+        "label_verbatim": {
+          "type": "string",
+          "description": "The category label exactly as published by the source."
+        },
+        "count": {
+          "type": "integer"
+        },
+        "percent": {
+          "type": "number"
+        },
+        "taxonomy_code": {
+          "type": "string",
+          "description": "Optional link to a denomination-taxonomy.json denomination code."
+        }
+      },
+      "oneOf": [
+        { "required": ["count"] },
+        { "required": ["percent"] }
+      ]
+    },
+    "AreaSummaryRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*_percent$": {
+          "type": ["number", "null"],
+          "description": "Legacy flat per-denomination share field (for example presbyterian_percent) that the shared runtime's metric select currently reads. Legitimised during the transition, per the data-manifest.v2 playbook; composition is the canonical carrier, and these fields retire when the runtime reads composition directly."
+        }
+      },
+      "required": [
+        "country_code",
+        "boundary_set_id",
+        "boundary_level",
+        "area_unit_id",
+        "area_code",
+        "area_name",
+        "year",
+        "population_total",
+        "population_total_basis",
+        "religious_affiliation_count",
+        "religious_affiliation_percent",
+        "no_religion_count",
+        "no_religion_percent",
+        "place_count",
+        "places_per_10000_residents",
+        "place_density_per_sq_km",
+        "land_area_sq_km",
+        "site_snapshot_date",
+        "place_count_basis",
+        "source_dataset_ids",
+        "quality_flag"
+      ],
+      "properties": {
+        "country_code": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "boundary_set_id": {
+          "type": "string"
+        },
+        "boundary_level": {
+          "type": "string"
+        },
+        "area_unit_id": {
+          "type": "string"
+        },
+        "area_code": {
+          "type": "string"
+        },
+        "area_name": {
+          "type": "string"
+        },
+        "year": {
+          "type": "integer"
+        },
+        "population_total": {
+          "type": ["integer", "null"]
+        },
+        "population_total_basis": {
+          "type": "string"
+        },
+        "religious_affiliation_count": {
+          "type": ["integer", "null"]
+        },
+        "religious_affiliation_percent": {
+          "type": ["number", "null"]
+        },
+        "no_religion_count": {
+          "type": ["integer", "null"]
+        },
+        "no_religion_percent": {
+          "type": ["number", "null"]
+        },
+        "place_count": {
+          "type": ["integer", "null"],
+          "description": "Null when the release ships no governed place-of-worship snapshot (see site_snapshot.basis); the derived place metrics are then null too."
+        },
+        "places_per_10000_residents": {
+          "type": ["number", "null"]
+        },
+        "place_density_per_sq_km": {
+          "type": ["number", "null"]
+        },
+        "land_area_sq_km": {
+          "type": ["number", "null"]
+        },
+        "site_snapshot_date": {
+          "type": ["string", "null"],
+          "anyOf": [
+            { "format": "date" },
+            { "format": "date-time" }
+          ],
+          "description": "Date or date-time of the place snapshot; date-time accepted under v2."
+        },
+        "place_count_basis": {
+          "type": ["string", "null"],
+          "description": "Null when place_count is null (no governed place snapshot in the release)."
+        },
+        "source_dataset_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "quality_flag": {
+          "type": "string"
+        },
+        "service_url": {
+          "type": "string",
+          "description": "Optional per-row link to a service or portal page for the area (admitted for the NZ SA2 product)."
+        },
+        "composition": {
+          "type": "array",
+          "description": "Optional structured per-row composition: the canonical home for denominational (or other categorical) composition shares, replacing flag-string carriage.",
+          "items": {
+            "$ref": "#/$defs/CompositionItem"
+          }
+        }
+      }
+    }
+  }
+}
