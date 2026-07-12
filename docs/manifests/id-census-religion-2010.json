@@ -3,7 +3,7 @@
   "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:id-census-religion:id:2010:bps-province",
   "dataset_id": "id-census-religion:id:2010:bps-province",
-  "dataset_version_id": "id-census-religion:id:2010:bps-province:85b387049073",
+  "dataset_version_id": "id-census-religion:id:2010:bps-province:fe3684e1ffca",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -25,7 +25,7 @@
   ],
   "pipeline": {
     "script": "scripts/build_id_area_summary.R",
-    "git_commit": "b65dc4fd574d7d5a94fb8b2f399bcaf3fbd96e72",
+    "git_commit": "04be1385af0eec94854575a10e16e388c877b2f9",
     "command": "Rscript scripts/build_id_area_summary.R",
     "parameters": {
       "construct": "census affiliation",
@@ -204,8 +204,8 @@
       "uri": "repo:apps/regions/id/data/area_summary_province.json",
       "storage_provider": "git_repository",
       "format": "json",
-      "bytes": 68897,
-      "sha256": "85b387049073ec2a7e955c64e44ab715f24e32e3166714569330ac42df21334c",
+      "bytes": 74480,
+      "sha256": "fe3684e1ffcac9416d3026bc76802e0bce14e6993c7a33199b11ed498b090d9a",
       "row_count": 33,
       "feature_count": null,
       "content": "Indonesia 33-province SP2010 census-affiliation area summary (single wave, 2010).",
@@ -217,8 +217,8 @@
       "uri": "repo:apps/regions/id/data/area_summary_province.csv",
       "storage_provider": "git_repository",
       "format": "csv",
-      "bytes": 40924,
-      "sha256": "1fde4b39f1fd13025e4b87defb2a90dc3b21cbe06c9fbf43c3bdc23290c39666",
+      "bytes": 45248,
+      "sha256": "601744048b97f05d91f0a8c05a6d11c0a6a99c79df72556f8578b2c4552ebe8b",
       "row_count": 33,
       "feature_count": null,
       "content": "Flattened Indonesia 33-province SP2010 census-affiliation rows (2010).",
@@ -243,7 +243,7 @@
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/id/data/area_summary_province.json",
-      "sha256": "85b387049073ec2a7e955c64e44ab715f24e32e3166714569330ac42df21334c",
+      "sha256": "fe3684e1ffcac9416d3026bc76802e0bce14e6993c7a33199b11ed498b090d9a",
       "built_by": "scripts/build_id_area_summary.R",
       "notes": "33 provinces x 1 wave = 33 rows; all-persons universe; no no-religion category in the official frame (null); non-response residual disclosed in the denominator."
     },

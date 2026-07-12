@@ -289,21 +289,28 @@ land_area <- setNames(round(written[["land_area_sq_km"]], 4), written[["area_cod
 area_unit <- setNames(written[["area_unit_id"]], written[["area_code"]])
 
 # ---- product rows --------------------------------------------------------------
-# slot design: the Indonesian official frame has NO no-religion category (all seven
-# lines are religions; Lainnya is other religions/beliefs). religious_affiliation is
-# the sum of the seven religion lines; no_religion is null (rendered, not invented).
-# the two non-response residuals (Tidak Terjawab = not answered, Tidak Ditanyakan =
-# not asked) stay in the denominator (the published Total) and in neither slot, so the
-# affiliation share sits just below 100. the rich per-province composition rides
-# verbatim on the quality flag (source_categories_verbatim pattern).
+# minority-share slot design (ratified task 6; BD/PK/LK/NP family, conductor ruling
+# 2026-07-12): the Indonesian official frame has NO no-religion category (all seven
+# lines are religions; Lainnya is other religions/beliefs), and the seven-religion
+# share is near-flat by construction. religious_affiliation_percent therefore carries
+# the reference-group Islam share (the largest published national category, held
+# constant across every province) and no_religion_percent the summed share of the
+# other six named religions — arithmetic on the published categories, never a
+# no-religion measure. the two non-response residuals (Tidak Terjawab = not answered,
+# Tidak Ditanyakan = not asked) stay in the denominator (the published Total) and in
+# neither slot; the two shares therefore need not sum to 100. the per-province
+# composition rides verbatim on the quality flag (source_categories_verbatim pattern).
+
+reference_group <- "Islam" # largest published national category, held constant everywhere
+minority_categories <- setdiff(affiliation_cats, reference_group)
 
 flag_common <- paste(
+  "census_flat_frame_minority_share_design",
   "census_affiliation", "all_persons_universe", "single_select_reported_religion",
   "official_frame_has_no_no_religion_category",
-  "no_religion_slot_null_not_invented",
-  "religious_affiliation_percent_is_seven_religion_share",
+  "no_religion_slot_carries_named_minority_share_not_no_religion",
   "non_response_residual_tidak_terjawab_and_tidak_ditanyakan_in_denominator_neither_slot",
-  "affiliation_share_sits_below_100_by_the_residual",
+  "shares_need_not_sum_to_100",
   "single_wave_sp2010_sp2020_dropped_religion",
   "dukcapil_2020plus_is_separate_administrative_construct_not_merged",
   "licence_needs_review_build_then_ask_bps_attribution",
@@ -320,11 +327,18 @@ make_row <- function(i) {
   code <- prov_code[i]
   ac <- paste0("id", code)
   pop <- prov_total[i]
-  affiliation <- sum(vapply(affiliation_cats, function(c) cat_mat[[c]][i], numeric(1)))
-  aff_pct <- round(100 * affiliation / pop, 4)
+  ref_count <- cat_mat[[reference_group]][i]
+  minority_count <- sum(vapply(minority_categories, function(c) cat_mat[[c]][i], numeric(1)))
+  ref_pct <- round(100 * ref_count / pop, 4)
+  minority_pct <- round(100 * minority_count / pop, 4)
   breakdown <- paste(vapply(all_cats, function(c) paste0(c, "=", cat_mat[[c]][i]), character(1)),
                      collapse = ";")
-  full_flag <- paste0(flag_common, ";bps_province_code=", code,
+  full_flag <- paste0(flag_common,
+                      ";reference_group=", reference_group,
+                      ";reference_share_pct=", ref_pct,
+                      ";minority_share_pct=", minority_pct,
+                      ";minority_share=", paste(minority_categories, collapse = "+"),
+                      ";bps_province_code=", code,
                       ";census_name=", prov_name_src[i],
                       ";source_categories_verbatim=", breakdown)
   list(
@@ -337,10 +351,10 @@ make_row <- function(i) {
     year = 2010L,
     population_total = as.integer(pop),
     population_total_basis = basis_pop,
-    religious_affiliation_count = as.integer(affiliation),
-    religious_affiliation_percent = aff_pct,
-    no_religion_count = NULL,
-    no_religion_percent = NULL,
+    religious_affiliation_count = as.integer(ref_count),
+    religious_affiliation_percent = ref_pct,
+    no_religion_count = as.integer(minority_count),
+    no_religion_percent = minority_pct,
     place_count = NULL,
     places_per_10000_residents = NULL,
     place_density_per_sq_km = NULL,
@@ -403,8 +417,8 @@ indicators <- function() {
   denom_note <- paste(
     "Percentages use each province's published census Total. The two non-response",
     "columns (Tidak Terjawab = not answered; Tidak Ditanyakan = not asked) stay in the",
-    "denominator and outside the affiliation numerator, so the affiliation share sits",
-    "just below 100%.")
+    "denominator and outside both numerators; the two shares therefore need not",
+    "sum to 100%.")
   list(
     list(indicator_id = "population_total", label = "Census population total",
          description = "Province all-persons population in the SP2010 religion table.",
@@ -412,12 +426,18 @@ indicators <- function() {
          method = "Printed province Total column, SP2010 'Penduduk Menurut Wilayah dan Agama yang Dianut'.",
          temporal_coverage = "2010", spatial_coverage = "Indonesia provinces (33, 2010 frame)",
          quality_notes = "All persons of all ages. The Total includes the Tidak Terjawab (not answered) and Tidak Ditanyakan (not asked) residual columns, kept as published."),
-    list(indicator_id = "religious_affiliation_percent", label = "Religious affiliation %",
-         description = "Share of the province population reporting one of the seven official religions.",
+    list(indicator_id = "religious_affiliation_percent", label = "Islam (reference group) %",
+         description = "Reference-group share: the share of the province Total reporting Islam, the largest published national category, held constant across every province. Declared construct under the minority-share design (project-lead ruling task 6): the value is that group's share of the census frame, never a measure of affiliation versus non-affiliation.",
          unit = "percent", denominator_indicator_id = "population_total",
-         method = "100 * (Islam + Kristen + Katolik + Hindu + Budha + Khong Hu Chu + Lainnya) / Total.",
+         method = "100 * Islam / Total. The Total includes the two non-response residual columns, which stay in the denominator and in neither slot.",
          temporal_coverage = "2010", spatial_coverage = "Indonesia provinces (33, 2010 frame)",
-         quality_notes = paste("The Indonesian official frame has no no-religion category, so the no-religion slot is null (rendered, not invented) and the affiliation share is high everywhere (the residual is the non-response columns). The map-worthy signal is the religious COMPOSITION across provinces (Islam-dominant west; Protestant/Catholic Nusa Tenggara Timur, Papua, Papua Barat, Sulawesi Utara, Maluku; Hindu Bali), carried verbatim on each row's quality flag.", denom_note))
+         quality_notes = paste("Minority-share design (BD/PK/LK/NP family; conductor ruling 2026-07-12). The composition signal (Islam-dominant west; Protestant/Catholic Nusa Tenggara Timur, Papua, Papua Barat, Sulawesi Utara, Maluku; Hindu Bali) is what the two slots surface, and the full nine-column composition rides verbatim on each row's quality flag.", denom_note)),
+    list(indicator_id = "no_religion_percent", label = "Minority share %",
+         description = "The summed share of the six named non-reference religions (Kristen, Katolik, Hindu, Budha, Khong Hu Chu, Lainnya). Arithmetic on the published categories, never a no-religion measure; the official frame has no no-religion category.",
+         unit = "percent", denominator_indicator_id = "population_total",
+         method = "100 * (Kristen + Katolik + Hindu + Budha + Khong Hu Chu + Lainnya) / Total. The two non-response residuals stay in the denominator and in neither slot; the two shares need not sum to 100.",
+         temporal_coverage = "2010", spatial_coverage = "Indonesia provinces (33, 2010 frame)",
+         quality_notes = "The no_religion slot carries the named-minority share under the minority-share design; the field name is the legacy slot key and carries no no-religion semantics.")
   )
 }
 

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Indonesia Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712b" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Indonesia's product is census affiliation from the Badan Pusat Statistik
+    // (BPS) Sensus Penduduk 2010 (SP2010) table "Penduduk Menurut Wilayah dan
+    // Agama yang Dianut" (population by region and religion), a single 2010
+    // snapshot on the 33 provinces of the 2010 census frame. It measures each
+    // resident's reported religion, not practice, attendance, or membership.
+    //
+    // SLOT WIRING (ratified minority-share design, BD/PK/LK/NP family; conductor
+    // ruling 2026-07-12). The product emits religious_affiliation_percent as the
+    // reference-group Islam share (the largest published national category, held
+    // constant across every province) and no_religion_percent as the summed share
+    // of the six other named religions (Kristen, Katolik, Hindu, Budha, Khong Hu
+    // Chu, Lainnya) — the Minority share, arithmetic on the published categories,
+    // never a no-religion measure (the official frame has NO no-religion
+    // category). The two non-response columns (Tidak Terjawab = not answered;
+    // Tidak Ditanyakan = not asked) stay in the denominator and in neither slot;
+    // the two shares need not sum to 100. Place and density metrics are null (no
+    // governed place-of-worship snapshot) and are omitted. No change metric is
+    // offered: only the 2010 wave ships (SP2020 dropped the religion question,
+    // and the Dukcapil 2020+ civil-registration series is a separate construct,
+    // never merged).
+    //
+    // COMPOSITION IS THE SIGNAL, and the two slots now surface it directly:
+    // Islam runs from 9.1 percent (Nusa Tenggara Timur) and 13.4 percent (Bali)
+    // to 98.2 percent (Aceh); the full nine-column composition rides every row
+    // of the downloadable area summary verbatim (the quality_flag
+    // source_categories_verbatim field).
+    //
+    // SENSITIVITY: small-area religion maps are sensitive in Aceh, Papua, and
+    // Maluku. Province is the ruled grain (kabupaten/kota is data-available but
+    // boundary-blocked). All copy is descriptive and neutral, reporting
+    // published census population facts with no conflict commentary.
+    //
+    // BPS asserts copyright only, with no open-data reuse grant, on the SP2010
+    // source. Under BUILD-THEN-ASK the derived province summaries ship in staging
+    // with attribution to Badan Pusat Statistik while a BPS reuse-confirmation
+    // ask is on the project lead's plate; the licence stays needs-review.
+    // Boundaries are geoBoundaries IDN ADM1 (gbHumanitarian), CC BY 3.0 IGO,
+    // dissolved 34 to 33 (Kalimantan Utara united into Kalimantan Timur to
+    // reconstruct the 2010 province).
+    window.REGION_CONFIG = {
+      countryCode: "ID",
+      title: "Places of Worship | Indonesia Research Map",
+      // archipelago extent lon ~95E..141E, lat ~11S..6N; centre on the span and
+      // sit at z4 so Sumatra through Papua frame together beside the panels
+      center: [118, -2.3],
+      initialZoom: 4.1,
+      // lighter census fill so the many small islands stay distinct beneath the wash
+      censusFillOpacity: 0.5,
+      censusLevels: {
+        province: {
+          label: "Province (2010 frame)",
+          boundaries: "data/id_province_2019.geojson",
+          summary: "data/area_summary_province.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion from BPS Sensus Penduduk 2010, Penduduk Menurut Wilayah dan Agama yang Dianut, on the 33-province 2010 census frame; BPS asserts copyright only, derived province summaries used for research with attribution · Boundaries © geoBoundaries IDN ADM1 (gbHumanitarian), CC BY 3.0 IGO, source OCHA ROAP (COD-AB), Kalimantan Utara dissolved into Kalimantan Timur"
+        }
+      },
+      defaultLevel: "province",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2010,
+      // the two minority-share slots; place and density metrics are null (no
+      // governed place-of-worship snapshot) and only the 2010 wave ships (no
+      // change metric)
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Islam (%)",
+          note: "reference-group share: the share of each province's printed SP2010 census Total reporting Islam, the largest published national category, held constant across every province. The value is that group's share of the census frame, never a measure of affiliation versus non-affiliation. Islam runs from 9.1 percent (Nusa Tenggara Timur) and 13.4 percent (Bali) to 98.2 percent (Aceh)."
+        },
+        no_religion_percent: {
+          label: "Minority share (%)",
+          note: "the summed share of the six named non-reference religions (Kristen, Katolik, Hindu, Budha, Khong Hu Chu, Lainnya) — arithmetic on the published categories, never a no-religion measure; the official frame has no no-religion category. Protestant (Kristen) and Catholic (Katolik) affiliations are largest in several eastern provinces (Nusa Tenggara Timur 54.1 percent Catholic; Papua 65.5 percent Protestant), and Hindu affiliation concentrates in Bali (83.5 percent)."
+        }
+      },
+      popupDenominatorNote: "Percentages use each province's printed SP2010 census Total (all persons of all ages). Islam (%) is the reference-group share and Minority share (%) is the summed share of the six other named religions (Kristen, Katolik, Hindu, Budha, Khong Hu Chu, Lainnya) — arithmetic on the published categories under the minority-share design, never a no-religion measure; the official Indonesian frame has no no-religion category. The two non-response columns (Tidak Terjawab = not answered, Tidak Ditanyakan = not asked) stay in the denominator and in neither share; the two shares need not sum to 100. The nine-column composition rides every row of the downloadable area summary verbatim. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+      cityPresets: [
+        { label: "Jakarta", coords: [106.8272, -6.1751], zoom: 9 },
+        { label: "Surabaya", coords: [112.7521, -7.2575], zoom: 10 },
+        { label: "Bandung", coords: [107.6098, -6.9147], zoom: 10 },
+        { label: "Medan", coords: [98.6722, 3.5952], zoom: 10 },
+        { label: "Makassar", coords: [119.4327, -5.1477], zoom: 10 },
+        { label: "Denpasar", shortLabel: "Denpasar (Bali)", coords: [115.2126, -8.6705], zoom: 10 },
+        { label: "Banda Aceh", coords: [95.3222, 5.5483], zoom: 10 },
+        { label: "Jayapura", shortLabel: "Jayapura (Papua)", coords: [140.7181, -2.5330], zoom: 9 },
+        { label: "Kupang", shortLabel: "Kupang (NTT)", coords: [123.5877, -10.1772], zoom: 10 },
+        { label: "Manado", shortLabel: "Manado (Sulawesi Utara)", coords: [124.8455, 1.4748], zoom: 10 }
+      ],
+      geocode: { country: "id", biasLngLat: [118, -2.3] },
+      onboarding: {
+        title: "Indonesia research map",
+        intro: "Census religious-affiliation overlays for Indonesia's 33 provinces, a single 2010 snapshot from the Badan Pusat Statistik (BPS) Sensus Penduduk 2010, Penduduk Menurut Wilayah dan Agama yang Dianut. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+        bullets: [
+          "Provinces carry the census composition in the seven official religions printed verbatim by BPS: Islam, Kristen (Protestant), Katolik (Catholic), Hindu, Budha (Buddhist), Khong Hu Chu (Confucian), and Lainnya (other religion or belief). Nothing is merged, redistributed, or backcast.",
+          "The map shades the reference-group Islam share, or the Minority share — the summed share of the six other named religions (Kristen, Katolik, Hindu, Budha, Khong Hu Chu, Lainnya). Both are arithmetic on the published categories under the ratified minority-share design; neither is a no-religion measure. The two non-response columns (Tidak Terjawab, not answered; Tidak Ditanyakan, not asked) stay in the denominator and in neither share.",
+          "The substantive signal is the seven-religion composition, which rides every row of the downloadable area summary verbatim. It varies sharply across provinces: Islam is the largest reported religion across the western provinces (Aceh 98.2 percent, Jawa Barat 97.0 percent) and nationally (87.2 percent); Protestant and Catholic affiliations are largest in several eastern provinces (Nusa Tenggara Timur 54.1 percent Catholic, 88.9 percent Protestant and Catholic together; Papua 65.5 percent Protestant; Sulawesi Utara 63.6 percent Protestant); and Hindu affiliation concentrates in Bali (83.5 percent).",
+          "The official Indonesian frame has no no-religion category, and the Minority share is never a no-religion measure. The composition is the signal the two shares surface: Islam runs from 9.1 percent (Nusa Tenggara Timur) and 13.4 percent (Bali) to 98.2 percent (Aceh). Tap a province for its two shares; the verbatim seven-religion counts ride every row of the downloadable area summary (see About this map).",
+          "Only the 2010 wave ships. SP2020 dropped the religion question (pandemic short form), and the 2020+ Dukcapil civil-registration religion figures are a separate administrative construct that is never merged. The kabupaten/kota grain is data-available but boundary-blocked, and is recorded as a deeper route.",
+          "Open <strong>Show Census Data</strong> (top centre) for the geography and metric controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      // BPS asserts copyright only on the SP2010 source, with no open-data reuse
+      // grant; the derived province summaries ship in staging with attribution to
+      // BPS while a reuse-confirmation ask is on the project lead's plate.
+      // geoBoundaries IDN ADM1 (gbHumanitarian) is CC BY 3.0 IGO, source OCHA ROAP
+      // (COD-AB), dissolved 34 to 33.
+      censusSourceAttribution: 'Census religion &copy; <a href="https://sensus.bps.go.id/" target="_blank" rel="noopener">Badan Pusat Statistik</a>, Sensus Penduduk 2010, Penduduk Menurut Wilayah dan Agama yang Dianut &middot; BPS asserts copyright only with no open-data reuse grant; the derived province summaries are used for a research map with attribution to Badan Pusat Statistik while a reuse-confirmation ask is outstanding (staging) &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> IDN ADM1 (gbHumanitarian), source OCHA Regional Office for Asia and the Pacific (COD-AB), Creative Commons Attribution 3.0 IGO (CC BY 3.0 IGO)',
+      censusFlagNote: "* Percentages use each province's printed SP2010 census Total (all persons of all ages). Islam (%) is the reference-group share and Minority share (%) is the summed share of the six other named religions (Kristen, Katolik, Hindu, Budha, Khong Hu Chu, Lainnya) — arithmetic on the published categories under the ratified minority-share design, never a no-religion measure; the official Indonesian frame has no no-religion category. The two non-response columns (Tidak Terjawab = not answered, national 139,582; Tidak Ditanyakan = not asked, national 757,118) stay in the denominator and in neither share; the two shares need not sum to 100. The composition varies sharply across provinces (Islam-largest west; Protestant and Catholic largest in Nusa Tenggara Timur, Papua, Papua Barat, Sulawesi Utara, and Maluku; Hindu concentrated in Bali) and rides every row of the downloadable area summary verbatim. The verbatim BPS spelling is preserved (Budha, Khong Hu Chu, Lainnya) and no category is merged, redistributed, or backcast. Both margins close integer-exact to the national total 237,641,326. Only the 2010 wave ships: SP2020 dropped the religion question, and the 2020+ Dukcapil civil-registration series is a separate administrative construct, never merged. The kabupaten/kota grain is data-available but boundary-blocked and recorded as a deeper route. BPS asserts copyright only with no open-data reuse grant; the derived province summaries ship in staging with attribution to Badan Pusat Statistik while a reuse-confirmation ask is on the project lead's plate, and the page reverts in a single commit if BPS objects. Boundaries are geoBoundaries IDN ADM1 (gbHumanitarian), CC BY 3.0 IGO, source OCHA ROAP (COD-AB); the 34-province layer is dissolved to the 33-province 2010 census frame by uniting Kalimantan Utara (created 2012) into Kalimantan Timur."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712b"></script>
+</body>
+</html>

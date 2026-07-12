@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Indonesia map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Indonesia research map; every string traces to
+    // research/countries/id/route-probe.md, the manifest
+    // docs/manifests/id-census-religion-2010.json (construct notes, category
+    // frame, validation, and licence), or the live REGION_CONFIG in
+    // apps/regions/id/index.html. authors nothing.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "ID",
+      countryName: "Indonesia",
+      mapHref: "./",
+      intro: "Census religious-affiliation overlays for the 33 provinces of Indonesia, a single 2010 snapshot from the Badan Pusat Statistik (BPS) Sensus Penduduk 2010 (SP2010), Penduduk Menurut Wilayah dan Agama yang Dianut (population by region and religion). The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+      facts: {
+        waves: "One census: 2010 (SP2010)",
+        geographies: "Province (33 units) on the 2010 census frame, geoBoundaries IDN ADM1 (gbHumanitarian) dissolved 34 to 33",
+        metrics: "Islam % (reference-group share) and Minority share % (the six other named religions), under the ratified minority-share design; the full composition rides every area-summary row verbatim"
+      },
+      reading: [
+        "Provinces are shaded by the reference-group Islam share, or by the Minority share — the summed share of the six other named religions (Kristen, Katolik, Hindu, Budha, Khong Hu Chu, Lainnya) — on each province's printed SP2010 census Total, under the ratified minority-share design (the BD/PK/LK/NP family). Both shares are arithmetic on the published categories; neither is a no-religion measure. The two non-response columns (Tidak Terjawab = not answered; Tidak Ditanyakan = not asked) stay in the denominator and in neither share; the two shares need not sum to 100.",
+        "The substantive signal is the seven-religion composition, and it rides every row of the downloadable area summary verbatim (the source_categories_verbatim field). It varies sharply across provinces. Islam is the largest reported religion across the western provinces and nationally (national 87.2 percent; Aceh 98.2 percent, Jawa Barat 97.0 percent, Sumatera Barat 97.4 percent). Protestant (Kristen) and Catholic (Katolik) affiliations are largest in several eastern provinces: Nusa Tenggara Timur is 54.1 percent Catholic (88.9 percent Protestant and Catholic together), Papua is 65.5 percent Protestant (83.1 percent Protestant and Catholic together), Papua Barat is 53.8 percent Protestant, Sulawesi Utara is 63.6 percent Protestant, and Maluku is close to evenly split between Islam (50.6 percent) and Christian affiliations (48.2 percent Protestant and Catholic together). Hindu affiliation concentrates overwhelmingly in Bali (83.5 percent; 3,247,283 of 3,890,757). Buddhist (Budha) and Confucian (Khong Hu Chu) populations concentrate in Kepulauan Bangka Belitung, Kepulauan Riau, and DKI Jakarta. This composition lives in the source religion table and the build manifest's category frame; the headline affiliation metric does not carry it.",
+        "The official Indonesian religion frame has no no-religion category, and the Minority share is never a no-religion measure. Buddhist, Confucian, and other-religion or belief affiliations are counted within the seven official religions (Lainnya is other religion or belief), not treated as no religion. The composition is the signal the two shares surface: Islam runs from 9.1 percent (Nusa Tenggara Timur) and 13.4 percent (Bali) to 98.2 percent (Aceh).",
+        "Percentages use each province's printed census Total. The two non-response columns stay in the denominator and outside the affiliation numerator; the share therefore does not reach 100. The verbatim BPS spelling is preserved (Budha, not Buddha; Khong Hu Chu; Lainnya, other), and no category is merged, redistributed, or backcast. Two cells published as a dash (Maluku Tidak Terjawab; Papua Barat Lainnya) read as nil, as printed.",
+        "Only the 2010 wave ships, and no earlier or later wave is backcast. SP2020 dropped the religion question (a pandemic short-form census); there is therefore no comparable 2020 census religion table and no change metric. The 2020-and-later subnational religion figures published by Ditjen Dukcapil (Ministry of Home Affairs civil registration) are administrative registration, a different construct from census self-report, and are never merged into this product. SP2000 and earlier province religion appears in provincial BPS tables but no single national cross-province table was pinned; a deeper-history route is held.",
+        "The kabupaten/kota (regency and city) grain is data-available in SP2010 via the 33 province drill-downs (about 497 units) but boundary-blocked: the open licensed regency and city layers are the 2020 (519-unit) frame, and mapping across the 2010-to-2020 kabupaten splits would need an invented concordance, which the project forbids. Province is the ruled grain, held pending a licensed 2010-vintage boundary layer. Small-area religion figures are sensitive in Aceh, Papua, and Maluku; the province grain reduces very small cells while rendering the official record.",
+        "The record reconciles at both margins, fail-fast and verified against the printed control totals: every one of the 33 province rows sums over the nine published category columns to its printed Total, and every one of the nine category columns sums over the 33 provinces to its printed national control, with both grand totals closing integer-exact to the national total of 237,641,326 (Islam 207,176,162; Kristen 16,528,513; Katolik 6,907,873; Hindu 4,012,116; Budha 1,703,254; Khong Hu Chu 117,091; Lainnya 299,617; Tidak Terjawab 139,582; Tidak Ditanyakan 757,118). The build stops on any margin failure and never allocates, infers, rounds, imputes, or tunes a published value.",
+        "The display frame is the geoBoundaries IDN ADM1 (gbHumanitarian) layer, 34 provinces dissolved to the 33-province 2010 census frame: Kalimantan Utara (carved wholly out of Kalimantan Timur in 2012, after the 2010 census) is united back into Kalimantan Timur to reconstruct the single 2010 province, a complete-unit aggregation and never an invented concordance. The remaining provinces join one-to-one on name after a three-name concordance (boundary Aceh to census Nanggroe Aceh Darussalam; Dki Jakarta to DKI Jakarta; Daerah Istimewa Yogyakarta to DI Yogyakarta). The extent spans lon about 95 to 141 East and lat about 6 North to 11 South, far from the antimeridian; no dateline handling is needed."
+      ],
+      sources: [
+        {
+          name: "Indonesia SP2010 (Sensus Penduduk 2010): Penduduk Menurut Wilayah dan Agama yang Dianut (population by region and religion)",
+          href: "https://sensus.bps.go.id/topik/tabular/sp2010/12/0/0",
+          construct: "Census religious affiliation by province, all persons of all ages; verbatim ten-column frame (Islam, Kristen, Katolik, Hindu, Budha, Khong Hu Chu, Lainnya, Tidak Terjawab, Tidak Ditanyakan, Total). Integer full-count. Both margins close integer-exact: every province row sums over the nine category columns to its printed Total, and every category column sums over the 33 provinces to its printed national control; national Total 237,641,326. Two dash cells (Maluku Tidak Terjawab; Papua Barat Lainnya) read as nil, as printed",
+          years: "2010",
+          licence: "No open-data reuse licence is stated on the BPS Sensus Penduduk 2010 source; the sensus.bps.go.id page footer asserts copyright only (a copyright assertion, not a reuse grant), and the main bps.go.id term-of-use page sits behind a human-verification challenge that this build did not complete (a recorded gap). The derived province summaries ship with attribution to Badan Pusat Statistik under the BUILD-THEN-ASK ruling while a BPS reuse-confirmation ask is on the project lead's plate; the licence is recorded as needs-review, and the page reverts in a single commit if BPS objects"
+        },
+        {
+          name: "geoBoundaries IDN ADM1 (gbHumanitarian): 34 provinces",
+          href: "https://www.geoboundaries.org/api/current/gbHumanitarian/IDN/ADM1/",
+          construct: "Boundary geometry (34 ADM1 provinces), boundaryYearRepresented 2019, boundary source OCHA Regional Office for Asia and the Pacific (COD-AB, BPS lineage); dissolved to the 33-province 2010 census frame by uniting Kalimantan Utara into Kalimantan Timur, then joined one-to-one on area_code after a three-name concordance, and simplified with mapshaper weighted keep-shapes. The extent is far from the antimeridian; no dateline handling is needed",
+          years: "2019 (represented year)",
+          licence: "Creative Commons Attribution 3.0 IGO (CC BY 3.0 IGO), per the release metadata (pinned commit 9469f09); attribution geoBoundaries (gbHumanitarian), boundary source OCHA Regional Office for Asia and the Pacific (COD-AB)"
+        }
+      ],
+      accessData: {
+        note: "The committed products are the derived area summary (the reference-group Islam share, the named-minority share, and the all-persons population total by province, with the verbatim composition on every row) and a simplified 33-province boundary; the raw SP2010 source HTML and the ADM1 source GeoJSON are not committed. The composition rides every row of the area summary verbatim (the source_categories_verbatim field) and is documented in the manifest's category frame; the popup shows the two shares. The official frame has no no-religion category, the Minority share carries no no-religion semantics, and place counts and density metrics are null because no governed place-of-worship snapshot ships.",
+        sourceOfRecord: "Badan Pusat Statistik, <a href=\"https://sensus.bps.go.id/topik/tabular/sp2010/12/0/0\" target=\"_blank\" rel=\"noopener\">source of record</a> for the SP2010 Penduduk Menurut Wilayah dan Agama yang Dianut table; boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbHumanitarian/IDN/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries IDN ADM1 (gbHumanitarian)</a>.",
+        tables: "The SP2010 Penduduk Menurut Wilayah dan Agama yang Dianut table is the source of record for the shipped counts. Reconciliation passes at both margins (national closure 237,641,326); every province row and every religion column sums to the printed national total. The area-summary religious_affiliation_percent field carries the reference-group Islam share over each province's own census Total, and the no_religion_percent field carries the named-minority share (the six other religions) under the minority-share design — the field name is the legacy slot key and carries no no-religion semantics. The two non-response columns (Tidak Terjawab, Tidak Ditanyakan) stay in the denominator and in neither share. The composition rides every row verbatim.",
+        licence: "No open-data reuse licence is stated on the BPS Sensus Penduduk 2010 source: the sensus.bps.go.id page footer asserts copyright only, a copyright assertion rather than a reuse grant, and the main bps.go.id term-of-use page sits behind a human-verification challenge that this build did not complete (a recorded gap). Under the BUILD-THEN-ASK ruling the derived province summaries ship with attribution to Badan Pusat Statistik while a courtesy BPS reuse-confirmation ask is on the project lead's plate; the licence is recorded as needs-review, and the page reverts in a single commit if BPS objects. The geoBoundaries IDN ADM1 (gbHumanitarian) boundary is Creative Commons Attribution 3.0 IGO (CC BY 3.0 IGO) per its release metadata, boundary source OCHA Regional Office for Asia and the Pacific (COD-AB).",
+        script: "scripts/build_id_area_summary.R",
+        manifests: [
+          { label: "id-census-religion-2010", href: "docs/manifests/id-census-religion-2010.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Indonesia map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
