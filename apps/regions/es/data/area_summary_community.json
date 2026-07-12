@@ -1,10 +1,10 @@
 {
   "schema_version": "area-summary.v2",
-  "generated_at": "2026-07-12T08:06:37Z",
+  "generated_at": "2026-07-12T09:45:56Z",
   "generated_by": "scripts/build_es_area_summary.R",
   "country_code": "ES",
   "data_status": "survey_religion_live",
-  "data_status_note": "CIS Barómetro Abril 2025 (Estudio 3505) survey affiliation-and-practice estimates for 19 autonomous communities: religious self-definition and mass attendance, both weighted (PESOCCAA) percentages with 95% intervals, no counts. Survey dataNoun, never blended with census affiliation (Spain's census has no religion question). Small-cell rule applied on unweighted respondent n; Ceuta and Melilla and other small bases wash. Ships STAGED (no page, no hub).",
+  "data_status_note": "CIS Barómetro Abril 2025 (Estudio 3505) survey religious SELF-DEFINITION estimates for 19 autonomous communities: weighted (PESOCCAA) percentages with 95% intervals, no counts. Survey dataNoun, never blended with census affiliation (Spain's census has no religion question). This file carries the self-definition construct ONLY; its small-cell tokens read the full-community respondent base (PI ruling 2026-07-12: unweighted survey respondent n is the wash denominator, stated on the map surfaces), washing exactly 5 communities (Aragón, Asturias, La Rioja, Ceuta, Melilla). The mass-attendance construct ships separately in area_summary_attendance_community.json (data-only). Ships STAGED (no page, no hub).",
   "boundary_set": {
     "boundary_set_id": "es-ccaa-cis-3505",
     "country_code": "ES",
@@ -76,28 +76,6 @@
       "temporal_coverage": "2025 (single wave, Estudio 3505)",
       "spatial_coverage": "19 autonomous communities and autonomous cities (17 communities + Ceuta + Melilla) on geoBoundaries ESP ADM1, keyed by area_unit_id.",
       "quality_notes": "Survey estimate with uncertainty; complements religious_affiliation_percent (the two sides of the self-definition item, with N.C. as residual)."
-    },
-    {
-      "indicator_id": "mass_attendance_monthly_or_more_percent",
-      "label": "Mass attendance at least monthly (%) - survey estimate",
-      "description": "Weighted share attending mass or other religious services at least two or three times a month (PRACTICARELIG6 codes 4+5+6), among those who define as Catholic or believer of another religion.",
-      "unit": "percent",
-      "denominator_indicator_id": "religious_affiliation_percent",
-      "method": "Weighted (PESOCCAA) share of PRACTICARELIG6 in {4,5,6} over the asked subset (RELIGION in {1,2,3}, i.e. PRACTICARELIG6 != 0). 95% Wald interval on the Kish effective n of the asked subset. The asked subset is a filtered subgroup, materially smaller than the community sample, so most communities fall under the small-cell denominator threshold. The full seven-category frequency distribution is recorded per community in the manifest.",
-      "temporal_coverage": "2025 (single wave, Estudio 3505)",
-      "spatial_coverage": "19 autonomous communities and autonomous cities (17 communities + Ceuta + Melilla) on geoBoundaries ESP ADM1, keyed by area_unit_id.",
-      "quality_notes": "Mass-attendance metric, a distinct construct from self-definition. Denominator is the self-defined religious subset; excludes those not asked (N.P.)."
-    },
-    {
-      "indicator_id": "mass_attendance_weekly_or_more_percent",
-      "label": "Mass attendance weekly or more (%) - survey estimate",
-      "description": "Weighted share attending mass or other religious services every Sunday/feast day or more often (PRACTICARELIG6 codes 5+6), among those who define as Catholic or believer of another religion.",
-      "unit": "percent",
-      "denominator_indicator_id": "religious_affiliation_percent",
-      "method": "Weighted (PESOCCAA) share of PRACTICARELIG6 in {5,6} over the asked subset; 95% Wald interval on the Kish effective n. The canonical practising-attendance cut, carried alongside the at-least-monthly headline.",
-      "temporal_coverage": "2025 (single wave, Estudio 3505)",
-      "spatial_coverage": "19 autonomous communities and autonomous cities (17 communities + Ceuta + Melilla) on geoBoundaries ESP ADM1, keyed by area_unit_id.",
-      "quality_notes": "Same asked-subset base as mass_attendance_monthly_or_more_percent; smaller numerator, so the small-cell numerator marker bites in more communities."
     }
   ],
   "visual_layers": [
@@ -140,26 +118,6 @@
       "uncertainty_display": "quality_flag",
       "default_visibility": false,
       "notes": "Complements the affiliation layer; N.C. is the residual to 100."
-    },
-    {
-      "visual_layer_id": "es-ccaa-mass-attendance-monthly-survey",
-      "label": "Mass attendance at least monthly (survey)",
-      "description": "Weighted survey share attending mass at least monthly among self-defined Catholics and believers of another religion, by autonomous community, 2025.",
-      "layer_type": "choropleth",
-      "indicator_ids": [
-        "mass_attendance_monthly_or_more_percent"
-      ],
-      "geometry_unit_type": "area_unit",
-      "legend": {
-        "unit": "percent",
-        "denominator": "self-defined Catholic or other-believer subset (PESOCCAA-weighted)"
-      },
-      "colour_scale": "sequential",
-      "time_control": "none",
-      "aggregation_rule": "weighted community survey estimate on the asked subset",
-      "uncertainty_display": "quality_flag",
-      "default_visibility": false,
-      "notes": "Filtered-subgroup base; most communities wash under the small-cell denominator threshold. Distinct construct from self-definition."
     }
   ],
   "rows": [
@@ -172,13 +130,8 @@
       "area_name": "Andalucía",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=671 (weighted 671); mass-attendance asked subset n=422. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 63,
       "no_religion_count": null,
-      "no_religion_percent": 35.6,
-      "mass_attendance_monthly_or_more_percent": 32.7,
-      "mass_attendance_weekly_or_more_percent": 20.1,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -189,7 +142,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_01_Andalucia;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=671;self_definition_neff=538.2;affiliation_pct=63_ci95=59-67.1;no_religion_pct=35.6_ci95=31.6-39.7;mass_attendance_base_n=422;mass_attendance_neff=337.7;monthly_or_more_pct=32.7_ci95=27.7-37.7;weekly_or_more_pct=20.1_ci95=15.8-24.3;ficha_community_maxerror_pct=3.9;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=671 (weighted 671). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 63,
+      "no_religion_percent": 35.6,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_01_Andalucia;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=671;self_definition_neff=538.2;affiliation_pct=63_ci95=59-67.1;no_religion_pct=35.6_ci95=31.6-39.7;ficha_community_maxerror_pct=3.9;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",
@@ -232,13 +188,8 @@
       "area_name": "Aragón",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=98 (weighted 98); mass-attendance asked subset n=49. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 51.9,
       "no_religion_count": null,
-      "no_religion_percent": 44.2,
-      "mass_attendance_monthly_or_more_percent": 30.2,
-      "mass_attendance_weekly_or_more_percent": 21.7,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -249,7 +200,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_02_Aragon;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=98;self_definition_neff=79.4;affiliation_pct=51.9_ci95=40.9-62.9;no_religion_pct=44.2_ci95=33.3-55.1;mass_attendance_base_n=49;mass_attendance_neff=36.6;monthly_or_more_pct=30.2_ci95=15.4-45.1;weekly_or_more_pct=21.7_ci95=8.4-35;ficha_community_maxerror_pct=10.1;small_denominator_under_100:self_definition_base_n=98;small_denominator_under_100:mass_attendance_base_n=49;small_cell_under_10:mass_attendance:weekly_or_more_n=8;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=98 (weighted 98). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 51.9,
+      "no_religion_percent": 44.2,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_02_Aragon;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=98;self_definition_neff=79.4;affiliation_pct=51.9_ci95=40.9-62.9;no_religion_pct=44.2_ci95=33.3-55.1;ficha_community_maxerror_pct=10.1;small_denominator_under_100:self_definition_base_n=98;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",
@@ -292,13 +246,8 @@
       "area_name": "Asturias (Principado de)",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=95 (weighted 95); mass-attendance asked subset n=50. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 57.6,
       "no_religion_count": null,
-      "no_religion_percent": 40.2,
-      "mass_attendance_monthly_or_more_percent": 25.2,
-      "mass_attendance_weekly_or_more_percent": 7.8,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -309,7 +258,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_03_Asturias_Principado_de_;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=95;self_definition_neff=72.2;affiliation_pct=57.6_ci95=46.2-69;no_religion_pct=40.2_ci95=28.9-51.5;mass_attendance_base_n=50;mass_attendance_neff=37.4;monthly_or_more_pct=25.2_ci95=11.2-39.1;weekly_or_more_pct=7.8_ci95=0-16.5;ficha_community_maxerror_pct=10.2;small_denominator_under_100:self_definition_base_n=95;small_denominator_under_100:mass_attendance_base_n=50;small_cell_under_10:mass_attendance:weekly_or_more_n=4;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=95 (weighted 95). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 57.6,
+      "no_religion_percent": 40.2,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_03_Asturias_Principado_de_;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=95;self_definition_neff=72.2;affiliation_pct=57.6_ci95=46.2-69;no_religion_pct=40.2_ci95=28.9-51.5;ficha_community_maxerror_pct=10.2;small_denominator_under_100:self_definition_base_n=95;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",
@@ -352,13 +304,8 @@
       "area_name": "Balears (Illes)",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=102 (weighted 102); mass-attendance asked subset n=49. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 48,
       "no_religion_count": null,
-      "no_religion_percent": 50.2,
-      "mass_attendance_monthly_or_more_percent": 31.7,
-      "mass_attendance_weekly_or_more_percent": 21.1,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -369,7 +316,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_04_Balears_Illes_;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=102;self_definition_neff=94.5;affiliation_pct=48_ci95=37.9-58.1;no_religion_pct=50.2_ci95=40.1-60.3;mass_attendance_base_n=49;mass_attendance_neff=46.1;monthly_or_more_pct=31.7_ci95=18.2-45.1;weekly_or_more_pct=21.1_ci95=9.3-32.9;ficha_community_maxerror_pct=9.9;small_denominator_under_100:mass_attendance_base_n=49;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=102 (weighted 102). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 48,
+      "no_religion_percent": 50.2,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_04_Balears_Illes_;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=102;self_definition_neff=94.5;affiliation_pct=48_ci95=37.9-58.1;no_religion_pct=50.2_ci95=40.1-60.3;ficha_community_maxerror_pct=9.9;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",
@@ -412,13 +362,8 @@
       "area_name": "Canarias",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=171 (weighted 171); mass-attendance asked subset n=87. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 50.7,
       "no_religion_count": null,
-      "no_religion_percent": 47.8,
-      "mass_attendance_monthly_or_more_percent": 23.6,
-      "mass_attendance_weekly_or_more_percent": 12.9,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -429,7 +374,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_05_Canarias;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=171;self_definition_neff=130.5;affiliation_pct=50.7_ci95=42.1-59.3;no_religion_pct=47.8_ci95=39.2-56.3;mass_attendance_base_n=87;mass_attendance_neff=66.7;monthly_or_more_pct=23.6_ci95=13.4-33.7;weekly_or_more_pct=12.9_ci95=4.8-20.9;ficha_community_maxerror_pct=7.6;small_denominator_under_100:mass_attendance_base_n=87;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=171 (weighted 171). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 50.7,
+      "no_religion_percent": 47.8,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_05_Canarias;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=171;self_definition_neff=130.5;affiliation_pct=50.7_ci95=42.1-59.3;no_religion_pct=47.8_ci95=39.2-56.3;ficha_community_maxerror_pct=7.6;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",
@@ -472,13 +420,8 @@
       "area_name": "Cantabria",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=109 (weighted 109); mass-attendance asked subset n=59. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 52.7,
       "no_religion_count": null,
-      "no_religion_percent": 45.3,
-      "mass_attendance_monthly_or_more_percent": 26.9,
-      "mass_attendance_weekly_or_more_percent": 16.6,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -489,7 +432,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_06_Cantabria;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=109;self_definition_neff=99.8;affiliation_pct=52.7_ci95=42.9-62.5;no_religion_pct=45.3_ci95=35.5-55.1;mass_attendance_base_n=59;mass_attendance_neff=54.5;monthly_or_more_pct=26.9_ci95=15.2-38.7;weekly_or_more_pct=16.6_ci95=6.7-26.5;ficha_community_maxerror_pct=9.6;small_denominator_under_100:mass_attendance_base_n=59;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=109 (weighted 109). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 52.7,
+      "no_religion_percent": 45.3,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_06_Cantabria;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=109;self_definition_neff=99.8;affiliation_pct=52.7_ci95=42.9-62.5;no_religion_pct=45.3_ci95=35.5-55.1;ficha_community_maxerror_pct=9.6;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",
@@ -532,13 +478,8 @@
       "area_name": "Castilla-La Mancha",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=162 (weighted 162); mass-attendance asked subset n=101. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 61.6,
       "no_religion_count": null,
-      "no_religion_percent": 36.3,
-      "mass_attendance_monthly_or_more_percent": 33,
-      "mass_attendance_weekly_or_more_percent": 26.4,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -549,7 +490,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_07_Castilla_La_Mancha;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=162;self_definition_neff=141.9;affiliation_pct=61.6_ci95=53.6-69.6;no_religion_pct=36.3_ci95=28.4-44.2;mass_attendance_base_n=101;mass_attendance_neff=88.4;monthly_or_more_pct=33_ci95=23.2-42.8;weekly_or_more_pct=26.4_ci95=17.2-35.6;ficha_community_maxerror_pct=7.9;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=162 (weighted 162). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 61.6,
+      "no_religion_percent": 36.3,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_07_Castilla_La_Mancha;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=162;self_definition_neff=141.9;affiliation_pct=61.6_ci95=53.6-69.6;no_religion_pct=36.3_ci95=28.4-44.2;ficha_community_maxerror_pct=7.9;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",
@@ -592,13 +536,8 @@
       "area_name": "Castilla y León",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=202 (weighted 202); mass-attendance asked subset n=127. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 63.6,
       "no_religion_count": null,
-      "no_religion_percent": 36,
-      "mass_attendance_monthly_or_more_percent": 30.4,
-      "mass_attendance_weekly_or_more_percent": 26.3,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -609,7 +548,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_08_Castilla_y_Leon;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=202;self_definition_neff=149.3;affiliation_pct=63.6_ci95=55.9-71.4;no_religion_pct=36_ci95=28.3-43.7;mass_attendance_base_n=127;mass_attendance_neff=96.1;monthly_or_more_pct=30.4_ci95=21.2-39.6;weekly_or_more_pct=26.3_ci95=17.5-35.1;ficha_community_maxerror_pct=7;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=202 (weighted 202). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 63.6,
+      "no_religion_percent": 36,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_08_Castilla_y_Leon;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=202;self_definition_neff=149.3;affiliation_pct=63.6_ci95=55.9-71.4;no_religion_pct=36_ci95=28.3-43.7;ficha_community_maxerror_pct=7;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",
@@ -652,13 +594,8 @@
       "area_name": "Cataluña",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=573 (weighted 573); mass-attendance asked subset n=252. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 44.7,
       "no_religion_count": null,
-      "no_religion_percent": 54,
-      "mass_attendance_monthly_or_more_percent": 22.9,
-      "mass_attendance_weekly_or_more_percent": 17.2,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -669,7 +606,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_09_Cataluna;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=573;self_definition_neff=472.8;affiliation_pct=44.7_ci95=40.2-49.2;no_religion_pct=54_ci95=49.6-58.5;mass_attendance_base_n=252;mass_attendance_neff=214.7;monthly_or_more_pct=22.9_ci95=17.3-28.5;weekly_or_more_pct=17.2_ci95=12.2-22.3;ficha_community_maxerror_pct=4.2;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=573 (weighted 573). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 44.7,
+      "no_religion_percent": 54,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_09_Cataluna;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=573;self_definition_neff=472.8;affiliation_pct=44.7_ci95=40.2-49.2;no_religion_pct=54_ci95=49.6-58.5;ficha_community_maxerror_pct=4.2;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",
@@ -712,13 +652,8 @@
       "area_name": "Comunitat Valenciana",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=407 (weighted 407); mass-attendance asked subset n=206. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 52,
       "no_religion_count": null,
-      "no_religion_percent": 46.6,
-      "mass_attendance_monthly_or_more_percent": 25.1,
-      "mass_attendance_weekly_or_more_percent": 15.6,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -729,7 +664,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_10_Comunitat_Valenciana;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=407;self_definition_neff=368.8;affiliation_pct=52_ci95=46.9-57.1;no_religion_pct=46.6_ci95=41.5-51.7;mass_attendance_base_n=206;mass_attendance_neff=185;monthly_or_more_pct=25.1_ci95=18.9-31.4;weekly_or_more_pct=15.6_ci95=10.4-20.9;ficha_community_maxerror_pct=5;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=407 (weighted 407). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 52,
+      "no_religion_percent": 46.6,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_10_Comunitat_Valenciana;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=407;self_definition_neff=368.8;affiliation_pct=52_ci95=46.9-57.1;no_religion_pct=46.6_ci95=41.5-51.7;ficha_community_maxerror_pct=5;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",
@@ -772,13 +710,8 @@
       "area_name": "Extremadura",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=108 (weighted 108); mass-attendance asked subset n=79. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 76,
       "no_religion_count": null,
-      "no_religion_percent": 24,
-      "mass_attendance_monthly_or_more_percent": 40.4,
-      "mass_attendance_weekly_or_more_percent": 25.5,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -789,7 +722,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_11_Extremadura;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=108;self_definition_neff=83.2;affiliation_pct=76_ci95=66.9-85.2;no_religion_pct=24_ci95=14.8-33.1;mass_attendance_base_n=79;mass_attendance_neff=58.1;monthly_or_more_pct=40.4_ci95=27.8-53;weekly_or_more_pct=25.5_ci95=14.3-36.7;ficha_community_maxerror_pct=9.6;small_denominator_under_100:mass_attendance_base_n=79;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=108 (weighted 108). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 76,
+      "no_religion_percent": 24,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_11_Extremadura;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=108;self_definition_neff=83.2;affiliation_pct=76_ci95=66.9-85.2;no_religion_pct=24_ci95=14.8-33.1;ficha_community_maxerror_pct=9.6;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",
@@ -832,13 +768,8 @@
       "area_name": "Galicia",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=237 (weighted 237); mass-attendance asked subset n=124. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 59.2,
       "no_religion_count": null,
-      "no_religion_percent": 40.4,
-      "mass_attendance_monthly_or_more_percent": 19.9,
-      "mass_attendance_weekly_or_more_percent": 17.2,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -849,7 +780,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_12_Galicia;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=237;self_definition_neff=135.3;affiliation_pct=59.2_ci95=50.9-67.5;no_religion_pct=40.4_ci95=32.2-48.7;mass_attendance_base_n=124;mass_attendance_neff=61.1;monthly_or_more_pct=19.9_ci95=9.9-29.9;weekly_or_more_pct=17.2_ci95=7.8-26.7;ficha_community_maxerror_pct=6.5;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=237 (weighted 237). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 59.2,
+      "no_religion_percent": 40.4,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_12_Galicia;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=237;self_definition_neff=135.3;affiliation_pct=59.2_ci95=50.9-67.5;no_religion_pct=40.4_ci95=32.2-48.7;ficha_community_maxerror_pct=6.5;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",
@@ -892,13 +826,8 @@
       "area_name": "Madrid (Comunidad de)",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=543 (weighted 543); mass-attendance asked subset n=287. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 54.1,
       "no_religion_count": null,
-      "no_religion_percent": 44.8,
-      "mass_attendance_monthly_or_more_percent": 38.3,
-      "mass_attendance_weekly_or_more_percent": 26.2,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -909,7 +838,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_13_Madrid_Comunidad_de_;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=543;self_definition_neff=480.5;affiliation_pct=54.1_ci95=49.6-58.5;no_religion_pct=44.8_ci95=40.4-49.3;mass_attendance_base_n=287;mass_attendance_neff=256.3;monthly_or_more_pct=38.3_ci95=32.4-44.3;weekly_or_more_pct=26.2_ci95=20.8-31.6;ficha_community_maxerror_pct=4.3;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=543 (weighted 543). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 54.1,
+      "no_religion_percent": 44.8,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_13_Madrid_Comunidad_de_;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=543;self_definition_neff=480.5;affiliation_pct=54.1_ci95=49.6-58.5;no_religion_pct=44.8_ci95=40.4-49.3;ficha_community_maxerror_pct=4.3;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",
@@ -952,13 +884,8 @@
       "area_name": "Murcia (Región de)",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=117 (weighted 117); mass-attendance asked subset n=72. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 58,
       "no_religion_count": null,
-      "no_religion_percent": 41.3,
-      "mass_attendance_monthly_or_more_percent": 36.6,
-      "mass_attendance_weekly_or_more_percent": 29.3,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -969,7 +896,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_14_Murcia_Region_de_;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=117;self_definition_neff=106.5;affiliation_pct=58_ci95=48.6-67.4;no_religion_pct=41.3_ci95=31.9-50.6;mass_attendance_base_n=72;mass_attendance_neff=66.5;monthly_or_more_pct=36.6_ci95=25-48.2;weekly_or_more_pct=29.3_ci95=18.4-40.2;ficha_community_maxerror_pct=9.2;small_denominator_under_100:mass_attendance_base_n=72;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=117 (weighted 117). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 58,
+      "no_religion_percent": 41.3,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_14_Murcia_Region_de_;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=117;self_definition_neff=106.5;affiliation_pct=58_ci95=48.6-67.4;no_religion_pct=41.3_ci95=31.9-50.6;ficha_community_maxerror_pct=9.2;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",
@@ -1012,13 +942,8 @@
       "area_name": "Navarra (Comunidad Foral de)",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=108 (weighted 108); mass-attendance asked subset n=55. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 48.7,
       "no_religion_count": null,
-      "no_religion_percent": 51.3,
-      "mass_attendance_monthly_or_more_percent": 35.4,
-      "mass_attendance_weekly_or_more_percent": 22.3,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1029,7 +954,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_15_Navarra_Comunidad_Foral_de_;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=108;self_definition_neff=90.6;affiliation_pct=48.7_ci95=38.4-59;no_religion_pct=51.3_ci95=41-61.6;mass_attendance_base_n=55;mass_attendance_neff=51.9;monthly_or_more_pct=35.4_ci95=22.4-48.5;weekly_or_more_pct=22.3_ci95=10.9-33.6;ficha_community_maxerror_pct=9.6;small_denominator_under_100:mass_attendance_base_n=55;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=108 (weighted 108). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 48.7,
+      "no_religion_percent": 51.3,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_15_Navarra_Comunidad_Foral_de_;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=108;self_definition_neff=90.6;affiliation_pct=48.7_ci95=38.4-59;no_religion_pct=51.3_ci95=41-61.6;ficha_community_maxerror_pct=9.6;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",
@@ -1072,13 +1000,8 @@
       "area_name": "País Vasco",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=178 (weighted 178); mass-attendance asked subset n=85. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 47.1,
       "no_religion_count": null,
-      "no_religion_percent": 50.6,
-      "mass_attendance_monthly_or_more_percent": 25,
-      "mass_attendance_weekly_or_more_percent": 12.7,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1089,7 +1012,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_16_Pais_Vasco;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=178;self_definition_neff=139.8;affiliation_pct=47.1_ci95=38.8-55.4;no_religion_pct=50.6_ci95=42.4-58.9;mass_attendance_base_n=85;mass_attendance_neff=79.3;monthly_or_more_pct=25_ci95=15.5-34.5;weekly_or_more_pct=12.7_ci95=5.4-20;ficha_community_maxerror_pct=7.5;small_denominator_under_100:mass_attendance_base_n=85;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=178 (weighted 178). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 47.1,
+      "no_religion_percent": 50.6,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_16_Pais_Vasco;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=178;self_definition_neff=139.8;affiliation_pct=47.1_ci95=38.8-55.4;no_religion_pct=50.6_ci95=42.4-58.9;ficha_community_maxerror_pct=7.5;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",
@@ -1132,13 +1058,8 @@
       "area_name": "Rioja (La)",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=89 (weighted 89); mass-attendance asked subset n=47. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 54,
       "no_religion_count": null,
-      "no_religion_percent": 44.7,
-      "mass_attendance_monthly_or_more_percent": 42.9,
-      "mass_attendance_weekly_or_more_percent": 33.9,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1149,7 +1070,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_17_Rioja_La_;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=89;self_definition_neff=69.9;affiliation_pct=54_ci95=42.3-65.7;no_religion_pct=44.7_ci95=33.1-56.4;mass_attendance_base_n=47;mass_attendance_neff=35.6;monthly_or_more_pct=42.9_ci95=26.7-59.2;weekly_or_more_pct=33.9_ci95=18.4-49.5;ficha_community_maxerror_pct=10.6;small_denominator_under_100:self_definition_base_n=89;small_denominator_under_100:mass_attendance_base_n=47;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=89 (weighted 89). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 54,
+      "no_religion_percent": 44.7,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_17_Rioja_La_;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=89;self_definition_neff=69.9;affiliation_pct=54_ci95=42.3-65.7;no_religion_pct=44.7_ci95=33.1-56.4;ficha_community_maxerror_pct=10.6;small_denominator_under_100:self_definition_base_n=89;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",
@@ -1192,13 +1116,8 @@
       "area_name": "Ceuta (Ciudad Autónoma de)",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=19 (weighted 19); mass-attendance asked subset n=14. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 72,
       "no_religion_count": null,
-      "no_religion_percent": 28,
-      "mass_attendance_monthly_or_more_percent": 36.3,
-      "mass_attendance_weekly_or_more_percent": 21.2,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1209,7 +1128,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_18_Ceuta_Ciudad_Autonoma_de_;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=19;self_definition_neff=18.4;affiliation_pct=72_ci95=51.6-92.5;no_religion_pct=28_ci95=7.5-48.4;mass_attendance_base_n=14;mass_attendance_neff=13.6;monthly_or_more_pct=36.3_ci95=10.7-61.8;weekly_or_more_pct=21.2_ci95=0-43;ficha_community_maxerror_pct=22.9;small_denominator_under_100:self_definition_base_n=19;small_cell_under_10:self_definition:no_religion_n=5;small_denominator_under_100:mass_attendance_base_n=14;small_cell_under_10:mass_attendance:monthly_or_more_n=5;small_cell_under_10:mass_attendance:weekly_or_more_n=3;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=19 (weighted 19). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 72,
+      "no_religion_percent": 28,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_18_Ceuta_Ciudad_Autonoma_de_;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=19;self_definition_neff=18.4;affiliation_pct=72_ci95=51.6-92.5;no_religion_pct=28_ci95=7.5-48.4;ficha_community_maxerror_pct=22.9;small_denominator_under_100:self_definition_base_n=19;small_cell_under_10:self_definition:no_religion_n=5;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",
@@ -1252,13 +1174,8 @@
       "area_name": "Melilla (Ciudad Autónoma de)",
       "year": 2025,
       "population_total": null,
-      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=19 (weighted 19); mass-attendance asked subset n=14. Survey estimates as weighted percentages with 95% intervals, no counts published.",
       "religious_affiliation_count": null,
-      "religious_affiliation_percent": 73.2,
       "no_religion_count": null,
-      "no_religion_percent": 21.1,
-      "mass_attendance_monthly_or_more_percent": 42.3,
-      "mass_attendance_weekly_or_more_percent": 22.2,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1269,7 +1186,10 @@
         "cis-3505-barometro-abril-2025-microdatos",
         "geoboundaries-esp-adm1-cc-by-4-0"
       ],
-      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;ccaa_code_19_Melilla_Ciudad_Autonoma_de_;metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0;self_definition_base_n=19;self_definition_neff=18.9;affiliation_pct=73.2_ci95=53.3-93.2;no_religion_pct=21.1_ci95=2.7-39.5;mass_attendance_base_n=14;mass_attendance_neff=13.9;monthly_or_more_pct=42.3_ci95=16.3-68.2;weekly_or_more_pct=22.2_ci95=0.3-44;ficha_community_maxerror_pct=22.9;small_denominator_under_100:self_definition_base_n=19;small_cell_under_10:self_definition:no_religion_n=4;small_denominator_under_100:mass_attendance_base_n=14;small_cell_under_10:mass_attendance:monthly_or_more_n=6;small_cell_under_10:mass_attendance:weekly_or_more_n=3;licence_open_datos_gob_es_federation_grant_with_cis_citation",
+      "population_total_basis": "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community estimation weight PESOCCAA. Community realised n=19 (weighted 19). Survey estimates as weighted percentages with 95% intervals, no counts published.",
+      "religious_affiliation_percent": 73.2,
+      "no_religion_percent": 21.1,
+      "quality_flag": "survey_construct_cis_barometro_estudio_3505_abril_2025;own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question;weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped;design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight;uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried;small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12;ccaa_code_19_Melilla_Ciudad_Autonoma_de_;construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual;self_definition_base_n=19;self_definition_neff=18.9;affiliation_pct=73.2_ci95=53.3-93.2;no_religion_pct=21.1_ci95=2.7-39.5;ficha_community_maxerror_pct=22.9;small_denominator_under_100:self_definition_base_n=19;small_cell_under_10:self_definition:no_religion_n=4;licence_open_datos_gob_es_federation_grant_with_cis_citation",
       "composition": [
         {
           "label_verbatim": "Católico/a practicante",

@@ -10,8 +10,18 @@
 #       codigo3505.pdf (codebook), FT3505.pdf (ficha tecnica), cues3505.pdf.
 #   - esp_adm1.geojson : geoBoundaries ESP ADM1 (19 features, CC BY 4.0; IGN/CNIG
 #       source) for the autonomous-community boundary keyed by area_unit_id.
-# outputs:
-#   - apps/regions/es/data/area_summary_community.{json,csv} (area-summary.v2)
+# outputs (per-construct files, the Netherlands house pattern; conductor ruling
+# 2026-07-12, so the runtime's metric-agnostic wash fires per construct):
+#   - apps/regions/es/data/area_summary_community.{json,csv} (area-summary.v2):
+#       SELF-DEFINITION ONLY - the two slots, the composition, and only
+#       self-definition small-cell tokens (the wash fires on exactly 5
+#       communities: Aragon, Asturias, La Rioja, Ceuta, Melilla).
+#   - apps/regions/es/data/area_summary_attendance_community.{json,csv}
+#       (area-summary.v2): the mass-attendance construct (monthly-or-more,
+#       weekly-or-more, asked-subset n, intervals) with only attendance tokens.
+#       data-only for now - not wired to the map; the overview and popup carry
+#       attendance as context (attendance-as-map-metric is an open runtime
+#       design item, not this build's).
 #   - apps/regions/es/data/es_ccaa_community_2025.geojson (19 community features)
 #   - docs/manifests/es-cis-religion-2025.json (data-manifest.v2)
 # run from the repo root: Rscript scripts/build_es_area_summary.R
@@ -47,18 +57,16 @@
 # Kish n_eff) are recorded per community in the manifest and in quality_flag.
 #
 # small-cell rule (docs/development/small-cell-rule.md, RATIFIED 2026-07-12).
-#   the ratified thresholds are written for census PERSONS (denominator < 100
-#   persons washes pale; numerator < 10 persons marks the cell). their
-#   applicability to SURVEY respondent n is not settled by the doc. this build
-#   applies the numeric thresholds to the unweighted respondent n as the closest
-#   analogue - the same reading the route-probe used to wash Ceuta and Melilla
-#   (n~19) - and emits small_denominator_under_100 / small_cell_under_10 tokens
-#   mechanically. a mechanical read additionally washes the full-design
-#   communities whose REALISED n dipped just under 100 (Aragon 98, Asturias 95,
-#   La Rioja 89) and, for the filtered attendance metric, most communities. this
-#   interpretive question (survey respondent n vs designed n vs population as the
-#   rule's denominator) is recorded for the conductor in the manifest; no NEW
-#   treatment is invented here.
+#   PI RULING (2026-07-12, recorded in research/build-queue.md rank-92 row and
+#   the CHANGELOG): unweighted survey respondent n IS the wash denominator,
+#   stated on the map's information surfaces. the thresholds apply to the
+#   unweighted respondent n of each construct's own base: self-definition base =
+#   all community respondents (washes Aragon 98, Asturias 95, La Rioja 89, Ceuta
+#   19, Melilla 19); attendance base = the asked subset (washes 12 communities).
+#   because the runtime wash is metric-agnostic within a file, the two constructs
+#   ship in SEPARATE files (conductor ruling, Netherlands house pattern), each
+#   carrying only its own small_denominator_under_100 / small_cell_under_10
+#   tokens.
 #
 # licence. CIS study matrices are federated to datos.gob.es as open microdata
 # with an affirmative open-reuse grant (reproduction, modification, distribution
@@ -114,6 +122,8 @@ boundary_set_id <- "es-ccaa-cis-3505"
 boundary_output <- file.path(output_dir, "es_ccaa_community_2025.geojson")
 summary_output <- file.path(output_dir, "area_summary_community.json")
 summary_csv_output <- file.path(output_dir, "area_summary_community.csv")
+attendance_output <- file.path(output_dir, "area_summary_attendance_community.json")
+attendance_csv_output <- file.path(output_dir, "area_summary_attendance_community.csv")
 manifest_output <- file.path(manifest_dir, "es-cis-religion-2025.json")
 
 dataset_id_cis <- "cis-3505-barometro-abril-2025-microdatos"
@@ -259,8 +269,10 @@ nat_asked <- micro[micro$PRACTICARELIG6 != 0, ]
 nat_attendance <- weighted_pct(nat_asked$PESO, nat_asked$PRACTICARELIG6, as.integer(attendance_code_order))
 
 recon_tol <- 0.3   # one-decimal rounding plus the 4008-vs-4009 record difference
-religion_dev <- max(abs(as.numeric(nat_religion) - avance_religion_pct[religion_code_order]))
-attendance_dev <- max(abs(as.numeric(nat_attendance) - avance_attendance_pct[attendance_code_order]))
+# round to 3 dp: the deviations compare one-decimal percentages, so anything
+# finer is floating-point noise in the recorded value.
+religion_dev <- round(max(abs(as.numeric(nat_religion) - avance_religion_pct[religion_code_order])), 3)
+attendance_dev <- round(max(abs(as.numeric(nat_attendance) - avance_attendance_pct[attendance_code_order])), 3)
 if (religion_dev > recon_tol) {
   stop("national RELIGION reconciliation exceeded ", recon_tol, " pp: max dev ", religion_dev, call. = FALSE)
 }
@@ -472,45 +484,14 @@ common_flags <- c(
   "own_datanoun_survey_never_blended_with_census_affiliation_spain_census_has_no_religion_question",
   "weighted_estimates_pesoccaa_per_community_weight;no_counts_shipped",
   "design_2020_onward_cati_min_100_interviews_per_community_pesoccaa_weight",
-  "uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried"
+  "uncertainty_95pct_wald_on_kish_effective_n;ficha_published_community_maxerror_carried",
+  "small_cell_wash_denominator_unweighted_survey_respondent_n_pi_ruling_2026_07_12"
 )
 
-build_row <- function(code) {
+# shared row skeleton (identity, geometry, and null place metrics).
+row_base <- function(code) {
   meta <- ccaa[[code]]
-  st <- community_stats[[code]]
-  aff <- st$affiliation; nor <- st$no_religion
-  mon <- st$monthly; wk <- st$weekly
-
-  # small-cell tokens: metric 1 numerator cells are affiliation and no_religion
-  # respondent counts; metric 2 numerator cells are the monthly and weekly counts.
-  sd_num1 <- c(affiliation = sum(st$selfdef_n[c("1", "2", "3")]),
-               no_religion = sum(st$selfdef_n[c("4", "5", "6")]))
-  toks1 <- small_cell_tokens(aff$base_n, sd_num1, "self_definition")
-  sd_num2 <- c(monthly_or_more = mon$num_n, weekly_or_more = wk$num_n)
-  toks2 <- small_cell_tokens(mon$base_n, sd_num2, "mass_attendance")
-
-  unc <- paste0(
-    "self_definition_base_n=", aff$base_n, ";self_definition_neff=", aff$n_eff,
-    ";affiliation_pct=", aff$percent, "_ci95=", aff$ci_low, "-", aff$ci_high,
-    ";no_religion_pct=", nor$percent, "_ci95=", nor$ci_low, "-", nor$ci_high,
-    ";mass_attendance_base_n=", mon$base_n, ";mass_attendance_neff=", mon$n_eff,
-    ";monthly_or_more_pct=", mon$percent, "_ci95=", mon$ci_low, "-", mon$ci_high,
-    ";weekly_or_more_pct=", wk$percent, "_ci95=", wk$ci_low, "-", wk$ci_high,
-    ";ficha_community_maxerror_pct=", meta$ficha_error)
-
-  flags <- c(common_flags,
-    paste0("ccaa_code_", code, "_", gsub("[^A-Za-z]+", "_", meta$cis)),
-    "metric1_self_definition_affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual",
-    "metric2_mass_attendance_base=self_defined_catholic_or_other_believer_practicarelig6_ne_0",
-    unc,
-    toks1, toks2,
-    "licence_open_datos_gob_es_federation_grant_with_cis_citation")
-
-  composition <- lapply(religion_code_order, function(k) {
-    composition_item(religion_cats[[k]][["label"]], unname(st$selfdef_dist[[k]]), religion_cats[[k]][["tax"]])
-  })
-
-  row <- list(
+  list(
     country_code = country_code,
     boundary_set_id = boundary_set_id,
     boundary_level = "autonomous_community",
@@ -519,32 +500,117 @@ build_row <- function(code) {
     area_name = meta$cis_es,
     year = year,
     population_total = NULL,
-    population_total_basis = paste0(
-      "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community ",
-      "estimation weight PESOCCAA. Community realised n=", aff$base_n,
-      " (weighted ", aff$base_weighted, "); mass-attendance asked subset n=", mon$base_n,
-      ". Survey estimates as weighted percentages with 95% intervals, no counts published."),
     religious_affiliation_count = NULL,
-    religious_affiliation_percent = aff$percent,
     no_religion_count = NULL,
-    no_religion_percent = nor$percent,
-    mass_attendance_monthly_or_more_percent = mon$percent,
-    mass_attendance_weekly_or_more_percent = wk$percent,
     place_count = NULL,
     places_per_10000_residents = NULL,
     place_density_per_sq_km = NULL,
     land_area_sq_km = unname(land_area_by_code[[code]]),
     site_snapshot_date = NULL,
     place_count_basis = NULL,
-    source_dataset_ids = list(dataset_id_cis, dataset_id_boundary),
-    quality_flag = paste(flags[nzchar(flags)], collapse = ";"),
-    composition = composition
+    source_dataset_ids = list(dataset_id_cis, dataset_id_boundary)
   )
-  row
 }
 
-product_rows <- lapply(names(ccaa), build_row)
-if (length(product_rows) != 19L) stop("expected 19 rows (19 communities x 1 wave)", call. = FALSE)
+# self-definition row: the two slots, the seven-category composition, and ONLY
+# self-definition small-cell tokens (the file's wash fires on these alone).
+build_row_selfdef <- function(code) {
+  meta <- ccaa[[code]]
+  st <- community_stats[[code]]
+  aff <- st$affiliation; nor <- st$no_religion
+
+  sd_num <- c(affiliation = sum(st$selfdef_n[c("1", "2", "3")]),
+              no_religion = sum(st$selfdef_n[c("4", "5", "6")]))
+  toks <- small_cell_tokens(aff$base_n, sd_num, "self_definition")
+
+  unc <- paste0(
+    "self_definition_base_n=", aff$base_n, ";self_definition_neff=", aff$n_eff,
+    ";affiliation_pct=", aff$percent, "_ci95=", aff$ci_low, "-", aff$ci_high,
+    ";no_religion_pct=", nor$percent, "_ci95=", nor$ci_low, "-", nor$ci_high,
+    ";ficha_community_maxerror_pct=", meta$ficha_error)
+
+  flags <- c(common_flags,
+    paste0("ccaa_code_", code, "_", gsub("[^A-Za-z]+", "_", meta$cis)),
+    "construct_self_definition_p28;affiliation=religion_1_2_3;no_religion=religion_4_5_6;nc=9_residual",
+    unc,
+    toks,
+    "licence_open_datos_gob_es_federation_grant_with_cis_citation")
+
+  composition <- lapply(religion_code_order, function(k) {
+    composition_item(religion_cats[[k]][["label"]], unname(st$selfdef_dist[[k]]), religion_cats[[k]][["tax"]])
+  })
+
+  c(row_base(code), list(
+    population_total_basis = paste0(
+      "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community ",
+      "estimation weight PESOCCAA. Community realised n=", aff$base_n,
+      " (weighted ", aff$base_weighted, "). Survey estimates as weighted percentages with 95% ",
+      "intervals, no counts published."),
+    religious_affiliation_percent = aff$percent,
+    no_religion_percent = nor$percent,
+    quality_flag = paste(flags[nzchar(flags)], collapse = ";"),
+    composition = composition
+  ))
+}
+
+# attendance row: the monthly-or-more and weekly-or-more cuts on the asked
+# subset, the seven-frequency composition, and ONLY attendance small-cell tokens.
+# the two fixed slots are null: attendance is its own construct, not affiliation.
+build_row_attendance <- function(code) {
+  meta <- ccaa[[code]]
+  st <- community_stats[[code]]
+  mon <- st$monthly; wk <- st$weekly
+
+  att_num <- c(monthly_or_more = mon$num_n, weekly_or_more = wk$num_n)
+  toks <- small_cell_tokens(mon$base_n, att_num, "mass_attendance")
+
+  unc <- paste0(
+    "mass_attendance_base_n=", mon$base_n, ";mass_attendance_neff=", mon$n_eff,
+    ";monthly_or_more_pct=", mon$percent, "_ci95=", mon$ci_low, "-", mon$ci_high,
+    ";weekly_or_more_pct=", wk$percent, "_ci95=", wk$ci_low, "-", wk$ci_high,
+    ";ficha_community_maxerror_pct=", meta$ficha_error)
+
+  flags <- c(common_flags,
+    paste0("ccaa_code_", code, "_", gsub("[^A-Za-z]+", "_", meta$cis)),
+    "construct_mass_attendance_p28a;base=self_defined_catholic_or_other_believer_practicarelig6_ne_0",
+    "data_only_not_wired_to_map;overview_and_popup_context",
+    unc,
+    toks,
+    "licence_open_datos_gob_es_federation_grant_with_cis_citation")
+
+  composition <- lapply(attendance_code_order, function(k) {
+    composition_item(attendance_cats[[k]], unname(st$attend_dist[[k]]), NA_character_)
+  })
+
+  c(row_base(code), list(
+    population_total_basis = paste0(
+      "CIS Barómetro Abril 2025 (Estudio 3505), CATI, fieldwork April 2025; autonomous-community ",
+      "estimation weight PESOCCAA. Mass-attendance asked subset (self-defined Catholic or believer ",
+      "of another religion) n=", mon$base_n, " of community realised n=", st$affiliation$base_n,
+      ". Survey estimates as weighted percentages with 95% intervals, no counts published."),
+    religious_affiliation_percent = NULL,
+    no_religion_percent = NULL,
+    mass_attendance_monthly_or_more_percent = mon$percent,
+    mass_attendance_weekly_or_more_percent = wk$percent,
+    quality_flag = paste(flags[nzchar(flags)], collapse = ";"),
+    composition = composition
+  ))
+}
+
+selfdef_rows <- lapply(names(ccaa), build_row_selfdef)
+attendance_rows <- lapply(names(ccaa), build_row_attendance)
+if (length(selfdef_rows) != 19L || length(attendance_rows) != 19L) {
+  stop("expected 19 rows per construct (19 communities x 1 wave)", call. = FALSE)
+}
+
+# gate the ruling's wash arithmetic: the self-definition file must wash exactly
+# the five communities (Aragon, Asturias, La Rioja, Ceuta, Melilla) and no other.
+selfdef_washed <- vapply(selfdef_rows, function(r) grepl("small_denominator_under_100", r$quality_flag), logical(1))
+washed_codes <- vapply(selfdef_rows[selfdef_washed], `[[`, character(1), "area_code")
+if (!setequal(washed_codes, c("02", "03", "17", "18", "19"))) {
+  stop("self-definition wash set diverges from the ruling's arithmetic: ",
+       paste(washed_codes, collapse = ","), call. = FALSE)
+}
 
 # ---- source datasets, indicators, visual layers ----------------------------
 
@@ -599,7 +665,7 @@ source_datasets <- list(
 
 survey_spatial_note <- "19 autonomous communities and autonomous cities (17 communities + Ceuta + Melilla) on geoBoundaries ESP ADM1, keyed by area_unit_id."
 
-indicators <- list(
+selfdef_indicators <- list(
   list(
     indicator_id = "religious_affiliation_percent",
     label = "Religious self-definition: affiliated (%) - survey estimate",
@@ -624,13 +690,16 @@ indicators <- list(
     temporal_coverage = "2025 (single wave, Estudio 3505)",
     spatial_coverage = survey_spatial_note,
     quality_notes = "Survey estimate with uncertainty; complements religious_affiliation_percent (the two sides of the self-definition item, with N.C. as residual)."
-  ),
+  )
+)
+
+attendance_indicators <- list(
   list(
     indicator_id = "mass_attendance_monthly_or_more_percent",
     label = "Mass attendance at least monthly (%) - survey estimate",
     description = "Weighted share attending mass or other religious services at least two or three times a month (PRACTICARELIG6 codes 4+5+6), among those who define as Catholic or believer of another religion.",
     unit = "percent",
-    denominator_indicator_id = "religious_affiliation_percent",
+    denominator_indicator_id = NULL,
     method = paste0(
       "Weighted (PESOCCAA) share of PRACTICARELIG6 in {4,5,6} over the asked subset (RELIGION in {1,2,3}, i.e. ",
       "PRACTICARELIG6 != 0). 95% Wald interval on the Kish effective n of the asked subset. The asked subset is a ",
@@ -645,7 +714,7 @@ indicators <- list(
     label = "Mass attendance weekly or more (%) - survey estimate",
     description = "Weighted share attending mass or other religious services every Sunday/feast day or more often (PRACTICARELIG6 codes 5+6), among those who define as Catholic or believer of another religion.",
     unit = "percent",
-    denominator_indicator_id = "religious_affiliation_percent",
+    denominator_indicator_id = NULL,
     method = "Weighted (PESOCCAA) share of PRACTICARELIG6 in {5,6} over the asked subset; 95% Wald interval on the Kish effective n. The canonical practising-attendance cut, carried alongside the at-least-monthly headline.",
     temporal_coverage = "2025 (single wave, Estudio 3505)",
     spatial_coverage = survey_spatial_note,
@@ -653,7 +722,7 @@ indicators <- list(
   )
 )
 
-visual_layers <- list(
+selfdef_visual_layers <- list(
   list(
     visual_layer_id = "es-ccaa-religious-affiliation-survey",
     label = "Religious self-definition: affiliated (survey)",
@@ -683,93 +752,121 @@ visual_layers <- list(
     uncertainty_display = "quality_flag",
     default_visibility = FALSE,
     notes = "Complements the affiliation layer; N.C. is the residual to 100."
-  ),
-  list(
-    visual_layer_id = "es-ccaa-mass-attendance-monthly-survey",
-    label = "Mass attendance at least monthly (survey)",
-    description = "Weighted survey share attending mass at least monthly among self-defined Catholics and believers of another religion, by autonomous community, 2025.",
-    layer_type = "choropleth",
-    indicator_ids = list("mass_attendance_monthly_or_more_percent"),
-    geometry_unit_type = "area_unit",
-    legend = list(unit = "percent", denominator = "self-defined Catholic or other-believer subset (PESOCCAA-weighted)"),
-    colour_scale = "sequential",
-    time_control = "none",
-    aggregation_rule = "weighted community survey estimate on the asked subset",
-    uncertainty_display = "quality_flag",
-    default_visibility = FALSE,
-    notes = "Filtered-subgroup base; most communities wash under the small-cell denominator threshold. Distinct construct from self-definition."
   )
 )
 
-area_summary <- list(
-  schema_version = "area-summary.v2",
-  generated_at = stamp,
-  generated_by = script_id,
+# the attendance file is data-only for now: NOT wired to the map, so it declares
+# no visual layers; the overview and popup carry attendance as context. whether
+# attendance becomes a map metric is an open runtime design item (recorded in
+# the manifest), not this build's.
+attendance_visual_layers <- list()
+
+# one area-summary.v2 document per construct (Netherlands house pattern).
+boundary_set_block <- list(
+  boundary_set_id = boundary_set_id,
   country_code = country_code,
-  data_status = "survey_religion_live",
-  data_status_note = paste0(
-    "CIS Barómetro Abril 2025 (Estudio 3505) survey affiliation-and-practice estimates for 19 autonomous ",
-    "communities: religious self-definition and mass attendance, both weighted (PESOCCAA) percentages with 95% ",
-    "intervals, no counts. Survey dataNoun, never blended with census affiliation (Spain's census has no religion ",
-    "question). Small-cell rule applied on unweighted respondent n; Ceuta and Melilla and other small bases wash. ",
-    "Ships STAGED (no page, no hub)."),
-  boundary_set = list(
-    boundary_set_id = boundary_set_id,
-    country_code = country_code,
-    level = "autonomous_community",
-    vintage = "geoBoundaries ESP ADM1 (IGN/CNIG source), 19 units",
-    source_dataset_id = dataset_id_boundary
-  ),
-  site_snapshot = list(
-    source_dataset_id = NULL,
-    snapshot_date = NULL,
-    basis = "no governed Spain place-of-worship snapshot is included in this survey release",
-    notes = "The Observatorio del Pluralismo Religioso places-of-worship directory is a distinct, open places-layer opportunity recorded in the route-probe; it is not built in this survey lane."
-  ),
-  source_datasets = source_datasets,
-  indicators = indicators,
-  visual_layers = visual_layers,
-  rows = product_rows
+  level = "autonomous_community",
+  vintage = "geoBoundaries ESP ADM1 (IGN/CNIG source), 19 units",
+  source_dataset_id = dataset_id_boundary
 )
+site_snapshot_block <- list(
+  source_dataset_id = NULL,
+  snapshot_date = NULL,
+  basis = "no governed Spain place-of-worship snapshot is included in this survey release",
+  notes = "The Observatorio del Pluralismo Religioso places-of-worship directory is a distinct, open places-layer opportunity recorded in the route-probe; it is not built in this survey lane."
+)
+
+make_area_summary <- function(note, indicators, layers, rows) {
+  list(
+    schema_version = "area-summary.v2",
+    generated_at = stamp,
+    generated_by = script_id,
+    country_code = country_code,
+    data_status = "survey_religion_live",
+    data_status_note = note,
+    boundary_set = boundary_set_block,
+    site_snapshot = site_snapshot_block,
+    source_datasets = source_datasets,
+    indicators = indicators,
+    visual_layers = layers,
+    rows = rows
+  )
+}
+
+selfdef_summary <- make_area_summary(
+  paste0(
+    "CIS Barómetro Abril 2025 (Estudio 3505) survey religious SELF-DEFINITION estimates for 19 autonomous ",
+    "communities: weighted (PESOCCAA) percentages with 95% intervals, no counts. Survey dataNoun, never blended ",
+    "with census affiliation (Spain's census has no religion question). This file carries the self-definition ",
+    "construct ONLY; its small-cell tokens read the full-community respondent base (PI ruling 2026-07-12: ",
+    "unweighted survey respondent n is the wash denominator, stated on the map surfaces), washing exactly 5 ",
+    "communities (Aragón, Asturias, La Rioja, Ceuta, Melilla). The mass-attendance construct ships separately in ",
+    "area_summary_attendance_community.json (data-only). Ships STAGED (no page, no hub)."),
+  selfdef_indicators, selfdef_visual_layers, selfdef_rows)
+
+attendance_summary <- make_area_summary(
+  paste0(
+    "CIS Barómetro Abril 2025 (Estudio 3505) survey MASS-ATTENDANCE estimates for 19 autonomous communities, ",
+    "among self-defined Catholics and believers of another religion (the asked subset): weighted (PESOCCAA) ",
+    "percentages with 95% intervals, no counts. This file carries the attendance construct ONLY and is data-only ",
+    "for now - not wired to the map; the overview and popup carry attendance as context (attendance-as-map-metric ",
+    "is an open runtime design item). Its small-cell tokens read the asked-subset respondent base (PI ruling ",
+    "2026-07-12: unweighted survey respondent n is the wash denominator), under which 12 communities fall below ",
+    "the denominator threshold. Ships STAGED (no page, no hub)."),
+  attendance_indicators, attendance_visual_layers, attendance_rows)
 
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 dir.create(manifest_dir, recursive = TRUE, showWarnings = FALSE)
-write_json(area_summary, summary_output, auto_unbox = TRUE, pretty = TRUE, null = "null", na = "null", digits = NA)
-
-if (!jsonlite::validate(readChar(summary_output, file_bytes(summary_output), useBytes = TRUE))) {
-  stop("area-summary output failed JSON syntax validation", call. = FALSE)
+for (pair in list(list(doc = selfdef_summary, path = summary_output),
+                  list(doc = attendance_summary, path = attendance_output))) {
+  write_json(pair$doc, pair$path, auto_unbox = TRUE, pretty = TRUE, null = "null", na = "null", digits = NA)
+  if (!jsonlite::validate(readChar(pair$path, file_bytes(pair$path), useBytes = TRUE))) {
+    stop("area-summary output failed JSON syntax validation: ", pair$path, call. = FALSE)
+  }
+  validate_json_schema("schemas/area-summary.v2.schema.json", pair$path)
 }
-validate_json_schema("schemas/area-summary.v2.schema.json", summary_output)
 
-# ---- flat CSV companion ----------------------------------------------------
+# ---- flat CSV companions (one per construct) --------------------------------
 num_or_na <- function(row, key) { v <- row[[key]]; if (is.null(v)) NA_real_ else v }
-flat <- data.frame(
-  country_code = vapply(product_rows, `[[`, character(1), "country_code"),
-  boundary_set_id = vapply(product_rows, `[[`, character(1), "boundary_set_id"),
-  boundary_level = vapply(product_rows, `[[`, character(1), "boundary_level"),
-  area_unit_id = vapply(product_rows, `[[`, character(1), "area_unit_id"),
-  area_code = vapply(product_rows, `[[`, character(1), "area_code"),
-  area_name = vapply(product_rows, `[[`, character(1), "area_name"),
-  year = vapply(product_rows, `[[`, integer(1), "year"),
-  population_total = NA_integer_,
-  population_total_basis = vapply(product_rows, `[[`, character(1), "population_total_basis"),
-  religious_affiliation_count = NA_integer_,
-  religious_affiliation_percent = vapply(product_rows, function(r) num_or_na(r, "religious_affiliation_percent"), numeric(1)),
-  no_religion_count = NA_integer_,
-  no_religion_percent = vapply(product_rows, function(r) num_or_na(r, "no_religion_percent"), numeric(1)),
-  mass_attendance_monthly_or_more_percent = vapply(product_rows, function(r) num_or_na(r, "mass_attendance_monthly_or_more_percent"), numeric(1)),
-  mass_attendance_weekly_or_more_percent = vapply(product_rows, function(r) num_or_na(r, "mass_attendance_weekly_or_more_percent"), numeric(1)),
-  place_count = NA_integer_,
-  places_per_10000_residents = NA_real_,
-  place_density_per_sq_km = NA_real_,
-  land_area_sq_km = vapply(product_rows, function(r) num_or_na(r, "land_area_sq_km"), numeric(1)),
-  site_snapshot_date = NA_character_,
-  place_count_basis = NA_character_,
-  source_dataset_ids = vapply(product_rows, function(r) paste(unlist(r[["source_dataset_ids"]]), collapse = "|"), character(1)),
-  quality_flag = vapply(product_rows, `[[`, character(1), "quality_flag"),
-  stringsAsFactors = FALSE
-)
-utils::write.csv(flat, summary_csv_output, row.names = FALSE, na = "")
+
+# shared identity and null place columns for a flat CSV frame.
+flat_frame <- function(rows) {
+  data.frame(
+    country_code = vapply(rows, `[[`, character(1), "country_code"),
+    boundary_set_id = vapply(rows, `[[`, character(1), "boundary_set_id"),
+    boundary_level = vapply(rows, `[[`, character(1), "boundary_level"),
+    area_unit_id = vapply(rows, `[[`, character(1), "area_unit_id"),
+    area_code = vapply(rows, `[[`, character(1), "area_code"),
+    area_name = vapply(rows, `[[`, character(1), "area_name"),
+    year = vapply(rows, `[[`, integer(1), "year"),
+    population_total = NA_integer_,
+    population_total_basis = vapply(rows, `[[`, character(1), "population_total_basis"),
+    religious_affiliation_count = NA_integer_,
+    religious_affiliation_percent = vapply(rows, function(r) num_or_na(r, "religious_affiliation_percent"), numeric(1)),
+    no_religion_count = NA_integer_,
+    no_religion_percent = vapply(rows, function(r) num_or_na(r, "no_religion_percent"), numeric(1)),
+    place_count = NA_integer_,
+    places_per_10000_residents = NA_real_,
+    place_density_per_sq_km = NA_real_,
+    land_area_sq_km = vapply(rows, function(r) num_or_na(r, "land_area_sq_km"), numeric(1)),
+    site_snapshot_date = NA_character_,
+    place_count_basis = NA_character_,
+    source_dataset_ids = vapply(rows, function(r) paste(unlist(r[["source_dataset_ids"]]), collapse = "|"), character(1)),
+    quality_flag = vapply(rows, `[[`, character(1), "quality_flag"),
+    stringsAsFactors = FALSE
+  )
+}
+
+# self-definition CSV: the two slots only, no attendance columns.
+utils::write.csv(flat_frame(selfdef_rows), summary_csv_output, row.names = FALSE, na = "")
+
+# attendance CSV: the two attendance cuts added; the affiliation slots stay empty.
+flat_att <- flat_frame(attendance_rows)
+flat_att$mass_attendance_monthly_or_more_percent <-
+  vapply(attendance_rows, function(r) num_or_na(r, "mass_attendance_monthly_or_more_percent"), numeric(1))
+flat_att$mass_attendance_weekly_or_more_percent <-
+  vapply(attendance_rows, function(r) num_or_na(r, "mass_attendance_weekly_or_more_percent"), numeric(1))
+utils::write.csv(flat_att, attendance_csv_output, row.names = FALSE, na = "")
 
 # ---- manifest --------------------------------------------------------------
 
@@ -783,7 +880,7 @@ raw_sources <- list(
   raw_source_record(boundary_src, url_boundary, "geoBoundaries ESP ADM1 (19 autonomous communities and cities), CC BY 4.0")
 )
 
-output_paths <- c(summary_output, summary_csv_output, boundary_output)
+output_paths <- c(summary_output, summary_csv_output, attendance_output, attendance_csv_output, boundary_output)
 output_hashes <- vapply(output_paths, sha256_file, character(1))
 raw_hashes <- vapply(raw_sources, `[[`, character(1), "sha256")
 version_hash <- substr(digest(paste(c(raw_hashes, output_hashes), collapse = ""),
@@ -887,24 +984,22 @@ manifest <- list(
         doc = "docs/development/small-cell-rule.md (RATIFIED 2026-07-12)",
         thresholds_applied = list(small_denominator_under_100 = "unweighted respondent base n < 100 washes pale",
                                   small_cell_under_10 = "unweighted numerator respondent count < 10 marks the cell"),
-        applied_to = "UNWEIGHTED respondent n as the closest survey analogue of the rule's census-person denominator/numerator; the same reading the route-probe used to wash Ceuta and Melilla.",
+        pi_ruling = paste0(
+          "PI RULING (2026-07-12, recorded in research/build-queue.md rank-92 row and the CHANGELOG): unweighted ",
+          "survey respondent n IS the wash denominator, stated on the map's information surfaces. The build's ",
+          "earlier open question is resolved; the tokens read each construct's own unweighted respondent base."),
+        per_construct_files = paste0(
+          "CONDUCTOR RULING (2026-07-12, Netherlands house pattern): because the runtime wash is metric-agnostic ",
+          "within a file, the two constructs ship in separate files, each carrying only its own tokens. ",
+          "area_summary_community.json is self-definition only (wash fires on exactly 5 communities); ",
+          "area_summary_attendance_community.json carries the attendance construct with only attendance tokens and ",
+          "is data-only for now - not wired to the map (the overview and popup carry attendance as context)."),
         self_definition_denominator_under_100 = as.list(Filter(Negate(is.null), setNames(lapply(names(ccaa), function(c) {
           n <- community_stats[[c]]$affiliation$base_n; if (n < 100L) n else NULL
         }), vapply(ccaa, `[[`, character(1), "cis_es")))),
         mass_attendance_denominator_under_100 = as.list(Filter(Negate(is.null), setNames(lapply(names(ccaa), function(c) {
           n <- community_stats[[c]]$monthly$base_n; if (n < 100L) n else NULL
-        }), vapply(ccaa, `[[`, character(1), "cis_es")))),
-        open_question_for_conductor = paste0(
-          "The ratified small-cell rule fixes its thresholds on census PERSONS (denominator < 100 persons washes; ",
-          "numerator < 10 persons marks). Its applicability to SURVEY respondent n is not settled by the doc. This ",
-          "build applies the thresholds to the unweighted respondent n as the closest analogue - the same reading ",
-          "the route-probe used for Ceuta and Melilla (n~19). A mechanical read washes not only the designed-small ",
-          "cities (Ceuta 19, Melilla 19) but also the full-design communities whose REALISED n dipped just under 100 ",
-          "(Aragón 98, Asturias 95, La Rioja 89), and, for the filtered mass-attendance metric, most communities. ",
-          "QUESTION: is unweighted survey respondent n the intended denominator for the wash, or should the wash apply ",
-          "only to units DESIGNED under 100 (Ceuta/Melilla), with the full-design sub-100-realised communities carried ",
-          "at full colour with a wide-interval note? No new treatment was invented; the tokens are emitted mechanically ",
-          "and this question is recorded for a ruling.")
+        }), vapply(ccaa, `[[`, character(1), "cis_es"))))
       ),
       boundary = list(
         boundary_set_id = boundary_set_id,
@@ -925,9 +1020,10 @@ manifest <- list(
           "The delivered anonymised microdata file carries ", realised_total, " records; the ficha técnica prints ",
           ficha_realised_total, " realised interviews (the difference is one record, in Asturias: microdata 95 vs ficha 96). ",
           "All shipped estimates rest on the delivered file. National PESO-weighted distributions match the avance de ",
-          "resultados within ", recon_tol, " pp (RELIGION max dev ", religion_dev, " pp; attendance max dev ",
-          attendance_dev, " pp), confirming the file is the correct study; the sub-0.1 pp gaps (e.g. Católico no ",
-          "practicante 36,7 microdata vs 36,6 avance) are one-decimal rounding plus the one-record difference."),
+          "resultados within ", max(religion_dev, attendance_dev), " pp observed (RELIGION max dev ", religion_dev,
+          " pp; attendance max dev ", attendance_dev, " pp; gate tolerance ", recon_tol, " pp), confirming the file is ",
+          "the correct study; the 0,1 pp gaps (e.g. Católico no practicante 36,7 microdata vs 36,6 avance) are ",
+          "one-decimal rounding plus the one-record difference."),
         per_community = community_records
       ),
       licence_position = list(
@@ -970,23 +1066,34 @@ manifest <- list(
     list(layer = "places of worship (Observatorio del Pluralismo Religioso)", status = "distinct open route, not built here",
          note = "The Observatorio directory of minority places of worship is open under the Spanish RISP regime (Ley 37/2007) with attribution 'Origen de los datos: Observatorio del Pluralismo Religioso en España'; a distinct places-layer opportunity recorded in the route-probe, not part of this survey lane."),
     list(layer = "pooled / multi-wave", status = "future extension",
-         note = "This build ships one wave (Estudio 3505). Pooling adjacent 2020-onward community barometers would narrow the community intervals at the cost of a mixed reference period; a future extension.")
+         note = "This build ships one wave (Estudio 3505). Pooling adjacent 2020-onward community barometers would narrow the community intervals at the cost of a mixed reference period; a future extension."),
+    list(layer = "attendance as a map metric", status = "open runtime design item",
+         note = "The attendance file is data-only: not wired to the map; the overview and popup carry attendance as context. Whether the attendance construct becomes a map metric (with its own asked-subset wash semantics) is an open runtime design item recorded by the conductor, not this build's.")
   ),
   durable_files = list(
-    durable_file_record(summary_output, "Spain 19-community CIS survey affiliation-and-practice area-summary JSON (area-summary.v2)",
+    durable_file_record(summary_output, "Spain 19-community CIS survey religious self-definition area-summary JSON (area-summary.v2; self-definition construct and tokens only)",
                         "cis_datos_gob_es_open_reuse_with_citation", "accepted", row_count = 19L),
-    durable_file_record(summary_csv_output, "Spain 19-community CIS survey affiliation-and-practice area-summary CSV",
+    durable_file_record(summary_csv_output, "Spain 19-community CIS survey religious self-definition area-summary CSV (self-definition construct and tokens only)",
+                        "cis_datos_gob_es_open_reuse_with_citation", "accepted", row_count = 19L),
+    durable_file_record(attendance_output, "Spain 19-community CIS survey mass-attendance area-summary JSON (area-summary.v2; attendance construct and tokens only; data-only, not wired to the map)",
+                        "cis_datos_gob_es_open_reuse_with_citation", "accepted", row_count = 19L),
+    durable_file_record(attendance_csv_output, "Spain 19-community CIS survey mass-attendance area-summary CSV (attendance construct and tokens only)",
                         "cis_datos_gob_es_open_reuse_with_citation", "accepted", row_count = 19L),
     durable_file_record(boundary_output, "Spain 19 autonomous-community boundary (geoBoundaries ESP ADM1) keyed by area_unit_id",
                         "cc_by_4_0", "accepted", feature_count = 19L)
   ),
   partitions = list(
-    list(partition_id = "es-ccaa-2025", partition_type = "area",
+    list(partition_id = "es-ccaa-selfdef-2025", partition_type = "area",
          file_uri = paste0("repo:", summary_output), sha256 = sha256_file(summary_output),
+         country_code = "ES", row_count = 19L, stage = "staged"),
+    list(partition_id = "es-ccaa-attendance-2025", partition_type = "area",
+         file_uri = paste0("repo:", attendance_output), sha256 = sha256_file(attendance_output),
          country_code = "ES", row_count = 19L, stage = "staged")
   ),
   stats = list(
-    waves = 1L, years = "2025", community_rows = 19L, communities = 19L,
+    waves = 1L, years = "2025", communities = 19L,
+    selfdef_rows = 19L, attendance_rows = 19L,
+    selfdef_washed_communities = 5L, attendance_denominator_under_100 = 12L,
     boundary_features = 19L, boundary_keep_percent = boundary_result[["keep_percent"]],
     boundary_bytes = boundary_result[["output_bytes"]],
     realised_total = realised_total,
@@ -999,30 +1106,38 @@ manifest <- list(
     commands = list(
       paste("Rscript", script_id),
       paste("uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.v2.schema.json", summary_output),
-      paste("uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json", manifest_output)
+      paste("uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.v2.schema.json", attendance_output),
+      paste("uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json", manifest_output),
+      "bash scripts/validate_area_summaries.sh",
+      "bash scripts/validate_manifests.sh"
     ),
     warnings = list(
-      "Both metrics are SURVEY estimates with uncertainty, never census affiliation; each shipped share carries a 95% interval on the Kish effective n.",
-      "Mass attendance is a filtered subgroup (self-defined Catholics/other-believers); most communities fall under the small-cell denominator threshold; Ceuta and Melilla (n~19) wash on both metrics.",
-      "Small-cell rule applicability to survey respondent n is an OPEN QUESTION recorded for the conductor (see pipeline.parameters.small_cell_rule.open_question_for_conductor); tokens emitted mechanically, no new treatment invented.",
+      "Both constructs are SURVEY estimates with uncertainty, never census affiliation; each shipped share carries a 95% interval on the Kish effective n.",
+      "Per-construct files (conductor ruling 2026-07-12, Netherlands house pattern): the self-definition file carries only self-definition tokens (wash fires on exactly 5 communities); the attendance file carries only attendance tokens and is data-only, not wired to the map.",
+      "Mass attendance is a filtered subgroup (self-defined Catholics/other-believers); 12 communities fall under the attendance denominator threshold; Ceuta and Melilla (n~19) wash on both constructs.",
       "The delivered microdata carries 4008 records vs the ficha's 4009 realised (one record, Asturias 95 vs 96); estimates rest on the delivered file."
     ),
     notes = paste0(
       "Source hashes recorded and gated (3505_num.csv, codigo3505.pdf, FT3505.pdf, esp_adm1.geojson). National PESO-",
-      "weighted RELIGION and attendance distributions match the avance de resultados within ", recon_tol, " pp. The ",
-      "19-feature boundary joins 19/19 communities by verbatim shapeName with distinct geometry hashes, valid non-empty ",
-      "geometries, under the 3 MB cap. Both the area-summary (area-summary.v2) and the manifest pass schema validation.")
+      "weighted RELIGION and attendance distributions match the avance de resultados within ",
+      max(religion_dev, attendance_dev), " pp observed (gate tolerance ", recon_tol, " pp). The self-definition wash ",
+      "set is gated to exactly {Aragón, Asturias, La Rioja, Ceuta, Melilla}. The 19-feature boundary joins 19/19 ",
+      "communities by verbatim shapeName with distinct geometry hashes, valid non-empty geometries, under the 3 MB ",
+      "cap. Both area-summary files (area-summary.v2) and the manifest pass schema validation.")
   ),
   privacy = "public",
   licence_status = "accepted",
   licence_basis = "cis_datos_gob_es_open_reuse_with_citation",
   downstream_status = "staged",
   notes = paste0(
-    "Single-wave (2025) 19-community CIS survey affiliation-and-practice product: religious self-definition (P28) and ",
-    "mass attendance (P28a), both weighted (PESOCCAA) percentages with 95% intervals, no counts. Survey dataNoun, never ",
-    "blended with census affiliation (Spain's census has no religion question). Small-cell rule applied on unweighted ",
-    "respondent n (open interpretive question recorded for the conductor). CIS open reuse via the datos.gob.es ",
-    "federation grant with citation (accepted); boundary CC BY 4.0. Ships STAGED (no page, no hub).")
+    "Single-wave (2025) 19-community CIS survey affiliation-and-practice product in per-construct files (conductor ",
+    "ruling 2026-07-12, Netherlands house pattern): religious self-definition (P28) in area_summary_community.json ",
+    "with only self-definition small-cell tokens (wash fires on exactly 5 communities), and mass attendance (P28a) in ",
+    "area_summary_attendance_community.json with only attendance tokens, data-only and not wired to the map. Both ",
+    "weighted (PESOCCAA) percentages with 95% intervals, no counts. Survey dataNoun, never blended with census ",
+    "affiliation (Spain's census has no religion question). Small-cell wash denominator is unweighted survey ",
+    "respondent n (PI ruling 2026-07-12), stated on the map surfaces. CIS open reuse via the datos.gob.es federation ",
+    "grant with citation (accepted); boundary CC BY 4.0. Ships STAGED (no page, no hub).")
 )
 
 write_json(manifest, manifest_output, auto_unbox = TRUE, pretty = TRUE, null = "null", na = "null", digits = NA)
@@ -1033,8 +1148,10 @@ if (!jsonlite::validate(readChar(manifest_output, file_bytes(manifest_output), u
 validate_json_schema("schemas/data-manifest.schema.json", manifest_output)
 
 message(
-  "built Spain CIS survey affiliation-and-practice product: ", length(product_rows), " community rows (1 wave, 2025); ",
-  "boundary ", boundary_result[["output_bytes"]], " bytes at keep ", boundary_result[["keep_percent"]], "%, ",
-  boundary_result[["total_land_area"]], " km2; national RELIGION dev ", religion_dev, " pp, attendance dev ",
-  attendance_dev, " pp; staged (licence accepted, CIS citation)."
+  "built Spain CIS survey affiliation-and-practice product in per-construct files: ",
+  length(selfdef_rows), " self-definition rows (wash on ", sum(selfdef_washed), " communities) + ",
+  length(attendance_rows), " attendance rows (data-only); boundary ", boundary_result[["output_bytes"]],
+  " bytes at keep ", boundary_result[["keep_percent"]], "%, ", boundary_result[["total_land_area"]],
+  " km2; national RELIGION dev ", religion_dev, " pp, attendance dev ", attendance_dev,
+  " pp; staged (licence accepted, CIS citation)."
 )

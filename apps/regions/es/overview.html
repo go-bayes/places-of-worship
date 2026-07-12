@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Spain map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260712d" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Spain research map; every string traces to
+    // research/countries/es/route-probe.md, the manifest
+    // docs/manifests/es-cis-religion-2025.json, the small-cell ruling in
+    // research/build-queue.md (Spain row, PI 2026-07-12), or the live
+    // REGION_CONFIG in apps/regions/es/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "ES",
+      countryName: "Spain",
+      mapHref: "./",
+      intro: "Survey religious self-definition and mass attendance by autonomous community, from the CIS (Centro de Investigaciones Sociológicas) Barómetro de Abril 2025, Estudio nº 3505, a single wave over the 19 autonomous communities and autonomous cities. Spain's census carries no religion question, so this is a survey product, not a census map: every figure is a weighted (PESOCCAA per-community weight) percentage with a wide 95% interval, and no counts are published or shown. The two constructs are distinct — religious self-definition (who people say they are) and mass attendance (how often the believers among them attend) — and neither is ever blended with a census affiliation count.",
+      facts: {
+        waves: "One survey wave: 2025 (CIS Barómetro de Abril 2025, Estudio nº 3505; the CIS community design begins 2020)",
+        geographies: "Autonomous community (19 units: 17 communities + Ceuta + Melilla)",
+        metrics: "Religious self-definition (affiliated %, no religion %); mass attendance (monthly-or-more, weekly-or-more) — all weighted survey estimates with 95% intervals, no counts"
+      },
+      reading: [
+        "Communities are shaded by a weighted CIS survey estimate for the whole community sample: the self-definition share reporting affiliation (a practising or non-practising Catholic, or a believer of another religion) or the share reporting none (agnostic, indifferent/non-believer, or atheist). These are survey estimates with wide 95% intervals, drawn from the Estudio 3505 open microdata, never census counts.",
+        "The self-definition item (P28) is asked of all respondents. Affiliated is RELIGION codes 1 to 3 and no religion is codes 4 to 6; N.C. (no answer, code 9) stays in the denominator and in neither share, so affiliated and no religion need not sum to 100. Each community share is weighted by PESOCCAA, the per-community estimation weight the CIS ficha técnica documents for autonomous-community estimation.",
+        "Mass attendance (P28a) is the second, distinct construct. It is asked only of those who define as Catholic or believer of another religion, so its base is a filtered believer subset, materially smaller than the community sample. The headline cut is attending at least monthly and the secondary cut is attending weekly or more; both are weighted survey estimates with 95% intervals. Because the two cuts are nested subsets of the same practising pole rather than opposite poles, they ride the record and the popup rather than the two opposite-pole map slots; the full seven-category attendance frequency is carried per community in the manifest.",
+        "Every figure carries a wide 95% interval on the Kish effective sample size, and the CIS ficha prints community sampling errors from ±3.9% in Andalucía to ±22.9% in Ceuta and Melilla. Under the PI small-cell ruling (2026-07-12, research/build-queue.md): the unweighted survey respondent n is the wash denominator. A community whose respondent base falls under 100 washes pale, with its estimate held in the popup and the wide interval doing the honest work; a share resting on fewer than ten respondents carries a fewer-than-ten marker. This is a deliberate display decision, not a suppression — no value is altered or hidden.",
+        "On self-definition the small-cell wash covers five communities: Aragón (98 respondents), Asturias (95), La Rioja (89), Ceuta (19), and Melilla (19). On the filtered mass-attendance believer base it covers twelve of the nineteen communities, since the believer subset is thinner than the full sample. Ceuta and Melilla, designed at twenty interviews each, wash on both constructs.",
+        "This is one wave, 2025, and no change metric is offered. The CIS community design — a minimum of 100 interviews per community and the PESOCCAA weight, on a 4,000-interview CATI barometer — begins with the 2020-onward barometers; the 2012 to 2019 face-to-face barometers carry no community weight and no minimum community sample, so no earlier single-wave community estimate is supported. Pooling adjacent 2020-onward waves would narrow the community intervals at the cost of a mixed reference period, and is recorded as a future extension.",
+        "The national margins reconcile: the PESO-weighted national self-definition and attendance distributions reproduce the CIS printed avance de resultados within 0.1 pp. One documented discrepancy is carried as delivered — the anonymised microdata file holds 4,008 records against the ficha técnica's 4,009 realised interviews (a single record, in Asturias: microdata 95 versus ficha 96). All shipped estimates rest on the delivered file.",
+        "The boundary frame is geoBoundaries ESP ADM1 (source Instituto Geográfico Nacional, IGN/CNIG), 19 features joined one-to-one to the CIS 19-unit autonomous-community frame by verbatim shapeName, with Ceuta and Melilla as their own features.",
+        "No governed Spain place-of-worship snapshot ships with this product; place counts and density metrics are null. The Observatorio del Pluralismo Religioso directory of minority places of worship, open under the Spanish public-sector reuse regime, is recorded in the route probe as a distinct places-layer opportunity, not built in this survey lane."
+      ],
+      sources: [
+        {
+          name: "CIS Barómetro de Abril 2025 (Estudio nº 3505), microdatos (matriz de datos)",
+          href: "https://www.cis.es/detalle-ficha-estudio?origen=estudio&codEstudio=3505",
+          construct: "Survey religious self-definition (P28) and mass attendance (P28a), weighted (PESOCCAA) percentages with 95% intervals, by autonomous community; no counts",
+          years: "2025 (single wave, fieldwork April 2025, CATI)",
+          licence: "Open reuse via the datos.gob.es federation grant (commercial and non-commercial, with modification and distribution) under a CIS source-citation condition, accepted. Fuente: Centro de Investigaciones Sociológicas (CIS), Estudio nº 3505, Barómetro de Abril 2025"
+        },
+        {
+          name: "geoBoundaries Spain ADM1 boundaries",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/ESP/ADM1/",
+          construct: "Boundary geometry (19 units: 17 autonomous communities plus the autonomous cities of Ceuta and Melilla), source Instituto Geográfico Nacional (IGN/CNIG)",
+          years: "2017 (represented year)",
+          licence: "Creative Commons Attribution 4.0 International (CC BY 4.0), per the release metadata"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Centro de Investigaciones Sociológicas (CIS), <a href=\"https://www.cis.es/en/w/bancos-de-datos\" target=\"_blank\" rel=\"noopener\">banco de datos</a>: the Barómetro de Abril 2025 (Estudio nº 3505) open microdata (MD3505.zip); boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/ESP/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries ESP ADM1</a>.",
+        tables: "Both constructs are weighted survey estimates, never counts. Self-definition (P28): affiliated is RELIGION {1,2,3} and no religion is RELIGION {4,5,6} over all community respondents, with N.C. (9) as the residual in the denominator and in neither slot. Mass attendance (P28a): monthly-or-more is PRACTICARELIG6 {4,5,6} and weekly-or-more is {5,6}, over the asked believer subset (RELIGION {1,2,3}). Each share is weighted by PESOCCAA and carries a 95% Wald interval on the Kish effective sample size n_eff = (sum w)^2 / sum(w^2); the intervals, both bases (unweighted n and n_eff), and the ficha's published community maximum sampling error ride the manifest and the area summary. National PESO-weighted distributions reproduce the CIS avance within 0.1 pp. The delivered microdata carries 4,008 records against the ficha's 4,009 realised; estimates rest on the delivered file.",
+        licence: "CIS reuse is accepted under the datos.gob.es federation open-reuse grant with a source-citation condition, which authorises reproduction, modification, distribution, and communication for commercial and non-commercial use of the openly federated study matrices; the derived community-estimate product ships with the CIS source citation (Orden PRE/3188/2008 governs bespoke microdata requests, not these openly published matrices). Attribution: 'Fuente: Centro de Investigaciones Sociológicas (CIS), Estudio nº 3505, Barómetro de Abril 2025.' The geoBoundaries ESP ADM1 boundary is Creative Commons Attribution 4.0 International (CC BY 4.0), source Instituto Geográfico Nacional (IGN/CNIG).",
+        script: "scripts/build_es_area_summary.R",
+        manifests: [
+          { label: "es-cis-religion-2025", href: "docs/manifests/es-cis-religion-2025.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Spain map is a survey-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260712d"></script>
+</body>
+</html>

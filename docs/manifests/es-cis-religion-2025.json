@@ -1,9 +1,9 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
   "schema_version": "data-manifest.v2",
-  "manifest_id": "manifest:es-cis-religion:es:2025:6d7439c0e81d",
+  "manifest_id": "manifest:es-cis-religion:es:2025:cc1e04ae35d1",
   "dataset_id": "es-cis-religion:es:2025:cis-3505",
-  "dataset_version_id": "es-cis-religion:es:2025:cis-3505:6d7439c0e81d",
+  "dataset_version_id": "es-cis-religion:es:2025:cis-3505:cc1e04ae35d1",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -17,14 +17,14 @@
     "snapshot_date": null,
     "pipeline_stage": "staged"
   },
-  "created_at": "2026-07-12T08:06:37Z",
+  "created_at": "2026-07-12T09:45:56Z",
   "created_by": "scripts/build_es_area_summary.R",
   "target_years": [
     2025
   ],
   "pipeline": {
     "script": "scripts/build_es_area_summary.R",
-    "git_commit": "54678de",
+    "git_commit": "069f4d0",
     "command": "Rscript scripts/build_es_area_summary.R",
     "parameters": {
       "construct": {
@@ -56,7 +56,7 @@
           "6": 15.8,
           "9": 1.9
         },
-        "national_max_dev_pp": 0.100000000000001
+        "national_max_dev_pp": 0.1
       },
       "metric_2_mass_attendance": {
         "variable": "PRACTICARELIG6 (P28a)",
@@ -82,7 +82,7 @@
           "6": 5.2,
           "9": 1
         },
-        "national_max_dev_pp": 0.100000000000001
+        "national_max_dev_pp": 0.1
       },
       "small_cell_rule": {
         "doc": "docs/development/small-cell-rule.md (RATIFIED 2026-07-12)",
@@ -90,7 +90,8 @@
           "small_denominator_under_100": "unweighted respondent base n < 100 washes pale",
           "small_cell_under_10": "unweighted numerator respondent count < 10 marks the cell"
         },
-        "applied_to": "UNWEIGHTED respondent n as the closest survey analogue of the rule's census-person denominator/numerator; the same reading the route-probe used to wash Ceuta and Melilla.",
+        "pi_ruling": "PI RULING (2026-07-12, recorded in research/build-queue.md rank-92 row and the CHANGELOG): unweighted survey respondent n IS the wash denominator, stated on the map's information surfaces. The build's earlier open question is resolved; the tokens read each construct's own unweighted respondent base.",
+        "per_construct_files": "CONDUCTOR RULING (2026-07-12, Netherlands house pattern): because the runtime wash is metric-agnostic within a file, the two constructs ship in separate files, each carrying only its own tokens. area_summary_community.json is self-definition only (wash fires on exactly 5 communities); area_summary_attendance_community.json carries the attendance construct with only attendance tokens and is data-only for now - not wired to the map (the overview and popup carry attendance as context).",
         "self_definition_denominator_under_100": {
           "Aragón": 98,
           "Asturias (Principado de)": 95,
@@ -111,8 +112,7 @@
           "Rioja (La)": 47,
           "Ceuta (Ciudad Autónoma de)": 14,
           "Melilla (Ciudad Autónoma de)": 14
-        },
-        "open_question_for_conductor": "The ratified small-cell rule fixes its thresholds on census PERSONS (denominator < 100 persons washes; numerator < 10 persons marks). Its applicability to SURVEY respondent n is not settled by the doc. This build applies the thresholds to the unweighted respondent n as the closest analogue - the same reading the route-probe used for Ceuta and Melilla (n~19). A mechanical read washes not only the designed-small cities (Ceuta 19, Melilla 19) but also the full-design communities whose REALISED n dipped just under 100 (Aragón 98, Asturias 95, La Rioja 89), and, for the filtered mass-attendance metric, most communities. QUESTION: is unweighted survey respondent n the intended denominator for the wash, or should the wash apply only to units DESIGNED under 100 (Ceuta/Melilla), with the full-design sub-100-realised communities carried at full colour with a wide-interval note? No new treatment was invented; the tokens are emitted mechanically and this question is recorded for a ruling."
+        }
       },
       "boundary": {
         "boundary_set_id": "es-ccaa-cis-3505",
@@ -149,7 +149,7 @@
       "reconciliation": {
         "realised_total_microdata": 4008,
         "realised_total_ficha": 4009,
-        "record_difference_note": "The delivered anonymised microdata file carries 4008 records; the ficha técnica prints 4009 realised interviews (the difference is one record, in Asturias: microdata 95 vs ficha 96). All shipped estimates rest on the delivered file. National PESO-weighted distributions match the avance de resultados within 0.3 pp (RELIGION max dev 0.100000000000001 pp; attendance max dev 0.100000000000001 pp), confirming the file is the correct study; the sub-0.1 pp gaps (e.g. Católico no practicante 36,7 microdata vs 36,6 avance) are one-decimal rounding plus the one-record difference.",
+        "record_difference_note": "The delivered anonymised microdata file carries 4008 records; the ficha técnica prints 4009 realised interviews (the difference is one record, in Asturias: microdata 95 vs ficha 96). All shipped estimates rest on the delivered file. National PESO-weighted distributions match the avance de resultados within 0.1 pp observed (RELIGION max dev 0.1 pp; attendance max dev 0.1 pp; gate tolerance 0.3 pp), confirming the file is the correct study; the 0,1 pp gaps (e.g. Católico no practicante 36,7 microdata vs 36,6 avance) are one-decimal rounding plus the one-record difference.",
         "per_community": [
           {
             "area_code": "01",
@@ -1704,6 +1704,11 @@
       "layer": "pooled / multi-wave",
       "status": "future extension",
       "note": "This build ships one wave (Estudio 3505). Pooling adjacent 2020-onward community barometers would narrow the community intervals at the cost of a mixed reference period; a future extension."
+    },
+    {
+      "layer": "attendance as a map metric",
+      "status": "open runtime design item",
+      "note": "The attendance file is data-only: not wired to the map; the overview and popup carry attendance as context. Whether the attendance construct becomes a map metric (with its own asked-subset wash semantics) is an open runtime design item recorded by the conductor, not this build's."
     }
   ],
   "durable_files": [
@@ -1711,9 +1716,9 @@
       "uri": "repo:apps/regions/es/data/area_summary_community.json",
       "storage_provider": "git_repository",
       "format": "json",
-      "bytes": 69720,
-      "sha256": "0f523234f50773a5d94d34975fd0581628a6ce5d2ab1bfe756c9ded08a606f52",
-      "content": "Spain 19-community CIS survey affiliation-and-practice area-summary JSON (area-summary.v2)",
+      "bytes": 60342,
+      "sha256": "f79813d008cbedb5da9ed7a40699ab8633ec7253b7ef7cef017e5fd20ce9aba9",
+      "content": "Spain 19-community CIS survey religious self-definition area-summary JSON (area-summary.v2; self-definition construct and tokens only)",
       "privacy": "public",
       "licence_status": "accepted",
       "licence_basis": "cis_datos_gob_es_open_reuse_with_citation",
@@ -1723,9 +1728,33 @@
       "uri": "repo:apps/regions/es/data/area_summary_community.csv",
       "storage_provider": "git_repository",
       "format": "csv",
-      "bytes": 28934,
-      "sha256": "22f94a48461bc1c359e7b235d7e974d1d1bdb1fa4df84f3c6d64b70e12342300",
-      "content": "Spain 19-community CIS survey affiliation-and-practice area-summary CSV",
+      "bytes": 24490,
+      "sha256": "bb0fd87985b5d937d457e35faf21e55c348e52298673d5920fb74ab82dd24c94",
+      "content": "Spain 19-community CIS survey religious self-definition area-summary CSV (self-definition construct and tokens only)",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "cis_datos_gob_es_open_reuse_with_citation",
+      "row_count": 19
+    },
+    {
+      "uri": "repo:apps/regions/es/data/area_summary_attendance_community.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 62054,
+      "sha256": "03832866088963b0ae2a4052300b4fad788efbc3fc82b46fdb622fa80ed69d7b",
+      "content": "Spain 19-community CIS survey mass-attendance area-summary JSON (area-summary.v2; attendance construct and tokens only; data-only, not wired to the map)",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "cis_datos_gob_es_open_reuse_with_citation",
+      "row_count": 19
+    },
+    {
+      "uri": "repo:apps/regions/es/data/area_summary_attendance_community.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 27835,
+      "sha256": "4899270cf5ce29257431652170a6927a731ed32ec342667427de636f9dffde68",
+      "content": "Spain 19-community CIS survey mass-attendance area-summary CSV (attendance construct and tokens only)",
       "privacy": "public",
       "licence_status": "accepted",
       "licence_basis": "cis_datos_gob_es_open_reuse_with_citation",
@@ -1746,10 +1775,19 @@
   ],
   "partitions": [
     {
-      "partition_id": "es-ccaa-2025",
+      "partition_id": "es-ccaa-selfdef-2025",
       "partition_type": "area",
       "file_uri": "repo:apps/regions/es/data/area_summary_community.json",
-      "sha256": "0f523234f50773a5d94d34975fd0581628a6ce5d2ab1bfe756c9ded08a606f52",
+      "sha256": "f79813d008cbedb5da9ed7a40699ab8633ec7253b7ef7cef017e5fd20ce9aba9",
+      "country_code": "ES",
+      "row_count": 19,
+      "stage": "staged"
+    },
+    {
+      "partition_id": "es-ccaa-attendance-2025",
+      "partition_type": "area",
+      "file_uri": "repo:apps/regions/es/data/area_summary_attendance_community.json",
+      "sha256": "03832866088963b0ae2a4052300b4fad788efbc3fc82b46fdb622fa80ed69d7b",
       "country_code": "ES",
       "row_count": 19,
       "stage": "staged"
@@ -1758,14 +1796,17 @@
   "stats": {
     "waves": 1,
     "years": "2025",
-    "community_rows": 19,
     "communities": 19,
+    "selfdef_rows": 19,
+    "attendance_rows": 19,
+    "selfdef_washed_communities": 5,
+    "attendance_denominator_under_100": 12,
     "boundary_features": 19,
     "boundary_keep_percent": 16,
     "boundary_bytes": 2929929,
     "realised_total": 4008,
-    "national_religion_max_dev_pp": 0.100000000000001,
-    "national_attendance_max_dev_pp": 0.100000000000001
+    "national_religion_max_dev_pp": 0.1,
+    "national_attendance_max_dev_pp": 0.1
   },
   "local_cache_hint": "data/raw/es_cis/ (git-ignored; MD3505.zip and members with URL, bytes, SHA-256 in pipeline.parameters.raw_sources).",
   "validation": {
@@ -1773,19 +1814,22 @@
     "commands": [
       "Rscript scripts/build_es_area_summary.R",
       "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.v2.schema.json apps/regions/es/data/area_summary_community.json",
-      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/es-cis-religion-2025.json"
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.v2.schema.json apps/regions/es/data/area_summary_attendance_community.json",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/es-cis-religion-2025.json",
+      "bash scripts/validate_area_summaries.sh",
+      "bash scripts/validate_manifests.sh"
     ],
     "warnings": [
-      "Both metrics are SURVEY estimates with uncertainty, never census affiliation; each shipped share carries a 95% interval on the Kish effective n.",
-      "Mass attendance is a filtered subgroup (self-defined Catholics/other-believers); most communities fall under the small-cell denominator threshold; Ceuta and Melilla (n~19) wash on both metrics.",
-      "Small-cell rule applicability to survey respondent n is an OPEN QUESTION recorded for the conductor (see pipeline.parameters.small_cell_rule.open_question_for_conductor); tokens emitted mechanically, no new treatment invented.",
+      "Both constructs are SURVEY estimates with uncertainty, never census affiliation; each shipped share carries a 95% interval on the Kish effective n.",
+      "Per-construct files (conductor ruling 2026-07-12, Netherlands house pattern): the self-definition file carries only self-definition tokens (wash fires on exactly 5 communities); the attendance file carries only attendance tokens and is data-only, not wired to the map.",
+      "Mass attendance is a filtered subgroup (self-defined Catholics/other-believers); 12 communities fall under the attendance denominator threshold; Ceuta and Melilla (n~19) wash on both constructs.",
       "The delivered microdata carries 4008 records vs the ficha's 4009 realised (one record, Asturias 95 vs 96); estimates rest on the delivered file."
     ],
-    "notes": "Source hashes recorded and gated (3505_num.csv, codigo3505.pdf, FT3505.pdf, esp_adm1.geojson). National PESO-weighted RELIGION and attendance distributions match the avance de resultados within 0.3 pp. The 19-feature boundary joins 19/19 communities by verbatim shapeName with distinct geometry hashes, valid non-empty geometries, under the 3 MB cap. Both the area-summary (area-summary.v2) and the manifest pass schema validation."
+    "notes": "Source hashes recorded and gated (3505_num.csv, codigo3505.pdf, FT3505.pdf, esp_adm1.geojson). National PESO-weighted RELIGION and attendance distributions match the avance de resultados within 0.1 pp observed (gate tolerance 0.3 pp). The self-definition wash set is gated to exactly {Aragón, Asturias, La Rioja, Ceuta, Melilla}. The 19-feature boundary joins 19/19 communities by verbatim shapeName with distinct geometry hashes, valid non-empty geometries, under the 3 MB cap. Both area-summary files (area-summary.v2) and the manifest pass schema validation."
   },
   "privacy": "public",
   "licence_status": "accepted",
   "licence_basis": "cis_datos_gob_es_open_reuse_with_citation",
   "downstream_status": "staged",
-  "notes": "Single-wave (2025) 19-community CIS survey affiliation-and-practice product: religious self-definition (P28) and mass attendance (P28a), both weighted (PESOCCAA) percentages with 95% intervals, no counts. Survey dataNoun, never blended with census affiliation (Spain's census has no religion question). Small-cell rule applied on unweighted respondent n (open interpretive question recorded for the conductor). CIS open reuse via the datos.gob.es federation grant with citation (accepted); boundary CC BY 4.0. Ships STAGED (no page, no hub)."
+  "notes": "Single-wave (2025) 19-community CIS survey affiliation-and-practice product in per-construct files (conductor ruling 2026-07-12, Netherlands house pattern): religious self-definition (P28) in area_summary_community.json with only self-definition small-cell tokens (wash fires on exactly 5 communities), and mass attendance (P28a) in area_summary_attendance_community.json with only attendance tokens, data-only and not wired to the map. Both weighted (PESOCCAA) percentages with 95% intervals, no counts. Survey dataNoun, never blended with census affiliation (Spain's census has no religion question). Small-cell wash denominator is unweighted survey respondent n (PI ruling 2026-07-12), stated on the map surfaces. CIS open reuse via the datos.gob.es federation grant with citation (accepted); boundary CC BY 4.0. Ships STAGED (no page, no hub)."
 }
