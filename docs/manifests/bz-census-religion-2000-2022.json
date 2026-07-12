@@ -3,7 +3,7 @@
   "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:bz-census-religion:bz:2000-2022:sib-district",
   "dataset_id": "bz-census-religion:bz:2000-2022:sib-district",
-  "dataset_version_id": "bz-census-religion:bz:2000-2022:sib-district:f364869e2024",
+  "dataset_version_id": "bz-census-religion:bz:2000-2022:sib-district:774d7d4ba81a",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -27,7 +27,7 @@
   ],
   "pipeline": {
     "script": "scripts/build_bz_area_summary.R",
-    "git_commit": "3487a0549435aa4e0a2700ba57c7136051a20ee5",
+    "git_commit": "632ed16d034c59a5b5faa0665026370c8d8b0750",
     "command": "Rscript scripts/build_bz_area_summary.R",
     "parameters": {
       "construct": "census affiliation",
@@ -393,8 +393,8 @@
       "uri": "repo:apps/regions/bz/data/area_summary_district.json",
       "storage_provider": "git_repository",
       "format": "json",
-      "bytes": 51923,
-      "sha256": "f364869e202481b10d8c24f786f44bfc855df7f50500dc35a38ae20f4dd0fce4",
+      "bytes": 52031,
+      "sha256": "774d7d4ba81a83eb68a13059e3de4f820239f72dc96b921da6c94af5553507d1",
       "row_count": 18,
       "feature_count": null,
       "content": "Belize 6-district census-affiliation area summary for 2000, 2010, and 2022.",
@@ -406,8 +406,8 @@
       "uri": "repo:apps/regions/bz/data/area_summary_district.csv",
       "storage_provider": "git_repository",
       "format": "csv",
-      "bytes": 27693,
-      "sha256": "ba13461e7d8417e5b1a8801fe03cf1baeede86cb174c705c034210b4e2c4bebb",
+      "bytes": 27801,
+      "sha256": "2923489b1a61071c01b3ef1021f3688c0d94157e41336d04f497783744cffffb",
       "row_count": 18,
       "feature_count": null,
       "content": "Flattened Belize 6-district census-affiliation rows for 2000, 2010, and 2022.",
@@ -432,7 +432,7 @@
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/bz/data/area_summary_district.json",
-      "sha256": "f364869e202481b10d8c24f786f44bfc855df7f50500dc35a38ae20f4dd0fce4",
+      "sha256": "774d7d4ba81a83eb68a13059e3de4f820239f72dc96b921da6c94af5553507d1",
       "built_by": "scripts/build_bz_area_summary.R",
       "notes": "6 districts x 3 waves = 18 rows; all-persons universe in every wave; no suppressed cells in the headline slots."
     },

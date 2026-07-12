@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Belize map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Belize research map; every string traces to
+    // research/countries/bz/route-probe.md, the manifest
+    // docs/manifests/bz-census-religion-2000-2022.json, or the live
+    // REGION_CONFIG in apps/regions/bz/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "BZ",
+      countryName: "Belize",
+      mapHref: "./",
+      intro: "District census religion for Belize's six districts across three censuses, 2000, 2010 and 2022, from the Statistical Institute of Belize (SIB). The 2000 wave is the 2000 Census Report Table B2 (integer full-count); the 2010 and 2022 waves are the General Characteristics Tables sheet Religion_by_District, Table 9 (SIB weighted, non-integer counts). The construct is census affiliation: each resident's reported religion, asked of the whole resident population. It does not measure belief, practice, attendance, or membership.",
+      facts: {
+        waves: "Three censuses: 2000, 2010, 2022",
+        geographies: "District (6 units)",
+        metrics: "Religious affiliation %, no religion %"
+      },
+      reading: [
+        "The six districts are shaded by the share in the census None line, shown as No religion %, or by the share reporting a named religion, shown as Religious affiliation %. Religious affiliation % is the district population minus the None line minus the non-response line, over the district Total; No religion % is the single None line. The non-response line (2000 DK/NS; 2010/2022 Don't Know/Not Stated) stays in the denominator and in neither slot; the two shares therefore need not sum to 100.",
+        "The map-worthy signal is secularisation. The national No religion share rose 9.4% in 2000, to 15.5% in 2010, to 31.0% in 2022, among the sharpest such series in the corpus. By district in 2022, the None share already approaches the Roman Catholic share in Belize District and is highest in Stann Creek; Toledo and Corozal remain the most Catholic. The trend is read on the year selector, and a change metric reports the percentage-point change in the headline affiliation share between adjacent waves on the stable six-district frame.",
+        "The 2000 Table B2 cells are integer full-counts; every district column and every category row reconciles to the printed national total of 232,111 exactly. The 2010 and 2022 district cells are SIB weighted, non-integer counts from the census weighting and non-response-adjustment methodology (Key Findings Report sections 1.3.1 and 1.3.4); both waves reconcile float-exact to the national 322,423.82 and 397,483.46, and the 2022 rounded national counts match the Key Findings Report Table 3.5 published integers exactly. The weighted counts are carried verbatim and rounded to integer for display only; percentages use the unrounded as-published values.",
+        "Two frame breaks limit fine-denomination comparison. The first is category collapse: the 2000 seventeen-category frame names Bahai Faith, Hindu, Mormon, Muslim, and Salvation Army as separate lines, while the 2010 and 2022 twelve-category frame folds them into Other; the Other lines and those small-body lines are therefore not comparable across the 2000 break. The second is method: the 2000 cells are integer full-counts while the 2010 and 2022 cells are weighted, non-integer counts. Fine-denomination change is withheld across both breaks; the headline no-religion and affiliation shares stay comparable across all three waves. The frames are preserved verbatim per wave and never merged.",
+        "The full per-district category composition rides each row of the downloadable area summary verbatim (the source categories, per wave, in the row's quality flag). The popup shows the two headline shares by census year only; it does not show the per-denomination composition.",
+        "The boundary frame is geoBoundaries BLZ ADM1, six districts, represented year 2006. The six district boundaries (Corozal, Orange Walk, Belize, Cayo, Stann Creek, Toledo) join the six census districts one-to-one by name with no concordance. Belize's western and southern border with Guatemala is subject to a long-standing Guatemalan territorial claim before the International Court of Justice; the layer renders the official Belizean administrative extent that the SIB census enumerates, and the build takes no position on the dispute.",
+        "Earlier and alternative waves are held or deferred. The 1991 district religion figure survives in the 2000 report Table B2 but folds None into a combined None/Not-Stated line; the no-religion slot therefore cannot be isolated, and it is a deeper-history wave, not shipped. The 2010 Census Report Table R1.1 (integer full-count, twenty categories, with suppression on cells of ten or fewer persons, national total 322,453) is a richer-frame alternative 2010 source, deferred in favour of the 2010/2022 same-frame Excel pair.",
+        "No governed Belize place-of-worship snapshot ships with this product; place counts and density metrics are null."
+      ],
+      sources: [
+        {
+          name: "SIB 2000 Census Report, Table B2 (Population by Religion and Sex for Major Divisions), and 2010 & 2022 General Characteristics Tables, sheet Religion_by_District (Table 9)",
+          href: "https://sib.org.bz/",
+          construct: "District census religious affiliation over the six districts; 2000 integer full-count (seventeen categories), 2010 and 2022 SIB weighted non-integer counts (twelve categories)",
+          years: "2000, 2010, 2022",
+          licence: "No open-data licence is stated on any SIB census product. The 2010 Census Report front matter permits copying short sections for individual use with full acknowledgement and otherwise reserves all rights; the SIB website footer asserts all rights reserved. The derived district summaries carry attribution to SIB and ship under the build-then-ask ruling while a reuse-confirmation ask is outgoing; the page reverts in a single commit if SIB objects. Licence status: needs review."
+        },
+        {
+          name: "geoBoundaries Belize ADM1 boundaries",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/BLZ/ADM1/",
+          construct: "Boundary geometry (6 districts), boundary source Wikimedia Commons, joined one-to-one to the census districts by name",
+          years: "2006 (represented year)",
+          licence: "Creative Commons Attribution 2.5 Generic (CC BY 2.5 Generic), per the release metadata; pinned commit 9469f09"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Statistical Institute of Belize, <a href=\"https://sib.org.bz/\" target=\"_blank\" rel=\"noopener\">SIB</a>: the 2000 Census Report Table B2 and the 2010 & 2022 General Characteristics Tables Religion_by_District (Table 9), religion by district; boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/BLZ/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries BLZ ADM1</a>.",
+        tables: "Table B2 (2000) and Table 9 (2010, 2022) are the sources of record for the shipped shares. Each wave's religion table denominator is that wave's district Total tabulated by religion. The area-summary religious_affiliation_percent field is the district population minus the None line minus the non-response line, over the district Total; the no_religion_percent field carries the single None line. The 2000 margins close integer-exact to 232,111; the 2010 and 2022 margins close float-exact to 322,423.82 and 397,483.46 on the SIB weighted counts, and the 2022 rounded national counts match the Key Findings Report Table 3.5 published integers exactly.",
+        licence: "No open-data licence is stated on any SIB census product; the 2010 Census Report permits copying short sections with full acknowledgement and otherwise reserves all rights, and the SIB website footer asserts all rights reserved. The derived aggregate district summaries carry attribution to SIB and ship under the standing build-then-ask ruling while a reuse-confirmation ask is outgoing; the licence status is needs_review and the page reverts in a single commit if SIB objects. The microdata-portal terms restrict raw-microdata redistribution; the build touches no microdata. The geoBoundaries BLZ ADM1 boundary is CC BY 2.5 Generic per the release metadata, boundary source Wikimedia Commons.",
+        script: "scripts/build_bz_area_summary.R",
+        manifests: [
+          { label: "bz-census-religion-2000-2022", href: "docs/manifests/bz-census-religion-2000-2022.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Belize map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

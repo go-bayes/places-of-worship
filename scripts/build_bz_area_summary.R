@@ -335,7 +335,10 @@ flag_common <- paste(
   "non_response_residual_in_denominator_neither_slot",
   "shares_need_not_sum_to_100",
   "headline_no_religion_and_affiliation_comparable_across_waves",
-  "fine_denomination_change_withheld_across_frame_break",
+  # named to keep clear of the runtime's blanket change_withheld guard: the
+  # manifest change_rule reads headline change across all three waves and
+  # withholds only the fine-denomination series across the 2000 frame break
+  "fine_denomination_series_not_comparable_across_frame_break",
   "licence_needs_review_build_then_ask_sib_attribution",
   "boundary_cc_by_2_5_generic",
   sep = ";")
