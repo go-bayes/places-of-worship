@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Moldova map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Moldova research map; every string traces to
+    // research/countries/md/route-probe.md, the manifest
+    // docs/manifests/md-census-religion-2004-2024.json, or the live
+    // REGION_CONFIG in apps/regions/md/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "MD",
+      countryName: "Moldova",
+      mapHref: "./",
+      intro: "Raion and municipality census religion for Moldova's 35 right-bank units across three censuses, 2004, 2014 and 2024, from the National Bureau of Statistics of the Republic of Moldova (BNS). The construct is census affiliation: each enumerated resident's declared religion, asked of the whole enumerated population of all ages. It does not measure belief, practice, attendance, or membership. Every wave reconciles exactly at both margins, and the three waves ship as levels rather than as a change series.",
+      facts: {
+        waves: "Three censuses: 2004, 2014, 2024",
+        geographies: "Raion / municipality (35 right-bank units)",
+        metrics: "Religious affiliation %, no religion %"
+      },
+      reading: [
+        "Units are shaded by the share reporting a declared religious affiliation, or by the share in the wave's atheist/no-religion block, shown as No religion %. Orthodox affiliation dominates every raion; declared affiliation runs above nine in ten residents in every wave, and the sharpest contrasts sit in the north, where minority confessions and higher non-response pull a few raions below the national level.",
+        "The three waves do not share one category frame and are never merged. The 2004 table prints fifteen columns: twelve named confessions plus Atei, Fără religie and Nedeclarată. The 2014 table carries fourteen declared-block columns, holding Agnostic and Ateu inside the declared block with no separate 'fără religie' line at raion grain, plus one not-declared column. The 2024 annex adds Staroveri as a named line and splits the no-religion block into Liber cugetător, Agnostic, Ateu and Fără religie, folding several confessions into Alte religii. No cross-wave category change is claimed, and the map offers no change metric; the comparable spine is the Orthodox and aggregate declared-affiliation shares, which the per-unit composition carries verbatim.",
+        "Each wave ships two headline slots on its own frame. Affiliation is the population minus the wave's atheist/no-religion block and the not-declared line, divided by the population; no religion is the wave's own atheist/no-religion block. The not-declared line stays in the denominator and in neither slot, and the two shares need not sum to 100. Non-response is largest in 2014, where the not-declared line reaches 193,042 nationally and up to about a sixth of a raion; the no-religion block is not cell-comparable across waves, because 2014 carries no separate 'fără religie' line at raion grain, and each wave renders its own block.",
+        "Every wave counts the whole enumerated resident population of all ages; there is therefore no universe break, and the raion shares are construct-comparable within each wave. The national religion-table totals equal the census populations exactly: 3,383,332 in 2004, 2,804,801 in 2014, and 2,409,207 in 2024, with the Orthodox column closing to 3,158,015, 2,528,152 and 2,271,105. The enumerated population falls across the series; each raion's shares are read within its own wave denominator, and population change is never treated as a religion change. The 2014 enumerated base differs from a later BNS usual-resident revision; the waves are read in their own published denominators and are not reconciled.",
+        "Territorial scope, rendered as published (the map takes no position on the status of the territories): the National Bureau of Statistics enumerates the right bank only in every post-Soviet census, and the Transnistrian region conducts its own separate censuses. The two left-bank ADM1 polygons, Transnistria and Bender, carry no census religion in any wave and render as no-data, never zero. Căuşeni and Dubăsari are enumerated in their central-government-controlled parts only; their boundary polygons span the full administrative extent, and the 2024 annex footnote lists the non-enumerated left-bank localities verbatim, disclosed on those two units' flags. No count is invented for any non-enumerated area.",
+        "The smallest raion denominator is Basarabeasca in 2024 at 14,914 residents, far above the 100-person wash threshold; no unit washes on denominator size. Many minority-confession category counts fall below ten (or print as magnitude zero, the '-' cell in the 2024 annex treated as 0); a raion carrying any such cell is marked, and every count renders exactly as published, none suppressed or differenced. The 2024 shares sheet prints the Liber cugetător and Agnostic columns at 100 times their fraction, a source-internal formatting inconsistency; the product carries the exact 2024 counts and does not use those printed shares.",
+        "The boundary frame is geoBoundaries MDA ADM1, 37 units, represented year 2020. The 35 census units join one-to-one after folding Romanian diacritics to the boundary ASCII form and stripping the Mun. and U.T.A. prefixes; the two non-census polygons are exactly Transnistria and Bender. One boundary set serves all three waves. Raion and municipality is the shipped level; the 2004 and 2024 sources additionally split religion by age, sex and urban/rural, a deeper product deferred here.",
+        "No governed Moldova place-of-worship snapshot ships with this product; place counts and density metrics are null."
+      ],
+      sources: [
+        {
+          name: "BNS 2004 Population Census, Volume I, Table 5.2 (population by religion, in territorial aspect)",
+          href: "https://statistica.gov.md/files/files/publicatii_electronice/Recensamint/recensamint_2004_vol.I.zip",
+          construct: "Census religion by raion, 35 right-bank units, fifteen columns (twelve named confessions plus Atei, Fără religie and Nedeclarată), integer counts",
+          years: "2004",
+          licence: "BNS Terms of use of data, Creative Commons Attribution 4.0 International (source attribution required)"
+        },
+        {
+          name: "BNS 2014 Population and Housing Census, population by religion in territorial aspect (table 2.1)",
+          href: "https://statistica.gov.md/public/files/Recensamint/Recensamint_pop_2014/Rezultate/Tabele/Caracteristici_populatie_Comune_RPL_2014_rom_rus_eng.xls",
+          construct: "Census religion by raion, 35 units, fourteen declared-block columns (incl. Agnostic and Ateu) plus a separate not-declared column, integer counts",
+          years: "2014",
+          licence: "BNS Terms of use of data, Creative Commons Attribution 4.0 International (source attribution required)"
+        },
+        {
+          name: "BNS 2024 Population and Housing Census, ethnocultural annex table 5.29 (religion by development region and raion, counts)",
+          href: "https://statistica.gov.md/files/files/ComPresa/Recensamant/2024/Ro/Anexa_Caracteristici_Etnoculturale_RPL2024.xlsx",
+          construct: "Census religion by raion, 35 units, fourteen declared-block columns (incl. Staroveri, Liber cugetător, Agnostic, Ateu, Fără religie) plus a separate not-declared column, integer counts; '-' taken as magnitude zero",
+          years: "2024",
+          licence: "BNS Terms of use of data, Creative Commons Attribution 4.0 International (source attribution required)"
+        },
+        {
+          name: "geoBoundaries Moldova ADM1 boundaries",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/MDA/ADM1/",
+          construct: "Boundary geometry (37 units; 35 census units plus Transnistria and Bender as non-census polygons), boundary source UNHCR, OCHA FISS",
+          years: "2020 (represented year)",
+          licence: "Creative Commons Attribution 3.0 IGO (CC BY 3.0 IGO), per the release metadata"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "National Bureau of Statistics of the Republic of Moldova, <a href=\"https://statistica.gov.md/\" target=\"_blank\" rel=\"noopener\">BNS</a>: the 2004 census Volume I Table 5.2, the 2014 population-by-religion territorial table 2.1, and the 2024 ethnocultural annex table 5.29; boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/MDA/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries MDA ADM1</a>.",
+        tables: "The shipped raion rows reconcile exactly at both margins in every wave. In 2004 the 35 unit rows sum to 3,383,332 and each unit's fifteen columns close to its printed total, with the Orthodox column at 3,158,015. In 2014 each unit's total equals declared plus not-declared and the declared block equals the sum of its fourteen categories, closing nationally to 2,804,801 (Orthodox 2,528,152). In 2024 each unit's total equals its categories plus not-declared, closing to 2,409,207 (Orthodox 2,271,105). Boundaries join 35 of 35 census units one-to-one; Transnistria and Bender are present as no-data.",
+        licence: "Census reuse is accepted under the BNS Terms of use of data, which place website content and data under Creative Commons Attribution 4.0 International, free to copy, redistribute, remix, transform and build upon the material for any purpose, on the conditions that the source is clearly indicated and any modification is noted. Attribution is 'National Bureau of Statistics of the Republic of Moldova'. No reuse ask is needed. The geoBoundaries MDA ADM1 boundary is Creative Commons Attribution 3.0 IGO (CC BY 3.0 IGO) per the release metadata, boundary source UNHCR, OCHA FISS.",
+        script: "scripts/build_md_area_summary.R",
+        manifests: [
+          { label: "md-census-religion-2004-2024", href: "docs/manifests/md-census-religion-2004-2024.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Moldova map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

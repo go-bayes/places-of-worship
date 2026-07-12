@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Moldova Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712c" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Moldova's product is raion/municipality census religion from the
+    // National Bureau of Statistics of the Republic of Moldova (Biroul
+    // Naţional de Statistică, BNS) across three censuses (2004, 2014, 2024)
+    // as exact counts, joined to the geoBoundaries MDA ADM1 boundary set (37
+    // units). The 35 right-bank census units join one-to-one; the two
+    // left-bank polygons (Transnistria, Bender) carry no census religion and
+    // render as disclosed no-data. Every wave reconciles at both margins
+    // (national totals 3,383,332 / 2,804,801 / 2,409,207; Orthodox
+    // 3,158,015 / 2,528,152 / 2,271,105). The construct is census
+    // affiliation: each enumerated resident's declared religion, asked of the
+    // whole enumerated population of all ages. It does not measure belief,
+    // practice, attendance, or membership.
+    //
+    // Per-wave category frames differ and are never merged. The 2004 table
+    // prints fifteen columns (twelve named confessions plus Atei, Fără
+    // religie and Nedeclarată); 2014 carries fourteen declared-block columns
+    // (Agnostic and Ateu inside the declared block, no separate fără-religie
+    // line at raion grain) plus one not-declared column; 2024 adds Staroveri
+    // and splits the no-religion block into Liber cugetător, Agnostic, Ateu
+    // and Fără religie, folding several confessions into Alte religii. No
+    // cross-wave category change is claimed; the comparable spine is the
+    // Orthodox and aggregate declared-affiliation shares. The three waves
+    // ship as levels.
+    //
+    // RUNTIME GUARD FINDING (reported to the conductor). The intended design
+    // was to ship a two-slot percentage-point change metric on the affiliation
+    // and no-religion levels while withholding only the fine-category change.
+    // The product carries the withhold intent as the flag token
+    // fine_category_cross_wave_change_withheld, and that token CONTAINS the
+    // substring "change_withheld" that the runtime's changeWithheld() guard
+    // matches. The guard therefore nulls every change metric for every raion,
+    // not only the fine-category one. This page ships the two levels WITHOUT a
+    // change metric (as Georgia does) rather than list a religious_change
+    // metric that would render all no-data. The collision is reported for the
+    // conductor to resolve at the product level; this lane renames no token.
+    //
+    // Two-slot design (each wave on its own frame). Affiliation is the
+    // population minus the wave's atheist/no-religion block and the
+    // not-declared line, divided by the population; no religion is the wave's
+    // own atheist/no-religion block. The not-declared line stays in the
+    // denominator and in neither slot, and the two shares need not sum to 100.
+    // The no-religion block is not cell-comparable across waves (2014 carries
+    // no separate fără-religie line at raion grain); each wave renders its own
+    // block. The 2024 counts are the shipped values; the 2024 shares sheet
+    // prints two columns at 100x their fraction (a source-internal formatting
+    // inconsistency), documented and not used.
+    //
+    // TERRITORIAL SCOPE (render the record; take no position on status). The
+    // National Bureau of Statistics enumerates the right bank only in every
+    // post-Soviet census; the Transnistrian region conducts its own separate
+    // censuses. The two left-bank ADM1 polygons (Transnistria, Bender) carry
+    // no census religion in any wave and render as disclosed no-data, never
+    // zero. Căuşeni and Dubăsari are enumerated in their central-government-
+    // controlled parts only, against polygons drawn to the full administrative
+    // extent; the 2024 annex footnote lists the non-enumerated left-bank
+    // localities, disclosed on those two units' flags. No count is invented
+    // for any non-enumerated area.
+    //
+    // Licence accepted (no ask): the census ships under the BNS Terms of use
+    // of data (Creative Commons Attribution 4.0 International with source
+    // attribution). Boundaries are geoBoundaries MDA ADM1 (Creative Commons
+    // Attribution 3.0 IGO), boundary source UNHCR, OCHA FISS, represented year
+    // 2020.
+    window.REGION_CONFIG = {
+      countryCode: "MD",
+      title: "Places of Worship | Moldova Research Map",
+      // boundary bbox verified numerically from the 37-feature layer:
+      // lon 26.616..30.163, lat 45.467..48.492; centre on [28.39, 46.98].
+      // the ~3.5 deg lon / ~3.0 deg lat extent fits every raion at z7.
+      center: [28.39, 46.98],
+      initialZoom: 7,
+      censusLevels: {
+        raion: {
+          label: "Raion / municipality (35 units)",
+          boundaries: "data/md_raion.geojson",
+          summary: "data/area_summary_raion.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © National Bureau of Statistics of the Republic of Moldova (BNS), 2004, 2014 and 2024 population censuses, religion-by-raion tables (BNS Terms of use of data, Creative Commons Attribution 4.0 International) · Boundaries © geoBoundaries MDA ADM1 (Creative Commons Attribution 3.0 IGO), boundary source UNHCR, OCHA FISS"
+        }
+      },
+      defaultLevel: "raion",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2024,
+      // the two census-question shares; place and density metrics are omitted
+      // (no governed place layer), and no change metric is offered: the three
+      // waves carry different category frames and ship as levels, and the
+      // fine_category_cross_wave_change_withheld token trips the runtime's
+      // changeWithheld() guard, which would null a change metric everywhere.
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the raion's census population reporting a declared religion. In every wave it is the population minus the wave's atheist/no-religion block and the not-declared line, divided by the population; the not-declared line stays in the denominator and in neither share, and the affiliation and no-religion shares need not sum to 100. The three waves carry different category frames and ship as levels; no cross-wave category change is offered, and the comparable spine is the Orthodox and aggregate declared-affiliation shares."
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the wave's atheist/no-religion block: 2004 Atei and Fără religie; 2014 Agnostic and Ateu; 2024 Liber cugetător, Agnostic, Ateu and Fără religie. The block is not cell-comparable across waves (2014 carries no separate 'fără religie' line at raion grain); each wave renders its own block. The not-declared line is a disclosed denominator residual and is never folded into this slot."
+        }
+      },
+      popupDenominatorNote: "Percentages use each raion's printed census population total as the denominator. Religious affiliation % is the declared-religion share: the population minus the wave's atheist/no-religion block and the not-declared line, divided by the population. No religion % is the wave's own atheist/no-religion block (2004 Atei and Fără religie; 2014 Agnostic and Ateu; 2024 Liber cugetător, Agnostic, Ateu and Fără religie), which is not cell-comparable across waves. The not-declared line stays in the denominator and in neither share, and the two shares need not sum to 100. The three waves carry different category frames and ship as levels; no cross-wave change is offered. The construct is census affiliation; it does not measure belief, practice, attendance, or membership. The National Bureau of Statistics enumerates the right bank only: Transnistria and Bender are not enumerated and render as no-data, and Căuşeni and Dubăsari are enumerated in their central-government-controlled parts only, against polygons drawn to the full administrative extent.",
+      cityPresets: [
+        { label: "Chişinău", coords: [28.8353, 47.0245], zoom: 10 },
+        { label: "Bălţi", coords: [27.9186, 47.7615], zoom: 10 },
+        { label: "Comrat", coords: [28.6564, 46.2917], zoom: 10 },
+        { label: "Cahul", coords: [28.1944, 45.9080], zoom: 10 },
+        { label: "Ungheni", coords: [27.8000, 47.2117], zoom: 10 },
+        { label: "Orhei", coords: [28.8236, 47.3831], zoom: 10 },
+        { label: "Soroca", coords: [28.2971, 48.1550], zoom: 10 },
+        { label: "Edineţ", coords: [27.3044, 48.1681], zoom: 10 }
+      ],
+      geocode: { country: "md", biasLngLat: [28.39, 46.98] },
+      onboarding: {
+        title: "Moldova research map",
+        intro: "Raion and municipality census religion for Moldova's 35 right-bank units across three censuses, 2004, 2014 and 2024, from the National Bureau of Statistics of the Republic of Moldova (BNS). The construct is census affiliation: each enumerated resident's declared religion, asked of the whole enumerated population of all ages. It does not measure belief, practice, attendance, or membership.",
+        bullets: [
+          "Units are shaded by the share reporting a declared religious affiliation, or by the share in the wave's atheist/no-religion block, shown as No religion %. Orthodox affiliation dominates every raion; declared affiliation runs above nine in ten residents in every wave.",
+          "Three census waves ship at raion level, 2004, 2014 and 2024, as exact counts. The category frames differ across waves and are never merged; no cross-wave change metric is offered, and the comparable spine is the Orthodox and aggregate declared-affiliation shares. Each wave's verbatim categories and counts ride the popup composition block.",
+          "In every wave the not-declared line stays in the denominator and in neither share, and the affiliation and no-religion shares need not sum to 100. The not-declared line is largest in 2014 (193,042 nationally, up to about a sixth of a raion). The no-religion block is not cell-comparable across waves (2014 carries no separate 'fără religie' line at raion grain); each wave renders its own block.",
+          "Territorial scope (render the record): the National Bureau of Statistics enumerates the right bank only. Transnistria and Bender carry no census religion in any wave and render as no-data, never zero. Căuşeni and Dubăsari are enumerated in their central-government-controlled parts only, against polygons drawn to the full administrative extent, disclosed on those two units' flags. No count is invented for any non-enumerated area.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://statistica.gov.md/" target="_blank" rel="noopener">National Bureau of Statistics of the Republic of Moldova (BNS)</a>, 2004, 2014 and 2024 population censuses (religion-by-raion tables). BNS Terms of use of data, Creative Commons Attribution 4.0 International; source: National Bureau of Statistics of the Republic of Moldova. &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> MDA ADM1 (Creative Commons Attribution 3.0 IGO, CC BY 3.0 IGO), boundary source UNHCR, OCHA FISS',
+      censusFlagNote: "* The construct is census affiliation (each enumerated resident's declared religion, whole enumerated population, all ages); it does not measure belief, practice, attendance, or membership. Category frames differ across the three waves and are never merged; no cross-wave category change is claimed, and the comparable spine is the Orthodox and aggregate declared-affiliation shares. In every wave the not-declared line stays in the denominator and in neither share, and the two shares need not sum to 100; the no-religion block is not cell-comparable across waves (2014 carries no separate 'fără religie' line at raion grain). Territorial scope: the National Bureau of Statistics enumerates the right bank only; Transnistria and Bender are not enumerated and render as no-data, never zero, and Căuşeni and Dubăsari are enumerated in their central-government-controlled parts only against polygons drawn to the full administrative extent. † marks a raion whose wave carries a published category count under ten people; counts render exactly as published, none suppressed. Census reuse under the BNS Terms of use of data (Creative Commons Attribution 4.0 International)."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712c"></script>
+</body>
+</html>
