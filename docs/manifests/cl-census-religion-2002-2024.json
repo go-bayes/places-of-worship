@@ -1,0 +1,499 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:cl-census-religion:cl:2002-2024:ine-commune",
+  "dataset_id": "cl-census-religion:cl:2002-2024:ine-commune",
+  "dataset_version_id": "cl-census-religion:cl:2002-2024:ine-commune:787baf9e2f09",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "cl-census-religion",
+  "dataset_role": "accepted_export",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "CL"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "accepted"
+  },
+  "created_at": "2026-07-12T00:00:00Z",
+  "created_by": "scripts/build_cl_area_summary.R",
+  "target_years": [
+    2002,
+    2024
+  ],
+  "pipeline": {
+    "script": "scripts/build_cl_area_summary.R",
+    "git_commit": "555440b6a9cc3735cb76ed1493838fc1968ad606",
+    "command": "Rscript scripts/build_cl_area_summary.R",
+    "parameters": {
+      "construct": "census affiliation",
+      "shipped_waves": [
+        2002,
+        2024
+      ],
+      "shipped_geography": "346 communes (current INE DPA frame); both waves on one frame",
+      "boundary_set": "cl-commune-2024-ine-dpa",
+      "source_route": "BCN Estadisticas Territoriales theme 101 'Religion Declarada' (source INE census): POST GenerarConsulta idTema=101 tipoUnidadTerritorial=1 variables=14312..14322 anios=2002,2024 with all commune CUTs; download descargar-resultados/<id>/datos.json. No CAPTCHA on the query.",
+      "universes": {
+        "2002": "aged 15+",
+        "2024": "aged 15+"
+      },
+      "denominators": {
+        "2002": "commune total_r; affiliation = total_r - Ninguna (no 'No declara' line)",
+        "2024": "commune total_r; affiliation = total_r - Ninguna - 'No declara religion'"
+      },
+      "slot_design": "Ordinary two-slot (KZ/BZ precedent; Chile has a real 'Ninguna' no-religion category, no minority-share gate). religious_affiliation_percent = (total_r - Ninguna - No-declara)/total_r; no_religion_percent = Ninguna/total_r. 'No declara' (2024 only) is a disclosed denominator residual in neither slot, so the two shares need not sum to 100. INE's headline percentages use the responder base (total_r minus No-declara), so the product no-religion share runs ~0.58pp below the INE 2024 headline and is identical in 2002.",
+      "category_frame": {
+        "bcn_harmonised_ten": [
+          "Católica",
+          "Evangélica o Protestante",
+          "Testigos de Jehová",
+          "Judaica",
+          "Mormón",
+          "Musulmana",
+          "Ortodoxa",
+          "Otro religión o credo",
+          "Ninguna religión, ateo o agnóstico",
+          "No declara religión"
+        ],
+        "census_2024_questionnaire": [
+          "Catolica",
+          "Evangelica o protestante",
+          "Judia",
+          "Musulmana",
+          "Mormon",
+          "Catolica Ortodoxa",
+          "Budista",
+          "Hinduista",
+          "Fe Baha'i",
+          "Testigo de Jehova",
+          "Otra religion o credo",
+          "Ninguna"
+        ],
+        "frame_note": "The commune series uses the BCN harmonised ten-category frame (identical across 1992/2002/2024), which folds the finer 2024 census options (Budista, Hinduista, Fe Baha'i) into 'Otro religion o credo'. The finer 2024 categories and the derived 'Otros cristianos y tradiciones relacionadas con Cristo' appear only in the INE national/regional presentation; the 26,051-person 'Otros cristianos' group is the 2024 residual (total_r minus the ten BCN columns), folded into the affiliation slot."
+      },
+      "frame_break": "Both waves ship on the current 346-commune frame. When Arica y Parinacota + Los Rios (2007) and Nuble (2018) split off, 37 communes were re-coded (e.g. Valdivia 10501->14101); the build maps 2002 CUTs to current CUTs directly (304) or by unique name (37), 0 unmatched. Five communes are null in 2002: four created in 2004 (Alto Hospicio, Hualpen, Alto Biobio, Cholchol; parents carry the combined 2002 count, change withheld on those pairs) and Puchuncavi (a BCN 2002-series gap). No backcast, no invented split.",
+      "external_reconciliation": "2024 matches the INE presentation within sub-0.005% (affiliation 11,215,141 vs 11,214,961; none 3,903,128 vs 3,903,308; Catolica 8,168,945 vs 8,168,978). 2002 runs ~0.87% below the INE regional/national base (commune total_r 11,128,104 vs ~11,226,309), uniform across categories; reconciles exactly internally; documented discrepancy (Saint Lucia/CI precedent), never redistributed.",
+      "antarctic_extent": "The Comuna Antartica (CUT 12202) polygon reaches -89 lat (Chilean Antarctic claim); rendered as published. No dateline cut needed (all longitudes western negative). Isla de Pascua (CUT 5201) at -109.45 lon is present.",
+      "omitted_metrics": [
+        "place_count",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 10,
+        "bytes": 1784847
+      },
+      "local_cache_hint": "All raw sources are cached under data/raw/cl_census/ and remain git-ignored.",
+      "retrieval_record": [
+        {
+          "uri": "data/raw/cl_census/cl_bcn_comunas_2002_2024.json",
+          "url": "https://www.bcn.cl/siit/estadisticasterritoriales/servicio/GenerarConsulta",
+          "format": "json",
+          "bytes": 304852,
+          "sha256": "b3203048a4d33af0af3ca00fc874185058a97eb42cb7d87ffbaf51153bfb8fdd",
+          "row_count": null,
+          "source_dataset_id": "cl-bcn-estadisticas-territoriales-101-religion-declarada-comuna",
+          "used_in_public_product": true,
+          "periods": "2002;2024",
+          "notes": "BCN GenerarConsulta theme 101 (idTema=101, tipoUnidadTerritorial=1, variables 14312-14322, anios 2002+2024, all commune CUTs); source INE census. 2002 reconciles exactly to total_r 11,128,104; 2024 to total_r 15,205,784 with a 26,051 'Otros cristianos' residual folded into affiliation.",
+          "local_cache_hint": "data/raw/cl_census/cl_bcn_comunas_2002_2024.json (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cl_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cl_census/cl_bcn_comunas_2002_2024.csv",
+          "url": "https://www.bcn.cl/siit/estadisticasterritoriales/servicio/GenerarConsulta",
+          "format": "csv",
+          "bytes": 186571,
+          "sha256": "888d394b3e27beb83c3df181127cc1b722fe67fb757407fe3139c7a0f560f42a",
+          "row_count": null,
+          "source_dataset_id": "cl-bcn-estadisticas-territoriales-101-religion-declarada-comuna",
+          "used_in_public_product": false,
+          "periods": "2002;2024",
+          "notes": "Same BCN query, CSV form (companion to the JSON build input).",
+          "local_cache_hint": "data/raw/cl_census/cl_bcn_comunas_2002_2024.csv (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cl_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cl_census/ine_comunas_dpa2017.geojson",
+          "url": "https://services5.arcgis.com/hUyD8u3TeZLKPe4T/arcgis/rest/services/Limites_DPA_Censal_2017_AGOL/FeatureServer/3",
+          "format": "geojson",
+          "bytes": 25975115,
+          "sha256": "6616181771f30021ac6906b504230091353540a5211efea657858705c5a30357",
+          "row_count": null,
+          "source_dataset_id": "ine-dpa-censal-comunas-simp16r",
+          "used_in_public_product": true,
+          "periods": "2024",
+          "notes": "INE DPA Censal Comunas_Simp16R (346 communes, CUT-coded); joins the 2024 census one-to-one by CUT.",
+          "local_cache_hint": "data/raw/cl_census/ine_comunas_dpa2017.geojson (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cl_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cl_census/ine_dpa_item.json",
+          "url": "https://www.arcgis.com/sharing/rest/content/items/515565c9739143428fbc50c4689dbca5",
+          "format": "json",
+          "bytes": 1513,
+          "sha256": "54af95049eac2bd9cab5d63094ae9c039d9db93a3b78cfe79b91f063361708c9",
+          "row_count": null,
+          "source_dataset_id": "ine-dpa-censal-comunas-simp16r",
+          "used_in_public_product": false,
+          "periods": "2024",
+          "notes": "ArcGIS item metadata for the INE DPA commune layer (provenance; owner publicaciones_geodatos).",
+          "local_cache_hint": "data/raw/cl_census/ine_dpa_item.json (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cl_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cl_census/ine_terminos.html",
+          "url": "https://www.ine.gob.cl/terminos-de-uso-y-licencia-de-datos-abiertos",
+          "format": "html",
+          "bytes": 106779,
+          "sha256": "708dde1ff6580973a48f0786eb746e76d91dc719401de570ba5e2dabd111279c",
+          "row_count": null,
+          "source_dataset_id": "cl-bcn-estadisticas-territoriales-101-religion-declarada-comuna",
+          "used_in_public_product": false,
+          "periods": "2026",
+          "notes": "INE terms of use: CC BY-SA 4.0 (Reconocimiento-CompartirIgual 4.0), quoted verbatim.",
+          "local_cache_hint": "data/raw/cl_census/ine_terminos.html (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cl_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cl_census/cl_2024_religion_presentation.pdf",
+          "url": "https://censo2024.ine.gob.cl/wp-content/uploads/2025/08/Presentacion-resultados-religion-o-credos_CPV2024.pdf",
+          "format": "pdf",
+          "bytes": 6099754,
+          "sha256": "695c2be2c725ab75359ba01c4042c6c7cbf5c381b49abceffe2c3b08d6b80284",
+          "row_count": null,
+          "source_dataset_id": "cl-bcn-estadisticas-territoriales-101-religion-declarada-comuna",
+          "used_in_public_product": false,
+          "periods": "2024",
+          "notes": "INE 2024 religion presentation (Q.31 categories, aged-15+ universe, national/regional context; external reconciliation check).",
+          "local_cache_hint": "data/raw/cl_census/cl_2024_religion_presentation.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cl_census/"
+          ]
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "scripts/lib/simplify_boundary.R (npx mapshaper)"
+    }
+  },
+  "source": {
+    "provider": "Instituto Nacional de Estadisticas de Chile (INE); disseminated by the Biblioteca del Congreso Nacional (BCN)",
+    "source_dataset_ids": [
+      "cl-bcn-estadisticas-territoriales-101-religion-declarada-comuna",
+      "ine-dpa-censal-comunas-simp16r"
+    ],
+    "source_urls": [
+      "https://www.bcn.cl/siit/estadisticasterritoriales/tema?id=101",
+      "https://www.bcn.cl/siit/estadisticasterritoriales/servicio/GenerarConsulta",
+      "https://services5.arcgis.com/hUyD8u3TeZLKPe4T/arcgis/rest/services/Limites_DPA_Censal_2017_AGOL/FeatureServer/3",
+      "https://www.arcgis.com/sharing/rest/content/items/515565c9739143428fbc50c4689dbca5",
+      "https://www.ine.gob.cl/terminos-de-uso-y-licencia-de-datos-abiertos",
+      "https://censo2024.ine.gob.cl/wp-content/uploads/2025/08/Presentacion-resultados-religion-o-credos_CPV2024.pdf"
+    ],
+    "retrieved_at": "2026-07-12T00:00:00Z",
+    "licence": "Instituto Nacional de Estadisticas (INE) open-data licence. The INE terms (ine.gob.cl/terminos-de-uso-y-licencia-de-datos-abiertos, retrieved 2026-07-12) state: 'El contenido de este sitio Web se rige bajo una licencia de Creative Commons Reconocimiento-CompartirIgual 4.0 Internacional' (CC BY-SA 4.0): free reuse including commercial, with attribution ('Fuente: INE, nombre del producto ..., actualizada AAAA') and share-alike, and a requirement to state that any derivation is not INE's own analysis.",
+    "citation": "INE, Censo 2002 y Censo 2024, Religion Declarada por comuna (BCN Estadisticas Territoriales tema 101); INE DPA Censal commune boundary.",
+    "raw_redistribution": "The BCN census JSON/CSV and the INE boundary geojson are not committed; they remain in data/raw/cl_census/.",
+    "local_cache_hint": "data/raw/cl_census/ (git-ignored by .gitignore data/ rule)",
+    "raw_cache_durable_uris": [
+      "gs://pow-research-data/raw_sources/cl_census/"
+    ]
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/cl_census/cl_bcn_comunas_2002_2024.json",
+      "url": "https://www.bcn.cl/siit/estadisticasterritoriales/servicio/GenerarConsulta",
+      "format": "json",
+      "bytes": 304852,
+      "sha256": "b3203048a4d33af0af3ca00fc874185058a97eb42cb7d87ffbaf51153bfb8fdd",
+      "row_count": null,
+      "source_dataset_id": "cl-bcn-estadisticas-territoriales-101-religion-declarada-comuna",
+      "used_in_public_product": true,
+      "periods": "2002;2024",
+      "notes": "BCN GenerarConsulta theme 101 (idTema=101, tipoUnidadTerritorial=1, variables 14312-14322, anios 2002+2024, all commune CUTs); source INE census. 2002 reconciles exactly to total_r 11,128,104; 2024 to total_r 15,205,784 with a 26,051 'Otros cristianos' residual folded into affiliation.",
+      "local_cache_hint": "data/raw/cl_census/cl_bcn_comunas_2002_2024.json (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cl_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cl_census/cl_bcn_comunas_2002_2024.csv",
+      "url": "https://www.bcn.cl/siit/estadisticasterritoriales/servicio/GenerarConsulta",
+      "format": "csv",
+      "bytes": 186571,
+      "sha256": "888d394b3e27beb83c3df181127cc1b722fe67fb757407fe3139c7a0f560f42a",
+      "row_count": null,
+      "source_dataset_id": "cl-bcn-estadisticas-territoriales-101-religion-declarada-comuna",
+      "used_in_public_product": false,
+      "periods": "2002;2024",
+      "notes": "Same BCN query, CSV form (companion to the JSON build input).",
+      "local_cache_hint": "data/raw/cl_census/cl_bcn_comunas_2002_2024.csv (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cl_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cl_census/ine_comunas_dpa2017.geojson",
+      "url": "https://services5.arcgis.com/hUyD8u3TeZLKPe4T/arcgis/rest/services/Limites_DPA_Censal_2017_AGOL/FeatureServer/3",
+      "format": "geojson",
+      "bytes": 25975115,
+      "sha256": "6616181771f30021ac6906b504230091353540a5211efea657858705c5a30357",
+      "row_count": null,
+      "source_dataset_id": "ine-dpa-censal-comunas-simp16r",
+      "used_in_public_product": true,
+      "periods": "2024",
+      "notes": "INE DPA Censal Comunas_Simp16R (346 communes, CUT-coded); joins the 2024 census one-to-one by CUT.",
+      "local_cache_hint": "data/raw/cl_census/ine_comunas_dpa2017.geojson (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cl_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cl_census/ine_dpa_item.json",
+      "url": "https://www.arcgis.com/sharing/rest/content/items/515565c9739143428fbc50c4689dbca5",
+      "format": "json",
+      "bytes": 1513,
+      "sha256": "54af95049eac2bd9cab5d63094ae9c039d9db93a3b78cfe79b91f063361708c9",
+      "row_count": null,
+      "source_dataset_id": "ine-dpa-censal-comunas-simp16r",
+      "used_in_public_product": false,
+      "periods": "2024",
+      "notes": "ArcGIS item metadata for the INE DPA commune layer (provenance; owner publicaciones_geodatos).",
+      "local_cache_hint": "data/raw/cl_census/ine_dpa_item.json (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cl_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cl_census/ine_terminos.html",
+      "url": "https://www.ine.gob.cl/terminos-de-uso-y-licencia-de-datos-abiertos",
+      "format": "html",
+      "bytes": 106779,
+      "sha256": "708dde1ff6580973a48f0786eb746e76d91dc719401de570ba5e2dabd111279c",
+      "row_count": null,
+      "source_dataset_id": "cl-bcn-estadisticas-territoriales-101-religion-declarada-comuna",
+      "used_in_public_product": false,
+      "periods": "2026",
+      "notes": "INE terms of use: CC BY-SA 4.0 (Reconocimiento-CompartirIgual 4.0), quoted verbatim.",
+      "local_cache_hint": "data/raw/cl_census/ine_terminos.html (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cl_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cl_census/cl_2024_religion_presentation.pdf",
+      "url": "https://censo2024.ine.gob.cl/wp-content/uploads/2025/08/Presentacion-resultados-religion-o-credos_CPV2024.pdf",
+      "format": "pdf",
+      "bytes": 6099754,
+      "sha256": "695c2be2c725ab75359ba01c4042c6c7cbf5c381b49abceffe2c3b08d6b80284",
+      "row_count": null,
+      "source_dataset_id": "cl-bcn-estadisticas-territoriales-101-religion-declarada-comuna",
+      "used_in_public_product": false,
+      "periods": "2024",
+      "notes": "INE 2024 religion presentation (Q.31 categories, aged-15+ universe, national/regional context; external reconciliation check).",
+      "local_cache_hint": "data/raw/cl_census/cl_2024_religion_presentation.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cl_census/"
+      ]
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/cl/data/area_summary_commune.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 1326185,
+      "sha256": "787baf9e2f09dd135bf34c59c00cf02c618b7970ff119c5c651229d093e0115e",
+      "row_count": 692,
+      "feature_count": null,
+      "content": "Chile commune census-affiliation area summary for 2002 and 2024 (346 communes).",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "ine_chile_cc_by_sa_4_0"
+    },
+    {
+      "uri": "repo:apps/regions/cl/data/area_summary_commune.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 876878,
+      "sha256": "6505ea8c74f572b1e72326a29de04ed5ded1c77f1679c9d93c91fb509d63fa53",
+      "row_count": 692,
+      "feature_count": null,
+      "content": "Flattened Chile commune census-affiliation rows for 2002 and 2024.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "ine_chile_cc_by_sa_4_0"
+    },
+    {
+      "uri": "repo:apps/regions/cl/data/cl_commune_2002_2024.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 1784847,
+      "sha256": "e6a5b56340e0eb9382180a2452f0b0e02c3b3311cfd8b8aad4beec1554d58ffc",
+      "row_count": null,
+      "feature_count": 346,
+      "content": "Simplified INE DPA 346-commune boundary GeoJSON (current frame).",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "ine_chile_cc_by_sa_4_0"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/cl/data/area_summary_commune.json",
+      "sha256": "787baf9e2f09dd135bf34c59c00cf02c618b7970ff119c5c651229d093e0115e",
+      "built_by": "scripts/build_cl_area_summary.R",
+      "notes": "692 rows: 346 communes x 2 waves; 2002 null for five communes; aged-15+ universe both waves."
+    },
+    {
+      "uri": "repo:apps/regions/cl/data/cl_commune_2002_2024.geojson",
+      "sha256": "e6a5b56340e0eb9382180a2452f0b0e02c3b3311cfd8b8aad4beec1554d58ffc",
+      "built_by": "scripts/build_cl_area_summary.R",
+      "notes": "346 commune features from the INE DPA Censal layer, simplified with mapshaper."
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "Rscript scripts/build_cl_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/cl/data/area_summary_commune.json",
+      "bash scripts/validate_manifests.sh"
+    ],
+    "reconciliation": [
+      {
+        "year": 2002,
+        "communes": 341,
+        "national_total_r": 11128104,
+        "national_affiliation": 10205066,
+        "national_none": 923038,
+        "national_no_declara": 0,
+        "otros_cristianos_residual": 0,
+        "catolica": 7784616,
+        "evangelica": 1689483,
+        "exact_internal": true
+      },
+      {
+        "year": 2024,
+        "communes": 346,
+        "national_total_r": 15205784,
+        "national_affiliation": 11215141,
+        "national_none": 3903128,
+        "national_no_declara": 87515,
+        "otros_cristianos_residual": 26051,
+        "catolica": 8168945,
+        "evangelica": 2466441,
+        "exact_internal": false
+      }
+    ],
+    "boundary_validation": {
+      "status": "passed",
+      "feature_count": 346,
+      "distinct_geometry_hashes": 346,
+      "output_bytes": 1784847,
+      "keep_percent": 10,
+      "bbox": {
+        "xmin": -109.44994,
+        "ymin": -89,
+        "xmax": -53,
+        "ymax": -17.49778
+      },
+      "licence": "INE CC BY-SA 4.0 (site-wide open-data terms; item licence field blank)",
+      "cut_join": "346/346 one-to-one with the 2024 census; 2002 mapped 341 (304 direct + 37 by name), 5 null"
+    },
+    "notes": "2002 reconciles exactly (ten categories sum to commune total_r; national total_r 11,128,104). 2024 total_r 15,205,784 with a 26,051 'Otros cristianos' residual folded into affiliation (affiliation 11,215,141 matches the INE presentation within 180). 2002 runs ~0.87% below the INE national base (documented discrepancy).",
+    "warnings": [
+      "2002 is null for five communes (four created in 2004; Puchuncavi a BCN 2002-series gap); the four 2004 parents carry the combined 2002 count, change withheld on those pairs.",
+      "The product's shares use the full total_r denominator; INE's headline percentages use the responder base (total_r minus No-declara), a ~0.58pp difference in 2024, zero in 2002.",
+      "The 2002 commune series runs ~0.87% below the INE regional/national base, uniform across categories; reconciles exactly internally; documented, never redistributed.",
+      "The Comuna Antartica polygon reaches -89 lat (Chilean Antarctic claim), rendered as the official record; a continental viewport clip may be preferred at page time.",
+      "Licence is CC BY-SA 4.0 (share-alike); the derived product carries the share-alike notice and must state the shares are the project's derivation, not INE's own analysis."
+    ]
+  },
+  "construct_notes": [
+    "The construct is census affiliation: each resident's reported religion (asked of persons aged 15+), not practice, attendance, or membership. Religion was asked in the 2002 and 2024 censuses; the 2012 census was annulled and the 2017 abbreviated census dropped religion; 1992 (aged 5+) is held.",
+    "The public product carries three headline fields per commune-wave: population total (aged-15+ religion base), religious affiliation percent, and no-religion percent. Place-density metrics are null (no governed place-of-worship snapshot).",
+    "The commune series uses the BCN harmonised ten-category frame (Catolica, Evangelica o Protestante, Testigos de Jehova, Judaica, Mormon, Musulmana, Ortodoxa, Otro religion o credo, Ninguna religion/ateo/agnostico, No declara religion), preserved verbatim per commune on the quality flag.",
+    "Slot design (ordinary two-slot, KZ/BZ precedent): religious_affiliation_percent = (total_r - Ninguna - No-declara)/total_r captures the INE-derived 'Otros cristianos' group the BCN frame does not column; no_religion_percent = Ninguna/total_r. 'No declara' (2024 only, national 87,515) is a disclosed denominator residual in neither slot, so the two shares need not sum to 100.",
+    "Both waves ship on the current 346-commune frame. 2002 CUTs are mapped to current CUTs by direct match (304) or unique name (37); five communes are null in 2002 (four created in 2004 whose parents carry the combined count, change withheld on those pairs; and Puchuncavi, a BCN 2002-series gap). No backcast, no invented split.",
+    "Licence: INE CC BY-SA 4.0 (Reconocimiento-CompartirIgual 4.0), quoted verbatim in source.licence and captured under data/raw/cl_census/. The product ships with attribution to INE and carries the share-alike notice; on-page attribution must state the shares are the project's derivation, not INE's own analysis. No reuse ask gates the build; a courtesy note is recorded for the PI."
+  ],
+  "deferred_sources": [
+    {
+      "source_dataset_id": "cl-census-religion-1992-commune",
+      "status": "deferred",
+      "url": "https://www.bcn.cl/siit/estadisticasterritoriales/tema?id=101",
+      "local_path": null,
+      "notes": "BCN theme 101 also publishes 1992 religion by commune, but aged 5+ (a universe break vs the shipped 15+ waves) and predating commune creations; a documented deeper-history wave, not shipped, no backcast."
+    },
+    {
+      "source_dataset_id": "cl-census-2024-fine-categories-national",
+      "status": "deferred",
+      "url": "https://censo2024.ine.gob.cl/wp-content/uploads/2025/08/Presentacion-resultados-religion-o-credos_CPV2024.pdf",
+      "local_path": null,
+      "notes": "The 2024 INE presentation carries finer national/regional categories (Budista, Hinduista, Fe Baha'i, and the derived 'Otros cristianos') not available at commune level in the BCN harmonised frame; a future national-context lane."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "accepted",
+  "licence_basis": "ine_chile_cc_by_sa_4_0",
+  "downstream_status": "accepted",
+  "source_datasets": [
+    {
+      "source_dataset_id": "cl-bcn-estadisticas-territoriales-101-religion-declarada-comuna",
+      "name": "Chile census religion by commune, 2002 and 2024 (INE, via BCN Estadisticas Territoriales theme 101 'Religion Declarada')",
+      "provider": "Instituto Nacional de Estadisticas de Chile (INE); disseminated by the Biblioteca del Congreso Nacional de Chile (BCN)",
+      "url": "https://www.bcn.cl/siit/estadisticasterritoriales/tema?id=101",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/cl_census/cl_bcn_comunas_2002_2024.json",
+      "licence": {
+        "name": "Instituto Nacional de Estadisticas (INE) open-data licence. The INE terms (ine.gob.cl/terminos-de-uso-y-licencia-de-datos-abiertos, retrieved 2026-07-12) state: 'El contenido de este sitio Web se rige bajo una licencia de Creative Commons Reconocimiento-CompartirIgual 4.0 Internacional' (CC BY-SA 4.0): free reuse including commercial, with attribution ('Fuente: INE, nombre del producto ..., actualizada AAAA') and share-alike, and a requirement to state that any derivation is not INE's own analysis.",
+        "url": "https://www.ine.gob.cl/terminos-de-uso-y-licencia-de-datos-abiertos",
+        "attribution": "Fuente: Instituto Nacional de Estadisticas (INE), Censo 2002 y Censo 2024, Religion Declarada (via BCN Estadisticas Territoriales)"
+      },
+      "citation": "INE, Censo de Poblacion y Vivienda 2002 y 2024, Religion Declarada por comuna (BCN Estadisticas Territoriales, tema 101).",
+      "access_limits": null,
+      "redistribution_limits": "Open reuse with attribution and share-alike (CC BY-SA 4.0); derived commune summaries ship with attribution to INE and carry the share-alike notice.",
+      "notes": "Aged 15+ in both waves. Ten-category harmonised BCN frame. 2002 reconciles exactly (ten categories sum to total_r); 2024 carries a small positive residual (26,051 nationally, the INE-derived 'Otros cristianos' group not columned by BCN), folded into affiliation."
+    },
+    {
+      "source_dataset_id": "ine-dpa-censal-comunas-simp16r",
+      "name": "INE DPA Censal commune boundary (Comunas_Simp16R, 346 communes, CUT-coded)",
+      "provider": "Instituto Nacional de Estadisticas de Chile (INE), DPA Working Group of IDE Chile",
+      "url": "https://services5.arcgis.com/hUyD8u3TeZLKPe4T/arcgis/rest/services/Limites_DPA_Censal_2017_AGOL/FeatureServer/3",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/cl_census/ine_comunas_dpa2017.geojson",
+      "licence": {
+        "name": "Instituto Nacional de Estadisticas (INE) open-data licence. The INE terms (ine.gob.cl/terminos-de-uso-y-licencia-de-datos-abiertos, retrieved 2026-07-12) state: 'El contenido de este sitio Web se rige bajo una licencia de Creative Commons Reconocimiento-CompartirIgual 4.0 Internacional' (CC BY-SA 4.0): free reuse including commercial, with attribution ('Fuente: INE, nombre del producto ..., actualizada AAAA') and share-alike, and a requirement to state that any derivation is not INE's own analysis.",
+        "url": "https://www.ine.gob.cl/terminos-de-uso-y-licencia-de-datos-abiertos",
+        "attribution": "Fuente: Instituto Nacional de Estadisticas (INE), Division Politico Administrativa Censal"
+      },
+      "citation": "INE, Limites DPA Censal (Comunas_Simp16R), 346 communes.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed under CC BY-SA 4.0 with attribution to INE and the share-alike notice.",
+      "notes": "346 communes with CUT codes; joins the 2024 census one-to-one. Extent includes Isla de Pascua (CUT 5201) and the Comuna Antartica (CUT 12202, -89 lat, Chilean Antarctic claim), rendered as the official record. The alternative geoBoundaries CHL ADM3 (CC BY 3.0 IGO, 345 units, name-only) is recorded in the probe as the explicit-licence swap-in."
+    }
+  ],
+  "notes": "Accepted product (INE CC BY-SA 4.0 with attribution and share-alike). The committed products are the derived commune area summary (692 rows across 2002 and 2024) and the simplified 346-commune INE DPA boundary GeoJSON. On-page attribution, when a page is built, must cite INE (Censo 2002 y 2024, Religion Declarada, via BCN Estadisticas Territoriales) and state that the shares are the project's derivation, not INE's own analysis."
+}
