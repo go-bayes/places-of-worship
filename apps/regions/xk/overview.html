@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Kosovo map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Kosovo research map; every string traces to
+    // research/countries/xk/route-probe.md, the manifest
+    // docs/manifests/xk-census-religion-2011-2024.json, the data product
+    // apps/regions/xk/data/area_summary_municipality.json, or the live
+    // REGION_CONFIG in apps/regions/xk/index.html. authors nothing.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "XK",
+      countryName: "Kosovo",
+      mapHref: "./",
+      intro: "Census religious affiliation across Kosovo's 38 municipalities over two waves, 2011 and 2024, from the Kosovo Agency of Statistics (KAS). Both waves count the usually resident population of all ages with the same six categories (Islam, Orthodox, Catholic, Others, No religious affiliation, Prefers not to answer), from a single ASKdata PxWeb table (census2024_10, Total-sex slice). The construct is census affiliation. It does not measure belief, practice, attendance, or registered membership.",
+      facts: {
+        waves: "Two censuses: 2011 and 2024",
+        geographies: "Municipality (38 units): 34 enumerated in 2011, all 38 in 2024",
+        metrics: "Religious affiliation %, no religious affiliation %"
+      },
+      reading: [
+        "Municipalities are shaded by the share reporting a religious affiliation (Islam, Orthodox, Catholic, or Others), or by the share in the census No-religious-affiliation line (Asnjë besim fetar / Nema versku pripadnost), shown as No religious affiliation %. Both waves use each municipality's printed usually-resident census population as the denominator. Prefers not to answer (Preferon të mos përgjigjet) stays in the denominator and in neither slot; the two shares therefore need not sum to 100.",
+        "Each wave reconciles exactly at both margins. In 2011 the 34 enumerated municipality totals sum to the printed national 1,739,825, and every religion column sums across those municipalities to its printed national total (Islam 1,663,412; Orthodox 25,837; Catholic 38,438; Others 1,188; No religious affiliation 1,242; Prefers not to answer 9,708). In 2024 all 38 municipality totals sum to the printed national 1,585,566, and every religion column sums to its printed national total (Islam 1,482,276; Orthodox 36,683; Catholic 27,815; Others 7,175; No religious affiliation 7,899; Prefers not to answer 23,718).",
+        "The 2011 census omitted the four northern Serb-majority municipalities (Leposaviq, Zubin Potok, Zveqan, North Mitrovica) entirely (boycott; North Mitrovica was carved from Mitrovica in 2013 and did not yet exist as a separate municipality) — rendered as null features, never imputed. The 2024 census enumerated those four only partially (continued boycott, tiny counts: Leposaviq 3,185; Zubin Potok 763; Zveqan 434; North Mitrovica 2,326), rendered as published. The two waves cover different territory in the north; no cross-wave municipal change is claimed across this coverage break, and no change metric is offered.",
+        "The No-religious-affiliation and Prefers-not-to-answer lines grow between waves at the national level (No religious affiliation 1,242 to 7,899; Prefers not to answer 9,708 to 23,718). These are read as levels within each wave, never asserted as a cross-wave affiliation change across the coverage break.",
+        "Kosovo is overwhelmingly Muslim and the religious geography is legible by municipality. Nationally in 2011 Islam is 95.6% (1,663,412 / 1,739,825), Catholic 2.2% (38,438), Orthodox 1.5% (25,837); the Catholic share concentrates in the western Gjakovë, Klinë, and Prizren belt, and the Orthodox share in the Serb-majority enclaves (Graçanicë, Shtërpcë, Ranillug, Partesh, Kllokot) and the north.",
+        "The boundary frame is geoBoundaries XKX ADM2, 38 municipalities, represented year 2017. Both waves ride this single boundary set; the census municipalities join one-to-one after a name crosswalk, the one non-obvious pair being Drenas (geoBoundaries) and Gllogoc (census). Kosovo lies wholly within the standard frame and needs no antimeridian handling.",
+        "Kosovo's international status is contested; the product takes no position and renders the official KAS record on the official 38-municipality frame under the country code XK (XKX in geoBoundaries), separate from Serbia. No governed Kosovo place-of-worship snapshot ships with this product; place counts and density metrics are null."
+      ],
+      sources: [
+        {
+          name: "KAS ASKdata census2024_10: population by religion and sex at country and municipal level for the years 2011 and 2024",
+          href: "https://askdata.rks-gov.net/pxweb/en/ASKdata/ASKdata__Census%20population__1_Demographic_Characteristics/census2024_10.px/",
+          construct: "Census religious affiliation by municipality, usually resident population of all ages, six categories (Islam, Orthodox, Catholic, Others, No religious affiliation, Prefers not to answer); count-valued, both margins close exactly (2011 national 1,739,825; 2024 national 1,585,566)",
+          years: "2011; 2024",
+          licence: "Kosovo Agency of Statistics open reuse grant. The 2024 First Final Results report front matter states: '© Kosovo Agency of Statistics. Reuse is authorised provided the source is acknowledged.' An open licence conditioned only on source acknowledgement; the product ships with attribution to KAS"
+        },
+        {
+          name: "geoBoundaries XKX ADM2 boundaries",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/XKX/ADM2/",
+          construct: "Boundary geometry (38 municipalities), boundary source OpenStreetMap, Wambacher; joins the census 38-municipality frame one-to-one after a name crosswalk (Drenas ↔ Gllogoc the one non-obvious pair)",
+          years: "2017 (represented year)",
+          licence: "Creative Commons Attribution-ShareAlike 2.0 (CC BY-SA 2.0), source OpenStreetMap contributors, per the release metadata; the simplified derived boundary is redistributed under the same CC BY-SA 2.0 share-alike"
+        }
+      ],
+      accessData: {
+        note: "The committed products are the derived 38-municipality area summary (76 rows across 2011 and 2024) and the simplified geoBoundaries XKX ADM2 38-municipality boundary; the raw census cube, metadata, PDF, and source GeoJSON are not committed.",
+        sourceOfRecord: "Kosovo Agency of Statistics (KAS), <a href=\"https://askdata.rks-gov.net/pxweb/en/ASKdata/ASKdata__Census%20population__1_Demographic_Characteristics/census2024_10.px/\" target=\"_blank\" rel=\"noopener\">ASKdata census2024_10</a>, population by religion and sex at country and municipal level for 2011 and 2024, usually resident population; boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/XKX/ADM2/\" target=\"_blank\" rel=\"noopener\">geoBoundaries XKX ADM2</a>.",
+        tables: "One PxWeb table carries both waves at municipal level (Total-sex slice). The area-summary religious_affiliation_percent field sums Islam, Orthodox, Catholic, and Others; no_religion_percent carries the single No-religious-affiliation line; and each row's quality_flag carries the six verbatim category counts in Albanian, Serbian, and English. The four northern municipalities are carried null in 2011 (unenumerated, never imputed) and as published in 2024. A build gate stops on any blank cell that would break a municipality's reconciliation to its printed total; in 2024, 21 small-category cells are genuine zeros rendered as blanks, and every such row still closes exactly to its total.",
+        licence: "The census data ship under the KAS open reuse grant conditioned only on source acknowledgement ('Reuse is authorised provided the source is acknowledged.', 2024 First Final Results front matter, retrieved 2026-07-12); no reuse ask is needed, and the product ships with attribution to the Kosovo Agency of Statistics. The geoBoundaries XKX ADM2 boundary is Creative Commons Attribution-ShareAlike 2.0 (CC BY-SA 2.0), source OpenStreetMap contributors; the simplified derived boundary is redistributed under the same share-alike.",
+        script: "scripts/build_xk_area_summary.R",
+        manifests: [
+          { label: "xk-census-religion-2011-2024", href: "docs/manifests/xk-census-religion-2011-2024.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Kosovo map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Kosovo Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712b" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Kosovo's product is KAS census religious affiliation by the 38
+    // municipalities across two waves, 2011 and 2024, from a single ASKdata
+    // PxWeb table (census2024_10, Total-sex slice). Both waves reconcile
+    // exactly at both margins: 1,739,825 on the 34 enumerated municipalities in
+    // 2011 and 1,585,566 on all 38 in 2024. Both waves ride one geoBoundaries
+    // XKX ADM2 38-municipality frame.
+    //
+    // No religious affiliation (Asnjë besim fetar) is a real category; the
+    // ordinary two-slot design therefore applies: religious_affiliation_percent
+    // sums the Islam, Orthodox, Catholic, and Others shares; no_religion_percent
+    // is the single No-religious-affiliation line. Prefers not to answer
+    // (Preferon të mos përgjigjet) stays in the denominator and in neither slot;
+    // the two shares therefore need not sum to 100.
+    //
+    // Coverage: the 2011 census omitted the four northern Serb-majority
+    // municipalities (Leposaviq, Zubin Potok, Zveqan, North Mitrovica) entirely
+    // (boycott; North Mitrovica was carved from Mitrovica in 2013 and did not
+    // yet exist as a separate municipality) — rendered as null features, never
+    // imputed. The 2024 census enumerated those four only partially (continued
+    // boycott, tiny counts), rendered as published. The two waves cover
+    // different territory in the north; no cross-wave municipal change is
+    // claimed across this coverage break (CHANGE-WITHHOLD). Each wave ships as
+    // levels; religious_change is therefore not exposed in metricsAvailable.
+    //
+    // Kosovo's international status is contested; the product takes no position
+    // and renders the official KAS record on the official 38-municipality frame
+    // under the country code XK (XKX in geoBoundaries), separate from Serbia.
+    //
+    // Licence accepted: the census data ship under the KAS open reuse grant
+    // ("Reuse is authorised provided the source is acknowledged.", 2024 First
+    // Final Results front matter). Boundaries are geoBoundaries XKX ADM2 (CC
+    // BY-SA 2.0, source OpenStreetMap contributors); the simplified municipality
+    // boundary is the project's derivation and carries the same share-alike.
+    window.REGION_CONFIG = {
+      countryCode: "XK",
+      title: "Places of Worship | Kosovo Research Map",
+      // kosovo spans lon 20.01..21.79 by lat 41.86..43.27 across the 38
+      // municipalities; centre on the frame and open at a zoom that fits the
+      // full extent beside the census panels
+      center: [20.90, 42.58],
+      initialZoom: 8,
+      censusLevels: {
+        municipality: {
+          label: "Municipality (38 units)",
+          boundaries: "data/xk_municipality.geojson",
+          summary: "data/area_summary_municipality.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Kosovo Agency of Statistics (KAS), 2011 and 2024 Population and Housing Census (ASKdata census2024_10, usually resident population); open reuse with source acknowledgement · Boundaries © geoBoundaries XKX ADM2 (Creative Commons Attribution-ShareAlike 2.0, CC BY-SA 2.0), source OpenStreetMap contributors; the simplified municipality boundary is the project's derivation and carries the same share-alike"
+        }
+      },
+      defaultLevel: "municipality",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2024,
+      // the two census-question shares only; place and density metrics are
+      // omitted because no governed place-of-worship snapshot ships here, and
+      // the cross-wave change metric is withheld because the two waves cover
+      // different territory in the north (the coverage break)
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the municipality population reporting affiliation with a named religion, summing the Islam, Orthodox, Catholic, and Others categories of KAS ASKdata census2024_10. Read as levels within each wave, not as cross-wave change: the four northern municipalities are unenumerated in 2011 and only partially enumerated in 2024; no cross-wave municipal change is claimed across this coverage break."
+        },
+        no_religion_percent: {
+          label: "No religious affiliation %",
+          note: "share in the census No-religious-affiliation line (Asnjë besim fetar / Nema versku pripadnost). Prefers not to answer (Preferon të mos përgjigjet) stays in the denominator and outside both headline numerators; religious affiliation % and no religion % therefore need not sum to 100."
+        }
+      },
+      popupDenominatorNote: "Percentages use each municipality's printed usually-resident census population as the denominator (all ages). The six substantive categories (Islam, Orthodox, Catholic, Others, No religious affiliation, Prefers not to answer) are identical across both waves; religious affiliation % sums Islam, Orthodox, Catholic, and Others, and no religion % is the single No-religious-affiliation line. Prefers not to answer stays in the denominator and in neither slot; the two shares therefore need not sum to 100. The 2011 census omitted the four northern Serb-majority municipalities (Leposaviq, Zubin Potok, Zveqan, North Mitrovica) entirely (boycott; North Mitrovica was carved from Mitrovica in 2013 and did not yet exist as a separate municipality); those municipalities render as no-data in 2011, never as zero. The 2024 census enumerated those four only partially (continued boycott, tiny counts), rendered as published. No cross-wave municipal change is claimed across this coverage break. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+      cityPresets: [
+        { label: "Prishtinë", coords: [21.1655, 42.6629], zoom: 11 },
+        { label: "Prizren", coords: [20.7419, 42.2139], zoom: 11 },
+        { label: "Pejë", coords: [20.2887, 42.6592], zoom: 11 },
+        { label: "Gjakovë", coords: [20.4308, 42.3803], zoom: 11 },
+        { label: "Ferizaj", coords: [21.1553, 42.3702], zoom: 11 },
+        { label: "Gjilan", coords: [21.4694, 42.4637], zoom: 11 },
+        { label: "Mitrovicë", coords: [20.8660, 42.8830], zoom: 11 },
+        { label: "Fushë Kosovë", coords: [21.0906, 42.6640], zoom: 11 }
+      ],
+      geocode: { country: "xk", biasLngLat: [20.90, 42.58] },
+      onboarding: {
+        title: "Kosovo research map",
+        intro: "Census religious affiliation across Kosovo's 38 municipalities over two waves, 2011 and 2024, from the Kosovo Agency of Statistics (KAS). Both waves count the usually resident population of all ages with the same six categories (Islam, Orthodox, Catholic, Others, No religious affiliation, Prefers not to answer). The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+        bullets: [
+          "Municipalities are shaded by the share reporting a religious affiliation (Islam, Orthodox, Catholic, or Others), or by the share in the census <code>No religious affiliation</code> line (Asnjë besim fetar), shown as No religious affiliation %. Prefers not to answer stays in the denominator and in neither slot; the two shares therefore need not sum to 100.",
+          "Two census waves, 2011 and 2024, at municipality level, on one shared 38-municipality boundary frame. Each wave reconciles exactly at both margins: 1,739,825 across the 34 enumerated municipalities in 2011 and 1,585,566 across all 38 in 2024.",
+          "The 2011 census omitted the four northern Serb-majority municipalities (Leposaviq, Zubin Potok, Zveqan, North Mitrovica) entirely (boycott; North Mitrovica was carved from Mitrovica in 2013 and did not yet exist as a separate municipality); they render as no-data in 2011, never as zero. The 2024 census enumerated those four only partially (continued boycott, tiny counts), rendered as published. No cross-wave municipal change is claimed across this coverage break.",
+          "Kosovo's international status is contested; the product takes no position and renders the official KAS record on the official 38-municipality frame under the country code XK, separate from Serbia.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://ask.rks-gov.net/" target="_blank" rel="noopener">Kosovo Agency of Statistics (KAS)</a>, 2011 and 2024 Population and Housing Census (ASKdata census2024_10, usually resident population). Open reuse grant: "Reuse is authorised provided the source is acknowledged." &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> XKX ADM2 (Creative Commons Attribution-ShareAlike 2.0, CC BY-SA 2.0), source OpenStreetMap contributors; the simplified municipality boundary is the project\'s derivation and is redistributed under the same CC BY-SA 2.0 share-alike',
+      censusFlagNote: "* Universe: usually resident population, all ages, in both waves. The six census categories (Islam, Orthodox, Catholic, Others, No religious affiliation, Prefers not to answer) are identical across waves; religious affiliation % sums Islam, Orthodox, Catholic, and Others, no religion % is the single No-religious-affiliation line, and Prefers not to answer stays in the denominator and in neither slot; the two shares therefore need not sum to 100. Each wave reconciles exactly at both margins (2011 national 1,739,825 on 34 enumerated municipalities; 2024 national 1,585,566 on all 38). The four northern Serb-majority municipalities (Leposaviq, Zubin Potok, Zveqan, North Mitrovica) are unenumerated in 2011 (boycott; North Mitrovica was carved from Mitrovica in 2013 and did not yet exist as a separate municipality), rendered as no-data, never as zero, and only partially enumerated in 2024 (continued boycott), rendered as published. No cross-wave municipal change is claimed across this coverage break. Census data ship under the KAS open reuse grant with source acknowledgement; boundaries are geoBoundaries XKX ADM2 (CC BY-SA 2.0, source OpenStreetMap contributors), the simplified boundary carrying the same share-alike."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712b"></script>
+</body>
+</html>
