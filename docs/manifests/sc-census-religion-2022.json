@@ -1,0 +1,643 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:sc-census-religion:sc:2022:nbs-district",
+  "dataset_id": "sc-census-religion:sc:2022:nbs-district",
+  "dataset_version_id": "sc-census-religion:sc:2022:nbs-district:f3156d46fb52",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "sc-census-religion",
+  "dataset_role": "staged_evidence",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "SC"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-07-12T00:00:00Z",
+  "created_by": "scripts/build_sc_area_summary.R",
+  "target_years": [
+    2022
+  ],
+  "pipeline": {
+    "script": "scripts/build_sc_area_summary.R",
+    "git_commit": "00be77447b9a407bc76f2579ec64119fdd74f9fe",
+    "command": "Rscript scripts/build_sc_area_summary.R",
+    "parameters": {
+      "construct": "census affiliation",
+      "shipped_waves": [
+        2022
+      ],
+      "shipped_geography": "27 Seychelles districts on OCHA COD-AB NBS ADM3 (23 Mahé + 2 Praslin + La Digue + Other Islands)",
+      "boundary_set": "sc-district-2020-cod-ab-nbs-adm3",
+      "source_tables": {
+        "2022": "2022 Census Table B4.1 Population in all households by religion and region/district (integer counts, 8 categories)"
+      },
+      "universes": {
+        "2022": "all-households population, all persons, all ages (national 102,612); matches the census total population and the Table 3.2 religion total. Table B4.2 (conventional households, 89,273) is a documented sub-universe, not shipped."
+      },
+      "method_note": "The 2022 religion cross-tab (Table B4.1) is integer counts by district. Every cell is transcribed verbatim. The 25 granite districts and the La Digue leaf join the 27 COD ADM3 districts one-to-one; the single official 'Other Islands' district takes the exact aggregate of the census inner-island (except La Digue) and outer-island leaves (Outer Islands 988 + (La Digue & Inner Islands 3,624 - La Digue 3,133) = 1,479). Every value summed is a published census leaf; the aggregation is an exact partition to the official district frame, never a redistribution.",
+      "denominators": {
+        "2022": "district all-households population Total; affiliation = Catholic + Anglican + Islam + Hindu + Christian (Other)"
+      },
+      "slot_design": "Extended two-slot. religious_affiliation_percent is the share reporting one of the five clearly-religious categories (Catholic, Anglican, Islam, Hindu, Christian (Other)). no_religion_percent is NULL: the 2022 report publishes no standalone No-religion line (the questionnaire's No-religion/Atheist responses are folded into 'Other (Specify)', which the printed note says includes Baha'i, Buddhist, non-religious). Other (Specify), Unable to classify and Missing stay in the denominator and in neither slot, so the affiliation share is below 100 by construction. No minority-share (task-6) treatment is needed (affiliation is a genuine share, not a flat-100 frame), but the absent no-religion line is disclosed.",
+      "category_frames": {
+        "2022": [
+          "Catholic",
+          "Anglican",
+          "Islam",
+          "Hindu",
+          "Christian (Other)",
+          "Unable to classify",
+          "Other (Specify)",
+          "Missing"
+        ],
+        "affiliation_categories": [
+          "Catholic",
+          "Anglican",
+          "Islam",
+          "Hindu",
+          "Christian (Other)"
+        ],
+        "alignment_note": "Single-wave product: religion is cross-tabulated by district only in the 2022 census (Table B4.1). National religion is published for 2010 and 2022 (Table 3.2, categories Catholic, Anglican, Islam, Hindu, Christian (other), Other, Unable to classify, Not specified/missing). 2010 district religion is unconfirmed and would sit on a pre-Perseverance-Island frame; 2002/1994 religion is in no retrieved product. The 2022 frame is preserved verbatim."
+      },
+      "documented_discrepancy": "A 5-person discrepancy between Table 3.2 (national) and Table B4.1 (district): Table 3.2 prints Christian (other) 8,805 and Unable to classify 654; Table B4.1 prints 8,810 and 649. Both sum to 102,612; the split of the same 9,459 persons differs by 5. The build renders Table B4.1 (the district source) verbatim and documents the discrepancy (Saint Lucia / Côte d'Ivoire documented-discrepancy treatment).",
+      "change_rule": "Single wave (2022): no cross-wave district change layer. National religion context exists for 2010 and 2022 (Table 3.2 national totals), but the subnational (district) product is 2022-only.",
+      "no_religion_treatment": {
+        "2022": "no standalone No-religion line; folded into 'Other (Specify)' with Baha'i/Buddhist per the printed note. no_religion is null and disclosed, never derived."
+      },
+      "held_and_deferred": "A 2010 district religion wave would require the 2010 census report (not retrieved) and a pre-Perseverance frame; 2002 and 1994 religion appear in no retrieved product. National 2010 religion (Table 3.2) is deeper-history national context, not a district product. Table B4.2 (conventional households, 89,273) is a documented sub-universe. A genuine no-religion share and the historic district waves are NBS data requests (courtesy asks).",
+      "territorial_note": "Seychelles has no external territorial dispute affecting the district frame.",
+      "omitted_metrics": [
+        "no_religion_percent",
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 10,
+        "bytes": 1085733
+      },
+      "local_cache_hint": "All raw sources are cached under data/raw/sc_census/ and remain git-ignored.",
+      "retrieval_record": [
+        {
+          "uri": "data/raw/sc_census/sc_2022_census_report.pdf",
+          "url": "https://web.archive.org/web/20260703110307id_/https://www.nbs.gov.sc/downloads/1555-seychelles-population-and-housing-census-2022/download",
+          "format": "pdf",
+          "bytes": 10525457,
+          "sha256": "7a9c1ec3f7458c69f042da9f4789c668fc82a2264cab8644b80d60b12f05fefa",
+          "row_count": null,
+          "source_dataset_id": "sc-census-2022-table-b4-1-religion-by-district",
+          "used_in_public_product": true,
+          "periods": "2022",
+          "notes": "2022 Census report (Internet Archive snapshot); Table B4.1 religion by district (integer counts, all households). 27-district partition closes to 102,612.",
+          "local_cache_hint": "data/raw/sc_census/sc_2022_census_report.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/sc_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/sc_census/nbs_terms_verbatim.txt",
+          "url": "https://www.nbs.gov.sc/terms-and-conditions",
+          "format": "text",
+          "bytes": 920,
+          "sha256": "2b361967a2b4cb110138d2c64b2769758200bf65acc11741646062ebdf00e31b",
+          "row_count": null,
+          "source_dataset_id": "sc-census-2022-table-b4-1-religion-by-district",
+          "used_in_public_product": false,
+          "periods": "2026",
+          "notes": "NBS Terms and Conditions (verbatim): prior written consent required to reproduce content; all rights reserved.",
+          "local_cache_hint": "data/raw/sc_census/nbs_terms_verbatim.txt (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/sc_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/sc_census/syc_adm_nbs2010_SHP.zip",
+          "url": "https://data.humdata.org/dataset/9ac1737f-cd33-4458-86e8-aec90eeffda2/resource/de3bca8b-f522-46ba-b4d2-e1c52034fcc0/download/syc_adm_nbs2010_shp.zip",
+          "format": "shapefile-zip",
+          "bytes": 23768800,
+          "sha256": "15752ee8b6b81b29103bb43c83b8874111c44d2327bcd597f0ada8656f47886c",
+          "row_count": null,
+          "source_dataset_id": "cod-ab-syc-nbs-adm3-2020",
+          "used_in_public_product": true,
+          "periods": "2020",
+          "notes": "OCHA COD-AB SYC shapefile zip; ADM3 (27 districts) from NBS, CC BY-IGO. Includes Perseverance Island.",
+          "local_cache_hint": "data/raw/sc_census/syc_adm_nbs2010_SHP.zip (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/sc_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/sc_census/hdx_cod_ab_syc.json",
+          "url": "https://data.humdata.org/api/3/action/package_show?id=cod-ab-syc",
+          "format": "json",
+          "bytes": 12943,
+          "sha256": "db08948c82ba5b9dbe298505e0812ad3963a6afd6315e874871bcf2955a09bb8",
+          "row_count": null,
+          "source_dataset_id": "cod-ab-syc-nbs-adm3-2020",
+          "used_in_public_product": false,
+          "periods": "2020",
+          "notes": "OCHA COD-AB SYC HDX metadata; records CC BY-IGO and dataset_source Seychelles National Bureau of Statistics.",
+          "local_cache_hint": "data/raw/sc_census/hdx_cod_ab_syc.json (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/sc_census/"
+          ]
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "scripts/lib/simplify_boundary.R (npx mapshaper)"
+    }
+  },
+  "source": {
+    "provider": "Seychelles National Bureau of Statistics (NBS); OCHA COD-AB (source NBS)",
+    "source_dataset_ids": [
+      "sc-census-2022-table-b4-1-religion-by-district",
+      "cod-ab-syc-nbs-adm3-2020"
+    ],
+    "source_urls": [
+      "https://www.nbs.gov.sc/downloads/1555-seychelles-population-and-housing-census-2022",
+      "https://web.archive.org/web/20260703110307id_/https://www.nbs.gov.sc/downloads/1555-seychelles-population-and-housing-census-2022/download",
+      "https://www.nbs.gov.sc/terms-and-conditions",
+      "https://data.humdata.org/dataset/seychelles-subnational-administrative-boundaries",
+      "https://data.humdata.org/dataset/9ac1737f-cd33-4458-86e8-aec90eeffda2/resource/de3bca8b-f522-46ba-b4d2-e1c52034fcc0/download/syc_adm_nbs2010_shp.zip",
+      "https://data.humdata.org/api/3/action/package_show?id=cod-ab-syc"
+    ],
+    "retrieved_at": "2026-07-12T00:00:00Z",
+    "licence": "The Seychelles National Bureau of Statistics (NBS) Terms and Conditions (nbs.gov.sc/terms-and-conditions) state: 'You may reproduce short extracts from the content appearing on the site provided that the source is stated and prior written consent is obtained from the NBS' and 'All rights not expressly granted are reserved.' The website footer reads 'Copyright (c) 2026 National Bureau of Statistics Seychelles. All Rights Reserved.' Under the standing build-then-ask ruling the derived aggregate summaries ship staged with NBS attribution while a reuse confirmation is sought (courtesy ask to ceo@nbs.gov.sc, not sent). Licence status: needs_review. The boundary is the OCHA COD-AB, sourced from NBS, licensed CC BY-IGO (accepted).",
+    "citation": "NBS Population and Housing Census 2022 Table B4.1; OCHA COD-AB SYC ADM3 (source NBS).",
+    "raw_redistribution": "The census PDF and the COD-AB shapefile zip are not committed; they remain in data/raw/sc_census/.",
+    "local_cache_hint": "data/raw/sc_census/ (git-ignored by .gitignore data/ rule)",
+    "raw_cache_durable_uris": [
+      "gs://pow-research-data/raw_sources/sc_census/"
+    ],
+    "licence_position": "needs_review: NBS all-rights-reserved with a prior-consent reproduction clause; derived summaries staged with attribution under build-then-ask. Boundary CC BY-IGO (accepted).",
+    "licence_todo": "PI ruling to extend the derived-summaries-with-attribution stance to NBS (CI/MONSTAT/DCS line), or an NBS reuse confirmation (ceo@nbs.gov.sc)."
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/sc_census/sc_2022_census_report.pdf",
+      "url": "https://web.archive.org/web/20260703110307id_/https://www.nbs.gov.sc/downloads/1555-seychelles-population-and-housing-census-2022/download",
+      "format": "pdf",
+      "bytes": 10525457,
+      "sha256": "7a9c1ec3f7458c69f042da9f4789c668fc82a2264cab8644b80d60b12f05fefa",
+      "row_count": null,
+      "source_dataset_id": "sc-census-2022-table-b4-1-religion-by-district",
+      "used_in_public_product": true,
+      "periods": "2022",
+      "notes": "2022 Census report (Internet Archive snapshot); Table B4.1 religion by district (integer counts, all households). 27-district partition closes to 102,612.",
+      "local_cache_hint": "data/raw/sc_census/sc_2022_census_report.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/sc_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/sc_census/nbs_terms_verbatim.txt",
+      "url": "https://www.nbs.gov.sc/terms-and-conditions",
+      "format": "text",
+      "bytes": 920,
+      "sha256": "2b361967a2b4cb110138d2c64b2769758200bf65acc11741646062ebdf00e31b",
+      "row_count": null,
+      "source_dataset_id": "sc-census-2022-table-b4-1-religion-by-district",
+      "used_in_public_product": false,
+      "periods": "2026",
+      "notes": "NBS Terms and Conditions (verbatim): prior written consent required to reproduce content; all rights reserved.",
+      "local_cache_hint": "data/raw/sc_census/nbs_terms_verbatim.txt (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/sc_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/sc_census/syc_adm_nbs2010_SHP.zip",
+      "url": "https://data.humdata.org/dataset/9ac1737f-cd33-4458-86e8-aec90eeffda2/resource/de3bca8b-f522-46ba-b4d2-e1c52034fcc0/download/syc_adm_nbs2010_shp.zip",
+      "format": "shapefile-zip",
+      "bytes": 23768800,
+      "sha256": "15752ee8b6b81b29103bb43c83b8874111c44d2327bcd597f0ada8656f47886c",
+      "row_count": null,
+      "source_dataset_id": "cod-ab-syc-nbs-adm3-2020",
+      "used_in_public_product": true,
+      "periods": "2020",
+      "notes": "OCHA COD-AB SYC shapefile zip; ADM3 (27 districts) from NBS, CC BY-IGO. Includes Perseverance Island.",
+      "local_cache_hint": "data/raw/sc_census/syc_adm_nbs2010_SHP.zip (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/sc_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/sc_census/hdx_cod_ab_syc.json",
+      "url": "https://data.humdata.org/api/3/action/package_show?id=cod-ab-syc",
+      "format": "json",
+      "bytes": 12943,
+      "sha256": "db08948c82ba5b9dbe298505e0812ad3963a6afd6315e874871bcf2955a09bb8",
+      "row_count": null,
+      "source_dataset_id": "cod-ab-syc-nbs-adm3-2020",
+      "used_in_public_product": false,
+      "periods": "2020",
+      "notes": "OCHA COD-AB SYC HDX metadata; records CC BY-IGO and dataset_source Seychelles National Bureau of Statistics.",
+      "local_cache_hint": "data/raw/sc_census/hdx_cod_ab_syc.json (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/sc_census/"
+      ]
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/sc/data/area_summary_district.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 63414,
+      "sha256": "f3156d46fb5298e68698c8c15dfcc81f903d9885e2fd82f8ab6de0110371b2de",
+      "row_count": 27,
+      "feature_count": null,
+      "content": "Seychelles 27-district census-affiliation area summary for 2022.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "nbs_all_rights_reserved_prior_consent"
+    },
+    {
+      "uri": "repo:apps/regions/sc/data/area_summary_district.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 38412,
+      "sha256": "1f9c74082b63b09871918f71ad1a907377ee59d20487045263e1962d41eed8a7",
+      "row_count": 27,
+      "feature_count": null,
+      "content": "Flattened Seychelles 27-district census-affiliation rows for 2022.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "nbs_all_rights_reserved_prior_consent"
+    },
+    {
+      "uri": "repo:apps/regions/sc/data/sc_district_2020.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 1085733,
+      "sha256": "4bb921b5b7b5635d74446c8bd28a84a9cac89f44533975e5881774c9ca4b4f38",
+      "row_count": null,
+      "feature_count": 27,
+      "content": "Simplified OCHA COD-AB SYC ADM3 27-district boundary GeoJSON.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "cc_by_igo_ocha_cod_ab"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/sc/data/area_summary_district.json",
+      "sha256": "f3156d46fb5298e68698c8c15dfcc81f903d9885e2fd82f8ab6de0110371b2de",
+      "built_by": "scripts/build_sc_area_summary.R",
+      "notes": "27 districts x 1 wave = 27 rows; all-households universe; no standalone no-religion line (null)."
+    },
+    {
+      "uri": "repo:apps/regions/sc/data/sc_district_2020.geojson",
+      "sha256": "4bb921b5b7b5635d74446c8bd28a84a9cac89f44533975e5881774c9ca4b4f38",
+      "built_by": "scripts/build_sc_area_summary.R",
+      "notes": "27 district features from OCHA COD-AB SYC ADM3, simplified with mapshaper weighted keep-shapes."
+    }
+  ],
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_sc_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/sc/data/area_summary_district.json",
+      "bash scripts/validate_manifests.sh"
+    ],
+    "gate_2022": {
+      "status": "passed",
+      "grand_total_closes_to": 102612,
+      "district_row_checks": 27,
+      "religion_column_checks": 8,
+      "records": [
+        {
+          "margin": "district_row",
+          "key": "English River",
+          "computed": 3508
+        },
+        {
+          "margin": "district_row",
+          "key": "Mont Buxton",
+          "computed": 2778
+        },
+        {
+          "margin": "district_row",
+          "key": "Saint Louis",
+          "computed": 3267
+        },
+        {
+          "margin": "district_row",
+          "key": "Bel Air",
+          "computed": 2619
+        },
+        {
+          "margin": "district_row",
+          "key": "Mont Fleuri",
+          "computed": 3506
+        },
+        {
+          "margin": "district_row",
+          "key": "Plaisance",
+          "computed": 3685
+        },
+        {
+          "margin": "district_row",
+          "key": "Roche Caiman",
+          "computed": 3157
+        },
+        {
+          "margin": "district_row",
+          "key": "Les Mamelles",
+          "computed": 2215
+        },
+        {
+          "margin": "district_row",
+          "key": "Ile Perseverance",
+          "computed": 5410
+        },
+        {
+          "margin": "district_row",
+          "key": "Cascade",
+          "computed": 6659
+        },
+        {
+          "margin": "district_row",
+          "key": "Pointe Larue",
+          "computed": 3267
+        },
+        {
+          "margin": "district_row",
+          "key": "Anse Aux Pins",
+          "computed": 3898
+        },
+        {
+          "margin": "district_row",
+          "key": "Anse Royale",
+          "computed": 4552
+        },
+        {
+          "margin": "district_row",
+          "key": "Takamaka",
+          "computed": 3528
+        },
+        {
+          "margin": "district_row",
+          "key": "Au Cap",
+          "computed": 5168
+        },
+        {
+          "margin": "district_row",
+          "key": "Baie Lazare",
+          "computed": 4265
+        },
+        {
+          "margin": "district_row",
+          "key": "Anse Boileau",
+          "computed": 4595
+        },
+        {
+          "margin": "district_row",
+          "key": "Grand Anse Mahé",
+          "computed": 3425
+        },
+        {
+          "margin": "district_row",
+          "key": "Port Glaud",
+          "computed": 2773
+        },
+        {
+          "margin": "district_row",
+          "key": "Belombre",
+          "computed": 3823
+        },
+        {
+          "margin": "district_row",
+          "key": "Beau Vallon",
+          "computed": 4740
+        },
+        {
+          "margin": "district_row",
+          "key": "Glacis",
+          "computed": 3803
+        },
+        {
+          "margin": "district_row",
+          "key": "Anse Etoile",
+          "computed": 5477
+        },
+        {
+          "margin": "district_row",
+          "key": "Baie Ste Anne",
+          "computed": 4272
+        },
+        {
+          "margin": "district_row",
+          "key": "Grand Anse Praslin",
+          "computed": 3610
+        },
+        {
+          "margin": "district_row",
+          "key": "La Digue",
+          "computed": 3133
+        },
+        {
+          "margin": "district_row",
+          "key": "Other Islands",
+          "computed": 1479
+        },
+        {
+          "margin": "religion_column",
+          "key": "Catholic",
+          "computed": 62952
+        },
+        {
+          "margin": "religion_column",
+          "key": "Anglican",
+          "computed": 5180
+        },
+        {
+          "margin": "religion_column",
+          "key": "Islam",
+          "computed": 2498
+        },
+        {
+          "margin": "religion_column",
+          "key": "Hindu",
+          "computed": 5508
+        },
+        {
+          "margin": "religion_column",
+          "key": "Christian (Other)",
+          "computed": 8810
+        },
+        {
+          "margin": "religion_column",
+          "key": "Unable to classify",
+          "computed": 649
+        },
+        {
+          "margin": "religion_column",
+          "key": "Other (Specify)",
+          "computed": 5243
+        },
+        {
+          "margin": "religion_column",
+          "key": "Missing",
+          "computed": 11772
+        }
+      ],
+      "national_category_totals": {
+        "Catholic": 62952,
+        "Anglican": 5180,
+        "Islam": 2498,
+        "Hindu": 5508,
+        "Christian (Other)": 8810,
+        "Unable to classify": 649,
+        "Other (Specify)": 5243,
+        "Missing": 11772
+      },
+      "other_islands_aggregate": {
+        "Catholic": 104,
+        "Anglican": 1,
+        "Islam": 5,
+        "Hindu": 730,
+        "Christian (Other)": 16,
+        "Unable to classify": 2,
+        "Other (Specify)": 16,
+        "Missing": 605
+      }
+    },
+    "boundary_validation": {
+      "status": "passed",
+      "feature_count": 27,
+      "distinct_geometry_hashes": 27,
+      "bbox": {
+        "xmin": 46.2035675,
+        "ymin": -10.2061987,
+        "xmax": 56.2943382,
+        "ymax": -3.7142322
+      },
+      "dateline_note": "extent lon 46.20 to 56.29E, lat -10.21 to -3.71N; far from the antimeridian, no dateline handling needed",
+      "output_bytes": 1085733,
+      "simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 10,
+        "bytes": 1085733
+      },
+      "licence": "Creative Commons Attribution for Intergovernmental Organisations (CC BY-IGO)",
+      "adm_unit_count": 27,
+      "includes_perseverance_island": true
+    },
+    "join_coverage": {
+      "matched_districts": 27,
+      "expected_districts": 27,
+      "unmatched_districts": [],
+      "unused_boundary_features": []
+    },
+    "notes": "2022 Table B4.1 closes integer-exact at every margin (national total 102,612). Boundary joins 27/27 to OCHA COD-AB SYC ADM3 (25 granite districts + La Digue direct; Other Islands as the exact island-leaf aggregate) with 27 distinct geometry hashes.",
+    "warnings": [
+      "STAGED product: no page, no hub link. The page and the single-wave-subnational display decision are the conductor's (parallel to Barbados/Guyana/Antigua).",
+      "Licence needs_review: NBS Terms require prior written consent to reproduce content ('All rights not expressly granted are reserved'). Derived summaries ship staged with attribution under build-then-ask; the unblock is a PI ruling (CI/MONSTAT/DCS line) or an NBS reuse confirmation. The boundary is CC BY-IGO (accepted).",
+      "No standalone No-religion line: the questionnaire collected No-religion/Atheist, but the published table folds the non-religious into 'Other (Specify)'. no_religion is null and disclosed, never derived.",
+      "Single wave (2022): religion is cross-tabulated by district only in 2022. National religion is published for 2010 and 2022 (Table 3.2); 2010 district religion is unconfirmed, 2002/1994 religion is not in retrieved products.",
+      "A 5-person Table 3.2 vs Table B4.1 discrepancy (Christian (Other) / Unable to classify) is documented; the build renders Table B4.1 verbatim.",
+      "The 'Other Islands' district religion is the exact aggregate of the census inner-island (except La Digue) and outer-island leaf rows, matching the single official Other Islands administrative district."
+    ]
+  },
+  "construct_notes": [
+    "The construct is census affiliation: each resident's reported religion (questionnaire Q.01.11 'What is [Name's] religion?', single-select), asked of the whole resident population, not practice, attendance, or membership.",
+    "The public product carries two headline fields per district: population total and religious affiliation percent. No-religion percent is null (not separately tabulated). Place-density metrics are null (no governed place-of-worship snapshot).",
+    "Single wave (2022): religion is cross-tabulated by district only in the 2022 census (Table B4.1). National religion is published for 2010 and 2022 (Table 3.2); 2010 district religion is unconfirmed, and 2002/1994 religion is in no retrieved product.",
+    "Slot design (extended two-slot): religious_affiliation_percent is the share reporting one of the five clearly-religious categories (Catholic, Anglican, Islam, Hindu, Christian (Other)). Other (Specify), Unable to classify and Missing stay in the denominator and in neither slot, so the affiliation share is below 100 by construction. There is no standalone No-religion line; no_religion is null and disclosed.",
+    "The 27-district frame is the official OCHA COD-AB (source NBS), including Perseverance Island. The single 'Other Islands' district religion is the exact aggregate of the census's inner-island (except La Digue) and outer-island leaves; every value is a published census figure.",
+    "Licence needs_review: NBS asserts all rights reserved and requires prior written consent to reproduce content. Under build-then-ask the derived aggregate summaries ship staged with NBS attribution; the boundary is CC BY-IGO (accepted)."
+  ],
+  "deferred_sources": [
+    {
+      "source_dataset_id": "sc-census-2022-table-3-2-national-religion-2010-2022",
+      "status": "deferred",
+      "url": "https://www.nbs.gov.sc/downloads/1555-seychelles-population-and-housing-census-2022",
+      "local_path": "data/raw/sc_census/sc_2022_census_report.pdf",
+      "notes": "2022 Census Table 3.2: national religion for 2010 (total 90,945) and 2022 (102,612). A deeper-history national two-wave series, not a district product; documented as context."
+    },
+    {
+      "source_dataset_id": "sc-census-2022-table-b4-2-conventional-households",
+      "status": "deferred",
+      "url": "https://www.nbs.gov.sc/downloads/1555-seychelles-population-and-housing-census-2022",
+      "local_path": "data/raw/sc_census/sc_2022_census_report.pdf",
+      "notes": "Table B4.2: religion by district for conventional households only (89,273). A documented sub-universe, not the shipped all-households product."
+    },
+    {
+      "source_dataset_id": "sc-census-2010-district-religion",
+      "status": "unverified_upstream",
+      "url": "https://www.nbs.gov.sc/downloads/1555-seychelles-population-and-housing-census-2022",
+      "local_path": null,
+      "notes": "2010 district religion is unconfirmed (the 2010 report was not retrieved) and would sit on a pre-Perseverance-Island frame. An NBS data request or the 2010 report would be needed for a two-wave district product."
+    },
+    {
+      "source_dataset_id": "sc-census-unfolded-no-religion",
+      "status": "not_published",
+      "url": "https://www.nbs.gov.sc/downloads/1555-seychelles-population-and-housing-census-2022",
+      "local_path": null,
+      "notes": "The questionnaire collected No-religion/Atheist but the published table folds them into 'Other (Specify)'. A genuine no-religion share is an NBS data request (courtesy ask)."
+    },
+    {
+      "source_dataset_id": "nbs-reuse-confirmation",
+      "status": "not_pinned",
+      "url": "https://www.nbs.gov.sc/terms-and-conditions",
+      "local_path": null,
+      "notes": "NBS Terms require prior written consent for reproduction. A PI ruling (CI/MONSTAT/DCS line) or an NBS reuse confirmation (ceo@nbs.gov.sc) would move the census licence to accepted; recorded as a courtesy ask for the PI."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "needs_review",
+  "licence_basis": "nbs_all_rights_reserved_prior_consent",
+  "downstream_status": "staged",
+  "source_datasets": [
+    {
+      "source_dataset_id": "sc-census-2022-table-b4-1-religion-by-district",
+      "name": "Seychelles Population and Housing Census 2022, Table B4.1: Population in all households by religion and region/district",
+      "provider": "Seychelles National Bureau of Statistics (NBS)",
+      "url": "https://www.nbs.gov.sc/downloads/1555-seychelles-population-and-housing-census-2022",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/sc_census/sc_2022_census_report.pdf",
+      "licence": {
+        "name": "The Seychelles National Bureau of Statistics (NBS) Terms and Conditions (nbs.gov.sc/terms-and-conditions) state: 'You may reproduce short extracts from the content appearing on the site provided that the source is stated and prior written consent is obtained from the NBS' and 'All rights not expressly granted are reserved.' The website footer reads 'Copyright (c) 2026 National Bureau of Statistics Seychelles. All Rights Reserved.' Under the standing build-then-ask ruling the derived aggregate summaries ship staged with NBS attribution while a reuse confirmation is sought (courtesy ask to ceo@nbs.gov.sc, not sent). Licence status: needs_review. The boundary is the OCHA COD-AB, sourced from NBS, licensed CC BY-IGO (accepted).",
+        "url": "https://www.nbs.gov.sc/terms-and-conditions",
+        "attribution": "Source: Seychelles National Bureau of Statistics, Population and Housing Census 2022 (Table B4.1). Derived district religion shares; contains NBS information reproduced with attribution pending reuse confirmation."
+      },
+      "citation": "Seychelles National Bureau of Statistics, Population and Housing Census 2022, Table B4.1.",
+      "access_limits": "The nbs.gov.sc /downloads component WAF-blocks scripted retrieval; the report was cached from a byte-faithful Internet Archive snapshot.",
+      "redistribution_limits": "Derived district religion summaries ship staged with NBS attribution under build-then-ask; the raw census PDF is not committed. NBS Terms require prior written consent for reproduction of site content (needs_review).",
+      "notes": "Integer counts; 8-category frame; all-households universe (national 102,612). The 27-district partition closes exactly at every margin. There is no standalone No-religion line (folded into 'Other (Specify)'). A 5-person Table 3.2 vs Table B4.1 split discrepancy (Christian (Other) / Unable to classify) is documented; the build renders Table B4.1 verbatim."
+    },
+    {
+      "source_dataset_id": "cod-ab-syc-nbs-adm3-2020",
+      "name": "OCHA COD-AB Seychelles, admin level 3 (27 districts)",
+      "provider": "OCHA (HDX); source Seychelles National Bureau of Statistics; vetted by ITOS",
+      "url": "https://data.humdata.org/dataset/seychelles-subnational-administrative-boundaries",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/sc_census/syc_adm_nbs2010_SHP.zip",
+      "licence": {
+        "name": "Creative Commons Attribution for Intergovernmental Organisations (CC BY-IGO)",
+        "url": "https://data.humdata.org/dataset/seychelles-subnational-administrative-boundaries",
+        "attribution": "Administrative boundaries: OCHA COD-AB, source Seychelles National Bureau of Statistics (CC BY-IGO)."
+      },
+      "citation": "OCHA COD-AB Seychelles (cod-ab-syc), syc_admbnda_adm3_nbs2010, 27 districts.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed under CC BY-IGO (attribution to OCHA / Seychelles NBS).",
+      "notes": "27 ADM3 districts sourced from NBS, including Perseverance Island. The 25 granite districts and La Digue join the census one-to-one; the single 'Other Islands' district takes the exact aggregate of the census inner-island (except La Digue) and outer-island leaves. Extent lon 46.20-56.29E, lat -10.21 to -3.71N; far from the antimeridian, no dateline handling needed."
+    }
+  ],
+  "notes": "STAGED product (no page, no hub link). The committed products are the derived 27-district area summary (27 rows for 2022) and the simplified OCHA COD-AB SYC ADM3 boundary. Census licence needs_review (NBS all-rights-reserved with a prior-consent clause; derived summaries ship staged with attribution under build-then-ask); boundary CC BY-IGO (accepted). Single-wave district product; the page decision is the conductor's, parallel to Barbados/Guyana."
+}
