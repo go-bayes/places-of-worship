@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Seychelles Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712b" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Seychelles's product is NBS census religious affiliation by the 27
+    // districts for a single wave, 2022. The source, Population and Housing
+    // Census 2022 Table B4.1 "Population in all households by religion and
+    // region/district", is an integer full-count of the all-households
+    // population, 102,612. Every district row and every one of the eight
+    // religion columns closes exactly to the printed national total; there is
+    // no cell suppression.
+    //
+    // Slot design is the extended two-slot with a null no-religion slot.
+    // religious_affiliation_percent is the share reporting one of the five
+    // clearly-religious categories (Catholic, Anglican, Islam, Hindu, Christian
+    // (Other)). no_religion_percent is NULL and omitted from metricsAvailable:
+    // the 2022 report publishes no standalone No-religion line, folding the
+    // questionnaire's No-religion and Atheist responses into "Other (Specify)"
+    // (which the printed note records as including Baha'i and Buddhist). The
+    // three residual columns — Other (Specify), Unable to classify, and Missing
+    // — stay in the denominator and in neither share; the affiliation share is
+    // therefore below 100 by construction. Omitting no_religion_percent (rather
+    // than shipping a permanently null metric) drops the map choropleth, the
+    // dropdown entry, and the popup column for it; the runtime keys that on
+    // "no_religion_percent" not being in CENSUS_METRICS.
+    //
+    // Place, density, and change metrics are omitted: no governed
+    // place-of-worship snapshot ships, and religion is cross-tabulated by
+    // district only in the 2022 census.
+    //
+    // Single wave only. Religion by district is published for 2022 alone;
+    // national religion is published for 2010 and 2022 (Table 3.2), documented
+    // as context, not shipped as a district product. 2010 district religion is
+    // unconfirmed and would sit on a pre-Perseverance-Island frame; 2002 and
+    // 1994 religion appear in no retrieved product.
+    //
+    // Licence accepted (PI ruling 2026-07-12, task 17): the
+    // derived-summaries-with-attribution stance extends to NBS notwithstanding
+    // the prior-consent reproduction clause in the NBS Terms; the courtesy note
+    // stays with the project lead. Boundaries are the official OCHA COD-AB SYC
+    // ADM3, source NBS, licensed CC BY-IGO (accepted), 27 districts including
+    // Perseverance Island; the single "Other Islands" district takes the exact
+    // published island-leaf aggregate.
+    window.REGION_CONFIG = {
+      countryCode: "SC",
+      title: "Places of Worship | Seychelles Research Map",
+      // seychelles spans lon 46.20..56.29 by lat -10.21..-3.71; 26 of the 27
+      // districts sit on the granite islands (Mahé, Praslin, La Digue). the
+      // map opens centred on that inhabited cluster, with the outer coral
+      // islands aggregated into the single Other Islands district
+      center: [55.58, -4.60],
+      initialZoom: 9,
+      censusLevels: {
+        district: {
+          label: "District",
+          boundaries: "data/sc_district_2020.geojson",
+          summary: "data/area_summary_district.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Seychelles National Bureau of Statistics (NBS), Population and Housing Census 2022, Table B4.1 (reproduced with attribution) · Boundaries © OCHA COD-AB SYC ADM3 (Creative Commons Attribution for Intergovernmental Organisations, CC BY-IGO), source Seychelles National Bureau of Statistics"
+        }
+      },
+      defaultLevel: "district",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2022,
+      // only the religious-affiliation share ships. no_religion_percent is
+      // omitted because the 2022 report publishes no standalone No-religion
+      // line (folded into Other (Specify)); place, density, and change metrics
+      // are omitted because no place layer is built and religion is
+      // cross-tabulated by district only in the 2022 census (single wave)
+      metricsAvailable: [
+        "religious_affiliation_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the district all-households population reporting one of the five clearly-religious categories (Catholic, Anglican, Islam, Hindu, Christian (Other)), from 2022 Census Table B4.1. The residual categories — Other (Specify), Unable to classify, and Missing — stay in the denominator and in neither share; the affiliation share is therefore below 100 by construction. No standalone No-religion line is published."
+        }
+      },
+      popupDenominatorNote: "Percentages use each district's all-households population (national 102,612), the census total population carried through the 2022 religion table (Table B4.1). Religious affiliation is the share reporting one of the five clearly-religious categories (Catholic, Anglican, Islam, Hindu, Christian (Other)). The 2022 report publishes no standalone No-religion line: the questionnaire's No-religion and Atheist responses are folded into Other (Specify), which the printed note records as including Baha'i and Buddhist. Other (Specify), Unable to classify, and Missing stay in the denominator and in neither share; the affiliation share is therefore below 100 by construction. This is a single 2022 census wave; the construct is census affiliation and does not measure belief, practice, attendance, or registered membership.",
+      cityPresets: [
+        { label: "Victoria", coords: [55.4527, -4.6197], zoom: 12 },
+        { label: "Beau Vallon", coords: [55.4275, -4.6200], zoom: 13 },
+        { label: "Cascade", coords: [55.4900, -4.6600], zoom: 13 },
+        { label: "Anse Royale", coords: [55.5147, -4.7286], zoom: 13 },
+        { label: "Praslin", shortLabel: "Praslin", aliases: ["Baie Sainte Anne", "Grand Anse Praslin"], coords: [55.7400, -4.3300], zoom: 12 },
+        { label: "La Digue", coords: [55.8378, -4.3567], zoom: 13 }
+      ],
+      geocode: { country: "sc", biasLngLat: [55.58, -4.60] },
+      onboarding: {
+        title: "Seychelles research map",
+        intro: "Census religious affiliation across Seychelles's 27 districts, a single 2022 snapshot from the National Bureau of Statistics (NBS), Population and Housing Census 2022, Table B4.1. The table is an integer full-count of the all-households population, 102,612, over eight religion categories. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+        bullets: [
+          "Districts are shaded by the share reporting one of the five clearly-religious categories (Catholic, Anglican, Islam, Hindu, Christian (Other)), from 2022 Census Table B4.1.",
+          "This is one census wave, 2022, at district level. The table is an integer full-count, and both national margins close exactly to the all-households population, 102,612. No change metric is offered.",
+          "The 2022 report publishes no standalone No-religion line: the questionnaire's No-religion and Atheist responses are folded into <code>Other (Specify)</code>, which the printed note records as including Baha'i and Buddhist. Other (Specify), Unable to classify, and Missing stay in the denominator and in neither share; the affiliation share is therefore below 100 by construction. No-religion is not shown as a separate metric.",
+          "Hindu affiliation concentrates on the plantation and outer-island geography: Cascade is 20.1% Hindu (against a 5.4% national share) and the Other Islands district is 49.4% Hindu, reflecting migrant labour on the outer coral islands. Anglican strength is highest on Praslin (Grand Anse Praslin 21.4%) against a 5.0% national share.",
+          "The Missing non-response residual is large and uneven (national 11.5%; Cascade 23.7%, Beau Vallon 15.3%), a documented data-quality feature of the 2022 census.",
+          "Open <strong>Show Census Data</strong> (top centre) for the legend and per-district figures."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion © <a href="https://www.nbs.gov.sc/" target="_blank" rel="noopener">Seychelles National Bureau of Statistics (NBS)</a>, Population and Housing Census 2022, Table B4.1 (Population in all households by religion and region/district). Source: Seychelles National Bureau of Statistics, Population and Housing Census 2022 (Table B4.1); derived district religion shares, contains NBS information reproduced with attribution. &middot; Boundaries © <a href="https://data.humdata.org/dataset/seychelles-subnational-administrative-boundaries" target="_blank" rel="noopener">OCHA COD-AB</a> SYC ADM3 (Creative Commons Attribution for Intergovernmental Organisations, CC BY-IGO), source Seychelles National Bureau of Statistics',
+      censusFlagNote: "* Counts are the 2022 Census Table B4.1 integer full-count (all households); both national margins close exactly to the all-households population, 102,612, with no cell suppression. Religious affiliation is the share reporting one of the five clearly-religious categories (Catholic, Anglican, Islam, Hindu, Christian (Other)). The 2022 report publishes no standalone No-religion line (folded into Other (Specify)); Other (Specify), Unable to classify, and Missing stay in the denominator and in neither share, and no-religion is not shown as a metric. Single wave (2022), district level; no change metric. Census data © NBS, reproduced with attribution; boundaries CC BY-IGO."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712b"></script>
+</body>
+</html>
