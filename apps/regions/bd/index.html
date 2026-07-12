@@ -23,37 +23,45 @@
       center: [90.35, 23.7],
       initialZoom: 6.3,
       censusLevels: {
-        district_2022: {
-          label: "District (2022)",
+        district: {
+          label: "District (zila, 64 units)",
           boundaries: "data/bd_district_2022.geojson",
-          summary: "data/area_summary_district_2022.json",
+          summary: "data/area_summary_district.json",
           codeProp: "area_code",
           nameProp: "area_name",
-          credit: "Boundaries &copy; geoBoundaries; Bangladesh Bureau of Statistics; OCHA ROAP (CC BY 3.0 IGO)"
+          credit: "Census religion &copy; Bangladesh Bureau of Statistics (BBS), Population and Housing Census 2011 (Community Report series, Table C-13; Lalmonirhat from the Zila Series report, Table P05, authorized source swap) and 2022 (National Report Volume I, Table P08); reuse terms unresolved (staging) &middot; Boundaries &copy; geoBoundaries BGD ADM2; BBS; OCHA ROAP (CC BY 3.0 IGO)"
         }
       },
-      defaultLevel: "district_2022",
+      defaultLevel: "district",
       defaultMetric: "religious_affiliation_percent",
       defaultYear: 2022,
       // minority-share design: the flat five-category frame sums to 100 by
       // construction; the two legacy slots therefore carry declared constructs. The
       // affiliation slot is the reference-group (Muslim) share; the no-religion
-      // slot is its exact complement, the minority share. Both are exposed.
+      // slot is its exact complement, the minority share. Both are exposed. The
+      // two waves (2011, 2022) share the identical five-category frame and the
+      // stable 64-zila boundary, so the runtime derives a wave-to-wave change
+      // metric from the two waves (the Peru two-wave precedent).
       metricsAvailable: [
         "religious_affiliation_percent",
-        "no_religion_percent"
+        "no_religion_percent",
+        "religious_change"
       ],
       metricLabels: {
         religious_affiliation_percent: {
           label: "Muslim (%)",
-          note: "share of the district's classified population reporting Muslim, Bangladesh's largest published census category, held constant as the reference group across every district. This is the reference group's share of the census frame, not a measure of affiliation versus non-affiliation. The popup shows this share and the minority share; the full composition (Muslim, Hindu, Christian, Buddhist, Others) rides each row of the downloadable area summary verbatim."
+          note: "share of the district's classified population reporting Muslim, Bangladesh's largest published census category, held constant as the reference group across every district and both waves. This is the reference group's share of the census frame, not a measure of affiliation versus non-affiliation. The popup shows this share and the minority share by census year; the full composition (Muslim, Hindu, Christian, Buddhist, Others) rides each row of the downloadable area summary verbatim. Bhola 2011 is withheld (source-PDF defect) and reads no-data, never zero."
         },
         no_religion_percent: {
           label: "Minority share (%)",
-          note: "share outside Bangladesh's largest published category, Muslim: the summed share of Hindu, Christian, Buddhist and Others, the exact complement of the Muslim share. This is arithmetic on the published affiliation categories; it is not a measure of no religion, belief, practice, or secularity."
+          note: "share outside Bangladesh's largest published category, Muslim: the summed share of Hindu, Christian, Buddhist and Others, the exact complement of the Muslim share. This is arithmetic on the published affiliation categories; it is not a measure of no religion, belief, practice, or secularity. Shown for both waves; Bhola 2011 is withheld and reads no-data."
+        },
+        religious_change: {
+          label: "Muslim-share change",
+          note: "percentage-point change in the reference-group (Muslim) share between the 2011 and 2022 censuses, an eleven-year interval on the stable 64-zila frame. The Muslim share and the minority share are exact complements, so the same magnitude with the opposite sign describes the minority-share change. A wave-to-wave difference is not an annual rate, and population growth is never treated as religion change. Change renders on the 2022 wave; Bhola has no change because its 2011 composition is withheld, so it reads no-data, never zero."
         }
       },
-      popupDenominatorNote: "Percentages use the sum of the five BBS census religion categories (Muslim, Hindu, Christian, Buddhist, Others) as the denominator. The Muslim (%) metric is the reference-group share; the Minority share (%) metric is its exact complement, the share outside the reference group (Hindu + Christian + Buddhist + Others). Table P08 is the sex-classified basis and excludes the 8,124 hijra (third gender) persons nationally, who are religion-classified only at division level. There is no no-religion and no not-stated category.",
+      popupDenominatorNote: "Percentages use the sum of the five BBS census religion categories (Muslim, Hindu, Christian, Buddhist, Others) as the denominator in each wave. The Muslim (%) metric is the reference-group share; the Minority share (%) metric is its exact complement, the share outside the reference group (Hindu + Christian + Buddhist + Others); the two sum to 100 in every district and wave. The change metric differences the Muslim share across the 2011-2022 pair on the stable 64-zila frame. The two waves carry a disclosed universe difference immaterial to the shares: 2011 is the full enumerated population (the census carried no third-gender enumeration and Table C-13 has no not-stated category), and 2022 is the sex-classified basis (Table P08), which excludes the 8,124 hijra (third gender) persons nationally, religion-classified only at division level. Neither wave has a no-religion or not-stated category. Lalmonirhat's 2011 row comes from the Zila Series report (Table P05, authorized source swap; its Buddhist count of 5 fires the fewer-than-ten marker) because the Community Report copy is a scanned image. Bhola's 2011 religion composition is withheld on twin source defects (its Community Report omits the printed religion pages and its Zila-Series copy is image-only), so the 2011 row reads no-data, never zero.",
       cityPresets: [
         { label: "Dhaka", coords: [90.4125, 23.8103], zoom: 10 },
         { label: "Chattogram", aliases: ["Chittagong"], coords: [91.8123, 22.3569], zoom: 10 },
@@ -67,12 +75,13 @@
       geocode: { country: "bd", biasLngLat: [90.35, 23.7] },
       onboarding: {
         title: "Bangladesh research map",
-        intro: "Population and Housing Census 2022 religious-affiliation overlay by district (zila), from Bangladesh Bureau of Statistics Table P08.",
+        intro: "Census religious-affiliation composition by district (zila) across two waves, 2011 and 2022, from the Bangladesh Bureau of Statistics (BBS): the 2011 Community Report series (Table C-13) and the 2022 National Report (Table P08), on the stable 64-zila frame.",
         bullets: [
-          "Districts carry the census composition in five recognised categories: Muslim, Hindu, Christian, Buddhist and Others.",
-          "Two metrics are shown: the Muslim (%) share, the reference group and Bangladesh's largest published category, and the Minority share (%), its exact complement (Hindu + Christian + Buddhist + Others). The minority share is highest in districts such as Rangamati and Bandarban.",
-          "The minority share is arithmetic on the published affiliation categories; it is not a measure of no religion, belief, practice, or secularity. The census has no no-religion and no not-stated category. Tap a district for its Muslim share and minority share; the verbatim five-category counts ride every row of the downloadable area summary (see About this map).",
-          "The district table is the sex-classified basis and excludes the 8,124 hijra (third gender) persons, who are religion-classified only at division level.",
+          "Districts carry the census composition in five recognised categories: Muslim, Hindu, Christian, Buddhist and Others, in both the 2011 and 2022 waves.",
+          "Two metrics are shown: the Muslim (%) share, the reference group and Bangladesh's largest published category, and the Minority share (%), its exact complement (Hindu + Christian + Buddhist + Others). The minority share is highest in districts such as Rangamati and Bandarban. Use the year control to switch between the 2011 and 2022 waves.",
+          "A change metric reports the percentage-point change in the Muslim share between 2011 and 2022 on the stable 64-zila frame; the minority-share change is the same magnitude with the opposite sign. A wave-to-wave difference is not an annual rate, and population growth is never treated as religion change.",
+          "The minority share is arithmetic on the published affiliation categories; it is not a measure of no religion, belief, practice, or secularity. Neither wave has a no-religion or not-stated category. Tap a district for its Muslim share and minority share by census year; the verbatim five-category counts ride every row of the downloadable area summary (see About this map).",
+          "The two waves carry a disclosed universe difference immaterial to the shares: 2011 is the full enumerated population (no third-gender enumeration), and the 2022 table is the sex-classified basis, which excludes the 8,124 hijra (third gender) persons, religion-classified only at division level. Lalmonirhat's 2011 row uses the Zila Series report (its Buddhist count of 5 is marked as fewer than ten), and Bhola's 2011 composition is withheld on a source-PDF defect and reads no-data, never zero.",
           "Open <strong>Show Census Data</strong> (top centre) for the geography and metric controls."
         ],
         links: [
@@ -84,8 +93,8 @@
         { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
         { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
       ],
-      censusSourceAttribution: 'Census religion &copy; <a href="https://bbs.gov.bd/" target="_blank" rel="noopener">Bangladesh Bureau of Statistics</a>, Population and Housing Census 2022, National Report (Volume I), Table P08 &middot; Reuse terms unresolved (staging) &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a>; BBS; OCHA ROAP (CC BY 3.0 IGO)',
-      censusFlagNote: "* The BBS census religion frame is Muslim, Hindu, Christian, Buddhist and Others, with no no-religion and no not-stated category; the frame therefore sums to 100% by construction. The map shades the reference-group (Muslim) share and its exact complement, the minority share; the no-religion slot label carries the minority share and no no-religion meaning. Table P08 is the sex-classified basis and excludes the 8,124 hijra (third gender) persons nationally. This product is held in staging until BBS census reuse terms are established."
+      censusSourceAttribution: 'Census religion &copy; <a href="https://bbs.gov.bd/" target="_blank" rel="noopener">Bangladesh Bureau of Statistics</a>, Population and Housing Census 2011 (Community Report series, Table C-13; Lalmonirhat from the Zila Series report, Table P05, authorized source swap) and 2022 (National Report Volume I, Table P08) &middot; Reuse terms unresolved (staging) &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> BGD ADM2; BBS; OCHA ROAP (CC BY 3.0 IGO)',
+      censusFlagNote: "* The BBS census religion frame is Muslim, Hindu, Christian, Buddhist and Others in both waves, with no no-religion and no not-stated category; the frame sums to 100% by construction. The map shades the reference-group (Muslim) share and its exact complement, the minority share; the no-religion slot label carries the minority share and no no-religion meaning. The two waves carry a disclosed universe difference immaterial to the shares: 2011 is the full enumerated population (no third-gender enumeration), and the 2022 table is the sex-classified basis, which excludes the 8,124 hijra (third gender) persons nationally, religion-classified only at division level. Lalmonirhat's 2011 row comes from the Zila Series report (Table P05, authorized source swap) because the Community Report copy is a scanned image; its Buddhist count of 5 fires the fewer-than-ten marker (†). Bhola's 2011 religion composition is withheld on twin source defects (the Community Report omits the printed religion pages and the Zila-Series copy is image-only), so the 2011 row reads no-data, never zero, and Bhola carries no change. This product is held in staging until BBS census reuse terms are established; it reverts in a single commit if BBS objects."
     };
   </script>
   <script src="../_shared/region-map.js?v=20260712d"></script>
