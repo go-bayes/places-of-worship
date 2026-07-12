@@ -24,6 +24,7 @@
     main { width: min(560px, 92vw); }
     h1 { margin: 0 0 4px; font-size: 24px; font-weight: 600; letter-spacing: -0.01em; }
     .lede { margin: 0 0 20px; color: #94a3b8; font-size: 14px; line-height: 1.5; }
+    .country-count { color: #e2e8f0; font-weight: 600; }
     .map-list { display: grid; gap: 10px; }
     a.map-card {
       display: block;
@@ -59,7 +60,7 @@
 <body>
   <main>
     <h1>Data maps</h1>
-    <p class="lede">Places of worship with census and religion-data overlays, by country.</p>
+    <p class="lede">Places of worship with census and religion-data overlays, by country. <span id="country-count" class="country-count">89 countries mapped.</span></p>
     <nav class="map-list">
       <a class="map-card" href="al/">
         <div class="map-card-title">Albania <span class="wave-badge w2">2 waves · 2011–2023</span></div>
@@ -420,5 +421,11 @@
     </nav>
     <a class="back" href="../global/">← Global map</a>
   </main>
+  <script>
+    // the count derives from the cards so a new launch never leaves it stale;
+    // the static text above is the no-script fallback
+    document.getElementById("country-count").textContent =
+      document.querySelectorAll(".map-card").length + " countries mapped.";
+  </script>
 </body>
 </html>

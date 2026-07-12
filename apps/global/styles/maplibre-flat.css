@@ -215,9 +215,9 @@
       display: block;
     }
     /* the theme select rides in the wordmark pill, behind its own divider;
-       the wordmark hides on phones, which fixes the theme to backdrop there
-       (the credit fallback still guards it). select chrome comes from
-       .shell-pill-select in the shared sheet. */
+       the select hides on phones (map-shell.css), which fixes the theme to
+       backdrop there (the credit fallback still guards it). select chrome
+       comes from .shell-pill-select in the shared sheet. */
     #basemapSelect { max-width: 120px; }
     #tile-status {
       position: fixed;
@@ -537,9 +537,9 @@
   color: #fff;
   text-decoration: underline;
 }
-@media (max-width: 640px) {
-  #wordmark { display: none; }
-}
+/* phones: the pill itself stays — the shared sheet (map-shell.css) hides its
+   non-navigation members (fix-map link, theme select, repo link), leaving
+   "Data maps" (and "Global map" on country pages) reachable on mobile */
 
 /* lazy street view: the popup shows a button until someone asks */
 .streetview .sv-show {
