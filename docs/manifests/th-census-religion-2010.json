@@ -1,0 +1,3497 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:th-census-religion:th:2010:nso-province",
+  "dataset_id": "th-census-religion:th:2010:nso-province",
+  "dataset_version_id": "th-census-religion:th:2010:nso-province:5c496040b109",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "th-census-religion",
+  "dataset_role": "staged_evidence",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "TH"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-07-12T00:00:00Z",
+  "created_by": "scripts/build_th_area_summary.R",
+  "target_years": [
+    2010
+  ],
+  "pipeline": {
+    "script": "scripts/build_th_area_summary.R",
+    "git_commit": "9e84d1d3bea2c92faabff06b0f87cb3bcd562327",
+    "command": "Rscript scripts/build_th_area_summary.R",
+    "parameters": {
+      "construct": "census affiliation",
+      "shipped_waves": [
+        2010
+      ],
+      "shipped_geography": "76 Thailand provinces (changwat) on the 2010 census frame (Bueng Kan within Nong Khai)",
+      "boundary_set": "th-province-2010censusframe-geoboundaries-adm1",
+      "source_table": "2010 census provincial final reports, Table 4 'Population by religion, sex and area' (full-count, 9 categories)",
+      "universe": "all persons, all ages; province Total row of Table 4",
+      "extraction_note": "The 76 census-frame province counts were transcribed from the cached provincial report PDFs (data/raw/th_census/reports2010) with pdftotext -layout, keying on the stable Thai category labels (English labels carry per-report typos e.g. 'Buddihism' in Tak, and the reversed Total label 'รวมยอด' in Ayutthaya). The transcription is data/raw/th_census/table4_extracted.json, sha256-pinned in raw_sources, and embedded in this build.",
+      "slot_design": "Ordinary two-slot (BZ/SB precedent). religious_affiliation_percent is the share of the province population reporting a named religion (population minus No religion minus Unknown); no_religion_percent is the single No religion line. The Unknown non-response line stays in the denominator and in neither slot, so the two shares need not sum to 100.",
+      "category_frame": {
+        "english": [
+          "Buddhism",
+          "Islam",
+          "Christianity",
+          "Hindus",
+          "Confucious",
+          "Sikh",
+          "Others",
+          "No religion",
+          "Unknown"
+        ],
+        "thai": [
+          "พุทธ",
+          "อิสลาม",
+          "คริสต์",
+          "ฮินดู",
+          "ขงจื้อ",
+          "ซิกข์",
+          "อื่น ๆ",
+          "ไม่มีศาสนา",
+          "ไม่ทราบ"
+        ]
+      },
+      "reconciliation_rule": "Per province, the nine category counts must sum to the printed Total row within a +-2 person bound (the observed maximum NSO independent-rounding residual in these full-count tables). Every deviation is recorded; counts are carried verbatim, never repaired. The slots use the printed Total row as the denominator, so affiliation% + no-religion% + unknown% = 100% exactly.",
+      "change_rule": "Single wave (2010); no cross-wave change is claimed. The 2000 province religion is percentage-only (two categories, no counts); not compared.",
+      "bueng_kan_note": "The 2010 census enumeration (1 September 2010) predates Bueng Kan province (created March 2011 from eight Nong Khai amphoes). The NongKhai provincial report is the old frame -- its Table 1 lists all 17 amphoes including the eight later transferred -- and the separate BuengKan report re-tabulates those same eight amphoes, so summing all 77 reports double-counts Bueng Kan (+362,747 against the WholeKingdom Table 4 total; Bueng Kan's own total is 362,754). The product therefore ships the NSO-published 2010 frame: 76 provinces, with the Bueng Kan polygon unioned into Nong Khai (geometrically exact; Bueng Kan was carved wholly from Nong Khai). The BuengKan re-tabulation is recorded as a deferred source; no unpublished cell is derived by subtraction and no allocation is invented.",
+      "territorial_note": "The deep-South provinces (Pattani, Yala, Narathiwat, Satun) are Muslim-majority and politically sensitive; the build renders the NSO record neutrally. Separate page annotation is a page-lane concern.",
+      "omitted_metrics": [
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 30,
+        "bytes": 1079907
+      },
+      "access_note": "statbbi.nso.go.th and nsoweb.nso.go.th are decommissioned (NXDOMAIN via Cloudflare DoH); the live www.nso.go.th is behind a CloudWAF/Cloudflare managed challenge that blocks automation. The report PDFs were retrieved from Internet Archive replays of the NSO originals; content type verified on every download.",
+      "local_cache_hint": "All raw sources are cached under data/raw/th_census/ and remain git-ignored.",
+      "retrieval_record": [
+        {
+          "uri": "data/raw/th_census/reports2010/AmnatCharoen_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/AmnatCharoen_T.pdf",
+          "format": "pdf",
+          "bytes": 1964377,
+          "sha256": "7c4e1e087715828a072f0fc09f0d1cc52d8d8a4bd094763088f5b90b6de0f44e",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/AmnatCharoen_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/AngThong_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/AngThong_T.pdf",
+          "format": "pdf",
+          "bytes": 2434971,
+          "sha256": "2ee514630a8af88062808e2998dadb13b15fcd79a1275feb44ba51383dd55ce5",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/AngThong_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Ayutthaya_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Ayutthaya_T.pdf",
+          "format": "pdf",
+          "bytes": 2392674,
+          "sha256": "da5ba23191cf4b52a7e1a542e7050cb442202b1584e470ed762d0d8a16497c62",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Ayutthaya_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Bangkok_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Bangkok_T.pdf",
+          "format": "pdf",
+          "bytes": 2790862,
+          "sha256": "6c6fa8e90e73897263b64c192a7747d6001a875d1d6ccf095b748df70514d5a1",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Bangkok_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/BuengKan_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/BuengKan_T.pdf",
+          "format": "pdf",
+          "bytes": 6110848,
+          "sha256": "a319bf776361df5e542bd6dc55b46b2267885c70af5694948f260e5d69ff93dd",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": false,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/BuengKan_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/BuriRam_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/BuriRam_T.pdf",
+          "format": "pdf",
+          "bytes": 6184992,
+          "sha256": "7b111440bc1c3769b52995de5be8228952804a9b90eaaa34426be1e2a2880a51",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/BuriRam_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Central_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Central_T.pdf",
+          "format": "pdf",
+          "bytes": 2641599,
+          "sha256": "9ffef2beaaa6cca7fd5cef1ce85e5c9befda1e47acec7fd40bdcc83ac9895a51",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": false,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Central_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Chachoengsao_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Chachoengsao_T.pdf",
+          "format": "pdf",
+          "bytes": 6387393,
+          "sha256": "05b5d4d0ff139ba0f4e025494f60d255038d1bd91dc95a0bc1fed5d5df425cb0",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Chachoengsao_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/ChaiNat_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/ChaiNat_T.pdf",
+          "format": "pdf",
+          "bytes": 2057006,
+          "sha256": "361885d210be95c6702f5ecb5e9aeff11f94b5a5b99a9b2026a4a8eb3deea0c6",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/ChaiNat_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Chaiyaphum_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Chaiyaphum_T.pdf",
+          "format": "pdf",
+          "bytes": 6006673,
+          "sha256": "6b1c5160acb1724e90dd5ecf87b8e63a411338a4af951ae60b3d4d5b91c50c23",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Chaiyaphum_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Chanthaburi_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Chanthaburi_T.pdf",
+          "format": "pdf",
+          "bytes": 6501436,
+          "sha256": "26400088bd160b1e7928735f55210dcedcecbf0964af4634e771cfc0ca9b852f",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Chanthaburi_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/ChiangMai_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/ChiangMai_T.pdf",
+          "format": "pdf",
+          "bytes": 2249630,
+          "sha256": "20b56e6e91c347f934a03591a91c81e40b6bf0843bd5c032986ee2beb53b6d65",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/ChiangMai_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/ChiangRai_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/ChiangRai_T.pdf",
+          "format": "pdf",
+          "bytes": 3872531,
+          "sha256": "22628f1b12a24fe58fc855108a6c0826c52db094fd8d8b2051b12ac5575b0d7b",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/ChiangRai_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/ChonBuri_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/ChonBuri_T.pdf",
+          "format": "pdf",
+          "bytes": 6414928,
+          "sha256": "6a6e0d0b4e5987aaaf776ef840fbca8e6270f649063d01cc6d960c15e27ea929",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/ChonBuri_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Chumphon_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Chumphon_T.pdf",
+          "format": "pdf",
+          "bytes": 1967592,
+          "sha256": "14ed090979d44dc97e56047881b02e9efb976556eb2f55c227de927909c99bc6",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Chumphon_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Kalasin_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Kalasin_T.pdf",
+          "format": "pdf",
+          "bytes": 6097377,
+          "sha256": "c68e8d3e3bbc5d27d928a29c6786bba48c8a65abc143610aa00a3c630af7a126",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Kalasin_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/KamphaengPhet_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/KamphaengPhet_T.pdf",
+          "format": "pdf",
+          "bytes": 2346352,
+          "sha256": "d8dbbb3aab8d23232326067e6e50b57c01498121b96dcf6e9db210f53c247cb0",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/KamphaengPhet_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Kanchanaburi_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Kanchanaburi_T.pdf",
+          "format": "pdf",
+          "bytes": 6474180,
+          "sha256": "3a71e4701ebd6509ef9f0ffdfd27a2f52c86df66950f9e4d618598553a41d726",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Kanchanaburi_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/KhonKaen_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/KhonKaen_T.pdf",
+          "format": "pdf",
+          "bytes": 6105012,
+          "sha256": "b0a57a9470f3d7e96321a8fe93e28b7972866ca906a0b9ec72f8ffecdfc0c9cc",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/KhonKaen_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Krabi_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Krabi_T.pdf",
+          "format": "pdf",
+          "bytes": 9578568,
+          "sha256": "d9a752d76b09fe0f93c8bcfbc8c99d2f3c5e568f5f482613148f1c5eb66a151e",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Krabi_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Lampang_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Lampang_T.pdf",
+          "format": "pdf",
+          "bytes": 2807243,
+          "sha256": "025292d420e2d5bb99d87e8bee3f3ee9457963f10c8e5080d3e062d52766f977",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Lampang_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Lamphun_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Lamphun_T.pdf",
+          "format": "pdf",
+          "bytes": 3713692,
+          "sha256": "58d50ba8f58b2eb495b05c364339e967066a4887e2106abcf07562460b9d8807",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Lamphun_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Loei_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Loei_T.pdf",
+          "format": "pdf",
+          "bytes": 6073261,
+          "sha256": "eab35110b85fc5ecf2f0c80f821491cdcccc89e864a6fb05b88c52c87451cfbc",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Loei_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/LopBuri_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/LopBuri_T.pdf",
+          "format": "pdf",
+          "bytes": 6633613,
+          "sha256": "95110b4777ea36f5a3ec685b3bc6f44e23dd781a3a6b1321ca53b1e10bdf30a2",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/LopBuri_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/MaeHongSon_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/MaeHongSon_T.pdf",
+          "format": "pdf",
+          "bytes": 2981337,
+          "sha256": "6d1fe81022be89d456886e708a321024a7763e9426cd1b81facd350d02026971",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/MaeHongSon_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/MahaSarakham_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/MahaSarakham_T.pdf",
+          "format": "pdf",
+          "bytes": 6008774,
+          "sha256": "4336388a665d3bf40a411cbd45bd72913e1018586ca20b29f9898c7f0a9cd419",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/MahaSarakham_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Mukdahan_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Mukdahan_T.pdf",
+          "format": "pdf",
+          "bytes": 1932084,
+          "sha256": "f1c4b56943d5829a6918004eed6cee2b02d9fa772f894d3c158e54b0ec475778",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Mukdahan_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/NakhonNayok_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/NakhonNayok_T.pdf",
+          "format": "pdf",
+          "bytes": 6650193,
+          "sha256": "06ef95ecec7af9d095afb9d4efe0d397117a57c867855c707be06bfaad8ea010",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/NakhonNayok_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/NakhonPathom_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/NakhonPathom_T.pdf",
+          "format": "pdf",
+          "bytes": 7727863,
+          "sha256": "412f4af903186eab61fb937c52a89488ac0bc458e6f33940542094dda9dfdccd",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/NakhonPathom_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/NakhonPhanom_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/NakhonPhanom_T.pdf",
+          "format": "pdf",
+          "bytes": 6005896,
+          "sha256": "e25d13fd2b2bd4f5552a8b3f8657c5c3a9b0fc77949d019ef82cb8c8dc0c45f7",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/NakhonPhanom_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/NakhonRatchasima_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/NakhonRatchasima_T.pdf",
+          "format": "pdf",
+          "bytes": 6344053,
+          "sha256": "d85d361dc11f8371e6c20daa6c259aca1c7d7d943b833a6406c985387e4daf6e",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/NakhonRatchasima_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/NakhonSawan_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/NakhonSawan_T.pdf",
+          "format": "pdf",
+          "bytes": 2487098,
+          "sha256": "1f3db8f1686fd078bd5c931a3b285f3427c97aa81dff832a477ef4ca3c2d6063",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/NakhonSawan_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/NakhonSiThammarat_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/NakhonSiThammarat_T.pdf",
+          "format": "pdf",
+          "bytes": 2739632,
+          "sha256": "c3af98b2fc0e6c59acd771d6a6d5498d86514bc9374ccbcb3dfe7637ad3c7258",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/NakhonSiThammarat_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Nan_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Nan_T.pdf",
+          "format": "pdf",
+          "bytes": 3078455,
+          "sha256": "de762baf96ea52c2919747241b68cd15cf09db46a1391a8148dc540a00ec912a",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Nan_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Narathiwat_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Narathiwat_T.pdf",
+          "format": "pdf",
+          "bytes": 2632891,
+          "sha256": "9de64a878bf7158907cbfd99ae8f0da0319d8eab13544608cbfdaf8e0092142d",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Narathiwat_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/NongBuaLamPhu_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/NongBuaLamPhu_T.pdf",
+          "format": "pdf",
+          "bytes": 5889136,
+          "sha256": "be6857e995d02bddad71f7745666de1dbcd743d3de676da0972be687137163be",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/NongBuaLamPhu_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/NongKhai_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/NongKhai_T.pdf",
+          "format": "pdf",
+          "bytes": 5991716,
+          "sha256": "9af1d760baa00af8b5f2ecddb63b9634215d9fda5dca73411281d5e393c3106b",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/NongKhai_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Nonthaburi_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Nonthaburi_T.pdf",
+          "format": "pdf",
+          "bytes": 6300000,
+          "sha256": "16e77364f88229beee737aa0b65d865f1c45ed0842cb559c107d9355be60bdd3",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Nonthaburi_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Northeastern_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Northeastern_T.pdf",
+          "format": "pdf",
+          "bytes": 2728279,
+          "sha256": "3942aa0832ad930e4bd836f0d6159b959ec90174313bff657ab42facfe3f8407",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": false,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Northeastern_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Northern_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Northern_T.pdf",
+          "format": "pdf",
+          "bytes": 2687438,
+          "sha256": "1fe9a5b931f9eb015ba6b1b3a6ec939761205eb6807a7f235caf81b569e489fc",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": false,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Northern_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/PathumThani_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/PathumThani_T.pdf",
+          "format": "pdf",
+          "bytes": 6547646,
+          "sha256": "e373f6fab517e2a08bc83a47f6b5b4e783893f2a0ea57511bd3d4542567acec3",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/PathumThani_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Pattani_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Pattani_T.pdf",
+          "format": "pdf",
+          "bytes": 2401814,
+          "sha256": "cea0a0becf32df0446c5e4974339867036362467788df869c4cf24388c955eec",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Pattani_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Phachuap_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phachuap_T.pdf",
+          "format": "pdf",
+          "bytes": 6401657,
+          "sha256": "46301a1765596a7a820e8e5a575f2a1920db4d5f2aa53f6e5c08c62cdc4fd16e",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Phachuap_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Phangnga_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phangnga_T.pdf",
+          "format": "pdf",
+          "bytes": 2810757,
+          "sha256": "9ab3c126c4a548f35137e69934facc7a183036473de3113c020c3d580b4512f9",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Phangnga_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Phatthalung_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phatthalung_T.pdf",
+          "format": "pdf",
+          "bytes": 2193954,
+          "sha256": "c284f2b5adb5fabcea97431f6197629889bb4740e7adf45b275e20278c661a55",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Phatthalung_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Phayao_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phayao_T.pdf",
+          "format": "pdf",
+          "bytes": 2034257,
+          "sha256": "9180e58cd7879eb48a22a009c7a40d5c6b927fe0b69f61fc45d968639dcedc0e",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Phayao_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Phetchabun_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phetchabun_T.pdf",
+          "format": "pdf",
+          "bytes": 2483078,
+          "sha256": "d6dede9d5b832c49a7a7522b6886f737df9a4ae6aeceaa053588104be920da98",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Phetchabun_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Phetchaburi_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phetchaburi_T.pdf",
+          "format": "pdf",
+          "bytes": 6660654,
+          "sha256": "ca756cc43f8805af80c20fca37e241da7a7edb09433e6375140310dc627ad04c",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Phetchaburi_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Phichit_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phichit_T.pdf",
+          "format": "pdf",
+          "bytes": 4265041,
+          "sha256": "3aa8eeda640064b171ff4d784cba80ec2ca94f203ae2c01444dbfd76d73ee73e",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Phichit_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Phitsanulok_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phitsanulok_T.pdf",
+          "format": "pdf",
+          "bytes": 4860005,
+          "sha256": "bb360cc53fd811fa776c835596179eec39bf5fe5ab1518b5806e1226b3fbcfd8",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Phitsanulok_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Phrae_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phrae_T.pdf",
+          "format": "pdf",
+          "bytes": 2000128,
+          "sha256": "1e8d44ea445f3a7ae98d42a796e05785399409af01befb364c8ca8cbe226702e",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Phrae_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Phuket_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phuket_T.pdf",
+          "format": "pdf",
+          "bytes": 2315932,
+          "sha256": "6a4b7c715603f63612d466ce7fd04d330fffa0b94d9a86e3975a888c87b5eac3",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Phuket_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/PrachinBuri_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/PrachinBuri_T.pdf",
+          "format": "pdf",
+          "bytes": 6630269,
+          "sha256": "7657910e0a905b019a70a9a13cd54f407819a7d41bd5ba9d6585aa1ea8e7245a",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/PrachinBuri_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Ranong_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Ranong_T.pdf",
+          "format": "pdf",
+          "bytes": 3241550,
+          "sha256": "73d41db7b014b691f1be2d499a0d13a45a910ef6bc6ccadc4e4e62c8f9b0ddb4",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Ranong_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Ratchaburi_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Ratchaburi_T.pdf",
+          "format": "pdf",
+          "bytes": 6822162,
+          "sha256": "896bfb21aa7f71e27edd6b4053809d5b86d096d0dbe94948a1d9b53e15bb1122",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Ratchaburi_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Rayong_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Rayong_T.pdf",
+          "format": "pdf",
+          "bytes": 6538982,
+          "sha256": "8e88c93d581ccf8d0153e4736f711c7718248a64cedd0e787ac46b9801479d21",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Rayong_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/RoiEt_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/RoiEt_T.pdf",
+          "format": "pdf",
+          "bytes": 6667956,
+          "sha256": "5781869f024cd8bb4746237a0bc0a3fb45c65f572d61c23b6674fabaf3194ef5",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/RoiEt_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/SaKaeo_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/SaKaeo_T.pdf",
+          "format": "pdf",
+          "bytes": 6401136,
+          "sha256": "ee082e83b0a192966da7294f48c98ac744e9bda1cc970330037a7648d13c4965",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/SaKaeo_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/SakonNakhon_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/SakonNakhon_T.pdf",
+          "format": "pdf",
+          "bytes": 6048417,
+          "sha256": "7c6b370178cf283bd56331398d1328a0cc6d2c978c7612d368877b061ea2d184",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/SakonNakhon_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/SamutPrakan_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/SamutPrakan_T.pdf",
+          "format": "pdf",
+          "bytes": 6384343,
+          "sha256": "7cdaccf2fea0334461dbb7d7760917da4ea28e7acf866a47d06a3175846f587c",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/SamutPrakan_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/SamutSakhon_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/SamutSakhon_T.pdf",
+          "format": "pdf",
+          "bytes": 2181967,
+          "sha256": "594b20189485436dd8c384fef00ae3e45941dc1a67de0cc97dcca68417efe96e",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/SamutSakhon_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/SamutSongkhram_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/SamutSongkhram_T.pdf",
+          "format": "pdf",
+          "bytes": 6200170,
+          "sha256": "d2e7d6b91591976fc1bc2317dfe1d1258e820059a27a94cc85bb8f4a50d455e3",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/SamutSongkhram_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Saraburi_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Saraburi_T.pdf",
+          "format": "pdf",
+          "bytes": 2136259,
+          "sha256": "55637c9831fa742c865e8022a1fd045efff1f9b3a564bf5b0703c9ed5edcec68",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Saraburi_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Satun_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Satun_T.pdf",
+          "format": "pdf",
+          "bytes": 2104394,
+          "sha256": "3f311957a585815af6ef1c8b6c8760bd1a078a0e63016a5f3e790a74aba1eccc",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Satun_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/SingBuri_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/SingBuri_T.pdf",
+          "format": "pdf",
+          "bytes": 6372730,
+          "sha256": "9d2b847481b2c0ba88d240e02738c038e4eb109f05bf28eba197aaa7db1b3036",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/SingBuri_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/SiSaKet_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/SiSaKet_T.pdf",
+          "format": "pdf",
+          "bytes": 6152519,
+          "sha256": "7b6675f69cd16d42d56c249fc3a83922f7f4781cd7ab8f4a99991b8e29039f17",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/SiSaKet_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Songkhla_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Songkhla_T.pdf",
+          "format": "pdf",
+          "bytes": 2999495,
+          "sha256": "e80dce65c117f8418491543e6e0fab2718aa59c769fbcb4c92275eb29fb20c22",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Songkhla_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Southern_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Southern_T.pdf",
+          "format": "pdf",
+          "bytes": 2984793,
+          "sha256": "cce5ce50782f78caa794e054d7458a6db657c1f59332a9740036a4ced967a811",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": false,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Southern_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Sukhothai_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Sukhothai_T.pdf",
+          "format": "pdf",
+          "bytes": 2160686,
+          "sha256": "eabdf0b4e78e6fe519d4f39b8db7adb0696d1f0468c08261028a036e70bc1372",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Sukhothai_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/SuphanBuri_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/SuphanBuri_T.pdf",
+          "format": "pdf",
+          "bytes": 6581836,
+          "sha256": "407c192bc8211ba6ac60900c85e7274ba9852192d853e8c35db1ec9b76d3d4df",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/SuphanBuri_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/SuratThani_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/SuratThani_T.pdf",
+          "format": "pdf",
+          "bytes": 8471437,
+          "sha256": "46770f5e835c647cc0771c6b8fd450eb487246515c36a8d92a6f5773413c82b1",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/SuratThani_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Surin_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Surin_T.pdf",
+          "format": "pdf",
+          "bytes": 7905244,
+          "sha256": "4d0e3bd1449bec724f69f6248a4a34af0d6fa74ea712c251a8fa2e203a659dac",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Surin_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Tak_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Tak_T.pdf",
+          "format": "pdf",
+          "bytes": 3880709,
+          "sha256": "42a2a1fe39be038e898be0320fe45fe8ab4bfd15a643c2652567b2eddadb4c56",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Tak_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Trang_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Trang_T.pdf",
+          "format": "pdf",
+          "bytes": 2627544,
+          "sha256": "aee9f8027345c410e44308bec2031547b0d387f053ea53fe32daecb33df09726",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Trang_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Trat_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Trat_T.pdf",
+          "format": "pdf",
+          "bytes": 3783566,
+          "sha256": "cd0b6d172be9ca8971328a2a59b0ac6f1d9bda277507bda8abb432ca38557d53",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Trat_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Ubonatchathani_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Ubonatchathani_T.pdf",
+          "format": "pdf",
+          "bytes": 6544575,
+          "sha256": "bbdd979a1721b80010049a65677623eb27f96c294be182c79843344d5cdb0fdf",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Ubonatchathani_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/UdonThani_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/UdonThani_T.pdf",
+          "format": "pdf",
+          "bytes": 6305646,
+          "sha256": "21f1ad046028ec28aac87f440f6e324d0e5989e732680bf29ce4b2cc50cef248",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/UdonThani_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/UthaiThani_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/UthaiThani_T.pdf",
+          "format": "pdf",
+          "bytes": 2049181,
+          "sha256": "824cdaf465d0ef40ede337f20e4c8ea8c4a542c0bd5b7c030e4fc982e98ae72a",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/UthaiThani_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Uttaradit_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Uttaradit_T.pdf",
+          "format": "pdf",
+          "bytes": 2394371,
+          "sha256": "4e4186075e4d79a74fd8b2d2aa3e7372088e8ec207413f2014dac25147c71764",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Uttaradit_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/WholeKingdom_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/WholeKingdom_T.pdf",
+          "format": "pdf",
+          "bytes": 8081815,
+          "sha256": "9a3a58232a25398d0faaa8812a075d3019c34f99237227fd1bfe2d316f7baad8",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": false,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/WholeKingdom_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Yala_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Yala_T.pdf",
+          "format": "pdf",
+          "bytes": 2069226,
+          "sha256": "52dc086f9ecf093102df227e9b776dd41824451e845c480de4b522573fc7b647",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Yala_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/reports2010/Yasothon_T.pdf",
+          "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Yasothon_T.pdf",
+          "format": "pdf",
+          "bytes": 5917937,
+          "sha256": "477cc83fa5cf03082693493880f90c122331a0abca12e3aa3c38ee85469a75f4",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+          "local_cache_hint": "data/raw/th_census/reports2010/Yasothon_T.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/geoBoundaries-THA-ADM1.geojson",
+          "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/THA/ADM1/geoBoundaries-THA-ADM1.geojson",
+          "format": "geojson",
+          "bytes": 4032763,
+          "sha256": "145beb11e52785a42e16997c92a65426b3df8d009941db6b012ec8e411f3e33c",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-tha-adm1-2017",
+          "used_in_public_product": true,
+          "periods": "2017",
+          "notes": "geoBoundaries THA ADM1 GeoJSON; 77 provinces, ODbL 1.0. Pinned commit 9469f09.",
+          "local_cache_hint": "data/raw/th_census/geoBoundaries-THA-ADM1.geojson (git-ignored)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/gb_tha_adm1_meta.json",
+          "url": "https://www.geoboundaries.org/api/current/gbOpen/THA/ADM1/",
+          "format": "json",
+          "bytes": 1750,
+          "sha256": "10119cda1b995f724304f99132ecca4a80dbeb96aaf750b8eabf24747ee5a38d",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-tha-adm1-2017",
+          "used_in_public_product": false,
+          "periods": "2017",
+          "notes": "geoBoundaries THA ADM1 metadata; records ODbL 1.0, admUnitCount 77, boundaryYearRepresented 2017.",
+          "local_cache_hint": "data/raw/th_census/gb_tha_adm1_meta.json (git-ignored)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/th_census/table4_extracted.json",
+          "url": null,
+          "format": "json",
+          "bytes": 19333,
+          "sha256": "ef30d4deb9431b9eb430590dfb99ffd3324ff0391ef3ca9ac92a097524348e90",
+          "row_count": null,
+          "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "Transcription of Table 4 (Total column) from the cached provincial report PDFs via pdftotext Thai-anchor extraction; the counts embedded in this build.",
+          "local_cache_hint": "data/raw/th_census/table4_extracted.json (git-ignored)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/th_census/"
+          ]
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "scripts/lib/simplify_boundary.R (npx mapshaper)",
+      "extraction": "pdftotext (poppler) -layout + Thai-anchor parse (data/raw/th_census/extract_table4.py)"
+    }
+  },
+  "source": {
+    "provider": "National Statistical Office of Thailand (NSO); geoBoundaries (William & Mary geoLab)",
+    "source_dataset_ids": [
+      "th-census-2010-provincial-report-table4-religion-by-province",
+      "geoboundaries-tha-adm1-2017"
+    ],
+    "source_urls": [
+      "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/THA/ADM1/geoBoundaries-THA-ADM1.geojson",
+      "https://www.geoboundaries.org/api/current/gbOpen/THA/ADM1/"
+    ],
+    "retrieved_at": "2026-07-12T00:00:00Z",
+    "licence": "No reuse licence is stated on the 2010 census provincial final-report PDFs; the front matter records only the publisher (National Statistical Office, Social Statistics Bureau). The NSO open-data catalogue (catalog.nso.go.th) labels its published datasets 'Creative Commons Attributions' (fetched verbatim from the CKAN package_show API, 2026-07-12), which governs the catalogue's survey datasets rather than these archived census reports. The derived province summaries carry attribution to the National Statistical Office of Thailand and ship STAGED under the BUILD-THEN-ASK ruling (summaries-with-attribution stance, RO/SK/CI/MONSTAT/LK line); an NSO reuse-confirmation is the clean courtesy unblock. The boundary is Open Data Commons Open Database License 1.0 (ODbL; attribution and share-alike to OpenStreetMap).",
+    "citation": "NSO Thailand 2010 Population and Housing Census, Provincial Reports Table 4; geoBoundaries THA ADM1 (gbOpen).",
+    "raw_redistribution": "The census report PDFs and the geoBoundaries source GeoJSON are not committed; they remain in data/raw/th_census/.",
+    "local_cache_hint": "data/raw/th_census/ (git-ignored by .gitignore data/ rule)",
+    "raw_cache_durable_uris": [
+      "gs://pow-research-data/raw_sources/th_census/"
+    ]
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/th_census/reports2010/AmnatCharoen_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/AmnatCharoen_T.pdf",
+      "format": "pdf",
+      "bytes": 1964377,
+      "sha256": "7c4e1e087715828a072f0fc09f0d1cc52d8d8a4bd094763088f5b90b6de0f44e",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/AmnatCharoen_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/AngThong_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/AngThong_T.pdf",
+      "format": "pdf",
+      "bytes": 2434971,
+      "sha256": "2ee514630a8af88062808e2998dadb13b15fcd79a1275feb44ba51383dd55ce5",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/AngThong_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Ayutthaya_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Ayutthaya_T.pdf",
+      "format": "pdf",
+      "bytes": 2392674,
+      "sha256": "da5ba23191cf4b52a7e1a542e7050cb442202b1584e470ed762d0d8a16497c62",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Ayutthaya_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Bangkok_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Bangkok_T.pdf",
+      "format": "pdf",
+      "bytes": 2790862,
+      "sha256": "6c6fa8e90e73897263b64c192a7747d6001a875d1d6ccf095b748df70514d5a1",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Bangkok_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/BuengKan_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/BuengKan_T.pdf",
+      "format": "pdf",
+      "bytes": 6110848,
+      "sha256": "a319bf776361df5e542bd6dc55b46b2267885c70af5694948f260e5d69ff93dd",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": false,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/BuengKan_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/BuriRam_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/BuriRam_T.pdf",
+      "format": "pdf",
+      "bytes": 6184992,
+      "sha256": "7b111440bc1c3769b52995de5be8228952804a9b90eaaa34426be1e2a2880a51",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/BuriRam_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Central_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Central_T.pdf",
+      "format": "pdf",
+      "bytes": 2641599,
+      "sha256": "9ffef2beaaa6cca7fd5cef1ce85e5c9befda1e47acec7fd40bdcc83ac9895a51",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": false,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Central_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Chachoengsao_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Chachoengsao_T.pdf",
+      "format": "pdf",
+      "bytes": 6387393,
+      "sha256": "05b5d4d0ff139ba0f4e025494f60d255038d1bd91dc95a0bc1fed5d5df425cb0",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Chachoengsao_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/ChaiNat_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/ChaiNat_T.pdf",
+      "format": "pdf",
+      "bytes": 2057006,
+      "sha256": "361885d210be95c6702f5ecb5e9aeff11f94b5a5b99a9b2026a4a8eb3deea0c6",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/ChaiNat_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Chaiyaphum_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Chaiyaphum_T.pdf",
+      "format": "pdf",
+      "bytes": 6006673,
+      "sha256": "6b1c5160acb1724e90dd5ecf87b8e63a411338a4af951ae60b3d4d5b91c50c23",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Chaiyaphum_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Chanthaburi_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Chanthaburi_T.pdf",
+      "format": "pdf",
+      "bytes": 6501436,
+      "sha256": "26400088bd160b1e7928735f55210dcedcecbf0964af4634e771cfc0ca9b852f",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Chanthaburi_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/ChiangMai_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/ChiangMai_T.pdf",
+      "format": "pdf",
+      "bytes": 2249630,
+      "sha256": "20b56e6e91c347f934a03591a91c81e40b6bf0843bd5c032986ee2beb53b6d65",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/ChiangMai_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/ChiangRai_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/ChiangRai_T.pdf",
+      "format": "pdf",
+      "bytes": 3872531,
+      "sha256": "22628f1b12a24fe58fc855108a6c0826c52db094fd8d8b2051b12ac5575b0d7b",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/ChiangRai_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/ChonBuri_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/ChonBuri_T.pdf",
+      "format": "pdf",
+      "bytes": 6414928,
+      "sha256": "6a6e0d0b4e5987aaaf776ef840fbca8e6270f649063d01cc6d960c15e27ea929",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/ChonBuri_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Chumphon_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Chumphon_T.pdf",
+      "format": "pdf",
+      "bytes": 1967592,
+      "sha256": "14ed090979d44dc97e56047881b02e9efb976556eb2f55c227de927909c99bc6",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Chumphon_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Kalasin_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Kalasin_T.pdf",
+      "format": "pdf",
+      "bytes": 6097377,
+      "sha256": "c68e8d3e3bbc5d27d928a29c6786bba48c8a65abc143610aa00a3c630af7a126",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Kalasin_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/KamphaengPhet_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/KamphaengPhet_T.pdf",
+      "format": "pdf",
+      "bytes": 2346352,
+      "sha256": "d8dbbb3aab8d23232326067e6e50b57c01498121b96dcf6e9db210f53c247cb0",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/KamphaengPhet_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Kanchanaburi_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Kanchanaburi_T.pdf",
+      "format": "pdf",
+      "bytes": 6474180,
+      "sha256": "3a71e4701ebd6509ef9f0ffdfd27a2f52c86df66950f9e4d618598553a41d726",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Kanchanaburi_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/KhonKaen_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/KhonKaen_T.pdf",
+      "format": "pdf",
+      "bytes": 6105012,
+      "sha256": "b0a57a9470f3d7e96321a8fe93e28b7972866ca906a0b9ec72f8ffecdfc0c9cc",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/KhonKaen_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Krabi_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Krabi_T.pdf",
+      "format": "pdf",
+      "bytes": 9578568,
+      "sha256": "d9a752d76b09fe0f93c8bcfbc8c99d2f3c5e568f5f482613148f1c5eb66a151e",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Krabi_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Lampang_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Lampang_T.pdf",
+      "format": "pdf",
+      "bytes": 2807243,
+      "sha256": "025292d420e2d5bb99d87e8bee3f3ee9457963f10c8e5080d3e062d52766f977",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Lampang_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Lamphun_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Lamphun_T.pdf",
+      "format": "pdf",
+      "bytes": 3713692,
+      "sha256": "58d50ba8f58b2eb495b05c364339e967066a4887e2106abcf07562460b9d8807",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Lamphun_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Loei_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Loei_T.pdf",
+      "format": "pdf",
+      "bytes": 6073261,
+      "sha256": "eab35110b85fc5ecf2f0c80f821491cdcccc89e864a6fb05b88c52c87451cfbc",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Loei_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/LopBuri_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/LopBuri_T.pdf",
+      "format": "pdf",
+      "bytes": 6633613,
+      "sha256": "95110b4777ea36f5a3ec685b3bc6f44e23dd781a3a6b1321ca53b1e10bdf30a2",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/LopBuri_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/MaeHongSon_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/MaeHongSon_T.pdf",
+      "format": "pdf",
+      "bytes": 2981337,
+      "sha256": "6d1fe81022be89d456886e708a321024a7763e9426cd1b81facd350d02026971",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/MaeHongSon_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/MahaSarakham_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/MahaSarakham_T.pdf",
+      "format": "pdf",
+      "bytes": 6008774,
+      "sha256": "4336388a665d3bf40a411cbd45bd72913e1018586ca20b29f9898c7f0a9cd419",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/MahaSarakham_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Mukdahan_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Mukdahan_T.pdf",
+      "format": "pdf",
+      "bytes": 1932084,
+      "sha256": "f1c4b56943d5829a6918004eed6cee2b02d9fa772f894d3c158e54b0ec475778",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Mukdahan_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/NakhonNayok_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/NakhonNayok_T.pdf",
+      "format": "pdf",
+      "bytes": 6650193,
+      "sha256": "06ef95ecec7af9d095afb9d4efe0d397117a57c867855c707be06bfaad8ea010",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/NakhonNayok_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/NakhonPathom_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/NakhonPathom_T.pdf",
+      "format": "pdf",
+      "bytes": 7727863,
+      "sha256": "412f4af903186eab61fb937c52a89488ac0bc458e6f33940542094dda9dfdccd",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/NakhonPathom_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/NakhonPhanom_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/NakhonPhanom_T.pdf",
+      "format": "pdf",
+      "bytes": 6005896,
+      "sha256": "e25d13fd2b2bd4f5552a8b3f8657c5c3a9b0fc77949d019ef82cb8c8dc0c45f7",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/NakhonPhanom_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/NakhonRatchasima_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/NakhonRatchasima_T.pdf",
+      "format": "pdf",
+      "bytes": 6344053,
+      "sha256": "d85d361dc11f8371e6c20daa6c259aca1c7d7d943b833a6406c985387e4daf6e",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/NakhonRatchasima_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/NakhonSawan_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/NakhonSawan_T.pdf",
+      "format": "pdf",
+      "bytes": 2487098,
+      "sha256": "1f3db8f1686fd078bd5c931a3b285f3427c97aa81dff832a477ef4ca3c2d6063",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/NakhonSawan_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/NakhonSiThammarat_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/NakhonSiThammarat_T.pdf",
+      "format": "pdf",
+      "bytes": 2739632,
+      "sha256": "c3af98b2fc0e6c59acd771d6a6d5498d86514bc9374ccbcb3dfe7637ad3c7258",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/NakhonSiThammarat_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Nan_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Nan_T.pdf",
+      "format": "pdf",
+      "bytes": 3078455,
+      "sha256": "de762baf96ea52c2919747241b68cd15cf09db46a1391a8148dc540a00ec912a",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Nan_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Narathiwat_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Narathiwat_T.pdf",
+      "format": "pdf",
+      "bytes": 2632891,
+      "sha256": "9de64a878bf7158907cbfd99ae8f0da0319d8eab13544608cbfdaf8e0092142d",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Narathiwat_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/NongBuaLamPhu_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/NongBuaLamPhu_T.pdf",
+      "format": "pdf",
+      "bytes": 5889136,
+      "sha256": "be6857e995d02bddad71f7745666de1dbcd743d3de676da0972be687137163be",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/NongBuaLamPhu_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/NongKhai_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/NongKhai_T.pdf",
+      "format": "pdf",
+      "bytes": 5991716,
+      "sha256": "9af1d760baa00af8b5f2ecddb63b9634215d9fda5dca73411281d5e393c3106b",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/NongKhai_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Nonthaburi_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Nonthaburi_T.pdf",
+      "format": "pdf",
+      "bytes": 6300000,
+      "sha256": "16e77364f88229beee737aa0b65d865f1c45ed0842cb559c107d9355be60bdd3",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Nonthaburi_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Northeastern_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Northeastern_T.pdf",
+      "format": "pdf",
+      "bytes": 2728279,
+      "sha256": "3942aa0832ad930e4bd836f0d6159b959ec90174313bff657ab42facfe3f8407",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": false,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Northeastern_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Northern_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Northern_T.pdf",
+      "format": "pdf",
+      "bytes": 2687438,
+      "sha256": "1fe9a5b931f9eb015ba6b1b3a6ec939761205eb6807a7f235caf81b569e489fc",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": false,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Northern_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/PathumThani_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/PathumThani_T.pdf",
+      "format": "pdf",
+      "bytes": 6547646,
+      "sha256": "e373f6fab517e2a08bc83a47f6b5b4e783893f2a0ea57511bd3d4542567acec3",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/PathumThani_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Pattani_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Pattani_T.pdf",
+      "format": "pdf",
+      "bytes": 2401814,
+      "sha256": "cea0a0becf32df0446c5e4974339867036362467788df869c4cf24388c955eec",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Pattani_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Phachuap_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phachuap_T.pdf",
+      "format": "pdf",
+      "bytes": 6401657,
+      "sha256": "46301a1765596a7a820e8e5a575f2a1920db4d5f2aa53f6e5c08c62cdc4fd16e",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Phachuap_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Phangnga_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phangnga_T.pdf",
+      "format": "pdf",
+      "bytes": 2810757,
+      "sha256": "9ab3c126c4a548f35137e69934facc7a183036473de3113c020c3d580b4512f9",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Phangnga_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Phatthalung_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phatthalung_T.pdf",
+      "format": "pdf",
+      "bytes": 2193954,
+      "sha256": "c284f2b5adb5fabcea97431f6197629889bb4740e7adf45b275e20278c661a55",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Phatthalung_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Phayao_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phayao_T.pdf",
+      "format": "pdf",
+      "bytes": 2034257,
+      "sha256": "9180e58cd7879eb48a22a009c7a40d5c6b927fe0b69f61fc45d968639dcedc0e",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Phayao_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Phetchabun_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phetchabun_T.pdf",
+      "format": "pdf",
+      "bytes": 2483078,
+      "sha256": "d6dede9d5b832c49a7a7522b6886f737df9a4ae6aeceaa053588104be920da98",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Phetchabun_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Phetchaburi_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phetchaburi_T.pdf",
+      "format": "pdf",
+      "bytes": 6660654,
+      "sha256": "ca756cc43f8805af80c20fca37e241da7a7edb09433e6375140310dc627ad04c",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Phetchaburi_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Phichit_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phichit_T.pdf",
+      "format": "pdf",
+      "bytes": 4265041,
+      "sha256": "3aa8eeda640064b171ff4d784cba80ec2ca94f203ae2c01444dbfd76d73ee73e",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Phichit_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Phitsanulok_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phitsanulok_T.pdf",
+      "format": "pdf",
+      "bytes": 4860005,
+      "sha256": "bb360cc53fd811fa776c835596179eec39bf5fe5ab1518b5806e1226b3fbcfd8",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Phitsanulok_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Phrae_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phrae_T.pdf",
+      "format": "pdf",
+      "bytes": 2000128,
+      "sha256": "1e8d44ea445f3a7ae98d42a796e05785399409af01befb364c8ca8cbe226702e",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Phrae_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Phuket_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Phuket_T.pdf",
+      "format": "pdf",
+      "bytes": 2315932,
+      "sha256": "6a4b7c715603f63612d466ce7fd04d330fffa0b94d9a86e3975a888c87b5eac3",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Phuket_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/PrachinBuri_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/PrachinBuri_T.pdf",
+      "format": "pdf",
+      "bytes": 6630269,
+      "sha256": "7657910e0a905b019a70a9a13cd54f407819a7d41bd5ba9d6585aa1ea8e7245a",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/PrachinBuri_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Ranong_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Ranong_T.pdf",
+      "format": "pdf",
+      "bytes": 3241550,
+      "sha256": "73d41db7b014b691f1be2d499a0d13a45a910ef6bc6ccadc4e4e62c8f9b0ddb4",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Ranong_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Ratchaburi_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Ratchaburi_T.pdf",
+      "format": "pdf",
+      "bytes": 6822162,
+      "sha256": "896bfb21aa7f71e27edd6b4053809d5b86d096d0dbe94948a1d9b53e15bb1122",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Ratchaburi_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Rayong_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Rayong_T.pdf",
+      "format": "pdf",
+      "bytes": 6538982,
+      "sha256": "8e88c93d581ccf8d0153e4736f711c7718248a64cedd0e787ac46b9801479d21",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Rayong_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/RoiEt_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/RoiEt_T.pdf",
+      "format": "pdf",
+      "bytes": 6667956,
+      "sha256": "5781869f024cd8bb4746237a0bc0a3fb45c65f572d61c23b6674fabaf3194ef5",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/RoiEt_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/SaKaeo_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/SaKaeo_T.pdf",
+      "format": "pdf",
+      "bytes": 6401136,
+      "sha256": "ee082e83b0a192966da7294f48c98ac744e9bda1cc970330037a7648d13c4965",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/SaKaeo_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/SakonNakhon_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/SakonNakhon_T.pdf",
+      "format": "pdf",
+      "bytes": 6048417,
+      "sha256": "7c6b370178cf283bd56331398d1328a0cc6d2c978c7612d368877b061ea2d184",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/SakonNakhon_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/SamutPrakan_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/SamutPrakan_T.pdf",
+      "format": "pdf",
+      "bytes": 6384343,
+      "sha256": "7cdaccf2fea0334461dbb7d7760917da4ea28e7acf866a47d06a3175846f587c",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/SamutPrakan_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/SamutSakhon_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/SamutSakhon_T.pdf",
+      "format": "pdf",
+      "bytes": 2181967,
+      "sha256": "594b20189485436dd8c384fef00ae3e45941dc1a67de0cc97dcca68417efe96e",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/SamutSakhon_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/SamutSongkhram_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/SamutSongkhram_T.pdf",
+      "format": "pdf",
+      "bytes": 6200170,
+      "sha256": "d2e7d6b91591976fc1bc2317dfe1d1258e820059a27a94cc85bb8f4a50d455e3",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/SamutSongkhram_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Saraburi_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Saraburi_T.pdf",
+      "format": "pdf",
+      "bytes": 2136259,
+      "sha256": "55637c9831fa742c865e8022a1fd045efff1f9b3a564bf5b0703c9ed5edcec68",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Saraburi_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Satun_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Satun_T.pdf",
+      "format": "pdf",
+      "bytes": 2104394,
+      "sha256": "3f311957a585815af6ef1c8b6c8760bd1a078a0e63016a5f3e790a74aba1eccc",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Satun_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/SingBuri_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/SingBuri_T.pdf",
+      "format": "pdf",
+      "bytes": 6372730,
+      "sha256": "9d2b847481b2c0ba88d240e02738c038e4eb109f05bf28eba197aaa7db1b3036",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/SingBuri_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/SiSaKet_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/SiSaKet_T.pdf",
+      "format": "pdf",
+      "bytes": 6152519,
+      "sha256": "7b6675f69cd16d42d56c249fc3a83922f7f4781cd7ab8f4a99991b8e29039f17",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/SiSaKet_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Songkhla_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Songkhla_T.pdf",
+      "format": "pdf",
+      "bytes": 2999495,
+      "sha256": "e80dce65c117f8418491543e6e0fab2718aa59c769fbcb4c92275eb29fb20c22",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Songkhla_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Southern_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Southern_T.pdf",
+      "format": "pdf",
+      "bytes": 2984793,
+      "sha256": "cce5ce50782f78caa794e054d7458a6db657c1f59332a9740036a4ced967a811",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": false,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Southern_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Sukhothai_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Sukhothai_T.pdf",
+      "format": "pdf",
+      "bytes": 2160686,
+      "sha256": "eabdf0b4e78e6fe519d4f39b8db7adb0696d1f0468c08261028a036e70bc1372",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Sukhothai_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/SuphanBuri_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/SuphanBuri_T.pdf",
+      "format": "pdf",
+      "bytes": 6581836,
+      "sha256": "407c192bc8211ba6ac60900c85e7274ba9852192d853e8c35db1ec9b76d3d4df",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/SuphanBuri_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/SuratThani_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/SuratThani_T.pdf",
+      "format": "pdf",
+      "bytes": 8471437,
+      "sha256": "46770f5e835c647cc0771c6b8fd450eb487246515c36a8d92a6f5773413c82b1",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/SuratThani_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Surin_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Surin_T.pdf",
+      "format": "pdf",
+      "bytes": 7905244,
+      "sha256": "4d0e3bd1449bec724f69f6248a4a34af0d6fa74ea712c251a8fa2e203a659dac",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Surin_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Tak_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Tak_T.pdf",
+      "format": "pdf",
+      "bytes": 3880709,
+      "sha256": "42a2a1fe39be038e898be0320fe45fe8ab4bfd15a643c2652567b2eddadb4c56",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Tak_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Trang_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Trang_T.pdf",
+      "format": "pdf",
+      "bytes": 2627544,
+      "sha256": "aee9f8027345c410e44308bec2031547b0d387f053ea53fe32daecb33df09726",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Trang_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Trat_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Trat_T.pdf",
+      "format": "pdf",
+      "bytes": 3783566,
+      "sha256": "cd0b6d172be9ca8971328a2a59b0ac6f1d9bda277507bda8abb432ca38557d53",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Trat_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Ubonatchathani_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Ubonatchathani_T.pdf",
+      "format": "pdf",
+      "bytes": 6544575,
+      "sha256": "bbdd979a1721b80010049a65677623eb27f96c294be182c79843344d5cdb0fdf",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Ubonatchathani_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/UdonThani_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/UdonThani_T.pdf",
+      "format": "pdf",
+      "bytes": 6305646,
+      "sha256": "21f1ad046028ec28aac87f440f6e324d0e5989e732680bf29ce4b2cc50cef248",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/UdonThani_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/UthaiThani_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/UthaiThani_T.pdf",
+      "format": "pdf",
+      "bytes": 2049181,
+      "sha256": "824cdaf465d0ef40ede337f20e4c8ea8c4a542c0bd5b7c030e4fc982e98ae72a",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/UthaiThani_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Uttaradit_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Uttaradit_T.pdf",
+      "format": "pdf",
+      "bytes": 2394371,
+      "sha256": "4e4186075e4d79a74fd8b2d2aa3e7372088e8ec207413f2014dac25147c71764",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Uttaradit_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/WholeKingdom_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/WholeKingdom_T.pdf",
+      "format": "pdf",
+      "bytes": 8081815,
+      "sha256": "9a3a58232a25398d0faaa8812a075d3019c34f99237227fd1bfe2d316f7baad8",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": false,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/WholeKingdom_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Yala_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Yala_T.pdf",
+      "format": "pdf",
+      "bytes": 2069226,
+      "sha256": "52dc086f9ecf093102df227e9b776dd41824451e845c480de4b522573fc7b647",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Yala_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/reports2010/Yasothon_T.pdf",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/Yasothon_T.pdf",
+      "format": "pdf",
+      "bytes": 5917937,
+      "sha256": "477cc83fa5cf03082693493880f90c122331a0abca12e3aa3c38ee85469a75f4",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 census provincial final report; Table 4 religion by province (full count). Retrieved from Internet Archive replay of the NSO original.",
+      "local_cache_hint": "data/raw/th_census/reports2010/Yasothon_T.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/geoBoundaries-THA-ADM1.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/THA/ADM1/geoBoundaries-THA-ADM1.geojson",
+      "format": "geojson",
+      "bytes": 4032763,
+      "sha256": "145beb11e52785a42e16997c92a65426b3df8d009941db6b012ec8e411f3e33c",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-tha-adm1-2017",
+      "used_in_public_product": true,
+      "periods": "2017",
+      "notes": "geoBoundaries THA ADM1 GeoJSON; 77 provinces, ODbL 1.0. Pinned commit 9469f09.",
+      "local_cache_hint": "data/raw/th_census/geoBoundaries-THA-ADM1.geojson (git-ignored)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/gb_tha_adm1_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/THA/ADM1/",
+      "format": "json",
+      "bytes": 1750,
+      "sha256": "10119cda1b995f724304f99132ecca4a80dbeb96aaf750b8eabf24747ee5a38d",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-tha-adm1-2017",
+      "used_in_public_product": false,
+      "periods": "2017",
+      "notes": "geoBoundaries THA ADM1 metadata; records ODbL 1.0, admUnitCount 77, boundaryYearRepresented 2017.",
+      "local_cache_hint": "data/raw/th_census/gb_tha_adm1_meta.json (git-ignored)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/th_census/table4_extracted.json",
+      "url": null,
+      "format": "json",
+      "bytes": 19333,
+      "sha256": "ef30d4deb9431b9eb430590dfb99ffd3324ff0391ef3ca9ac92a097524348e90",
+      "row_count": null,
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "Transcription of Table 4 (Total column) from the cached provincial report PDFs via pdftotext Thai-anchor extraction; the counts embedded in this build.",
+      "local_cache_hint": "data/raw/th_census/table4_extracted.json (git-ignored)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/th_census/"
+      ]
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/th/data/area_summary_province.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 166456,
+      "sha256": "5c496040b109d99fa3fe662a98341ecd179687f2383154464e1f2326c2a1f0d4",
+      "row_count": 76,
+      "feature_count": null,
+      "content": "Thailand 76-province (2010 census frame) census-affiliation area summary.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "nso_no_stated_licence_attribution_build_then_ask"
+    },
+    {
+      "uri": "repo:apps/regions/th/data/area_summary_province.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 109516,
+      "sha256": "811f136e935b75707100d556d9d7c2f21c3eb985c11a97b90620feba2f02860e",
+      "row_count": 76,
+      "feature_count": null,
+      "content": "Flattened Thailand 76-province (2010 census frame) census-affiliation rows.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "nso_no_stated_licence_attribution_build_then_ask"
+    },
+    {
+      "uri": "repo:apps/regions/th/data/th_province_2010frame.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 1079907,
+      "sha256": "489ad1f4aa4a6f3778dbbfc767ba0dcb15bc7e11b71384addbcc2ea44ef3a877",
+      "row_count": null,
+      "feature_count": 76,
+      "content": "Simplified 76-unit 2010-census-frame boundary GeoJSON (geoBoundaries THA ADM1; Bueng Kan unioned into Nong Khai).",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_odbl_1_0"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/th/data/area_summary_province.json",
+      "sha256": "5c496040b109d99fa3fe662a98341ecd179687f2383154464e1f2326c2a1f0d4",
+      "built_by": "scripts/build_th_area_summary.R",
+      "notes": "76 census-frame provinces x 1 wave = 76 rows; all-persons full-count universe; verbatim nine-category breakdown in quality_flag."
+    },
+    {
+      "uri": "repo:apps/regions/th/data/th_province_2010frame.geojson",
+      "sha256": "489ad1f4aa4a6f3778dbbfc767ba0dcb15bc7e11b71384addbcc2ea44ef3a877",
+      "built_by": "scripts/build_th_area_summary.R",
+      "notes": "76 province features (2010 frame: Bueng Kan unioned into Nong Khai) from geoBoundaries THA ADM1, simplified with mapshaper weighted keep-shapes."
+    }
+  ],
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_th_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/th/data/area_summary_province.json",
+      "bash scripts/validate_manifests.sh"
+    ],
+    "province_reconciliation": {
+      "status": "passed",
+      "provinces": 76,
+      "exact": 41,
+      "within_bound": 35,
+      "bound": 3,
+      "records": [
+        {
+          "province": "Amnat Charoen Province",
+          "printed_total": 283729,
+          "category_sum": 283729,
+          "deviation": 0
+        },
+        {
+          "province": "Ang Thong Province",
+          "printed_total": 254292,
+          "category_sum": 254291,
+          "deviation": -1
+        },
+        {
+          "province": "Bangkok",
+          "printed_total": 8305218,
+          "category_sum": 8305218,
+          "deviation": 0
+        },
+        {
+          "province": "Buri Ram Province",
+          "printed_total": 1274912,
+          "category_sum": 1274913,
+          "deviation": 1
+        },
+        {
+          "province": "Chachoengsao Province",
+          "printed_total": 715603,
+          "category_sum": 715603,
+          "deviation": 0
+        },
+        {
+          "province": "Chai Nat Province",
+          "printed_total": 305587,
+          "category_sum": 305587,
+          "deviation": 0
+        },
+        {
+          "province": "Chaiyaphum Province",
+          "printed_total": 963907,
+          "category_sum": 963907,
+          "deviation": 0
+        },
+        {
+          "province": "Chanthaburi Province",
+          "printed_total": 485611,
+          "category_sum": 485611,
+          "deviation": 0
+        },
+        {
+          "province": "Chiang Mai Province",
+          "printed_total": 1737041,
+          "category_sum": 1737041,
+          "deviation": 0
+        },
+        {
+          "province": "Chiang Rai Province",
+          "printed_total": 1172928,
+          "category_sum": 1172928,
+          "deviation": 0
+        },
+        {
+          "province": "Chon Buri Province",
+          "printed_total": 1555358,
+          "category_sum": 1555358,
+          "deviation": 0
+        },
+        {
+          "province": "Chumphon Province",
+          "printed_total": 467801,
+          "category_sum": 467801,
+          "deviation": 0
+        },
+        {
+          "province": "Kalasin",
+          "printed_total": 824534,
+          "category_sum": 824534,
+          "deviation": 0
+        },
+        {
+          "province": "Kamphaeng Phet Province",
+          "printed_total": 797391,
+          "category_sum": 797391,
+          "deviation": 0
+        },
+        {
+          "province": "Kanchanaburi Province",
+          "printed_total": 801519,
+          "category_sum": 801519,
+          "deviation": 0
+        },
+        {
+          "province": "Khon Kaen Province",
+          "printed_total": 1741969,
+          "category_sum": 1741970,
+          "deviation": 1
+        },
+        {
+          "province": "Krabi Province",
+          "printed_total": 362203,
+          "category_sum": 362203,
+          "deviation": 0
+        },
+        {
+          "province": "Lampang Province",
+          "printed_total": 743143,
+          "category_sum": 743142,
+          "deviation": -1
+        },
+        {
+          "province": "Lamphun Province",
+          "printed_total": 412741,
+          "category_sum": 412742,
+          "deviation": 1
+        },
+        {
+          "province": "Loei Province",
+          "printed_total": 546031,
+          "category_sum": 546032,
+          "deviation": 1
+        },
+        {
+          "province": "Lopburi Province",
+          "printed_total": 769925,
+          "category_sum": 769924,
+          "deviation": -1
+        },
+        {
+          "province": "Mae Hong Son Province",
+          "printed_total": 209153,
+          "category_sum": 209154,
+          "deviation": 1
+        },
+        {
+          "province": "Maha Sarakham Province",
+          "printed_total": 827639,
+          "category_sum": 827638,
+          "deviation": -1
+        },
+        {
+          "province": "Mukdahan Province",
+          "printed_total": 357339,
+          "category_sum": 357339,
+          "deviation": 0
+        },
+        {
+          "province": "Nakhon Nayok Province",
+          "printed_total": 246867,
+          "category_sum": 246867,
+          "deviation": 0
+        },
+        {
+          "province": "Nakhon Pathom Province",
+          "printed_total": 943892,
+          "category_sum": 943893,
+          "deviation": 1
+        },
+        {
+          "province": "Nakhon Phanom Province",
+          "printed_total": 583726,
+          "category_sum": 583726,
+          "deviation": 0
+        },
+        {
+          "province": "Nakhon Ratchasima Province",
+          "printed_total": 2525987,
+          "category_sum": 2525987,
+          "deviation": 0
+        },
+        {
+          "province": "Nakhon Sawan Province",
+          "printed_total": 992749,
+          "category_sum": 992748,
+          "deviation": -1
+        },
+        {
+          "province": "Nakhon Si Thammarat Province",
+          "printed_total": 1450466,
+          "category_sum": 1450465,
+          "deviation": -1
+        },
+        {
+          "province": "Nan Province",
+          "printed_total": 452814,
+          "category_sum": 452813,
+          "deviation": -1
+        },
+        {
+          "province": "Narathiwat Province",
+          "printed_total": 670002,
+          "category_sum": 670002,
+          "deviation": 0
+        },
+        {
+          "province": "Nong Bua Lam Phu Province",
+          "printed_total": 485974,
+          "category_sum": 485974,
+          "deviation": 0
+        },
+        {
+          "province": "Nong Khai Province",
+          "printed_total": 821526,
+          "category_sum": 821526,
+          "deviation": 0
+        },
+        {
+          "province": "Nonthaburi Province",
+          "printed_total": 1334083,
+          "category_sum": 1334082,
+          "deviation": -1
+        },
+        {
+          "province": "Pathum Thani Province",
+          "printed_total": 1327147,
+          "category_sum": 1327146,
+          "deviation": -1
+        },
+        {
+          "province": "Pattani Province",
+          "printed_total": 609015,
+          "category_sum": 609016,
+          "deviation": 1
+        },
+        {
+          "province": "Phangnga Province",
+          "printed_total": 258534,
+          "category_sum": 258534,
+          "deviation": 0
+        },
+        {
+          "province": "Phatthalung Province",
+          "printed_total": 480976,
+          "category_sum": 480975,
+          "deviation": -1
+        },
+        {
+          "province": "Phayao Province",
+          "printed_total": 417380,
+          "category_sum": 417379,
+          "deviation": -1
+        },
+        {
+          "province": "Phetchabun Province",
+          "printed_total": 940076,
+          "category_sum": 940076,
+          "deviation": 0
+        },
+        {
+          "province": "Phetchaburi Province",
+          "printed_total": 472589,
+          "category_sum": 472589,
+          "deviation": 0
+        },
+        {
+          "province": "Phichit Province",
+          "printed_total": 548242,
+          "category_sum": 548243,
+          "deviation": 1
+        },
+        {
+          "province": "Phitsanulok Province",
+          "printed_total": 912827,
+          "category_sum": 912827,
+          "deviation": 0
+        },
+        {
+          "province": "Phra Nakhon Si Ayutthaya Province",
+          "printed_total": 870671,
+          "category_sum": 870671,
+          "deviation": 0
+        },
+        {
+          "province": "Phrae Province",
+          "printed_total": 427398,
+          "category_sum": 427398,
+          "deviation": 0
+        },
+        {
+          "province": "Phuket Province",
+          "printed_total": 525709,
+          "category_sum": 525708,
+          "deviation": -1
+        },
+        {
+          "province": "Prachin Buri Province",
+          "printed_total": 546996,
+          "category_sum": 546997,
+          "deviation": 1
+        },
+        {
+          "province": "Prachuap Khiri Khan Province",
+          "printed_total": 467466,
+          "category_sum": 467467,
+          "deviation": 1
+        },
+        {
+          "province": "Ranong Province",
+          "printed_total": 249017,
+          "category_sum": 249018,
+          "deviation": 1
+        },
+        {
+          "province": "Ratchaburi Province",
+          "printed_total": 796748,
+          "category_sum": 796748,
+          "deviation": 0
+        },
+        {
+          "province": "Rayong Province",
+          "printed_total": 821072,
+          "category_sum": 821072,
+          "deviation": 0
+        },
+        {
+          "province": "Roi Et Province",
+          "printed_total": 1084988,
+          "category_sum": 1084985,
+          "deviation": -3
+        },
+        {
+          "province": "Sa Kaeo Province",
+          "printed_total": 555961,
+          "category_sum": 555961,
+          "deviation": 0
+        },
+        {
+          "province": "Sakon Nakhon Province",
+          "printed_total": 941811,
+          "category_sum": 941811,
+          "deviation": 0
+        },
+        {
+          "province": "Samut Prakan Province",
+          "printed_total": 1828694,
+          "category_sum": 1828692,
+          "deviation": -2
+        },
+        {
+          "province": "Samut Sakhon Province",
+          "printed_total": 887191,
+          "category_sum": 887191,
+          "deviation": 0
+        },
+        {
+          "province": "Samut Songkhram Province",
+          "printed_total": 185564,
+          "category_sum": 185565,
+          "deviation": 1
+        },
+        {
+          "province": "Saraburi Province",
+          "printed_total": 717051,
+          "category_sum": 717050,
+          "deviation": -1
+        },
+        {
+          "province": "Satun Province",
+          "printed_total": 274863,
+          "category_sum": 274863,
+          "deviation": 0
+        },
+        {
+          "province": "Si Sa Ket Province",
+          "printed_total": 1055979,
+          "category_sum": 1055979,
+          "deviation": 0
+        },
+        {
+          "province": "Sing Buri Province",
+          "printed_total": 199982,
+          "category_sum": 199982,
+          "deviation": 0
+        },
+        {
+          "province": "Songkhla Province",
+          "printed_total": 1481021,
+          "category_sum": 1481021,
+          "deviation": 0
+        },
+        {
+          "province": "Sukhothai Province",
+          "printed_total": 629707,
+          "category_sum": 629706,
+          "deviation": -1
+        },
+        {
+          "province": "Suphan Buri Province",
+          "printed_total": 845561,
+          "category_sum": 845562,
+          "deviation": 1
+        },
+        {
+          "province": "Surat Thani Province",
+          "printed_total": 1009351,
+          "category_sum": 1009351,
+          "deviation": 0
+        },
+        {
+          "province": "Surin Province",
+          "printed_total": 1122900,
+          "category_sum": 1122902,
+          "deviation": 2
+        },
+        {
+          "province": "Tak Province",
+          "printed_total": 526381,
+          "category_sum": 526381,
+          "deviation": 0
+        },
+        {
+          "province": "Trang Province",
+          "printed_total": 598877,
+          "category_sum": 598876,
+          "deviation": -1
+        },
+        {
+          "province": "Trat Province",
+          "printed_total": 247876,
+          "category_sum": 247875,
+          "deviation": -1
+        },
+        {
+          "province": "Ubon Ratchathani Province",
+          "printed_total": 1746793,
+          "category_sum": 1746794,
+          "deviation": 1
+        },
+        {
+          "province": "Udon Thani Province",
+          "printed_total": 1288365,
+          "category_sum": 1288366,
+          "deviation": 1
+        },
+        {
+          "province": "Uthai Thani Province",
+          "printed_total": 297493,
+          "category_sum": 297495,
+          "deviation": 2
+        },
+        {
+          "province": "Uttaradit Province",
+          "printed_total": 438578,
+          "category_sum": 438578,
+          "deviation": 0
+        },
+        {
+          "province": "Yala Province",
+          "printed_total": 433167,
+          "category_sum": 433167,
+          "deviation": 0
+        },
+        {
+          "province": "Yasothon Province",
+          "printed_total": 487976,
+          "category_sum": 487976,
+          "deviation": 0
+        }
+      ]
+    },
+    "national_control": {
+      "status": "passed",
+      "bound": 25,
+      "province_sum_total": 65981653,
+      "wholekingdom_total": 65981660,
+      "deviations": {
+        "Buddhism": -14,
+        "Islam": 1,
+        "Christianity": 7,
+        "Hindus": 1,
+        "Confucious": -2,
+        "Sikh": -2,
+        "Others": 2,
+        "No religion": -3,
+        "Unknown": 2,
+        "Total": -7
+      }
+    },
+    "boundary_validation": {
+      "status": "passed",
+      "feature_count": 76,
+      "distinct_geometry_hashes": 76,
+      "bbox": {
+        "xmin": 97.3438072,
+        "ymin": 5.612851,
+        "xmax": 105.636812,
+        "ymax": 20.4648337
+      },
+      "dateline_note": "extent lon ~97-106E, lat ~5.6-20.5N; far from the antimeridian, no dateline handling needed",
+      "output_bytes": 1079907,
+      "simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 30,
+        "bytes": 1079907
+      },
+      "licence": "Open Data Commons Open Database License 1.0",
+      "adm_unit_count": "77"
+    },
+    "join_coverage": {
+      "matched_provinces": 76,
+      "expected_provinces": 76,
+      "unmatched_provinces": [],
+      "unused_boundary_features": [
+        "Bueng Kan Province (unioned into Nong Khai for the 2010 frame)"
+      ]
+    },
+    "notes": "76 census-frame provinces reconcile to their printed Table 4 Total within a +-3 person NSO independent-rounding bound, and their sums reconcile to the WholeKingdom national Table 4 within -7 (total) and +-14 (categories); the 2010-frame boundary (Bueng Kan unioned into Nong Khai) joins 76/76 with 76 distinct geometry hashes.",
+    "warnings": [
+      "STAGED product: no page, no hub link. Licence needs review; ships under BUILD-THEN-ASK with attribution to NSO (no stated reuse licence on the census reports).",
+      "About half the provinces carry a +-1 to +-3 person residual between the nine category counts and the printed Total row (NSO independent-rounding in a full-count table); carried verbatim and disclosed per province, never repaired. The cross-report national control deviates by -7 (total) and at most +-14 (categories), likewise disclosed.",
+      "Single wave (2010): no cross-wave change is claimed. 2000 province religion is percentage-only (Buddhism/Muslim, no counts); 2020 is register-assisted with no located province religion table.",
+      "2010 census frame: 76 provinces. The Bueng Kan re-tabulation (NSO, post-2011 frame) is a deferred source; the Nong Khai row and polygon include the later Bueng Kan territory.",
+      "The deep-South provinces are Muslim-majority and sensitive; the data renders the NSO record neutrally, and separate page annotation is left to the page lane."
+    ]
+  },
+  "construct_notes": [
+    "The construct is census affiliation: each resident's reported religion (2010 questionnaire 'What religion': Buddhism, Islam, Christianity, ...), asked of the whole resident population of all ages, not practice, attendance, or membership.",
+    "The public product carries three headline fields per province: population total, religious affiliation percent, and no-religion percent. Place-density metrics are null (no governed place-of-worship snapshot).",
+    "Slot design (ordinary two-slot, BZ/SB precedent): religious_affiliation_percent is the share reporting a named religion (population minus No religion minus Unknown); no_religion_percent is the single No religion line. The Unknown non-response line stays in the denominator and in neither slot, so the two shares need not sum to 100.",
+    "Single wave (2010). The 2000 census publishes province religion only as a two-category percentage summary (Buddhism %, Muslim %) with no counts and no no-religion line; the 2020 register-assisted census has no located province religion table. No cross-wave change is asserted.",
+    "Boundary: geoBoundaries THA ADM1 rendered on the 2010 census frame -- 76 provinces, with Bueng Kan (created March 2011) unioned into Nong Khai, geometrically exact. Licence Open Data Commons Open Database License 1.0 (ODbL, share-alike). The 76 units join one-to-one to the NSO 2010 provincial reports by name after a three-name concordance. The NSO Bueng Kan re-tabulation is a deferred source; no unpublished cell is derived."
+  ],
+  "deferred_sources": [
+    {
+      "source_dataset_id": "th-census-2010-bueng-kan-retabulation",
+      "status": "deferred",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/BuengKan_T.pdf",
+      "local_path": "data/raw/th_census/reports2010/BuengKan_T.pdf",
+      "notes": "NSO re-tabulation of the eight Nong Khai amphoes that became Bueng Kan province (March 2011): Table 4 total 362,754 (Buddhism 360,468; Islam 242; Christianity 1,913). Published on the post-2011 frame; using it beside the old-frame NongKhai report double-counts. Recorded for a possible future finer-frame view; not shipped in the 2010-frame product."
+    },
+    {
+      "source_dataset_id": "th-census-2000-religion-by-province",
+      "status": "deferred",
+      "url": "http://web.nso.go.th/census/poph/finalrep/tables/",
+      "local_path": null,
+      "notes": "2000 census province religion is percentage-only (Buddhism %, Muslim %) in the provincial workbooks; the full nine-category count table is region-level (eadv_tab3.xls, in thousands) or was on the decommissioned statbbi portal. Not shipped."
+    },
+    {
+      "source_dataset_id": "th-census-2020-religion-by-province",
+      "status": "not_located",
+      "url": "https://www.nso.go.th",
+      "local_path": null,
+      "notes": "The 2020 register-assisted census has no located province religion count table in open products; recovery would need the WAF-gated live portal or an NSO request."
+    },
+    {
+      "source_dataset_id": "nso-licence-confirmation",
+      "status": "not_pinned",
+      "url": "https://www.nso.go.th",
+      "local_path": null,
+      "notes": "An NSO reuse-confirmation is the clean courtesy unblock under BUILD-THEN-ASK; none is held. The catalogue posture is 'Creative Commons Attributions'."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "needs_review",
+  "licence_basis": "nso_no_stated_licence_attribution_build_then_ask",
+  "downstream_status": "staged",
+  "source_datasets": [
+    {
+      "source_dataset_id": "th-census-2010-provincial-report-table4-religion-by-province",
+      "name": "Thailand 2010 Population and Housing Census, provincial final reports, Table 4: Population by religion, sex and area",
+      "provider": "National Statistical Office of Thailand (NSO)",
+      "url": "http://web.nso.go.th/sites/2014en/Documents/popeng/2010/Report/",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/th_census/reports2010",
+      "licence": {
+        "name": "No reuse licence is stated on the 2010 census provincial final-report PDFs; the front matter records only the publisher (National Statistical Office, Social Statistics Bureau). The NSO open-data catalogue (catalog.nso.go.th) labels its published datasets 'Creative Commons Attributions' (fetched verbatim from the CKAN package_show API, 2026-07-12), which governs the catalogue's survey datasets rather than these archived census reports. The derived province summaries carry attribution to the National Statistical Office of Thailand and ship STAGED under the BUILD-THEN-ASK ruling (summaries-with-attribution stance, RO/SK/CI/MONSTAT/LK line); an NSO reuse-confirmation is the clean courtesy unblock. The boundary is Open Data Commons Open Database License 1.0 (ODbL; attribution and share-alike to OpenStreetMap).",
+        "url": "https://www.nso.go.th",
+        "attribution": "National Statistical Office of Thailand, 2010 Population and Housing Census"
+      },
+      "citation": "National Statistical Office of Thailand, 2010 Population and Housing Census, Provincial Reports, Table 4 (Population by religion, sex and area).",
+      "access_limits": "The live NSO hosts are WAF/Cloudflare-blocked to automation and the statbbi/nsoweb portals are decommissioned; the report PDFs were retrieved from Internet Archive replays of the NSO originals.",
+      "redistribution_limits": "Derived province summaries only; no open-data licence is stated on the census reports. Ships STAGED under BUILD-THEN-ASK with attribution.",
+      "notes": "77 provincial final reports cached (full-count enumeration); 76 ship on the 2010 frame (the BuengKan report is a deferred re-tabulation of eight old-Nong-Khai amphoes). One Table 4 per province, nine verbatim categories (Buddhism, Islam, Christianity, Hindus, Confucious, Sikh, Others, No religion, Unknown). Category counts sum to the printed province Total exactly or within a +-1/+-2 person NSO independent-rounding residual, disclosed per province. WholeKingdom and the four regional reports carry the same Table 4 as cross-source controls."
+    },
+    {
+      "source_dataset_id": "geoboundaries-tha-adm1-2017",
+      "name": "geoBoundaries THA ADM1 (77 provinces)",
+      "provider": "geoBoundaries (William & Mary geoLab); boundary source OpenStreetMap",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/THA/ADM1/geoBoundaries-THA-ADM1.geojson",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/th_census/geoBoundaries-THA-ADM1.geojson",
+      "licence": {
+        "name": "Open Data Commons Open Database License 1.0",
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/THA/ADM1/",
+        "attribution": "geoBoundaries (gbOpen); boundary source OpenStreetMap contributors (ODbL)"
+      },
+      "citation": "geoBoundaries THA ADM1 (gbOpen, pinned 9469f09), 77 province boundaries.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed under Open Data Commons Open Database License 1.0 (attribution and share-alike to OpenStreetMap contributors).",
+      "notes": "77 ADM1 provinces (boundaryYearRepresented 2017), rendered as the 76-unit 2010 census frame by unioning Bueng Kan into Nong Khai; joined one-to-one to the census provinces by shapeName after a three-name concordance (Ayutthaya/Phra Nakhon Si Ayutthaya, Phachuap/Prachuap Khiri Khan, Ubonatchathani/Ubon Ratchathani). shapeISO carries the ISO-3166-2 code. Thailand is far from the antimeridian; no dateline handling needed."
+    }
+  ],
+  "notes": "STAGED product (no page, no hub link). The committed products are the derived 76-province area summary (76 rows, 2010 census frame: Bueng Kan within Nong Khai) and the simplified geoBoundaries THA ADM1 2010-frame boundary. Ships under BUILD-THEN-ASK with attribution to the National Statistical Office of Thailand (NSO) and geoBoundaries (ODbL 1.0)."
+}
