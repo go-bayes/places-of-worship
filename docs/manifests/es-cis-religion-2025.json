@@ -1,0 +1,1791 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:es-cis-religion:es:2025:6d7439c0e81d",
+  "dataset_id": "es-cis-religion:es:2025:cis-3505",
+  "dataset_version_id": "es-cis-religion:es:2025:cis-3505:6d7439c0e81d",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "es-cis-religion",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "ES"
+    ],
+    "snapshot_date": null,
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-07-12T08:06:37Z",
+  "created_by": "scripts/build_es_area_summary.R",
+  "target_years": [
+    2025
+  ],
+  "pipeline": {
+    "script": "scripts/build_es_area_summary.R",
+    "git_commit": "54678de",
+    "command": "Rscript scripts/build_es_area_summary.R",
+    "parameters": {
+      "construct": {
+        "data_noun": "Survey",
+        "summary": "CIS Barómetro Abril 2025 (Estudio 3505), the 2020-onward community-designed CATI barometer (minimum 100 interviews per community, PESOCCAA per-community weight), two survey metrics on the 19-unit autonomous-community frame: religious self-definition (P28) and mass attendance (P28a). Weighted percentages with 95% intervals, no counts. Survey dataNoun, never blended with census affiliation (Spain's census carries no religion question).",
+        "weight": "PESOCCAA (per-community estimation weight, documented by the ficha técnica 'para la estimación a nivel de cada autonomía'); self-weighting within community (sum PESOCCAA = realised n).",
+        "uncertainty": "95% Wald interval per metric on the Kish effective sample size n_eff = (sum w)^2 / sum(w^2) over the metric base; the ficha's published community maximum sampling error (+/-3,9% to +/-22,9%) is carried alongside."
+      },
+      "metric_1_self_definition": {
+        "variable": "RELIGION (P28)",
+        "item_verbatim": "¿Cómo se define Ud. en materia religiosa: católico/a practicante, católico/a no practicante, creyente de otra religión, agnóstico/a, indiferente o no creyente, o ateo/a?",
+        "base": "all community respondents",
+        "slot_design": "affiliation = RELIGION {1,2,3} (Católico/a practicante + Católico/a no practicante + Creyente de otra religión); no_religion = RELIGION {4,5,6} (Agnóstico/a + Indiferente, no creyente + Ateo/a); N.C. (9) is the residual to 100 (carried in composition).",
+        "national_avance_pct": {
+          "1": 18.8,
+          "2": 36.6,
+          "3": 3.6,
+          "4": 11.2,
+          "5": 12,
+          "6": 15.8,
+          "9": 2
+        },
+        "national_microdata_pct": {
+          "1": 18.8,
+          "2": 36.7,
+          "3": 3.6,
+          "4": 11.2,
+          "5": 12,
+          "6": 15.8,
+          "9": 1.9
+        },
+        "national_max_dev_pp": 0.100000000000001
+      },
+      "metric_2_mass_attendance": {
+        "variable": "PRACTICARELIG6 (P28a)",
+        "item_verbatim": "¿Con qué frecuencia asiste Ud. a misa u otros oficios religiosos, sin contar las ocasiones relacionadas con ceremonias de tipo social, por ejemplo, bodas, comuniones o funerales?",
+        "base": "asked subset: self-defined Catholics or believers of another religion (RELIGION in {1,2,3}, i.e. PRACTICARELIG6 != 0). unweighted n=2179, weighted base~2367 (matches the avance base N~2.364).",
+        "headline_monthly_or_more": "PRACTICARELIG6 {4,5,6} (Dos o tres veces al mes + Todos los domingos y festivos + Varias veces a la semana)",
+        "secondary_weekly_or_more": "PRACTICARELIG6 {5,6} (Todos los domingos y festivos + Varias veces a la semana)",
+        "national_avance_pct": {
+          "1": 26.4,
+          "2": 20.7,
+          "3": 23.7,
+          "4": 9.4,
+          "5": 13.6,
+          "6": 5.2,
+          "9": 1
+        },
+        "national_microdata_pct": {
+          "1": 26.4,
+          "2": 20.8,
+          "3": 23.7,
+          "4": 9.3,
+          "5": 13.5,
+          "6": 5.2,
+          "9": 1
+        },
+        "national_max_dev_pp": 0.100000000000001
+      },
+      "small_cell_rule": {
+        "doc": "docs/development/small-cell-rule.md (RATIFIED 2026-07-12)",
+        "thresholds_applied": {
+          "small_denominator_under_100": "unweighted respondent base n < 100 washes pale",
+          "small_cell_under_10": "unweighted numerator respondent count < 10 marks the cell"
+        },
+        "applied_to": "UNWEIGHTED respondent n as the closest survey analogue of the rule's census-person denominator/numerator; the same reading the route-probe used to wash Ceuta and Melilla.",
+        "self_definition_denominator_under_100": {
+          "Aragón": 98,
+          "Asturias (Principado de)": 95,
+          "Rioja (La)": 89,
+          "Ceuta (Ciudad Autónoma de)": 19,
+          "Melilla (Ciudad Autónoma de)": 19
+        },
+        "mass_attendance_denominator_under_100": {
+          "Aragón": 49,
+          "Asturias (Principado de)": 50,
+          "Balears (Illes)": 49,
+          "Canarias": 87,
+          "Cantabria": 59,
+          "Extremadura": 79,
+          "Murcia (Región de)": 72,
+          "Navarra (Comunidad Foral de)": 55,
+          "País Vasco": 85,
+          "Rioja (La)": 47,
+          "Ceuta (Ciudad Autónoma de)": 14,
+          "Melilla (Ciudad Autónoma de)": 14
+        },
+        "open_question_for_conductor": "The ratified small-cell rule fixes its thresholds on census PERSONS (denominator < 100 persons washes; numerator < 10 persons marks). Its applicability to SURVEY respondent n is not settled by the doc. This build applies the thresholds to the unweighted respondent n as the closest analogue - the same reading the route-probe used for Ceuta and Melilla (n~19). A mechanical read washes not only the designed-small cities (Ceuta 19, Melilla 19) but also the full-design communities whose REALISED n dipped just under 100 (Aragón 98, Asturias 95, La Rioja 89), and, for the filtered mass-attendance metric, most communities. QUESTION: is unweighted survey respondent n the intended denominator for the wash, or should the wash apply only to units DESIGNED under 100 (Ceuta/Melilla), with the full-design sub-100-realised communities carried at full colour with a wide-interval note? No new treatment was invented; the tokens are emitted mechanically and this question is recorded for a ruling."
+      },
+      "boundary": {
+        "boundary_set_id": "es-ccaa-cis-3505",
+        "source": "geoBoundaries ESP ADM1 (IGN/CNIG source), CC BY 4.0, 19 units keyed by area_unit_id",
+        "source_units": 19,
+        "features": 19,
+        "concordance": "join by verbatim shapeName; all 19 matched one-to-one to CCAA codes 01-19",
+        "total_land_area_sq_km": 505457.23,
+        "output_bytes": 2929929,
+        "keep_percent": 16,
+        "distinct_written_geometry_hashes": 19,
+        "written_geometry_sha256": {
+          "01": "a8291860b4b6410f8683c559a0856872ea033abc52a21c80fbc97b0dc1590b1d",
+          "02": "34aa893443d5f3137e09305e372e42c218258a38d124bb4eb7775efbdb60c276",
+          "03": "ddf3f2419a7e435e0a3cc3a581437b9a4afba941a1a803f59e43147af1d59978",
+          "04": "54fc717455ea363e46fdacebed22b96a50042b951345f01fd0cb0055355cab8f",
+          "05": "3e125e09ad3fb0af7c845c003a76d2514c505a0834ce8e2fc0d7ca0db775be45",
+          "06": "5b0b0192fba743494da9ccdf95c9b26d90d398d747bcc9a0cfd8d21fbfb12e8a",
+          "07": "2b2a1506097dd163444f3e3153aa13f515aa1e9424cdfe06ea9f783510bfc7d8",
+          "08": "260d38bc2f05b14ad4f217ee28381e599ba4083342a394168bf196af03b4469d",
+          "09": "93111e797c2edcedb8915a0e0431f64966e494a880cda2c215e391eda85115ee",
+          "10": "c8894e5b787dadbdb5d54ebce8da79083e22ce004f63bf67ee9d7d9dd16ee322",
+          "11": "9023d7b10a07b0c079164e583b9a272d1bbbc043c6170bc7b59fd98d5ea35d60",
+          "12": "f6d243c02161ee99029d2afabbac26e1712f6053bebc7ff17d49b58b4364bee3",
+          "13": "d6fe572fdc3143ebfa6d309752f4ec5c524fa5fa489fed7a68f462427817abc5",
+          "14": "c5658b5b2da218c79674b10ce0229db4917d61e839f1df3da38448a9f42fe879",
+          "15": "a8aba5c314b0b201b1f7ad7923ebe8c5e7bcc3880a87c388b9827f3aee8fc96e",
+          "16": "d94f48e85396f336f75faddda9d2ece405fb21b4bd19f65409c789c93b72e42e",
+          "17": "97264a97af8bf011fc7d1859c0972fa7b0c59ddde59d36066a399b1b443cfab3",
+          "18": "b6acd5922cd37679f53a313df70c5ae75e151e58d402138acbf93ffc2cc0a094",
+          "19": "b205ab8766902ce9446070b0978e14de499f4c9dd2ab56bef8e5c0ce2df11df0"
+        }
+      },
+      "reconciliation": {
+        "realised_total_microdata": 4008,
+        "realised_total_ficha": 4009,
+        "record_difference_note": "The delivered anonymised microdata file carries 4008 records; the ficha técnica prints 4009 realised interviews (the difference is one record, in Asturias: microdata 95 vs ficha 96). All shipped estimates rest on the delivered file. National PESO-weighted distributions match the avance de resultados within 0.3 pp (RELIGION max dev 0.100000000000001 pp; attendance max dev 0.100000000000001 pp), confirming the file is the correct study; the sub-0.1 pp gaps (e.g. Católico no practicante 36,7 microdata vs 36,6 avance) are one-decimal rounding plus the one-record difference.",
+        "per_community": [
+          {
+            "area_code": "01",
+            "ccaa_cis": "Andalucía",
+            "geoboundaries_shapeName": "Andalucía",
+            "realised_n": 671,
+            "weighted_n": 671,
+            "self_definition": {
+              "base_neff": 538.2,
+              "affiliation_pct": 63,
+              "affiliation_ci95": [59, 67.1],
+              "no_religion_pct": 35.6,
+              "no_religion_ci95": [31.6, 39.7],
+              "distribution_pct": {
+                "1": 21.8,
+                "2": 38.2,
+                "3": 3.1,
+                "4": 11.7,
+                "5": 9.4,
+                "6": 14.5,
+                "9": 1.3
+              },
+              "unweighted_n": {
+                "1": 142,
+                "2": 261,
+                "3": 19,
+                "4": 77,
+                "5": 67,
+                "6": 95,
+                "9": 10
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 422,
+              "asked_subset_neff": 337.7,
+              "monthly_or_more_pct": 32.7,
+              "monthly_or_more_ci95": [27.7, 37.7],
+              "weekly_or_more_pct": 20.1,
+              "weekly_or_more_ci95": [15.8, 24.3],
+              "distribution_pct": {
+                "1": 20.2,
+                "2": 21.8,
+                "3": 24.4,
+                "4": 12.7,
+                "5": 14.9,
+                "6": 5.1,
+                "9": 0.9
+              },
+              "unweighted_n": {
+                "1": 90,
+                "2": 92,
+                "3": 109,
+                "4": 55,
+                "5": 56,
+                "6": 18,
+                "9": 2
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 3.9
+          },
+          {
+            "area_code": "02",
+            "ccaa_cis": "Aragón",
+            "geoboundaries_shapeName": "Aragón",
+            "realised_n": 98,
+            "weighted_n": 98,
+            "self_definition": {
+              "base_neff": 79.4,
+              "affiliation_pct": 51.9,
+              "affiliation_ci95": [40.9, 62.9],
+              "no_religion_pct": 44.2,
+              "no_religion_ci95": [33.3, 55.1],
+              "distribution_pct": {
+                "1": 20.4,
+                "2": 27.6,
+                "3": 3.9,
+                "4": 13.4,
+                "5": 14.5,
+                "6": 16.2,
+                "9": 3.9
+              },
+              "unweighted_n": {
+                "1": 19,
+                "2": 25,
+                "3": 5,
+                "4": 14,
+                "5": 14,
+                "6": 18,
+                "9": 3
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 49,
+              "asked_subset_neff": 36.6,
+              "monthly_or_more_pct": 30.2,
+              "monthly_or_more_ci95": [15.4, 45.1],
+              "weekly_or_more_pct": 21.7,
+              "weekly_or_more_ci95": [8.4, 35],
+              "distribution_pct": {
+                "1": 22.3,
+                "2": 12.2,
+                "3": 31.4,
+                "4": 8.5,
+                "5": 12.9,
+                "6": 8.8,
+                "9": 3.9
+              },
+              "unweighted_n": {
+                "1": 12,
+                "2": 6,
+                "3": 16,
+                "4": 5,
+                "5": 5,
+                "6": 3,
+                "9": 2
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 10.1
+          },
+          {
+            "area_code": "03",
+            "ccaa_cis": "Asturias (Principado de)",
+            "geoboundaries_shapeName": "Principado de Asturias",
+            "realised_n": 95,
+            "weighted_n": 95,
+            "self_definition": {
+              "base_neff": 72.2,
+              "affiliation_pct": 57.6,
+              "affiliation_ci95": [46.2, 69],
+              "no_religion_pct": 40.2,
+              "no_religion_ci95": [28.9, 51.5],
+              "distribution_pct": {
+                "1": 16.7,
+                "2": 38.8,
+                "3": 2.1,
+                "4": 14.9,
+                "5": 8.5,
+                "6": 16.8,
+                "9": 2.3
+              },
+              "unweighted_n": {
+                "1": 15,
+                "2": 33,
+                "3": 2,
+                "4": 16,
+                "5": 9,
+                "6": 18,
+                "9": 2
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 50,
+              "asked_subset_neff": 37.4,
+              "monthly_or_more_pct": 25.2,
+              "monthly_or_more_ci95": [11.2, 39.1],
+              "weekly_or_more_pct": 7.8,
+              "weekly_or_more_ci95": [0, 16.5],
+              "distribution_pct": {
+                "1": 24.4,
+                "2": 22.6,
+                "3": 27.8,
+                "4": 17.3,
+                "5": 6.6,
+                "6": 1.2,
+                "9": 0
+              },
+              "unweighted_n": {
+                "1": 14,
+                "2": 11,
+                "3": 13,
+                "4": 8,
+                "5": 3,
+                "6": 1,
+                "9": 0
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 10.2
+          },
+          {
+            "area_code": "04",
+            "ccaa_cis": "Balears (Illes)",
+            "geoboundaries_shapeName": "Illes Balears",
+            "realised_n": 102,
+            "weighted_n": 102,
+            "self_definition": {
+              "base_neff": 94.5,
+              "affiliation_pct": 48,
+              "affiliation_ci95": [37.9, 58.1],
+              "no_religion_pct": 50.2,
+              "no_religion_ci95": [40.1, 60.3],
+              "distribution_pct": {
+                "1": 13,
+                "2": 31,
+                "3": 4,
+                "4": 14.5,
+                "5": 18.1,
+                "6": 17.6,
+                "9": 1.8
+              },
+              "unweighted_n": {
+                "1": 13,
+                "2": 32,
+                "3": 4,
+                "4": 15,
+                "5": 18,
+                "6": 18,
+                "9": 2
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 49,
+              "asked_subset_neff": 46.1,
+              "monthly_or_more_pct": 31.7,
+              "monthly_or_more_ci95": [18.2, 45.1],
+              "weekly_or_more_pct": 21.1,
+              "weekly_or_more_ci95": [9.3, 32.9],
+              "distribution_pct": {
+                "1": 24.6,
+                "2": 24.2,
+                "3": 19.6,
+                "4": 10.5,
+                "5": 11.9,
+                "6": 9.2,
+                "9": 0
+              },
+              "unweighted_n": {
+                "1": 13,
+                "2": 11,
+                "3": 10,
+                "4": 5,
+                "5": 6,
+                "6": 4,
+                "9": 0
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 9.9
+          },
+          {
+            "area_code": "05",
+            "ccaa_cis": "Canarias",
+            "geoboundaries_shapeName": "Canarias",
+            "realised_n": 171,
+            "weighted_n": 171,
+            "self_definition": {
+              "base_neff": 130.5,
+              "affiliation_pct": 50.7,
+              "affiliation_ci95": [42.1, 59.3],
+              "no_religion_pct": 47.8,
+              "no_religion_ci95": [39.2, 56.3],
+              "distribution_pct": {
+                "1": 14.8,
+                "2": 32.7,
+                "3": 3.1,
+                "4": 19.4,
+                "5": 10.6,
+                "6": 17.7,
+                "9": 1.5
+              },
+              "unweighted_n": {
+                "1": 26,
+                "2": 54,
+                "3": 7,
+                "4": 31,
+                "5": 18,
+                "6": 32,
+                "9": 3
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 87,
+              "asked_subset_neff": 66.7,
+              "monthly_or_more_pct": 23.6,
+              "monthly_or_more_ci95": [13.4, 33.7],
+              "weekly_or_more_pct": 12.9,
+              "weekly_or_more_ci95": [4.8, 20.9],
+              "distribution_pct": {
+                "1": 35.6,
+                "2": 24.5,
+                "3": 14.2,
+                "4": 10.7,
+                "5": 9.7,
+                "6": 3.2,
+                "9": 2.1
+              },
+              "unweighted_n": {
+                "1": 30,
+                "2": 22,
+                "3": 12,
+                "4": 10,
+                "5": 8,
+                "6": 3,
+                "9": 2
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 7.6
+          },
+          {
+            "area_code": "06",
+            "ccaa_cis": "Cantabria",
+            "geoboundaries_shapeName": "Cantabria",
+            "realised_n": 109,
+            "weighted_n": 109,
+            "self_definition": {
+              "base_neff": 99.8,
+              "affiliation_pct": 52.7,
+              "affiliation_ci95": [42.9, 62.5],
+              "no_religion_pct": 45.3,
+              "no_religion_ci95": [35.5, 55.1],
+              "distribution_pct": {
+                "1": 20.2,
+                "2": 31.2,
+                "3": 1.3,
+                "4": 8,
+                "5": 15.8,
+                "6": 21.5,
+                "9": 2
+              },
+              "unweighted_n": {
+                "1": 22,
+                "2": 35,
+                "3": 2,
+                "4": 9,
+                "5": 19,
+                "6": 21,
+                "9": 1
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 59,
+              "asked_subset_neff": 54.5,
+              "monthly_or_more_pct": 26.9,
+              "monthly_or_more_ci95": [15.2, 38.7],
+              "weekly_or_more_pct": 16.6,
+              "weekly_or_more_ci95": [6.7, 26.5],
+              "distribution_pct": {
+                "1": 25.3,
+                "2": 24.1,
+                "3": 23.6,
+                "4": 10.3,
+                "5": 13,
+                "6": 3.6,
+                "9": 0
+              },
+              "unweighted_n": {
+                "1": 15,
+                "2": 14,
+                "3": 14,
+                "4": 6,
+                "5": 8,
+                "6": 2,
+                "9": 0
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 9.6
+          },
+          {
+            "area_code": "07",
+            "ccaa_cis": "Castilla-La Mancha",
+            "geoboundaries_shapeName": "Castilla-La Mancha",
+            "realised_n": 162,
+            "weighted_n": 162,
+            "self_definition": {
+              "base_neff": 141.9,
+              "affiliation_pct": 61.6,
+              "affiliation_ci95": [53.6, 69.6],
+              "no_religion_pct": 36.3,
+              "no_religion_ci95": [28.4, 44.2],
+              "distribution_pct": {
+                "1": 20.7,
+                "2": 36.7,
+                "3": 4.3,
+                "4": 10,
+                "5": 9.7,
+                "6": 16.5,
+                "9": 2.1
+              },
+              "unweighted_n": {
+                "1": 35,
+                "2": 59,
+                "3": 7,
+                "4": 15,
+                "5": 16,
+                "6": 28,
+                "9": 2
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 101,
+              "asked_subset_neff": 88.4,
+              "monthly_or_more_pct": 33,
+              "monthly_or_more_ci95": [23.2, 42.8],
+              "weekly_or_more_pct": 26.4,
+              "weekly_or_more_ci95": [17.2, 35.6],
+              "distribution_pct": {
+                "1": 21.1,
+                "2": 23.4,
+                "3": 21.1,
+                "4": 6.6,
+                "5": 20,
+                "6": 6.3,
+                "9": 1.4
+              },
+              "unweighted_n": {
+                "1": 21,
+                "2": 23,
+                "3": 22,
+                "4": 7,
+                "5": 20,
+                "6": 7,
+                "9": 1
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 7.9
+          },
+          {
+            "area_code": "08",
+            "ccaa_cis": "Castilla y León",
+            "geoboundaries_shapeName": "Castilla y León",
+            "realised_n": 202,
+            "weighted_n": 202,
+            "self_definition": {
+              "base_neff": 149.3,
+              "affiliation_pct": 63.6,
+              "affiliation_ci95": [55.9, 71.4],
+              "no_religion_pct": 36,
+              "no_religion_ci95": [28.3, 43.7],
+              "distribution_pct": {
+                "1": 21.5,
+                "2": 42.2,
+                "3": 0,
+                "4": 10.6,
+                "5": 13.6,
+                "6": 11.8,
+                "9": 0.4
+              },
+              "unweighted_n": {
+                "1": 39,
+                "2": 88,
+                "3": 0,
+                "4": 25,
+                "5": 23,
+                "6": 26,
+                "9": 1
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 127,
+              "asked_subset_neff": 96.1,
+              "monthly_or_more_pct": 30.4,
+              "monthly_or_more_ci95": [21.2, 39.6],
+              "weekly_or_more_pct": 26.3,
+              "weekly_or_more_ci95": [17.5, 35.1],
+              "distribution_pct": {
+                "1": 25.7,
+                "2": 19,
+                "3": 21.5,
+                "4": 4.1,
+                "5": 20.9,
+                "6": 5.4,
+                "9": 3.3
+              },
+              "unweighted_n": {
+                "1": 37,
+                "2": 24,
+                "3": 30,
+                "4": 7,
+                "5": 23,
+                "6": 5,
+                "9": 1
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 7
+          },
+          {
+            "area_code": "09",
+            "ccaa_cis": "Cataluña",
+            "geoboundaries_shapeName": "Cataluña/Catalunya",
+            "realised_n": 573,
+            "weighted_n": 573,
+            "self_definition": {
+              "base_neff": 472.8,
+              "affiliation_pct": 44.7,
+              "affiliation_ci95": [40.2, 49.2],
+              "no_religion_pct": 54,
+              "no_religion_ci95": [49.6, 58.5],
+              "distribution_pct": {
+                "1": 10.5,
+                "2": 30.6,
+                "3": 3.6,
+                "4": 17.9,
+                "5": 15.2,
+                "6": 21,
+                "9": 1.2
+              },
+              "unweighted_n": {
+                "1": 53,
+                "2": 177,
+                "3": 22,
+                "4": 106,
+                "5": 89,
+                "6": 118,
+                "9": 8
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 252,
+              "asked_subset_neff": 214.7,
+              "monthly_or_more_pct": 22.9,
+              "monthly_or_more_ci95": [17.3, 28.5],
+              "weekly_or_more_pct": 17.2,
+              "weekly_or_more_ci95": [12.2, 22.3],
+              "distribution_pct": {
+                "1": 35.5,
+                "2": 19.9,
+                "3": 21.7,
+                "4": 5.7,
+                "5": 10.6,
+                "6": 6.7,
+                "9": 0
+              },
+              "unweighted_n": {
+                "1": 91,
+                "2": 54,
+                "3": 51,
+                "4": 14,
+                "5": 24,
+                "6": 18,
+                "9": 0
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 4.2
+          },
+          {
+            "area_code": "10",
+            "ccaa_cis": "Comunitat Valenciana",
+            "geoboundaries_shapeName": "Comunitat Valenciana",
+            "realised_n": 407,
+            "weighted_n": 407,
+            "self_definition": {
+              "base_neff": 368.8,
+              "affiliation_pct": 52,
+              "affiliation_ci95": [46.9, 57.1],
+              "no_religion_pct": 46.6,
+              "no_religion_ci95": [41.5, 51.7],
+              "distribution_pct": {
+                "1": 13.6,
+                "2": 34.9,
+                "3": 3.5,
+                "4": 15.9,
+                "5": 11.3,
+                "6": 19.4,
+                "9": 1.4
+              },
+              "unweighted_n": {
+                "1": 51,
+                "2": 140,
+                "3": 15,
+                "4": 65,
+                "5": 51,
+                "6": 79,
+                "9": 6
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 206,
+              "asked_subset_neff": 185,
+              "monthly_or_more_pct": 25.1,
+              "monthly_or_more_ci95": [18.9, 31.4],
+              "weekly_or_more_pct": 15.6,
+              "weekly_or_more_ci95": [10.4, 20.9],
+              "distribution_pct": {
+                "1": 28.3,
+                "2": 22.2,
+                "3": 23.8,
+                "4": 9.5,
+                "5": 11.2,
+                "6": 4.4,
+                "9": 0.6
+              },
+              "unweighted_n": {
+                "1": 59,
+                "2": 47,
+                "3": 50,
+                "4": 19,
+                "5": 23,
+                "6": 7,
+                "9": 1
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 5
+          },
+          {
+            "area_code": "11",
+            "ccaa_cis": "Extremadura",
+            "geoboundaries_shapeName": "Extremadura",
+            "realised_n": 108,
+            "weighted_n": 108,
+            "self_definition": {
+              "base_neff": 83.2,
+              "affiliation_pct": 76,
+              "affiliation_ci95": [66.9, 85.2],
+              "no_religion_pct": 24,
+              "no_religion_ci95": [14.8, 33.1],
+              "distribution_pct": {
+                "1": 27.9,
+                "2": 46.3,
+                "3": 1.9,
+                "4": 6.9,
+                "5": 7.9,
+                "6": 9.2,
+                "9": 0
+              },
+              "unweighted_n": {
+                "1": 27,
+                "2": 50,
+                "3": 2,
+                "4": 9,
+                "5": 9,
+                "6": 11,
+                "9": 0
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 79,
+              "asked_subset_neff": 58.1,
+              "monthly_or_more_pct": 40.4,
+              "monthly_or_more_ci95": [27.8, 53],
+              "weekly_or_more_pct": 25.5,
+              "weekly_or_more_ci95": [14.3, 36.7],
+              "distribution_pct": {
+                "1": 20.3,
+                "2": 21.4,
+                "3": 12.5,
+                "4": 14.9,
+                "5": 21.6,
+                "6": 3.9,
+                "9": 5.4
+              },
+              "unweighted_n": {
+                "1": 18,
+                "2": 18,
+                "3": 11,
+                "4": 13,
+                "5": 15,
+                "6": 3,
+                "9": 1
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 9.6
+          },
+          {
+            "area_code": "12",
+            "ccaa_cis": "Galicia",
+            "geoboundaries_shapeName": "Galicia",
+            "realised_n": 237,
+            "weighted_n": 237,
+            "self_definition": {
+              "base_neff": 135.3,
+              "affiliation_pct": 59.2,
+              "affiliation_ci95": [50.9, 67.5],
+              "no_religion_pct": 40.4,
+              "no_religion_ci95": [32.2, 48.7],
+              "distribution_pct": {
+                "1": 22.1,
+                "2": 33.9,
+                "3": 3.1,
+                "4": 11.8,
+                "5": 13.5,
+                "6": 15.1,
+                "9": 0.3
+              },
+              "unweighted_n": {
+                "1": 34,
+                "2": 86,
+                "3": 4,
+                "4": 32,
+                "5": 37,
+                "6": 43,
+                "9": 1
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 124,
+              "asked_subset_neff": 61.1,
+              "monthly_or_more_pct": 19.9,
+              "monthly_or_more_ci95": [9.9, 29.9],
+              "weekly_or_more_pct": 17.2,
+              "weekly_or_more_ci95": [7.8, 26.7],
+              "distribution_pct": {
+                "1": 26.3,
+                "2": 24,
+                "3": 28.8,
+                "4": 2.7,
+                "5": 16.6,
+                "6": 0.6,
+                "9": 1.1
+              },
+              "unweighted_n": {
+                "1": 34,
+                "2": 33,
+                "3": 38,
+                "4": 5,
+                "5": 11,
+                "6": 1,
+                "9": 2
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 6.5
+          },
+          {
+            "area_code": "13",
+            "ccaa_cis": "Madrid (Comunidad de)",
+            "geoboundaries_shapeName": "Comunidad de Madrid",
+            "realised_n": 543,
+            "weighted_n": 543,
+            "self_definition": {
+              "base_neff": 480.5,
+              "affiliation_pct": 54.1,
+              "affiliation_ci95": [49.6, 58.5],
+              "no_religion_pct": 44.8,
+              "no_religion_ci95": [40.4, 49.3],
+              "distribution_pct": {
+                "1": 21.7,
+                "2": 30.2,
+                "3": 2.1,
+                "4": 15.5,
+                "5": 13.6,
+                "6": 15.7,
+                "9": 1.1
+              },
+              "unweighted_n": {
+                "1": 108,
+                "2": 167,
+                "3": 12,
+                "4": 89,
+                "5": 73,
+                "6": 87,
+                "9": 7
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 287,
+              "asked_subset_neff": 256.3,
+              "monthly_or_more_pct": 38.3,
+              "monthly_or_more_ci95": [32.4, 44.3],
+              "weekly_or_more_pct": 26.2,
+              "weekly_or_more_ci95": [20.8, 31.6],
+              "distribution_pct": {
+                "1": 19.4,
+                "2": 18.9,
+                "3": 22.8,
+                "4": 12.1,
+                "5": 20.4,
+                "6": 5.8,
+                "9": 0.6
+              },
+              "unweighted_n": {
+                "1": 57,
+                "2": 58,
+                "3": 66,
+                "4": 34,
+                "5": 54,
+                "6": 16,
+                "9": 2
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 4.3
+          },
+          {
+            "area_code": "14",
+            "ccaa_cis": "Murcia (Región de)",
+            "geoboundaries_shapeName": "Región de Murcia",
+            "realised_n": 117,
+            "weighted_n": 117,
+            "self_definition": {
+              "base_neff": 106.5,
+              "affiliation_pct": 58,
+              "affiliation_ci95": [48.6, 67.4],
+              "no_religion_pct": 41.3,
+              "no_religion_ci95": [31.9, 50.6],
+              "distribution_pct": {
+                "1": 20.2,
+                "2": 34.8,
+                "3": 2.9,
+                "4": 19.1,
+                "5": 8.4,
+                "6": 13.8,
+                "9": 0.7
+              },
+              "unweighted_n": {
+                "1": 25,
+                "2": 44,
+                "3": 3,
+                "4": 18,
+                "5": 10,
+                "6": 16,
+                "9": 1
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 72,
+              "asked_subset_neff": 66.5,
+              "monthly_or_more_pct": 36.6,
+              "monthly_or_more_ci95": [25, 48.2],
+              "weekly_or_more_pct": 29.3,
+              "weekly_or_more_ci95": [18.4, 40.2],
+              "distribution_pct": {
+                "1": 16.4,
+                "2": 29.4,
+                "3": 17.6,
+                "4": 7.3,
+                "5": 13.9,
+                "6": 15.4,
+                "9": 0
+              },
+              "unweighted_n": {
+                "1": 13,
+                "2": 21,
+                "3": 12,
+                "4": 6,
+                "5": 10,
+                "6": 10,
+                "9": 0
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 9.2
+          },
+          {
+            "area_code": "15",
+            "ccaa_cis": "Navarra (Comunidad Foral de)",
+            "geoboundaries_shapeName": "Comunidad Foral de Navarra",
+            "realised_n": 108,
+            "weighted_n": 108,
+            "self_definition": {
+              "base_neff": 90.6,
+              "affiliation_pct": 48.7,
+              "affiliation_ci95": [38.4, 59],
+              "no_religion_pct": 51.3,
+              "no_religion_ci95": [41, 61.6],
+              "distribution_pct": {
+                "1": 18.4,
+                "2": 26.9,
+                "3": 3.4,
+                "4": 17.4,
+                "5": 8.3,
+                "6": 25.6,
+                "9": 0
+              },
+              "unweighted_n": {
+                "1": 20,
+                "2": 31,
+                "3": 4,
+                "4": 18,
+                "5": 9,
+                "6": 26,
+                "9": 0
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 55,
+              "asked_subset_neff": 51.9,
+              "monthly_or_more_pct": 35.4,
+              "monthly_or_more_ci95": [22.4, 48.5],
+              "weekly_or_more_pct": 22.3,
+              "weekly_or_more_ci95": [10.9, 33.6],
+              "distribution_pct": {
+                "1": 23.6,
+                "2": 24.1,
+                "3": 16.9,
+                "4": 13.2,
+                "5": 16.6,
+                "6": 5.6,
+                "9": 0
+              },
+              "unweighted_n": {
+                "1": 13,
+                "2": 15,
+                "3": 8,
+                "4": 7,
+                "5": 9,
+                "6": 3,
+                "9": 0
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 9.6
+          },
+          {
+            "area_code": "16",
+            "ccaa_cis": "País Vasco",
+            "geoboundaries_shapeName": "País Vasco/Euskadi",
+            "realised_n": 178,
+            "weighted_n": 178,
+            "self_definition": {
+              "base_neff": 139.8,
+              "affiliation_pct": 47.1,
+              "affiliation_ci95": [38.8, 55.4],
+              "no_religion_pct": 50.6,
+              "no_religion_ci95": [42.4, 58.9],
+              "distribution_pct": {
+                "1": 16.5,
+                "2": 28.4,
+                "3": 2.2,
+                "4": 16.7,
+                "5": 14.1,
+                "6": 19.8,
+                "9": 2.2
+              },
+              "unweighted_n": {
+                "1": 28,
+                "2": 53,
+                "3": 4,
+                "4": 31,
+                "5": 19,
+                "6": 38,
+                "9": 5
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 85,
+              "asked_subset_neff": 79.3,
+              "monthly_or_more_pct": 25,
+              "monthly_or_more_ci95": [15.5, 34.5],
+              "weekly_or_more_pct": 12.7,
+              "weekly_or_more_ci95": [5.4, 20],
+              "distribution_pct": {
+                "1": 29,
+                "2": 24.3,
+                "3": 21.7,
+                "4": 12.3,
+                "5": 9,
+                "6": 3.7,
+                "9": 0
+              },
+              "unweighted_n": {
+                "1": 25,
+                "2": 21,
+                "3": 19,
+                "4": 10,
+                "5": 7,
+                "6": 3,
+                "9": 0
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 7.5
+          },
+          {
+            "area_code": "17",
+            "ccaa_cis": "Rioja (La)",
+            "geoboundaries_shapeName": "La Rioja",
+            "realised_n": 89,
+            "weighted_n": 89,
+            "self_definition": {
+              "base_neff": 69.9,
+              "affiliation_pct": 54,
+              "affiliation_ci95": [42.3, 65.7],
+              "no_religion_pct": 44.7,
+              "no_religion_ci95": [33.1, 56.4],
+              "distribution_pct": {
+                "1": 24.7,
+                "2": 29.3,
+                "3": 0,
+                "4": 18.3,
+                "5": 12.9,
+                "6": 13.5,
+                "9": 1.3
+              },
+              "unweighted_n": {
+                "1": 20,
+                "2": 27,
+                "3": 0,
+                "4": 16,
+                "5": 12,
+                "6": 13,
+                "9": 1
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 47,
+              "asked_subset_neff": 35.6,
+              "monthly_or_more_pct": 42.9,
+              "monthly_or_more_ci95": [26.7, 59.2],
+              "weekly_or_more_pct": 33.9,
+              "weekly_or_more_ci95": [18.4, 49.5],
+              "distribution_pct": {
+                "1": 9.1,
+                "2": 25.4,
+                "3": 22.6,
+                "4": 9,
+                "5": 21.8,
+                "6": 12.2,
+                "9": 0
+              },
+              "unweighted_n": {
+                "1": 7,
+                "2": 12,
+                "3": 8,
+                "4": 6,
+                "5": 8,
+                "6": 6,
+                "9": 0
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 10.6
+          },
+          {
+            "area_code": "18",
+            "ccaa_cis": "Ceuta (Ciudad Autónoma de)",
+            "geoboundaries_shapeName": "Ciudad Autónoma de Ceuta",
+            "realised_n": 19,
+            "weighted_n": 19,
+            "self_definition": {
+              "base_neff": 18.4,
+              "affiliation_pct": 72,
+              "affiliation_ci95": [51.6, 92.5],
+              "no_religion_pct": 28,
+              "no_religion_ci95": [7.5, 48.4],
+              "distribution_pct": {
+                "1": 12.7,
+                "2": 28.8,
+                "3": 30.6,
+                "4": 15.3,
+                "5": 12.7,
+                "6": 0,
+                "9": 0
+              },
+              "unweighted_n": {
+                "1": 2,
+                "2": 6,
+                "3": 6,
+                "4": 3,
+                "5": 2,
+                "6": 0,
+                "9": 0
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 14,
+              "asked_subset_neff": 13.6,
+              "monthly_or_more_pct": 36.3,
+              "monthly_or_more_ci95": [10.7, 61.8],
+              "weekly_or_more_pct": 21.2,
+              "weekly_or_more_ci95": [0, 43],
+              "distribution_pct": {
+                "1": 27.5,
+                "2": 21.2,
+                "3": 15,
+                "4": 15,
+                "5": 15,
+                "6": 6.2,
+                "9": 0
+              },
+              "unweighted_n": {
+                "1": 4,
+                "2": 3,
+                "3": 2,
+                "4": 2,
+                "5": 2,
+                "6": 1,
+                "9": 0
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 22.9
+          },
+          {
+            "area_code": "19",
+            "ccaa_cis": "Melilla (Ciudad Autónoma de)",
+            "geoboundaries_shapeName": "Ciudad Autónoma de Melilla",
+            "realised_n": 19,
+            "weighted_n": 19,
+            "self_definition": {
+              "base_neff": 18.9,
+              "affiliation_pct": 73.2,
+              "affiliation_ci95": [53.3, 93.2],
+              "no_religion_pct": 21.1,
+              "no_religion_ci95": [2.7, 39.5],
+              "distribution_pct": {
+                "1": 15.5,
+                "2": 31.7,
+                "3": 26,
+                "4": 4.9,
+                "5": 16.2,
+                "6": 0,
+                "9": 5.7
+              },
+              "unweighted_n": {
+                "1": 3,
+                "2": 6,
+                "3": 5,
+                "4": 1,
+                "5": 3,
+                "6": 0,
+                "9": 1
+              },
+              "labels": {
+                "1": "Católico/a practicante",
+                "2": "Católico/a no practicante",
+                "3": "Creyente de otra religión",
+                "4": "Agnóstico/a",
+                "5": "Indiferente, no creyente",
+                "6": "Ateo/a",
+                "9": "N.C."
+              }
+            },
+            "mass_attendance": {
+              "asked_subset_n": 14,
+              "asked_subset_neff": 13.9,
+              "monthly_or_more_pct": 42.3,
+              "monthly_or_more_ci95": [16.3, 68.2],
+              "weekly_or_more_pct": 22.2,
+              "weekly_or_more_ci95": [0.3, 44],
+              "distribution_pct": {
+                "1": 28.9,
+                "2": 28.9,
+                "3": 0,
+                "4": 20.1,
+                "5": 7.7,
+                "6": 14.4,
+                "9": 0
+              },
+              "unweighted_n": {
+                "1": 4,
+                "2": 4,
+                "3": 0,
+                "4": 3,
+                "5": 1,
+                "6": 2,
+                "9": 0
+              },
+              "labels": {
+                "1": "Nunca",
+                "2": "Casi nunca",
+                "3": "Varias veces al año",
+                "4": "Dos o tres veces al mes",
+                "5": "Todos los domingos y festivos",
+                "6": "Varias veces a la semana",
+                "9": "N.C."
+              }
+            },
+            "ficha_community_maxerror_pct": 22.9
+          }
+        ]
+      },
+      "licence_position": {
+        "cis": {
+          "status": "accepted",
+          "basis": "datos_gob_es_federation_open_reuse_grant_with_cis_citation",
+          "grant_verbatim": "quedando autorizada su reproducción total o parcial, modificación, distribución y comunicación, para usos comerciales y no comerciales, de acuerdo a las condiciones generales de uso de su portal.",
+          "condition": "CIS source citation required; the openly federated study matrices carry the affirmative open-reuse grant. Orden PRE/3188/2008 governs bespoke microdata requests, not these openly published matrices.",
+          "citation": "Fuente: Centro de Investigaciones Sociológicas (CIS), Estudio nº 3505, Barómetro de Abril 2025."
+        },
+        "boundary": "geoBoundaries ESP ADM1: CC BY 4.0 (IGN/CNIG source)."
+      },
+      "raw_sources": [
+        {
+          "local_path": "data/raw/es_cis/MD3505.zip",
+          "url": "https://www.cis.es/documents/20117/13445319/MD3505.zip",
+          "content": "CIS Estudio 3505 open microdata bundle (MD3505.zip): 3505_num.csv, codigo3505.pdf, FT3505.pdf, cues3505.pdf, 3505.sav, DA3505",
+          "retrieval_date": "2026-07-12",
+          "bytes": 2572219,
+          "sha256": "df1f28248e622ac23fde454c3c4f2e4c8ff293bdbb2705be26ec64fc5e255392"
+        },
+        {
+          "local_path": "data/raw/es_cis/3505_num.csv",
+          "url": "https://www.cis.es/documents/20117/13445319/MD3505.zip",
+          "content": "CIS Estudio 3505 numeric matriz de datos (extracted from MD3505.zip); the source of record for both metrics",
+          "retrieval_date": "2026-07-12",
+          "bytes": 1922618,
+          "sha256": "b08ca759ffd3917a26756a8dcad5a5ce5d198d89f6b13c51c21e8136b5ae552a"
+        },
+        {
+          "local_path": "data/raw/es_cis/esp_adm1.geojson",
+          "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/ESP/ADM1/geoBoundaries-ESP-ADM1.geojson",
+          "content": "geoBoundaries ESP ADM1 (19 autonomous communities and cities), CC BY 4.0",
+          "retrieval_date": "2026-07-12",
+          "bytes": 23481829,
+          "sha256": "adce53a257c2ddba0b135f330b73f5cd296edc58bd15012e33df66ba841e13e4"
+        }
+      ],
+      "local_cache_hint": "data/raw/es_cis/ (git-ignored via .gitignore raw_data/ pattern? see note; MD3505.zip and extracted members cached with URL, bytes, SHA-256 in pipeline.parameters.raw_sources).",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/es_cis/"
+      ],
+      "md_zip_sha256": "df1f28248e622ac23fde454c3c4f2e4c8ff293bdbb2705be26ec64fc5e255392"
+    },
+    "software_versions": {
+      "R": "4.6.1",
+      "sf": "1.1.1",
+      "stringi": "1.8.7",
+      "jsonlite": "2.0.0"
+    }
+  },
+  "source": {
+    "provider": "Centro de Investigaciones Sociológicas (CIS); geoBoundaries (IGN/CNIG)",
+    "source_dataset_ids": [
+      "cis-3505-barometro-abril-2025-microdatos",
+      "geoboundaries-esp-adm1-cc-by-4-0"
+    ],
+    "source_urls": [
+      "https://www.cis.es/documents/20117/13445319/MD3505.zip",
+      "https://www.cis.es/detalle-ficha-estudio?origen=estudio&codEstudio=3505",
+      "https://www.cis.es/en/w/bancos-de-datos",
+      "https://datos.gob.es/es/noticias/el-analisis-online-del-banco-de-datos-del-cis",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/ESP/ADM1/geoBoundaries-ESP-ADM1.geojson",
+      "https://www.geoboundaries.org/api/current/gbOpen/ESP/ADM1/"
+    ],
+    "retrieved_at": "2026-07-12T00:00:00Z",
+    "licence": "CIS: open reuse via the datos.gob.es federation grant with CIS citation (accepted). Boundary: CC BY 4.0.",
+    "raw_redistribution": "CIS open microdata and geoBoundaries are open web sources; intended durable mirror gs://pow-research-data/raw_sources/es_cis/.",
+    "citation": "CIS Barómetro de Abril 2025 (Estudio nº 3505), microdatos; geoBoundaries ESP ADM1 (IGN/CNIG).",
+    "local_cache_hint": "data/raw/es_cis/ (git-ignored).",
+    "raw_cache_durable_uris": [
+      "gs://pow-research-data/raw_sources/es_cis/"
+    ]
+  },
+  "input_manifests": [],
+  "deferred_sources": [
+    {
+      "layer": "census religion",
+      "status": "documented non-route",
+      "note": "Spain's census carries no religion question; the CIS barometer is the affiliation-and-practice route. The survey construct is never blended with any census affiliation."
+    },
+    {
+      "layer": "places of worship (Observatorio del Pluralismo Religioso)",
+      "status": "distinct open route, not built here",
+      "note": "The Observatorio directory of minority places of worship is open under the Spanish RISP regime (Ley 37/2007) with attribution 'Origen de los datos: Observatorio del Pluralismo Religioso en España'; a distinct places-layer opportunity recorded in the route-probe, not part of this survey lane."
+    },
+    {
+      "layer": "pooled / multi-wave",
+      "status": "future extension",
+      "note": "This build ships one wave (Estudio 3505). Pooling adjacent 2020-onward community barometers would narrow the community intervals at the cost of a mixed reference period; a future extension."
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/es/data/area_summary_community.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 69720,
+      "sha256": "0f523234f50773a5d94d34975fd0581628a6ce5d2ab1bfe756c9ded08a606f52",
+      "content": "Spain 19-community CIS survey affiliation-and-practice area-summary JSON (area-summary.v2)",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "cis_datos_gob_es_open_reuse_with_citation",
+      "row_count": 19
+    },
+    {
+      "uri": "repo:apps/regions/es/data/area_summary_community.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 28934,
+      "sha256": "22f94a48461bc1c359e7b235d7e974d1d1bdb1fa4df84f3c6d64b70e12342300",
+      "content": "Spain 19-community CIS survey affiliation-and-practice area-summary CSV",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "cis_datos_gob_es_open_reuse_with_citation",
+      "row_count": 19
+    },
+    {
+      "uri": "repo:apps/regions/es/data/es_ccaa_community_2025.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 2929929,
+      "sha256": "0fdc7ca8babc48f726cb999cd8a8d25866d4b95287ad965e2dea1b3c4fa55d55",
+      "content": "Spain 19 autonomous-community boundary (geoBoundaries ESP ADM1) keyed by area_unit_id",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "cc_by_4_0",
+      "feature_count": 19
+    }
+  ],
+  "partitions": [
+    {
+      "partition_id": "es-ccaa-2025",
+      "partition_type": "area",
+      "file_uri": "repo:apps/regions/es/data/area_summary_community.json",
+      "sha256": "0f523234f50773a5d94d34975fd0581628a6ce5d2ab1bfe756c9ded08a606f52",
+      "country_code": "ES",
+      "row_count": 19,
+      "stage": "staged"
+    }
+  ],
+  "stats": {
+    "waves": 1,
+    "years": "2025",
+    "community_rows": 19,
+    "communities": 19,
+    "boundary_features": 19,
+    "boundary_keep_percent": 16,
+    "boundary_bytes": 2929929,
+    "realised_total": 4008,
+    "national_religion_max_dev_pp": 0.100000000000001,
+    "national_attendance_max_dev_pp": 0.100000000000001
+  },
+  "local_cache_hint": "data/raw/es_cis/ (git-ignored; MD3505.zip and members with URL, bytes, SHA-256 in pipeline.parameters.raw_sources).",
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "Rscript scripts/build_es_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.v2.schema.json apps/regions/es/data/area_summary_community.json",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/es-cis-religion-2025.json"
+    ],
+    "warnings": [
+      "Both metrics are SURVEY estimates with uncertainty, never census affiliation; each shipped share carries a 95% interval on the Kish effective n.",
+      "Mass attendance is a filtered subgroup (self-defined Catholics/other-believers); most communities fall under the small-cell denominator threshold; Ceuta and Melilla (n~19) wash on both metrics.",
+      "Small-cell rule applicability to survey respondent n is an OPEN QUESTION recorded for the conductor (see pipeline.parameters.small_cell_rule.open_question_for_conductor); tokens emitted mechanically, no new treatment invented.",
+      "The delivered microdata carries 4008 records vs the ficha's 4009 realised (one record, Asturias 95 vs 96); estimates rest on the delivered file."
+    ],
+    "notes": "Source hashes recorded and gated (3505_num.csv, codigo3505.pdf, FT3505.pdf, esp_adm1.geojson). National PESO-weighted RELIGION and attendance distributions match the avance de resultados within 0.3 pp. The 19-feature boundary joins 19/19 communities by verbatim shapeName with distinct geometry hashes, valid non-empty geometries, under the 3 MB cap. Both the area-summary (area-summary.v2) and the manifest pass schema validation."
+  },
+  "privacy": "public",
+  "licence_status": "accepted",
+  "licence_basis": "cis_datos_gob_es_open_reuse_with_citation",
+  "downstream_status": "staged",
+  "notes": "Single-wave (2025) 19-community CIS survey affiliation-and-practice product: religious self-definition (P28) and mass attendance (P28a), both weighted (PESOCCAA) percentages with 95% intervals, no counts. Survey dataNoun, never blended with census affiliation (Spain's census has no religion question). Small-cell rule applied on unweighted respondent n (open interpretive question recorded for the conductor). CIS open reuse via the datos.gob.es federation grant with citation (accepted); boundary CC BY 4.0. Ships STAGED (no page, no hub)."
+}
