@@ -214,3 +214,20 @@ Spot verification on two of the four: Perlis Table 2 religion for 2020 (Islam 25
 1. The federal-territory rows are titled "State Wilayah Persekutuan {Name}", never "W.P. {Name}"; keyword probes on the W.P. abbreviation return nothing, which is why the district-lane sweep reported them absent.
 2. The state-report Table numbering differs from the district reports: the six-category religion series sits in Table 2 (unit principal statistics by census year), not Table 3, and the detailed frame in Table 7 covers religion by sex rather than religion by district.
 3. No login, CAPTCHA, or rate-limiting was encountered; all four chapters served true PDFs at the first request.
+
+### Kedah and Terengganu follow-up, 2026-07-13
+
+The build flagged four unusable districts — Padang Terap, Yan, and Pendang (Kedah) and Hulu Terengganu (Terengganu) — and asked whether the two state reports print religion by district. They do. Files added:
+
+| Unit | Local file | URL | sha256 | Bytes |
+|---|---|---|---|---|
+| Kedah (state report PDF) | `state_reports/kedah.pdf` | <https://www.dosm.gov.my/uploads/publications/20221018112934.pdf> | `b9c0eb9c07db9742e52a13e47184b03be615dafcde338108bbfc56a9fbef03db` | 4,287,180 |
+| Terengganu (state tables workbook) | `state_reports/terengganu_jadual.xlsx` | <https://www.dosm.gov.my/uploads/publications/20221013110544.xlsx> | `083f5a3edc385a0d108873cf91d0e15038b55ccaec65d08949ddf247db064fdf` | 373,953 |
+| Padang Terap (district tables workbook) | `district_reports/padang_terap_jadual.xlsx` | <https://www.dosm.gov.my/uploads/publications/20221011130742.xlsx> | `7449db32c7e799e55a0475ec37dd66c934d8c4bd4dac407f09acbb95bb0b7bd6` | 617,728 |
+| Yan (district tables workbook) | `district_reports/yan_jadual.xlsx` | <https://www.dosm.gov.my/uploads/publications/20221014093930.xlsx> | `c2df2e9d1ae4df8cf57127671be0424beb56032489f12447a26304d3952a443a` | 613,508 |
+
+**Grain finding.** Both state reports publish religion by administrative district, in Table 7 ("Number of population by religion, sex and administrative district/ jajahan"), for the 2020 wave only, on the detailed seven-category 2020 frame (Islam; Christianity; Buddhism; Hinduism; Others; No Religion; Unknown — No Religion and Unknown are separate here, unlike the six-category historical frame). Kedah's Table 7 covers all 12 Kedah districts in three sex panels; the Total-panel rows for Padang Terap, Yan, and Pendang each sum exactly to their printed district totals (65,698; 73,384; 98,922). The Terengganu state-report row carries no PDF at all — its only census chapter is the "JADUAL 1 HINGGA 16" workbook — and that workbook's sheet 7 carries the same Table 7 by district; the Hulu Terengganu row sums exactly to its printed 69,881. The historical six-category series (1991–2020) sits in Table 2 at state grain only, so the state reports close the four districts for 2020 but not for the earlier waves.
+
+**Alternative-chapter finding for Padang Terap and Yan.** Neither publication row carries a true census PDF in any chapter: all three chapters of each resolve to XLSX. However, the first chapter ("DP {NAME} JADUAL", the district tables workbook) is a genuine structured census file, and its sheet "3. DP" is Jadual 3 itself — the six-category religion series with 1991, 2000, 2010, and 2020 values (Padang Terap Islam: 46,525; 51,480; 57,028; 58,752 — Yan Islam: 54,555; 57,422; 61,933; 70,332). Yan's 2020 Islam value agrees exactly with the Kedah state report's Table 7. The two workbooks are saved beside the PDFs in `district_reports/`, and together with the state reports they close all four districts for every wave: 1991–2020 from the district workbooks for Padang Terap and Yan, and 2020 from state-report Table 7 for Pendang and Hulu Terengganu, whose earlier waves remain unpublished online.
+
+**Anomaly.** The Terengganu state report's Penemuan Utama PDF was never uploaded: the catalogue row exposes 21 MyLocal Stats chapters and the tables workbook only. Kedah's PDF chapter is present and correct.
