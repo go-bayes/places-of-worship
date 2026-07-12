@@ -1,0 +1,725 @@
+{
+  "schema_version": "area-summary.v2",
+  "generated_at": "2026-07-12T06:54:35Z",
+  "generated_by": "scripts/build_ar_area_summary.R",
+  "country_code": "AR",
+  "data_status": "survey_religion_live",
+  "data_status_note": "Survey religious affiliation (CEIL-CONICET Encuesta sobre Creencias y Actitudes Religiosas) is live for six macro-regions in 2008 and 2019. Its own survey dataNoun; never blended with census affiliation (the Argentine census dropped religion after 1960). Percentages only, no counts. The 2019 affiliation is a disclosed lower bound (chart prints only values above 2%). Ships STAGED pending a PI licence ruling (2019 CC BY-NC-SA 4.0 non-commercial; 2008 needs_review build-then-ask).",
+  "boundary_set": {
+    "boundary_set_id": "ar-macroregion-codab-adm2-dissolve",
+    "country_code": "AR",
+    "level": "macro_region",
+    "vintage": "COD-AB ARG ADM2 (UNHCR 2017) custom dissolve to six macro-regions",
+    "source_dataset_id": "codab-arg-adm2-unhcr2017"
+  },
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "no governed Argentina place-of-worship snapshot is included in this survey-religion release",
+    "notes": "The Argentina lane ships survey-religion percentage metrics only."
+  },
+  "source_datasets": [
+    {
+      "source_dataset_id": "ceil-conicet-2008-primera-encuesta-region-table",
+      "name": "CEIL-CONICET Primera Encuesta Nacional sobre Creencias y Actitudes Religiosas en Argentina (2008), region table",
+      "provider": "Programa Sociedad, Cultura y Religión, CEIL-CONICET",
+      "url": "https://www.bahia.gob.ar/wp-content/uploads/2021/12/Primera-Encuesta-Nacional-CEIL-CONICET-2008-Dres.-Fortunato-Mallimaci-Juan-Cruz-Esquivel-Lic.-Gabriela-Irraz%C3%A1bal.pdf",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/ar_survey/primera-encuesta-2008.pdf",
+      "licence": {
+        "name": "No located open licence (CEIL-CONICET report); reuse needs_review, build-then-ask",
+        "url": null,
+        "attribution": "Source: CEIL-CONICET, Primera Encuesta Nacional sobre Creencias y Actitudes Religiosas en Argentina (2008); dirs. Fortunato Mallimaci, Juan Cruz Esquivel, Lic. Gabriela Irrazábal"
+      },
+      "citation": "Mallimaci, F., Esquivel, J. C., Irrazábal, G. (2008). Primera Encuesta Nacional sobre Creencias y Actitudes Religiosas en Argentina. CEIL-CONICET. Region table 'La religión de los Argentinos – según región' (Base 2403 casos).",
+      "access_limits": "Open web PDF (bahia.gob.ar mirror).",
+      "redistribution_limits": "No located open-data licence for the 2008 report; reuse of the derived regional percentages is needs_review pending a project-lead ruling (build-then-ask, CEIL-CONICET attribution).",
+      "notes": "Five printed categories partition each region column. Indiferentes: Agnósticos, Ateos y Ninguna Religión de Pertenencia. AMBA is printed 'Capital y GBA'; Patagonia is printed 'Sur'."
+    },
+    {
+      "source_dataset_id": "ceil-conicet-2019-informe25-adscripcion-region",
+      "name": "CEIL-CONICET Segunda Encuesta Nacional sobre Creencias y Actitudes Religiosas en Argentina (2019), Informe de Investigación nº 25",
+      "provider": "Programa Sociedad, Cultura y Religión, CEIL-CONICET",
+      "url": "https://www.ceil-conicet.gov.ar/wp-content/uploads/2019/11/ii25-2encuestacreencias.pdf",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/ar_survey/ii25-2encuestacreencias.pdf",
+      "licence": {
+        "name": "CC BY-NC-SA 4.0 via the peer-reviewed article (non-commercial; PI/project-lead ruling pending)",
+        "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+        "attribution": "Source: CEIL-CONICET, Segunda Encuesta Nacional sobre Creencias y Actitudes Religiosas en Argentina (2019), Informe nº 25"
+      },
+      "citation": "CEIL-CONICET (2019). Segunda Encuesta Nacional sobre Creencias y Actitudes Religiosas en Argentina, Informe de Investigación nº 25 (ISSN 1515-7466). Chart 'Adscripción religiosa según región', p. 14 (Base 2421 casos).",
+      "access_limits": "Open web PDF.",
+      "redistribution_limits": "The 2019 regional table is carried under CC BY-NC-SA 4.0 via the peer-reviewed article (Mallimaci, Esquivel & Giménez Béliveau 2020). The non-commercial clause is a genuine condition; a project-lead / PI licence ruling is pending (a new licence class for the corpus). The Informe nº 25 chart is the source of record for the figures. The chart prints only values above 2% ('Se consignan en el gráfico valores superiores al 2%').",
+      "notes": "The 2019 affiliation share is a disclosed lower bound: only above-2% affiliation categories are printed, so unprinted below-2% categories are omitted and no unprinted value is derived."
+    },
+    {
+      "source_dataset_id": "mallimaci-esquivel-gimenez-beliveau-2020-sociedad-y-religion-30-55",
+      "name": "Mallimaci, Esquivel & Giménez Béliveau (2020), Sociedad y Religión 30(55): licence basis for the 2019 wave",
+      "provider": "CONICET; Sociedad y Religión (Sociología, Antropología e Historia de la Religión en el Cono Sur)",
+      "url": "https://www.redalyc.org/journal/3872/387266813004/",
+      "retrieval_date": "2026-07-12",
+      "local_path": null,
+      "licence": {
+        "name": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)",
+        "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+        "attribution": "Mallimaci, F., Esquivel, J. C. & Giménez Béliveau, V. (2020), Sociedad y Religión 30(55), CONICET"
+      },
+      "citation": "Mallimaci, F., Esquivel, J. C., & Giménez Béliveau, V. (2020). Religiones y creencias en Argentina (2008-2019). Resultados de la Segunda Encuesta Nacional de Creencias y actitudes religiosas en Argentina. Sociedad y Religión, 30(55).",
+      "access_limits": "Open access (redalyc).",
+      "redistribution_limits": "CC BY-NC-SA 4.0: reuse with attribution, non-commercial, share-alike. Verbatim: 'Esta obra está bajo una Licencia Creative Commons Atribución-NoComercial-CompartirIgual 4.0 Internacional'.",
+      "notes": "The article carries a 2019 regional table whose Católica/Evangélica columns diverge from the Informe nº 25 chart (see the manifest discrepancy note); the Informe chart is the source of record for the shipped figures."
+    },
+    {
+      "source_dataset_id": "codab-arg-adm2-unhcr2017",
+      "name": "COD-AB Argentina ADM2 (UNHCR 2017; Instituto Geográfico Nacional source), 526 departments/partidos",
+      "provider": "UNHCR / OCHA ROLAC; Instituto Geográfico Nacional (IGN), Argentina",
+      "url": "https://data.humdata.org/dataset/c661e398-66cf-4a9f-9607-4962c72d1ccf/resource/9f3b2c43-ad1c-406a-85dd-d387c5e3ffb3/download/arg_adm_unhcr2017_shp.zip",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/ar_survey/arg_adm_unhcr2017_shp.zip",
+      "licence": {
+        "name": "Creative Commons Attribution for Intergovernmental Organisations (CC BY-IGO)",
+        "url": "https://data.humdata.org/dataset/cod-ab-arg",
+        "attribution": "OCHA / UNHCR COD-AB Argentina (2017); source Instituto Geográfico Nacional"
+      },
+      "citation": "OCHA/UNHCR (2017). Argentina - Subnational Administrative Boundaries (COD-AB), ADM2. Source: Instituto Geográfico Nacional.",
+      "access_limits": "Open on the Humanitarian Data Exchange.",
+      "redistribution_limits": "CC BY-IGO permits redistribution and derivatives with attribution.",
+      "notes": "Chosen over geoBoundaries ARG ADM2: geoBoundaries carries only shapeName (department) with no province field, and Argentine department names repeat across provinces, so a province-based dissolve is ambiguous. COD-AB carries ADM1_ES (province) + ADM2_ES (department) + INDEC ADM2_PCODE, which makes the six-region dissolve and the AMBA/Centro split of Buenos Aires province unambiguous."
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_id": "religious_affiliation_percent",
+      "label": "Religious affiliation (%) — survey",
+      "description": "Share of survey respondents reporting a religious affiliation. 2008: Católica + Evangélica + Testigos de Jehová/Mormones + Otras. 2019: a disclosed lower bound (printed above-2% affiliation categories only).",
+      "unit": "percent",
+      "denominator_indicator_id": null,
+      "method": "2008: sum of the four printed affiliation-category shares (all categories printed; column sums to 100 within the derived 0.25 pp one-decimal bound). 2019: sum of the PRINTED affiliation categories only (Católica + Evangélica + any printed Testigos de Jehová/Mormones), a disclosed lower bound because the chart prints only values above 2% and below-2% categories are omitted; no unprinted value is derived.",
+      "temporal_coverage": "2008, 2019 (each wave a separate cross-section; no cross-wave change)",
+      "spatial_coverage": "Six standard Argentine macro-regions on a custom COD-AB ADM2 dissolve (AMBA = CABA + 24 GBA partidos; Centro takes the rest of Buenos Aires province; the other four regions are whole-province groupings).",
+      "quality_notes": "Survey construct (CEIL-CONICET), its own dataNoun, never blended with census affiliation. Per-region estimates rest on subsamples of roughly 400 and carry a larger unpublished margin than the national +/- 2% at 95%."
+    },
+    {
+      "indicator_id": "no_religion_percent",
+      "label": "No religion (%) — survey",
+      "description": "2008: Indiferentes (agnostics, atheists and no-affiliation combined). 2019: printed Sin religión.",
+      "unit": "percent",
+      "denominator_indicator_id": null,
+      "method": "2008: the printed Indiferentes share, carried unchanged. 2019: the printed Sin religión share, carried unchanged.",
+      "temporal_coverage": "2008, 2019",
+      "spatial_coverage": "Six standard Argentine macro-regions on a custom COD-AB ADM2 dissolve (AMBA = CABA + 24 GBA partidos; Centro takes the rest of Buenos Aires province; the other four regions are whole-province groupings).",
+      "quality_notes": "The frames differ across waves: Indiferentes: Agnósticos, Ateos y Ninguna Religión de Pertenencia. The 2019 wave replaces Indiferentes with an explicit Sin religión slot plus a separate No sabe slot; no cross-wave change is shipped."
+    }
+  ],
+  "visual_layers": [
+    {
+      "visual_layer_id": "ar-macroregion-religious-affiliation-share-survey",
+      "label": "Religious affiliation share (survey)",
+      "description": "Survey religious affiliation share by macro-region, 2008 and 2019 (2019 a disclosed lower bound).",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "religious_affiliation_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "survey respondents (published one-decimal shares)"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "published regional survey value on the macro-region dissolve",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": true,
+      "notes": "Two waves, each a separate cross-section; no cross-wave change layer (2008 Indiferentes vs 2019 Sin religión, and the 2019 affiliation is a printed-only lower bound)."
+    },
+    {
+      "visual_layer_id": "ar-macroregion-no-religion-share-survey",
+      "label": "No religion share (survey)",
+      "description": "Survey no-religion share by macro-region: 2008 Indiferentes, 2019 Sin religión.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "no_religion_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "survey respondents (published one-decimal shares)"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "published regional survey value on the macro-region dissolve",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "2008 Indiferentes and 2019 Sin religión are non-identical constructs; each wave is shown as its own cross-section."
+    }
+  ],
+  "rows": [
+    {
+      "country_code": "AR",
+      "boundary_set_id": "ar-macroregion-codab-adm2-dissolve",
+      "boundary_level": "macro_region",
+      "area_unit_id": "ar-macroregion-codab-adm2-dissolve:amba",
+      "area_code": "amba",
+      "area_name": "AMBA",
+      "year": 2008,
+      "population_total": null,
+      "religious_affiliation_count": null,
+      "no_religion_count": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 3978.7269,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "population_total_basis": "CEIL-CONICET Primera Encuesta 2008, region table (Base: 2403 casos, national); survey estimate as one-decimal percentages, no counts published. Region subsample roughly 400; larger unpublished margin than the national +/- 2% at 95%.",
+      "religious_affiliation_percent": 81.9,
+      "no_religion_percent": 18,
+      "source_dataset_ids": [
+        "ceil-conicet-2008-primera-encuesta-region-table",
+        "codab-arg-adm2-unhcr2017"
+      ],
+      "quality_flag": "survey_construct_ceil_conicet_encuesta_creencias_y_actitudes_religiosas;own_datanoun_survey_never_blended_with_census_affiliation;percentages_only_no_counts_no_derivation_from_percent;region_frame_stable_across_waves_amba_centro_noa_nea_cuyo_patagonia;regional_estimates_from_subsamples_~400_uncertainty_larger_than_national_2pct_margin_at_95;change_withheld_2008_indiferentes_vs_2019_sin_religion_and_2019_affiliation_disclosed_lower_bound;boundary_codab_adm2_unhcr2017_custom_dissolve_cc_by_igo;amba_split_caba_plus_24_gba_partidos_indec;centro_takes_rest_of_buenos_aires_province;wave_2008_primera_encuesta_ceil_conicet_2403_casos_source_label_capital_y_gba=amba_sur=patagonia;affiliation=catolica+evangelica+testigos_mormones+otras;no_religion=indiferentes;indiferentes_defined_agnosticos_ateos_y_ninguna_religion_de_pertenencia;source_column_sums_to_99.9_within_derived_0.25pp_one_decimal_bound;licence_needs_review_2008_build_then_ask_ceil_conicet_attribution",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "percent": 69.1,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Indiferentes",
+          "percent": 18
+        },
+        {
+          "label_verbatim": "Evangélica",
+          "percent": 9.1,
+          "taxonomy_code": "christian.evangelical"
+        },
+        {
+          "label_verbatim": "Testigos de Jehová / Mormones",
+          "percent": 1.4
+        },
+        {
+          "label_verbatim": "Otras",
+          "percent": 2.3
+        }
+      ]
+    },
+    {
+      "country_code": "AR",
+      "boundary_set_id": "ar-macroregion-codab-adm2-dissolve",
+      "boundary_level": "macro_region",
+      "area_unit_id": "ar-macroregion-codab-adm2-dissolve:centro",
+      "area_code": "centro",
+      "area_name": "Centro",
+      "year": 2008,
+      "population_total": null,
+      "religious_affiliation_count": null,
+      "no_religion_count": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 822122.4627,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "population_total_basis": "CEIL-CONICET Primera Encuesta 2008, region table (Base: 2403 casos, national); survey estimate as one-decimal percentages, no counts published. Region subsample roughly 400; larger unpublished margin than the national +/- 2% at 95%.",
+      "religious_affiliation_percent": 90.6,
+      "no_religion_percent": 9.4,
+      "source_dataset_ids": [
+        "ceil-conicet-2008-primera-encuesta-region-table",
+        "codab-arg-adm2-unhcr2017"
+      ],
+      "quality_flag": "survey_construct_ceil_conicet_encuesta_creencias_y_actitudes_religiosas;own_datanoun_survey_never_blended_with_census_affiliation;percentages_only_no_counts_no_derivation_from_percent;region_frame_stable_across_waves_amba_centro_noa_nea_cuyo_patagonia;regional_estimates_from_subsamples_~400_uncertainty_larger_than_national_2pct_margin_at_95;change_withheld_2008_indiferentes_vs_2019_sin_religion_and_2019_affiliation_disclosed_lower_bound;boundary_codab_adm2_unhcr2017_custom_dissolve_cc_by_igo;amba_split_caba_plus_24_gba_partidos_indec;centro_takes_rest_of_buenos_aires_province;wave_2008_primera_encuesta_ceil_conicet_2403_casos_source_label_capital_y_gba=amba_sur=patagonia;affiliation=catolica+evangelica+testigos_mormones+otras;no_religion=indiferentes;indiferentes_defined_agnosticos_ateos_y_ninguna_religion_de_pertenencia;licence_needs_review_2008_build_then_ask_ceil_conicet_attribution",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "percent": 79.2,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Indiferentes",
+          "percent": 9.4
+        },
+        {
+          "label_verbatim": "Evangélica",
+          "percent": 8.3,
+          "taxonomy_code": "christian.evangelical"
+        },
+        {
+          "label_verbatim": "Testigos de Jehová / Mormones",
+          "percent": 2.7
+        },
+        {
+          "label_verbatim": "Otras",
+          "percent": 0.4
+        }
+      ]
+    },
+    {
+      "country_code": "AR",
+      "boundary_set_id": "ar-macroregion-codab-adm2-dissolve",
+      "boundary_level": "macro_region",
+      "area_unit_id": "ar-macroregion-codab-adm2-dissolve:noa",
+      "area_code": "noa",
+      "area_name": "NOA",
+      "year": 2008,
+      "population_total": null,
+      "religious_affiliation_count": null,
+      "no_religion_count": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 562092.6783,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "population_total_basis": "CEIL-CONICET Primera Encuesta 2008, region table (Base: 2403 casos, national); survey estimate as one-decimal percentages, no counts published. Region subsample roughly 400; larger unpublished margin than the national +/- 2% at 95%.",
+      "religious_affiliation_percent": 98.2,
+      "no_religion_percent": 1.8,
+      "source_dataset_ids": [
+        "ceil-conicet-2008-primera-encuesta-region-table",
+        "codab-arg-adm2-unhcr2017"
+      ],
+      "quality_flag": "survey_construct_ceil_conicet_encuesta_creencias_y_actitudes_religiosas;own_datanoun_survey_never_blended_with_census_affiliation;percentages_only_no_counts_no_derivation_from_percent;region_frame_stable_across_waves_amba_centro_noa_nea_cuyo_patagonia;regional_estimates_from_subsamples_~400_uncertainty_larger_than_national_2pct_margin_at_95;change_withheld_2008_indiferentes_vs_2019_sin_religion_and_2019_affiliation_disclosed_lower_bound;boundary_codab_adm2_unhcr2017_custom_dissolve_cc_by_igo;amba_split_caba_plus_24_gba_partidos_indec;centro_takes_rest_of_buenos_aires_province;wave_2008_primera_encuesta_ceil_conicet_2403_casos_source_label_capital_y_gba=amba_sur=patagonia;affiliation=catolica+evangelica+testigos_mormones+otras;no_religion=indiferentes;indiferentes_defined_agnosticos_ateos_y_ninguna_religion_de_pertenencia;licence_needs_review_2008_build_then_ask_ceil_conicet_attribution",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "percent": 91.7,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Indiferentes",
+          "percent": 1.8
+        },
+        {
+          "label_verbatim": "Evangélica",
+          "percent": 3.7,
+          "taxonomy_code": "christian.evangelical"
+        },
+        {
+          "label_verbatim": "Testigos de Jehová / Mormones",
+          "percent": 2.1
+        },
+        {
+          "label_verbatim": "Otras",
+          "percent": 0.7
+        }
+      ]
+    },
+    {
+      "country_code": "AR",
+      "boundary_set_id": "ar-macroregion-codab-adm2-dissolve",
+      "boundary_level": "macro_region",
+      "area_unit_id": "ar-macroregion-codab-adm2-dissolve:nea",
+      "area_code": "nea",
+      "area_name": "NEA",
+      "year": 2008,
+      "population_total": null,
+      "religious_affiliation_count": null,
+      "no_religion_count": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 294806.8806,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "population_total_basis": "CEIL-CONICET Primera Encuesta 2008, region table (Base: 2403 casos, national); survey estimate as one-decimal percentages, no counts published. Region subsample roughly 400; larger unpublished margin than the national +/- 2% at 95%.",
+      "religious_affiliation_percent": 96.7,
+      "no_religion_percent": 3.2,
+      "source_dataset_ids": [
+        "ceil-conicet-2008-primera-encuesta-region-table",
+        "codab-arg-adm2-unhcr2017"
+      ],
+      "quality_flag": "survey_construct_ceil_conicet_encuesta_creencias_y_actitudes_religiosas;own_datanoun_survey_never_blended_with_census_affiliation;percentages_only_no_counts_no_derivation_from_percent;region_frame_stable_across_waves_amba_centro_noa_nea_cuyo_patagonia;regional_estimates_from_subsamples_~400_uncertainty_larger_than_national_2pct_margin_at_95;change_withheld_2008_indiferentes_vs_2019_sin_religion_and_2019_affiliation_disclosed_lower_bound;boundary_codab_adm2_unhcr2017_custom_dissolve_cc_by_igo;amba_split_caba_plus_24_gba_partidos_indec;centro_takes_rest_of_buenos_aires_province;wave_2008_primera_encuesta_ceil_conicet_2403_casos_source_label_capital_y_gba=amba_sur=patagonia;affiliation=catolica+evangelica+testigos_mormones+otras;no_religion=indiferentes;indiferentes_defined_agnosticos_ateos_y_ninguna_religion_de_pertenencia;source_column_sums_to_99.9_within_derived_0.25pp_one_decimal_bound;licence_needs_review_2008_build_then_ask_ceil_conicet_attribution",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "percent": 84,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Indiferentes",
+          "percent": 3.2
+        },
+        {
+          "label_verbatim": "Evangélica",
+          "percent": 11.8,
+          "taxonomy_code": "christian.evangelical"
+        },
+        {
+          "label_verbatim": "Testigos de Jehová / Mormones",
+          "percent": 0.8
+        },
+        {
+          "label_verbatim": "Otras",
+          "percent": 0.1
+        }
+      ]
+    },
+    {
+      "country_code": "AR",
+      "boundary_set_id": "ar-macroregion-codab-adm2-dissolve",
+      "boundary_level": "macro_region",
+      "area_unit_id": "ar-macroregion-codab-adm2-dissolve:cuyo",
+      "area_code": "cuyo",
+      "area_name": "Cuyo",
+      "year": 2008,
+      "population_total": null,
+      "religious_affiliation_count": null,
+      "no_religion_count": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 312852.7179,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "population_total_basis": "CEIL-CONICET Primera Encuesta 2008, region table (Base: 2403 casos, national); survey estimate as one-decimal percentages, no counts published. Region subsample roughly 400; larger unpublished margin than the national +/- 2% at 95%.",
+      "religious_affiliation_percent": 94.8,
+      "no_religion_percent": 5.3,
+      "source_dataset_ids": [
+        "ceil-conicet-2008-primera-encuesta-region-table",
+        "codab-arg-adm2-unhcr2017"
+      ],
+      "quality_flag": "survey_construct_ceil_conicet_encuesta_creencias_y_actitudes_religiosas;own_datanoun_survey_never_blended_with_census_affiliation;percentages_only_no_counts_no_derivation_from_percent;region_frame_stable_across_waves_amba_centro_noa_nea_cuyo_patagonia;regional_estimates_from_subsamples_~400_uncertainty_larger_than_national_2pct_margin_at_95;change_withheld_2008_indiferentes_vs_2019_sin_religion_and_2019_affiliation_disclosed_lower_bound;boundary_codab_adm2_unhcr2017_custom_dissolve_cc_by_igo;amba_split_caba_plus_24_gba_partidos_indec;centro_takes_rest_of_buenos_aires_province;wave_2008_primera_encuesta_ceil_conicet_2403_casos_source_label_capital_y_gba=amba_sur=patagonia;affiliation=catolica+evangelica+testigos_mormones+otras;no_religion=indiferentes;indiferentes_defined_agnosticos_ateos_y_ninguna_religion_de_pertenencia;source_column_sums_to_100.1_within_derived_0.25pp_one_decimal_bound;licence_needs_review_2008_build_then_ask_ceil_conicet_attribution",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "percent": 82.6,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Indiferentes",
+          "percent": 5.3
+        },
+        {
+          "label_verbatim": "Evangélica",
+          "percent": 10,
+          "taxonomy_code": "christian.evangelical"
+        },
+        {
+          "label_verbatim": "Testigos de Jehová / Mormones",
+          "percent": 1.8
+        },
+        {
+          "label_verbatim": "Otras",
+          "percent": 0.4
+        }
+      ]
+    },
+    {
+      "country_code": "AR",
+      "boundary_set_id": "ar-macroregion-codab-adm2-dissolve",
+      "boundary_level": "macro_region",
+      "area_unit_id": "ar-macroregion-codab-adm2-dissolve:patagonia",
+      "area_code": "patagonia",
+      "area_name": "Patagonia",
+      "year": 2008,
+      "population_total": null,
+      "religious_affiliation_count": null,
+      "no_religion_count": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 784470.4465,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "population_total_basis": "CEIL-CONICET Primera Encuesta 2008, region table (Base: 2403 casos, national); survey estimate as one-decimal percentages, no counts published. Region subsample roughly 400; larger unpublished margin than the national +/- 2% at 95%.",
+      "religious_affiliation_percent": 88.3,
+      "no_religion_percent": 11.7,
+      "source_dataset_ids": [
+        "ceil-conicet-2008-primera-encuesta-region-table",
+        "codab-arg-adm2-unhcr2017"
+      ],
+      "quality_flag": "survey_construct_ceil_conicet_encuesta_creencias_y_actitudes_religiosas;own_datanoun_survey_never_blended_with_census_affiliation;percentages_only_no_counts_no_derivation_from_percent;region_frame_stable_across_waves_amba_centro_noa_nea_cuyo_patagonia;regional_estimates_from_subsamples_~400_uncertainty_larger_than_national_2pct_margin_at_95;change_withheld_2008_indiferentes_vs_2019_sin_religion_and_2019_affiliation_disclosed_lower_bound;boundary_codab_adm2_unhcr2017_custom_dissolve_cc_by_igo;amba_split_caba_plus_24_gba_partidos_indec;centro_takes_rest_of_buenos_aires_province;wave_2008_primera_encuesta_ceil_conicet_2403_casos_source_label_capital_y_gba=amba_sur=patagonia;affiliation=catolica+evangelica+testigos_mormones+otras;no_religion=indiferentes;indiferentes_defined_agnosticos_ateos_y_ninguna_religion_de_pertenencia;licence_needs_review_2008_build_then_ask_ceil_conicet_attribution",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "percent": 61.5,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Indiferentes",
+          "percent": 11.7
+        },
+        {
+          "label_verbatim": "Evangélica",
+          "percent": 21.6,
+          "taxonomy_code": "christian.evangelical"
+        },
+        {
+          "label_verbatim": "Testigos de Jehová / Mormones",
+          "percent": 3.7
+        },
+        {
+          "label_verbatim": "Otras",
+          "percent": 1.5
+        }
+      ]
+    },
+    {
+      "country_code": "AR",
+      "boundary_set_id": "ar-macroregion-codab-adm2-dissolve",
+      "boundary_level": "macro_region",
+      "area_unit_id": "ar-macroregion-codab-adm2-dissolve:amba",
+      "area_code": "amba",
+      "area_name": "AMBA",
+      "year": 2019,
+      "population_total": null,
+      "religious_affiliation_count": null,
+      "no_religion_count": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 3978.7269,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "population_total_basis": "CEIL-CONICET Segunda Encuesta 2019 (Informe nº 25), region chart (Base: 2421 casos, national); survey estimate as one-decimal percentages, no counts published. Universe 18+ in urban localities of at least 5,000 inhabitants. Region subsample roughly 400; larger unpublished margin than the national +/- 2% at 95%.",
+      "religious_affiliation_percent": 71.4,
+      "no_religion_percent": 26.2,
+      "source_dataset_ids": [
+        "ceil-conicet-2019-informe25-adscripcion-region",
+        "mallimaci-esquivel-gimenez-beliveau-2020-sociedad-y-religion-30-55",
+        "codab-arg-adm2-unhcr2017"
+      ],
+      "quality_flag": "survey_construct_ceil_conicet_encuesta_creencias_y_actitudes_religiosas;own_datanoun_survey_never_blended_with_census_affiliation;percentages_only_no_counts_no_derivation_from_percent;region_frame_stable_across_waves_amba_centro_noa_nea_cuyo_patagonia;regional_estimates_from_subsamples_~400_uncertainty_larger_than_national_2pct_margin_at_95;change_withheld_2008_indiferentes_vs_2019_sin_religion_and_2019_affiliation_disclosed_lower_bound;boundary_codab_adm2_unhcr2017_custom_dissolve_cc_by_igo;amba_split_caba_plus_24_gba_partidos_indec;centro_takes_rest_of_buenos_aires_province;wave_2019_segunda_encuesta_informe_25_source_of_record_2421_casos;chart_prints_only_values_above_2pct_Se_consignan_en_el_gráfico_valores_superiores_al_2%;affiliation_is_disclosed_lower_bound_printed_above_2pct_affiliation_categories_only_below_2pct_omitted;affiliation=catolica+evangelica+printed_testigos_mormones;no_religion=sin_religion;printed_values_sum_to_97.6_do_not_sum_to_100_below_2pct_categories_omitted;licence_cc_by_nc_sa_4_0_via_mallimaci_esquivel_gimenez_beliveau_2020_noncommercial_pi_ruling_pending",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "percent": 56.4,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Sin religión",
+          "percent": 26.2
+        },
+        {
+          "label_verbatim": "Evangélica",
+          "percent": 15,
+          "taxonomy_code": "christian.evangelical"
+        }
+      ]
+    },
+    {
+      "country_code": "AR",
+      "boundary_set_id": "ar-macroregion-codab-adm2-dissolve",
+      "boundary_level": "macro_region",
+      "area_unit_id": "ar-macroregion-codab-adm2-dissolve:centro",
+      "area_code": "centro",
+      "area_name": "Centro",
+      "year": 2019,
+      "population_total": null,
+      "religious_affiliation_count": null,
+      "no_religion_count": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 822122.4627,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "population_total_basis": "CEIL-CONICET Segunda Encuesta 2019 (Informe nº 25), region chart (Base: 2421 casos, national); survey estimate as one-decimal percentages, no counts published. Universe 18+ in urban localities of at least 5,000 inhabitants. Region subsample roughly 400; larger unpublished margin than the national +/- 2% at 95%.",
+      "religious_affiliation_percent": 79.5,
+      "no_religion_percent": 18.6,
+      "source_dataset_ids": [
+        "ceil-conicet-2019-informe25-adscripcion-region",
+        "mallimaci-esquivel-gimenez-beliveau-2020-sociedad-y-religion-30-55",
+        "codab-arg-adm2-unhcr2017"
+      ],
+      "quality_flag": "survey_construct_ceil_conicet_encuesta_creencias_y_actitudes_religiosas;own_datanoun_survey_never_blended_with_census_affiliation;percentages_only_no_counts_no_derivation_from_percent;region_frame_stable_across_waves_amba_centro_noa_nea_cuyo_patagonia;regional_estimates_from_subsamples_~400_uncertainty_larger_than_national_2pct_margin_at_95;change_withheld_2008_indiferentes_vs_2019_sin_religion_and_2019_affiliation_disclosed_lower_bound;boundary_codab_adm2_unhcr2017_custom_dissolve_cc_by_igo;amba_split_caba_plus_24_gba_partidos_indec;centro_takes_rest_of_buenos_aires_province;wave_2019_segunda_encuesta_informe_25_source_of_record_2421_casos;chart_prints_only_values_above_2pct_Se_consignan_en_el_gráfico_valores_superiores_al_2%;affiliation_is_disclosed_lower_bound_printed_above_2pct_affiliation_categories_only_below_2pct_omitted;affiliation=catolica+evangelica+printed_testigos_mormones;printed_testigos_mormones_minor_2.5;no_religion=sin_religion;printed_values_sum_to_98.1_do_not_sum_to_100_below_2pct_categories_omitted;licence_cc_by_nc_sa_4_0_via_mallimaci_esquivel_gimenez_beliveau_2020_noncommercial_pi_ruling_pending",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "percent": 65.7,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Sin religión",
+          "percent": 18.6
+        },
+        {
+          "label_verbatim": "Evangélica",
+          "percent": 11.3,
+          "taxonomy_code": "christian.evangelical"
+        },
+        {
+          "label_verbatim": "Testigos de Jehová/Mormones",
+          "percent": 2.5
+        }
+      ]
+    },
+    {
+      "country_code": "AR",
+      "boundary_set_id": "ar-macroregion-codab-adm2-dissolve",
+      "boundary_level": "macro_region",
+      "area_unit_id": "ar-macroregion-codab-adm2-dissolve:noa",
+      "area_code": "noa",
+      "area_name": "NOA",
+      "year": 2019,
+      "population_total": null,
+      "religious_affiliation_count": null,
+      "no_religion_count": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 562092.6783,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "population_total_basis": "CEIL-CONICET Segunda Encuesta 2019 (Informe nº 25), region chart (Base: 2421 casos, national); survey estimate as one-decimal percentages, no counts published. Universe 18+ in urban localities of at least 5,000 inhabitants. Region subsample roughly 400; larger unpublished margin than the national +/- 2% at 95%.",
+      "religious_affiliation_percent": 92.7,
+      "no_religion_percent": 5,
+      "source_dataset_ids": [
+        "ceil-conicet-2019-informe25-adscripcion-region",
+        "mallimaci-esquivel-gimenez-beliveau-2020-sociedad-y-religion-30-55",
+        "codab-arg-adm2-unhcr2017"
+      ],
+      "quality_flag": "survey_construct_ceil_conicet_encuesta_creencias_y_actitudes_religiosas;own_datanoun_survey_never_blended_with_census_affiliation;percentages_only_no_counts_no_derivation_from_percent;region_frame_stable_across_waves_amba_centro_noa_nea_cuyo_patagonia;regional_estimates_from_subsamples_~400_uncertainty_larger_than_national_2pct_margin_at_95;change_withheld_2008_indiferentes_vs_2019_sin_religion_and_2019_affiliation_disclosed_lower_bound;boundary_codab_adm2_unhcr2017_custom_dissolve_cc_by_igo;amba_split_caba_plus_24_gba_partidos_indec;centro_takes_rest_of_buenos_aires_province;wave_2019_segunda_encuesta_informe_25_source_of_record_2421_casos;chart_prints_only_values_above_2pct_Se_consignan_en_el_gráfico_valores_superiores_al_2%;affiliation_is_disclosed_lower_bound_printed_above_2pct_affiliation_categories_only_below_2pct_omitted;affiliation=catolica+evangelica+printed_testigos_mormones;no_religion=sin_religion;printed_values_sum_to_97.7_do_not_sum_to_100_below_2pct_categories_omitted;licence_cc_by_nc_sa_4_0_via_mallimaci_esquivel_gimenez_beliveau_2020_noncommercial_pi_ruling_pending",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "percent": 76,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Sin religión",
+          "percent": 5
+        },
+        {
+          "label_verbatim": "Evangélica",
+          "percent": 16.7,
+          "taxonomy_code": "christian.evangelical"
+        }
+      ]
+    },
+    {
+      "country_code": "AR",
+      "boundary_set_id": "ar-macroregion-codab-adm2-dissolve",
+      "boundary_level": "macro_region",
+      "area_unit_id": "ar-macroregion-codab-adm2-dissolve:nea",
+      "area_code": "nea",
+      "area_name": "NEA",
+      "year": 2019,
+      "population_total": null,
+      "religious_affiliation_count": null,
+      "no_religion_count": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 294806.8806,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "population_total_basis": "CEIL-CONICET Segunda Encuesta 2019 (Informe nº 25), region chart (Base: 2421 casos, national); survey estimate as one-decimal percentages, no counts published. Universe 18+ in urban localities of at least 5,000 inhabitants. Region subsample roughly 400; larger unpublished margin than the national +/- 2% at 95%.",
+      "religious_affiliation_percent": 90.5,
+      "no_religion_percent": 7,
+      "source_dataset_ids": [
+        "ceil-conicet-2019-informe25-adscripcion-region",
+        "mallimaci-esquivel-gimenez-beliveau-2020-sociedad-y-religion-30-55",
+        "codab-arg-adm2-unhcr2017"
+      ],
+      "quality_flag": "survey_construct_ceil_conicet_encuesta_creencias_y_actitudes_religiosas;own_datanoun_survey_never_blended_with_census_affiliation;percentages_only_no_counts_no_derivation_from_percent;region_frame_stable_across_waves_amba_centro_noa_nea_cuyo_patagonia;regional_estimates_from_subsamples_~400_uncertainty_larger_than_national_2pct_margin_at_95;change_withheld_2008_indiferentes_vs_2019_sin_religion_and_2019_affiliation_disclosed_lower_bound;boundary_codab_adm2_unhcr2017_custom_dissolve_cc_by_igo;amba_split_caba_plus_24_gba_partidos_indec;centro_takes_rest_of_buenos_aires_province;wave_2019_segunda_encuesta_informe_25_source_of_record_2421_casos;chart_prints_only_values_above_2pct_Se_consignan_en_el_gráfico_valores_superiores_al_2%;affiliation_is_disclosed_lower_bound_printed_above_2pct_affiliation_categories_only_below_2pct_omitted;affiliation=catolica+evangelica+printed_testigos_mormones;no_religion=sin_religion;printed_values_sum_to_97.5_do_not_sum_to_100_below_2pct_categories_omitted;licence_cc_by_nc_sa_4_0_via_mallimaci_esquivel_gimenez_beliveau_2020_noncommercial_pi_ruling_pending",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "percent": 67.4,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Sin religión",
+          "percent": 7
+        },
+        {
+          "label_verbatim": "Evangélica",
+          "percent": 23.1,
+          "taxonomy_code": "christian.evangelical"
+        }
+      ]
+    },
+    {
+      "country_code": "AR",
+      "boundary_set_id": "ar-macroregion-codab-adm2-dissolve",
+      "boundary_level": "macro_region",
+      "area_unit_id": "ar-macroregion-codab-adm2-dissolve:cuyo",
+      "area_code": "cuyo",
+      "area_name": "Cuyo",
+      "year": 2019,
+      "population_total": null,
+      "religious_affiliation_count": null,
+      "no_religion_count": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 312852.7179,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "population_total_basis": "CEIL-CONICET Segunda Encuesta 2019 (Informe nº 25), region chart (Base: 2421 casos, national); survey estimate as one-decimal percentages, no counts published. Universe 18+ in urban localities of at least 5,000 inhabitants. Region subsample roughly 400; larger unpublished margin than the national +/- 2% at 95%.",
+      "religious_affiliation_percent": 86.7,
+      "no_religion_percent": 13.2,
+      "source_dataset_ids": [
+        "ceil-conicet-2019-informe25-adscripcion-region",
+        "mallimaci-esquivel-gimenez-beliveau-2020-sociedad-y-religion-30-55",
+        "codab-arg-adm2-unhcr2017"
+      ],
+      "quality_flag": "survey_construct_ceil_conicet_encuesta_creencias_y_actitudes_religiosas;own_datanoun_survey_never_blended_with_census_affiliation;percentages_only_no_counts_no_derivation_from_percent;region_frame_stable_across_waves_amba_centro_noa_nea_cuyo_patagonia;regional_estimates_from_subsamples_~400_uncertainty_larger_than_national_2pct_margin_at_95;change_withheld_2008_indiferentes_vs_2019_sin_religion_and_2019_affiliation_disclosed_lower_bound;boundary_codab_adm2_unhcr2017_custom_dissolve_cc_by_igo;amba_split_caba_plus_24_gba_partidos_indec;centro_takes_rest_of_buenos_aires_province;wave_2019_segunda_encuesta_informe_25_source_of_record_2421_casos;chart_prints_only_values_above_2pct_Se_consignan_en_el_gráfico_valores_superiores_al_2%;affiliation_is_disclosed_lower_bound_printed_above_2pct_affiliation_categories_only_below_2pct_omitted;affiliation=catolica+evangelica+printed_testigos_mormones;printed_testigos_mormones_minor_2.6;no_religion=sin_religion;printed_values_sum_to_99.9_do_not_sum_to_100_below_2pct_categories_omitted;licence_cc_by_nc_sa_4_0_via_mallimaci_esquivel_gimenez_beliveau_2020_noncommercial_pi_ruling_pending",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "percent": 69.6,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Sin religión",
+          "percent": 13.2
+        },
+        {
+          "label_verbatim": "Evangélica",
+          "percent": 14.5,
+          "taxonomy_code": "christian.evangelical"
+        },
+        {
+          "label_verbatim": "Testigos de Jehová/Mormones",
+          "percent": 2.6
+        }
+      ]
+    },
+    {
+      "country_code": "AR",
+      "boundary_set_id": "ar-macroregion-codab-adm2-dissolve",
+      "boundary_level": "macro_region",
+      "area_unit_id": "ar-macroregion-codab-adm2-dissolve:patagonia",
+      "area_code": "patagonia",
+      "area_name": "Patagonia",
+      "year": 2019,
+      "population_total": null,
+      "religious_affiliation_count": null,
+      "no_religion_count": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 784470.4465,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "population_total_basis": "CEIL-CONICET Segunda Encuesta 2019 (Informe nº 25), region chart (Base: 2421 casos, national); survey estimate as one-decimal percentages, no counts published. Universe 18+ in urban localities of at least 5,000 inhabitants. Region subsample roughly 400; larger unpublished margin than the national +/- 2% at 95%.",
+      "religious_affiliation_percent": 75.4,
+      "no_religion_percent": 24.3,
+      "source_dataset_ids": [
+        "ceil-conicet-2019-informe25-adscripcion-region",
+        "mallimaci-esquivel-gimenez-beliveau-2020-sociedad-y-religion-30-55",
+        "codab-arg-adm2-unhcr2017"
+      ],
+      "quality_flag": "survey_construct_ceil_conicet_encuesta_creencias_y_actitudes_religiosas;own_datanoun_survey_never_blended_with_census_affiliation;percentages_only_no_counts_no_derivation_from_percent;region_frame_stable_across_waves_amba_centro_noa_nea_cuyo_patagonia;regional_estimates_from_subsamples_~400_uncertainty_larger_than_national_2pct_margin_at_95;change_withheld_2008_indiferentes_vs_2019_sin_religion_and_2019_affiliation_disclosed_lower_bound;boundary_codab_adm2_unhcr2017_custom_dissolve_cc_by_igo;amba_split_caba_plus_24_gba_partidos_indec;centro_takes_rest_of_buenos_aires_province;wave_2019_segunda_encuesta_informe_25_source_of_record_2421_casos;chart_prints_only_values_above_2pct_Se_consignan_en_el_gráfico_valores_superiores_al_2%;affiliation_is_disclosed_lower_bound_printed_above_2pct_affiliation_categories_only_below_2pct_omitted;affiliation=catolica+evangelica+printed_testigos_mormones;no_religion=sin_religion;printed_values_sum_to_99.7_do_not_sum_to_100_below_2pct_categories_omitted;licence_cc_by_nc_sa_4_0_via_mallimaci_esquivel_gimenez_beliveau_2020_noncommercial_pi_ruling_pending",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "percent": 51,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Sin religión",
+          "percent": 24.3
+        },
+        {
+          "label_verbatim": "Evangélica",
+          "percent": 24.4,
+          "taxonomy_code": "christian.evangelical"
+        }
+      ]
+    }
+  ]
+}
