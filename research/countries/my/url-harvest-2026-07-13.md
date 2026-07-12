@@ -191,3 +191,26 @@ The full table below lists every harvested file, sorted by state then district.
 | Terengganu | Kuala Terengganu | `kuala_terengganu.pdf` | <https://www.dosm.gov.my/uploads/publications/20221018134907.pdf> | `30896a6cadae8958eb710f71bd6a0b5c964277d8d10f6b0d6f0b76bb1351cf12` | 2,424,732 |
 | Terengganu | Marang | `marang.pdf` | <https://www.dosm.gov.my/uploads/publications/20221012102433.pdf> | `cc290b43cee6570b2d5fa7535b44a01d871e86a8c1cf78995730e6e57ef981f7` | 2,408,831 |
 | Terengganu | Setiu | `setiu.pdf` | <https://www.dosm.gov.my/uploads/publications/20221012101107.pdf> | `056b51c57cda7a7fecacf657dfe4823195e670188addd014e56596d3ba723a33` | 2,449,624 |
+
+## State-report follow-up, 2026-07-13
+
+The four units absent from the district-report series have 2020 census key-findings state reports in the same DOSM catalogue, under the series title "Key Findings Population and Housing Census of Malaysia 2020: State {Name}" (16 rows: 13 states and 3 federal territories). The same `publication-estatistik-log` endpoint serves each report's Penemuan Utama PDF chapter. All four downloaded cleanly to `data/raw/my_census/state_reports/`:
+
+| Unit | Local file | URL | sha256 | Bytes |
+|---|---|---|---|---|
+| Perlis | `perlis.pdf` | <https://www.dosm.gov.my/uploads/publications/20221013105823.pdf> | `b3b42d3d2d62e5eda43fade522de237dcc5bcac04bfda47c8051f70d4146b1eb` | 4,663,322 |
+| W.P. Kuala Lumpur | `wp_kuala_lumpur.pdf` | <https://www.dosm.gov.my/uploads/publications/20221018092119.pdf> | `12ffc12a8765dd4fc3850f219d47ebcfc1d56ee14ecd3312be29c9c7a521ee0a` | 3,638,675 |
+| W.P. Labuan | `wp_labuan.pdf` | <https://www.dosm.gov.my/uploads/publications/20221018092216.pdf> | `efd5a08ce878fb92676c6ff53c2c21d0cceff797b7ece8058c9337752d8d6f57` | 3,615,671 |
+| W.P. Putrajaya | `wp_putrajaya.pdf` | <https://www.dosm.gov.my/uploads/publications/20221014151146.pdf> | `80dcb749699dad9012889e300e97f3ef528c2eb011c6a116f7784623031d4179` | 3,563,493 |
+
+### Grain finding
+
+The state reports publish religion at the whole-unit grain, and for these four units the whole-unit grain equals the administrative-district grain, because each unit comprises exactly one district in the 160-district frame (Perlis is a single-district state; the three federal territories have no administrative subdivision). Table 2 of each state report prints the same six-category religion block as district-report Table 3 — Islam; Christianity; Buddhism; Hinduism; Others; No Religion/Unknown — across the census-year columns 1970–2020, so the 1991, 2000, 2010, and 2020 waves the build needs are all present, and the state reports additionally supply 1970 and 1980 values where available (W.P. Kuala Lumpur's 1970 column prints `..`). Table 7 adds the detailed 2020 religion-by-sex frame. **The build can therefore close the 160-district frame from these four files.**
+
+Spot verification on two of the four: Perlis Table 2 religion for 2020 (Islam 250,129; Christianity 1,670; Buddhism 26,199; Hinduism 3,619; Others 525; No Religion/Unknown 2,743) sums to exactly the printed 284,885, and W.P. Kuala Lumpur's 2020 rows (Islam 897,637; Christianity 127,695; Buddhism 639,619; Hinduism 162,926; Others 35,045; No Religion/Unknown 119,190) sum to exactly the printed 1,982,112.
+
+### Anomalies
+
+1. The federal-territory rows are titled "State Wilayah Persekutuan {Name}", never "W.P. {Name}"; keyword probes on the W.P. abbreviation return nothing, which is why the district-lane sweep reported them absent.
+2. The state-report Table numbering differs from the district reports: the six-category religion series sits in Table 2 (unit principal statistics by census year), not Table 3, and the detailed frame in Table 7 covers religion by sex rather than religion by district.
+3. No login, CAPTCHA, or rate-limiting was encountered; all four chapters served true PDFs at the first request.
