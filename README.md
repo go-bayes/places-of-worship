@@ -28,6 +28,8 @@ Building historical datasets fit for scientific inferences is remarkably difficu
 - [System map](docs/system-map.md)
 - [FAQ](FAQ.md)
 - [Lexicon](LEXICON.md)
+- [Religious change in the census-religion corpus](docs/religious-change-highlights.md)
+- [Using the census-religion data](docs/using-the-census-religion-data.md)
 
 
 ## Who reads what
