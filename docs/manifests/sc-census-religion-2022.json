@@ -174,14 +174,14 @@
       "https://data.humdata.org/api/3/action/package_show?id=cod-ab-syc"
     ],
     "retrieved_at": "2026-07-12T00:00:00Z",
-    "licence": "The Seychelles National Bureau of Statistics (NBS) Terms and Conditions (nbs.gov.sc/terms-and-conditions) state: 'You may reproduce short extracts from the content appearing on the site provided that the source is stated and prior written consent is obtained from the NBS' and 'All rights not expressly granted are reserved.' The website footer reads 'Copyright (c) 2026 National Bureau of Statistics Seychelles. All Rights Reserved.' Under the standing build-then-ask ruling the derived aggregate summaries ship staged with NBS attribution while a reuse confirmation is sought (courtesy ask to ceo@nbs.gov.sc, not sent). Licence status: needs_review. The boundary is the OCHA COD-AB, sourced from NBS, licensed CC BY-IGO (accepted).",
+    "licence": "The Seychelles National Bureau of Statistics (NBS) Terms and Conditions (nbs.gov.sc/terms-and-conditions) state: 'You may reproduce short extracts from the content appearing on the site provided that the source is stated and prior written consent is obtained from the NBS' and 'All rights not expressly granted are reserved.' The website footer reads 'Copyright (c) 2026 National Bureau of Statistics Seychelles. All Rights Reserved.' Under the standing build-then-ask ruling the derived aggregate summaries ship staged with NBS attribution while a reuse confirmation is sought (courtesy ask to ceo@nbs.gov.sc, not sent). Licence status: accepted under the PI's 2026-07-12 ruling (see below). The boundary is the OCHA COD-AB, sourced from NBS, licensed CC BY-IGO (accepted).",
     "citation": "NBS Population and Housing Census 2022 Table B4.1; OCHA COD-AB SYC ADM3 (source NBS).",
     "raw_redistribution": "The census PDF and the COD-AB shapefile zip are not committed; they remain in data/raw/sc_census/.",
     "local_cache_hint": "data/raw/sc_census/ (git-ignored by .gitignore data/ rule)",
     "raw_cache_durable_uris": [
       "gs://pow-research-data/raw_sources/sc_census/"
     ],
-    "licence_position": "needs_review: NBS all-rights-reserved with a prior-consent reproduction clause; derived summaries staged with attribution under build-then-ask. Boundary CC BY-IGO (accepted).",
+    "licence_position": "accepted (PI ruling 2026-07-12): the derived-summaries-with-attribution stance extends to NBS notwithstanding the prior-consent reproduction clause; the courtesy note stays with the PI. Boundary CC BY-IGO (accepted).",
     "licence_todo": "PI ruling to extend the derived-summaries-with-attribution stance to NBS (CI/MONSTAT/DCS line), or an NBS reuse confirmation (ceo@nbs.gov.sc)."
   },
   "input_manifests": [],
@@ -262,7 +262,7 @@
       "feature_count": null,
       "content": "Seychelles 27-district census-affiliation area summary for 2022.",
       "privacy": "public",
-      "licence_status": "needs_review",
+      "licence_status": "accepted",
       "licence_basis": "nbs_all_rights_reserved_prior_consent"
     },
     {
@@ -275,7 +275,7 @@
       "feature_count": null,
       "content": "Flattened Seychelles 27-district census-affiliation rows for 2022.",
       "privacy": "public",
-      "licence_status": "needs_review",
+      "licence_status": "accepted",
       "licence_basis": "nbs_all_rights_reserved_prior_consent"
     },
     {
@@ -600,7 +600,7 @@
     }
   ],
   "privacy": "public",
-  "licence_status": "needs_review",
+  "licence_status": "accepted",
   "licence_basis": "nbs_all_rights_reserved_prior_consent",
   "downstream_status": "staged",
   "source_datasets": [
@@ -612,7 +612,7 @@
       "retrieval_date": "2026-07-12",
       "local_path": "data/raw/sc_census/sc_2022_census_report.pdf",
       "licence": {
-        "name": "The Seychelles National Bureau of Statistics (NBS) Terms and Conditions (nbs.gov.sc/terms-and-conditions) state: 'You may reproduce short extracts from the content appearing on the site provided that the source is stated and prior written consent is obtained from the NBS' and 'All rights not expressly granted are reserved.' The website footer reads 'Copyright (c) 2026 National Bureau of Statistics Seychelles. All Rights Reserved.' Under the standing build-then-ask ruling the derived aggregate summaries ship staged with NBS attribution while a reuse confirmation is sought (courtesy ask to ceo@nbs.gov.sc, not sent). Licence status: needs_review. The boundary is the OCHA COD-AB, sourced from NBS, licensed CC BY-IGO (accepted).",
+        "name": "The Seychelles National Bureau of Statistics (NBS) Terms and Conditions (nbs.gov.sc/terms-and-conditions) state: 'You may reproduce short extracts from the content appearing on the site provided that the source is stated and prior written consent is obtained from the NBS' and 'All rights not expressly granted are reserved.' The website footer reads 'Copyright (c) 2026 National Bureau of Statistics Seychelles. All Rights Reserved.' Under the standing build-then-ask ruling the derived aggregate summaries ship staged with NBS attribution while a reuse confirmation is sought (courtesy ask to ceo@nbs.gov.sc, not sent). Licence status: accepted under the PI's 2026-07-12 ruling (see below). The boundary is the OCHA COD-AB, sourced from NBS, licensed CC BY-IGO (accepted).",
         "url": "https://www.nbs.gov.sc/terms-and-conditions",
         "attribution": "Source: Seychelles National Bureau of Statistics, Population and Housing Census 2022 (Table B4.1). Derived district religion shares; contains NBS information reproduced with attribution pending reuse confirmation."
       },
