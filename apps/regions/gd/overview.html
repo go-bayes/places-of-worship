@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Grenada map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260712d" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Grenada research map; every string traces to
+    // research/countries/gd/route-probe.md, the manifest
+    // docs/manifests/gd-census-religion-2021.json, or the live REGION_CONFIG in
+    // apps/regions/gd/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "GD",
+      countryName: "Grenada",
+      mapHref: "./",
+      intro: "Parish census religious affiliation across Grenada's seven units — the six parishes and the Carriacou & Petite Martinique dependency — a single 2021 snapshot from Table 23 'Population by Religion and Parish' of the Central Statistical Office (CSO) 2021 National Population and Housing Census Results. The source is a PRELIMINARY release: its counts are official CSO figures over 26 verbatim categories and reconcile integer-exact to the national total of 108,279 at every margin, but may be revised when the final 2021 report is published, and this product regenerates then. The construct is census affiliation. It does not measure belief, practice, attendance, or membership.",
+      facts: {
+        waves: "One census: 2021 (preliminary release)",
+        geographies: "Parish (7 units: 6 parishes + Carriacou & Petite Martinique)",
+        metrics: "Religious affiliation %, no religion %"
+      },
+      reading: [
+        "The seven parishes are shaded by the share reporting affiliation with any religion (the 22 named denominations plus the 'Other (Specify)' residual), or by the share reporting no religion, shown as No religion %. Roman Catholic is the largest affiliation nationally (34,145; 31.5%), then Pentecostal (21,581; 19.9%), Seventh Day Adventist (13,343; 12.3%), and Anglican (7,916; 7.3%).",
+        "The source is a PRELIMINARY release, and this is the first preliminary-data product in the corpus. Its counts are official CSO figures and reconcile integer-exact to 108,279 at every margin — each of the 26 religion rows sums across the source's eight columns to its printed national total, each column sums over the 26 rows to its printed column total, and both national margins equal 108,279 — but they may be revised. The product regenerates when the CSO publishes the final 2021 report; the preliminary status is stated on every surface of the map and this page.",
+        "Each parish ships two headline shares over one denominator, its whole 2021 census population (all ages, all 26 categories). Religious affiliation % is the 22 named denominations plus 'Other (Specify)'; No religion % sums the two distinct no-religion lines Table 23 prints, 'Atheist' (49 nationally) and 'No Religious Affiliation' (6,444). Both no-religion lines stay distinct in the popup composition. The 'Not Stated' non-response line (7,698 nationally) stays inside the denominator and outside both shares; the two shares need not sum to 100.",
+        "Each parish's 26 verbatim categories and counts ride the popup composition block, in the source's order and spelling. No category is merged or translated, and the two no-religion lines are kept apart; no count is derived from a share.",
+        "Only the 2021 wave ships, and no change metric is offered. Parish religion is published for 2021 alone: religion is a national series in 2001 and 2011 (the 2011 Census Report Table 2.3.1, on the non-institutional population in private dwellings), with no parish cross-tab for either wave. The 2001 and 2011 parish waves are recorded as deferred non-routes; the clean unblock is a CSO request for a religion-by-parish table.",
+        "Every count renders exactly as published; none is suppressed. Six of the seven parishes carry at least one religion category count under ten people, and a parish carrying any such count is marked on its popup share with a dagger. The combined St. George parish is the exception — its smallest category, Moravian, is 12. The under-ten cells (for example Saint Andrew's single Bahai and Saint John's four Brethren) render at their published magnitude.",
+        "The Town of St. George is rolled into the St. George parish feature to match the seven-unit boundary. Table 23 prints the Town of St. George (2,681) as a separate column from the St. George parish column (42,096); the census defines the town as part of the parish, and the geoBoundaries GRD ADM1 layer carries no separate town polygon. The St. George parish row is their sum, 44,777 — exact and lossless, and disclosed here, on the map, and in the manifest.",
+        "The boundary frame is geoBoundaries GRD ADM1, seven units, OpenStreetMap-derived, represented year 2017. Six units join the census parishes one-to-one; the seventh, the Southern Grenadine Islands polygon, joins the census Carriacou & Petite Martinique column by a documented identity. The extent runs lon -61.80 to -61.38 E and lat 11.99 to 12.53 N, well within the standard frame.",
+        "No governed Grenada place-of-worship snapshot ships with this product; place counts and density metrics are null."
+      ],
+      sources: [
+        {
+          name: "CSO Grenada 2021 National Population and Housing Census Results (PRELIMINARY), Table 23: Population by Religion and Parish",
+          href: "https://stats.gov.gd/wp-content/uploads/2025/04/2021-National-Housing-Population-Census-Results-Latest-PRELIMINARY.pdf",
+          construct: "Census religious affiliation by parish, count-valued over 26 verbatim categories and 8 columns, integer-exact to 108,279 at both margins",
+          years: "2021 (preliminary release)",
+          licence: "CSO Open Licence Agreement, accepted: free reuse, commercial and non-commercial, with an acknowledgement-of-source notice. Preliminary release; the product regenerates when the final 2021 report is published. Source: Central Statistical Office of Grenada, 2021 Population and Housing Census (PRELIMINARY results), Table 23"
+        },
+        {
+          name: "geoBoundaries Grenada ADM1 boundaries",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/GRD/ADM1/",
+          construct: "Boundary geometry (7 parish units: 6 parishes plus the Southern Grenadine Islands / Carriacou & Petite Martinique dependency), OpenStreetMap-derived",
+          years: "2017 (represented year)",
+          licence: "Creative Commons Attribution-ShareAlike 2.0 (CC BY-SA 2.0), per the release metadata; the derived boundary ships share-alike with attribution to OpenStreetMap contributors"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Central Statistical Office of Grenada, <a href=\"https://stats.gov.gd/\" target=\"_blank\" rel=\"noopener\">CSO Grenada</a>: the 2021 National Population and Housing Census Results (PRELIMINARY), Table 23, religion by parish; boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/GRD/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries GRD ADM1</a>.",
+        tables: "Table 23 is the source of record for the shipped shares. It is count-valued over 26 verbatim categories across eight columns (the six parishes, the Town of St. George shown separately, and Carriacou & Petite Martinique) and reconciles integer-exact to 108,279: each of the 26 religion rows sums across the eight columns to its printed national total, each column sums over the 26 rows to its printed column total, and both national margins equal 108,279. The eight source columns roll up to the seven boundary units by summing the Town of St. George column (2,681) into the St. George parish column (42,096) for a St. George parish row of 44,777 (exact and lossless); after the roll-up the seven parishes sum to 108,279 at every category and margin. The area-summary religious_affiliation_percent field sums the 22 named denominations plus 'Other (Specify)'; the no_religion_percent field sums the two distinct no-religion lines 'Atheist' and 'No Religious Affiliation'. The 'Not Stated' non-response line stays in the denominator and in neither slot. No count is derived from a percentage. The source is a preliminary release; the product regenerates when the final 2021 report is published.",
+        licence: "Census reuse is accepted under the CSO Open Licence Agreement, which grants a worldwide, royalty-free, non-exclusive licence to freely use, copy, modify, translate, publish, adapt, distribute, and create derivative works and value-added products for commercial and non-commercial purposes, on the condition that the required acknowledgement of source is carried. The notice is 'This product was adapted from the Central Statistical Office of Grenada's information, which is licensed under the Central Statistical Office's Open Licence Agreement.' The source is the 2021 Population and Housing Census PRELIMINARY results, Table 23; the product regenerates when the final 2021 report is published. The geoBoundaries GRD ADM1 boundary is Creative Commons Attribution-ShareAlike 2.0 (CC BY-SA 2.0) per the release metadata, OpenStreetMap-derived, and the derived boundary ships share-alike.",
+        script: "scripts/build_gd_area_summary.R",
+        manifests: [
+          { label: "gd-census-religion-2021", href: "docs/manifests/gd-census-religion-2021.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Grenada map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260712d"></script>
+</body>
+</html>

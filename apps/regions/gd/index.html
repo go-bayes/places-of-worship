@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Grenada Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css?v=20260712d" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712d" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Grenada's product is census religious affiliation for the seven parish
+    // units (six parishes plus the Carriacou & Petite Martinique dependency) for
+    // a single wave, 2021, from Table 23 "Population by Religion and Parish" of
+    // the Central Statistical Office (CSO) 2021 National Population and Housing
+    // Census Results. The source is a PRELIMINARY release: its counts are
+    // official CSO figures and reconcile integer-exact to the national total of
+    // 108,279 at every margin, but may be revised when the final 2021 report is
+    // published; this product regenerates then. The preliminary status is
+    // disclosed on every surface (onboarding, metric notes, popup denominator
+    // note, flag note, and attribution), the corpus's first preliminary-data
+    // ship, under the project's preliminary-disclosure ruling (2026-07-12).
+    //
+    // Table 23 prints 26 verbatim categories across 8 columns; each parish's 26
+    // counts ride the popup composition block. Two-slot design.
+    // religious_affiliation_percent is the 22 named denominations plus the
+    // "Other (Specify)" residual affiliation over the parish's whole 2021 census
+    // population; no_religion_percent sums the two distinct no-religion lines the
+    // table prints, "Atheist" (49 nationally) and "No Religious Affiliation"
+    // (6,444). The "Not Stated" non-response line (7,698 nationally) stays inside
+    // the denominator and outside both slots; the two shares need not sum to 100.
+    //
+    // Single wave, no change metric: parish religion is published for 2021 only,
+    // because 2001 and 2011 religion is a national series (2011 Census Report
+    // Table 2.3.1), not a parish cross-tab. Six of the seven parishes carry a
+    // religion category count under ten people; the runtime marks those popups
+    // with a dagger and never suppresses a count. The combined St. George parish
+    // is the exception (its smallest category, Moravian, is 12).
+    //
+    // The Town of St. George is rolled into the St. George parish feature
+    // (42,096 + 2,681 = 44,777, exact and lossless) to match the 7-unit boundary,
+    // disclosed here and in the overview. Licence accepted: the CSO Open Licence
+    // Agreement grants free reuse (commercial and non-commercial) with an
+    // acknowledgement-of-source notice, and the derived parish summary sits inside
+    // the grant. Boundaries are geoBoundaries GRD ADM1 (CC BY-SA 2.0),
+    // OpenStreetMap-derived; the Southern Grenadine Islands polygon joins the
+    // census Carriacou & Petite Martinique column.
+    window.REGION_CONFIG = {
+      countryCode: "GD",
+      title: "Places of Worship | Grenada Research Map",
+      // boundary bbox verified numerically from the 7-feature layer:
+      // lon -61.802..-61.378, lat 11.988..12.529; centre on [-61.59, 12.26].
+      // the Carriacou & Petite Martinique dependency reaches north to 12.53,
+      // so open at z9.5 to fit the main island and the dependency beside the
+      // census panels
+      center: [-61.59, 12.26],
+      initialZoom: 9.5,
+      censusLevels: {
+        parish: {
+          label: "Parish (7 units)",
+          boundaries: "data/gd_parish_2021.geojson",
+          summary: "data/area_summary_parish.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Central Statistical Office of Grenada (CSO), 2021 National Population and Housing Census Results (PRELIMINARY), Table 23; CSO Open Licence Agreement — a preliminary release that regenerates on the final 2021 report · Boundaries © geoBoundaries GRD ADM1 (Creative Commons Attribution-ShareAlike 2.0, CC BY-SA 2.0), OpenStreetMap contributors"
+        }
+      },
+      defaultLevel: "parish",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      // the two census-question shares; place, density, and change metrics are
+      // omitted because no place layer is built and parish religion is published
+      // for 2021 only
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the parish's whole 2021 census population affiliated with any religion (the 22 named denominations plus the 'Other (Specify)' residual), from Table 23 of the CSO 2021 PRELIMINARY census results, counts carried verbatim. The 'Not Stated' non-response line stays in the denominator and outside both shares; the two shares need not sum to 100. Preliminary release: the figures reconcile exactly to 108,279 but may be revised, and the product regenerates when the final 2021 report is published"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share of the parish's whole 2021 census population reporting no religion, the two distinct no-religion lines Table 23 prints ('Atheist', 49 nationally, and 'No Religious Affiliation', 6,444) summed, with both kept distinct in the popup composition. Distinct from the 'Not Stated' non-response line, which stays in the denominator and outside both shares. Preliminary release: the product regenerates when the final 2021 report is published"
+        }
+      },
+      popupDenominatorNote: "Percentages use each parish's whole 2021 census population (all ages, all 26 religion categories including 'Not Stated') as the denominator, the universe of Table 23 in the CSO 2021 PRELIMINARY census results. Religious affiliation % is the 22 named denominations plus 'Other (Specify)'; no religion % sums the two distinct no-religion lines 'Atheist' and 'No Religious Affiliation'. The 'Not Stated' non-response line stays inside the denominator and outside both shares; the two shares need not sum to 100. The counts are carried verbatim from Table 23 and reconcile integer-exact to 108,279; the source is a preliminary release that may be revised, and the product regenerates when the final 2021 report is published. The construct is census affiliation; it does not measure belief, practice, attendance, or membership.",
+      cityPresets: [
+        { label: "St. George's", coords: [-61.7488, 12.0561], zoom: 12 },
+        { label: "Gouyave", coords: [-61.7333, 12.1667], zoom: 12 },
+        { label: "Grenville", coords: [-61.6250, 12.1225], zoom: 12 },
+        { label: "Hillsborough", coords: [-61.4583, 12.4833], zoom: 12 }
+      ],
+      geocode: { country: "gd", biasLngLat: [-61.59, 12.26] },
+      onboarding: {
+        title: "Grenada research map",
+        intro: "Census religious affiliation across Grenada's seven parish units — the six parishes and the Carriacou & Petite Martinique dependency — a single 2021 snapshot from Table 23 of the Central Statistical Office (CSO) 2021 PRELIMINARY census results, 'Population by Religion and Parish'. The source is a preliminary release: its counts are official CSO figures and reconcile integer-exact to the national total of 108,279, but may be revised, and this product regenerates when the final 2021 report is published. The construct is census affiliation; it does not measure belief, practice, attendance, or membership.",
+        bullets: [
+          "The seven parishes are shaded by the share reporting affiliation with any religion (the 22 named denominations plus <code>Other (Specify)</code>), or by the share reporting no religion, shown as No religion %. Roman Catholic (31.5% nationally) and Pentecostal (19.9%) are the largest affiliations.",
+          "This is one census wave, 2021, at parish grain, from a <strong>PRELIMINARY</strong> release. The figures reconcile integer-exact to 108,279 at every margin but may be revised; the product regenerates when the final 2021 report lands. Parish religion is published for 2021 only (2001 and 2011 religion is a national series); no change metric is offered.",
+          "Each parish's 26 verbatim categories and counts ride the popup composition block. The no-religion slot sums the two distinct no-religion lines Table 23 prints, <code>Atheist</code> and <code>No Religious Affiliation</code>, with both kept distinct in the composition. The <code>Not Stated</code> non-response line stays in the denominator and outside both shares; the two shares need not sum to 100.",
+          "Six of the seven parishes carry a religion category count under ten people, marked with a dagger on the popup share; the combined St. George parish is the exception. Counts render exactly as published, none suppressed.",
+          "The Town of St. George is rolled into the St. George parish feature to match the seven-unit boundary (exact and lossless, disclosed on the map and in the overview).",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://stats.gov.gd/" target="_blank" rel="noopener">Central Statistical Office of Grenada (CSO)</a>, 2021 National Population and Housing Census Results (PRELIMINARY), Table 23 &lsquo;Population by Religion and Parish&rsquo;. This product was adapted from the Central Statistical Office of Grenada&rsquo;s information, which is licensed under the CSO Open Licence Agreement. The source is a preliminary release; the product regenerates when the final 2021 report is published. &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> GRD ADM1 (Creative Commons Attribution-ShareAlike 2.0, CC BY-SA 2.0), OpenStreetMap contributors',
+      censusFlagNote: "* The construct is census affiliation (each enumerated resident's recorded religion), from Table 23 'Population by Religion and Parish' of the CSO 2021 PRELIMINARY census results; it does not measure belief, practice, attendance, or membership. The source is a preliminary release: the counts are official CSO figures and reconcile integer-exact to 108,279 at every margin, but may be revised, and the product regenerates when the final 2021 report is published. The 26 verbatim categories carry per row; the no-religion slot sums the two distinct no-religion lines ('Atheist' and 'No Religious Affiliation'), and the 'Not Stated' non-response line stays in the denominator and outside both shares; the two shares need not sum to 100. Single wave (2021), parish grain; no change metric (parish religion is a 2021-only table; 2001 and 2011 religion is published nationally only). † marks a parish carrying a religion category count under ten people (six of the seven parishes; the combined St. George parish is the exception); counts render exactly as published, none suppressed. The Town of St. George is rolled into the St. George parish feature to match the seven-unit boundary (exact, lossless, disclosed). Census reuse accepted under the CSO Open Licence Agreement; boundaries geoBoundaries GRD ADM1 (CC BY-SA 2.0)."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712d"></script>
+</body>
+</html>
