@@ -1,0 +1,1060 @@
+{
+  "schema_version": "area-summary.v2",
+  "generated_at": "2026-07-12T11:03:30Z",
+  "generated_by": "scripts/build_gd_area_summary.R",
+  "country_code": "GD",
+  "data_status": "census_religion_preliminary",
+  "data_status_note": "Census religious affiliation is live for the 7 parish units in 2021 from Table 23 of the CSO 2021 PRELIMINARY census results ('Population by Religion and Parish'). The source is a preliminary release: figures are official CSO counts and reconcile exactly to 108,279, but may be revised when the final 2021 report is published; the product regenerates then. Single wave: religion is a national series only in 2001 and 2011, so no cross-wave parish change is possible.",
+  "boundary_set": {
+    "boundary_set_id": "gd-parish-2021-geoboundaries-adm1",
+    "country_code": "GD",
+    "level": "parish",
+    "vintage": "geoBoundaries GRD ADM1 (gbOpen); 7 units, OpenStreetMap/Wikipedia-sourced",
+    "source_dataset_id": "geoboundaries-grd-adm1"
+  },
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "no governed Grenada place-of-worship snapshot is included in this census-religion release",
+    "notes": "The Grenada lane ships census-religion count and share metrics only; place metrics are null."
+  },
+  "source_datasets": [
+    {
+      "source_dataset_id": "cso-gd-2021-preliminary-table23-religion-parish",
+      "name": "CSO Grenada 2021 Preliminary Census, Table 23: Population by Religion and Parish",
+      "provider": "Central Statistical Office of Grenada (CSO)",
+      "url": "https://stats.gov.gd/wp-content/uploads/2025/04/2021-National-Housing-Population-Census-Results-Latest-PRELIMINARY.pdf",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/gd_census/gd_2021_prelim.pdf",
+      "licence": {
+        "name": "Central Statistical Office of Grenada Open Licence Agreement (free reuse, commercial and non-commercial, with acknowledgement of source)",
+        "url": "https://stats.gov.gd/open-licence-agreement/",
+        "attribution": "This product was adapted from the Central Statistical Office of Grenada's information, which is licensed under the Central Statistical Office's Open Licence Agreement. Source: Central Statistical Office of Grenada, 2021 Population and Housing Census (PRELIMINARY results), Table 23."
+      },
+      "citation": "Central Statistical Office of Grenada, 2021 National Population and Housing Census Results (PRELIMINARY), Table 23 'Population by Religion and Parish'. Preliminary release; superseded by the final 2021 report when published.",
+      "access_limits": "Public direct PDF download from stats.gov.gd.",
+      "redistribution_limits": "Open reuse under the CSO Open Licence Agreement with the required acknowledgement of source. The Central Statistical Office of Grenada grants you (an individual or a legal entity that you are authorized to represent) a worldwide, royalty-free non-exclusive licence to freely use the data, copy, modify, translate, publish, adapt, distribute, create derivative works and value-added products for commercial and non-commercial purposes subject to the terms of this licence.",
+      "notes": "PRELIMINARY source (uploaded April 2025); a final 2021 report is not yet published. Table 23 is count-valued over 26 verbatim categories and 8 columns, integer-exact to 108,279 at both margins. The Town of St. George column is rolled into St. George parish to match the 7-unit boundary."
+    },
+    {
+      "source_dataset_id": "geoboundaries-grd-adm1",
+      "name": "geoBoundaries Grenada ADM1 (7 parish units)",
+      "provider": "geoBoundaries (William & Mary geoLab); source OpenStreetMap, Wikipedia",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GRD/ADM1/geoBoundaries-GRD-ADM1.geojson",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/gd_census/geoBoundaries-GRD-ADM1.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution-ShareAlike 2.0 (CC BY-SA 2.0)",
+        "url": "https://creativecommons.org/licenses/by-sa/2.0/",
+        "attribution": "geoBoundaries (gbOpen) GRD ADM1; boundary source OpenStreetMap contributors; derived boundary shared under CC BY-SA."
+      },
+      "citation": "Runfola, D. et al. (2020) geoBoundaries: A global database of political administrative boundaries. gbOpen GRD ADM1 (pinned commit 9469f09).",
+      "access_limits": null,
+      "redistribution_limits": "CC BY-SA 2.0 permits redistribution and derivatives with attribution and share-alike.",
+      "notes": "7 ADM1 units; release metadata: boundaryType ADM1, CC BY-SA 2.0, source OpenStreetMap/Wikipedia, admUnitCount 7, represented year 2017."
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_id": "religious_affiliation_percent",
+      "label": "Religious affiliation (%)",
+      "description": "Share of the parish's 2021 census population affiliated with any religion (the 22 named affiliations plus the 'Other (Specify)' residual affiliation).",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "Sum of the 22 named affiliation categories plus 'Other (Specify)' over the parish's whole 2021 census population (all 26 categories, including 'Not Stated'). Counts carried verbatim from Table 23; no category merged or translated.",
+      "temporal_coverage": "2021 (preliminary)",
+      "spatial_coverage": "Seven parish units on the geoBoundaries GRD ADM1 layer; six parishes join one-to-one, and the Town of St. George column is rolled into the St. George parish feature. Carriacou & Petite Martinique is the Southern Grenadine Islands dependency polygon.",
+      "quality_notes": "PRELIMINARY source; figures reconcile exactly but may be revised. The 'Not Stated' non-response line stays inside the denominator and outside the affiliation slot."
+    },
+    {
+      "indicator_id": "no_religion_percent",
+      "label": "No religion (%)",
+      "description": "Share of the parish's 2021 census population reporting no religion (the two distinct no-religion lines 'Atheist' and 'No Religious Affiliation', summed).",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "Sum of the 'Atheist' and 'No Religious Affiliation' counts over the parish's whole 2021 census population. Both lines stay distinct in the per-row composition.",
+      "temporal_coverage": "2021 (preliminary)",
+      "spatial_coverage": "Seven parish units on the geoBoundaries GRD ADM1 layer; six parishes join one-to-one, and the Town of St. George column is rolled into the St. George parish feature. Carriacou & Petite Martinique is the Southern Grenadine Islands dependency polygon.",
+      "quality_notes": "The no-religion slot combines the two distinct no-religion lines Table 23 prints; both are substantive no-religion responses, distinct from the 'Not Stated' non-response line, which stays inside the denominator and outside both slots."
+    },
+    {
+      "indicator_id": "population_total",
+      "label": "Population (2021 census, religion universe)",
+      "description": "Whole enumerated 2021 census population, all ages, the religion cross-tab universe and the share denominator.",
+      "unit": "count",
+      "denominator_indicator_id": null,
+      "method": "Sum of the 26 verbatim religion category counts per parish from Table 23.",
+      "temporal_coverage": "2021 (preliminary)",
+      "spatial_coverage": "Seven parish units on the geoBoundaries GRD ADM1 layer; six parishes join one-to-one, and the Town of St. George column is rolled into the St. George parish feature. Carriacou & Petite Martinique is the Southern Grenadine Islands dependency polygon.",
+      "quality_notes": "Parishes sum to the national 2021 total of 108,279 exactly."
+    }
+  ],
+  "visual_layers": [
+    {
+      "visual_layer_id": "gd-parish-religious-affiliation-share",
+      "label": "Religious affiliation share",
+      "description": "Census religious affiliation share by parish, 2021 (preliminary).",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "religious_affiliation_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "whole 2021 census population"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "published parish value on the geoBoundaries ADM1 layer (Town of St. George rolled into St. George)",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": true,
+      "notes": "PRELIMINARY 2021 release; Roman Catholic and Pentecostal are the largest affiliations nationally."
+    },
+    {
+      "visual_layer_id": "gd-parish-no-religion-share",
+      "label": "No religion share",
+      "description": "Census no-religion share by parish, 2021 (preliminary).",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "no_religion_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "whole 2021 census population"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "published parish value on the geoBoundaries ADM1 layer",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Single wave; no cross-wave change layer (parish religion is available for 2021 only, and only in the preliminary release)."
+    }
+  ],
+  "rows": [
+    {
+      "country_code": "GD",
+      "boundary_set_id": "gd-parish-2021-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "gd-parish-2021-geoboundaries-adm1:GD-01",
+      "area_code": "GD-01",
+      "area_name": "Saint Andrew",
+      "year": 2021,
+      "population_total": 24755,
+      "population_total_basis": "Whole enumerated 2021 census population, all ages, from Table 23 ('Population by Religion and Parish') of the CSO 2021 PRELIMINARY census results. The parish denominator is the sum of all 26 verbatim religion categories, including the 'Not Stated' non-response line. PRELIMINARY source: figures are official CSO counts and reconcile exactly, but may be revised when the final 2021 report is published.",
+      "religious_affiliation_count": 22970,
+      "religious_affiliation_percent": 92.7893,
+      "no_religion_count": 1131,
+      "no_religion_percent": 4.5688,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 95.3805,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "cso-gd-2021-preliminary-table23-religion-parish",
+        "geoboundaries-grd-adm1"
+      ],
+      "quality_flag": "census_2021_preliminary_release;source_cso_2021_preliminary_table_23_population_by_religion_and_parish;universe_whole_2021_census_population_all_ages;religious_affiliation_slot_22_named_affiliations_plus_other_specify;no_religion_slot_atheist_plus_no_religious_affiliation_two_distinct_lines;not_stated_non_response_inside_denominator_outside_slots;single_wave_2021;religious_change_withheld;boundary_geoboundaries_grd_adm1_ccbysa20;small_cell_under_10",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 1421
+        },
+        {
+          "label_verbatim": "Buddhist",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 7
+        },
+        {
+          "label_verbatim": "Church of God",
+          "count": 2098
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "count": 490
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 6
+        },
+        {
+          "label_verbatim": "Independent Baptiste",
+          "count": 279
+        },
+        {
+          "label_verbatim": "Jehovah Witnesses",
+          "count": 197
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 79
+        },
+        {
+          "label_verbatim": "Mennonite",
+          "count": 2
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormom",
+          "count": 13
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 76
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 5702
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "count": 89
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 211
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 7243
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 5
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 4615
+        },
+        {
+          "label_verbatim": "Spiritual Baptist",
+          "count": 316
+        },
+        {
+          "label_verbatim": "Lutheran",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Atheist",
+          "count": 0
+        },
+        {
+          "label_verbatim": "No Religious Affiliation",
+          "count": 1131
+        },
+        {
+          "label_verbatim": "Other (Specify)",
+          "count": 120
+        },
+        {
+          "label_verbatim": "Not Stated",
+          "count": 654
+        }
+      ]
+    },
+    {
+      "country_code": "GD",
+      "boundary_set_id": "gd-parish-2021-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "gd-parish-2021-geoboundaries-adm1:GD-02",
+      "area_code": "GD-02",
+      "area_name": "Saint David",
+      "year": 2021,
+      "population_total": 14443,
+      "population_total_basis": "Whole enumerated 2021 census population, all ages, from Table 23 ('Population by Religion and Parish') of the CSO 2021 PRELIMINARY census results. The parish denominator is the sum of all 26 verbatim religion categories, including the 'Not Stated' non-response line. PRELIMINARY source: figures are official CSO counts and reconcile exactly, but may be revised when the final 2021 report is published.",
+      "religious_affiliation_count": 12188,
+      "religious_affiliation_percent": 84.3869,
+      "no_religion_count": 1069,
+      "no_religion_percent": 7.4015,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 39.987,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "cso-gd-2021-preliminary-table23-religion-parish",
+        "geoboundaries-grd-adm1"
+      ],
+      "quality_flag": "census_2021_preliminary_release;source_cso_2021_preliminary_table_23_population_by_religion_and_parish;universe_whole_2021_census_population_all_ages;religious_affiliation_slot_22_named_affiliations_plus_other_specify;no_religion_slot_atheist_plus_no_religious_affiliation_two_distinct_lines;not_stated_non_response_inside_denominator_outside_slots;single_wave_2021;religious_change_withheld;boundary_geoboundaries_grd_adm1_ccbysa20;small_cell_under_10",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 438
+        },
+        {
+          "label_verbatim": "Buddhist",
+          "count": 2
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 91
+        },
+        {
+          "label_verbatim": "Church of God",
+          "count": 203
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "count": 166
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 15
+        },
+        {
+          "label_verbatim": "Independent Baptiste",
+          "count": 234
+        },
+        {
+          "label_verbatim": "Jehovah Witnesses",
+          "count": 154
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 58
+        },
+        {
+          "label_verbatim": "Mennonite",
+          "count": 72
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 5
+        },
+        {
+          "label_verbatim": "Mormom",
+          "count": 2
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 14
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 3738
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "count": 28
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 151
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 4992
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 1154
+        },
+        {
+          "label_verbatim": "Spiritual Baptist",
+          "count": 435
+        },
+        {
+          "label_verbatim": "Lutheran",
+          "count": 7
+        },
+        {
+          "label_verbatim": "Atheist",
+          "count": 2
+        },
+        {
+          "label_verbatim": "No Religious Affiliation",
+          "count": 1067
+        },
+        {
+          "label_verbatim": "Other (Specify)",
+          "count": 228
+        },
+        {
+          "label_verbatim": "Not Stated",
+          "count": 1186
+        }
+      ]
+    },
+    {
+      "country_code": "GD",
+      "boundary_set_id": "gd-parish-2021-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "gd-parish-2021-geoboundaries-adm1:GD-03",
+      "area_code": "GD-03",
+      "area_name": "Saint George",
+      "year": 2021,
+      "population_total": 44777,
+      "population_total_basis": "Whole enumerated 2021 census population, all ages, from Table 23 ('Population by Religion and Parish') of the CSO 2021 PRELIMINARY census results. The parish denominator is the sum of all 26 verbatim religion categories, including the 'Not Stated' non-response line. PRELIMINARY source: figures are official CSO counts and reconcile exactly, but may be revised when the final 2021 report is published.",
+      "religious_affiliation_count": 37229,
+      "religious_affiliation_percent": 83.1431,
+      "no_religion_count": 2965,
+      "no_religion_percent": 6.6217,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 70.7507,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "cso-gd-2021-preliminary-table23-religion-parish",
+        "geoboundaries-grd-adm1"
+      ],
+      "quality_flag": "census_2021_preliminary_release;source_cso_2021_preliminary_table_23_population_by_religion_and_parish;universe_whole_2021_census_population_all_ages;religious_affiliation_slot_22_named_affiliations_plus_other_specify;no_religion_slot_atheist_plus_no_religious_affiliation_two_distinct_lines;not_stated_non_response_inside_denominator_outside_slots;single_wave_2021;religious_change_withheld;boundary_geoboundaries_grd_adm1_ccbysa20;town_of_st_george_rolled_into_st_george_parish",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 3387
+        },
+        {
+          "label_verbatim": "Buddhist",
+          "count": 14
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 14
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 207
+        },
+        {
+          "label_verbatim": "Church of God",
+          "count": 1115
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "count": 1106
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 127
+        },
+        {
+          "label_verbatim": "Independent Baptiste",
+          "count": 839
+        },
+        {
+          "label_verbatim": "Jehovah Witnesses",
+          "count": 521
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 1170
+        },
+        {
+          "label_verbatim": "Mennonite",
+          "count": 204
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 12
+        },
+        {
+          "label_verbatim": "Mormom",
+          "count": 76
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 262
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 9477
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "count": 131
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 441
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 13474
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 43
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 3286
+        },
+        {
+          "label_verbatim": "Spiritual Baptist",
+          "count": 676
+        },
+        {
+          "label_verbatim": "Lutheran",
+          "count": 34
+        },
+        {
+          "label_verbatim": "Atheist",
+          "count": 35
+        },
+        {
+          "label_verbatim": "No Religious Affiliation",
+          "count": 2930
+        },
+        {
+          "label_verbatim": "Other (Specify)",
+          "count": 613
+        },
+        {
+          "label_verbatim": "Not Stated",
+          "count": 4583
+        }
+      ]
+    },
+    {
+      "country_code": "GD",
+      "boundary_set_id": "gd-parish-2021-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "gd-parish-2021-geoboundaries-adm1:GD-04",
+      "area_code": "GD-04",
+      "area_name": "Saint John",
+      "year": 2021,
+      "population_total": 7773,
+      "population_total_basis": "Whole enumerated 2021 census population, all ages, from Table 23 ('Population by Religion and Parish') of the CSO 2021 PRELIMINARY census results. The parish denominator is the sum of all 26 verbatim religion categories, including the 'Not Stated' non-response line. PRELIMINARY source: figures are official CSO counts and reconcile exactly, but may be revised when the final 2021 report is published.",
+      "religious_affiliation_count": 6645,
+      "religious_affiliation_percent": 85.4882,
+      "no_religion_count": 559,
+      "no_religion_percent": 7.1916,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 36.7385,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "cso-gd-2021-preliminary-table23-religion-parish",
+        "geoboundaries-grd-adm1"
+      ],
+      "quality_flag": "census_2021_preliminary_release;source_cso_2021_preliminary_table_23_population_by_religion_and_parish;universe_whole_2021_census_population_all_ages;religious_affiliation_slot_22_named_affiliations_plus_other_specify;no_religion_slot_atheist_plus_no_religious_affiliation_two_distinct_lines;not_stated_non_response_inside_denominator_outside_slots;single_wave_2021;religious_change_withheld;boundary_geoboundaries_grd_adm1_ccbysa20;small_cell_under_10",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 641
+        },
+        {
+          "label_verbatim": "Buddhist",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 4
+        },
+        {
+          "label_verbatim": "Church of God",
+          "count": 168
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "count": 115
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Independent Baptiste",
+          "count": 53
+        },
+        {
+          "label_verbatim": "Jehovah Witnesses",
+          "count": 67
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 12
+        },
+        {
+          "label_verbatim": "Mennonite",
+          "count": 2
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormom",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 15
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 618
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "count": 14
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 129
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 3216
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 1161
+        },
+        {
+          "label_verbatim": "Spiritual Baptist",
+          "count": 103
+        },
+        {
+          "label_verbatim": "Lutheran",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Atheist",
+          "count": 3
+        },
+        {
+          "label_verbatim": "No Religious Affiliation",
+          "count": 556
+        },
+        {
+          "label_verbatim": "Other (Specify)",
+          "count": 326
+        },
+        {
+          "label_verbatim": "Not Stated",
+          "count": 569
+        }
+      ]
+    },
+    {
+      "country_code": "GD",
+      "boundary_set_id": "gd-parish-2021-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "gd-parish-2021-geoboundaries-adm1:GD-05",
+      "area_code": "GD-05",
+      "area_name": "Saint Mark",
+      "year": 2021,
+      "population_total": 3938,
+      "population_total_basis": "Whole enumerated 2021 census population, all ages, from Table 23 ('Population by Religion and Parish') of the CSO 2021 PRELIMINARY census results. The parish denominator is the sum of all 26 verbatim religion categories, including the 'Not Stated' non-response line. PRELIMINARY source: figures are official CSO counts and reconcile exactly, but may be revised when the final 2021 report is published.",
+      "religious_affiliation_count": 3713,
+      "religious_affiliation_percent": 94.2864,
+      "no_religion_count": 189,
+      "no_religion_percent": 4.7994,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 23.2526,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "cso-gd-2021-preliminary-table23-religion-parish",
+        "geoboundaries-grd-adm1"
+      ],
+      "quality_flag": "census_2021_preliminary_release;source_cso_2021_preliminary_table_23_population_by_religion_and_parish;universe_whole_2021_census_population_all_ages;religious_affiliation_slot_22_named_affiliations_plus_other_specify;no_religion_slot_atheist_plus_no_religious_affiliation_two_distinct_lines;not_stated_non_response_inside_denominator_outside_slots;single_wave_2021;religious_change_withheld;boundary_geoboundaries_grd_adm1_ccbysa20;small_cell_under_10",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 304
+        },
+        {
+          "label_verbatim": "Buddhist",
+          "count": 2
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Church of God",
+          "count": 26
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "count": 24
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Independent Baptiste",
+          "count": 65
+        },
+        {
+          "label_verbatim": "Jehovah Witnesses",
+          "count": 8
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 8
+        },
+        {
+          "label_verbatim": "Mennonite",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormom",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 2
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 684
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "count": 125
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 66
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 1162
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 890
+        },
+        {
+          "label_verbatim": "Spiritual Baptist",
+          "count": 188
+        },
+        {
+          "label_verbatim": "Lutheran",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Atheist",
+          "count": 5
+        },
+        {
+          "label_verbatim": "No Religious Affiliation",
+          "count": 184
+        },
+        {
+          "label_verbatim": "Other (Specify)",
+          "count": 158
+        },
+        {
+          "label_verbatim": "Not Stated",
+          "count": 36
+        }
+      ]
+    },
+    {
+      "country_code": "GD",
+      "boundary_set_id": "gd-parish-2021-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "gd-parish-2021-geoboundaries-adm1:GD-06",
+      "area_code": "GD-06",
+      "area_name": "Saint Patrick",
+      "year": 2021,
+      "population_total": 7846,
+      "population_total_basis": "Whole enumerated 2021 census population, all ages, from Table 23 ('Population by Religion and Parish') of the CSO 2021 PRELIMINARY census results. The parish denominator is the sum of all 26 verbatim religion categories, including the 'Not Stated' non-response line. PRELIMINARY source: figures are official CSO counts and reconcile exactly, but may be revised when the final 2021 report is published.",
+      "religious_affiliation_count": 7125,
+      "religious_affiliation_percent": 90.8106,
+      "no_religion_count": 361,
+      "no_religion_percent": 4.6011,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 50.9767,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "cso-gd-2021-preliminary-table23-religion-parish",
+        "geoboundaries-grd-adm1"
+      ],
+      "quality_flag": "census_2021_preliminary_release;source_cso_2021_preliminary_table_23_population_by_religion_and_parish;universe_whole_2021_census_population_all_ages;religious_affiliation_slot_22_named_affiliations_plus_other_specify;no_religion_slot_atheist_plus_no_religious_affiliation_two_distinct_lines;not_stated_non_response_inside_denominator_outside_slots;single_wave_2021;religious_change_withheld;boundary_geoboundaries_grd_adm1_ccbysa20;small_cell_under_10",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 677
+        },
+        {
+          "label_verbatim": "Buddhist",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Church of God",
+          "count": 219
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "count": 477
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Independent Baptiste",
+          "count": 122
+        },
+        {
+          "label_verbatim": "Jehovah Witnesses",
+          "count": 87
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 7
+        },
+        {
+          "label_verbatim": "Mennonite",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormom",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 20
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 1019
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "count": 79
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 112
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 2133
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 1890
+        },
+        {
+          "label_verbatim": "Spiritual Baptist",
+          "count": 87
+        },
+        {
+          "label_verbatim": "Lutheran",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Atheist",
+          "count": 1
+        },
+        {
+          "label_verbatim": "No Religious Affiliation",
+          "count": 360
+        },
+        {
+          "label_verbatim": "Other (Specify)",
+          "count": 194
+        },
+        {
+          "label_verbatim": "Not Stated",
+          "count": 360
+        }
+      ]
+    },
+    {
+      "country_code": "GD",
+      "boundary_set_id": "gd-parish-2021-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "gd-parish-2021-geoboundaries-adm1:GD-10",
+      "area_code": "GD-10",
+      "area_name": "Carriacou & Petite Martinique",
+      "year": 2021,
+      "population_total": 4747,
+      "population_total_basis": "Whole enumerated 2021 census population, all ages, from Table 23 ('Population by Religion and Parish') of the CSO 2021 PRELIMINARY census results. The parish denominator is the sum of all 26 verbatim religion categories, including the 'Not Stated' non-response line. PRELIMINARY source: figures are official CSO counts and reconcile exactly, but may be revised when the final 2021 report is published.",
+      "religious_affiliation_count": 4218,
+      "religious_affiliation_percent": 88.8561,
+      "no_religion_count": 219,
+      "no_religion_percent": 4.6134,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 34.3,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "cso-gd-2021-preliminary-table23-religion-parish",
+        "geoboundaries-grd-adm1"
+      ],
+      "quality_flag": "census_2021_preliminary_release;source_cso_2021_preliminary_table_23_population_by_religion_and_parish;universe_whole_2021_census_population_all_ages;religious_affiliation_slot_22_named_affiliations_plus_other_specify;no_religion_slot_atheist_plus_no_religious_affiliation_two_distinct_lines;not_stated_non_response_inside_denominator_outside_slots;single_wave_2021;religious_change_withheld;boundary_geoboundaries_grd_adm1_ccbysa20;small_cell_under_10",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 1048
+        },
+        {
+          "label_verbatim": "Buddhist",
+          "count": 6
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 2
+        },
+        {
+          "label_verbatim": "Church of God",
+          "count": 71
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "count": 175
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Independent Baptiste",
+          "count": 33
+        },
+        {
+          "label_verbatim": "Jehovah Witnesses",
+          "count": 63
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 34
+        },
+        {
+          "label_verbatim": "Mennonite",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormom",
+          "count": 4
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 7
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 343
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 44
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 1925
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 347
+        },
+        {
+          "label_verbatim": "Spiritual Baptist",
+          "count": 38
+        },
+        {
+          "label_verbatim": "Lutheran",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Atheist",
+          "count": 3
+        },
+        {
+          "label_verbatim": "No Religious Affiliation",
+          "count": 216
+        },
+        {
+          "label_verbatim": "Other (Specify)",
+          "count": 77
+        },
+        {
+          "label_verbatim": "Not Stated",
+          "count": 310
+        }
+      ]
+    }
+  ]
+}
