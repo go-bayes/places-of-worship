@@ -3,7 +3,7 @@
   "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:np-census-religion:np:2021:nso-district",
   "dataset_id": "np-census-religion:np:2021:nso-district",
-  "dataset_version_id": "np-census-religion:np:2021:nso-district:cf016ca3c89d",
+  "dataset_version_id": "np-census-religion:np:2021:nso-district:5dbd73e21c08",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -25,7 +25,7 @@
   ],
   "pipeline": {
     "script": "scripts/build_np_area_summary.R",
-    "git_commit": "0026dace6690976ec23caedc19d995341b2bfe1e",
+    "git_commit": "2a60d9476f7f50da51351d9112e31624b5fd6bb3",
     "command": "Rscript scripts/build_np_area_summary.R",
     "parameters": {
       "construct": "census affiliation",
@@ -248,8 +248,8 @@
       "uri": "repo:apps/regions/np/data/area_summary_district.json",
       "storage_provider": "git_repository",
       "format": "json",
-      "bytes": 144677,
-      "sha256": "cf016ca3c89d9ccd0ba93cbaa1088eb723d7d31f647667a084336daf89b78ba9",
+      "bytes": 152868,
+      "sha256": "5dbd73e21c08cf2552e62984fee4fca8f9963d6d063df3845ea7d9d41a7ae4de",
       "row_count": 77,
       "feature_count": null,
       "content": "Nepal 77-district census-religion area summary for 2021 (ten-religion composition; flat-100 affiliation).",
@@ -261,8 +261,8 @@
       "uri": "repo:apps/regions/np/data/area_summary_district.csv",
       "storage_provider": "git_repository",
       "format": "csv",
-      "bytes": 88099,
-      "sha256": "2b92379b70c92e3566e6fcaffd9e1a06d1ff2c8ae31881cc8b79a31c72776f74",
+      "bytes": 96389,
+      "sha256": "7075acdb9f3ff54191c0d0d2d3b35625fc1d0fd8734b448b6159b0d99e5bd31b",
       "row_count": 77,
       "feature_count": null,
       "content": "Flattened Nepal 77-district census-religion rows for 2021.",
@@ -287,7 +287,7 @@
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/np/data/area_summary_district.json",
-      "sha256": "cf016ca3c89d9ccd0ba93cbaa1088eb723d7d31f647667a084336daf89b78ba9",
+      "sha256": "5dbd73e21c08cf2552e62984fee4fca8f9963d6d063df3845ea7d9d41a7ae4de",
       "built_by": "scripts/build_np_area_summary.R",
       "notes": "77 districts x 1 wave = 77 rows; all-persons-all-ages universe; ten-religion composition on the quality flag; affiliation 100% by construction."
     },

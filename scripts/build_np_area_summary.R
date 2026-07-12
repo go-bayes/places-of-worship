@@ -11,18 +11,19 @@
 # every religion cell is read verbatim from the workbook and reconciled against the
 # printed district and national control totals here; the build stops on any margin
 # mismatch and never allocates, infers, rounds, imputes, redistributes, or tunes a
-# value. the 2021 frame has no no-religion category, so affiliation is 100% by
-# construction (Sri Lanka / Bangladesh flat-100 case): religious_affiliation_percent
-# is 100 for every district, the affiliation count is the district population, and the
-# no-religion slot is null (the category is absent, not zero). the ten-way composition
-# rides verbatim on the quality flag for the PI task-6 minority-share metric.
+# value. the 2021 frame has no no-religion category, and the ten categories exhaust
+# the population, so the product takes the ratified minority-share design (project-lead
+# ruling task 6; BD/PK/LK precedent): religious_affiliation_percent carries the
+# reference-group Hindu share and no_religion_percent its exact complement, the
+# minority share — arithmetic on the published categories, never a no-religion
+# measure. the ten-way composition rides verbatim on the quality flag.
 # outputs: apps/regions/np/data/np_district_2021.geojson,
 #   apps/regions/np/data/area_summary_district.{json,csv}, and
 #   docs/manifests/np-census-religion-2021.json.
 # run from the repo root: Rscript scripts/build_np_area_summary.R
-# STAGED product: no page, no hub link. licence needs_review under BUILD-THEN-ASK
-# (NSO all-rights-reserved with attribution; boundary CC BY-IGO). the page is
-# additionally gated on PI task 6 (flat-100 affiliation).
+# licence needs_review under BUILD-THEN-ASK (NSO all-rights-reserved with
+# attribution; boundary CC BY-IGO). slots re-emitted to the minority-share design
+# at the 2026-07-12 page launch (conductor ruling under ratified task 6).
 
 suppressPackageStartupMessages({
   library(digest)
@@ -276,18 +277,22 @@ area_code <- setNames(written[["area_code"]], written[["area_name"]])
 province_of <- setNames(written[["province_name"]], written[["area_name"]])
 
 # ---- product rows --------------------------------------------------------------
-# flat-100 slot design (Sri Lanka / Bangladesh precedent): every one of the ten
-# categories is a named religion and the ten exhaust the population, so affiliation is
-# 100% by construction and the affiliation count is the district population. the
-# no-religion slot is null (the Nepal frame has no none/atheist/not-stated category);
-# it is absent, not zero. the ten-way composition rides verbatim on the quality flag.
+# minority-share slot design (ratified task 6; BD/PK/LK precedent): the ten named
+# religions exhaust the population with no no-religion or not-stated category, so
+# religious_affiliation_percent carries the reference-group Hindu share (the largest
+# published national category, held constant across every district) and
+# no_religion_percent carries its exact complement, the minority share — arithmetic
+# on the published categories, never a no-religion measure. the ten-way composition
+# rides verbatim on the quality flag.
+
+reference_group <- "Hindu" # largest published national category, held constant everywhere
+minority_categories <- setdiff(religions, reference_group)
 
 flag_common <- paste(
+  "census_flat_frame_minority_share_design",
   "census_affiliation", "all_persons_all_ages_universe", "single_select_reported_religion",
   "ten_religion_frame_no_no_religion_category",
-  "religious_affiliation_percent_is_100_by_construction",
-  "no_religion_slot_null_category_absent_not_zero",
-  "flat_100_affiliation_gated_on_pi_task_6_minority_share_metric",
+  "no_religion_category_absent_minority_share_in_no_religion_slot",
   "single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual",
   "licence_needs_review_build_then_ask_nso_attribution",
   "boundary_cc_by_igo",
@@ -302,9 +307,17 @@ basis_2021 <- paste(
 # build one schema-shaped area-summary row for a district.
 make_row <- function(d) {
   pop <- district_total[[d]]
+  ref_count <- relmat[d, reference_group]
+  minority_count <- pop - ref_count
+  ref_pct <- round(100 * ref_count / pop, 4)
+  minority_pct <- round(100 - ref_pct, 4)
   breakdown <- paste(vapply(religions, function(r) paste0(r, "=", relmat[d, r]), character(1)),
                      collapse = ";")
   full_flag <- paste0(flag_common,
+                      ";reference_group=", reference_group,
+                      ";reference_share_pct=", ref_pct,
+                      ";minority_share_pct=", minority_pct,
+                      ";minority_share=", paste(minority_categories, collapse = "+"),
                       ";province=", province_of[[d]],
                       ";source_categories_verbatim=", breakdown)
   list(
@@ -317,10 +330,10 @@ make_row <- function(d) {
     year = 2021L,
     population_total = as.integer(pop),
     population_total_basis = basis_2021,
-    religious_affiliation_count = as.integer(pop),
-    religious_affiliation_percent = 100.0,
-    no_religion_count = NULL,
-    no_religion_percent = NULL,
+    religious_affiliation_count = as.integer(ref_count),
+    religious_affiliation_percent = ref_pct,
+    no_religion_count = as.integer(minority_count),
+    no_religion_percent = minority_pct,
     place_count = NULL,
     places_per_10000_residents = NULL,
     place_density_per_sq_km = NULL,
@@ -382,8 +395,8 @@ source_datasets <- function() {
 indicators <- function() {
   denom_note <- paste(
     "Percentages use each district's Total Population. The 2021 frame has no no-religion",
-    "or not-stated category, so the ten religion cells exhaust the population and the",
-    "affiliation share is 100% by construction.")
+    "or not-stated category; the ten religion cells exhaust the population, and the two",
+    "slots are exact complements in every row.")
   list(
     list(indicator_id = "population_total", label = "Census population total",
          description = "District all-persons population in the 2021 religion table.",
@@ -391,18 +404,18 @@ indicators <- function() {
          method = "Printed district Total Population, Table 5 (Religion_NPHC_2021.xlsx, Prov_District_local level).",
          temporal_coverage = "2021", spatial_coverage = "Nepal districts (77)",
          quality_notes = "Religion is asked of the whole resident population of all ages. The 77 district totals sum exactly to the national 29,164,578."),
-    list(indicator_id = "religious_affiliation_percent", label = "Religious affiliation %",
-         description = "Share of the district population reporting affiliation with a named religion.",
+    list(indicator_id = "religious_affiliation_percent", label = "Hindu (reference group) %",
+         description = "Reference-group share: the share of the district population reporting Hindu, the largest published national category, held constant across every district. Declared construct under the minority-share design (project-lead ruling task 6): the value is that group's share of the census frame, never a measure of affiliation versus non-affiliation.",
          unit = "percent", denominator_indicator_id = "population_total",
-         method = "100 * (sum of the ten named-religion cells) / population; equal to 100 by construction because the Nepal frame has no no-religion category.",
+         method = "100 * Hindu / population_total. The ten named-religion cells exhaust the population; the Nepal frame has no no-religion or not-stated category.",
          temporal_coverage = "2021", spatial_coverage = "Nepal districts (77)",
-         quality_notes = paste("Flat-100 by construction (Sri Lanka / Bangladesh precedent); the map-worthy signal is the ten-way composition on the quality flag, surfaced by the PI task-6 minority-share metric.", denom_note)),
-    list(indicator_id = "no_religion_percent", label = "No religious affiliation %",
-         description = "Share of the district population reporting no religion.",
+         quality_notes = paste("Minority-share design (BD/PK/LK precedent); the ten-way composition rides verbatim on the quality flag.", denom_note)),
+    list(indicator_id = "no_religion_percent", label = "Minority share %",
+         description = "The exact complement of the reference-group Hindu share: the summed share of the other nine named religions. Arithmetic on the published categories, never a no-religion measure.",
          unit = "percent", denominator_indicator_id = "population_total",
-         method = "Null: the Nepal 2021 religion frame contains no no-religion, atheist, or not-stated category.",
+         method = "100 * (Bouddha + Islam + Kirat + Christian + Prakriti + Bon + Jain + Bahai + Sikha) / population_total; equivalently 100 minus the Hindu share. The two slots are exact complements in every row.",
          temporal_coverage = "2021", spatial_coverage = "Nepal districts (77)",
-         quality_notes = "The no-religion slot is null because the category is absent from the source frame, not zero. Every enumerated person is assigned one of ten named religions.")
+         quality_notes = "The no_religion slot carries the minority share under the minority-share design; the field name is the legacy slot key and carries no no-religion semantics. The Nepal frame has no no-religion and no not-stated category.")
   )
 }
 
@@ -412,11 +425,11 @@ visual_layers <- function() {
          description = "Nepal 2021 census ten-religion composition by district.", layer_type = "choropleth",
          indicator_ids = list("religious_affiliation_percent"), geometry_unit_type = "area_unit",
          legend = list(unit = "percent", denominator = "district total population",
-                       note = "affiliation is 100% by construction; the ten-way composition rides on the quality flag for the minority-share metric"),
+                       note = "reference-group Hindu share and its exact complement, the minority share; the ten-way composition rides on the quality flag"),
          colour_scale = "sequential", time_control = "none",
          aggregation_rule = "reported district value", uncertainty_display = "quality_flag",
          default_visibility = TRUE,
-         notes = "Census affiliation, not practice, attendance, or membership. Single wave (2021). Page gated on PI task 6 (flat-100).")
+         notes = "Census affiliation, not practice, attendance, or membership. Single wave (2021). Minority-share design under the ratified task-6 ruling (BD/PK/LK family).")
   )
 }
 

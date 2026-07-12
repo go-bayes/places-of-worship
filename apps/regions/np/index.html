@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Nepal Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712b" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime
+    // ../_shared/region-map.js and keys on this config plus the data files.
+    // Nepal's product is a single 2021 wave of district census religion from the
+    // National Statistics Office of Nepal (NSO), National Population and Housing
+    // Census 2021, Table 5 (Population by Religion and Sex), rendered exactly as
+    // the NSO prints it. The ten published categories (Hindu, Bouddha, Islam,
+    // Kirat, Christian, Prakriti, Bon, Jain, Bahai, Sikha) are carried verbatim;
+    // nothing is combined and no count is suppressed. It does not measure belief,
+    // practice, or attendance.
+    //
+    // Minority-share design (minority-share-metric.md, ratified 2026-07-11). The
+    // 2021 ten-religion frame partitions every enumerated person into one of ten
+    // named religions, with no no-religion and no not-stated category; the frame
+    // sums to 100 by construction. The two legacy slots therefore carry declared
+    // constructs: the affiliation slot is the reference-group (Hindu) share —
+    // Hindu is Nepal's largest published national category (national share
+    // 81.19%), declared once and held constant across every district — and the
+    // no-religion slot is the exact complement, the minority share (Bouddha +
+    // Islam + Kirat + Christian + Prakriti + Bon + Jain + Bahai + Sikha summed).
+    // The full ten-category composition rides each row verbatim (source_
+    // categories_verbatim in quality_flag); the popup shows the two shares. No
+    // change metric is offered: only the 2021 wave ships. The 2011 district wave
+    // is HELD (the 75-district Social Characteristics table is behind the census
+    // single-page-application 404), and the 2015 district split (75 to 77) and
+    // the 2011 "Undefined" residual are frame breaks that bar cross-wave change.
+    window.REGION_CONFIG = {
+      countryCode: "NP",
+      title: "Places of Worship | Nepal Research Map",
+      // Nepal spans lon 80.06..88.20E, lat 26.35..30.45N; centre for the panel
+      center: [84.1, 28.3],
+      initialZoom: 6.3,
+      censusLevels: {
+        district: {
+          label: "District (2021)",
+          boundaries: "data/np_district_2021.geojson",
+          summary: "data/area_summary_district.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "District census religion from the National Statistics Office of Nepal (NSO), National Population and Housing Census 2021, Table 5, on the 77-district 2021 frame &middot; Boundaries OCHA COD-AB Nepal admin2 (Survey Department of Nepal / OCHA FISS), CC BY-IGO"
+        }
+      },
+      defaultLevel: "district",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      // minority-share design: the ten-category census frame sums to 100 by
+      // construction; the two legacy slots therefore carry declared constructs.
+      // The affiliation slot is the reference-group (Hindu) share; the
+      // no-religion slot is its exact complement, the minority share. No change
+      // slot is emitted (single 2021 wave).
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Hindu (%)",
+          note: "share of the district's census religion population reporting Hindu, Nepal's largest published national category, held constant as the reference group across every district. This is the reference group's share of the census frame, not a measure of affiliation versus non-affiliation. The popup shows this share and the minority share; the full ten-category composition (Hindu, Bouddha, Islam, Kirat, Christian, Prakriti, Bon, Jain, Bahai, Sikha) rides each row of the downloadable area summary verbatim."
+        },
+        no_religion_percent: {
+          label: "Minority share (%)",
+          note: "share outside Nepal's largest published category, Hindu: the summed share of Bouddha, Islam, Kirat, Christian, Prakriti, Bon, Jain, Bahai and Sikha, the exact complement of the Hindu share. This is arithmetic on the published census categories; it is not a measure of no religion, belief, practice, or secularity."
+        }
+      },
+      popupDenominatorNote: "Percentages use each district's total census population (the sum of the ten published religion categories: Hindu, Bouddha, Islam, Kirat, Christian, Prakriti, Bon, Jain, Bahai, Sikha) as the denominator. The Hindu (%) metric is the reference-group share; the Minority share (%) metric is its exact complement, the share outside the reference group. The 2021 census religion frame has no no-religion category and no not-stated category; the frame sums to 100 by construction. These are census enumerations rendered exactly as published; they do not measure belief, practice, or attendance.",
+      cityPresets: [
+        { label: "Kathmandu", coords: [85.3240, 27.7172], zoom: 11 },
+        { label: "Pokhara", coords: [83.9856, 28.2096], zoom: 11 },
+        { label: "Biratnagar", coords: [87.2718, 26.4525], zoom: 11 },
+        { label: "Birgunj", coords: [84.8800, 27.0104], zoom: 11 },
+        { label: "Bharatpur", coords: [84.4333, 27.6833], zoom: 11 },
+        { label: "Butwal", coords: [83.4483, 27.7006], zoom: 11 },
+        { label: "Dharan", coords: [87.2830, 26.8065], zoom: 11 },
+        { label: "Nepalgunj", coords: [81.6167, 28.0500], zoom: 11 }
+      ],
+      geocode: { country: "np", biasLngLat: [84.1, 28.3] },
+      onboarding: {
+        title: "Nepal research map",
+        intro: "District census religion for Nepal, a single 2021 snapshot from the National Statistics Office of Nepal (NSO), National Population and Housing Census 2021, Table 5 (Population by Religion and Sex). The construct is census affiliation over the ten-category official frame, rendered exactly as the NSO prints it; the map shades the reference-group (Hindu) share and its exact complement, the minority share. It does not measure belief, practice, or attendance.",
+        bullets: [
+          "Districts carry the census composition in ten recognised categories printed verbatim by the NSO: Hindu, Bouddha, Islam, Kirat, Christian, Prakriti, Bon, Jain, Bahai and Sikha. Nothing is combined and no count is suppressed.",
+          "Two metrics are shown: the Hindu (%) share, the reference group and Nepal's largest published national category, and the Minority share (%), its exact complement (Bouddha + Islam + Kirat + Christian + Prakriti + Bon + Jain + Bahai + Sikha). The minority share is highest in the northern and eastern hill and mountain districts, led by Rasuwa (74.4), Panchthar (70.8) and Taplejung (69.6); it is lowest in the far-western hills, at Baitadi (0.04).",
+          "The minority share is arithmetic on the published census categories; it is not a measure of no religion, belief, practice, or secularity. The 2021 frame has no no-religion category and no not-stated category. Tap a district for its Hindu share and minority share; the verbatim ten-category counts ride every row of the downloadable area summary (see About this map).",
+          "The composition, carried verbatim in every row, is sharply regional: Rasuwa is 70.8 percent Bouddha, Panchthar 55.7 percent Kirat, and Rautahat 22.5 percent Islam. Buddhism concentrates in the high mountains and the Kathmandu Valley, Kirat in the eastern hills of Koshi province, and Islam in the Madhesh Terai.",
+          "Only the 2021 wave is mapped, and no change metric is offered; the 2011 district religion table is held pending recovery. Open <strong>Show Census Data</strong> (top centre) for the geography and metric controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://censusresults.nsonepal.gov.np/" target="_blank" rel="noopener">National Statistics Office of Nepal</a>, National Population and Housing Census 2021, Table 5 (Population by Religion and Sex) &middot; Reuse terms unresolved (staging) &middot; Boundaries &copy; <a href="https://data.humdata.org/dataset/cod-ab-npl" target="_blank" rel="noopener">OCHA COD-AB</a>; Survey Department of Nepal / OCHA FISS (CC BY-IGO)',
+      censusFlagNote: "* The 2021 census religion frame is Hindu, Bouddha, Islam, Kirat, Christian, Prakriti, Bon, Jain, Bahai and Sikha, with no no-religion category and no not-stated category; the frame therefore sums to 100% by construction. The map shades the reference-group (Hindu) share and its exact complement, the minority share; the no-religion slot label carries the minority share and no no-religion meaning. Every district's ten religion cells sum exactly to its total population, and the 77 district totals sum exactly to the national 29,164,578, with no cell suppression. This product renders a single 2021 wave; the 2011 district religion table is held pending recovery, and the 2015 district split (75 to 77) and the 2011 'Undefined' residual bar cross-wave change. The National Statistics Office asserts all rights reserved with no open-reuse licence located; the derived district summaries ship with NSO attribution while a reuse ask is outgoing, and the page reverts in a single commit if the NSO objects. Boundaries are OCHA COD-AB Nepal admin2 (Survey Department of Nepal / OCHA FISS), CC BY-IGO (Creative Commons Attribution 3.0 IGO)."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712b"></script>
+</body>
+</html>

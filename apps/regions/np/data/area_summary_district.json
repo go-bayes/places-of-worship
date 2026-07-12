@@ -66,25 +66,25 @@
     },
     {
       "indicator_id": "religious_affiliation_percent",
-      "label": "Religious affiliation %",
-      "description": "Share of the district population reporting affiliation with a named religion.",
+      "label": "Hindu (reference group) %",
+      "description": "Reference-group share: the share of the district population reporting Hindu, the largest published national category, held constant across every district. Declared construct under the minority-share design (project-lead ruling task 6): the value is that group's share of the census frame, never a measure of affiliation versus non-affiliation.",
       "unit": "percent",
       "denominator_indicator_id": "population_total",
-      "method": "100 * (sum of the ten named-religion cells) / population; equal to 100 by construction because the Nepal frame has no no-religion category.",
+      "method": "100 * Hindu / population_total. The ten named-religion cells exhaust the population; the Nepal frame has no no-religion or not-stated category.",
       "temporal_coverage": "2021",
       "spatial_coverage": "Nepal districts (77)",
-      "quality_notes": "Flat-100 by construction (Sri Lanka / Bangladesh precedent); the map-worthy signal is the ten-way composition on the quality flag, surfaced by the PI task-6 minority-share metric. Percentages use each district's Total Population. The 2021 frame has no no-religion or not-stated category, so the ten religion cells exhaust the population and the affiliation share is 100% by construction."
+      "quality_notes": "Minority-share design (BD/PK/LK precedent); the ten-way composition rides verbatim on the quality flag. Percentages use each district's Total Population. The 2021 frame has no no-religion or not-stated category; the ten religion cells exhaust the population, and the two slots are exact complements in every row."
     },
     {
       "indicator_id": "no_religion_percent",
-      "label": "No religious affiliation %",
-      "description": "Share of the district population reporting no religion.",
+      "label": "Minority share %",
+      "description": "The exact complement of the reference-group Hindu share: the summed share of the other nine named religions. Arithmetic on the published categories, never a no-religion measure.",
       "unit": "percent",
       "denominator_indicator_id": "population_total",
-      "method": "Null: the Nepal 2021 religion frame contains no no-religion, atheist, or not-stated category.",
+      "method": "100 * (Bouddha + Islam + Kirat + Christian + Prakriti + Bon + Jain + Bahai + Sikha) / population_total; equivalently 100 minus the Hindu share. The two slots are exact complements in every row.",
       "temporal_coverage": "2021",
       "spatial_coverage": "Nepal districts (77)",
-      "quality_notes": "The no-religion slot is null because the category is absent from the source frame, not zero. Every enumerated person is assigned one of ten named religions."
+      "quality_notes": "The no_religion slot carries the minority share under the minority-share design; the field name is the legacy slot key and carries no no-religion semantics. The Nepal frame has no no-religion and no not-stated category."
     }
   ],
   "visual_layers": [
@@ -100,14 +100,14 @@
       "legend": {
         "unit": "percent",
         "denominator": "district total population",
-        "note": "affiliation is 100% by construction; the ten-way composition rides on the quality flag for the minority-share metric"
+        "note": "reference-group Hindu share and its exact complement, the minority share; the ten-way composition rides on the quality flag"
       },
       "colour_scale": "sequential",
       "time_control": "none",
       "aggregation_rule": "reported district value",
       "uncertainty_display": "quality_flag",
       "default_visibility": true,
-      "notes": "Census affiliation, not practice, attendance, or membership. Single wave (2021). Page gated on PI task 6 (flat-100)."
+      "notes": "Census affiliation, not practice, attendance, or membership. Single wave (2021). Minority-share design under the ratified task-6 ruling (BD/PK/LK family)."
     }
   ],
   "rows": [
@@ -121,10 +121,10 @@
       "year": 2021,
       "population_total": 120590,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 120590,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 36717,
+      "religious_affiliation_percent": 30.4478,
+      "no_religion_count": 83873,
+      "no_religion_percent": 69.5522,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -135,7 +135,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Koshi;source_categories_verbatim=Hindu=36717;Bouddha=26496;Islam=112;Kirat=53328;Christian=3134;Prakriti=10;Bon=792;Jain=1;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=30.4478;minority_share_pct=69.5522;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Koshi;source_categories_verbatim=Hindu=36717;Bouddha=26496;Islam=112;Kirat=53328;Christian=3134;Prakriti=10;Bon=792;Jain=1;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -147,10 +147,10 @@
       "year": 2021,
       "population_total": 158041,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 158041,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 63889,
+      "religious_affiliation_percent": 40.4256,
+      "no_religion_count": 94152,
+      "no_religion_percent": 59.5744,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -161,7 +161,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Koshi;source_categories_verbatim=Hindu=63889;Bouddha=42258;Islam=491;Kirat=45581;Christian=5072;Prakriti=6;Bon=709;Jain=2;Bahai=0;Sikha=33"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=40.4256;minority_share_pct=59.5744;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Koshi;source_categories_verbatim=Hindu=63889;Bouddha=42258;Islam=491;Kirat=45581;Christian=5072;Prakriti=6;Bon=709;Jain=2;Bahai=0;Sikha=33"
     },
     {
       "country_code": "NP",
@@ -173,10 +173,10 @@
       "year": 2021,
       "population_total": 104851,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 104851,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 39573,
+      "religious_affiliation_percent": 37.7421,
+      "no_religion_count": 65278,
+      "no_religion_percent": 62.2579,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -187,7 +187,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Koshi;source_categories_verbatim=Hindu=39573;Bouddha=29682;Islam=6;Kirat=32295;Christian=3287;Prakriti=6;Bon=2;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=37.7421;minority_share_pct=62.2579;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Koshi;source_categories_verbatim=Hindu=39573;Bouddha=29682;Islam=6;Kirat=32295;Christian=3287;Prakriti=6;Bon=2;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -199,10 +199,10 @@
       "year": 2021,
       "population_total": 139552,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 139552,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 90645,
+      "religious_affiliation_percent": 64.9543,
+      "no_religion_count": 48907,
+      "no_religion_percent": 35.0457,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -213,7 +213,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Koshi;source_categories_verbatim=Hindu=90645;Bouddha=27923;Islam=3;Kirat=18777;Christian=2123;Prakriti=46;Bon=35;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=64.9543;minority_share_pct=35.0457;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Koshi;source_categories_verbatim=Hindu=90645;Bouddha=27923;Islam=3;Kirat=18777;Christian=2123;Prakriti=46;Bon=35;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -225,10 +225,10 @@
       "year": 2021,
       "population_total": 175298,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 175298,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 91508,
+      "religious_affiliation_percent": 52.2014,
+      "no_religion_count": 83790,
+      "no_religion_percent": 47.7986,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -239,7 +239,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Koshi;source_categories_verbatim=Hindu=91508;Bouddha=14622;Islam=23;Kirat=63459;Christian=5388;Prakriti=294;Bon=4;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=52.2014;minority_share_pct=47.7986;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Koshi;source_categories_verbatim=Hindu=91508;Bouddha=14622;Islam=23;Kirat=63459;Christian=5388;Prakriti=294;Bon=4;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -251,10 +251,10 @@
       "year": 2021,
       "population_total": 157923,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 157923,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 73259,
+      "religious_affiliation_percent": 46.3891,
+      "no_religion_count": 84664,
+      "no_religion_percent": 53.6109,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -265,7 +265,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Koshi;source_categories_verbatim=Hindu=73259;Bouddha=25335;Islam=28;Kirat=57317;Christian=1909;Prakriti=70;Bon=4;Jain=0;Bahai=1;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=46.3891;minority_share_pct=53.6109;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Koshi;source_categories_verbatim=Hindu=73259;Bouddha=25335;Islam=28;Kirat=57317;Christian=1909;Prakriti=70;Bon=4;Jain=0;Bahai=1;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -277,10 +277,10 @@
       "year": 2021,
       "population_total": 150599,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 150599,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 74642,
+      "religious_affiliation_percent": 49.5634,
+      "no_religion_count": 75957,
+      "no_religion_percent": 50.4366,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -291,7 +291,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Koshi;source_categories_verbatim=Hindu=74642;Bouddha=19746;Islam=144;Kirat=52325;Christian=3720;Prakriti=22;Bon=0;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=49.5634;minority_share_pct=50.4366;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Koshi;source_categories_verbatim=Hindu=74642;Bouddha=19746;Islam=144;Kirat=52325;Christian=3720;Prakriti=22;Bon=0;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -303,10 +303,10 @@
       "year": 2021,
       "population_total": 88731,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 88731,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 45215,
+      "religious_affiliation_percent": 50.9574,
+      "no_religion_count": 43516,
+      "no_religion_percent": 49.0426,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -317,7 +317,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Koshi;source_categories_verbatim=Hindu=45215;Bouddha=11991;Islam=15;Kirat=29462;Christian=1846;Prakriti=108;Bon=94;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=50.9574;minority_share_pct=49.0426;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Koshi;source_categories_verbatim=Hindu=45215;Bouddha=11991;Islam=15;Kirat=29462;Christian=1846;Prakriti=108;Bon=94;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -329,10 +329,10 @@
       "year": 2021,
       "population_total": 172400,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 172400,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 50357,
+      "religious_affiliation_percent": 29.2094,
+      "no_religion_count": 122043,
+      "no_religion_percent": 70.7906,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -343,7 +343,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Koshi;source_categories_verbatim=Hindu=50357;Bouddha=21129;Islam=166;Kirat=96049;Christian=4684;Prakriti=14;Bon=1;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=29.2094;minority_share_pct=70.7906;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Koshi;source_categories_verbatim=Hindu=50357;Bouddha=21129;Islam=166;Kirat=96049;Christian=4684;Prakriti=14;Bon=1;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -355,10 +355,10 @@
       "year": 2021,
       "population_total": 279534,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 279534,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 123533,
+      "religious_affiliation_percent": 44.1925,
+      "no_religion_count": 156001,
+      "no_religion_percent": 55.8075,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -369,7 +369,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Koshi;source_categories_verbatim=Hindu=123533;Bouddha=44627;Islam=229;Kirat=101192;Christian=9825;Prakriti=85;Bon=43;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=44.1925;minority_share_pct=55.8075;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Koshi;source_categories_verbatim=Hindu=123533;Bouddha=44627;Islam=229;Kirat=101192;Christian=9825;Prakriti=85;Bon=43;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -381,10 +381,10 @@
       "year": 2021,
       "population_total": 998054,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 998054,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 789432,
+      "religious_affiliation_percent": 79.0971,
+      "no_religion_count": 208622,
+      "no_religion_percent": 20.9029,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -395,7 +395,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Koshi;source_categories_verbatim=Hindu=789432;Bouddha=49295;Islam=33200;Kirat=93648;Christian=25929;Prakriti=6293;Bon=75;Jain=150;Bahai=0;Sikha=32"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=79.0971;minority_share_pct=20.9029;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Koshi;source_categories_verbatim=Hindu=789432;Bouddha=49295;Islam=33200;Kirat=93648;Christian=25929;Prakriti=6293;Bon=75;Jain=150;Bahai=0;Sikha=32"
     },
     {
       "country_code": "NP",
@@ -407,10 +407,10 @@
       "year": 2021,
       "population_total": 1148156,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 1148156,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 935450,
+      "religious_affiliation_percent": 81.4741,
+      "no_religion_count": 212706,
+      "no_religion_percent": 18.5259,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -421,7 +421,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Koshi;source_categories_verbatim=Hindu=935450;Bouddha=46633;Islam=56757;Kirat=76294;Christian=22648;Prakriti=9213;Bon=247;Jain=714;Bahai=166;Sikha=34"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=81.4741;minority_share_pct=18.5259;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Koshi;source_categories_verbatim=Hindu=935450;Bouddha=46633;Islam=56757;Kirat=76294;Christian=22648;Prakriti=9213;Bon=247;Jain=714;Bahai=166;Sikha=34"
     },
     {
       "country_code": "NP",
@@ -433,10 +433,10 @@
       "year": 2021,
       "population_total": 926962,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 926962,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 689190,
+      "religious_affiliation_percent": 74.3493,
+      "no_religion_count": 237772,
+      "no_religion_percent": 25.6507,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -447,7 +447,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Koshi;source_categories_verbatim=Hindu=689190;Bouddha=33736;Islam=114416;Kirat=71568;Christian=15639;Prakriti=2079;Bon=141;Jain=156;Bahai=15;Sikha=22"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=74.3493;minority_share_pct=25.6507;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Koshi;source_categories_verbatim=Hindu=689190;Bouddha=33736;Islam=114416;Kirat=71568;Christian=15639;Prakriti=2079;Bon=141;Jain=156;Bahai=15;Sikha=22"
     },
     {
       "country_code": "NP",
@@ -459,10 +459,10 @@
       "year": 2021,
       "population_total": 340721,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 340721,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 239773,
+      "religious_affiliation_percent": 70.3722,
+      "no_religion_count": 100948,
+      "no_religion_percent": 29.6278,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -473,7 +473,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Koshi;source_categories_verbatim=Hindu=239773;Bouddha=39791;Islam=2721;Kirat=44191;Christian=10049;Prakriti=4171;Bon=6;Jain=4;Bahai=12;Sikha=3"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=70.3722;minority_share_pct=29.6278;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Koshi;source_categories_verbatim=Hindu=239773;Bouddha=39791;Islam=2721;Kirat=44191;Christian=10049;Prakriti=4171;Bon=6;Jain=4;Bahai=12;Sikha=3"
     },
     {
       "country_code": "NP",
@@ -485,10 +485,10 @@
       "year": 2021,
       "population_total": 706255,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 706255,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 624854,
+      "religious_affiliation_percent": 88.4743,
+      "no_religion_count": 81401,
+      "no_religion_percent": 11.5257,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -499,7 +499,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Madhesh;source_categories_verbatim=Hindu=624854;Bouddha=12132;Islam=67782;Kirat=586;Christian=455;Prakriti=59;Bon=1;Jain=384;Bahai=2;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=88.4743;minority_share_pct=11.5257;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Madhesh;source_categories_verbatim=Hindu=624854;Bouddha=12132;Islam=67782;Kirat=586;Christian=455;Prakriti=59;Bon=1;Jain=384;Bahai=2;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -511,10 +511,10 @@
       "year": 2021,
       "population_total": 739953,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 739953,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 667968,
+      "religious_affiliation_percent": 90.2717,
+      "no_religion_count": 71985,
+      "no_religion_percent": 9.7283,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -525,7 +525,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Madhesh;source_categories_verbatim=Hindu=667968;Bouddha=8234;Islam=61242;Kirat=914;Christian=819;Prakriti=761;Bon=1;Jain=13;Bahai=1;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=90.2717;minority_share_pct=9.7283;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Madhesh;source_categories_verbatim=Hindu=667968;Bouddha=8234;Islam=61242;Kirat=914;Christian=819;Prakriti=761;Bon=1;Jain=13;Bahai=1;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -537,10 +537,10 @@
       "year": 2021,
       "population_total": 867747,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 867747,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 772128,
+      "religious_affiliation_percent": 88.9808,
+      "no_religion_count": 95619,
+      "no_religion_percent": 11.0192,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -551,7 +551,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Madhesh;source_categories_verbatim=Hindu=772128;Bouddha=9789;Islam=84080;Kirat=256;Christian=1169;Prakriti=82;Bon=213;Jain=30;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=88.9808;minority_share_pct=11.0192;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Madhesh;source_categories_verbatim=Hindu=772128;Bouddha=9789;Islam=84080;Kirat=256;Christian=1169;Prakriti=82;Bon=213;Jain=30;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -563,10 +563,10 @@
       "year": 2021,
       "population_total": 706994,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 706994,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 584513,
+      "religious_affiliation_percent": 82.6758,
+      "no_religion_count": 122481,
+      "no_religion_percent": 17.3242,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -577,7 +577,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Madhesh;source_categories_verbatim=Hindu=584513;Bouddha=10953;Islam=109914;Kirat=219;Christian=1137;Prakriti=230;Bon=0;Jain=26;Bahai=0;Sikha=2"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=82.6758;minority_share_pct=17.3242;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Madhesh;source_categories_verbatim=Hindu=584513;Bouddha=10953;Islam=109914;Kirat=219;Christian=1137;Prakriti=230;Bon=0;Jain=26;Bahai=0;Sikha=2"
     },
     {
       "country_code": "NP",
@@ -589,10 +589,10 @@
       "year": 2021,
       "population_total": 862470,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 862470,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 739092,
+      "religious_affiliation_percent": 85.6948,
+      "no_religion_count": 123378,
+      "no_religion_percent": 14.3052,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -603,7 +603,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Madhesh;source_categories_verbatim=Hindu=739092;Bouddha=43074;Islam=76659;Kirat=549;Christian=2755;Prakriti=311;Bon=20;Jain=1;Bahai=1;Sikha=8"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=85.6948;minority_share_pct=14.3052;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Madhesh;source_categories_verbatim=Hindu=739092;Bouddha=43074;Islam=76659;Kirat=549;Christian=2755;Prakriti=311;Bon=20;Jain=1;Bahai=1;Sikha=8"
     },
     {
       "country_code": "NP",
@@ -615,10 +615,10 @@
       "year": 2021,
       "population_total": 813573,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 813573,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 616023,
+      "religious_affiliation_percent": 75.7182,
+      "no_religion_count": 197550,
+      "no_religion_percent": 24.2818,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -629,7 +629,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Madhesh;source_categories_verbatim=Hindu=616023;Bouddha=12241;Islam=183448;Kirat=192;Christian=1630;Prakriti=25;Bon=11;Jain=1;Bahai=0;Sikha=2"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=75.7182;minority_share_pct=24.2818;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Madhesh;source_categories_verbatim=Hindu=616023;Bouddha=12241;Islam=183448;Kirat=192;Christian=1630;Prakriti=25;Bon=11;Jain=1;Bahai=0;Sikha=2"
     },
     {
       "country_code": "NP",
@@ -641,10 +641,10 @@
       "year": 2021,
       "population_total": 763137,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 763137,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 617344,
+      "religious_affiliation_percent": 80.8956,
+      "no_religion_count": 145793,
+      "no_religion_percent": 19.1044,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -655,7 +655,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Madhesh;source_categories_verbatim=Hindu=617344;Bouddha=30980;Islam=112248;Kirat=326;Christian=2155;Prakriti=75;Bon=0;Jain=3;Bahai=0;Sikha=6"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=80.8956;minority_share_pct=19.1044;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Madhesh;source_categories_verbatim=Hindu=617344;Bouddha=30980;Islam=112248;Kirat=326;Christian=2155;Prakriti=75;Bon=0;Jain=3;Bahai=0;Sikha=6"
     },
     {
       "country_code": "NP",
@@ -667,10 +667,10 @@
       "year": 2021,
       "population_total": 654471,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 654471,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 529083,
+      "religious_affiliation_percent": 80.8413,
+      "no_religion_count": 125388,
+      "no_religion_percent": 19.1587,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -681,7 +681,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Madhesh;source_categories_verbatim=Hindu=529083;Bouddha=7922;Islam=116505;Kirat=57;Christian=778;Prakriti=6;Bon=17;Jain=7;Bahai=0;Sikha=96"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=80.8413;minority_share_pct=19.1587;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Madhesh;source_categories_verbatim=Hindu=529083;Bouddha=7922;Islam=116505;Kirat=57;Christian=778;Prakriti=6;Bon=17;Jain=7;Bahai=0;Sikha=96"
     },
     {
       "country_code": "NP",
@@ -693,10 +693,10 @@
       "year": 2021,
       "population_total": 172767,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 172767,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 114841,
+      "religious_affiliation_percent": 66.4716,
+      "no_religion_count": 57926,
+      "no_religion_percent": 33.5284,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -707,7 +707,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Bagmati;source_categories_verbatim=Hindu=114841;Bouddha=44923;Islam=107;Kirat=9320;Christian=3539;Prakriti=0;Bon=37;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=66.4716;minority_share_pct=33.5284;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Bagmati;source_categories_verbatim=Hindu=114841;Bouddha=44923;Islam=107;Kirat=9320;Christian=3539;Prakriti=0;Bon=37;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -719,10 +719,10 @@
       "year": 2021,
       "population_total": 262624,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 262624,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 142255,
+      "religious_affiliation_percent": 54.1668,
+      "no_religion_count": 120369,
+      "no_religion_percent": 45.8332,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -733,7 +733,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Bagmati;source_categories_verbatim=Hindu=142255;Bouddha=108753;Islam=104;Kirat=2956;Christian=6533;Prakriti=1523;Bon=500;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=54.1668;minority_share_pct=45.8332;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Bagmati;source_categories_verbatim=Hindu=142255;Bouddha=108753;Islam=104;Kirat=2956;Christian=6533;Prakriti=1523;Bon=500;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -745,10 +745,10 @@
       "year": 2021,
       "population_total": 46689,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 46689,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 11956,
+      "religious_affiliation_percent": 25.6077,
+      "no_religion_count": 34733,
+      "no_religion_percent": 74.3923,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -759,7 +759,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Bagmati;source_categories_verbatim=Hindu=11956;Bouddha=33075;Islam=16;Kirat=14;Christian=1606;Prakriti=19;Bon=3;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=25.6077;minority_share_pct=74.3923;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Bagmati;source_categories_verbatim=Hindu=11956;Bouddha=33075;Islam=16;Kirat=14;Christian=1606;Prakriti=19;Bon=3;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -771,10 +771,10 @@
       "year": 2021,
       "population_total": 325710,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 325710,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 230315,
+      "religious_affiliation_percent": 70.7117,
+      "no_religion_count": 95395,
+      "no_religion_percent": 29.2883,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -785,7 +785,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Bagmati;source_categories_verbatim=Hindu=230315;Bouddha=66000;Islam=1320;Kirat=1396;Christian=24578;Prakriti=1249;Bon=843;Jain=0;Bahai=0;Sikha=9"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=70.7117;minority_share_pct=29.2883;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Bagmati;source_categories_verbatim=Hindu=230315;Bouddha=66000;Islam=1320;Kirat=1396;Christian=24578;Prakriti=1249;Bon=843;Jain=0;Bahai=0;Sikha=9"
     },
     {
       "country_code": "NP",
@@ -797,10 +797,10 @@
       "year": 2021,
       "population_total": 263391,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 263391,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 150074,
+      "religious_affiliation_percent": 56.9776,
+      "no_religion_count": 113317,
+      "no_religion_percent": 43.0224,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -811,7 +811,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Bagmati;source_categories_verbatim=Hindu=150074;Bouddha=100436;Islam=515;Kirat=5511;Christian=6704;Prakriti=38;Bon=107;Jain=0;Bahai=2;Sikha=4"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=56.9776;minority_share_pct=43.0224;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Bagmati;source_categories_verbatim=Hindu=150074;Bouddha=100436;Islam=515;Kirat=5511;Christian=6704;Prakriti=38;Bon=107;Jain=0;Bahai=2;Sikha=4"
     },
     {
       "country_code": "NP",
@@ -823,10 +823,10 @@
       "year": 2021,
       "population_total": 2041587,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 2041587,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 1602377,
+      "religious_affiliation_percent": 78.4868,
+      "no_religion_count": 439210,
+      "no_religion_percent": 21.5132,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -837,7 +837,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Bagmati;source_categories_verbatim=Hindu=1602377;Bouddha=332340;Islam=26339;Kirat=29291;Christian=48126;Prakriti=1063;Bon=1175;Jain=687;Bahai=21;Sikha=168"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=78.4868;minority_share_pct=21.5132;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Bagmati;source_categories_verbatim=Hindu=1602377;Bouddha=332340;Islam=26339;Kirat=29291;Christian=48126;Prakriti=1063;Bon=1175;Jain=687;Bahai=21;Sikha=168"
     },
     {
       "country_code": "NP",
@@ -849,10 +849,10 @@
       "year": 2021,
       "population_total": 432132,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 432132,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 373382,
+      "religious_affiliation_percent": 86.4046,
+      "no_religion_count": 58750,
+      "no_religion_percent": 13.5954,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -863,7 +863,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Bagmati;source_categories_verbatim=Hindu=373382;Bouddha=42900;Islam=2102;Kirat=4941;Christian=8712;Prakriti=47;Bon=46;Jain=2;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=86.4046;minority_share_pct=13.5954;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Bagmati;source_categories_verbatim=Hindu=373382;Bouddha=42900;Islam=2102;Kirat=4941;Christian=8712;Prakriti=47;Bon=46;Jain=2;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -875,10 +875,10 @@
       "year": 2021,
       "population_total": 551667,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 551667,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 412050,
+      "religious_affiliation_percent": 74.6918,
+      "no_religion_count": 139617,
+      "no_religion_percent": 25.3082,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -889,7 +889,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Bagmati;source_categories_verbatim=Hindu=412050;Bouddha=94738;Islam=4040;Kirat=13539;Christian=26568;Prakriti=320;Bon=244;Jain=65;Bahai=11;Sikha=92"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=74.6918;minority_share_pct=25.3082;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Bagmati;source_categories_verbatim=Hindu=412050;Bouddha=94738;Islam=4040;Kirat=13539;Christian=26568;Prakriti=320;Bon=244;Jain=65;Bahai=11;Sikha=92"
     },
     {
       "country_code": "NP",
@@ -901,10 +901,10 @@
       "year": 2021,
       "population_total": 364039,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 364039,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 230460,
+      "religious_affiliation_percent": 63.3064,
+      "no_religion_count": 133579,
+      "no_religion_percent": 36.6936,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -915,7 +915,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Bagmati;source_categories_verbatim=Hindu=230460;Bouddha=123371;Islam=681;Kirat=594;Christian=7664;Prakriti=1256;Bon=11;Jain=0;Bahai=0;Sikha=2"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=63.3064;minority_share_pct=36.6936;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Bagmati;source_categories_verbatim=Hindu=230460;Bouddha=123371;Islam=681;Kirat=594;Christian=7664;Prakriti=1256;Bon=11;Jain=0;Bahai=0;Sikha=2"
     },
     {
       "country_code": "NP",
@@ -927,10 +927,10 @@
       "year": 2021,
       "population_total": 170302,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 170302,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 120330,
+      "religious_affiliation_percent": 70.6568,
+      "no_religion_count": 49972,
+      "no_religion_percent": 29.3432,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -941,7 +941,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Bagmati;source_categories_verbatim=Hindu=120330;Bouddha=40644;Islam=48;Kirat=5365;Christian=3549;Prakriti=291;Bon=75;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=70.6568;minority_share_pct=29.3432;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Bagmati;source_categories_verbatim=Hindu=120330;Bouddha=40644;Islam=48;Kirat=5365;Christian=3549;Prakriti=291;Bon=75;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -953,10 +953,10 @@
       "year": 2021,
       "population_total": 300026,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 300026,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 204733,
+      "religious_affiliation_percent": 68.2384,
+      "no_religion_count": 95293,
+      "no_religion_percent": 31.7616,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -967,7 +967,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Bagmati;source_categories_verbatim=Hindu=204733;Bouddha=80778;Islam=315;Kirat=6638;Christian=5515;Prakriti=2024;Bon=23;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=68.2384;minority_share_pct=31.7616;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Bagmati;source_categories_verbatim=Hindu=204733;Bouddha=80778;Islam=315;Kirat=6638;Christian=5515;Prakriti=2024;Bon=23;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -979,10 +979,10 @@
       "year": 2021,
       "population_total": 466073,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 466073,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 227095,
+      "religious_affiliation_percent": 48.7252,
+      "no_religion_count": 238978,
+      "no_religion_percent": 51.2748,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -993,7 +993,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Bagmati;source_categories_verbatim=Hindu=227095;Bouddha=204592;Islam=3240;Kirat=1518;Christian=28543;Prakriti=806;Bon=261;Jain=8;Bahai=0;Sikha=10"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=48.7252;minority_share_pct=51.2748;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Bagmati;source_categories_verbatim=Hindu=227095;Bouddha=204592;Islam=3240;Kirat=1518;Christian=28543;Prakriti=806;Bon=261;Jain=8;Bahai=0;Sikha=10"
     },
     {
       "country_code": "NP",
@@ -1005,10 +1005,10 @@
       "year": 2021,
       "population_total": 719859,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 719859,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 586162,
+      "religious_affiliation_percent": 81.4273,
+      "no_religion_count": 133697,
+      "no_religion_percent": 18.5727,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1019,7 +1019,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Bagmati;source_categories_verbatim=Hindu=586162;Bouddha=89842;Islam=9578;Kirat=604;Christian=30157;Prakriti=1144;Bon=2350;Jain=9;Bahai=0;Sikha=13"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=81.4273;minority_share_pct=18.5727;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Bagmati;source_categories_verbatim=Hindu=586162;Bouddha=89842;Islam=9578;Kirat=604;Christian=30157;Prakriti=1144;Bon=2350;Jain=9;Bahai=0;Sikha=13"
     },
     {
       "country_code": "NP",
@@ -1031,10 +1031,10 @@
       "year": 2021,
       "population_total": 251027,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 251027,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 175604,
+      "religious_affiliation_percent": 69.9542,
+      "no_religion_count": 75423,
+      "no_religion_percent": 30.0458,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1045,7 +1045,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Gandaki;source_categories_verbatim=Hindu=175604;Bouddha=40118;Islam=3395;Kirat=1281;Christian=15062;Prakriti=1181;Bon=14385;Jain=0;Bahai=1;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=69.9542;minority_share_pct=30.0458;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Gandaki;source_categories_verbatim=Hindu=175604;Bouddha=40118;Islam=3395;Kirat=1281;Christian=15062;Prakriti=1181;Bon=14385;Jain=0;Bahai=1;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1057,10 +1057,10 @@
       "year": 2021,
       "population_total": 5658,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 5658,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 2302,
+      "religious_affiliation_percent": 40.6858,
+      "no_religion_count": 3356,
+      "no_religion_percent": 59.3142,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1071,7 +1071,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Gandaki;source_categories_verbatim=Hindu=2302;Bouddha=2863;Islam=3;Kirat=5;Christian=134;Prakriti=4;Bon=347;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=40.6858;minority_share_pct=59.3142;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Gandaki;source_categories_verbatim=Hindu=2302;Bouddha=2863;Islam=3;Kirat=5;Christian=134;Prakriti=4;Bon=347;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1083,10 +1083,10 @@
       "year": 2021,
       "population_total": 14452,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 14452,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 5512,
+      "religious_affiliation_percent": 38.14,
+      "no_religion_count": 8940,
+      "no_religion_percent": 61.86,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1097,7 +1097,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Gandaki;source_categories_verbatim=Hindu=5512;Bouddha=8467;Islam=27;Kirat=10;Christian=272;Prakriti=4;Bon=160;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=38.14;minority_share_pct=61.86;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Gandaki;source_categories_verbatim=Hindu=5512;Bouddha=8467;Islam=27;Kirat=10;Christian=272;Prakriti=4;Bon=160;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1109,10 +1109,10 @@
       "year": 2021,
       "population_total": 107033,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 107033,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 93708,
+      "religious_affiliation_percent": 87.5506,
+      "no_religion_count": 13325,
+      "no_religion_percent": 12.4494,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1123,7 +1123,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Gandaki;source_categories_verbatim=Hindu=93708;Bouddha=8773;Islam=234;Kirat=22;Christian=1629;Prakriti=2266;Bon=400;Jain=1;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=87.5506;minority_share_pct=12.4494;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Gandaki;source_categories_verbatim=Hindu=93708;Bouddha=8773;Islam=234;Kirat=22;Christian=1629;Prakriti=2266;Bon=400;Jain=1;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1135,10 +1135,10 @@
       "year": 2021,
       "population_total": 600051,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 600051,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 486725,
+      "religious_affiliation_percent": 81.1139,
+      "no_religion_count": 113326,
+      "no_religion_percent": 18.8861,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1149,7 +1149,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Gandaki;source_categories_verbatim=Hindu=486725;Bouddha=74665;Islam=6217;Kirat=1263;Christian=14031;Prakriti=1700;Bon=15358;Jain=34;Bahai=15;Sikha=43"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=81.1139;minority_share_pct=18.8861;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Gandaki;source_categories_verbatim=Hindu=486725;Bouddha=74665;Islam=6217;Kirat=1263;Christian=14031;Prakriti=1700;Bon=15358;Jain=34;Bahai=15;Sikha=43"
     },
     {
       "country_code": "NP",
@@ -1161,10 +1161,10 @@
       "year": 2021,
       "population_total": 155852,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 155852,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 97318,
+      "religious_affiliation_percent": 62.4426,
+      "no_religion_count": 58534,
+      "no_religion_percent": 37.5574,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1175,7 +1175,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Gandaki;source_categories_verbatim=Hindu=97318;Bouddha=46045;Islam=1194;Kirat=53;Christian=3864;Prakriti=121;Bon=7255;Jain=0;Bahai=1;Sikha=1"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=62.4426;minority_share_pct=37.5574;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Gandaki;source_categories_verbatim=Hindu=97318;Bouddha=46045;Islam=1194;Kirat=53;Christian=3864;Prakriti=121;Bon=7255;Jain=0;Bahai=1;Sikha=1"
     },
     {
       "country_code": "NP",
@@ -1187,10 +1187,10 @@
       "year": 2021,
       "population_total": 321153,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 321153,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 270027,
+      "religious_affiliation_percent": 84.0805,
+      "no_religion_count": 51126,
+      "no_religion_percent": 15.9195,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1201,7 +1201,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Gandaki;source_categories_verbatim=Hindu=270027;Bouddha=31245;Islam=5012;Kirat=164;Christian=7392;Prakriti=1465;Bon=5837;Jain=4;Bahai=6;Sikha=1"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=84.0805;minority_share_pct=15.9195;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Gandaki;source_categories_verbatim=Hindu=270027;Bouddha=31245;Islam=5012;Kirat=164;Christian=7392;Prakriti=1465;Bon=5837;Jain=4;Bahai=6;Sikha=1"
     },
     {
       "country_code": "NP",
@@ -1213,10 +1213,10 @@
       "year": 2021,
       "population_total": 378079,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 378079,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 329425,
+      "religious_affiliation_percent": 87.1313,
+      "no_religion_count": 48654,
+      "no_religion_percent": 12.8687,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1227,7 +1227,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Gandaki;source_categories_verbatim=Hindu=329425;Bouddha=33280;Islam=2522;Kirat=72;Christian=11365;Prakriti=778;Bon=635;Jain=0;Bahai=0;Sikha=2"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=87.1313;minority_share_pct=12.8687;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Gandaki;source_categories_verbatim=Hindu=329425;Bouddha=33280;Islam=2522;Kirat=72;Christian=11365;Prakriti=778;Bon=635;Jain=0;Bahai=0;Sikha=2"
     },
     {
       "country_code": "NP",
@@ -1239,10 +1239,10 @@
       "year": 2021,
       "population_total": 253024,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 253024,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 218488,
+      "religious_affiliation_percent": 86.3507,
+      "no_religion_count": 34536,
+      "no_religion_percent": 13.6493,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1253,7 +1253,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Gandaki;source_categories_verbatim=Hindu=218488;Bouddha=20041;Islam=2284;Kirat=31;Christian=836;Prakriti=2934;Bon=8409;Jain=0;Bahai=1;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=86.3507;minority_share_pct=13.6493;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Gandaki;source_categories_verbatim=Hindu=218488;Bouddha=20041;Islam=2284;Kirat=31;Christian=836;Prakriti=2934;Bon=8409;Jain=0;Bahai=1;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1265,10 +1265,10 @@
       "year": 2021,
       "population_total": 130887,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 130887,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 121334,
+      "religious_affiliation_percent": 92.7013,
+      "no_religion_count": 9553,
+      "no_religion_percent": 7.2987,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1279,7 +1279,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Gandaki;source_categories_verbatim=Hindu=121334;Bouddha=6910;Islam=618;Kirat=36;Christian=773;Prakriti=644;Bon=572;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=92.7013;minority_share_pct=7.2987;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Gandaki;source_categories_verbatim=Hindu=121334;Bouddha=6910;Islam=618;Kirat=36;Christian=773;Prakriti=644;Bon=572;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1291,10 +1291,10 @@
       "year": 2021,
       "population_total": 249211,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 249211,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 227547,
+      "religious_affiliation_percent": 91.307,
+      "no_religion_count": 21664,
+      "no_religion_percent": 8.693,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1305,7 +1305,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Gandaki;source_categories_verbatim=Hindu=227547;Bouddha=12235;Islam=855;Kirat=31;Christian=2957;Prakriti=5538;Bon=47;Jain=0;Bahai=1;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=91.307;minority_share_pct=8.693;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Gandaki;source_categories_verbatim=Hindu=227547;Bouddha=12235;Islam=855;Kirat=31;Christian=2957;Prakriti=5538;Bon=47;Jain=0;Bahai=1;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1317,10 +1317,10 @@
       "year": 2021,
       "population_total": 56786,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 56786,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 44883,
+      "religious_affiliation_percent": 79.0388,
+      "no_religion_count": 11903,
+      "no_religion_percent": 20.9612,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1331,7 +1331,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Lumbini;source_categories_verbatim=Hindu=44883;Bouddha=490;Islam=1;Kirat=2;Christian=1968;Prakriti=9442;Bon=0;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=79.0388;minority_share_pct=20.9612;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Lumbini;source_categories_verbatim=Hindu=44883;Bouddha=490;Islam=1;Kirat=2;Christian=1968;Prakriti=9442;Bon=0;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1343,10 +1343,10 @@
       "year": 2021,
       "population_total": 234793,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 234793,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 205404,
+      "religious_affiliation_percent": 87.483,
+      "no_religion_count": 29389,
+      "no_religion_percent": 12.517,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1357,7 +1357,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Lumbini;source_categories_verbatim=Hindu=205404;Bouddha=4139;Islam=273;Kirat=10;Christian=5612;Prakriti=19281;Bon=71;Jain=3;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=87.483;minority_share_pct=12.517;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Lumbini;source_categories_verbatim=Hindu=205404;Bouddha=4139;Islam=273;Kirat=10;Christian=5612;Prakriti=19281;Bon=71;Jain=3;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1369,10 +1369,10 @@
       "year": 2021,
       "population_total": 232019,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 232019,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 223835,
+      "religious_affiliation_percent": 96.4727,
+      "no_religion_count": 8184,
+      "no_religion_percent": 3.5273,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1383,7 +1383,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Lumbini;source_categories_verbatim=Hindu=223835;Bouddha=2879;Islam=778;Kirat=3;Christian=578;Prakriti=3745;Bon=201;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=96.4727;minority_share_pct=3.5273;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Lumbini;source_categories_verbatim=Hindu=223835;Bouddha=2879;Islam=778;Kirat=3;Christian=578;Prakriti=3745;Bon=201;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1395,10 +1395,10 @@
       "year": 2021,
       "population_total": 246494,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 246494,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 238059,
+      "religious_affiliation_percent": 96.578,
+      "no_religion_count": 8435,
+      "no_religion_percent": 3.422,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1409,7 +1409,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Lumbini;source_categories_verbatim=Hindu=238059;Bouddha=5305;Islam=543;Kirat=10;Christian=504;Prakriti=1476;Bon=596;Jain=0;Bahai=0;Sikha=1"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=96.578;minority_share_pct=3.422;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Lumbini;source_categories_verbatim=Hindu=238059;Bouddha=5305;Islam=543;Kirat=10;Christian=504;Prakriti=1476;Bon=596;Jain=0;Bahai=0;Sikha=1"
     },
     {
       "country_code": "NP",
@@ -1421,10 +1421,10 @@
       "year": 2021,
       "population_total": 177086,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 177086,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 174034,
+      "religious_affiliation_percent": 98.2765,
+      "no_religion_count": 3052,
+      "no_religion_percent": 1.7235,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1435,7 +1435,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Lumbini;source_categories_verbatim=Hindu=174034;Bouddha=1390;Islam=1213;Kirat=1;Christian=293;Prakriti=154;Bon=1;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=98.2765;minority_share_pct=1.7235;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Lumbini;source_categories_verbatim=Hindu=174034;Bouddha=1390;Islam=1213;Kirat=1;Christian=293;Prakriti=154;Bon=1;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1447,10 +1447,10 @@
       "year": 2021,
       "population_total": 245027,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 245027,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 223941,
+      "religious_affiliation_percent": 91.3944,
+      "no_religion_count": 21086,
+      "no_religion_percent": 8.6056,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1461,7 +1461,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Lumbini;source_categories_verbatim=Hindu=223941;Bouddha=13310;Islam=1514;Kirat=36;Christian=2239;Prakriti=3978;Bon=6;Jain=1;Bahai=0;Sikha=2"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=91.3944;minority_share_pct=8.6056;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Lumbini;source_categories_verbatim=Hindu=223941;Bouddha=13310;Islam=1514;Kirat=36;Christian=2239;Prakriti=3978;Bon=6;Jain=1;Bahai=0;Sikha=2"
     },
     {
       "country_code": "NP",
@@ -1473,10 +1473,10 @@
       "year": 2021,
       "population_total": 386868,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 386868,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 338848,
+      "religious_affiliation_percent": 87.5875,
+      "no_religion_count": 48020,
+      "no_religion_percent": 12.4125,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1487,7 +1487,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Lumbini;source_categories_verbatim=Hindu=338848;Bouddha=13964;Islam=28028;Kirat=134;Christian=4317;Prakriti=48;Bon=1522;Jain=1;Bahai=4;Sikha=2"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=87.5875;minority_share_pct=12.4125;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Lumbini;source_categories_verbatim=Hindu=338848;Bouddha=13964;Islam=28028;Kirat=134;Christian=4317;Prakriti=48;Bon=1522;Jain=1;Bahai=4;Sikha=2"
     },
     {
       "country_code": "NP",
@@ -1499,10 +1499,10 @@
       "year": 2021,
       "population_total": 1121957,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 1121957,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 976383,
+      "religious_affiliation_percent": 87.025,
+      "no_religion_count": 145574,
+      "no_religion_percent": 12.975,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1513,7 +1513,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Lumbini;source_categories_verbatim=Hindu=976383;Bouddha=42320;Islam=90744;Kirat=236;Christian=7794;Prakriti=1944;Bon=2466;Jain=14;Bahai=1;Sikha=55"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=87.025;minority_share_pct=12.975;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Lumbini;source_categories_verbatim=Hindu=976383;Bouddha=42320;Islam=90744;Kirat=236;Christian=7794;Prakriti=1944;Bon=2466;Jain=14;Bahai=1;Sikha=55"
     },
     {
       "country_code": "NP",
@@ -1525,10 +1525,10 @@
       "year": 2021,
       "population_total": 682961,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 682961,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 551205,
+      "religious_affiliation_percent": 80.7081,
+      "no_religion_count": 131756,
+      "no_religion_percent": 19.2919,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1539,7 +1539,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Lumbini;source_categories_verbatim=Hindu=551205;Bouddha=5044;Islam=124376;Kirat=21;Christian=1601;Prakriti=586;Bon=26;Jain=12;Bahai=19;Sikha=71"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=80.7081;minority_share_pct=19.2919;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Lumbini;source_categories_verbatim=Hindu=551205;Bouddha=5044;Islam=124376;Kirat=21;Christian=1601;Prakriti=586;Bon=26;Jain=12;Bahai=19;Sikha=71"
     },
     {
       "country_code": "NP",
@@ -1551,10 +1551,10 @@
       "year": 2021,
       "population_total": 674993,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 674993,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 643521,
+      "religious_affiliation_percent": 95.3374,
+      "no_religion_count": 31472,
+      "no_religion_percent": 4.6626,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1565,7 +1565,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Lumbini;source_categories_verbatim=Hindu=643521;Bouddha=5959;Islam=7179;Kirat=51;Christian=11977;Prakriti=6270;Bon=11;Jain=0;Bahai=22;Sikha=3"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=95.3374;minority_share_pct=4.6626;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Lumbini;source_categories_verbatim=Hindu=643521;Bouddha=5959;Islam=7179;Kirat=51;Christian=11977;Prakriti=6270;Bon=11;Jain=0;Bahai=22;Sikha=3"
     },
     {
       "country_code": "NP",
@@ -1577,10 +1577,10 @@
       "year": 2021,
       "population_total": 603194,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 603194,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 475945,
+      "religious_affiliation_percent": 78.9041,
+      "no_religion_count": 127249,
+      "no_religion_percent": 21.0959,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1591,7 +1591,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Lumbini;source_categories_verbatim=Hindu=475945;Bouddha=4035;Islam=112546;Kirat=103;Christian=9713;Prakriti=52;Bon=33;Jain=28;Bahai=18;Sikha=721"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=78.9041;minority_share_pct=21.0959;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Lumbini;source_categories_verbatim=Hindu=475945;Bouddha=4035;Islam=112546;Kirat=103;Christian=9713;Prakriti=52;Bon=33;Jain=28;Bahai=18;Sikha=721"
     },
     {
       "country_code": "NP",
@@ -1603,10 +1603,10 @@
       "year": 2021,
       "population_total": 459900,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 459900,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 429565,
+      "religious_affiliation_percent": 93.404,
+      "no_religion_count": 30335,
+      "no_religion_percent": 6.596,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1617,7 +1617,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Lumbini;source_categories_verbatim=Hindu=429565;Bouddha=3263;Islam=14363;Kirat=12;Christian=12460;Prakriti=142;Bon=66;Jain=0;Bahai=28;Sikha=1"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=93.404;minority_share_pct=6.596;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Lumbini;source_categories_verbatim=Hindu=429565;Bouddha=3263;Islam=14363;Kirat=12;Christian=12460;Prakriti=142;Bon=66;Jain=0;Bahai=28;Sikha=1"
     },
     {
       "country_code": "NP",
@@ -1629,10 +1629,10 @@
       "year": 2021,
       "population_total": 42774,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 42774,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 30210,
+      "religious_affiliation_percent": 70.627,
+      "no_religion_count": 12564,
+      "no_religion_percent": 29.373,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1643,7 +1643,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Karnali;source_categories_verbatim=Hindu=30210;Bouddha=11879;Islam=32;Kirat=5;Christian=193;Prakriti=0;Bon=455;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=70.627;minority_share_pct=29.373;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Karnali;source_categories_verbatim=Hindu=30210;Bouddha=11879;Islam=32;Kirat=5;Christian=193;Prakriti=0;Bon=455;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1655,10 +1655,10 @@
       "year": 2021,
       "population_total": 64549,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 64549,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 59237,
+      "religious_affiliation_percent": 91.7706,
+      "no_religion_count": 5312,
+      "no_religion_percent": 8.2294,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1669,7 +1669,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Karnali;source_categories_verbatim=Hindu=59237;Bouddha=4797;Islam=13;Kirat=2;Christian=500;Prakriti=0;Bon=0;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=91.7706;minority_share_pct=8.2294;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Karnali;source_categories_verbatim=Hindu=59237;Bouddha=4797;Islam=13;Kirat=2;Christian=500;Prakriti=0;Bon=0;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1681,10 +1681,10 @@
       "year": 2021,
       "population_total": 55394,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 55394,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 48441,
+      "religious_affiliation_percent": 87.4481,
+      "no_religion_count": 6953,
+      "no_religion_percent": 12.5519,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1695,7 +1695,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Karnali;source_categories_verbatim=Hindu=48441;Bouddha=6730;Islam=0;Kirat=27;Christian=196;Prakriti=0;Bon=0;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=87.4481;minority_share_pct=12.5519;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Karnali;source_categories_verbatim=Hindu=48441;Bouddha=6730;Islam=0;Kirat=27;Christian=196;Prakriti=0;Bon=0;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1707,10 +1707,10 @@
       "year": 2021,
       "population_total": 118349,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 118349,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 115149,
+      "religious_affiliation_percent": 97.2961,
+      "no_religion_count": 3200,
+      "no_religion_percent": 2.7039,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1721,7 +1721,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Karnali;source_categories_verbatim=Hindu=115149;Bouddha=1721;Islam=98;Kirat=4;Christian=1375;Prakriti=1;Bon=0;Jain=0;Bahai=0;Sikha=1"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=97.2961;minority_share_pct=2.7039;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Karnali;source_categories_verbatim=Hindu=115149;Bouddha=1721;Islam=98;Kirat=4;Christian=1375;Prakriti=1;Bon=0;Jain=0;Bahai=0;Sikha=1"
     },
     {
       "country_code": "NP",
@@ -1733,10 +1733,10 @@
       "year": 2021,
       "population_total": 145292,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 145292,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 144988,
+      "religious_affiliation_percent": 99.7908,
+      "no_religion_count": 304,
+      "no_religion_percent": 0.2092,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1747,7 +1747,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Karnali;source_categories_verbatim=Hindu=144988;Bouddha=96;Islam=8;Kirat=4;Christian=189;Prakriti=7;Bon=0;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=99.7908;minority_share_pct=0.2092;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Karnali;source_categories_verbatim=Hindu=144988;Bouddha=96;Islam=8;Kirat=4;Christian=189;Prakriti=7;Bon=0;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1759,10 +1759,10 @@
       "year": 2021,
       "population_total": 252313,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 252313,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 241997,
+      "religious_affiliation_percent": 95.9114,
+      "no_religion_count": 10316,
+      "no_religion_percent": 4.0886,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1773,7 +1773,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Karnali;source_categories_verbatim=Hindu=241997;Bouddha=6949;Islam=486;Kirat=20;Christian=2034;Prakriti=812;Bon=15;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=95.9114;minority_share_pct=4.0886;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Karnali;source_categories_verbatim=Hindu=241997;Bouddha=6949;Islam=486;Kirat=20;Christian=2034;Prakriti=812;Bon=15;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1785,10 +1785,10 @@
       "year": 2021,
       "population_total": 189360,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 189360,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 186808,
+      "religious_affiliation_percent": 98.6523,
+      "no_religion_count": 2552,
+      "no_religion_percent": 1.3477,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1799,7 +1799,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Karnali;source_categories_verbatim=Hindu=186808;Bouddha=584;Islam=67;Kirat=2;Christian=1770;Prakriti=129;Bon=0;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=98.6523;minority_share_pct=1.3477;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Karnali;source_categories_verbatim=Hindu=186808;Bouddha=584;Islam=67;Kirat=2;Christian=1770;Prakriti=129;Bon=0;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1811,10 +1811,10 @@
       "year": 2021,
       "population_total": 166740,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 166740,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 162627,
+      "religious_affiliation_percent": 97.5333,
+      "no_religion_count": 4113,
+      "no_religion_percent": 2.4667,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1825,7 +1825,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Karnali;source_categories_verbatim=Hindu=162627;Bouddha=1014;Islam=94;Kirat=3;Christian=2043;Prakriti=953;Bon=0;Jain=6;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=97.5333;minority_share_pct=2.4667;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Karnali;source_categories_verbatim=Hindu=162627;Bouddha=1014;Islam=94;Kirat=3;Christian=2043;Prakriti=953;Bon=0;Jain=6;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1837,10 +1837,10 @@
       "year": 2021,
       "population_total": 238515,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 238515,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 228706,
+      "religious_affiliation_percent": 95.8875,
+      "no_religion_count": 9809,
+      "no_religion_percent": 4.1125,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1851,7 +1851,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Karnali;source_categories_verbatim=Hindu=228706;Bouddha=2628;Islam=290;Kirat=8;Christian=6476;Prakriti=404;Bon=1;Jain=0;Bahai=1;Sikha=1"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=95.8875;minority_share_pct=4.1125;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Karnali;source_categories_verbatim=Hindu=228706;Bouddha=2628;Islam=290;Kirat=8;Christian=6476;Prakriti=404;Bon=1;Jain=0;Bahai=1;Sikha=1"
     },
     {
       "country_code": "NP",
@@ -1863,10 +1863,10 @@
       "year": 2021,
       "population_total": 415126,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 415126,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 380274,
+      "religious_affiliation_percent": 91.6045,
+      "no_religion_count": 34852,
+      "no_religion_percent": 8.3955,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1877,7 +1877,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Karnali;source_categories_verbatim=Hindu=380274;Bouddha=16894;Islam=2482;Kirat=20;Christian=14681;Prakriti=703;Bon=63;Jain=1;Bahai=7;Sikha=1"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=91.6045;minority_share_pct=8.3955;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Karnali;source_categories_verbatim=Hindu=380274;Bouddha=16894;Islam=2482;Kirat=20;Christian=14681;Prakriti=703;Bon=63;Jain=1;Bahai=7;Sikha=1"
     },
     {
       "country_code": "NP",
@@ -1889,10 +1889,10 @@
       "year": 2021,
       "population_total": 138523,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 138523,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 136744,
+      "religious_affiliation_percent": 98.7157,
+      "no_religion_count": 1779,
+      "no_religion_percent": 1.2843,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1903,7 +1903,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Sudur Paschim;source_categories_verbatim=Hindu=136744;Bouddha=1583;Islam=120;Kirat=0;Christian=75;Prakriti=0;Bon=0;Jain=0;Bahai=1;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=98.7157;minority_share_pct=1.2843;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Sudur Paschim;source_categories_verbatim=Hindu=136744;Bouddha=1583;Islam=120;Kirat=0;Christian=75;Prakriti=0;Bon=0;Jain=0;Bahai=1;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1915,10 +1915,10 @@
       "year": 2021,
       "population_total": 189085,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 189085,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 188489,
+      "religious_affiliation_percent": 99.6848,
+      "no_religion_count": 596,
+      "no_religion_percent": 0.3152,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1929,7 +1929,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Sudur Paschim;source_categories_verbatim=Hindu=188489;Bouddha=411;Islam=0;Kirat=0;Christian=182;Prakriti=1;Bon=0;Jain=1;Bahai=1;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=99.6848;minority_share_pct=0.3152;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Sudur Paschim;source_categories_verbatim=Hindu=188489;Bouddha=411;Islam=0;Kirat=0;Christian=182;Prakriti=1;Bon=0;Jain=1;Bahai=1;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1941,10 +1941,10 @@
       "year": 2021,
       "population_total": 133310,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 133310,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 133006,
+      "religious_affiliation_percent": 99.772,
+      "no_religion_count": 304,
+      "no_religion_percent": 0.228,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1955,7 +1955,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Sudur Paschim;source_categories_verbatim=Hindu=133006;Bouddha=137;Islam=35;Kirat=3;Christian=127;Prakriti=0;Bon=0;Jain=0;Bahai=2;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=99.772;minority_share_pct=0.228;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Sudur Paschim;source_categories_verbatim=Hindu=133006;Bouddha=137;Islam=35;Kirat=3;Christian=127;Prakriti=0;Bon=0;Jain=0;Bahai=2;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1967,10 +1967,10 @@
       "year": 2021,
       "population_total": 242157,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 242157,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 242053,
+      "religious_affiliation_percent": 99.9571,
+      "no_religion_count": 104,
+      "no_religion_percent": 0.0429,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -1981,7 +1981,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Sudur Paschim;source_categories_verbatim=Hindu=242053;Bouddha=18;Islam=23;Kirat=0;Christian=62;Prakriti=1;Bon=0;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=99.9571;minority_share_pct=0.0429;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Sudur Paschim;source_categories_verbatim=Hindu=242053;Bouddha=18;Islam=23;Kirat=0;Christian=62;Prakriti=1;Bon=0;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -1993,10 +1993,10 @@
       "year": 2021,
       "population_total": 139602,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 139602,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 137067,
+      "religious_affiliation_percent": 98.1841,
+      "no_religion_count": 2535,
+      "no_religion_percent": 1.8159,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -2007,7 +2007,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Sudur Paschim;source_categories_verbatim=Hindu=137067;Bouddha=1879;Islam=71;Kirat=0;Christian=357;Prakriti=214;Bon=0;Jain=0;Bahai=14;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=98.1841;minority_share_pct=1.8159;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Sudur Paschim;source_categories_verbatim=Hindu=137067;Bouddha=1879;Islam=71;Kirat=0;Christian=357;Prakriti=214;Bon=0;Jain=0;Bahai=14;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -2019,10 +2019,10 @@
       "year": 2021,
       "population_total": 204831,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 204831,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 202717,
+      "religious_affiliation_percent": 98.9679,
+      "no_religion_count": 2114,
+      "no_religion_percent": 1.0321,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -2033,7 +2033,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Sudur Paschim;source_categories_verbatim=Hindu=202717;Bouddha=1380;Islam=114;Kirat=13;Christian=295;Prakriti=305;Bon=0;Jain=2;Bahai=5;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=98.9679;minority_share_pct=1.0321;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Sudur Paschim;source_categories_verbatim=Hindu=202717;Bouddha=1380;Islam=114;Kirat=13;Christian=295;Prakriti=305;Bon=0;Jain=2;Bahai=5;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -2045,10 +2045,10 @@
       "year": 2021,
       "population_total": 228852,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 228852,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 226891,
+      "religious_affiliation_percent": 99.1431,
+      "no_religion_count": 1961,
+      "no_religion_percent": 0.8569,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -2059,7 +2059,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Sudur Paschim;source_categories_verbatim=Hindu=226891;Bouddha=1133;Islam=313;Kirat=1;Christian=387;Prakriti=127;Bon=0;Jain=0;Bahai=0;Sikha=0"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=99.1431;minority_share_pct=0.8569;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Sudur Paschim;source_categories_verbatim=Hindu=226891;Bouddha=1133;Islam=313;Kirat=1;Christian=387;Prakriti=127;Bon=0;Jain=0;Bahai=0;Sikha=0"
     },
     {
       "country_code": "NP",
@@ -2071,10 +2071,10 @@
       "year": 2021,
       "population_total": 904666,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 904666,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 867685,
+      "religious_affiliation_percent": 95.9122,
+      "no_religion_count": 36981,
+      "no_religion_percent": 4.0878,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -2085,7 +2085,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Sudur Paschim;source_categories_verbatim=Hindu=867685;Bouddha=11863;Islam=5775;Kirat=207;Christian=18601;Prakriti=427;Bon=10;Jain=27;Bahai=23;Sikha=48"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=95.9122;minority_share_pct=4.0878;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Sudur Paschim;source_categories_verbatim=Hindu=867685;Bouddha=11863;Islam=5775;Kirat=207;Christian=18601;Prakriti=427;Bon=10;Jain=27;Bahai=23;Sikha=48"
     },
     {
       "country_code": "NP",
@@ -2097,10 +2097,10 @@
       "year": 2021,
       "population_total": 513757,
       "population_total_basis": "2021 National Population and Housing Census, 'Table -5: Population by religion and sex' (Religion_NPHC_2021.xlsx, sheet Prov_District_local level), integer full-count; the denominator is the printed district Total Population. Every person is assigned to one of ten named religions; there is no no-religion category.",
-      "religious_affiliation_count": 513757,
-      "religious_affiliation_percent": 100,
-      "no_religion_count": null,
-      "no_religion_percent": null,
+      "religious_affiliation_count": 490824,
+      "religious_affiliation_percent": 95.5362,
+      "no_religion_count": 22933,
+      "no_religion_percent": 4.4638,
       "place_count": null,
       "places_per_10000_residents": null,
       "place_density_per_sq_km": null,
@@ -2111,7 +2111,7 @@
         "np-census-2021-religion-by-district-nphc",
         "ocha-codab-npl-adm2-2021"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;religious_affiliation_percent_is_100_by_construction;no_religion_slot_null_category_absent_not_zero;flat_100_affiliation_gated_on_pi_task_6_minority_share_metric;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;province=Sudur Paschim;source_categories_verbatim=Hindu=490824;Bouddha=4132;Islam=532;Kirat=26;Christian=17454;Prakriti=465;Bon=184;Jain=0;Bahai=134;Sikha=6"
+      "quality_flag": "census_flat_frame_minority_share_design;census_affiliation;all_persons_all_ages_universe;single_select_reported_religion;ten_religion_frame_no_no_religion_category;no_religion_category_absent_minority_share_in_no_religion_slot;single_wave_2021_change_withheld_across_75_to_77_frame_break_and_2011_undefined_residual;licence_needs_review_build_then_ask_nso_attribution;boundary_cc_by_igo;reference_group=Hindu;reference_share_pct=95.5362;minority_share_pct=4.4638;minority_share=Bouddha+Islam+Kirat+Christian+Prakriti+Bon+Jain+Bahai+Sikha;province=Sudur Paschim;source_categories_verbatim=Hindu=490824;Bouddha=4132;Islam=532;Kirat=26;Christian=17454;Prakriti=465;Bon=184;Jain=0;Bahai=134;Sikha=6"
     }
   ]
 }
