@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Peru map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Peru research map; every string traces to
+    // research/countries/pe/route-probe.md, the manifest
+    // docs/manifests/pe-census-religion-2007-2017.json, the data product
+    // apps/regions/pe/data/area_summary_department.json, or the live
+    // REGION_CONFIG in apps/regions/pe/index.html. authors nothing.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "PE",
+      countryName: "Peru",
+      mapHref: "./",
+      intro: "Census religious affiliation across Peru's 25 departments over two waves, 2007 and 2017, from the Instituto Nacional de Estadística e Informática (INEI). Both waves count the population aged 12 and over with the same four INEI categories (Católica, Evangélica, Otra, Ninguna); the department series is therefore comparable with no universe or frame break. The construct is census affiliation. It does not measure belief, practice, attendance, or membership.",
+      facts: {
+        waves: "Two censuses: 2007 and 2017",
+        geographies: "Department (25 units): 24 departments plus the Provincia Constitucional del Callao, Lima as the whole department",
+        metrics: "Religious affiliation %, no religion %, religious affiliation change"
+      },
+      reading: [
+        "Departments are shaded by the share reporting a religious affiliation (Católica, Evangélica, or Otra), or by the share in the INEI Ninguna category, shown as No religion %. The four INEI categories partition the population aged 12 and over; the two shares are exact complements and sum to 100 by construction. Both waves use each department's printed census population aged 12 and over as the denominator.",
+        "The 2017 wave carries exact published counts from Resultados Definitivos, CUADRO Nº 1: every department's four categories sum to its printed department Total, and every category sums across the 25 departments to its printed national margin (Católica 17,635,339; Evangélica 3,264,819; Otra 1,115,872; Ninguna 1,180,361), for a grand total of 23,196,391. The 2017 table splits Lima into Provincia de Lima and Región Lima; this product aggregates the two rows to Departamento Lima to share the 2007 25-unit frame, and the split sums exactly at every category.",
+        "The 2007 wave, from Perfil Sociodemográfico, CUADRO Nº 2.46, ships the exact published department Total and the published one-decimal Ninguna percentage. The 25 department Totals sum exactly to the printed national 20,850,502. The Católica, Evangélica and Otra counts are derived as round(Total × percentage / 100) from the published one-decimal percentages, under a recorded per-category rounding bound of ceiling(Total × 0.0005); no published value is allocated, imputed, rounded away, or tuned. Each department's four published percentages sum to 100 within a ±0.15 percentage-point one-decimal band, recorded per department.",
+        "A change metric reports the percentage-point change in the affiliation share between the 2007 and 2017 censuses on the stable 25-department frame. The interval is ten years and a wave-to-wave difference is not an annual rate. Affiliation and no religion are exact complements; the same magnitude with the opposite sign therefore describes the no-religion change, and national population growth from 20,850,502 to 23,196,391 is never treated as a religion change.",
+        "No religion (Ninguna) varies sharply across departments. San Martín is the national maximum (2007 8.5%, 2017 11.3%), against Piura and Apurímac near 1-2%, and the national no-religion share grows from 2.9% in 2007 to 5.1% in 2017. Evangélica concentrates in the Amazon and central highlands (2017 Ucayali 27.6%, Huánuco 26.4%, Huancavelica 25.2%), against the strongly Catholic coastal and southern departments (Piura, Ica, Arequipa above 84%). This department-level contrast is the reason to map Peru; the Católica/Evangélica/Otra composition rides verbatim on each row of the area summary and is source context, not a shipped map metric.",
+        "The boundary frame is the geoBoundaries PER ADM1 layer (26 features, Public Domain, source Wikimedia Commons, represented year 2008), dissolved to the 25 census departments: 'Lima' (Región Lima) and 'Municipalidad Metropolitana de Lima' (Lima province) union into Departamento Lima, 'El Callao' maps to the Provincia Constitucional del Callao, and the other 23 map one-to-one. The 25 departments join one-to-one to the area summary on area_code. Peru is wholly in the western hemisphere and needs no antimeridian handling.",
+        "1993 is held for the department product. INEI's harmonised comparison re-tabulates 1993 for the population aged 12 and over with the same four categories, but only at the national level (Perfil 2007, CUADRO Nº 2.44); no department-level 1993 table at that universe was reachable, and the contemporaneous all-ages three-category 1993 table is a different universe and frame that is neither backcast nor merged. Finer geography (province, district) exists via INEI REDATAM and the census microdata but was out of route for this build. No governed Peru place-of-worship snapshot ships with this product; place counts and density metrics are null."
+      ],
+      sources: [
+        {
+          name: "INEI Censos Nacionales 2007 (XI de Población, VI de Vivienda), Perfil Sociodemográfico del Perú, CUADRO Nº 2.46: population aged 12 and over by religion, by department",
+          href: "https://www.inei.gob.pe/media/MenuRecursivo/publicaciones_digitales/Est/Lib1136/libro.pdf",
+          construct: "Census religious affiliation by department, population aged 12 and over, four categories (Católica, Evangélica, Otra, Ninguna); exact department Total plus one-decimal category percentages",
+          years: "2007",
+          licence: "INEI states no Creative Commons or explicit data-reuse licence on its published census results. The reachable INEI 'Términos y Condiciones' (ODISEA) govern the portal's interactive participation services, not reuse of the statistical tables. Derived department summaries ship with attribution to INEI under a build-then-ask stance; licence status needs review, and an INEI reuse-confirmation ask is recorded for the project lead"
+        },
+        {
+          name: "INEI Censos Nacionales 2017 (XII de Población, VII de Vivienda y III de Comunidades Indígenas), Resultados Definitivos, CUADRO Nº 1: population aged 12 and over by department, area, sex and religion",
+          href: "https://www.inei.gob.pe/media/MenuRecursivo/publicaciones_digitales/Est/Lib1544/00TOMO_03.pdf",
+          construct: "Census religious affiliation by department, population aged 12 and over, four categories (Católica, Evangélica, Otra, Ninguna); exact published counts, national grand total 23,196,391",
+          years: "2017",
+          licence: "INEI states no Creative Commons or explicit data-reuse licence on its published census results. Derived department summaries ship with attribution to INEI under a build-then-ask stance; licence status needs review, and an INEI reuse-confirmation ask is recorded for the project lead"
+        },
+        {
+          name: "geoBoundaries PER ADM1 boundaries, dissolved to the 25 departments",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/PER/ADM1/",
+          construct: "Boundary geometry (26 features dissolving to 25 departments), source Wikimedia Commons; 'Lima' and 'Municipalidad Metropolitana de Lima' union into Departamento Lima, 'El Callao' maps to the Provincia Constitucional del Callao",
+          years: "2008 (represented year)",
+          licence: "Public Domain, per the geoBoundaries release metadata (boundaryLicense 'Public Domain', licenseSource commons.wikimedia.org/wiki/File); no attribution obligation on the geometry"
+        }
+      ],
+      accessData: {
+        note: "INEI states no explicit reuse licence on its published census results; the product therefore ships STAGED with licence status needs_review under a build-then-ask stance, and an INEI reuse-confirmation ask is recorded for the project lead. The committed products are the derived 25-department area summary (50 rows across 2007 and 2017) and the simplified geoBoundaries PER ADM1 boundary dissolved to 25 departments; the raw census PDFs and the source GeoJSON are not committed.",
+        sourceOfRecord: "Instituto Nacional de Estadística e Informática (INEI), <a href=\"https://www.inei.gob.pe/media/MenuRecursivo/publicaciones_digitales/Est/Lib1136/libro.pdf\" target=\"_blank\" rel=\"noopener\">Perfil Sociodemográfico del Perú, CUADRO Nº 2.46</a> (2007) and <a href=\"https://www.inei.gob.pe/media/MenuRecursivo/publicaciones_digitales/Est/Lib1544/00TOMO_03.pdf\" target=\"_blank\" rel=\"noopener\">Resultados Definitivos, CUADRO Nº 1</a> (2017), religion by department, population aged 12 and over; boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/PER/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries PER ADM1</a>, dissolved to the 25 departments.",
+        tables: "The department religion tables are the source of record: 25 departments by two waves. The area-summary religious_affiliation_percent field sums Católica, Evangélica and Otra, and no_religion_percent carries the Ninguna share; each row's quality_flag carries the verbatim Católica/Evangélica/Otra composition (exact counts in 2017, one-decimal percentages in 2007). The 2017 wave reconciles exactly at every department and category margin (grand total 23,196,391); the 2007 department Totals sum exactly to 20,850,502, with category counts derived from the published one-decimal percentages under a recorded per-category rounding bound of ceiling(Total × 0.0005).",
+        licence: "INEI publishes the 2007 and 2017 census results openly on its institutional portal (www.inei.gob.pe), but states no Creative Commons or explicit data-reuse licence on the published results tables. The reachable INEI 'Términos y Condiciones' (ODISEA) govern the portal's interactive participation services, not reuse of the statistical tables, and the INEI microdata access policy (ANDA) was unreachable from the build environment and is not quoted. Under a build-then-ask stance the derived department summaries ship with attribution to INEI and licence status needs_review; an INEI reuse-confirmation ask is recorded for the project lead. The geoBoundaries PER ADM1 boundary is Public Domain (source Wikimedia Commons), with no attribution obligation on the geometry.",
+        script: "scripts/build_pe_area_summary.R",
+        manifests: [
+          { label: "pe-census-religion-2007-2017", href: "docs/manifests/pe-census-religion-2007-2017.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Peru map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Peru Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712b" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Peru's product is INEI census religious affiliation by the 25 departments
+    // across two waves, 2007 and 2017. The universe is the population aged 12
+    // and over in both waves, and the frame is the four verbatim INEI
+    // categories (Católica, Evangélica, Otra, Ninguna). Ninguna is a real
+    // no-religion category; the ordinary two-slot design therefore applies:
+    // religious_affiliation_percent = Católica + Evangélica + Otra share, and
+    // no_religion_percent = the Ninguna share. The four categories partition the
+    // answering population; the two shares sum to 100 by construction.
+    //
+    // 2017 ships exact published counts (Resultados Definitivos, CUADRO Nº 1).
+    // 2007 ships the exact published department Total and the published Ninguna
+    // percentage, with the Católica/Evangélica/Otra counts DERIVED from the
+    // published one-decimal percentages under a recorded per-category rounding
+    // bound of ceiling(Total × 0.0005) (Perfil Sociodemográfico, CUADRO Nº
+    // 2.46). Both waves share the 25-unit department frame; affiliation and
+    // no-religion change is therefore readable across the pair, and the runtime
+    // derives the change from the two waves.
+    //
+    // The richer Católica/Evangélica/Otra composition (the real signal) rides
+    // verbatim on each row of the downloadable area summary (quality_flag); it
+    // is source context, not a shipped popup metric, and it is not shown in the
+    // popup. The popup shows the two slot shares by census year.
+    //
+    // Map-worthy pattern: no religion (Ninguna) varies sharply — San Martín is
+    // the national maximum (2007 8.5%, 2017 11.3%), against Piura and Apurímac
+    // near 1-2%. Evangélica concentrates in the Amazon and central highlands
+    // (2017 Ucayali 27.6%, Huánuco 26.4%, Huancavelica 25.2%), against the
+    // strongly Catholic coastal and southern departments.
+    //
+    // Licence needs_review (build-then-ask): INEI states no explicit reuse
+    // grant on its published census results. The derived department summaries
+    // ship with attribution to INEI under a build-then-ask stance; an INEI
+    // reuse-confirmation ask is recorded for the project lead. Boundaries are
+    // geoBoundaries PER ADM1 (Public Domain, Wikimedia Commons source), 26
+    // features dissolved to the 25 census departments.
+    window.REGION_CONFIG = {
+      countryCode: "PE",
+      title: "Places of Worship | Peru Research Map",
+      // boundary bbox verified numerically from the 25-feature layer:
+      // lon -81.33..-68.64, lat -18.36..-0.01; centre on [-75.0, -9.2].
+      // Peru is wholly western-hemisphere; the ~12.7 deg lon / ~18.3 deg lat
+      // extent fits all 25 departments beside the census panels at z5.
+      center: [-75.0, -9.2],
+      initialZoom: 5,
+      censusLevels: {
+        department: {
+          label: "Department (25 units)",
+          boundaries: "data/pe_department_2008.geojson",
+          summary: "data/area_summary_department.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Instituto Nacional de Estadística e Informática (INEI), Censos Nacionales 2007 (Perfil Sociodemográfico, CUADRO Nº 2.46) and 2017 (Resultados Definitivos, CUADRO Nº 1), population aged 12 and over; derived department summaries reproduced with attribution while the reuse position is reviewed · Boundaries © geoBoundaries PER ADM1 (Public Domain, source Wikimedia Commons), dissolved to the 25 departments"
+        }
+      },
+      defaultLevel: "department",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2017,
+      // the two census-question shares plus the cross-wave change the runtime
+      // derives from the 2007 and 2017 waves; place and density metrics are
+      // omitted because no governed place-of-worship snapshot ships here
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the department population aged 12 and over reporting a religion, summing the Católica, Evangélica and Otra INEI categories. 2017 is exact published counts; 2007 is 100 minus the published Ninguna percentage. The Católica/Evangélica/Otra composition rides verbatim on each row of the downloadable area summary and is not shown in this popup."
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share of the department population aged 12 and over in the INEI Ninguna (no religion) category. 2017 is the exact published count share; 2007 is the published one-decimal Ninguna percentage. Affiliation % and no religion % are exact complements and sum to 100 by construction."
+        },
+        religious_change: {
+          label: "Religious affiliation change",
+          note: "percentage-point change in the religious-affiliation share between the 2007 and 2017 censuses, a ten-year interval on the stable 25-department frame. Affiliation and no religion are exact complements; the same magnitude with the opposite sign describes the no-religion change. A wave-to-wave difference is not an annual rate, and population growth (20.85M to 23.20M) is never treated as a religion change."
+        }
+      },
+      popupDenominatorNote: "Percentages use each department's printed census population aged 12 and over as the denominator. The four verbatim INEI categories (Católica, Evangélica, Otra, Ninguna) partition the answering population; religious affiliation % sums Católica, Evangélica and Otra, and no religion % is the Ninguna share. The two shares are exact complements and sum to 100 by construction. The 2017 wave carries exact published counts. For 2007 the department Total is the exact published count and the no-religion share is the published one-decimal Ninguna percentage; the Católica, Evangélica and Otra counts are derived from the published one-decimal percentages under a recorded per-category rounding bound of ceiling(Total × 0.0005). The Católica/Evangélica/Otra composition rides verbatim on each row of the downloadable area summary and is not shown here. The construct is census affiliation; it does not measure belief, practice, attendance, or membership.",
+      cityPresets: [
+        { label: "Lima", coords: [-77.0428, -12.0464], zoom: 9 },
+        { label: "Arequipa", coords: [-71.5375, -16.4090], zoom: 10 },
+        { label: "Trujillo", coords: [-79.0299, -8.1120], zoom: 10 },
+        { label: "Chiclayo", coords: [-79.8391, -6.7714], zoom: 10 },
+        { label: "Piura", coords: [-80.6328, -5.1945], zoom: 10 },
+        { label: "Cusco", coords: [-71.9675, -13.5320], zoom: 10 },
+        { label: "Iquitos", coords: [-73.2538, -3.7491], zoom: 10 },
+        { label: "Huancayo", coords: [-75.2049, -12.0653], zoom: 10 }
+      ],
+      geocode: { country: "pe", biasLngLat: [-75.0, -9.2] },
+      onboarding: {
+        title: "Peru research map",
+        intro: "Census religious affiliation across Peru's 25 departments over two waves, 2007 and 2017, from the Instituto Nacional de Estadística e Informática (INEI). Both waves count the population aged 12 and over with the same four INEI categories (Católica, Evangélica, Otra, Ninguna); the department series is therefore comparable with no universe or frame break. The construct is census affiliation; it does not measure belief, practice, attendance, or membership.",
+        bullets: [
+          "Departments are shaded by the share reporting a religious affiliation (Católica, Evangélica, or Otra), or by the share in the INEI <code>Ninguna</code> category, shown as No religion %. The four categories partition the population aged 12 and over; the two shares are exact complements and sum to 100 by construction.",
+          "Two census waves, 2007 and 2017, at department level. The 2017 wave carries exact published counts. For 2007 the department Total and the Ninguna percentage are exact-published; the Católica, Evangélica and Otra counts are derived from the published one-decimal percentages under a recorded per-category rounding bound of ceiling(Total × 0.0005).",
+          "A change metric reports the percentage-point change in the affiliation share between 2007 and 2017 on the stable 25-department frame. A wave-to-wave difference is not an annual rate, and national population growth (20.85M to 23.20M) is never treated as a religion change.",
+          "No religion (Ninguna) varies sharply: San Martín is the national maximum (2007 8.5%, 2017 11.3%), against Piura and Apurímac near 1-2%. Evangélica concentrates in the Amazon and central highlands (2017 Ucayali 27.6%, Huánuco 26.4%, Huancavelica 25.2%); that per-category split is source context on each area-summary row, not a shipped map metric.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://www.inei.gob.pe/" target="_blank" rel="noopener">Instituto Nacional de Estadística e Informática (INEI)</a>, Censos Nacionales 2007 (Perfil Sociodemográfico, CUADRO Nº 2.46) and 2017 (Resultados Definitivos, CUADRO Nº 1), population aged 12 and over. INEI states no explicit reuse licence on its published census results; the derived department summaries are reproduced with attribution to INEI under a build-then-ask stance, and the licence position remains under review. &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> PER ADM1 (Public Domain, source Wikimedia Commons), 26 features dissolved to the 25 census departments',
+      censusFlagNote: "* Universe: population aged 12 and over in both waves. The four verbatim INEI categories (Católica, Evangélica, Otra, Ninguna) partition the answering population; religious affiliation % sums Católica, Evangélica and Otra, no religion % is the Ninguna share, and the two shares sum to 100 by construction. 2017 carries exact published counts (Resultados Definitivos, CUADRO Nº 1). For 2007 the department Total and the Ninguna percentage are exact-published (Perfil Sociodemográfico, CUADRO Nº 2.46); the Católica, Evangélica and Otra counts are derived from the published one-decimal percentages under a recorded per-category rounding bound of ceiling(Total × 0.0005). The change metric differences the affiliation share across the 2007-2017 pair on the stable 25-department frame; a wave-to-wave difference is not an annual rate. INEI states no explicit reuse licence on its published census results; the derived department summaries ship with attribution to INEI under a build-then-ask stance while the licence position is reviewed. Boundaries are geoBoundaries PER ADM1, Public Domain (Wikimedia Commons source), dissolved to the 25 departments."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712b"></script>
+</body>
+</html>
