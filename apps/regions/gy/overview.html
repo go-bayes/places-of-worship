@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Guyana map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Guyana research map; every string traces to
+    // research/countries/gy/route-probe.md, the manifest
+    // docs/manifests/gy-census-religion-2012.json, or the live REGION_CONFIG in
+    // apps/regions/gy/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "GY",
+      countryName: "Guyana",
+      mapHref: "./",
+      intro: "Census religious affiliation across Guyana's ten administrative regions, a single 2012 snapshot from the Bureau of Statistics, Guyana, 2012 Population and Housing Census, Final Compendium 2 (Population Composition), Table 2.19. The source publishes integer counts across thirteen religion categories, closing exactly at both national margins to 746,955. The construct is census affiliation. It does not measure belief, practice, attendance, or registered membership.",
+      facts: {
+        waves: "One census: 2012",
+        geographies: "Region (10 units)",
+        metrics: "Religious affiliation %, no religion %"
+      },
+      reading: [
+        "The ten regions are shaded by the share reporting affiliation with a named religion, or by the share in the census None category, shown as No religion %. Table 2.19 prints thirteen categories: Anglican, Methodist, Pentecostal, Roman Catholic, Jehovah Witness, Seventh Day Adventist, Bahai, Muslim, Hindu, Rastafarian, Other Christians, None, and Other. Religious affiliation is the region population minus the None line; the two headline shares partition the region population.",
+        "The 2012 counts are integer and close exactly at both national margins to 746,955. Every region column sums over the thirteen categories to its region total, and every religion row sums across the ten regions to its printed national total. Every cell was verified against a 200-dpi render of Compendium 2 page 49; no cell is suppressed, and no value is inferred or imputed.",
+        "The 2012 table carries no Not Stated line. The Bureau of Statistics prorated the 363 Not-Stated, 16,331 No-Contact, and 7,443 Institutional persons across the thirteen categories, and the affiliation and no-religion shares therefore sum to 100 by construction. This is a property of the prorated source, disclosed on every surface, never repaired.",
+        "The no-religion share is legible by region and varies more than sixfold, from 1.15% in Upper Takutu-Upper Essequibo (Region 9) and 1.54% in Essequibo Islands-West Demerara (Region 3) to 7.25% in Upper Demerara-Berbice (Region 10) and 6.12% in Potaro-Siparuni (Region 8). The national None share was 3.14% (23,419 of 746,955). Because Guyana has a real, regionally-varying None category, affiliation is not flat and no minority-share treatment applies.",
+        "Only the 2012 wave ships at region level; no change metric is offered. The 2002 census publishes region religion as one-decimal percentages only (Tables 2.6A/2.6B), with national control totals that are internally inconsistent across the report's own tables; no count-valued 2002 region wave is publishable from them, and it is documented and deferred, not shipped. The 2022 census has released only preliminary results (population 878,674) with no religion table in any geography.",
+        "The boundary frame is geoBoundaries GUY ADM1, ten regions, represented year 2017, joined one-to-one to the census regions by ISO 3166-2 code. The western regions fall within the Essequibo area, which is subject to a long-standing Venezuelan territorial claim before the International Court of Justice. The layer renders the official Guyanese administrative extent that the Bureau of Statistics census enumerates; the ten-region counts are those of the Government of Guyana, and the map takes no position on the dispute.",
+        "No governed Guyana place-of-worship snapshot ships with this product; place counts and density metrics are null."
+      ],
+      sources: [
+        {
+          name: "BoS 2012 Population and Housing Census, Final Compendium 2 (Population Composition), Table 2.19 (Distribution of the Population by Religious Affiliation and Administrative Regions)",
+          href: "https://statisticsguyana.gov.gy/wp-content/uploads/2019/10/Final_2012_Census_Compendium2.pdf",
+          construct: "Census religious affiliation by administrative region, integer counts, thirteen categories including a None line",
+          years: "2012",
+          licence: "BoS Open Licence Agreement (free reuse for commercial and non-commercial purposes, with the required acknowledgement-of-source notice); licence accepted"
+        },
+        {
+          name: "geoBoundaries Guyana ADM1 boundaries",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/GUY/ADM1/",
+          construct: "Boundary geometry (10 regions), source OpenStreetMap contributors, pinned commit 9469f09",
+          years: "2017 (represented year)",
+          licence: "Open Data Commons Open Database License 1.0 (ODbL), per the release metadata"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Bureau of Statistics, Guyana, <a href=\"https://statisticsguyana.gov.gy/\" target=\"_blank\" rel=\"noopener\">BoS</a>: the 2012 Population and Housing Census, Final Compendium 2, Table 2.19, religion by administrative region; boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/GUY/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries GUY ADM1</a>.",
+        tables: "Table 2.19 is the source of record for the shipped counts. It prints integer counts for the thirteen categories across the ten regions plus a Total column. Both national margins close exactly to 746,955, and the thirteen category national totals equal the Table 2.17 2012 column exactly (an independent cross-check). The area-summary religious_affiliation_percent field is the region population minus the None line, over the region total; the no_religion_percent field is the None line over the region total. The table carries no Not Stated line: BoS prorated the Not-Stated, No-Contact, and Institutional persons across the thirteen categories, and the two shares therefore sum to 100 by construction.",
+        licence: "Census reuse is accepted under the BoS Open Licence Agreement, which grants a worldwide, royalty-free non-exclusive licence to freely use, copy, modify, publish, adapt, and distribute the data for commercial and non-commercial purposes, conditioned on the acknowledgement-of-source notice. The required derived-tables notice ships on the map: 'This table was adapted from the Bureau of Statistics, Guyana, which is licenced under the Central Statistical Office's Open Licence Agreement.' The geoBoundaries GUY ADM1 boundary is Open Data Commons Open Database License 1.0 (ODbL) per the release metadata, source OpenStreetMap contributors; the derived boundary ships share-alike under ODbL with attribution to OpenStreetMap contributors.",
+        script: "scripts/build_gy_area_summary.R",
+        manifests: [
+          { label: "gy-census-religion-2012", href: "docs/manifests/gy-census-religion-2012.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Guyana map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
