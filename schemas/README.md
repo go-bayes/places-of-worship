@@ -117,6 +117,8 @@ legitimisations extend the ruling's named additions under its "per the
 data-manifest.v2 playbook" clause and stand open to the project lead's veto. Legacy products (Canada, US, Romania, and others) stay on
 their declared versions and upgrade opportunistically.
 
+`apps/global/data/measurement_regimes.json` now provides the provisional v1 measurement-regime declarations table, generated from committed manifests and area-summary metadata by `scripts/build_measurement_regime_table.R` (vocabulary: `docs/development/measurement-regime-vocabulary.md`); it has no schema contract pending the project lead's vocabulary review.
+
 The pre-ruling record: a full validation of the 37 shipped country
 products against `area-summary.schema.json` passes 23. The 14 failures
 are structural generation differences, not data defects:
