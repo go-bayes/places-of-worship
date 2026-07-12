@@ -90,6 +90,18 @@ old_manifest_out <- file.path(manifest_dir, "bd-census-religion-2022.json")
 # column order in both.
 categories <- c("Muslim", "Hindu", "Christian", "Buddhist", "Others")
 
+# denomination-taxonomy.json code for each printed source category, assigned only
+# where the mapping is unambiguous. "Others" is a residual mix with no single
+# code, so it ships without one; the area-summary.v2 composition field carries a
+# taxonomy_code only when present.
+category_taxonomy <- c(
+  "Muslim"    = "muslim",
+  "Hindu"     = "hindu",
+  "Christian" = "christian",
+  "Buddhist"  = "buddhist",
+  "Others"    = NA_character_
+)
+
 # verified 2022 national category totals (Table P08, male+female basis). these
 # anchor the 2022 extraction against pdftotext column drift; a mismatch stops the
 # build.
@@ -570,6 +582,19 @@ build_row <- function(area_code, area_name, land_area_sq_km, counts, year, unive
   minority_pct <- round(100 * minority_count / total, metric_round_digits)
   composition <- paste(sprintf("%s=%d", categories, cat_counts), collapse = ";")
 
+  # structured area-summary.v2 composition: one item per printed source category
+  # in the verbatim frame order, carrying the source-verbatim label and the exact
+  # published zila count. the census prints counts, not percentages, so no percent
+  # is derived. taxonomy_code links to denomination-taxonomy.json where the
+  # mapping is unambiguous (Others has none). withheld rows (Bhola 2011) carry no
+  # composition; the field is absent, never zeroed or estimated.
+  composition_items <- lapply(categories, function(cat) {
+    item <- list(label_verbatim = cat, count = as.integer(cat_counts[[cat]]))
+    code <- category_taxonomy[[cat]]
+    if (!is.na(code)) item[["taxonomy_code"]] <- code
+    item
+  })
+
   # small-cell tokens (thresholds applied exactly). the denominator token fires
   # when the zila total is under 100; the numerator token when any published
   # category cell is under 10. name the sub-threshold categories for transparency.
@@ -635,7 +660,8 @@ build_row <- function(area_code, area_name, land_area_sq_km, counts, year, unive
       else if (source_swap) census_dataset_id_2011_zila
       else census_dataset_id_2011,
       boundary_dataset_id),
-    quality_flag = flags
+    quality_flag = flags,
+    composition = composition_items
   )
 }
 
@@ -1037,7 +1063,7 @@ site_snapshot_block <- list(
 
 write_summary <- function(rows_subset, path_json, path_csv) {
   area_summary <- list(
-    schema_version = "0.2.0",
+    schema_version = "area-summary.v2",
     generated_at = stamp,
     generated_by = script_id,
     country_code = country_code,
