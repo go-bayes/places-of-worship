@@ -1,0 +1,357 @@
+{
+  "schema_version": "0.2.0",
+  "generated_at": "2026-07-12T03:52:58Z",
+  "generated_by": "scripts/build_gw_area_summary.R",
+  "country_code": "GW",
+  "boundary_set": {
+    "boundary_set_id": "gw-region-2009-geoboundaries-adm1",
+    "country_code": "GW",
+    "level": "region",
+    "vintage": "geoBoundaries ADM1 represented year 2017; 8 regions + Sector Autónomo de Bissau",
+    "source_dataset_id": "geoboundaries-gnb-adm1-2017"
+  },
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "no governed Guinea-Bissau place-of-worship snapshot is included in this census-religion release",
+    "notes": "The Guinea-Bissau lane ships census-religion percentage metrics only."
+  },
+  "source_datasets": [
+    {
+      "source_dataset_id": "ine-rgph2009-socio-cultural-quadro-4",
+      "name": "INE RGPH-2009, Características socioculturais, Quadro 4",
+      "provider": "Instituto Nacional de Estatística (INE), Guiné-Bissau",
+      "url": "https://www.stat-guinebissau.com/Menu_principal/IV_RGPH/rgph1/caracteristicas_socio_cultural.pdf",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/gw_census/caracteristicas_socio_cultural.pdf",
+      "licence": {
+        "name": "All rights reserved (INE Guiné-Bissau site footer); no located open-data licence; reuse needs_review",
+        "url": "https://www.stat-guinebissau.com/",
+        "attribution": "Source: INE Guiné-Bissau, RGPH-2009 (Características socioculturais, Quadro 4)"
+      },
+      "citation": "INE Guiné-Bissau, 3º Recenseamento Geral da População e Habitação 2009 (RGPH-2009), Características socioculturais, Quadro 4 (religion by region).",
+      "access_limits": "Open web PDF.",
+      "redistribution_limits": "The INE site carries an all-rights-reserved footer verbatim: Instituto Nacional de Estatistica da Guiné-Bissau 1991-2020 © Todos os direitos reservados No open-data licence was located. Reuse of the derived percentages is needs_review pending a project-lead ruling. Recorded ask: May transcribed one-decimal regional percentages from the INE RGPH-2009 sociocultural report be published as a derived map product, given the site's all-rights-reserved footer and no located open-data licence? Mirrors the open BF/CI reuse questions; not decided in this lane.",
+      "notes": "Eight regions plus the Sector Autónomo de Bissau, one-decimal column percentages, six categories (including a large ND non-response share), no counts. The prose in section 3.4.2 misstates two table values (Oio Muçulmana 47,1 vs table 42,1; Gabú/Bafatá order); Quadro 4 is internally consistent and is trusted. No percentage was altered."
+    },
+    {
+      "source_dataset_id": "geoboundaries-gnb-adm1-2017",
+      "name": "geoBoundaries Guinea-Bissau ADM1 (9 units, represented year 2017)",
+      "provider": "geoBoundaries (William & Mary geoLab); OpenStreetMap-derived",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GNB/ADM1/geoBoundaries-GNB-ADM1.geojson",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/gw_census/geoBoundaries-GNB-ADM1.geojson",
+      "licence": {
+        "name": "Open Data Commons Open Database License 1.0 (ODbL 1.0)",
+        "url": "https://opendatacommons.org/licenses/odbl/1-0/",
+        "attribution": "geoBoundaries (gbOpen) GNB ADM1; boundary ID GNB-ADM1-76643164; OpenStreetMap contributors"
+      },
+      "citation": "Runfola, D. et al. (2020) geoBoundaries: A global database of political administrative boundaries. gbOpen GNB ADM1 (pinned commit 9469f09).",
+      "access_limits": null,
+      "redistribution_limits": "ODbL 1.0 permits redistribution and derivatives with attribution and share-alike.",
+      "notes": "9 ADM1 units (8 regions + Sector Autónomo de Bissau); release metadata states ODbL 1.0, represented year 2017, admUnitCount 9."
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_id": "religious_affiliation_percent",
+      "label": "Religious affiliation (%)",
+      "description": "Share of the Guinean-nationality resident population in the four affiliation categories (Animista, Muçulmana, Cristão, Outra Religião).",
+      "unit": "percent",
+      "denominator_indicator_id": null,
+      "method": "Sum of the four published affiliation-category one-decimal shares from Quadro 4, rounded to one decimal. ND (não declarado) and Sem religião stay outside this numerator. No count is derived from any percentage.",
+      "temporal_coverage": "2009",
+      "spatial_coverage": "Eight ADM1 regions plus the Sector Autónomo de Bissau on the geoBoundaries 2017 boundary; the census frame matches the boundary units one-to-one (B. Bijagós -> Bolama, SAB -> Bissau by documented concordance).",
+      "quality_notes": "One-decimal published column percentages of the Guinean-nationality universe (1,442,227 of 1,449,230 household residents). ND is 10,5-25,7% by region; affiliation + no religion + ND = 100 within the derived 0,30 pp bound."
+    },
+    {
+      "indicator_id": "no_religion_percent",
+      "label": "No religion (%)",
+      "description": "Sem religião as a share of the Guinean-nationality resident population.",
+      "unit": "percent",
+      "denominator_indicator_id": null,
+      "method": "The published Sem religião one-decimal share from Quadro 4, carried unchanged.",
+      "temporal_coverage": "2009",
+      "spatial_coverage": "Eight ADM1 regions plus the Sector Autónomo de Bissau on the geoBoundaries 2017 boundary; the census frame matches the boundary units one-to-one (B. Bijagós -> Bolama, SAB -> Bissau by documented concordance).",
+      "quality_notes": "Sem religião is a real non-affiliation category inside the denominator and outside the affiliation numerator; distinct from the ND non-response category."
+    }
+  ],
+  "visual_layers": [
+    {
+      "visual_layer_id": "gw-region-religious-affiliation-share",
+      "label": "Religious affiliation share",
+      "description": "Census religious affiliation share by region, 2009.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "religious_affiliation_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "Guinean-nationality resident population (published shares)"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "published regional value on the 2017 boundary",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": true,
+      "notes": "Muslim-majority east (Gabú 86,5%, Bafatá 77,1%) contrasts with the animist/ Christian west and islands (Biombo animist 40,1%, Bolama/Bijagós Christian 30,7%, Bissau Christian 40,2%). A large ND non-response share (10,5-25,7%) sits outside both metrics."
+    },
+    {
+      "visual_layer_id": "gw-region-no-religion-share",
+      "label": "No religion share",
+      "description": "Sem religião share by region, 2009.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "no_religion_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "Guinean-nationality resident population (published shares)"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "published regional value on the 2017 boundary",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Single wave; no cross-wave change layer (subnational religion is published for 2009 only)."
+    }
+  ],
+  "rows": [
+    {
+      "country_code": "GW",
+      "boundary_set_id": "gw-region-2009-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gw-region-2009-geoboundaries-adm1:tombali",
+      "area_code": "tombali",
+      "area_name": "Tombali",
+      "year": 2009,
+      "population_total": null,
+      "population_total_basis": "INE RGPH-2009, Características socioculturais, Quadro 4: religion by region as one-decimal column percentages of each region's Guinean-nationality resident population. The source publishes percentage shares only, with no regional counts; population_total and all counts are therefore null; percentages are shipped as printed. National counts (Quadro 3/5) are recorded as context and are not multiplied into the shares (no derived-count layer).",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": 81.8,
+      "no_religion_count": null,
+      "no_religion_percent": 0.4,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 3720.2861,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-rgph2009-socio-cultural-quadro-4",
+        "geoboundaries-gnb-adm1-2017"
+      ],
+      "quality_flag": "census_affiliation;universe_guinean_nationality_resident_population;published_one_decimal_column_percent_shares;counts_withheld_no_derivation_from_percent;single_wave_2009;religious_change_withheld;affiliation=animista+muculmana+cristao+outra_religiao;no_religion=sem_religiao;not_declared_nd_17,8pp_inside_denominator_outside_numerators;boundary_2017_geoboundaries_odbl;census_needs_review_all_rights_reserved"
+    },
+    {
+      "country_code": "GW",
+      "boundary_set_id": "gw-region-2009-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gw-region-2009-geoboundaries-adm1:quinara",
+      "area_code": "quinara",
+      "area_name": "Quinara",
+      "year": 2009,
+      "population_total": null,
+      "population_total_basis": "INE RGPH-2009, Características socioculturais, Quadro 4: religion by region as one-decimal column percentages of each region's Guinean-nationality resident population. The source publishes percentage shares only, with no regional counts; population_total and all counts are therefore null; percentages are shipped as printed. National counts (Quadro 3/5) are recorded as context and are not multiplied into the shares (no derived-count layer).",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": 71.4,
+      "no_religion_count": null,
+      "no_religion_percent": 7.1,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 3248.8506,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-rgph2009-socio-cultural-quadro-4",
+        "geoboundaries-gnb-adm1-2017"
+      ],
+      "quality_flag": "census_affiliation;universe_guinean_nationality_resident_population;published_one_decimal_column_percent_shares;counts_withheld_no_derivation_from_percent;single_wave_2009;religious_change_withheld;affiliation=animista+muculmana+cristao+outra_religiao;no_religion=sem_religiao;not_declared_nd_21,5pp_inside_denominator_outside_numerators;boundary_2017_geoboundaries_odbl;census_needs_review_all_rights_reserved"
+    },
+    {
+      "country_code": "GW",
+      "boundary_set_id": "gw-region-2009-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gw-region-2009-geoboundaries-adm1:oio",
+      "area_code": "oio",
+      "area_name": "Oio",
+      "year": 2009,
+      "population_total": null,
+      "population_total_basis": "INE RGPH-2009, Características socioculturais, Quadro 4: religion by region as one-decimal column percentages of each region's Guinean-nationality resident population. The source publishes percentage shares only, with no regional counts; population_total and all counts are therefore null; percentages are shipped as printed. National counts (Quadro 3/5) are recorded as context and are not multiplied into the shares (no derived-count layer).",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": 78.7,
+      "no_religion_count": null,
+      "no_religion_percent": 0.9,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 5697.7137,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-rgph2009-socio-cultural-quadro-4",
+        "geoboundaries-gnb-adm1-2017"
+      ],
+      "quality_flag": "census_affiliation;universe_guinean_nationality_resident_population;published_one_decimal_column_percent_shares;counts_withheld_no_derivation_from_percent;single_wave_2009;religious_change_withheld;affiliation=animista+muculmana+cristao+outra_religiao;no_religion=sem_religiao;not_declared_nd_20,5pp_inside_denominator_outside_numerators;boundary_2017_geoboundaries_odbl;census_needs_review_all_rights_reserved;source_column_sums_to_100,1_within_derived_rounding_bound_0.30pp"
+    },
+    {
+      "country_code": "GW",
+      "boundary_set_id": "gw-region-2009-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gw-region-2009-geoboundaries-adm1:biombo",
+      "area_code": "biombo",
+      "area_name": "Biombo",
+      "year": 2009,
+      "population_total": null,
+      "population_total_basis": "INE RGPH-2009, Características socioculturais, Quadro 4: religion by region as one-decimal column percentages of each region's Guinean-nationality resident population. The source publishes percentage shares only, with no regional counts; population_total and all counts are therefore null; percentages are shipped as printed. National counts (Quadro 3/5) are recorded as context and are not multiplied into the shares (no derived-count layer).",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": 76.6,
+      "no_religion_count": null,
+      "no_religion_percent": 2.5,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 862.3406,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-rgph2009-socio-cultural-quadro-4",
+        "geoboundaries-gnb-adm1-2017"
+      ],
+      "quality_flag": "census_affiliation;universe_guinean_nationality_resident_population;published_one_decimal_column_percent_shares;counts_withheld_no_derivation_from_percent;single_wave_2009;religious_change_withheld;affiliation=animista+muculmana+cristao+outra_religiao;no_religion=sem_religiao;not_declared_nd_20,8pp_inside_denominator_outside_numerators;boundary_2017_geoboundaries_odbl;census_needs_review_all_rights_reserved;source_column_sums_to_99,9_within_derived_rounding_bound_0.30pp"
+    },
+    {
+      "country_code": "GW",
+      "boundary_set_id": "gw-region-2009-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gw-region-2009-geoboundaries-adm1:bolama",
+      "area_code": "bolama",
+      "area_name": "Bolama/Bijagós",
+      "year": 2009,
+      "population_total": null,
+      "population_total_basis": "INE RGPH-2009, Características socioculturais, Quadro 4: religion by region as one-decimal column percentages of each region's Guinean-nationality resident population. The source publishes percentage shares only, with no regional counts; population_total and all counts are therefore null; percentages are shipped as printed. National counts (Quadro 3/5) are recorded as context and are not multiplied into the shares (no derived-count layer).",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": 70.2,
+      "no_religion_count": null,
+      "no_religion_percent": 4.2,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 1337.4036,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-rgph2009-socio-cultural-quadro-4",
+        "geoboundaries-gnb-adm1-2017"
+      ],
+      "quality_flag": "census_affiliation;universe_guinean_nationality_resident_population;published_one_decimal_column_percent_shares;counts_withheld_no_derivation_from_percent;single_wave_2009;religious_change_withheld;affiliation=animista+muculmana+cristao+outra_religiao;no_religion=sem_religiao;not_declared_nd_25,7pp_inside_denominator_outside_numerators;boundary_2017_geoboundaries_odbl;census_needs_review_all_rights_reserved;source_column_sums_to_100,1_within_derived_rounding_bound_0.30pp"
+    },
+    {
+      "country_code": "GW",
+      "boundary_set_id": "gw-region-2009-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gw-region-2009-geoboundaries-adm1:bafata",
+      "area_code": "bafata",
+      "area_name": "Bafatá",
+      "year": 2009,
+      "population_total": null,
+      "population_total_basis": "INE RGPH-2009, Características socioculturais, Quadro 4: religion by region as one-decimal column percentages of each region's Guinean-nationality resident population. The source publishes percentage shares only, with no regional counts; population_total and all counts are therefore null; percentages are shipped as printed. National counts (Quadro 3/5) are recorded as context and are not multiplied into the shares (no derived-count layer).",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": 87.8,
+      "no_religion_count": null,
+      "no_religion_percent": 0.9,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 6013.3291,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-rgph2009-socio-cultural-quadro-4",
+        "geoboundaries-gnb-adm1-2017"
+      ],
+      "quality_flag": "census_affiliation;universe_guinean_nationality_resident_population;published_one_decimal_column_percent_shares;counts_withheld_no_derivation_from_percent;single_wave_2009;religious_change_withheld;affiliation=animista+muculmana+cristao+outra_religiao;no_religion=sem_religiao;not_declared_nd_11,3pp_inside_denominator_outside_numerators;boundary_2017_geoboundaries_odbl;census_needs_review_all_rights_reserved"
+    },
+    {
+      "country_code": "GW",
+      "boundary_set_id": "gw-region-2009-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gw-region-2009-geoboundaries-adm1:gabu",
+      "area_code": "gabu",
+      "area_name": "Gabú",
+      "year": 2009,
+      "population_total": null,
+      "population_total_basis": "INE RGPH-2009, Características socioculturais, Quadro 4: religion by region as one-decimal column percentages of each region's Guinean-nationality resident population. The source publishes percentage shares only, with no regional counts; population_total and all counts are therefore null; percentages are shipped as printed. National counts (Quadro 3/5) are recorded as context and are not multiplied into the shares (no derived-count layer).",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": 89.4,
+      "no_religion_count": null,
+      "no_religion_percent": 0.1,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 9135.6015,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-rgph2009-socio-cultural-quadro-4",
+        "geoboundaries-gnb-adm1-2017"
+      ],
+      "quality_flag": "census_affiliation;universe_guinean_nationality_resident_population;published_one_decimal_column_percent_shares;counts_withheld_no_derivation_from_percent;single_wave_2009;religious_change_withheld;affiliation=animista+muculmana+cristao+outra_religiao;no_religion=sem_religiao;not_declared_nd_10,5pp_inside_denominator_outside_numerators;boundary_2017_geoboundaries_odbl;census_needs_review_all_rights_reserved"
+    },
+    {
+      "country_code": "GW",
+      "boundary_set_id": "gw-region-2009-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gw-region-2009-geoboundaries-adm1:cacheu",
+      "area_code": "cacheu",
+      "area_name": "Cacheu",
+      "year": 2009,
+      "population_total": null,
+      "population_total_basis": "INE RGPH-2009, Características socioculturais, Quadro 4: religion by region as one-decimal column percentages of each region's Guinean-nationality resident population. The source publishes percentage shares only, with no regional counts; population_total and all counts are therefore null; percentages are shipped as printed. National counts (Quadro 3/5) are recorded as context and are not multiplied into the shares (no derived-count layer).",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": 79.7,
+      "no_religion_count": null,
+      "no_religion_percent": 3,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 5203.7894,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-rgph2009-socio-cultural-quadro-4",
+        "geoboundaries-gnb-adm1-2017"
+      ],
+      "quality_flag": "census_affiliation;universe_guinean_nationality_resident_population;published_one_decimal_column_percent_shares;counts_withheld_no_derivation_from_percent;single_wave_2009;religious_change_withheld;affiliation=animista+muculmana+cristao+outra_religiao;no_religion=sem_religiao;not_declared_nd_17,3pp_inside_denominator_outside_numerators;boundary_2017_geoboundaries_odbl;census_needs_review_all_rights_reserved"
+    },
+    {
+      "country_code": "GW",
+      "boundary_set_id": "gw-region-2009-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gw-region-2009-geoboundaries-adm1:bissau",
+      "area_code": "bissau",
+      "area_name": "Sector Autónomo de Bissau",
+      "year": 2009,
+      "population_total": null,
+      "population_total_basis": "INE RGPH-2009, Características socioculturais, Quadro 4: religion by region as one-decimal column percentages of each region's Guinean-nationality resident population. The source publishes percentage shares only, with no regional counts; population_total and all counts are therefore null; percentages are shipped as printed. National counts (Quadro 3/5) are recorded as context and are not multiplied into the shares (no derived-count layer).",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": 82.3,
+      "no_religion_count": null,
+      "no_religion_percent": 3.3,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 188.8942,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-rgph2009-socio-cultural-quadro-4",
+        "geoboundaries-gnb-adm1-2017"
+      ],
+      "quality_flag": "census_affiliation;universe_guinean_nationality_resident_population;published_one_decimal_column_percent_shares;counts_withheld_no_derivation_from_percent;single_wave_2009;religious_change_withheld;affiliation=animista+muculmana+cristao+outra_religiao;no_religion=sem_religiao;not_declared_nd_14,4pp_inside_denominator_outside_numerators;boundary_2017_geoboundaries_odbl;census_needs_review_all_rights_reserved"
+    }
+  ]
+}
