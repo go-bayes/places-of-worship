@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Paraguay Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712c" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Paraguay's product is census religious affiliation for the 18 first-level
+    // units (17 departments plus the Asunción capital district) for a single
+    // wave, 2002, from the Instituto Nacional de Estadística (INE, the DGEEC-era
+    // census office). The 2002 census asked "Religión que profesa" of the
+    // population aged 10 and over; the published tabulation is national only
+    // (cuadro P16 by sex, cuadro P11 by age/area/sex). Department grain comes
+    // from a parametrically pinned cross-tabulation of the census microdata
+    // against the CELADE-hosted INE REDATAM Webserver (base CPV2002), recoded
+    // from the detailed denomination list to the published P16 seven-group frame.
+    // The seven recoded national group totals equal the published P16 totals
+    // exactly (national total 3,892,603).
+    //
+    // Two-slot design. religious_affiliation_percent is the five P16 affiliation
+    // groups (Católica, Evangélicas, Otras cristianas, Indígena, Otras
+    // religiones) over the department's population aged 10+; no_religion_percent
+    // is the "No tiene" group (REDATAM "Sin religión"). The "No informado"
+    // non-response group stays in the denominator and outside both slots, so the
+    // two shares need not sum to 100.
+    //
+    // Single wave, no change metric: the 2012 and 2022 censuses carry no religion
+    // variable, and the 1992 census is not offered in REDATAM, so no cross-wave
+    // change is possible. Four rows carry small_cell_under_10 on the Indígena
+    // group (Cordillera, Misiones, Paraguarí, Ñeembucú); the runtime marks those
+    // popups and never suppresses a count.
+    //
+    // Licence accepted: the Paraguay open-data licence (Decreto 4064 / Ley
+    // 5282/2014) explicitly authorises extracción and transformación with
+    // attribution, so the REDATAM extraction sits inside the grant. Boundaries
+    // are geoBoundaries PRY ADM1 (Creative Commons Attribution 4.0 International),
+    // boundary source DGEEC, joined one-to-one to the census departments by name.
+    window.REGION_CONFIG = {
+      countryCode: "PY",
+      title: "Places of Worship | Paraguay Research Map",
+      // boundary bbox verified numerically from the 18-feature layer:
+      // lon -62.645..-54.259, lat -27.592..-19.290; centre on [-58.45, -23.44].
+      // the large, sparse Chaco departments push the extent to about 8.4 deg
+      // lon by 8.3 deg lat, so open at z5.5 to fit all 18 beside the panels
+      center: [-58.45, -23.44],
+      initialZoom: 5.5,
+      censusLevels: {
+        department: {
+          label: "Department (18 units)",
+          boundaries: "data/py_department_2002.geojson",
+          summary: "data/area_summary_department.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © INE Paraguay, Censo Nacional de Población y Viviendas 2002 (REDATAM CPV2002 department cross-tabulation, recoded to the P16 seven-group frame; Licencia de Uso de la Información Pública, Decreto 4064 / Ley 5282/2014) · Boundaries © geoBoundaries PRY ADM1 (Creative Commons Attribution 4.0 International, CC BY 4.0), boundary source DGEEC"
+        }
+      },
+      defaultLevel: "department",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2002,
+      // the two census-question shares; place, density, and change metrics are
+      // omitted because no place layer is built and department religion is
+      // available for 2002 only
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the department's population aged 10 and over reporting affiliation with a named religion (the five P16 groups Católica, Evangélicas, Otras cristianas, Indígena and Otras religiones), from the 2002 census 'Religión que profesa' cross-tabulation recoded to the P16 seven-group frame. The 'No informado' non-response group stays in the denominator and outside both shares, so affiliation and no religion need not sum to 100"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the census 'No tiene' group (REDATAM 'Sin religión'), from the same 2002 cross-tabulation. The national no-religion share was near 1.1%; it is highest in Boquerón at 10.34%, the one Evangelical-majority department (the Mennonite Chaco colonies)"
+        }
+      },
+      popupDenominatorNote: "Percentages use each department's population aged 10 and over as the denominator, the universe of the 2002 census religion question ('Religión que profesa', asked only of persons 10+). Religious affiliation % is the five P16 affiliation groups over that denominator; no religion % is the 'No tiene' group ('Sin religión'). The 'No informado' non-response group stays in the denominator and outside both shares, so the two shares need not sum to 100. The construct is census affiliation; it does not measure belief, practice, attendance, or membership.",
+      cityPresets: [
+        { label: "Asunción", coords: [-57.6359, -25.2637], zoom: 10 },
+        { label: "Ciudad del Este", coords: [-54.6167, -25.5167], zoom: 10 },
+        { label: "Encarnación", coords: [-55.7667, -27.3333], zoom: 10 },
+        { label: "San Lorenzo", coords: [-57.5089, -25.3397], zoom: 10 },
+        { label: "Coronel Oviedo", coords: [-56.4333, -25.4500], zoom: 10 },
+        { label: "Concepción", coords: [-57.4344, -23.4064], zoom: 10 },
+        { label: "Pedro Juan Caballero", coords: [-55.7333, -22.5500], zoom: 10 },
+        { label: "Filadelfia", coords: [-60.0333, -22.3500], zoom: 9 }
+      ],
+      geocode: { country: "py", biasLngLat: [-58.45, -23.44] },
+      onboarding: {
+        title: "Paraguay research map",
+        intro: "Census religious affiliation across Paraguay's 18 first-level units, the 17 departments and the Asunción capital district, a single 2002 snapshot from the Instituto Nacional de Estadística (INE). The 2002 census asked 'Religión que profesa' of the population aged 10 and over; the department table is extracted from the CELADE-hosted INE REDATAM engine (base CPV2002) and recoded to the published national P16 seven-group frame, reconciling to the national total of 3,892,603 exactly. The construct is census affiliation; it does not measure belief, practice, attendance, or membership.",
+        bullets: [
+          "Departments are shaded by the share reporting affiliation with a named religion, or by the share in the census <code>No tiene</code> (no religion) group, shown as No religion %. Affiliation runs above nine in ten residents in every department except Boquerón.",
+          "This is one census wave, 2002, at department grain. The 2012 and 2022 censuses asked no religion, and the 1992 census is not in the REDATAM engine, so no change metric is offered.",
+          "The department counts come from the detailed 'Religión que profesa' denomination list, recoded to the seven published P16 groups; the seven national group totals reconcile to the published census totals exactly (national total 3,892,603). Each department's seven verbatim groups and counts ride the popup composition block. The 'No informado' non-response group stays in the denominator and outside both shares, so affiliation and no religion need not sum to 100.",
+          "Boquerón, in the Chaco, is the one Evangelical-majority department: the Mennonite colonies there put Evangélicas (16,046) above Católica (10,583), and no religion is highest there too, at 10.34% against a national share near 1.1%.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://www.ine.gov.py/" target="_blank" rel="noopener">INE Paraguay</a>, Censo Nacional de Población y Viviendas 2002, department cross-tabulation via the CELADE-hosted REDATAM Webserver (base CPV2002), recoded to the national cuadro P16 seven-group frame. Fuente: INE Paraguay, Censo Nacional de Población y Viviendas 2002; contenido regido por la Licencia de Uso de la Información Pública (Decreto 4064 / Ley 5282/2014); no es un producto oficial ni patrocinado por el Estado Paraguayo. &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> PRY ADM1 (Creative Commons Attribution 4.0 International, CC BY 4.0), boundary source DGEEC',
+      censusFlagNote: "* The construct is census affiliation (each enumerated resident's declared religion, 'Religión que profesa', population aged 10 and over); it does not measure belief, practice, attendance, or membership. The department table is an extraction from the CELADE-hosted INE REDATAM engine (base CPV2002), recoded from the detailed denomination list to the seven published P16 groups; the seven national group totals reconcile to the published census totals exactly (national total 3,892,603). The 'No informado' non-response group stays in the denominator and outside both shares, so the two shares need not sum to 100. Single wave (2002), department grain; no change metric (2012 and 2022 asked no religion; 1992 is not in REDATAM). † marks a department carrying a P16 group count under ten people (the Indígena group in Cordillera, Misiones, Paraguarí and Ñeembucú); counts render exactly as published, none suppressed. Census reuse accepted under the Paraguay open-data licence (Decreto 4064 / Ley 5282/2014); boundaries geoBoundaries PRY ADM1 (CC BY 4.0)."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712c"></script>
+</body>
+</html>
