@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Barbados Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712b" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Barbados's product is BSS census religious affiliation by the eleven
+    // parishes for a single wave, 2010. The source, 2010 Population and Housing
+    // Census Volume 1 Table 02.06 "Total Population by Parish, Sex and Religion",
+    // is an integer full-count (Both Sexes) of the Tabulable Population, 226,193.
+    // Every parish column and every one of the twenty-three religion rows closes
+    // exactly to the printed national total; there is no cell suppression.
+    //
+    // Slot design is the ordinary two-slot (SB/FM/KI precedent):
+    // religious_affiliation_percent is the parish population minus the None and
+    // Not Stated lines; no_religion_percent is the single census None line.
+    // The Not Stated non-response line stays in the denominator and in neither
+    // share; the two shares therefore need not sum to 100. Barbados has a real
+    // None category; no minority-share treatment applies. Place, density, and
+    // change metrics are omitted: no governed place-of-worship snapshot ships,
+    // and religion is cross-tabulated by parish only in the 2010 census.
+    //
+    // The denominator is the Tabulable Population (226,193), NOT the separate
+    // Estimated Resident Population (277,821); the difference is the census
+    // undercount and is not a religion quantity.
+    //
+    // No religion is the map-worthy signal: 20.6% nationally, from 16.3% in
+    // St. Philip to 25.7% in St. Joseph, with urban St. Michael second at
+    // 23.6% and the rural north-central parishes close behind.
+    //
+    // Single wave only. The 2021 census collected religion (questionnaire P11)
+    // but published no religion table in any geography; 1990 and 2000 religion
+    // are national only (2000 Report Table 2.7). The single-wave parish page
+    // proceeds under the Guinea task-8 precedent.
+    //
+    // Licence accepted: the BSS Open Licence Agreement grants free reuse with an
+    // acknowledgement-of-source notice, carried verbatim below. Boundaries are
+    // geoBoundaries BRB ADM1 (Creative Commons Attribution 2.5 Generic), source
+    // Wikimedia Commons, joined one-to-one via a St. -> Saint name crosswalk.
+    window.REGION_CONFIG = {
+      countryCode: "BB",
+      title: "Places of Worship | Barbados Research Map",
+      // barbados spans lon -59.65..-59.42 by lat 13.05..13.33 across the eleven
+      // parishes; centre on the island and open at a zoom that fits the full
+      // extent beside the census panels
+      center: [-59.54, 13.19],
+      initialZoom: 10,
+      censusLevels: {
+        parish: {
+          label: "Parish",
+          boundaries: "data/bb_parish_2005.geojson",
+          summary: "data/area_summary_parish.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Barbados Statistical Service (BSS), 2010 Population and Housing Census, Volume 1, Table 02.06 (BSS Open Licence Agreement) · Boundaries © geoBoundaries BRB ADM1 (Creative Commons Attribution 2.5 Generic, CC BY 2.5), source Wikimedia Commons"
+        }
+      },
+      defaultLevel: "parish",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2010,
+      // the two census-question shares; place, density, and change metrics are
+      // omitted because no place layer is built and religion is cross-tabulated
+      // by parish only in the 2010 census (single wave)
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the parish population (Tabulable Population) reporting a named religion or denomination — the parish total minus the census None and Not Stated lines, from 2010 Census Volume 1 Table 02.06"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share of the parish population (Tabulable Population) in the single census None line; the separate Not Stated non-response line stays in the denominator and is not counted here"
+        }
+      },
+      popupDenominatorNote: "Percentages use each parish's Tabulable Population, the enumerated population carried through the 2010 census cross-tabulations (national 226,193), not the separate Estimated Resident Population (277,821); the difference is the census undercount. Religious affiliation is the parish population minus the None and Not Stated lines; No religion is the single None line. The Not Stated non-response line stays in the denominator and in neither share; the two shares therefore need not sum to 100. This is a single 2010 census wave; the construct is census affiliation and does not measure belief, practice, attendance, or registered membership.",
+      cityPresets: [
+        { label: "Bridgetown", coords: [-59.6167, 13.0975], zoom: 13 },
+        { label: "Speightstown", coords: [-59.6437, 13.2472], zoom: 13 },
+        { label: "Oistins", coords: [-59.5333, 13.0667], zoom: 13 },
+        { label: "Holetown", coords: [-59.6386, 13.1875], zoom: 13 },
+        { label: "Bathsheba", coords: [-59.5236, 13.2167], zoom: 13 }
+      ],
+      geocode: { country: "bb", biasLngLat: [-59.54, 13.19] },
+      onboarding: {
+        title: "Barbados research map",
+        intro: "Census religious affiliation across Barbados's eleven parishes, a single 2010 snapshot from the Barbados Statistical Service (BSS), 2010 Population and Housing Census, Volume 1, Table 02.06. The table is an integer full-count of the Tabulable Population (226,193), with twenty-three religion categories including a real None line and a separate Not Stated non-response line. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+        bullets: [
+          "Parishes are shaded by the share reporting a named religion or denomination, or by the share in the census <code>None</code> line, shown as No religion %.",
+          "This is one census wave, 2010, at parish level. The table is an integer full-count, and both national margins close exactly to the Tabulable Population, 226,193. No change metric is offered.",
+          "Percentages use each parish's Tabulable Population (226,193 nationally), not the separate Estimated Resident Population (277,821); the difference is the census undercount. The Not Stated non-response line stays in the denominator and in neither share; the two shares therefore need not sum to 100.",
+          "No religion is already substantial and legible by parish: 20.6% nationally, from 16.3% in St. Philip to 25.7% in St. Joseph, with urban St. Michael second at 23.6% and the rural north-central parishes close behind. Anglican affiliation is heaviest in the traditional plantation belt (St. John, St. Philip).",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion © <a href="https://stats.gov.bb/" target="_blank" rel="noopener">Barbados Statistical Service (BSS)</a>, 2010 Population and Housing Census, Volume 1, Table 02.06 (Total Population by Parish, Sex and Religion). This product was adapted from the Barbados Statistical Service\'s information, which is licensed under the Barbados Statistical Service\'s Open Licence Agreement. &middot; Boundaries © <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> BRB ADM1 (Creative Commons Attribution 2.5 Generic, CC BY 2.5), source Wikimedia Commons',
+      censusFlagNote: "* Counts are the 2010 Census Volume 1 Table 02.06 integer full-count (Both Sexes); both national margins close exactly to the Tabulable Population, 226,193, with no cell suppression. Religious affiliation is the parish population minus the None and Not Stated lines; No religion is the single None line; the Not Stated non-response line stays in the denominator and in neither share; the two therefore need not sum to 100. Single wave (2010), parish level; no change metric. Census data under the BSS Open Licence Agreement; boundaries CC BY 2.5 Generic."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712b"></script>
+</body>
+</html>
