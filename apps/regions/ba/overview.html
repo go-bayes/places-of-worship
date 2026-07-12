@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Bosnia and Herzegovina map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Bosnia and Herzegovina research map; every string
+    // traces to research/countries/ba/route-probe.md, the manifest
+    // docs/manifests/ba-census-religion-2013.json, or the live REGION_CONFIG in
+    // apps/regions/ba/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "BA",
+      countryName: "Bosnia and Herzegovina",
+      mapHref: "./",
+      intro: "Census declared religion across Bosnia and Herzegovina's 142 municipal units (141 level-3 municipalities plus Brčko District), a single 2013 snapshot from the Agency for Statistics of Bosnia and Herzegovina (BHAS), 2013 Census of Population, Households and Dwellings, Book 2, Table 5.1. The table is count-valued: both margins close integer-exact to the BHAS resident total of 3,531,159. The construct is declared religion. It does not measure belief, practice, attendance, or registered membership.",
+      facts: {
+        waves: "One census: 2013",
+        geographies: "Municipality (142 units)",
+        metrics: "Religious affiliation %, no religion %"
+      },
+      reading: [
+        "The 142 municipalities are shaded by the share declaring a named religion (16 named-religion lines of Table 5.1 summed), or by the No religion % share (Agnostic plus Atheist, the census's only two explicitly non-religious declared lines). Religion was asked of every resident of all ages, and each municipality's denominator is its printed resident total.",
+        "The two non-response lines (Undeclared and Unknown) stay in the denominator and in neither slot; the affiliation and no-religion shares therefore need not sum to 100%. Nationally, affiliation is 97.79% and no religion 1.10% (38,669 of 3,531,159). The two non-response lines are 39,288 residents nationally.",
+        "Table 5.1 carries 20 verbatim religion categories in the source column order. All 20 are preserved per municipality in the published area summary; the map shades the two aggregate slots, not the 20 lines. Several categories are ethnonym-in-religion-field declarations (Romani, Bosniak, Croat, Bosnian) entered in the religion box and rendered verbatim; none is invented, merged, or redistributed.",
+        "The 2013 census was politically disputed. The Republika Srpska institute of statistics (RZS) rejected the BHAS residence-based methodology and published separate entity results; the BHAS state-level resident total is 3,531,159. This map renders the BHAS publication as the official state record and states the dispute neutrally; no number is repaired or reconciled to the RZS figures.",
+        "The Sarajevo urban core is the most secular: Centar Sarajevo is 8.6% Agnostic-plus-Atheist against 86.9% affiliation, Novo Sarajevo 7.1%. Bosniak-majority northwest municipalities are near-uniformly religious (Bužim 99.8% affiliation), and the Muslim, Orthodox, and Catholic split tracks the entity and canton lines. Nationally, Islam is 50.7%, Orthodox 30.7%, and Catholic 15.2% of the resident total.",
+        "Only the 2013 wave ships; no change metric is offered. 1991 is held: the 1991 SFRY census measured ethnicity and nationality (nacionalna pripadnost), not religion; no 1991 municipality religion table exists, and no open licensed pre-war (~109-municipality) boundary vector is available. Mapping 1991 ethnicity onto 2013 religion would be an invented cross-construct backcast, and it is not done.",
+        "The boundary frame is geoBoundaries BIH ADM3, 142 units, boundaryYearRepresented 2013 &mdash; the exact post-Dayton municipal frame of the 2013 census. The census municipalities join the boundary one-to-one (142 of 142) via a documented crosswalk: 16 name-mapped entries and 3 shapeID-keyed entries that resolve a polygon mislabelled 'Republika Srpska' (Višegrad by centroid), two 'Novi Grad' polygons (RS Novi Grad and Novi Grad Sarajevo), and the source typo 'Kupra na Uni' for Krupa na Uni. All 142 features are distinct.",
+        "No governed Bosnia and Herzegovina place-of-worship snapshot ships with this product; place counts and density metrics are null."
+      ],
+      sources: [
+        {
+          name: "BHAS 2013 Census, Book 2 (Ethnicity/nationality, Religion, Mother tongue), Table 5.1 (Stanovništvo prema vjeroispovijesti i spolu, po općinama/gradovima — Population by religion and sex, by municipalities/cities)",
+          href: "https://www.popis.gov.ba/popis2013/doc/Knjiga2/BOS/K2_T5-1_B.xlsx",
+          construct: "Census declared religion by municipality, count-valued, 20 verbatim categories, Ukupno/Total (both sexes, all ages)",
+          years: "2013",
+          licence: "No open-data licence stated. The 2013 Book 2 foreword (K2_B_E.pdf) requests source attribution: 'Molimo korisnike da prilikom upotrebe podataka obavezno navedu izvor.' / 'Users are kindly requested to mention data source.' Derived municipality summaries ship with attribution to BHAS under the standing build-then-ask ruling; a BHAS reuse-confirmation ask is with the project lead. Licence status: needs_review."
+        },
+        {
+          name: "geoBoundaries Bosnia and Herzegovina ADM3 boundaries",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/BIH/ADM3/",
+          construct: "Boundary geometry (142 municipalities), boundary source Wikimedia Commons, pinned commit f549eab",
+          years: "2013 (boundaryYearRepresented)",
+          licence: "Public Domain, per the geoBoundaries gbOpen release metadata (boundaryLicense 'Public Domain', licenseSource commons.wikimedia.org). The simplified derived boundary carries attribution to geoBoundaries and Wikimedia Commons."
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Agency for Statistics of Bosnia and Herzegovina, <a href=\"https://www.popis.gov.ba/\" target=\"_blank\" rel=\"noopener\">BHAS</a>: the 2013 Census Book 2, Table 5.1, population by religion and municipality; boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/BIH/ADM3/\" target=\"_blank\" rel=\"noopener\">geoBoundaries BIH ADM3</a>.",
+        tables: "Table 5.1 (Ukupno/Total block, both sexes, all ages) is the source of record for the shipped shares. It prints integer counts for 20 religion categories across the 142 municipalities. Every municipality row's 20 categories sum to its printed Total, and every one of the 20 religion columns sums to its printed national total; the 142 leaf Totals and the 20 national category totals each sum to the printed national 3,531,159. Both margins close integer-exact. Printed '-' cells read as nil (true zeros; no cell is suppressed). The area-summary religious_affiliation_percent field sums the 16 named-religion lines; no_religion_percent sums the two explicitly non-religious lines (Agnostik, Ateist); the two non-response lines (Ne izjašnjava se, Nepoznato) stay in the denominator and in neither slot.",
+        licence: "No open-data licence is stated on any BHAS census product. The 2013 Book 2 Director's foreword (K2_B_E.pdf, retrieved 2026-07-12) requests source attribution: 'Molimo korisnike da prilikom upotrebe podataka obavezno navedu izvor.' / 'Users are kindly requested to mention data source.' Publisher: Agencija za statistiku Bosne i Hercegovine / Agency for Statistics of Bosnia and Herzegovina, Zelenih beretki 26, Sarajevo. This product is a derived aggregate of an openly published table, leaking no microdata; the municipality summaries ship with attribution to BHAS under the standing build-then-ask ruling while a reuse confirmation is pending (licence_status needs_review). The geoBoundaries BIH ADM3 boundary is Public Domain per the release metadata, boundary source Wikimedia Commons.",
+        script: "scripts/build_ba_area_summary.R",
+        manifests: [
+          { label: "ba-census-religion-2013", href: "docs/manifests/ba-census-religion-2013.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Bosnia and Herzegovina map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
