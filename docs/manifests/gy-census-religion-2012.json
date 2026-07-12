@@ -1,0 +1,718 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:gy-census-religion:gy:2012:bos-region",
+  "dataset_id": "gy-census-religion:gy:2012:bos-region",
+  "dataset_version_id": "gy-census-religion:gy:2012:bos-region:1a301bab50b6",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "gy-census-religion",
+  "dataset_role": "staged_evidence",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "GY"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-07-12T00:00:00Z",
+  "created_by": "scripts/build_gy_area_summary.R",
+  "target_years": [
+    2012
+  ],
+  "pipeline": {
+    "script": "scripts/build_gy_area_summary.R",
+    "git_commit": "96c3c87f4f3bdd577607cbfd5287b3a775265070",
+    "command": "Rscript scripts/build_gy_area_summary.R",
+    "parameters": {
+      "construct": "census affiliation",
+      "shipped_waves": [
+        2012
+      ],
+      "shipped_geography": "10 Guyana administrative regions (Barima-Waini, Pomeroon-Supenaam, Essequibo Islands-West Demerara, Demerara-Mahaica, Mahaica-Berbice, East Berbice-Corentyne, Cuyuni-Mazaruni, Potaro-Siparuni, Upper Takutu-Upper Essequibo, Upper Demerara-Berbice)",
+      "boundary_set": "gy-region-2017-geoboundaries-adm1",
+      "source_tables": {
+        "2012": "2012 Census Compendium 2 Table 2.19 Distribution of the Population by Religious Affiliation and Administrative Regions (integer counts, 13 categories)"
+      },
+      "universes": {
+        "2012": "whole census population, all ages (746,955); Not-Stated (363), No-Contact (16,331), and Institutional (7,443) persons prorated across the 13 groups"
+      },
+      "method_note": "The 2012 religion cross-tab (Table 2.19) is a count table over the whole census population (746,955). Every cell is transcribed verbatim and verified against a 200-dpi render of Compendium 2 page 49. Both national margins close exactly, and the 13 category national totals equal the Table 2.17 2012 column exactly. The table has no Not Stated line: BoS prorated the Not-Stated/No-Contact/Institutional persons across groups, so the two headline shares sum to 100 by construction.",
+      "denominators": {
+        "2012": "printed region Total (whole census population); affiliation = population - None"
+      },
+      "slot_design": "Ordinary two-slot (BB/SB/FM/KI precedent). religious_affiliation_percent is the share of the region population reporting a named religion (population minus None); no_religion_percent is the single None line. The 2012 table carries no Not Stated residual (prorated by BoS), so the two shares sum to 100 by construction (unlike Barbados/Belize). Guyana has a real, regionally-varying None category (1.15% to 7.25%), so no minority-share (task-6) treatment applies.",
+      "category_frames": {
+        "2012": [
+          "Anglican",
+          "Methodist",
+          "Pentecostal",
+          "Roman Catholic",
+          "Jehovah Witness",
+          "Seventh Day Adventist",
+          "Bahai",
+          "Muslim",
+          "Hindu",
+          "Rastafarian",
+          "Other Christians",
+          "None",
+          "Other"
+        ],
+        "alignment_note": "Single-wave product: religion is cross-tabulated by region with counts only in the 2012 census. The 2002 census (same 13-category frame nationally) publishes region religion as percentages only (Tables 2.6A/2.6B) with internally inconsistent national totals (Table 2.5 vs Table 2.6B vs the 2012 Compendium Table 2.17 2002 column give three different totals), so no count-valued 2002 region wave is publishable. The 2022 census has released only preliminary results (population 878,674) with no religion table. No cross-wave region change is assertable; the 2012 frame is preserved verbatim."
+      },
+      "change_rule": "Single wave (2012): no cross-wave region change layer. National religion context exists for 2002 and 2012 (Table 2.17), but the count-valued subnational (region) product is 2012-only.",
+      "no_religion_treatment": {
+        "2012": "single None line (national 23,419; 3.14%); no separate Not Stated line (prorated by BoS)"
+      },
+      "held_and_deferred": "The 2002 region religion tables (2.6A/2.6B) are percentages-only with inconsistent national totals; a count-valued 2002 wave would require a BoS data request (courtesy ask). The 2022 census final results carrying religion are not yet released (only preliminary population). Both are documented gaps, not held sources with recoverable counts.",
+      "territorial_note": "The western regions fall within the Essequibo area subject to a Venezuelan territorial claim; the build renders the official Guyanese administrative extent that the BoS census enumerates, neutrally, and takes no position on the dispute.",
+      "omitted_metrics": [
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 354618
+      },
+      "local_cache_hint": "All raw sources are cached under data/raw/gy_census/ and remain git-ignored.",
+      "retrieval_record": [
+        {
+          "uri": "data/raw/gy_census/gy_2012_Compendium2.pdf",
+          "url": "https://statisticsguyana.gov.gy/wp-content/uploads/2019/10/Final_2012_Census_Compendium2.pdf",
+          "format": "pdf",
+          "bytes": 3648260,
+          "sha256": "35f09013015f6e0880c81c95fe2245d51b83e07716ec96879dae9780e702e783",
+          "row_count": null,
+          "source_dataset_id": "gy-census-2012-compendium2-table-2-19-religion-by-region",
+          "used_in_public_product": true,
+          "periods": "2012",
+          "notes": "2012 Census Final Compendium 2 (Population Composition); Table 2.19 Religion by region (integer counts). Both margins close to 746,955. Page 49.",
+          "local_cache_hint": "data/raw/gy_census/gy_2012_Compendium2.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/gy_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/gy_census/gy_2002_National_Report.zip",
+          "url": "https://statisticsguyana.gov.gy/wp-content/uploads/2019/10/Guyana_National_Census-Report_2002.zip",
+          "format": "zip",
+          "bytes": 2205481,
+          "sha256": "9efdcc7acd3e822c4a963d86299ac773ac8c0c086162be60212d932b494aa29e",
+          "row_count": null,
+          "source_dataset_id": "gy-census-2002-national-report",
+          "used_in_public_product": false,
+          "periods": "2002",
+          "notes": "2002 National Census Report (zip). Chapter 2 Tables 2.6A/2.6B give region religion as percentages only (no counts) with internally inconsistent national totals. Context, not a shipped subnational source.",
+          "local_cache_hint": "data/raw/gy_census/gy_2002_National_Report.zip (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/gy_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/gy_census/Preliminary-Report-Guyana-National-Population-and-Housing-Census-2022.pdf",
+          "url": "https://statisticsguyana.gov.gy/wp-content/uploads/2019/10/Preliminary-Report-Guyana-National-Population-and-Housing-Census-2022.pdf",
+          "format": "pdf",
+          "bytes": 6950210,
+          "sha256": "4599b518c8c61073bb3a35bb78371a0498fca1ca0dffc2b6a050f11833667b79",
+          "row_count": null,
+          "source_dataset_id": "gy-census-2022-preliminary-report",
+          "used_in_public_product": false,
+          "periods": "2022",
+          "notes": "2022 Preliminary Report; population count only (878,674), no religion table. Documents the not-yet-released 2022 wave.",
+          "local_cache_hint": "data/raw/gy_census/Preliminary-Report-Guyana-National-Population-and-Housing-Census-2022.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/gy_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/gy_census/bos_open-licence-agreement.html",
+          "url": "https://statisticsguyana.gov.gy/open-licence-agreement/",
+          "format": "html",
+          "bytes": 111835,
+          "sha256": "5a445f141326797b214dc9810e76eaaecc2a6f0fb3bc12ad92eb2f926b1c1552",
+          "row_count": null,
+          "source_dataset_id": "gy-census-2012-compendium2-table-2-19-religion-by-region",
+          "used_in_public_product": false,
+          "periods": "2026",
+          "notes": "BoS Open Licence Agreement (verbatim licence grant and acknowledgement-of-source notice).",
+          "local_cache_hint": "data/raw/gy_census/bos_open-licence-agreement.html (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/gy_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/gy_census/bos_census.html",
+          "url": "https://statisticsguyana.gov.gy/census/",
+          "format": "html",
+          "bytes": 155073,
+          "sha256": "8bf0323540536c29a93edd45e38d0eacdc05498702ce4becab44e3b83504d2b7",
+          "row_count": null,
+          "source_dataset_id": "gy-census-2012-compendium2-table-2-19-religion-by-region",
+          "used_in_public_product": false,
+          "periods": "2026",
+          "notes": "BoS census page; download index for the 2002/2012/2022 census products.",
+          "local_cache_hint": "data/raw/gy_census/bos_census.html (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/gy_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/gy_census/geoBoundaries-GUY-ADM1.geojson",
+          "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GUY/ADM1/geoBoundaries-GUY-ADM1.geojson",
+          "format": "geojson",
+          "bytes": 477777,
+          "sha256": "695bc45f5f05024d7ccb3336bd6f317a9168598ae4879858566fc4774c718ab6",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-guy-adm1-2017",
+          "used_in_public_product": true,
+          "periods": "2017",
+          "notes": "geoBoundaries GUY ADM1 GeoJSON; 10 regions, ODbL 1.0 (OpenStreetMap). Pinned commit 9469f09.",
+          "local_cache_hint": "data/raw/gy_census/geoBoundaries-GUY-ADM1.geojson (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/gy_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/gy_census/gb_guy_adm1_meta.json",
+          "url": "https://www.geoboundaries.org/api/current/gbOpen/GUY/ADM1/",
+          "format": "json",
+          "bytes": 1753,
+          "sha256": "c56fb3611bc33c34728b9d39321c9dfae33f734914a376a18e754e6c99057834",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-guy-adm1-2017",
+          "used_in_public_product": false,
+          "periods": "2017",
+          "notes": "geoBoundaries GUY ADM1 metadata; records ODbL 1.0, boundaryYearRepresented 2017, admUnitCount 10.",
+          "local_cache_hint": "data/raw/gy_census/gb_guy_adm1_meta.json (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/gy_census/"
+          ]
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "scripts/lib/simplify_boundary.R (npx mapshaper)"
+    }
+  },
+  "source": {
+    "provider": "Bureau of Statistics, Guyana (BoS); geoBoundaries (William & Mary geoLab)",
+    "source_dataset_ids": [
+      "gy-census-2012-compendium2-table-2-19-religion-by-region",
+      "geoboundaries-guy-adm1-2017"
+    ],
+    "source_urls": [
+      "https://statisticsguyana.gov.gy/wp-content/uploads/2019/10/Final_2012_Census_Compendium2.pdf",
+      "https://statisticsguyana.gov.gy/wp-content/uploads/2019/10/Guyana_National_Census-Report_2002.zip",
+      "https://statisticsguyana.gov.gy/wp-content/uploads/2019/10/Preliminary-Report-Guyana-National-Population-and-Housing-Census-2022.pdf",
+      "https://statisticsguyana.gov.gy/open-licence-agreement/",
+      "https://statisticsguyana.gov.gy/census/",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GUY/ADM1/geoBoundaries-GUY-ADM1.geojson",
+      "https://www.geoboundaries.org/api/current/gbOpen/GUY/ADM1/"
+    ],
+    "retrieved_at": "2026-07-12T00:00:00Z",
+    "licence": "The Bureau of Statistics, Guyana (BoS) publishes an Open Licence Agreement (statisticsguyana.gov.gy/open-licence-agreement/) that governs use of BoS data. It grants 'a worldwide, royalty-free non-exclusive licence to freely use the data, copy, modify, translate, publish, adapt, distribute, create derivative works and value-added products for commercial and non-commercial purposes', conditioned on the acknowledgement-of-source notice. The required derived-tables notice is: 'This table was adapted from the Bureau of Statistics, Guyana, which is licenced under the Central Statistical Office's Open Licence Agreement.' Licence status: accepted. The boundary is Open Data Commons Open Database License 1.0 (OpenStreetMap).",
+    "citation": "BoS 2012 Population and Housing Census Compendium 2 Table 2.19; geoBoundaries GUY ADM1 (gbOpen).",
+    "raw_redistribution": "The census PDF/zip and the geoBoundaries source GeoJSON are not committed; they remain in data/raw/gy_census/.",
+    "local_cache_hint": "data/raw/gy_census/ (git-ignored by .gitignore data/ rule)",
+    "raw_cache_durable_uris": [
+      "gs://pow-research-data/raw_sources/gy_census/"
+    ]
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/gy_census/gy_2012_Compendium2.pdf",
+      "url": "https://statisticsguyana.gov.gy/wp-content/uploads/2019/10/Final_2012_Census_Compendium2.pdf",
+      "format": "pdf",
+      "bytes": 3648260,
+      "sha256": "35f09013015f6e0880c81c95fe2245d51b83e07716ec96879dae9780e702e783",
+      "row_count": null,
+      "source_dataset_id": "gy-census-2012-compendium2-table-2-19-religion-by-region",
+      "used_in_public_product": true,
+      "periods": "2012",
+      "notes": "2012 Census Final Compendium 2 (Population Composition); Table 2.19 Religion by region (integer counts). Both margins close to 746,955. Page 49.",
+      "local_cache_hint": "data/raw/gy_census/gy_2012_Compendium2.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/gy_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/gy_census/gy_2002_National_Report.zip",
+      "url": "https://statisticsguyana.gov.gy/wp-content/uploads/2019/10/Guyana_National_Census-Report_2002.zip",
+      "format": "zip",
+      "bytes": 2205481,
+      "sha256": "9efdcc7acd3e822c4a963d86299ac773ac8c0c086162be60212d932b494aa29e",
+      "row_count": null,
+      "source_dataset_id": "gy-census-2002-national-report",
+      "used_in_public_product": false,
+      "periods": "2002",
+      "notes": "2002 National Census Report (zip). Chapter 2 Tables 2.6A/2.6B give region religion as percentages only (no counts) with internally inconsistent national totals. Context, not a shipped subnational source.",
+      "local_cache_hint": "data/raw/gy_census/gy_2002_National_Report.zip (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/gy_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/gy_census/Preliminary-Report-Guyana-National-Population-and-Housing-Census-2022.pdf",
+      "url": "https://statisticsguyana.gov.gy/wp-content/uploads/2019/10/Preliminary-Report-Guyana-National-Population-and-Housing-Census-2022.pdf",
+      "format": "pdf",
+      "bytes": 6950210,
+      "sha256": "4599b518c8c61073bb3a35bb78371a0498fca1ca0dffc2b6a050f11833667b79",
+      "row_count": null,
+      "source_dataset_id": "gy-census-2022-preliminary-report",
+      "used_in_public_product": false,
+      "periods": "2022",
+      "notes": "2022 Preliminary Report; population count only (878,674), no religion table. Documents the not-yet-released 2022 wave.",
+      "local_cache_hint": "data/raw/gy_census/Preliminary-Report-Guyana-National-Population-and-Housing-Census-2022.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/gy_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/gy_census/bos_open-licence-agreement.html",
+      "url": "https://statisticsguyana.gov.gy/open-licence-agreement/",
+      "format": "html",
+      "bytes": 111835,
+      "sha256": "5a445f141326797b214dc9810e76eaaecc2a6f0fb3bc12ad92eb2f926b1c1552",
+      "row_count": null,
+      "source_dataset_id": "gy-census-2012-compendium2-table-2-19-religion-by-region",
+      "used_in_public_product": false,
+      "periods": "2026",
+      "notes": "BoS Open Licence Agreement (verbatim licence grant and acknowledgement-of-source notice).",
+      "local_cache_hint": "data/raw/gy_census/bos_open-licence-agreement.html (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/gy_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/gy_census/bos_census.html",
+      "url": "https://statisticsguyana.gov.gy/census/",
+      "format": "html",
+      "bytes": 155073,
+      "sha256": "8bf0323540536c29a93edd45e38d0eacdc05498702ce4becab44e3b83504d2b7",
+      "row_count": null,
+      "source_dataset_id": "gy-census-2012-compendium2-table-2-19-religion-by-region",
+      "used_in_public_product": false,
+      "periods": "2026",
+      "notes": "BoS census page; download index for the 2002/2012/2022 census products.",
+      "local_cache_hint": "data/raw/gy_census/bos_census.html (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/gy_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/gy_census/geoBoundaries-GUY-ADM1.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GUY/ADM1/geoBoundaries-GUY-ADM1.geojson",
+      "format": "geojson",
+      "bytes": 477777,
+      "sha256": "695bc45f5f05024d7ccb3336bd6f317a9168598ae4879858566fc4774c718ab6",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-guy-adm1-2017",
+      "used_in_public_product": true,
+      "periods": "2017",
+      "notes": "geoBoundaries GUY ADM1 GeoJSON; 10 regions, ODbL 1.0 (OpenStreetMap). Pinned commit 9469f09.",
+      "local_cache_hint": "data/raw/gy_census/geoBoundaries-GUY-ADM1.geojson (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/gy_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/gy_census/gb_guy_adm1_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/GUY/ADM1/",
+      "format": "json",
+      "bytes": 1753,
+      "sha256": "c56fb3611bc33c34728b9d39321c9dfae33f734914a376a18e754e6c99057834",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-guy-adm1-2017",
+      "used_in_public_product": false,
+      "periods": "2017",
+      "notes": "geoBoundaries GUY ADM1 metadata; records ODbL 1.0, boundaryYearRepresented 2017, admUnitCount 10.",
+      "local_cache_hint": "data/raw/gy_census/gb_guy_adm1_meta.json (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/gy_census/"
+      ]
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/gy/data/area_summary_region.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 29133,
+      "sha256": "1a301bab50b6c478113a8d35aba322f19aa106037b4a74bcb49fd7e1d2e6eb86",
+      "row_count": 10,
+      "feature_count": null,
+      "content": "Guyana 10-region census-affiliation area summary for 2012.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "bos_open_licence_agreement"
+    },
+    {
+      "uri": "repo:apps/regions/gy/data/area_summary_region.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 14470,
+      "sha256": "3d152c179cba64a4b90c74baa36f47ab983c1f3f607f23d8db596fe9d20c6ee5",
+      "row_count": 10,
+      "feature_count": null,
+      "content": "Flattened Guyana 10-region census-affiliation rows for 2012.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "bos_open_licence_agreement"
+    },
+    {
+      "uri": "repo:apps/regions/gy/data/gy_region_2017.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 354618,
+      "sha256": "02edde284e400225cb62b9653cfdb9ec63e08a21b39ff2bb4e8192a2e4f773d2",
+      "row_count": null,
+      "feature_count": 10,
+      "content": "Simplified geoBoundaries GUY ADM1 10-region boundary GeoJSON.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_odbl_1_0"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/gy/data/area_summary_region.json",
+      "sha256": "1a301bab50b6c478113a8d35aba322f19aa106037b4a74bcb49fd7e1d2e6eb86",
+      "built_by": "scripts/build_gy_area_summary.R",
+      "notes": "10 regions x 1 wave = 10 rows; whole-population universe; no suppressed cells."
+    },
+    {
+      "uri": "repo:apps/regions/gy/data/gy_region_2017.geojson",
+      "sha256": "02edde284e400225cb62b9653cfdb9ec63e08a21b39ff2bb4e8192a2e4f773d2",
+      "built_by": "scripts/build_gy_area_summary.R",
+      "notes": "10 region features from geoBoundaries GUY ADM1, simplified with mapshaper weighted keep-shapes."
+    }
+  ],
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_gy_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/gy/data/area_summary_region.json",
+      "bash scripts/validate_manifests.sh"
+    ],
+    "gate_2012": {
+      "status": "passed",
+      "both_margins_close_to": 746955,
+      "region_column_checks": 10,
+      "religion_row_checks": 13,
+      "records": [
+        {
+          "year": 2012,
+          "margin": "region_column",
+          "key": "Region 1",
+          "computed": 27643,
+          "printed": 27643,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "region_column",
+          "key": "Region 2",
+          "computed": 46810,
+          "printed": 46810,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "region_column",
+          "key": "Region 3",
+          "computed": 107785,
+          "printed": 107785,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "region_column",
+          "key": "Region 4",
+          "computed": 311563,
+          "printed": 311563,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "region_column",
+          "key": "Region 5",
+          "computed": 49820,
+          "printed": 49820,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "region_column",
+          "key": "Region 6",
+          "computed": 109652,
+          "printed": 109652,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "region_column",
+          "key": "Region 7",
+          "computed": 18375,
+          "printed": 18375,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "region_column",
+          "key": "Region 8",
+          "computed": 11077,
+          "printed": 11077,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "region_column",
+          "key": "Region 9",
+          "computed": 24238,
+          "printed": 24238,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "region_column",
+          "key": "Region 10",
+          "computed": 39992,
+          "printed": 39992,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "religion_row",
+          "key": "Anglican",
+          "computed": 38962,
+          "printed": 38962,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "religion_row",
+          "key": "Methodist",
+          "computed": 10106,
+          "printed": 10106,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "religion_row",
+          "key": "Pentecostal",
+          "computed": 170289,
+          "printed": 170289,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "religion_row",
+          "key": "Roman Catholic",
+          "computed": 52901,
+          "printed": 52901,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "religion_row",
+          "key": "Jehovah Witness",
+          "computed": 9602,
+          "printed": 9602,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "religion_row",
+          "key": "Seventh Day Adventist",
+          "computed": 40374,
+          "printed": 40374,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "religion_row",
+          "key": "Bahai",
+          "computed": 421,
+          "printed": 421,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "religion_row",
+          "key": "Muslim",
+          "computed": 50572,
+          "printed": 50572,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "religion_row",
+          "key": "Hindu",
+          "computed": 185439,
+          "printed": 185439,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "religion_row",
+          "key": "Rastafarian",
+          "computed": 3496,
+          "printed": 3496,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "religion_row",
+          "key": "Other Christians",
+          "computed": 155050,
+          "printed": 155050,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "religion_row",
+          "key": "None",
+          "computed": 23419,
+          "printed": 23419,
+          "difference": 0
+        },
+        {
+          "year": 2012,
+          "margin": "religion_row",
+          "key": "Other",
+          "computed": 6324,
+          "printed": 6324,
+          "difference": 0
+        }
+      ]
+    },
+    "boundary_validation": {
+      "status": "passed",
+      "feature_count": 10,
+      "distinct_geometry_hashes": 10,
+      "geometry_hashes": [
+        "387f6b67f0dbe3cf2837086f393026ba19cb0e1591710ab4f630bd1af4ac3416",
+        "dffcddda88d523508406f2900c8ee9080abc6465a8d6566dda740ad190668ce7",
+        "2717c0e217be163c523eec20b5c4ea0f20ba9084c01ddc48ea9f163fed000ae3",
+        "82fb6938fe81d2a75fd239ad6a51d6e41b4ed53a491b817b49c617f181a7d7a4",
+        "502759338421bee9471a7564f696586049afd007a3e1e1f37a5fb3b82f847712",
+        "5c04ae21285abffbd41c22978cdedc4f85e5544d2ece8a87d85109636ead8755",
+        "19d1cac4aa64228f49469573bbcfd962ee769e05a52f50cdbf3781d5f39e4ac8",
+        "e201f05a049829e112bf30a540d704e8657f7e2fb7527efd58bbe0a38184fb32",
+        "8760184599d81ba87d4601ab32537fe645f44bec3b21e353a317ff1ea6257e8a",
+        "59caa29b5c36a04076f1b8721d75cd2d228f4b8c7c59f01bd79b241e46ef87f2"
+      ],
+      "bbox": {
+        "xmin": -61.414905,
+        "ymin": 1.1710017,
+        "xmax": -56.4689543,
+        "ymax": 8.5283698
+      },
+      "dateline_note": "extent lon -61.4 to -56.5E, lat 1.2 to 8.6N; far from the antimeridian, no dateline handling needed",
+      "output_bytes": 354618,
+      "simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 354618
+      },
+      "licence": "Open Data Commons Open Database License 1.0",
+      "adm_unit_count": "10"
+    },
+    "join_coverage": {
+      "matched_regions": 10,
+      "expected_regions": 10,
+      "unmatched_regions": [],
+      "unused_boundary_features": []
+    },
+    "notes": "2012 Table 2.19 closes integer-exact at both margins (national total 746,955). Boundary joins 10/10 to geoBoundaries GUY ADM1 by ISO 3166-2 code with 10 distinct geometry hashes.",
+    "warnings": [
+      "STAGED product: no page, no hub link. The page and the single-wave-subnational display decision are the conductor's (parallel to the Barbados/Antigua task-8 single-wave subnational question).",
+      "Single-wave product: religion is cross-tabulated by region with counts only in 2012. 2002 region religion is percentages-only with inconsistent totals; 2022 final results carrying religion are not yet released.",
+      "The 2012 table carries no Not Stated line (BoS prorated Not-Stated/No-Contact/Institutional persons across groups), so the two headline shares sum to 100 by construction; Guyana has a real, regionally-varying None category, so no task-6 treatment applies.",
+      "The western regions fall within the Essequibo area subject to a Venezuelan territorial claim; the build renders the official Guyanese record neutrally."
+    ]
+  },
+  "construct_notes": [
+    "The construct is census affiliation: each resident's reported religion, asked of the whole resident population, not practice, attendance, or membership.",
+    "The public product carries three headline fields per region-wave: population total, religious affiliation percent, and no-religion percent. Place-density metrics are null (no governed place-of-worship snapshot).",
+    "Single wave (2012): religion is cross-tabulated by region with counts only in the 2012 census (Compendium 2 Table 2.19). The 2002 census publishes region religion as percentages only (Tables 2.6A/2.6B) with internally inconsistent national totals; the 2022 census has released only preliminary results with no religion table.",
+    "The 2012 table spans the whole census population (746,955): BoS prorated the 363 Not-Stated, 16,331 No-Contact, and 7,443 Institutional persons across the 13 groups, so there is no Not Stated line and the two headline shares sum to 100 by construction.",
+    "Slot design (ordinary two-slot, BB/SB/FM/KI precedent): religious_affiliation_percent is the share reporting a named religion (population minus None); no_religion_percent is the single None line. Guyana has a real, regionally-varying None category (1.15% to 7.25%), so no minority-share (task-6) treatment applies.",
+    "Licence accepted: the BoS Open Licence Agreement grants free reuse (commercial and non-commercial) with the acknowledgement-of-source notice. The product ships with the required derived-tables attribution to the Bureau of Statistics, Guyana. The boundary is geoBoundaries GUY ADM1, 10 regions, Open Data Commons Open Database License 1.0 (OpenStreetMap), joined one-to-one by ISO 3166-2 code."
+  ],
+  "deferred_sources": [
+    {
+      "source_dataset_id": "gy-census-2002-national-report",
+      "status": "deferred",
+      "url": "https://statisticsguyana.gov.gy/wp-content/uploads/2019/10/Guyana_National_Census-Report_2002.zip",
+      "local_path": "data/raw/gy_census/gy_2002_National_Report.zip",
+      "notes": "2002 National Census Report Chapter 2 Tables 2.6A/2.6B: region religion as one-decimal percentages only (no counts), with internally inconsistent national totals across Table 2.5, Table 2.6B, and the 2012 Compendium Table 2.17 2002 column. Not shipped; a count-valued 2002 region table would require a BoS data request (courtesy ask)."
+    },
+    {
+      "source_dataset_id": "gy-census-2022-religion-by-region",
+      "status": "not_published",
+      "url": "https://statisticsguyana.gov.gy/wp-content/uploads/2019/10/Preliminary-Report-Guyana-National-Population-and-Housing-Census-2022.pdf",
+      "local_path": "data/raw/gy_census/Preliminary-Report-Guyana-National-Population-and-Housing-Census-2022.pdf",
+      "notes": "The 2022 census has released only preliminary results (population 878,674, January 2026); no religion table is published in any geography. A future BoS final-report release is the only route to a 2022 wave."
+    },
+    {
+      "source_dataset_id": "bos-data-request-2002-region-religion",
+      "status": "not_pinned",
+      "url": "https://statisticsguyana.gov.gy/",
+      "local_path": null,
+      "notes": "A BoS data request for the 2002 region religion count table would extend the product to two waves; recorded as a courtesy ask for the PI."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "accepted",
+  "licence_basis": "bos_open_licence_agreement",
+  "downstream_status": "staged",
+  "source_datasets": [
+    {
+      "source_dataset_id": "gy-census-2012-compendium2-table-2-19-religion-by-region",
+      "name": "Guyana 2012 Population and Housing Census, Final Compendium 2 (Population Composition), Table 2.19: Distribution of the Population by Religious Affiliation and Administrative Regions",
+      "provider": "Bureau of Statistics, Guyana (BoS)",
+      "url": "https://statisticsguyana.gov.gy/wp-content/uploads/2019/10/Final_2012_Census_Compendium2.pdf",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/gy_census/gy_2012_Compendium2.pdf",
+      "licence": {
+        "name": "The Bureau of Statistics, Guyana (BoS) publishes an Open Licence Agreement (statisticsguyana.gov.gy/open-licence-agreement/) that governs use of BoS data. It grants 'a worldwide, royalty-free non-exclusive licence to freely use the data, copy, modify, translate, publish, adapt, distribute, create derivative works and value-added products for commercial and non-commercial purposes', conditioned on the acknowledgement-of-source notice. The required derived-tables notice is: 'This table was adapted from the Bureau of Statistics, Guyana, which is licenced under the Central Statistical Office's Open Licence Agreement.' Licence status: accepted. The boundary is Open Data Commons Open Database License 1.0 (OpenStreetMap).",
+        "url": "https://statisticsguyana.gov.gy/open-licence-agreement/",
+        "attribution": "This table was adapted from the Bureau of Statistics, Guyana, which is licenced under the Central Statistical Office's Open Licence Agreement."
+      },
+      "citation": "Bureau of Statistics, Guyana, 2012 Population and Housing Census, Final Compendium 2, Table 2.19.",
+      "access_limits": null,
+      "redistribution_limits": "Derived region summaries ship under the BoS Open Licence Agreement (free reuse with the acknowledgement-of-source notice). The raw census PDF is not committed.",
+      "notes": "Integer counts; 13-category frame. Both margins close exactly: every region column and every religion row sum to the printed national total of 746,955. No cell suppression. The table carries no Not Stated line: BoS prorated the 363 Not-Stated, 16,331 No-Contact, and 7,443 Institutional persons across the 13 groups, so the table spans the whole census population and the two headline shares sum to 100 by construction. Category national totals equal the Table 2.17 2012 column exactly."
+    },
+    {
+      "source_dataset_id": "geoboundaries-guy-adm1-2017",
+      "name": "geoBoundaries GUY ADM1 (10 regions)",
+      "provider": "geoBoundaries (William & Mary geoLab); boundary source OpenStreetMap",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GUY/ADM1/geoBoundaries-GUY-ADM1.geojson",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/gy_census/geoBoundaries-GUY-ADM1.geojson",
+      "licence": {
+        "name": "Open Data Commons Open Database License 1.0",
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/GUY/ADM1/",
+        "attribution": "geoBoundaries (gbOpen); boundary source (c) OpenStreetMap contributors, ODbL"
+      },
+      "citation": "geoBoundaries GUY ADM1 (gbOpen, pinned 9469f09), 10 region boundaries.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed under Open Data Commons Open Database License 1.0 (share-alike; attribution to OpenStreetMap contributors).",
+      "notes": "10 ADM1 regions, boundaryYearRepresented 2017, joined one-to-one to the census regions by ISO 3166-2 code (shapeISO). The extent spans lon -61.4 to -56.5E and lat 1.2 to 8.6N, far from the antimeridian; no dateline handling is needed. The western regions fall within the Essequibo area subject to a Venezuelan territorial claim; the layer renders the official Guyanese administrative extent that the BoS census enumerates, neutrally."
+    }
+  ],
+  "notes": "STAGED product (no page, no hub link). The committed products are the derived 10-region area summary (10 rows for 2012) and the simplified geoBoundaries GUY ADM1 boundary. Licence accepted (BoS Open Licence Agreement, free reuse with the acknowledgement-of-source notice); boundary ODbL 1.0 (OpenStreetMap). Single-wave region product; the page decision is the conductor's, parallel to the Barbados/Antigua task-8 single-wave-subnational question."
+}

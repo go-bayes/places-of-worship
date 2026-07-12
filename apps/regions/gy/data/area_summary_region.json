@@ -1,0 +1,394 @@
+{
+  "schema_version": "area-summary.v1",
+  "generated_at": "2026-07-12T00:00:00Z",
+  "generated_by": "scripts/build_gy_area_summary.R",
+  "country_code": "GY",
+  "boundary_set": {
+    "boundary_set_id": "gy-region-2017-geoboundaries-adm1",
+    "country_code": "GY",
+    "level": "region",
+    "vintage": "2017",
+    "source_dataset_id": "geoboundaries-guy-adm1-2017"
+  },
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "No governed place-of-worship snapshot ships in the Guyana census product.",
+    "notes": "Place counts and density metrics remain null."
+  },
+  "source_datasets": [
+    {
+      "source_dataset_id": "gy-census-2012-compendium2-table-2-19-religion-by-region",
+      "name": "Guyana 2012 Population and Housing Census, Final Compendium 2 (Population Composition), Table 2.19: Distribution of the Population by Religious Affiliation and Administrative Regions",
+      "provider": "Bureau of Statistics, Guyana (BoS)",
+      "url": "https://statisticsguyana.gov.gy/wp-content/uploads/2019/10/Final_2012_Census_Compendium2.pdf",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/gy_census/gy_2012_Compendium2.pdf",
+      "licence": {
+        "name": "The Bureau of Statistics, Guyana (BoS) publishes an Open Licence Agreement (statisticsguyana.gov.gy/open-licence-agreement/) that governs use of BoS data. It grants 'a worldwide, royalty-free non-exclusive licence to freely use the data, copy, modify, translate, publish, adapt, distribute, create derivative works and value-added products for commercial and non-commercial purposes', conditioned on the acknowledgement-of-source notice. The required derived-tables notice is: 'This table was adapted from the Bureau of Statistics, Guyana, which is licenced under the Central Statistical Office's Open Licence Agreement.' Licence status: accepted. The boundary is Open Data Commons Open Database License 1.0 (OpenStreetMap).",
+        "url": "https://statisticsguyana.gov.gy/open-licence-agreement/",
+        "attribution": "This table was adapted from the Bureau of Statistics, Guyana, which is licenced under the Central Statistical Office's Open Licence Agreement."
+      },
+      "citation": "Bureau of Statistics, Guyana, 2012 Population and Housing Census, Final Compendium 2, Table 2.19.",
+      "access_limits": null,
+      "redistribution_limits": "Derived region summaries ship under the BoS Open Licence Agreement (free reuse with the acknowledgement-of-source notice). The raw census PDF is not committed.",
+      "notes": "Integer counts; 13-category frame. Both margins close exactly: every region column and every religion row sum to the printed national total of 746,955. No cell suppression. The table carries no Not Stated line: BoS prorated the 363 Not-Stated, 16,331 No-Contact, and 7,443 Institutional persons across the 13 groups, so the table spans the whole census population and the two headline shares sum to 100 by construction. Category national totals equal the Table 2.17 2012 column exactly."
+    },
+    {
+      "source_dataset_id": "geoboundaries-guy-adm1-2017",
+      "name": "geoBoundaries GUY ADM1 (10 regions)",
+      "provider": "geoBoundaries (William & Mary geoLab); boundary source OpenStreetMap",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/GUY/ADM1/geoBoundaries-GUY-ADM1.geojson",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/gy_census/geoBoundaries-GUY-ADM1.geojson",
+      "licence": {
+        "name": "Open Data Commons Open Database License 1.0",
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/GUY/ADM1/",
+        "attribution": "geoBoundaries (gbOpen); boundary source (c) OpenStreetMap contributors, ODbL"
+      },
+      "citation": "geoBoundaries GUY ADM1 (gbOpen, pinned 9469f09), 10 region boundaries.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed under Open Data Commons Open Database License 1.0 (share-alike; attribution to OpenStreetMap contributors).",
+      "notes": "10 ADM1 regions, boundaryYearRepresented 2017, joined one-to-one to the census regions by ISO 3166-2 code (shapeISO). The extent spans lon -61.4 to -56.5E and lat 1.2 to 8.6N, far from the antimeridian; no dateline handling is needed. The western regions fall within the Essequibo area subject to a Venezuelan territorial claim; the layer renders the official Guyanese administrative extent that the BoS census enumerates, neutrally."
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_id": "population_total",
+      "label": "Census population total",
+      "description": "Region all-persons population represented in the 2012 religion table.",
+      "unit": "count",
+      "denominator_indicator_id": null,
+      "method": "Printed region Total from 2012 Census Compendium 2 Table 2.19.",
+      "temporal_coverage": "2012",
+      "spatial_coverage": "Guyana administrative regions (10)",
+      "quality_notes": "Religion is asked of the whole resident population (no age restriction). The 2012 table spans the full census population (national 746,955); BoS prorated the 363 Not-Stated, 16,331 No-Contact, and 7,443 Institutional persons across the 13 groups."
+    },
+    {
+      "indicator_id": "religious_affiliation_percent",
+      "label": "Religious affiliation %",
+      "description": "Share of the region population reporting affiliation with a named religion.",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "100 * (population - None) / population.",
+      "temporal_coverage": "2012",
+      "spatial_coverage": "Guyana administrative regions (10)",
+      "quality_notes": "Single wave (2012): religion is cross-tabulated by region with counts only in the 2012 census (Compendium 2 Table 2.19); the 2002 census publishes region religion as percentages only (Tables 2.6A/2.6B) with internally inconsistent national totals, and the 2022 census has released only preliminary results with no religion table. Percentages use each region's whole-population Total (the 2012 table is prorated over Not-Stated/No-Contact/Institutional persons, so it has no residual line and the two headline shares sum to 100% by construction)."
+    },
+    {
+      "indicator_id": "no_religion_percent",
+      "label": "No religious affiliation %",
+      "description": "Share of the region population in the census None line.",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "100 * None / population.",
+      "temporal_coverage": "2012",
+      "spatial_coverage": "Guyana administrative regions (10)",
+      "quality_notes": "The national no-religion share was 3.14% in 2012 (23,419 / 746,955), ranging from 1.15% (Region 9) to 7.25% (Region 10); the construct is the share reporting None, read within each region's own denominator. Percentages use each region's whole-population Total (the 2012 table is prorated over Not-Stated/No-Contact/Institutional persons, so it has no residual line and the two headline shares sum to 100% by construction)."
+    }
+  ],
+  "visual_layers": [
+    {
+      "visual_layer_id": "gy-region-religious-affiliation",
+      "label": "Religious affiliation %",
+      "description": "Guyana census-affiliation share by region (2012).",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "religious_affiliation_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "region whole-population Total (prorated; no residual line)"
+      },
+      "colour_scale": "sequential",
+      "time_control": "none",
+      "aggregation_rule": "reported region value",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": true,
+      "notes": "Census affiliation, not practice, attendance, or membership. Single wave (2012)."
+    },
+    {
+      "visual_layer_id": "gy-region-no-religion",
+      "label": "No religious affiliation %",
+      "description": "Guyana census no-religion share by region (2012).",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "no_religion_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "region whole-population Total"
+      },
+      "colour_scale": "sequential",
+      "time_control": "none",
+      "aggregation_rule": "reported region value",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "The source category is None. The two headline shares sum to 100 by construction (prorated source)."
+    }
+  ],
+  "rows": [
+    {
+      "country_code": "GY",
+      "boundary_set_id": "gy-region-2017-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gy-region-2017-geoboundaries-adm1:region_01",
+      "area_code": "region_01",
+      "area_name": "Barima-Waini",
+      "year": 2012,
+      "population_total": 27643,
+      "population_total_basis": "2012 Population and Housing Census, Final Compendium 2 'Population Composition', Table 2.19 'Distribution of the Population by Religious Affiliation and Administrative Regions'. The denominator is the printed region Total (whole census population, with Not-Stated/No-Contact/Institutional persons prorated across groups). Religious affiliation is the region population minus the None line.",
+      "religious_affiliation_count": 26811,
+      "religious_affiliation_percent": 96.9902,
+      "no_religion_count": 832,
+      "no_religion_percent": 3.0098,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 19220.5218,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "gy-census-2012-compendium2-table-2-19-religion-by-region",
+        "geoboundaries-guy-adm1-2017"
+      ],
+      "quality_flag": "frame_2012_thirteen_category_integer_counts;none_line=None;no_nonresponse_line_prorated;census_affiliation;all_persons_universe;single_select_reported_religion;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;no_not_stated_line_source_prorated_not_stated_nocontact_institutional;two_shares_sum_to_100_by_construction;single_wave_2012_region_product;denominator_is_whole_census_population_746955;licence_accepted_bos_open_licence_agreement;boundary_odbl_1_0_openstreetmap;source_categories_verbatim=Anglican=682;Methodist=31;Pentecostal=11030;Roman Catholic=9357;Jehovah Witness=554;Seventh Day Adventist=941;Bahai=3;Muslim=70;Hindu=114;Rastafarian=40;Other Christians=3792;None=832;Other=197"
+    },
+    {
+      "country_code": "GY",
+      "boundary_set_id": "gy-region-2017-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gy-region-2017-geoboundaries-adm1:region_02",
+      "area_code": "region_02",
+      "area_name": "Pomeroon-Supenaam",
+      "year": 2012,
+      "population_total": 46810,
+      "population_total_basis": "2012 Population and Housing Census, Final Compendium 2 'Population Composition', Table 2.19 'Distribution of the Population by Religious Affiliation and Administrative Regions'. The denominator is the printed region Total (whole census population, with Not-Stated/No-Contact/Institutional persons prorated across groups). Religious affiliation is the region population minus the None line.",
+      "religious_affiliation_count": 45743,
+      "religious_affiliation_percent": 97.7206,
+      "no_religion_count": 1067,
+      "no_religion_percent": 2.2794,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 5778.2905,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "gy-census-2012-compendium2-table-2-19-religion-by-region",
+        "geoboundaries-guy-adm1-2017"
+      ],
+      "quality_flag": "frame_2012_thirteen_category_integer_counts;none_line=None;no_nonresponse_line_prorated;census_affiliation;all_persons_universe;single_select_reported_religion;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;no_not_stated_line_source_prorated_not_stated_nocontact_institutional;two_shares_sum_to_100_by_construction;single_wave_2012_region_product;denominator_is_whole_census_population_746955;licence_accepted_bos_open_licence_agreement;boundary_odbl_1_0_openstreetmap;source_categories_verbatim=Anglican=3225;Methodist=490;Pentecostal=7667;Roman Catholic=1623;Jehovah Witness=449;Seventh Day Adventist=3792;Bahai=25;Muslim=3201;Hindu=15556;Rastafarian=35;Other Christians=9407;None=1067;Other=273"
+    },
+    {
+      "country_code": "GY",
+      "boundary_set_id": "gy-region-2017-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gy-region-2017-geoboundaries-adm1:region_03",
+      "area_code": "region_03",
+      "area_name": "Essequibo Islands-West Demerara",
+      "year": 2012,
+      "population_total": 107785,
+      "population_total_basis": "2012 Population and Housing Census, Final Compendium 2 'Population Composition', Table 2.19 'Distribution of the Population by Religious Affiliation and Administrative Regions'. The denominator is the printed region Total (whole census population, with Not-Stated/No-Contact/Institutional persons prorated across groups). Religious affiliation is the region population minus the None line.",
+      "religious_affiliation_count": 106128,
+      "religious_affiliation_percent": 98.4627,
+      "no_religion_count": 1657,
+      "no_religion_percent": 1.5373,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 3464.3748,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "gy-census-2012-compendium2-table-2-19-religion-by-region",
+        "geoboundaries-guy-adm1-2017"
+      ],
+      "quality_flag": "frame_2012_thirteen_category_integer_counts;none_line=None;no_nonresponse_line_prorated;census_affiliation;all_persons_universe;single_select_reported_religion;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;no_not_stated_line_source_prorated_not_stated_nocontact_institutional;two_shares_sum_to_100_by_construction;single_wave_2012_region_product;denominator_is_whole_census_population_746955;licence_accepted_bos_open_licence_agreement;boundary_odbl_1_0_openstreetmap;source_categories_verbatim=Anglican=3124;Methodist=1389;Pentecostal=18251;Roman Catholic=2268;Jehovah Witness=1128;Seventh Day Adventist=2899;Bahai=56;Muslim=12688;Hindu=40666;Rastafarian=317;Other Christians=22996;None=1657;Other=346"
+    },
+    {
+      "country_code": "GY",
+      "boundary_set_id": "gy-region-2017-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gy-region-2017-geoboundaries-adm1:region_04",
+      "area_code": "region_04",
+      "area_name": "Demerara-Mahaica",
+      "year": 2012,
+      "population_total": 311563,
+      "population_total_basis": "2012 Population and Housing Census, Final Compendium 2 'Population Composition', Table 2.19 'Distribution of the Population by Religious Affiliation and Administrative Regions'. The denominator is the printed region Total (whole census population, with Not-Stated/No-Contact/Institutional persons prorated across groups). Religious affiliation is the region population minus the None line.",
+      "religious_affiliation_count": 300015,
+      "religious_affiliation_percent": 96.2935,
+      "no_religion_count": 11548,
+      "no_religion_percent": 3.7065,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 2061.3789,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "gy-census-2012-compendium2-table-2-19-religion-by-region",
+        "geoboundaries-guy-adm1-2017"
+      ],
+      "quality_flag": "frame_2012_thirteen_category_integer_counts;none_line=None;no_nonresponse_line_prorated;census_affiliation;all_persons_universe;single_select_reported_religion;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;no_not_stated_line_source_prorated_not_stated_nocontact_institutional;two_shares_sum_to_100_by_construction;single_wave_2012_region_product;denominator_is_whole_census_population_746955;licence_accepted_bos_open_licence_agreement;boundary_odbl_1_0_openstreetmap;source_categories_verbatim=Anglican=16259;Methodist=6194;Pentecostal=84424;Roman Catholic=19150;Jehovah Witness=4207;Seventh Day Adventist=14262;Bahai=234;Muslim=18702;Hindu=64752;Rastafarian=2056;Other Christians=67093;None=11548;Other=2682"
+    },
+    {
+      "country_code": "GY",
+      "boundary_set_id": "gy-region-2017-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gy-region-2017-geoboundaries-adm1:region_05",
+      "area_code": "region_05",
+      "area_name": "Mahaica-Berbice",
+      "year": 2012,
+      "population_total": 49820,
+      "population_total_basis": "2012 Population and Housing Census, Final Compendium 2 'Population Composition', Table 2.19 'Distribution of the Population by Religious Affiliation and Administrative Regions'. The denominator is the printed region Total (whole census population, with Not-Stated/No-Contact/Institutional persons prorated across groups). Religious affiliation is the region population minus the None line.",
+      "religious_affiliation_count": 48496,
+      "religious_affiliation_percent": 97.3424,
+      "no_religion_count": 1324,
+      "no_religion_percent": 2.6576,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 3891.3703,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "gy-census-2012-compendium2-table-2-19-religion-by-region",
+        "geoboundaries-guy-adm1-2017"
+      ],
+      "quality_flag": "frame_2012_thirteen_category_integer_counts;none_line=None;no_nonresponse_line_prorated;census_affiliation;all_persons_universe;single_select_reported_religion;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;no_not_stated_line_source_prorated_not_stated_nocontact_institutional;two_shares_sum_to_100_by_construction;single_wave_2012_region_product;denominator_is_whole_census_population_746955;licence_accepted_bos_open_licence_agreement;boundary_odbl_1_0_openstreetmap;source_categories_verbatim=Anglican=3025;Methodist=792;Pentecostal=10611;Roman Catholic=376;Jehovah Witness=638;Seventh Day Adventist=2896;Bahai=7;Muslim=4494;Hindu=17006;Rastafarian=123;Other Christians=8231;None=1324;Other=297"
+    },
+    {
+      "country_code": "GY",
+      "boundary_set_id": "gy-region-2017-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gy-region-2017-geoboundaries-adm1:region_06",
+      "area_code": "region_06",
+      "area_name": "East Berbice-Corentyne",
+      "year": 2012,
+      "population_total": 109652,
+      "population_total_basis": "2012 Population and Housing Census, Final Compendium 2 'Population Composition', Table 2.19 'Distribution of the Population by Religious Affiliation and Administrative Regions'. The denominator is the printed region Total (whole census population, with Not-Stated/No-Contact/Institutional persons prorated across groups). Religious affiliation is the region population minus the None line.",
+      "religious_affiliation_count": 107622,
+      "religious_affiliation_percent": 98.1487,
+      "no_religion_count": 2030,
+      "no_religion_percent": 1.8513,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 37496.5121,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "gy-census-2012-compendium2-table-2-19-religion-by-region",
+        "geoboundaries-guy-adm1-2017"
+      ],
+      "quality_flag": "frame_2012_thirteen_category_integer_counts;none_line=None;no_nonresponse_line_prorated;census_affiliation;all_persons_universe;single_select_reported_religion;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;no_not_stated_line_source_prorated_not_stated_nocontact_institutional;two_shares_sum_to_100_by_construction;single_wave_2012_region_product;denominator_is_whole_census_population_746955;licence_accepted_bos_open_licence_agreement;boundary_odbl_1_0_openstreetmap;source_categories_verbatim=Anglican=3452;Methodist=630;Pentecostal=18086;Roman Catholic=1891;Jehovah Witness=1408;Seventh Day Adventist=5670;Bahai=47;Muslim=10448;Hindu=46196;Rastafarian=234;Other Christians=19193;None=2030;Other=367"
+    },
+    {
+      "country_code": "GY",
+      "boundary_set_id": "gy-region-2017-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gy-region-2017-geoboundaries-adm1:region_07",
+      "area_code": "region_07",
+      "area_name": "Cuyuni-Mazaruni",
+      "year": 2012,
+      "population_total": 18375,
+      "population_total_basis": "2012 Population and Housing Census, Final Compendium 2 'Population Composition', Table 2.19 'Distribution of the Population by Religious Affiliation and Administrative Regions'. The denominator is the printed region Total (whole census population, with Not-Stated/No-Contact/Institutional persons prorated across groups). Religious affiliation is the region population minus the None line.",
+      "religious_affiliation_count": 17269,
+      "religious_affiliation_percent": 93.981,
+      "no_religion_count": 1106,
+      "no_religion_percent": 6.019,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 47648.4322,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "gy-census-2012-compendium2-table-2-19-religion-by-region",
+        "geoboundaries-guy-adm1-2017"
+      ],
+      "quality_flag": "frame_2012_thirteen_category_integer_counts;none_line=None;no_nonresponse_line_prorated;census_affiliation;all_persons_universe;single_select_reported_religion;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;no_not_stated_line_source_prorated_not_stated_nocontact_institutional;two_shares_sum_to_100_by_construction;single_wave_2012_region_product;denominator_is_whole_census_population_746955;licence_accepted_bos_open_licence_agreement;boundary_odbl_1_0_openstreetmap;source_categories_verbatim=Anglican=3217;Methodist=72;Pentecostal=4347;Roman Catholic=932;Jehovah Witness=118;Seventh Day Adventist=3182;Bahai=3;Muslim=350;Hindu=637;Rastafarian=49;Other Christians=3084;None=1106;Other=1278"
+    },
+    {
+      "country_code": "GY",
+      "boundary_set_id": "gy-region-2017-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gy-region-2017-geoboundaries-adm1:region_08",
+      "area_code": "region_08",
+      "area_name": "Potaro-Siparuni",
+      "year": 2012,
+      "population_total": 11077,
+      "population_total_basis": "2012 Population and Housing Census, Final Compendium 2 'Population Composition', Table 2.19 'Distribution of the Population by Religious Affiliation and Administrative Regions'. The denominator is the printed region Total (whole census population, with Not-Stated/No-Contact/Institutional persons prorated across groups). Religious affiliation is the region population minus the None line.",
+      "religious_affiliation_count": 10399,
+      "religious_affiliation_percent": 93.8792,
+      "no_religion_count": 678,
+      "no_religion_percent": 6.1208,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 20555.0635,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "gy-census-2012-compendium2-table-2-19-religion-by-region",
+        "geoboundaries-guy-adm1-2017"
+      ],
+      "quality_flag": "frame_2012_thirteen_category_integer_counts;none_line=None;no_nonresponse_line_prorated;census_affiliation;all_persons_universe;single_select_reported_religion;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;no_not_stated_line_source_prorated_not_stated_nocontact_institutional;two_shares_sum_to_100_by_construction;single_wave_2012_region_product;denominator_is_whole_census_population_746955;licence_accepted_bos_open_licence_agreement;boundary_odbl_1_0_openstreetmap;source_categories_verbatim=Anglican=694;Methodist=68;Pentecostal=1062;Roman Catholic=4408;Jehovah Witness=62;Seventh Day Adventist=293;Bahai=3;Muslim=67;Hindu=116;Rastafarian=79;Other Christians=3498;None=678;Other=49"
+    },
+    {
+      "country_code": "GY",
+      "boundary_set_id": "gy-region-2017-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gy-region-2017-geoboundaries-adm1:region_09",
+      "area_code": "region_09",
+      "area_name": "Upper Takutu-Upper Essequibo",
+      "year": 2012,
+      "population_total": 24238,
+      "population_total_basis": "2012 Population and Housing Census, Final Compendium 2 'Population Composition', Table 2.19 'Distribution of the Population by Religious Affiliation and Administrative Regions'. The denominator is the printed region Total (whole census population, with Not-Stated/No-Contact/Institutional persons prorated across groups). Religious affiliation is the region population minus the None line.",
+      "religious_affiliation_count": 23959,
+      "religious_affiliation_percent": 98.8489,
+      "no_religion_count": 279,
+      "no_religion_percent": 1.1511,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 54483.2055,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "gy-census-2012-compendium2-table-2-19-religion-by-region",
+        "geoboundaries-guy-adm1-2017"
+      ],
+      "quality_flag": "frame_2012_thirteen_category_integer_counts;none_line=None;no_nonresponse_line_prorated;census_affiliation;all_persons_universe;single_select_reported_religion;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;no_not_stated_line_source_prorated_not_stated_nocontact_institutional;two_shares_sum_to_100_by_construction;single_wave_2012_region_product;denominator_is_whole_census_population_746955;licence_accepted_bos_open_licence_agreement;boundary_odbl_1_0_openstreetmap;source_categories_verbatim=Anglican=3608;Methodist=6;Pentecostal=397;Roman Catholic=12145;Jehovah Witness=208;Seventh Day Adventist=505;Bahai=29;Muslim=135;Hindu=88;Rastafarian=25;Other Christians=6498;None=279;Other=315"
+    },
+    {
+      "country_code": "GY",
+      "boundary_set_id": "gy-region-2017-geoboundaries-adm1",
+      "boundary_level": "region",
+      "area_unit_id": "gy-region-2017-geoboundaries-adm1:region_10",
+      "area_code": "region_10",
+      "area_name": "Upper Demerara-Berbice",
+      "year": 2012,
+      "population_total": 39992,
+      "population_total_basis": "2012 Population and Housing Census, Final Compendium 2 'Population Composition', Table 2.19 'Distribution of the Population by Religious Affiliation and Administrative Regions'. The denominator is the printed region Total (whole census population, with Not-Stated/No-Contact/Institutional persons prorated across groups). Religious affiliation is the region population minus the None line.",
+      "religious_affiliation_count": 37094,
+      "religious_affiliation_percent": 92.7536,
+      "no_religion_count": 2898,
+      "no_religion_percent": 7.2464,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 16128.7855,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "gy-census-2012-compendium2-table-2-19-religion-by-region",
+        "geoboundaries-guy-adm1-2017"
+      ],
+      "quality_flag": "frame_2012_thirteen_category_integer_counts;none_line=None;no_nonresponse_line_prorated;census_affiliation;all_persons_universe;single_select_reported_religion;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;no_not_stated_line_source_prorated_not_stated_nocontact_institutional;two_shares_sum_to_100_by_construction;single_wave_2012_region_product;denominator_is_whole_census_population_746955;licence_accepted_bos_open_licence_agreement;boundary_odbl_1_0_openstreetmap;source_categories_verbatim=Anglican=1676;Methodist=434;Pentecostal=14414;Roman Catholic=751;Jehovah Witness=830;Seventh Day Adventist=5934;Bahai=14;Muslim=417;Hindu=308;Rastafarian=538;Other Christians=11258;None=2898;Other=520"
+    }
+  ]
+}
