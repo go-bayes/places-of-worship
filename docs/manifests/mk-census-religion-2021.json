@@ -1,0 +1,1114 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:mk-census-religion:mk:2021:sso-municipality",
+  "dataset_id": "mk-census-religion:mk:2021:sso-municipality",
+  "dataset_version_id": "mk-census-religion:mk:2021:sso-municipality:9b6b315b3ee0",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "mk-census-religion",
+  "dataset_role": "staged_evidence",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "MK"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-07-12T00:00:00Z",
+  "created_by": "scripts/build_mk_area_summary.R",
+  "target_years": [
+    2021
+  ],
+  "pipeline": {
+    "script": "scripts/build_mk_area_summary.R",
+    "git_commit": "555440b6a9cc3735cb76ed1493838fc1968ad606",
+    "command": "Rscript scripts/build_mk_area_summary.R",
+    "parameters": {
+      "construct": "census affiliation",
+      "shipped_waves": [
+        2021
+      ],
+      "shipped_geography": "80 North Macedonia municipalities (2021 census frame)",
+      "boundary_sets": {
+        "2021": "mk-municipality-2021-ocha-codab-adm2"
+      },
+      "source_tables": {
+        "2021": "2021 census book table T-06 (religious affiliation by municipality)"
+      },
+      "universes": {
+        "2021": "total resident population (1,836,713), including 132,260 administratively-sourced persons"
+      },
+      "denominators": {
+        "2021": "printed municipality total resident population; affiliation = sum of nine affiliation categories"
+      },
+      "slot_design": "Ordinary two-slot (SB/FM/KZ precedent; North Macedonia has a real Non-believer (atheist) category). religious_affiliation_percent is the summed share of Orthodox + Muslim (Islam) + Catholic + Christian + Protestant + Evangelical + Evangelical Methodist + Jehovah's Witnesses + Other. no_religion_percent is the single Non-believer (atheist) line. Undeclared, Unknown, and administratively-sourced persons stay in the denominator and in neither slot, so the two shares need not sum to 100.",
+      "category_frames": {
+        "top_level_en": [
+          "Orthodox",
+          "Muslim (Islam)",
+          "Catholic",
+          "Christian",
+          "Protestant",
+          "Evangelical",
+          "Evangelical Methodist",
+          "Jehovah's Witnesses",
+          "Other",
+          "Non-believer (atheist)",
+          "Undeclared",
+          "Unknown",
+          "Taken from administrative sources"
+        ],
+        "top_level_mk": [
+          "Православни",
+          "Муслимани (ислам)",
+          "Католици",
+          "Христијани",
+          "Протестанти",
+          "Евангелисти",
+          "Евангелисти-методисти",
+          "Јеховини сведоци",
+          "Друго",
+          "Не е верник (атеист)",
+          "Не се изјаснил",
+          "Непознато",
+          "Лица за кои податоците се преземени од административни извори"
+        ],
+        "affiliation_categories": [
+          "Orthodox",
+          "Muslim (Islam)",
+          "Catholic",
+          "Christian",
+          "Protestant",
+          "Evangelical",
+          "Evangelical Methodist",
+          "Jehovah's Witnesses",
+          "Other"
+        ],
+        "no_religion_category": "Non-believer (atheist)",
+        "residual_categories": [
+          "Undeclared",
+          "Unknown",
+          "Taken from administrative sources"
+        ],
+        "category_note": "Thirteen categories printed verbatim in census table T-06, English edition (Macedonian names from the Macedonian edition). The English edition footnote states religion categories refer to occurrences over 500 at the country level; this is a category-selection note, not cell suppression. No cell is suppressed in the municipality table."
+      },
+      "frame_break": "Single 2021 wave on the 80-municipality frame. The 2002 census religion table (Book X) is on the pre-2004 (1996) 123-municipality frame and is HELD: no licensed 123-municipality boundary exists, and the 2004 re-tabulation (Book XIII) carries total population and ethnicity but NOT religion (CHANGE-WITHHOLD across the 2004 reorganisation). No cross-wave change is claimed.",
+      "boundary_derivation": {
+        "2021": "OCHA COD-AB MKD ADM2 (80 units, CC BY-IGO, 2025); one-to-one join via a 15-entry Cyrillic-to-Latin transliteration crosswalk (c<->ts). No geometry merged or split."
+      },
+      "transliteration_crosswalk": {
+        "Bogdanci": "Bogdantsi",
+        "Brvenica": "Brvenitsa",
+        "Debarca": "Debartsa",
+        "Jegunovce": "Jegunovtse",
+        "Karbinci": "Karbintsi",
+        "Kavadarci": "Kavadartsi",
+        "Makedonska Kamenica": "Makedonska Kamenitsa",
+        "Novaci": "Novatsi",
+        "Petrovec": "Petrovets",
+        "Plasnica": "Plasnitsa",
+        "Rankovce": "Rankovtse",
+        "Strumica": "Strumitsa",
+        "Tearce": "Teartse",
+        "Vinica": "Vinitsa",
+        "Zrnovci": "Zrnovtsi"
+      },
+      "omitted_metrics": [
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "boundary_simplification": {
+        "2021": {
+          "method": "mapshaper weighted keep-shapes",
+          "clean_option": "allow-overlaps",
+          "keep_percent": 30,
+          "bytes": 101735
+        }
+      },
+      "local_cache_hint": "All raw sources are cached under data/raw/mk_census/ and remain git-ignored.",
+      "retrieval_record": [
+        {
+          "uri": "data/raw/mk_census/mk_2021_census_book_en.pdf",
+          "url": "https://www.stat.gov.mk/publikacii/2022/POPIS_DZS_web_EN.pdf",
+          "format": "pdf",
+          "bytes": 4019171,
+          "sha256": "a6a8f1d4ce8cbb36e5917d00a13caf8b962f1eff249c837c09c7ca04ad4531d5",
+          "row_count": null,
+          "source_dataset_id": "mk-census-2021-book-t06-religion-by-municipality",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "SSO 2021 census book, English edition; table T-06 parsed for religion by municipality. Both margins close to 1,836,713.",
+          "local_cache_hint": "data/raw/mk_census/mk_2021_census_book_en.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/mk_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/mk_census/mk_2021_census_book_mk.pdf",
+          "url": "https://www.stat.gov.mk/publikacii/2022/POPIS_DZS_web_MK.pdf",
+          "format": "pdf",
+          "bytes": 3984457,
+          "sha256": "429b588eb48a0f225581f1297d4bc636e75e11c1b0b3d71d21deb5038d9658f9",
+          "row_count": null,
+          "source_dataset_id": "mk-census-2021-book-t06-religion-by-municipality",
+          "used_in_public_product": false,
+          "periods": "2021",
+          "notes": "SSO 2021 census book, Macedonian edition; verbatim Macedonian religion category names taken from its table T-06.",
+          "local_cache_hint": "data/raw/mk_census/mk_2021_census_book_mk.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/mk_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/mk_census/mkd_codab_2025_shp.zip",
+          "url": "https://data.humdata.org/dataset/f7b918d3-9633-4142-8ae5-2358ca87ff3f/resource/9ac00088-e0d1-47b0-a4cd-06500776e93b/download/mkd_adm_2025_ab_shp.zip",
+          "format": "shp_zip",
+          "bytes": 372398,
+          "sha256": "83d36558324e15ecb0733603863fb4d441b16b7e8791e5390baf1d3b64e1bf30",
+          "row_count": null,
+          "source_dataset_id": "ocha-codab-mkd-adm2-2025",
+          "used_in_public_product": true,
+          "periods": "2025",
+          "notes": "OCHA COD-AB MKD ADM2 shapefile (2025, 80 municipalities, CC BY-IGO). Joined to the census by a 15-entry transliteration crosswalk.",
+          "local_cache_hint": "data/raw/mk_census/mkd_codab_2025_shp.zip (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/mk_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/mk_census/hdx_mkd_codab.json",
+          "url": "https://data.humdata.org/api/3/action/package_show?id=cod-ab-mkd",
+          "format": "json",
+          "bytes": 9591,
+          "sha256": "f39a6958008d7b2aa89b610ccfbd12a87ac7351317e9de7402850a56f0c27a56",
+          "row_count": null,
+          "source_dataset_id": "ocha-codab-mkd-adm2-2025",
+          "used_in_public_product": false,
+          "periods": "2025",
+          "notes": "HDX COD-AB MKD metadata; records license_id cc-by-igo, source EuroGeographics and SSO NTES.",
+          "local_cache_hint": "data/raw/mk_census/hdx_mkd_codab.json (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/mk_census/"
+          ]
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "pdftotext": "poppler pdftotext -layout",
+      "mapshaper": "scripts/lib/simplify_boundary.R (npx mapshaper)"
+    }
+  },
+  "source": {
+    "provider": "State Statistical Office of the Republic of North Macedonia; OCHA COD-AB (EuroGeographics/SSO)",
+    "source_dataset_ids": [
+      "mk-census-2021-book-t06-religion-by-municipality",
+      "ocha-codab-mkd-adm2-2025"
+    ],
+    "source_urls": [
+      "https://www.stat.gov.mk/publikacii/2022/POPIS_DZS_web_EN.pdf",
+      "https://www.stat.gov.mk/publikacii/2022/POPIS_DZS_web_MK.pdf",
+      "https://data.humdata.org/dataset/f7b918d3-9633-4142-8ae5-2358ca87ff3f/resource/9ac00088-e0d1-47b0-a4cd-06500776e93b/download/mkd_adm_2025_ab_shp.zip",
+      "https://data.humdata.org/api/3/action/package_show?id=cod-ab-mkd",
+      "https://www.stat.gov.mk/KopjrajtStatistika_en.aspx"
+    ],
+    "retrieved_at": "2026-07-12T00:00:00Z",
+    "licence": "State Statistical Office of the Republic of North Macedonia. The SSO asserts copyright ('© Државен завод за статистика' / '© State Statistical Office', stat.gov.mk/KopjrajtStatistika_en.aspx, retrieved 2026-07-12) with no stated open-data licence; each census book carries the instruction 'When using data contained here, please cite the source'. Under the project BUILD-THEN-ASK ruling the derived municipality summaries ship with attribution to the State Statistical Office; an SSO reuse-confirmation email is the clean courtesy unblock, recorded for the PI.",
+    "citation": "SSO 2021 Census book table T-06 (religion by municipality); OCHA COD-AB MKD ADM2 (CC BY-IGO).",
+    "raw_redistribution": "The census book PDFs and the boundary source zip are not committed; they remain in data/raw/mk_census/.",
+    "local_cache_hint": "data/raw/mk_census/ (git-ignored by .gitignore data/ rule)",
+    "raw_cache_durable_uris": [
+      "gs://pow-research-data/raw_sources/mk_census/"
+    ]
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/mk_census/mk_2021_census_book_en.pdf",
+      "url": "https://www.stat.gov.mk/publikacii/2022/POPIS_DZS_web_EN.pdf",
+      "format": "pdf",
+      "bytes": 4019171,
+      "sha256": "a6a8f1d4ce8cbb36e5917d00a13caf8b962f1eff249c837c09c7ca04ad4531d5",
+      "row_count": null,
+      "source_dataset_id": "mk-census-2021-book-t06-religion-by-municipality",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "SSO 2021 census book, English edition; table T-06 parsed for religion by municipality. Both margins close to 1,836,713.",
+      "local_cache_hint": "data/raw/mk_census/mk_2021_census_book_en.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/mk_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/mk_census/mk_2021_census_book_mk.pdf",
+      "url": "https://www.stat.gov.mk/publikacii/2022/POPIS_DZS_web_MK.pdf",
+      "format": "pdf",
+      "bytes": 3984457,
+      "sha256": "429b588eb48a0f225581f1297d4bc636e75e11c1b0b3d71d21deb5038d9658f9",
+      "row_count": null,
+      "source_dataset_id": "mk-census-2021-book-t06-religion-by-municipality",
+      "used_in_public_product": false,
+      "periods": "2021",
+      "notes": "SSO 2021 census book, Macedonian edition; verbatim Macedonian religion category names taken from its table T-06.",
+      "local_cache_hint": "data/raw/mk_census/mk_2021_census_book_mk.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/mk_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/mk_census/mkd_codab_2025_shp.zip",
+      "url": "https://data.humdata.org/dataset/f7b918d3-9633-4142-8ae5-2358ca87ff3f/resource/9ac00088-e0d1-47b0-a4cd-06500776e93b/download/mkd_adm_2025_ab_shp.zip",
+      "format": "shp_zip",
+      "bytes": 372398,
+      "sha256": "83d36558324e15ecb0733603863fb4d441b16b7e8791e5390baf1d3b64e1bf30",
+      "row_count": null,
+      "source_dataset_id": "ocha-codab-mkd-adm2-2025",
+      "used_in_public_product": true,
+      "periods": "2025",
+      "notes": "OCHA COD-AB MKD ADM2 shapefile (2025, 80 municipalities, CC BY-IGO). Joined to the census by a 15-entry transliteration crosswalk.",
+      "local_cache_hint": "data/raw/mk_census/mkd_codab_2025_shp.zip (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/mk_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/mk_census/hdx_mkd_codab.json",
+      "url": "https://data.humdata.org/api/3/action/package_show?id=cod-ab-mkd",
+      "format": "json",
+      "bytes": 9591,
+      "sha256": "f39a6958008d7b2aa89b610ccfbd12a87ac7351317e9de7402850a56f0c27a56",
+      "row_count": null,
+      "source_dataset_id": "ocha-codab-mkd-adm2-2025",
+      "used_in_public_product": false,
+      "periods": "2025",
+      "notes": "HDX COD-AB MKD metadata; records license_id cc-by-igo, source EuroGeographics and SSO NTES.",
+      "local_cache_hint": "data/raw/mk_census/hdx_mkd_codab.json (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/mk_census/"
+      ]
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/mk/data/area_summary_municipality.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 192446,
+      "sha256": "9b6b315b3ee0b77d4df696c61f1ed4eeaad76b99a742b7cd5614d3e6fff8e81d",
+      "row_count": 80,
+      "feature_count": null,
+      "content": "North Macedonia municipality census-affiliation area summary, 2021 (80 municipalities).",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "mk_sso_copyright_ships_with_attribution"
+    },
+    {
+      "uri": "repo:apps/regions/mk/data/area_summary_municipality.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 133477,
+      "sha256": "3bb4d8095d7c6b9dcd05afb1771981f8d35fdeab4980d410f40609c405106c60",
+      "row_count": 80,
+      "feature_count": null,
+      "content": "Flattened North Macedonia municipality census-affiliation rows, 2021.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "mk_sso_copyright_ships_with_attribution"
+    },
+    {
+      "uri": "repo:apps/regions/mk/data/mk_municipality_2021.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 101735,
+      "sha256": "51cfd0df2080e4b3ddabf0f5fc785ff87143fef63f2041e1f1ffc7036ef7e765",
+      "row_count": null,
+      "feature_count": 80,
+      "content": "Simplified OCHA COD-AB MKD 80-municipality boundary GeoJSON (2021 frame).",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "ocha_codab_cc_by_igo"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/mk/data/area_summary_municipality.json",
+      "sha256": "9b6b315b3ee0b77d4df696c61f1ed4eeaad76b99a742b7cd5614d3e6fff8e81d",
+      "built_by": "scripts/build_mk_area_summary.R",
+      "notes": "80 rows: 80 municipalities (2021); total resident population universe; no suppressed cells."
+    },
+    {
+      "uri": "repo:apps/regions/mk/data/mk_municipality_2021.geojson",
+      "sha256": "51cfd0df2080e4b3ddabf0f5fc785ff87143fef63f2041e1f1ffc7036ef7e765",
+      "built_by": "scripts/build_mk_area_summary.R",
+      "notes": "80 municipality features from OCHA COD-AB MKD ADM2, simplified with mapshaper."
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "Rscript scripts/build_mk_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/mk/data/area_summary_municipality.json",
+      "bash scripts/validate_manifests.sh"
+    ],
+    "gate_2021": {
+      "status": "passed",
+      "both_margins_close_to": 1836713,
+      "municipality_row_checks": 80,
+      "religion_column_checks": 13,
+      "skopje_partition_check": "passed",
+      "records": [
+        {
+          "margin": "municipality_row",
+          "key": "Aerodrom",
+          "computed": 77735,
+          "printed": 77735,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Arachinovo",
+          "computed": 12676,
+          "printed": 12676,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Berovo",
+          "computed": 10890,
+          "printed": 10890,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Bitola",
+          "computed": 85164,
+          "printed": 85164,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Bogdanci",
+          "computed": 7339,
+          "printed": 7339,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Bogovinje",
+          "computed": 22906,
+          "printed": 22906,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Bosilovo",
+          "computed": 11508,
+          "printed": 11508,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Brvenica",
+          "computed": 13645,
+          "printed": 13645,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Butel",
+          "computed": 37968,
+          "printed": 37968,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Centar",
+          "computed": 43893,
+          "printed": 43893,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Centar Zhupa",
+          "computed": 3720,
+          "printed": 3720,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Chair",
+          "computed": 62586,
+          "printed": 62586,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Chashka",
+          "computed": 7942,
+          "printed": 7942,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Cheshinovo - Obleshevo",
+          "computed": 5471,
+          "printed": 5471,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Chucher - Sandevo",
+          "computed": 9200,
+          "printed": 9200,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Debar",
+          "computed": 15412,
+          "printed": 15412,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Debarca",
+          "computed": 3719,
+          "printed": 3719,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Delchevo",
+          "computed": 13585,
+          "printed": 13585,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Demir Hisar",
+          "computed": 7260,
+          "printed": 7260,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Demir Kapija",
+          "computed": 3777,
+          "printed": 3777,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Dojran",
+          "computed": 3084,
+          "printed": 3084,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Dolneni",
+          "computed": 13126,
+          "printed": 13126,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Gazi Baba",
+          "computed": 69626,
+          "printed": 69626,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Gevgelija",
+          "computed": 21582,
+          "printed": 21582,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Gjorche Petrov",
+          "computed": 44844,
+          "printed": 44844,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Gostivar",
+          "computed": 59770,
+          "printed": 59770,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Gradsko",
+          "computed": 3233,
+          "printed": 3233,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Ilinden",
+          "computed": 17435,
+          "printed": 17435,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Jegunovce",
+          "computed": 8895,
+          "printed": 8895,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Karbinci",
+          "computed": 3420,
+          "printed": 3420,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Karposh",
+          "computed": 63760,
+          "printed": 63760,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Kavadarci",
+          "computed": 35733,
+          "printed": 35733,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Kichevo",
+          "computed": 39669,
+          "printed": 39669,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Kisela Voda",
+          "computed": 61965,
+          "printed": 61965,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Kochani",
+          "computed": 31602,
+          "printed": 31602,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Konche",
+          "computed": 2725,
+          "printed": 2725,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Kratovo",
+          "computed": 7545,
+          "printed": 7545,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Kriva Palanka",
+          "computed": 18059,
+          "printed": 18059,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Krivogashtani",
+          "computed": 5167,
+          "printed": 5167,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Krushevo",
+          "computed": 8385,
+          "printed": 8385,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Kumanovo",
+          "computed": 98104,
+          "printed": 98104,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Lipkovo",
+          "computed": 22308,
+          "printed": 22308,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Lozovo",
+          "computed": 2264,
+          "printed": 2264,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Makedonska Kamenica",
+          "computed": 6439,
+          "printed": 6439,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Makedonski Brod",
+          "computed": 5889,
+          "printed": 5889,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Mavrovo and Rostusha",
+          "computed": 5042,
+          "printed": 5042,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Mogila",
+          "computed": 5283,
+          "printed": 5283,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Negotino",
+          "computed": 18194,
+          "printed": 18194,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Novaci",
+          "computed": 2648,
+          "printed": 2648,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Novo Selo",
+          "computed": 6972,
+          "printed": 6972,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Ohrid",
+          "computed": 51428,
+          "printed": 51428,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Pehchevo",
+          "computed": 3983,
+          "printed": 3983,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Petrovec",
+          "computed": 9150,
+          "printed": 9150,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Plasnica",
+          "computed": 4222,
+          "printed": 4222,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Prilep",
+          "computed": 69025,
+          "printed": 69025,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Probishtip",
+          "computed": 13417,
+          "printed": 13417,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Radovish",
+          "computed": 24122,
+          "printed": 24122,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Rankovce",
+          "computed": 3465,
+          "printed": 3465,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Resen",
+          "computed": 14373,
+          "printed": 14373,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Rosoman",
+          "computed": 3796,
+          "printed": 3796,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Saraj",
+          "computed": 38399,
+          "printed": 38399,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Shtip",
+          "computed": 44866,
+          "printed": 44866,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Shuto Orizari",
+          "computed": 25726,
+          "printed": 25726,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Sopishte",
+          "computed": 6713,
+          "printed": 6713,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Staro Nagorichane",
+          "computed": 3501,
+          "printed": 3501,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Struga",
+          "computed": 50980,
+          "printed": 50980,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Strumica",
+          "computed": 49995,
+          "printed": 49995,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Studenichani",
+          "computed": 21970,
+          "printed": 21970,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Sveti Nikole",
+          "computed": 15320,
+          "printed": 15320,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Tearce",
+          "computed": 17694,
+          "printed": 17694,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Tetovo",
+          "computed": 84770,
+          "printed": 84770,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Valandovo",
+          "computed": 10508,
+          "printed": 10508,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Vasilevo",
+          "computed": 10552,
+          "printed": 10552,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Veles",
+          "computed": 48463,
+          "printed": 48463,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Vevchani",
+          "computed": 2359,
+          "printed": 2359,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Vinica",
+          "computed": 14475,
+          "printed": 14475,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Vrapchishte",
+          "computed": 19842,
+          "printed": 19842,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Zelenikovo",
+          "computed": 3361,
+          "printed": 3361,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Zhelino",
+          "computed": 18988,
+          "printed": 18988,
+          "difference": 0
+        },
+        {
+          "margin": "municipality_row",
+          "key": "Zrnovci",
+          "computed": 2086,
+          "printed": 2086,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Orthodox",
+          "computed": 847390,
+          "printed": 847390,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Muslim (Islam)",
+          "computed": 590878,
+          "printed": 590878,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Catholic",
+          "computed": 6746,
+          "printed": 6746,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Christian",
+          "computed": 242579,
+          "printed": 242579,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Protestant",
+          "computed": 1313,
+          "printed": 1313,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Evangelical",
+          "computed": 678,
+          "printed": 678,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Evangelical Methodist",
+          "computed": 889,
+          "printed": 889,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Jehovah's Witnesses",
+          "computed": 1137,
+          "printed": 1137,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Other",
+          "computed": 1221,
+          "printed": 1221,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Non-believer (atheist)",
+          "computed": 8764,
+          "printed": 8764,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Undeclared",
+          "computed": 1964,
+          "printed": 1964,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Unknown",
+          "computed": 894,
+          "printed": 894,
+          "difference": 0
+        },
+        {
+          "margin": "religion_column",
+          "key": "Taken from administrative sources",
+          "computed": 132260,
+          "printed": 132260,
+          "difference": 0
+        }
+      ]
+    },
+    "boundary_validation": {
+      "2021": {
+        "status": "passed",
+        "feature_count": 80,
+        "distinct_geometry_hashes": 80,
+        "bbox": {
+          "xmin": 20.45473,
+          "ymin": 40.85468,
+          "xmax": 23.0325,
+          "ymax": 42.37379
+        },
+        "output_bytes": 101735,
+        "licence": "Creative Commons Attribution for Intergovernmental Organisations (CC BY-IGO)",
+        "crosswalk_entries": 15
+      }
+    },
+    "join_coverage": {
+      "matched_2021": 80,
+      "expected_2021": 80
+    },
+    "notes": "2021 (80 municipalities) closes exactly at both margins: every municipality row (thirteen categories) sums to its printed population, and every religion column sums to the printed national total (1,836,713). The City of Skopje aggregate equals the sum of its ten constituent municipalities. Boundary joins 80/80.",
+    "warnings": [
+      "Single 2021 wave. The 2002 census religion table (Book X) is on the pre-2004 123-municipality frame with no licensed boundary and is HELD; the 2004 re-tabulation (Book XIII) excludes religion.",
+      "The total resident population universe (1,836,713) includes 132,260 administratively-sourced persons (7.20%) whose religion is a distinct published category ('Taken from administrative sources'); it is rendered as published, never repaired or redistributed.",
+      "Undeclared, Unknown, and administratively-sourced lines are disclosed denominator residuals in neither headline slot; affiliation and no-religion shares need not sum to 100%.",
+      "Boundary names join the census by a 15-entry Cyrillic-to-Latin transliteration crosswalk (c<->ts); every mapping is one-to-one with no geometry merged or split."
+    ]
+  },
+  "construct_notes": [
+    "The construct is census affiliation: each resident's reported religion (asked of the resident population), not practice, attendance, or membership.",
+    "The public product carries three headline fields per municipality: total resident population, religious affiliation percent, and no-religion percent. Place-density metrics are null (no governed place-of-worship snapshot).",
+    "Thirteen verbatim census categories (Orthodox, Muslim (Islam), Catholic, Christian, Protestant, Evangelical, Evangelical Methodist, Jehovah's Witnesses, Other, Non-believer (atheist), Undeclared, Unknown, Taken from administrative sources) are preserved per municipality on the quality flag, with Macedonian originals.",
+    "Slot design (ordinary two-slot, SB/FM/KZ precedent): religious_affiliation_percent is the summed share of the nine affiliation categories; no_religion_percent is the single Non-believer (atheist) line. Undeclared, Unknown, and administratively-sourced persons are disclosed residuals kept in the denominator and in neither slot, so the two shares need not sum to 100.",
+    "Universe: the 2021 total resident population (1,836,713) includes 132,260 persons whose data, including religion, were taken from administrative sources (the combined-census methodology). That component is rendered as its own published religion category, never repaired or redistributed.",
+    "Single wave: the 2002 census religion-by-municipality table (Book X, ethnic affiliation, mother tongue and religion) is on the pre-2004 (1996) 123-municipality frame. No licensed 123-municipality boundary exists, and the 2004 re-tabulation (Book XIII) carries total population and ethnicity but not religion, so 2002 is HELD (documented in the route probe), not shipped.",
+    "Licence: the SSO asserts copyright with no stated open-data licence; each census book instructs 'When using data contained here, please cite the source'. The derived municipality summaries ship with attribution to the State Statistical Office under the BUILD-THEN-ASK ruling; an SSO reuse-confirmation email is recorded for the PI."
+  ],
+  "deferred_sources": [
+    {
+      "source_dataset_id": "mk-census-2002-book-x-religion-by-settlement",
+      "status": "held",
+      "url": "https://www.stat.gov.mk/Publikacii/knigaX.pdf",
+      "local_path": "data/raw/mk_census/mk_2002_knigaX.pdf",
+      "notes": "2002 census Book X 'Total population according to ethnic affiliation, mother tongue and religion, final data by settlements'. Five religion categories (Orthodox 1,310,184; Muslim/Islam 674,015; Catholic 7,008; Protestant 520; Other 30,820; total 2,022,547) on the pre-2004 123-municipality (1996) frame. HELD: no licensed 123-municipality boundary exists. Unblock: (a) a licensed 1996/123 municipality boundary; or (b) an SSO re-tabulation of 2002 religion onto the 2004/current frame (parallel to Book XIII's total-population/ethnicity re-tabulation); or (c) an SSO-published settlement-to-current-municipality concordance to exactly re-aggregate Book X's settlement religion."
+    },
+    {
+      "source_dataset_id": "mk-2021-religion-sex-urban-rural",
+      "status": "deferred",
+      "url": "https://www.stat.gov.mk/publikacii/2022/POPIS_DZS_web_EN.pdf",
+      "local_path": null,
+      "notes": "The 2021 census also splits religion by sex within municipality (and religion by ethnicity, mother tongue nationally). Only the both-sexes municipality block is shipped; the sex cut is a deeper future product."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "accepted",
+  "licence_basis": "mk_sso_copyright_ships_with_attribution",
+  "downstream_status": "staged",
+  "source_datasets": [
+    {
+      "source_dataset_id": "mk-census-2021-book-t06-religion-by-municipality",
+      "name": "North Macedonia 2021 Census, book table T-06: Total resident population by religious affiliation and sex, by municipalities",
+      "provider": "State Statistical Office of the Republic of North Macedonia",
+      "url": "https://www.stat.gov.mk/publikacii/2022/POPIS_DZS_web_EN.pdf",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/mk_census/mk_2021_census_book_en.pdf",
+      "licence": {
+        "name": "State Statistical Office of the Republic of North Macedonia. The SSO asserts copyright ('© Државен завод за статистика' / '© State Statistical Office', stat.gov.mk/KopjrajtStatistika_en.aspx, retrieved 2026-07-12) with no stated open-data licence; each census book carries the instruction 'When using data contained here, please cite the source'. Under the project BUILD-THEN-ASK ruling the derived municipality summaries ship with attribution to the State Statistical Office; an SSO reuse-confirmation email is the clean courtesy unblock, recorded for the PI.",
+        "url": "https://www.stat.gov.mk/KopjrajtStatistika_en.aspx",
+        "attribution": "State Statistical Office of the Republic of North Macedonia, Census of Population, Households and Dwellings 2021"
+      },
+      "citation": "State Statistical Office of the Republic of North Macedonia, Census of Population, Households and Dwellings, 2021 (book, table T-06).",
+      "access_limits": null,
+      "redistribution_limits": "SSO asserts copyright with no open-data licence; derived municipality summaries ship with attribution under BUILD-THEN-ASK. The census book PDF is not committed.",
+      "notes": "Total resident population universe (1,836,713), including 132,260 persons whose data were taken from administrative sources. Thirteen religion categories; both margins close exactly. English edition parsed; Macedonian category names taken verbatim from the Macedonian edition (POPIS_DZS_web_MK.pdf)."
+    },
+    {
+      "source_dataset_id": "ocha-codab-mkd-adm2-2025",
+      "name": "OCHA COD-AB North Macedonia ADM2 (2025), 80 municipalities",
+      "provider": "OCHA Field Information Services Section; source EuroGeographics and the SSO NTES nomenclature",
+      "url": "https://data.humdata.org/dataset/f7b918d3-9633-4142-8ae5-2358ca87ff3f/resource/9ac00088-e0d1-47b0-a4cd-06500776e93b/download/mkd_adm_2025_ab_shp.zip",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/mk_census/mkd_codab_2025_shp.zip",
+      "licence": {
+        "name": "Creative Commons Attribution for Intergovernmental Organisations (CC BY-IGO)",
+        "url": "https://data.humdata.org/api/3/action/package_show?id=cod-ab-mkd",
+        "attribution": "OCHA, Common Operational Dataset - Administrative Boundaries (CC BY-IGO); source EuroGeographics and SSO"
+      },
+      "citation": "OCHA COD-AB North Macedonia ADM2 (2025), 80 municipalities.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed under CC BY-IGO with attribution to OCHA.",
+      "notes": "80 ADM2 municipalities matching the 2021 census frame; joined to the census names by a 15-entry Cyrillic-to-Latin transliteration crosswalk (one-to-one, no geometry merged or split)."
+    }
+  ],
+  "notes": "Product built under BUILD-THEN-ASK: derived municipality summaries ship with attribution while an SSO reuse-confirmation ask is recorded for the PI (licence_status needs_review). The committed products are the derived municipality area summary (80 rows, 2021) and one boundary GeoJSON (OCHA COD-AB 80-municipality 2021 frame). On-page attribution must cite the State Statistical Office of the Republic of North Macedonia and OCHA COD-AB (CC BY-IGO). The 2002 wave is HELD (see deferred_sources)."
+}
