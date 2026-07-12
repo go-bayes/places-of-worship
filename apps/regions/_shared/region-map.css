@@ -247,3 +247,30 @@
 .pulotu-legend-count { color: #94a3b8; font-size: 11px; }
 #census-panel.pulotu-mode .census-slider { accent-color: #6d28d9; }
 .pulotu-ticks span { letter-spacing: 0.01em; }
+
+/* touch drag (phone parity with desktop): the draggable chrome — both
+   pill bars, the wordmark, the census panel, and popups — opts out of
+   browser pan/zoom so a touch drag reaches the module's pointer handlers
+   instead of being claimed for scrolling. the onboarding card is absent
+   from this set on purpose: it scrolls, and it is not draggable anywhere. */
+#counts-bar, #data-pill, #wordmark, #census-panel { touch-action: none; }
+/* native controls keep their own touch handling (select pickers, the time
+   slider, the later-foundations checkbox); drags never start from them */
+#census-panel select, #census-panel input, #data-pill select { touch-action: auto; }
+/* the denomination key list scrolls on phones: touches there scroll it */
+#counts { touch-action: pan-y; }
+/* a stalled touch drag must not pop text selection or the link callout */
+#counts-bar, #data-pill, #wordmark, #census-panel {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+/* popups drag by their body; interactive children keep native gestures via
+   the module's drag-start exclusions, and .streetview declares its own
+   touch-action for the pano */
+.maplibregl-popup-content { touch-action: none; }
+.maplibregl-popup-content a,
+.maplibregl-popup-content button,
+.maplibregl-popup-content select,
+.maplibregl-popup-content input,
+.maplibregl-popup-content textarea { touch-action: auto; }
