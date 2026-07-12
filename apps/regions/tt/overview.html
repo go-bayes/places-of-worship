@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Trinidad and Tobago map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Trinidad and Tobago research map; every string
+    // traces to research/countries/tt/route-probe.md, the manifest
+    // docs/manifests/tt-census-religion-2011.json, or the live REGION_CONFIG in
+    // apps/regions/tt/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "TT",
+      countryName: "Trinidad and Tobago",
+      mapHref: "./",
+      intro: "Census religious affiliation across Trinidad and Tobago's fifteen municipalities, a single 2011 snapshot from the Central Statistical Office (CSO), 2011 Population and Housing Census Demographic Report, Table 8 (Non-Institutional Population by Sex, Age Group, Religion and Municipality). The table is a count-valued cross-tab of the non-institutional population, 1,322,546, with seventeen verbatim religion categories including Baptist-Spiritual Shouter and Orisha, a real None line, and a separate Not Stated non-response line. The construct is census affiliation. It does not measure belief, practice, attendance, or registered membership.",
+      facts: {
+        waves: "One census: 2011",
+        geographies: "Municipality (15 units)",
+        metrics: "Religious affiliation %, no religion %"
+      },
+      reading: [
+        "The fifteen municipalities are shaded by the share reporting a religion (the fifteen named categories plus the residual Other line), or by the share in the census None line, shown as No religion %. Religious affiliation is the sum of categories 1-15; No religion is the single None line.",
+        "Counts are the 2011 Demographic Report Table 8 verbatim cells (Both Sexes, All Ages column). The published table does not close integer-exact: printed marginals differ from the sums of the printed cells by up to ±2 (municipality columns ±1, religion rows ±2, the national total −1). This is a source property, not an extraction error: two independent extractors agree on all 255 cells, and the published national row itself sums to 1,322,547 against a printed 1,322,546. Under the documented-discrepancy ruling (Saint Lucia / Côte d'Ivoire), every cell is transcribed verbatim and every residual is recorded, never repaired; printed '-' cells are transcribed as 0.",
+        "Percentages use each municipality's printed non-institutional population total, the population living in private households (national 1,322,546), not the total enumerated population (1,328,019). The difference of 5,473 is the institutional population, which is tabulated separately (Table 5) and not cross-tabbed by religion. The Not Stated non-response line stays in the denominator and in neither share; the two shares therefore need not sum to 100.",
+        "Religious affiliation ranges from 78.5% in Tunapuna/Piarco to 90.8% in Penal/Debe, and the gradient is driven mainly by the Not Stated line, which runs high nationally (11.1%) and reaches 19.3% in Tunapuna/Piarco. No religion is low across every unit: 2.2% nationally (28,842 of 1,322,546), from 0.9% in Penal/Debe to 5.4% in Tobago. In the source cells the central-and-south belt is Hindu-plurality (Penal/Debe 43.0%, Couva/Tabaquite/Talparo 31.3%) while the north-west urban corridor is Roman Catholic and Anglican (Diego Martin 44.8% Roman Catholic) and Tobago is distinctively Anglican; that per-category geography is recorded in Table 8 and is source context, not a shipped map metric.",
+        "Only the 2011 wave ships at municipality level, and no change metric is offered. Religion is cross-tabulated by municipality only in the 2011 census. The 2000 National Census Report publishes religion nationally only (Table 2.6, prorated, on a tabulable-households base), on a coarser eleven-name frame not comparable to the 2011 seventeen-category frame. A 2000 municipality religion table is reachable only through the CSO REDATAM online tabulation engine (session-ephemeral microdata), recorded as the deferred unblock. No post-2011 census exists: the census was COVID-delayed, the Geospatial Data Update Exercise began in January 2026, and the census is now planned for 2027.",
+        "The boundary frame is OCHA COD-AB TTO ADM1, fifteen municipalities, geometry from GADM. The fifteen census units join one-to-one via a deterministic name crosswalk (City of / Borough of prefixes dropped, punctuation normalised); the join is 15 of 15, with fifteen distinct geometries. geoBoundaries TTO ADM1 (OpenStreetMap, Open Database License) was rejected on completeness: it carries only fourteen units and omits the Borough of Arima (population 33,404).",
+        "No governed Trinidad and Tobago place-of-worship snapshot ships with this product; place counts and density metrics are null."
+      ],
+      sources: [
+        {
+          name: "CSO 2011 Population and Housing Census Demographic Report, Table 8 (Non-Institutional Population by Sex, Age Group, Religion and Municipality)",
+          href: "https://cso.gov.tt/wp-content/uploads/2020/01/2011-Demographic-Report.pdf",
+          construct: "Census religious affiliation by municipality, count-valued (Both Sexes, All Ages), seventeen verbatim categories, non-institutional population denominator (1,322,546)",
+          years: "2011",
+          licence: "The CSO asserts copyright and permits reproduction of extracts only for personal, non-commercial use with permission and full acknowledgement; its website footer asserts All Rights Reserved. No open-data licence is stated. The derived aggregate summary ships with CSO attribution under BUILD-THEN-ASK, pending a CSO reuse confirmation. Licence status: needs_review."
+        },
+        {
+          name: "OCHA COD-AB Trinidad and Tobago ADM1 boundaries",
+          href: "https://data.humdata.org/dataset/cod-ab-tto",
+          construct: "Boundary geometry (15 municipalities), ADM1, each with an ADM1 pcode (TT10-TT90); geometry lineage GADM, republished by OCHA FISS",
+          years: "codab-v2 (represented vintage)",
+          licence: "Creative Commons Attribution for Intergovernmental Organisations (CC BY-IGO), per the HDX release metadata; attribution to OCHA/GADM."
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Central Statistical Office of Trinidad and Tobago, <a href=\"https://cso.gov.tt/\" target=\"_blank\" rel=\"noopener\">CSO</a>: the 2011 Population and Housing Census Demographic Report, Table 8, religion by municipality; boundaries from <a href=\"https://data.humdata.org/dataset/cod-ab-tto\" target=\"_blank\" rel=\"noopener\">OCHA COD-AB TTO ADM1</a>.",
+        tables: "Table 8 is the source of record for the shipped counts. It prints count-valued Both Sexes, All Ages cells for seventeen religion categories across the fifteen municipalities plus a national Total column. The published table does not close integer-exact: printed marginals differ from the printed-cell sums by up to ±2 (municipality columns ±1, religion rows ±2, national total −1), a source property confirmed by two independent extractors that agree on all 255 cells. The area-summary religious_affiliation_percent field is the sum of the fifteen named-religion cells plus the residual Other line, over the printed municipality Total; the no_religion_percent field is the single None line. The Baptist-Spiritual Shouter and Orisha categories are preserved verbatim, never merged.",
+        licence: "Census reuse is needs_review. The CSO asserts copyright over its census publications and permits reproduction of extracts only for 'personal, non-commercial use with permission, provided that the Central Statistical Office of Trinidad and Tobago is fully acknowledged as the source' (Copyright 2012); the CSO website footer asserts 'All Rights Reserved', and no open-data licence is stated. This derived aggregate municipality summary carries full attribution to the CSO and ships under the standing BUILD-THEN-ASK ruling, pending a CSO reuse confirmation (a courtesy ask recorded for the investigator); nothing here implies the licence is settled. The OCHA COD-AB TTO ADM1 boundary is Creative Commons Attribution for Intergovernmental Organisations (CC BY-IGO) per the HDX release metadata, geometry from GADM.",
+        script: "scripts/build_tt_area_summary.R",
+        manifests: [
+          { label: "tt-census-religion-2011", href: "docs/manifests/tt-census-religion-2011.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Trinidad and Tobago map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
