@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | North Macedonia map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the North Macedonia research map; every string traces to
+    // research/countries/mk/route-probe.md, the manifest
+    // docs/manifests/mk-census-religion-2021.json, or the live REGION_CONFIG in
+    // apps/regions/mk/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "MK",
+      countryName: "North Macedonia",
+      mapHref: "./",
+      intro: "Census religious affiliation across North Macedonia's 80 municipalities, a single 2021 snapshot from the State Statistical Office (SSO), Census of Population, Households and Dwellings 2021, table T-06. The table is count-valued: both margins, and the City of Skopje ten-municipality partition, close integer-exact to the total resident population of 1,836,713. The construct is census affiliation. It does not measure belief, practice, attendance, or registered membership.",
+      facts: {
+        waves: "One census: 2021",
+        geographies: "Municipality (80 units)",
+        metrics: "Religious affiliation %, no religion %"
+      },
+      reading: [
+        "The 80 municipalities are shaded by the share reporting a named religion (nine affiliation lines of table T-06 summed), or by the No religion % share (the census's single Non-believer (atheist) line). Religion was asked of the resident population, and each municipality's denominator is its printed total resident population.",
+        "The Undeclared and Unknown lines stay in the denominator and in neither slot, and the affiliation and no-religion shares therefore need not sum to 100%. Nationally, affiliation is 92.17% and no religion 0.48% (8,764 of 1,836,713). Orthodox is 46.1% and Muslim 32.2% of the resident total.",
+        "The total resident population (1,836,713) includes 132,260 residents (7.20%) whose data, including religion, were taken from administrative sources under the 2021 combined-census methodology. They form the distinct published category “Persons for whom data are taken from administrative sources”, which stays in each municipality's denominator and is rendered as published, never enumerated into a religion, repaired, or redistributed.",
+        "Table T-06 carries thirteen verbatim religion categories in the source column order (Orthodox, Muslim (Islam), Catholic, Christian, Protestant, Evangelical, Evangelical Methodist, Jehovah's Witnesses, Other, Non-believer (atheist), Undeclared, Unknown, and Persons for whom data are taken from administrative sources). All thirteen are preserved per municipality in the published area summary, with their verbatim Macedonian names; the map shades the two aggregate slots, not the thirteen lines.",
+        "The religious geography is legible directly in the counts. The Skopje-area municipality of Saraj is 93.6% Muslim, and central Skopje's Centar carries the highest No religion share at 4.5%, an order of magnitude above the national 0.48%. The Muslim-majority municipalities of the Skopje ring and the northwest (Arachinovo, Lipkovo, Zhelino) contrast with the Orthodox-majority east and southeast (Berovo, Vevchani, Demir Hisar).",
+        "Only the 2021 wave ships; no change metric is offered. 2002 is held: the 2002 census religion table (Book X, ethnic affiliation, mother tongue and religion) is on the pre-2004 (1996) 123-municipality frame, for which no licensed boundary exists, and the 2004 re-tabulation (Book XIII) carries total population and ethnicity but not religion. Building 2002 without a licensed 1996/123 boundary, an SSO re-tabulation onto the current frame, or an SSO settlement-to-municipality concordance would require an invented concordance, and it is not done.",
+        "The boundary frame is OCHA COD-AB North Macedonia ADM2 (2025), 80 municipalities &mdash; the exact 2021 census frame. The census municipalities join the boundary one-to-one (80 of 80) through a 15-entry Cyrillic-to-Latin transliteration crosswalk (the census renders Cyrillic ц as c/ce/ci, the boundary as ts/tse/tsi: Bogdanci&rarr;Bogdantsi, Kavadarci&rarr;Kavadartsi, Strumica&rarr;Strumitsa, and twelve more); every mapping is one-to-one, with no geometry merged or split. geoBoundaries MKD ADM2 is rejected as the wrong vintage: it records 84 units on the 2004 territorial organisation, before the 2013 merger to 80.",
+        "No governed North Macedonia place-of-worship snapshot ships with this product; place counts and density metrics are null."
+      ],
+      sources: [
+        {
+          name: "SSO 2021 Census, book table T-06 (Total resident population by religious affiliation and sex, by municipalities)",
+          href: "https://www.stat.gov.mk/publikacii/2022/POPIS_DZS_web_EN.pdf",
+          construct: "Census religious affiliation by municipality, count-valued, thirteen verbatim categories, total resident population (all ages)",
+          years: "2021",
+          licence: "No open-data licence stated. Each SSO census book carries the instruction 'When using data contained here, please cite the source'. Derived municipality summaries ship with attribution to the State Statistical Office of the Republic of North Macedonia under the standing build-then-ask ruling; an SSO reuse-confirmation ask is with the project lead. Licence status: needs_review."
+        },
+        {
+          name: "OCHA COD-AB North Macedonia ADM2 boundaries",
+          href: "https://data.humdata.org/dataset/cod-ab-mkd",
+          construct: "Boundary geometry (80 municipalities), source EuroGeographics and the SSO NTES nomenclature",
+          years: "2025 (release), matching the 2021 census 80-municipality frame",
+          licence: "Creative Commons Attribution for Intergovernmental Organisations (CC BY-IGO), per the HDX release metadata (license_id cc-by-igo). The simplified derived boundary carries attribution to OCHA COD-AB."
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "State Statistical Office of the Republic of North Macedonia, <a href=\"https://www.stat.gov.mk/\" target=\"_blank\" rel=\"noopener\">SSO</a>: the Census of Population, Households and Dwellings 2021, table T-06, religion by municipality; boundaries from <a href=\"https://data.humdata.org/dataset/cod-ab-mkd\" target=\"_blank\" rel=\"noopener\">OCHA COD-AB North Macedonia ADM2</a>.",
+        tables: "Table T-06 is the source of record for the shipped shares. It prints integer counts for thirteen religion categories across the 80 municipalities. Every municipality row's thirteen categories sum to its printed total resident population, and every one of the thirteen religion columns sums to its printed national total; the 80 leaf totals and the thirteen national category totals each sum to the printed national 1,836,713. The City of Skopje aggregate equals the sum of its ten constituent municipalities in every category. Both margins close integer-exact; no cell is suppressed (the English-edition footnote, that religion categories refer to occurrences over 500 at the country level, is a category-selection note, not cell suppression). The MakStat PxWeb API navigation is disabled to automated access; the enduring published census book is therefore the transcription source, and it reconciles exactly. The area-summary religious_affiliation_percent field sums the nine affiliation lines; no_religion_percent is the single Non-believer (atheist) line; the Undeclared, Unknown, and administratively-sourced lines stay in the denominator and in neither slot.",
+        licence: "No open-data licence is stated on any SSO census product. The SSO asserts copyright ('© Државен завод за статистика' / '© State Statistical Office', stat.gov.mk/KopjrajtStatistika_en.aspx, retrieved 2026-07-12); each census book instructs 'When using data contained here, please cite the source'. This product is a derived aggregate of an openly published table, leaking no microdata; the municipality summaries ship with attribution to the State Statistical Office of the Republic of North Macedonia under the standing build-then-ask ruling while a reuse confirmation is pending (licence_status needs_review). The OCHA COD-AB North Macedonia ADM2 boundary is CC BY-IGO per the HDX release metadata, source EuroGeographics and the SSO NTES nomenclature.",
+        script: "scripts/build_mk_area_summary.R",
+        manifests: [
+          { label: "mk-census-religion-2021", href: "docs/manifests/mk-census-religion-2021.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The North Macedonia map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
