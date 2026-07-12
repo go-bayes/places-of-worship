@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Jamaica map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260712d" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Jamaica research map; every string traces to
+    // research/countries/jm/route-probe.md, the manifest
+    // docs/manifests/jm-census-religion-2011.json, or the live REGION_CONFIG in
+    // apps/regions/jm/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "JM",
+      countryName: "Jamaica",
+      mapHref: "./",
+      intro: "Parish census religious affiliation across Jamaica's 14 parishes in 2011, from Table 5 of the Statistical Institute of Jamaica (STATIN) Population and Housing Census, Volume 6. The Total-column counts reconcile exactly to the national religion universe of 2,684,115. The construct is census affiliation. It does not measure belief, practice, attendance, or membership.",
+      facts: {
+        waves: "One census: 2011",
+        geographies: "Parish (14 units)",
+        metrics: "Religious affiliation %, no religion %"
+      },
+      reading: [
+        "The 14 parishes are shaded by the share reporting affiliation with any religion or by the share reporting no religion. Seventh-Day Adventist is the largest affiliation nationally (322,261; 12.0%), followed by Pentecostal (319,730; 11.9%) and Other Church of God (247,291; 9.2%). No religion accounts for 571,982 people (21.3%).",
+        "The 14 parish totals sum to 2,684,115. The headline slots also close exactly: 2,050,759 people report a religious affiliation, 571,982 report no religion, and 61,374 fall in the non-response role. These counts sum to 2,684,115.",
+        "The printed parish frame is heterogeneous, and the product carries every parish's rows verbatim. Eleven parishes print 19 categories. Saint James and Saint Catherine print 20 categories, while Saint Andrew prints 23. Saint Andrew breaks out Bahai, Hinduism, Islam, and Judaism; Saint James breaks out Hinduism; Saint Catherine breaks out Islam. The parish Other lines absorb the remaining small-group residuals by STATIN's design.",
+        "The no-religion slot is assigned by role across three printed spellings: 'No Religious Affiliation/Denomination', 'No Religion/Denomination', and 'None'. Each spelling remains verbatim in the popup composition. The non-response spellings 'Not Reported' and 'Not Stated' stay inside the denominator and outside both headline shares.",
+        "Religious affiliation ranges from 62.5% in Kingston (52,864 of 84,606) to 86.6% in Manchester (163,508 of 188,826). No religion ranges from 11.8% in Manchester (22,343 of 188,826) to 34.0% in Kingston (28,794 of 84,606).",
+        "Only the 2011 parish wave ships, and no change metric is offered. The located 2001 religion source is national only, while the 2022 census has no religion release yet.",
+        "No parish carries a printed category count under ten. The smallest shipped cell is Trelawny's Moravian line, with 31 people. STATIN instead collapses four small non-Christian groups into the parish Other line except where the table prints a breakout.",
+        "The boundary frame is geoBoundaries JAM ADM1, 14 parishes, represented year 2011. All 14 boundary codes and names join one-to-one to the census summary. The extent runs from longitude -78.36893 to -76.18296 and latitude 17.70572 to 18.52504.",
+        "No governed Jamaica place-of-worship snapshot ships with this product; place counts and density metrics are null."
+      ],
+      sources: [
+        {
+          name: "STATIN 2011 Population and Housing Census, Volume 6, Table 5: Population by Sex and Religious Affiliation/Denomination, by Parish",
+          href: "https://census.statinja.gov.jm/wp-content/themes/futurio-child/Census2011Reports/Population and Housing Census 2011 Jamaica Ethnic Origin & Religious Affiliation Vol 6 .pdf",
+          construct: "Census religious affiliation by parish, Total-column counts over the heterogeneous printed 19-to-23-category frame, integer-exact to 2,684,115",
+          years: "2011",
+          licence: "STATIN Terms & Conditions of Data Use, accepted. 'STATIN grants to the Data User a non-exclusive, royalty-free licence to copy, use and create derivative works from STATIN's Data for commercial and non-commercial purposes, released through its website, www.statinja.gov.jm , subject to the terms of this Licence.' Proper attribution is required."
+        },
+        {
+          name: "geoBoundaries Jamaica ADM1 boundaries",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/JAM/ADM1/",
+          construct: "Boundary geometry for 14 parishes, OpenStreetMap-derived",
+          years: "2011 (represented year)",
+          licence: "Creative Commons Attribution-ShareAlike 2.0 (CC BY-SA 2.0), per the release metadata; the derived boundary ships share-alike with attribution to OpenStreetMap contributors"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Statistical Institute of Jamaica, <a href=\"https://census.statinja.gov.jm/census-reports/\" target=\"_blank\" rel=\"noopener\">2011 census reports</a>: Volume 6, Table 5, religion by parish; boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/JAM/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries JAM ADM1</a>.",
+        tables: "Volume 6 Table 5 is the source of record for the shipped shares. The product uses its Total column only and carries each parish's heterogeneous printed frame verbatim. Eleven parishes have 19 categories, Saint James and Saint Catherine have 20, and Saint Andrew has 23. The 14 parish totals sum exactly to 2,684,115. Religious affiliation is every affiliation row, including Other and printed small-group breakouts. No religion is assigned by role across the three printed no-religion spellings. Not Reported or Not Stated stays in the denominator and outside both slots. No count is derived from a percentage.",
+        licence: "STATIN grants to the Data User a non-exclusive, royalty-free licence to copy, use and create derivative works from STATIN's Data for commercial and non-commercial purposes, subject to the STATIN Terms & Conditions of Data Use. Derived works require proper attribution, an indication of changes, and a link to the original data. The geoBoundaries JAM ADM1 boundary is Creative Commons Attribution-ShareAlike 2.0 (CC BY-SA 2.0), OpenStreetMap-derived, and the derived boundary ships share-alike.",
+        script: "scripts/build_jm_area_summary.R",
+        manifests: [
+          { label: "jm-census-religion-2011", href: "docs/manifests/jm-census-religion-2011.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Jamaica map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260712d"></script>
+</body>
+</html>

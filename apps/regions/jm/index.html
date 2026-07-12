@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Jamaica Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css?v=20260712d" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712d" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Jamaica's product is 2011 census religious affiliation for 14 parishes,
+    // from STATIN Volume 6 Table 5, Total column. Counts reconcile exactly to
+    // the 2,684,115-person religion universe. The heterogeneous printed frame
+    // ships verbatim: eleven parishes have 19 rows, Saint James and Saint
+    // Catherine have 20, and Saint Andrew has 23. Small-group breakouts appear
+    // only where STATIN prints them; remaining small groups stay in Other.
+    //
+    // religious_affiliation_percent covers every affiliation row, including
+    // Other and any printed small-group breakout. no_religion_percent assigns
+    // the affirmative no-religion line by role across three printed spellings.
+    // Not Reported or Not Stated stays in the denominator and outside both
+    // slots. No parish has a printed category count under ten.
+    window.REGION_CONFIG = {
+      countryCode: "JM",
+      title: "Places of Worship | Jamaica Research Map",
+      // boundary bbox verified numerically from the 14-feature layer:
+      // lon -78.36893..-76.18296, lat 17.70572..18.52504;
+      // centre on [-77.27595, 18.11538] and open at z7.2 to fit the island
+      // beside the census panels
+      center: [-77.27595, 18.11538],
+      initialZoom: 7.2,
+      censusLevels: {
+        parish: {
+          label: "Parish (14 units)",
+          boundaries: "data/jm_parish_2011.geojson",
+          summary: "data/area_summary_parish.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Statistical Institute of Jamaica (STATIN), 2011 Population and Housing Census, Volume 6, Table 5; STATIN Terms & Conditions of Data Use · Boundaries © geoBoundaries JAM ADM1 (Creative Commons Attribution-ShareAlike 2.0, CC BY-SA 2.0), OpenStreetMap contributors"
+        }
+      },
+      defaultLevel: "parish",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2011,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the parish's whole 2011 religion universe affiliated with any religion. STATIN Volume 6 Table 5 prints a heterogeneous parish frame, shipped verbatim: eleven parishes have 19 categories, Saint James and Saint Catherine have 20, and Saint Andrew has 23. Small-group breakouts appear only where printed; remaining small groups stay in the parish Other line"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share of the parish's whole 2011 religion universe assigned to the affirmative no-religion line by role. The source uses three parish spellings: 'No Religious Affiliation/Denomination', 'No Religion/Denomination', and 'None'. Each spelling remains verbatim in the popup composition. The heterogeneous 19-to-23-category printed frame also remains verbatim"
+        }
+      },
+      popupDenominatorNote: "Percentages use each parish's whole 2011 religion universe as the denominator, including its non-response line. STATIN Volume 6 Table 5 prints a heterogeneous frame, shipped verbatim: eleven parishes have 19 categories, Saint James and Saint Catherine have 20, and Saint Andrew has 23. Small-group breakouts appear only where STATIN prints them; remaining small groups stay in the parish Other line. The no-religion slot is assigned by role across three printed spellings: 'No Religious Affiliation/Denomination', 'No Religion/Denomination', and 'None'. 'Not Reported' or 'Not Stated' stays inside the denominator and outside both shares. The religion universe totals 2,684,115, slightly below Jamaica's full 2011 de jure census population. The construct is census affiliation; it does not measure belief, practice, attendance, or membership.",
+      cityPresets: [
+        { label: "Kingston", coords: [-76.7936, 17.9714], zoom: 11 },
+        { label: "Montego Bay", coords: [-77.8939, 18.4762], zoom: 11 },
+        { label: "Spanish Town", coords: [-76.9574, 17.9911], zoom: 11 },
+        { label: "Mandeville", coords: [-77.5071, 18.0417], zoom: 11 }
+      ],
+      geocode: { country: "jm", biasLngLat: [-77.27595, 18.11538] },
+      onboarding: {
+        title: "Jamaica research map",
+        intro: "Census religious affiliation across Jamaica's 14 parishes in 2011, from Table 5 of the Statistical Institute of Jamaica (STATIN) Population and Housing Census, Volume 6. The Total-column counts reconcile exactly to the national religion universe of 2,684,115. The construct is census affiliation; it does not measure belief, practice, attendance, or membership.",
+        bullets: [
+          "The 14 parishes are shaded by the share reporting affiliation with any religion or by the share reporting no religion. Seventh-Day Adventist (322,261; 12.0% nationally) and Pentecostal (319,730; 11.9%) are the largest affiliations. No religion accounts for 571,982 people (21.3%).",
+          "This product carries one census wave, 2011, at parish grain. The 2001 parish table was not located, and the 2022 census has no religion release yet. No change metric is offered.",
+          "STATIN prints a heterogeneous parish frame, which the map carries verbatim. Eleven parishes print 19 categories. Saint James and Saint Catherine print 20, while Saint Andrew prints 23. The extra rows are small-group breakouts printed only for those parishes; unbroken small groups remain in the parish <code>Other</code> line.",
+          "The no-religion slot is assigned by role across three printed spellings: <code>No Religious Affiliation/Denomination</code>, <code>No Religion/Denomination</code>, and <code>None</code>. Each spelling remains verbatim in the popup composition. <code>Not Reported</code> or <code>Not Stated</code> stays in the denominator and outside both shares.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://statinja.gov.jm/" target="_blank" rel="noopener">Statistical Institute of Jamaica (STATIN)</a>, 2011 Population and Housing Census, Volume 6, Table 5 &lsquo;Population by Sex and Religious Affiliation/Denomination, by Parish&rsquo;. Adapted under the <a href="https://statinja.gov.jm/terms-of-use.aspx" target="_blank" rel="noopener">STATIN Terms &amp; Conditions of Data Use</a>. &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/api/current/gbOpen/JAM/ADM1/" target="_blank" rel="noopener">geoBoundaries</a> JAM ADM1 (Creative Commons Attribution-ShareAlike 2.0, CC BY-SA 2.0), OpenStreetMap contributors',
+      censusFlagNote: "* STATIN Volume 6 Table 5 prints a heterogeneous parish frame, carried verbatim here: eleven parishes have 19 categories, Saint James and Saint Catherine have 20, and Saint Andrew has 23. Small-group breakouts appear only where STATIN prints them; remaining small groups stay in the parish Other line. The no-religion slot is assigned by role across three printed spellings ('No Religious Affiliation/Denomination', 'No Religion/Denomination', and 'None'), each preserved in the popup composition. 'Not Reported' or 'Not Stated' stays inside the denominator and outside both shares. Single wave (2011), parish grain; no change metric. Census reuse is accepted under the STATIN Terms & Conditions of Data Use; boundaries are geoBoundaries JAM ADM1 (CC BY-SA 2.0)."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712d"></script>
+</body>
+</html>
