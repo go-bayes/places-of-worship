@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Myanmar map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Myanmar research map. Every sensitive sentence is
+    // verbatim from the record: research/countries/mm/route-probe.md and the
+    // manifest docs/manifests/mm-census-religion-2014.json. The non-enumeration
+    // disclosure, the estimated-total (Part II) presentation, and the Rakhine
+    // caveat are quoted, never authored. The enumerated and estimated-total
+    // presentations are kept strictly separate and never blended.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "MM",
+      countryName: "Myanmar",
+      mapHref: "./",
+      intro: "Census religion across Myanmar's fifteen units (fourteen States and Regions plus Nay Pyi Taw Union Territory) for a single wave, 2014. This product renders the religion categories of the 2014 Myanmar Population and Housing Census exactly as the Department of Population prints them in \"The Union Report: Religion — Census Report Volume 2-C\" (July 2016), Table 1. The seven published categories are Buddhist, Christian, Islam, Hindu, Animist, Other religion, and No religion. The counts are the enumerated population by state/region; nothing is combined, reallocated, or estimated. The census presents two figures for the national religious composition and this product keeps them separate: an ENUMERATED presentation (Part I, denominator 50,279,900) shown here per state/region, and an ESTIMATED-total presentation (Part II, denominator 51,486,253) that adds the non-enumerated Rakhine population under the report's stated Islam assumption and that the record publishes only at the Union level. The two presentations are never blended. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+      facts: {
+        waves: "One census: 2014",
+        geographies: "State / Region (15 units)",
+        metrics: "Religious affiliation %, no religion %"
+      },
+      reading: [
+        "The fifteen states and regions are shaded by the share of the enumerated population reporting a religious affiliation (Buddhist, Christian, Islam, Hindu, Animist, or Other religion), or by the share in the census No religion category, shown as No religion %. The slot design is the ordinary two-slot: religious_affiliation_percent is the summed share of the six named-religion categories on the enumerated denominator, no_religion_percent is the No-religion category, and the seven categories sum exactly to the enumerated total (no not-stated residual); the two shares therefore sum to 100.",
+        "The 2014 Census enumerated 50,279,900 persons. An estimated 1,090,000 persons in Rakhine State, 69,753 in Kayin State and 46,600 in Kachin State were not enumerated (1,206,353 in total, 2.3 per cent of the estimated overall population of 51,486,253). This product's counts and shares are the ENUMERATED population only (Part I of the Census Report Volume 2-C). The estimated non-enumerated population is carried as disclosed context and is never added into any state/region count or share.",
+        "The Department of Population states that the size of the non-enumerated population in Rakhine State is significant enough to affect the results on religion at both the Rakhine State and the Union level, and that the Part I (enumerated) results are \"inconclusive in terms of drawing a profile on the composition of religion in Rakhine State and at the Union level\". The report's Part II applies the assumption that the non-enumerated Rakhine population is mainly affiliated with the Islamic faith; under that assumption the Union-level share of Islam rises from 2.3 per cent (enumerated) to 4.3 per cent (estimated overall). That Part II adjustment is a Union-level presentation in the record and is NOT distributed to any state/region row in this product.",
+        "The 2024 census (conducted October 2024 under the State Administration Council military government, with substantial areas not enumerated: 32,191,407 enumerated + 19,125,349 estimated = 51,316,756) is a frame-and-universe break from 2014 and publishes no state/region religion table yet; it is deferred, never blended with 2014.",
+        "The boundary frame is OCHA COD-AB MMR ADM1 (source MIMU, CC BY-IGO) dissolved from 18 to the 15-unit census frame (Bago and Shan sub-units folded into their parents). The COD-AB release carries 18 ADM1 units, splitting Bago into East/West and Shan into East/North/South; Bago (East)+(West) and Shan (East)+(North)+(South) are dissolved into whole Bago and whole Shan by exact complete-unit partition, reconstructing the 15-unit census frame. The 14-unit geoBoundaries release was rejected because it omits Nay Pyi Taw Union Territory and cannot join the census 15-unit frame one-to-one.",
+        "No governed Myanmar place-of-worship snapshot ships with this product; place counts and density metrics are null."
+      ],
+      sources: [
+        {
+          name: "Department of Population, The 2014 Myanmar Population and Housing Census, The Union Report: Religion — Census Report Volume 2-C, Table 1 (persons by religion and State/Region)",
+          href: "https://www.dop.gov.mm/sites/dop.gov.mm/files/publication_docs/union_2-c_religion_en_0.pdf",
+          construct: "Census religion by state/region, seven verbatim categories on the enumerated count basis, plus an estimated non-enumerated column; counts as published, no allocation",
+          years: "2014",
+          licence: "No stated reuse terms. The report carries no reuse or copyright clause; the Department of Population website footer (www.dop.gov.mm, retrieved 2026-07-12) asserts only \"Department of Population © 2026\" with no reuse grant. The report is mirrored openly by UNFPA Myanmar and the Myanmar Information Management Unit (MIMU). Derived state/region rates ship with attribution to the Department of Population under the derived-summaries-with-attribution stance for bare-copyright sources; licence_status is needs_review."
+        },
+        {
+          name: "OCHA COD-AB Myanmar Subnational Administrative Boundaries, ADM1 (source: Myanmar Information Management Unit), dissolved to the 15-unit census frame",
+          href: "https://data.humdata.org/dataset/cod-ab-mmr",
+          construct: "Boundary geometry (15 State/Region units), OCHA Field Information Services Section, boundary source Myanmar Information Management Unit (MIMU), dissolved from 18 units by exact complete-unit partition",
+          years: "2014 census frame (COD-AB valid_on 2024-02-15)",
+          licence: "Creative Commons Attribution for Intergovernmental Organisations (CC BY-IGO), per the HDX COD-AB MMR release metadata"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Department of Population, Ministry of Labour, Immigration and Population, Myanmar: the 2014 Population and Housing Census, The Union Report: Religion (Census Report Volume 2-C), Table 1, religion by state/region on the enumerated count basis; boundaries from <a href=\"https://data.humdata.org/dataset/cod-ab-mmr\" target=\"_blank\" rel=\"noopener\">OCHA COD-AB Myanmar ADM1</a> (source MIMU, CC BY-IGO).",
+        tables: "Table 1 is the source of record for the shipped counts and shares. It prints the enumerated population by seven religion categories across the 15 units plus an estimated non-enumerated column. Every state/region row's seven enumerated categories sum to its printed enumerated total (15/15), and every religion column sums to its printed Union total; the enumerated Union total is 50,279,900. The estimated non-enumerated column sums to the printed Union figure 1,206,353, and enumerated 50,279,900 + non-enumerated 1,206,353 = estimated overall 51,486,253, exactly as the report states. religious_affiliation_percent sums Buddhist, Christian, Islam, Hindu, Animist, and Other religion on the enumerated denominator; no_religion_percent carries the No-religion category. The estimated-total (Part II) presentation is carried as Union-level context only and is never blended into any state/region row, mapped, or used in any percentage.",
+        licence: "No stated reuse terms. The 2014 Census Religion report (Census Report Volume 2-C) carries no reuse or copyright clause in the publication; the Department of Population website footer (www.dop.gov.mm, retrieved 2026-07-12) asserts only \"Department of Population © 2026\" with no reuse grant. The report is also mirrored openly by UNFPA Myanmar and the Myanmar Information Management Unit (MIMU). This build ships derived state/region rates with attribution to the Department of Population under the derived-summaries-with-attribution stance for bare-copyright sources; raw PDFs stay git-ignored, and licence_status is needs_review. The boundary ships under Creative Commons Attribution for Intergovernmental Organisations (CC BY-IGO) with attribution to OCHA/MIMU.",
+        script: "scripts/build_mm_area_summary.R",
+        manifests: [
+          { label: "mm-census-religion-2014", href: "docs/manifests/mm-census-religion-2014.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Myanmar map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
