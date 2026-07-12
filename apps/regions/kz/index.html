@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Kazakhstan Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712b" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Kazakhstan's product is Bureau of National Statistics (BNS) census
+    // religious affiliation by region for two waves, 2009 and 2021, each on
+    // its own boundary vintage. The two waves ride different region frames:
+    // the 2009 census used 16 regions (14 oblasts including South Kazakhstan
+    // Region, plus Astana and Almaty cities); the 2021 census used 17 regions,
+    // because in June 2018 South Kazakhstan Region was renamed Turkistan Region
+    // and Shymkent city was carved out. This is a region-level frame break, so
+    // no cross-wave region change metric is offered (CHANGE-WITHHOLD). Each wave
+    // is its own census level pointed at a per-vintage summary file (Canada and
+    // Germany precedent): area_summary_region_2009.json (16 rows) and
+    // area_summary_region_2021.json (17 rows), each a filtered view of the
+    // committed area_summary_region.json. The timeline switches the boundary
+    // vintage with the year: 2009 always renders on the 16-region frame and
+    // 2021 on the 17-region frame.
+    //
+    // Slot design (ordinary two-slot, SB/FM precedent): the BNS table prints
+    // seven verbatim categories (Islam, Christianity, Judaism, Buddhism, Other,
+    // Non-believers, Refused to indicate). religious_affiliation_percent is the
+    // summed share of Islam, Christianity, Judaism, Buddhism, and Other;
+    // no_religion_percent is the single Non-believers line. Refused to indicate
+    // stays in the denominator and in neither slot; the two shares therefore
+    // need not sum to 100. The Refused residual jumps sharply between waves,
+    // from 0.5%
+    // nationally in 2009 to 11.0% in 2021; a lower 2021 affiliation share often
+    // reflects that non-response rather than measured secularisation. Both waves are
+    // count-valued and close exactly at both margins (16,009,597 in 2009;
+    // 19,186,015 in 2021). The construct is census affiliation; it does not
+    // measure belief, practice, attendance, or registered membership.
+    //
+    // Licence accepted (BNS open reuse-with-attribution grant, verbatim capture;
+    // no ask needed). Boundaries per vintage: 2009 on geoBoundaries KAZ ADM1
+    // (ODbL), 2021 on OCHA COD-AB KAZ ADM1 (CC BY-IGO, 2023) dissolved to the
+    // 17-region 2021 frame by exact complete-unit partitions.
+    window.REGION_CONFIG = {
+      countryCode: "KZ",
+      title: "Places of Worship | Kazakhstan Research Map",
+      // centre on the national extent (bbox lon 46.5..87.3 by lat 40.6..55.5)
+      center: [66.9, 48.0],
+      initialZoom: 4,
+      censusLevels: {
+        region_2021: {
+          label: "Region (2021 frame, 17 units)",
+          boundaries: "data/kz_region_2021.geojson",
+          summary: "data/area_summary_region_2021.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Bureau of National Statistics of the Republic of Kazakhstan, 2021 National Population Census, Brief Results Section 7.1 (open reuse with attribution) · Boundaries © OCHA / UNHCR COD-AB KAZ ADM1 (CC BY-IGO), UNHCR from OpenStreetMap, 2023 vintage dissolved to the 17-region 2021 frame"
+        },
+        region_2009: {
+          label: "Region (2009 frame, 16 units)",
+          boundaries: "data/kz_region_2009.geojson",
+          summary: "data/area_summary_region_2009.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Bureau of National Statistics of the Republic of Kazakhstan, 2009 National Population Census, Brief Results Section 7.1 (open reuse with attribution) · Boundaries © geoBoundaries KAZ ADM1 (ODbL), source OpenStreetMap contributors, 2017 vintage"
+        }
+      },
+      defaultLevel: "region_2021",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      // one slider across both waves: dragging the year switches the
+      // geography level (boundary vintage) automatically (US precedent)
+      timeline: [
+        { year: 2009, level: "region_2009" },
+        { year: 2021, level: "region_2021" }
+      ],
+      // only the two census-question shares ship. place and density metrics are
+      // omitted because no governed place-of-worship snapshot exists, and no
+      // cross-wave change metric is offered: the 2018 region-level frame break
+      // (South Kazakhstan to Turkistan + Shymkent) bars an area-by-area change.
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share reporting a religious affiliation, summed from the BNS categories Islam, Christianity, Judaism, Buddhism, and Other over the region's resident population; the Refused-to-indicate residual stays in the denominator, and this share and No religion % need not sum to 100"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the BNS Non-believers (неверующие) category over the region's resident population; the Refused-to-indicate residual is a separate line kept in the denominator and in neither share"
+        }
+      },
+      popupDenominatorNote: "Percentages use the printed region total (all persons of all ages) for the selected wave. Religious affiliation % sums Islam, Christianity, Judaism, Buddhism, and Other; No religion % is the single Non-believers line. Refused to indicate stays in the denominator and in neither share; the two therefore need not sum to 100. The Refused residual is small in 2009 (0.5% nationally) and large in 2021 (11.0% nationally, up to about 22% in Mangystau); read a lower 2021 affiliation share as more non-response rather than measured secularisation. The construct is census affiliation: it does not measure belief, practice, attendance, or registered membership.",
+      cityPresets: [
+        { label: "Astana", coords: [71.4272, 51.1605], zoom: 10 },
+        { label: "Almaty", coords: [76.8897, 43.2389], zoom: 10 },
+        { label: "Shymkent", coords: [69.5901, 42.3417], zoom: 10 },
+        { label: "Karaganda", coords: [73.0877, 49.8064], zoom: 10 },
+        { label: "Aktobe", coords: [57.1670, 50.2839], zoom: 10 },
+        { label: "Taraz", coords: [71.3667, 42.9000], zoom: 10 },
+        { label: "Pavlodar", coords: [76.9674, 52.2871], zoom: 10 },
+        { label: "Oskemen", coords: [82.6100, 49.9481], zoom: 10 },
+        { label: "Atyrau", coords: [51.9235, 47.0945], zoom: 10 },
+        { label: "Kostanay", coords: [63.6246, 53.2140], zoom: 10 },
+        { label: "Kyzylorda", coords: [65.5090, 44.8479], zoom: 10 },
+        { label: "Turkistan", coords: [68.2517, 43.2973], zoom: 10 }
+      ],
+      geocode: { country: "kz", biasLngLat: [66.9, 48.0] },
+      onboarding: {
+        title: "Kazakhstan research map",
+        intro: "Census religious affiliation across Kazakhstan's regions, two waves from the Bureau of National Statistics (BNS): the 2009 census on the 16-region frame and the 2021 census on the 17-region frame. Both waves are count-valued and close exactly at both margins. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+        bullets: [
+          "Regions are shaded by the share reporting a religious affiliation (Islam, Christianity, Judaism, Buddhism, or Other), or by the share in the source's Non-believers category, shown as No religion %.",
+          "The year slider switches the boundary vintage: 2009 renders on the 16-region frame and 2021 on the 17-region frame. South Kazakhstan Region split into Turkistan Region and Shymkent city in 2018; the two waves therefore ride different region frames.",
+          "Refused to indicate is a separate residual kept in the denominator and in neither share; affiliation and no religion therefore need not sum to 100. The residual is small in 2009 (0.5% nationally) and large in 2021 (11.0% nationally, up to about 22% in Mangystau); a lower 2021 affiliation share reflects more non-response rather than measured secularisation.",
+          "No cross-wave change metric is offered. The 2018 region frame break bars an area-by-area change, and the 2021 Refused surge would swamp any comparison of the affiliation shares.",
+          "Affiliation is high across the country: about 92.5% to 99.7% in 2009, and 73.5% to 98.1% in 2021 once the large Refused residual is set aside.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year slider."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion © <a href="https://stat.gov.kz/" target="_blank" rel="noopener">Bureau of National Statistics of the Republic of Kazakhstan</a>, 2009 and 2021 National Population Censuses, Brief Results (Краткие итоги) Section 7.1. Used under the BNS open reuse grant with a reference to the source (stat.gov.kz/en/description/). &middot; 2021 boundaries © <a href="https://data.humdata.org/dataset/cod-ab-kaz" target="_blank" rel="noopener">OCHA / UNHCR COD-AB KAZ ADM1</a> (Creative Commons Attribution for Intergovernmental Organisations, CC BY-IGO), UNHCR from OpenStreetMap. &middot; 2009 boundaries © <a href="https://www.geoboundaries.org/api/current/gbOpen/KAZ/ADM1/" target="_blank" rel="noopener">geoBoundaries</a> KAZ ADM1 (Open Data Commons Open Database License, ODbL), source OpenStreetMap contributors.',
+      censusFlagNote: "* Religious affiliation % sums the BNS categories Islam, Christianity, Judaism, Buddhism, and Other; No religion % is the Non-believers line. Refused to indicate is a residual kept in the denominator and in neither share (0.5% nationally in 2009, 11.0% in 2021); the two shares therefore need not sum to 100. The year slider switches boundary vintage: 2009 on 16 regions, 2021 on 17 regions after the 2018 South Kazakhstan to Turkistan + Shymkent split. No cross-wave region change is offered. BNS open reuse with attribution."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712b"></script>
+</body>
+</html>
